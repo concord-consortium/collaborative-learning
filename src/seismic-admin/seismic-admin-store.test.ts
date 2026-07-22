@@ -526,6 +526,8 @@ describe("update (event generation)", () => {
     expect(options.metadata).toEqual({ id: "compact-v1" });
     // endDate is inclusive: the range extends through the end of Jan 3 UTC.
     expect(options.range).toEqual({ start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 4) });
+    // Real EarthScope data via the proxy, matching the raw-download flow — never the mock.
+    expect(options.proxy).toBe(true);
   });
 
   it("reloads that pair's coverage stats after each model", async () => {

@@ -508,6 +508,7 @@ export class SeismicAdminStore {
         const run = this.deps.processCoverage ?? processUncoveredRanges;
         await run({
           stationData, metadata, range,
+          proxy: true,
           onProgress: (progress, total) => this.setFeedback(
             `${prefix}${getStationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
           onDayCovered: day => this.markDayCovered(key, url, day),

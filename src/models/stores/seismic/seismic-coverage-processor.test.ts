@@ -76,6 +76,22 @@ describe("processUncoveredRanges", () => {
     expect(result).toEqual({ processed: 3, skipped: 0, total: 3 });
   });
 
+  it("forwards the proxy option to the download service", async () => {
+    const fakeService = makeFakeDownloadService([feb1Day]);
+    await processUncoveredRanges({
+      ...makeOptions(fakeService),
+      uncovered: [threeDayRange],
+      proxy: true,
+    });
+    expect(fakeService.ensureRange).toHaveBeenCalledWith(expect.objectContaining({ proxy: true }));
+  });
+
+  it("passes no proxy preference by default, preserving the URL-param fallback", async () => {
+    const fakeService = makeFakeDownloadService([feb1Day]);
+    await processUncoveredRanges({ ...makeOptions(fakeService), uncovered: [threeDayRange] });
+    expect(fakeService.ensureRange.mock.calls[0][0].proxy).toBeUndefined();
+  });
+
   it("downloads each uncovered span separately with its own exact bounds", async () => {
     // Feb 1 and Feb 3 uncovered; Feb 2 covered
     const feb3Sec = feb1Sec + 2 * SECONDS_PER_DAY;

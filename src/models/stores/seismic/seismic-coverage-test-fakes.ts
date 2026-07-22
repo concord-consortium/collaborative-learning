@@ -15,7 +15,7 @@ import type { CoverageDownloadService } from "./seismic-coverage-processor";
 export function makeFakeDownloadService(days: number[]) {
   let pending: number[] = [];
   return {
-    ensureRange: jest.fn(({ startSec, endSec }: { startSec: number, endSec: number }) => {
+    ensureRange: jest.fn(({ startSec, endSec }: { startSec: number, endSec: number, proxy?: boolean }) => {
       pending = days.filter(d => d * SECONDS_PER_DAY >= startSec && d * SECONDS_PER_DAY <= endSec);
     }),
     nextReadyDay: jest.fn(async () => pending.shift() ?? DONE),

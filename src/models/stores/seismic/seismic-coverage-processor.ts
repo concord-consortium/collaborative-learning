@@ -29,6 +29,8 @@ export interface ProcessCoverageOptions {
   /** Fires after a day's events + coverage are persisted; empty days included,
    *  errored days and failed persists excluded. */
   onDayCovered?: (day: number) => void;
+  /** Forwarded to the download service's raw-data fetches. */
+  proxy?: boolean;
   /** Test seams; production defaults construct real ones. */
   downloadService?: CoverageDownloadService;
   createRunner?: () => SeismicModelRunner;
@@ -58,7 +60,7 @@ async function saveDayResults(
  *  Owns the runner lifecycle (loadModel/dispose). Returns day counts. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
-  const { stationData, metadata, onEvents, onProgress, onDayCovered, range } = options;
+  const { stationData, metadata, onEvents, onProgress, onDayCovered, proxy, range } = options;
   const modelId = metadata.id;
 
   const uncovered = options.uncovered ?? await getUncoveredRanges(stationData, modelId, range);
@@ -89,7 +91,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
       // ensureRange resets the service, so each span is fully drained before the next starts.
       // endSec is inclusive: the day containing it is downloaded (matches the downloader's daysInRange).
       downloadService.ensureRange({
-        ...stationData, startSec: span.startDay * SECONDS_PER_DAY, endSec: span.endDay * SECONDS_PER_DAY
+        ...stationData, startSec: span.startDay * SECONDS_PER_DAY, endSec: span.endDay * SECONDS_PER_DAY, proxy
       });
 
       for (;;) {
