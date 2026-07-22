@@ -2,9 +2,9 @@ import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel"
 import { SerialDevice } from "./serial";
 import { parseArduinoSerialData, detectSpikerbitVersion } from "./serial-protocol";
 
-// The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue-v1.hex.
+// The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
 // Bump together with the VERSION constant in the MakeCode source.
-export const kSpikerbitFirmwareVersion = 1;
+export const kSpikerbitFirmwareVersion = 2;
 
 // How long to wait for a "?" version reply before deciding to flash.
 const kVersionQueryTimeoutMs = 1500;

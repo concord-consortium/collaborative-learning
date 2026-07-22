@@ -21,7 +21,7 @@ import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../nodes/rete-manager";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
-import spikerbitHex from "../firmware/spikerbit-clue-v1.hex";
+import spikerbitHex from "../firmware/spikerbit-clue.hex";
 
 import "./dataflow-program.scss";
 
