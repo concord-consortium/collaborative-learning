@@ -4,7 +4,7 @@ import { parseArduinoSerialData, detectSpikerbitVersion } from "./serial-protoco
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
 // Bump together with the VERSION constant in the MakeCode source.
-export const kSpikerbitFirmwareVersion = 2;
+export const kSpikerbitFirmwareVersion = 3;
 
 // How long to wait for a "?" version reply before deciding to flash.
 const kVersionQueryTimeoutMs = 1500;
