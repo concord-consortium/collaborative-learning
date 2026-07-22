@@ -32,6 +32,7 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
+import { getDocumentKindInfo } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -583,6 +584,15 @@ export class DB {
       groupInfo.groupId = groupId;
     }
 
+    // Stamp the kind + concurrent axes for kinds registered in the kind registry (group today).
+    // Only defined fields are added so Firestore never sees `undefined`.
+    const kindFields: { kind?: string; concurrent?: boolean } = {};
+    const kindInfo = getDocumentKindInfo(metadata.type);
+    if (kindInfo) {
+      kindFields.kind = kindInfo.kind;
+      if (kindInfo.concurrent) kindFields.concurrent = true;
+    }
+
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
       // `self` here is metadata.self (destructured above), whose classHash is populated for every
@@ -596,7 +606,8 @@ export class DB {
       properties: {},
       uid,
       ...problemInfo,
-      ...groupInfo
+      ...groupInfo,
+      ...kindFields
     };
     await documentRef.set(firestoreMetadata);
     return firestoreMetadata;

@@ -362,6 +362,42 @@ describe("db", () => {
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
   });
 
+  it("stamps kind and concurrent on a group document's Firestore metadata", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    expect(written).toMatchObject({ kind: "group", concurrent: true });
+    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
+  });
+
+  it("does NOT stamp kind/concurrent on a personal document", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
+      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    expect(written).not.toHaveProperty("kind");
+    expect(written).not.toHaveProperty("concurrent");
+  });
+
   it("writes context_id from self.classHash for documents with no top-level classHash", async () => {
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
