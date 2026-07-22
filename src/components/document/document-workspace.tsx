@@ -171,7 +171,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private getDefaultSectionedDocumentContent(defaultType: string, defaultContent?: DocumentContentModelType) {
     const { appConfig: { autoSectionProblemDocuments }, problem } = this.stores;
-    if ((defaultType === ProblemDocument) && autoSectionProblemDocuments) {
+    // A non-empty document template provides its own content (and its own sections via dividers), so use it
+    // for the problem document instead of the empty auto-sectioned default. getDefaultDocumentContentSpec
+    // already yields empty content when the template is absent or switched off, so this covers those cases.
+    const hasTemplateContent = !!defaultContent && !defaultContent.isEmpty;
+    if ((defaultType === ProblemDocument) && autoSectionProblemDocuments && !hasTemplateContent) {
       // for problem documents, default content is a section header row and a placeholder tile
       // for each section that is present in the corresponding problem content
       return createDefaultSectionedContent({ sections: problem.sections });
