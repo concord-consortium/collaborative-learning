@@ -9,6 +9,7 @@ import { initializeApp } from "../../lib/firebase-config";
 export async function initAdminFirebase(): Promise<void> {
   initializeApp();
   const auth = firebase.auth();
+  await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
   if (!auth.currentUser) {
     await auth.signInAnonymously();
   }
