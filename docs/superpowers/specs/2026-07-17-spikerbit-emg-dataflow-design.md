@@ -218,3 +218,14 @@ These are deliberate MVP shortcuts, to be revisited once this ships:
   ("not a micro:bit ⇒ Arduino") is untouched here because the Spiker:bit path does not
   go through Web Serial port selection; a real board lookup table is part of the future
   abstraction.
+- **No user-facing feedback for connection/flash errors.** `connectSpikerbit` currently
+  only `console.error`s on failure, and there is no on-screen flash progress (see §7).
+  The most important case observed in practice is a **`device-in-use` error** (WebUSB
+  `claimInterface` fails with "Unable to claim interface") when another page or app —
+  typically the **MakeCode editor tab** — still holds the micro:bit's WebUSB interface,
+  which is exclusive. The user sees nothing and assumes the tile is broken. Follow-up:
+  surface a visible, actionable message for this case — e.g. "Another program (such as
+  MakeCode) is connected to your micro:bit. Close it, then reconnect." — alongside the
+  general flash-progress modal and the MakeCode-fallback UI. Map the library's
+  `DeviceError.code` values (`device-in-use`, `no-device-selected`,
+  `device-disconnected`, `firmware-update-required`, …) to appropriate messages.
