@@ -47,14 +47,16 @@ const InnerApp: React.FC = () => {
 
   const problemOrdinal = useMemo(() => getProblemOrdinal(unitConfig, path), [unitConfig, path]);
 
-  const openPreview = (userType: PreviewUserType) => {
+  const openPreview = (userType: PreviewUserType, fresh?: boolean) => {
     if (branch && unit) {
-      authoringPreview.openPreview(branch, unit, userType, problemOrdinal);
+      authoringPreview.openPreview(branch, unit, userType, problemOrdinal, fresh);
     }
   };
 
   const handleStudentPreviewClick = () => openPreview("student");
   const handleTeacherPreviewClick = () => openPreview("teacher");
+  // Opens a fresh-user student preview so newly-created documents pick up current templates.
+  const handleResetPreviewClick = () => openPreview("student", true);
 
   const renderHeader = () => {
     const title = `CLUE Authoring${unitConfig ? `: ${unitConfig.title}` : ""}`;
@@ -72,6 +74,14 @@ const InnerApp: React.FC = () => {
           { branch && unit && (
             <button onClick={handleTeacherPreviewClick}>
               Teacher Preview
+            </button>
+          )}
+          { branch && unit && (
+            <button
+              onClick={handleResetPreviewClick}
+              title="Open a fresh student preview that recreates documents from the current templates"
+            >
+              Reset Preview
             </button>
           )}
           { branch && unit && (

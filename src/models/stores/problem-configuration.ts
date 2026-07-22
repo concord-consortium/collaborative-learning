@@ -17,7 +17,11 @@ export interface ProblemConfiguration {
   // required tile types that aren't in the toolbar can be specified here
   tools?: string[]; // legacy use of `tools` preserved to avoid content changes
   defaultDocumentTemplate?: IAuthoredDocumentContent;
+  // Non-destructive switch for defaultDocumentTemplate: undefined (legacy) or true → apply the
+  // template; false → skip it while preserving the authored content. Mirrors `aiEvaluation`/`aiPrompt`.
+  defaultDocumentTemplateEnabled?: boolean;
   planningTemplate?: Record<string, IAuthoredDocumentContent>;
+  planningTemplateEnabled?: boolean;
   // text shown in "placeholder" tiles.
   // key is the container type, value is the text.
   // currently supported container types are "QuestionContent" for placeholder tiles inside Question tiles,

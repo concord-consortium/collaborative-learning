@@ -80,6 +80,16 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
       ]
     };
 
+    // Show a template editor page when its template is enabled or already has content (so legacy
+    // hand-authored templates remain editable even when the enable flag was never set).
+    const uc = unitConfig?.config;
+    if (uc?.defaultDocumentTemplateEnabled || uc?.defaultDocumentTemplate) {
+      result.children[0].children!.push({ id: "documentTemplate", label: "Document Template" });
+    }
+    if (uc?.planningTemplateEnabled || uc?.planningTemplate) {
+      result.children[0].children!.push({ id: "planningTemplate", label: "Planning Template" });
+    }
+
     if (teacherGuideConfig) {
       result.children.push({
         id: "teacher-guides",

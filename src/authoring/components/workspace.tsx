@@ -15,8 +15,10 @@ import CommentsSettings from "./workspace/comments-settings";
 import SortWorkSettings from "./workspace/sort-work-settings";
 import { TermOverridesSettings } from "./workspace/term-overrides-settings";
 import DocumentSettings from "./workspace/document-settings";
+import PlanningTemplateEditor from "./workspace/planning-template-editor";
 import ExemplarMetadata from "./editors/exemplar-metadata";
 import { ContainerConfig } from "./workspace/container-config/container-config";
+import { TemplateEditor } from "./editors/template-editor";
 
 import "./workspace.scss";
 
@@ -155,6 +157,15 @@ const Workspace: React.FC = () => {
         return <TermOverridesSettings />;
       case "config/documentSettings":
         return <DocumentSettings />;
+      case "config/documentTemplate":
+        return (
+          <TemplateEditor
+            value={unitConfig?.config?.defaultDocumentTemplate}
+            onChange={(v) => setUnitConfig(draft => { if (draft) draft.config.defaultDocumentTemplate = v; })}
+          />
+        );
+      case "config/planningTemplate":
+        return <PlanningTemplateEditor />;
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }
@@ -208,8 +219,10 @@ const Workspace: React.FC = () => {
     return <div className="centered muted">No content available.</div>;
   };
 
+  // These config paths render a full-height editor (not a scrolling form), like the raw JSON editor.
+  const fullEditorConfigPaths = ["config/raw", "config/documentTemplate", "config/planningTemplate"];
   const className = classNames("workspace", {
-    "overflowing": isConfigPath && path !== "config/raw",
+    "overflowing": isConfigPath && !fullEditorConfigPaths.includes(path ?? ""),
   });
 
   return (

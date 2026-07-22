@@ -162,8 +162,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private getDefaultDocumentContentSpec() {
-    const { appConfig: { defaultDocumentType: type, defaultDocumentTemplate } } = this.stores;
-    return { type, content: DocumentContentModel.create(defaultDocumentTemplate) };
+    const { appConfig: { defaultDocumentType: type, defaultDocumentTemplate, defaultDocumentTemplateEnabled } }
+      = this.stores;
+    // Apply the template unless it has been explicitly switched off (undefined/legacy → apply).
+    const template = defaultDocumentTemplateEnabled !== false ? defaultDocumentTemplate : undefined;
+    return { type, content: DocumentContentModel.create(template) };
   }
 
   private getDefaultSectionedDocumentContent(defaultType: string, defaultContent?: DocumentContentModelType) {
@@ -341,8 +344,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {
-    const { appConfig: { defaultDocumentTemplate } } = this.stores;
-    const template = type === PersonalDocument ? defaultDocumentTemplate : undefined;
+    const { appConfig: { defaultDocumentTemplate, defaultDocumentTemplateEnabled } } = this.stores;
+    const templateEnabled = defaultDocumentTemplateEnabled !== false;
+    const template = (type === PersonalDocument && templateEnabled) ? defaultDocumentTemplate : undefined;
     return DocumentContentModel.create(template);
   };
 

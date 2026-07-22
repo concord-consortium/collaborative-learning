@@ -472,7 +472,8 @@ export class DB {
     if (requiredPlanningDocument) {
       const planningDocument = await requiredPlanningDocument.promise;
       if (planningDocument) return planningDocument;
-      const content = appConfig.planningTemplate;
+      // Apply the planning template unless it has been explicitly switched off (undefined/legacy → apply).
+      const content = appConfig.planningTemplateEnabled !== false ? appConfig.planningTemplate : undefined;
       const docContent = createDefaultSectionedContent({ sections, content });
       return this.createProblemOrPlanningDocument(PlanningDocument, docContent);
     }

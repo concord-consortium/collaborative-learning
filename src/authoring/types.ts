@@ -35,7 +35,7 @@ export interface IUnit {
   investigations: IInvestigation[];
 }
 
-export interface IUnitConfig {
+export interface IUnitConfig extends IItemTemplateConfig {
   enableHistoryRoles: string[];
   disablePublish: boolean;
   placeholderText: string;
@@ -172,10 +172,24 @@ export interface IProblem {
   title: string;
   subtitle: string;
   sections: string[];
-  config?: {
-    planningTemplate: IPlanningTemplate;
-  };
+  config?: IItemTemplateConfig;
   disabled?: any[];
+}
+
+// Preloaded document content ({ tiles }) copied into a new document on first creation.
+// Same authored shape as section content. See IAuthoredDocumentContent in the runtime.
+export interface ITemplateContent {
+  tiles: ITile[];
+}
+
+// Template-related config shared by the unit and by each problem/teacher-guide problem.
+// The `*Enabled` flags switch a template on/off WITHOUT deleting its content (mirrors how
+// `aiEvaluation` gates the persistent `aiPrompt`); content is only removed by an explicit delete.
+export interface IItemTemplateConfig {
+  defaultDocumentTemplate?: ITemplateContent;
+  defaultDocumentTemplateEnabled?: boolean;
+  planningTemplate?: IPlanningTemplate;
+  planningTemplateEnabled?: boolean;
 }
 
 export interface IPlanningTemplate {
