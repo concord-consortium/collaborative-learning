@@ -347,8 +347,7 @@
         ],
         "defaultStation": null,
         "models": [
-          { "label": "Compact Model", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v2/metadata.json" },
-          { "label": "Placeholder (random weights)", "metadataUrl": "placeholder:random-weights" }
+          { "label": "Compact Model", "metadataUrl": "https://models-resources.concord.org/tiny-cnn-seismicML/models/v1/compact-v2/metadata.json" }
         ],
         "defaultModel": null
       },

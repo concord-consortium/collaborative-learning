@@ -1,9 +1,9 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useMemo } from "react";
+import { ModelListEntry } from "../../../../shared/seismic/model-metadata";
 import { StationConfig } from "../../../../shared/seismic/seismic-types";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { stationId } from "../../shared-seismogram/station-model";
-import { ModelListEntry } from "../models/wave-runner-content";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import "./data-setup.scss";
 

@@ -1,5 +1,5 @@
 import { SeismicDownloadService, DONE } from "./seismic-download-service";
-import { DownloadEvent, DownloadParams } from "../../../shared/seismic/seismic-downloader";
+import { DownloadEvent, DownloadParams } from "../../../../shared/seismic/seismic-downloader";
 
 const PARAMS: DownloadParams = {
   network: "AK", station: "K204", location: "", channel: "HNZ",

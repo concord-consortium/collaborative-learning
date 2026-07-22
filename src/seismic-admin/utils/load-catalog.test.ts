@@ -1,7 +1,8 @@
-import { defaultCatalog, loadCatalog, stationsFromUnitConfig } from "./load-catalog";
+import { defaultCatalog, loadCatalog, modelsFromUnitConfig, stationsFromUnitConfig } from "./load-catalog";
 import { reprocessUrlParams } from "../../utilities/url-params";
 
 const stations = [{ network: "AK", station: "K204", channel: "HNZ", location: "00", label: "Anchorage" }];
+const models = [{ label: "Compact", metadataUrl: "https://x/m.json" }];
 
 // Point the global urlParams (shared with CurriculumConfig and getContent) at a new search string.
 const setSearch = (search: string) => {
@@ -26,11 +27,31 @@ describe("stationsFromUnitConfig", () => {
   });
 });
 
+describe("modelsFromUnitConfig", () => {
+  it("extracts wave-runner models from config.settings", () => {
+    const json = { config: { settings: { "wave-runner": { models } } } };
+    expect(modelsFromUnitConfig(json)).toEqual(models);
+  });
+
+  it("supports deprecated top-level settings", () => {
+    const json = { settings: { "wave-runner": { models } } };
+    expect(modelsFromUnitConfig(json)).toEqual(models);
+  });
+
+  it("returns undefined when the unit declares no models or malformed ones", () => {
+    expect(modelsFromUnitConfig({})).toBeUndefined();
+    expect(modelsFromUnitConfig({ config: { settings: {} } })).toBeUndefined();
+    expect(modelsFromUnitConfig({ config: { settings: { "wave-runner": { models: "bogus" } } } })).toBeUndefined();
+  });
+});
+
 describe("defaultCatalog", () => {
-  it("reads the wave-runner stations from the base app config", () => {
+  it("reads the wave-runner stations and models from the base app config", () => {
     const base = defaultCatalog();
-    expect(base.length).toBeGreaterThan(0);
-    expect(base.map(s => s.station)).toContain("RC01");
+    expect(base.stations.length).toBeGreaterThan(0);
+    expect(base.stations.map(s => s.station)).toContain("RC01");
+    expect(base.models.length).toBeGreaterThan(0);
+    expect(base.models.every(m => typeof m.label === "string" && typeof m.metadataUrl === "string")).toBe(true);
   });
 });
 
@@ -51,15 +72,30 @@ describe("loadCatalog", () => {
     expect(await loadCatalog()).toEqual(defaultCatalog());
   });
 
-  it("fetches the unit URL and returns its stations", async () => {
+  it("fetches the unit URL and returns its stations and models", async () => {
     setSearch("?unit=https%3A%2F%2Fexample.org%2Funits%2Fqa%2Fcontent.json");
+    (global as any).fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({ config: { settings: { "wave-runner": { stations, models } } } }),
+    }));
+    const result = await loadCatalog();
+    expect(result).toEqual({ stations, models });
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toBe("https://example.org/units/qa/content.json");
+  });
+
+  it("degrades stations and models independently to the base catalog", async () => {
+    setSearch("?unit=https%3A%2F%2Fexample.org%2Fcontent.json");
+    (global as any).fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({ config: { settings: { "wave-runner": { models } } } }),
+    }));
+    expect(await loadCatalog()).toEqual({ stations: defaultCatalog().stations, models });
+
     (global as any).fetch = jest.fn(async () => ({
       ok: true,
       json: async () => ({ config: { settings: { "wave-runner": { stations } } } }),
     }));
-    const result = await loadCatalog();
-    expect(result).toEqual(stations);
-    expect((global.fetch as jest.Mock).mock.calls[0][0]).toBe("https://example.org/units/qa/content.json");
+    expect(await loadCatalog()).toEqual({ stations, models: defaultCatalog().models });
   });
 
   it("resolves a bare unit code against the curriculum site and branch", async () => {

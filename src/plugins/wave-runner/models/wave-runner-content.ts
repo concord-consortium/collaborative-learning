@@ -1,10 +1,12 @@
 import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
-import { miniseed } from "seisplotjs";
-import { MILLISECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { SeismicDownloadService, DONE } from "../../../models/stores/seismic-download-service";
-import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
+import { eventDocId } from "../../../../shared/seismic/event-database";
+import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/model-metadata";
+import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { TimeRange } from "../../../../shared/seismic/seismic-types";
+import { processUncoveredRanges } from "../../../models/stores/seismic/seismic-coverage-processor";
+import { getUncoveredRanges, loadEvents } from "../../../models/stores/seismic/seismic-event-service";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
@@ -14,27 +16,6 @@ import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-
 import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
-
-const SUPPORTED_SCHEMA = "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json";
-
-export const PLACEHOLDER_MODEL_URL = "placeholder:random-weights";
-
-const PLACEHOLDER_METADATA: ModelMetadata = {
-  $schema: SUPPORTED_SCHEMA,
-  id: "placeholder-v1",
-  architecture: "placeholder",
-  class_names: ["Noise", "Earthquake"],
-  sampling_rate: 100,
-  window_duration: 60,
-  instrument_types: ["H", "N", "L"],
-  weightsUrl: "",
-};
-
-// The model list is configured per-unit under settings["wave-runner"].models.
-export interface ModelListEntry {
-  label: string;
-  metadataUrl: string;
-}
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
@@ -146,7 +127,14 @@ export const WaveRunnerContentModel = TileContentModel
       self.chunksTotal = total;
     },
     addDetectedEvents(events: SeismicEvent[]) {
-      self.detectedEvents = [...self.detectedEvents, ...events];
+      const seen = new Set(self.detectedEvents.map(eventDocId));
+      const fresh = events.filter(evt => {
+        const key = eventDocId(evt);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      self.detectedEvents = [...self.detectedEvents, ...fresh];
     },
     getOrCreateEventsDataSet(): SharedDataSetType | undefined {
       if (self.eventsDataSet) return self.eventsDataSet;
@@ -174,26 +162,8 @@ export const WaveRunnerContentModel = TileContentModel
       self.modelLoadError = null;
       self.clearEventsDataSet();
 
-      // Placeholder model — use hardcoded metadata, no fetch needed
-      if (metadataUrl === PLACEHOLDER_MODEL_URL) {
-        self.selectedModelMetadata = { ...PLACEHOLDER_METADATA };
-        return;
-      }
-
       try {
-        const response: Response = yield fetch(metadataUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch model metadata: ${response.status}`);
-        }
-        const metadata: ModelMetadata = yield response.json();
-        if (metadata.$schema !== SUPPORTED_SCHEMA) {
-          throw new Error(
-            `Unsupported model schema: "${metadata.$schema}". This version of CLUE supports "${SUPPORTED_SCHEMA}".`
-          );
-        }
-        // Resolve weightsUrl relative to the metadata URL
-        metadata.weightsUrl = new URL(metadata.weightsUrl, metadataUrl).href;
-        self.selectedModelMetadata = metadata;
+        self.selectedModelMetadata = yield fetchModelMetadata(metadataUrl);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.modelLoadError = message;
@@ -220,22 +190,20 @@ export const WaveRunnerContentModel = TileContentModel
         self.runError = "No station selected";
         return;
       }
+      const station = self.station;
 
       self.clearEventsDataSet();
       self.runError = null;
       self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
+      const modelId = metadata.id;
 
-      const runner = new SeismicModelRunner();
       try {
-        yield runner.loadModel(metadata);
-
         const startDate = new Date(`${self.startDate}T00:00:00Z`);
         const endDate = new Date(`${self.endDate}T00:00:00Z`);
         const startMs = startDate.getTime();
         const endMs = endDate.getTime();
-        const detectionThreshold = 0.7;
 
         if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) {
           self.runError = "Invalid date range. End date must be after start date.";
@@ -243,49 +211,24 @@ export const WaveRunnerContentModel = TileContentModel
           return;
         }
 
-        const totalDays = Math.floor((endMs - startMs) / MILLISECONDS_PER_DAY) + 1;
-        self.updateChunkProgress(0, totalDays);
+        // endDate is inclusive: the range extends through the end of that UTC day.
+        const rangeSec: TimeRange = { start: startMs / 1000, end: endMs / 1000 + SECONDS_PER_DAY };
 
-        // Bulk-download the range into OPFS, running the model on each day as it lands.
-        // Days may arrive out of order; detection is per-window independent, so that's fine.
-        // No-data days come as `dayEmpty` and are simply never yielded.
-        const downloadService = new SeismicDownloadService();
-        downloadService.ensureRange({ ...self.station, startSec: startMs / 1000, endSec: endMs / 1000 });
-
-        let processed = 0;
-        const updateProgress = () => {
-          const progress = processed + downloadService.erroredDays.length + downloadService.emptyDays.length;
-          self.updateChunkProgress(progress, totalDays);
-        };
-
-        while (true) {
-          const day: number | typeof DONE = yield downloadService.nextReadyDay();
-          if (day === DONE) break;
-
-          const buffer: ArrayBuffer | null = yield downloadService.readDay(day);
-          if (!buffer) continue;
-
-          // Parse miniSEED → Seismogram
-          const records = miniseed.parseDataRecords(buffer);
-          const seismogram = miniseed.merge(records);
-
-          // Run model on this chunk
-          yield runner.processChunk(
-            seismogram,
-            {
-              onProgress: () => {},
-              onEvents: (events: SeismicEvent[]) => {
-                self.addDetectedEvents(events);
-              },
-            },
-            detectionThreshold,
-          );
-          processed++;
-          updateProgress();
+        // Load previously stored events and coverage; fall back to a full local run if unavailable.
+        let uncovered: TimeRange[] = [rangeSec];
+        try {
+          const prior: SeismicEvent[] = yield loadEvents(station, modelId, rangeSec);
+          self.addDetectedEvents(prior);
+          uncovered = yield getUncoveredRanges(station, modelId, rangeSec);
+        } catch (err) {
+          console.warn("Seismic event database unavailable; processing the full range:", err);
         }
 
-        // Ensure progress is accurate after loop finishes
-        updateProgress();
+        yield processUncoveredRanges({
+          stationData: station, metadata, range: rangeSec, uncovered,
+          onEvents: events => self.addDetectedEvents(events),
+          onProgress: (progress, total) => self.updateChunkProgress(progress, total),
+        });
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {
@@ -306,7 +249,6 @@ export const WaveRunnerContentModel = TileContentModel
         self.runError = `Error running model: ${message}`;
         console.error("Wave Runner runModel error:", err);
       } finally {
-        runner.dispose();
         self.isRunning = false;
       }
     })

@@ -1,4 +1,10 @@
 .feedback-area {
+  border-radius: 4px;
+  margin-top: 8px;
   min-height: 18px;
-  padding-top: 8px;
+  padding: 4px;
+
+  &.busy {
+    background-color: #eedd99;
+  }
 }

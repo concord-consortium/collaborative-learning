@@ -45,7 +45,7 @@ describe("AdminBody", () => {
   it("renders only a single station section and no all-stations section when one is selected", async () => {
     const { store } = makeStore();
     await store.refresh();
-    store.toggle(getStationChannelPrefix(stationB)); // deselect one, leaving one selected
+    store.toggleStation(getStationChannelPrefix(stationB)); // deselect one, leaving one selected
 
     renderBody(store);
 

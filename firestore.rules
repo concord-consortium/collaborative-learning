@@ -724,5 +724,44 @@ service cloud.firestore {
       allow write: if matchFirebaseUserId(userId);
     }
 
+    //
+    // seismic event database (see docs/seismic/event-database-design.md)
+    // Anonymous users are allowed to read and contribute (see design doc Decision).
+    //
+    // Note: future collectionGroup("events") queries would additionally need a
+    // `match /{path=**}/events/{eventId}` rule; without one they'll be denied.
+    // The {version} segment tracks EVENT_LAYOUT_VERSION (shared/seismic/event-database.ts);
+    // rules are version-agnostic so a layout bump doesn't require a rules deploy.
+    match /services/seismic/versions/{version}/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
+
+      match /events/{eventId} {
+        allow read: if isAuthed();
+        allow write: if isAuthed()
+                     && request.resource.data.createdBy == request.auth.uid
+                     && request.resource.data.station == station
+                     && request.resource.data.location == location
+                     && request.resource.data.channel == channel
+                     && request.resource.data.model == model
+                     && request.resource.data.windowStart is timestamp
+                     && request.resource.data.windowEnd is timestamp
+                     && request.resource.data.eventType is string
+                     && request.resource.data.confidence is number
+                     && request.resource.data.createdAt is timestamp
+                     && request.resource.data.keys().hasOnly([
+                      'createdBy', 'station', 'location', 'channel', 'model', 'windowStart', 'windowEnd', 'eventType',
+                      'confidence', 'createdAt'
+                     ]);
+      }
+
+      match /coverage/{chunkId} {
+        allow read: if isAuthed();
+        allow write: if isAuthed()
+                     && request.resource.data.bitmap is bytes
+                     && request.resource.data.bitmap.size() == 540
+                     && request.resource.data.updatedAt is timestamp
+                     && request.resource.data.keys().hasOnly(['bitmap', 'updatedAt']);
+      }
+    }
+
   }
 }

@@ -38,7 +38,7 @@ import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
-import { SeismicQueryService } from "./seismic-query-service";
+import { SeismicQueryService } from "./seismic/seismic-query-service";
 
 export interface IStores extends IBaseStores {
   problemPath: string;

@@ -11,7 +11,23 @@
 
   .station-name {
     font-weight: bold;
-    margin-bottom: 8px;
+  }
+
+  .station-ready {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    padding: 4px 4px 4px 8px;
+
+    &.not-ready {
+      background-color: #ffeebb;
+      border-radius: 12px;
+    }
+
+    .icon {
+      height: 24px;
+      width: 24px;
+    }
   }
 
   .station-body {
@@ -19,25 +35,33 @@
     align-items: flex-start;
     gap: 24px;
 
-    .data-section {
+    .data-sections {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 12px;
       width: 100%;
 
-      .data-section-header {
+      .data-section {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
 
-        .data-kind {
-          font-size: 14px;
-          text-transform: uppercase;
-          color: #888;
-        }
+        .data-section-header {
+          align-items: center;
+          display: flex;
+          justify-content: space-between;
 
-        .data-stats {
-          font-size: 13px;
-          color: #444;
+          .data-kind {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #888;
+          }
+
+          .data-stats {
+            font-size: 13px;
+            color: #444;
+          }
         }
       }
     }
@@ -47,9 +71,17 @@
       flex-direction: column;
       gap: 6px;
 
+      button:enabled {
+        cursor: pointer;
+      }
+
       .danger {
         color: #fff;
         background: #c0392b;
+
+        &:enabled:hover {
+          background: #a0190b;
+        }
       }
     }
   }
