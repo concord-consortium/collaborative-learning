@@ -409,10 +409,10 @@ service cloud.firestore {
         allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
         // teachers can only delete their own documents
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
-        // class members can delete non-canonical group documents
+        // class members can delete their own non-canonical concurrent documents (group docs, DQB, ...)
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
-          && resource.data.type == "group"
+          && resource.data.get("concurrent", false) == true
           && !isCanonicalValue(resource.data.get('canonical', ""));
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
