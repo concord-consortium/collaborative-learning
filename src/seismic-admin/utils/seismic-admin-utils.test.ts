@@ -1,5 +1,5 @@
 import {
-  missingDayCount, mergeStations, formatBytes, stationLabel, timelineSegments
+  missingDayCount, mergeStations, formatBytes, getStationLabel, timelineSegments
 } from "./seismic-admin-utils";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
@@ -47,9 +47,9 @@ describe("seismic-admin-utils", () => {
   });
 
   it("includes the location code in the fallback label when present", () => {
-    expect(stationLabel({ network: "IU", station: "ANMO", location: "00", channel: "BHZ" }))
+    expect(getStationLabel({ network: "IU", station: "ANMO", location: "00", channel: "BHZ" }))
       .toBe("IU ANMO 00 BHZ");
-    expect(stationLabel({ network: "AK", station: "K204", channel: "HNZ" })).toBe("AK K204 HNZ");
+    expect(getStationLabel({ network: "AK", station: "K204", channel: "HNZ" })).toBe("AK K204 HNZ");
   });
 
   it("formats byte sizes", () => {

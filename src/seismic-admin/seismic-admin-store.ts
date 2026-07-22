@@ -10,7 +10,7 @@ import { processUncoveredRanges, ProcessCoverageOptions } from "../models/stores
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
 import { getUncoveredRanges, loadEvents } from "../models/stores/seismic/seismic-event-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
-import { mergeStations, missingDayCount, stationLabel } from "./utils/seismic-admin-utils";
+import { mergeStations, missingDayCount, getStationLabel } from "./utils/seismic-admin-utils";
 
 type AdminCache = Pick<SeismicCache, "listStations" | "scanCachedDays" | "stationRawBytes" | "deleteDaysInRange">;
 
@@ -435,7 +435,7 @@ export class SeismicAdminStore {
       if (!s) return;
 
       await this.download(s);
-      this.setFeedback(`Finished downloading data for ${stationLabel(s)}.`);
+      this.setFeedback(`Finished downloading data for ${getStationLabel(s)}.`);
     });
   }
 
@@ -463,8 +463,8 @@ export class SeismicAdminStore {
       if (!s) return;
       const ok = await this.updateSingleStation(key);
       this.setFeedback(ok
-        ? `Finished updating ${stationLabel(s)}.`
-        : `Finished updating ${stationLabel(s)} with failures.`);
+        ? `Finished updating ${getStationLabel(s)}.`
+        : `Finished updating ${getStationLabel(s)} with failures.`);
     });
   }
 
@@ -509,12 +509,12 @@ export class SeismicAdminStore {
         await run({
           stationData, metadata, range,
           onProgress: (progress, total) => this.setFeedback(
-            `${prefix}${stationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
+            `${prefix}${getStationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
           onDayCovered: day => this.markDayCovered(key, url, day),
         });
       } catch (err) {
         console.warn("Update failed:", err);
-        this.setFeedback(`${prefix}Update failed for ${stationLabel(stationData)} — ${label}.`);
+        this.setFeedback(`${prefix}Update failed for ${getStationLabel(stationData)} — ${label}.`);
         ok = false;
       }
       await this.loadCoverageStats(stationData, url);
@@ -546,7 +546,7 @@ export class SeismicAdminStore {
     if (this.firstSec === undefined || this.lastSec === undefined) return;
 
     const run = this.deps.downloadStation ?? defaultDownloadStation;
-    const name = stationLabel(s);
+    const name = getStationLabel(s);
     const key = getStationChannelPrefix(s);
     const genericFeedback = `${prefix}Downloading data for ${name}...`;
     this.setFeedback(genericFeedback);

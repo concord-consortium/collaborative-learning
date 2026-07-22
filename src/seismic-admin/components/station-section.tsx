@@ -5,7 +5,7 @@ import { ModelListEntry } from "../../../shared/seismic/model-metadata";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
 import CheckIcon from "../../assets/icons/check/check-selected.svg";
 import WarningIcon from "../../assets/icons/caution.svg";
-import { formatBytes, stationLabel } from "../utils/seismic-admin-utils";
+import { formatBytes, getStationLabel } from "../utils/seismic-admin-utils";
 import { ConfirmModal } from "./confirm-modal";
 import { RawTimeline } from "./raw-timeline";
 import "./station-section.scss";
@@ -13,12 +13,13 @@ import "./station-section.scss";
 interface ICoverageSectionProps {
   // The station whose coverage is shown; absent for the all-stations aggregate.
   stationKey?: string;
+  stationLabel: string;
   model: ModelListEntry;
 }
 
 /** One model's event coverage: a three-state timeline for a single station,
  *  or an aggregate text line (no bar) across all selected stations. */
-const CoverageSection = observer(function CoverageSection({ stationKey, model }: ICoverageSectionProps) {
+const CoverageSection = observer(function CoverageSection({ stationKey, stationLabel, model }: ICoverageSectionProps) {
   const store = useSeismicAdminStore();
   const { firstDay, lastDay } = store;
   const hasRange = firstDay !== undefined && lastDay !== undefined;
@@ -67,7 +68,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const { firstDay, lastDay, rangeDays, selectedStations } = store;
   const hasRange = firstDay !== undefined && lastDay !== undefined;
   const label = station
-    ? stationLabel(station)
+    ? getStationLabel(station)
     : `All selected stations (${selectedStations.size})`;
 
   const allTotalDays = rangeDays * selectedStations.size;
@@ -136,7 +137,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
             )}
           </div>
           {store.selectedModelList.map(model => (
-            <CoverageSection key={model.metadataUrl} stationKey={stationKey} model={model} />
+            <CoverageSection key={model.metadataUrl} stationKey={stationKey} stationLabel={label} model={model} />
           ))}
         </div>
         <div className="station-actions">

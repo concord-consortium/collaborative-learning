@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
-import { stationLabel } from "../utils/seismic-admin-utils";
+import { getStationLabel } from "../utils/seismic-admin-utils";
 import "./admin-header.scss";
 import { FeedbackArea } from "./feedback-area";
 
@@ -52,7 +52,7 @@ export const AdminHeader = observer(function AdminHeader() {
                     checked={checked}
                     onChange={() => store.toggleStation(key)}
                   />
-                  {stationLabel(station)}
+                  {getStationLabel(station)}
                 </label>
               );
             })}

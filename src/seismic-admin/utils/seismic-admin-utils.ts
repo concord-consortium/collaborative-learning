@@ -45,7 +45,7 @@ export function formatBytes(bytes: number): string {
 }
 
 /** A station's display name: its catalog label, else "{network} {station} {location} {channel}". */
-export function stationLabel(station: StationConfig): string {
+export function getStationLabel(station: StationConfig): string {
   return station.label ||
     [station.network, station.station, station.location, station.channel].filter(Boolean).join(" ");
 }
