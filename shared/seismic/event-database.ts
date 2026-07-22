@@ -7,6 +7,9 @@ import { SeismicEvent } from "./seismic-model-types";
 import { StationData, TimeRange } from "./seismic-types";
 import { encodeLocation, getStationPrefix } from "./tile-addressing";
 
+/** Layout version -- update this when the constants below or the event doc schema change */
+export const EVENT_LAYOUT_VERSION = 1;
+
 /** Coverage epoch: Jan 1 2020 UTC. All coverage math is in seconds. */
 export const COVERAGE_EPOCH = Date.UTC(2020, 0, 1) / 1000;
 export const CHUNK_DURATION_S = 30 * SECONDS_PER_DAY; // 30 days
@@ -38,7 +41,8 @@ export function getWindowIndex(timeSec: number): number {
 
 /** Firestore path to a station+location+channel+model container document. */
 export function modelPath(stationData: StationData, model: string): string {
-  return `services/seismic/stations/${getStationPrefix(stationData)}` +
+  return `services/seismic/versions/v${EVENT_LAYOUT_VERSION}` +
+    `/stations/${getStationPrefix(stationData)}` +
     `/locations/${encodeLocation(stationData.location)}` +
     `/channels/${stationData.channel}/models/${model}`;
 }

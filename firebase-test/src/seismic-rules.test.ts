@@ -8,9 +8,11 @@ describe("Firestore security rules: seismic event database", () => {
 
   let db: firebase.firestore.Firestore;
 
-  const kModelPath = "services/seismic/stations/AK_K204/locations/00/channels/BHZ/models/compact-v1";
+  const kModelPath = "services/seismic/versions/v1/stations/AK_K204/locations/00/channels/BHZ/models/compact-v1";
   const kEventPath = `${kModelPath}/events/1710720000000_earthquake`;
   const kCoveragePath = `${kModelPath}/coverage/76`;
+  // The rules are layout-version-agnostic: a future EVENT_LAYOUT_VERSION bump must not require a rules deploy.
+  const kV2CoveragePath = kCoveragePath.replace("/versions/v1/", "/versions/v2/");
 
   const validEvent = () => ({
     station: "AK_K204", location: "00", channel: "BHZ", model: "compact-v1",
@@ -88,6 +90,11 @@ describe("Firestore security rules: seismic event database", () => {
       db = initFirestore(genericAuth);
       await expectWriteToSucceed(db, kCoveragePath, validCoverage());
       await expectReadToSucceed(db, kCoveragePath);
+    });
+
+    it("accepts writes under a future layout version without a rules change", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kV2CoveragePath, validCoverage());
     });
 
     it("rejects coverage with a non-bytes bitmap, non-timestamp updatedAt, or missing updatedAt", async () => {

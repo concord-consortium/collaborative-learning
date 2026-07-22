@@ -1,6 +1,6 @@
 import {
   BYTES_PER_CHUNK, CHUNK_DURATION_S, COVERAGE_EPOCH, WINDOW_DURATION_S, WINDOWS_PER_CHUNK,
-  classifyDayCoverage, coveragePath, eventDocId, eventsPath, findUncoveredRanges, getChunkEnd,
+  classifyDayCoverage, coveragePath, EVENT_LAYOUT_VERSION, eventDocId, eventsPath, findUncoveredRanges, getChunkEnd,
   getChunkIndex, getChunkStart, getWindowIndex, groupWindowsByChunk, isWindowCovered, modelPath,
   setWindowBits, uncoveredDaySpans
 } from "./event-database";
@@ -56,14 +56,15 @@ describe("chunk and window index math", () => {
 });
 
 describe("Firestore path builders", () => {
-  it("builds the model container path", () => {
+  it("builds the model container path under the current layout version", () => {
     expect(modelPath(stationData, "compact-v1"))
-      .toBe("services/seismic/stations/AK_K204/locations/00/channels/BHZ/models/compact-v1");
+      .toBe(`services/seismic/versions/v${EVENT_LAYOUT_VERSION}` +
+        "/stations/AK_K204/locations/00/channels/BHZ/models/compact-v1");
   });
 
   it("encodes a blank location as --", () => {
     expect(modelPath(blankLocation, "compact-v1"))
-      .toBe("services/seismic/stations/AK_K204/locations/--/channels/BHZ/models/compact-v1");
+      .toBe("services/seismic/versions/v1/stations/AK_K204/locations/--/channels/BHZ/models/compact-v1");
   });
 
   it("builds coverage and events paths from the model path", () => {

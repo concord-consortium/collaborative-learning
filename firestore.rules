@@ -730,7 +730,9 @@ service cloud.firestore {
     //
     // Note: future collectionGroup("events") queries would additionally need a
     // `match /{path=**}/events/{eventId}` rule; without one they'll be denied.
-    match /services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
+    // The {version} segment tracks EVENT_LAYOUT_VERSION (shared/seismic/event-database.ts);
+    // rules are version-agnostic so a layout bump doesn't require a rules deploy.
+    match /services/seismic/versions/{version}/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
 
       match /events/{eventId} {
         allow read: if isAuthed();

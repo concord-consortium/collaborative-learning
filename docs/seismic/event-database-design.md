@@ -15,7 +15,7 @@ Related: [CLUE-463](https://concord-consortium.atlassian.net/browse/CLUE-463)
 One document per detected event, organized by station, channel, and model:
 
 ```
-services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model}/events/{windowStart}_{eventType}
+services/seismic/versions/{version}/stations/{station}/locations/{location}/channels/{channel}/models/{model}/events/{windowStart}_{eventType}
   station: string          // e.g., "AK_K204" — denormalized for collection group queries
   location: string         // e.g., "00" ("--" for blank) — denormalized for collection group queries
   channel: string          // e.g., "BHZ" — denormalized for collection group queries
@@ -28,6 +28,8 @@ services/seismic/stations/{station}/locations/{location}/channels/{channel}/mode
   createdAt: Timestamp
 ```
 
+The `{version}` segment is `v{EVENT_LAYOUT_VERSION}` (e.g., `v1`), mirroring the envelope cache's `ENVELOPE_LAYOUT_VERSION`: bump the constant in [event-database.ts](../../shared/seismic/event-database.ts) whenever the layout constants (coverage epoch, window/chunk durations) or the event document schema change, and all clients switch to a fresh subtree rather than misinterpreting old data. The security rules match `{version}` as a wildcard, so a bump does not require a rules deploy.
+
 The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`), as produced by `getStationPrefix` in [tile-addressing.ts](../../shared/seismic/tile-addressing.ts). This is globally unique across data providers — station codes alone are only unique within a network. The `{location}` is the SEED location code encoded with `encodeLocation` (blank becomes `--`, since Firestore path segments cannot be empty); it is its own segment because a station can host multiple instruments that share a channel code but differ by location. The `{channel}` is a separate path segment because different channels (e.g., BHZ vs BNZ) have different sample rates and physical units, and the ML model produces different results for each. The station/location/channel ordering matches the envelope tile cache (`getStationChannelPrefix`). See [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems) for the full convention.
 
 The document ID is `{windowStart}_{eventType}` (e.g., `1710720000000_earthquake`), where `windowStart` is epoch ms, matching `SeismicEvent.windowStart`. The composite key supports multiple events per window (a multi-class model may detect both traffic and earthquake in the same window) while providing natural deduplication — two users detecting the same event just overwrite with the same data.
@@ -39,7 +41,7 @@ The primary query pattern is single station + single model + time range. The den
 Bitmap-based tracking of which time ranges have been processed. Each bit represents a 10-minute coverage window. Documents are chunked into 30-day periods.
 
 ```
-services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model}/coverage/{chunkIndex}
+services/seismic/versions/{version}/stations/{station}/locations/{location}/channels/{channel}/models/{model}/coverage/{chunkIndex}
   bitmap: Bytes            // Uint8Array, 1 bit per 10-min window, 540 bytes per 30-day chunk
   updatedAt: Timestamp
 ```
@@ -83,7 +85,7 @@ Firestore's `arrayUnion` would avoid transactions by storing coverage as an arra
 ## Security Rules
 
 ```javascript
-match /services/seismic/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
+match /services/seismic/versions/{version}/stations/{station}/locations/{location}/channels/{channel}/models/{model} {
 
   match /events/{eventId} {
     allow read: if request.auth != null;
@@ -129,6 +131,9 @@ import { encodeLocation, getStationPrefix } from "shared/seismic/tile-addressing
 ### Constants and paths
 
 ```typescript
+/** Layout version -- update this when the constants below or the event doc schema change */
+const EVENT_LAYOUT_VERSION = 1;
+
 const COVERAGE_EPOCH = Date.UTC(2020, 0, 1) / 1000; // Jan 1 2020, Unix seconds
 const CHUNK_DURATION_S = 30 * 24 * 60 * 60; // 30 days
 const WINDOW_DURATION_S = 10 * 60; // 10 minutes
@@ -137,7 +142,8 @@ const BYTES_PER_CHUNK = Math.ceil(WINDOWS_PER_CHUNK / 8); // 540
 
 /** Firestore path to a station+location+channel+model container document. */
 function modelPath(stationData: StationData, model: string): string {
-  return `services/seismic/stations/${getStationPrefix(stationData)}` +
+  return `services/seismic/versions/v${EVENT_LAYOUT_VERSION}` +
+    `/stations/${getStationPrefix(stationData)}` +
     `/locations/${encodeLocation(stationData.location)}` +
     `/channels/${stationData.channel}/models/${model}`;
 }
