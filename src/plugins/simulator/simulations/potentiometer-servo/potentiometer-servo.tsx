@@ -7,6 +7,7 @@ import { potentiometerAndServoValues } from "../../../../../shared/simulations/p
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { findVariable } from "../simulation-utilities";
+import { kVolatileVariableLabel } from "../../../shared-variables/variable-labels";
 import {
   IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1, getNodeBoundingBox
 } from "./chip-sim-utils";
@@ -239,14 +240,14 @@ export const potentiometerAndServoSimulation: ISimulation = {
     },
     {
       displayName: "Pin",
-      labels: ["input", "reading", "sensor:pin-reading", "decimalPlaces:0"],
+      labels: ["input", "reading", "sensor:pin-reading", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(resistReadingKey),
       name: resistReadingKey,
       value: potentiometerAndServoValues.minResistReading.value
     },
     {
       displayName: "Servo",
-      labels: ["output", "position", "live-output:Servo", "decimalPlaces:0"],
+      labels: ["output", "position", "live-output:Servo", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(servoAngleKey),
       name: servoAngleKey,
       value: potentiometerAndServoValues.minServoAngle.value,
