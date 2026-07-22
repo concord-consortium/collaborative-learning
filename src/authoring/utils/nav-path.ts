@@ -223,6 +223,11 @@ export const getUnitChildrenTree = (
                 path
               };
             }) || [],
+            // Show a template editor page when its template is enabled or already has content.
+            ...(problem.config?.defaultDocumentTemplateEnabled || problem.config?.defaultDocumentTemplate
+              ? [{ id: "documentTemplate", label: "Document Template" }] : []),
+            ...(problem.config?.planningTemplateEnabled || problem.config?.planningTemplate
+              ? [{ id: "planningTemplate", label: "Planning Template" }] : []),
           ]
         })) || [],
       ]

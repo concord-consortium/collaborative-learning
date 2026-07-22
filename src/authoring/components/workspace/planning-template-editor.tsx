@@ -3,11 +3,17 @@ import { useCurriculum } from "../../hooks/use-curriculum";
 import { TemplateEditor } from "../editors/template-editor";
 import { ITemplateContent } from "../../types";
 
-// The planning template is a per-planning-section map ({ [sectionType]: { tiles } }). This page lets the
-// author pick a planning section and edit that section's template with the shared doc-editor, saving back
-// into config.planningTemplate[sectionType].
-const PlanningTemplateEditor: React.FC = () => {
-  const { unitConfig, setUnitConfig } = useCurriculum();
+interface IProps {
+  // The planning template map ({ [sectionType]: { tiles } }) for the scope being edited (unit or problem).
+  planningTemplate?: Record<string, ITemplateContent>;
+  onChange: (sectionType: string, content: ITemplateContent) => void;
+}
+
+// Lets the author pick a planning section and edit that section's template with the shared doc-editor.
+// The planning sections are defined at the unit level (unitConfig.planningDocument); only the content
+// location (unit vs problem config) differs, which the caller supplies via `planningTemplate` + `onChange`.
+const PlanningTemplateEditor: React.FC<IProps> = ({ planningTemplate, onChange }) => {
+  const { unitConfig } = useCurriculum();
   const planningSections = unitConfig?.planningDocument?.sections ?? [];
   const sectionInfo = unitConfig?.planningDocument?.sectionInfo ?? {};
   const sectionTypes = planningSections.map(s => s.type);
@@ -18,15 +24,7 @@ const PlanningTemplateEditor: React.FC = () => {
   }
 
   const current = selected && sectionTypes.includes(selected) ? selected : sectionTypes[0];
-  const value = (unitConfig?.config?.planningTemplate as any)?.[current] as ITemplateContent | undefined;
-
-  const handleChange = (v: ITemplateContent) => {
-    setUnitConfig(draft => {
-      if (!draft) return;
-      if (!draft.config.planningTemplate) draft.config.planningTemplate = {};
-      (draft.config.planningTemplate as any)[current] = v;
-    });
-  };
+  const value = planningTemplate?.[current];
 
   return (
     <div className="planning-template-editor">
@@ -43,7 +41,7 @@ const PlanningTemplateEditor: React.FC = () => {
         ))}
       </div>
       {/* key forces the iframe to reload with the selected section's content */}
-      <TemplateEditor key={current} value={value} onChange={handleChange} />
+      <TemplateEditor key={current} value={value} onChange={(v) => onChange(current, v)} />
     </div>
   );
 };

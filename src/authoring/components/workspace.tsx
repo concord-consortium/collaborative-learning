@@ -18,13 +18,17 @@ import DocumentSettings from "./workspace/document-settings";
 import PlanningTemplateEditor from "./workspace/planning-template-editor";
 import ExemplarMetadata from "./editors/exemplar-metadata";
 import { ContainerConfig } from "./workspace/container-config/container-config";
+import { isProblem } from "./workspace/container-config/container-config-helpers";
 import { TemplateEditor } from "./editors/template-editor";
+import { getCurriculumItem, getUnitItem } from "../utils/nav-path";
+import { IProblem } from "../types";
 
 import "./workspace.scss";
 
 const Workspace: React.FC = () => {
   const api = useAuthoringApi();
-  const { branch, unit, path, unitConfig, setUnitConfig, files, saveContent } = useCurriculum();
+  const { branch, unit, path, unitConfig, setUnitConfig, teacherGuideConfig, setTeacherGuideConfig,
+          files, saveContent } = useCurriculum();
   const [content, setContent] = useImmer<any>({});
   const [status, setStatus] = useImmer<"loading" | "loaded" | "notImplemented" | "error">("loading");
   const [contentPath, setContentPath] = useImmer<string | undefined>(undefined);
@@ -165,13 +169,66 @@ const Workspace: React.FC = () => {
           />
         );
       case "config/planningTemplate":
-        return <PlanningTemplateEditor />;
+        return (
+          <PlanningTemplateEditor
+            planningTemplate={unitConfig?.config?.planningTemplate as any}
+            onChange={(sectionType, sectionContent) => setUnitConfig(draft => {
+              if (!draft) return;
+              if (!draft.config.planningTemplate) draft.config.planningTemplate = {};
+              (draft.config.planningTemplate as any)[sectionType] = sectionContent;
+            })}
+          />
+        );
       default:
         return <div className="centered muted">Not yet implemented.</div>;
     }
   };
 
+  // Per-problem / teacher-guide template editor pages (full-height, bound to the item's config).
+  const renderItemTemplate = () => {
+    const m = path && /^(investigations|teacher-guides)\/(.+)\/(documentTemplate|planningTemplate)$/.exec(path);
+    if (!m) return undefined;
+    const itemPath = `${m[1]}/${m[2]}`;
+    const kind = m[3];
+    const isTG = m[1] === "teacher-guides";
+    const setConfig = isTG ? setTeacherGuideConfig : setUnitConfig;
+    const item = getCurriculumItem(unitConfig, teacherGuideConfig, itemPath);
+    if (!item || !isProblem(item)) {
+      return <div className="centered muted">Templates are only available for problems.</div>;
+    }
+    const pathParts = itemPath.split("/");
+    const updateItemConfig = (mutate: (config: NonNullable<IProblem["config"]>) => void) => {
+      setConfig(draft => {
+        const draftItem = getUnitItem(draft, pathParts);
+        if (draftItem && isProblem(draftItem)) {
+          if (!draftItem.config) draftItem.config = {};
+          mutate(draftItem.config);
+        }
+      });
+    };
+    if (kind === "documentTemplate") {
+      return (
+        <TemplateEditor
+          value={item.config?.defaultDocumentTemplate}
+          onChange={(v) => updateItemConfig(c => { c.defaultDocumentTemplate = v; })}
+        />
+      );
+    }
+    return (
+      <PlanningTemplateEditor
+        planningTemplate={item.config?.planningTemplate as any}
+        onChange={(sectionType, sectionContent) => updateItemConfig(c => {
+          if (!c.planningTemplate) c.planningTemplate = {};
+          (c.planningTemplate as any)[sectionType] = sectionContent;
+        })}
+      />
+    );
+  };
+
   const renderContent = () => {
+    const itemTemplate = renderItemTemplate();
+    if (itemTemplate) return itemTemplate;
+
     if (isConfigPath) {
       return (
         <div className="config">

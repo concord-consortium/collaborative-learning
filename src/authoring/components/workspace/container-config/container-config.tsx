@@ -315,30 +315,87 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     isSubmitting.current = false;
   };
 
+  // Non-destructive template switches for this problem. These write straight to the problem's config
+  // (immediately saved) — toggling flips the enable flag only; content is removed by the Delete buttons.
+  const updateProblemConfig = (mutate: (config: NonNullable<IProblem["config"]>) => void) => {
+    if (!itemPath) return;
+    const itemPathParts = itemPath.split("/");
+    const setConfig = itemPathParts[0] === "teacher-guides" ? setTeacherGuideConfig : setUnitConfig;
+    setConfig(draft => {
+      const currentItem = getUnitItem(draft, itemPathParts);
+      if (currentItem && isProblem(currentItem)) {
+        if (!currentItem.config) currentItem.config = {};
+        mutate(currentItem.config);
+      }
+    });
+  };
+
+  const deleteProblemDocumentTemplate = () => {
+    if (window.confirm("Delete this problem's document template and its content?")) {
+      updateProblemConfig(c => { delete c.defaultDocumentTemplate; delete c.defaultDocumentTemplateEnabled; });
+    }
+  };
+  const deleteProblemPlanningTemplate = () => {
+    if (window.confirm("Delete this problem's planning template and its content?")) {
+      updateProblemConfig(c => { delete c.planningTemplate; delete c.planningTemplateEnabled; });
+    }
+  };
+
   if (isProblem(item)) {
+    const problemConfig = item.config;
+    const docEnabled = problemConfig?.defaultDocumentTemplateEnabled ?? !!problemConfig?.defaultDocumentTemplate;
+    const planEnabled = problemConfig?.planningTemplateEnabled ?? !!problemConfig?.planningTemplate;
     return (
-      <form onSubmit={problemForm.handleSubmit(onSubmitProblem)}>
-        <div>
-          <label htmlFor="title">{itemType} Title</label>
-          <input
-            type="text"
-            id="title"
-            defaultValue={problemFormDefaults?.title}
-            {...problemForm.register("title", { required: "Title is required" })}
+      <>
+        <form onSubmit={problemForm.handleSubmit(onSubmitProblem)}>
+          <div>
+            <label htmlFor="title">{itemType} Title</label>
+            <input
+              type="text"
+              id="title"
+              defaultValue={problemFormDefaults?.title}
+              {...problemForm.register("title", { required: "Title is required" })}
+            />
+            {problemForm.formState.errors.title && (
+              <span className="form-error">{problemForm.formState.errors.title.message}</span>
+            )}
+          </div>
+          <ProblemSections
+            availableSections={availableSections}
+            control={problemForm.control}
+            errors={problemForm.formState.errors}
           />
-          {problemForm.formState.errors.title && (
-            <span className="form-error">{problemForm.formState.errors.title.message}</span>
-          )}
-        </div>
-        <ProblemSections
-          availableSections={availableSections}
-          control={problemForm.control}
-          errors={problemForm.formState.errors}
-        />
-        <div className="bottomButtons">
-          <button type="submit" disabled={saveState === "saving"}>Save</button>
-        </div>
-      </form>
+          <div className="bottomButtons">
+            <button type="submit" disabled={saveState === "saving"}>Save</button>
+          </div>
+        </form>
+        <fieldset className="template-controls">
+          <legend>Templates</legend>
+          <p className="muted small">
+            Enable a template to edit it on its own page in the nav. Disabling keeps the content.
+          </p>
+          <label className="horizontal middle">
+            <input
+              type="checkbox"
+              checked={docEnabled}
+              onChange={e => updateProblemConfig(c => { c.defaultDocumentTemplateEnabled = e.target.checked; })}
+            />
+            <span>Enable the document template</span>
+            {problemConfig?.defaultDocumentTemplate &&
+              <button type="button" className="danger" onClick={deleteProblemDocumentTemplate}>Delete</button>}
+          </label>
+          <label className="horizontal middle">
+            <input
+              type="checkbox"
+              checked={planEnabled}
+              onChange={e => updateProblemConfig(c => { c.planningTemplateEnabled = e.target.checked; })}
+            />
+            <span>Enable the planning template</span>
+            {problemConfig?.planningTemplate &&
+              <button type="button" className="danger" onClick={deleteProblemPlanningTemplate}>Delete</button>}
+          </label>
+        </fieldset>
+      </>
     );
   }
 
