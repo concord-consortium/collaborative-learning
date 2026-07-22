@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { ISettings } from "../../types";
+import { buildSectionDividerTemplate } from "../../utils/template-utils";
 
 interface DocumentSettingsFormInputs {
   defaultSharedDocuments: boolean;
@@ -55,6 +56,11 @@ const DocumentSettings: React.FC = () => {
       // Non-destructive template switches (like aiEvaluation gates the persistent aiPrompt): these flip
       // the enable flag only; the authored template content is untouched. Content is removed by "Delete".
       draft.config.defaultDocumentTemplateEnabled = data.documentTemplateEnabled;
+      // Seed a fresh document template with a section divider per unit section so the author just fills
+      // each section (only when first enabling and no content exists yet).
+      if (data.documentTemplateEnabled && !draft.config.defaultDocumentTemplate) {
+        draft.config.defaultDocumentTemplate = buildSectionDividerTemplate(draft.sections);
+      }
       draft.config.planningTemplateEnabled = data.planningTemplateEnabled;
     });
   };

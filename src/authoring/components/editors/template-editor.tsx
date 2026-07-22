@@ -9,7 +9,8 @@ interface IProps {
 
 // Edits an inline template ({ tiles }) with the same doc-editor used for section content. Unlike the
 // file-based content editor in the workspace, changes are saved back into the unit/teacher-guide config
-// slice by the caller's onChange (via setUnitConfig / setTeacherGuideConfig).
+// slice by the caller's onChange (via setUnitConfig / setTeacherGuideConfig). Document templates are
+// pre-seeded with a section divider per unit section when enabled, so authors just fill each section.
 export const TemplateEditor: React.FC<IProps> = ({ value, onChange }) => {
   const content = value?.tiles ? value : { tiles: [] };
 

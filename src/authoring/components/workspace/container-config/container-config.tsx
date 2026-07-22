@@ -13,6 +13,7 @@ import {
 } from "./container-config-helpers";
 import { UnitItemChildren } from "./unit-item-children";
 import { ProblemSections } from "./problem-sections";
+import { buildSectionDividerTemplate } from "../../../utils/template-utils";
 
 interface Props {
   path: string;
@@ -345,6 +346,8 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     const problemConfig = item.config;
     const docEnabled = problemConfig?.defaultDocumentTemplateEnabled ?? !!problemConfig?.defaultDocumentTemplate;
     const planEnabled = problemConfig?.planningTemplateEnabled ?? !!problemConfig?.planningTemplate;
+    // Seed a document template with a divider per section, using this scope's sections (teacher guide or unit).
+    const templateSections = (pathInfo?.isTeacherGuide ? teacherGuideConfig : unitConfig)?.sections;
     return (
       <>
         <form onSubmit={problemForm.handleSubmit(onSubmitProblem)}>
@@ -378,7 +381,12 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
             <input
               type="checkbox"
               checked={docEnabled}
-              onChange={e => updateProblemConfig(c => { c.defaultDocumentTemplateEnabled = e.target.checked; })}
+              onChange={e => updateProblemConfig(c => {
+                c.defaultDocumentTemplateEnabled = e.target.checked;
+                if (e.target.checked && !c.defaultDocumentTemplate) {
+                  c.defaultDocumentTemplate = buildSectionDividerTemplate(templateSections);
+                }
+              })}
             />
             <span>Enable the document template</span>
             {problemConfig?.defaultDocumentTemplate &&
