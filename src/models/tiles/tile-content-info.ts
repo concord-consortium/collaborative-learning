@@ -133,6 +133,10 @@ export interface IDocumentExportOptions extends ITileExportOptions {
   includeTileIds?: boolean;
   appendComma?: boolean;
   transformImageUrl?: (url: string, filename?: string) => string;
+  // Keep section-header rows in the flat `tiles` export as { content: { isSectionHeader, sectionId } }
+  // so section dividers survive a load→edit→save round-trip (used when editing document templates).
+  // Default off preserves the historical behavior of dropping section headers from the export.
+  includeSectionHeaders?: boolean;
 }
 
 export function isRegisteredTileType(type: string) {

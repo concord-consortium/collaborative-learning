@@ -84,11 +84,14 @@ export const RowList = types
         return json;
       }
     },
-    exportableRows(tileMap: ITileMapLookup) {
-      // identify rows with exportable tiles
+    exportableRows(tileMap: ITileMapLookup, includeSectionHeaders = false) {
+      // identify rows with exportable tiles (optionally keeping section-header rows so dividers export)
       return self.rowOrder.map(rowId => {
         const row = this.getRow(rowId);
-        return row && !row.isSectionHeader && !row.isEmpty && !row.isPlaceholderRow(tileMap) ? row : undefined;
+        if (row?.isSectionHeader) {
+          return includeSectionHeaders ? row : undefined;
+        }
+        return row && !row.isEmpty && !row.isPlaceholderRow(tileMap) ? row : undefined;
       }).filter(row => !!row);
     },
     exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: ITileMapLookup,
@@ -99,6 +102,14 @@ export const RowList = types
       const exportRowCount = rows.length;
       rows.forEach((row, rowIndex) => {
         const isLastRow = rowIndex === exportRowCount - 1;
+        // Section-header rows have no tiles; emit them as a divider marker so they round-trip.
+        if (row?.isSectionHeader) {
+          builder.pushLine(
+            `{ "content": { "isSectionHeader": true, "sectionId": "${row.sectionId ?? ""}" } }${comma(!isLastRow)}`,
+            2
+          );
+          return;
+        }
         // export each exportable tile
         const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
           const isLastTile = tileIndex === row.tiles.length - 1;

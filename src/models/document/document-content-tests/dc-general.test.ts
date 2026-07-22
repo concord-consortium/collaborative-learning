@@ -695,3 +695,25 @@ describe("DocumentContentModel -- createDefaultSectionedContent", () => {
     expect(content.rowCount).toBe(4);
   });
 });
+
+describe("DocumentContentModel -- section header export round-trip --", () => {
+  const sectionIdsIn = (tiles: any[]) =>
+    tiles.filter(t => t?.content?.isSectionHeader).map(t => t.content.sectionId);
+
+  it("drops section headers from the flat export by default", () => {
+    const content = createDocumentContent("[Header:A, Text, Header:B, Placeholder]");
+    expect(sectionIdsIn(parsedExport(content).tiles)).toEqual([]);
+  });
+
+  it("keeps section headers when includeSectionHeaders is set, and they survive a round-trip", () => {
+    const content = createDocumentContent("[Header:A, Text, Header:B, Placeholder]");
+    const exported = parsedExport(content, { includeSectionHeaders: true });
+    expect(sectionIdsIn(exported.tiles)).toEqual(["A", "B"]);
+
+    // Re-import the exported JSON (the load→edit→save path the template editor uses) and export
+    // again — the dividers must still be present.
+    const reimported = DocumentContentModel.create({ tiles: exported.tiles } as any);
+    const reexported = parsedExport(reimported, { includeSectionHeaders: true });
+    expect(sectionIdsIn(reexported.tiles)).toEqual(["A", "B"]);
+  });
+});

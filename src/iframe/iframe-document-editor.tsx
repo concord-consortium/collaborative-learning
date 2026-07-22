@@ -57,7 +57,9 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
         // FIXME: If the document has tiles at the end of it which aren't setup by the unit json,
         // then exportAsJson creates an invalid JSON file. It leaves a trailing comma after the
         // last known tile.
-        const json = document.content?.exportAsJson({ includeTileIds: true });
+        // includeSectionHeaders keeps section dividers in the export so they survive editing a
+        // document template through the authoring iframe (no-op for section content, which has none).
+        const json = document.content?.exportAsJson({ includeTileIds: true, includeSectionHeaders: true });
         if (json) {
           const parsedJson = JSON.parse(json);
           const stringifiedJson = JSON.stringify(parsedJson);
