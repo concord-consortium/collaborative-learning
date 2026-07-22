@@ -54,8 +54,9 @@ export class SpikerbitDevice {
     await this.connection.connect();
 
     const running = await this.queryVersion();
-    if (running == null) {
-      // USB connection stays Connected through a flash (DAPLink interface chip is
+    if (running == null || running < kSpikerbitFirmwareVersion) {
+      // Flash when the board is running no known firmware (no reply) or an out-of-date
+      // version. USB connection stays Connected through a flash (DAPLink interface chip is
       // untouched) and serial auto-reinitialises, so no explicit reconnect here.
       await this.connection.flash(flashDataSource, { partial: true, progress });
       await this.queryVersion();

@@ -157,9 +157,8 @@ boot is easy to miss):
 1. Open the WebUSB serial connection via `microbit-connection`.
 2. Send the version-query command (`?`). Wait a short timeout for a
    `CLUE-SPIKERBIT v<N>\r\n` reply.
-   - Reply received → our program is running; record the version; start streaming.
-     (For this MVP any valid version reply counts as "present"; comparing `<N>` to the
-     bundled version to decide on re-flash is future work.)
+   - Reply received → record the version. If `<N>` is at least the bundled
+     `kSpikerbitFirmwareVersion`, start streaming; if it is older, flash to auto-update.
    - The startup banner, if seen in the window, is accepted as the same signal.
 3. No valid reply within the timeout → flash the bundled universal hex, showing a
    progress modal driven by the library's flash-progress events. The library reconnects
@@ -168,9 +167,10 @@ boot is easy to miss):
    to set up the micro:bit in MakeCode, with the project link and a hex download, then
    a retry. This is the same path used for the manual-MakeCode fallback.
 
-We only flash when no valid version reply is received; a micro:bit already running our
-program is not re-flashed. No "this will overwrite your micro:bit" confirmation is
-shown — the activity assumes a dedicated board.
+We flash when no valid version reply is received or when the reported version is older
+than the bundled one; a micro:bit already running the current version is not re-flashed.
+No "this will overwrite your micro:bit" confirmation is shown — the activity assumes a
+dedicated board.
 
 ## 8. Testing
 
@@ -209,9 +209,8 @@ These are deliberate MVP shortcuts, to be revisited once this ships:
 - **`writeLine()` transport branch.** Routing writes by an active-transport flag inside
   `SerialDevice` is a shortcut that keeps the rest of the codebase untouched; it folds
   into the transport-pluggable refactor above.
-- **No version-based re-flash.** We detect the running version but do not yet compare it
-  to the bundled version to auto-update an out-of-date micro:bit. The version-query is
-  designed so this is a small follow-up.
+- ~~**No version-based re-flash.**~~ Implemented: `connectAndStream` compares the reported
+  version to `kSpikerbitFirmwareVersion` and flashes to auto-update an out-of-date micro:bit.
 - **Firmware is hand-exported from MakeCode.** A reproducible in-repo pxt/Docker build
   is preferred once the system works end-to-end.
 - **`determineDeviceFamily` binary assumption.** The existing USB-id discriminator
