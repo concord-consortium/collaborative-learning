@@ -140,10 +140,6 @@ export interface IDocumentMetadataBase {
   problem?: string|null;
   unit?: string|null;
   groupId?: string|null;
-  /** True for multi-writer documents (concurrent history manager, class/group presence, editable by
-   *  non-owners). Written at creation; read by firestore.rules. `| null` mirrors the `visibility`
-   *  pattern so the DocumentMetadataModel parity check passes without an exclusion. */
-  concurrent?: boolean|null;
 }
 
 export interface IDocumentMetadata extends IDocumentMetadataBase {
@@ -158,6 +154,10 @@ export interface IDocumentMetadata extends IDocumentMetadataBase {
     id: string;
     index: number;
   }|null;
+  /** True for multi-writer documents (concurrent history manager + editable by non-owners). Written at
+   *  creation; read from the stored value (not derived) on the client. `| null` mirrors `visibility` so the
+   *  DocumentMetadataModel parity check passes without an exclusion. */
+  concurrent?: boolean|null;
   /** Presentation/identity registry key (e.g. "group"). See document-kinds.ts. */
   kind?: string|null;
 }
