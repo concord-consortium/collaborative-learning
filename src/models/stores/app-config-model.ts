@@ -108,6 +108,7 @@ export const AppConfigModel = types
     get termOverrides() { return self.configMgr.termOverrides; },
     get defaultPanelLayout() { return self.configMgr.defaultPanelLayout; },
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
+    get classWideDocuments() { return self.configMgr.classWideDocuments; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),
