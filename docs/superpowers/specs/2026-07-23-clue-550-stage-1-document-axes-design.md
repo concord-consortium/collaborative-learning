@@ -134,10 +134,11 @@ exactly the ones that get opened. Two backfills converge the stored field:
   is transitional migration code: it is clearly commented as such and is slated for removal a release after the
   batch script has run (see below), restoring the pure "read `concurrent` from storage" path.
 
-- **One-shot batch script.** `migrations/backfill-group-concurrent.js` sweeps all `type == "group"` documents
-  and stamps `{ concurrent: true, kind: "group" }` onto any lacking `concurrent`, covering the never-opened tail
-  (including orphan race-losers). It is **dry-run by default** (`APPLY=1` to write) — the dry run doubles as a
-  per-project count — idempotent, and batched. It uses a collection-group query on `documents`, backed by a
+- **One-shot batch script.** `scripts/backfill-group-concurrent.ts` (run with `npx tsx`, following the existing
+  `scripts/` conventions) sweeps all `type == "group"` documents and stamps `{ concurrent: true, kind: "group" }`
+  onto any lacking `concurrent`, covering the never-opened tail (including orphan race-losers). It is **dry-run
+  by default** (`APPLY=1` to write) — the dry run doubles as a per-project count — idempotent, and batched. Its
+  pure logic is exported and unit-tested; it uses a collection-group query on `documents`, backed by a
   single-field index added to `firestore.indexes.json`. It is run manually against staging then production after
   this ships; it is not run as part of the PR.
 
@@ -183,4 +184,4 @@ Deferred to later stages of the document-axes work; see the roadmap
 - Key code sites: `src/models/document/document-kinds.ts`, `src/lib/db.ts`,
   `src/models/document/document.ts`, `src/models/document/document-utils.ts`,
   `src/models/stores/documents.ts`, `src/hooks/use-document-sync-to-firebase.ts`, `firestore.rules`,
-  `migrations/backfill-group-concurrent.js`.
+  `scripts/backfill-group-concurrent.ts`.
