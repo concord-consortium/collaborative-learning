@@ -409,9 +409,8 @@ service cloud.firestore {
         allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
         // teachers can only delete their own documents
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
-        // class members can delete their own non-canonical group documents — the non-winning documents
-        // from the canonical-pointer creation race (CLUE-524). Keyed on the document type, not `concurrent`,
-        // so pre-existing race-loser orphans (which are never opened, so never backfilled) stay deletable.
+        // class members can delete their own non-canonical group documents — the non-winning
+        // documents from the canonical-pointer creation race.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
           && resource.data.type == "group"
