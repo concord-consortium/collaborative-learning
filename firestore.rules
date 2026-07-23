@@ -360,26 +360,25 @@ service cloud.firestore {
 
       match /documents/{docId} {
         // A document's scope is read from the association fields it carries, not from its `type`.
-        // Group scope = a group-in-offering document (has both an offering and a group).
-        function isGroupScope(data) {
-          return data.get("offeringId", "") != "" && data.get("groupId", "") != "";
+        // True when `data`'s scope can hold a canonical pointer: it is anchored to an offering or a unit.
+        // (class+owner-only scopes — personal, learning-log — have no canonical pointer.)
+        function hasCanonicalScope(data) {
+          return data.get("offeringId", "") != "" || data.get("unit", "") != "";
         }
 
-        // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has
-        // no canonical-pointer shape. Only the group scope has canonical documents today, so this
-        // returns the one fixed path. Once other scopes need them, the natural generalization is to
-        // build the path from field presence — append /offerings/<offeringId> and /groups/<groupId>
-        // only when set (string concat + path(), verified against the emulator) — addressing the
-        // class, offering, and group scopes without a branch per scope, and canonicalFieldOk() stays
-        // untouched. A new scope still needs its own `.../canonical/{label}` write-guard match block.
-        // Keep in lockstep with getGroupCanonicalPointerPath in scoped-document-pointers.ts.
+        // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has no canonical
+        // shape. Built segment-by-segment from the scope fields the document carries, so all canonical scopes
+        // share one Firestore layout. Keep in lockstep with getCanonicalPointerPath in scoped-document-pointers.ts:
+        //   classes/<context_id> / (offerings/<offeringId> | units/<unit>) / [groups/<groupId>] / canonical/<label>
+        // The units segment is used only when there is no offering (an offering already pins a unit). A future
+        // problem/planning pointer will add a /users/<owner> segment after the offering.
         function canonicalPointerPath(portal, data, label) {
-          return isGroupScope(data)
-            ? /databases/$(database)/documents/authed/$(portal)
-                /classes/$(data.context_id)
-                /offerings/$(data.offeringId)
-                /groups/$(data.groupId)
-                /canonical/$(label)
+          return hasCanonicalScope(data)
+            ? path("/databases/" + database + "/documents/authed/" + portal
+                + "/classes/" + data.context_id
+                + (data.get("offeringId", "") != "" ? "/offerings/" + data.offeringId : "/units/" + data.unit)
+                + (data.get("groupId", "") != "" ? "/groups/" + data.groupId : "")
+                + "/canonical/" + label)
             : null;
         }
 
@@ -547,6 +546,13 @@ service cloud.firestore {
       }
 
       match /classes/{classId}/offerings/{offeringId}/groups/{groupId}/canonical/{label} {
+        allow read:   if isAuthed() && request.auth.token.class_hash == classId;
+        allow create: if isAuthed() && request.auth.token.class_hash == classId
+                       && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
+        allow update, delete: if false;   // pointers are immutable
+      }
+
+      match /classes/{classId}/units/{unit}/canonical/{label} {
         allow read:   if isAuthed() && request.auth.token.class_hash == classId;
         allow create: if isAuthed() && request.auth.token.class_hash == classId
                        && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);

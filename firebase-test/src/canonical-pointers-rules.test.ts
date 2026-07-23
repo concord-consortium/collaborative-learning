@@ -126,3 +126,69 @@ describe("canonical flag integrity", () => {
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
   });
 });
+
+const kUnit = "msu";
+const kClassWideLabel = "driving-question-board";
+const kClassWidePointerPath =
+  `authed/test-portal/classes/${thisClass}/units/${kUnit}/canonical/${kClassWideLabel}`;
+const kOtherClassWidePointerPath =
+  `authed/test-portal/classes/other-class/units/${kUnit}/canonical/${kClassWideLabel}`;
+
+describe("class+unit canonical pointers", () => {
+  it("a student in the class may create a class+unit pointer with the required keys", async () => {
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kClassWidePointerPath).set(validPointer()));
+  });
+
+  it("a student in the class may read the class+unit pointer", async () => {
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kClassWidePointerPath).get());
+  });
+
+  it("a create missing a required key is denied", async () => {
+    db = initFirestore(studentAuth);
+    const { createdBy, ...missing } = validPointer();
+    await assertFails(db.doc(kClassWidePointerPath).set(missing));
+  });
+
+  it("a user in a different class is denied create and read", async () => {
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kOtherClassWidePointerPath).set(validPointer()));
+    await assertFails(db.doc(kOtherClassWidePointerPath).get());
+  });
+
+  it("class+unit pointers are immutable — update and delete are denied", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kClassWidePointerPath).set(validPointer());
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kClassWidePointerPath).update({ documentKey: "hijacked" }));
+    await assertFails(db.doc(kClassWidePointerPath).delete());
+  });
+});
+
+const kClassWideDocPath = `authed/test-portal/documents/dqb-doc-1`;
+const classWideDoc = (extra: any = {}) => ({
+  uid: `class_${kUnit}`, type: "group", key: "dqb-doc-1",
+  createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
+  unit: kUnit, kind: kClassWideLabel, concurrent: true, ...extra
+});
+
+describe("class-wide document canonical claim", () => {
+  it("a class-wide doc may set canonical when its class+unit pointer confirms it", async () => {
+    const admin = initFirestore(teacherAuth);
+    // Seed the doc (non-canonical) and the pointer that points at it.
+    await admin.doc(kClassWideDocPath).set(classWideDoc());
+    await admin.doc(kClassWidePointerPath).set({
+      documentKey: "dqb-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: `class_${kUnit}`
+    });
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kClassWideDocPath).update({ canonical: kClassWideLabel }));
+  });
+
+  it("a class-wide doc may NOT set a canonical label its pointer does not confirm", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kClassWideDocPath).set(classWideDoc());   // no pointer seeded
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kClassWideDocPath).update({ canonical: kClassWideLabel }));
+  });
+});
