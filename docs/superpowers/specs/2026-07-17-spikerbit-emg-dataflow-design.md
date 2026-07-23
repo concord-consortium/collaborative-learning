@@ -228,3 +228,15 @@ These are deliberate MVP shortcuts, to be revisited once this ships:
   general flash-progress modal and the MakeCode-fallback UI. Map the library's
   `DeviceError.code` values (`device-in-use`, `no-device-selected`,
   `device-disconnected`, `firmware-update-required`, …) to appropriate messages.
+- **Half-wired connect menu.** The device chooser in `dataflow-serial-connect-button.tsx`
+  offers "Arduino", "micro:bit (radio hub)", and "Spiker:bit", but the first two both call
+  the same Web Serial path (identical behavior), and the menu has no click-outside
+  dismissal — it only closes when a device is chosen. Follow-up: distinguish or collapse the
+  duplicate options and add dismissal (e.g. an outside-click / blur handler).
+- **No listener cleanup or in-flight connect guard.** `SpikerbitDevice.connectAndStream`
+  registers `serialdata`/`status` listeners on the connection with no removal path, a fresh
+  `SpikerbitDevice` is created per connect in `dataflow-program.tsx`, and `connectSpikerbit`
+  only guards on `isConnected()` — not on an already-in-progress connect. So repeated
+  connects, a reconnect, or a double-click can leak listeners/devices. Follow-up: retain and
+  dispose the active device, remove listeners on disconnect/unmount, and guard against
+  concurrent connect attempts.

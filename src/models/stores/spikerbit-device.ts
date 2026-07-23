@@ -10,8 +10,9 @@ export const kSpikerbitFirmwareVersion = 3;
 const kVersionQueryTimeoutMs = 1500;
 
 // Minimal subset of @microbit/microbit-connection's MicrobitUSBConnection that
-// this module depends on. Kept as an interface so tests can supply a fake, and
-// so this file never has to statically import the (ESM-only) library.
+// this module depends on. Kept as an interface so tests can supply a fake and so
+// the device logic stays decoupled from the library (only spikerbit-connection.ts
+// imports it).
 export interface IMicrobitUsbConnection {
   addEventListener(type: "serialdata", listener: (data: { data: string }) => void): void;
   addEventListener(type: "status", listener: (data: { status: string }) => void): void;

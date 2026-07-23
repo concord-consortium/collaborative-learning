@@ -28,6 +28,7 @@ export class SerialDevice {
 
   constructor() {
     this.localBuffer = "";
+    this.spikerbitConnected = false;
 
     navigator.serial?.addEventListener("connect", (e) => {
       this.updateConnectionInfo(e.timeStamp, e.type);
@@ -237,7 +238,7 @@ export class SerialDevice {
   }
 
   public isConnected(){
-    return this.hasWebSerialPort() || this.spikerbitConnected === true;
+    return this.hasWebSerialPort() || this.spikerbitConnected;
   }
 
   public setSpikerbitActive(write: (line: string) => void){
