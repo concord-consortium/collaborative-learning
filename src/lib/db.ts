@@ -179,6 +179,7 @@ export class DB {
             unitLoadedPromise.then(() => {
               this.listeners.start().then(resolve).catch(reject);
               exemplarController.initialize(this.stores);
+              this.createDeclaredClassWideDocuments();
 
               // After unit config is available, apply default panel layout for first-time visitors
               persistentUIReady.then(() => {
@@ -778,6 +779,19 @@ export class DB {
       groupUserId: syntheticUid,   // synthetic owner: createdBy attribution + orphan-cleanup RTDB path
       classWide: { kind: slot.kind, unit: unit.code, syntheticUid, title: slot.title }
     });
+  }
+
+  // Auto-create each class-wide document slot the unit declares. Called once per unit open, after the unit is
+  // loaded. Each slot is created independently and fire-and-forget: the canonical-pointer engine converges all
+  // class members to one document per slot, so a failure here never blocks app startup.
+  private createDeclaredClassWideDocuments() {
+    const slots = this.stores.appConfig.classWideDocuments;
+    if (!slots?.length) return;
+    for (const slot of slots) {
+      this.getOrCreateClassWideDocument(slot).catch((err) => {
+        console.error("Failed to create class-wide document", slot.kind, err);
+      });
+    }
   }
 
   private async getOrCreateCanonicalDocument(

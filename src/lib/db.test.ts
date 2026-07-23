@@ -8,6 +8,7 @@ import {
   GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
+import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 import { UnitModel } from "../models/curriculum/unit";
@@ -734,6 +735,34 @@ describe("db", () => {
       const doc = await db.openDocument({ documentKey: "p1", type: "personal", userId: "u", firestoreMetadata } as any);
       expect(doc.concurrent).toBeFalsy();
       expect(setCalls.length).toBe(0);
+    });
+  });
+
+  describe("createDeclaredClassWideDocuments", () => {
+    it("creates one document per declared slot", async () => {
+      const created: any[] = [];
+      (db as any).getOrCreateClassWideDocument = jest.fn(async (slot: any) => { created.push(slot); });
+      stores.appConfig = specAppConfig({
+        config: { classWideDocuments: [
+          { kind: "driving-question-board", title: "DQB" },
+          { kind: "word-wall", title: "Word Wall" }
+        ] } as any
+      });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).createDeclaredClassWideDocuments();
+      // allow the fire-and-forget promises to settle
+      await new Promise(r => setTimeout(r, 0));
+      expect((db as any).getOrCreateClassWideDocument).toHaveBeenCalledTimes(2);
+      expect(created.map((s: any) => s.kind)).toEqual(["driving-question-board", "word-wall"]);
+    });
+
+    it("does nothing when no slots are declared", async () => {
+      (db as any).getOrCreateClassWideDocument = jest.fn(async () => undefined);
+      stores.appConfig = specAppConfig();   // no classWideDocuments
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).createDeclaredClassWideDocuments();
+      await new Promise(r => setTimeout(r, 0));
+      expect((db as any).getOrCreateClassWideDocument).not.toHaveBeenCalled();
     });
   });
 
