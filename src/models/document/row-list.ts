@@ -84,14 +84,18 @@ export const RowList = types
         return json;
       }
     },
-    exportableRows(tileMap: ITileMapLookup, includeSectionHeaders = false) {
-      // identify rows with exportable tiles (optionally keeping section-header rows so dividers export)
+    exportableRows(tileMap: ITileMapLookup, includeSectionHeaders = false, includePlaceholders = false) {
+      // identify rows with exportable tiles (optionally keeping section-header and placeholder rows so
+      // section dividers and their "put content here" placeholders survive a template round-trip)
       return self.rowOrder.map(rowId => {
         const row = this.getRow(rowId);
         if (row?.isSectionHeader) {
           return includeSectionHeaders ? row : undefined;
         }
-        return row && !row.isEmpty && !row.isPlaceholderRow(tileMap) ? row : undefined;
+        if (row?.isPlaceholderRow(tileMap)) {
+          return includePlaceholders ? row : undefined;
+        }
+        return row && !row.isEmpty ? row : undefined;
       }).filter(row => !!row);
     },
     exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: ITileMapLookup,
@@ -110,6 +114,20 @@ export const RowList = types
             `{ "content": { "isSectionHeader": true, "sectionId": ${sectionId} } }${comma(!isLastRow)}`,
             2
           );
+          return;
+        }
+        // Placeholder rows emit a "put content here" marker so a section's placeholder survives a
+        // template round-trip. Only reached when includePlaceholders kept the row in exportableRows.
+        if (row?.isPlaceholderRow(tileMap)) {
+          const content = row.tiles[0]?.tileId ? tileMap.get(row.tiles[0].tileId)?.content : undefined;
+          const marker = JSON.stringify({
+            content: {
+              type: "Placeholder",
+              sectionId: (content as { sectionId?: string })?.sectionId ?? "",
+              containerType: (content as { containerType?: string })?.containerType ?? ""
+            }
+          });
+          builder.pushLine(`${marker}${comma(!isLastRow)}`, 2);
           return;
         }
         // export each exportable tile

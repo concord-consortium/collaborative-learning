@@ -235,7 +235,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 .views(self => ({
   exportAsJson(options?: IDocumentExportOptions) {
     return self.exportRowsModelsAndAnnotationsAsJson(
-      self.exportableRows(self.tileMap, options?.includeSectionHeaders), options);
+      self.exportableRows(self.tileMap, options?.includeSectionHeaders, options?.includePlaceholders),
+      options);
   },
   exportSectionsAsJson(options?: IDocumentExportOptions) {
     const sections: Record<string, string> = {};
