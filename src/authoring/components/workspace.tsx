@@ -186,7 +186,9 @@ const Workspace: React.FC = () => {
 
   // Per-problem / teacher-guide template editor pages (full-height, bound to the item's config).
   const renderItemTemplate = () => {
-    const m = path && /^(investigations|teacher-guides)\/(.+)\/(documentTemplate|planningTemplate)$/.exec(path);
+    const m = path &&
+      /^(investigations|teacher-guides)\/(investigation-\d+\/problem-\d+)\/(documentTemplate|planningTemplate)$/
+        .exec(path);
     if (!m) return undefined;
     const itemPath = `${m[1]}/${m[2]}`;
     const kind = m[3];
@@ -206,9 +208,12 @@ const Workspace: React.FC = () => {
         }
       });
     };
+    // key by the full path so the editor (and the iframe inside it, which only pushes initialValue on
+    // mount) remounts when navigating between different problems' template pages of the same kind.
     if (kind === "documentTemplate") {
       return (
         <TemplateEditor
+          key={path}
           value={item.config?.defaultDocumentTemplate}
           onChange={(v) => updateItemConfig(c => { c.defaultDocumentTemplate = v; })}
         />
@@ -216,6 +221,7 @@ const Workspace: React.FC = () => {
     }
     return (
       <PlanningTemplateEditor
+        key={path}
         planningTemplate={item.config?.planningTemplate}
         onChange={(sectionType, sectionContent) => updateItemConfig(c => {
           if (!c.planningTemplate) c.planningTemplate = {};

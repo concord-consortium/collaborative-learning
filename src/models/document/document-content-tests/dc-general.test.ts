@@ -736,4 +736,16 @@ describe("DocumentContentModel -- section header export round-trip --", () => {
     const reimported = DocumentContentModel.create({ tiles: exported.tiles } as any);
     expect(placeholderSectionIds(parsedExport(reimported, opts).tiles)).toEqual(["A", "B"]);
   });
+
+  it("tolerates a placeholder marker with an empty containerType through the round-trip", () => {
+    // These fixture placeholders carry no containerType, so the export falls back to "".
+    const content = createDocumentContent("[Header:A, Placeholder, Header:B, Placeholder]");
+    const opts = { includeSectionHeaders: true, includePlaceholders: true };
+    const exported = parsedExport(content, opts);
+    const placeholder = exported.tiles.find((t: any) => t?.content?.type === "Placeholder");
+    expect(placeholder.content.containerType).toBe("");
+    // Re-importing the empty-containerType marker still yields a placeholder for each section.
+    const reimported = DocumentContentModel.create({ tiles: exported.tiles } as any);
+    expect(placeholderSectionIds(parsedExport(reimported, opts).tiles)).toEqual(["A", "B"]);
+  });
 });
