@@ -13,6 +13,7 @@ import {
 } from "./container-config-helpers";
 import { UnitItemChildren } from "./unit-item-children";
 import { ProblemSections } from "./problem-sections";
+import { buildSectionDividerTemplate } from "../../../utils/template-utils";
 
 interface Props {
   path: string;
@@ -124,9 +125,13 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
 
   const problemFormDefaults = useMemo(() => {
     if (!item || !isProblem(item)) return undefined;
+    const cfg = item.config;
     return {
       title: item.title,
       sections: buildProblemSectionsFormData(item, availableSections, files, sectionPathPrefix),
+      // Default to on when a legacy template already exists (flag undefined → applied at runtime).
+      documentTemplateEnabled: cfg?.defaultDocumentTemplateEnabled ?? !!cfg?.defaultDocumentTemplate,
+      planningTemplateEnabled: cfg?.planningTemplateEnabled ?? !!cfg?.planningTemplate,
     };
   }, [item, availableSections, files, sectionPathPrefix]);
 
@@ -305,6 +310,25 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       if (!currentItem || !isProblem(currentItem)) return;
       currentItem.title = data.title;
       currentItem.sections = newSectionPaths;
+
+      // Template enable flags, persisted with the form (non-destructive — flipping the flag keeps the
+      // content; Delete removes it). Only write when the author is using templates for this problem so
+      // we don't add empty config blocks to every problem on save.
+      const cfg = currentItem.config;
+      if (data.documentTemplateEnabled || cfg?.defaultDocumentTemplateEnabled != null ||
+          cfg?.defaultDocumentTemplate) {
+        if (!currentItem.config) currentItem.config = {};
+        currentItem.config.defaultDocumentTemplateEnabled = data.documentTemplateEnabled;
+        // Seed a divider + placeholder per enabled section (by section type) on first enable.
+        if (data.documentTemplateEnabled && !currentItem.config.defaultDocumentTemplate) {
+          const sectionTypes = data.sections.filter(s => s.enabled).map(s => s.type);
+          currentItem.config.defaultDocumentTemplate = buildSectionDividerTemplate(sectionTypes);
+        }
+      }
+      if (data.planningTemplateEnabled || cfg?.planningTemplateEnabled != null || cfg?.planningTemplate) {
+        if (!currentItem.config) currentItem.config = {};
+        currentItem.config.planningTemplateEnabled = data.planningTemplateEnabled;
+      }
     };
 
     if (pathInfo.isTeacherGuide) {
@@ -315,7 +339,34 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     isSubmitting.current = false;
   };
 
+  // Immediate write to the problem's config, used by the destructive Delete actions below (enable/disable
+  // itself persists with the form on Save). Mirrors the unit-scope Document Settings form + Delete pattern.
+  const updateProblemConfig = (mutate: (config: NonNullable<IProblem["config"]>) => void) => {
+    if (!itemPath) return;
+    const itemPathParts = itemPath.split("/");
+    const setConfig = itemPathParts[0] === "teacher-guides" ? setTeacherGuideConfig : setUnitConfig;
+    setConfig(draft => {
+      const currentItem = getUnitItem(draft, itemPathParts);
+      if (currentItem && isProblem(currentItem)) {
+        if (!currentItem.config) currentItem.config = {};
+        mutate(currentItem.config);
+      }
+    });
+  };
+
+  const deleteProblemDocumentTemplate = () => {
+    if (window.confirm("Delete this problem's document template and its content?")) {
+      updateProblemConfig(c => { delete c.defaultDocumentTemplate; delete c.defaultDocumentTemplateEnabled; });
+    }
+  };
+  const deleteProblemPlanningTemplate = () => {
+    if (window.confirm("Delete this problem's planning template and its content?")) {
+      updateProblemConfig(c => { delete c.planningTemplate; delete c.planningTemplateEnabled; });
+    }
+  };
+
   if (isProblem(item)) {
+    const problemConfig = item.config;
     return (
       <form onSubmit={problemForm.handleSubmit(onSubmitProblem)}>
         <div>
@@ -335,6 +386,29 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           control={problemForm.control}
           errors={problemForm.formState.errors}
         />
+        <fieldset className="template-controls">
+          <legend>Templates</legend>
+          <p className="muted small">
+            Enable a template to edit it on its own page in the nav. Enabling/disabling saves with the form
+            below; disabling keeps the content. Delete removes the content immediately.
+          </p>
+          <div className="horizontal middle">
+            <label>
+              <input type="checkbox" {...problemForm.register("documentTemplateEnabled")} />
+              <span>Enable the document template</span>
+            </label>
+            {problemConfig?.defaultDocumentTemplate &&
+              <button type="button" className="danger" onClick={deleteProblemDocumentTemplate}>Delete</button>}
+          </div>
+          <div className="horizontal middle">
+            <label>
+              <input type="checkbox" {...problemForm.register("planningTemplateEnabled")} />
+              <span>Enable the planning template</span>
+            </label>
+            {problemConfig?.planningTemplate &&
+              <button type="button" className="danger" onClick={deleteProblemPlanningTemplate}>Delete</button>}
+          </div>
+        </fieldset>
         <div className="bottomButtons">
           <button type="submit" disabled={saveState === "saving"}>Save</button>
         </div>

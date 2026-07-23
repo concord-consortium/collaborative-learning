@@ -195,8 +195,16 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultDocumentTemplate"]>("defaultDocumentTemplate");
   }
 
+  get defaultDocumentTemplateEnabled() {
+    return this.getProp<UC["defaultDocumentTemplateEnabled"]>("defaultDocumentTemplateEnabled");
+  }
+
   get planningTemplate() {
     return this.getProp<UC["planningTemplate"]>("planningTemplate");
+  }
+
+  get planningTemplateEnabled() {
+    return this.getProp<UC["planningTemplateEnabled"]>("planningTemplateEnabled");
   }
 
   get placeholder() {

@@ -162,13 +162,20 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private getDefaultDocumentContentSpec() {
-    const { appConfig: { defaultDocumentType: type, defaultDocumentTemplate } } = this.stores;
-    return { type, content: DocumentContentModel.create(defaultDocumentTemplate) };
+    const { appConfig: { defaultDocumentType: type, defaultDocumentTemplate, defaultDocumentTemplateEnabled } }
+      = this.stores;
+    // Apply the template unless it has been explicitly switched off (undefined/legacy → apply).
+    const template = defaultDocumentTemplateEnabled !== false ? defaultDocumentTemplate : undefined;
+    return { type, content: DocumentContentModel.create(template) };
   }
 
   private getDefaultSectionedDocumentContent(defaultType: string, defaultContent?: DocumentContentModelType) {
     const { appConfig: { autoSectionProblemDocuments }, problem } = this.stores;
-    if ((defaultType === ProblemDocument) && autoSectionProblemDocuments) {
+    // A non-empty document template provides its own content (and its own sections via dividers), so use it
+    // for the problem document instead of the empty auto-sectioned default. getDefaultDocumentContentSpec
+    // already yields empty content when the template is absent or switched off, so this covers those cases.
+    const hasTemplateContent = !!defaultContent && !defaultContent.isEmpty;
+    if ((defaultType === ProblemDocument) && autoSectionProblemDocuments && !hasTemplateContent) {
       // for problem documents, default content is a section header row and a placeholder tile
       // for each section that is present in the corresponding problem content
       return createDefaultSectionedContent({ sections: problem.sections });
@@ -341,8 +348,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {
-    const { appConfig: { defaultDocumentTemplate } } = this.stores;
-    const template = type === PersonalDocument ? defaultDocumentTemplate : undefined;
+    const { appConfig: { defaultDocumentTemplate, defaultDocumentTemplateEnabled } } = this.stores;
+    const templateEnabled = defaultDocumentTemplateEnabled !== false;
+    const template = (type === PersonalDocument && templateEnabled) ? defaultDocumentTemplate : undefined;
     return DocumentContentModel.create(template);
   };
 
