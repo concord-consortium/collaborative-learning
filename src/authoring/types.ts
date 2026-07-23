@@ -57,6 +57,9 @@ export interface IUnitConfig extends IItemTemplateConfig {
   sortWorkConfig?: ISortWorkConfig;
   termOverrides?: Record<string, string>;
   defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  // "50-50" (default) splits the panes evenly; "wideContent" narrows the resources pane to its
+  // comments-open width so the workspace gets ~2/3 until comments are opened.
+  contentLayout?: "50-50" | "wideContent";
   defaultSharedDocuments?: boolean;
 }
 

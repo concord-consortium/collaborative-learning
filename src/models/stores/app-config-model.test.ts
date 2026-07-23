@@ -179,6 +179,26 @@ describe("ConfigurationManager", () => {
     });
   });
 
+  describe("contentLayout", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.contentLayout).toBeUndefined();
+    });
+
+    it("should return the configured value", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, contentLayout: "wideContent" }
+      });
+      expect(appConfig.contentLayout).toBe("wideContent");
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ contentLayout: "wideContent" }]);
+      expect(appConfig.contentLayout).toBe("wideContent");
+    });
+  });
+
   describe("chatTutorPrompts", () => {
     it("should return undefined when not configured", () => {
       const appConfig = AppConfigModel.create({ config: unitConfigDefaults });

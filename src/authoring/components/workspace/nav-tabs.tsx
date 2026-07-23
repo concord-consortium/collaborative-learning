@@ -15,6 +15,7 @@ interface FormTab {
 
 interface INavTabsInputs {
   defaultPanelLayout: IUnitConfig["defaultPanelLayout"];
+  contentLayout: IUnitConfig["contentLayout"];
   tabs: FormTab[];
 }
 
@@ -65,6 +66,9 @@ const NavTabs: React.FC = () => {
   const currentPanelLayout = useMemo(() => {
     return unitConfig?.config?.defaultPanelLayout ?? "split";
   }, [unitConfig]);
+  const currentContentLayout = useMemo(() => {
+    return unitConfig?.config?.contentLayout ?? "50-50";
+  }, [unitConfig]);
   const { handleSubmit, register, formState: { errors } } = useForm<INavTabsInputs>();
 
   const onSubmit: SubmitHandler<INavTabsInputs> = (data) => {
@@ -75,6 +79,12 @@ const NavTabs: React.FC = () => {
           draft.config.defaultPanelLayout = data.defaultPanelLayout;
         } else {
           delete draft.config.defaultPanelLayout;
+        }
+        // Save content layout (omit if "50-50" since that's the default)
+        if (data.contentLayout && data.contentLayout !== "50-50") {
+          draft.config.contentLayout = data.contentLayout;
+        } else {
+          delete draft.config.contentLayout;
         }
         formTabs.forEach((tab, index) => {
           const formTab = data.tabs[index];
@@ -114,6 +124,18 @@ const NavTabs: React.FC = () => {
           <option value="split">Split (resources and workspace)</option>
           <option value="workspace-only">Workspace only</option>
           <option value="resources-only">Resources only</option>
+        </select>
+        <p className="muted">
+          Content layout controls how the split view divides its width. &ldquo;Wide content&rdquo; keeps the
+          resources pane at its comments-open width (~1/3) so the workspace stays wide until comments are
+          opened.
+        </p>
+        <select
+          {...register("contentLayout")}
+          defaultValue={currentContentLayout}
+        >
+          <option value="50-50">50 / 50 (even split)</option>
+          <option value="wideContent">Wide content (narrow resources)</option>
         </select>
       </fieldset>
       <table>
