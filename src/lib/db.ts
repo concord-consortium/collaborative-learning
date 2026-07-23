@@ -99,6 +99,7 @@ export interface OpenDocumentOptions {
   problem?: string;
   investigation?: string;
   unit?: string;
+  firestoreMetadata?: IDocumentMetadata;
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
@@ -589,7 +590,7 @@ export class DB {
       // metadata, so reading it would be undefined for personal/learning-log documents.
       context_id: self.classHash,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
-      // "network field is problematic" note in docs/firestore-schema.md. Null for students/group docs.
+      // `network` section in docs/document-metadata/metadata-fields.md. Null for students/group docs.
       network: userContext.network || null,
       key: documentKey,
       properties: {},
@@ -693,11 +694,11 @@ export class DB {
     return this.createOtherDocument(PersonalDocument, params);
   }
 
-  public async findFirestoreMetadata(documentKey: string): Promise<IDocumentMetadata | undefined> {
-    // fetchMetadata throws when the document is missing or invalid; catch that so findFirestoreMetadata
-    // keeps its "undefined when absent" contract, which openCanonicalDocumentByKey and document-workspace
-    // handle. Callers that want the strict error can call fetchMetadata directly.
-    return this.stores.documentMetadata.fetchMetadata(documentKey).catch(() => undefined);
+  public async findFirestoreMetadata(documentKey: string) {
+    // fetchMetadata throws when the document is missing or invalid; findFirestoreMetadata surfaces that
+    // throw. openDocument and openCanonicalDocumentByKey require the metadata, and document-workspace
+    // handles the throw in its try/catch.
+    return this.stores.documentMetadata.fetchMetadata(documentKey);
   }
 
   public async getOrCreateGroupDocument() {
@@ -792,10 +793,8 @@ export class DB {
   }
 
   private async openCanonicalDocumentByKey(documentKey: string) {
+    // findFirestoreMetadata throws when the referenced document is missing or invalid.
     const metadata = await this.findFirestoreMetadata(documentKey);
-    if (!metadata) {
-      throw new Error(`Canonical document ${documentKey} referenced by a pointer was not found`);
-    }
     return this.openDocumentFromFirestoreMetadata(metadata);
   }
 
@@ -928,8 +927,14 @@ export class DB {
       const documentRef = this.firebase.ref(documentPath);
       const metadataRef = this.firebase.ref(metadataPath);
 
-      return Promise.all([documentRef.once("value"), metadataRef.once("value")])
-        .then(([documentSnapshot, metadataSnapshot]) => {
+      // fetchMetadata throws when the Firestore metadata is missing or invalid; that
+      // rejection flows through Promise.all to the catch below.
+      const firestoreMetadataPromise = options.firestoreMetadata
+        ? Promise.resolve<IDocumentMetadata>(options.firestoreMetadata)
+        : this.stores.documentMetadata.fetchMetadata(documentKey);
+
+      return Promise.all([documentRef.once("value"), metadataRef.once("value"), firestoreMetadataPromise])
+        .then(([documentSnapshot, metadataSnapshot, firestoreMetadata]) => {
           const document: DBDocument|null = documentSnapshot.val();
           const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
           if (!metadata) {
@@ -948,7 +953,8 @@ export class DB {
             console.warn(msg);
             return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
-                                  key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
+                                  key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0,
+                                  contextId: firestoreMetadata.context_id ?? undefined });
           }
 
           const content = this.parseDocumentContent(document);
@@ -968,7 +974,8 @@ export class DB {
               pubVersion,
               problem,
               investigation,
-              unit
+              unit,
+              contextId: firestoreMetadata.context_id ?? undefined,
             });
             // Stash the envelope's lastHistoryEntryId for the drift check that
             // runs once the Firestore history loads. Skipped (undefined) for
@@ -990,18 +997,19 @@ export class DB {
           resolve(document);
         })
         .catch((msg) => {
-          // TODO: this rejected promise is not handled by the callers of openDocument. Most of those
-          // callers trace back to firebase listeners. The listener is triggered by some existing or new
-          // entry representing a document. The listener then tries to create a document from the
-          // information. If an error happens this document is likely not added to the documents list.
-          // The document will likely not ever be seen by the user.
-          // The best thing to do here seems to be to add error handling in these listeners so they can
-          // print out a useful error message. Ideally the message should include the paths in firebase
-          // that were accessed, and what data was missing or invalid. Getting all of this information
-          // will probably require additional logging a lower level.
-          // After this is changed, the updated error reporting should be tested to make sure it
-          // continues show a stack trace pointing at the original error site.
-          // For example just calling console.error(msg) here will hide the original stack trace.
+          // This rejection is intentionally left unhandled by openDocument's callers (most trace back
+          // to firebase listeners), so it surfaces as an unhandled promise rejection that Rollbar
+          // captures with the original stack trace (captureUnhandledRejections in src/index.html). The
+          // RTDB "Error retrieving metadata for document" variant is deliberately suppressed there via
+          // checkIgnore as known stale-demo-data noise (see docs/rollbar-metadata-errors.md).
+          //
+          // TODO: when a listener is triggered by an existing or new document entry and this rejects,
+          // the document is likely never added to the documents list and never seen by the user. The
+          // better fix is to handle the error in those listeners and print a useful message including
+          // the firebase paths accessed and what data was missing or invalid (which will probably need
+          // additional logging at a lower level). Whatever replaces the unhandled-rejection path must
+          // still show a stack trace pointing at the original error site — e.g. just calling
+          // console.error(msg) here would hide it.
           reject(msg);
         });
     });
@@ -1028,6 +1036,7 @@ export class DB {
       ...firestoreMetadata,
       documentKey: firestoreMetadata.key,
       userId: firestoreMetadata.uid,
+      firestoreMetadata,
 
       // The following props are sometimes null in Firestore on the metadata docs.
       // For consistency we make them undefined which is what openDocument

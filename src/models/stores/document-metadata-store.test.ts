@@ -1,17 +1,21 @@
 import { DocumentMetadataStore, IDocumentMetadataStoreStores } from "./document-metadata-store";
 
-// A minimal fake Firestore query chain: collection().withConverter().where().where().get().
+// A minimal fake Firestore query chain: collection().withConverter().where().where().limit().get().
 // It honors both the `context_id` and `key` filters so class-scoping is actually exercised:
-// a doc is only returned when the requested context_id matches the doc's context_id.
+// a doc is only returned when the requested context_id matches the doc's context_id. A docsByKey
+// value may be an array to simulate duplicate (context_id, key) matches.
 function makeFakeDb(docsByKey: Record<string, any>) {
   let requestedKey = "";
   let requestedContextId = "";
+  let requestedLimit = Infinity;
   const getSpy = jest.fn(() => {
-    const data = docsByKey[requestedKey];
-    const matches = data && data.context_id === requestedContextId;
+    const value = docsByKey[requestedKey];
+    const candidates = (Array.isArray(value) ? value : value ? [value] : [])
+      .filter(data => data.context_id === requestedContextId)
+      .slice(0, requestedLimit);
     return Promise.resolve(
-      matches
-        ? { empty: false, docs: [{ data: () => data }] }
+      candidates.length > 0
+        ? { empty: false, docs: candidates.map(data => ({ data: () => data })) }
         : { empty: true, docs: [] }
     );
   });
@@ -24,6 +28,7 @@ function makeFakeDb(docsByKey: Record<string, any>) {
       if (field === "context_id") requestedContextId = value;
       return query;
     },
+    limit: (n: number) => { requestedLimit = n; return query; },
     get: () => getSpy(),
   };
   return {
@@ -107,6 +112,23 @@ describe("DocumentMetadataStore", () => {
       expect(a?.key).toBe("doc-3");
       expect(b?.key).toBe("doc-3");
       expect(getSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("logs and uses the first match when duplicate (context_id, key) docs exist", async () => {
+      // A duplicate is a data-integrity anomaly, not a reason to lock the user out: the document is
+      // still openable, so it resolves with the first match and reports the anomaly via console.error.
+      const { store } = makeStore({
+        "dup-1": [
+          { uid: "u1", type: "problem", key: "dup-1", context_id: "class-1" },
+          { uid: "u2", type: "problem", key: "dup-1", context_id: "class-1" },
+        ]
+      });
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const result = await store.fetchMetadata("dup-1");
+      expect(result?.uid).toBe("u1");
+      expect(consoleErrorSpy)
+        .toHaveBeenCalledWith(expect.stringMatching(/Multiple Firestore metadata documents found/));
+      consoleErrorSpy.mockRestore();
     });
   });
 

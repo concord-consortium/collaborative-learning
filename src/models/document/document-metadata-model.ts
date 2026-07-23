@@ -12,6 +12,12 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   type: types.string,
   key: types.identifier,
   createdAt: types.maybe(types.number),
+  context_id: types.maybeNull(types.string),
+  /**
+   * The creating user's primary network (or null). It is not recommended to use this
+   * property. See docs/document-metadata/metadata-fields.md for more information.
+   */
+  network: types.maybeNull(types.string),
   /**
    * If the document is a group document this is the id the group that owns the document.
    * If the document is not a group document this should be undefined because the group

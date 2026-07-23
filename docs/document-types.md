@@ -4,6 +4,8 @@
 
 In the beginning there were only a few types of documents but over time more have been added with different purposes, scopes, metadata, locations in the database, etc. This document is an attempt to gather information about the various document types in one place.
 
+This document covers *where documents live and why*. For a field-by-field account of the metadata itself — what writes each field, how it reaches the runtime, and whether changes are reactive — see [document-metadata/metadata-fields.md](./document-metadata/metadata-fields.md).
+
 For reasons harking back to the limitations of the Firebase realtime database, documents are generally stored in three pieces in the database. The content of a document is separated from its metadata so that they can be listed without downloading their full contents. (Realtime database queries are deep, i.e. a request for a record at a given path returns all information below that path.) Furthermore, metadata is generally split between generic metadata which is identical for all documents and type-specific metadata to make it easier to find documents of a given type. A consequence of this, however, is that three writes are required for each document and three reads are required to find and load individual document contents.
 
 All of the contents of the realtime database for a given class are stored at a path like `/{firebaseRoot}/classes/{classHash}`, where the `{firebaseRoot}` depends on the `appMode` and other environmental factors. For the remainder of this document we will refer to this as the `/{classPath}` for brevity.
@@ -77,7 +79,7 @@ export interface DBOfferingUserProblemDocument {
 }
 ```
 
-Note that only problem/planning documents have the `visibility` property, intended to support group sharing of problem documents in the four-up view.
+The `visibility` property is intended to support group sharing of problem documents in the four-up view. It also determines whether a document is discoverable by other users in the Sort Work tab. It is not unique to problem/planning documents, though: personal documents and learning logs also carry `visibility` on their `DBOtherDocument` record (see below), and the generic `DBBaseDocumentMetadata` defines an optional `visibility` for all types.
 
 ## Personal/Learning Log Documents
 
@@ -98,7 +100,7 @@ export interface DBOtherDocument {
 }
 ```
 
-Note that only personal documents and learning logs have the `title` property (other document types are given titles automatically) and the `properties` property, which is used to store additional information like whether or not the document has been "deleted" by the user (i.e. should be hidden in the UI).
+Note that only personal documents and learning logs (and their published versions) have the `title` property (other document types are given titles automatically) and the `properties` property, which is used to store additional information like whether or not the document has been "deleted" by the user (i.e. should be hidden in the UI).
 
 ## Group Documents
 
