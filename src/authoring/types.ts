@@ -182,8 +182,14 @@ export interface ISectionDividerTile {
   content: { isSectionHeader: true; sectionId: string };
 }
 
-// A tile in a template is either a normal authored tile or a section divider.
-export type ITemplateTile = ITile | ISectionDividerTile;
+// A "put content here" placeholder for an empty section, mirroring the placeholder tile the default
+// sectioned problem document uses (createDefaultSectionedContent). Removed at runtime once content is added.
+export interface IPlaceholderTile {
+  content: { type: "Placeholder"; sectionId: string; containerType: string };
+}
+
+// A tile in a template is a normal authored tile, a section divider, or a section placeholder.
+export type ITemplateTile = ITile | ISectionDividerTile | IPlaceholderTile;
 
 // Preloaded document content ({ tiles }) copied into a new document on first creation.
 // Same authored shape as section content. See IAuthoredDocumentContent in the runtime.
