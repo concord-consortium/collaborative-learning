@@ -192,3 +192,29 @@ describe("class-wide document canonical claim", () => {
     await assertFails(db.doc(kClassWideDocPath).update({ canonical: kClassWideLabel }));
   });
 });
+
+describe("class-wide get-or-create convergence (#1, #6)", () => {
+  it("two concurrent claims on the same class+unit pointer converge to one documentKey", async () => {
+    const a = initFirestore(studentAuth);
+    const b = initFirestore({ uid: "77", platform_user_id: 77, user_type: "student", class_hash: thisClass });
+    // First writer wins; the pointer is immutable, so the second create is denied (it must then adopt the winner).
+    await assertSucceeds(a.doc(kClassWidePointerPath).set(
+      { documentKey: "doc-A", createdAt: firebase.firestore.Timestamp.now(), createdBy: `class_${kUnit}` }));
+    await assertFails(b.doc(kClassWidePointerPath).set(
+      { documentKey: "doc-B", createdAt: firebase.firestore.Timestamp.now(), createdBy: `class_${kUnit}` }));
+    const snap = await a.doc(kClassWidePointerPath).get();
+    expect(snap.data()!.documentKey).toBe("doc-A");
+  });
+
+  it("the class-wide metadata document is readable before any history entry exists (#6 ordering)", async () => {
+    // getOrCreateCanonicalDocument writes the Firestore metadata document (rules require the create to
+    // arrive non-canonical; the label is stamped afterward by the pointer-claim update — see
+    // isValidDocumentCreateRequest) before the document is opened and its history manager subscribes,
+    // so a first-session drift false-positive cannot occur. Assert the metadata doc is present/readable
+    // immediately after creation, with no history subcollection involved.
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kClassWideDocPath).set(classWideDoc());
+    const student = initFirestore(studentAuth);
+    await assertSucceeds(student.doc(kClassWideDocPath).get());
+  });
+});
