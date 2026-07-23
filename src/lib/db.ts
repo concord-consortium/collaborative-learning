@@ -32,7 +32,7 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
-import { getDocumentKindMetadataFields } from "../models/document/document-kinds";
+import { getDocumentKindMetadataFields, registerDocumentKind } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -118,6 +118,9 @@ interface IGetOrCreateCanonicalDocumentOpts {
   canonicalLabel: string;
   groupUserId?: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
+  // When set, the canonical document is a class-wide collaborative document created via createDocument's
+  // class-wide path (class+unit scope, synthetic owner uid). `title` is the authored slot title.
+  classWide?: IClassWideCreateInfo & { title?: string };
 }
 
 export class DB {
@@ -755,6 +758,28 @@ export class DB {
     });
   }
 
+  // Class-scoped synthetic RTDB owner for this unit's class-wide documents. One shared owner per (class, unit);
+  // the class part comes from the storage path prefix, so the uid only encodes the unit.
+  private get userIdForClassWideDocuments() {
+    return `class_${this.stores.unit.code}`;
+  }
+
+  public async getOrCreateClassWideDocument(slot: { kind: string; title: string }) {
+    const { user, unit } = this.stores;
+    // Register the slot's kind so createFirestoreMetadataDocument stamps its axis fields via the registry.
+    // Class-wide collaborative documents are always concurrent; idempotent, so calling per open is harmless.
+    registerDocumentKind({ kind: slot.kind, metadataFields: { concurrent: true } });
+    // For class-wide slots the canonical-pointer label equals the document's kind.
+    const label = slot.kind;
+    const syntheticUid = this.userIdForClassWideDocuments;
+    const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
+    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
+      canonicalLabel: label,
+      groupUserId: syntheticUid,   // synthetic owner: createdBy attribution + orphan-cleanup RTDB path
+      classWide: { kind: slot.kind, unit: unit.code, syntheticUid, title: slot.title }
+    });
+  }
+
   private async getOrCreateCanonicalDocument(
     pointerPath: string,
     type: DBDocumentType,
@@ -793,7 +818,12 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
-    const { firestoreMetadata } = await this.createDocument({ type });
+    const { firestoreMetadata } = await this.createDocument(
+      opts.classWide
+        ? { type, title: opts.classWide.title, classWide: {
+            kind: opts.classWide.kind, unit: opts.classWide.unit, syntheticUid: opts.classWide.syntheticUid } }
+        : { type }
+    );
     const documentKey = firestoreMetadata.key;
 
     const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));

@@ -10,6 +10,7 @@ import {
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
+import { UnitModel } from "../models/curriculum/unit";
 import { TextContentModelType } from "../models/tiles/text/text-content";
 import { ITileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
@@ -450,6 +451,55 @@ describe("db", () => {
         type: "group", context_id: "class-1", unit: "msu",
         kind: "driving-question-board", concurrent: true, uid: "class_msu"
       });
+    });
+  });
+
+  describe("getOrCreateClassWideDocument", () => {
+    const openStub = jest.fn(async (m: any) => ({ opened: m.key }));
+    beforeEach(() => {
+      // The class+unit pointer scope needs stores.unit.code === "msu"; there is no unit-code setter
+      // (UnitModel has no such action), so rebuild stores with a unit fixture carrying that code.
+      stores = specStores({
+        appMode: "test",
+        documents: DocumentsModel.create(),
+        user: UserModel.create({ id: "1", portal: "example.com" }),
+        unit: UnitModel.create({ code: "msu", title: "Unit" })
+      });
+      (db as any).openDocumentFromFirestoreMetadata = openStub;
+      (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
+    });
+
+    it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: (p: string) => ({
+          get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) })
+        })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
+      expect(result.opened).toBe("existing");
+    });
+
+    it("create path: mints a class-wide doc and claims the class+unit pointer", async () => {
+      const setCalls: any[] = [];
+      const updateCalls: any[] = [];
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "dqb-key" } }));
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }),
+             set: (_r: any, d: any) => setCalls.push(d),
+             update: (_r: any, d: any) => updateCalls.push(d) }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
+        type: GroupDocument,
+        classWide: expect.objectContaining({ kind: "driving-question-board", unit: "msu", syntheticUid: "class_msu" })
+      }));
+      expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
+      expect(result.opened).toBeDefined();
     });
   });
 
