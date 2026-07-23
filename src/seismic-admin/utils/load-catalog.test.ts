@@ -49,7 +49,7 @@ describe("defaultCatalog", () => {
   it("reads the wave-runner stations and models from the base app config", () => {
     const base = defaultCatalog();
     expect(base.stations.length).toBeGreaterThan(0);
-    expect(base.stations.map(s => s.station)).toContain("RC01");
+    expect(base.stations.map(s => s.station)).toContain("FIRE");
     expect(base.models.length).toBeGreaterThan(0);
     expect(base.models.every(m => typeof m.label === "string" && typeof m.metadataUrl === "string")).toBe(true);
   });
