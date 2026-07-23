@@ -346,8 +346,9 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
     const problemConfig = item.config;
     const docEnabled = problemConfig?.defaultDocumentTemplateEnabled ?? !!problemConfig?.defaultDocumentTemplate;
     const planEnabled = problemConfig?.planningTemplateEnabled ?? !!problemConfig?.planningTemplate;
-    // Seed a document template with a divider per section, using this scope's sections (teacher guide or unit).
-    const templateSections = (pathInfo?.isTeacherGuide ? teacherGuideConfig : unitConfig)?.sections;
+    // Seed a document template with a divider per section, using the sections this problem actually
+    // uses (item.sections) rather than every section defined for the unit/teacher guide.
+    const templateSectionIds = item.sections ?? [];
     return (
       <>
         <form onSubmit={problemForm.handleSubmit(onSubmitProblem)}>
@@ -384,7 +385,7 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
               onChange={e => updateProblemConfig(c => {
                 c.defaultDocumentTemplateEnabled = e.target.checked;
                 if (e.target.checked && !c.defaultDocumentTemplate) {
-                  c.defaultDocumentTemplate = buildSectionDividerTemplate(templateSections);
+                  c.defaultDocumentTemplate = buildSectionDividerTemplate(templateSectionIds);
                 }
               })}
             />

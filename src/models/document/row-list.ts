@@ -104,8 +104,10 @@ export const RowList = types
         const isLastRow = rowIndex === exportRowCount - 1;
         // Section-header rows have no tiles; emit them as a divider marker so they round-trip.
         if (row?.isSectionHeader) {
+          // JSON.stringify the sectionId so a value with quotes/backslashes can't produce invalid JSON.
+          const sectionId = JSON.stringify(row.sectionId ?? "");
           builder.pushLine(
-            `{ "content": { "isSectionHeader": true, "sectionId": "${row.sectionId ?? ""}" } }${comma(!isLastRow)}`,
+            `{ "content": { "isSectionHeader": true, "sectionId": ${sectionId} } }${comma(!isLastRow)}`,
             2
           );
           return;

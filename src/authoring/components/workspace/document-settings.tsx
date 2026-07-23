@@ -59,7 +59,7 @@ const DocumentSettings: React.FC = () => {
       // Seed a fresh document template with a section divider per unit section so the author just fills
       // each section (only when first enabling and no content exists yet).
       if (data.documentTemplateEnabled && !draft.config.defaultDocumentTemplate) {
-        draft.config.defaultDocumentTemplate = buildSectionDividerTemplate(draft.sections);
+        draft.config.defaultDocumentTemplate = buildSectionDividerTemplate(Object.keys(draft.sections ?? {}));
       }
       draft.config.planningTemplateEnabled = data.planningTemplateEnabled;
     });

@@ -171,11 +171,11 @@ const Workspace: React.FC = () => {
       case "config/planningTemplate":
         return (
           <PlanningTemplateEditor
-            planningTemplate={unitConfig?.config?.planningTemplate as any}
+            planningTemplate={unitConfig?.config?.planningTemplate}
             onChange={(sectionType, sectionContent) => setUnitConfig(draft => {
               if (!draft) return;
               if (!draft.config.planningTemplate) draft.config.planningTemplate = {};
-              (draft.config.planningTemplate as any)[sectionType] = sectionContent;
+              draft.config.planningTemplate[sectionType] = sectionContent;
             })}
           />
         );
@@ -216,10 +216,10 @@ const Workspace: React.FC = () => {
     }
     return (
       <PlanningTemplateEditor
-        planningTemplate={item.config?.planningTemplate as any}
+        planningTemplate={item.config?.planningTemplate}
         onChange={(sectionType, sectionContent) => updateItemConfig(c => {
           if (!c.planningTemplate) c.planningTemplate = {};
-          (c.planningTemplate as any)[sectionType] = sectionContent;
+          c.planningTemplate[sectionType] = sectionContent;
         })}
       />
     );
