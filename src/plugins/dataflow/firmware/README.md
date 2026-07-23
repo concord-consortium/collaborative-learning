@@ -32,6 +32,11 @@ longer required. See the header of `spikerbit-clue.ts` for the full rationale.
 4. Export the **universal hex** and save it as `spikerbit-clue.hex` in this
    directory.
 
+> **Note:** the `spikerbit-firmware-consistency` test only checks that the version
+> *string* is embedded in the hex — it can't verify the hex was actually compiled from
+> `spikerbit-clue.ts`. Always confirm real behavior with the bench-test firmware after a
+> re-export; the hex is a hand-built binary, not a reproducible in-repo build.
+
 ## Bench-test firmware
 
 Two diagnostic programs (never flashed by CLUE — paste into MakeCode and use the

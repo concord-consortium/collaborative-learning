@@ -7,6 +7,12 @@ import { kSpikerbitFirmwareVersion } from "./spikerbit-device";
 //  - the compiled .hex vs that version (a stale hex — the easy mistake, since the hex
 //    must be hand-exported from MakeCode whenever the source changes).
 // The files are read from disk (not imported) so the .hex isn't the Jest fileMock stub.
+//
+// LIMITATION: this only checks that the version *string* is embedded in the hex. It does
+// NOT verify the hex was actually compiled from spikerbit-clue.ts — a hex built from
+// different logic but carrying the right version banner would still pass. Reviewing the
+// committed hex's behavior still relies on the manual bench test. A reproducible in-repo
+// build (pxt CLI / Docker) is the real fix; see the design spec's future-work section.
 
 const firmwareDir = path.join(__dirname, "../../plugins/dataflow/firmware");
 const sourcePath = path.join(firmwareDir, "spikerbit-clue.ts");

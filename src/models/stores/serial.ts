@@ -56,7 +56,12 @@ export class SerialDevice {
       : "arduino";
   }
 
-  public hasPort(){
+  /**
+   * True only for a Web Serial port (Arduino / radio-hub micro:bit). The Spiker:bit
+   * connects over WebUSB and has no port, so for "is any device connected?" use
+   * {@link isConnected} instead — this method is intentionally Web-Serial-specific.
+   */
+  public hasWebSerialPort(){
     return this.port !== undefined && this.port?.readable;
   }
 
@@ -232,7 +237,7 @@ export class SerialDevice {
   }
 
   public isConnected(){
-    return this.hasPort() || this.spikerbitConnected === true;
+    return this.hasWebSerialPort() || this.spikerbitConnected === true;
   }
 
   public setSpikerbitActive(write: (line: string) => void){
@@ -254,7 +259,7 @@ export class SerialDevice {
       this.spikerbitWrite(line);
       return;
     }
-    if (this.hasPort()){
+    if (this.hasWebSerialPort()){
       this.writer.write(textEncoder.encode(`${line}\n`));
     } else {
       log("Port closed, skipping write");

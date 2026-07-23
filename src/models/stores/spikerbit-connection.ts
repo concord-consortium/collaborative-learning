@@ -1,7 +1,6 @@
-// Only file in the app that statically imports @microbit/microbit-connection.
-// The library is ESM and not in the jest transformIgnorePatterns allowlist, so
-// no other module (and no test) may import it directly; consumers should load
-// this file with a dynamic import() from a click handler instead.
+// Thin typed wrapper around @microbit/microbit-connection. Consolidating the library's
+// subpath imports and the `as unknown as IMicrobitUsbConnection` cast here keeps the
+// untyped surface in one place.
 import { createUSBConnection } from "@microbit/microbit-connection/usb";
 import { createUniversalHexFlashDataSource } from "@microbit/microbit-connection/universal-hex";
 import { IMicrobitUsbConnection } from "./spikerbit-device";
