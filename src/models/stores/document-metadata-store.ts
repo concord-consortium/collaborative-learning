@@ -134,9 +134,10 @@ export class DocumentMetadataStore {
   /**
    * Validated point read of a single document's metadata, scoped to the user's class. Throws if
    * there is no such document or it fails validation; the error describes the query that was run
-   * (collection path, context_id, key) so a developer can understand why it was rejected.
-   * Concurrent reads for the same key share one query. Results are not cached here because the
-   * Firestore SDK is already caching the documents locally.
+   * (collection path, context_id, key) so a developer can understand why it was rejected. A
+   * duplicate (context_id, key) match is logged but not fatal — the document is still openable, so
+   * the first match is used. Concurrent reads for the same key share one query. Results are not
+   * cached here because the Firestore SDK is already caching the documents locally.
    */
   fetchMetadata(key: string): Promise<IDocumentMetadata> {
     const inFlight = this.inFlightPointReads.get(key);
@@ -157,7 +158,10 @@ export class DocumentMetadataStore {
     const query = documentsCollection
       .withConverter(converter)
       .where("context_id", "==", classHash)
-      .where("key", "==", key);
+      .where("key", "==", key)
+      // A (context_id, key) pair should identify exactly one document; limit(2) reads only what we
+      // need to open one while still letting us detect (and log) a duplicate below.
+      .limit(2);
     const snapshot = await query.get();
     // Describe the query, not a single doc path: the read is a collection query on context_id + key
     // (not a get() at documents/{key}), so this is where we actually looked. The collection path
@@ -165,6 +169,12 @@ export class DocumentMetadataStore {
     const where = `'${documentsCollection.path}' where context_id == '${classHash}' and key == '${key}'`;
     if (snapshot.empty) {
       throw new Error(`No Firestore metadata document found: queried ${where}`);
+    }
+    if (snapshot.docs.length > 1) {
+      // A data-integrity anomaly, not a reason to deny access: the document is still openable, so
+      // log it (console.error surfaces in Rollbar) and proceed with the first match rather than
+      // throwing and locking the user out of a document that exists.
+      console.error(`Multiple Firestore metadata documents found; using the first: queried ${where}`);
     }
     const metadata = this.metadataFromFirestoreData(snapshot.docs[0].data());
     if (!metadata) {
