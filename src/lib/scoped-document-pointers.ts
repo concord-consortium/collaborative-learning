@@ -15,21 +15,41 @@ export interface ICanonicalPointer {
  */
 export const kDefaultCanonicalDocumentLabel = "default";
 
-/**
- * Path (relative to the Firestore root) of a canonical-document pointer for a CLUE group scope.
- * Each scope part is its own bare-id segment; `canonical` is the subcollection and `label` the
- * document id. 6 segments here + the 2-segment root = 8 (even).
- *
- * Only the group scope has canonical documents today, so this builds the one fixed path. Once
- * other scopes need them, the natural generalization is a single builder that appends the
- * `/offerings/<offeringId>` and `/groups/<groupId>` segments only when those fields are present,
- * addressing the class, offering, and group scopes from one function. firestore.rules
- * `canonicalPointerPath` can build the path the same presence-driven way (string concat + `path()`,
- * verified against the emulator), so the two stay mirrored. Not worth generalizing until a second
- * scope actually needs it.
- */
-export function getGroupCanonicalPointerPath(
-  classHash: string, offeringId: string, groupId: string, label: string
-): string {
-  return `classes/${classHash}/offerings/${offeringId}/groups/${groupId}/canonical/${label}`;
+export interface ICanonicalPointerScope {
+  classHash: string;
+  offeringId?: string;
+  groupId?: string;
+  unit?: string;
+  // owner?: string;  // future: problem/planning pointers are scoped to an offering + a user (users/<owner>).
 }
+
+/**
+ * Path (relative to the Firestore root) of a canonical-document pointer, built from the scope fields the
+ * document carries. Segments are appended by field presence so every canonical scope shares one layout:
+ *
+ *   classes/<classHash> / (offerings/<offeringId> | units/<unit>) / [groups/<groupId>] / canonical/<label>
+ *
+ * The `units/` segment is used only when there is no offering — an offering already pins a unit, so
+ * offering-scoped pointers (group docs; future problem/planning docs) omit it, while class+unit pointers
+ * (class-wide docs like the DQB) use it. For class-wide slots the label equals the document's `kind`; the
+ * group document keeps its CLUE-524 label `default`.
+ *
+ * The Firestore layout is a long-term commitment (existing pointers can't be relocated without migration); the
+ * derivation logic below is cheap to change. firestore.rules `canonicalPointerPath` builds the same path the
+ * same way (string concat + path(), verified against the emulator) — keep the two in lockstep.
+ */
+export function getCanonicalPointerPath(scope: ICanonicalPointerScope, label: string): string {
+  const { classHash, offeringId, groupId, unit } = scope;
+  const segments = [`classes/${classHash}`];
+  if (offeringId) {
+    segments.push(`offerings/${offeringId}`);
+  } else if (unit) {
+    segments.push(`units/${unit}`);
+  }
+  if (groupId) {
+    segments.push(`groups/${groupId}`);
+  }
+  segments.push(`canonical/${label}`);
+  return segments.join("/");
+}
+

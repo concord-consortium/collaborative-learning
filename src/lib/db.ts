@@ -46,7 +46,7 @@ import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
 import {
-  getGroupCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
+  getCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
 } from "./scoped-document-pointers";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
@@ -716,8 +716,9 @@ export class DB {
     }
     // The pointer slot is labeled "default" (the group's default canonical document), not by the
     // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
-    const pointerPath =
-      getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, kDefaultCanonicalDocumentLabel);
+    const pointerPath = getCanonicalPointerPath(
+      { classHash: user.classHash, offeringId: user.offeringId, groupId }, kDefaultCanonicalDocumentLabel
+    );
     return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       groupUserId: user.userIdForGroupDocuments,
