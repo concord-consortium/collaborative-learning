@@ -1,8 +1,8 @@
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
-import { PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
-import { getDocumentDisplayTitle } from "./document-utils";
+import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
+import { getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 describe("document utils", () => {
@@ -176,5 +176,25 @@ describe("document utils", () => {
         expect(title).toBe("Test Problem");
       });
     });
+  });
+});
+
+describe("isDocumentAccessibleToUser — group documents", () => {
+  const student: any = { id: "s1", isTeacherOrResearcher: false, isStudent: true };
+  const documents: any = { isExemplarVisible: () => false };
+
+  it("grants a student access to a group-typed doc owned by someone else, with or without concurrent", () => {
+    // Access is keyed on the document TYPE (a permission tied to kind), not the stored `concurrent`
+    // field, so a pre-existing group doc lacking `concurrent` is still class-wide readable.
+    const groupNoFlag: any = { uid: "other", type: GroupDocument, key: "g1" };  // no concurrent
+    expect(isDocumentAccessibleToUser({ documentMetadata: groupNoFlag, documents, user: student })).toBe(true);
+
+    const groupWithFlag: any = { uid: "other", type: GroupDocument, key: "g2", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: groupWithFlag, documents, user: student })).toBe(true);
+  });
+
+  it("denies a student access to a non-shared personal document owned by someone else", () => {
+    const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };
+    expect(isDocumentAccessibleToUser({ documentMetadata, documents, user: student })).toBe(false);
   });
 });

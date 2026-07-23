@@ -59,7 +59,7 @@ export function useDocumentSyncToFirebase(
   const disableFirebaseSync = (window as any).DISABLE_FIREBASE_SYNC;
 
   // The warning's concern is writing to another user's user-namespaced path, so we allow group documents.
-  !disableFirebaseSync && !readOnly && !document.isGroup && (user.id !== uid) &&
+  !disableFirebaseSync && !readOnly && !document.concurrent && (user.id !== uid) &&
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;

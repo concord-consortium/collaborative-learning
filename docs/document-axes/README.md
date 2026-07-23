@@ -27,13 +27,13 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 | Axis / component | Mechanism (target) | Status | Delivered by |
 |---|---|---|---|
 | `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524 |
-| `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | not started | — |
-| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | not started | — |
+| `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
+| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3) |
 | `owner` (authoring identity / provenance) | getter over existing `uid` | not started | — |
 | `scope` (org + curriculum association refs) | getter derived from existing `context`/`offeringId`/`groupId`/`problem`/`unit` | not started | — |
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
-| kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | not started | — |
-| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | not started | — |
+| kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
+| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis) |
 | creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | not started | — |
 
 Status values: `not started` / `in progress` / `done`.

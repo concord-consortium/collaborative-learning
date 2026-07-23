@@ -32,6 +32,7 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
+import { getDocumentKindMetadataFields } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -583,6 +584,11 @@ export class DB {
       groupInfo.groupId = groupId;
     }
 
+    // Stamp the kind's axis fields. Sourcing the kind from `metadata.type` is temporary: it works only
+    // because `group` — the single registered kind today — has a kind key equal to its `type` value.
+    // In the future creation will be passed the kind explicitly.
+    const kindFields = getDocumentKindMetadataFields(metadata.type);
+
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
       // `self` here is metadata.self (destructured above), whose classHash is populated for every
@@ -596,7 +602,8 @@ export class DB {
       properties: {},
       uid,
       ...problemInfo,
-      ...groupInfo
+      ...groupInfo,
+      ...kindFields
     };
     await documentRef.set(firestoreMetadata);
     return firestoreMetadata;
@@ -944,6 +951,20 @@ export class DB {
                         `at '${firebaseRefPath(metadataRef)}'`;
             throw new Error(msg);
           }
+          // MIGRATION (transitional — remove once the concurrent backfill script has run on production; see
+          // docs/superpowers/specs/2026-07-23-clue-550-stage-1-document-axes-design.md).
+          // Pre-existing group documents were created before `concurrent` was stamped, so their Firestore
+          // metadata lacks it. The kind registry is the source of truth for which kinds are concurrent: derive
+          // the value so the opened model's history manager runs in concurrent mode this session, and best-
+          // effort write it back so the stored field converges (the batch script covers never-opened docs).
+          const kindMetadataFields = getDocumentKindMetadataFields(firestoreMetadata.type);
+          const concurrent = firestoreMetadata.concurrent ?? kindMetadataFields.concurrent ?? undefined;
+          const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
+          if (kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
+            this.firestore.doc(getSimpleDocumentPath(documentKey))
+              .set(kindMetadataFields, { merge: true })
+              .catch((err: any) => console.warn("group-doc concurrent backfill failed", documentKey, err));
+          }
           if (!document) {
             // If we have metadata but no document content, we can return a valid empty document.
             // This has been seen to occur in the wild, presumably as a result of a prior bug.
@@ -954,7 +975,8 @@ export class DB {
             return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0,
-                                  contextId: firestoreMetadata.context_id ?? undefined });
+                                  contextId: firestoreMetadata.context_id ?? undefined,
+                                  concurrent, kind });
           }
 
           const content = this.parseDocumentContent(document);
@@ -976,6 +998,8 @@ export class DB {
               investigation,
               unit,
               contextId: firestoreMetadata.context_id ?? undefined,
+              concurrent,
+              kind,
             });
             // Stash the envelope's lastHistoryEntryId for the drift check that
             // runs once the Firestore history loads. Skipped (undefined) for
