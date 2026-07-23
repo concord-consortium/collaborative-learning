@@ -9,6 +9,7 @@ import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
+import { DataflowGroupsOverlay } from "./ui/dataflow-groups-overlay";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { ProgramDataRates } from "../model/utilities/node";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -157,6 +158,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                     ref={elt => this.playbackToolDiv = elt}
                   />
                 }
+                { this.reteManager && programMode !== ProgramMode.Done &&
+                  <DataflowGroupsOverlay reteManager={this.reteManager} readOnly={readOnly} /> }
                 { this.shouldShowProgramCover() &&
                   <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
                 {showZoomControl && this.reteManager &&

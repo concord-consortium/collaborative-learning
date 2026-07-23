@@ -86,6 +86,19 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     },
   });
 
+  // Keep this the single selected tile while interacting with the canvas, so the toolbar stays
+  // visible and Cmd/Ctrl/Shift-clicking nodes (to multi-select for grouping) doesn't toggle the
+  // tile out of selection. No preventDefault, so rete still handles node selection/drag. Works with
+  // tileHandlesOwnSelection (which disables the framework's modifier-append tile selection).
+  private handleTileContentPointerDown = () => {
+    const { ui } = this.stores;
+    const { model } = this.props;
+    const selected = ui.selectedTileIds;
+    if (!(selected.length === 1 && selected[0] === model.id)) {
+      ui.setSelectedTileId(model.id, { append: false });
+    }
+  };
+
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -102,7 +115,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         <TileTitleArea>
           {this.renderTitle()}
         </TileTitleArea>
-        <div className={classes}>
+        <div className={classes} onPointerDownCapture={this.handleTileContentPointerDown}>
           <DataflowProgram
             documentProperties={this.getDocumentProperties()}
             tileId={model.id}

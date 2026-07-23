@@ -13,6 +13,7 @@ import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "./rete-scheme";
+import { MarqueeSelection, Rect } from "./marquee-selection";
 import { NodeEditorMST } from "./node-editor-mst";
 import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
@@ -57,6 +58,15 @@ interface IContentBounds {
   minY: number;
 }
 
+// The far end of a boundary connection (a socket on a node outside the group).
+export interface ExternalEndpoint { connId: string; externalNodeId: string; externalKey: string; }
+// A member input socket exposed on a collapsed group. `external` is set when an outside node feeds
+// it; undefined means the input is open (a proxy dot with no wire).
+export interface GroupInputSocket { nodeId: string; key: string; external?: ExternalEndpoint; }
+// A member output socket exposed on a collapsed group. `externals` lists outside targets it feeds
+// (empty when the output is open).
+export interface GroupOutputSocket { nodeId: string; key: string; externals: ExternalEndpoint[]; }
+
  /**
 * Get an indexed name based on exiting names.
 * If existing names are "MyBase 1" and "MyBase 3" this will return "MyBase 5"
@@ -76,11 +86,45 @@ export function getNewIndexedName(existingNames: Array<string | undefined>, base
  return `${baseName} ${nextNum}`;
 }
 
+// Fallback node dimensions (CSS px) used for group-bounds math when a member element isn't
+// measurable (hidden while collapsed, or not yet laid out just after expanding). Node width is
+// fixed ($node-width = 176); height varies, so this is an estimate refined on the next layout pass.
+const kDefaultNodeWidth = 176;
+const kDefaultNodeHeight = 120;
+
+// Accumulate node selection while Shift, Ctrl, or Cmd is held. Mirrors
+// AreaExtensions.accumulateOnCtrl() but also allows Shift, the more natural multi-select modifier.
+function accumulateOnModifier() {
+  let pressed = false;
+  const isModifierKey = (e: KeyboardEvent) => e.key === "Shift" || e.key === "Control" || e.key === "Meta";
+  const keydown = (e: KeyboardEvent) => {
+    if (isModifierKey(e) || e.shiftKey || e.ctrlKey || e.metaKey) pressed = true;
+  };
+  const keyup = (e: KeyboardEvent) => { if (isModifierKey(e)) pressed = false; };
+  document.addEventListener("keydown", keydown);
+  document.addEventListener("keyup", keyup);
+  return {
+    active: () => pressed,
+    destroy: () => {
+      document.removeEventListener("keydown", keydown);
+      document.removeEventListener("keyup", keyup);
+    }
+  };
+}
+
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
   private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
+  private selectable: ReturnType<typeof AreaExtensions.selectableNodes> | undefined;
+  private selectionAccumulator: ReturnType<typeof accumulateOnModifier> | undefined;
+  private collapsedConnectionsDisposer: (() => void) | undefined;
+  private marquee: MarqueeSelection | undefined;
+  // Left-drag marquee-selects; the arrow keys pan instead. `canvasActive` gates arrow-panning to the
+  // tile the user last interacted with (so arrows don't pan every dataflow tile on the page at once).
+  private canvasActive = false;
+  private arrowPanDisposer: (() => void) | undefined;
   public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
@@ -114,9 +158,26 @@ export class ReteManager implements INodeServices {
     area.area.setZoomHandler(null);
 
     this.nodeSelector = AreaExtensions.selector();
-    AreaExtensions.selectableNodes(area, this.nodeSelector, {
-      accumulating: AreaExtensions.accumulateOnCtrl()
+    this.selectionAccumulator = accumulateOnModifier();
+    this.selectable = AreaExtensions.selectableNodes(area, this.nodeSelector, {
+      accumulating: this.selectionAccumulator
     });
+
+    // Left-drag on the empty canvas marquee-selects nodes; the arrow keys pan the view. Read-only
+    // tiles get neither.
+    if (!this.readOnly) {
+      this.setupMarqueeSelection();
+      this.setupArrowKeyPan();
+    }
+
+    // Hide connections whose endpoints are in a collapsed group (those nodes are hidden). Member
+    // node elements hide declaratively via CustomDataflowNode; wires are hidden imperatively here
+    // because the connection renderer isn't reactive to group state.
+    this.collapsedConnectionsDisposer = reaction(
+      () => this.collapsedMemberKey(),
+      () => this.applyCollapsedConnectionVisibility(),
+      { fireImmediately: true }
+    );
 
     // Sync observable selection state when nodes are picked or the background is clicked.
     // This pipe runs after selectableNodes has updated the selector.
@@ -486,6 +547,75 @@ export class ReteManager implements INodeServices {
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
 
+  // Disable the area's background drag (it panned on left-drag) and wire marquee selection so a
+  // left-drag on the empty canvas rubber-band-selects nodes instead.
+  private setupMarqueeSelection() {
+    const { area } = this;
+    area.area.setDragHandler(null);
+    if (!area.container) return;
+    this.marquee = new MarqueeSelection({
+      container: area.container,
+      isPanGesture: () => false, // panning is on the arrow keys, not the pointer
+      getNodeRects: () => {
+        const rects: Array<{ id: string; rect: Rect }> = [];
+        area.nodeViews.forEach((view, id) => {
+          const el = view.element;
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) return; // skip hidden (e.g. collapsed-group members)
+          rects.push({ id, rect: r });
+        });
+        return rects;
+      },
+      onSelect: (ids, additive) => {
+        if (!additive) this.nodeSelector.unselectAll();
+        ids.forEach(id => this.selectable?.select(id, true));
+        this.syncSelection();
+      },
+    });
+  }
+
+  // Pan the canvas with the arrow keys. Scoped to the tile the user last interacted with, and it
+  // yields to node keyboard-nav / text editing (those handlers stopPropagation before this fires,
+  // and we double-check the focused element).
+  private setupArrowKeyPan() {
+    const container = this.area.container;
+    if (!container) return;
+    const onDocPointerDown = (e: PointerEvent) => {
+      this.canvasActive = e.target instanceof Node && container.contains(e.target);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!this.canvasActive || e.altKey || e.ctrlKey || e.metaKey) return;
+      const step = e.shiftKey ? 120 : 40;
+      let dx = 0, dy = 0;
+      switch (e.key) {
+        case "ArrowLeft":  dx = step;  break;
+        case "ArrowRight": dx = -step; break;
+        case "ArrowUp":    dy = step;  break;
+        case "ArrowDown":  dy = -step; break;
+        default: return;
+      }
+      const active = document.activeElement;
+      if (active instanceof HTMLElement &&
+          (active.closest(".node") || active.tagName === "INPUT" ||
+           active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+      e.preventDefault();
+      void this.pan(dx, dy);
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    window.addEventListener("keydown", onKeyDown);
+    this.arrowPanDisposer = () => {
+      document.removeEventListener("pointerdown", onDocPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }
+
+  // Pan the view by a screen-space delta (positive dx moves content right).
+  public async pan(dx: number, dy: number) {
+    const t = this.area.area.transform;
+    await this.area.area.translate(t.x + dx, t.y + dy);
+  }
+
   /**
    * Focus the node's keyboard-focusable `.node` div.
    *
@@ -833,6 +963,158 @@ export class ReteManager implements INodeServices {
     this.syncSelection();
   }
 
+  // The group ids that the current node selection belongs to (used to enable/perform Ungroup).
+  public getSelectedGroupIds(): string[] {
+    const groupIds = new Set<string>();
+    this.getSelectedNodeIds().forEach(id => {
+      const group = this.mstProgram.getGroupForNode(id);
+      if (group) groupIds.add(group.id);
+    });
+    return [...groupIds];
+  }
+
+  // True when the current selection can be grouped: >=2 selected nodes, none already in a group.
+  public canGroupSelection(): boolean {
+    const ids = this.getSelectedNodeIds();
+    return ids.length >= 2 && ids.every(id => !this.mstProgram.getGroupForNode(id));
+  }
+
+  // Group the selected nodes into a new "super node" (needs >=2 ungrouped selected nodes).
+  public groupSelectedNodes() {
+    return this.mstProgram.createGroup(this.getSelectedNodeIds());
+  }
+
+  public ungroupSelectedGroups() {
+    this.mstProgram.ungroupGroups(this.getSelectedGroupIds());
+  }
+
+  public toggleGroupCollapsed(groupId: string) {
+    const group = this.mstProgram.groups.get(groupId);
+    group?.setCollapsed(!group.collapsed);
+  }
+
+  // Sorted list of node ids that are hidden because their group is collapsed (reaction key).
+  private collapsedMemberKey() {
+    const ids: string[] = [];
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) ids.push(...g.nodeIds); });
+    return ids.sort().join(",");
+  }
+
+  // The external interface a collapsed group exposes: every member socket that isn't consumed
+  // internally. An input is exposed when it isn't fed by another member (open, or fed by an external
+  // node); an output is exposed when it isn't fully consumed by other members (open, or feeding at
+  // least one external node). Open sockets get a proxy dot with no wire; external-facing ones also
+  // route a boundary wire. This makes the collapsed group behave like a node — its free sockets
+  // stay connectable even when nothing is wired to them yet.
+  public getGroupInterface(nodeIds: string[]) {
+    const members = new Set(nodeIds);
+    const key = (nodeId: string, socketKey: string) => `${nodeId} ${socketKey}`;
+    const inputFedByMember = new Set<string>();
+    const inputExternal = new Map<string, ExternalEndpoint>();
+    const outputToMember = new Set<string>();
+    const outputExternals = new Map<string, ExternalEndpoint[]>();
+
+    this.mstProgram.connections.forEach(conn => {
+      const sourceIn = members.has(conn.source);
+      const targetIn = members.has(conn.target);
+      if (targetIn) {
+        const k = key(conn.target, conn.targetInput);
+        if (sourceIn) inputFedByMember.add(k);
+        else inputExternal.set(k, { connId: conn.id, externalNodeId: conn.source, externalKey: conn.sourceOutput });
+      }
+      if (sourceIn) {
+        const k = key(conn.source, conn.sourceOutput);
+        if (targetIn) {outputToMember.add(k);}
+        else {
+          const arr = outputExternals.get(k) ?? [];
+          arr.push({ connId: conn.id, externalNodeId: conn.target, externalKey: conn.targetInput });
+          outputExternals.set(k, arr);
+        }
+      }
+    });
+
+    const inputs: GroupInputSocket[] = [];
+    const outputs: GroupOutputSocket[] = [];
+    for (const nodeId of nodeIds) {
+      const node = this.editor.getNode(nodeId);
+      if (!node) continue;
+      for (const socketKey of Object.keys(node.inputs ?? {})) {
+        if (!node.inputs?.[socketKey]) continue;
+        const k = key(nodeId, socketKey);
+        if (inputFedByMember.has(k)) continue; // consumed internally
+        inputs.push({ nodeId, key: socketKey, external: inputExternal.get(k) });
+      }
+      for (const socketKey of Object.keys(node.outputs ?? {})) {
+        if (!node.outputs?.[socketKey]) continue;
+        const k = key(nodeId, socketKey);
+        const externals = outputExternals.get(k) ?? [];
+        if (outputToMember.has(k) && externals.length === 0) continue; // consumed internally
+        outputs.push({ nodeId, key: socketKey, externals });
+      }
+    }
+    return { inputs, outputs };
+  }
+
+  // The socket-dot DOM element for a node's socket (used to anchor collapsed-group boundary wires to
+  // external nodes' sockets). The overlay measures it relative to its own element so both wire ends
+  // share an origin. The `[data-socket-side][data-socket-key]` wrapper also contains the socket
+  // label, so we drill into the inner socket dot (`data-testid="<side>-socket"`) — the same element
+  // rete anchors its own connections to — falling back to the wrapper if it isn't found.
+  public getSocketElement(nodeId: string, key: string, side: "input" | "output") {
+    const wrapper = this.area.nodeViews.get(nodeId)?.element?.querySelector<HTMLElement>(
+      `[data-socket-side="${side}"][data-socket-key="${key}"]`
+    );
+    return wrapper?.querySelector<HTMLElement>(`[data-testid="${side}-socket"]`) ?? wrapper ?? undefined;
+  }
+
+  // Hide/show connection views whose source or target node is in a collapsed group.
+  public applyCollapsedConnectionVisibility() {
+    const hidden = new Set<string>();
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) g.nodeIds.forEach(id => hidden.add(id)); });
+    this.area.connectionViews.forEach((view, id) => {
+      const conn = this.mstProgram.connections.get(id);
+      const hide = !!conn && (hidden.has(conn.source) || hidden.has(conn.target));
+      if (view.element) view.element.style.display = hide ? "none" : "";
+    });
+  }
+
+  // Observable accessors for the groups overlay component.
+  public get groups() {
+    return this.mstProgram.groups;
+  }
+  public get nodes() {
+    return this.mstProgram.nodes;
+  }
+
+  // Screen-space bounding box (in .flow-tool pixels) around the given nodes, using rete's measured
+  // node views + the current area transform. Returns undefined if no member is currently rendered.
+  public getGroupScreenBounds(nodeIds: string[]) {
+    const { k, x: tx, y: ty } = this.area.area.transform;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const id of nodeIds) {
+      const el = this.area.nodeViews.get(id)?.element;
+      const node = this.mstProgram.nodes.get(id);
+      if (!el || !node) continue;
+      // Use the MST position (the source of truth, updated live during drags) for placement, and
+      // the measured element for size. Reading rete's nodeView.position can be stale for a node
+      // that was moved before being grouped.
+      const px = isNaN(node.liveX) ? node.x : node.liveX;
+      const py = isNaN(node.liveY) ? node.y : node.liveY;
+      const left = tx + px * k;
+      const top = ty + py * k;
+      // Fall back to default node dimensions when the element isn't measurable (e.g. a member is
+      // hidden while its group is collapsed, or the DOM hasn't laid out yet right after expanding).
+      const w = (el.offsetWidth || kDefaultNodeWidth) * k;
+      const h = (el.offsetHeight || kDefaultNodeHeight) * k;
+      minX = Math.min(minX, left);
+      minY = Math.min(minY, top);
+      maxX = Math.max(maxX, left + w);
+      maxY = Math.max(maxY, top + h);
+    }
+    if (minX === Infinity) return undefined;
+    return { left: minX, top: minY, width: maxX - minX, height: maxY - minY };
+  }
+
   public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
     this.area.update(type, id);
   };
@@ -1073,6 +1355,10 @@ export class ReteManager implements INodeServices {
 
   public dispose() {
     this.snapshotDisposer?.();
+    this.selectionAccumulator?.destroy();
+    this.collapsedConnectionsDisposer?.();
+    this.marquee?.destroy();
+    this.arrowPanDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;
@@ -1170,6 +1456,9 @@ export class ReteManager implements INodeServices {
       this.process();
       this.updateSharedProgramData();
     });
+
+    // Re-apply collapsed-group visibility in case connection views were (re)created above.
+    this.applyCollapsedConnectionVisibility();
   };
 
   public updateSharedProgramData = () => {

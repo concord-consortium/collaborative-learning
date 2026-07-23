@@ -1,0 +1,136 @@
+// Overlay layer that draws expanded group boxes / collapsed group chips over the dataflow canvas.
+// The layer itself does not capture pointer events (so the canvas stays interactive); only the
+// interactive controls (label + toggle) do.
+.dataflow-groups-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+
+  // Shared label + toggle styling. The expand/collapse triangle is enlarged to read at the same
+  // scale as the node sockets.
+  .dataflow-group-toggle {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .dataflow-group-label {
+    flex: 1 1 auto;
+    cursor: text;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: left;
+    // Labels double as code comments: wrap to multiple lines instead of truncating.
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .dataflow-group-label-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: left;
+    resize: none;
+    overflow: hidden;
+    field-sizing: content; // grow with content where supported
+  }
+
+  .dataflow-group-box {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1.5px dashed #7f7f7f;
+    border-radius: 6px;
+    // Transparent fill so member nodes remain visible/interactive underneath.
+    background: rgba(127, 127, 127, 0.04);
+
+    // The label bar floats directly above the box's top edge and grows upward as the label wraps,
+    // so a long comment never overlaps the members.
+    // Spans the box width and grows upward as the label wraps.
+    .dataflow-group-label-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 100%;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 2px 6px;
+      background: rgba(127, 127, 127, 0.18);
+      border-radius: 6px 6px 0 0;
+      pointer-events: auto;
+    }
+  }
+
+  // SVG layer for collapsed-group boundary wires. Sits under the nodes; not interactive.
+  .dataflow-group-wires {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+
+    path {
+      fill: none;
+      // Match the color + dashed look of the real node connections ($socket-and-connection-gray).
+      stroke: #949494;
+      stroke-width: 2;
+      stroke-dasharray: 5 3;
+    }
+  }
+
+  // Collapsed group rendered like a node: a fixed-width box that auto-sizes to its (wrapping) label
+  // header, with a socket body below reserving whitespace for the boundary sockets (inputs on the
+  // left edge, outputs on the right edge, one per row).
+  .dataflow-group-node {
+    position: absolute;
+    box-sizing: border-box;
+    border: 2px solid #7f7f7f;
+    border-radius: 6px;
+    background: #f2f2f2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
+
+    .dataflow-group-node-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 4px 6px;
+    }
+
+    // Reserved whitespace below the header holding the socket rows.
+    .dataflow-group-node-body {
+      position: relative;
+      padding: 2px 0 6px;
+    }
+
+    .dataflow-group-node-row {
+      position: relative;
+      height: 26px;
+    }
+
+    // Socket markers straddling the node's left/right border, vertically centered in their row.
+    // Sized/styled to match the dataflow node sockets: a 24px gray disc with a 2px white ring
+    // ($socket-and-connection-gray = #949494).
+    .dataflow-group-socket {
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: #949494;
+      transform: translate(-50%, -50%);
+
+      &.input { left: 0; }
+      &.output { left: 100%; }
+    }
+  }
+}

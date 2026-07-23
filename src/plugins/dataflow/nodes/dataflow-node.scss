@@ -27,6 +27,11 @@ $top-space: 18px;
     box-shadow: 0 0 0 3px $charcoal-light-1;
   }
 
+  // Member of a collapsed group: hidden (the group shows as a chip instead).
+  &.collapsed-hidden {
+    display: none;
+  }
+
   @include focus-ring(2px);
 
   .top-bar {
