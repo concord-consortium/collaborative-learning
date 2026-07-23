@@ -179,24 +179,22 @@ describe("document utils", () => {
   });
 });
 
-describe("isDocumentAccessibleToUser — concurrent documents", () => {
+describe("isDocumentAccessibleToUser — group documents", () => {
   const student: any = { id: "s1", isTeacherOrResearcher: false, isStudent: true };
   const documents: any = { isExemplarVisible: () => false };
 
-  it("grants a student access to a concurrent document owned by someone else", () => {
-    // Access reads the STORED `concurrent` field (from Firestore metadata / the model's metadata getter),
-    // not the document type.
-    const groupDoc: any = { uid: "other", type: GroupDocument, key: "g1", concurrent: true };
-    expect(isDocumentAccessibleToUser({ documentMetadata: groupDoc, documents, user: student })).toBe(true);
+  it("grants a student access to a group-typed doc owned by someone else, with or without concurrent", () => {
+    // Access is keyed on the document TYPE (a permission tied to kind), not the stored `concurrent`
+    // field, so a pre-existing group doc lacking `concurrent` is still class-wide readable.
+    const groupNoFlag: any = { uid: "other", type: GroupDocument, key: "g1" };  // no concurrent
+    expect(isDocumentAccessibleToUser({ documentMetadata: groupNoFlag, documents, user: student })).toBe(true);
 
-    // A concurrent doc of a NON-group type must also be accessible. Keyed on type === "group" this
-    // fails (its type is "generic"), which is what forces the rebase onto the stored `concurrent`.
-    const dqbLike: any = { uid: "other", type: "generic", key: "g2", concurrent: true };
-    expect(isDocumentAccessibleToUser({ documentMetadata: dqbLike, documents, user: student })).toBe(true);
+    const groupWithFlag: any = { uid: "other", type: GroupDocument, key: "g2", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: groupWithFlag, documents, user: student })).toBe(true);
   });
 
   it("denies a student access to a non-shared personal document owned by someone else", () => {
-    const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };  // no concurrent
+    const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };
     expect(isDocumentAccessibleToUser({ documentMetadata, documents, user: student })).toBe(false);
   });
 });
