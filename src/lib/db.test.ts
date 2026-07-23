@@ -3,6 +3,7 @@ import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../mo
 import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
+import { registerDocumentKind } from "../models/document/document-kinds";
 import {
   GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -416,6 +417,40 @@ describe("db", () => {
     const written = await db.createFirestoreMetadataDocument(metadata, "pk");
     expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
+  });
+
+  describe("class-wide document creation", () => {
+    it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent", async () => {
+      // The explicit kind must be registered so getDocumentKindMetadataFields returns its axis fields.
+      registerDocumentKind({ kind: "driving-question-board", metadataFields: { concurrent: true } });
+      const setPayloads: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({
+          get: () => Promise.resolve({ exists: false }),
+          set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+        })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const metadata: any = {
+        version: "1.0", type: GroupDocument, createdAt: 1,
+        self: { uid: "class_msu", classHash: "class-1", documentKey: "dqb-1" },
+        title: "Driving Question Board", unit: "msu"
+      };
+      const written: any = await db.createFirestoreMetadataDocument(
+        metadata, "dqb-1", undefined, { kind: "driving-question-board", unit: "msu" }
+      );
+      expect(written).toMatchObject({
+        type: "group", context_id: "class-1", unit: "msu",
+        kind: "driving-question-board", concurrent: true, uid: "class_msu"
+      });
+      expect(written.offeringId).toBeUndefined();
+      expect(written.groupId).toBeUndefined();
+      expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
+      expect(setPayloads[0]).toMatchObject({
+        type: "group", context_id: "class-1", unit: "msu",
+        kind: "driving-question-board", concurrent: true, uid: "class_msu"
+      });
+    });
   });
 
   describe("document visibility with defaultSharedDocuments", () => {

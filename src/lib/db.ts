@@ -103,6 +103,15 @@ export interface OpenDocumentOptions {
   firestoreMetadata?: IDocumentMetadata;
 }
 
+interface IClassWideCreateInfo {
+  // Registry key + canonical-pointer label for the slot (e.g. "driving-question-board").
+  kind: string;
+  // Unit code — class+unit scope. Stamped onto the metadata; also part of the synthetic owner uid.
+  unit: string;
+  // Class-scoped synthetic RTDB owner uid, e.g. `class_<unitCode>`. Shared by all class-wide slots of the unit.
+  syntheticUid: string;
+}
+
 interface IGetOrCreateCanonicalDocumentOpts {
   // The pointer slot's label. It must match the final segment of pointerPath and is written to the
   // winning document's `canonical` field.
@@ -552,7 +561,10 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string, groupId?: string) {
+  async createFirestoreMetadataDocument(
+    metadata: DBDocumentMetadata, documentKey: string, groupId?: string,
+    classWide?: { kind: string; unit: string }
+  ) {
     const userContext = this.stores.userContextProvider.userContext;
 
     if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
@@ -571,7 +583,10 @@ export class DB {
     const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
 
     let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-    if ("offeringId" in metadata && metadata.offeringId != null) {
+    if (classWide) {
+      // Class+unit scope: stamp the unit but no investigation/problem (no offering).
+      problemInfo = { unit: classWide.unit };
+    } else if ("offeringId" in metadata && metadata.offeringId != null) {
       problemInfo = this.currentProblemInfo;
     }
 
@@ -584,10 +599,11 @@ export class DB {
       groupInfo.groupId = groupId;
     }
 
-    // Stamp the kind's axis fields. Sourcing the kind from `metadata.type` is temporary: it works only
-    // because `group` — the single registered kind today — has a kind key equal to its `type` value.
-    // In the future creation will be passed the kind explicitly.
-    const kindFields = getDocumentKindMetadataFields(metadata.type);
+    // Stamp the kind's axis fields (kind + concurrent today) from the registry. A class-wide slot passes its
+    // kind explicitly — its `kind` differs from the transitional `type: "group"`; every other document sources
+    // the kind from its type (valid while each kind's key equals its type). getDocumentKindMetadataFields returns
+    // {} for an unregistered kind, so `set` never receives `undefined`.
+    const kindFields = getDocumentKindMetadataFields(classWide?.kind ?? metadata.type);
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
@@ -618,8 +634,10 @@ export class DB {
     };
   }
 
-  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
-    const { type, content, title } = params;
+  public async createDocument(
+    params: { type: DBDocumentType, content?: string, title?: string, classWide?: IClassWideCreateInfo }
+  ) {
+    const { type, content, title, classWide } = params;
     const { user } = this.stores;
 
     return new Promise<{
@@ -627,9 +645,12 @@ export class DB {
       metadata: DBDocumentMetadata,
       firestoreMetadata: IDocumentMetadata
     }>((resolve, reject) => {
-      let groupUserId: string | undefined;
+      let syntheticUserId: string | undefined;
       let groupId: string | undefined;
-      if (type === GroupDocument) {
+      if (classWide) {
+        // Class-wide collaborative document: class-scoped synthetic owner, no group membership required.
+        syntheticUserId = classWide.syntheticUid;
+      } else if (type === GroupDocument) {
         if (!user.currentGroupId) {
           return reject("Cannot create group document because user is not in a group.");
         }
@@ -638,41 +659,46 @@ export class DB {
         // could become invalid.
         groupId = user.currentGroupId;
         // Group documents have a special user id based on the offering and group id
-        groupUserId = user.userIdForGroupDocuments;
+        syntheticUserId = user.userIdForGroupDocuments;
       }
 
-      // If this is group document use a group user id instead of the current user id
-      const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
+      // If this is a group or class-wide document use the synthetic user id instead of the current user id
+      const documentPath = this.firebase.getUserDocumentPath(user, undefined, syntheticUserId);
       const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
-      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId);
+      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, syntheticUserId);
       const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
 
       const self = {
-        uid: groupUserId ?? user.id,
+        uid: syntheticUserId ?? user.id,
         documentKey,
         classHash
       };
 
       let metadata: DBDocumentMetadata;
 
-      switch (type) {
-        case PersonalDocument:
-        case LearningLogDocument:
-        case PersonalPublication:
-        case LearningLogPublication:
-          metadata = {version, self, createdAt, type, title};
-          break;
-        case PlanningDocument:
-        case ProblemDocument:
-        case ProblemPublication:
-        case SupportPublication:
-        case GroupDocument:
-          metadata = {version, self, createdAt, type, classHash, offeringId};
-          break;
+      if (classWide) {
+        // Transitional type "group"; class+unit scope (unit, no offeringId/groupId).
+        metadata = { version, self, createdAt, type: GroupDocument, classHash, unit: classWide.unit, title };
+      } else {
+        switch (type) {
+          case PersonalDocument:
+          case LearningLogDocument:
+          case PersonalPublication:
+          case LearningLogPublication:
+            metadata = {version, self, createdAt, type, title};
+            break;
+          case PlanningDocument:
+          case ProblemDocument:
+          case ProblemPublication:
+          case SupportPublication:
+          case GroupDocument:
+            metadata = {version, self, createdAt, type, classHash, offeringId};
+            break;
+        }
       }
 
       const document: DBDocument = {version, self, type};
@@ -688,7 +714,10 @@ export class DB {
         .then((metadataValue) => {
           // This approach of reading the value that was written in the metadata
           // causes the createdAt timestamp to be populated with a value
-          return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, groupId);
+          return this.createFirestoreMetadataDocument(
+            metadataValue.val(), documentKey, groupId,
+            classWide ? { kind: classWide.kind, unit: classWide.unit } : undefined
+          );
         })
         .then((firestoreMetadata) => {
           resolve({document, metadata, firestoreMetadata});

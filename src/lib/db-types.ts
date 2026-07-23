@@ -44,7 +44,8 @@ export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata |
                                  DBSupportPublicationMetadata |
-                                 DBGroupDocMetadata;
+                                 DBGroupDocMetadata |
+                                 DBClassWideDocMetadata;
 
 // metadata written to {classHash}/users/{userId}/documentMetadata for all document types
 export interface DBBaseDocumentMetadata {
@@ -103,6 +104,15 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
 
 export interface DBGroupDocMetadata extends DBBaseProblemDocumentMetadata {
   type: "group";
+}
+
+// A class-wide collaborative document (e.g. the Driving Question Board). Transitional `type: "group"`
+// (Stages 1-3) but class+unit scope: it carries a `unit` and no `offeringId`/`groupId`. Its RTDB owner
+// is a class-scoped synthetic uid (`class_<unitCode>`).
+export interface DBClassWideDocMetadata extends DBBaseDocumentMetadata {
+  type: "group";
+  classHash: string;
+  unit?: string;
 }
 
 export interface DBGroupUserConnections {
