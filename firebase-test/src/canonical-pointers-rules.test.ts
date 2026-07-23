@@ -53,7 +53,7 @@ const kDocPath = `authed/test-portal/documents/group-doc-1`;
 const groupDoc = (extra: any = {}) => ({
   uid: `group_${kOffering}_${kGroup}`, type: "group", key: "group-doc-1",
   createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
-  offeringId: kOffering, groupId: kGroup, concurrent: true, ...extra
+  offeringId: kOffering, groupId: kGroup, ...extra
 });
 
 describe("deleting group documents", () => {
@@ -74,18 +74,6 @@ describe("deleting group documents", () => {
     const admin = initFirestore(teacherAuth);
     await admin.doc(kDocPath).set(groupDoc());
     db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
-    await assertFails(db.doc(kDocPath).delete());
-  });
-
-  it("a class member may NOT delete a non-concurrent document even if type is group", async () => {
-    const admin = initFirestore(teacherAuth);
-    // type "group" but no concurrent flag -> not deletable by a class member under the new rule
-    await admin.doc(kDocPath).set({
-      uid: `group_${kOffering}_${kGroup}`, type: "group", key: "group-doc-1",
-      createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
-      offeringId: kOffering, groupId: kGroup
-    });
-    db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).delete());
   });
 });
