@@ -57,6 +57,8 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
 
 export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
 
+export const MetadataDocMapModel = types.map(DocumentMetadataModel);
+
 //
 // Compile-time type checks
 // =========================

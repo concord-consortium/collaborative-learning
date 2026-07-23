@@ -693,23 +693,11 @@ export class DB {
     return this.createOtherDocument(PersonalDocument, params);
   }
 
-  public async findFirestoreMetadata(documentKey: string) {
-    const { user } = this.stores;
-
-    const converter = typeConverter<IDocumentMetadata>();
-    const docByKey = this.firestore.collection("documents")
-      .withConverter(converter)
-      .where("context_id", "==", user.classHash)
-      .where("key", "==", documentKey);
-
-    // TODO: I suspect I'll need an new index for this to work
-    const maybeDoc = await docByKey.get();
-
-    if (maybeDoc.empty) {
-      return undefined;
-    } else {
-      return maybeDoc.docs[0].data();
-    }
+  public async findFirestoreMetadata(documentKey: string): Promise<IDocumentMetadata | undefined> {
+    // fetchMetadata throws when the document is missing or invalid; catch that so findFirestoreMetadata
+    // keeps its "undefined when absent" contract, which openCanonicalDocumentByKey and document-workspace
+    // handle. Callers that want the strict error can call fetchMetadata directly.
+    return this.stores.documentMetadata.fetchMetadata(documentKey).catch(() => undefined);
   }
 
   public async getOrCreateGroupDocument() {
