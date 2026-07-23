@@ -955,6 +955,20 @@ export class DB {
                         `at '${firebaseRefPath(metadataRef)}'`;
             throw new Error(msg);
           }
+          // MIGRATION (transitional — remove once the concurrent backfill script has run on production; see
+          // docs/superpowers/specs/2026-07-22-clue-550-group-permission-split-and-concurrent-backfill-design.md).
+          // Pre-existing group documents were created before `concurrent` was stamped, so their Firestore
+          // metadata lacks it. The kind registry is the source of truth for which kinds are concurrent: derive
+          // the value so the opened model's history manager runs in concurrent mode this session, and best-
+          // effort write it back so the stored field converges (the batch script covers never-opened docs).
+          const kindInfo = getDocumentKindInfo(firestoreMetadata.type);
+          const concurrent = firestoreMetadata.concurrent ?? kindInfo?.concurrent ?? undefined;
+          const kind = firestoreMetadata.kind ?? kindInfo?.kind ?? undefined;
+          if (kindInfo?.concurrent && firestoreMetadata.concurrent !== true) {
+            this.firestore.doc(getSimpleDocumentPath(documentKey))
+              .set({ concurrent: true, kind: kindInfo.kind }, { merge: true })
+              .catch((err: any) => console.warn("group-doc concurrent backfill failed", documentKey, err));
+          }
           if (!document) {
             // If we have metadata but no document content, we can return a valid empty document.
             // This has been seen to occur in the wild, presumably as a result of a prior bug.
@@ -966,8 +980,7 @@ export class DB {
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0,
                                   contextId: firestoreMetadata.context_id ?? undefined,
-                                  concurrent: firestoreMetadata.concurrent ?? undefined,
-                                  kind: firestoreMetadata.kind ?? undefined });
+                                  concurrent, kind });
           }
 
           const content = this.parseDocumentContent(document);
@@ -989,8 +1002,8 @@ export class DB {
               investigation,
               unit,
               contextId: firestoreMetadata.context_id ?? undefined,
-              concurrent: firestoreMetadata.concurrent ?? undefined,
-              kind: firestoreMetadata.kind ?? undefined,
+              concurrent,
+              kind,
             });
             // Stash the envelope's lastHistoryEntryId for the drift check that
             // runs once the Firestore history loads. Skipped (undefined) for
