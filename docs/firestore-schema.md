@@ -102,7 +102,7 @@ Fields:
 - strategies: (array of strings, comment tags; written only by the `on-document-tagged` cloud function)
 - lastHistoryEntry: (map `{ id, index }`, the head of the Firestore history chain; concurrent-history documents)
 - canonical: (string, group documents; claims a canonical label so concurrent creators converge)
-- network: (string, name of a network) — _snapshot of the creator's primary network, read back by the rules; see the [`network`](./document-metadata/metadata-fields.md#network) section in metadata-fields.md for why it's problematic_
+- network: (string, name of a network) — _snapshot of the creator's primary network, read back by the rules; this field is unreliable because it gets stale when a user switches networks; see the [`network`](./document-metadata/metadata-fields.md#network) section in metadata-fields.md for details_
 - teachers: (array of user IDs) _legacy; no code writes it to `documents/{docId}` today, but the rules still read it for legacy documents_
 
 Collection:

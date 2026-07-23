@@ -79,7 +79,7 @@ export interface DBOfferingUserProblemDocument {
 }
 ```
 
-The `visibility` property is intended to support group sharing of problem documents in the four-up view. It is not unique to problem/planning documents, though: personal documents and learning logs also carry `visibility` on their `DBOtherDocument` record (see below), and the generic `DBBaseDocumentMetadata` defines an optional `visibility` for all types.
+The `visibility` property is intended to support group sharing of problem documents in the four-up view. It also determines whether a document is discoverable by other users in the Sort Work tab. It is not unique to problem/planning documents, though: personal documents and learning logs also carry `visibility` on their `DBOtherDocument` record (see below), and the generic `DBBaseDocumentMetadata` defines an optional `visibility` for all types.
 
 ## Personal/Learning Log Documents
 
