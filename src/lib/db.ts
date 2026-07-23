@@ -32,7 +32,7 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
-import { getDocumentKindInfo } from "../models/document/document-kinds";
+import { getDocumentKindMetadataFields } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -584,14 +584,10 @@ export class DB {
       groupInfo.groupId = groupId;
     }
 
-    // Stamp the kind + concurrent axes for kinds registered in the kind registry (group today).
-    // Only defined fields are added so Firestore never sees `undefined`.
-    const kindFields: { kind?: string; concurrent?: boolean } = {};
-    const kindInfo = getDocumentKindInfo(metadata.type);
-    if (kindInfo) {
-      kindFields.kind = kindInfo.kind;
-      if (kindInfo.concurrent) kindFields.concurrent = true;
-    }
+    // Stamp the kind's axis fields. Sourcing the kind from `metadata.type` is temporary: it works only
+    // because `group` — the single registered kind today — has a kind key equal to its `type` value.
+    // In the future creation will be passed the kind explicitly.
+    const kindFields = getDocumentKindMetadataFields(metadata.type);
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
@@ -956,17 +952,17 @@ export class DB {
             throw new Error(msg);
           }
           // MIGRATION (transitional — remove once the concurrent backfill script has run on production; see
-          // docs/superpowers/specs/2026-07-22-clue-550-group-permission-split-and-concurrent-backfill-design.md).
+          // docs/superpowers/specs/2026-07-23-clue-550-stage-1-document-axes-design.md).
           // Pre-existing group documents were created before `concurrent` was stamped, so their Firestore
           // metadata lacks it. The kind registry is the source of truth for which kinds are concurrent: derive
           // the value so the opened model's history manager runs in concurrent mode this session, and best-
           // effort write it back so the stored field converges (the batch script covers never-opened docs).
-          const kindInfo = getDocumentKindInfo(firestoreMetadata.type);
-          const concurrent = firestoreMetadata.concurrent ?? kindInfo?.concurrent ?? undefined;
-          const kind = firestoreMetadata.kind ?? kindInfo?.kind ?? undefined;
-          if (kindInfo?.concurrent && firestoreMetadata.concurrent !== true) {
+          const kindMetadataFields = getDocumentKindMetadataFields(firestoreMetadata.type);
+          const concurrent = firestoreMetadata.concurrent ?? kindMetadataFields.concurrent ?? undefined;
+          const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
+          if (kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))
-              .set({ concurrent: true, kind: kindInfo.kind }, { merge: true })
+              .set(kindMetadataFields, { merge: true })
               .catch((err: any) => console.warn("group-doc concurrent backfill failed", documentKey, err));
           }
           if (!document) {

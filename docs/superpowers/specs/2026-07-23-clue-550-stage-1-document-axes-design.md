@@ -65,17 +65,21 @@ no base-typed consumer reads it.
 ## The kind registry
 
 `src/models/document/document-kinds.ts` — `registerDocumentKind(info)` / `getDocumentKindInfo(kind)` over an
-in-memory map, seeding the built-in `group` kind as `{ concurrent: true }`. It is the **source of truth for
-which kinds are concurrent**, consulted at exactly two points: document **creation** (what axis values to
-stamp) and the **on-open backfill** (below). It is deliberately *not* on the steady-state client read path —
-live behavior reads the stored `concurrent`, not the registry.
+in-memory map. Each entry declares the metadata axis fields that kind stamps onto its documents
+(`metadataFields`); the built-in `group` kind declares `{ concurrent: true }`.
+`getDocumentKindMetadataFields(kind)` returns that set with the `kind` key merged in, so the two stamp sites
+(creation and the on-open backfill, below) splat a single object and pick up new axes automatically as
+`metadataFields` grows. It is the **source of truth for a kind's stamped axes**, and is deliberately *not* on
+the steady-state client read path — live behavior reads the stored `concurrent`, not the registry.
 
 ## Sourcing and stamping
 
-- **Stamping (creation):** `createFirestoreMetadataDocument` (`src/lib/db.ts`) looks up the document's type in
-  the registry and, for a registered concurrent kind (group today), writes `kind` and `concurrent: true` into
-  the Firestore metadata. Only defined fields are added, so Firestore `set` never receives `undefined`
-  (mirroring the existing `groupInfo` pattern).
+- **Stamping (creation):** `createFirestoreMetadataDocument` (`src/lib/db.ts`) stamps
+  `getDocumentKindMetadataFields(metadata.type)` into the Firestore metadata — the kind's axis fields plus its
+  `kind` key, or an empty object for an unregistered type, so `set` never receives `undefined` (mirroring the
+  existing `groupInfo` pattern). Sourcing the kind from `type` is a temporary shortcut, valid only while every
+  kind's key equals its `type` value; when a later stage adds a kind that shares `type: "group"` but carries a
+  distinct `kind` (a class-wide DQB), creation passes the kind explicitly instead.
 - **Sourcing (open):** `openDocument` applies `concurrent`/`kind` from the resolved Firestore metadata onto the
   `DocumentModel` at both `createDocumentModel` sites, alongside the prerequisite's `contextId` — the same
   `context_id → contextId` template.
