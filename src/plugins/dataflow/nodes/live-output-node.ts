@@ -13,6 +13,7 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kServoOutputTypes} from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
+import { deviceProtocol } from "../model/utilities/device-capabilities";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 import { getValueOrZero } from "./utilities/view-utilities";
 
@@ -223,9 +224,9 @@ export class LiveOutputNode extends BaseNode<
     const val = this.model.nodeValue ?? 0;
     const outType = this.model.liveOutputType;
     const isNumberOutput = val != null ? isFinite(val) : false;
-    const { deviceFamily } = serialDevice;
+    const protocol = deviceProtocol(serialDevice.deviceFamily);
 
-    if (deviceFamily === "arduino" && isNumberOutput){
+    if (protocol === "arduino" && isNumberOutput){
       if (kGripperOutputTypes.includes(outType)){
         serialDevice.writeToOutForBBGripper(val, outType);
       }
@@ -233,7 +234,7 @@ export class LiveOutputNode extends BaseNode<
         serialDevice.writeToOutForServo(val, outType);
       }
     }
-    if (deviceFamily === "microbit"){
+    if (protocol === "microbit"){
       // It is not clear when the channels would be falsey but that is how this
       // code was written before.
       if (!this.services.getChannels()) return;

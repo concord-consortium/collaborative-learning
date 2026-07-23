@@ -181,7 +181,3 @@ export const serialSensorChannels: NodeChannelInfo[] = [
   ...microBitSensorChannels, ...microBitRelayChannels
 ];
 
-export const kDeviceDisplayNames: Record<string, string> = {
-  "arduino": "Arduino",
-  "microbit": "micro:bit"
-};
