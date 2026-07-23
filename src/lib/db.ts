@@ -120,7 +120,7 @@ interface IGetOrCreateCanonicalDocumentOpts {
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
   // When set, the canonical document is a class-wide collaborative document created via createDocument's
   // class-wide path (class+unit scope, synthetic owner uid). `title` is the authored slot title.
-  classWide?: IClassWideCreateInfo & { title?: string };
+  classWide?: IClassWideCreateInfo & { title: string };
 }
 
 export class DB {
