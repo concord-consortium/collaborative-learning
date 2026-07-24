@@ -45,11 +45,4 @@ CLUE-550 ("class-wide collaborative documents") is the first concrete slice of t
 history, non-owner write-sync, class-wide read access, the rules delete clause) from `type === "group"` onto
 the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
 canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
-get-or-create convergence guaranteeing exactly one document per slot per class. Those pieces flip the
-`concurrent`, `kind`, kind-registry, `canonical`, and creation-factory rows above as they land.
-
-Review issue #6 (a content-drift guard globally weakened in an earlier, superseded PR to mask a first-session
-DQB creation race) turned out not to need its revert: the weakening never landed on this branch or master, and
-the canonical-creation path already writes the Firestore metadata document before the document is opened and
-its history manager subscribes, so the ordering that would have produced a first-session drift false-positive
-cannot occur. This is verified at the rules/emulator level rather than by changing drift-guard code.
+get-or-create convergence guaranteeing exactly one document per slot per class.
