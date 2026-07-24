@@ -367,18 +367,19 @@ service cloud.firestore {
         }
 
         // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has no canonical
-        // shape. Built segment-by-segment from the scope fields the document carries, so all canonical scopes
-        // share one Firestore layout. Keep in lockstep with getCanonicalPointerPath in scoped-document-pointers.ts:
-        //   classes/<context_id> / (offerings/<offeringId> | units/<unit>) / [groups/<groupId>] / canonical/<label>
+        // shape. Pointers live in a dedicated, versioned collection (canonical/v1/…); below the version the path
+        // is built segment-by-segment from the scope fields the document carries, so all scopes share one layout.
+        // Keep in lockstep with getCanonicalPointerPath in scoped-document-pointers.ts:
+        //   canonical/v1/classes/<context_id> / (offerings/<offeringId> | units/<unit>) / [groups/<groupId>] / slots/<label>
         // The units segment is used only when there is no offering (an offering already pins a unit). A future
         // problem/planning pointer will add a /users/<owner> segment after the offering.
         function canonicalPointerPath(portal, data, label) {
           return hasCanonicalScope(data)
             ? path("/databases/" + database + "/documents/authed/" + portal
-                + "/classes/" + data.context_id
+                + "/canonical/v1/classes/" + data.context_id
                 + (data.get("offeringId", "") != "" ? "/offerings/" + data.offeringId : "/units/" + data.unit)
                 + (data.get("groupId", "") != "" ? "/groups/" + data.groupId : "")
-                + "/canonical/" + label)
+                + "/slots/" + label)
             : null;
         }
 
@@ -545,18 +546,32 @@ service cloud.firestore {
         allow write: if false;  // only cloud functions write here
       }
 
-      match /classes/{classId}/offerings/{offeringId}/groups/{groupId}/canonical/{label} {
-        allow read:   if isAuthed() && request.auth.token.class_hash == classId;
-        allow create: if isAuthed() && request.auth.token.class_hash == classId
-                       && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
-        allow update, delete: if false;   // pointers are immutable
+      // Canonical-document pointers live in a dedicated, versioned collection (canonical/v1/…), not interleaved
+      // in the class/offering/group tree. Read and immutability are uniform across every scope, so they are
+      // stated once on the recursive wildcard below; create stays per-scope so each scope can authorize who may
+      // claim its slot (a single wildcard create could not be tightened per-scope — Firestore ORs allow rules).
+      // Keep these paths in lockstep with getCanonicalPointerPath in scoped-document-pointers.ts.
+      function canonicalPointerReadable(classId) {
+        return isAuthed() && request.auth.token.class_hash == classId;
+      }
+      function canonicalPointerCreatable(classId) {
+        return canonicalPointerReadable(classId)
+          && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
       }
 
-      match /classes/{classId}/units/{unit}/canonical/{label} {
-        allow read:   if isAuthed() && request.auth.token.class_hash == classId;
-        allow create: if isAuthed() && request.auth.token.class_hash == classId
-                       && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
-        allow update, delete: if false;   // pointers are immutable
+      // Uniform for every scope: any class member may read their class's pointers; pointers are immutable.
+      match /canonical/v1/classes/{classId}/{scopePath=**} {
+        allow read:           if canonicalPointerReadable(classId);
+        allow update, delete: if false;   // no block grants these — pointers are immutable
+      }
+
+      // Create is granted only per-scope, so each scope authorizes its own slot claim; a create at any path not
+      // matched by one of these blocks is denied by default (a new scope must add its own create block).
+      match /canonical/v1/classes/{classId}/offerings/{offeringId}/groups/{groupId}/slots/{label} {
+        allow create: if canonicalPointerCreatable(classId);
+      }
+      match /canonical/v1/classes/{classId}/units/{unit}/slots/{label} {
+        allow create: if canonicalPointerCreatable(classId);
       }
 
       // A tag write must be self-consistent with its path, attributed to the requesting teacher,

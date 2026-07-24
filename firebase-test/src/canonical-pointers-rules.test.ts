@@ -8,9 +8,9 @@ const kOffering = "offering-1";
 const kGroup = "3";
 const kLabel = "default";
 const kPointerPath =
-  `authed/test-portal/classes/${thisClass}/offerings/${kOffering}/groups/${kGroup}/canonical/${kLabel}`;
+  `authed/test-portal/canonical/v1/classes/${thisClass}/offerings/${kOffering}/groups/${kGroup}/slots/${kLabel}`;
 const kOtherClassPointerPath =
-  `authed/test-portal/classes/other-class/offerings/${kOffering}/groups/${kGroup}/canonical/${kLabel}`;
+  `authed/test-portal/canonical/v1/classes/other-class/offerings/${kOffering}/groups/${kGroup}/slots/${kLabel}`;
 const validPointer = () => ({ documentKey: "doc-abc", createdAt: firebase.firestore.Timestamp.now(), createdBy: `group_${kOffering}_${kGroup}` });
 
 let db: firebase.firestore.Firestore;
@@ -130,9 +130,9 @@ describe("canonical flag integrity", () => {
 const kUnit = "msu";
 const kClassWideLabel = "driving-question-board";
 const kClassWidePointerPath =
-  `authed/test-portal/classes/${thisClass}/units/${kUnit}/canonical/${kClassWideLabel}`;
+  `authed/test-portal/canonical/v1/classes/${thisClass}/units/${kUnit}/slots/${kClassWideLabel}`;
 const kOtherClassWidePointerPath =
-  `authed/test-portal/classes/other-class/units/${kUnit}/canonical/${kClassWideLabel}`;
+  `authed/test-portal/canonical/v1/classes/other-class/units/${kUnit}/slots/${kClassWideLabel}`;
 
 describe("class+unit canonical pointers", () => {
   it("a student in the class may create a class+unit pointer with the required keys", async () => {
