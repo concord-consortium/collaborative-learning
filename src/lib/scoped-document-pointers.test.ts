@@ -1,15 +1,16 @@
-import { getGroupCanonicalPointerPath } from "./scoped-document-pointers";
+import { getCanonicalPointerPath } from "./scoped-document-pointers";
 
-describe("getGroupCanonicalPointerPath", () => {
-  it("builds the nested canonical path from bare scope ids and a slot label", () => {
-    expect(getGroupCanonicalPointerPath("class-h", "off-2", "3", "default"))
-      .toBe("classes/class-h/offerings/off-2/groups/3/canonical/default");
+describe("getCanonicalPointerPath", () => {
+  it("group scope (class + offering + group) — offering wins, unit omitted even when present", () => {
+    // Real group metadata carries both offeringId and unit; the offering pins the unit, so no units segment.
+    expect(getCanonicalPointerPath(
+      { classHash: "class-1", offeringId: "off-1", groupId: "3", unit: "msu" }, "default"
+    )).toBe("canonical/v1/classes/class-1/offerings/off-1/groups/3/slots/default");
   });
 
-  it("produces a valid Firestore document path (even segment count)", () => {
-    // Firestore doc paths must have an even number of segments; an odd count is a collection path
-    // and would fail at runtime when we call firestore.doc(pointerPath).
-    const path = getGroupCanonicalPointerPath("c", "o", "g", "default");
-    expect(path.split("/").length % 2).toBe(0);
+  it("class+unit scope (no offering) — uses the units segment; label === kind", () => {
+    expect(getCanonicalPointerPath(
+      { classHash: "class-1", unit: "msu" }, "driving-question-board"
+    )).toBe("canonical/v1/classes/class-1/units/msu/slots/driving-question-board");
   });
 });

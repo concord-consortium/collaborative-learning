@@ -3,12 +3,15 @@ import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../mo
 import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
+import { registerDocumentKind } from "../models/document/document-kinds";
 import {
   GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
+import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
+import { UnitModel } from "../models/curriculum/unit";
 import { TextContentModelType } from "../models/tiles/text/text-content";
 import { ITileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
@@ -418,6 +421,89 @@ describe("db", () => {
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
   });
 
+  describe("class-wide document creation", () => {
+    it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent", async () => {
+      // The explicit kind must be registered so getDocumentKindMetadataFields returns its axis fields.
+      registerDocumentKind({ kind: "driving-question-board", metadataFields: { concurrent: true } });
+      const setPayloads: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({
+          get: () => Promise.resolve({ exists: false }),
+          set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+        })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const metadata: any = {
+        version: "1.0", type: GroupDocument, createdAt: 1,
+        self: { uid: "class_msu", classHash: "class-1", documentKey: "dqb-1" },
+        title: "Driving Question Board", unit: "msu"
+      };
+      const written: any = await db.createFirestoreMetadataDocument(
+        metadata, "dqb-1", undefined, { kind: "driving-question-board", unit: "msu" }
+      );
+      expect(written).toMatchObject({
+        type: "group", context_id: "class-1", unit: "msu",
+        kind: "driving-question-board", concurrent: true, uid: "class_msu"
+      });
+      expect(written.offeringId).toBeUndefined();
+      expect(written.groupId).toBeUndefined();
+      expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
+      expect(setPayloads[0]).toMatchObject({
+        type: "group", context_id: "class-1", unit: "msu",
+        kind: "driving-question-board", concurrent: true, uid: "class_msu"
+      });
+    });
+  });
+
+  describe("getOrCreateClassWideDocument", () => {
+    const openStub = jest.fn(async (m: any) => ({ opened: m.key }));
+    beforeEach(() => {
+      // The class+unit pointer scope needs stores.unit.code === "msu"; there is no unit-code setter
+      // (UnitModel has no such action), so rebuild stores with a unit fixture carrying that code.
+      stores = specStores({
+        appMode: "test",
+        documents: DocumentsModel.create(),
+        user: UserModel.create({ id: "1", portal: "example.com" }),
+        unit: UnitModel.create({ code: "msu", title: "Unit" })
+      });
+      (db as any).openDocumentFromFirestoreMetadata = openStub;
+      (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
+    });
+
+    it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: (p: string) => ({
+          get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) })
+        })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
+      expect(result.opened).toBe("existing");
+    });
+
+    it("create path: mints a class-wide doc and claims the class+unit pointer", async () => {
+      const setCalls: any[] = [];
+      const updateCalls: any[] = [];
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "dqb-key" } }));
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }),
+             set: (_r: any, d: any) => setCalls.push(d),
+             update: (_r: any, d: any) => updateCalls.push(d) }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
+        type: GroupDocument,
+        classWide: expect.objectContaining({ kind: "driving-question-board", unit: "msu", syntheticUid: "class_msu" })
+      }));
+      expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
+      expect(result.opened).toBeDefined();
+    });
+  });
+
   describe("document visibility with defaultSharedDocuments", () => {
     // Synchronous thenable that executes callbacks immediately, avoiding async
     // timing issues in the mock chain. Unwraps nested thenables like real Promises.
@@ -649,6 +735,34 @@ describe("db", () => {
       const doc = await db.openDocument({ documentKey: "p1", type: "personal", userId: "u", firestoreMetadata } as any);
       expect(doc.concurrent).toBeFalsy();
       expect(setCalls.length).toBe(0);
+    });
+  });
+
+  describe("createDeclaredClassWideDocuments", () => {
+    it("creates one document per declared slot", async () => {
+      const created: any[] = [];
+      (db as any).getOrCreateClassWideDocument = jest.fn(async (slot: any) => { created.push(slot); });
+      stores.appConfig = specAppConfig({
+        config: { classWideDocuments: [
+          { kind: "driving-question-board", title: "DQB" },
+          { kind: "word-wall", title: "Word Wall" }
+        ] } as any
+      });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).createDeclaredClassWideDocuments();
+      // allow the fire-and-forget promises to settle
+      await new Promise(r => setTimeout(r, 0));
+      expect((db as any).getOrCreateClassWideDocument).toHaveBeenCalledTimes(2);
+      expect(created.map((s: any) => s.kind)).toEqual(["driving-question-board", "word-wall"]);
+    });
+
+    it("does nothing when no slots are declared", async () => {
+      (db as any).getOrCreateClassWideDocument = jest.fn(async () => undefined);
+      stores.appConfig = specAppConfig();   // no classWideDocuments
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).createDeclaredClassWideDocuments();
+      await new Promise(r => setTimeout(r, 0));
+      expect((db as any).getOrCreateClassWideDocument).not.toHaveBeenCalled();
     });
   });
 

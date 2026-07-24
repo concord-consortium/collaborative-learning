@@ -26,21 +26,23 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 
 | Axis / component | Mechanism (target) | Status | Delivered by |
 |---|---|---|---|
-| `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524 |
+| `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524; class+unit pointer scope added CLUE-550 Stage 2 |
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
-| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3) |
+| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3); class-wide slot kinds registered CLUE-550 Stage 2 |
 | `owner` (authoring identity / provenance) | getter over existing `uid` | not started | — |
 | `scope` (org + curriculum association refs) | getter derived from existing `context`/`offeringId`/`groupId`/`problem`/`unit` | not started | — |
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
 | kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
 | behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis) |
-| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | not started | — |
+| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation) |
 
 Status values: `not started` / `in progress` / `done`.
 
 ## Current effort
 
-CLUE-550 ("class-wide collaborative documents") is the first concrete slice of this roadmap. It introduces the
-`concurrent` and `kind` stored axes plus a kind registry, then rebases group-document behavior (concurrent
+CLUE-550 ("class-wide collaborative documents") is the first concrete slice of this roadmap. Stage 1 introduced the
+`concurrent` and `kind` stored axes plus a kind registry, then rebased group-document behavior (concurrent
 history, non-owner write-sync, class-wide read access, the rules delete clause) from `type === "group"` onto
-the stored `concurrent`. Those pieces flip the `concurrent`, `kind`, and kind-registry rows above as they land.
+the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
+canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
+get-or-create convergence guaranteeing exactly one document per slot per class.
