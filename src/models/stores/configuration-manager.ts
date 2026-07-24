@@ -243,6 +243,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultPanelLayout"]>("defaultPanelLayout");
   }
 
+  get contentLayout() {
+    return this.getProp<UC["contentLayout"]>("contentLayout");
+  }
+
   get defaultSharedDocuments() {
     return this.getProp<UC["defaultSharedDocuments"]>("defaultSharedDocuments");
   }

@@ -110,6 +110,7 @@ export const AppConfigModel = types
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
     get termOverrides() { return self.configMgr.termOverrides; },
     get defaultPanelLayout() { return self.configMgr.defaultPanelLayout; },
+    get contentLayout() { return self.configMgr.contentLayout; },
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
     get authorToolbar() {
       return ToolbarModel.create([
