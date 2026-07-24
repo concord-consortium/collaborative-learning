@@ -2,7 +2,7 @@ import { kDividerHalf } from "../../models/stores/ui-types";
 
 export interface IWideContentLayoutState {
   /** appConfig.contentLayout — "wideContent" opts into the narrow-resources behavior. */
-  contentLayout: "50-50" | "wideContent" | undefined;
+  contentLayout: "evenLayout" | "wideContent" | undefined;
   showLeftPanel: boolean;
   showRightPanel: boolean;
   /** persistentUI.dividerPosition (kDividerMin/Half/Max). */

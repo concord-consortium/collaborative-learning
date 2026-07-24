@@ -23,7 +23,8 @@
   // its comments-open content width (~1/3 — the nav tabs get 64% of the 50% panel once the 36%-wide chat
   // opens) so the workspace gets ~2/3. The class is removed when comments open, restoring the 50/50 split;
   // the panel's existing 0.5s transition animates the change. #resources-panel overrides its flex: 1.
-  &.wide-content-narrow #resources-panel:not(.collapsed) {
+  // (shouldNarrowResources already excludes collapsed states, so no :not(.collapsed) guard is needed.)
+  &.wide-content-narrow #resources-panel {
     flex: 0 0 32%;
   }
 }

@@ -35,8 +35,8 @@ export interface ProblemConfiguration {
   // default panel layout when user first visits a problem
   // "split" (default) shows both panels; "workspace-only" collapses resources; "resources-only" collapses workspace
   defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
-  // how the resources and workspace panes divide the split view. "50-50" (default) splits evenly.
+  // how the resources and workspace panes divide the split view. "evenLayout" (default) splits evenly.
   // "wideContent" narrows the resources pane to its comments-open width (~1/3) when both panes are shown
   // and comments are closed, giving the workspace ~2/3; opening comments expands it back to the even split.
-  contentLayout?: "50-50" | "wideContent";
+  contentLayout?: "evenLayout" | "wideContent";
 }

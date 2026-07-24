@@ -67,7 +67,7 @@ const NavTabs: React.FC = () => {
     return unitConfig?.config?.defaultPanelLayout ?? "split";
   }, [unitConfig]);
   const currentContentLayout = useMemo(() => {
-    return unitConfig?.config?.contentLayout ?? "50-50";
+    return unitConfig?.config?.contentLayout ?? "evenLayout";
   }, [unitConfig]);
   const { handleSubmit, register, formState: { errors } } = useForm<INavTabsInputs>();
 
@@ -80,8 +80,8 @@ const NavTabs: React.FC = () => {
         } else {
           delete draft.config.defaultPanelLayout;
         }
-        // Save content layout (omit if "50-50" since that's the default)
-        if (data.contentLayout && data.contentLayout !== "50-50") {
+        // Save content layout (omit if "evenLayout" since that's the default)
+        if (data.contentLayout && data.contentLayout !== "evenLayout") {
           draft.config.contentLayout = data.contentLayout;
         } else {
           delete draft.config.contentLayout;
@@ -134,7 +134,7 @@ const NavTabs: React.FC = () => {
           {...register("contentLayout")}
           defaultValue={currentContentLayout}
         >
-          <option value="50-50">50 / 50 (even split)</option>
+          <option value="evenLayout">Even split (50 / 50)</option>
           <option value="wideContent">Wide content (narrow resources)</option>
         </select>
       </fieldset>

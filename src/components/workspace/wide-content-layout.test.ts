@@ -15,8 +15,8 @@ describe("shouldNarrowResources", () => {
     expect(shouldNarrowResources(narrowState)).toBe(true);
   });
 
-  it("does not narrow in the default 50-50 layout", () => {
-    expect(shouldNarrowResources({ ...narrowState, contentLayout: "50-50" })).toBe(false);
+  it("does not narrow in the default even layout", () => {
+    expect(shouldNarrowResources({ ...narrowState, contentLayout: "evenLayout" })).toBe(false);
     expect(shouldNarrowResources({ ...narrowState, contentLayout: undefined })).toBe(false);
   });
 
