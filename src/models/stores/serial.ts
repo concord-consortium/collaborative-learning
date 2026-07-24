@@ -47,14 +47,13 @@ export class SerialDevice {
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;
-  // Spiker:bit (WebUSB) transport hooks. Removed in Task 5 once the WebUSB path
-  // uses activeTransport; see the design spec §10.
-  spikerbitWrite: ((line: string) => void) | undefined;
-  private spikerbitConnected: boolean;
+  // True while a store-tracked (WebUSB) transport is connected. The Web Serial
+  // path tracks its own connectedness through the port (hasWebSerialPort).
+  private transportConnected: boolean;
 
   constructor() {
     this.localBuffer = "";
-    this.spikerbitConnected = false;
+    this.transportConnected = false;
 
     navigator.serial?.addEventListener("connect", (e) => {
       this.updateConnectionInfo(e.timeStamp, e.type);
@@ -270,28 +269,26 @@ export class SerialDevice {
   }
 
   public isConnected(){
-    return this.hasWebSerialPort() || this.spikerbitConnected;
+    return this.hasWebSerialPort() || this.transportConnected;
   }
 
-  public setSpikerbitActive(write: (line: string) => void){
-    this.spikerbitWrite = write;
-    this.spikerbitConnected = true;
-    this.deviceFamily = "arduino";
+  // Called by a non-Web-Serial device (Spiker:bit/WebUSB) to make its transport
+  // the active write path and mark the shared store connected.
+  public setActiveDevice(deviceFamily: string, transport: IDeviceTransport){
+    this.activeTransport = transport;
+    this.transportConnected = true;
+    this.deviceFamily = deviceFamily;
     this.updateConnectionInfo(Date.now(), "connect");
   }
 
-  public clearSpikerbit(){
-    this.spikerbitWrite = undefined;
-    this.spikerbitConnected = false;
+  public clearActiveDevice(){
+    this.activeTransport = undefined;
+    this.transportConnected = false;
     this.deviceFamily = undefined;
     this.updateConnectionInfo(Date.now(), "disconnect");
   }
 
   public writeLine(line: string){
-    if (this.spikerbitWrite){
-      this.spikerbitWrite(line);
-      return;
-    }
     if (this.activeTransport){
       this.activeTransport.write(line);
     } else {
