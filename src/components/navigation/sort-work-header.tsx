@@ -19,7 +19,7 @@ interface ISortHeaderProps{
 
 export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWorkView(props){
   const { docFilterItems, primarySortItems, secondarySortItems, showContextFilter = true } = props;
-  const { width, ref } = useResizeDetector();
+  const { width, ref } = useResizeDetector<HTMLDivElement>();
   // Show the secondary sort until we've measured a width that's too narrow to fit all fields.
   const showSecondarySort = width == null || width >= kMinWidthForSecondarySort;
   return (
