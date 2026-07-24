@@ -178,10 +178,49 @@ are exactly the ones the boundary pushes out.
 2. `DocumentModel` today mixes generic metadata (`title`, `key`), org-specific fields (`groupId`, `problem`),
    and behavior (`isProblem`). The cleanup keeps metadata + axis getters and evicts behavior.
 
+## Typed document shapes — requirement types + guards, not kind-discriminated shapes
+
+The persisted metadata types — `DBDocumentMetadata` in `src/lib/db-types.ts`, and the parallel
+`isProblem`/`isGroup` type-view methods on `DocumentModel` — are today a **discriminated union keyed on
+`type`**: a consumer narrows on `type === "problem"` to reach the fields that co-occur with it (`offeringId`,
+`problem`, `unit`). That is the same "branch on kind" pattern this refactor removes, expressed in the type
+system rather than in control flow. When `type` becomes just the `kind` tag (read only in the registry and
+factory), the discriminant is gone and these per-kind interfaces have nothing to switch on.
+
+**Target — declare what a consumer needs, then guard for it.** The kind-discriminated interfaces dissolve.
+Stored metadata is one generic base (`DBBaseDocumentMetadata`) carrying the axis fields (`owner`/`uid`, the
+`scope` association fields, `canonical`, `concurrent`, `kind`), with the org-specific ones optional. Code that
+needs particular fields does **not** ask "is this kind X"; it declares a **structural requirement type** for
+the fields it uses and narrows with a **type guard** — the type-system form of "read an axis, not the kind":
+
+- a requirement type names the fields a consumer needs, e.g.
+  `type OfferingScoped = DBBaseDocumentMetadata & { offeringId: string; unit: string }`;
+- a guard verifies a document satisfies it, e.g. `hasOfferingScope(doc): doc is OfferingScoped`, testing the
+  *scope fields*, never `type`;
+- consumers accept the requirement type and call the guard, so a function that needs an offering works for
+  **any** document in an offering scope, whatever its kind.
+
+These guards are the typed siblings of the axis getters / registry `fn(doc)`: a guard like `hasOfferingScope`
+is `doc.scope`-shaped and lives with the axis layer, not scattered per feature. `.type`/`.kind` still appear
+only in the registry and factory (the core rule); a guard that tests `offeringId` is an axis-field check, not
+a kind check, so it is allowed everywhere.
+
+**Already visible in the code.** `DBGroupDocMetadata` and `DBClassWideDocMetadata` are **both** `type: "group"`
+yet have different shapes (group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). So `type`
+already fails to discriminate shape — a guard on the scope fields is the only sound way to tell them apart even
+now. This transitional shared `type: "group"` is the first concrete case motivating the guard approach ahead of
+`type` removal.
+
+**Deferred:** the concrete requirement-type set and guard inventory land with the field-shape work already
+deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This section fixes the *approach*
+(requirement types + guards), not the exact types.
+
 ## Enforcement
 
 - A lint rule / CI grep: `.type` / `.kind` reads are allowed **only** in the registry and factory modules.
 - Behavior and rules code reference axis getters or `fn(doc)` calls exclusively.
+- Consumers narrow document shapes with field/axis **type guards** (e.g. `hasOfferingScope`), never by `type`;
+  a guard tests axis fields, so it is not a `.type`/`.kind` read.
 - New security rules read stored axes (`canonical`, `owner`, `permissions`, `concurrent`) directly.
 
 ## Non-goals / out of scope (deferred)
