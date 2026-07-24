@@ -15,7 +15,7 @@ function log(message: string) {
 // It reads the current writer through a getter so SerialDevice's reopen logic
 // (which recreates the writer) needs no coordination, and guards on the port
 // being open so a closed-port write is a no-op, matching prior behavior.
-class WebSerialTransport implements IDeviceTransport {
+export class WebSerialTransport implements IDeviceTransport {
   constructor(
     private getWriter: () => WritableStreamDefaultWriter | undefined,
     private isOpen: () => boolean,
@@ -60,6 +60,9 @@ export class SerialDevice {
     });
 
     navigator.serial?.addEventListener("disconnect", (e) => {
+      // A WebUSB (Spiker:bit) session owns the connection via transportConnected and
+      // has no Web Serial port, so an unrelated Web Serial disconnect must not tear it down.
+      if (this.transportConnected) return;
       this.updateConnectionInfo(e.timeStamp, e.type);
       this.deviceFamily = undefined;
       this.activeTransport = undefined;
