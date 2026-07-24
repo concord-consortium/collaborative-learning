@@ -17,6 +17,9 @@ export interface ProblemSectionFormItem {
 export interface IProblemFormInputs {
   title: string;
   sections: ProblemSectionFormItem[];
+  // Template enable flags persist with the form (on Save), like the unit-scope Document Settings form.
+  documentTemplateEnabled: boolean;
+  planningTemplateEnabled: boolean;
 }
 
 export interface IUnitParentFormInputs {

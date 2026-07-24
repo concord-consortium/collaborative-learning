@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./left-nav.scss";
 import { useCurriculum } from "../hooks/use-curriculum";
 import { useAuth } from "../hooks/use-auth";
-import { getUnitChildrenTree } from "../utils/nav-path";
+import { getUnitChildrenTree, hasDocumentTemplate, hasPlanningTemplate } from "../utils/nav-path";
 
 // Tree node type
 export interface TreeNode {
@@ -79,6 +79,16 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
         }
       ]
     };
+
+    // Show a template editor page when its template is enabled or already has content (so legacy
+    // hand-authored templates remain editable even when the enable flag was never set).
+    const uc = unitConfig?.config;
+    if (hasDocumentTemplate(uc)) {
+      result.children[0].children!.push({ id: "documentTemplate", label: "Document Template" });
+    }
+    if (hasPlanningTemplate(uc)) {
+      result.children[0].children!.push({ id: "planningTemplate", label: "Planning Template" });
+    }
 
     if (teacherGuideConfig) {
       result.children.push({
