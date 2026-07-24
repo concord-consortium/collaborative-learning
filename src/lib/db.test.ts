@@ -357,7 +357,7 @@ describe("db", () => {
       version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
-    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument, "3");
     expect(written).toMatchObject({
       context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3"
     });
@@ -378,7 +378,7 @@ describe("db", () => {
       version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
-    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument, "3");
     expect(written).toMatchObject({ kind: "group", concurrent: true });
     expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
   });
@@ -396,7 +396,7 @@ describe("db", () => {
       version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
       self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
     };
-    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk", PersonalDocument);
     expect(written).not.toHaveProperty("kind");
     expect(written).not.toHaveProperty("concurrent");
   });
@@ -416,7 +416,7 @@ describe("db", () => {
       version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
       self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
     };
-    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk", PersonalDocument);
     expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
   });
@@ -439,7 +439,7 @@ describe("db", () => {
         title: "Driving Question Board", unit: "msu"
       };
       const written: any = await db.createFirestoreMetadataDocument(
-        metadata, "dqb-1", undefined, { kind: "driving-question-board", unit: "msu" }
+        metadata, "dqb-1", "driving-question-board", undefined, "msu"
       );
       expect(written).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
@@ -497,7 +497,8 @@ describe("db", () => {
       const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
-        classWide: expect.objectContaining({ kind: "driving-question-board", unit: "msu", syntheticUid: "class_msu" })
+        kind: "driving-question-board",
+        classWide: expect.objectContaining({ unit: "msu", syntheticUid: "class_msu" })
       }));
       expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
       expect(result.opened).toBeDefined();

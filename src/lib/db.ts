@@ -104,8 +104,6 @@ export interface OpenDocumentOptions {
 }
 
 interface IClassWideCreateInfo {
-  // Registry key + canonical-pointer label for the slot (e.g. "driving-question-board").
-  kind: string;
   // Unit code — class+unit scope. Stamped onto the metadata; also part of the synthetic owner uid.
   unit: string;
   // Class-scoped synthetic RTDB owner uid, e.g. `class_<unitCode>`. Shared by all class-wide slots of the unit.
@@ -566,8 +564,7 @@ export class DB {
   }
 
   async createFirestoreMetadataDocument(
-    metadata: DBDocumentMetadata, documentKey: string, groupId?: string,
-    classWide?: { kind: string; unit: string }
+    metadata: DBDocumentMetadata, documentKey: string, kind: string, groupId?: string, unit?: string
   ) {
     const userContext = this.stores.userContextProvider.userContext;
 
@@ -587,9 +584,9 @@ export class DB {
     const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
 
     let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-    if (classWide) {
+    if (unit != null) {
       // Class+unit scope: stamp the unit but no investigation/problem (no offering).
-      problemInfo = { unit: classWide.unit };
+      problemInfo = { unit };
     } else if ("offeringId" in metadata && metadata.offeringId != null) {
       problemInfo = this.currentProblemInfo;
     }
@@ -603,11 +600,8 @@ export class DB {
       groupInfo.groupId = groupId;
     }
 
-    // Stamp the kind's axis fields (kind + concurrent today) from the registry. A class-wide slot passes its
-    // kind explicitly — its `kind` differs from the transitional `type: "group"`; every other document sources
-    // the kind from its type (valid while each kind's key equals its type). getDocumentKindMetadataFields returns
-    // {} for an unregistered kind, so `set` never receives `undefined`.
-    const kindFields = getDocumentKindMetadataFields(classWide?.kind ?? metadata.type);
+    // Stamp the kind's axis fields.
+    const kindFields = getDocumentKindMetadataFields(kind);
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
@@ -639,9 +633,11 @@ export class DB {
   }
 
   public async createDocument(
-    params: { type: DBDocumentType, content?: string, title?: string, classWide?: IClassWideCreateInfo }
+    params: { type: DBDocumentType, kind?: string, content?: string, title?: string, classWide?: IClassWideCreateInfo }
   ) {
-    const { type, content, title, classWide } = params;
+    // `kind` is an explicit creation input; it defaults to `type` because every document except class-wide
+    // slots has a kind equal to its type. It is stamped as the `kind` axis by createFirestoreMetadataDocument.
+    const { type, kind = type, content, title, classWide } = params;
     const { user } = this.stores;
 
     return new Promise<{
@@ -719,8 +715,7 @@ export class DB {
           // This approach of reading the value that was written in the metadata
           // causes the createdAt timestamp to be populated with a value
           return this.createFirestoreMetadataDocument(
-            metadataValue.val(), documentKey, groupId,
-            classWide ? { kind: classWide.kind, unit: classWide.unit } : undefined
+            metadataValue.val(), documentKey, kind, groupId, classWide?.unit
           );
         })
         .then((firestoreMetadata) => {
@@ -752,7 +747,8 @@ export class DB {
     const pointerPath = getCanonicalPointerPath(
       { classHash: user.classHash, offeringId: user.offeringId, groupId }, kDefaultCanonicalDocumentLabel
     );
-    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
+    // Regular group documents: the transitional `type` and `kind` coincide (both GroupDocument).
+    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, GroupDocument, {
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       groupUserId: user.userIdForGroupDocuments,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
@@ -774,10 +770,11 @@ export class DB {
     const label = slot.kind;
     const syntheticUid = this.userIdForClassWideDocuments;
     const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
-    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
+    // Class-wide slot: the document's transitional `type` stays GroupDocument while its `kind` is the slot kind.
+    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, slot.kind, {
       canonicalLabel: label,
       groupUserId: syntheticUid,   // synthetic owner: createdBy attribution + orphan-cleanup RTDB path
-      classWide: { kind: slot.kind, unit: unit.code, syntheticUid, title: slot.title }
+      classWide: { unit: unit.code, syntheticUid, title: slot.title }
     });
   }
 
@@ -797,6 +794,7 @@ export class DB {
   private async getOrCreateCanonicalDocument(
     pointerPath: string,
     type: DBDocumentType,
+    kind: string,
     opts: IGetOrCreateCanonicalDocumentOpts
   ) {
     const { canonicalLabel, groupUserId, findLegacy } = opts;
@@ -834,9 +832,9 @@ export class DB {
     const { user } = this.stores;
     const { firestoreMetadata } = await this.createDocument(
       opts.classWide
-        ? { type, title: opts.classWide.title, classWide: {
-            kind: opts.classWide.kind, unit: opts.classWide.unit, syntheticUid: opts.classWide.syntheticUid } }
-        : { type }
+        ? { type, kind, title: opts.classWide.title,
+            classWide: { unit: opts.classWide.unit, syntheticUid: opts.classWide.syntheticUid } }
+        : { type, kind }
     );
     const documentKey = firestoreMetadata.key;
 
