@@ -42,6 +42,7 @@ import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
 import HoldZeroArrowIcon from "../../assets/icons/control/hold-zero.svg";
 
 import { isFiniteNumber } from "../../../../utilities/math-utils";
+import { deviceSupportsOutput, OutputCategory } from "./device-capabilities";
 
 export const kMaxNodeValues = 16;
 
@@ -500,6 +501,37 @@ export const baseLiveOutputOptions = {
     name: "⚠️ connect device",
   }
 };
+
+export type OutputGateState = "live" | "unsupported" | "no-device";
+
+// Given whether a device is connected and which one, decide how a live-output
+// option should present: it drives the device, the connected device can't drive
+// it, or no device is connected. See design spec §3.4.
+export function outputGateState(
+  connected: boolean, deviceFamily: string | undefined, category: OutputCategory
+): OutputGateState {
+  if (connected && deviceSupportsOutput(deviceFamily, category)) return "live";
+  if (connected) return "unsupported";
+  return "no-device";
+}
+
+// A hubSelect option shown when a device IS connected but does not support the
+// selected output category. `name` matches the live/no-device variants so the
+// hubSelect value stays stable; `displayName` carries the warning.
+export function unsupportedOutputOption(category: OutputCategory, deviceDisplayName?: string) {
+  const nameByCategory: Record<OutputCategory, string> = {
+    gripper: "Physical Gripper",
+    servo: "Physical Servo",
+    relay: "⚠️ connect device",
+  };
+  const label = deviceDisplayName ?? "This device";
+  return {
+    active: true,
+    id: `unsupported-${category}`,
+    name: nameByCategory[category],
+    displayName: `⚠️ ${label} doesn't support this output`,
+  };
+}
 
 export const NodePeriodUnits = [
   {

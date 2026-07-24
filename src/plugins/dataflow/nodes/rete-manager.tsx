@@ -19,6 +19,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
 import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
+import { channelSatisfiedBy } from "../model/utilities/device-capabilities";
 import { ControlNode } from "./control-node";
 import { CounterNode } from "./counter-node";
 import { DemoOutputNode } from "./demo-output-node";
@@ -1048,7 +1049,7 @@ export class ReteManager implements INodeServices {
       const { serialDevice } = this.stores;
       if (serialDevice.isConnected()){
         channel.serialConnected = true;
-        const deviceMismatch = serialDevice.deviceFamily !== channel.deviceFamily;
+        const deviceMismatch = !channelSatisfiedBy(serialDevice.deviceFamily, channel);
         const timeSinceActive = channel.usesSerial && channel.lastMessageReceivedAt
           ? Date.now() - channel.lastMessageReceivedAt: 0;
         channel.missing = deviceMismatch || timeSinceActive > 7000;

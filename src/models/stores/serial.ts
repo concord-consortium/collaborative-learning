@@ -1,6 +1,7 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 import { parseArduinoSerialData } from "./serial-protocol";
+import { IDeviceTransport } from "./device-transport";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -8,6 +9,30 @@ const textDecoder = new TextDecoder();
 function log(message: string) {
   // eslint-disable-next-line no-console
   console.log(`[SerialDevice] ${message}`);
+}
+
+// Wraps the Web Serial writer/port for the shared IDeviceTransport write path.
+// It reads the current writer through a getter so SerialDevice's reopen logic
+// (which recreates the writer) needs no coordination, and guards on the port
+// being open so a closed-port write is a no-op, matching prior behavior.
+export class WebSerialTransport implements IDeviceTransport {
+  constructor(
+    private getWriter: () => WritableStreamDefaultWriter | undefined,
+    private isOpen: () => boolean,
+    private closeFn: () => Promise<void>
+  ) {}
+
+  write(line: string) {
+    if (this.isOpen()) {
+      this.getWriter()?.write(textEncoder.encode(`${line}\n`));
+    } else {
+      log("Port closed, skipping write");
+    }
+  }
+
+  close() {
+    return this.closeFn();
+  }
 }
 
 export class SerialDevice {
@@ -20,23 +45,27 @@ export class SerialDevice {
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
   deviceFamily: string | undefined;
-  // Spiker:bit (WebUSB) transport hooks. When spikerbitWrite is set, writeLine
-  // routes to it instead of the Web Serial writer. This single-store reuse is a
-  // deliberate MVP shortcut; see docs/superpowers/specs/2026-07-17-spikerbit-emg-dataflow-design.md §10.
-  spikerbitWrite: ((line: string) => void) | undefined;
-  private spikerbitConnected: boolean;
+  // The active write transport (Web Serial or WebUSB). writeLine routes here.
+  activeTransport: IDeviceTransport | undefined;
+  // True while a store-tracked (WebUSB) transport is connected. The Web Serial
+  // path tracks its own connectedness through the port (hasWebSerialPort).
+  private transportConnected: boolean;
 
   constructor() {
     this.localBuffer = "";
-    this.spikerbitConnected = false;
+    this.transportConnected = false;
 
     navigator.serial?.addEventListener("connect", (e) => {
       this.updateConnectionInfo(e.timeStamp, e.type);
     });
 
     navigator.serial?.addEventListener("disconnect", (e) => {
+      // A WebUSB (Spiker:bit) session owns the connection via transportConnected and
+      // has no Web Serial port, so an unrelated Web Serial disconnect must not tear it down.
+      if (this.transportConnected) return;
       this.updateConnectionInfo(e.timeStamp, e.type);
       this.deviceFamily = undefined;
+      this.activeTransport = undefined;
     });
   }
 
@@ -151,6 +180,11 @@ export class SerialDevice {
       return;
     }
     this.writer = this.port.writable.getWriter();
+    this.activeTransport = new WebSerialTransport(
+      () => this.writer,
+      () => !!this.hasWebSerialPort(),
+      () => this.closePort()
+    );
 
     // listen for serial data coming in to computer
     while (this.port) {
@@ -238,30 +272,28 @@ export class SerialDevice {
   }
 
   public isConnected(){
-    return this.hasWebSerialPort() || this.spikerbitConnected;
+    return this.hasWebSerialPort() || this.transportConnected;
   }
 
-  public setSpikerbitActive(write: (line: string) => void){
-    this.spikerbitWrite = write;
-    this.spikerbitConnected = true;
-    this.deviceFamily = "arduino";
+  // Called by a non-Web-Serial device (Spiker:bit/WebUSB) to make its transport
+  // the active write path and mark the shared store connected.
+  public setActiveDevice(deviceFamily: string, transport: IDeviceTransport){
+    this.activeTransport = transport;
+    this.transportConnected = true;
+    this.deviceFamily = deviceFamily;
     this.updateConnectionInfo(Date.now(), "connect");
   }
 
-  public clearSpikerbit(){
-    this.spikerbitWrite = undefined;
-    this.spikerbitConnected = false;
+  public clearActiveDevice(){
+    this.activeTransport = undefined;
+    this.transportConnected = false;
     this.deviceFamily = undefined;
     this.updateConnectionInfo(Date.now(), "disconnect");
   }
 
   public writeLine(line: string){
-    if (this.spikerbitWrite){
-      this.spikerbitWrite(line);
-      return;
-    }
-    if (this.hasWebSerialPort()){
-      this.writer.write(textEncoder.encode(`${line}\n`));
+    if (this.activeTransport){
+      this.activeTransport.write(line);
     } else {
       log("Port closed, skipping write");
     }
