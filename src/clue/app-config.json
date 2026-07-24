@@ -342,8 +342,16 @@
           "timeline"
         ],
         "stations": [
-          { "network": "AK", "station": "RC01", "channel": "BHZ", "label": "Rabbit Creek, AK" },
-          { "network": "AK", "station": "FIRE", "channel": "BHZ", "label": "Fire Island, AK" }
+          { "network": "AK", "station": "K213", "channel": "HNZ", "label": "South Anchorage" },
+          { "network": "AK", "station": "K220", "channel": "HNZ", "label": "Kincaid Park" },
+          { "network": "AK", "station": "K223", "channel": "HNZ", "label": "Government Hill Elementary" },
+          { "network": "AK", "station": "K210", "channel": "HNZ", "label": "Mears Junior High" },
+          { "network": "AK", "station": "K204", "channel": "HNZ", "label": "Anchorage Airport" },
+          { "network": "AK", "station": "K212", "channel": "HNZ", "label": "Far North Park" },
+          { "network": "AK", "station": "K216", "location": "DH", "channel": "HNZ", "label": "Southeast Anchorage" },
+          { "network": "AT", "station": "DORN", "channel": "BHZ", "label": "Barry Arm" },
+          { "network": "AK", "station": "FIRE", "channel": "BHZ", "label": "Fire Island" },
+          { "network": "AT", "station": "PMR", "channel": "BHZ", "label": "Palmer, AK" }
         ],
         "defaultStation": null,
         "models": [
