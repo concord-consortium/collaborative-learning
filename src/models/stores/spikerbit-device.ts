@@ -79,8 +79,7 @@ export class SpikerbitDevice {
     }
 
     // Route servo writes through this WebUSB connection and mark the shared store connected.
-    // Spiker:bit is identified as "arduino" here; Task 6 flips it to "spikerbit".
-    this.serialDevice.setActiveDevice("arduino", new MicrobitUsbTransport(this.connection));
+    this.serialDevice.setActiveDevice("spikerbit", new MicrobitUsbTransport(this.connection));
   }
 
   private handleSerialData = ({ data }: { data: string }) => {
