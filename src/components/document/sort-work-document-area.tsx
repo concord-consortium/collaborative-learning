@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
-import { isExemplarType } from "../../models/document/document-types";
+import { GroupDocument, isExemplarType } from "../../models/document/document-types";
 import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
@@ -62,7 +62,12 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     document: openDocument, documentMetadata: openDocumentMetadata, user, documents
   });
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
-  const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
+  // Show the Edit button for any document the current user can edit: their own documents or their own
+  // group's document (a group doc created by any member of the user's group). Clicking Edit opens the
+  // document in the main workspace for editing.
+  const isOwnGroupDoc = openDocument?.type === GroupDocument
+    && !!user.currentGroupId && openDocument.groupId === user.currentGroupId;
+  const showEdit = openDocument?.uid === user.id || isOwnGroupDoc;
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
 
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
