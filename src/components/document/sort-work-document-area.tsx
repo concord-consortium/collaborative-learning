@@ -65,9 +65,14 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   // Show the Edit button for any document the current user can edit: their own documents or their own
   // group's document (a group doc created by any member of the user's group). Clicking Edit opens the
   // document in the main workspace for editing.
-  const isOwnGroupDoc = openDocument?.type === GroupDocument
-    && !!user.currentGroupId && openDocument.groupId === user.currentGroupId;
-  const showEdit = openDocument?.uid === user.id || isOwnGroupDoc;
+  // Prefer the reactive metadata (kept in sync by Firestore listeners) over the lazily-fetched full
+  // document, so the button appears as soon as a groupmate's document syncs — without needing a reload.
+  const docUid = openDocumentMetadata?.uid ?? openDocument?.uid;
+  const docType = openDocumentMetadata?.type ?? openDocument?.type;
+  const docGroupId = openDocumentMetadata?.groupId ?? openDocument?.groupId;
+  const isOwnGroupDoc = docType === GroupDocument
+    && !!user.currentGroupId && docGroupId === user.currentGroupId;
+  const showEdit = docUid === user.id || isOwnGroupDoc;
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
 
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
