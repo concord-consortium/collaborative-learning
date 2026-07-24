@@ -1,5 +1,6 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
+import { parseArduinoSerialData } from "./serial-protocol";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -19,9 +20,15 @@ export class SerialDevice {
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
   deviceFamily: string | undefined;
+  // Spiker:bit (WebUSB) transport hooks. When spikerbitWrite is set, writeLine
+  // routes to it instead of the Web Serial writer. This single-store reuse is a
+  // deliberate MVP shortcut; see docs/superpowers/specs/2026-07-17-spikerbit-emg-dataflow-design.md §10.
+  spikerbitWrite: ((line: string) => void) | undefined;
+  private spikerbitConnected: boolean;
 
   constructor() {
     this.localBuffer = "";
+    this.spikerbitConnected = false;
 
     navigator.serial?.addEventListener("connect", (e) => {
       this.updateConnectionInfo(e.timeStamp, e.type);
@@ -50,7 +57,12 @@ export class SerialDevice {
       : "arduino";
   }
 
-  public hasPort(){
+  /**
+   * True only for a Web Serial port (Arduino / radio-hub micro:bit). The Spiker:bit
+   * connects over WebUSB and has no port, so for "is any device connected?" use
+   * {@link isConnected} instead — this method is intentionally Web-Serial-specific.
+   */
+  public hasWebSerialPort(){
     return this.port !== undefined && this.port?.readable;
   }
 
@@ -222,48 +234,33 @@ export class SerialDevice {
   }
 
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
-    this.localBuffer += value;
+    this.localBuffer = parseArduinoSerialData(this.localBuffer + value, channels);
+  }
 
-    // Match any alphanumeric channel name, not just known ones,
-    // so unknown channels are still consumed from the buffer.
-    // No 'g' flag since we always search from the start of the modified buffer.
-    // Note this pattern doesn't handle NaN or negative numbers.
-    // We are seeing at least some NAN values from the Arduino. This currently
-    // gets ignored correctly, by the corrupted data fallback.
-    const pattern = /([a-z0-9]+):([0-9.]+)[\r][\n]/;
+  public isConnected(){
+    return this.hasWebSerialPort() || this.spikerbitConnected;
+  }
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const match = pattern.exec(this.localBuffer);
+  public setSpikerbitActive(write: (line: string) => void){
+    this.spikerbitWrite = write;
+    this.spikerbitConnected = true;
+    this.deviceFamily = "arduino";
+    this.updateConnectionInfo(Date.now(), "connect");
+  }
 
-      if (match) {
-        const [fullMatch, channel, numStr] = match;
-        this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
-
-        const targetChannel = channels.find((c: NodeChannelInfo) => {
-          return c.channelId === channel;
-        });
-
-        if (targetChannel){
-          targetChannel.value = Math.round(Number(numStr));
-        }
-      } else {
-        // No valid pattern found - check for corrupted data we can discard
-        const lineEndIndex = this.localBuffer.indexOf("\r\n");
-        if (lineEndIndex !== -1) {
-
-          // Discard everything up to and including the \r\n to recover
-          this.localBuffer = this.localBuffer.substring(lineEndIndex + 2);
-        } else {
-          // No complete line to discard, wait for more data
-          break;
-        }
-      }
-    }
+  public clearSpikerbit(){
+    this.spikerbitWrite = undefined;
+    this.spikerbitConnected = false;
+    this.deviceFamily = undefined;
+    this.updateConnectionInfo(Date.now(), "disconnect");
   }
 
   public writeLine(line: string){
-    if (this.hasPort()){
+    if (this.spikerbitWrite){
+      this.spikerbitWrite(line);
+      return;
+    }
+    if (this.hasWebSerialPort()){
       this.writer.write(textEncoder.encode(`${line}\n`));
     } else {
       log("Port closed, skipping write");
@@ -278,7 +275,7 @@ export class SerialDevice {
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
     const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && outputConfig?.angleBase !== undefined){
+    if (this.isConnected() && outputConfig?.angleBase !== undefined){
       const percent = n / 100;
       const openTo = Math.round(outputConfig.angleBase - (percent * outputConfig.sweep));
       this.writeLine(openTo.toString());
@@ -287,7 +284,7 @@ export class SerialDevice {
 
   public writeToOutForServo(n:number, liveOutputType: string){
     const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && outputConfig?.angleOffset !== undefined){
+    if (this.isConnected() && outputConfig?.angleOffset !== undefined){
       const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
       const roundedScaled = Math.round(scaledAngle);
       this.writeLine(roundedScaled.toString());

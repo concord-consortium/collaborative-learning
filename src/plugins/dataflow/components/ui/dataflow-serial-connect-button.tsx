@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
@@ -6,13 +6,14 @@ import { SerialDevice } from "../../../../models/stores/serial";
 import "./dataflow-program-topbar.scss";
 
 interface SerialConnectProps {
-  onSerialRefreshDevices: () => void;
+  onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
   readOnly: boolean;
   serialDevice: SerialDevice;
 }
 
 export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
-  const { onSerialRefreshDevices, readOnly, serialDevice } = props;
+  const { onConnectDevice, readOnly, serialDevice } = props;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
@@ -24,7 +25,7 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     { "physical-connection": lastMsg === "connect"},
     { "no-physical-connection": lastMsg === "disconnect" && knownBoard},
     serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
-    serialDevice.hasPort() ? "has-port" : "no-port"
+    serialDevice.isConnected() ? "has-port" : "no-port"
   );
   function serialMessage(){
     // nodes that use serial, but no device physically connected
@@ -33,7 +34,7 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     }
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
-        && !serialDevice.hasPort()
+        && !serialDevice.isConnected()
         && serialDevice.serialNodesCount > 0
     ){
       return "click to finish connecting";
@@ -43,16 +44,28 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     }
   }
 
+  const chooseDevice = (deviceType: "serial" | "spikerbit") => {
+    setMenuOpen(false);
+    onConnectDevice(deviceType);
+  };
+
   return (
     <div className="topbar-icon">
-      {<IconButton
+      <IconButton
         icon="serial"
         key="serial"
-        onClickButton={onSerialRefreshDevices}
-        title="Refresh Serial Connection"
+        onClickButton={() => setMenuOpen(open => !open)}
+        title="Connect a device"
         disabled={readOnly}
         className={classes}
-      />}
+      />
+      { menuOpen &&
+        <div className="serial-device-menu">
+          <button onClick={() => chooseDevice("serial")}>Arduino</button>
+          <button onClick={() => chooseDevice("serial")}>micro:bit (radio hub)</button>
+          <button onClick={() => chooseDevice("spikerbit")}>Spiker:bit</button>
+        </div>
+      }
       <div className="serial-message">
         { serialMessage() }
       </div>
