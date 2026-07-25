@@ -8,7 +8,7 @@ import { observable, makeObservable } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
-  DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
 import { DocumentModelType, createDocumentModel, isVisibilityType } from "../models/document/document";
@@ -533,7 +533,7 @@ export class DB {
         .then(() => {
           // create the new document
           return this.createDocument({ type, content: JSON.stringify(content) })
-            .then(({document, metadata}) => {
+            .then(({document}) => {
                 const newDocument: DBOfferingUserProblemDocument = {
                   version: "1.0",
                   self: {
@@ -665,7 +665,6 @@ export class DB {
 
     return new Promise<{
       document: DBDocument,
-      metadata: DBDocumentMetadata,
       firestoreMetadata: IDocumentMetadata
     }>((resolve, reject) => {
       // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner scope:
@@ -692,16 +691,18 @@ export class DB {
         classHash
       };
 
-      let metadata: DBDocumentMetadata;
+      let rtdbMetadata: DBDocumentMetadata;
+      // `type` can't be included because it is part of a discriminated union and must be a fresh literal
+      const common = { version, self, createdAt } as const;
 
       if (type === GroupDocument) {
         // group + class-wide documents share the transitional type "group"; the kind's scope tells them apart.
         if (getDocumentOwnerScope(kind) === "class") {
           // class-wide: class+unit scope (unit, no offeringId/groupId).
-          metadata = { version, self, createdAt, type, classHash, unit: this.stores.unit.code, title };
+          rtdbMetadata = { ...common, type, classHash, unit: this.stores.unit.code, title };
         } else {
           // group: offering+group scope (groupId is stamped into the Firestore metadata below).
-          metadata = { version, self, createdAt, type, classHash, offeringId };
+          rtdbMetadata = { ...common, type, classHash, offeringId };
         }
       } else {
         switch (type) {
@@ -709,14 +710,18 @@ export class DB {
           case LearningLogDocument:
           case PersonalPublication:
           case LearningLogPublication:
-            metadata = {version, self, createdAt, type, title};
+            rtdbMetadata = { ...common, type, title };
             break;
           case PlanningDocument:
           case ProblemDocument:
           case ProblemPublication:
           case SupportPublication:
-            metadata = {version, self, createdAt, type, classHash, offeringId};
+            // The top-level `classHash` here is never read, it is left just for
+            // legacy consistency in the RTDB. See docs/document-metadata/metadata-fields.md for details.
+            rtdbMetadata = { ...common, type, classHash, offeringId };
             break;
+          default:
+            throw new Error(`Cannot create document of unsupported type '${type}'`);
         }
       }
 
@@ -727,7 +732,7 @@ export class DB {
 
       return documentRef.set(document)
         .then(() => {
-          metadataRef.set(metadata);
+          metadataRef.set(rtdbMetadata);
           return metadataRef.once("value");
         })
         .then((metadataValue) => {
@@ -736,7 +741,7 @@ export class DB {
           return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, kind);
         })
         .then((firestoreMetadata) => {
-          resolve({document, metadata, firestoreMetadata});
+          resolve({document, firestoreMetadata});
         })
         .catch(reject);
     });
@@ -912,8 +917,8 @@ export class DB {
     }
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
+    return new Promise<{document: DBDocument}>((resolve, reject) => {
+      this.createDocument({ type: ProblemPublication, content }).then(({document}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.getGroupById(user.currentGroupId);
         const groupUserConnections: DBGroupUserConnections | undefined = userGroup && userGroup.activeUsers
@@ -938,7 +943,7 @@ export class DB {
         publicationRef.set(publication)
           .then(() => {
             logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
-            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+            resolve({document});
           })
           .catch(reject);
       });
@@ -954,9 +959,9 @@ export class DB {
     const publicationType = documentModel.type + "Publication" as DBDocumentType;
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
+    return new Promise<{document: DBDocument}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content, title: documentModel.title })
-      .then(({document, metadata}) => {
+      .then(({document}) => {
         const publicationPath = publicationType === "personalPublication"
                                 ? this.firebase.getPersonalPublicationsPath(user)
                                 : this.firebase.getLearningLogPublicationsPath(user);
@@ -976,7 +981,7 @@ export class DB {
         publicationRef.set(publication)
           .then(() => {
             logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
-            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+            resolve({document});
           })
           .catch(reject);
       });
@@ -1178,7 +1183,7 @@ export class DB {
 
     return new Promise<DocumentModelType | null>((resolve, reject) => {
       return this.createDocument({ type: documentType, content: JSON.stringify(content), title: docTitle })
-        .then(({document, metadata}) => {
+        .then(({document}) => {
           const {documentKey} = document.self;
           const newDocument: DBOtherDocument = {
             version: "1.0",
