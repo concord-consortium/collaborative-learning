@@ -30,7 +30,7 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
 | `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3); class-wide slot kinds registered CLUE-550 Stage 2 |
 | `owner` (authoring identity / provenance) | creation: kind-declared `ownerScope` → owner `uid` (in the kind registry); read: getter over stored `uid` | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for group + class-wide; read-side getter still to come) |
-| `scope` (org + curriculum association refs) | getter derived from existing `context`/`offeringId`/`groupId`/`problem`/`unit` | not started | — |
+| `scope` (org + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields; read: getter derived from existing `context`/`offeringId`/`groupId`/`problem`/`unit` | in progress | CLUE-550 Stage 2 (creation-side scope fields — `groupId`/`unit` — registry-derived for `type:"group"` docs; other kinds still on the type switch) |
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
 | kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
 | behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis) |
@@ -46,6 +46,9 @@ history, non-owner write-sync, class-wide read access, the rules delete clause) 
 the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
 canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
 get-or-create convergence guaranteeing exactly one document per slot per class. Stage 2 also begins the
-`owner` axis: the creation-side owner `uid` is now derived from the kind's registered `ownerScope`
-(`user` / `group` / `class`) in the kind registry rather than a `type` switch, with class-wide documents
-owned by a class-scoped synthetic uid (`class_<classHash>`).
+`owner` and `scope` axes on the creation side: a document's owner `uid` is derived from the kind's registered
+`ownerScope` (`user` / `group` / `class`) — class-wide documents owned by a class-scoped synthetic uid
+(`class_<classHash>`) — and its scope association fields from `getDocumentScopeFields(kind, ctx)`, both in the
+kind registry rather than a `type` switch. This let the class-wide creation path shed its bespoke `classWide`
+descriptor. So far only `type:"group"` documents are covered; the other kinds' owner/scope derivation still
+lives in the `createDocument` type switch.

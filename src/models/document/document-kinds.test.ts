@@ -1,7 +1,7 @@
 import { GroupDocument, PersonalDocument } from "./document-types";
 import {
   getDocumentKindInfo, getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerScope,
-  registerDocumentKind
+  getDocumentScopeFields, registerDocumentKind
 } from "./document-kinds";
 
 describe("document kinds registry", () => {
@@ -54,6 +54,24 @@ describe("document kinds registry", () => {
 
     it("falls back to the user when the scope's synthetic owner was not supplied", () => {
       expect(getDocumentOwner(GroupDocument, { userId: "u-1" })).toBe("u-1");
+    });
+  });
+
+  describe("scope fields", () => {
+    const ctx = { groupId: "3", unit: "msu" };
+
+    it("returns groupId for the group kind", () => {
+      expect(getDocumentScopeFields(GroupDocument, ctx)).toEqual({ groupId: "3" });
+    });
+
+    it("returns unit for a class kind", () => {
+      registerDocumentKind({ kind: "test-word-wall", metadataFields: { concurrent: true }, ownerScope: "class" });
+      expect(getDocumentScopeFields("test-word-wall", ctx)).toEqual({ unit: "msu" });
+    });
+
+    it("returns no scope fields for other kinds", () => {
+      expect(getDocumentScopeFields(PersonalDocument, ctx)).toEqual({});
+      expect(getDocumentScopeFields(undefined, ctx)).toEqual({});
     });
   });
 });

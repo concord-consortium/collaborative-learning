@@ -353,11 +353,12 @@ describe("db", () => {
       })
     }));
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
     const metadata: any = {
       version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
-    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument, "3");
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument);
     expect(written).toMatchObject({
       context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3"
     });
@@ -374,11 +375,12 @@ describe("db", () => {
       })
     }));
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
     const metadata: any = {
       version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
-    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument, "3");
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument);
     expect(written).toMatchObject({ kind: "group", concurrent: true });
     expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
   });
@@ -423,8 +425,18 @@ describe("db", () => {
 
   describe("class-wide document creation", () => {
     it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent", async () => {
-      // The explicit kind must be registered so getDocumentKindMetadataFields returns its axis fields.
-      registerDocumentKind({ kind: "driving-question-board", metadataFields: { concurrent: true } });
+      // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
+      // getDocumentScopeFields returns the class `unit` (read from the stores' current unit).
+      registerDocumentKind({
+        kind: "driving-question-board", metadataFields: { concurrent: true }, ownerScope: "class"
+      });
+      // Rebuild stores with the current unit code the class-wide scope is derived from.
+      stores = specStores({
+        appMode: "test",
+        documents: DocumentsModel.create(),
+        user: UserModel.create({ id: "1", portal: "example.com" }),
+        unit: UnitModel.create({ code: "msu", title: "Unit" })
+      });
       const setPayloads: any[] = [];
       mockFirestore.mockImplementation(() => ({
         doc: () => ({
@@ -440,7 +452,7 @@ describe("db", () => {
         title: "Driving Question Board", unit: "msu"
       };
       const written: any = await db.createFirestoreMetadataDocument(
-        metadata, "dqb-1", "driving-question-board", undefined, "msu"
+        metadata, "dqb-1", "driving-question-board"
       );
       expect(written).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
@@ -499,7 +511,7 @@ describe("db", () => {
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
         kind: "driving-question-board",
-        classWide: expect.objectContaining({ unit: "msu" })
+        title: "DQB"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
       expect(result.opened).toBeDefined();

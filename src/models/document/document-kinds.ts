@@ -68,6 +68,28 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
   }
 }
 
+/** Runtime values a document's scope association fields draw from, supplied by the caller because they
+ *  depend on the user's current group and unit. */
+export interface IDocumentScopeContext {
+  groupId?: string;
+  unit?: string;
+}
+
+/** The scope association field a group-typed (group | class-wide) document carries, derived from its kind:
+ *  `groupId` for group scope, `unit` for class scope. Keyed on the owner scope, which is unambiguous for
+ *  these two fields (a `groupId` appears only on group-owned docs, a `unit`-only scope only on class-owned
+ *  docs). Returns {} for every other kind — their scope fields still come from createDocument's type switch;
+ *  the scope axis is modularized only for type:"group" documents so far. */
+export function getDocumentScopeFields(
+  kind: string|null|undefined, ctx: IDocumentScopeContext
+): IDocumentScopeContext {
+  switch (getDocumentOwnerScope(kind)) {
+    case "group": return { groupId: ctx.groupId };
+    case "class": return { unit: ctx.unit };
+    default:      return {};
+  }
+}
+
 // Built-in kinds. The group document is the first concurrent kind; the DQB / word-wall register later
 // (Stage 2). `kind` deliberately equals the `type` value "group"; its owner is the synthetic group user.
 registerDocumentKind({ kind: GroupDocument, metadataFields: { concurrent: true }, ownerScope: "group" });
