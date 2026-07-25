@@ -435,7 +435,8 @@ describe("db", () => {
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const metadata: any = {
         version: "1.0", type: GroupDocument, createdAt: 1,
-        self: { uid: "class_msu", classHash: "class-1", documentKey: "dqb-1" },
+        // The owner is the class (class_<classHash>), shared across units; the unit lives in the slot, not the uid.
+        self: { uid: "class_class-1", classHash: "class-1", documentKey: "dqb-1" },
         title: "Driving Question Board", unit: "msu"
       };
       const written: any = await db.createFirestoreMetadataDocument(
@@ -443,14 +444,14 @@ describe("db", () => {
       );
       expect(written).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
-        kind: "driving-question-board", concurrent: true, uid: "class_msu"
+        kind: "driving-question-board", concurrent: true, uid: "class_class-1"
       });
       expect(written.offeringId).toBeUndefined();
       expect(written.groupId).toBeUndefined();
       expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
       expect(setPayloads[0]).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
-        kind: "driving-question-board", concurrent: true, uid: "class_msu"
+        kind: "driving-question-board", concurrent: true, uid: "class_class-1"
       });
     });
   });
@@ -498,7 +499,7 @@ describe("db", () => {
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
         kind: "driving-question-board",
-        classWide: expect.objectContaining({ unit: "msu", syntheticUid: "class_msu" })
+        classWide: expect.objectContaining({ unit: "msu" })
       }));
       expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
       expect(result.opened).toBeDefined();

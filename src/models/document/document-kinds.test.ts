@@ -1,5 +1,8 @@
 import { GroupDocument, PersonalDocument } from "./document-types";
-import { getDocumentKindInfo, getDocumentKindMetadataFields, registerDocumentKind } from "./document-kinds";
+import {
+  getDocumentKindInfo, getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerScope,
+  registerDocumentKind
+} from "./document-kinds";
 
 describe("document kinds registry", () => {
   it("resolves the built-in group kind as concurrent", () => {
@@ -26,6 +29,31 @@ describe("document kinds registry", () => {
       expect(getDocumentKindMetadataFields(PersonalDocument)).toEqual({});
       expect(getDocumentKindMetadataFields(undefined)).toEqual({});
       expect(getDocumentKindMetadataFields(null)).toEqual({});
+    });
+  });
+
+  describe("owner scope", () => {
+    const ctx = { userId: "u-1", groupOwnerId: "group_off_3", classOwnerId: "class_c1" };
+
+    it("defaults an unregistered kind to the user scope and the user as owner", () => {
+      expect(getDocumentOwnerScope(PersonalDocument)).toBe("user");
+      expect(getDocumentOwnerScope(undefined)).toBe("user");
+      expect(getDocumentOwner(PersonalDocument, ctx)).toBe("u-1");
+    });
+
+    it("resolves the built-in group kind to the group owner", () => {
+      expect(getDocumentOwnerScope(GroupDocument)).toBe("group");
+      expect(getDocumentOwner(GroupDocument, ctx)).toBe("group_off_3");
+    });
+
+    it("resolves a class kind to the class owner", () => {
+      registerDocumentKind({ kind: "test-dqb", metadataFields: { concurrent: true }, ownerScope: "class" });
+      expect(getDocumentOwnerScope("test-dqb")).toBe("class");
+      expect(getDocumentOwner("test-dqb", ctx)).toBe("class_c1");
+    });
+
+    it("falls back to the user when the scope's synthetic owner was not supplied", () => {
+      expect(getDocumentOwner(GroupDocument, { userId: "u-1" })).toBe("u-1");
     });
   });
 });

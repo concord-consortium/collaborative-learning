@@ -1,6 +1,6 @@
 import firebase from "firebase";
 import {
-  adminWriteDoc, initFirestore, prepareEachTest, studentAuth, teacherAuth, tearDownTests, thisClass
+  adminWriteDoc, initFirestore, prepareEachTest, studentAuth, studentId, teacherAuth, tearDownTests, thisClass
 } from "./setup-rules-tests";
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 
@@ -11,7 +11,8 @@ const kPointerPath =
   `authed/test-portal/canonical/v1/classes/${thisClass}/offerings/${kOffering}/groups/${kGroup}/slots/${kLabel}`;
 const kOtherClassPointerPath =
   `authed/test-portal/canonical/v1/classes/other-class/offerings/${kOffering}/groups/${kGroup}/slots/${kLabel}`;
-const validPointer = () => ({ documentKey: "doc-abc", createdAt: firebase.firestore.Timestamp.now(), createdBy: `group_${kOffering}_${kGroup}` });
+// createdBy is the real user who created/claimed the pointer, not the document's synthetic owner.
+const validPointer = () => ({ documentKey: "doc-abc", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId });
 
 let db: firebase.firestore.Firestore;
 beforeEach(async () => { await prepareEachTest(); });
@@ -168,7 +169,8 @@ describe("class+unit canonical pointers", () => {
 
 const kClassWideDocPath = `authed/test-portal/documents/dqb-doc-1`;
 const classWideDoc = (extra: any = {}) => ({
-  uid: `class_${kUnit}`, type: "group", key: "dqb-doc-1",
+  // Owner is the class (class_<classHash>), shared across units; the unit lives in the canonical slot, not the uid.
+  uid: `class_${thisClass}`, type: "group", key: "dqb-doc-1",
   createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
   unit: kUnit, kind: kClassWideLabel, concurrent: true, ...extra
 });
@@ -179,7 +181,7 @@ describe("class-wide document canonical claim", () => {
     // Seed the doc (non-canonical) and the pointer that points at it.
     await admin.doc(kClassWideDocPath).set(classWideDoc());
     await admin.doc(kClassWidePointerPath).set({
-      documentKey: "dqb-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: `class_${kUnit}`
+      documentKey: "dqb-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId
     });
     db = initFirestore(studentAuth);
     await assertSucceeds(db.doc(kClassWideDocPath).update({ canonical: kClassWideLabel }));
@@ -198,10 +200,11 @@ describe("class-wide get-or-create convergence (#1, #6)", () => {
     const a = initFirestore(studentAuth);
     const b = initFirestore({ uid: "77", platform_user_id: 77, user_type: "student", class_hash: thisClass });
     // First writer wins; the pointer is immutable, so the second create is denied (it must then adopt the winner).
+    // Each writer attributes createdBy to its own real user id.
     await assertSucceeds(a.doc(kClassWidePointerPath).set(
-      { documentKey: "doc-A", createdAt: firebase.firestore.Timestamp.now(), createdBy: `class_${kUnit}` }));
+      { documentKey: "doc-A", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId }));
     await assertFails(b.doc(kClassWidePointerPath).set(
-      { documentKey: "doc-B", createdAt: firebase.firestore.Timestamp.now(), createdBy: `class_${kUnit}` }));
+      { documentKey: "doc-B", createdAt: firebase.firestore.Timestamp.now(), createdBy: "77" }));
     const snap = await a.doc(kClassWidePointerPath).get();
     expect(snap.data()!.documentKey).toBe("doc-A");
   });

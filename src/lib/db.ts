@@ -32,7 +32,9 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
-import { getDocumentKindMetadataFields, registerDocumentKind } from "../models/document/document-kinds";
+import {
+  getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerScope, registerDocumentKind
+} from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -104,10 +106,9 @@ export interface OpenDocumentOptions {
 }
 
 interface IClassWideCreateInfo {
-  // Unit code — class+unit scope. Stamped onto the metadata; also part of the synthetic owner uid.
+  // Unit code — the class+unit canonical slot scope. Stamped onto the metadata; not part of the owner
+  // (the owner is the class; createDocument derives it from the kind's registered owner scope).
   unit: string;
-  // Class-scoped synthetic RTDB owner uid, e.g. `class_<unitCode>`. Shared by all class-wide slots of the unit.
-  syntheticUid: string;
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
@@ -117,10 +118,10 @@ interface IGetOrCreateCanonicalDocumentOpts {
   // winning document's `canonical` field.
   canonicalLabel: string;
   // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
-  // a class-wide slot keeps type === GroupDocument while its kind is the slot kind.
+  // a class-wide slot keeps type === GroupDocument while its kind is the slot kind. The kind also drives the
+  // owner uid (createDocument derives it via the kind registry).
   type: DBDocumentType;
   kind: string;
-  groupUserId?: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
   // When set, the canonical document is a class-wide collaborative document created via createDocument's
   // class-wide path (class+unit scope, synthetic owner uid). `title` is the authored slot title.
@@ -651,12 +652,8 @@ export class DB {
       metadata: DBDocumentMetadata,
       firestoreMetadata: IDocumentMetadata
     }>((resolve, reject) => {
-      let syntheticUserId: string | undefined;
       let groupId: string | undefined;
-      if (classWide) {
-        // Class-wide collaborative document: class-scoped synthetic owner, no group membership required.
-        syntheticUserId = classWide.syntheticUid;
-      } else if (type === GroupDocument) {
+      if (getDocumentOwnerScope(kind) === "group") {
         if (!user.currentGroupId) {
           return reject("Cannot create group document because user is not in a group.");
         }
@@ -664,22 +661,28 @@ export class DB {
         // Other documents are specific to the user and the user might change groups so this groupId
         // could become invalid.
         groupId = user.currentGroupId;
-        // Group documents have a special user id based on the offering and group id
-        syntheticUserId = user.userIdForGroupDocuments;
       }
 
-      // If this is a group or class-wide document use the synthetic user id instead of the current user id
-      const documentPath = this.firebase.getUserDocumentPath(user, undefined, syntheticUserId);
+      // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner scope:
+      // the creating user, the synthetic group owner, or the synthetic class owner. It is also the document's
+      // storage-path owner — a document the user owns resolves to their own path (getUserPath: owner || user.id).
+      const owner = getDocumentOwner(kind, {
+        userId: user.id,
+        groupOwnerId: user.userIdForGroupDocuments,
+        classOwnerId: this.userIdForClassWideDocuments
+      });
+
+      const documentPath = this.firebase.getUserDocumentPath(user, undefined, owner);
       const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
-      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, syntheticUserId);
+      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, owner);
       const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
 
       const self = {
-        uid: syntheticUserId ?? user.id,
+        uid: owner,
         documentKey,
         classHash
       };
@@ -759,31 +762,30 @@ export class DB {
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       type: GroupDocument,
       kind: GroupDocument,
-      groupUserId: user.userIdForGroupDocuments,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
     });
   }
 
-  // Class-scoped synthetic RTDB owner for this unit's class-wide documents. One shared owner per (class, unit);
-  // the class part comes from the storage path prefix, so the uid only encodes the unit.
+  // Class-scoped synthetic owner for this class's class-wide documents, shared by every member and across all
+  // units' slots. The unit belongs to a document's canonical slot, not its ownership, so the owner uid encodes
+  // only the class — parallel to a group document's group_<off>_<grp> owner (class supplied by the path prefix).
   private get userIdForClassWideDocuments() {
-    return `class_${this.stores.unit.code}`;
+    return `class_${this.stores.user.classHash}`;
   }
 
   public async getOrCreateClassWideDocument(slot: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For class-wide slots the canonical-pointer label equals the document's kind.
     const label = slot.kind;
-    const syntheticUid = this.userIdForClassWideDocuments;
     const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
     // Class-wide slot: the document's transitional `type` stays GroupDocument while its `kind` is the slot kind.
+    // createDocument derives the class owner from the kind's registered owner scope.
     return this.getOrCreateCanonicalDocument({
       pointerPath,
       canonicalLabel: label,
       type: GroupDocument,
       kind: slot.kind,
-      groupUserId: syntheticUid,   // synthetic owner: createdBy attribution + orphan-cleanup RTDB path
-      classWide: { unit: unit.code, syntheticUid, title: slot.title }
+      classWide: { unit: unit.code, title: slot.title }
     });
   }
 
@@ -795,8 +797,9 @@ export class DB {
     if (!slots?.length) return;
     for (const slot of slots) {
       // Register each declared slot's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry. Class-wide collaborative documents are always concurrent; registration is idempotent.
-      registerDocumentKind({ kind: slot.kind, metadataFields: { concurrent: true } });
+      // registry and createDocument derives the class+unit owner. Class-wide collaborative documents are
+      // always concurrent and class+unit owned; registration is idempotent.
+      registerDocumentKind({ kind: slot.kind, metadataFields: { concurrent: true }, ownerScope: "class" });
       this.getOrCreateClassWideDocument(slot).catch((err) => {
         console.error("Failed to create class-wide document", slot.kind, err);
       });
@@ -804,7 +807,7 @@ export class DB {
   }
 
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
-    const { pointerPath, type, kind, canonicalLabel, groupUserId, findLegacy } = opts;
+    const { pointerPath, type, kind, canonicalLabel, findLegacy } = opts;
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists.
@@ -825,7 +828,7 @@ export class DB {
           if (!s.exists) {
             txn.set(pointerRef, {
               documentKey: legacy.key, createdAt: this.firestore.timestamp(),
-              createdBy: groupUserId ?? this.stores.user.id
+              createdBy: this.stores.user.id   // the real user backfilling the pointer, for provenance
             });
             txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
           }
@@ -839,8 +842,7 @@ export class DB {
     const { user } = this.stores;
     const { firestoreMetadata } = await this.createDocument(
       opts.classWide
-        ? { type, kind, title: opts.classWide.title,
-            classWide: { unit: opts.classWide.unit, syntheticUid: opts.classWide.syntheticUid } }
+        ? { type, kind, title: opts.classWide.title, classWide: { unit: opts.classWide.unit } }
         : { type, kind }
     );
     const documentKey = firestoreMetadata.key;
@@ -850,14 +852,16 @@ export class DB {
       const s = await txn.get(pointerRef);
       if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
       txn.set(pointerRef, {
-        documentKey, createdAt: this.firestore.timestamp(), createdBy: groupUserId ?? user.id
+        documentKey, createdAt: this.firestore.timestamp(),
+        createdBy: user.id   // the real user who won the creation race, for provenance
       });
       txn.update(metadataRef, { canonical: canonicalLabel });
       return documentKey;
     });
 
     if (wonKey !== documentKey) {
-      await this.deleteOrphanDocument(documentKey, groupUserId);
+      // The orphan lives under its own owner's path; that owner is the uid createDocument stamped.
+      await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
       return this.openCanonicalDocumentByKey(wonKey);
     }
     if (type === GroupDocument) {
@@ -884,12 +888,13 @@ export class DB {
     return this.openDocumentFromFirestoreMetadata(metadata);
   }
 
-  // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan).
-  private async deleteOrphanDocument(documentKey: string, groupUserId?: string) {
+  // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan). ownerId is the orphan's
+  // owner uid (its RTDB storage path is under that owner); undefined falls back to the current user's path.
+  private async deleteOrphanDocument(documentKey: string, ownerId?: string) {
     const { user } = this.stores;
     await Promise.all([
-      this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, groupUserId)).remove(),
-      this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId)).remove(),
+      this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, ownerId)).remove(),
+      this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey, ownerId)).remove(),
       this.firestore.doc(getSimpleDocumentPath(documentKey)).delete()
     ]).catch(() => undefined);
   }
