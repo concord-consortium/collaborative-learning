@@ -111,9 +111,15 @@ interface IClassWideCreateInfo {
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
+  // Firestore path of the pointer slot for this scope.
+  pointerPath: string;
   // The pointer slot's label. It must match the final segment of pointerPath and is written to the
   // winning document's `canonical` field.
   canonicalLabel: string;
+  // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
+  // a class-wide slot keeps type === GroupDocument while its kind is the slot kind.
+  type: DBDocumentType;
+  kind: string;
   groupUserId?: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
   // When set, the canonical document is a class-wide collaborative document created via createDocument's
@@ -748,8 +754,11 @@ export class DB {
       { classHash: user.classHash, offeringId: user.offeringId, groupId }, kDefaultCanonicalDocumentLabel
     );
     // Regular group documents: the transitional `type` and `kind` coincide (both GroupDocument).
-    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, GroupDocument, {
+    return this.getOrCreateCanonicalDocument({
+      pointerPath,
       canonicalLabel: kDefaultCanonicalDocumentLabel,
+      type: GroupDocument,
+      kind: GroupDocument,
       groupUserId: user.userIdForGroupDocuments,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
     });
@@ -763,16 +772,16 @@ export class DB {
 
   public async getOrCreateClassWideDocument(slot: { kind: string; title: string }) {
     const { user, unit } = this.stores;
-    // Register the slot's kind so createFirestoreMetadataDocument stamps its axis fields via the registry.
-    // Class-wide collaborative documents are always concurrent; idempotent, so calling per open is harmless.
-    registerDocumentKind({ kind: slot.kind, metadataFields: { concurrent: true } });
     // For class-wide slots the canonical-pointer label equals the document's kind.
     const label = slot.kind;
     const syntheticUid = this.userIdForClassWideDocuments;
     const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
     // Class-wide slot: the document's transitional `type` stays GroupDocument while its `kind` is the slot kind.
-    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, slot.kind, {
+    return this.getOrCreateCanonicalDocument({
+      pointerPath,
       canonicalLabel: label,
+      type: GroupDocument,
+      kind: slot.kind,
       groupUserId: syntheticUid,   // synthetic owner: createdBy attribution + orphan-cleanup RTDB path
       classWide: { unit: unit.code, syntheticUid, title: slot.title }
     });
@@ -785,19 +794,17 @@ export class DB {
     const slots = this.stores.appConfig.classWideDocuments;
     if (!slots?.length) return;
     for (const slot of slots) {
+      // Register each declared slot's kind so createFirestoreMetadataDocument stamps its axis fields via the
+      // registry. Class-wide collaborative documents are always concurrent; registration is idempotent.
+      registerDocumentKind({ kind: slot.kind, metadataFields: { concurrent: true } });
       this.getOrCreateClassWideDocument(slot).catch((err) => {
         console.error("Failed to create class-wide document", slot.kind, err);
       });
     }
   }
 
-  private async getOrCreateCanonicalDocument(
-    pointerPath: string,
-    type: DBDocumentType,
-    kind: string,
-    opts: IGetOrCreateCanonicalDocumentOpts
-  ) {
-    const { canonicalLabel, groupUserId, findLegacy } = opts;
+  private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
+    const { pointerPath, type, kind, canonicalLabel, groupUserId, findLegacy } = opts;
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists.
