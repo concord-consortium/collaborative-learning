@@ -109,7 +109,8 @@ export function isDocumentAccessibleToUser ({
 
   const ownDocument = metadata.uid === user.id;
   const isPublished = isPublishedType(metadata.type);
-  const isGroupDoc = metadata.type === GroupDocument; // Group documents are accessible to everyone in the class
+  // Group documents are accessible to all students; the security rules scope them to the class.
+  const isGroupDoc = metadata.type === GroupDocument;
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
     return ownDocument || isShared || isPublished || isGroupDoc
