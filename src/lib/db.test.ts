@@ -405,6 +405,8 @@ describe("db", () => {
       self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
     };
     const written = await db.createFirestoreMetadataDocument(metadata, "pk", PersonalDocument);
+    // `kind` is stamped only on type:"group" docs; non-group docs are left kind-less to avoid persisting a
+    // (possibly-to-be-consolidated) publication/personal kind we would later have to migrate.
     expect(written).not.toHaveProperty("kind");
     expect(written).not.toHaveProperty("concurrent");
   });
@@ -433,8 +435,8 @@ describe("db", () => {
     it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent", async () => {
       // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
       // getDocumentScopeFields returns the class `unit` (read from the stores' current unit).
-      registerDocumentKind({
-        kind: "driving-question-board", metadataFields: { concurrent: true }, ownerScope: "class"
+      registerDocumentKind("driving-question-board", {
+        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit"
       });
       // Rebuild stores with the current unit code the class-wide scope is derived from.
       stores = specStores({

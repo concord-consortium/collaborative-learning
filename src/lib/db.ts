@@ -33,8 +33,7 @@ import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
-  getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerScope, getDocumentScopeFields,
-  IDocumentScopeContext,
+  getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType, getDocumentScopeFields,
   registerDocumentKind
 } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
@@ -583,42 +582,24 @@ export class DB {
     if (docSnapshot.exists) {
       return docSnapshot.data() as IDocumentMetadata;
     }
-    // `classHash`, `self`, `version`, and `offeringId` are handled separately (self and
-    // its classHash become uid/context_id; top-level classHash is intentionally dropped).
+    // Split the RTDB metadata: `self` supplies the doc's uid and context_id (self.classHash); `version` and the
+    // top-level `classHash` are dropped (context_id comes from self.classHash); `offeringId` is pulled out so it
+    // doesn't ride the ...cleanedMetadata spread — it is re-sourced from the kind's scope below. What remains in
+    // cleanedMetadata is essentially createdAt/type (+ title for personal-like kinds).
     const { classHash, self, version, offeringId: metadataOfferingId, ...cleanedMetadata } =
       metadata as DBDocumentMetadata & { classHash: string; offeringId?: string };
 
-    // Resolve the document's scope fields — the class it belongs to (context_id), its unit/investigation/problem
-    // context, and its offering/group association. For type:"group" docs these come from the kind's registered
-    // scope; every other doc's offeringId still travels in its RTDB metadata (the scope axis is modularized for
-    // type:"group" only so far), so it is read explicitly here. Nothing rides the ...cleanedMetadata spread.
-    let scopeFields: IDocumentScopeContext;
-    if (metadata.type === GroupDocument) {
-      // The runtime values come from the stores. They are valid here because createDocument validated them via
-      // validateDocumentKindCreation before writing (a group kind requires the user to be in a group, so
-      // currentGroupId is present).
-      scopeFields = getDocumentScopeFields(kind, {
-        ...this.currentProblemInfo,
-        context_id: self.classHash,
-        offeringId: this.stores.user.offeringId,
-        groupId: this.stores.user.currentGroupId,
-      });
-    } else {
-      if (metadataOfferingId != null) {
-        // Offering-scoped docs (problem/planning/publications): stamp their offeringId and the current problem.
-        scopeFields = {
-          ...this.currentProblemInfo,
-          context_id: self.classHash,
-          offeringId: metadataOfferingId
-        };
-      } else {
-        // Personal / learning-log docs only have the null unit
-        scopeFields = {
-          unit: null,
-          context_id: self.classHash
-        };
-      }
-    }
+    // Resolve every scope field (context_id, unit/investigation/problem, offering/group association) from the
+    // kind's registered scope — all kinds are registered, so getDocumentScopeFields handles each type. The
+    // runtime values come from the stores; they are valid here because createDocument validated them via
+    // validateDocumentKindCreation before writing (a group kind requires the user to be in a group, so
+    // currentGroupId is present).
+    const scopeFields = getDocumentScopeFields(kind, {
+      ...this.currentProblemInfo,
+      context_id: self.classHash,
+      offeringId: this.stores.user.offeringId,
+      groupId: this.stores.user.currentGroupId,
+    });
 
     // Group documents use a fake uid based on the group id; others use the current user.
     const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
@@ -631,8 +612,12 @@ export class DB {
       titleInfo.title = title;
     }
 
-    // Stamp the kind's axis fields.
-    const kindFields = getDocumentKindMetadataFields(kind);
+    // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
+    // Every kind is registered now for scope/owner resolution, yet we deliberately do NOT persist `kind` on
+    // other docs' Firestore metadata yet: publication kinds may later be consolidated into the kinds they
+    // publish, and we don't want to stamp a kind we'd then have to migrate. (Non-group kinds carry no
+    // concurrent axis either, so nothing else is lost.)
+    const kindFields = metadata.type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
@@ -663,7 +648,7 @@ export class DB {
   // fields. Throws when the context is missing. Currently only group-scoped kinds have a requirement (the user
   // must be in a group); the check lives here — not in the kind registry — because only db.ts has the stores.
   private validateDocumentKindCreation(kind: string) {
-    if (getDocumentOwnerScope(kind) === "group" && !this.stores.user.currentGroupId) {
+    if (getDocumentOwnerType(kind) === "group" && !this.stores.user.currentGroupId) {
       throw new Error("Cannot create group document because user is not in a group.");
     }
   }
@@ -685,7 +670,7 @@ export class DB {
       document: DBDocument,
       firestoreMetadata: IDocumentMetadata
     }>((resolve, reject) => {
-      // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner scope:
+      // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner type:
       // the creating user, the synthetic group owner, or the synthetic class owner. It is also the document's
       // storage-path owner — a document the user owns resolves to their own path (getUserPath: owner || user.id).
       const owner = getDocumentOwner(kind, {
@@ -808,7 +793,7 @@ export class DB {
     const label = slot.kind;
     const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
     // Class-wide slot: the document's transitional `type` stays GroupDocument while its `kind` is the slot kind.
-    // createDocument derives the class owner and the class+unit scope from the kind's registered owner scope.
+    // createDocument derives the class owner and the class+unit scope from the kind's registered owner/scope type.
     return this.getOrCreateCanonicalDocument({
       pointerPath,
       canonicalLabel: label,
@@ -826,9 +811,13 @@ export class DB {
     if (!slots?.length) return;
     for (const slot of slots) {
       // Register each declared slot's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry and createDocument derives the class+unit owner. Class-wide collaborative documents are
-      // always concurrent and class+unit owned; registration is idempotent.
-      registerDocumentKind({ kind: slot.kind, metadataFields: { concurrent: true }, ownerScope: "class" });
+      // registry and createDocument derives its owner and scope. Class-wide collaborative documents are always
+      // concurrent, class-owned (class_<classHash>), and class+unit scoped; registration is idempotent.
+      registerDocumentKind(slot.kind, {
+        metadataFields: { concurrent: true },
+        ownerType: "class",
+        scopeType: "classUnit"
+      });
       this.getOrCreateClassWideDocument(slot).catch((err) => {
         console.error("Failed to create class-wide document", slot.kind, err);
       });
@@ -1069,7 +1058,11 @@ export class DB {
           const kindMetadataFields = getDocumentKindMetadataFields(firestoreMetadata.type);
           const concurrent = firestoreMetadata.concurrent ?? kindMetadataFields.concurrent ?? undefined;
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
-          if (kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
+          // Explicitly restrict the write-back to group documents. Every kind is now registered, so the
+          // `kindMetadataFields.concurrent` gate alone already limits this to the group type (the only concurrent
+          // kind), but the type guard keeps this migration group-only regardless of future kind registrations.
+          if (firestoreMetadata.type === GroupDocument
+              && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))
               .set(kindMetadataFields, { merge: true })
               .catch((err: any) => console.warn("group-doc concurrent backfill failed", documentKey, err));
