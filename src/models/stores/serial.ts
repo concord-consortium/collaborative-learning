@@ -1,5 +1,6 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
+import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-capabilities";
 import { parseArduinoSerialData } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
 
@@ -47,6 +48,8 @@ export class SerialDevice {
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;
+  // The connecting tile's channels, recorded at connect so inbound data can be parsed.
+  channels: NodeChannelInfo[] = [];
   // True while a store-tracked (WebUSB) transport is connected. The Web Serial
   // path tracks its own connectedness through the port (hasWebSerialPort).
   private transportConnected: boolean;
@@ -170,6 +173,7 @@ export class SerialDevice {
 
   public async handleStream(channels: Array<NodeChannelInfo>){
     if (!this.port) return;
+    this.channels = channels;
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
     // set up writer directly on the port's writable stream
@@ -212,12 +216,7 @@ export class SerialDevice {
           if (done){
             break;
           }
-          if (this.deviceFamily === "arduino"){
-            this.handleArduinoStreamObj(value!, channels);
-          }
-          if (this.deviceFamily === "microbit"){
-            this.handleMicroBitStreamObj(value!, channels);
-          }
+          this.receive(value!);
         }
       }
       catch (error) {
@@ -227,6 +226,14 @@ export class SerialDevice {
         streamReader.releaseLock();
       }
     }
+  }
+
+  // Central inbound router: dispatch a serial chunk to the parser for the connected
+  // device's protocol, using the recorded channels. A transport's onData is wired here.
+  public receive(chunk: string){
+    const protocol = deviceProtocol(this.deviceFamily);
+    if (protocol === "arduino") this.handleArduinoStreamObj(chunk, this.channels);
+    if (protocol === "microbit") this.handleMicroBitStreamObj(chunk, this.channels);
   }
 
   public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){

@@ -94,3 +94,25 @@ describe("WebSerialTransport", () => {
     expect(firstWriter.write).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("SerialDevice.receive protocol routing", () => {
+  function arduinoChannel() {
+    return { channelId: "emg", value: 0 } as any;
+  }
+  it("routes to the arduino parser when the device protocol is arduino", () => {
+    const device = new SerialDevice();
+    const ch = arduinoChannel();
+    device.channels = [ch];
+    device.deviceFamily = "arduino";
+    device.receive("emg:42\r\n");
+    expect(ch.value).toBe(42);
+  });
+  it("does not update arduino channels when the device protocol is microbit", () => {
+    const device = new SerialDevice();
+    const ch = arduinoChannel();
+    device.channels = [ch];
+    device.deviceFamily = "microbit";
+    device.receive("emg:42\r\n");
+    expect(ch.value).toBe(0);
+  });
+});

@@ -1,8 +1,11 @@
-// A device's write path. Both Web Serial and WebUSB (micro:bit) implement this so
-// SerialDevice.writeLine routes through one active transport instead of a
-// per-transport branch. Read/parse and connect/flash intentionally stay out of this
-// interface — see the design spec §3.1.
+// A device's write path plus optional inbound callbacks. Both Web Serial and WebUSB
+// (micro:bit) implement this so SerialDevice routes writes through one active transport
+// and receives inbound data centrally. onData/onDisconnect are wired by the store when
+// the transport becomes active; a transport that manages its own inbound path need not
+// use them.
 export interface IDeviceTransport {
   write(line: string): void;   // implementation supplies its own line framing (\n)
   close(): Promise<void>;
+  onData?: (chunk: string) => void;
+  onDisconnect?: () => void;
 }
