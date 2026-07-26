@@ -205,11 +205,13 @@ is `doc.scope`-shaped and lives with the axis layer, not scattered per feature. 
 only in the registry and factory (the core rule); a guard that tests `offeringId` is an axis-field check, not
 a kind check, so it is allowed everywhere.
 
-**Already visible in the code.** `DBGroupDocMetadata` and `DBClassWideDocMetadata` are **both** `type: "group"`
-yet have different shapes (group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). So `type`
-already fails to discriminate shape — a guard on the scope fields is the only sound way to tell them apart even
-now. This transitional shared `type: "group"` is the first concrete case motivating the guard approach ahead of
-`type` removal.
+**Already visible in the code.** Group and class-wide documents both store `type: "group"` yet have different
+scope shapes (group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). Those scope fields live
+in the Firestore `IDocumentMetadata`, stamped from the kind's registered scope — not from `type` — so a single
+`type: "group"` covers two shapes and only a guard on the scope fields tells them apart. (The RTDB
+`DBGroupDocMetadata` is now a single bare `type: "group"` shape shared by both, precisely because `type` can no
+longer carry the distinction.) This transitional shared `type: "group"` is the first concrete case motivating
+the guard approach ahead of `type` removal.
 
 **Deferred:** the concrete requirement-type set and guard inventory land with the field-shape work already
 deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This section fixes the *approach*

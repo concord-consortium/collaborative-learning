@@ -352,15 +352,21 @@ describe("db", () => {
         set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
       })
     }));
+    // group scope: createFirestoreMetadataDocument derives groupId + offeringId from the stores.
+    stores = specStores({
+      appMode: "test",
+      documents: DocumentsModel.create(),
+      user: UserModel.create({ id: "1", portal: "example.com", offeringId: "off-1", currentGroupId: "3" })
+    });
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+    // The RTDB metadata is minimal (createdAt/self/type); groupId + offeringId come from the kind's scope.
     const metadata: any = {
-      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      version: "1.0", type: GroupDocument, createdAt: 123,
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
     const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument);
     expect(written).toMatchObject({
-      context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3"
+      context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3", offeringId: "off-1"
     });
     expect(written).not.toHaveProperty("contextId");
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
@@ -374,10 +380,10 @@ describe("db", () => {
         set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
       })
     }));
-    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     const metadata: any = {
-      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      version: "1.0", type: GroupDocument, createdAt: 123,
       self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
     };
     const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument);
@@ -445,24 +451,25 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      // The RTDB metadata is minimal: only createdAt/self/type. The unit is derived from the kind's class
+      // scope (read from the stores' current unit) and the title is passed directly, not round-tripped.
       const metadata: any = {
         version: "1.0", type: GroupDocument, createdAt: 1,
         // The owner is the class (class_<classHash>), shared across units; the unit lives in the slot, not the uid.
-        self: { uid: "class_class-1", classHash: "class-1", documentKey: "dqb-1" },
-        title: "Driving Question Board", unit: "msu"
+        self: { uid: "class_class-1", classHash: "class-1", documentKey: "dqb-1" }
       };
       const written: any = await db.createFirestoreMetadataDocument(
-        metadata, "dqb-1", "driving-question-board"
+        metadata, "dqb-1", "driving-question-board", "Driving Question Board"
       );
       expect(written).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu",
+        type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
         kind: "driving-question-board", concurrent: true, uid: "class_class-1"
       });
       expect(written.offeringId).toBeUndefined();
       expect(written.groupId).toBeUndefined();
       expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
       expect(setPayloads[0]).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu",
+        type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
         kind: "driving-question-board", concurrent: true, uid: "class_class-1"
       });
     });

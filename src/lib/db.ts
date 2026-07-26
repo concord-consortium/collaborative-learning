@@ -34,6 +34,7 @@ import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
   getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerScope, getDocumentScopeFields,
+  IDocumentScopeContext,
   registerDocumentKind
 } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
@@ -565,7 +566,7 @@ export class DB {
   }
 
   async createFirestoreMetadataDocument(
-    metadata: DBDocumentMetadata, documentKey: string, kind: string
+    metadata: DBDocumentMetadata, documentKey: string, kind: string, title?: string
   ) {
     const userContext = this.stores.userContextProvider.userContext;
 
@@ -582,31 +583,52 @@ export class DB {
     if (docSnapshot.exists) {
       return docSnapshot.data() as IDocumentMetadata;
     }
-    const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+    // `classHash`, `self`, `version`, and `offeringId` are handled separately (self and
+    // its classHash become uid/context_id; top-level classHash is intentionally dropped).
+    const { classHash, self, version, offeringId: metadataOfferingId, ...cleanedMetadata } =
+      metadata as DBDocumentMetadata & { classHash: string; offeringId?: string };
 
-    // Scope association fields for a group-typed document, derived from the kind: `groupId` for group scope,
-    // `unit` for class scope (both empty for every other kind — offering docs get their unit from
-    // currentProblemInfo below). The runtime values come from the stores, which are valid here because
-    // createDocument validated them via validateDocumentKindCreation before writing anything.
-    const { groupId, unit } = getDocumentScopeFields(kind, {
-      groupId: this.stores.user.currentGroupId, unit: this.stores.unit.code
-    });
-
-    let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-    if (unit != null) {
-      // Class+unit scope: stamp the unit but no investigation/problem (no offering).
-      problemInfo = { unit };
-    } else if ("offeringId" in metadata && metadata.offeringId != null) {
-      problemInfo = this.currentProblemInfo;
+    // Resolve the document's scope fields — the class it belongs to (context_id), its unit/investigation/problem
+    // context, and its offering/group association. For type:"group" docs these come from the kind's registered
+    // scope; every other doc's offeringId still travels in its RTDB metadata (the scope axis is modularized for
+    // type:"group" only so far), so it is read explicitly here. Nothing rides the ...cleanedMetadata spread.
+    let scopeFields: IDocumentScopeContext;
+    if (metadata.type === GroupDocument) {
+      // The runtime values come from the stores. They are valid here because createDocument validated them via
+      // validateDocumentKindCreation before writing (a group kind requires the user to be in a group, so
+      // currentGroupId is present).
+      scopeFields = getDocumentScopeFields(kind, {
+        ...this.currentProblemInfo,
+        context_id: self.classHash,
+        offeringId: this.stores.user.offeringId,
+        groupId: this.stores.user.currentGroupId,
+      });
+    } else {
+      if (metadataOfferingId != null) {
+        // Offering-scoped docs (problem/planning/publications): stamp their offeringId and the current problem.
+        scopeFields = {
+          ...this.currentProblemInfo,
+          context_id: self.classHash,
+          offeringId: metadataOfferingId
+        };
+      } else {
+        // Personal / learning-log docs only have the null unit
+        scopeFields = {
+          unit: null,
+          context_id: self.classHash
+        };
+      }
     }
 
     // Group documents use a fake uid based on the group id; others use the current user.
     const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
 
-    // Only set groupId when truthy so Firestore never sees `groupId: undefined`.
-    const groupInfo: { groupId?: string } = {};
-    if (groupId) {
-      groupInfo.groupId = groupId;
+    // `title` comes from createDocument's arg. Group/class-wide docs need it here because their (now minimal)
+    // RTDB metadata no longer carries it; other types also still have it in cleanedMetadata (the same value,
+    // since the RTDB title came from this same arg). Set only when present so Firestore never sees undefined.
+    const titleInfo: { title?: string } = {};
+    if (title != null) {
+      titleInfo.title = title;
     }
 
     // Stamp the kind's axis fields.
@@ -614,18 +636,14 @@ export class DB {
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       ...cleanedMetadata,
-      // `self` here is metadata.self (destructured above), whose classHash is populated for every
-      // document type. The top-level metadata.classHash exists only on problem/offering-type
-      // metadata, so reading it would be undefined for personal/learning-log documents.
-      context_id: self.classHash,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
       // `network` section in docs/document-metadata/metadata-fields.md. Null for students/group docs.
       network: userContext.network || null,
       key: documentKey,
       properties: {},
       uid,
-      ...problemInfo,
-      ...groupInfo,
+      ...titleInfo,
+      ...scopeFields,
       ...kindFields
     };
     await documentRef.set(firestoreMetadata);
@@ -696,14 +714,10 @@ export class DB {
       const common = { version, self, createdAt } as const;
 
       if (type === GroupDocument) {
-        // group + class-wide documents share the transitional type "group"; the kind's scope tells them apart.
-        if (getDocumentOwnerScope(kind) === "class") {
-          // class-wide: class+unit scope (unit, no offeringId/groupId).
-          rtdbMetadata = { ...common, type, classHash, unit: this.stores.unit.code, title };
-        } else {
-          // group: offering+group scope (groupId is stamped into the Firestore metadata below).
-          rtdbMetadata = { ...common, type, classHash, offeringId };
-        }
+        // group + class-wide documents share the transitional type "group" and store only base RTDB metadata:
+        // just createdAt is ever read back from this node (at open). Their scope (groupId/unit/offeringId),
+        // owner, title, and kind are stamped into the Firestore metadata by createFirestoreMetadataDocument.
+        rtdbMetadata = { ...common, type };
       } else {
         switch (type) {
           case PersonalDocument:
@@ -737,8 +751,10 @@ export class DB {
         })
         .then((metadataValue) => {
           // This approach of reading the value that was written in the metadata
-          // causes the createdAt timestamp to be populated with a value
-          return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, kind);
+          // causes the createdAt timestamp to be populated with a value. `title` is passed directly rather
+          // than round-tripped through the RTDB metadata so group/class-wide docs (whose RTDB metadata is now
+          // minimal) still stamp it into their Firestore metadata.
+          return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, kind, title);
         })
         .then((firestoreMetadata) => {
           resolve({document, firestoreMetadata});

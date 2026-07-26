@@ -44,8 +44,7 @@ export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata |
                                  DBSupportPublicationMetadata |
-                                 DBGroupDocMetadata |
-                                 DBClassWideDocMetadata;
+                                 DBGroupDocMetadata;
 
 // metadata written to {classHash}/users/{userId}/documentMetadata for all document types
 export interface DBBaseDocumentMetadata {
@@ -102,16 +101,12 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
   type: "supportPublication";
 }
 
-export interface DBGroupDocMetadata extends DBBaseProblemDocumentMetadata {
+// Group and class-wide documents share the transitional type "group". Both store only base metadata in RTDB
+// (createdAt is the sole field read back, at open); their scope (groupId/unit/offeringId), owner, title, and
+// kind are stamped into the Firestore metadata by createFirestoreMetadataDocument instead. So the two collapse
+// to this one shape here — until documents are discriminated by axes rather than `type`.
+export interface DBGroupDocMetadata extends DBBaseDocumentMetadata {
   type: "group";
-}
-
-// Shares `type: "group"` with DBGroupDocMetadata but has a distinct shape (class+unit scope: a `unit`, no
-// `offeringId`/`groupId`). The two coexist until documents are discriminated by axes rather than `type`.
-export interface DBClassWideDocMetadata extends DBBaseDocumentMetadata {
-  type: "group";
-  classHash: string;
-  unit?: string;
 }
 
 export interface DBGroupUserConnections {

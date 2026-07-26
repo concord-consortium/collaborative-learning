@@ -58,20 +58,24 @@ describe("document kinds registry", () => {
   });
 
   describe("scope fields", () => {
-    const ctx = { groupId: "3", unit: "msu" };
+    const ctx = {
+      groupId: "3", offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
+    };
 
-    it("returns groupId for the group kind", () => {
-      expect(getDocumentScopeFields(GroupDocument, ctx)).toEqual({ groupId: "3" });
+    it("returns group + offering scope plus the problem context for the group kind", () => {
+      expect(getDocumentScopeFields(GroupDocument, ctx)).toEqual({
+        groupId: "3", offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
+      });
     });
 
-    it("returns unit for a class kind", () => {
+    it("returns only the unit and context_id for a class kind", () => {
       registerDocumentKind({ kind: "test-word-wall", metadataFields: { concurrent: true }, ownerScope: "class" });
-      expect(getDocumentScopeFields("test-word-wall", ctx)).toEqual({ unit: "msu" });
+      expect(getDocumentScopeFields("test-word-wall", ctx)).toEqual({ unit: "msu", context_id: "class-h" });
     });
 
-    it("returns no scope fields for other kinds", () => {
-      expect(getDocumentScopeFields(PersonalDocument, ctx)).toEqual({});
-      expect(getDocumentScopeFields(undefined, ctx)).toEqual({});
+    it("returns only a null unit and context_id for other kinds", () => {
+      expect(getDocumentScopeFields(PersonalDocument, ctx)).toEqual({ unit: null, context_id: "class-h" });
+      expect(getDocumentScopeFields(undefined, ctx)).toEqual({ unit: null, context_id: "class-h" });
     });
   });
 });

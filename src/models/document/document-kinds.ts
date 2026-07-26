@@ -68,25 +68,43 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
   }
 }
 
-/** Runtime values a document's scope association fields draw from, supplied by the caller because they
- *  depend on the user's current group and unit. */
+/** The scope fields a document draws from its runtime context, supplied by the caller because they depend on
+ *  the user's class, current group, offering, unit, and problem. Doubles as the return shape of
+ *  getDocumentScopeFields (the subset a given kind actually stamps). */
 export interface IDocumentScopeContext {
+  unit: string | null;
+  investigation?: string;
+  problem?: string;
+  context_id: string;
   groupId?: string;
-  unit?: string;
+  offeringId?: string;
 }
 
-/** The scope association field a group-typed (group | class-wide) document carries, derived from its kind:
- *  `groupId` for group scope, `unit` for class scope. Keyed on the owner scope, which is unambiguous for
- *  these two fields (a `groupId` appears only on group-owned docs, a `unit`-only scope only on class-owned
- *  docs). Returns {} for every other kind — their scope fields still come from createDocument's type switch;
- *  the scope axis is modularized only for type:"group" documents so far. */
+/** The scope fields to stamp on a document of the given kind, selected by its registered owner scope. The
+ *  class (`context_id`) is always included. Group scope adds the full offering context (`groupId`, `offeringId`,
+ *  `unit`, `investigation`, `problem`); class scope adds just its `unit`; every other kind gets only a null
+ *  `unit`. Non-group docs still resolve their own offering scope in createDocument — the scope axis is
+ *  modularized for type:"group" documents so far. */
 export function getDocumentScopeFields(
   kind: string|null|undefined, ctx: IDocumentScopeContext
 ): IDocumentScopeContext {
   switch (getDocumentOwnerScope(kind)) {
-    case "group": return { groupId: ctx.groupId };
-    case "class": return { unit: ctx.unit };
-    default:      return {};
+    case "group": return {
+      unit: ctx.unit,
+      investigation: ctx.investigation,
+      problem: ctx.problem,
+      context_id: ctx.context_id,
+      offeringId: ctx.offeringId,
+      groupId: ctx.groupId
+    };
+    case "class": return {
+      unit: ctx.unit,
+      context_id: ctx.context_id
+    };
+    default:      return {
+      unit: null,
+      context_id: ctx.context_id
+    };
   }
 }
 
