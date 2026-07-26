@@ -3,6 +3,7 @@ import { AppConfigModel } from "../stores/app-config-model";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
 import { getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
+import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 describe("document utils", () => {
@@ -174,6 +175,30 @@ describe("document utils", () => {
         const appConfig = AppConfigModel.create({config: unitConfigDefaults});
         const title = getDocumentDisplayTitle(unit, metadata, appConfig);
         expect(title).toBe("Test Problem");
+      });
+    });
+
+    describe("group documents", () => {
+      const unit = UnitModel.create({ code: "test", title: "test" });
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+
+      test("a regular group document uses the group label", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: GroupDocument, uid: "g", key: "g1", groupId: "3"
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Group 3 Document");
+      });
+
+      test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
+        registerDocumentKind("test-class-wide-title", {
+          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          title: "Driving Question Board"
+        });
+        const metadata = DocumentMetadataModel.create({
+          // type stays "group"; the title comes from the kind, and no `title` is stored on the doc.
+          type: GroupDocument, kind: "test-class-wide-title", uid: "class_c1", key: "dqb-1"
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
     });
   });

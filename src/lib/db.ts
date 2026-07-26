@@ -118,25 +118,14 @@ interface IGetOrCreateCanonicalDocumentOpts {
   type: DBDocumentType;
   kind: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
-  // Authored title for the created document. Class-wide slots pass their slot title; group documents pass none.
-  title?: string;
 }
 
-// Everything createFirestoreMetadataDocument needs to write a Firestore metadata document. It deliberately does
-// NOT take the RTDB metadata object: the caller passes each value directly, so what gets written is explicit and
-// the RTDB metadata can eventually be removed.
 interface ICreateFirestoreMetadataDocumentOpts {
-  // The document's key (its RTDB documentKey and Firestore doc id).
   documentKey: string;
-  // The document's stored `type` (transitional). Gates whether the kind axis fields are stamped.
   type: DBDocumentType;
-  // The document's `kind`; drives the scope fields and, for group docs, the stamped kind/concurrent fields.
   kind: string;
-  // The document's owner uid (authoring identity), stored as `uid`.
   owner: string;
-  // The server-resolved creation timestamp (read back from the RTDB write, the one value still sourced there).
   createdAt: number;
-  // Authored title, if any.
   title?: string;
 }
 
@@ -809,8 +798,7 @@ export class DB {
       pointerPath,
       canonicalLabel: label,
       type: GroupDocument,
-      kind: slot.kind,
-      title: slot.title
+      kind: slot.kind
     });
   }
 
@@ -823,11 +811,14 @@ export class DB {
     for (const slot of slots) {
       // Register each declared slot's kind so createFirestoreMetadataDocument stamps its axis fields via the
       // registry and createDocument derives its owner and scope. Class-wide collaborative documents are always
-      // concurrent, class-owned (class_<classHash>), and class+unit scoped; registration is idempotent.
+      // concurrent, class-owned (class_<classHash>), and class+unit scoped; registration is idempotent. The
+      // authored title is registered here (not stored per document) so it is resolved live by kind — an author
+      // changing it applies to every document of that kind (see getDocumentTitle).
       registerDocumentKind(slot.kind, {
         metadataFields: { concurrent: true },
         ownerType: "class",
-        scopeType: "classUnit"
+        scopeType: "classUnit",
+        title: slot.title
       });
       this.getOrCreateClassWideDocument(slot).catch((err) => {
         console.error("Failed to create class-wide document", slot.kind, err);
@@ -869,7 +860,7 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
-    const { firestoreMetadata } = await this.createDocument({ type, kind, title: opts.title });
+    const { firestoreMetadata } = await this.createDocument({ type, kind });
     const documentKey = firestoreMetadata.key;
 
     const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));

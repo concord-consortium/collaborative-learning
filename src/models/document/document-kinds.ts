@@ -30,6 +30,11 @@ export interface IDocumentKindInfo {
   ownerType: DocumentOwnerType;
   /** How this kind's scope axes are derived (see DocumentScopeType). */
   scopeType: DocumentScopeType;
+  /** Static display title (presentation config). Class-wide slots register their authored title here so it is
+   *  resolved live by kind — not stored per document. Kinds whose title is dynamic (e.g. a problem document's
+   *  title comes from the unit) leave this unset; getDocumentTitle returns undefined for them so the caller
+   *  resolves the title another way (see getDocumentTitle). */
+  title?: string;
 }
 
 /** The candidate owner uids for a document being created. The synthetic ones depend on runtime state
@@ -132,6 +137,34 @@ export function getDocumentScopeFields(
       context_id: ctx.context_id
     };
   }
+}
+
+/** The minimal document fields getDocumentTitle reads. Structural so the registry stays a leaf module that
+ *  doesn't import the document models. */
+interface IDocumentTitleFields {
+  kind?: string | null;
+  type?: string;
+  groupId?: string | null;
+}
+
+/** The display title for a document, resolved by its kind — presentation is a by-kind lookup, never stored
+ *  (see docs/document-axes/target-architecture.md). Returns:
+ *   - the kind's registered static title (class-wide slots);
+ *   - the group-document label for other type:"group" documents (regular group docs, incl. legacy ones with
+ *     no stored kind);
+ *   - undefined for every other kind, so the caller falls back to type-based title computation
+ *     (problem/personal/support).
+ *  Those remaining strategies will move here as the kinds are filled out; dynamic ones (e.g. a problem's title
+ *  from the unit) will take a context argument then, like getDocumentScopeFields keeps the registry
+ *  store-free. */
+export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
+  const registeredTitle = getDocumentKindInfo(document.kind)?.title;
+  if (registeredTitle != null) return registeredTitle;
+  // Keyed on `type`, not `kind`: pre-existing group documents predate the `kind` axis and may have no stored
+  // `kind` yet (metadata records are only backfilled when a document is opened), while `type` is always
+  // present. Class-wide docs are new and always carry a `kind`, so their title is resolved above by kind.
+  if (document.type === GroupDocument) return `Group ${document.groupId} Document`;
+  return undefined;
 }
 
 // Built-in kinds. The group document is the first concurrent kind; the DQB / word-wall register later

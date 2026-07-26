@@ -430,11 +430,13 @@ describe("db", () => {
   });
 
   describe("class-wide document creation", () => {
-    it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent", async () => {
+    it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent (but not title)", async () => {
       // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
-      // getDocumentScopeFields returns the class `unit` (read from the stores' current unit).
+      // getDocumentScopeFields returns the class `unit` (read from the stores' current unit). The authored title
+      // is registered too, to prove it is resolved by kind and NOT persisted into the Firestore metadata.
       registerDocumentKind("driving-question-board", {
-        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit"
+        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+        title: "Driving Question Board"
       });
       // Rebuild stores with the classHash (→ context_id) and the current unit code the class-wide scope uses.
       stores = specStores({
@@ -451,24 +453,25 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores;
-      // title and owner are passed directly. The owner is the class (class_<classHash>), shared across units —
-      // the unit lives in the canonical slot, not the uid.
+      // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner
+      // is passed directly. No title is passed — a class-wide doc's title is resolved live by kind at display.
       const written: any = await db.createFirestoreMetadataDocument({
         documentKey: "dqb-1", type: GroupDocument, kind: "driving-question-board",
-        owner: "class_class-1", createdAt: 1, title: "Driving Question Board"
+        owner: "class_class-1", createdAt: 1
       });
       expect(written).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
+        type: "group", context_id: "class-1", unit: "msu",
         kind: "driving-question-board", concurrent: true, uid: "class_class-1"
       });
+      expect(written.title).toBeUndefined();       // title is looked up by kind, never stored
       expect(written.offeringId).toBeUndefined();
       expect(written.groupId).toBeUndefined();
       expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
       expect(setPayloads[0]).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
+        type: "group", context_id: "class-1", unit: "msu",
         kind: "driving-question-board", concurrent: true, uid: "class_class-1"
       });
+      expect(setPayloads[0].title).toBeUndefined();
     });
   });
 
@@ -512,10 +515,10 @@ describe("db", () => {
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      // The slot title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
-        kind: "driving-question-board",
-        title: "DQB"
+        kind: "driving-question-board"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
       expect(result.opened).toBeDefined();

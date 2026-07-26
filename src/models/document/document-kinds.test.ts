@@ -1,7 +1,7 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
   getDocumentKindInfo, getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType,
-  getDocumentScopeFields, registerDocumentKind
+  getDocumentScopeFields, getDocumentTitle, registerDocumentKind
 } from "./document-kinds";
 
 describe("document kinds registry", () => {
@@ -87,6 +87,29 @@ describe("document kinds registry", () => {
     it("returns only a null unit and context_id for a class kind and unregistered kinds", () => {
       expect(getDocumentScopeFields(PersonalDocument, ctx)).toEqual({ unit: null, context_id: "class-h" });
       expect(getDocumentScopeFields(undefined, ctx)).toEqual({ unit: null, context_id: "class-h" });
+    });
+  });
+
+  describe("title", () => {
+    it("returns a class-wide kind's registered static title", () => {
+      registerDocumentKind("test-dqb-title", {
+        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+        title: "Driving Question Board"
+      });
+      expect(getDocumentTitle({ kind: "test-dqb-title", type: GroupDocument })).toBe("Driving Question Board");
+    });
+
+    it("returns the group-document label for a type:group doc with no registered title", () => {
+      // Regular group docs (kind "group", which registers no title) and legacy group docs (no kind).
+      expect(getDocumentTitle({ kind: GroupDocument, type: GroupDocument, groupId: "3" }))
+        .toBe("Group 3 Document");
+      expect(getDocumentTitle({ type: GroupDocument, groupId: "4" })).toBe("Group 4 Document");
+    });
+
+    it("returns undefined for kinds resolved elsewhere (problem/personal/unregistered)", () => {
+      expect(getDocumentTitle({ kind: ProblemDocument, type: ProblemDocument })).toBeUndefined();
+      expect(getDocumentTitle({ kind: PersonalDocument, type: PersonalDocument })).toBeUndefined();
+      expect(getDocumentTitle({ type: "unregistered" })).toBeUndefined();
     });
   });
 });
