@@ -52,7 +52,7 @@ view, and it is legitimate to put here because these are *data the document has*
 | axis | getter source |
 |---|---|
 | `owner` | existing `uid` (identity/provenance; may differ from scope for publications) |
-| `scope` | derived from `context` / `offeringId` / `groupId` / `problem` / `unit` (the org + curriculum associations) |
+| `scope` | the individual association fields `context` / `offeringId` / `groupId` / `problem` / `unit` (the org + curriculum associations). Consumed via field/axis **guards** (see "Typed document shapes"), not by branching on `type`; whether to also expose a single unified `scope` getter is an open question — the fields may be read directly |
 | `kind` | existing `type` (a stored tag — see Layer 2 for its uses) |
 | `canonical` | new stored field (pointer-slot occupancy) |
 | `permissions` | **composed getter** — merges *permission-policy grants* (from the document's referenced policy) with *stored per-doc grants* (the `visibility` share toggle, support audience, exemplar visibility). See "Permissions composition" below |
@@ -150,8 +150,10 @@ are exactly the ones the boundary pushes out.
 
 ## How each thing is realized
 
-- **Stored per-doc** (getters on `DocumentModel`; rule-readable; migrate to change): `canonical`, `owner`,
-  `scope`, `concurrent`, and the **stored per-doc grants of `permissions`** — plus the `kind` tag.
+- **Stored per-doc** (rule-readable; migrate to change): `canonical`, `owner`, `concurrent`, the **scope**
+  association fields, and the **stored per-doc grants of `permissions`** — plus the `kind` tag. `owner` and
+  `concurrent` are exposed as getters on `DocumentModel`; the scope fields are read directly / via field guards
+  (see "Typed document shapes"), not necessarily behind a single `scope` getter.
 - **Looked up by `kind`** (registry `fn(doc)`; no storage, no migration): presentation, creation defaults,
   copy/publish templates, `showInSortWork`, and the **shared grants of `permissions`** (via its referenced
   permission policy).
@@ -164,10 +166,11 @@ are exactly the ones the boundary pushes out.
 
 - `DocumentContentModel` — the generic tile container. **No change.** Already reused standalone by
   `src/models/curriculum/*` and the doc-editor.
-- `DocumentModel` — the metadata wrapper. **Gains** explicit axis getters (some over existing fields:
-  `owner`←`uid`, `scope`←`context`/`offeringId`/`groupId`/`problem`/`unit`, `kind`←`type`) and new stored
-  fields (`canonical`, `permissions`, `concurrent`). **Loses** its type-view methods (`isProblem`, …), which
-  become axis getters + external behaviors.
+- `DocumentModel` — the metadata wrapper. **Gains** explicit axis getters over existing fields
+  (`owner`←`uid`, `kind`←`type`) and new stored fields (`canonical`, `permissions`, `concurrent`). The **scope**
+  association fields (`context`/`offeringId`/`groupId`/`problem`/`unit`) are consumed via field guards (see
+  "Typed document shapes") rather than necessarily a single `scope` getter. **Loses** its type-view methods
+  (`isProblem`, …), which become axis getters + external behaviors.
 - New modules: the **kind registry** (`fn(doc)` config), **behavior modules** per feature, and the
   **creation/derivation factory**.
 

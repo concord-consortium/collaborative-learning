@@ -28,13 +28,13 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 |---|---|---|---|
 | `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524; class+unit pointer scope added CLUE-550 Stage 2 |
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
-| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3); class-wide slot kinds registered CLUE-550 Stage 2 |
-| `owner` (authoring identity / provenance) | creation: kind-declared `ownerScope` → owner `uid` (in the kind registry); read: getter over stored `uid` | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for group + class-wide; read-side getter still to come) |
-| `scope` (org + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields; read: getter derived from existing `context`/`offeringId`/`groupId`/`problem`/`unit` | in progress | CLUE-550 Stage 2 (creation-side scope fields — `groupId`/`unit` — registry-derived for `type:"group"` docs; other kinds still on the type switch) |
+| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3); class-wide slot kinds registered and their titles resolved by kind (`getDocumentTitle`) CLUE-550 Stage 2 |
+| `owner` (authoring identity / provenance) | creation: kind-declared `ownerType` → owner `uid` (in the kind registry); read: getter over stored `uid` | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds via `getDocumentOwner`; read-side getter still to come) |
+| `scope` (org + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields, keyed on a registered `scopeType`; read: consumers read the individual scope fields, narrowing with field/axis **guards** (e.g. `hasOfferingScope`) rather than branching on `type` — whether to also add a single unified `scope` getter is an open question | in progress | CLUE-550 Stage 2 (creation-side scope fields registry-derived for every kind — the `createFirestoreMetadataDocument` type switch is gone) |
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
 | kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
 | behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis) |
-| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner `uid` stamped from the kind's `ownerScope`) |
+| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner `uid` and scope fields stamped from the kind's `ownerType`/`scopeType`) |
 
 Status values: `not started` / `in progress` / `done`.
 
@@ -46,9 +46,11 @@ history, non-owner write-sync, class-wide read access, the rules delete clause) 
 the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
 canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
 get-or-create convergence guaranteeing exactly one document per slot per class. Stage 2 also begins the
-`owner` and `scope` axes on the creation side: a document's owner `uid` is derived from the kind's registered
-`ownerScope` (`user` / `group` / `class`) — class-wide documents owned by a class-scoped synthetic uid
-(`class_<classHash>`) — and its scope association fields from `getDocumentScopeFields(kind, ctx)`, both in the
-kind registry rather than a `type` switch. This let the class-wide creation path shed its bespoke `classWide`
-descriptor. So far only `type:"group"` documents are covered; the other kinds' owner/scope derivation still
-lives in the `createDocument` type switch.
+`owner` and `scope` axes on the creation side, now for **every** kind: a document's owner `uid` is derived from
+the kind's registered `ownerType` (`user` / `group` / `class`) — class-wide documents owned by a class-scoped
+synthetic uid (`class_<classHash>`) — and its scope association fields from the kind's registered `scopeType`
+via `getDocumentScopeFields(kind, ctx)`, both resolved in the kind registry rather than a `type` switch. Because
+all kinds are registered, `createFirestoreMetadataDocument` derives owner and scope through these registry calls
+for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
+`type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
+into the kinds they publish.
