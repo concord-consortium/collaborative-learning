@@ -352,19 +352,19 @@ describe("db", () => {
         set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
       })
     }));
-    // group scope: createFirestoreMetadataDocument derives groupId + offeringId from the stores.
+    // group scope: createFirestoreMetadataDocument derives context_id/groupId/offeringId from the stores.
     stores = specStores({
       appMode: "test",
       documents: DocumentsModel.create(),
-      user: UserModel.create({ id: "1", portal: "example.com", offeringId: "off-1", currentGroupId: "3" })
+      user: UserModel.create({
+        id: "1", portal: "example.com", classHash: "class-h", offeringId: "off-1", currentGroupId: "3"
+      })
     });
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    // The RTDB metadata is minimal (createdAt/self/type); groupId + offeringId come from the kind's scope.
-    const metadata: any = {
-      version: "1.0", type: GroupDocument, createdAt: 123,
-      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
-    };
-    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument);
+    // context_id/groupId/offeringId come from the user via the kind's scope; owner→uid is passed directly.
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    });
     expect(written).toMatchObject({
       context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3", offeringId: "off-1"
     });
@@ -382,11 +382,9 @@ describe("db", () => {
     }));
     stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    const metadata: any = {
-      version: "1.0", type: GroupDocument, createdAt: 123,
-      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
-    };
-    const written = await db.createFirestoreMetadataDocument(metadata, "gk", GroupDocument);
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    });
     expect(written).toMatchObject({ kind: "group", concurrent: true });
     expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
   });
@@ -400,18 +398,16 @@ describe("db", () => {
       })
     }));
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    const metadata: any = {
-      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
-      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
-    };
-    const written = await db.createFirestoreMetadataDocument(metadata, "pk", PersonalDocument);
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123, title: "t"
+    });
     // `kind` is stamped only on type:"group" docs; non-group docs are left kind-less to avoid persisting a
     // (possibly-to-be-consolidated) publication/personal kind we would later have to migrate.
     expect(written).not.toHaveProperty("kind");
     expect(written).not.toHaveProperty("concurrent");
   });
 
-  it("writes context_id from self.classHash for documents with no top-level classHash", async () => {
+  it("writes context_id from the user's classHash", async () => {
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
       doc: () => ({
@@ -419,14 +415,16 @@ describe("db", () => {
         set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
       })
     }));
+    stores = specStores({
+      appMode: "test",
+      documents: DocumentsModel.create(),
+      user: UserModel.create({ id: "1", portal: "example.com", classHash: "class-h" })
+    });
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    // Personal/learning-log metadata carries classHash only under `self`, never at the top level,
-    // so context_id must come from self.classHash or it would be written undefined.
-    const metadata: any = {
-      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
-      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
-    };
-    const written = await db.createFirestoreMetadataDocument(metadata, "pk", PersonalDocument);
+    // context_id is stamped from the user's classHash (it is the class scope field).
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123, title: "t"
+    });
     expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
   });
@@ -438,11 +436,11 @@ describe("db", () => {
       registerDocumentKind("driving-question-board", {
         metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit"
       });
-      // Rebuild stores with the current unit code the class-wide scope is derived from.
+      // Rebuild stores with the classHash (→ context_id) and the current unit code the class-wide scope uses.
       stores = specStores({
         appMode: "test",
         documents: DocumentsModel.create(),
-        user: UserModel.create({ id: "1", portal: "example.com" }),
+        user: UserModel.create({ id: "1", portal: "example.com", classHash: "class-1" }),
         unit: UnitModel.create({ code: "msu", title: "Unit" })
       });
       const setPayloads: any[] = [];
@@ -453,16 +451,13 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      // The RTDB metadata is minimal: only createdAt/self/type. The unit is derived from the kind's class
-      // scope (read from the stores' current unit) and the title is passed directly, not round-tripped.
-      const metadata: any = {
-        version: "1.0", type: GroupDocument, createdAt: 1,
-        // The owner is the class (class_<classHash>), shared across units; the unit lives in the slot, not the uid.
-        self: { uid: "class_class-1", classHash: "class-1", documentKey: "dqb-1" }
-      };
-      const written: any = await db.createFirestoreMetadataDocument(
-        metadata, "dqb-1", "driving-question-board", "Driving Question Board"
-      );
+      // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores;
+      // title and owner are passed directly. The owner is the class (class_<classHash>), shared across units —
+      // the unit lives in the canonical slot, not the uid.
+      const written: any = await db.createFirestoreMetadataDocument({
+        documentKey: "dqb-1", type: GroupDocument, kind: "driving-question-board",
+        owner: "class_class-1", createdAt: 1, title: "Driving Question Board"
+      });
       expect(written).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
         kind: "driving-question-board", concurrent: true, uid: "class_class-1"

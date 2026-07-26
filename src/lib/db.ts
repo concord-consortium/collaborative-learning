@@ -122,6 +122,24 @@ interface IGetOrCreateCanonicalDocumentOpts {
   title?: string;
 }
 
+// Everything createFirestoreMetadataDocument needs to write a Firestore metadata document. It deliberately does
+// NOT take the RTDB metadata object: the caller passes each value directly, so what gets written is explicit and
+// the RTDB metadata can eventually be removed.
+interface ICreateFirestoreMetadataDocumentOpts {
+  // The document's key (its RTDB documentKey and Firestore doc id).
+  documentKey: string;
+  // The document's stored `type` (transitional). Gates whether the kind axis fields are stamped.
+  type: DBDocumentType;
+  // The document's `kind`; drives the scope fields and, for group docs, the stamped kind/concurrent fields.
+  kind: string;
+  // The document's owner uid (authoring identity), stored as `uid`.
+  owner: string;
+  // The server-resolved creation timestamp (read back from the RTDB write, the one value still sourced there).
+  createdAt: number;
+  // Authored title, if any.
+  title?: string;
+}
+
 export class DB {
   @observable public groups: GroupUsersMap = {};
   public firebase: Firebase;
@@ -564,9 +582,9 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(
-    metadata: DBDocumentMetadata, documentKey: string, kind: string, title?: string
-  ) {
+  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts) {
+    const { documentKey, type, kind, owner, createdAt, title } = opts;
+    const { user } = this.stores;
     const userContext = this.stores.userContextProvider.userContext;
 
     if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
@@ -582,12 +600,6 @@ export class DB {
     if (docSnapshot.exists) {
       return docSnapshot.data() as IDocumentMetadata;
     }
-    // Split the RTDB metadata: `self` supplies the doc's uid and context_id (self.classHash); `version` and the
-    // top-level `classHash` are dropped (context_id comes from self.classHash); `offeringId` is pulled out so it
-    // doesn't ride the ...cleanedMetadata spread — it is re-sourced from the kind's scope below. What remains in
-    // cleanedMetadata is essentially createdAt/type (+ title for personal-like kinds).
-    const { classHash, self, version, offeringId: metadataOfferingId, ...cleanedMetadata } =
-      metadata as DBDocumentMetadata & { classHash: string; offeringId?: string };
 
     // Resolve every scope field (context_id, unit/investigation/problem, offering/group association) from the
     // kind's registered scope — all kinds are registered, so getDocumentScopeFields handles each type. The
@@ -596,17 +608,12 @@ export class DB {
     // currentGroupId is present).
     const scopeFields = getDocumentScopeFields(kind, {
       ...this.currentProblemInfo,
-      context_id: self.classHash,
-      offeringId: this.stores.user.offeringId,
-      groupId: this.stores.user.currentGroupId,
+      context_id: user.classHash,
+      offeringId: user.offeringId,
+      groupId: user.currentGroupId,
     });
 
-    // Group documents use a fake uid based on the group id; others use the current user.
-    const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
-
-    // `title` comes from createDocument's arg. Group/class-wide docs need it here because their (now minimal)
-    // RTDB metadata no longer carries it; other types also still have it in cleanedMetadata (the same value,
-    // since the RTDB title came from this same arg). Set only when present so Firestore never sees undefined.
+    // `title` is stamped only when present so Firestore never sees `title: undefined`.
     const titleInfo: { title?: string } = {};
     if (title != null) {
       titleInfo.title = title;
@@ -617,16 +624,19 @@ export class DB {
     // other docs' Firestore metadata yet: publication kinds may later be consolidated into the kinds they
     // publish, and we don't want to stamp a kind we'd then have to migrate. (Non-group kinds carry no
     // concurrent axis either, so nothing else is lost.)
-    const kindFields = metadata.type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
+    const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
+    // Every field written to Firestore is now explicit — nothing is copied from the RTDB metadata. `context_id`
+    // comes from scopeFields (the class is a scope field).
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
-      ...cleanedMetadata,
+      type,
+      createdAt,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
       // `network` section in docs/document-metadata/metadata-fields.md. Null for students/group docs.
       network: userContext.network || null,
       key: documentKey,
       properties: {},
-      uid,
+      uid: owner,
       ...titleInfo,
       ...scopeFields,
       ...kindFields
@@ -735,11 +745,12 @@ export class DB {
           return metadataRef.once("value");
         })
         .then((metadataValue) => {
-          // This approach of reading the value that was written in the metadata
-          // causes the createdAt timestamp to be populated with a value. `title` is passed directly rather
-          // than round-tripped through the RTDB metadata so group/class-wide docs (whose RTDB metadata is now
-          // minimal) still stamp it into their Firestore metadata.
-          return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, kind, title);
+          // Reading the value back resolves the server `createdAt` timestamp to a real number.
+          // This way the RTDB and Firestore metadata have the same createdAt value.
+          const resolvedCreatedAt: number = metadataValue.val().createdAt;
+          return this.createFirestoreMetadataDocument({
+            documentKey, type, kind, owner, createdAt: resolvedCreatedAt, title
+          });
         })
         .then((firestoreMetadata) => {
           resolve({document, firestoreMetadata});
