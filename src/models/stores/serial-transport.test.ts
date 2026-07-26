@@ -39,6 +39,22 @@ describe("SerialDevice active-transport routing", () => {
     expect(device.activeTransport).toBeUndefined();
     expect(device.deviceFamily).toBeUndefined();
   });
+
+  it("ignores a stale transport's onDisconnect after a newer device has taken over", () => {
+    const device = new SerialDevice();
+    const transportA = fakeTransport([]);
+    const transportB = fakeTransport([]);
+
+    device.setActiveDevice("arduino", transportA, []);
+    device.setActiveDevice("spikerbit", transportB, []);
+
+    // Simulate transportA's read loop finally giving up long after transportB took over.
+    transportA.onDisconnect?.();
+
+    expect(device.isConnected()).toBe(true);
+    expect(device.activeTransport).toBe(transportB);
+    expect(device.deviceFamily).toBe("spikerbit");
+  });
 });
 
 describe("SerialDevice.receive protocol routing", () => {

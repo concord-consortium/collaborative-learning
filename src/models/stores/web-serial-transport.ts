@@ -76,6 +76,8 @@ export class WebSerialTransport implements IDeviceTransport {
   // onDisconnect. Preserves the prior reopen/timeout recovery behavior. Relies on the
   // browser nulling `port.readable` on a real disconnect to drive the reopen check below.
   public async startReading(){
+    // Not proactively stopped by the navigator.serial "disconnect" event; it self-terminates
+    // within one reopen cycle once the port stops being readable (see the timeout/reopen logic below).
     this.reading = true;
     while (this.reading && this.port) {
       if (!this.port.readable) {

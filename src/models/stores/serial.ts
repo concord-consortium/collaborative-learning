@@ -52,8 +52,8 @@ export class SerialDevice {
     this.activeTransport = transport;
     this.deviceFamily = deviceFamily;
     this.channels = channels;
-    transport.onData = (chunk: string) => this.receive(chunk);
-    transport.onDisconnect = () => this.clearActiveDevice();
+    transport.onData = (chunk: string) => { if (this.activeTransport === transport) this.receive(chunk); };
+    transport.onDisconnect = () => { if (this.activeTransport === transport) this.clearActiveDevice(); };
     this.updateConnectionInfo(Date.now(), "connect");
   }
 
