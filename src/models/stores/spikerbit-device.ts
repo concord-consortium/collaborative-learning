@@ -79,7 +79,7 @@ export class SpikerbitDevice {
     }
 
     // Route servo writes through this WebUSB connection and mark the shared store connected.
-    this.serialDevice.setActiveDevice("spikerbit", new MicrobitUsbTransport(this.connection));
+    this.serialDevice.setActiveDevice("spikerbit", new MicrobitUsbTransport(this.connection), this.channels);
   }
 
   private handleSerialData = ({ data }: { data: string }) => {

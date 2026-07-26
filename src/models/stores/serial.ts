@@ -1,75 +1,30 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
-import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-capabilities";
 import { parseArduinoSerialData } from "./serial-protocol";
+import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-capabilities";
 import { IDeviceTransport } from "./device-transport";
-
-const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
 
 function log(message: string) {
   // eslint-disable-next-line no-console
   console.log(`[SerialDevice] ${message}`);
 }
 
-// Wraps the Web Serial writer/port for the shared IDeviceTransport write path.
-// It reads the current writer through a getter so SerialDevice's reopen logic
-// (which recreates the writer) needs no coordination, and guards on the port
-// being open so a closed-port write is a no-op, matching prior behavior.
-export class WebSerialTransport implements IDeviceTransport {
-  constructor(
-    private getWriter: () => WritableStreamDefaultWriter | undefined,
-    private isOpen: () => boolean,
-    private closeFn: () => Promise<void>
-  ) {}
-
-  write(line: string) {
-    if (this.isOpen()) {
-      this.getWriter()?.write(textEncoder.encode(`${line}\n`));
-    } else {
-      log("Port closed, skipping write");
-    }
-  }
-
-  close() {
-    return this.closeFn();
-  }
-}
-
 export class SerialDevice {
   localBuffer: string;
-  private port: SerialPort | null;
   connectChangeStamp: number | null;
   lastConnectMessage: string | null;
-  deviceInfo: SerialPortInfo | null;
   serialNodesCount: number;
-  writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;
   // The connecting tile's channels, recorded at connect so inbound data can be parsed.
   channels: NodeChannelInfo[] = [];
-  // True while a store-tracked (WebUSB) transport is connected. The Web Serial
-  // path tracks its own connectedness through the port (hasWebSerialPort).
-  private transportConnected: boolean;
+  // True once a known board (authentic Arduino) has connected; drives connect-button UI.
+  knownBoard = false;
 
   constructor() {
     this.localBuffer = "";
-    this.transportConnected = false;
-
-    navigator.serial?.addEventListener("connect", (e) => {
-      this.updateConnectionInfo(e.timeStamp, e.type);
-    });
-
-    navigator.serial?.addEventListener("disconnect", (e) => {
-      // A WebUSB (Spiker:bit) session owns the connection via transportConnected and
-      // has no Web Serial port, so an unrelated Web Serial disconnect must not tear it down.
-      if (this.transportConnected) return;
-      this.updateConnectionInfo(e.timeStamp, e.type);
-      this.deviceFamily = undefined;
-      this.activeTransport = undefined;
-    });
   }
 
   public setSerialNodesCount(n: number){
@@ -83,153 +38,33 @@ export class SerialDevice {
     localStorage.setItem("last-connect-message", status);
   }
 
-  public determineDeviceFamily(info: SerialPortInfo){
-    return info.usbProductId === 516 && info.usbVendorId === 3368
-      ? "microbit"
-      : "arduino";
+  public setKnownBoard(knownBoard: boolean){
+    this.knownBoard = knownBoard;
   }
 
-  /**
-   * True only for a Web Serial port (Arduino / radio-hub micro:bit). The Spiker:bit
-   * connects over WebUSB and has no port, so for "is any device connected?" use
-   * {@link isConnected} instead — this method is intentionally Web-Serial-specific.
-   */
-  public hasWebSerialPort(){
-    return this.port !== undefined && this.port?.readable;
+  public isConnected(){
+    return this.activeTransport != null;
   }
 
-  public async requestAndSetPort(){
-    try {
-      this.port = await navigator.serial.requestPort();
-      this.deviceInfo = await this.port.getInfo();
-      this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
-    }
-    catch (error) {
-      console.error("error requesting port: ", error);
-    }
-  }
-
-  private readonly READ_TIMEOUT_MS = 2000;
-
-  private async readWithTimeout(
-    streamReader: ReadableStreamDefaultReader<Uint8Array>
-  ): Promise<{ value: string | undefined; done: boolean; timedOut: boolean }> {
-    const timeoutPromise = new Promise<{ value: undefined; done: false; timedOut: true }>((resolve) => {
-      setTimeout(() => resolve({ value: undefined, done: false, timedOut: true }), this.READ_TIMEOUT_MS);
-    });
-
-    const readPromise = streamReader.read().then(({ value, done }) => ({
-      value: value ? textDecoder.decode(value) : undefined,
-      done,
-      timedOut: false
-    }));
-
-    return Promise.race([readPromise, timeoutPromise]);
-  }
-
-  private async closePort(streamReader?: ReadableStreamDefaultReader<Uint8Array>) {
-    if (!this.port) return;
-    try {
-      // Cancel and release the reader first
-      if (streamReader) {
-        try {
-          await streamReader.cancel();
-        } catch (e) {
-          // Reader may already be released
-        }
-        try {
-          streamReader.releaseLock();
-        } catch (e) {
-          // Lock may already be released
-        }
-      }
-      // Close the writer
-      if (this.writer) {
-        try {
-          await this.writer.close();
-        } catch (e) {
-          // Writer may already be closed
-        }
-      }
-      await this.port.close();
-    } catch (e) {
-      console.error("Error closing port:", e);
-    }
-  }
-
-  private async reopenPort() {
-    if (!this.port) return false;
-    try {
-      await this.port.open({ baudRate: 9600 });
-      // Re-setup writer after reopening
-      // If port.writable is null, this will throw and be caught below
-      this.writer = this.port.writable!.getWriter();
-      return true;
-    } catch (e) {
-      console.error("Error reopening port:", e);
-      return false;
-    }
-  }
-
-  public async handleStream(channels: Array<NodeChannelInfo>){
-    if (!this.port) return;
+  // Called by a transport (Web Serial or WebUSB) to become the active write path, receive
+  // inbound data centrally, and mark the store connected.
+  public setActiveDevice(deviceFamily: string, transport: IDeviceTransport, channels: NodeChannelInfo[]){
+    this.activeTransport = transport;
+    this.deviceFamily = deviceFamily;
     this.channels = channels;
-    await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
+    transport.onData = (chunk: string) => this.receive(chunk);
+    transport.onDisconnect = () => this.clearActiveDevice();
+    this.updateConnectionInfo(Date.now(), "connect");
+  }
 
-    // set up writer directly on the port's writable stream
-    if (!this.port.writable) {
-      console.error("Port is not writable");
-      // This has never happened in practice, but we try to handle it gracefully
-      await this.closePort();
-      return;
-    }
-    this.writer = this.port.writable.getWriter();
-    this.activeTransport = new WebSerialTransport(
-      () => this.writer,
-      () => !!this.hasWebSerialPort(),
-      () => this.closePort()
-    );
-
-    // listen for serial data coming in to computer
-    while (this.port) {
-      if (!this.port.readable) {
-        // Port is closed, try to reopen
-        log("Port not readable, attempting to reopen...");
-        const reopened = await this.reopenPort();
-        if (!reopened || !this.port.readable) {
-          console.error("Failed to reopen port, stopping stream handler");
-          break;
-        }
-      }
-
-      const streamReader = this.port.readable!.getReader();
-      try {
-        while (this.port.readable) {
-          const { value, done, timedOut } = await this.readWithTimeout(streamReader);
-
-          if (timedOut) {
-            log("Read timed out, closing and reopening port...");
-            await this.closePort(streamReader);
-            break; // Break inner loop to trigger reopen in outer loop
-          }
-
-          if (done){
-            break;
-          }
-          this.receive(value!);
-        }
-      }
-      catch (error) {
-        console.error(error);
-      }
-      finally {
-        streamReader.releaseLock();
-      }
-    }
+  public clearActiveDevice(){
+    this.activeTransport = undefined;
+    this.deviceFamily = undefined;
+    this.updateConnectionInfo(Date.now(), "disconnect");
   }
 
   // Central inbound router: dispatch a serial chunk to the parser for the connected
-  // device's protocol, using the recorded channels. A transport's onData is wired here.
+  // device's protocol, using the recorded channels.
   public receive(chunk: string){
     const protocol = deviceProtocol(this.deviceFamily);
     if (protocol === "arduino") this.handleArduinoStreamObj(chunk, this.channels);
@@ -276,26 +111,6 @@ export class SerialDevice {
 
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer = parseArduinoSerialData(this.localBuffer + value, channels);
-  }
-
-  public isConnected(){
-    return this.hasWebSerialPort() || this.transportConnected;
-  }
-
-  // Called by a non-Web-Serial device (Spiker:bit/WebUSB) to make its transport
-  // the active write path and mark the shared store connected.
-  public setActiveDevice(deviceFamily: string, transport: IDeviceTransport){
-    this.activeTransport = transport;
-    this.transportConnected = true;
-    this.deviceFamily = deviceFamily;
-    this.updateConnectionInfo(Date.now(), "connect");
-  }
-
-  public clearActiveDevice(){
-    this.activeTransport = undefined;
-    this.transportConnected = false;
-    this.deviceFamily = undefined;
-    this.updateConnectionInfo(Date.now(), "disconnect");
   }
 
   public writeLine(line: string){

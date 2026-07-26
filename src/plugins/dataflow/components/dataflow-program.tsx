@@ -22,6 +22,7 @@ import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../nodes/rete-manager";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import { createSpikerbitConnection, makeSpikerbitFlashDataSource } from "../../../models/stores/spikerbit-connection";
+import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 
 import "./dataflow-program.scss";
@@ -437,18 +438,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.reteManager?.createAndAddNode(nodeType, position);
   };
 
-  private serialDeviceRefresh = () => {
-    if (!this.stores.serialDevice.hasWebSerialPort()){
-      this.stores.serialDevice.requestAndSetPort()
-        .then(() => {
-          this.stores.serialDevice.handleStream(this.props.tileContent.channels);
-        });
-    }
-
-    if (this.stores.serialDevice.hasWebSerialPort()){
-      // TODO - if necessary
-      // https://web.dev/serial/#close-port
-    }
+  private serialDeviceRefresh = async () => {
+    if (this.stores.serialDevice.isConnected()) return;
+    const transport = new WebSerialTransport();
+    const opened = await transport.open();
+    if (!opened) return;
+    this.stores.serialDevice.setActiveDevice(
+      transport.deviceFamily!, transport, this.props.tileContent.channels);
+    this.stores.serialDevice.setKnownBoard(transport.knownBoard);
+    transport.startReading();
   };
 
   private connectSpikerbit = async () => {

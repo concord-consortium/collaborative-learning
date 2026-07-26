@@ -73,7 +73,8 @@ export class WebSerialTransport implements IDeviceTransport {
   }
 
   // Read loop. Delivers decoded chunks to onData; on give-up (reopen fails) fires
-  // onDisconnect. Preserves the prior reopen/timeout recovery behavior.
+  // onDisconnect. Preserves the prior reopen/timeout recovery behavior. Relies on the
+  // browser nulling `port.readable` on a real disconnect to drive the reopen check below.
   public async startReading(){
     this.reading = true;
     while (this.reading && this.port) {
