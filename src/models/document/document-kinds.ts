@@ -111,8 +111,8 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
  */
 export interface IDocumentScopeContext {
   unit: string | null;
-  investigation?: string;
-  problem?: string;
+  investigation?: string | null;
+  problem?: string | null;
   context_id: string;
   groupId?: string;
   offeringId?: string;
@@ -136,7 +136,13 @@ export function getDocumentScopeFields(
     };
     case "classUnit": return {
       unit: ctx.unit,
-      context_id: ctx.context_id
+      context_id: ctx.context_id,
+      // Stated explicitly rather than omitted. A scope field written as null means "absent scope"
+      // (firestore.rules `hasScopeField`), the same convention class-scoped documents use for
+      // `unit: null`. It is what lets Sort Work query for documents scoped to a unit but not to a
+      // problem — Firestore cannot match a field that is missing.
+      investigation: null,
+      problem: null
     };
     case "class": return {
       unit: null,
