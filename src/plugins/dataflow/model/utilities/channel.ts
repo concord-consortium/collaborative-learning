@@ -1,7 +1,6 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 
 export interface NodeChannelInfo {
-  hubId: string;
   hubName: string;
   channelId: string;
   missing: boolean;
@@ -28,7 +27,6 @@ export interface NodeChannelInfo {
 }
 
 const emgSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "emg",
   displayName: "EMG",
@@ -44,7 +42,6 @@ const emgSensorChannel: NodeChannelInfo = {
 };
 
 export const fsrSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "fsr",
   displayName: "Pressure",
@@ -60,7 +57,6 @@ export const fsrSensorChannel: NodeChannelInfo = {
 };
 
 export const tmpSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "tmp",
   displayName: "Temperature",
@@ -76,7 +72,6 @@ export const tmpSensorChannel: NodeChannelInfo = {
 };
 
 export const a1PinChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "a1",
   displayName: "A1",
@@ -137,7 +132,6 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
     return {
       ...basis,
       microbitId: s.microBitId,
-      hubId: `MICROBIT-RADIO-${s.microBitId}`,
       hubName: `microbit ${s.microBitId}`,
       name: `${s.type}-microbit-${s.microBitId}`,
       displayName: `${sensorTypeDisplayName} ${hubDisplayName}`,
@@ -165,7 +159,6 @@ function createMicroBitRelayInfoChannels(hubs: MicroBitHubInfo[] ){
     return {
       ...basis,
       microbitId: h.microBitId,
-      hubId: `MICROBIT-RADIO-${h.microBitId}`,
       hubName: `microbit ${h.microBitId}`,
       name: `relays-microbit-${h.microBitId}`,
       channelId: `r-${h.microBitId}`,
