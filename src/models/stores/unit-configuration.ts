@@ -125,5 +125,5 @@ export interface UnitConfiguration extends ProblemConfiguration {
   defaultSharedDocuments?: boolean;
   // Class-wide collaborative documents for this unit. Each becomes one auto-created,
   // concurrently-edited document per class per unit.
-  classWideDocuments?: Array<{ kind: string; title: string; icon?: string }>;
+  classWideDocuments?: Array<{ kind: string; title: string }>;
 }
