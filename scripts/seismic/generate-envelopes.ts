@@ -22,6 +22,7 @@ import {
 import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
 import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
+import { getMetadataForChannel } from "../../shared/seismic/channel-metadata-utils.js";
 import {
   createPipelineState, processL2Point, flushTiles, type FlushTileFn
 } from "../../shared/seismic/envelope-pipeline.js";
@@ -171,32 +172,18 @@ function loadMiniSeedFile(filePath: string): RawTrace[] {
   return traces;
 }
 
-// ---- Sensitivity Lookup ----
-
-function findSensitivity(
+/** getMetadataForChannel, but throwing when the channel/location has no metadata at all. */
+function requireMetadataForChannel(
   metadata: ChannelMetadata[],
   channel: string,
   location: string,
   timeSec: number
-): { scale: number; instrumentCode: string } {
-  // Find the channel metadata entry that covers this time
-  const matching = metadata.filter(m => m.channel === channel && (m.location ?? "") === location);
-  if (matching.length === 0) {
+): ChannelMetadata {
+  const match = getMetadataForChannel(metadata, { channel, location }, timeSec);
+  if (!match) {
     throw new Error(`No metadata found for channel ${channel} location "${location}"`);
   }
-
-  for (const m of matching) {
-    const start = new Date(m.startTime).getTime() / 1000;
-    const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
-    if (timeSec >= start && timeSec < end) {
-      return { scale: m.scale, instrumentCode: m.instrumentCode };
-    }
-  }
-
-  // Fall back to the most recent entry
-  console.warn(`No metadata time match for channel ${channel} at ${timeSec}, using latest`);
-  const last = matching[matching.length - 1];
-  return { scale: last.scale, instrumentCode: last.instrumentCode };
+  return match;
 }
 
 // ---- S3 Operations ----
@@ -328,7 +315,7 @@ async function main() {
       console.warn(`No traces for channel ${channel} at location "${config.location}"${existsAt}, skipping`);
       continue;
     }
-    const { instrumentCode } = findSensitivity(metadata, channel, config.location, firstTrace.startTime);
+    const { instrumentCode } = requireMetadataForChannel(metadata, channel, config.location, firstTrace.startTime);
     const rangeMax = AMPLITUDE_RANGES[instrumentCode];
     if (!rangeMax) {
       console.warn(
@@ -364,7 +351,7 @@ async function main() {
         .sort((a, b) => a.startTime - b.startTime);
 
       for (const trace of channelTraces) {
-        const { scale } = findSensitivity(metadata, channel, config.location, trace.startTime);
+        const { scale } = requireMetadataForChannel(metadata, channel, config.location, trace.startTime);
         const physicalSamples = new Float64Array(trace.samples.length);
         for (let i = 0; i < trace.samples.length; i++) {
           physicalSamples[i] = trace.samples[i] / scale;

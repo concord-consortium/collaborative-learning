@@ -248,23 +248,13 @@ export function mergeEnvelopeTileData(a: EnvelopeTileData, b: EnvelopeTileData):
 
 ---
 
-### Task 4: Extract `findSensitivity` to shared
+### Task 4: Shared channel metadata lookup — ALREADY DONE
 
-The browser processor needs the sensitivity lookup currently private to
-`scripts/seismic/generate-envelopes.ts` (lines ~176-200).
-
-**Files:**
-- Create: `shared/seismic/channel-sensitivity.ts`, `shared/seismic/channel-sensitivity.test.ts`
-- Modify: `scripts/seismic/generate-envelopes.ts` (delete local `findSensitivity`, import instead)
-
-**Steps:** Move the function verbatim (signature
-`findSensitivity(metadata: ChannelMetadata[], channel: string, location: string, timeSec: number): { scale: number; instrumentCode: string }`),
-including the throw-on-no-channel-match and warn-and-use-latest fallback. Write tests first
-(match by time epoch; blank location matching `undefined`; fallback to latest; throw when no
-channel matches). Then update the script's import (note the script uses `.js` suffixes:
-`from "../../shared/seismic/channel-sensitivity.js"`). Verify:
-`npm test -- --no-watchman shared/seismic/channel-sensitivity.test.ts` and `npm run check:types`.
-Commit: `"Extract findSensitivity into shared channel-sensitivity module"`
+Completed ahead of plan execution: `getMetadataForChannel` was moved from
+`SeismicQueryService` into `shared/seismic/channel-metadata-utils.ts` (with tests), and the
+script's duplicate `findSensitivity` was replaced by a thin `requireMetadataForChannel`
+wrapper over it. The processor in Task 8 imports `getMetadataForChannel` from there.
+Nothing to do for this task.
 
 ---
 
@@ -539,7 +529,7 @@ one-segment days (constant sample rate) so expected tile contents are computable
 
 ```ts
 import { miniseed } from "seisplotjs";
-import { findSensitivity } from "../../../../shared/seismic/channel-sensitivity";
+import { getMetadataForChannel } from "../../../../shared/seismic/channel-metadata-utils";
 import { quantize } from "../../../../shared/seismic/envelope-codec";
 import { AMPLITUDE_RANGES, FINEST_LEVEL, LEVEL_SPACINGS } from "../../../../shared/seismic/envelope-config";
 import { computeEnvelopesFromRaw } from "../../../../shared/seismic/envelope-compute";
@@ -598,7 +588,6 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
   const metadata = await (options.fetchMetadata ?? fetchStationMetadata)(stationData);
   const cache = options.cache ?? createOpfsCache();
   const parseDay = options.parseDay ?? defaultParseDay;
-  const location = stationData.location ?? "";
 
   let uploadedTiles = 0;
   let processedDays = 0;
@@ -629,8 +618,11 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
       }
       const segments = parseDay(buffer).sort((a, b) => a.startTime - b.startTime);
       for (const seg of segments) {
-        const { scale, instrumentCode } =
-          findSensitivity(metadata, stationData.channel, location, seg.startTime);
+        const channelMetadata = getMetadataForChannel(metadata, stationData, seg.startTime);
+        if (!channelMetadata) {
+          throw new Error(`No metadata for channel ${stationData.channel}`);
+        }
+        const { scale, instrumentCode } = channelMetadata;
         const rangeMax = AMPLITUDE_RANGES[instrumentCode];
         if (!rangeMax) throw new Error(`Unknown instrument code "${instrumentCode}"`);
         const physical = new Float64Array(seg.samples.length);
