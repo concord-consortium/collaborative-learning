@@ -269,6 +269,11 @@ Deferred to later stages (see [../../document-axes/README.md](../../document-axe
   user is denied; a class-wide document may set its `canonical` label only when its class+unit pointer confirms
   it; two concurrent claims converge to one documentKey; the metadata document is readable before any history
   exists.
+- **Manual end-to-end:** the `demo/units/qa` unit (`src/public/demo/units/qa/content.json`) declares one
+  `drivingQuestionBoard` class-wide slot. Loading that unit auto-creates the class-wide document and claims its
+  pointer, so the Firestore metadata document (owner `class_<classHash>`, `unit`, `kind: "drivingQuestionBoard"`,
+  `concurrent: true`) and the `classes/<classHash>/units/<unit>/slots/drivingQuestionBoard` pointer can be
+  inspected directly.
 - Full `npm test`, `npm run check:types`, `npm run lint:build`, and the `firebase-test` rules suite green.
 
 ## References
