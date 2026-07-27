@@ -33,7 +33,7 @@ export interface IDocumentKindInfo {
   /** How this kind's scope axes are derived (see DocumentScopeType). */
   scopeType: DocumentScopeType;
   /**
-   * Static display title (presentation config). Leave undefined for dynamic titles like
+   * Static document display title. Leave undefined for dynamic titles like
    * group documents or in the future problem documents.
    */
   title?: string;
@@ -53,9 +53,27 @@ export interface IDocumentOwnerContext {
   classOwnerId?: string;
 }
 
+const kDocumentKindPattern = /^[a-z][a-zA-Z0-9]*$/;
+/**
+ * A document `kind` is used as a Firestore path segment (the canonical-pointer slot) as well as the registry
+ * key, so a kind is restricted to a camelCase identifier: a lowercase letter followed by letters/digits, with
+ * no separators or special characters. This matches the built-in document type strings (e.g.
+ * "learningLogPublication") and keeps the value safe as a Firestore document id.
+ */
+export function isValidDocumentKind(value: string): boolean {
+  return kDocumentKindPattern.test(value);
+}
+
 const gDocumentKindInfoMap: Record<string, IDocumentKindInfo> = {};
 
 export function registerDocumentKind(kind: string, info: Omit<IDocumentKindInfo, "kind">) {
+  if (!isValidDocumentKind(kind)) {
+    throw new Error(`Document kind "${kind}" is not a valid identifier ` +
+      `(must be camelCase letters/digits, with no separators or special characters)`);
+  }
+  if (gDocumentKindInfoMap[kind]) {
+    throw new Error(`Document kind "${kind}" is already registered`);
+  }
   gDocumentKindInfoMap[kind] = { kind, ...info };
 }
 
@@ -161,32 +179,42 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   return undefined;
 }
 
-//
-// Built-in document kinds.
-//
+function registerBuiltInDocumentKinds() {
+  registerDocumentKind(GroupDocument, {
+    metadataFields: { concurrent: true },
+    ownerType: "group",
+    scopeType: "group"
+  });
 
-registerDocumentKind( GroupDocument, {
-  metadataFields: { concurrent: true },
-  ownerType: "group",
-  scopeType: "group"
-});
+  const personalLikeKindInfo = {
+    metadataFields: { },
+    ownerType: "user",
+    scopeType: "class"
+  } as const;
+  registerDocumentKind(PersonalDocument, personalLikeKindInfo);
+  registerDocumentKind(LearningLogDocument, personalLikeKindInfo);
+  registerDocumentKind(PersonalPublication, personalLikeKindInfo);
+  registerDocumentKind(LearningLogPublication, personalLikeKindInfo);
 
-const personalLikeKindInfo = {
-  metadataFields: { },
-  ownerType: "user",
-  scopeType: "class"
-} as const;
-registerDocumentKind(PersonalDocument, personalLikeKindInfo);
-registerDocumentKind(LearningLogDocument, personalLikeKindInfo);
-registerDocumentKind(PersonalPublication, personalLikeKindInfo);
-registerDocumentKind(LearningLogPublication, personalLikeKindInfo);
+  const problemLikeKindInfo = {
+    metadataFields: { },
+    ownerType: "user",
+    scopeType: "offering"
+  } as const;
+  registerDocumentKind(PlanningDocument, problemLikeKindInfo);
+  registerDocumentKind(ProblemDocument, problemLikeKindInfo);
+  registerDocumentKind(ProblemPublication, problemLikeKindInfo);
+  registerDocumentKind(SupportPublication, problemLikeKindInfo);
+}
+registerBuiltInDocumentKinds();
 
-const problemLikeKindInfo = {
-  metadataFields: { },
-  ownerType: "user",
-  scopeType: "offering"
-} as const;
-registerDocumentKind(PlanningDocument, problemLikeKindInfo);
-registerDocumentKind(ProblemDocument, problemLikeKindInfo);
-registerDocumentKind(ProblemPublication, problemLikeKindInfo);
-registerDocumentKind(SupportPublication, problemLikeKindInfo);
+// Test-only: reset the registry to just the built-in kinds. The registry is module-global mutable state and
+// registerDocumentKind throws on duplicates, so a test that registers a kind must reset before another test
+// registers the same kind. (Jest gives each test file its own module registry, so this is only needed within a
+// file that registers the same kind in more than one test.)
+export function resetDocumentKindRegistryForTests() {
+  for (const kind of Object.keys(gDocumentKindInfoMap)) {
+    delete gDocumentKindInfoMap[kind];
+  }
+  registerBuiltInDocumentKinds();
+}

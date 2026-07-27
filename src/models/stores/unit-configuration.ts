@@ -124,7 +124,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // whether student documents (problem, personal, learning log) are shared by default
   defaultSharedDocuments?: boolean;
   // Class-wide collaborative documents for this unit. Each becomes one auto-created,
-  // concurrently-edited document per class per unit (the Driving Question Board is the common default).
-  // `kind` is the registry key (also the canonical-pointer label); `title` is the authored display title.
+  // concurrently-edited document per class per unit.
   classWideDocuments?: Array<{ kind: string; title: string; icon?: string }>;
 }

@@ -1,8 +1,20 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
   getDocumentKindInfo, getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType,
-  getDocumentScopeFields, getDocumentTitle, registerDocumentKind
+  getDocumentScopeFields, getDocumentTitle, isValidDocumentKind, registerDocumentKind
 } from "./document-kinds";
+
+describe("isValidDocumentKind", () => {
+  it("accepts camelCase identifiers, including the built-in document type strings", () => {
+    ["group", "personal", "learningLog", "personalPublication", "drivingQuestionBoard", "wordWall", "slot2"]
+      .forEach(kind => expect(isValidDocumentKind(kind)).toBe(true));
+  });
+
+  it("rejects separators, special characters, a leading uppercase or digit, and the empty string", () => {
+    ["driving-question-board", "word wall", "word_wall", "DQB", "2board", "board!", "a/b", ".", "__proto__", ""]
+      .forEach(kind => expect(isValidDocumentKind(kind)).toBe(false));
+  });
+});
 
 describe("document kinds registry", () => {
   it("resolves the built-in group kind as concurrent", () => {
@@ -16,9 +28,24 @@ describe("document kinds registry", () => {
   });
 
   it("registerDocumentKind adds new kinds", () => {
-    registerDocumentKind("test-added-kind",
+    registerDocumentKind("testAddedKind",
       { metadataFields: { concurrent: true }, ownerType: "user", scopeType: "class" });
-    expect(getDocumentKindInfo("test-added-kind")?.metadataFields.concurrent).toBe(true);
+    expect(getDocumentKindInfo("testAddedKind")?.metadataFields.concurrent).toBe(true);
+  });
+
+  it("registerDocumentKind throws when a kind is registered more than once", () => {
+    registerDocumentKind("testDuplicateKind",
+      { metadataFields: {}, ownerType: "user", scopeType: "class" });
+    expect(() => registerDocumentKind("testDuplicateKind",
+      { metadataFields: {}, ownerType: "user", scopeType: "class" })).toThrow(/already registered/);
+    // built-in kinds are registered at module load, so re-registering one throws too
+    expect(() => registerDocumentKind(GroupDocument,
+      { metadataFields: { concurrent: true }, ownerType: "group", scopeType: "group" })).toThrow();
+  });
+
+  it("registerDocumentKind throws for a kind that is not a valid camelCase identifier", () => {
+    expect(() => registerDocumentKind("not-camel-case",
+      { metadataFields: {}, ownerType: "user", scopeType: "class" })).toThrow(/not a valid identifier/);
   });
 
   describe("getDocumentKindMetadataFields", () => {
@@ -50,10 +77,10 @@ describe("document kinds registry", () => {
     });
 
     it("resolves a class kind to the class owner", () => {
-      registerDocumentKind("test-dqb",
+      registerDocumentKind("testDqb",
         { metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit" });
-      expect(getDocumentOwnerType("test-dqb")).toBe("class");
-      expect(getDocumentOwner("test-dqb", ctx)).toBe("class_c1");
+      expect(getDocumentOwnerType("testDqb")).toBe("class");
+      expect(getDocumentOwner("testDqb", ctx)).toBe("class_c1");
     });
 
     it("falls back to the user when the scope's synthetic owner was not supplied", () => {
@@ -73,9 +100,9 @@ describe("document kinds registry", () => {
     });
 
     it("returns the unit and context_id for a class-unit kind", () => {
-      registerDocumentKind("test-word-wall",
+      registerDocumentKind("testWordWall",
         { metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit" });
-      expect(getDocumentScopeFields("test-word-wall", ctx)).toEqual({ unit: "msu", context_id: "class-h" });
+      expect(getDocumentScopeFields("testWordWall", ctx)).toEqual({ unit: "msu", context_id: "class-h" });
     });
 
     it("returns offering scope plus the problem context for an offering kind", () => {
@@ -92,11 +119,11 @@ describe("document kinds registry", () => {
 
   describe("title", () => {
     it("returns a class-wide kind's registered static title", () => {
-      registerDocumentKind("test-dqb-title", {
+      registerDocumentKind("testDqbTitle", {
         metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
         title: "Driving Question Board"
       });
-      expect(getDocumentTitle({ kind: "test-dqb-title", type: GroupDocument })).toBe("Driving Question Board");
+      expect(getDocumentTitle({ kind: "testDqbTitle", type: GroupDocument })).toBe("Driving Question Board");
     });
 
     it("returns the group-document label for a type:group doc with no registered title", () => {

@@ -10,7 +10,7 @@ describe("getCanonicalPointerPath", () => {
 
   it("class+unit scope (no offering) — uses the units segment; label === kind", () => {
     expect(getCanonicalPointerPath(
-      { classHash: "class-1", unit: "msu" }, "driving-question-board"
-    )).toBe("canonical/v1/classes/class-1/units/msu/slots/driving-question-board");
+      { classHash: "class-1", unit: "msu" }, "drivingQuestionBoard"
+    )).toBe("canonical/v1/classes/class-1/units/msu/slots/drivingQuestionBoard");
   });
 });

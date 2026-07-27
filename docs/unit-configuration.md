@@ -111,6 +111,8 @@ which checks if the the aiEvaluation is set or if there are invisible exemplar d
 
 `hide4up`: (boolean | undefined) If true, the button that switches to 4up view is always hidden.
 
+`classWideDocuments`: (array | undefined) Class-wide collaborative documents for the unit. Each entry is `{ kind, title, icon? }` and becomes one auto-created, concurrently-edited document shared by the whole class, one per class per unit (e.g. a Driving Question Board). `kind` is a label so multiple class wide documents can be added. This label has to be unique across all document types not just class wide documents. It must be a camelCase identifier — a lowercase letter followed by letters or digits, with no spaces, hyphens, or other special characters (e.g. `drivingQuestionBoard`); entries with an invalid `kind` are ignored. `title` is the fixed document title. `icon` is optional. Units that omit this array create no class-wide documents.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.

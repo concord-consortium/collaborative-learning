@@ -3,7 +3,7 @@ import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../mo
 import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
-import { registerDocumentKind } from "../models/document/document-kinds";
+import { registerDocumentKind, resetDocumentKindRegistryForTests } from "../models/document/document-kinds";
 import {
   GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -63,6 +63,9 @@ describe("db", () => {
   };
 
   beforeEach(() => {
+    // registerDocumentKind throws on duplicates; several tests register the same class-wide kind, so reset the
+    // module-global registry to just the built-in kinds before each test.
+    resetDocumentKindRegistryForTests();
     setUrlParams(originalUrlParams);
     stores = specStores({
       appMode: "test",
@@ -434,7 +437,7 @@ describe("db", () => {
       // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
       // getDocumentScopeFields returns the class `unit` (read from the stores' current unit). The authored title
       // is registered too, to prove it is resolved by kind and NOT persisted into the Firestore metadata.
-      registerDocumentKind("driving-question-board", {
+      registerDocumentKind("drivingQuestionBoard", {
         metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
         title: "Driving Question Board"
       });
@@ -456,12 +459,12 @@ describe("db", () => {
       // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner
       // is passed directly. No title is passed — a class-wide doc's title is resolved live by kind at display.
       const written: any = await db.createFirestoreMetadataDocument({
-        documentKey: "dqb-1", type: GroupDocument, kind: "driving-question-board",
+        documentKey: "dqb-1", type: GroupDocument, kind: "drivingQuestionBoard",
         owner: "class_class-1", createdAt: 1
       });
       expect(written).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
-        kind: "driving-question-board", concurrent: true, uid: "class_class-1"
+        kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       expect(written.title).toBeUndefined();       // title is looked up by kind, never stored
       expect(written.offeringId).toBeUndefined();
@@ -469,7 +472,7 @@ describe("db", () => {
       expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
       expect(setPayloads[0]).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
-        kind: "driving-question-board", concurrent: true, uid: "class_class-1"
+        kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       expect(setPayloads[0].title).toBeUndefined();
     });
@@ -497,7 +500,7 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
       expect(result.opened).toBe("existing");
     });
@@ -514,13 +517,13 @@ describe("db", () => {
              set: (_r: any, d: any) => setCalls.push(d),
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
+      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
-        kind: "driving-question-board"
+        kind: "drivingQuestionBoard"
       }));
-      expect(updateCalls[0]).toEqual({ canonical: "driving-question-board" });
+      expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
       expect(result.opened).toBeDefined();
     });
   });
@@ -766,8 +769,8 @@ describe("db", () => {
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
-          { kind: "driving-question-board", title: "DQB" },
-          { kind: "word-wall", title: "Word Wall" }
+          { kind: "drivingQuestionBoard", title: "DQB" },
+          { kind: "wordWall", title: "Word Wall" }
         ] } as any
       });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
@@ -775,7 +778,7 @@ describe("db", () => {
       // allow the fire-and-forget promises to settle
       await new Promise(r => setTimeout(r, 0));
       expect((db as any).getOrCreateClassWideDocument).toHaveBeenCalledTimes(2);
-      expect(created.map((s: any) => s.kind)).toEqual(["driving-question-board", "word-wall"]);
+      expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard", "wordWall"]);
     });
 
     it("does nothing when no class-wide documents are declared", async () => {
@@ -785,6 +788,45 @@ describe("db", () => {
       (db as any).createDeclaredClassWideDocuments();
       await new Promise(r => setTimeout(r, 0));
       expect((db as any).getOrCreateClassWideDocument).not.toHaveBeenCalled();
+    });
+
+    it("skips entries whose kind is not a valid camelCase identifier", async () => {
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const created: any[] = [];
+      (db as any).getOrCreateClassWideDocument =
+        jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
+      stores.appConfig = specAppConfig({
+        config: { classWideDocuments: [
+          { kind: "driving-question-board", title: "invalid (kebab-case)" },
+          { kind: "drivingQuestionBoard", title: "DQB" }
+        ] } as any
+      });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).createDeclaredClassWideDocuments();
+      await new Promise(r => setTimeout(r, 0));
+      expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard"]);
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it("skips a second entry whose kind duplicates an already-registered kind", async () => {
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const created: any[] = [];
+      (db as any).getOrCreateClassWideDocument =
+        jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
+      stores.appConfig = specAppConfig({
+        config: { classWideDocuments: [
+          { kind: "drivingQuestionBoard", title: "DQB" },
+          { kind: "drivingQuestionBoard", title: "duplicate" },  // duplicate kind: registration throws → skipped
+          { kind: "group", title: "collides with a built-in kind" }  // also skipped
+        ] } as any
+      });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).createDeclaredClassWideDocuments();
+      await new Promise(r => setTimeout(r, 0));
+      expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard"]);
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
   });
 

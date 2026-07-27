@@ -129,7 +129,7 @@ describe("canonical flag integrity", () => {
 });
 
 const kUnit = "msu";
-const kClassWideLabel = "driving-question-board";
+const kClassWideLabel = "drivingQuestionBoard";
 const kClassWidePointerPath =
   `authed/test-portal/canonical/v1/classes/${thisClass}/units/${kUnit}/slots/${kClassWideLabel}`;
 const kOtherClassWidePointerPath =

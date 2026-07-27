@@ -190,13 +190,13 @@ describe("document utils", () => {
       });
 
       test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
-        registerDocumentKind("test-class-wide-title", {
+        registerDocumentKind("testClassWideTitle", {
           metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
           title: "Driving Question Board"
         });
         const metadata = DocumentMetadataModel.create({
           // type stays "group"; the title comes from the kind, and no `title` is stored on the doc.
-          type: GroupDocument, kind: "test-class-wide-title", uid: "class_c1", key: "dqb-1"
+          type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });

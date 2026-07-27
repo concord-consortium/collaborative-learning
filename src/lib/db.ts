@@ -800,15 +800,21 @@ export class DB {
     for (const classWideDoc of classWideDocs) {
       // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
       // registry and createDocument derives its owner and scope. Class-wide collaborative documents are always
-      // concurrent, class-owned (class_<classHash>), and class+unit scoped; registration is idempotent. The
-      // authored title is registered here (not stored per document) so it is resolved live by kind — an author
-      // changing it applies to every document of that kind (see getDocumentTitle).
-      registerDocumentKind(classWideDoc.kind, {
-        metadataFields: { concurrent: true },
-        ownerType: "class",
-        scopeType: "classUnit",
-        title: classWideDoc.title
-      });
+      // concurrent, class-owned (class_<classHash>), and class+unit scoped. The authored title is registered
+      // here (not stored per document) so it is resolved live by kind — an author changing it applies to every
+      // document of that kind (see getDocumentTitle). registerDocumentKind validates the kind and rejects a
+      // duplicate (both throw); skip a bad entry rather than crash startup.
+      try {
+        registerDocumentKind(classWideDoc.kind, {
+          metadataFields: { concurrent: true },
+          ownerType: "class",
+          scopeType: "classUnit",
+          title: classWideDoc.title
+        });
+      } catch (err) {
+        console.error("Ignoring class-wide document:", classWideDoc.kind, err);
+        continue;
+      }
       this.getOrCreateClassWideDocument(classWideDoc).catch((err) => {
         console.error("Failed to create class-wide document", classWideDoc.kind, err);
       });
