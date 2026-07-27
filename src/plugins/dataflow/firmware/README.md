@@ -18,9 +18,9 @@ longer required. See the header of `spikerbit-clue.ts` for the full rationale.
   program. This directory is excluded from the CLUE tsconfig/eslint because the
   program uses MakeCode-only globals.
 - **Compiled artifact:** `spikerbit-clue.hex` — imported by the app as a string
-  (webpack `asset/source`) in `dataflow-program.tsx`. **Until this file is committed,
-  the production webpack build will fail** (type-checking still passes via the
-  ambient `*.hex` declaration in `src/hex.d.ts`).
+  (webpack `asset/source`) in `dataflow-program.tsx`; TypeScript resolves the import via
+  the ambient `*.hex` declaration in `src/typings.d.ts`. The file must be present for the
+  production webpack build (`asset/source` reads it at build time).
 
 ## Rebuilding the hex
 
