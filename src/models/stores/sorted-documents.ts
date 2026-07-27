@@ -41,6 +41,10 @@ export class SortedDocuments {
   // `metadataDocsWithoutUnit` picks up unit-less docs (e.g. personal documents) when a unit
   // filter is applied.
   metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  // `metadataDocsUnitScoped` picks up documents scoped to the unit but not to a problem (class-wide
+  // collaborative documents) when an investigation or problem filter is applied, which would
+  // otherwise exclude them.
+  metadataDocsUnitScoped = MetadataDocMapModel.create();
   docsReceived = false;
   // Maps from document ID to the history entry ID that the user requested to view.
   documentHistoryViewRequests: Record<string,string> = {};
@@ -54,6 +58,7 @@ export class SortedDocuments {
     // We only want MobX observability + MST serialization, not MST actions, on these maps.
     unprotect(this.metadataDocsFiltered);
     unprotect(this.metadataDocsWithoutUnit);
+    unprotect(this.metadataDocsUnitScoped);
     this.rootDocumentGroup = new DocumentGroup({
       stores,
       sortType: "All",
@@ -151,11 +156,29 @@ export class SortedDocuments {
       this.metadataDocsWithoutUnit.clear();
     }
 
-    // A disposing function that calls the two disposers from the
+    let disposeUnitScopedListener: (() => void) | undefined;
+    if (filter === "Investigation" || filter === "Problem") {
+      // A class-wide collaborative document is scoped to the unit, not to a problem, so it stores
+      // `investigation: null` and the filtered query above excludes it. Fetch by scope — the query
+      // names no document type or kind.
+      const queryForUnitScoped = baseQuery
+        .where("unit", "in", this.curriculumConfig.getUnitCodeVariants(unit))
+        .where("investigation", "==", null);
+      disposeUnitScopedListener = queryForUnitScoped.onSnapshot(snapshot => {
+        const mstSnapshot = this.stores.documentMetadata.getMSTSnapshotFromFBSnapshot(snapshot);
+        applySnapshot(this.metadataDocsUnitScoped, mstSnapshot);
+      });
+    } else {
+      // The All and Unit filters already include these documents.
+      this.metadataDocsUnitScoped.clear();
+    }
+
+    // A disposing function that calls the disposers from the
     // onSnapshot listeners.
     return () => {
       disposeFilteredListener();
       disposeDocsWithoutUnitListener?.();
+      disposeUnitScopedListener?.();
     };
   }
 
@@ -178,6 +201,12 @@ export class SortedDocuments {
     });
     this.metadataDocsWithoutUnit.forEach(doc => {
       // If there is a duplicate for some reason just ignore the unit-less one
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.metadataDocsUnitScoped.forEach(doc => {
+      // Also present in the filtered map under the All and Unit filters; dedupe by key.
       if (matchedDocKeys.has(doc.key)) return;
       docsArray.push(doc);
       matchedDocKeys.add(doc.key);
