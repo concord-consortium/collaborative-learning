@@ -641,11 +641,15 @@ export class DB {
   }
 
   // Verify the stores hold the runtime context a document of this kind needs to construct its owner and scope
-  // fields. Throws when the context is missing. Currently only group-scoped kinds have a requirement (the user
-  // must be in a group); the check lives here instead of the kind registry because it is easier for now.
+  // fields. Throws when the context is missing. Currently only group-owned kinds have a requirement: their owner
+  // id is `group_<offeringId>_<groupId>`, so both are required. The check lives here instead of the kind registry
+  // because it is easier for now.
   private validateDocumentKindCreation(kind: string) {
-    if (getDocumentOwnerType(kind) === "group" && !this.stores.user.currentGroupId) {
-      throw new Error("Cannot create group document because user is not in a group.");
+    if (getDocumentOwnerType(kind) === "group") {
+      const { currentGroupId, offeringId } = this.stores.user;
+      if (!currentGroupId || !offeringId) {
+        throw new Error("Cannot create group document because user is not in a group with an offering.");
+      }
     }
   }
 
@@ -754,8 +758,9 @@ export class DB {
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
     const groupId = user.currentGroupId;
-    if (!groupId) {
-      return Promise.reject("Cannot create group document because user is not in a group.");
+    // The group owner id and canonical-pointer path are both keyed on `group_<offeringId>_<groupId>`.
+    if (!groupId || !user.offeringId) {
+      return Promise.reject("Cannot create group document because user is not in a group with an offering.");
     }
     // The pointer slot is labeled "default" (the group's default canonical document), not by the
     // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.

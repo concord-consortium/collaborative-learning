@@ -270,7 +270,8 @@ describe("db", () => {
     beforeEach(() => {
       (db as any).openDocumentFromFirestoreMetadata = openStub;
       (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
-      stores.user.setCurrentGroupId("3");
+      // The group owner id and canonical-pointer path need both offeringId and currentGroupId.
+      stores.user = UserModel.create({ id: "1", portal: "example.com", offeringId: "off-1", currentGroupId: "3" });
     });
 
     it("fast path: opens the pointer's documentKey when the pointer exists", async () => {

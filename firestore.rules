@@ -359,11 +359,18 @@ service cloud.firestore {
       }
 
       match /documents/{docId} {
+        // A scope field counts only when it holds a non-empty string. A field written as null counts as
+        // absent scope, not a value: class-scoped docs (personal, learning-log) store `unit: null`, and a
+        // bare `!= ""` test would read that null as present (`null != ""` is true in rules).
+        function hasScopeField(data, key) {
+          return data.get(key, "") is string && data.get(key, "") != "";
+        }
+
         // A document's scope is read from the association fields it carries, not from its `type`.
         // True when `data`'s scope can hold a canonical pointer: it is anchored to an offering or a unit.
         // (class+owner-only scopes — personal, learning-log — have no canonical pointer.)
         function hasCanonicalScope(data) {
-          return data.get("offeringId", "") != "" || data.get("unit", "") != "";
+          return hasScopeField(data, "offeringId") || hasScopeField(data, "unit");
         }
 
         // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has no canonical
@@ -377,8 +384,8 @@ service cloud.firestore {
           return hasCanonicalScope(data)
             ? path("/databases/" + database + "/documents/authed/" + portal
                 + "/canonical/v1/classes/" + data.context_id
-                + (data.get("offeringId", "") != "" ? "/offerings/" + data.offeringId : "/units/" + data.unit)
-                + (data.get("groupId", "") != "" ? "/groups/" + data.groupId : "")
+                + (hasScopeField(data, "offeringId") ? "/offerings/" + data.offeringId : "/units/" + data.unit)
+                + (hasScopeField(data, "groupId") ? "/groups/" + data.groupId : "")
                 + "/slots/" + label)
             : null;
         }

@@ -126,6 +126,20 @@ describe("canonical flag integrity", () => {
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
   });
+
+  it("a class-scoped document that stores unit: null cannot claim canonical", async () => {
+    // Personal / learning-log docs are class-scoped and store `unit: null` with no offering or group.
+    // `unit: null` is absent scope, not a value, so the document has no canonical-pointer path and the
+    // claim is denied. (A bare `!= ""` scope test would read the null as present and build /units/null/…)
+    const personalDoc = {
+      uid: studentId, type: "personal", key: "personal-doc-1",
+      createdAt: Date.now(), context_id: thisClass, network: null, unit: null
+    };
+    const kPersonalDocPath = `authed/test-portal/documents/personal-doc-1`;
+    await adminWriteDoc(kPersonalDocPath, personalDoc);
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kPersonalDocPath).update({ canonical: "personalPublication" }));
+  });
 });
 
 const kUnit = "msu";
