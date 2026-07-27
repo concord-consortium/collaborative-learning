@@ -14,7 +14,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { miniseed } from "seisplotjs/nodeonly";
 import {
-  LEVEL_SPACINGS, NUM_LEVELS, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
+  LEVEL_SPACINGS, FINEST_LEVEL, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
 } from "../../shared/seismic/envelope-config.js";
 import {
   decodeLocation, getS3Root, getStationChannelPrefix, getTileS3Key
@@ -351,7 +351,6 @@ async function main() {
     const state = createPipelineState();
     const pendingUploads: Promise<PutObjectCommandOutput>[] = [];
     const flushTile = makeFlushTile(stationData, config, s3, pendingUploads);
-    const finestLevel = NUM_LEVELS - 1;
 
     // Stream-process each file
     for (let fileIdx = 0; fileIdx < files.length; fileIdx++) {
@@ -372,7 +371,7 @@ async function main() {
         }
 
         const { mins, maxs, times } = computeEnvelopesFromRaw(
-          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[finestLevel], trace.startTime
+          physicalSamples, trace.sampleRate, LEVEL_SPACINGS[FINEST_LEVEL], trace.startTime
         );
 
         for (let i = 0; i < mins.length; i++) {

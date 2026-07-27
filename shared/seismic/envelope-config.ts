@@ -39,6 +39,9 @@ export const POINTS_PER_TILE = [
 /** Number of stored envelope levels. */
 export const NUM_LEVELS = LEVEL_SPACINGS.length;
 
+/** The finest (highest-resolution) stored envelope level. */
+export const FINEST_LEVEL = NUM_LEVELS - 1;
+
 /**
  * Fixed amplitude range per instrument type (second char of SEED channel code).
  * Physical units: H/L = m/s (velocity), N = m/s² (acceleration).

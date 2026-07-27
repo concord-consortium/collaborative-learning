@@ -118,14 +118,12 @@ describe("missingEnvelopeDaySpans", () => {
 **Step 3: Implement** `shared/seismic/envelope-coverage.ts`:
 
 ```ts
-import { S3_BUCKET, S3_PREFIX } from "./envelope-config";
+import { FINEST_LEVEL, S3_BUCKET, S3_PREFIX } from "./envelope-config";
 import { dayIndex, dayRange } from "./seismic-day";
 import { DayCoverageState, DaySpan, StationData, TimeRange } from "./seismic-types";
 import { getS3Root, getStationChannelPrefix, getTileIndicesForViewport } from "./tile-addressing";
 
 const LIST_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/`;
-/** Coverage is determined by the finest stored level; coarser tiles are derived from it. */
-const FINEST_LEVEL = 2;
 
 type ListFetchFn = (url: string) => Promise<Pick<Response, "ok" | "status" | "text">>;
 
@@ -545,7 +543,7 @@ one-segment days (constant sample rate) so expected tile contents are computable
 import { miniseed } from "seisplotjs";
 import { findSensitivity } from "../../../../shared/seismic/channel-sensitivity";
 import { quantize } from "../../../../shared/seismic/envelope-codec";
-import { AMPLITUDE_RANGES, LEVEL_SPACINGS, NUM_LEVELS } from "../../../../shared/seismic/envelope-config";
+import { AMPLITUDE_RANGES, FINEST_LEVEL, LEVEL_SPACINGS } from "../../../../shared/seismic/envelope-config";
 import { computeEnvelopesFromRaw } from "../../../../shared/seismic/envelope-compute";
 import { listEnvelopeTileIndices, missingEnvelopeDaySpans } from "../../../../shared/seismic/envelope-coverage";
 import { createPipelineState, flushTiles, processL2Point } from "../../../../shared/seismic/envelope-pipeline";
@@ -602,7 +600,6 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
   const metadata = await (options.fetchMetadata ?? fetchStationMetadata)(stationData);
   const cache = options.cache ?? createOpfsCache();
   const parseDay = options.parseDay ?? defaultParseDay;
-  const finest = NUM_LEVELS - 1;
   const location = stationData.location ?? "";
 
   let uploadedTiles = 0;
@@ -641,7 +638,7 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
         const physical = new Float64Array(seg.samples.length);
         for (let i = 0; i < seg.samples.length; i++) physical[i] = seg.samples[i] / scale;
         const { mins, maxs, times } =
-          computeEnvelopesFromRaw(physical, seg.sampleRate, LEVEL_SPACINGS[finest], seg.startTime);
+          computeEnvelopesFromRaw(physical, seg.sampleRate, LEVEL_SPACINGS[FINEST_LEVEL], seg.startTime);
         for (let i = 0; i < mins.length; i++) {
           processL2Point(state, times[i], quantize(mins[i], rangeMax), quantize(maxs[i], rangeMax));
         }
