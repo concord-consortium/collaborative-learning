@@ -20,8 +20,8 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | Object | File | Role |
 |---|---|---|
 | `WebSerialTransport` | `src/models/stores/web-serial-transport.ts` | Owns the Web Serial port + read loop; `write()` out, `onData` in. |
-| `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection; `write()` out. |
-| `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect/version/flash state machine; owns the WebUSB `serialdata` inbound path. |
+| `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect`. |
+| `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect/version/flash state machine; taps `onData` for connect-time version detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport + channels, routes writes (`writeLine`) and inbound parsing (`receive`). |
 | `parseArduinoSerialData` | `src/models/stores/serial-protocol.ts` | Shared parser: `emg:<n>\r\n` lines → channel values. |
 | tile serial channels | `NodeChannelInfo[]` (`.../model/utilities/channel.ts`) | The shared blackboard: parsers write `channel.value`; the Sensor node reads it. |
@@ -50,9 +50,9 @@ flowchart TB
     usb["WebUSB via microbit-connection"]
   end
 
-  subgraph transport [Transport and device layer]
+  subgraph transport [Transport layer]
     wst["WebSerialTransport.startReading<br/>read loop, then onData"]
-    sdev["SpikerbitDevice.handleSerialData<br/>serialdata listener"]
+    mut["MicrobitUsbTransport<br/>serialdata, then onData"]
   end
 
   recv["SerialDevice.receive<br/>routes by deviceProtocol"]
@@ -68,12 +68,13 @@ flowchart TB
   mbit -->|"radio data"| ws
   ws --> wst
   wst -->|"onData"| recv
-  recv -->|"arduino protocol"| parse
-  recv -->|"microbit protocol"| mparse
 
   sbit -->|"emg data"| usb
-  usb -->|"serialdata"| sdev
-  sdev -->|"parses directly, bypasses receive"| parse
+  usb -->|"serialdata"| mut
+  mut -->|"onData"| recv
+
+  recv -->|"arduino protocol"| parse
+  recv -->|"microbit protocol"| mparse
 
   parse -->|"writes channel value"| ch
   mparse -->|"writes channel value"| ch
@@ -89,11 +90,14 @@ Walkthrough:
   wired to `SerialDevice.receive`. `receive` looks up the device's protocol in the
   capability map and dispatches to `handleArduinoStreamObj` → `parseArduinoSerialData`,
   which writes `channel.value` on the matching channel.
-- **Spiker:bit (WebUSB):** `SpikerbitDevice` registered a `serialdata` listener on the
-  connection. `handleSerialData` calls the same `parseArduinoSerialData` **directly** — it
-  does *not* go through `SerialDevice.receive`. (`MicrobitUsbTransport` never invokes
-  `onData`.) This asymmetry is deliberate: `SpikerbitDevice` already consumes the inbound
-  stream during connect for firmware-version detection, so it owns the inbound path.
+- **Spiker:bit (WebUSB):** `MicrobitUsbTransport` owns the connection's `serialdata` event
+  and forwards each chunk to `onData`, which `SerialDevice.setActiveDevice` wired to
+  `SerialDevice.receive` — exactly like the Web Serial path. The Spiker:bit's `deviceFamily`
+  maps to the `arduino` protocol, so `receive` dispatches to the same
+  `handleArduinoStreamObj` → `parseArduinoSerialData`. During connect (before
+  `setActiveDevice`), `SpikerbitDevice` temporarily points `onData` at a version-detection
+  handler to decide whether to flash; EMG parsing begins once the transport becomes the
+  active device.
 - **Into the node:** both paths mutate the same `NodeChannelInfo` objects (the tile's
   `channels`). Each tick the Rete manager samples them and the `Sensor node`'s `data()`
   reads `getChannels().find(...).value`.
@@ -164,11 +168,14 @@ Walkthrough:
   `connection.serialWrite`. Neither the node nor `SerialDevice` above `writeLine` knows or
   cares which transport is active.
 
-## Summary of the (a)symmetry
+## Summary: both directions unified
 
-- **Outbound is fully unified**: `writeLine → activeTransport.write` is transport-agnostic;
-  the transport is swapped in at connect via `SerialDevice.setActiveDevice`.
-- **Inbound is asymmetric**: Web Serial devices flow through `SerialDevice.receive` (which
-  picks the parser by protocol), while the Spiker:bit parses in `SpikerbitDevice`. Both
-  ultimately call the shared `parseArduinoSerialData` and write the same tile channels, so
-  the Sensor node reads values the same way regardless of source.
+- **Outbound**: `writeLine → activeTransport.write` is transport-agnostic; the transport is
+  swapped in at connect via `SerialDevice.setActiveDevice`.
+- **Inbound**: every device flows `transport.onData → SerialDevice.receive`, which picks the
+  parser by protocol — `parseArduinoSerialData` for Arduino and Spiker:bit,
+  `handleMicroBitStreamObj` for the radio hub — and writes the same tile channels, so the
+  Sensor node reads values the same way regardless of source.
+- The Spiker:bit's only device-specific inbound step is **connect-time version detection**
+  (`SpikerbitDevice` taps `onData` before `setActiveDevice`), which decides whether to
+  flash. It is not part of the steady-state data path.

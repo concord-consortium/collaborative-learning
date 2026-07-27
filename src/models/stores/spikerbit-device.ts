@@ -1,6 +1,6 @@
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 import { SerialDevice } from "./serial";
-import { parseArduinoSerialData, detectSpikerbitVersion } from "./serial-protocol";
+import { detectSpikerbitVersion } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
@@ -26,9 +26,19 @@ export interface IMicrobitUsbConnection {
   disconnect(): Promise<void>;
 }
 
-// IDeviceTransport over a micro:bit WebUSB serial connection.
+// IDeviceTransport over a micro:bit WebUSB serial connection. Like WebSerialTransport,
+// it owns the connection's inbound events: it forwards serial chunks to onData and fires
+// onDisconnect on a lost/deauthorised connection, so SerialDevice can receive centrally.
 export class MicrobitUsbTransport implements IDeviceTransport {
-  constructor(private connection: IMicrobitUsbConnection) {}
+  onData?: (chunk: string) => void;
+  onDisconnect?: () => void;
+
+  constructor(private connection: IMicrobitUsbConnection) {
+    connection.addEventListener("serialdata", ({ data }) => this.onData?.(data));
+    connection.addEventListener("status", ({ status }) => {
+      if (status === "Disconnected" || status === "NoAuthorizedDevice") this.onDisconnect?.();
+    });
+  }
 
   write(line: string) {
     this.connection.serialWrite(`${line}\n`)
@@ -47,6 +57,7 @@ export interface SpikerbitDeviceOptions {
 export class SpikerbitDevice {
   private serialDevice: SerialDevice;
   private connection: IMicrobitUsbConnection;
+  private transport: MicrobitUsbTransport;
   private channels: NodeChannelInfo[] = [];
   private buffer = "";
   private detectedVersion: number | null = null;
@@ -55,6 +66,7 @@ export class SpikerbitDevice {
   constructor(serialDevice: SerialDevice, connection: IMicrobitUsbConnection, options?: SpikerbitDeviceOptions) {
     this.serialDevice = serialDevice;
     this.connection = connection;
+    this.transport = new MicrobitUsbTransport(connection);
     this.versionQueryTimeoutMs = options?.versionQueryTimeoutMs ?? kVersionQueryTimeoutMs;
   }
 
@@ -64,8 +76,9 @@ export class SpikerbitDevice {
     progress?: (stage: string, pct?: number) => void
   ){
     this.channels = channels;
-    this.connection.addEventListener("serialdata", this.handleSerialData);
-    this.connection.addEventListener("status", this.handleStatus);
+    // During connect, inbound data feeds only version detection. EMG parsing begins once
+    // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
+    this.transport.onData = this.handleVersionData;
 
     await this.connection.connect();
 
@@ -78,28 +91,27 @@ export class SpikerbitDevice {
       await this.queryVersion();
     }
 
-    // Route servo writes through this WebUSB connection and mark the shared store connected.
-    this.serialDevice.setActiveDevice("spikerbit", new MicrobitUsbTransport(this.connection), this.channels);
+    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
+    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
+    // the arduino protocol -> parseArduinoSerialData) and transport.onDisconnect, replacing
+    // the connect-time version handler.
+    this.serialDevice.setActiveDevice("spikerbit", this.transport, this.channels);
   }
 
-  private handleSerialData = ({ data }: { data: string }) => {
+  // Connect-time only: scan inbound data for the firmware version reply, surfaced via
+  // detectedVersion for queryVersion. EMG parsing does not happen here — it runs through
+  // SerialDevice.receive once the transport becomes the active device.
+  private handleVersionData = (data: string) => {
     this.buffer += data;
     const detected = detectSpikerbitVersion(this.buffer);
     if (detected.version != null) {
       this.detectedVersion = detected.version;
       this.buffer = detected.remaining;
     }
-    this.buffer = parseArduinoSerialData(this.buffer, this.channels);
-  };
-
-  private handleStatus = ({ status }: { status: string }) => {
-    if (status === "Disconnected" || status === "NoAuthorizedDevice") {
-      this.serialDevice.clearActiveDevice();
-    }
   };
 
   // Sends "?" and waits up to the timeout for a version reply (surfaced via
-  // handleSerialData setting detectedVersion). Returns the version or null.
+  // handleVersionData setting detectedVersion). Returns the version or null.
   private async queryVersion(): Promise<number | null> {
     this.detectedVersion = null;
     await this.connection.serialWrite("?\n");

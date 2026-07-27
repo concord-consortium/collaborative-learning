@@ -72,6 +72,21 @@ describe("SpikerbitDevice", () => {
     expect(conn.written).toContain("90\n");
   });
 
+  it("routes inbound EMG through SerialDevice.receive to the matching channel", async () => {
+    const serialDevice = new SerialDevice();
+    const conn = new FakeConnection();
+    conn.respondVersion = kSpikerbitFirmwareVersion;
+    const channel = { channelId: "emg", value: 0 } as any;
+    const device = new SpikerbitDevice(serialDevice, conn);
+
+    await device.connectAndStream([channel], "HEX");
+    // Data arriving after setActiveDevice flows transport.onData -> receive ->
+    // parseArduinoSerialData (spikerbit maps to the arduino protocol).
+    conn.emitSerial("emg:57\r\n");
+
+    expect(channel.value).toBe(57);
+  });
+
   it("clears the store's transport on disconnect", async () => {
     const serialDevice = new SerialDevice();
     const conn = new FakeConnection();
