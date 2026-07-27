@@ -186,15 +186,18 @@ export function missingEnvelopeDaySpans(tileIndices: Set<number>, range: TimeRan
 
 ---
 
-### Task 3: Tile merge (`shared/seismic/envelope-merge.ts`)
+### Task 3: Tile merge (in `shared/seismic/envelope-codec.ts`)
 
-**Files:** Create: `shared/seismic/envelope-merge.ts`, `shared/seismic/envelope-merge.test.ts`
+The merge operates on the codec's quantized `EnvelopeTileData` representation (the upload flow
+is decode → merge → encode), so it lives beside `encodeEnvelopeTile`/`decodeEnvelopeTile`.
+
+**Files:** Modify: `shared/seismic/envelope-codec.ts`, `shared/seismic/envelope-codec.test.ts`
 
 **Step 1: Failing tests.** Cases: both sentinel → sentinel; one side data → that side (both channels move together — a point is "present" only when *both* min and max are non-sentinel); both data → min-of-mins/max-of-maxes; length mismatch throws.
 
 ```ts
 import { NO_DATA_SENTINEL } from "./envelope-config";
-import { mergeEnvelopeTileData } from "./envelope-merge";
+import { mergeEnvelopeTileData } from "./envelope-codec";
 
 const S = NO_DATA_SENTINEL;
 const tile = (mins: number[], maxs: number[]) =>
@@ -214,12 +217,10 @@ describe("mergeEnvelopeTileData", () => {
 });
 ```
 
-**Step 2:** Run — FAIL. **Step 3: Implement:**
+**Step 2:** Run — FAIL. **Step 3: Implement** — append to `envelope-codec.ts` (and add
+`NO_DATA_SENTINEL` to its existing `./envelope-config` import):
 
 ```ts
-import { NO_DATA_SENTINEL } from "./envelope-config";
-import { EnvelopeTileData } from "./seismic-types";
-
 /**
  * Merge two envelope tiles for the same tile index. A point where either side is
  * sentinel takes the other side's value; where both have data, the result is
@@ -325,9 +326,9 @@ it("merges with an existing tile and PUTs with If-Match", async () => {
 
 ```ts
 import { AwsClient } from "aws4fetch";
-import { decodeEnvelopeTile, encodeEnvelopeTile } from "../../../../shared/seismic/envelope-codec";
+import { decodeEnvelopeTile, encodeEnvelopeTile, mergeEnvelopeTileData }
+  from "../../../../shared/seismic/envelope-codec";
 import { S3_PREFIX, TILE_BASE_URL } from "../../../../shared/seismic/envelope-config";
-import { mergeEnvelopeTileData } from "../../../../shared/seismic/envelope-merge";
 import { EnvelopeTileData, StationData } from "../../../../shared/seismic/seismic-types";
 import { getS3Root, getTileS3Key } from "../../../../shared/seismic/tile-addressing";
 
