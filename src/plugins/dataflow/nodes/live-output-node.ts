@@ -226,7 +226,7 @@ export class LiveOutputNode extends BaseNode<
     const isNumberOutput = val != null ? isFinite(val) : false;
     const protocol = deviceProtocol(serialDevice.deviceFamily);
 
-    if (protocol === "arduino" && isNumberOutput){
+    if (protocol === "keyValue" && isNumberOutput){
       if (kGripperOutputTypes.includes(outType)){
         serialDevice.writeToOutForBBGripper(val, outType);
       }
@@ -234,7 +234,7 @@ export class LiveOutputNode extends BaseNode<
         serialDevice.writeToOutForServo(val, outType);
       }
     }
-    if (protocol === "microbit"){
+    if (protocol === "radioHub"){
       // It is not clear when the channels would be falsey but that is how this
       // code was written before.
       if (!this.services.getChannels()) return;
@@ -320,7 +320,7 @@ export class LiveOutputNode extends BaseNode<
     // of the options is changed
     runInAction(() => {
       hubsChannels
-      .filter(c => c.deviceFamily === "microbit")
+      .filter(c => c.protocol === "radioHub")
       .forEach(c => {
         // Incase there is a channel without a microbitId, skip it
         if (!c.microbitId) return;

@@ -1,13 +1,13 @@
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 
-// Consumes complete "key:value\r\n" lines from `buffer`, updating the matching
-// channel's value, and returns the unconsumed remainder. Unparseable complete
-// lines are discarded to recover from corrupted serial data. Extracted from
-// SerialDevice.handleArduinoStreamObj so the Spiker:bit WebUSB path can reuse it.
-// The `[ \t]*` before the line ending tolerates trailing whitespace: the micro:bit
-// firmware pads each line with spaces (e.g. "emg:57            \r\n"), while the
+// Parser for the "keyValue" protocol: consumes complete "key:value\r\n" lines from
+// `buffer`, updating the matching channel's value, and returns the unconsumed remainder.
+// Unparseable complete lines are discarded to recover from corrupted serial data.
+// Extracted from SerialDevice.handleKeyValueStreamObj so the Spiker:bit WebUSB path can
+// reuse it. The `[ \t]*` before the line ending tolerates trailing whitespace: the
+// micro:bit firmware pads each line with spaces (e.g. "emg:57            \r\n"), while the
 // Arduino sends no padding — both parse correctly.
-export function parseArduinoSerialData(buffer: string, channels: NodeChannelInfo[]): string {
+export function parseKeyValueData(buffer: string, channels: NodeChannelInfo[]): string {
   const pattern = /([a-z0-9]+):([0-9.]+)[ \t]*[\r][\n]/;
   // eslint-disable-next-line no-constant-condition
   while (true) {

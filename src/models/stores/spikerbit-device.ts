@@ -93,7 +93,7 @@ export class SpikerbitDevice {
 
     // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
     // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the arduino protocol -> parseArduinoSerialData) and transport.onDisconnect, replacing
+    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
     // the connect-time version handler.
     this.serialDevice.setActiveDevice("spikerbit", this.transport, this.channels);
   }

@@ -19,7 +19,9 @@ export interface NodeChannelInfo {
   outputTargetDevice?: string;
   outputTargetActuator?: string;
   timeFactor?: number;
-  deviceFamily?: string | undefined;
+  // The wire protocol this channel's data uses (see DeviceProtocol): "keyValue" or
+  // "radioHub". A connected device satisfies this channel when its protocol matches.
+  protocol?: string | undefined;
   lastMessageReceivedAt?: number | null;
   relaysState?: number[];
   microbitId?: string;
@@ -38,7 +40,7 @@ const emgSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue"
 };
 
 export const fsrSensorChannel: NodeChannelInfo = {
@@ -54,7 +56,7 @@ export const fsrSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue"
 };
 
 export const tmpSensorChannel: NodeChannelInfo = {
@@ -70,7 +72,7 @@ export const tmpSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue"
 };
 
 export const a1PinChannel: NodeChannelInfo = {
@@ -86,7 +88,7 @@ export const a1PinChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue"
 };
 
 interface MicroBitSensorChannelInfo {
@@ -125,7 +127,7 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
     virtual: false,
     usesSerial: true,
     serialConnected: null,
-    deviceFamily: "microbit",
+    protocol: "radioHub",
     lastMessageRecievedAt: Date.now()
   };
 
@@ -155,7 +157,7 @@ function createMicroBitRelayInfoChannels(hubs: MicroBitHubInfo[] ){
     type: "relays",
     usesSerial: true,
     serialConnected: null,
-    deviceFamily: "microbit",
+    protocol: "radioHub",
     lastMessageRecievedAt: Date.now()
   };
 

@@ -81,7 +81,7 @@ describe("SpikerbitDevice", () => {
 
     await device.connectAndStream([channel], "HEX");
     // Data arriving after setActiveDevice flows transport.onData -> receive ->
-    // parseArduinoSerialData (spikerbit maps to the arduino protocol).
+    // parseKeyValueData (spikerbit maps to the keyValue protocol).
     conn.emitSerial("emg:57\r\n");
 
     expect(channel.value).toBe(57);

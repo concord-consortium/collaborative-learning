@@ -1,6 +1,6 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
-import { parseArduinoSerialData } from "./serial-protocol";
+import { parseKeyValueData } from "./serial-protocol";
 import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-capabilities";
 import { IDeviceTransport } from "./device-transport";
 
@@ -67,11 +67,11 @@ export class SerialDevice {
   // device's protocol, using the recorded channels.
   public receive(chunk: string){
     const protocol = deviceProtocol(this.deviceFamily);
-    if (protocol === "arduino") this.handleArduinoStreamObj(chunk, this.channels);
-    if (protocol === "microbit") this.handleMicroBitStreamObj(chunk, this.channels);
+    if (protocol === "keyValue") this.handleKeyValueStreamObj(chunk, this.channels);
+    if (protocol === "radioHub") this.handleRadioHubStreamObj(chunk, this.channels);
   }
 
-  public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
+  public handleRadioHubStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
     // [sc]   signal or control
@@ -109,8 +109,8 @@ export class SerialDevice {
     } while (match);
   }
 
-  public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
-    this.localBuffer = parseArduinoSerialData(this.localBuffer + value, channels);
+  public handleKeyValueStreamObj(value: string, channels: Array<NodeChannelInfo>){
+    this.localBuffer = parseKeyValueData(this.localBuffer + value, channels);
   }
 
   public writeLine(line: string){

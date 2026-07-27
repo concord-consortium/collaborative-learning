@@ -3,14 +3,14 @@ import {
   deviceProtocol, deviceDisplayName, channelSatisfiedBy, deviceSupportsOutput
 } from "./device-capabilities";
 
-const arduinoChannel = { deviceFamily: "arduino" } as NodeChannelInfo;
-const microbitChannel = { deviceFamily: "microbit" } as NodeChannelInfo;
+const arduinoChannel = { protocol: "keyValue" } as NodeChannelInfo;
+const microbitChannel = { protocol: "radioHub" } as NodeChannelInfo;
 
 describe("device-capabilities", () => {
   it("maps device identity to protocol", () => {
-    expect(deviceProtocol("arduino")).toBe("arduino");
-    expect(deviceProtocol("spikerbit")).toBe("arduino");
-    expect(deviceProtocol("microbit")).toBe("microbit");
+    expect(deviceProtocol("arduino")).toBe("keyValue");
+    expect(deviceProtocol("spikerbit")).toBe("keyValue");
+    expect(deviceProtocol("microbit")).toBe("radioHub");
     expect(deviceProtocol(undefined)).toBeUndefined();
     expect(deviceProtocol("nonsense")).toBeUndefined();
   });
