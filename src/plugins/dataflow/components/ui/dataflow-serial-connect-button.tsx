@@ -23,7 +23,7 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     { "physical-connection": lastMsg === "connect"},
     { "no-physical-connection": lastMsg === "disconnect" && raisesWebSerialConnect},
     serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
-    serialDevice.isConnected() ? "has-port" : "no-port"
+    serialDevice.isConnected() ? "connected" : "not-connected"
   );
   function serialMessage(){
     // nodes that use serial, but no device physically connected

@@ -122,7 +122,7 @@ $gray-text: #242424;
       &:disabled {
         opacity: 0.6;
       }
-      &.physical-connection.no-port.nodes-in-need {
+      &.physical-connection.not-connected.nodes-in-need {
         background-color: $star-yellow;
         animation: slowpulse 1.5s linear infinite;
 
@@ -132,14 +132,14 @@ $gray-text: #242424;
           }
         }
       }
-      &.has-port {
+      &.connected {
         background-color: #82f982; //lightened "online button" green
       }
       &.nodes-in-need.no-physical-connection {
         background-color: $problem-orange-light-2;
         animation: slowpulse 1.5s linear infinite;
       }
-      &.has-port.no-physical-connection { //occurs if wire yanked out
+      &.connected.no-physical-connection { //occurs if wire yanked out
         background-color: $problem-orange-light-2;
         animation: slowpulse 1.5s linear infinite;
       }
