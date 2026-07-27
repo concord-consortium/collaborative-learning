@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
 import { isExemplarType } from "../../models/document/document-types";
-import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
+import { canUserEditDocument, isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -14,7 +14,6 @@ import { EditableDocumentContent } from "./editable-document-content";
 import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 import { IOpenDocumentsGroupMetadata } from "./sorted-section";
 import { DocumentTitle } from "./document-title";
-import { canEditSortWorkDocument } from "./sort-work-edit-permission";
 
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
@@ -63,15 +62,8 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     document: openDocument, documentMetadata: openDocumentMetadata, user, documents
   });
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
-  // Show the Edit button for any document the current user can edit (their own, or their own group's).
-  // Prefer the reactive metadata (kept in sync by Firestore listeners) over the lazily-fetched full
-  // document, so the button appears as soon as a groupmate's document syncs — without needing a reload.
-  const showEdit = canEditSortWorkDocument({
-    docUid: openDocumentMetadata?.uid ?? openDocument?.uid,
-    docType: openDocumentMetadata?.type ?? openDocument?.type,
-    docGroupId: openDocumentMetadata?.groupId ?? openDocument?.groupId,
-    userId: user.id,
-    userGroupId: user.currentGroupId,
+  const showEdit = canUserEditDocument({
+    document: openDocument, documentMetadata: openDocumentMetadata, user
   });
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
 
