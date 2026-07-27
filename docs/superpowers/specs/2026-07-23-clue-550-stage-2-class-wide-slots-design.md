@@ -21,7 +21,7 @@
 
 ## Summary — what this PR delivers
 
-1. **Unit configuration `classWideDocuments`** — an authored array of slots `{ kind, title, icon? }` on
+1. **Unit configuration `classWideDocuments`** — an authored array of slots `{ kind, title }` on
    `UnitConfiguration`, read at runtime as `stores.appConfig.classWideDocuments`. This is the correct home for
    the authored DQB title (resolves review issue #2: a curriculum-specific title no longer lives in generic
    settings).
@@ -31,7 +31,7 @@
    `canonical/v1/…` collection, yielding the class+unit pointer
    `canonical/v1/classes/<classHash>/units/<unit>/slots/<label>` (with `label === kind`). Added to
    `scoped-document-pointers.ts` and mirrored in `firestore.rules`.
-3. **Class-wide document creation** — a new `getOrCreateClassWideDocument(slot)` that drives the existing
+3. **Class-wide document creation** — a new `getOrCreateClassWideDocument(classWideDoc)` that drives the existing
    `getOrCreateCanonicalDocument` engine against the class+unit pointer, producing a document with
    `concurrent: true`, `kind`, class+unit scope fields (`context_id` + `unit`, no `offeringId`/`groupId`), and
    `canonical: <kind>`. Its RTDB content is owned by a class-scoped synthetic uid `class_<classHash>`.
@@ -50,7 +50,7 @@ only by orthogonal fields:
 | Concern | Value | Source |
 |---|---|---|
 | Behavior — concurrent history, non-owner editable | `concurrent: true` | stamped at creation (Stage 1 axis) |
-| Identity / presentation | `kind: "driving-question-board"` (per slot) | stamped at creation (Stage 1 axis) |
+| Identity / presentation | `kind: "drivingQuestionBoard"` (per slot) | stamped at creation (Stage 1 axis) |
 | Title | resolved live from `kind`, **not stored** | `getDocumentTitle` (by-kind presentation lookup) |
 | Scope | `context_id` (classHash) + `unit`; **no** `offeringId`/`groupId` | metadata fields |
 | Pointer slot | `canonical: <kind>` (label = kind) | pointer-claim transaction |
@@ -88,7 +88,7 @@ canonical/v1/classes/<classHash> / (offerings/<offeringId> | units/<unit>) / [gr
 - **The next canonical scope** — problem/planning documents (offering + owner) — slots in as a `users/<owner>`
   segment after the offering; documented in the builder but not built now (`owner` is not yet a stored axis).
 - **Label = kind:** for class-wide slots the CLUE-524 pointer label and the `kind` are the same string (e.g.
-  `driving-question-board`), so there is a single identifier per slot. (The group document is the one case where
+  `drivingQuestionBoard`), so there is a single identifier per slot. (The group document is the one case where
   they differ — label `default`, kind `group`.)
 - **Firestore rules (per concern, not per scope):** all pointer rules are nested under one parent match,
   `canonical/v1/classes/{classId}`, so `classId` is captured once and shared by every child. Because read and
@@ -104,7 +104,7 @@ canonical/v1/classes/<classHash> / (offerings/<offeringId> | units/<unit>) / [gr
 
 ## Creation: reusing the canonical engine
 
-`getOrCreateClassWideDocument(slot)` builds the class+unit pointer path and delegates to the same race-safe
+`getOrCreateClassWideDocument(classWideDoc)` builds the class+unit pointer path and delegates to the same race-safe
 `getOrCreateCanonicalDocument` used by group documents (fast-path on an existing pointer; otherwise
 create-document-then-claim-pointer-atomically, deleting the orphan on a lost race). Rather than branch on a new
 type or a bespoke descriptor, the creation path was generalized off `type` onto the kind registry:
@@ -115,7 +115,7 @@ type or a bespoke descriptor, the creation path was generalized off `type` onto 
   (`getDocumentOwner`, next bullet), and — inside `createFirestoreMetadataDocument` — the scope association
   fields (`getDocumentScopeFields`, following bullet) and the stamped kind axis fields
   (`getDocumentKindMetadataFields(kind)`; each slot kind registered with `metadataFields: { concurrent: true }`).
-  Passing `kind` explicitly matters because a class-wide slot's kind (e.g. `driving-question-board`) differs from
+  Passing `kind` explicitly matters because a class-wide slot's kind (e.g. `drivingQuestionBoard`) differs from
   its transitional `type: "group"` — the default `type`-derived lookup would mis-stamp `kind: "group"`. The RTDB
   metadata `createDocument` writes for *any* `type: "group"` document (regular group or class-wide) is now just
   the base `{ version, self, createdAt, type }` — no scope, owner, title, or kind: only `createdAt` is ever read
@@ -187,9 +187,20 @@ the RTDB metadata:
   therefore no longer thread a `title` for class-wide slots.
 
 Auto-creation is invoked once per unit open, in `DB.connect()`'s `unitLoadedPromise.then(...)` block (alongside
-`exemplarController.initialize`), iterating `stores.appConfig.classWideDocuments`. Each slot is created
+`exemplarController.initialize`), iterating `stores.appConfig.classWideDocuments`. Each entry is created
 fire-and-forget; the pointer transaction converges all class members to one document per slot, so a failure never
 blocks startup and needs no "am I first" gating.
+
+**Kind validation and uniqueness.** All kind checking lives in one place — `registerDocumentKind`, called before
+each class-wide document is created. A `kind` is used as a Firestore path segment (the canonical-pointer slot)
+and the registry key, so `registerDocumentKind` requires it to be a **camelCase identifier**
+(`/^[a-z][a-zA-Z0-9]*$/`, via `isValidDocumentKind` — matching the built-in document-type strings) and rejects a
+kind that is **already registered** (a duplicate class-wide entry, or one that collides with a built-in kind).
+Both violations throw; `createDeclaredClassWideDocuments` catches the throw, logs it, and skips that entry rather
+than crash startup, so one malformed or duplicate author entry never blocks the others. The same throwing
+registry also surfaces a developer mistake — a new built-in kind that is malformed or collides — loudly at module
+load. (Built-in kinds register via `registerBuiltInDocumentKinds()`; a test-only reset re-registers them because
+the registry is module-global.)
 
 ## Review issue #6 — first-session history ordering
 
@@ -235,7 +246,8 @@ Deferred to later stages (see [../../document-axes/README.md](../../document-axe
 - **Kind-driven presentation (partial).** Each slot's `kind` is registered now with its stamped axis fields
   (`metadataFields: { concurrent: true }`) **and its authored title**, and the title is already resolved by kind
   via `getDocumentTitle` (the first presentation slice landing off the registry). The remaining presentation
-  config (icon, title-bar treatment, Sort Work sectioning) stays in unit config / is wired in Stage 3.
+  (icon, title-bar treatment, Sort Work sectioning) is deferred to Stage 3. Icon is not authored yet — no
+  `icon` field is added to `classWideDocuments` in this PR, and how icon is configured is a Stage-3 decision.
   (Class-wide documents never hit the Stage-1 on-open backfill — their `concurrent` is stamped at creation — so a
   kind unregistered in some other session at open time is harmless.)
 - **Unified presence.** The class-scoped presence/activity channel is Stage 4.
@@ -250,7 +262,9 @@ Deferred to later stages (see [../../document-axes/README.md](../../document-axe
   `createFirestoreMetadataDocument` stamping class+unit scope + explicit `kind` + `concurrent` (and *not*
   `offeringId`/`groupId`/`canonical`); `getOrCreateClassWideDocument` fast-path and create-path (mints a
   class-wide doc, claims the class+unit pointer, `canonical === kind`); `createDeclaredClassWideDocuments` firing
-  one creation per declared slot and none when unset.
+  one creation per declared entry and none when unset, and **skipping** an entry whose `kind` is invalid
+  (non-camelCase) or duplicates an already-registered kind; `isValidDocumentKind` accept/reject cases and
+  `registerDocumentKind` throwing on a malformed or duplicate kind.
 - **Rules (emulator):** a class member may create/read the class+unit pointer; it is immutable; a different-class
   user is denied; a class-wide document may set its `canonical` label only when its class+unit pointer confirms
   it; two concurrent claims converge to one documentKey; the metadata document is readable before any history
