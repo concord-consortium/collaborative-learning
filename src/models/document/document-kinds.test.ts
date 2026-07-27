@@ -1,7 +1,8 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
   getDocumentKindInfo, getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType,
-  getDocumentScopeFields, getDocumentTitle, isValidDocumentKind, registerDocumentKind
+  getDocumentScopeFields, getDocumentTitle, isValidDocumentKind, registerDocumentKind,
+  resetDocumentKindRegistryForTests
 } from "./document-kinds";
 
 describe("isValidDocumentKind", () => {
@@ -99,10 +100,12 @@ describe("document kinds registry", () => {
       });
     });
 
-    it("returns the unit and context_id for a class-unit kind", () => {
+    it("returns the unit and context_id for a class-unit kind, with curriculum scope stated as absent", () => {
       registerDocumentKind("testWordWall",
         { metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit" });
-      expect(getDocumentScopeFields("testWordWall", ctx)).toEqual({ unit: "msu", context_id: "class-h" });
+      expect(getDocumentScopeFields("testWordWall", ctx)).toEqual({
+        unit: "msu", context_id: "class-h", investigation: null, problem: null
+      });
     });
 
     it("returns offering scope plus the problem context for an offering kind", () => {
@@ -137,6 +140,45 @@ describe("document kinds registry", () => {
       expect(getDocumentTitle({ kind: ProblemDocument, type: ProblemDocument })).toBeUndefined();
       expect(getDocumentTitle({ kind: PersonalDocument, type: PersonalDocument })).toBeUndefined();
       expect(getDocumentTitle({ type: "unregistered" })).toBeUndefined();
+    });
+  });
+
+  describe("getDocumentScopeFields for a classUnit kind", () => {
+    const ctx = {
+      unit: "sas", investigation: "1", problem: "2",
+      context_id: "class-hash", groupId: "3", offeringId: "off-1"
+    };
+
+    beforeEach(() => {
+      resetDocumentKindRegistryForTests();
+      registerDocumentKind("testClassWideKind", {
+        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit"
+      });
+    });
+
+    it("stamps the unit and class, and states the absent curriculum scope explicitly", () => {
+      // `investigation`/`problem` are written as null rather than omitted: a null scope field means
+      // "absent scope" (firestore.rules hasScopeField), which is what makes the class+unit scope
+      // queryable — `where("investigation", "==", null)` cannot match a missing field.
+      expect(getDocumentScopeFields("testClassWideKind", ctx)).toEqual({
+        unit: "sas",
+        context_id: "class-hash",
+        investigation: null,
+        problem: null
+      });
+    });
+
+    it("does not stamp an offering or a group", () => {
+      const fields = getDocumentScopeFields("testClassWideKind", ctx);
+      expect(fields.offeringId).toBeUndefined();
+      expect(fields.groupId).toBeUndefined();
+    });
+
+    it("leaves the group scope unchanged", () => {
+      expect(getDocumentScopeFields(GroupDocument, ctx)).toEqual({
+        unit: "sas", investigation: "1", problem: "2",
+        context_id: "class-hash", offeringId: "off-1", groupId: "3"
+      });
     });
   });
 });

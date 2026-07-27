@@ -476,6 +476,12 @@ describe("db", () => {
         kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       expect(setPayloads[0].title).toBeUndefined();
+      // The class+unit scope states its absent curriculum fields explicitly so the scope is
+      // queryable; it must still carry no offering or group.
+      expect(setPayloads.some((d: any) =>
+        d.investigation === null && d.problem === null &&
+        d.offeringId === undefined && d.groupId === undefined
+      )).toBe(true);
     });
   });
 
