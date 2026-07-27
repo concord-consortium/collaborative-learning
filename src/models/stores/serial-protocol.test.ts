@@ -3,7 +3,7 @@ import { parseKeyValueData, detectSpikerbitVersion } from "./serial-protocol";
 
 function emgChannel(): NodeChannelInfo {
   return {
-    hubName: "Arduino", name: "emg", displayName: "EMG",
+    name: "emg", displayName: "EMG",
     channelId: "emg", missing: true, type: "emg-reading", units: "mV", value: 0,
     virtual: false, usesSerial: true, serialConnected: null, protocol: "keyValue"
   };

@@ -24,7 +24,6 @@ function simulatedChannelType(variable: VariableType) {
 export function simulatedChannel(variable: VariableType): NodeChannelInfo {
   const type = simulatedChannelType(variable);
   return {
-    hubName: "",
     channelId: simulatedChannelId(variable),
     missing: false,
     type,

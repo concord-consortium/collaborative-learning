@@ -138,7 +138,7 @@ export class SensorNode extends BaseNode<
       ? `${ch.name} Demo Data`
       : ch.simulated
         ? `Simulated ${ch.name}`
-        : `${ch.hubName}:${ch.type}`;
+        : ch.displayName ?? ch.type;
     return chStr;
   }
 
