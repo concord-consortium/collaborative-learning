@@ -50,6 +50,32 @@ So the environment service has to be created, then the root node created with th
 The top level properties of the environment object are not supposed to be modified after it is created, based on this "shallowly immutable" note here: https://mobx-state-tree.js.org/concepts/dependency-injection
 However we are doing this when the appConfig is added to the environment object in `Documents#add`
 
+## Reading a document's scope in code
+
+Consumers that need to know a document's scope read its stored association fields through the guards
+in `src/models/document/document-scope.ts`, rather than branching on the document `type`:
+
+- `hasGroupScope(doc)` — the document is scoped to a single group (`groupId` is set).
+- `hasClassUnitScope(doc)` — the document is scoped to a class and a unit and nothing narrower: a
+  class-wide collaborative document.
+
+No other stored shape satisfies `hasClassUnitScope`:
+
+| document | `unit` | `investigation` | `groupId` | class+unit scoped? |
+|---|---|---|---|---|
+| personal, learning log | `null` | — | — | no |
+| problem, planning, publications | set | set | — | no |
+| group | set | set | set | no |
+| exemplar (from curriculum) | unset | unset | — | no |
+| class-wide slot | set | `null` | — | **yes** |
+
+**No `scopeLevel` enum and no unified `scope` struct.** Scope is multi-dimensional — a personal
+document is class+owner scoped while a class-wide document is class+unit scoped — so a single
+ordered level would be ambiguous. Named guards are added as consumers need them.
+
+A guard reads *stored fields only*. It must not consult the kind registry: Sort Work lists documents
+from other units, whose kinds are not registered in the current session.
+
 # View layer
 
 ## React Context
