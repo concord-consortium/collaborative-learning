@@ -3,14 +3,13 @@ import { makeAutoObservable } from "mobx";
 
 import {
   createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs, GroupSectionSortKey,
-  kWholeClassSectionLabel, sortDateSectionLabels, sortGroupSections, sortNameSectionLabels,
+  kNoNameSectionLabel, kWholeClassSectionLabel, sortDateSectionLabels, sortGroupSections, sortNameSectionLabels,
   sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { hasClassUnitScope, hasGroupScope } from "../document/document-scope";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
-import { GroupDocument } from "../document/document-types";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { UnitModelType } from "../curriculum/unit";
@@ -226,17 +225,23 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
-      const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
+    const addDocToSection = (doc: IDocumentMetadataModel, sectionLabel: string) => {
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
     };
+    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
+      const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
+      addDocToSection(doc, sectionLabel);
+    };
 
     this.documents.forEach((doc) => {
-      if (doc.type === GroupDocument) {
-        // Add group documents to each user in the group
+      if (hasClassUnitScope(doc)) {
+        // A class-wide collaborative document belongs to the class, so it has no personal author.
+        addDocToSection(doc, kNoNameSectionLabel);
+      } else if (hasGroupScope(doc)) {
+        // A group document is listed under every member of the group that owns it.
         const groupId = doc.groupId ?? "unknownGroup";
         const group = this.stores.groups.getGroupById(groupId);
         group?.users.forEach(user => {

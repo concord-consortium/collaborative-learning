@@ -44,6 +44,9 @@ export const sortDateSectionLabels = (
 /** Section label for documents that belong to the class as a whole rather than to a group. */
 export const kWholeClassSectionLabel = "Whole Class";
 
+/** Section label, in the "by name" sort, for documents that have no personal author. */
+export const kNoNameSectionLabel = "No Name";
+
 /**
  * The ordering information for one "by group" section. Carried alongside the section label so the
  * comparator never has to recover structure from the display text, which is translatable

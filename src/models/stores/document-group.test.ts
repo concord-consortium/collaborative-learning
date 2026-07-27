@@ -309,10 +309,11 @@ describe('DocumentGroup Model', () => {
       expect(collection2[0].documents.length).toBe(2);
 
       // Swenson, Kirk: 1 personal doc + 1 Group 3 group doc, all in Group 3
-      const collection3 = byNameGroups[3].byGroup;
-      expect(collection3.length).toBe(1);
-      expect(collection3[0].label).toBe("Group 3");
-      expect(collection3[0].documents.length).toBe(2);
+      // (index 4 because "No Name" section sorts alphabetically at index 3)
+      const collection4 = byNameGroups[4].byGroup;
+      expect(collection4.length).toBe(1);
+      expect(collection4[0].label).toBe("Group 3");
+      expect(collection4[0].documents.length).toBe(2);
     });
 
     it('should use custom group term when term override is set', () => {
@@ -339,10 +340,11 @@ describe('DocumentGroup Model', () => {
       expect(collection2[0].documents.length).toBe(2);
 
       // Swenson, Kirk: Group 3
-      const collection3 = byNameGroups[3].byGroup;
-      expect(collection3.length).toBe(1);
-      expect(collection3[0].label).toBe("Team 3");
-      expect(collection3[0].documents.length).toBe(2);
+      // (index 4 because "No Name" section sorts alphabetically at index 3)
+      const collection4 = byNameGroups[4].byGroup;
+      expect(collection4.length).toBe(1);
+      expect(collection4[0].label).toBe("Team 3");
+      expect(collection4[0].documents.length).toBe(2);
     });
 
     it('puts a class-wide collaborative document in its own Whole Class section, ordered first', () => {
@@ -397,8 +399,8 @@ describe('DocumentGroup Model', () => {
     it('should include group documents under each member of the group', () => {
       // Sort directly by Name to test the top-level byName behavior
       const byNameDocs = sortedDocuments.sortBy("Name");
-      // Should have 4 name sections (alphabetical): Bacal, Cao, Cytacki, Swenson
-      expect(byNameDocs.length).toBe(4);
+      // Should have 5 name sections (alphabetical): Bacal, Cao, Cytacki, No Name, Swenson
+      expect(byNameDocs.length).toBe(5);
 
       // Bacal, Joe (Group 5) - own doc + Group 5 group doc
       expect(byNameDocs[0].label).toBe("Bacal, Joe");
@@ -418,10 +420,11 @@ describe('DocumentGroup Model', () => {
       expect(byNameDocs[2].documents.some(d => d.key === "Group 3 Group Doc")).toBe(true);
 
       // Swenson, Kirk (Group 3) - own doc + Group 3 group doc
-      expect(byNameDocs[3].label).toBe("Swenson, Kirk");
-      expect(byNameDocs[3].documents.length).toBe(2);
-      expect(byNameDocs[3].documents.some(d => d.key === "Student 4 Problem Doc Group 3")).toBe(true);
-      expect(byNameDocs[3].documents.some(d => d.key === "Group 3 Group Doc")).toBe(true);
+      // (index 4 because "No Name" section sorts alphabetically at index 3)
+      expect(byNameDocs[4].label).toBe("Swenson, Kirk");
+      expect(byNameDocs[4].documents.length).toBe(2);
+      expect(byNameDocs[4].documents.some(d => d.key === "Student 4 Problem Doc Group 3")).toBe(true);
+      expect(byNameDocs[4].documents.some(d => d.key === "Group 3 Group Doc")).toBe(true);
     });
 
     it('should not create a separate name section for group documents', () => {
@@ -429,7 +432,18 @@ describe('DocumentGroup Model', () => {
       // Group documents should not appear as their own name entry
       const labels = byNameDocs.map(d => d.label);
       expect(labels).not.toContain("Unknown");
-      expect(labels).toEqual(["Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "Swenson, Kirk"]);
+      expect(labels).toEqual(["Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "No Name", "Swenson, Kirk"]);
+    });
+
+    it('files a class-wide collaborative document under No Name, not under any student', () => {
+      const byNameDocs = sortedDocuments.sortBy("Name");
+      const noName = byNameDocs.find(d => d.label === "No Name");
+      expect(noName).toBeDefined();
+      expect(noName?.documents.map(d => d.key)).toEqual(["Class Wide Doc"]);
+
+      // It has no author, so it must not be repeated under the students the way a group document is.
+      const studentSections = byNameDocs.filter(d => d.label !== "No Name");
+      expect(studentSections.some(s => s.documents.some(d => d.key === "Class Wide Doc"))).toBe(false);
     });
   });
 
@@ -467,8 +481,20 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection3[2].label).toBe("Not Tagged");
       expect(documentCollection3[2].documents.length).toBe(2);
 
+      // No Name: class-wide document with no strategies
+      // (index 3 because "No Name" section sorts alphabetically between "Cytacki" and "Swenson")
+      const documentCollectionNoName = byNameGroups[3].byStrategy;
+      expect(documentCollectionNoName.length).toBe(3);
+      expect(documentCollectionNoName[0].label).toBe("foo");
+      expect(documentCollectionNoName[0].documents.length).toBe(0);
+      expect(documentCollectionNoName[1].label).toBe("bar");
+      expect(documentCollectionNoName[1].documents.length).toBe(0);
+      expect(documentCollectionNoName[2].label).toBe("Not Tagged");
+      expect(documentCollectionNoName[2].documents.length).toBe(1); // Class Wide Doc
+
       // Swenson, Kirk: problem doc has ["bar"] + Group 3 group doc with no strategies
-      const documentCollection4 = byNameGroups[3].byStrategy;
+      // (index 4 because "No Name" section sorts alphabetically at index 3)
+      const documentCollection4 = byNameGroups[4].byStrategy;
       expect(documentCollection4.length).toBe(3);
       expect(documentCollection4[0].label).toBe("foo");
       expect(documentCollection4[0].documents.length).toBe(0);
