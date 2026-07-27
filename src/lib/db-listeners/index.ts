@@ -15,6 +15,7 @@ import { DBPublicationsListener } from "./db-publications-listener";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBBookmarksListener } from "./db-bookmarks-listener";
+import { DBCommentTagsListener } from "./db-comment-tags-listener";
 import { BaseListener } from "./base-listener";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
 import { DBStudentPersonalDocsListener } from "./db-student-personal-docs-listener";
@@ -35,6 +36,7 @@ export class DBListeners extends BaseListener {
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
   private bookmarksListener: DBBookmarksListener;
+  private commentTagsListener: DBCommentTagsListener;
   private documentsContentListener: DBDocumentsContentListener;
   private exemplarsListener: DBExemplarsListener;
   private groupActivityBroadcaster: GroupActivityBroadcaster;
@@ -54,6 +56,7 @@ export class DBListeners extends BaseListener {
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
     this.bookmarksListener = new DBBookmarksListener(db);
+    this.commentTagsListener = new DBCommentTagsListener(db);
     this.documentsContentListener = new DBDocumentsContentListener(db);
     this.exemplarsListener = new DBExemplarsListener(db);
     this.groupActivityBroadcaster = new GroupActivityBroadcaster(db);
@@ -82,6 +85,8 @@ export class DBListeners extends BaseListener {
       this.documentsContentListener.start(),
       this.exemplarsListener.start()
     ]);
+    // custom comment tags: subscribes reactively to the current class + unit
+    this.commentTagsListener.start();
 
     runInAction(() => this.isListening = true);
   }
@@ -89,6 +94,7 @@ export class DBListeners extends BaseListener {
   public stop() {
     runInAction(() => this.isListening = false);
 
+    this.commentTagsListener.stop();
     this.documentsContentListener.stop();
     this.bookmarksListener.stop();
     this.commentsListener.stop();

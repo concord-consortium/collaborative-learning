@@ -69,6 +69,7 @@ module.exports = (env, argv) => {
       iframe: './src/iframe/iframe.tsx',
       'doc-editor': './src/doc-editor.tsx',
       authoring: './src/authoring/index.tsx',
+      'seismic-admin': './src/seismic-admin/index.tsx',
       standalone: './src/standalone.tsx',
     },
     mode: devMode ? 'development' : 'production',
@@ -262,6 +263,11 @@ module.exports = (env, argv) => {
         chunks: ['authoring'],
         filename: 'authoring/index.html',
         template: 'src/authoring/index.html'
+      }),
+      ...configHtmlPlugins({
+        chunks: ['seismic-admin'],
+        filename: 'seismic-admin/index.html',
+        template: 'src/seismic-admin/index.html'
       }),
       ...configHtmlPlugins({
         chunks: ['iframe'],

@@ -70,6 +70,7 @@ export const UIModel = types
     defaultLeftNavExpanded: false,
     standalone: false,
     errorContent: undefined as React.FC<any> | undefined,
+    showChatTutor: false,
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -210,6 +211,9 @@ export const UIModel = types
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
+      },
+      setShowChatTutor(showChatTutor: boolean) {
+        self.showChatTutor = showChatTutor;
       },
       closeDialog,
 

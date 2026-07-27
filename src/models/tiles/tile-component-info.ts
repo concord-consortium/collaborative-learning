@@ -23,11 +23,6 @@ export interface ITileComponentInfo {
    * from trying to set the selection.
    */
   tileHandlesOwnSelection?: boolean;
-  /**
-   * If true, the tile does not render its title visually in the UI.
-   * Used by the read-aloud service to avoid announcing hidden titles.
-   */
-  hiddenTitle?: boolean;
 }
 
 const gTileComponentInfoMap = new Map<string, ITileComponentInfo>();

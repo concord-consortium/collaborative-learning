@@ -6,18 +6,23 @@ export interface StationId {
   station: string;
 }
 
-/** Basic station data: a station plus a specific channel. */
-export interface StationData extends StationId {
+/** A channel plus its location code.
+ *  `location` is the SEED location code; `undefined` and `""` both mean the blank location. */
+export interface StationChannel {
   channel: string;
+  location?: string;
 }
 
-/** A station channel plus its location code. */
-export interface StationLocation extends StationData {
-  location: string;
+/** Basic station data: a station plus a specific channel and location. */
+export interface StationData extends StationId, StationChannel {}
+
+/** A station entry in unit configuration: identity plus optional label. */
+export interface StationConfig extends StationData {
+  label?: string;
 }
 
 /** A station/channel/location plus an ISO time range (e.g. a metadata epoch). */
-export interface StationQuery extends StationLocation {
+export interface StationQuery extends StationData {
   startTime: string;
   endTime: string;
 }
@@ -74,7 +79,7 @@ export interface FetchEnvelopeTileParams {
 
 /** Viewport parameters for seismic data queries. */
 export interface SeismicViewportParams {
-  stationLocation: StationLocation;
+  stationData: StationData;
   startTime: DateTime;
   endTime: DateTime;
   pixelWidth: number;

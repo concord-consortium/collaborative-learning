@@ -9,7 +9,9 @@ import { DocumentContentSnapshotType } from "../document/document-content";
 import { GroupDocument, ProblemDocument } from "../document/document-types";
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
-import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
+import { MetadataDocMapModel } from "../document/document-metadata-model";
+import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
+import { DocumentMetadataStore } from "./document-metadata-store";
 import { DB } from "../../lib/db";
 import { Bookmark, Bookmarks } from "./bookmarks";
 
@@ -184,6 +186,7 @@ function addDocBookmarks(bookmarks: Bookmarks, bookmarkMap: Record<string, Array
 
 describe('DocumentGroup Model', () => {
   let sortedDocuments: SortedDocuments;
+  let documentMetadata: DocumentMetadataStore;
   let mockDocuments: DocumentModelType[];
   let mockGroups: GroupsModelType;
   let mockClass: ClassModelType;
@@ -197,6 +200,10 @@ describe('DocumentGroup Model', () => {
     Object.setPrototypeOf(db, DB);
     bookmarks = new Bookmarks({db});
 
+    documentMetadata = new DocumentMetadataStore(
+      { db: {}, user: { classHash: "" }, documents: { exemplarDocuments: [] } } as any
+    );
+
     const mockStores: DeepPartial<ISortedDocumentsStores> = {
       //DeepPartial allows us to not need to mock the "dB" and "appConfig" stores
       //as well not needing to type the stores below
@@ -206,7 +213,12 @@ describe('DocumentGroup Model', () => {
       appConfig: {
         commentTags: {"foo": "foo", "bar": "bar"}
       },
-      bookmarks
+      commentTags: {
+        customTagRecord: {},
+        mergedWith: (configTags?: Record<string, string>) => ({ ...(configTags ?? {}) })
+      },
+      bookmarks,
+      documentMetadata,
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);

@@ -3,7 +3,7 @@ import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
   createActionTrackingMiddleware2, resolvePath, flow, onSnapshot,
-  hasEnv
+  hasEnv, typecheck
 } from "mobx-state-tree";
 import { uniqueId } from "../utilities/js-utils";
 
@@ -173,6 +173,28 @@ describe("mst", () => {
 
     TypeUsingLate.create({withLateMap: {"key": {prop: "value"}}});
     expect(lateCalled).toBe(true);
+  });
+
+  describe("typecheck", () => {
+    // Firestore metadata validation (DocumentMetadataStore.metadataFromFirestoreData)
+    // relies on typecheck NOT rejecting properties that the model doesn't declare:
+    // real `documents/{key}` docs carry fields such as `network` that are absent from
+    // DocumentMetadataModel. These tests pin that behavior so the store keeps working.
+    test("does not reject a snapshot with extra/unknown properties", () => {
+      const Model = types.model({
+        known: types.string
+      });
+
+      expect(() => typecheck(Model, { known: "value", network: "some-network" } as any)).not.toThrow();
+    });
+
+    test("still rejects a snapshot with a wrong-typed declared property", () => {
+      const Model = types.model({
+        known: types.string
+      });
+
+      expect(() => typecheck(Model, { known: 42, network: "some-network" } as any)).toThrow();
+    });
   });
 
   describe("applySnapshot", () => {

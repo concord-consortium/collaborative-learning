@@ -7,6 +7,7 @@ import {
   ReadAloudService, getReadAloudService, resetReadAloudService
 } from "./read-aloud-service";
 import { buildReadAloudQueue, ReadAloudQueueItem } from "./read-aloud-queue-items";
+import { specAppConfig } from "../stores/spec-app-config";
 
 // Mock the logger
 const mockLogToolbarEvent = jest.fn();
@@ -75,7 +76,10 @@ function createDocumentContent(tiles: Array<{ id: string; type: string; title?: 
   });
 
   const snapshot: DocumentContentSnapshotType = { rowMap, rowOrder, tileMap };
-  return DocumentContentModel.create(snapshot);
+  // Text-tile titles are hidden by default (settings.text.hideTitle) — attach an appConfig so the
+  // read-aloud service reads that setting off the content environment.
+  const appConfig = specAppConfig({ config: { settings: { text: { hideTitle: true } } } });
+  return DocumentContentModel.create(snapshot, { appConfig });
 }
 
 describe("ReadAloudService", () => {

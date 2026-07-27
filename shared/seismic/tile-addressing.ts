@@ -58,17 +58,41 @@ export function getStationPrefix(station: StationId): string {
 }
 
 /**
- * Constructs the S3 key prefix for all tiles of a given station and channel.
- * Format: {network}_{station}/{channel}
+ * Inverse of getStationPrefix: "{network}_{station}" → { network, station }.
+ */
+export function parseStationPrefix(prefix: string): StationId | undefined {
+  const sep = prefix.indexOf("_");
+  if (sep < 0) return undefined;
+
+  const network = prefix.slice(0, sep);
+  const station = prefix.slice(sep + 1);
+  if (!network || ! station) return undefined;
+
+  return { network, station };
+}
+
+/** Encode a SEED location code as a path segment. Blank (undefined or "") becomes "--". */
+export function encodeLocation(location?: string): string {
+  return location ? location : "--";
+}
+
+/** Inverse of encodeLocation: "--" becomes "". */
+export function decodeLocation(segment: string): string {
+  return segment === "--" ? "" : segment;
+}
+
+/**
+ * Constructs the S3 key prefix for all tiles of a given station, location, and channel.
+ * Format: {network}_{station}/{location}/{channel}
  */
 export function getStationChannelPrefix(stationData: StationData): string {
-  const { channel } = stationData;
-  return `${getStationPrefix(stationData)}/${channel}`;
+  const { channel, location } = stationData;
+  return `${getStationPrefix(stationData)}/${encodeLocation(location)}/${channel}`;
 }
 
 /**
  * Constructs the S3 object key for a tile.
- * Format: {network}_{station}/{channel}/L{level}/{tileIndex}
+ * Format: {network}_{station}/{location}/{channel}/L{level}/{tileIndex}
  */
 export function getTileS3Key(stationData: StationData, level: number, tileIndex: number): string {
   return `${getStationChannelPrefix(stationData)}/L${level}/${tileIndex}`;

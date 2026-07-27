@@ -36,18 +36,19 @@ All EarthScope requests go through a CloudFront CORS proxy, since EarthScope's s
 
 ### OPFS (Origin Private File System) for persistent caching
 
-Downloaded miniSEED files are stored in the browser's Origin Private File System. The directory layout needs to be finalized before implementation — there are two options:
+Downloaded miniSEED files are stored in the browser's Origin Private File System. Two directory layouts were considered; Option A is the one implemented (see `shared/seismic/opfs-seismic-cache.ts`):
 
-**Option A: Station-first layout (current proposal)**
+**Option A: Station-first layout (implemented)**
 
 ```
-/seismic-cache/
+/seismic-cache-v2/
   AK_FIB/                       (network_station)
-    BHZ/                         (channel)
-      2025/
-        001.mseed                (Jan 1)
-        002.mseed                (Jan 2)
-        ...
+    --/                          (location; blank encoded as "--")
+      BHZ/                       (channel)
+        2025/
+          001.mseed              (Jan 1)
+          002.mseed              (Jan 2)
+          ...
 ```
 
 This uses our standard `{network_station}` identifier (see [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems)), consistent with the envelope tile cache and Firestore paths. It keeps each station's data isolated, making it straightforward to scan what's cached per station and clean up a single station's data.

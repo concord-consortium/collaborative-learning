@@ -120,12 +120,12 @@ tile_duration = points_per_tile[level] × point_spacing[level]
 tile_index = floor((t - epoch) / tile_duration)
 ```
 
-Tile path: `/{station}/{channel}/{level}/{tile_index}`
+Tile path: `v2/{network}_{station}/{location}/{channel}/L{level}/{tileIndex}`
 
 **Pros**: Simple arithmetic, uniform tile sizes, uniform fetch sizes, similar to web map tile systems (z/x/y).
 **Cons**: Tile boundaries don't align with human-readable time units.
 
-Including the channel in the path is necessary because the amplitude quantization range depends on the instrument type (see [Amplitude quantization](#amplitude-quantization)), and a station may have multiple channels (e.g., both velocity BHZ and accelerometer BNZ).
+Including the channel in the path is necessary because the amplitude quantization range depends on the instrument type (see [Amplitude quantization](#amplitude-quantization)), and a station may have multiple channels (e.g., both velocity BHZ and accelerometer BNZ). The SEED location code is likewise its own path segment (blank encoded as `--`), since a station can host multiple instruments that share a channel code but differ by location.
 
 ### Option B: Calendar-aligned tiles
 
@@ -137,7 +137,7 @@ Tiles snap to natural time boundaries, with the point count varying per tile:
 | L1    | 1 month       | ~16,500–17,500 (varies by month)|
 | L2    | 1 hour        | ~2,286                   |
 
-Tile path: `/{station}/{channel}/{level}/2024-03-15T14:00:00` or `/{station}/{channel}/L2/2024/03/15/14`
+Tile path: `/{station}/{location}/{channel}/{level}/2024-03-15T14:00:00` or `/{station}/{location}/{channel}/L2/2024/03/15/14`
 
 **Pros**: Human-readable paths, easy to reason about cache invalidation ("regenerate March 2024"), aligns with how data often arrives in practice.
 **Cons**: Variable tile sizes (months have different lengths), more complex indexing math, variable fetch sizes.

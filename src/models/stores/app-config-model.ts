@@ -73,7 +73,9 @@ export const AppConfigModel = types
     get docTimeStampPropertyName() { return self.configMgr.docTimeStampPropertyName; },
     get docDisplayIdPropertyName() { return self.configMgr.docDisplayIdPropertyName; },
     get defaultDocumentTemplate() { return self.configMgr.defaultDocumentTemplate; },
+    get defaultDocumentTemplateEnabled() { return self.configMgr.defaultDocumentTemplateEnabled; },
     get planningTemplate() { return self.configMgr.planningTemplate; },
+    get planningTemplateEnabled() { return self.configMgr.planningTemplateEnabled; },
     get defaultLearningLogTitle() { return self.configMgr.defaultLearningLogTitle; },
     get initialLearningLogTitle() { return self.configMgr.initialLearningLogTitle; },
     get defaultLearningLogDocument() { return self.configMgr.defaultLearningLogDocument; },
@@ -81,8 +83,10 @@ export const AppConfigModel = types
     get showCommentTag() { return self.configMgr.showCommentTag; },
     get showCommentRating() { return self.configMgr.showCommentRating ?? true; },
     get commentTags() { return self.configMgr.commentTags; },
+    get allowCustomCommentTags() { return self.configMgr.allowCustomCommentTags; },
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },
+    get chatTutorPrompts() { return self.configMgr.chatTutorPrompts; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
@@ -106,6 +110,7 @@ export const AppConfigModel = types
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
     get termOverrides() { return self.configMgr.termOverrides; },
     get defaultPanelLayout() { return self.configMgr.defaultPanelLayout; },
+    get contentLayout() { return self.configMgr.contentLayout; },
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
     get authorToolbar() {
       return ToolbarModel.create([
@@ -137,8 +142,14 @@ export const AppConfigModel = types
      * the key would be "tools" and group would be "table".
      */
     getSetting(key: string, group?: string) {
-      const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
-      return groupSettings?.[key] ?? self.settings?.[key];
+      if (!group) return self.settings?.[key];
+
+      // Accept a group given as-is, lowercased, or camelCased so callers can pass a tile type
+      // (e.g. "Text", "IframeInteractive") without having to know how the settings key is cased.
+      const lowerCaseGroup = group.toLowerCase();
+      const camelCaseGroup = group.charAt(0).toLowerCase() + group.slice(1);
+      const groupSettings = self.settings?.[group] ?? self.settings?.[lowerCaseGroup] ?? self.settings?.[camelCaseGroup];
+      return (groupSettings as SnapshotIn<typeof SettingsGroupMstType>)?.[key] ?? self.settings?.[key];
     }
   }))
   .views(self => ({

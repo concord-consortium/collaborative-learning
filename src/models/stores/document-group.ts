@@ -14,6 +14,7 @@ import { getTileContentInfo } from "../tiles/tile-content-info";
 import { UnitModelType } from "../curriculum/unit";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
+import { CommentTags } from "./comment-tags";
 import { ClassModelType, ClassUserModelType } from "./class";
 import { GroupsModelType } from "./groups";
 import { SecondarySortType, SortType } from "./ui-types";
@@ -25,6 +26,7 @@ interface IDocumentGroupStores {
   class: ClassModelType;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
+  commentTags: CommentTags;
   unit?: UnitModelType;
 }
 
@@ -235,7 +237,7 @@ export class DocumentGroup {
   }
 
   get byStrategy(): DocumentGroup[] {
-    const commentTags = this.stores.appConfig.commentTags;
+    const commentTags = this.stores.commentTags.mergedWith(this.stores.appConfig.commentTags);
     const tagsWithDocs = getTagsWithDocs(this.documents, commentTags);
 
     const sortedDocsArr: DocumentGroup[] = [];

@@ -51,12 +51,20 @@ export class ConfigurationManager implements UnitConfiguration {
     return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : {};
   }
 
+  get allowCustomCommentTags(){
+    return this.showCommentTag ? this.getProp<UC["allowCustomCommentTags"]>("allowCustomCommentTags") : false;
+  }
+
   get aiEvaluation(){
     return this.getProp<UC["aiEvaluation"]>("aiEvaluation");
   }
 
   get aiPrompt(){
     return this.getProp<UC["aiPrompt"]>("aiPrompt");
+  }
+
+  get chatTutorPrompts(){
+    return this.getProp<UC["chatTutorPrompts"]>("chatTutorPrompts");
   }
 
   get autoAssignStudentsToIndividualGroups() {
@@ -187,8 +195,16 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultDocumentTemplate"]>("defaultDocumentTemplate");
   }
 
+  get defaultDocumentTemplateEnabled() {
+    return this.getProp<UC["defaultDocumentTemplateEnabled"]>("defaultDocumentTemplateEnabled");
+  }
+
   get planningTemplate() {
     return this.getProp<UC["planningTemplate"]>("planningTemplate");
+  }
+
+  get planningTemplateEnabled() {
+    return this.getProp<UC["planningTemplateEnabled"]>("planningTemplateEnabled");
   }
 
   get placeholder() {
@@ -225,6 +241,10 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get defaultPanelLayout() {
     return this.getProp<UC["defaultPanelLayout"]>("defaultPanelLayout");
+  }
+
+  get contentLayout() {
+    return this.getProp<UC["contentLayout"]>("contentLayout");
   }
 
   get defaultSharedDocuments() {

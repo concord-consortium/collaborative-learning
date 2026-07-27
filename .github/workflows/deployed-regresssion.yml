@@ -24,8 +24,13 @@ jobs:
       # leaving the Dashboard hanging ...
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
+      # WARNING: use "Re-run all jobs" to retry this workflow, never "Re-run failed jobs".
+      # Each run attempt gets a fresh Cypress Cloud ci-build-id, so a re-run of a single
+      # container starts a new Cloud run where that container is the only machine. With
+      # `parallel: true` it then claims every spec instead of its usual share and runs
+      # them serially, taking hours or hitting the job timeout.
       matrix:
-        # run 5 copies of the current job in parallel
+        # run 7 copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6, 7]
     steps:
       - name: Checkout Repository
@@ -37,9 +42,12 @@ jobs:
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
-          # TODO: we might need to manual set the build id
+          # retry registry fetches; a bare `npm ci` fails the whole container on a
+          # transient ECONNRESET, which is unrecoverable without a full re-run
+          install-command: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
+          # TODO: we might need to manually set the build id
           # TODO: the description of the run in cypress will be the commit message of branch
-          # instead of something about the app being tested. This can be overriden using these
+          # instead of something about the app being tested. This can be overridden using these
           # env variables: https://docs.cypress.io/guides/continuous-integration/introduction#Git-information
 
           # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set

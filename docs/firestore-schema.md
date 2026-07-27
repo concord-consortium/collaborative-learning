@@ -78,19 +78,32 @@ Fields:
 Holds metadata, history, and comments related to a user Document.
 (The actual current Document content is not stored here, it is in Firebase.)
 
+> For how each of these fields is handled — what writes it, how it reaches the runtime, and whether
+> changes are reactive — see
+> [document-metadata/metadata-fields.md](./document-metadata/metadata-fields.md).
+
 Fields:
 
 - key: (string, the id of the document in firebase)
-- title: (string)
+- title: (string, stored only for personal/learning-log documents and their publications; other types get generated titles)
 - type: (string, eg "problem")
 - uid: (string).  TODO: determine if this is the owner of the document, the owner of the comments, or sometimes either.
-- contextId: (currently ignored; see `DocumentModel.metadata()`)
-- context_id: (string, uuid, should match context_id of a class)
-- createdAt: (timestamp)
-- network: (string, name of a network)
+- context_id: (string, uuid, should match context_id of a class; read-only)
+- createdAt: (timestamp; read-only)
+- visibility: (string, "public" | "private")
+- groupId: (string, written only when truthy; group and publication documents)
+- offeringId: (string, problem-family documents)
+- unit: (string, unit code; written as null for personal/learning-log documents)
+- investigation: (string, investigation ordinal)
+- problem: (string, problem ordinal)
 - originDoc: (string, if set = key of the original document that created this PublishedDocument)
-- properties: (map, eg { pubCount: 1 })
-- teachers: (array of user IDs) _should be removed_
+- properties: (map; the client writes this as `{}` at creation and never updates it — treat as unpopulated. See metadata-fields.md.)
+- tools: (array of strings, tile types present in the content; maintained by the content sync)
+- strategies: (array of strings, comment tags; written only by the `on-document-tagged` cloud function)
+- lastHistoryEntry: (map `{ id, index }`, the head of the Firestore history chain; concurrent-history documents)
+- canonical: (string, group documents; claims a canonical label so concurrent creators converge)
+- network: (string, name of a network) — _snapshot of the creator's primary network, read back by the rules; this field is unreliable because it gets stale when a user switches networks; see the [`network`](./document-metadata/metadata-fields.md#network) section in metadata-fields.md for details_
+- teachers: (array of user IDs) _legacy; no code writes it to `documents/{docId}` today, but the rules still read it for legacy documents_
 
 Collection:
 

@@ -100,10 +100,17 @@ export interface UnitConfiguration extends ProblemConfiguration {
   showCommentRating?: boolean;
   // list of possible values for tagging in comments
   commentTags?: Record<string, string>;
+  // whether teachers may add their own comment tags (in addition to commentTags) for their
+  // class; requires showCommentTag. Default false so legacy units are unaffected.
+  allowCustomCommentTags?: boolean;
   // if set, enable the specified AI evaluation to run after document updates
   aiEvaluation?: "categorize-design" | "mock" | "custom";
   // If aiEvaluation is "custom", this defines the prompt strings to use for the AI evaluation
   aiPrompt?: SnapshotIn<typeof AIPromptModel>;
+  // optional per-unit AI chat tutor prompt overrides: replaceGenericPrompt swaps out the
+  // server's built-in generic tutor prompt; appendToGenericPrompt is added after the
+  // (possibly replaced) generic prompt
+  chatTutorPrompts?: { replaceGenericPrompt?: string; appendToGenericPrompt?: string };
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
   // if set it will be used to determine if the show ideas button is shown, otherwise

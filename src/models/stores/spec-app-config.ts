@@ -8,7 +8,7 @@ const PartialAppConfigModel = types
     // default unit configuration
     config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
   });
-interface PartialAppConfigModelSnapshot extends Partial<Instance<typeof PartialAppConfigModel>> {}
+export interface PartialAppConfigModelSnapshot extends Partial<Instance<typeof PartialAppConfigModel>> {}
 
 /*
  * specAppConfig - utility function for generating appConfigs for tests

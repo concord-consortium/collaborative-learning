@@ -37,6 +37,7 @@ function renderSection({ expanded = false }: { expanded?: boolean } = {}) {
       class: stores.class,
       appConfig: stores.appConfig,
       bookmarks: stores.bookmarks,
+      commentTags: stores.commentTags,
     },
   });
   const result = render(

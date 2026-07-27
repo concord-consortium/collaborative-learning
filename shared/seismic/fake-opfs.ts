@@ -1,6 +1,7 @@
 // Minimal in-memory implementation of the OPFS subset used by opfs-seismic-cache.
 
 class FakeFileHandle {
+  readonly kind = "file";
   constructor(public name: string, private store: Map<string, ArrayBuffer>, private key: string) {}
   async createWritable() {
     const store = this.store, key = this.key;
@@ -16,11 +17,12 @@ class FakeFileHandle {
   }
   async getFile() {
     const bytes = this.store.get(this.key) ?? new ArrayBuffer(0);
-    return { arrayBuffer: async () => bytes };
+    return { size: bytes.byteLength, arrayBuffer: async () => bytes };
   }
 }
 
 export class FakeDirHandle {
+  readonly kind = "directory";
   private dirs = new Map<string, FakeDirHandle>();
   private files = new Set<string>();
   constructor(private path = "", private store = new Map<string, ArrayBuffer>()) {}
@@ -44,5 +46,13 @@ export class FakeDirHandle {
   }
   async removeEntry(name: string, _opts?: { recursive?: boolean }): Promise<void> {
     this.dirs.delete(name); this.files.delete(name);
+  }
+
+  async *entries(): AsyncIterableIterator<[string, FakeDirHandle | FakeFileHandle]> {
+    for (const [name, dir] of this.dirs) yield [name, dir];
+    for (const name of this.files) yield [name, new FakeFileHandle(name, this.store, `${this.path}/${name}`)];
+  }
+  async *values(): AsyncIterableIterator<FakeDirHandle | FakeFileHandle> {
+    for await (const [, handle] of this.entries()) yield handle;
   }
 }

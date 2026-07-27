@@ -36,6 +36,19 @@ describe("TextToolComponent", () => {
     expect(headingButton).toBeDefined();
   });
 
+  it("does not render the tile title by default (titles hidden)", () => {
+    const tileModel = TileModel.create({ title: "Text 1", content: defaultTextContent() });
+    specTextTile({ tileModel });
+    expect(screen.getByTestId("text-tool-wrapper")).toBeInTheDocument();
+    expect(screen.queryByText("Text 1")).not.toBeInTheDocument();
+  });
+
+  it("renders the tile title when the unit shows text titles", () => {
+    const tileModel = TileModel.create({ title: "Text 1", content: defaultTextContent() });
+    specTextTile({ tileModel, showTitle: true });
+    expect(screen.getByText("Text 1")).toBeInTheDocument();
+  });
+
 });
 
 describe("TextToolComponent highlight bbox cache", () => {

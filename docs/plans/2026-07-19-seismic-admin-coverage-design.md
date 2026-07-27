@@ -1,0 +1,89 @@
+# Seismic Admin Event Coverage — Design
+
+Step 2 of the seismic event database work ([event-database-design.md](../seismic/event-database-design.md), implemented in step 1): integrate shared event coverage into the seismic admin interface (`src/seismic-admin/`).
+
+## Goals
+
+- **Visualize coverage**: per selected station and per selected model, show which parts of the date range have been model-processed (from the Firestore coverage bitmaps).
+- **Show event counts**: how many events are stored per station × model in the range.
+- **Update**: a third button (beside "Download missing raw data" and "Delete raw data", in both per-station and all-selected sections) that downloads all missing raw data and then generates events for time ranges lacking coverage, for every selected model.
+- **Model selection**: header checkboxes mirroring station selection; determines which models' coverage/events are displayed and which the Update button processes.
+
+Out of scope: clearing coverage, deleting events, portal-authenticated admin access.
+
+## Architecture
+
+### Directory reorganization: `src/models/stores/seismic/`
+
+The seismic services move out of the flat `stores/` directory into `src/models/stores/seismic/`:
+
+- `seismic-download-service.ts` (+ test)
+- `seismic-download-worker-runner.ts`
+- `seismic-query-service.ts` (+ test)
+- `seismic-event-service.ts` (+ test)
+- **new:** `seismic-coverage-processor.ts` (+ test)
+
+Known importers to update: `stores.ts`, `wave-runner-content.ts` (+ test), `seismic-admin-store.ts`, plus sibling imports among the moved files.
+
+### Shared coverage processor (refactor of Wave Runner)
+
+`seismic-coverage-processor.ts` extracts the span/download/run/persist loop from `wave-runner-content.ts`'s `runModel`:
+
+- **Input**: `stationData`, model `metadata` (ModelMetadata), `range` (TimeRange, Unix seconds), optional pre-resolved `uncovered` ranges, callbacks `onEvents(events)` / `onProgress(processed, total)`, optional injected `SeismicDownloadService` (test seam).
+- **Pipeline** (semantics identical to step 1, unchanged): `getUncoveredRanges` (skipped when `uncovered` is provided) → `uncoveredDaySpans` → per-span `ensureRange` with the downloader's **inclusive** end-day convention (`endSec = span.endDay * SECONDS_PER_DAY`) → drain to `DONE` → per day: miniSEED parse → `SeismicModelRunner.processChunk` → best-effort `writeEvents`-then-`markCovered` (`saveDayResults`) → after each span, empty days marked covered, errored days not.
+- Owns the `SeismicModelRunner` lifecycle (load/dispose). Exports the shared detection threshold constant (0.7).
+- **Returns** `{processed, skipped, total}` day counts.
+- **Live-fill callback** (added during implementation): optional `onDayCovered(day)` fires after a day's events + coverage are successfully persisted (empty days included; errored days and failed persists excluded), letting the admin UI fill timelines day-by-day. Wave Runner doesn't use it.
+
+`runModel` in `wave-runner-content.ts` becomes a thin MST wrapper: validation, prior-event loading with the offline fallback (it resolves `uncovered` itself — falling back to the full range on Firestore failure — and passes it in), dataset population, progress state. The admin does NOT use the fallback: its purpose is writing to the shared DB, so processor-level Firestore errors propagate.
+
+All 38 existing wave-runner tests stay green through the refactor; the fake download-service/runner/event-service machinery in `wave-runner-content.test.ts` moves to a shared test helper reused by the processor tests.
+
+## Admin integration
+
+### Firebase bootstrap
+
+Admin entry point calls `initializeApp()` ([firebase-config.ts](../../src/lib/firebase-config.ts) — brings `firebaseEnv`/`firestore`/`auth` emulator URL params for free) and `firebase.auth().signInAnonymously()` (the step-1 Decision: anonymous users may read and contribute). An `authReady` flag lands in the store; OPFS features keep working pre-auth; coverage rows show a pending/error state until signed in.
+
+### Model selection
+
+- Model list from the unit config's wave-runner `models` setting (`{label, metadataUrl}` entries), loaded alongside the station catalog in `load-catalog.ts` (respects `curriculumBranch`/`authoringBranch`).
+- Header checkboxes styled/behaving like station selection; persisted in the same localStorage filters (`admin-persistence.ts`).
+- Metadata JSONs fetched lazily (on first coverage load or update) and cached; a failed fetch is cached as an error and retried on the next `refresh()`. `metadata.id` is the Firestore `{model}` path key.
+- The placeholder model was removed from the default app-config catalog; `PLACEHOLDER_MODEL_URL` support remains in `shared/seismic/model-metadata.ts`.
+
+### Coverage display
+
+In each station section, under "Local Raw Data": **one row per selected model**:
+
+- Header: model label with stats `X / Y days · N events`, plus a per-section readiness indicator.
+- Day bar reusing the RawTimeline pattern with **three states**: fully covered / partially covered / uncovered, derived from `getUncoveredRanges` gaps by a pure day-classification helper (a day is fully covered if no gap intersects it, uncovered if a gap spans the whole day, else partial).
+- Event counts via `loadEvents` over the range, counted client-side (acceptable at admin scale; a year-long range across many stations costs one read per 500 events — deliberate admin action, noted).
+
+The "All selected stations" section shows per-model aggregate text (total events, days covered across stations); no aggregate bar.
+
+### Update button
+
+Labeled "Update station" / "Update all stations". Per station: (1) run the existing download-missing-raw flow for the whole range; (2) for each selected model, run the coverage processor over the range (only uncovered days are processed; already-downloaded days hit the OPFS cache via `ensureRange`). All-selected: stations sequentially (shared-proxy limit). Feedback line reports station/model/day progress; coverage timelines fill live day-by-day via the processor's `onDayCovered` callback and are reconciled by a full stats reload after each model. Update never clears coverage.
+
+Disabled when: unauthenticated, no models are selected, no stations are selected (all-stations button), a long-running operation is already in progress (global `isBusy` lockout — which also disables the Download/Delete buttons and the header date/station/model filters), or **the whole time range is already covered** for the button's scope (per-station: every selected model's coverage for that station is complete over the range; all-selected: complete for every selected station × model). While coverage stats are still pending or errored, the button stays enabled (unknown ≠ covered). Missing raw data alone does not enable Update — generating events is its purpose; the Download button owns raw data.
+
+### Store changes (`SeismicAdminStore`)
+
+- `models: Map<metadataUrl, ModelListEntry>`, `selectedModels: Set<metadataUrl>` (persisted), model metadata cache.
+- Coverage stats per (stationKey, metadataUrl): `{dayStates, eventCount, state: pending|loaded|error}`; loaded on `refresh()`, `setRange()`, and selection changes. (`metadata.id` is used only for Firestore paths.)
+- `authReady` flag; `updateStation(key)` / `updateAllSelected()` actions.
+- New injectable deps in `SeismicAdminDeps` for the event service and processor (test seams, matching the existing `downloadStation` pattern).
+
+## Error handling
+
+- Firestore/auth failures during display → the row renders the same loading state as pending (no distinct error display; zero stats, no timeline). A sign-in failure surfaces its reason once in the feedback area.
+- Update failures for one station/model → report in feedback, continue with the rest, summary at the end.
+- Deleting raw data never touches coverage or events.
+
+## Testing
+
+- **Processor**: unit tests using the shared fake machinery (download service, model runner, event service) — span bounds, persist ordering, empty/errored days, injected-`uncovered` path, error propagation.
+- **Wave Runner**: existing suite green through the refactor.
+- **Admin store**: injected-deps tests for model selection persistence, coverage stat loading, update sequencing and failure continuation.
+- **Components**: model-selection header, coverage rows (three states), Update button enable/disable.

@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
-import { StationData } from "../../../shared/seismic/seismic-types";
+import { StationConfig } from "../../../shared/seismic/seismic-types";
 
 /**
  * Compute the SEED-style station identifier from station fields.
@@ -35,12 +35,3 @@ export const StationModel = types
 
 export interface StationModelType extends Instance<typeof StationModel> {}
 export type StationSnapshot = SnapshotIn<typeof StationModel>;
-
-/**
- * Shape of a station entry in unit configuration.
- * Same fields as StationSnapshot (location is optional, defaults to "").
- */
-export interface StationConfig extends StationData {
-  location?: string;
-  label?: string;
-}

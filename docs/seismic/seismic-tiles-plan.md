@@ -101,10 +101,10 @@ Seismic data is identified by three components: **network** (e.g., `AK`), **stat
 | System | Path / Key Format | Network | Station | Channel |
 |--------|-------------------|---------|---------|---------|
 | **EarthScope API** | `?network=AK&station=K204&channel=BHZ` | Separate param | Separate param | Separate param |
-| **Envelope tile cache** | `/{station}/{channel}/{level}/{tile_index}` | Folded into station as `AK_K204` | Combined with network | Separate path segment |
+| **Envelope tile cache** | `v2/{station}/{location}/{channel}/L{level}/{tileIndex}` | Folded into station as `AK_K204` | Combined with network | Separate path segment |
 | **Firestore events** | `services/seismic/stations/{station}/models/{model}/events/{id}` | Folded into station as `AK_K204` | Combined with network | **Missing** |
 | **Firestore coverage** | `services/seismic/stations/{station}/models/{model}/coverage/{chunkIndex}` | Folded into station as `AK_K204` | Combined with network | **Missing** |
-| **OPFS cache (Option A)** | `/seismic-cache/{network}/{station}/{channel}/{year}/{doy}.mseed` | Separate directory | Separate directory | Separate directory |
+| **OPFS cache (Option A)** | `/seismic-cache-v2/{network}_{station}/{location}/{channel}/{year}/{doy}.mseed` | Folded into station as `AK_K204` | Combined with network | Separate path segment |
 | **OPFS cache (Option B/ROVER)** | `/data/{network}/{year}/{doy}/{station}.{network}.{year}.{doy}` | Separate dir + in filename | In filename | **Missing** |
 
 #### Recommended conventions
@@ -113,14 +113,16 @@ Seismic data is identified by three components: **network** (e.g., `AK`), **stat
 
 2. **`{channel}`** is always a separate path segment, never folded into the station ID. Channel has different semantics (affects amplitude interpretation, sample rate) and different channels may share station-level metadata.
 
-3. **Unified paths:**
+3. **`{location}`** (the SEED location code) is a separate path segment between the station and the channel, in FDSN NSLC order. A blank location code is encoded as `--` in paths (the FDSN convention); see `encodeLocation`/`decodeLocation` in `shared/seismic/tile-addressing.ts`. It distinguishes multiple instruments at one station that share a channel code.
+
+4. **Unified paths:**
 
 | System | Path |
 |--------|------|
-| **Envelope tile cache** | `/{network_station}/{channel}/{level}/{tile_index}` (already follows this) |
+| **Envelope tile cache** | `v2/{network_station}/{location}/{channel}/L{level}/{tileIndex}` (already follows this) |
 | **Firestore events** | `services/seismic/stations/{network_station}/channels/{channel}/models/{model}/events/{id}` |
 | **Firestore coverage** | `services/seismic/stations/{network_station}/channels/{channel}/models/{model}/coverage/{chunkIndex}` |
-| **OPFS raw cache (Option A)** | `/seismic-cache/{network_station}/{channel}/{year}/{doy}.mseed` |
+| **OPFS raw cache (Option A)** | `/seismic-cache-v2/{network_station}/{location}/{channel}/{year}/{doy}.mseed` |
 | **OPFS raw cache (Option B/ROVER)** | ROVER's own layout — does not follow our convention, kept as-is for reference |
 
 Note: the OPFS Option B (ROVER's layout) intentionally does not follow our convention since it mirrors ROVER's existing structure. See [browser-seismic-downloader.md](browser-seismic-downloader.md) for details on both options.

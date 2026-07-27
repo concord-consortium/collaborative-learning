@@ -42,4 +42,13 @@
     bottom: 0;
     opacity: 0;
   }
+
+  // While the AI chat tutor drawer is open, reserve its width on the right so the
+  // workspace panels reflow into the remaining space instead of being overlaid. The
+  // extra 8px accounts for the drawer's own 4px margin plus a 4px gap to the workspace.
+  &.chat-tutor-open {
+    .workspace {
+      margin-right: calc(#{$chat-tutor-width} + 8px);
+    }
+  }
 }

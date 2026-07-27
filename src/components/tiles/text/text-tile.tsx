@@ -10,7 +10,7 @@ import { BaseComponent } from "../../base";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { userSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { kTextTileType, TextContentModelType } from "../../../models/tiles/text/text-content";
 import { HighlightRegistryContext, HighlightRevisionContext, IHighlightBox }
     from "./plugins/highlight-registry-context";
 import { removeAnnotationsForChip } from "./plugins/chip-annotation-cleanup";
@@ -19,6 +19,8 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
 import { ITileProps } from "../tile-component";
+import { BasicEditableTileTitle } from "../basic-editable-tile-title";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
@@ -145,6 +147,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   public componentDidMount() {
+    this.ensureTextTitle();
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
@@ -202,6 +205,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
     // Tile API registration (including getFocusableElements) is now handled
     // by the ClueTileAccessibilityBridge rendered in render().
+  }
+
+  public componentDidUpdate() {
+    this.ensureTextTitle();
   }
 
   public componentWillUnmount() {
@@ -285,11 +292,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const readOnly = this.isReadOnly();
 
     const editableClass = readOnly ? "read-only" : "editable";
+    const showTitle = !this.textTitleHidden();
     const containerClasses = classNames("tile-content", "text-tool-wrapper", {
       editable: !readOnly,
       hovered: this.props.hovered,
       selected: this.stores.ui.isSelectedTile(this.props.model),
       "voice-typing-active": this.state.voiceTypingActive,
+      "show-title": showTitle,
     });
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
@@ -322,6 +331,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                     focusContent={this.focusSlateContent}
                     additionalApi={this.additionalTileApi}
                   />
+                  {showTitle && <div className="text-tile-title"><BasicEditableTileTitle /></div>}
                   <Slate
                     editor={this.editor as ReactEditor}
                     initialValue={this.state.initialValue}
@@ -422,6 +432,23 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private getContent() {
     return this.props.model.content as TextContentModelType;
+  }
+
+  private textTitleHidden(): boolean {
+    return !!this.stores.appConfig.getSetting("hideTitle", kTextTileType);
+  }
+
+  // Text tiles created via addTile already receive an auto-numbered title; this backfills a
+  // default for legacy tiles that predate that (or were authored without one) so they display a
+  // sensible name when the unit shows text-tile titles. Guarded to editable tiles so we never
+  // mutate read-only/curriculum documents.
+  private ensureTextTitle() {
+    if (this.textTitleHidden()) return;
+    if (this.isReadOnly()) return;
+    const { model } = this.props;
+    if (model.title) return;
+    const title = getDocumentContentFromNode(model)?.getUniqueTitleForType(kTextTileType);
+    if (title) model.setDefaultTitle(title);
   }
 
   private isReadOnly(): boolean {

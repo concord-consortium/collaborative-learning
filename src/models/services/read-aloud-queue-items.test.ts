@@ -8,10 +8,12 @@ import {
 } from "./read-aloud-queue-items";
 import { ChatCommentThread } from "../../components/chat/chat-comment-thread";
 import { kDrawingTileType, kDrawingStateVersion } from "../../plugins/drawing/model/drawing-types";
+import { PartialAppConfigModelSnapshot, specAppConfig } from "../stores/spec-app-config";
 
-// Helper to create document content with multiple tiles
+// Helper to create document content with multiple tiles and an optional custom app config.
 function createDocumentContent(
-  tiles: Array<{ id: string; type: string; title?: string; text?: string; content?: any }>
+  tiles: Array<{ id: string; type: string; title?: string; text?: string; content?: any }>,
+  customConfig: PartialAppConfigModelSnapshot = {}
 ) {
   const rowMap: Record<string, any> = {};
   const tileMap: Record<string, any> = {};
@@ -35,7 +37,8 @@ function createDocumentContent(
   });
 
   const snapshot: DocumentContentSnapshotType = { rowMap, rowOrder, tileMap };
-  return DocumentContentModel.create(snapshot);
+  const appConfig = specAppConfig(customConfig);
+  return DocumentContentModel.create(snapshot, { appConfig });
 }
 
 // Drawing content helpers
@@ -129,13 +132,20 @@ describe("read-aloud-queue-items", () => {
   });
 
   describe("buildTileSpeechText", () => {
-    it("does not speak the title for text tiles (hiddenTitle)", () => {
+    it("does not speak the title for text tiles when the unit hides them (hideTitle)", () => {
       const content = createDocumentContent([
         { id: "t1", type: "Text", title: "My Title", text: "My content" }
-      ]);
+      ], { config: { settings: { text: { hideTitle: true } } } });
       const tile = content.getTile("t1")!;
-      // Text tiles have hiddenTitle, so the title is excluded from spoken text
       expect(buildTileSpeechText(tile)).toBe("My content");
+    });
+
+    it("speaks the text-tile title when the unit shows text titles (hideTitle: false)", () => {
+      const content = createDocumentContent([
+        { id: "t1", type: "Text", title: "My Title", text: "My content" }
+      ], { config: { settings: { text: { hideTitle: false } } } });
+      const tile = content.getTile("t1")!;
+      expect(buildTileSpeechText(tile)).toBe("My Title. My content");
     });
 
     it("announces tile type and title for non-text tiles", () => {

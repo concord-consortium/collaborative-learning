@@ -40,6 +40,5 @@ registerTileComponentInfo({
   tileEltClass: "text-tool-tile",
   Icon,
   HeaderIcon,
-  tileHandlesOwnSelection: true,
-  hiddenTitle: true
+  tileHandlesOwnSelection: true
 });
