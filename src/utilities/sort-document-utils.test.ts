@@ -7,6 +7,8 @@ import {
   createDocMapByBookmarks,
   createTileTypeToDocumentsMap,
   getTagsWithDocs,
+  GroupSectionSortKey,
+  sortGroupSections,
   sortProblemSectionLabels
 } from "./sort-document-utils";
 import { clearTermOverrides, setTermOverrides } from "./translation/translate";
@@ -201,6 +203,47 @@ describe("sort-document-utils", () => {
       const sorted = sortProblemSectionLabels([...labels]);
 
       expect(sorted).toEqual(["Problem 1.1"]);
+    });
+  });
+
+  describe("sortGroupSections", () => {
+    const keys = (entries: Array<[string, GroupSectionSortKey]>) => new Map(entries);
+
+    it("puts the whole-class section first, groups in numeric order, and no-group last", () => {
+      const labels = ["No Group", "Group 10", "Whole Class", "Group 2"];
+      const sorted = sortGroupSections(labels, keys([
+        ["No Group", { scope: "none" }],
+        ["Group 10", { scope: "group", groupId: "10" }],
+        ["Whole Class", { scope: "class" }],
+        ["Group 2", { scope: "group", groupId: "2" }],
+      ]));
+      expect(sorted).toEqual(["Whole Class", "Group 2", "Group 10", "No Group"]);
+    });
+
+    it("orders non-numeric group ids after numeric ones, alphabetically", () => {
+      const labels = ["Group b", "Group 3", "Group a"];
+      const sorted = sortGroupSections(labels, keys([
+        ["Group b", { scope: "group", groupId: "b" }],
+        ["Group 3", { scope: "group", groupId: "3" }],
+        ["Group a", { scope: "group", groupId: "a" }],
+      ]));
+      expect(sorted).toEqual(["Group 3", "Group a", "Group b"]);
+    });
+
+    it("does not read the label text — a renamed group term still sorts numerically", () => {
+      // The comparator must not infer order from the display string; `studentGroup` is overridable
+      // per unit, so "Team 2" and "Group 2" must sort identically.
+      const labels = ["Team 10", "Team 2"];
+      const sorted = sortGroupSections(labels, keys([
+        ["Team 10", { scope: "group", groupId: "10" }],
+        ["Team 2", { scope: "group", groupId: "2" }],
+      ]));
+      expect(sorted).toEqual(["Team 2", "Team 10"]);
+    });
+
+    it("treats a label with no sort key as no-group", () => {
+      const sorted = sortGroupSections(["Mystery", "Whole Class"], keys([["Whole Class", { scope: "class" }]]));
+      expect(sorted).toEqual(["Whole Class", "Mystery"]);
     });
   });
 });
