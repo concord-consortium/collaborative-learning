@@ -33,10 +33,8 @@ export interface IDocumentKindInfo {
   /** How this kind's scope axes are derived (see DocumentScopeType). */
   scopeType: DocumentScopeType;
   /**
-   * Static display title (presentation config). Class-wide slots register their authored title here so it is
-   * resolved live by kind — not stored per document. Kinds whose title is dynamic (e.g. a problem document's
-   * title comes from the unit) leave this unset; getDocumentTitle returns undefined for them so the caller
-   * resolves the title another way (see getDocumentTitle).
+   * Static display title (presentation config). Leave undefined for dynamic titles like
+   * group documents or in the future problem documents.
    */
   title?: string;
 }
