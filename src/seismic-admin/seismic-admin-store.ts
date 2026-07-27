@@ -1,10 +1,10 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { classifyDayCoverage, DayCoverageState } from "../../shared/seismic/event-database";
+import { classifyDayCoverage } from "../../shared/seismic/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
 import { dayIndex, SECONDS_PER_DAY, utcDayFromString } from "../../shared/seismic/seismic-day";
 import { ModelMetadata, SeismicEvent } from "../../shared/seismic/seismic-model-types";
-import { StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
+import { DayCoverageState, StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
 import { processUncoveredRanges, ProcessCoverageOptions } from "../models/stores/seismic/seismic-coverage-processor";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";

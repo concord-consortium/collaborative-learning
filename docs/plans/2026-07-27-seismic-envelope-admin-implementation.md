@@ -119,9 +119,8 @@ describe("missingEnvelopeDaySpans", () => {
 
 ```ts
 import { S3_BUCKET, S3_PREFIX } from "./envelope-config";
-import { DayCoverageState, DaySpan } from "./event-database";
 import { dayIndex, dayRange } from "./seismic-day";
-import { StationData, TimeRange } from "./seismic-types";
+import { DayCoverageState, DaySpan, StationData, TimeRange } from "./seismic-types";
 import { getS3Root, getStationChannelPrefix, getTileIndicesForViewport } from "./tile-addressing";
 
 const LIST_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/`;
