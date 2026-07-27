@@ -442,10 +442,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.stores.serialDevice.isConnected()) return;
     const transport = new WebSerialTransport();
     const opened = await transport.open();
-    if (!opened) return;
+    const deviceFamily = transport.deviceFamily;
+    if (!opened || !deviceFamily) return;
     this.stores.serialDevice.setActiveDevice(
-      transport.deviceFamily!, transport, this.props.tileContent.channels);
-    this.stores.serialDevice.setKnownBoard(transport.knownBoard);
+      deviceFamily, transport, this.props.tileContent.channels);
+    this.stores.serialDevice.setRaisesWebSerialConnect(transport.raisesWebSerialConnect);
     transport.startReading();
   };
 

@@ -15,22 +15,20 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
   const { onConnectDevice, readOnly, serialDevice } = props;
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
-  // Which we use to track physical connection independently of port state
-  // So we only warn of a lack of physical connection when using an known board
-  const knownBoard = serialDevice.knownBoard;
+  // Only track physical connection independently of port state when the device provides it.
+  const raisesWebSerialConnect = serialDevice.raisesWebSerialConnect;
   const lastMsg = localStorage.getItem("last-connect-message");
   const classes = classNames(
     "icon-serial",
     { "physical-connection": lastMsg === "connect"},
-    { "no-physical-connection": lastMsg === "disconnect" && knownBoard},
+    { "no-physical-connection": lastMsg === "disconnect" && raisesWebSerialConnect},
     serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
     serialDevice.isConnected() ? "has-port" : "no-port"
   );
   function serialMessage(){
     // nodes that use serial, but no device physically connected
     if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
-      return knownBoard ? "connect a device" : "";
+      return raisesWebSerialConnect ? "connect a device" : "";
     }
     // physical connection has been made but user action needed
     if (lastMsg === "connect"

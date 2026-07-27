@@ -59,7 +59,7 @@ transport, wires its inbound callbacks, and marks the store connected.
    `navigator.serial.requestPort()` shows the browser's device chooser; on selection we
    read `getInfo()`, resolve `deviceFamily`, and open the port at 9600 baud.
 2. `setActiveDevice(transport.deviceFamily, transport, channels)` and
-   `setKnownBoard(transport.knownBoard)`.
+   `setRaisesWebSerialConnect(transport.raisesWebSerialConnect)`.
 3. `transport.startReading()` starts the inbound read loop.
 
 The device chooser is intentionally **unfiltered**. `requestPort()` could take USB-ID
@@ -72,9 +72,9 @@ from it.)
 
 **Device identity** is resolved from the USB descriptor in
 `WebSerialTransport.determineDeviceFamily`: a micro:bit reports `usbProductId === 516 &&
-usbVendorId === 3368`; anything else is assumed to be an Arduino. `knownBoard` (an
-authentic Arduino, `usbProductId === 67`) additionally drives connect-button UI, because
-only authentic Arduinos raise the browser `connect` event.
+usbVendorId === 3368`; anything else is assumed to be an Arduino. We've only seen authentic
+Arduinos raise the Web Serial `connect` event. We check for that `usbProductId` (67), and only
+drive the connect-button UI with it when we think we are getting this `connect` event.
 
 **Spiker:bit (`connectSpikerbit`):** constructs a `SpikerbitDevice` and calls
 `connectAndStream`, which connects over WebUSB, checks and if needed flashes the firmware

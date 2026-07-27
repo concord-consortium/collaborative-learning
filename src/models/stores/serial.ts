@@ -20,8 +20,12 @@ export class SerialDevice {
   activeTransport: IDeviceTransport | undefined;
   // The connecting tile's channels, recorded at connect so inbound data can be parsed.
   channels: NodeChannelInfo[] = [];
-  // True once a known board (authentic Arduino) has connected; drives connect-button UI.
-  knownBoard = false;
+  /**
+   * True when we think the connected Web Serial board will raise the browser
+   * connect/disconnect events. It drives connect-button physical-connection UI. Only ever set
+   * by the Web Serial path — stays false for a WebUSB (Spiker:bit) connection.
+   */
+  raisesWebSerialConnect = false;
 
   constructor() {
     this.localBuffer = "";
@@ -38,8 +42,8 @@ export class SerialDevice {
     localStorage.setItem("last-connect-message", status);
   }
 
-  public setKnownBoard(knownBoard: boolean){
-    this.knownBoard = knownBoard;
+  public setRaisesWebSerialConnect(raises: boolean){
+    this.raisesWebSerialConnect = raises;
   }
 
   public isConnected(){
