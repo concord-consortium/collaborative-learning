@@ -1047,7 +1047,10 @@ export class DB {
           // the value so the opened model's history manager runs in concurrent mode this session, and best-
           // effort write it back so the stored field converges (the batch script covers never-opened docs).
           const kindMetadataFields = getDocumentKindMetadataFields(firestoreMetadata.type);
-          const concurrent = firestoreMetadata.concurrent ?? kindMetadataFields.concurrent ?? undefined;
+          // Storage wins when it says true; otherwise fall back to the registry, treating any non-`true`
+          // stored value as missing so it matches the write-back gate below.
+          const concurrent =
+            firestoreMetadata.concurrent === true ? true : (kindMetadataFields.concurrent ?? undefined);
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
           // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
           // it'd be possible for someone to add a concurrent field to another document type and then we'd
