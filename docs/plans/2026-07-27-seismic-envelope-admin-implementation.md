@@ -118,12 +118,10 @@ describe("missingEnvelopeDaySpans", () => {
 **Step 3: Implement** `shared/seismic/envelope-coverage.ts`:
 
 ```ts
-import { FINEST_LEVEL, S3_BUCKET, S3_PREFIX } from "./envelope-config";
+import { FINEST_LEVEL, S3_PREFIX, TILE_BASE_URL } from "./envelope-config";
 import { dayIndex, dayRange } from "./seismic-day";
 import { DayCoverageState, DaySpan, StationData, TimeRange } from "./seismic-types";
 import { getS3Root, getStationChannelPrefix, getTileIndicesForViewport } from "./tile-addressing";
-
-const LIST_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/`;
 
 type ListFetchFn = (url: string) => Promise<Pick<Response, "ok" | "status" | "text">>;
 
@@ -135,7 +133,7 @@ export async function listEnvelopeTileIndices(
   const indices = new Set<number>();
   let continuationToken: string | undefined;
   do {
-    let url = `${LIST_BASE_URL}?list-type=2&max-keys=1000&prefix=${encodeURIComponent(prefix)}`;
+    let url = `${TILE_BASE_URL}?list-type=2&max-keys=1000&prefix=${encodeURIComponent(prefix)}`;
     if (continuationToken) url += `&continuation-token=${encodeURIComponent(continuationToken)}`;
     const response = await fetchFn(url);
     if (!response.ok) throw new Error(`Envelope tile listing failed: ${response.status}`);
@@ -328,7 +326,7 @@ it("merges with an existing tile and PUTs with If-Match", async () => {
 ```ts
 import { AwsClient } from "aws4fetch";
 import { decodeEnvelopeTile, encodeEnvelopeTile } from "../../../../shared/seismic/envelope-codec";
-import { S3_BUCKET, S3_PREFIX } from "../../../../shared/seismic/envelope-config";
+import { S3_PREFIX, TILE_BASE_URL } from "../../../../shared/seismic/envelope-config";
 import { mergeEnvelopeTileData } from "../../../../shared/seismic/envelope-merge";
 import { EnvelopeTileData, StationData } from "../../../../shared/seismic/seismic-types";
 import { getS3Root, getTileS3Key } from "../../../../shared/seismic/tile-addressing";
@@ -351,7 +349,6 @@ export interface EnvelopeUploaderDeps {
   signFetch?: SignFetchFn;
 }
 
-const TILE_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/`;
 const AWS_REGION = "us-east-1";
 const MAX_CONFLICT_RETRIES = 3;
 

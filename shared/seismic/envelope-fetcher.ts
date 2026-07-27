@@ -1,9 +1,9 @@
 import { decodeEnvelopeTile } from "./envelope-codec";
-import { S3_BUCKET, S3_PREFIX } from "./envelope-config";
+import { S3_PREFIX, TILE_BASE_URL } from "./envelope-config";
 import { FetchEnvelopeTileParams, EnvelopeTileData } from "./seismic-types";
 import { getTileS3Key, getS3Root } from "./tile-addressing";
 
-const DEFAULT_S3_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}`;
+const DEFAULT_S3_BASE_URL = `${TILE_BASE_URL}${S3_PREFIX}`;
 
 /**
  * Fetch a single precomputed envelope tile from S3 and decode it.

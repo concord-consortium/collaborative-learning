@@ -61,5 +61,8 @@ export const S3_BUCKET = "models-resources";
 /** S3 key prefix for envelope tiles. */
 export const S3_PREFIX = "collaborative-learning/envelopes/";
 
+/** Base URL of the S3 bucket hosting envelope tiles. */
+export const TILE_BASE_URL = `https://${S3_BUCKET}.s3.amazonaws.com/`;
+
 /** Duration of each raw data fetch chunk in seconds. */
 export const RAW_CHUNK_DURATION = 7200; // 2 hours
