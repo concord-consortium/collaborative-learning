@@ -258,7 +258,11 @@ Nothing to do for this task.
 
 ---
 
-### Task 5: Envelope uploader (`src/models/stores/seismic/envelope-uploader.ts`)
+### Task 5: Envelope uploader & credentials (`src/models/stores/seismic/envelope-uploader.ts`)
+
+One module for the S3 write path: the token-service credentials provider produces exactly the
+`AwsCredentials` the uploader consumes, so both live here. In `src/models/stores/seismic/`
+(not seismic-admin) because Wave Runner (part 2) will use them too.
 
 **Files:** Create: `src/models/stores/seismic/envelope-uploader.ts`, `src/models/stores/seismic/envelope-uploader.test.ts`
 
@@ -272,6 +276,10 @@ verification covers it). Cases:
 3. 412 conflict: PUT returns 412 once → re-GET, re-merge, second PUT succeeds.
 4. Persistent 412: throws after 3 retries.
 5. Non-412 PUT failure and non-404 GET failure: throw.
+6. `createEnvelopeCredentialsProvider` (inject a fake client factory): resource id is
+   `v${ENVELOPE_LAYOUT_VERSION}`; credentials are cached across calls; a new client + fetch
+   happens once the cached credentials are within 5 minutes of expiry
+   (use `jest.spyOn(Date, "now")`).
 
 ```ts
 import { encodeEnvelopeTile, decodeEnvelopeTile } from "../../../../shared/seismic/envelope-codec";
@@ -316,9 +324,11 @@ it("merges with an existing tile and PUTs with If-Match", async () => {
 
 ```ts
 import { AwsClient } from "aws4fetch";
+import { TokenServiceClient } from "@concord-consortium/token-service";
 import { decodeEnvelopeTile, encodeEnvelopeTile, mergeEnvelopeTileData }
   from "../../../../shared/seismic/envelope-codec";
-import { AWS_REGION, S3_PREFIX, TILE_BASE_URL } from "../../../../shared/seismic/envelope-config";
+import { AWS_REGION, ENVELOPE_LAYOUT_VERSION, S3_PREFIX, TILE_BASE_URL }
+  from "../../../../shared/seismic/envelope-config";
 import { EnvelopeTileData, StationData } from "../../../../shared/seismic/seismic-types";
 import { getS3Root, getTileS3Key } from "../../../../shared/seismic/tile-addressing";
 
@@ -387,9 +397,44 @@ export function createEnvelopeUploader(deps: EnvelopeUploaderDeps): EnvelopeUplo
     },
   };
 }
+
+// ---- Credentials ----
+
+export const ENVELOPE_RESOURCE_ID = `v${ENVELOPE_LAYOUT_VERSION}`;
+const EXPIRY_MARGIN_MS = 5 * 60 * 1000;
+
+interface TimedCredentials extends AwsCredentials { expiration: string; }
+type GetCredentialsClient = Pick<TokenServiceClient, "getCredentials">;
+
+export interface EnvelopeCredentialsDeps {
+  /** Returns a fresh portal-signed Firebase JWT (admin: via OAuth token; Wave Runner: rawFirebaseJWT). */
+  getJwt: () => Promise<string>;
+  env?: "staging" | "production";
+  /** Test seam. */
+  createClient?: (jwt: string, env: "staging" | "production") => GetCredentialsClient;
+}
+
+/** getCredentials source for createEnvelopeUploader: token-service STS credentials,
+ *  cached until near expiry. */
+export function createEnvelopeCredentialsProvider(deps: EnvelopeCredentialsDeps) {
+  const { getJwt, env = "production" } = deps;
+  const createClient = deps.createClient ?? ((jwt, e) => new TokenServiceClient({ jwt, env: e }));
+  let cached: TimedCredentials | undefined;
+  return async (): Promise<AwsCredentials> => {
+    if (cached && new Date(cached.expiration).getTime() - Date.now() > EXPIRY_MARGIN_MS) {
+      return cached;
+    }
+    const client = createClient(await getJwt(), env);
+    cached = await client.getCredentials(ENVELOPE_RESOURCE_ID) as TimedCredentials;
+    return cached;
+  };
+}
 ```
 
-**Step 4:** Tests pass. **Step 5:** Commit: `"Add merge-uploading envelope tile uploader"`
+Note: check the actual `Credentials` type exported by `@concord-consortium/token-service` and
+adjust the cast (it includes `accessKeyId`, `secretAccessKey`, `sessionToken`, `expiration`).
+
+**Step 4:** Tests pass. **Step 5:** Commit: `"Add envelope tile uploader with token-service credentials"`
 
 ---
 
@@ -454,56 +499,10 @@ export async function fetchPortalFirebaseJwt(accessToken: string): Promise<strin
 
 ---
 
-### Task 7: Credentials provider (`src/models/stores/seismic/envelope-credentials.ts`)
+### Task 7: Credentials provider — FOLDED INTO TASK 5
 
-Lives beside the uploader (not in seismic-admin) because Wave Runner (part 2) will use it too.
-
-**Files:** Create: `src/models/stores/seismic/envelope-credentials.ts` + test
-
-**Step 1: Failing tests.** Inject a fake client factory; assert: resource id is
-`v${ENVELOPE_LAYOUT_VERSION}`; credentials are cached across calls; a new client+fetch happens
-once the cached credentials are within 5 minutes of expiry (use `jest.spyOn(Date, "now")`).
-
-**Step 3: Implement:**
-
-```ts
-import { TokenServiceClient } from "@concord-consortium/token-service";
-import { ENVELOPE_LAYOUT_VERSION } from "../../../../shared/seismic/envelope-config";
-import { AwsCredentials } from "./envelope-uploader";
-
-export const ENVELOPE_RESOURCE_ID = `v${ENVELOPE_LAYOUT_VERSION}`;
-const EXPIRY_MARGIN_MS = 5 * 60 * 1000;
-
-interface TimedCredentials extends AwsCredentials { expiration: string; }
-type GetCredentialsClient = Pick<TokenServiceClient, "getCredentials">;
-
-export interface EnvelopeCredentialsDeps {
-  /** Returns a fresh portal-signed Firebase JWT (admin: via OAuth token; Wave Runner: rawFirebaseJWT). */
-  getJwt: () => Promise<string>;
-  env?: "staging" | "production";
-  /** Test seam. */
-  createClient?: (jwt: string, env: "staging" | "production") => GetCredentialsClient;
-}
-
-export function createEnvelopeCredentialsProvider(deps: EnvelopeCredentialsDeps) {
-  const { getJwt, env = "production" } = deps;
-  const createClient = deps.createClient ?? ((jwt, e) => new TokenServiceClient({ jwt, env: e }));
-  let cached: TimedCredentials | undefined;
-  return async (): Promise<AwsCredentials> => {
-    if (cached && new Date(cached.expiration).getTime() - Date.now() > EXPIRY_MARGIN_MS) {
-      return cached;
-    }
-    const client = createClient(await getJwt(), env);
-    cached = await client.getCredentials(ENVELOPE_RESOURCE_ID) as TimedCredentials;
-    return cached;
-  };
-}
-```
-
-Note: check the actual `Credentials` type exported by `@concord-consortium/token-service` and
-adjust the cast (it includes `accessKeyId`, `secretAccessKey`, `sessionToken`, `expiration`).
-
-**Step 4:** Tests pass. **Step 5:** Commit: `"Add token-service envelope credentials provider"`
+`createEnvelopeCredentialsProvider` lives in `envelope-uploader.ts` (see Task 5); it does not
+get its own file. Nothing to do for this task.
 
 ---
 
