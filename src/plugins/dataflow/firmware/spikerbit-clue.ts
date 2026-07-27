@@ -41,11 +41,6 @@
 //
 // Keep VERSION's number in sync with kSpikerbitFirmwareVersion in
 // src/models/stores/spikerbit-device.ts whenever this program changes.
-//
-// NOTE: confirm the servo pin against the Spiker:bit board — documentation cites
-// P0 in some places and P8 in others. (P8 is used above as an EMG-mode select line, so if
-// the servo really is on P8 the two uses collide — resolve before shipping.) Update
-// AnalogPin.P0 below if needed and re-export the hex.
 
 const VERSION = "CLUE-SPIKERBIT v3"
 
