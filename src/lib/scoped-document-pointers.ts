@@ -35,8 +35,8 @@ export interface ICanonicalPointerScope {
  *
  * The `units/` segment is used only when there is no offering — an offering already pins a unit, so
  * offering-scoped pointers (group docs; future problem/planning docs) omit it, while class+unit pointers
- * (class-wide docs like the DQB) use it. For class-wide slots the label equals the document's `kind`; the
- * group document keeps its CLUE-524 label `default`.
+ * (class-wide docs like the DQB) use it. For class-wide slots the label equals the document's `kind`; a
+ * group document slot just uses "default".
  *
  * firestore.rules `canonicalPointerPath` builds the same path the same way (string concat + path(), verified
  * against the emulator) — keep the two in lockstep.
@@ -55,4 +55,3 @@ export function getCanonicalPointerPath(scope: ICanonicalPointerScope, label: st
   segments.push(`slots/${label}`);
   return segments.join("/");
 }
-

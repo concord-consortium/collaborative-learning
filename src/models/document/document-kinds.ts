@@ -5,13 +5,17 @@ import {
   ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 
-/** The stored metadata axis fields a kind stamps onto its documents. This grows as more axes become
- *  kind-derived; the stamp sites splat it verbatim, so they don't change when it grows. */
+/**
+ * The stored metadata axis fields a kind stamps onto its documents. This grows as more axes become
+ * kind-derived; the stamp sites splat it verbatim, so they don't change when it grows.
+ */
 export type IDocumentKindMetadataFields = Pick<IDocumentMetadata, "kind" | "concurrent">;
 
-/** How a kind's `owner` axis (authoring identity / provenance, stored as the document's `uid`) is derived
- *  at creation: "user" → the creating user; "group" → the synthetic group owner (`group_<off>_<grp>`);
- *  "class" → the synthetic class owner (`class_<classHash>`), shared by the whole class. Defaults to "user". */
+/**
+ * How a kind's `owner` axis (authoring identity / provenance, stored as the document's `uid`) is derived
+ * at creation: "user" → the creating user; "group" → the synthetic group owner (`group_<off>_<grp>`);
+ * "class" → the synthetic class owner (`class_<classHash>`), shared by the whole class. Defaults to "user".
+ */
 export type DocumentOwnerType = "user" | "group" | "class";
 
 /**
@@ -22,24 +26,30 @@ export type DocumentScopeType = "class" | "classUnit" | "offering" | "group";
 export interface IDocumentKindInfo {
   /** The kind key. Matches the value stored in a document's `kind` field. */
   kind: string;
-  /** The metadata axis fields stamped onto this kind's documents at creation (and backfilled on open).
-   *  The `kind` field itself is added automatically by getDocumentKindMetadataFields, so it is not
-   *  repeated here. */
+  /**
+   * The metadata axis fields stamped onto this kind's documents at creation (and backfilled on open).
+   * The `kind` field itself is added automatically by getDocumentKindMetadataFields, so it is not
+   * repeated here.
+   */
   metadataFields: Omit<IDocumentKindMetadataFields, "kind">;
   /** How this kind's owner uid is derived (see DocumentOwnerType). */
   ownerType: DocumentOwnerType;
   /** How this kind's scope axes are derived (see DocumentScopeType). */
   scopeType: DocumentScopeType;
-  /** Static display title (presentation config). Class-wide slots register their authored title here so it is
-   *  resolved live by kind — not stored per document. Kinds whose title is dynamic (e.g. a problem document's
-   *  title comes from the unit) leave this unset; getDocumentTitle returns undefined for them so the caller
-   *  resolves the title another way (see getDocumentTitle). */
+  /**
+   * Static display title (presentation config). Class-wide slots register their authored title here so it is
+   * resolved live by kind — not stored per document. Kinds whose title is dynamic (e.g. a problem document's
+   * title comes from the unit) leave this unset; getDocumentTitle returns undefined for them so the caller
+   * resolves the title another way (see getDocumentTitle).
+   */
   title?: string;
 }
 
-/** The candidate owner uids for a document being created. The synthetic ones depend on runtime state
- *  (the user's group, the current unit), so the caller supplies them; getDocumentOwner selects among
- *  them by the kind's registered owner type. */
+/**
+ * The candidate owner uids for a document being created. The synthetic ones depend on runtime state
+ * (the user's group, the current unit), so the caller supplies them; getDocumentOwner selects among
+ * them by the kind's registered owner type.
+ */
 export interface IDocumentOwnerContext {
   /** The creating user's own uid — the default owner. */
   userId: string;
@@ -59,23 +69,24 @@ export function getDocumentKindInfo(kind?: string|null) {
   return kind ? gDocumentKindInfoMap[kind] : undefined;
 }
 
-/** The stored metadata axis fields for the given kind — its own `kind` key plus any others (e.g. `concurrent`);
- *  empty for an unregistered kind. The stamp sites (createFirestoreMetadataDocument and the on-open backfill)
- *  currently apply these only to type:"group" documents, so both stay in sync as the field set grows. */
+/**
+ * The stored metadata axis fields for the given kind — its own `kind` key plus any others (e.g. `concurrent`);
+ * empty for an unregistered kind. The stamp sites (createFirestoreMetadataDocument and the on-open backfill)
+ * currently apply these only to type:"group" documents, so both stay in sync as the field set grows.
+ */
 export function getDocumentKindMetadataFields(kind?: string|null): IDocumentKindMetadataFields {
   const info = getDocumentKindInfo(kind);
   if (!info) return {};
   return { kind: info.kind, ...info.metadataFields };
 }
 
-/** The owner type registered for a kind (how its owner uid is derived); "user" for an unregistered kind. */
 export function getDocumentOwnerType(kind?: string|null): DocumentOwnerType {
   return getDocumentKindInfo(kind)?.ownerType ?? "user";
 }
 
-/** The owner uid to stamp on a new document of the given kind, chosen by the kind's registered owner type
- *  from the runtime-supplied context. Falls back to the creating user when the synthetic owner a type
- *  needs was not supplied. */
+/**
+ * The owner uid to stamp on a new document of the given kind
+ */
 export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwnerContext): string {
   switch (getDocumentOwnerType(kind)) {
     case "group": return ctx.groupOwnerId ?? ctx.userId;
@@ -85,9 +96,11 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
   }
 }
 
-/** The scope fields a document draws from its runtime context, supplied by the caller because they depend on
- *  the user's class, current group, offering, unit, and problem. Doubles as the return shape of
- *  getDocumentScopeFields (the subset a given kind actually stamps). */
+/**
+ * The scope fields a document draws from its runtime context, supplied by the caller because they depend on
+ * the user's class, current group, offering, unit, and problem. Doubles as the return shape of
+ * getDocumentScopeFields (the subset a given kind actually stamps).
+ */
 export interface IDocumentScopeContext {
   unit: string | null;
   investigation?: string;
@@ -97,17 +110,13 @@ export interface IDocumentScopeContext {
   offeringId?: string;
 }
 
-/** The scope fields to stamp on a document of the given kind, selected by its registered `scopeType`.
- *  `context_id` (the class) is always included; each scopeType then picks the subset its documents carry:
- *   - "group":     the full offering context — `groupId`, `offeringId`, `unit`, `investigation`, `problem`;
- *   - "offering":  `offeringId`, `unit`, `investigation`, `problem` (no group);
- *   - "classUnit": `unit` only;
- *   - "class" (and unregistered kinds): a null `unit` only.
- *  The caller supplies every runtime value via ctx; unused ones are simply not returned. */
+/**
+ * The scope fields to stamp on a document of the given kind, selected by its registered `scopeType`.
+ */
 export function getDocumentScopeFields(
   kind: string|null|undefined, ctx: IDocumentScopeContext
 ): IDocumentScopeContext {
-  const scopeType = getDocumentKindInfo(kind)?.scopeType; // ensure kind is registered, for dev-time validation
+  const scopeType = getDocumentKindInfo(kind)?.scopeType;
   switch (scopeType) {
     case "group": return {
       unit: ctx.unit,
@@ -139,36 +148,33 @@ export function getDocumentScopeFields(
   }
 }
 
-/** The minimal document fields getDocumentTitle reads. Structural so the registry stays a leaf module that
- *  doesn't import the document models. */
+/**
+ * The minimal document fields getDocumentTitle reads. Structural so the registry stays a leaf module that
+ * doesn't import the document models.
+ */
 interface IDocumentTitleFields {
   kind?: string | null;
   type?: string;
   groupId?: string | null;
 }
 
-/** The display title for a document, resolved by its kind — presentation is a by-kind lookup, never stored
- *  (see docs/document-axes/target-architecture.md). Returns:
- *   - the kind's registered static title (class-wide slots);
- *   - the group-document label for other type:"group" documents (regular group docs, incl. legacy ones with
- *     no stored kind);
- *   - undefined for every other kind, so the caller falls back to type-based title computation
- *     (problem/personal/support).
- *  Those remaining strategies will move here as the kinds are filled out; dynamic ones (e.g. a problem's title
- *  from the unit) will take a context argument then, like getDocumentScopeFields keeps the registry
- *  store-free. */
+/**
+ * The display title for a document based on its kind
+ */
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
   const registeredTitle = getDocumentKindInfo(document.kind)?.title;
   if (registeredTitle != null) return registeredTitle;
   // Keyed on `type`, not `kind`: pre-existing group documents predate the `kind` axis and may have no stored
-  // `kind` yet (metadata records are only backfilled when a document is opened), while `type` is always
-  // present. Class-wide docs are new and always carry a `kind`, so their title is resolved above by kind.
+  // `kind` yet. We backfill the kind on open but we need the title for the lists of documents before they
+  // are opened. Class-wide docs are new and always carry a `kind`, so their title is resolved above by kind.
   if (document.type === GroupDocument) return `Group ${document.groupId} Document`;
   return undefined;
 }
 
-// Built-in kinds. The group document is the first concurrent kind; the DQB / word-wall register later
-// (Stage 2). `kind` deliberately equals the `type` value "group"; its owner is the synthetic group user.
+//
+// Built-in document kinds.
+//
+
 registerDocumentKind( GroupDocument, {
   metadataFields: { concurrent: true },
   ownerType: "group",
