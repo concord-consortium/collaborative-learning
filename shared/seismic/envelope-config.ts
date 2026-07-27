@@ -58,6 +58,9 @@ export const NO_DATA_SENTINEL = -32768;
 /** S3 bucket where envelope tiles are stored. */
 export const S3_BUCKET = "models-resources";
 
+/** AWS region of the envelope tile bucket. */
+export const AWS_REGION = "us-east-1";
+
 /** S3 key prefix for envelope tiles. */
 export const S3_PREFIX = "collaborative-learning/envelopes/";
 

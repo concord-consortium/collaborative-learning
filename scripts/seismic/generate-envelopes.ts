@@ -14,7 +14,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { miniseed } from "seisplotjs/nodeonly";
 import {
-  LEVEL_SPACINGS, FINEST_LEVEL, AMPLITUDE_RANGES, S3_BUCKET, S3_PREFIX
+  LEVEL_SPACINGS, FINEST_LEVEL, AMPLITUDE_RANGES, AWS_REGION, S3_BUCKET, S3_PREFIX
 } from "../../shared/seismic/envelope-config.js";
 import {
   decodeLocation, getS3Root, getStationChannelPrefix, getTileS3Key
@@ -29,8 +29,6 @@ import {
 import type { ChannelMetadata, EnvelopeTileData, StationData } from "../../shared/seismic/seismic-types.js";
 
 // ---- Configuration ----
-
-const DEFAULT_AWS_REGION = "us-east-1";
 
 interface ScriptConfig {
   /** Path to ROVER data root (e.g., "<datarepo>/data/") */
@@ -63,7 +61,7 @@ function parseArgs(): ScriptConfig {
     location: "",
     s3Bucket: S3_BUCKET,
     s3Prefix: S3_PREFIX,
-    awsRegion: DEFAULT_AWS_REGION,
+    awsRegion: AWS_REGION,
     localOnly: false,
     maxFiles: 0,
   };

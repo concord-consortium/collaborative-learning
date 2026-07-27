@@ -318,7 +318,7 @@ it("merges with an existing tile and PUTs with If-Match", async () => {
 import { AwsClient } from "aws4fetch";
 import { decodeEnvelopeTile, encodeEnvelopeTile, mergeEnvelopeTileData }
   from "../../../../shared/seismic/envelope-codec";
-import { S3_PREFIX, TILE_BASE_URL } from "../../../../shared/seismic/envelope-config";
+import { AWS_REGION, S3_PREFIX, TILE_BASE_URL } from "../../../../shared/seismic/envelope-config";
 import { EnvelopeTileData, StationData } from "../../../../shared/seismic/seismic-types";
 import { getS3Root, getTileS3Key } from "../../../../shared/seismic/tile-addressing";
 
@@ -340,7 +340,6 @@ export interface EnvelopeUploaderDeps {
   signFetch?: SignFetchFn;
 }
 
-const AWS_REGION = "us-east-1";
 const MAX_CONFLICT_RETRIES = 3;
 
 export interface EnvelopeUploader {
