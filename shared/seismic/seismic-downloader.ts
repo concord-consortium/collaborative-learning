@@ -120,7 +120,9 @@ export async function downloadRange(
           // A 204/empty response means the station has no data for this day. Don't cache a
           // 0-byte chunk — it would masquerade as a present day and break models that read it.
           if (data.byteLength === 0) {
+            completed++;
             onEvent({ type: "dayEmpty", day });
+            emitProgress();
             return;
           }
           await deps.cache.writeDayChunk(stationData, day, data);
