@@ -2,11 +2,13 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 
 import {
-  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs,
-  sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
+  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs, GroupSectionSortKey,
+  kWholeClassSectionLabel, sortDateSectionLabels, sortGroupSections, sortNameSectionLabels,
+  sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
+import { hasClassUnitScope, hasGroupScope } from "../document/document-scope";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { GroupDocument } from "../document/document-types";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
@@ -190,22 +192,35 @@ export class DocumentGroup {
   get byGroup(): DocumentGroup[] {
     const groupTerm = upperWords(translate("studentGroup"));
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    // Ordering information per section, so the comparator never parses the display label.
+    const sortKeys: Map<string, GroupSectionSortKey> = new Map();
+
+    const groupSection = (groupId: string) =>
+      ({ sectionLabel: `${groupTerm} ${groupId}`, sortKey: { scope: "group", groupId } as GroupSectionSortKey });
+
     this.documents.forEach((doc) => {
-      const sectionLabel = (() => {
-        if (doc.type === GroupDocument) {
-          return `${groupTerm} ${doc.groupId}`;
+      const { sectionLabel, sortKey } = (() => {
+        // A document scoped to a group belongs to that group, whoever created it.
+        if (hasGroupScope(doc)) return groupSection(doc.groupId as string);
+        // A document scoped to the class and unit belongs to the class as a whole.
+        if (hasClassUnitScope(doc)) {
+          return { sectionLabel: kWholeClassSectionLabel, sortKey: { scope: "class" } as GroupSectionSortKey };
         }
-        const userId = doc.uid;
-        const group = this.stores.groups.groupForUser(userId);
-        return group ? `${groupTerm} ${group.id}` : `No ${groupTerm}`;
+        // Otherwise it belongs to its owner, and so to whichever group its owner is in now.
+        const group = this.stores.groups.groupForUser(doc.uid);
+        return group
+          ? groupSection(group.id)
+          : { sectionLabel: `No ${groupTerm}`, sortKey: { scope: "none" } as GroupSectionSortKey };
       })();
 
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+      sortKeys.set(sectionLabel, sortKey);
     });
-    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
+
+    const sortedSectionLabels = sortGroupSections(Array.from(documentMap.keys()), sortKeys);
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap: documentMap});
   }
 

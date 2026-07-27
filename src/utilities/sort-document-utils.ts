@@ -41,11 +41,48 @@ export const sortDateSectionLabels = (
   });
 };
 
-export const sortGroupSectionLabels = (docMapKeys: string[]) => {
+/** Section label for documents that belong to the class as a whole rather than to a group. */
+export const kWholeClassSectionLabel = "Whole Class";
+
+/**
+ * The ordering information for one "by group" section. Carried alongside the section label so the
+ * comparator never has to recover structure from the display text, which is translatable
+ * (`studentGroup` is overridable per unit) and has no number at all for some sections.
+ */
+export type GroupSectionSortKey =
+  | { scope: "class" }
+  | { scope: "group"; groupId: string }
+  | { scope: "none" };
+
+const kGroupSectionScopeOrder: Record<GroupSectionSortKey["scope"], number> = {
+  class: 0,
+  group: 1,
+  none: 2,
+};
+
+/**
+ * Order "by group" sections: the whole class first, then groups by ascending numeric id, then the
+ * no-group section. A section with no sort key is ordered as if it had none.
+ */
+export const sortGroupSections = (docMapKeys: string[], sortKeys: Map<string, GroupSectionSortKey>) => {
+  const keyFor = (label: string): GroupSectionSortKey => sortKeys.get(label) ?? { scope: "none" };
   return docMapKeys.sort((a, b) => {
-    const numA = parseInt(a.replace(/^\D+/g, ''), 10);
-    const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-    return numA - numB;
+    const keyA = keyFor(a);
+    const keyB = keyFor(b);
+    if (keyA.scope !== keyB.scope) {
+      return kGroupSectionScopeOrder[keyA.scope] - kGroupSectionScopeOrder[keyB.scope];
+    }
+    if (keyA.scope === "group" && keyB.scope === "group") {
+      const numA = parseInt(keyA.groupId, 10);
+      const numB = parseInt(keyB.groupId, 10);
+      // Group ids are numeric in practice; order any non-numeric id after the numeric ones rather
+      // than comparing NaN.
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      if (!isNaN(numA)) return -1;
+      if (!isNaN(numB)) return 1;
+      return keyA.groupId.localeCompare(keyB.groupId);
+    }
+    return a.localeCompare(b);
   });
 };
 
