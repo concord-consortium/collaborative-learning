@@ -157,10 +157,15 @@ export class WebSerialTransport implements IDeviceTransport {
   }
 }
 
-// Registered once at store creation. Preserves the app-start `connect`/`disconnect`
-// affordance (authentic Arduinos raise `connect` before the user clicks) while keeping
-// navigator.serial out of SerialDevice. Only tears down when a Web Serial transport owns
-// the current connection, so an unrelated Web Serial disconnect can't kill a WebUSB session.
+/**
+ * Some serial devices fire the `connect` event before we call requestPort (the browser
+ * raises it for devices the origin already has permission for), so we register handlers at
+ * CLUE startup to catch them and improve the connect-button UI. Not every board does this —
+ * of those tested, only authentic Arduinos (usbProductId 67, knownBoard) raise it — so the
+ * button only trusts this signal for a known board. The disconnect handler tears down the
+ * active connection on unplug, guarded so it only fires while a WebSerialTransport is active
+ * and can't kill a live WebUSB (Spiker:bit) session.
+ */
 export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
   navigator.serial?.addEventListener("connect", (e) => {
     serialDevice.updateConnectionInfo(e.timeStamp, e.type);
