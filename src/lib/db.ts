@@ -113,8 +113,8 @@ interface IGetOrCreateCanonicalDocumentOpts {
   // winning document's `canonical` field.
   canonicalLabel: string;
   // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
-  // a class-wide slot keeps type === GroupDocument while its kind is the slot kind. The kind also drives the
-  // owner uid (createDocument derives it via the kind registry).
+  // a class-wide document keeps type === GroupDocument while its kind is the declared kind. The kind also drives
+  // the owner uid (createDocument derives it via the kind registry).
   type: DBDocumentType;
   kind: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
@@ -610,13 +610,10 @@ export class DB {
 
     // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
     // Every kind is registered now for scope/owner resolution, yet we deliberately do NOT persist `kind` on
-    // other docs' Firestore metadata yet: publication kinds may later be consolidated into the kinds they
-    // publish, and we don't want to stamp a kind we'd then have to migrate. (Non-group kinds carry no
-    // concurrent axis either, so nothing else is lost.)
+    // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
+    // other document types, so we don't want to stamp a kind we'd then have to migrate.
     const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
-    // Every field written to Firestore is now explicit — nothing is copied from the RTDB metadata. `context_id`
-    // comes from scopeFields (the class is a scope field).
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
       type,
       createdAt,
@@ -645,7 +642,7 @@ export class DB {
 
   // Verify the stores hold the runtime context a document of this kind needs to construct its owner and scope
   // fields. Throws when the context is missing. Currently only group-scoped kinds have a requirement (the user
-  // must be in a group); the check lives here — not in the kind registry — because only db.ts has the stores.
+  // must be in a group); the check lives here instead of the kind registry because it is easier for now.
   private validateDocumentKindCreation(kind: string) {
     if (getDocumentOwnerType(kind) === "group" && !this.stores.user.currentGroupId) {
       throw new Error("Cannot create group document because user is not in a group.");
@@ -655,14 +652,11 @@ export class DB {
   public async createDocument(
     params: { type: DBDocumentType, kind?: string, content?: string, title?: string }
   ) {
-    // `kind` is an explicit creation input; it defaults to `type` because every document except class-wide
-    // slots has a kind equal to its type. It is stamped as the `kind` axis by createFirestoreMetadataDocument.
+    // `kind` defaults to `type` so all documents have a kind, and we can
+    // start to use the kind registry to manage all documents.
     const { type, kind = type, content, title } = params;
     const { user } = this.stores;
 
-    // Verify the stores hold the context this kind needs to build its owner and scope fields (e.g. a group
-    // document requires the user to be in a group). Throws — so this async method rejects — before anything is
-    // written, replacing the former inline group reject.
     this.validateDocumentKindCreation(kind);
 
     return new Promise<{
@@ -698,9 +692,7 @@ export class DB {
       const common = { version, self, createdAt } as const;
 
       if (type === GroupDocument) {
-        // group + class-wide documents share the transitional type "group" and store only base RTDB metadata:
-        // just createdAt is ever read back from this node (at open). Their scope (groupId/unit/offeringId),
-        // owner, title, and kind are stamped into the Firestore metadata by createFirestoreMetadataDocument.
+        // group + class-wide documents share the transitional type "group" and store only base RTDB metadata
         rtdbMetadata = { ...common, type };
       } else {
         switch (type) {
@@ -714,8 +706,8 @@ export class DB {
           case ProblemDocument:
           case ProblemPublication:
           case SupportPublication:
-            // The top-level `classHash` here is never read, it is left just for
-            // legacy consistency in the RTDB. See docs/document-metadata/metadata-fields.md for details.
+            // The top-level `classHash` here is actually never read, it is left for legacy consistency in the RTDB.
+            // See docs/document-metadata/metadata-fields.md for details.
             rtdbMetadata = { ...common, type, classHash, offeringId };
             break;
           default:
@@ -780,48 +772,45 @@ export class DB {
     });
   }
 
-  // Class-scoped synthetic owner for this class's class-wide documents, shared by every member and across all
-  // units' slots. The unit belongs to a document's canonical slot, not its ownership, so the owner uid encodes
-  // only the class — parallel to a group document's group_<off>_<grp> owner (class supplied by the path prefix).
+  // Class-scoped synthetic owner for this class's class-wide documents
   private get userIdForClassWideDocuments() {
     return `class_${this.stores.user.classHash}`;
   }
 
-  public async getOrCreateClassWideDocument(slot: { kind: string; title: string }) {
+  public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
-    // For class-wide slots the canonical-pointer label equals the document's kind.
-    const label = slot.kind;
+    // For a class-wide document the canonical-pointer label equals the document's kind.
+    const label = classWideDoc.kind;
     const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
-    // Class-wide slot: the document's transitional `type` stays GroupDocument while its `kind` is the slot kind.
-    // createDocument derives the class owner and the class+unit scope from the kind's registered owner/scope type.
+    // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
     return this.getOrCreateCanonicalDocument({
       pointerPath,
       canonicalLabel: label,
       type: GroupDocument,
-      kind: slot.kind
+      kind: classWideDoc.kind
     });
   }
 
-  // Auto-create each class-wide document slot the unit declares. Called once per unit open, after the unit is
-  // loaded. Each slot is created independently and fire-and-forget: the canonical-pointer engine converges all
-  // class members to one document per slot, so a failure here never blocks app startup.
+  // Auto-create each class-wide document the unit declares. Called once per unit open, after the unit is
+  // loaded. Each is created independently and fire-and-forget: the canonical-pointer engine converges all
+  // class members to one document per declared kind, so a failure here never blocks app startup.
   private createDeclaredClassWideDocuments() {
-    const slots = this.stores.appConfig.classWideDocuments;
-    if (!slots?.length) return;
-    for (const slot of slots) {
-      // Register each declared slot's kind so createFirestoreMetadataDocument stamps its axis fields via the
+    const classWideDocs = this.stores.appConfig.classWideDocuments;
+    if (!classWideDocs?.length) return;
+    for (const classWideDoc of classWideDocs) {
+      // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
       // registry and createDocument derives its owner and scope. Class-wide collaborative documents are always
       // concurrent, class-owned (class_<classHash>), and class+unit scoped; registration is idempotent. The
       // authored title is registered here (not stored per document) so it is resolved live by kind — an author
       // changing it applies to every document of that kind (see getDocumentTitle).
-      registerDocumentKind(slot.kind, {
+      registerDocumentKind(classWideDoc.kind, {
         metadataFields: { concurrent: true },
         ownerType: "class",
         scopeType: "classUnit",
-        title: slot.title
+        title: classWideDoc.title
       });
-      this.getOrCreateClassWideDocument(slot).catch((err) => {
-        console.error("Failed to create class-wide document", slot.kind, err);
+      this.getOrCreateClassWideDocument(classWideDoc).catch((err) => {
+        console.error("Failed to create class-wide document", classWideDoc.kind, err);
       });
     }
   }
@@ -1060,9 +1049,9 @@ export class DB {
           const kindMetadataFields = getDocumentKindMetadataFields(firestoreMetadata.type);
           const concurrent = firestoreMetadata.concurrent ?? kindMetadataFields.concurrent ?? undefined;
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
-          // Explicitly restrict the write-back to group documents. Every kind is now registered, so the
-          // `kindMetadataFields.concurrent` gate alone already limits this to the group type (the only concurrent
-          // kind), but the type guard keeps this migration group-only regardless of future kind registrations.
+          // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
+          // it'd be possible for someone to add a concurrent field to another document type and then we'd
+          // accidentally update the firestore metadata.
           if (firestoreMetadata.type === GroupDocument
               && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))

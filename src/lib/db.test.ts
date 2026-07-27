@@ -515,7 +515,7 @@ describe("db", () => {
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateClassWideDocument({ kind: "driving-question-board", title: "DQB" });
-      // The slot title is not threaded into createDocument — it is registered on the kind and resolved by kind.
+      // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
         kind: "driving-question-board"
@@ -760,9 +760,10 @@ describe("db", () => {
   });
 
   describe("createDeclaredClassWideDocuments", () => {
-    it("creates one document per declared slot", async () => {
+    it("creates one document per declared class-wide document", async () => {
       const created: any[] = [];
-      (db as any).getOrCreateClassWideDocument = jest.fn(async (slot: any) => { created.push(slot); });
+      (db as any).getOrCreateClassWideDocument =
+        jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
           { kind: "driving-question-board", title: "DQB" },
@@ -777,7 +778,7 @@ describe("db", () => {
       expect(created.map((s: any) => s.kind)).toEqual(["driving-question-board", "word-wall"]);
     });
 
-    it("does nothing when no slots are declared", async () => {
+    it("does nothing when no class-wide documents are declared", async () => {
       (db as any).getOrCreateClassWideDocument = jest.fn(async () => undefined);
       stores.appConfig = specAppConfig();   // no classWideDocuments
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
