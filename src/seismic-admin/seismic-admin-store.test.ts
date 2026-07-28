@@ -814,6 +814,54 @@ describe("envelope coverage", () => {
     const key = [...store.stations.keys()][0];
     expect(store.envelopeCoverageFor(key).state).toBe("error");
   });
+
+  it("classifies days and aggregates stats from the listed tiles", async () => {
+    // d30 fully covered, d31 partially (one tile), Feb 1 not at all.
+    const d31 = d30 + 1;
+    const listEnvelopeTiles = jest.fn(async () => new Set([...dayTiles(d30), dayTiles(d31)[0]]));
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+
+    expect(store.envelopeDayStates(key)?.get(d30)).toBe("covered");
+    expect(store.envelopeDayStates(key)?.get(d31)).toBe("partial");
+    expect(store.envelopeDayStates(key)?.get(d31 + 1)).toBe("uncovered");
+
+    const stats = store.envelopeStats(key);
+    expect(stats.coveredDayCount).toBe(1);
+    expect(stats.partialDayCount).toBe(1);
+    expect(stats.totalDays).toBe(3);
+    expect(stats.coveredDays.get(key)?.has(d30)).toBe(true);
+    expect(stats.partialDays.get(key)?.has(d31)).toBe(true);
+  });
+
+  it("aggregates envelope stats across all selected stations when stationKey is absent", async () => {
+    const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
+    const rc02 = { network: "AK", station: "RC02", location: "", channel: "BHZ", label: "Rabbit Creek 2" };
+    // A cache with no OPFS stations, so the store's stations come only from the catalog.
+    const emptyCache = {
+      listStations: jest.fn(async () => []),
+      scanCachedDays: jest.fn(async () => new Set<number>()),
+      stationRawBytes: jest.fn(async () => 0),
+      deleteDaysInRange: jest.fn(async () => {}),
+    };
+    // Same lister for both stations: d30 covered, d31 partial (boundary tile), Feb 1 uncovered.
+    const listEnvelopeTiles = jest.fn(async () => new Set(dayTiles(d30)));
+    const store = new SeismicAdminStore({
+      cache: emptyCache as any, stations: [rc01, rc02], listEnvelopeTiles,
+    });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    expect(store.selectedStations.size).toBe(2);
+
+    const stats = store.envelopeStats();
+    expect(stats.coveredDayCount).toBe(2);
+    expect(stats.partialDayCount).toBe(2);
+    expect(stats.totalDays).toBe(6);
+    expect(stats.coveredDays.get(getStationChannelPrefix(rc01))?.has(d30)).toBe(true);
+    expect(stats.coveredDays.get(getStationChannelPrefix(rc02))?.has(d30)).toBe(true);
+  });
 });
 
 it("authReady defaults false and is set by setAuthReady", () => {

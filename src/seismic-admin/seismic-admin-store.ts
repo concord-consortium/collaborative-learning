@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { listEnvelopeTileIndices } from "../../shared/seismic/envelope-coverage";
+import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices } from "../../shared/seismic/envelope-coverage";
 import { classifyDayCoverage } from "../../shared/seismic/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
@@ -336,30 +336,28 @@ export class SeismicAdminStore {
     return firstDay !== undefined && lastDay !== undefined ? lastDay - firstDay + 1 : 0;
   }
 
-  /** Coverage stats for a single model. When stationKey is present, the stats are just
-   *  for that station. When it is absent, stats are for all selected stations.
-   */
-  modelStats(modelUrl: string, stationKey?: string): ModelStats {
-    let eventCount = 0;
-    const coveredDays: Map<string, Set<number>> = new Map();
-    const partialDays: Map<string, Set<number>> = new Map();
+  /** Accumulate covered/partial day sets and counts across stations. Shared by modelStats and envelopeStats. */
+  private collectDayStats(
+    stationKeys: Set<string>,
+    getDayStates: (stationKey: string) => Map<number, DayCoverageState> | undefined
+  ): ModelStats {
+    const coveredDays = new Map<string, Set<number>>();
+    const partialDays = new Map<string, Set<number>>();
     let coveredDayCount = 0;
     let partialDayCount = 0;
     let totalDays = 0;
     const { rangeDays } = this;
 
-    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
-    stations.forEach(sk => {
+    stationKeys.forEach(sk => {
       totalDays += rangeDays;
-      const stats = this.modelCoverage.get(coverageKey(sk, modelUrl));
-      if (stats?.state !== "loaded") return;
+      const dayStates = getDayStates(sk);
+      if (!dayStates) return;
 
       const stationCoveredDays = new Set<number>();
       coveredDays.set(sk, stationCoveredDays);
       const stationPartialDays = new Set<number>();
       partialDays.set(sk, stationPartialDays);
-      eventCount += stats.eventCount ?? 0;
-      stats.dayStates?.forEach((state, day) => {
+      dayStates.forEach((state, day) => {
         if (state === "covered") {
           stationCoveredDays.add(day);
           coveredDayCount++;
@@ -370,7 +368,36 @@ export class SeismicAdminStore {
       });
     });
 
-    return { eventCount, coveredDays, partialDays, coveredDayCount, partialDayCount, totalDays };
+    return { coveredDays, partialDays, coveredDayCount, partialDayCount, totalDays };
+  }
+
+  /** Derived per-day envelope coverage for a station; undefined until its listing loads. */
+  envelopeDayStates(stationKey: string): Map<number, DayCoverageState> | undefined {
+    const stats = this.envelopeCoverage.get(stationKey);
+    const range = this.rangeSec;
+    if (stats?.state !== "loaded" || !stats.tileIndices || !range) return;
+    return classifyEnvelopeDayCoverage(stats.tileIndices, range);
+  }
+
+  /** Envelope coverage stats for one station, or all selected stations when stationKey is absent. */
+  envelopeStats(stationKey?: string): ModelStats {
+    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+    return this.collectDayStats(stations, sk => this.envelopeDayStates(sk));
+  }
+
+  /** Coverage stats for a single model. When stationKey is present, the stats are just
+   *  for that station. When it is absent, stats are for all selected stations.
+   */
+  modelStats(modelUrl: string, stationKey?: string): ModelStats {
+    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+    let eventCount = 0;
+    stations.forEach(sk => {
+      const stats = this.modelCoverage.get(coverageKey(sk, modelUrl));
+      if (stats?.state === "loaded") eventCount += stats.eventCount ?? 0;
+    });
+    const dayStats = this.collectDayStats(stations,
+      sk => this.modelCoverage.get(coverageKey(sk, modelUrl))?.dayStates);
+    return { eventCount, ...dayStats };
   }
 
   async refresh() {
