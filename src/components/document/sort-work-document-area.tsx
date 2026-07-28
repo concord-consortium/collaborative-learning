@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
 import { isExemplarType } from "../../models/document/document-types";
-import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
+import { canUserEditDocument, isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -62,7 +62,9 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     document: openDocument, documentMetadata: openDocumentMetadata, user, documents
   });
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
-  const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
+  const showEdit = canUserEditDocument({
+    document: openDocument, documentMetadata: openDocumentMetadata, user
+  });
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
 
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";

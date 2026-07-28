@@ -1,8 +1,10 @@
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
+import { UserModel } from "../stores/user";
+import { createDocumentModel } from "./document";
 import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
-import { getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
+import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
 import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
@@ -200,6 +202,92 @@ describe("document utils", () => {
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
+    });
+  });
+
+  describe("canUserEditDocument", () => {
+    const student = UserModel.create({ id: "me", type: "student", name: "Me", classHash: "class-1" });
+    const groupedStudent = UserModel.create({
+      id: "me", type: "student", name: "Me", classHash: "class-1", currentGroupId: "3"
+    });
+
+    const metadata = (props: Record<string, any>) =>
+      DocumentMetadataModel.create({ uid: "someone-else", type: GroupDocument, key: "k", ...props });
+
+    it("allows a user to edit their own document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "me", type: ProblemDocument }), user: student
+      })).toBe(true);
+    });
+
+    it("refuses another student's single-writer document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ type: ProblemDocument }), user: student
+      })).toBe(false);
+    });
+
+    it("allows a member of the owning group to edit a group document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
+        user: groupedStudent
+      })).toBe(true);
+    });
+
+    it("refuses another group's document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ concurrent: true, groupId: "7", unit: "sas", investigation: "1" }),
+        user: groupedStudent
+      })).toBe(false);
+    });
+
+    it("refuses a group document when the user is not in a group", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("allows any member of the class to edit a class-wide document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-1"
+        }),
+        user: student
+      })).toBe(true);
+    });
+
+    it("refuses a class-wide document belonging to another class", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-2"
+        }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("refuses a document that is not concurrent even inside the user's own scope", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ unit: "sas", investigation: null, context_id: "class-1" }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("returns false when neither a document nor metadata is supplied", () => {
+      expect(canUserEditDocument({ user: student })).toBe(false);
+    });
+
+    it("prefers the reactive metadata's group id over a still-loading document", () => {
+      // A groupmate's document syncs into the metadata before its content finishes loading; reading
+      // the metadata per field is what makes the Edit button appear without a reload.
+      const stillLoading = createDocumentModel({
+        uid: "someone-else", type: GroupDocument, key: "k", concurrent: true
+      });
+      expect(stillLoading.groupId).toBeUndefined();
+      expect(canUserEditDocument({
+        document: stillLoading,
+        documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
+        user: groupedStudent
+      })).toBe(true);
     });
   });
 });
