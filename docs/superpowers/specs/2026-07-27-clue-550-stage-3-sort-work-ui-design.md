@@ -79,7 +79,7 @@ unit loads). A registry lookup would silently misfile it; a field read cannot.
 | personal, learning log | `null` | — | — | no (`unit` is null) |
 | problem, planning, publications | set | set | — | no (has `investigation`) |
 | group | set | set | set | no |
-| exemplar (from curriculum) | unset | unset | — | no (`unit` unset) |
+| exemplar (from curriculum) | set | set | — | no (has `investigation`) |
 | class-wide slot | set | `null` | — | **yes** |
 
 `docs/document-scope.md` gains a section recording these guards, the table above, and the decision not to

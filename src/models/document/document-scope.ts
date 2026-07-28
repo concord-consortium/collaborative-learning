@@ -26,7 +26,7 @@ export interface IDocumentScopeFields {
  * In Firestore metadata only group-scoped documents carry a `groupId`; other documents deliberately
  * leave it unset so a stale group id can never be read back (see DocumentMetadataModel.groupId).
  */
-export function hasGroupScope(doc: IDocumentScopeFields): boolean {
+export function hasGroupScope(doc: IDocumentScopeFields): doc is IDocumentScopeFields & { groupId: string } {
   return !!doc.groupId;
 }
 
@@ -36,7 +36,8 @@ export function hasGroupScope(doc: IDocumentScopeFields): boolean {
  *
  * No other stored shape matches: class-scoped documents (personal, learning log) have `unit: null`;
  * offering-scoped documents (problem, planning, publications) carry an `investigation`; group
- * documents carry both an `investigation` and a `groupId`; curriculum exemplars carry no `unit`.
+ * documents carry both an `investigation` and a `groupId`; curriculum exemplars carry a `unit` but
+ * also an `investigation`.
  */
 export function hasClassUnitScope(doc: IDocumentScopeFields): boolean {
   return !!doc.unit && !doc.investigation && !doc.groupId;
