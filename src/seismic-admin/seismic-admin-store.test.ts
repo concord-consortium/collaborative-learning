@@ -13,6 +13,9 @@ function fakeCache(cached: number[] = []) {
   };
 }
 
+// Tiles spanning far beyond any range these tests use -> every day classifies as covered.
+const allTiles = () => new Set(getTileIndicesForViewport(utcDay(2025, 12, 1), utcDay(2026, 3, 1), FINEST_LEVEL));
+
 beforeEach(() => window.localStorage.clear());
 
 it("loads stations from OPFS and computes per-station stats for the range", async () => {
@@ -267,7 +270,9 @@ describe("coverage stats", () => {
     const fetchMetadata = jest.fn(async () => metadata);
     const store = new SeismicAdminStore({
       cache: emptyCache() as any, stations: [rc01], models: [model],
-      fetchMetadata, eventService, ...overrides,
+      fetchMetadata, eventService,
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
+      ...overrides,
     });
     return { store, eventService, fetchMetadata };
   }
@@ -399,6 +404,22 @@ describe("coverage stats", () => {
       expect(store.isFullyCovered()).toBe(false);
     });
 
+    it("is not fully covered while envelopes are missing, even when models are covered", async () => {
+      const { store } = makeCoverageStore({ listEnvelopeTiles: jest.fn(async () => new Set()) });
+      store.setAuthReady();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      expect(store.isFullyCovered(rc01Key)).toBe(false);   // model coverage IS complete here
+    });
+
+    it("is fully covered when both envelopes and all selected models are covered", async () => {
+      const { store } = makeCoverageStore();               // allTiles default
+      store.setAuthReady();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      expect(store.isFullyCovered(rc01Key)).toBe(true);
+    });
+
     it("scopes to one station when a key is given", async () => {
       const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
       // rc02 has an uncovered day; rc01 is fully covered.
@@ -490,6 +511,7 @@ describe("update (event generation)", () => {
         calls.push(`process:${metadata.id}`);
         return { processed: 0, skipped: 0, total: 0 };
       }),
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
       ...overrides,
     };
     const store = new SeismicAdminStore(deps);

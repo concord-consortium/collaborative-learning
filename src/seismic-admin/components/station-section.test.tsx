@@ -3,10 +3,14 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { StationSection } from "./station-section";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
-import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
+import { FINEST_LEVEL } from "../../../shared/seismic/envelope-config";
+import { getStationChannelPrefix, getTileIndicesForViewport } from "../../../shared/seismic/tile-addressing";
 import { utcDay } from "../../../shared/seismic/seismic-day";
 
 const opfsStation = { network: "AK", station: "K204", channel: "HNZ" };
+
+// Tiles spanning far beyond any range these tests use -> every day classifies as covered.
+const allTiles = () => new Set(getTileIndicesForViewport(utcDay(2025, 12, 1), utcDay(2026, 3, 1), FINEST_LEVEL));
 
 // The store persists filters (setRange/toggles) to localStorage; isolate the tests.
 beforeEach(() => window.localStorage.clear());
@@ -76,6 +80,7 @@ describe("StationSection coverage rows", () => {
       models: [compact],
       fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
       eventService,
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
       ...overrides,
     });
     store.setRange("2026-01-01", "2026-01-03");   // 3 days

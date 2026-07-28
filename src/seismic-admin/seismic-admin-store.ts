@@ -322,8 +322,19 @@ export class SeismicAdminStore {
       [...stats.dayStates.values()].every(s => s === "covered");
   }
 
+  /** Pending or errored envelope listings are NOT fully covered — unknown ≠ covered. */
+  envelopesFullyCovered(stationKey?: string): boolean {
+    const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
+    if (stationKeys.length === 0) return false;
+    return stationKeys.every(sk => {
+      const dayStates = this.envelopeDayStates(sk);
+      return !!dayStates && [...dayStates.values()].every(s => s === "covered");
+    });
+  }
+
   /** Pending or errored stats are NOT fully covered — unknown ≠ covered. */
   isFullyCovered(stationKey?: string): boolean {
+    if (!this.envelopesFullyCovered(stationKey)) return false;
     if (this.selectedModels.size === 0) return false;
     const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
     if (stationKeys.length === 0) return false;
