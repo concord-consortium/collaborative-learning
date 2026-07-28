@@ -44,6 +44,7 @@ export function createEnvelopeUploader(deps: EnvelopeUploaderDeps): EnvelopeUplo
   const signFetch: SignFetchFn = deps.signFetch ?? (async (url, init) => {
     const { accessKeyId, secretAccessKey, sessionToken } = await deps.getCredentials();
     const aws = new AwsClient({ accessKeyId, secretAccessKey, sessionToken, service: "s3", region: AWS_REGION });
+    // aws.fetch signs the request and also retries transient 5xx/429 responses internally.
     return aws.fetch(url, init);
   });
 
@@ -57,6 +58,11 @@ export function createEnvelopeUploader(deps: EnvelopeUploaderDeps): EnvelopeUplo
         let etag: string | null = null;
         if (existing.ok) {
           etag = existing.headers.get("ETag");
+          if (!etag) {
+            // Without the ETag the guarded PUT below would 412 on every attempt.
+            const errorText = `Envelope tile ETag not readable — check the bucket CORS ExposeHeaders config (${url})`;
+            throw new Error(errorText);
+          }
           merged = mergeEnvelopeTileData(decodeEnvelopeTile(await existing.arrayBuffer()), tile);
         } else if (existing.status !== 404) {
           throw new Error(`Envelope tile read failed: ${existing.status}`);
@@ -71,9 +77,13 @@ export function createEnvelopeUploader(deps: EnvelopeUploaderDeps): EnvelopeUplo
           },
         });
         if (put.ok) return;
-        if (put.status !== 412) throw new Error(`Envelope tile upload failed: ${put.status}`);
+        // 412 = precondition failed, 409 = ConditionalRequestConflict (racing an in-flight
+        // write); AWS documents both as retryable for conditional PUTs.
+        if (put.status !== 412 && put.status !== 409) {
+          throw new Error(`Envelope tile upload failed: ${put.status} (${url})`);
+        }
       }
-      throw new Error(`Envelope tile upload conflicted ${MAX_CONFLICT_RETRIES + 1} times`);
+      throw new Error(`Envelope tile upload conflicted ${MAX_CONFLICT_RETRIES + 1} times (${url})`);
     },
   };
 }

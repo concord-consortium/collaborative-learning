@@ -66,6 +66,36 @@ describe("createEnvelopeUploader", () => {
     expect([...decodeEnvelopeTile(secondInit.body).mins]).toEqual([-20]);
   });
 
+  it("re-reads and retries once after a 409 conflict", async () => {
+    const fetchFn = jest.fn()
+      .mockResolvedValueOnce(notFound)
+      .mockResolvedValueOnce(found);
+    const signFetch = jest.fn()
+      .mockResolvedValueOnce({ ok: false, status: 409 })
+      .mockResolvedValueOnce(putOk);
+    const uploader = makeUploader(fetchFn, signFetch);
+    await uploader.uploadTile(station, 2, 56123, tile);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(signFetch).toHaveBeenCalledTimes(2);
+    const [, secondInit] = signFetch.mock.calls[1];
+    // The retry saw the now-existing tile: merged body and If-Match.
+    expect(secondInit.headers["If-Match"]).toBe('"abc"');
+    expect([...decodeEnvelopeTile(secondInit.body).mins]).toEqual([-20]);
+  });
+
+  it("throws when the GET succeeds but the ETag is unreadable", async () => {
+    const fetchFn = jest.fn().mockResolvedValue({
+      ok: true, status: 200,
+      headers: { get: () => null },
+      arrayBuffer: async () => encodeEnvelopeTile(existingTile.mins, existingTile.maxs),
+    });
+    const signFetch = jest.fn();
+    const uploader = makeUploader(fetchFn, signFetch);
+    await expect(uploader.uploadTile(station, 2, 56123, tile))
+      .rejects.toThrow(/ETag not readable/);
+    expect(signFetch).not.toHaveBeenCalled();
+  });
+
   it("throws after persistent 412 conflicts", async () => {
     const fetchFn = jest.fn().mockResolvedValue(found);
     const signFetch = jest.fn().mockResolvedValue(putConflict);
