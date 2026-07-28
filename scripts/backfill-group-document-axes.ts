@@ -19,6 +19,13 @@
 //
 // Dry run (reports counts, writes nothing):   cd scripts && npx tsx backfill-group-document-axes.ts
 // Apply (performs the writes):                cd scripts && APPLY=1 npx tsx backfill-group-document-axes.ts
+//
+// This script authenticates as a service account, so it writes past Firestore rules regardless of
+// what they allow. The client-side backfill in src/lib/db.ts does not: it merge-updates `concurrent`
+// as an ordinary authenticated user, which is why the Firestore rule (concurrentChangeOk in
+// firestore.rules) transitionally allows any class member to set `concurrent` on a `type == "group"`
+// document. Once this script has been run against every environment, tighten that rule so
+// `concurrent` is settable only at document creation, and delete concurrentChangeOk.
 
 import type { Firestore } from "firebase-admin/firestore";
 

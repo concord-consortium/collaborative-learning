@@ -318,9 +318,9 @@ to the `history entries` block in `firebase-test/src/documents-rules.test.ts` an
 emulator (`firebase emulators:exec --only firestore "npm test"`). A class member's attempt to create a history
 entry under a metadata document owned by a synthetic group (`group_myOffering_3`) or class-wide (`class_<hash>`)
 owner **was denied** — `PERMISSION_DENIED` at the `create` rule for the group case, the class-wide case, and the
-corresponding read. The two negative controls (a user outside the class, and a class member on a classmate's
-single-writer document) already failed as expected, confirming the axis under test — not just authentication —
-was what gated the positive cases.
+corresponding read. The two negative-control tests **passed** (a user outside the class, and a class member on a
+classmate's single-writer document): their writes were correctly denied both before and after the fix, confirming
+the axis under test — not just authentication — was what gated the positive cases.
 
 Because the writes were denied, the rule was rebased onto the `concurrent` axis: create and read are now allowed
 when the parent document carries `concurrent: true` and the requester's `class_hash` matches its `context_id`, in
@@ -330,9 +330,29 @@ deliberately does **not** narrow group-document history to the owning group: the
 so the rules cannot express that, and the RTDB rules already grant write on the whole `classes/<classHash>`
 subtree, so this matches the existing write surface rather than widening it.
 
-Re-running the full `documents-rules.test.ts` suite (118 tests, including every pre-existing history-entry case)
-and the full `firebase-test` suite (364 tests across all 8 rule files) both passed after the change. The five new
-tests remain as the regression guard.
+**Follow-up fix: `concurrent` is itself an authorization input, so its write path needed gating too.**
+Code review on this change found that `concurrent` was not in `preservesReadOnlyDocumentFields()`'s read-only
+set, and `isValidDocumentUpdateRequest()` lets any class member update any document in their class
+(`resourceInUserClass()`). That combination let a class member forge the grant `isConcurrentClassDocument()`
+checks: update a classmate's ordinary `problemDocument` with `{ concurrent: true }` — no read-only field is
+touched, so the update was allowed — which then made that student, and every classmate, able to read and append
+history on the classmate's private document. `type` is itself read-only, so it cannot be flipped first to route
+around a `type == "group"` check placed elsewhere. A characterization test run against the pre-fix rules
+confirmed the forgery: `expectUpdateToFail(db, kDocumentDocPath, { concurrent: true })` from a classmate's session
+against another student's `problemDocument` failed with "Expected request to fail, but it succeeded."
+
+The fix closes the escalation at the write path rather than narrowing the read path: a new `concurrentChangeOk()`
+function (beside `preservesReadOnlyDocumentFields()` in `firestore.rules`) allows a change to `concurrent` only
+when the stored document's `type` is `"group"`, and is wired into `isValidDocumentUpdateRequest()`. This is
+transitional by design and is commented as such in the rules: two paths still merge-update `concurrent` onto
+pre-existing group documents that predate the field — the on-open backfill in `src/lib/db.ts` and the one-shot
+`scripts/backfill-group-document-axes.ts` — so it cannot yet be made unconditionally read-only. Once both backfill
+paths have run against every environment, `concurrentChangeOk()` should be deleted and `concurrent` added to
+`preservesReadOnlyDocumentFields()`'s read-only set, making it settable only at document creation.
+
+Re-running the full `documents-rules.test.ts` suite (120 tests, including every pre-existing history-entry and
+document-update case) and the full `firebase-test` suite (366 tests across all 8 rule files) both passed after
+the fix. The seven tests added across both fix rounds remain as the regression guard.
 
 ## Carried forward from Stage 2
 
