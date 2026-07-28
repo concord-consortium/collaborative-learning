@@ -52,6 +52,47 @@ const CoverageSection = observer(function CoverageSection({ stationKey, stationL
   );
 });
 
+interface IEnvelopesSectionProps {
+  // The station whose envelope coverage is shown; absent for the all-stations aggregate.
+  stationKey?: string;
+  stationLabel: string;
+}
+
+/** S3 envelope coverage: a three-state timeline for a single station,
+ *  or an aggregate text line (no bar) across all selected stations. */
+const EnvelopesSection = observer(function EnvelopesSection({ stationKey, stationLabel }: IEnvelopesSectionProps) {
+  const store = useSeismicAdminStore();
+  const { firstDay, lastDay } = store;
+  const hasRange = firstDay !== undefined && lastDay !== undefined;
+  const stats = store.envelopeStats(stationKey);
+  const { coveredDays, partialDays, coveredDayCount, totalDays } = stats;
+
+  const statsMessage = `${coveredDayCount} / ${totalDays} days`;
+  const highlightedDays = stationKey ? coveredDays.get(stationKey) : undefined;
+  const midDays = stationKey ? partialDays.get(stationKey) : undefined;
+  const coverageState = stationKey ? store.envelopeCoverageFor(stationKey).state : "loaded";
+
+  return (
+    <div className="data-section envelopes">
+      <div className="data-section-header">
+        <div className="data-kind">Envelopes</div>
+        <div className="data-stats">{statsMessage}</div>
+      </div>
+      {hasRange && stationKey && (highlightedDays
+        ? (
+          <RawTimeline
+            ariaLabel={`envelope coverage timeline for ${stationLabel}`}
+            highlightedDays={highlightedDays}
+            partialDays={midDays}
+            firstDay={firstDay}
+            lastDay={lastDay}
+          />
+        ) : coverageState === "error" ? "Unable to list envelopes" : "Loading..."
+      )}
+    </div>
+  );
+});
+
 interface IStationSectionProps {
   stationKey?: string;
 }
@@ -88,8 +129,8 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const isFullyCovered = store.isFullyCovered(stationKey);
   const ReadyIcon = isFullyCovered ? CheckIcon : WarningIcon;
   const readyLabel = isFullyCovered ? "Ready" : "Not Ready!";
-  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered || store.isBusy ||
-    (allStations && selectedStations.size === 0);
+  const updateDisabled = !store.authReady || !store.portalReady || store.selectedModels.size === 0 ||
+    isFullyCovered || store.isBusy || (allStations && selectedStations.size === 0);
   const updateLabel = `Update ${allStations ? "all stations" : "station"}`;
   const update = () => {
     if (allStations) {
@@ -136,6 +177,7 @@ export const StationSection = observer(function StationSection({ stationKey }: I
               />
             )}
           </div>
+          <EnvelopesSection stationKey={stationKey} stationLabel={label} />
           {store.selectedModelList.map(model => (
             <CoverageSection key={model.metadataUrl} stationKey={stationKey} stationLabel={label} model={model} />
           ))}
