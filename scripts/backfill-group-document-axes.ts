@@ -25,7 +25,11 @@
 // as an ordinary authenticated user, which is why the Firestore rule (concurrentChangeOk in
 // firestore.rules) transitionally allows any class member to set `concurrent` on a `type == "group"`
 // document. Once this script has been run against every environment, tighten that rule so
-// `concurrent` is settable only at document creation, and delete concurrentChangeOk.
+// `concurrent` is settable only at document creation, and delete concurrentChangeOk — and constrain
+// isValidDocumentCreateRequest in firestore.rules alongside it, since it constrains neither
+// `concurrent` nor `uid` today: a truthy `concurrent` at create should imply `type == "group"`,
+// and/or the create should require userIsRequestUser(), or a class member can create a new document
+// stamped with a classmate's `uid` and `concurrent: true`.
 
 import type { Firestore } from "firebase-admin/firestore";
 
