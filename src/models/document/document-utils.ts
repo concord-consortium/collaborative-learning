@@ -10,7 +10,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { getCurriculumScopeLabel, hasClassUnitScope } from "./document-scope";
+import { getCurriculumScopeLabel, hasGroupOwnerScope, hasUnitCurriculumScope } from "./document-scope";
 import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
@@ -192,8 +192,13 @@ export function canUserEditDocument({
   if (!!uid && uid === user.id) return true;
   if (user.isResearcher) return false;
   if (!concurrent) return false;
-  if (hasClassUnitScope({ unit, investigation, groupId })) {
+  // Beyond this point the user must be inside the document's scope, asked at the narrowest level the
+  // document is scoped to.
+  if (hasGroupOwnerScope({ groupId })) {
+    return !!user.currentGroupId && groupId === user.currentGroupId;
+  }
+  if (hasUnitCurriculumScope({ unit, investigation })) {
     return !!contextId && contextId === user.classHash;
   }
-  return !!user.currentGroupId && groupId === user.currentGroupId;
+  return false;
 }
