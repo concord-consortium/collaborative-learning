@@ -24,6 +24,11 @@ describe("portal-auth", () => {
       history.replaceState(null, "", "/seismic-admin/?portal=https://learn.staging.concord.org");
       expect(getPortalUrl()).toBe("https://learn.staging.concord.org");
     });
+
+    it("strips trailing slashes from the portal param", () => {
+      history.replaceState(null, "", "/seismic-admin/?portal=https://learn.staging.concord.org/");
+      expect(getPortalUrl()).toBe("https://learn.staging.concord.org");
+    });
   });
 
   describe("buildAuthorizeUrl", () => {
@@ -40,21 +45,45 @@ describe("portal-auth", () => {
   });
 
   describe("consumeAccessTokenFromLocation", () => {
-    it("returns the token from the hash, stores it, and clears the hash", () => {
+    it("returns the token from the hash, stores it with its portal, and clears the hash", () => {
       history.replaceState(null, "", "/seismic-admin/?x=1#access_token=abc&token_type=bearer");
       expect(consumeAccessTokenFromLocation()).toBe("abc");
-      expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).toBe("abc");
+      expect(JSON.parse(sessionStorage.getItem(ACCESS_TOKEN_KEY)!))
+        .toEqual({ portal: "https://learn.concord.org", token: "abc" });
       expect(window.location.hash).toBe("");
       expect(window.location.pathname + window.location.search).toBe("/seismic-admin/?x=1");
     });
 
-    it("returns the stored token when there is no hash", () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, "stored-token");
+    it("returns the stored token when there is no hash and the portal matches", () => {
+      sessionStorage.setItem(ACCESS_TOKEN_KEY,
+        JSON.stringify({ portal: "https://learn.concord.org", token: "stored-token" }));
       expect(consumeAccessTokenFromLocation()).toBe("stored-token");
+    });
+
+    it("does not return a token issued by a different portal, and removes it", () => {
+      sessionStorage.setItem(ACCESS_TOKEN_KEY,
+        JSON.stringify({ portal: "https://learn.concord.org", token: "stored-token" }));
+      history.replaceState(null, "", "/seismic-admin/?portal=learn.staging.concord.org");
+      expect(consumeAccessTokenFromLocation()).toBeNull();
+      expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+    });
+
+    it("returns null on a malformed stored record", () => {
+      sessionStorage.setItem(ACCESS_TOKEN_KEY, "{not json");
+      expect(consumeAccessTokenFromLocation()).toBeNull();
     });
 
     it("returns null with no hash and no stored token", () => {
       expect(consumeAccessTokenFromLocation()).toBeNull();
+    });
+
+    it("returns null when sessionStorage is unavailable", () => {
+      jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("disabled"); });
+      try {
+        expect(consumeAccessTokenFromLocation()).toBeNull();
+      } finally {
+        jest.restoreAllMocks();
+      }
     });
   });
 
