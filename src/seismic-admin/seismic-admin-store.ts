@@ -1,4 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { FINEST_LEVEL } from "../../shared/seismic/envelope-config";
 import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices } from "../../shared/seismic/envelope-coverage";
 import { classifyDayCoverage } from "../../shared/seismic/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
@@ -566,8 +567,8 @@ export class SeismicAdminStore {
     });
   }
 
-  /** Download the whole range, then generate events for each selected model's
-   *  uncovered days. Returns false if any model failed. */
+  /** Download the whole range, generate + upload missing envelopes, then generate
+   *  events for each selected model's uncovered days. Returns false if anything failed. */
   private async updateSingleStation(key: string, prefix = ""): Promise<boolean> {
     const stationData = this.stations.get(key);
     const range = this.rangeSec;
@@ -576,12 +577,32 @@ export class SeismicAdminStore {
     const uploader = this.envelopeUploader;
     if (!this.portalReady || !uploader) return false;
 
+    let ok = true;
+
     // 1) Raw data for the whole range (existing flow, reports its own feedback).
     await this.download(stationData, prefix);
+    // 2) Envelopes for days not fully covered in S3.
+    try {
+      const run = this.deps.processEnvelopes ?? processEnvelopeCoverage;
+      await run({
+        stationData, range,
+        uploadTile: (level, tileIndex, tile) => uploader.uploadTile(stationData, level, tileIndex, tile),
+        onProgress: (done, total) => this.setFeedback(
+          `${prefix}${getStationLabel(stationData)} — envelopes: day ${done} of ${total}`),
+        onTileUploaded: (level, tileIndex) => {
+          if (level === FINEST_LEVEL) this.markTileUploaded(key, tileIndex);
+        },
+      });
+    } catch (err) {
+      console.warn("Envelope update failed:", err);
+      this.setFeedback(`${prefix}Envelope update failed for ${getStationLabel(stationData)}.`);
+      ok = false;
+    }
+    // Reconcile with the actual listing; the incremental updates above are an estimate.
+    await this.loadEnvelopeCoverage(stationData);
 
-    // 2) Events for uncovered days, model by model. Snapshot the live selection:
+    // 3) Events for uncovered days, model by model. Snapshot the live selection:
     // a header toggle mid-run must not change this run's set.
-    let ok = true;
     for (const url of [...this.selectedModels]) {
       const label = this.models.get(url)?.label ?? url;
       const metadata = await this.ensureModelMetadata(url);

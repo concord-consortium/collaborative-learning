@@ -537,11 +537,11 @@ describe("update (event generation)", () => {
     return ctx;
   }
 
-  it("updateStation downloads the whole range first, then processes each selected model in order", async () => {
+  it("updateStation downloads the whole range, runs envelopes, then processes each selected model", async () => {
     const { store, calls } = await primed();
     await store.updateStation(rc01Key);
     expect(calls.filter((c: string) => !c.startsWith("coverage"))).toEqual([
-      "download", "process:compact-v1", "process:large-v1",
+      "download", "envelopes", "process:compact-v1", "process:large-v1",
     ]);
   });
 
@@ -563,7 +563,7 @@ describe("update (event generation)", () => {
     const { store, calls } = await primed();
     await store.updateStation(rc01Key);
     expect(calls).toEqual([
-      "download",
+      "download", "envelopes",
       "process:compact-v1", "coverage:compact-v1",
       "process:large-v1", "coverage:large-v1",
     ]);
@@ -692,6 +692,66 @@ describe("update (event generation)", () => {
     expect(ctx.store.feedback).toBe("Finished updating 2 stations; 1 had failures.");
   });
 
+  it("passes the range and a station-bound uploadTile to processEnvelopes", async () => {
+    const { store, processEnvelopes, envelopeUploader } = await primed();
+    await store.updateStation(rc01Key);
+
+    const options = processEnvelopes.mock.calls[0][0];
+    expect(options.stationData).toMatchObject({ station: "RC01" });
+    // endDate is inclusive: the range extends through the end of Jan 3 UTC.
+    expect(options.range).toEqual({ start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 3) + SECONDS_PER_DAY });
+    const tile = { mins: Int16Array.from([1]), maxs: Int16Array.from([2]) };
+    await options.uploadTile(2, 77, tile);
+    expect(envelopeUploader.uploadTile).toHaveBeenCalledWith(
+      expect.objectContaining({ station: "RC01" }), 2, 77, tile);
+  });
+
+  it("live-fills only finest-level tiles via onTileUploaded", async () => {
+    // markTileUploaded is a read-only MobX action, so observe its effect: the
+    // station's loaded (empty) tile set, captured mid-run before the post-step
+    // reconciliation reload replaces it with the listing again.
+    const midRun: Array<Set<number> | undefined> = [];
+    const processEnvelopes = jest.fn(async ({ onTileUploaded }: any) => {
+      onTileUploaded?.(0, 1);                   // coarse level: ignored
+      onTileUploaded?.(FINEST_LEVEL, 56123);
+      midRun.push(new Set(ctx.store.envelopeCoverage.get(rc01Key)?.tileIndices));
+      return { uploadedTiles: 2, processedDays: 1, skippedDays: 0, totalDays: 1 };
+    });
+    const ctx = await primed({ processEnvelopes, listEnvelopeTiles: jest.fn(async () => new Set<number>()) });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(midRun).toEqual([new Set([56123])]);
+  });
+
+  it("continues into events and reports failures when processEnvelopes rejects", async () => {
+    const processEnvelopes = jest.fn(async () => { throw new Error("upload died"); });
+    const { store, calls } = await primed({ processEnvelopes });
+
+    await store.updateStation(rc01Key);
+    expect(calls).toContain("process:compact-v1");   // events still ran
+    expect(store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+  });
+
+  it("reconciles envelope coverage from the listing after the envelope step", async () => {
+    const { store, listEnvelopeTiles } = await primed();
+    listEnvelopeTiles.mockClear();
+    await store.updateStation(rc01Key);
+    expect(listEnvelopeTiles).toHaveBeenCalled();
+  });
+
+  it("reports envelope day progress in feedback", async () => {
+    const seen: string[] = [];
+    const processEnvelopes = jest.fn(async ({ onProgress }: any) => {
+      onProgress?.(1, 3);
+      seen.push(ctx.store.feedback);
+      return { uploadedTiles: 0, processedDays: 1, skippedDays: 0, totalDays: 3 };
+    });
+    const ctx = await primed({ processEnvelopes });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(seen).toEqual(["Rabbit Creek — envelopes: day 1 of 3"]);
+  });
+
   describe("portal auth", () => {
     it("setPortalAuth flips portalReady", () => {
       const store = new SeismicAdminStore({ cache: fakeCache() as any });
@@ -751,7 +811,10 @@ describe("busy lockout", () => {
       fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
       downloadStation: jest.fn(async () => {}),
       processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
       envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+      processEnvelopes: jest.fn(async () =>
+        ({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 })),
       ...overrides,
     };
     const store = new SeismicAdminStore(deps);

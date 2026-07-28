@@ -198,6 +198,9 @@ describe("StationSection coverage rows", () => {
     const updateDeps = () => ({
       downloadStation: jest.fn(async () => {}),
       processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+      envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+      processEnvelopes: jest.fn(async () =>
+        ({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 })),
     });
 
     it("dispatches a single-station update on click", async () => {
@@ -206,6 +209,7 @@ describe("StationSection coverage rows", () => {
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 
@@ -220,6 +224,7 @@ describe("StationSection coverage rows", () => {
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       render(
         <SeismicAdminStoreContext.Provider value={store}>
@@ -255,12 +260,13 @@ describe("StationSection coverage rows", () => {
         finish = () => res({ processed: 0, skipped: 0, total: 0 });
       }));
       const { store, eventService } = makeCoverageStore({
-        downloadStation: jest.fn(async () => {}),
+        ...updateDeps(),
         processCoverage,
       });
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 
