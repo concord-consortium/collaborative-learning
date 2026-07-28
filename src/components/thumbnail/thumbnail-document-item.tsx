@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
 import { IDocumentMetadataModel } from "../../models/document/document-metadata-model";
-import { GroupDocument } from "../../models/document/document-types";
 import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
@@ -103,7 +102,9 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
-  const group = document.type === GroupDocument;
+  // Collaborative (multi-writer) documents get the shared-document treatment — a group document and
+  // a class-wide document are the same kind of thing here.
+  const group = !!document.concurrent;
   const isPrivate = !isDocumentAccessibleToUser({ document, documentMetadata, user, documents });
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;

@@ -4,9 +4,9 @@ import { runInAction } from "mobx";
 import { unprotect } from "mobx-state-tree";
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { createDocumentModel, DocumentModelType } from "../../models/document/document";
+import { createDocumentModel, DocumentModelType, DocumentModelSnapshotType } from "../../models/document/document";
 import { DocumentMetadataModel } from "../../models/document/document-metadata-model";
-import { PersonalDocument, ProblemDocument } from "../../models/document/document-types";
+import { PersonalDocument, ProblemDocument, GroupDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
 import { UserModel } from "../../models/stores/user";
 import { Bookmark } from "../../models/stores/bookmarks";
@@ -26,6 +26,7 @@ interface IRenderOptions {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   scrollable?: boolean;
+  documentProps?: Partial<DocumentModelSnapshotType>;
 }
 
 function renderItem(options: IRenderOptions = {}) {
@@ -38,6 +39,7 @@ function renderItem(options: IRenderOptions = {}) {
     onDocumentDragStart,
     onDocumentStarClick,
     scrollable,
+    documentProps,
   } = options;
   const ownerId = isPrivate ? "other-user" : "test-student";
   const user = UserModel.create({ id: "test-student", type: userType, name: "Test Student" });
@@ -48,7 +50,8 @@ function renderItem(options: IRenderOptions = {}) {
     uid: ownerId,
     key: "doc-key-1",
     createdAt: 1,
-    visibility: "private"
+    visibility: "private",
+    ...documentProps
   });
   if (isStarred) {
     // Bypass `toggleUserBookmark`, which would hit the DB; seed the bookmark directly.
@@ -294,6 +297,34 @@ describe("ThumbnailDocumentItem", () => {
       const { container } = renderItem({ onDocumentDragStart });
       const canvasContainer = container.querySelector(".scaled-list-item-container");
       expect(canvasContainer).not.toHaveAttribute("draggable");
+    });
+  });
+
+  describe("collaborative document treatment", () => {
+    it("marks a concurrent document's thumbnail as collaborative", () => {
+      const { container } = renderItem({ documentProps: { type: GroupDocument, concurrent: true } });
+      expect(container.querySelector(".scaled-list-item-container")).toHaveClass("group");
+    });
+
+    it("marks a class-wide collaborative document, which carries no group id", () => {
+      // The treatment follows the `concurrent` axis, not the presence of a group: a class-wide
+      // document is collaborative in exactly the same way a group document is.
+      const { container } = renderItem({
+        documentProps: { type: GroupDocument, concurrent: true, unit: "sas" }
+      });
+      expect(container.querySelector(".scaled-list-item-container")).toHaveClass("group");
+    });
+
+    it("does not mark a single-writer document as collaborative", () => {
+      const { container } = renderItem({ documentProps: { type: ProblemDocument } });
+      expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("group");
+    });
+
+    it("does not mark a group-typed document that is not concurrent", () => {
+      // The red test: the transitional `type` alone no longer earns the treatment. A group document
+      // created before the concurrent axis existed loses it until the backfill script stamps the axis.
+      const { container } = renderItem({ documentProps: { type: GroupDocument } });
+      expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("group");
     });
   });
 });
