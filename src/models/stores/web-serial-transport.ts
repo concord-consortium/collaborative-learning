@@ -106,6 +106,9 @@ export class WebSerialTransport implements IDeviceTransport {
       } catch (error) {
         console.error(error);
       } finally {
+        // The streamReader might have already been released by closePort().
+        // If it hasn't, we need to release it here so we can get a new reader later.
+        // It is idempotent so it is safe to call a second time.
         streamReader.releaseLock();
       }
     }
@@ -119,15 +122,17 @@ export class WebSerialTransport implements IDeviceTransport {
   private async readWithTimeout(
     streamReader: ReadableStreamDefaultReader<Uint8Array>
   ): Promise<{ value: string | undefined; done: boolean; timedOut: boolean }> {
+    let timeoutId: ReturnType<typeof setTimeout>;
     const timeoutPromise = new Promise<{ value: undefined; done: false; timedOut: true }>((resolve) => {
-      setTimeout(() => resolve({ value: undefined, done: false, timedOut: true }), this.READ_TIMEOUT_MS);
+      timeoutId = setTimeout(() => resolve({ value: undefined, done: false, timedOut: true }), this.READ_TIMEOUT_MS);
     });
     const readPromise = streamReader.read().then(({ value, done }) => ({
       value: value ? textDecoder.decode(value) : undefined,
       done,
       timedOut: false
     }));
-    return Promise.race([readPromise, timeoutPromise]);
+    // Clear the timer once the race settles so resolved reads don't leave pending timeouts firing.
+    return Promise.race([readPromise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
   }
 
   private async closePort(streamReader?: ReadableStreamDefaultReader<Uint8Array>) {

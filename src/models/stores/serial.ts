@@ -53,6 +53,9 @@ export class SerialDevice {
   // Called by a transport (Web Serial or WebUSB) to become the active write path, receive
   // inbound data centrally, and mark the store connected.
   public setActiveDevice(deviceFamily: string, transport: IDeviceTransport, channels: NodeChannelInfo[]){
+    // Start each session with an empty parse buffer so a partial line left by a prior
+    // connection can't combine with new data into a spurious message.
+    this.localBuffer = "";
     this.activeTransport = transport;
     this.deviceFamily = deviceFamily;
     this.channels = channels;
@@ -64,6 +67,7 @@ export class SerialDevice {
   public clearActiveDevice(){
     this.activeTransport = undefined;
     this.deviceFamily = undefined;
+    this.localBuffer = "";
     this.updateConnectionInfo(Date.now(), "disconnect");
   }
 

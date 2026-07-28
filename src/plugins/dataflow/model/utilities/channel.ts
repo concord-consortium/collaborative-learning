@@ -118,7 +118,7 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
     usesSerial: true,
     serialConnected: null,
     protocol: "radioHub",
-    lastMessageRecievedAt: Date.now()
+    lastMessageReceivedAt: Date.now()
   };
 
   const channels = sensors.map((s) => {
@@ -146,7 +146,7 @@ function createMicroBitRelayInfoChannels(hubs: MicroBitHubInfo[] ){
     usesSerial: true,
     serialConnected: null,
     protocol: "radioHub",
-    lastMessageRecievedAt: Date.now()
+    lastMessageReceivedAt: Date.now()
   };
 
   const channels = hubs.map((h) => {
