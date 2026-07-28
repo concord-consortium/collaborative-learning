@@ -348,7 +348,12 @@ transitional by design and is commented as such in the rules: two paths still me
 pre-existing group documents that predate the field — the on-open backfill in `src/lib/db.ts` and the one-shot
 `scripts/backfill-group-document-axes.ts` — so it cannot yet be made unconditionally read-only. Once both backfill
 paths have run against every environment, `concurrentChangeOk()` should be deleted and `concurrent` added to
-`preservesReadOnlyDocumentFields()`'s read-only set, making it settable only at document creation.
+`preservesReadOnlyDocumentFields()`'s read-only set, making it settable only at document creation — a change that
+also requires constraining `isValidDocumentCreateRequest()` (firestore.rules:172-180), which today constrains
+neither `concurrent` nor `uid`: a truthy `concurrent` at create should imply `type == "group"`, and/or the create
+should require `userIsRequestUser()`, or a class member can create a new document stamped with a classmate's
+`uid` and `concurrent: true`. That does not reopen the escalation closed above — a create cannot target an
+existing document — but it leaves that vector open once the update-path allowance above is removed.
 
 Re-running the full `documents-rules.test.ts` suite (120 tests, including every pre-existing history-entry and
 document-update case) and the full `firebase-test` suite (366 tests across all 8 rule files) both passed after
@@ -373,10 +378,29 @@ declares a `drivingQuestionBoard` slot, so they are live now.
   - `document-workspace.tsx`'s `guaranteeInitialDocuments` re-opens a `type: "group"` primary document after a
     reload (group documents are not loaded automatically); a class-wide document restored as the primary
     document is covered by that same branch, which is the behavior we want.
-- **Eager-open cost.** `createDeclaredClassWideDocuments` runs on every unit load, including the fast path, and
-  opens each declared slot's document into `stores.documents` (subscribing its history manager). This stage
-  measures that cost on a unit that declares a slot and records the result; if it is material, the fix is to
-  defer the open rather than the get-or-create, and it is called out as such rather than folded in silently.
+- **Eager-open cost — measured.** `createDeclaredClassWideDocuments` runs on every unit load, including the fast
+  path, and opens each declared slot's document into `stores.documents` (subscribing its history manager).
+  Measured against `demo/units/qa` (one declared slot, `drivingQuestionBoard`) on a second load — the pointer
+  and metadata documents already exist, so the fast path (`pointerRef.get()` then
+  `openCanonicalDocumentByKey()`) runs — by timing `stores.unitLoadedPromise` resolving against the class-wide
+  document appearing in `stores.documents.all`, in a real Chrome session against a live Firestore project
+  (`collaborative-learning-ec215`). Two independent reloads: **670ms** and **730ms** (~700ms average) between
+  the unit-loaded event and the document appearing. That crosses the "material" threshold this bullet set (more
+  than a few hundred milliseconds), and confirms the reasoning below directly: the fast path is still two
+  sequential round trips, not one.
+  Read count could not be measured the way originally planned: the Firestore v8 SDK multiplexes every
+  listener and one-time read for the whole page (persistent UI, curriculum, class/group listeners, this
+  slot's pointer and metadata reads) over one shared long-polling WebChannel connection, so individual reads
+  are not visible as separate Network-panel entries — only channel-level HTTP requests shared across
+  everything else the page is doing at that moment. By code inspection (not empirical capture),
+  `getOrCreateCanonicalDocument`'s fast path is `pointerRef.get()` (one read) followed by
+  `openCanonicalDocumentByKey()` → `findFirestoreMetadata()` (a second read), i.e. two sequential reads per
+  declared slot before the document opens — consistent with "a handful," but this half of the measurement is
+  reasoned, not captured.
+  **This is material and not fixed here, per the brief for this bullet: defer the open, not the
+  get-or-create.** The get-or-create must still run at unit-load to converge the class on one document per
+  slot; what should move is subscribing `stores.documents` and the history manager, which is what makes the
+  700ms visible on the critical path today. Filed as a follow-up rather than folded into this stage.
 
 ## Roadmap update
 
@@ -426,11 +450,21 @@ declares a `drivingQuestionBoard` slot, so they are live now.
   `Group N Document` for a group document; the thumbnail collaborative treatment driven by `concurrent`.
 - **Rules (emulator):** the synthetic-owner history-write test described above, plus whichever outcome it
   establishes.
-- **Manual end-to-end** on `demo/units/qa`, which declares a `drivingQuestionBoard` slot: the document appears
-  in Sort Work under "Whole Class" for every filter (All, Unit, Investigation, Problem) and under "No Name" when
-  sorting by name; its title is the authored one; the Edit button appears for any class member; editing it from
-  two browser sessions persists from both; a group document's title, thumbnail, and Edit button are unchanged;
-  and the resources-pane Edit button behaves correctly in the my-work, learning-log, and class-work tabs.
+- **Manual end-to-end — pending human verification.** This requires two browser profiles signed in as
+  different students in one class, which is outside what an automated session can perform; it was not run as
+  part of this task. On `demo/units/qa` (declares a `drivingQuestionBoard` slot), with two browser profiles
+  signed in as different students in one class, verify:
+  1. Sort Work shows a "Whole Class" section containing the class-wide document, under each of the All, Unit,
+     Investigation, and Problem filters.
+  2. Sorting by Name shows it under "No Name" and under no student.
+  3. Its title is the one authored in `classWideDocuments`.
+  4. Its thumbnail has the collaborative (purple/badge) treatment.
+  5. The Edit button appears for both students; editing from one appears in the other.
+  6. Opening it in the workspace shows the authored title in the title bar, not `Group undefined Document`.
+  7. A group document's title, thumbnail, section, and Edit button are unchanged.
+  8. In the resources pane: My Work and Learning Log still show Edit for the user's own documents; a
+     bookmarked document owned by another student does not show Edit.
+  Record any deviation here rather than silently fixing it.
 - Full `npm test`, `npm run check:types`, `npm run lint:build`, and the `firebase-test` rules suite green.
 
 ## References

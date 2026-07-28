@@ -28,12 +28,12 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 |---|---|---|---|
 | `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524; class+unit pointer scope added CLUE-550 Stage 2 |
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
-| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3); class-wide slot kinds registered and their titles resolved by kind (`getDocumentTitle`) CLUE-550 Stage 2 |
+| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | done | CLUE-550 Stage 1 (stored + registry seeded); titles resolved by kind Stage 2; presentation wired Stage 3 (workspace title bar reads the registry; no consumer branches on kind) |
 | `owner` (authoring identity / provenance) | creation: kind-declared `ownerType` → owner `uid` (in the kind registry); read: getter over stored `uid` | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds via `getDocumentOwner`; read-side getter still to come) |
-| `scope` (org + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields, keyed on a registered `scopeType`; read: consumers read the individual scope fields, narrowing with field/axis **guards** (e.g. `hasOfferingScope`) rather than branching on `type` — whether to also add a single unified `scope` getter is an open question | in progress | CLUE-550 Stage 2 (creation-side scope fields registry-derived for every kind — the `createFirestoreMetadataDocument` type switch is gone) |
+| `scope` (org + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields, keyed on a registered `scopeType`; read: consumers read the individual scope fields through named guards (`hasGroupScope`, `hasClassUnitScope`) rather than branching on `type` | in progress | CLUE-550 Stage 2 (creation side, every kind); Stage 3 (read side: guards in `document-scope.ts`; the class+unit scope states its absent curriculum fields explicitly so it is queryable) |
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
 | kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
-| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis) |
+| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis); Stage 3 (edit gate `canUserEditDocument`, collaborative thumbnail treatment, and the collaborative title bar all read `concurrent`) |
 | creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner `uid` and scope fields stamped from the kind's `ownerType`/`scopeType`) |
 
 Status values: `not started` / `in progress` / `done`.
@@ -54,3 +54,10 @@ all kinds are registered, `createFirestoreMetadataDocument` derives owner and sc
 for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
 `type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
 into the kinds they publish.
+
+Stage 3 surfaces those documents: Sort Work sections them under "Whole Class" by scope rather than by
+type, a unit-scoped listener keeps them visible under the investigation and problem filters,
+presentation reads `concurrent` and the kind registry, and one predicate (`canUserEditDocument`)
+gates every Edit button. It also settles the deferred scope-modeling question: consumers read narrow
+named guards over the stored association fields, with no `scopeLevel` enum and no unified `scope`
+struct (see docs/document-scope.md).
