@@ -1,5 +1,6 @@
 import {
-  buildAuthorizeUrl, clearAccessToken, consumeAccessTokenFromLocation, fetchPortalFirebaseJwt, getPortalUrl
+  buildAuthorizeUrl, clearAccessToken, consumeAccessTokenFromLocation, fetchPortalFirebaseJwt, getPortalUrl,
+  getTokenServiceEnv
 } from "./portal-auth";
 
 const ACCESS_TOKEN_KEY = "seismic-admin-portal-access-token";
@@ -28,6 +29,22 @@ describe("portal-auth", () => {
     it("strips trailing slashes from the portal param", () => {
       history.replaceState(null, "", "/seismic-admin/?portal=https://learn.staging.concord.org/");
       expect(getPortalUrl()).toBe("https://learn.staging.concord.org");
+    });
+  });
+
+  describe("getTokenServiceEnv", () => {
+    it("defaults to production", () => {
+      expect(getTokenServiceEnv()).toBe("production");
+    });
+
+    it("returns staging when the tokenServiceEnv param asks for it", () => {
+      history.replaceState(null, "", "/seismic-admin/?tokenServiceEnv=staging");
+      expect(getTokenServiceEnv()).toBe("staging");
+    });
+
+    it("treats any other param value as production", () => {
+      history.replaceState(null, "", "/seismic-admin/?tokenServiceEnv=dev");
+      expect(getTokenServiceEnv()).toBe("production");
     });
   });
 

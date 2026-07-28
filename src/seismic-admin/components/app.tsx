@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
 import { initAdminFirebase } from "../utils/admin-firebase";
 import { loadCatalog } from "../utils/load-catalog";
+import { consumeAccessTokenFromLocation, fetchPortalFirebaseJwt, getTokenServiceEnv } from "../utils/portal-auth";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { AdminBody } from "./admin-body";
 import { AdminHeader } from "./admin-header";
@@ -28,6 +29,12 @@ export const App = observer(function App() {
       const created = new SeismicAdminStore({ stations, models });
       setStore(created);
       void created.refresh();
+      // JWTs are fetched per credentials refresh; the ~1h access token in sessionStorage is
+      // enough for an admin session. A failed JWT fetch surfaces through the update-flow errors.
+      const accessToken = consumeAccessTokenFromLocation();
+      if (accessToken) {
+        created.setPortalAuth(() => fetchPortalFirebaseJwt(accessToken), getTokenServiceEnv());
+      }
       void authPromise.then(failure => {
         if (cancelled) return;
         if (failure === null) {
