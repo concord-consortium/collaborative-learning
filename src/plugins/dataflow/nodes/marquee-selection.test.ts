@@ -2,7 +2,7 @@ import { rectsIntersect, Rect } from "./marquee-selection";
 
 const r = (left: number, top: number, right: number, bottom: number): Rect => ({ left, top, right, bottom });
 
-describe("rectsIntersect (CLUE-568 marquee selection)", () => {
+describe("rectsIntersect", () => {
   it("returns true for overlapping rectangles", () => {
     expect(rectsIntersect(r(0, 0, 10, 10), r(5, 5, 15, 15))).toBe(true);
   });

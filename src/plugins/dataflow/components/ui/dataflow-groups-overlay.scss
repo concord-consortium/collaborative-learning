@@ -1,3 +1,5 @@
+@import "../../../../components/vars";
+
 // Overlay layer that draws expanded group boxes / collapsed group chips over the dataflow canvas.
 // The layer itself does not capture pointer events (so the canvas stays interactive); only the
 // interactive controls (label + toggle) do.
@@ -79,10 +81,9 @@
 
     path {
       fill: none;
-      // Match the color + dashed look of the real node connections ($socket-and-connection-gray).
+      // Match the color of the real node connections ($socket-and-connection-gray). The stroke width
+      // and dash length are set inline and scaled by the zoom so wires match the node connections.
       stroke: #949494;
-      stroke-width: 2;
-      stroke-dasharray: 5 3;
     }
   }
 
@@ -97,6 +98,12 @@
     background: #f2f2f2;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     pointer-events: auto;
+
+    &:focus { outline: none; }
+    &:focus-visible {
+      outline: 2px solid $focus-ring-color;
+      outline-offset: 2px;
+    }
 
     .dataflow-group-node-header {
       display: flex;
@@ -128,9 +135,31 @@
       border-radius: 50%;
       background: #949494;
       transform: translate(-50%, -50%);
+      cursor: pointer;
 
       &.input { left: 0; }
       &.output { left: 100%; }
+
+      // Connection affordances mirror the real node sockets (dataflow-node.scss): keyboard focus and
+      // in-progress connection state get the shared focus ring; a candidate target is dashed until
+      // focused, and the source output stays solid for the duration of the connection.
+      &:focus { outline: none; }
+      &:focus-visible {
+        outline: 2px solid $focus-ring-color;
+        outline-offset: 2px;
+      }
+      &.connection-candidate {
+        outline: 2px dashed $focus-ring-color;
+        outline-offset: 4px;
+      }
+      &.connection-candidate:focus-visible {
+        outline: 2px solid $focus-ring-color;
+        outline-offset: 4px;
+      }
+      &.connection-source {
+        outline: 2px solid $focus-ring-color;
+        outline-offset: 4px;
+      }
     }
   }
 }

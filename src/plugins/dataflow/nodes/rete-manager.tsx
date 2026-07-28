@@ -8,7 +8,7 @@ import { onPatch, onSnapshot } from "mobx-state-tree";
 import { observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
-import { DataflowContentModelType, DEFAULT_PROGRAM_ZOOM } from "../model/dataflow-content";
+import { DataflowContentModelType } from "../model/dataflow-content";
 import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
@@ -51,7 +51,7 @@ import { serialSensorChannels } from "../model/utilities/channel";
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
-interface IContentBounds {
+export interface IContentBounds {
   maxX: number;
   maxY: number;
   minX: number;
@@ -218,11 +218,13 @@ export class ReteManager implements INodeServices {
           nodeModel.setLivePosition(nodeView.position);
         }
       }
-      if (event === "translate" || event === "translated") {
+      // Keep the live zoom in sync on both pan (translate) and zoom, so anything driven off it (e.g. the
+      // group overlay, which mirrors this transform) stays aligned with the canvas at any zoom level.
+      if (event === "translate" || event === "translated" || event === "zoom" || event === "zoomed") {
         this.mstContent.setLiveProgramZoom(area.area.transform);
 
-        // Persist the canonical zoom only in editable instances
-        if (!this.readOnly && event === "translated") {
+        // Persist the canonical zoom only in editable instances, when a gesture completes.
+        if (!this.readOnly && (event === "translated" || event === "zoomed")) {
           this.mstContent.setProgramZoom(area.area.transform);
         }
       }
@@ -332,21 +334,12 @@ export class ReteManager implements INodeServices {
 
     AreaExtensions.simpleNodesOrder(area);
 
-    // Don't apply programZoom to read-only instances since they will be automatically sized to
-    // fit within the view.
-    if (!this.readOnly) {
-      const { programZoom } = this.mstContent;
-      const isDefaultZoom = programZoom.dx === DEFAULT_PROGRAM_ZOOM.dx
-        && programZoom.dy === DEFAULT_PROGRAM_ZOOM.dy
-        && programZoom.scale === DEFAULT_PROGRAM_ZOOM.scale;
-      if (isDefaultZoom && this.mstProgram.nodes.size > 0) {
-        // Tile was copied with default zoom — fit content to show all nodes.
-        // Use setTimeout to ensure DOM has rendered node elements with dimensions.
-        setTimeout(() => this.fitContentAndSave(), 100);
-      } else {
-        await this.area.area.zoom(programZoom.scale);
-        await this.area.area.translate(programZoom.dx, programZoom.dy);
-      }
+    // On restoration, fit all program elements into view (scaled + centered) rather than restoring a
+    // saved pan/zoom — this mirrors the read-only view and sidesteps stale/incorrect saved pans.
+    // Read-only tiles fit via componentDidMount / the content reaction instead. Deferred so the DOM has
+    // laid out node elements with real dimensions.
+    if (!this.readOnly && this.mstProgram.nodes.size > 0) {
+      setTimeout(() => this.fitContent(), 100);
     }
 
     // Notify after the area, connection, and render plugins have been configured
@@ -555,7 +548,6 @@ export class ReteManager implements INodeServices {
     if (!area.container) return;
     this.marquee = new MarqueeSelection({
       container: area.container,
-      isPanGesture: () => false, // panning is on the arrow keys, not the pointer
       getNodeRects: () => {
         const rects: Array<{ id: string; rect: Rect }> = [];
         area.nodeViews.forEach((view, id) => {
@@ -597,7 +589,7 @@ export class ReteManager implements INodeServices {
       }
       const active = document.activeElement;
       if (active instanceof HTMLElement &&
-          (active.closest(".node") || active.tagName === "INPUT" ||
+          (active.closest(".node, .dataflow-group-node") || active.tagName === "INPUT" ||
            active.tagName === "TEXTAREA" || active.isContentEditable)) return;
       e.preventDefault();
       void this.pan(dx, dy);
@@ -671,11 +663,17 @@ export class ReteManager implements INodeServices {
       if (node.id === sourceNodeId) continue;
       const view = this.area.nodeViews.get(node.id);
       if (!view?.element) continue;
+      // A collapsed group's members are display:none — their only visible, connectable sockets are the
+      // proxy dots on the group chip. Use those, and skip inputs consumed internally (no proxy exists)
+      // so they aren't offered as invisible targets.
+      const collapsed = this.isNodeInCollapsedGroup(node.id);
       for (const inputKey of Object.keys(node.inputs)) {
         if (!node.inputs[inputKey]) continue;
-        const socketEl = view.element.querySelector<HTMLElement>(
-          `[data-socket-side="input"][data-socket-key="${inputKey}"]`
-        );
+        const socketEl = collapsed
+          ? this.proxySocketEl(node.id, inputKey, "input")
+          : view.element.querySelector<HTMLElement>(
+              `[data-socket-side="input"][data-socket-key="${inputKey}"]`
+            );
         if (socketEl) candidates.push({ nodeId: node.id, inputKey, socketEl });
       }
     }
@@ -817,9 +815,27 @@ export class ReteManager implements INodeServices {
   }
 
   private getOutputSocketEl(nodeId: string, socketKey: string): HTMLElement | undefined {
+    // A collapsed member's real output socket is display:none; the connectable one is its chip proxy.
+    if (this.isNodeInCollapsedGroup(nodeId)) return this.proxySocketEl(nodeId, socketKey, "output");
     const view = this.area.nodeViews.get(nodeId);
     return view?.element?.querySelector<HTMLElement>(
       `[data-socket-side="output"][data-socket-key="${socketKey}"]`
+    ) ?? undefined;
+  }
+
+  // True when a node is hidden inside a collapsed group (its real sockets are display:none, so its
+  // only visible/connectable sockets are the proxy dots the group chip draws in the overlay).
+  private isNodeInCollapsedGroup(nodeId: string): boolean {
+    const groupId = this.mstProgram?.nodes.get(nodeId)?.groupId;
+    return !!groupId && !!this.mstProgram.groups.get(groupId)?.collapsed;
+  }
+
+  // The proxy socket dot a collapsed group draws for one of its exposed member sockets, located by the
+  // data attributes the overlay tags it with. Undefined when that socket isn't exposed (consumed
+  // internally, so no proxy is drawn).
+  private proxySocketEl(nodeId: string, socketKey: string, side: "input" | "output"): HTMLElement | undefined {
+    return document.querySelector<HTMLElement>(
+      `[data-group-proxy][data-socket-side="${side}"][data-node-id="${nodeId}"][data-socket-key="${socketKey}"]`
     ) ?? undefined;
   }
 
@@ -996,7 +1012,7 @@ export class ReteManager implements INodeServices {
   // Sorted list of node ids that are hidden because their group is collapsed (reaction key).
   private collapsedMemberKey() {
     const ids: string[] = [];
-    this.mstProgram.groups.forEach(g => { if (g.collapsed) ids.push(...g.nodeIds); });
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) ids.push(...g.nodeIds.keys()); });
     return ids.sort().join(",");
   }
 
@@ -1008,7 +1024,7 @@ export class ReteManager implements INodeServices {
   // stay connectable even when nothing is wired to them yet.
   public getGroupInterface(nodeIds: string[]) {
     const members = new Set(nodeIds);
-    const key = (nodeId: string, socketKey: string) => `${nodeId} ${socketKey}`;
+    const key = (nodeId: string, socketKey: string) => `${nodeId}::${socketKey}`;
     const inputFedByMember = new Set<string>();
     const inputExternal = new Map<string, ExternalEndpoint>();
     const outputToMember = new Set<string>();
@@ -1086,33 +1102,15 @@ export class ReteManager implements INodeServices {
     return this.mstProgram.nodes;
   }
 
-  // Screen-space bounding box (in .flow-tool pixels) around the given nodes, using rete's measured
-  // node views + the current area transform. Returns undefined if no member is currently rendered.
+  // Screen-space bounding box (in .flow-tool pixels) around the given nodes — the world-unit
+  // calculateContentBounds converted to screen coordinates via the current area transform. Returns
+  // undefined if no member is currently measurable.
   public getGroupScreenBounds(nodeIds: string[]) {
+    const bounds = this.calculateContentBounds(nodeIds);
+    if (!bounds) return undefined;
     const { k, x: tx, y: ty } = this.area.area.transform;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const id of nodeIds) {
-      const el = this.area.nodeViews.get(id)?.element;
-      const node = this.mstProgram.nodes.get(id);
-      if (!el || !node) continue;
-      // Use the MST position (the source of truth, updated live during drags) for placement, and
-      // the measured element for size. Reading rete's nodeView.position can be stale for a node
-      // that was moved before being grouped.
-      const px = isNaN(node.liveX) ? node.x : node.liveX;
-      const py = isNaN(node.liveY) ? node.y : node.liveY;
-      const left = tx + px * k;
-      const top = ty + py * k;
-      // Fall back to default node dimensions when the element isn't measurable (e.g. a member is
-      // hidden while its group is collapsed, or the DOM hasn't laid out yet right after expanding).
-      const w = (el.offsetWidth || kDefaultNodeWidth) * k;
-      const h = (el.offsetHeight || kDefaultNodeHeight) * k;
-      minX = Math.min(minX, left);
-      minY = Math.min(minY, top);
-      maxX = Math.max(maxX, left + w);
-      maxY = Math.max(maxY, top + h);
-    }
-    if (minX === Infinity) return undefined;
-    return { left: minX, top: minY, width: maxX - minX, height: maxY - minY };
+    const { minX, minY, maxX, maxY } = bounds;
+    return { left: tx + minX * k, top: ty + minY * k, width: (maxX - minX) * k, height: (maxY - minY) * k };
   }
 
   public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
@@ -1532,10 +1530,13 @@ export class ReteManager implements INodeServices {
     return { width: containerWidth, height: containerHeight };
   }
 
+  /**
+   * Fit all nodes into view (scaled + centered). Runs on load for both read-only and editable tiles
+   * (see the init flow and componentDidMount) and reactively when a read-only tile's content changes.
+   * The fit is not persisted — it's recomputed on every load — so an editing user's in-session pan/zoom
+   * is left untouched until the next restoration.
+   */
   public async fitContent() {
-    // Only apply content fitting to read-only tiles
-    if (!this.readOnly) return;
-
     const dims = this.getContainerDimensions();
     if (!dims) {
       if (!this.disposed) {
@@ -1551,31 +1552,6 @@ export class ReteManager implements INodeServices {
 
     await this.area.area.zoom(scale);
     await this.area.area.translate(offsetX, offsetY);
-  }
-
-  /**
-   * Fit all nodes into view for an editable tile and persist the resulting zoom.
-   * Used when a tile is copied (programZoom is reset to default) so all nodes are visible.
-   */
-  private async fitContentAndSave() {
-    const dims = this.getContainerDimensions();
-    if (!dims) {
-      if (!this.disposed) {
-        this.fitTimeout = window.setTimeout(() => this.fitContentAndSave(), 100);
-      }
-      return;
-    }
-
-    const bounds = this.calculateContentBounds();
-    if (!bounds) return;
-
-    const { scale, offsetX, offsetY } = this.calculateFitTransform(bounds, dims.width, dims.height);
-
-    await this.area.area.zoom(scale);
-    await this.area.area.translate(offsetX, offsetY);
-
-    // Persist so future loads use this fitted zoom
-    this.mstContent.setProgramZoom(this.area.area.transform);
   }
 
   private scheduleFit = () => {
@@ -1619,37 +1595,32 @@ export class ReteManager implements INodeServices {
     );
   };
 
-  private calculateContentBounds = () => {
-    const nodes = this.mstProgram.nodes;
-    if (!nodes || nodes.size === 0) return null;
+  // World-unit bounding box of the given nodes (default: all nodes). Uses each node's current position
+  // and its measured element size (converted from screen back to world units); falls back to the default
+  // node dimensions when an element isn't measurable (e.g. a member hidden while its group is collapsed).
+  // Returns null when no member is present. Used both to fit content and to place group overlays.
+  public calculateContentBounds = (nodeIds?: string[]) => {
+    const nodeList = nodeIds
+      ? nodeIds.map(id => this.mstProgram.nodes.get(id))
+      : [...this.mstProgram.nodes.values()];
 
     const { k } = this.area.area.transform; // current zoom
     let minX = Infinity, minY = Infinity;
     let maxX = -Infinity, maxY = -Infinity;
 
-    nodes.forEach(node => {
-      const x = Number.isFinite(node.liveX) ? node.liveX : node.x;
-      const y = Number.isFinite(node.liveY) ? node.liveY : node.y;
+    for (const node of nodeList) {
+      if (!node) continue;
+      const { currentX: x, currentY: y } = node;
+      const rect = this.area.nodeViews.get(node.id)?.element?.getBoundingClientRect();
+      const w = rect ? rect.width / k : kDefaultNodeWidth;   // screen px → world units
+      const h = rect ? rect.height / k : kDefaultNodeHeight;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + w);
+      maxY = Math.max(maxY, y + h);
+    }
 
-      const nodeView = this.area.nodeViews.get(node.id);
-      if (nodeView?.element) {
-        const r = nodeView.element.getBoundingClientRect();
-        const nodeWidth = r.width / k;   // convert back to world units
-        const nodeHeight = r.height / k; // convert back to world units
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x + nodeWidth);
-        maxY = Math.max(maxY, y + nodeHeight);
-      } else {
-        const nodeWidth = 120;
-        const nodeHeight = 80;
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x + nodeWidth);
-        maxY = Math.max(maxY, y + nodeHeight);
-      }
-    });
-
+    if (minX === Infinity) return null;
     return { minX, minY, maxX, maxY };
   };
 

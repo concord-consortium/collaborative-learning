@@ -38,7 +38,10 @@ export const GroupModel = types
   .model("Group", {
     id: types.identifier,
     label: types.string,
-    nodeIds: types.array(types.string),
+    // Member node ids, stored as a map used as a set (key = value = node id). A map gives O(1)
+    // add/remove/has and merges more cleanly than an array in collaborative (group) documents.
+    // Membership is mirrored on each node via `groupId` so node→group lookup is also O(1).
+    nodeIds: types.map(types.string),
     collapsed: types.optional(types.boolean, false),
   })
   .actions(self => ({
@@ -48,9 +51,11 @@ export const GroupModel = types
     setCollapsed(collapsed: boolean) {
       self.collapsed = collapsed;
     },
+    addNodeId(nodeId: string) {
+      self.nodeIds.set(nodeId, nodeId);
+    },
     removeNodeId(nodeId: string) {
-      const idx = self.nodeIds.indexOf(nodeId);
-      if (idx >= 0) self.nodeIds.splice(idx, 1);
+      self.nodeIds.delete(nodeId);
     }
   }));
 export interface IGroupModel extends Instance<typeof GroupModel> {}
@@ -83,6 +88,9 @@ export const DataflowNodeModel = types.
     name: types.string,
     x: types.number,
     y: types.number,
+    // The group this node belongs to, if any. Mirrors GroupModel.nodeIds so node→group lookup is O(1);
+    // maintained by createGroup / ungroupGroup / removeNodeAndConnections.
+    groupId: types.maybe(types.string),
     data: types.union(
       ControlNodeModel,
       CounterNodeModel,
@@ -102,6 +110,12 @@ export const DataflowNodeModel = types.
     liveX: NaN,
     liveY: NaN,
   }))
+  .views(self => ({
+    // Current position: the live (mid-drag) value when set, else the committed x/y. Centralizes the
+    // x-vs-liveX selection that bounds calculations need, so it lives in one place.
+    get currentX() { return Number.isFinite(self.liveX) ? self.liveX : self.x; },
+    get currentY() { return Number.isFinite(self.liveY) ? self.liveY : self.y; },
+  }))
   .actions(self => ({
     setPosition(position: {x: number, y: number}) {
       self.x = self.liveX = position.x;
@@ -110,6 +124,9 @@ export const DataflowNodeModel = types.
     setLivePosition(position: {x: number, y: number}) {
       self.liveX = position.x;
       self.liveY = position.y;
+    },
+    setGroupId(groupId?: string) {
+      self.groupId = groupId;
     }
   }))
   .preProcessSnapshot((snapshot: any) => {
@@ -181,7 +198,8 @@ export const DataflowProgramModel = types.
       return [...self.connections.keys()].map(id => self.getConnectionWrapper(id)!);
     },
     getGroupForNode(nodeId: string) {
-      return [...self.groups.values()].find(g => g.nodeIds.includes(nodeId));
+      const node = self.nodes.get(nodeId);
+      return node?.groupId ? self.groups.get(node.groupId) : undefined;
     },
     // Next default group label ("Group 1", "Group 2", ...) based on existing labels.
     getNextGroupLabel() {
@@ -285,17 +303,31 @@ export const DataflowProgramModel = types.
     }
   }))
   .actions(self => ({
+    // Dissolve a single group: clear each member node's groupId, then remove the group. In its own
+    // actions block so createGroup / ungroupGroups / removeNodeAndConnections can call it via `self`.
+    ungroupGroup(id: string) {
+      const group = self.groups.get(id);
+      if (!group) return;
+      [...group.nodeIds.keys()].forEach(nodeId => self.nodes.get(nodeId)?.setGroupId(undefined));
+      self.groups.delete(id);
+    }
+  }))
+  .actions(self => ({
     // Create a "super node" group from the given node ids. Requires ≥2 nodes that exist and are
     // not already in a group; returns the new group (or undefined if the request is invalid).
     createGroup(nodeIds: string[], label?: string) {
       const validIds = nodeIds.filter(nodeId => self.nodes.has(nodeId) && !self.getGroupForNode(nodeId));
       if (validIds.length < 2) return undefined;
       const id = uniqueId();
-      self.groups.put({ id, label: label ?? self.getNextGroupLabel(), nodeIds: validIds, collapsed: false });
-      return self.groups.get(id);
+      const group = self.groups.put({ id, label: label ?? self.getNextGroupLabel(), collapsed: false });
+      validIds.forEach(nodeId => {
+        group.addNodeId(nodeId);
+        self.nodes.get(nodeId)?.setGroupId(id);
+      });
+      return group;
     },
     ungroupGroups(ids: string[]) {
-      ids.forEach(groupId => self.groups.delete(groupId));
+      ids.forEach(id => self.ungroupGroup(id));
     }
   }))
   .actions(self => ({
@@ -312,13 +344,15 @@ export const DataflowProgramModel = types.
         wrapper && removedConnections.push(wrapper);
         self.removeConnection(connection.id);
       }
+
+      // Capture the node's group before removing the node (getGroupForNode reads node.groupId).
+      const group = self.getGroupForNode(nodeId);
       self.removeNode(nodeId);
 
       // Keep group membership consistent; auto-dissolve a group that drops below 2 members.
-      const group = self.getGroupForNode(nodeId);
       if (group) {
         group.removeNodeId(nodeId);
-        if (group.nodeIds.length < 2) self.groups.delete(group.id);
+        if (group.nodeIds.size < 2) self.ungroupGroup(group.id);
       }
       return removedConnections;
     }

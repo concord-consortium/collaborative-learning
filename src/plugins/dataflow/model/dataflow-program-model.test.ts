@@ -30,9 +30,12 @@ describe("DataflowProgramModel groups", () => {
     const group = program.createGroup(["a", "b"]);
     expect(group).toBeDefined();
     expect(group!.label).toBe("Group 1");
-    expect([...group!.nodeIds]).toEqual(["a", "b"]);
+    expect([...group!.nodeIds.keys()].sort()).toEqual(["a", "b"]);
     expect(program.getGroupForNode("a")?.id).toBe(group!.id);
     expect(program.getGroupForNode("c")).toBeUndefined();
+    // Membership is mirrored on each member node via groupId.
+    expect(program.nodes.get("a")!.groupId).toBe(group!.id);
+    expect(program.nodes.get("c")!.groupId).toBeUndefined();
   });
 
   it("refuses to group fewer than 2 valid nodes", () => {
@@ -61,6 +64,9 @@ describe("DataflowProgramModel groups", () => {
     expect(program.groups.size).toBe(0);
     expect(program.nodes.has("a")).toBe(true);
     expect(program.nodes.has("b")).toBe(true);
+    // Ungrouping clears each member node's groupId.
+    expect(program.nodes.get("a")!.groupId).toBeUndefined();
+    expect(program.nodes.get("b")!.groupId).toBeUndefined();
   });
 
   it("auto-dissolves a group when a member is removed and it drops below 2", () => {
@@ -70,9 +76,11 @@ describe("DataflowProgramModel groups", () => {
     const groupId = program.createGroup(["a", "b", "c"])!.id;
     program.removeNodeAndConnections("a");
     expect(program.groups.has(groupId)).toBe(true);
-    expect([...program.getGroupForNode("b")!.nodeIds]).toEqual(["b", "c"]);
+    expect([...program.getGroupForNode("b")!.nodeIds.keys()].sort()).toEqual(["b", "c"]);
     program.removeNodeAndConnections("b");
     expect(program.groups.has(groupId)).toBe(false);
+    // The last remaining member's groupId is cleared when the group dissolves.
+    expect(program.nodes.get("c")!.groupId).toBeUndefined();
   });
 
   it("round-trips groups (label, collapsed, members) through a snapshot", () => {
@@ -83,7 +91,7 @@ describe("DataflowProgramModel groups", () => {
     const rGroup = [...restored.groups.values()][0];
     expect(rGroup.label).toBe("My Group");
     expect(rGroup.collapsed).toBe(true);
-    expect([...rGroup.nodeIds]).toEqual(["a", "b"]);
+    expect([...rGroup.nodeIds.keys()].sort()).toEqual(["a", "b"]);
   });
 
   it("loads a legacy snapshot without a groups field as an empty map", () => {

@@ -159,7 +159,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   />
                 }
                 { this.reteManager && programMode !== ProgramMode.Done &&
-                  <DataflowGroupsOverlay reteManager={this.reteManager} readOnly={readOnly} /> }
+                  <DataflowGroupsOverlay reteManager={this.reteManager} /> }
                 { this.shouldShowProgramCover() &&
                   <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
                 {showZoomControl && this.reteManager &&

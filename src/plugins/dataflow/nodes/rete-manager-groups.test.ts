@@ -29,7 +29,7 @@ function managerWith(connections: IConn[], nodeSockets: Record<string, INodeSock
 const conn = (id: string, source: string, sourceOutput: string, target: string, targetInput: string): IConn =>
   ({ id, source, sourceOutput, target, targetInput });
 
-describe("ReteManager.getGroupInterface (CLUE-568)", () => {
+describe("ReteManager.getGroupInterface", () => {
   it("exposes a member input fed by an external node, with its boundary connection", () => {
     // ext.val -> a.num1, where a is a member.
     const mgr = managerWith([conn("c1", "ext", "val", "a", "num1")], { a: { inputs: ["num1"] } });

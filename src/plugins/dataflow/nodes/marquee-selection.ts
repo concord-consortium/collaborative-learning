@@ -1,8 +1,7 @@
 // Marquee (rubber-band) selection over the dataflow canvas. A left-drag starting on the empty
 // canvas draws a rectangle and selects every node it intersects; panning is on the arrow keys
-// (rete-manager disables background drag-pan), so this controller is passed isPanGesture: () =>
-// false. Node dragging is untouched (each node stops pointerdown propagation, so those drags never
-// reach this controller).
+// (rete-manager disables background drag-pan). Node dragging is untouched (each node stops
+// pointerdown propagation, so those drags never reach this controller).
 
 export interface Rect { left: number; top: number; right: number; bottom: number; }
 
@@ -21,8 +20,6 @@ interface MarqueeOptions {
   container: HTMLElement;
   // Screen-space (client) rects of the currently selectable node elements.
   getNodeRects: () => Array<{ id: string; rect: Rect }>;
-  // Gestures that should pan/scroll instead of marquee-select (space-drag, middle-mouse).
-  isPanGesture: (e: PointerEvent) => boolean;
   // Apply the selection. `additive` when a multi-select modifier was held at drag start.
   onSelect: (ids: string[], additive: boolean) => void;
 }
@@ -39,7 +36,6 @@ export class MarqueeSelection {
 
   private onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0) return;                       // left button only
-    if (this.opts.isPanGesture(e)) return;            // space/middle-mouse pans instead
     // Drags that start on a node/control have their own handling (and stopPropagation), but guard
     // anyway so a marquee never begins on top of a block.
     if ((e.target as HTMLElement | null)?.closest?.(".node")) return;
