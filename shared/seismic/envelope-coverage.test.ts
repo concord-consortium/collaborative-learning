@@ -34,6 +34,14 @@ describe("listEnvelopeTileIndices", () => {
     expect(fetchFn.mock.calls[1][0]).toContain(`continuation-token=${encodeURIComponent("tok/en+1")}`);
   });
 
+  it("ignores keys without a strictly numeric final segment", async () => {
+    const fetchFn = jest.fn().mockResolvedValue(okResponse(listXml([
+      "collaborative-learning/envelopes/v2/AK_K204/00/HNZ/L2/",       // directory marker
+      "collaborative-learning/envelopes/v2/AK_K204/00/HNZ/L2/56125",
+    ])));
+    expect(await listEnvelopeTileIndices(station, fetchFn as any)).toEqual(new Set([56125]));
+  });
+
   it("throws on a non-OK response", async () => {
     const fetchFn = jest.fn().mockResolvedValue({ ok: false, status: 403, text: async () => "" });
     await expect(listEnvelopeTileIndices(station, fetchFn as any)).rejects.toThrow("403");

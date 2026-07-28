@@ -20,8 +20,8 @@ export async function listEnvelopeTileIndices(
     const doc = new DOMParser().parseFromString(await response.text(), "text/xml");
     for (const keyEl of Array.from(doc.getElementsByTagName("Key"))) {
       const key = keyEl.textContent ?? "";
-      const index = Number(key.slice(key.lastIndexOf("/") + 1));
-      if (Number.isInteger(index)) indices.add(index);
+      const segment = key.slice(key.lastIndexOf("/") + 1);
+      if (/^\d+$/.test(segment)) indices.add(Number(segment));
     }
     const truncated = doc.getElementsByTagName("IsTruncated")[0]?.textContent === "true";
     continuationToken = truncated
