@@ -44,6 +44,7 @@ import { DataflowEngine } from "../nodes/engine/dataflow-engine";
 import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "../nodes/controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
 import { getSharedNodes } from "../nodes/utilities/shared-program-data-utilities";
+import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { serialSensorChannels } from "../model/utilities/channel";
@@ -66,25 +67,6 @@ export interface GroupInputSocket { nodeId: string; key: string; external?: Exte
 // A member output socket exposed on a collapsed group. `externals` lists outside targets it feeds
 // (empty when the output is open).
 export interface GroupOutputSocket { nodeId: string; key: string; externals: ExternalEndpoint[]; }
-
- /**
-* Get an indexed name based on exiting names.
-* If existing names are "MyBase 1" and "MyBase 3" this will return "MyBase 5"
-* @param existingNames
-* @param baseName
-* @returns {string} indexed name
-*/
-export function getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
-  const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+(\\.\\d+)?)$`);
- const namedNums: number[] = existingNames.map(name => {
-   const match = name?.match(matchTypeAndNum);
-   return match ? parseInt(match[1], 10) : 0;
- })
- .map(n => isNaN(n) ? 0 : Math.round(n));
-
- const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
- return `${baseName} ${nextNum}`;
-}
 
 // Fallback node dimensions (CSS px) used for group-bounds math when a member element isn't
 // measurable (hidden while collapsed, or not yet laid out just after expanding). Node width is
@@ -221,13 +203,9 @@ export class ReteManager implements INodeServices {
       }
       // Keep the live zoom in sync on both pan (translate) and zoom, so anything driven off it (e.g. the
       // group overlay, which mirrors this transform) stays aligned with the canvas at any zoom level.
+      // The zoom is not persisted — the canvas fits content on every load (see the init flow).
       if (event === "translate" || event === "translated" || event === "zoom" || event === "zoomed") {
         this.mstContent.setLiveProgramZoom(area.area.transform);
-
-        // Persist the canonical zoom only in editable instances, when a gesture completes.
-        if (!this.readOnly && (event === "translated" || event === "zoomed")) {
-          this.mstContent.setProgramZoom(area.area.transform);
-        }
       }
       return context;
     });
@@ -1679,6 +1657,6 @@ export class ReteManager implements INodeServices {
   private async setZoom(zoom: number) {
     await this.area.area.zoom(zoom);
     const { transform } = this.area.area;
-    this.mstContent.setProgramZoom(transform);
+    this.mstContent.setLiveProgramZoom(transform);
   }
 }

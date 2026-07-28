@@ -71,13 +71,14 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
-    programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
     channels: observable([]) as NodeChannelInfo[],
-    liveProgramZoom: ProgramZoom.create(getSnapshot(self.programZoom))
+    // Volatile (not persisted): the canvas fits all content on every load rather than restoring a
+    // saved pan/zoom, so this only tracks the live transform for the current session.
+    liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM)
   }))
   .views(self => ({
     get sharedModel() {
@@ -128,11 +129,6 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({
     get isUserResizable() {
       return true;
-    },
-    get tileSnapshotForCopy() {
-      const snapshot = getSnapshot(self);
-      // Reset programZoom so the rete manager knows to fit content on first display
-      return { ...snapshot, programZoom: DEFAULT_PROGRAM_ZOOM };
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
@@ -281,10 +277,6 @@ export const DataflowContentModel = TileContentModel
       self.programDataRate = dataRate;
     },
     setLiveProgramZoom(transform: Transform) {
-      self.liveProgramZoom.update(transform);
-    },
-    setProgramZoom(transform: Transform) {
-      self.programZoom.update(transform);
       self.liveProgramZoom.update(transform);
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){

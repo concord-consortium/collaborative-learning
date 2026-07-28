@@ -14,20 +14,20 @@ describe("DataflowContentModel", () => {
     const dcm = defaultDataflowContent();
     expect(dcm.isUserResizable).toBe(true);
     expect(dcm.programDataRate).toBe(DEFAULT_DATA_RATE);
-    expect(dcm.programZoom.dx).toBe(DEFAULT_PROGRAM_ZOOM.dx);
-    expect(dcm.programZoom.dy).toBe(DEFAULT_PROGRAM_ZOOM.dy);
-    expect(dcm.programZoom.scale).toBe(DEFAULT_PROGRAM_ZOOM.scale);
+    expect(dcm.liveProgramZoom.dx).toBe(DEFAULT_PROGRAM_ZOOM.dx);
+    expect(dcm.liveProgramZoom.dy).toBe(DEFAULT_PROGRAM_ZOOM.dy);
+    expect(dcm.liveProgramZoom.scale).toBe(DEFAULT_PROGRAM_ZOOM.scale);
     expect(Object.values(getSnapshot(dcm.program.nodes)).length).toBe(0);
   });
 
   it("should handle basic changes", () => {
     const dcm = defaultDataflowContent();
     dcm.setProgramDataRate(newDataRate);
-    dcm.setProgramZoom(newZoom);
+    dcm.setLiveProgramZoom(newZoom);
     expect(dcm.programDataRate).toBe(newDataRate);
-    expect(dcm.programZoom.dx).toBe(newZoom.x);
-    expect(dcm.programZoom.dy).toBe(newZoom.y);
-    expect(dcm.programZoom.scale).toBe(newZoom.k);
+    expect(dcm.liveProgramZoom.dx).toBe(newZoom.x);
+    expect(dcm.liveProgramZoom.dy).toBe(newZoom.y);
+    expect(dcm.liveProgramZoom.scale).toBe(newZoom.k);
   });
 
   it("should be to load a program", () => {
@@ -75,7 +75,6 @@ describe("DataflowContentModel", () => {
 
     // Do some sanity checking
     expect(exportedJson.programDataRate).toBe(1000);
-    expect(exportedJson.programZoom.dx).toBe(0);
 
     const { nodes, connections } = exportedJson.program;
     expect(Object.values(nodes).length).toBe(3);
