@@ -588,6 +588,15 @@ export class SeismicAdminStore {
     stats.dayStates.set(day, "covered");
   }
 
+  /** Fold a freshly-uploaded L2 tile into a station's envelope coverage so its timeline
+   *  fills in live. Ignored unless that station's coverage is already loaded — the
+   *  post-upload reload reconciles. */
+  markTileUploaded(stationKey: string, tileIndex: number) {
+    const stats = this.envelopeCoverage.get(stationKey);
+    if (stats?.state !== "loaded" || !stats.tileIndices) return;
+    stats.tileIndices.add(tileIndex);
+  }
+
   /** Fold a freshly-downloaded day into a station's stats so its timeline fills in live. */
   markDayCached(key: string, day: number, bytes: number) {
     const stats = this.stats.get(key);

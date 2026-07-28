@@ -862,6 +862,22 @@ describe("envelope coverage", () => {
     expect(stats.coveredDays.get(getStationChannelPrefix(rc01))?.has(d30)).toBe(true);
     expect(stats.coveredDays.get(getStationChannelPrefix(rc02))?.has(d30)).toBe(true);
   });
+
+  it("marks uploaded tiles so days fill in live", async () => {
+    const listEnvelopeTiles = jest.fn(async () => new Set<number>());
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+    expect(store.envelopeDayStates(key)?.get(d30)).toBe("uncovered");
+
+    dayTiles(d30).forEach(i => store.markTileUploaded(key, i));
+    expect(store.envelopeDayStates(key)?.get(d30)).toBe("covered");
+
+    // Unknown station: ignored, no entry synthesized.
+    store.markTileUploaded("nope", 1);
+    expect(store.envelopeCoverage.has("nope")).toBe(false);
+  });
 });
 
 it("authReady defaults false and is set by setAuthReady", () => {
