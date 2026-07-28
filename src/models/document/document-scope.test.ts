@@ -1,4 +1,4 @@
-import { hasClassUnitScope, hasGroupScope } from "./document-scope";
+import { getCurriculumScopeLabel, hasClassUnitScope, hasGroupScope } from "./document-scope";
 
 describe("document scope guards", () => {
   // One case per document shape CLUE stores, so the guards are pinned against every shape they
@@ -35,6 +35,29 @@ describe("document scope guards", () => {
 
     it("treats an empty-string unit as no unit", () => {
       expect(hasClassUnitScope({ unit: "", investigation: null, groupId: null })).toBe(false);
+    });
+  });
+
+  describe("getCurriculumScopeLabel", () => {
+    it("names the problem a document belongs to", () => {
+      expect(getCurriculumScopeLabel(problem)).toBe("sas-1.2");
+      expect(getCurriculumScopeLabel(group)).toBe("sas-1.2");
+      expect(getCurriculumScopeLabel(exemplar)).toBe("qa-1.1");
+    });
+
+    it("names the unit alone when the document is scoped no narrower", () => {
+      expect(getCurriculumScopeLabel(classWide)).toBe("sas");
+      expect(getCurriculumScopeLabel(legacyClassWide)).toBe("sas");
+    });
+
+    it("returns undefined when the document has no unit", () => {
+      expect(getCurriculumScopeLabel(personal)).toBeUndefined();
+      expect(getCurriculumScopeLabel({ unit: "" })).toBeUndefined();
+    });
+
+    it("keeps the investigation when a document has one but no problem", () => {
+      // No registered scope type produces this shape; the label degrades rather than dropping it.
+      expect(getCurriculumScopeLabel({ unit: "sas", investigation: "1" })).toBe("sas-1.x");
     });
   });
 });

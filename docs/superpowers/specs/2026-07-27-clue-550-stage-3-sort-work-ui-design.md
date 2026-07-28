@@ -254,6 +254,39 @@ kind-specific rule cuts against the project's requirement that adding another cl
 *configuration* change. This is the one intentional difference from #2890's UX and should be confirmed in the
 parity check.
 
+### Titling a document from another unit
+
+The Sort Work base query constrains only `context_id`, and under the **All** filter no unit clause is added.
+The class hash comes from the portal class, not the offering, so a class that has worked through more than
+one unit sees documents from all of them — the pre-existing `Problem doc from sas-1.2` fallback exists for
+exactly this reason. Class-wide documents reach that view too, and they raise two problems that titling by
+kind alone cannot answer, because only the *current* unit's config is loaded:
+
+1. The document's kind was declared by a unit that is not loaded, so the registry holds no title — and a
+   class-wide document stores no title of its own. It would render blank.
+2. Two units declare the *same* kind with different authored wording. The registry answers, but with the
+   current unit's title, stating a title for a document that unit does not govern.
+
+Both are handled by treating a unit-declared title as belonging to its unit. `IDocumentKindInfo` gains a
+`unit` field, recorded at registration from the same unit code the document is stamped with, and
+`getDocumentTitle` returns a registered title only for that unit's documents. Built-in kinds set no `unit`
+and no `title`, so they are unaffected; the group-document label does not depend on unit config and keeps
+working across units.
+
+A document that resolves no title and stores none is named by `getDocumentKindLabel(kind)` — a registry-free
+reading of the camelCase kind — plus `getCurriculumScopeLabel(doc)`, giving `Driving Question Board (other)`.
+The scope label is read from the stored fields rather than assumed to be a unit, because an unresolvable
+kind says nothing about how the document is scoped; it produces `sas-1.2` for a problem-scoped document and
+`sas` for a class-wide one, and `getDocumentTitleFromProblem` now shares it so the format lives in one place.
+Provenance appears only in this fallback, matching the existing convention: a resolvable title is shown
+plain, and coordinates stand in when there is none.
+
+Two limits are accepted. The label recovers the kind's identity, not the author's wording — a slot titled
+"Our Big Questions" reads as "Driving Question Board" from another unit, and nothing loads that unit's
+config to do better. And a document carrying a *renamed* unit code compares unequal to the declaring unit,
+so it drops to the fallback; `getUnitCodeVariants` lives on `curriculumConfig`, which the registry (a leaf
+module) does not import.
+
 **No icon is authored.** Stage 2 removed the unused `icon` field from the `classWideDocuments` declaration and
 left the question to this stage; nothing here needs one, so no icon field is added to the unit config or to the
 kind registry. Adding one later is additive.

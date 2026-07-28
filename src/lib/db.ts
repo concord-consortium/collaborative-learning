@@ -817,7 +817,10 @@ export class DB {
           metadataFields: { concurrent: true },
           ownerType: "class",
           scopeType: "classUnit",
-          title: classWideDoc.title
+          title: classWideDoc.title,
+          // The same code stamped as the document's `unit` (see currentProblemInfo), so getDocumentTitle
+          // can tell this unit's documents from another unit's that declares the same kind.
+          unit: this.stores.unit.code
         });
       } catch (err) {
         console.error("Ignoring class-wide document:", classWideDoc.kind, err);

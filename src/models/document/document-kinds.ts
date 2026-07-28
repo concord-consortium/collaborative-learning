@@ -1,3 +1,4 @@
+import { upperFirst } from "lodash";
 import { IDocumentMetadata } from "../../../shared/shared";
 import {
   GroupDocument, LearningLogDocument, LearningLogPublication,
@@ -37,6 +38,15 @@ export interface IDocumentKindInfo {
    * group documents or in the future problem documents.
    */
   title?: string;
+  /**
+   * The unit code whose config declared this kind. Set for kinds declared by a unit config; undefined
+   * for the built-in kinds, which are unit-independent.
+   *
+   * A `title` is authored in one unit's config, so it names only that unit's documents. Two units may
+   * declare the same kind with different wording, and only the current unit's config is loaded, so
+   * getDocumentTitle uses this to avoid lending one unit's title to another unit's document.
+   */
+  unit?: string;
 }
 
 /**
@@ -170,14 +180,18 @@ interface IDocumentTitleFields {
   kind?: string | null;
   type?: string;
   groupId?: string | null;
+  unit?: string | null;
 }
 
 /**
  * The display title for a document based on its kind
  */
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
-  const registeredTitle = getDocumentKindInfo(document.kind)?.title;
-  if (registeredTitle != null) return registeredTitle;
+  const info = getDocumentKindInfo(document.kind);
+  // A unit-declared title names that unit's documents only (see IDocumentKindInfo.unit). Lending it to
+  // a document from another unit would state a title confidently that its own unit may word
+  // differently; such a document falls through to a caller's fallback instead.
+  if (info?.title != null && (info.unit == null || info.unit === document.unit)) return info.title;
   // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
   // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
   // on the lookup above. Requiring `groupId` (not just `type === GroupDocument`) matters because a class-wide
@@ -187,6 +201,19 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   // through to `undefined`, which callers already handle.
   if (document.type === GroupDocument && document.groupId) return `Group ${document.groupId} Document`;
   return undefined;
+}
+
+/**
+ * A readable label derived from the kind string alone: "drivingQuestionBoard" → "Driving Question
+ * Board". Registry-free by design, so it can name a document whose kind was declared by a unit config
+ * that is not loaded — the case getDocumentTitle cannot answer.
+ *
+ * It recovers the kind's identity, not the author's wording: a slot titled "Our Big Questions" in its
+ * own unit reads as "Driving Question Board" from elsewhere.
+ */
+export function getDocumentKindLabel(kind?: string | null): string | undefined {
+  if (!kind) return undefined;
+  return upperFirst(kind.replace(/([A-Z])/g, " $1"));
 }
 
 function registerBuiltInDocumentKinds() {
