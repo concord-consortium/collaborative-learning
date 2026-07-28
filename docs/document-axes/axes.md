@@ -137,6 +137,45 @@ needed a separate preset concept — `type` does both jobs at once. The part tha
 defaults, the permission baseline, and copy/publish templates have no separate existence today; `type` and
 the code around it supply them implicitly.
 
+#### Static and dynamic kinds
+
+A preset does not have to be written in code. Kinds come from two sources:
+
+- **Static kinds** are registered by the application itself. They exist for the whole session, everywhere,
+  and are the same for every user.
+- **Dynamic kinds** are declared in configuration that is loaded at runtime — today, a unit's
+  `classWideDocuments`, which registers a kind when that unit loads. This is what lets "add another
+  class-wide document" be an authoring change rather than a code change, and it is the direction the
+  roadmap wants: a preset is data.
+
+Dynamic kinds carry a constraint that static kinds do not, and it is a property of *where the definition
+is loaded from*, not of the kind itself: **a dynamic kind's definition is only present when its
+configuration is loaded.** Only the current unit's config is loaded, so for a unit-declared kind the
+definition is absent for every document from any other unit — while those documents remain visible, because
+Sort Work's unfiltered view spans every unit a class has worked through.
+
+Two rules follow, and both are really the same rule — *a document must remain interpretable without its
+kind's definition*:
+
+1. **Anything a dynamic kind supplies must be stamped at creation or degrade gracefully.** Values the
+   definition contributes to a document's axes are written onto the document, so they survive the
+   definition's absence. Anything not stamped — presentation, above all — must have a fallback derived from
+   stored fields alone. This is the same reason consumers read scope through guards over stored fields
+   rather than through the registry.
+2. **A dynamic kind's documents must carry the association that identifies the configuration that defined
+   them.** For unit-declared kinds that association is `unit`. Kind names are not globally unique across
+   configurations — two units may declare the same kind with different wording — so without it there is no
+   way to tell whether a definition found under that name is the one the document was made from, and the
+   wrong definition would be applied confidently.
+
+**This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce documents
+scoped to that unit or narrower, because rule 2 requires the `unit` association. It cannot produce
+class-scoped documents — the ones with no unit at all, like personal documents and learning logs. Making
+*those* presets authorable is a reasonable future goal, but it is not a matter of adding entries to a unit
+config: it needs a configuration source loaded independently of the current unit (class- or site-level), so
+that a definition is present wherever its documents are, along with an association on the document naming
+that source. Until such a source exists, personal-like presets stay static.
+
 ### `permissions` — who may do what
 
 **What it is.** The permission set: who may `read`, `write`, `publish`, `copy`, and whether the content
