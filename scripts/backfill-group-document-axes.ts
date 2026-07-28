@@ -7,8 +7,8 @@
 //   group-scoped, missing `concurrent`      -> { concurrent: true, kind: "group" }
 //   class-wide, missing curriculum scope    -> { investigation: null, problem: null }
 //
-// The first pass restores the concurrent history manager for group documents created before the
-// `concurrent` axis existed. The second states a class-wide document's absent curriculum scope
+// The first pass restores the concurrent history manager for group documents that carry no stored
+// `concurrent` value. The second states a class-wide document's absent curriculum scope
 // explicitly, which is what makes it findable by Sort Work's unit-scoped query. Both are additive,
 // idempotent, and batched.
 //
