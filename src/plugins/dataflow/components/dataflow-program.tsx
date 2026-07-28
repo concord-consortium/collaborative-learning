@@ -20,7 +20,7 @@ import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
-import { ReteManager } from "../nodes/rete-manager";
+import { ReteManager } from "../rete/rete-manager";
 
 import "./dataflow-program.scss";
 

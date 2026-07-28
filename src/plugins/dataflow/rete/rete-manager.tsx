@@ -12,38 +12,38 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
-import { AreaExtra, Schemes } from "./rete-scheme";
-import { MarqueeSelection, Rect } from "./marquee-selection";
-import { NodeEditorMST } from "./node-editor-mst";
-import { INodeServices } from "./service-types";
+import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { MarqueeSelection, Rect } from "../utilities/marquee-selection";
+import { NodeEditorMST } from "../nodes/node-editor-mst";
+import { INodeServices } from "../nodes/service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
+import { IBaseNode, IBaseNodeModel, NodeClass } from "../nodes/base-node";
 import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
-import { ControlNode } from "./control-node";
-import { CounterNode } from "./counter-node";
-import { DemoOutputNode } from "./demo-output-node";
-import { GeneratorNode } from "./generator-node";
-import { LiveOutputNode } from "./live-output-node";
-import { LogicNode } from "./logic-node";
-import { MathNode } from "./math-node";
-import { NumberNode } from "./number-node";
-import { SensorNode } from "./sensor-node";
-import { TimerNode } from "./timer-node";
-import { TransformNode } from "./transform-node";
+import { ControlNode } from "../nodes/control-node";
+import { CounterNode } from "../nodes/counter-node";
+import { DemoOutputNode } from "../nodes/demo-output-node";
+import { GeneratorNode } from "../nodes/generator-node";
+import { LiveOutputNode } from "../nodes/live-output-node";
+import { LogicNode } from "../nodes/logic-node";
+import { MathNode } from "../nodes/math-node";
+import { NumberNode } from "../nodes/number-node";
+import { SensorNode } from "../nodes/sensor-node";
+import { TimerNode } from "../nodes/timer-node";
+import { TransformNode } from "../nodes/transform-node";
 import { uniqueId } from "../../../utilities/js-utils";
-import { CustomDataflowNode } from "./dataflow-node";
-import { ValueControl, ValueControlComponent } from "./controls/value-control";
-import { NumberUnitsControl, NumberUnitsControlComponent } from "./controls/num-units-control";
-import { NumberControl, NumberControlComponent } from "./controls/num-control";
-import { DropdownListControl, DropdownListControlComponent } from "./controls/dropdown-list-control";
-import { DemoOutputControl, DemoOutputControlComponent } from "./controls/demo-output-control";
-import { PlotButtonControl, PlotButtonControlComponent } from "./controls/plot-button-control";
-import { InputValueControl, InputValueControlComponent } from "./controls/input-value-control";
-import { DataflowEngine } from "./engine/dataflow-engine";
-import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
+import { CustomDataflowNode } from "../nodes/dataflow-node";
+import { ValueControl, ValueControlComponent } from "../nodes/controls/value-control";
+import { NumberUnitsControl, NumberUnitsControlComponent } from "../nodes/controls/num-units-control";
+import { NumberControl, NumberControlComponent } from "../nodes/controls/num-control";
+import { DropdownListControl, DropdownListControlComponent } from "../nodes/controls/dropdown-list-control";
+import { DemoOutputControl, DemoOutputControlComponent } from "../nodes/controls/demo-output-control";
+import { PlotButtonControl, PlotButtonControlComponent } from "../nodes/controls/plot-button-control";
+import { InputValueControl, InputValueControlComponent } from "../nodes/controls/input-value-control";
+import { DataflowEngine } from "../nodes/engine/dataflow-engine";
+import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "../nodes/controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
-import { getSharedNodes } from "./utilities/shared-program-data-utilities";
+import { getSharedNodes } from "../nodes/utilities/shared-program-data-utilities";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { serialSensorChannels } from "../model/utilities/channel";
@@ -132,6 +132,7 @@ export class ReteManager implements INodeServices {
   public setupComplete: Promise<void>;
   private previousChannelIds = "";
   private fitTimeout: number | undefined;
+  private visibilityReapplyPending = false;
 
   constructor(
     private mstProgram: DataflowProgramModelType,
@@ -227,6 +228,23 @@ export class ReteManager implements INodeServices {
         if (!this.readOnly && (event === "translated" || event === "zoomed")) {
           this.mstContent.setProgramZoom(area.area.transform);
         }
+      }
+      return context;
+    });
+
+    // A connection view's DOM is created asynchronously (React) after its model, so the
+    // fireImmediately pass of the collapsed-visibility reaction runs before the views exist — most
+    // visibly on load, where a connection into a collapsed group would otherwise stay drawn to its
+    // hidden member. Re-apply (coalesced to one call per microtask) whenever a connection view is
+    // (re)rendered so those wires hide as soon as they mount.
+    area.addPipe(context => {
+      if (context.type === "rendered" && (context.data as any)?.type === "connection"
+          && !this.visibilityReapplyPending) {
+        this.visibilityReapplyPending = true;
+        queueMicrotask(() => {
+          this.visibilityReapplyPending = false;
+          this.applyCollapsedConnectionVisibility();
+        });
       }
       return context;
     });
@@ -575,6 +593,14 @@ export class ReteManager implements INodeServices {
     if (!container) return;
     const onDocPointerDown = (e: PointerEvent) => {
       this.canvasActive = e.target instanceof Node && container.contains(e.target);
+      // Connections are committed via the keyboard, so any pointer press abandons an in-progress
+      // connection — unless it lands on a highlighted candidate/source socket. Without this, starting a
+      // connection (e.g. from a collapsed group's socket) and then clicking away would leave the
+      // candidate-highlight rings stuck on their sockets until reload.
+      if (this.isConnecting && !(e.target instanceof Element
+          && e.target.closest(".connection-candidate, .connection-source"))) {
+        this.cancelConnecting();
+      }
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (!this.canvasActive || e.altKey || e.ctrlKey || e.metaKey) return;

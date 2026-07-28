@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
-import { GroupInputSocket, GroupOutputSocket, ReteManager } from "../../nodes/rete-manager";
+import { GroupInputSocket, GroupOutputSocket, ReteManager } from "../../rete/rete-manager";
 import { IGroupModel } from "../../model/dataflow-program-model";
 
 import "./dataflow-groups-overlay.scss";
@@ -25,8 +25,9 @@ const inRefKey = (groupId: string, s: GroupInputSocket) => `${groupId}:in:${s.no
 const outRefKey = (groupId: string, s: GroupOutputSocket) => `${groupId}:out:${s.nodeId}:${s.key}`;
 
 // A collapsed chip is keyboard-navigable like a real node: Tab lands on the chip, arrows rove through
-// its toggle + proxy sockets, and Enter/Space (or a click) on a proxy socket starts/commits a
-// connection routed to the underlying member socket via the same connection mode real sockets use.
+// its toggle + proxy sockets, and Enter/Space on a proxy socket starts/commits a connection routed to
+// the underlying member socket via the same connection mode real sockets use. (Mouse-drag connection
+// to a collapsed group is a separate follow-up; the proxies are keyboard-driven only for now.)
 // This mirrors the block-level roving in dataflow-node.tsx.
 const CHIP_INTERACTIVE_SELECTOR = ".dataflow-group-toggle,[data-socket-side]";
 
@@ -219,7 +220,6 @@ const CollapsedGroupNode = observer(function CollapsedGroupNode(
                   aria-label={`Group input socket ${i + 1}`}
                   data-group-proxy="true" data-socket-side="input"
                   data-node-id={inp.nodeId} data-socket-key={inp.key}
-                  onClick={() => connectFromProxy(reteManager, inp.nodeId, inp.key, "input")}
                   onKeyDown={e => handleProxySocketKeyDown(e, reteManager, inp.nodeId, inp.key, "input")}
                   ref={el => setSocketRef(inRefKey(group.id, inp), el)} />}
               {out &&
@@ -228,7 +228,6 @@ const CollapsedGroupNode = observer(function CollapsedGroupNode(
                   aria-label={`Group output socket ${i + 1}`}
                   data-group-proxy="true" data-socket-side="output"
                   data-node-id={out.nodeId} data-socket-key={out.key}
-                  onClick={() => connectFromProxy(reteManager, out.nodeId, out.key, "output")}
                   onKeyDown={e => handleProxySocketKeyDown(e, reteManager, out.nodeId, out.key, "output")}
                   ref={el => setSocketRef(outRefKey(group.id, out), el)} />}
             </div>

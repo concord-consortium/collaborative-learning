@@ -12,7 +12,7 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
-import { ReteManager } from "../nodes/rete-manager";
+import { ReteManager } from "../rete/rete-manager";
 import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
 import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
 import { getEditableTitleElement } from "../../../utilities/dom-utils";

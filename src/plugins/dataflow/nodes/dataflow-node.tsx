@@ -10,7 +10,7 @@ import { IBaseNode } from "./base-node";
 import { NodeEditorMST } from "./node-editor-mst";
 import { Delete } from "./delete";
 import { ControlNode } from "./control-node";
-import { ReteManager } from "./rete-manager";
+import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
 

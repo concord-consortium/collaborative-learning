@@ -1,4 +1,4 @@
-import { getNewIndexedName } from "../rete-manager";
+import { getNewIndexedName } from "../../rete/rete-manager";
 
 describe('Indexed Name Test', () => {
   it('should return the correct indexed name', () => {
