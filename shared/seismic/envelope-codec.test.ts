@@ -1,5 +1,5 @@
 // shared/seismic/envelope-codec.test.ts
-import { encodeEnvelopeTile, decodeEnvelopeTile, quantize, dequantize } from "./envelope-codec";
+import { encodeEnvelopeTile, decodeEnvelopeTile, mergeEnvelopeTileData, quantize, dequantize } from "./envelope-codec";
 import { NO_DATA_SENTINEL, NUM_LEVELS, POINTS_PER_TILE } from "./envelope-config";
 
 describe("envelope-codec", () => {
@@ -71,6 +71,32 @@ describe("envelope-codec", () => {
       const mins = new Int16Array(100);
       const maxs = new Int16Array(200);
       expect(() => encodeEnvelopeTile(mins, maxs)).toThrow();
+    });
+  });
+
+  describe("mergeEnvelopeTileData", () => {
+    const S = NO_DATA_SENTINEL;
+    const tile = (mins: number[], maxs: number[]) =>
+      ({ mins: Int16Array.from(mins), maxs: Int16Array.from(maxs) });
+
+    it("merges elementwise: sentinel yields, overlaps take min/max", () => {
+      const a = tile([S, -10, -20], [S, 10, 20]);
+      const b = tile([-5, S, -15], [5, S, 25]);
+      const merged = mergeEnvelopeTileData(a, b);
+      expect([...merged.mins]).toEqual([-5, -10, -20]);
+      expect([...merged.maxs]).toEqual([5, 10, 25]);
+    });
+
+    it("keeps the sentinel where both sides have no data", () => {
+      const a = tile([S, -10], [S, 10]);
+      const b = tile([S, -5], [S, 5]);
+      const merged = mergeEnvelopeTileData(a, b);
+      expect([...merged.mins]).toEqual([S, -10]);
+      expect([...merged.maxs]).toEqual([S, 10]);
+    });
+
+    it("throws on length mismatch", () => {
+      expect(() => mergeEnvelopeTileData(tile([1], [1]), tile([1, 2], [1, 2]))).toThrow();
     });
   });
 });
