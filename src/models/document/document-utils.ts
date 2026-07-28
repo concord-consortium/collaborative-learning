@@ -10,6 +10,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
+import { hasClassUnitScope } from "./document-scope";
 import { getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
@@ -119,4 +120,53 @@ export function isDocumentAccessibleToUser ({
            || (isExemplarType(metadata.type) && documents.isExemplarVisible(metadata.key));
   }
   return false;
+}
+
+/**
+ * The metadata fields the edit predicate reads.
+ *
+ * Structural, and deliberately not `IDocumentMetadata`: that interface declares
+ * `properties?: Record<string, string>` while the MST `DocumentMetadataModel` holds an observable
+ * map there, so a metadata model instance is not assignable to it. `isDocumentAccessibleToUser`
+ * sidesteps the same problem by taking `IDocumentMetadataBase`, which has no `properties` — this
+ * adds the two axis/scope fields the base type lacks.
+ */
+type IEditPermissionMetadata = IDocumentMetadataBase & {
+  concurrent?: boolean | null;
+  context_id?: string | null;
+};
+
+interface ICanUserEditDocumentParams {
+  document?: DocumentModelType;
+  documentMetadata?: IEditPermissionMetadata;
+  user: UserModelType;
+}
+
+/**
+ * Whether this user may edit this document — the gate on every Edit button.
+ *
+ * A user may always edit their own document. Beyond that, only a `concurrent` (multi-writer)
+ * document is editable by someone other than its owner, and then only from inside its scope: a
+ * class-wide document by any member of its class, a group document by any member of its group.
+ *
+ * Fields are read from the reactive Firestore metadata, falling back per field to the lazily-fetched
+ * full document. A groupmate's document appears in the metadata before its content finishes loading,
+ * and reading it per field is what lets the Edit button appear without a reload.
+ */
+export function canUserEditDocument({
+  document, documentMetadata, user
+}: ICanUserEditDocumentParams): boolean {
+  const uid = documentMetadata?.uid ?? document?.uid;
+  const concurrent = documentMetadata?.concurrent ?? document?.concurrent;
+  const groupId = documentMetadata?.groupId ?? document?.groupId;
+  const unit = documentMetadata?.unit ?? document?.unit;
+  const investigation = documentMetadata?.investigation ?? document?.investigation;
+  const contextId = documentMetadata?.context_id ?? document?.contextId;
+
+  if (!!uid && uid === user.id) return true;
+  if (!concurrent) return false;
+  if (hasClassUnitScope({ unit, investigation, groupId })) {
+    return !!contextId && contextId === user.classHash;
+  }
+  return !!user.currentGroupId && groupId === user.currentGroupId;
 }

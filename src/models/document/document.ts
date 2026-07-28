@@ -136,12 +136,13 @@ export const DocumentModel = Tree.named("Document")
       return !!self.content;
     },
     get metadata(): IDocumentMetadata {
-      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent, kind } = self;
+      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent, kind,
+              contextId } = self;
       // NOTE: we always return a groupId here even for non group documents. If this metadata is
       // written to Firestore or Firebase this will probably fail because this groupId will be undefined.
       // Currently it seems the metadata is not written to either place, it is just used for finding
       // Firestore documents.
-      return { uid, groupId, type, key, createdAt, title, concurrent, kind,
+      return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, visibility } as IDocumentMetadata;
     },
