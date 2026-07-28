@@ -53,32 +53,70 @@ However we are doing this when the appConfig is added to the environment object 
 ## Reading a document's scope in code
 
 Consumers that need to know a document's scope read its stored association fields through the guards
-in `src/models/document/document-scope.ts`, rather than branching on the document `type`:
+in `src/models/document/document-scope.ts`, rather than branching on the document `type`.
 
-- `hasGroupScope(doc)` — the document is scoped to a single group (`groupId` is set).
-- `hasClassUnitScope(doc)` — the document is scoped to a class and a unit and nothing narrower: a
-  class-wide collaborative document.
+### Two dimensions, and a reference that crosses them
 
-No other stored shape satisfies `hasClassUnitScope`:
+Scope is not one ordered level. It is two, each its own linear nesting, and every document sits
+somewhere on both:
 
-| document | `unit` | `investigation` | `groupId` | class+unit scoped? |
-|---|---|---|---|---|
-| personal, learning log | `null` | — | — | no |
-| problem, planning, publications | set | set | — | no |
-| group | set | set | set | no |
-| exemplar (from curriculum) | set | set | — | no |
-| class-wide slot | set | `null` | — | **yes** |
+| dimension | levels (widest → narrowest) | read from |
+|---|---|---|
+| **curriculum scope** | unit → investigation → problem | `unit`, `investigation`, `problem` |
+| **owner scope** | class → group → user | `groupId`; the class and user levels live in `uid` |
 
-**No `scopeLevel` enum and no unified `scope` struct.** Scope is multi-dimensional — a personal
-document is class+owner scoped while a class-wide document is class+unit scoped — so a single
-ordered level would be ambiguous. Named guards are added as consumers need them.
+This is why there is **no `scopeLevel` enum and no unified `scope` struct** — a single ordered level
+cannot express a position on two axes at once. A personal document is user-owned with no curriculum
+scope; a class-wide document is class-owned with unit curriculum scope. Neither is "more scoped".
+
+**`offeringId` is on neither dimension — it crosses both.** An offering is the assignment of one
+problem to one class, so it is a point in the *product* of the two hierarchies rather than a level in
+either. Carrying one pins curriculum scope at problem, but it does not determine owner scope: the
+documents inside a single offering are variously user-owned (problem, planning), group-owned (group),
+and could be class-owned.
+
+**`context_id` is not a level either** — every document names a class. Being *associated with* a
+class is not being *owned by* one; class ownership is a synthetic `class_<classHash>` uid. That is why
+these guards name only the level they test and leave the class out of the name.
+
+**Each guard answers about one dimension and reads only that dimension's fields:**
+
+- `hasGroupOwnerScope(doc)` — owner scope: the document belongs to a single group (`groupId` is set).
+- `hasUnitCurriculumScope(doc)` — curriculum scope: the document spans a whole unit, narrowed no
+  further.
+
+A consumer needing a position on both asks both. Keeping the guards single-dimension is what makes
+each one's meaning independent of what the other dimension holds: `hasGroupOwnerScope` does not care
+which problem a document belongs to, and `hasUnitCurriculumScope` does not care who owns it.
+
+Where each stored shape sits:
+
+| document | `unit` | `investigation` | `offeringId` | `groupId` | curriculum scope | owner scope |
+|---|---|---|---|---|---|---|
+| personal, learning log | `null` | — | — | — | none | user |
+| problem, planning, publications | set | set | set | — | problem | user |
+| group | set | set | set | set | problem | **group** |
+| exemplar (from curriculum) | set | set | — | — | problem | user |
+| class-wide slot | set | `null` | — | — | **unit** | class |
 
 A guard reads *stored fields only*. It must not consult the kind registry: Sort Work lists documents
 from other units, whose kinds are not registered in the current session.
 
-The same module provides `getCurriculumScopeLabel(doc)`, which names a document's curriculum scope
-from those fields — `"sas-1.2"` when it is scoped to a problem, `"sas"` when it is scoped to a unit
-and nothing narrower. Titles use it as a stand-in when a document's real title cannot be resolved.
+**Two gaps, recorded rather than closed:**
+
+- No guard reads the class or user levels of owner scope, because those live in `uid` — the class
+  owner is a synthetic `class_<classHash>`. A consumer wanting "owned by the class" currently
+  approximates it with `hasUnitCurriculumScope`, which is correct only while the one class-owned kind
+  is also the one unit-scoped kind. `document-group.ts`'s `byName` is commented to that effect and
+  should switch when an owner-scope guard exists.
+- `offeringId` is written to Firestore at creation but is not declared on `IDocumentMetadata` or
+  modelled on `DocumentMetadataModel`, so no read-side consumer can see it. Every document that
+  carries one also carries an `investigation`, so nothing is misclassified today, but the field is
+  effectively write-only until the `scope` axis's read side surfaces it.
+
+The same module provides `getCurriculumScopeLabel(doc)`, which names a document's position on the
+curriculum dimension — `"sas-1.2"` for a problem, `"sas"` for a unit. Titles use it as a stand-in
+when a document's real title cannot be resolved.
 
 ## Titling a document from another unit
 

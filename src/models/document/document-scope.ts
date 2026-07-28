@@ -1,16 +1,14 @@
 /**
- * Guards over a document's stored scope association fields.
- *
- * A document's scope lives in its association fields (`context_id`, `unit`, `investigation`,
+ * Guards over a document's stored scope association fields (`context_id`, `unit`, `investigation`,
  * `problem`, `offeringId`, `groupId`), stamped at creation from the kind's registered `scopeType`
- * (see document-kinds.ts). Consumers that need a document's scope read it through these guards
- * rather than branching on `type` or looking `kind` up in the registry: a document listed in Sort
- * Work may belong to another unit whose kind is not registered in the current session, but its
- * stored fields are always present.
+ * (see document-kinds.ts).
  *
- * These are narrow named predicates by design. Scope is multi-dimensional — a personal document is
- * class+owner scoped while a class-wide document is class+unit scoped — so a single ordered
- * "scope level" would be ambiguous. See docs/document-scope.md.
+ * Scope has two dimensions — curriculum and owner — and each guard answers about one of them, reading
+ * only that dimension's fields. A consumer needing a position on both asks both. See
+ * docs/document-scope.md for the model, the field-by-shape table, and what is not covered yet.
+ *
+ * A guard reads stored fields only, never the kind registry: Sort Work lists documents from other
+ * units, whose kinds are not registered in the current session.
  */
 
 /** The scope fields the guards read. Structural, so this stays a leaf module. */
@@ -18,35 +16,33 @@ export interface IDocumentScopeFields {
   unit?: string | null;
   investigation?: string | null;
   problem?: string | null;
+  offeringId?: string | null;
   groupId?: string | null;
 }
 
 /**
- * True when the document is scoped to a single group.
+ * Owner scope: the document belongs to a single group, whoever created it.
  *
- * In Firestore metadata only group-scoped documents carry a `groupId`; other documents deliberately
- * leave it unset so a stale group id can never be read back (see DocumentMetadataModel.groupId).
+ * Only group-scoped documents carry a `groupId`; others leave it unset so a stale group id can never
+ * be read back, since a user's group may change (see DocumentMetadataModel.groupId).
  */
-export function hasGroupScope(doc: IDocumentScopeFields): doc is IDocumentScopeFields & { groupId: string } {
+export function hasGroupOwnerScope(doc: IDocumentScopeFields): doc is IDocumentScopeFields & { groupId: string } {
   return !!doc.groupId;
 }
 
 /**
- * True when the document is scoped to a class and a unit and nothing narrower — a class-wide
- * collaborative document.
+ * Curriculum scope: the document belongs to a unit and nothing narrower.
  *
- * No other stored shape matches: class-scoped documents (personal, learning log) have `unit: null`;
- * offering-scoped documents (problem, planning, publications) carry an `investigation`; group
- * documents carry both an `investigation` and a `groupId`; curriculum exemplars carry a `unit` but
- * also an `investigation`.
+ * Both negative terms narrow this same dimension — an `investigation` directly, an `offeringId`
+ * because an offering assigns one problem. It says nothing about who owns the document.
  */
-export function hasClassUnitScope(doc: IDocumentScopeFields): boolean {
-  return !!doc.unit && !doc.investigation && !doc.groupId;
+export function hasUnitCurriculumScope(doc: IDocumentScopeFields): boolean {
+  return !!doc.unit && !doc.investigation && !doc.offeringId;
 }
 
 /**
- * A short label for the curriculum a document belongs to: "sas-1.2" when it is scoped to a problem,
- * "sas" when it is scoped to a unit and nothing narrower, undefined when it has no unit at all.
+ * A short label for a document's curriculum scope: "sas-1.2" when it is scoped to a problem, "sas"
+ * when it is scoped to a unit and nothing narrower, undefined when it has no unit at all.
  *
  * Callers use it as a stand-in when a document's real title cannot be resolved, so the coordinates
  * name the document instead. It reads the stored fields alone, so it describes a document from any

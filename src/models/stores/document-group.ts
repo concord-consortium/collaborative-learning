@@ -8,7 +8,7 @@ import {
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
-import { hasClassUnitScope, hasGroupScope } from "../document/document-scope";
+import { hasGroupOwnerScope, hasUnitCurriculumScope } from "../document/document-scope";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
@@ -200,9 +200,9 @@ export class DocumentGroup {
     this.documents.forEach((doc) => {
       const { sectionLabel, sortKey } = (() => {
         // A document scoped to a group belongs to that group, whoever created it.
-        if (hasGroupScope(doc)) return groupSection(doc.groupId);
-        // A document scoped to the class and unit belongs to the class as a whole.
-        if (hasClassUnitScope(doc)) {
+        if (hasGroupOwnerScope(doc)) return groupSection(doc.groupId);
+        // A document that spans a whole unit is not one student's work; it belongs to the class.
+        if (hasUnitCurriculumScope(doc)) {
           return { sectionLabel: kWholeClassSectionLabel, sortKey: { scope: "class" } as GroupSectionSortKey };
         }
         // Otherwise it belongs to its owner, and so to whichever group its owner is in now.
@@ -237,15 +237,18 @@ export class DocumentGroup {
     };
 
     this.documents.forEach((doc) => {
-      if (hasClassUnitScope(doc)) {
-        // A class-wide collaborative document belongs to the class, so it has no personal author.
-        addDocToSection(doc, kNoNameSectionLabel);
-      } else if (hasGroupScope(doc)) {
+      // Owner scope decides the section, so it is asked first, narrowest level outward.
+      if (hasGroupOwnerScope(doc)) {
         // A group document is listed under every member of the group that owns it.
         const group = this.stores.groups.getGroupById(doc.groupId);
         group?.users.forEach(user => {
           addDocForUser(doc, user.classUser);
         });
+      } else if (hasUnitCurriculumScope(doc)) {
+        // A document spanning a whole unit is owned by the class, so it has no personal author. This
+        // reads curriculum scope to answer an owner-scope question: the class owner is a synthetic uid
+        // (`class_<classHash>`), and no guard reads it yet. Once one does, ask that instead.
+        addDocToSection(doc, kNoNameSectionLabel);
       } else {
         addDocForUser(doc, this.stores.class.getUserById(doc.uid));
       }
