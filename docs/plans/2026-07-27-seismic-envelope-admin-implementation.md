@@ -652,91 +652,517 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
 
 **Files:** Modify: `src/seismic-admin/seismic-admin-store.ts`, `src/seismic-admin/seismic-admin-store.test.ts`
 
-Follow the existing `modelCoverage` patterns. Sub-steps (test-first for each):
-
-**9a. Coverage state.** Add to `SeismicAdminDeps`:
-`listEnvelopeTiles?: (s: StationData) => Promise<Set<number>>`. Add state
-`envelopeCoverage = new Map<string, EnvelopeCoverageStats>()` where
+Follow the existing `modelCoverage` patterns. New store imports:
 
 ```ts
+import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices }
+  from "../../shared/seismic/envelope-coverage";
+```
+
+**⚠️ Existing-test impact:** sub-step 9d makes `isFullyCovered` require envelope coverage, so
+every existing `isFullyCovered` fixture must gain envelope coverage or those tests go red. Give
+`makeCoverageStore` and `makeUpdateStore` a default lister that covers any test range:
+
+```ts
+// Tiles spanning far beyond any range these tests use -> every day classifies as covered.
+const allTiles = () =>
+  new Set(getTileIndicesForViewport(utcDay(2025, 12, 1), utcDay(2026, 3, 1), FINEST_LEVEL));
+// in both helpers' deps:
+listEnvelopeTiles: jest.fn(async () => allTiles()),
+```
+
+(`FINEST_LEVEL` from envelope-config, `getTileIndicesForViewport` from tile-addressing,
+`dayRange` from seismic-day join the test file's imports.)
+
+**9a. Coverage state.**
+
+Step 1 — failing tests (new `describe("envelope coverage")`, using the existing `fakeCache`
+fixture whose station is AK K204 HNZ):
+
+```ts
+describe("envelope coverage", () => {
+  const d30 = dayIndex(utcDay(2026, 1, 30));
+  const dayTiles = (day: number) => {
+    const { start, end } = dayRange(day);
+    return getTileIndicesForViewport(start, end, FINEST_LEVEL);
+  };
+
+  it("loads tile listings per station without auth", async () => {
+    const listEnvelopeTiles = jest.fn(async () => new Set(dayTiles(d30)));
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");   // 3 days
+    await store.refresh();                        // note: no setAuthReady()
+    const key = [...store.stations.keys()][0];
+    expect(listEnvelopeTiles).toHaveBeenCalledTimes(1);
+    expect(store.envelopeCoverageFor(key).state).toBe("loaded");
+  });
+
+  it("records an error state when the listing fails", async () => {
+    const listEnvelopeTiles = jest.fn(async () => { throw new Error("nope"); });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+    expect(store.envelopeCoverageFor(key).state).toBe("error");
+  });
+});
+```
+
+Step 2 — run `npm test -- --no-watchman src/seismic-admin/seismic-admin-store.test.ts`: FAIL.
+
+Step 3 — implement. Add to `SeismicAdminDeps`:
+`listEnvelopeTiles?: (s: StationData) => Promise<Set<number>>`. Then:
+
+```ts
+/** One station's envelope coverage: the L2 tile indices listed from S3. */
 export interface EnvelopeCoverageStats {
   state: CoverageLoadState;
   tileIndices?: Set<number>;
 }
+
+// state:
+envelopeCoverage = new Map<string, EnvelopeCoverageStats>();   // keyed by stationKey
+
+/** Not gated on authReady — the S3 listing is anonymous. The listing is also
+ *  range-independent: day states are derived against the current range on read. */
+async loadEnvelopeCoverage(station: StationConfig) {
+  const key = getStationChannelPrefix(station);
+  runInAction(() => this.envelopeCoverage.set(key, { state: "pending" }));
+  try {
+    const list = this.deps.listEnvelopeTiles ?? listEnvelopeTileIndices;
+    const tileIndices = await list(station);
+    runInAction(() => this.envelopeCoverage.set(key, { state: "loaded", tileIndices }));
+  } catch (err) {
+    console.warn("Failed to list envelope tiles:", err);
+    runInAction(() => this.envelopeCoverage.set(key, { state: "error" }));
+  }
+}
+
+envelopeCoverageFor(stationKey: string): EnvelopeCoverageStats {
+  return this.envelopeCoverage.get(stationKey) ?? { state: "pending" };
+}
 ```
 
-Add `loadEnvelopeCoverage(station)` (pending → list → loaded / error, like
-`loadCoverageStats` but **not** gated on `authReady`) and call it for each selected station
-from `loadAllCoverageStats` (sequential, same stampede rationale). Tests: loads via injected
-dep; error path sets `"error"`; runs without `authReady`.
-
-**9b. Day states + stats.** Add views (deriving from `tileIndices` + `rangeSec` via
-`classifyEnvelopeDayCoverage`):
+And in `loadAllCoverageStats`, load envelopes per station before its models (sequential, same
+stampede rationale):
 
 ```ts
-envelopeDayStates(stationKey: string): Map<number, DayCoverageState> | undefined
-envelopeStats(stationKey?: string): ModelStats   // eventCount stays 0; reuse the shape
+async loadAllCoverageStats() {
+  for (const station of this.selectedStationList) {
+    await this.loadEnvelopeCoverage(station);
+    for (const url of this.selectedModels) {
+      await this.loadCoverageStats(station, url);
+    }
+  }
+}
 ```
 
-`envelopeStats` mirrors `modelStats` (per-station covered/partial day sets + aggregate counts
-across selected stations). Tests: known tile sets → expected day sets/counts.
+Step 4 — tests pass. Step 5 — commit: `"Add envelope coverage state to seismic admin store"`
 
-**9c. Live fill.** `markTileUploaded(stationKey: string, tileIndex: number)` — adds to
-`tileIndices` when that station's coverage is loaded (ignored otherwise, same contract as
-`markDayCovered`). Because day states derive from `tileIndices`, the timeline updates
-automatically. Test: uploading all of a day's tiles flips its state to covered.
+**9b. Day states + stats.**
 
-**9d. Ready gating.** Add `envelopesFullyCovered(stationKey?)` (loaded && every day covered;
-unknown ≠ covered) and AND it into `isFullyCovered`. Tests: envelopes missing → not ready even
-when models covered; both covered → ready.
+Step 1 — failing tests (same describe):
 
-Commit after each sub-step (e.g. `"Add envelope coverage state to seismic admin store"`, ...).
+```ts
+it("classifies days and aggregates stats from the listed tiles", async () => {
+  // d30 fully covered, d31 partially (one tile), Feb 1 not at all.
+  const d31 = d30 + 1;
+  const listEnvelopeTiles = jest.fn(async () => new Set([...dayTiles(d30), dayTiles(d31)[0]]));
+  const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+  store.setRange("2026-01-30", "2026-02-01");
+  await store.refresh();
+  const key = [...store.stations.keys()][0];
+
+  expect(store.envelopeDayStates(key)?.get(d30)).toBe("covered");
+  expect(store.envelopeDayStates(key)?.get(d31)).toBe("partial");
+  expect(store.envelopeDayStates(key)?.get(d31 + 1)).toBe("uncovered");
+
+  const stats = store.envelopeStats(key);
+  expect(stats.coveredDayCount).toBe(1);
+  expect(stats.partialDayCount).toBe(1);
+  expect(stats.totalDays).toBe(3);
+  expect(stats.coveredDays.get(key)?.has(d30)).toBe(true);
+  expect(stats.partialDays.get(key)?.has(d31)).toBe(true);
+});
+
+it("aggregates envelope stats across all selected stations when stationKey is absent", async () => {
+  // Two catalog stations, same lister -> totals double; per-station sets keyed by each key.
+});
+```
+
+Step 3 — implement. Extract the day-accumulation loop that `modelStats` already does into a
+private helper both methods share (DRY — the only difference is where day states come from
+and `eventCount`):
+
+```ts
+/** Accumulate covered/partial day sets and counts across stations.
+ *  Shared by modelStats and envelopeStats. */
+private collectDayStats(
+  stationKeys: Set<string>,
+  getDayStates: (stationKey: string) => Map<number, DayCoverageState> | undefined
+): Omit<ModelStats, "eventCount"> {
+  const coveredDays = new Map<string, Set<number>>();
+  const partialDays = new Map<string, Set<number>>();
+  let coveredDayCount = 0;
+  let partialDayCount = 0;
+  let totalDays = 0;
+  const { rangeDays } = this;
+
+  stationKeys.forEach(sk => {
+    totalDays += rangeDays;
+    const dayStates = getDayStates(sk);
+    if (!dayStates) return;
+
+    const stationCoveredDays = new Set<number>();
+    coveredDays.set(sk, stationCoveredDays);
+    const stationPartialDays = new Set<number>();
+    partialDays.set(sk, stationPartialDays);
+    dayStates.forEach((state, day) => {
+      if (state === "covered") {
+        stationCoveredDays.add(day);
+        coveredDayCount++;
+      } else if (state === "partial") {
+        stationPartialDays.add(day);
+        partialDayCount++;
+      }
+    });
+  });
+
+  return { coveredDays, partialDays, coveredDayCount, partialDayCount, totalDays };
+}
+
+/** Derived per-day envelope coverage for a station; undefined until its listing loads. */
+envelopeDayStates(stationKey: string): Map<number, DayCoverageState> | undefined {
+  const stats = this.envelopeCoverage.get(stationKey);
+  const range = this.rangeSec;
+  if (stats?.state !== "loaded" || !stats.tileIndices || !range) return;
+  return classifyEnvelopeDayCoverage(stats.tileIndices, range);
+}
+
+/** Envelope coverage stats for one station, or all selected stations when stationKey
+ *  is absent. eventCount is always 0 (reuses the ModelStats shape for the UI). */
+envelopeStats(stationKey?: string): ModelStats {
+  const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+  return { eventCount: 0, ...this.collectDayStats(stations, sk => this.envelopeDayStates(sk)) };
+}
+```
+
+Rewrite `modelStats` on the helper (behavior unchanged — its existing tests are the guard):
+
+```ts
+modelStats(modelUrl: string, stationKey?: string): ModelStats {
+  const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+  let eventCount = 0;
+  stations.forEach(sk => {
+    const stats = this.modelCoverage.get(coverageKey(sk, modelUrl));
+    if (stats?.state === "loaded") eventCount += stats.eventCount ?? 0;
+  });
+  const dayStats = this.collectDayStats(stations,
+    sk => this.modelCoverage.get(coverageKey(sk, modelUrl))?.dayStates);
+  return { eventCount, ...dayStats };
+}
+```
+
+Step 4 — the whole suite passes (including untouched `modelStats` tests).
+Step 5 — commit: `"Derive envelope day states and stats in admin store"`
+
+**9c. Live fill.**
+
+Step 1 — failing test:
+
+```ts
+it("marks uploaded tiles so days fill in live", async () => {
+  const listEnvelopeTiles = jest.fn(async () => new Set<number>());
+  const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+  store.setRange("2026-01-30", "2026-02-01");
+  await store.refresh();
+  const key = [...store.stations.keys()][0];
+  expect(store.envelopeDayStates(key)?.get(d30)).toBe("uncovered");
+
+  dayTiles(d30).forEach(i => store.markTileUploaded(key, i));
+  expect(store.envelopeDayStates(key)?.get(d30)).toBe("covered");
+
+  // Unknown station: ignored, no entry synthesized.
+  store.markTileUploaded("nope", 1);
+  expect(store.envelopeCoverage.has("nope")).toBe(false);
+});
+```
+
+Step 3 — implement:
+
+```ts
+/** Fold a freshly-uploaded L2 tile into a station's envelope coverage so its timeline
+ *  fills in live. Ignored unless that station's coverage is already loaded — the
+ *  post-upload reload reconciles (same contract as markDayCovered). */
+markTileUploaded(stationKey: string, tileIndex: number) {
+  const stats = this.envelopeCoverage.get(stationKey);
+  if (stats?.state !== "loaded" || !stats.tileIndices) return;
+  stats.tileIndices.add(tileIndex);
+}
+```
+
+(The observable map deep-observes its values, so mutating the Set notifies observers — the
+same mechanism `markDayCovered` relies on for `dayStates`.)
+
+Step 4 — tests pass. Step 5 — commit: `"Fill envelope timeline live as tiles upload"`
+
+**9d. Ready gating.**
+
+Step 1 — failing tests. First update `makeCoverageStore`/`makeUpdateStore` with the
+`listEnvelopeTiles: allTiles` default (see the warning at the top of this task) and confirm
+the suite is green again, then add:
+
+```ts
+it("is not fully covered while envelopes are missing, even when models are covered", async () => {
+  const { store } = makeCoverageStore({ listEnvelopeTiles: jest.fn(async () => new Set()) });
+  store.setAuthReady();
+  store.setRange("2026-01-01", "2026-01-03");
+  await store.refresh();
+  expect(store.isFullyCovered(rc01Key)).toBe(false);   // model coverage IS complete here
+});
+
+it("is fully covered when both envelopes and all selected models are covered", async () => {
+  const { store } = makeCoverageStore();               // allTiles default
+  store.setAuthReady();
+  store.setRange("2026-01-01", "2026-01-03");
+  await store.refresh();
+  expect(store.isFullyCovered(rc01Key)).toBe(true);
+});
+```
+
+Step 3 — implement:
+
+```ts
+/** Pending or errored envelope listings are NOT fully covered — unknown ≠ covered. */
+envelopesFullyCovered(stationKey?: string): boolean {
+  const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
+  if (stationKeys.length === 0) return false;
+  return stationKeys.every(sk => {
+    const dayStates = this.envelopeDayStates(sk);
+    return !!dayStates && [...dayStates.values()].every(s => s === "covered");
+  });
+}
+```
+
+and prepend to `isFullyCovered`:
+
+```ts
+isFullyCovered(stationKey?: string): boolean {
+  if (!this.envelopesFullyCovered(stationKey)) return false;
+  ...existing model logic unchanged...
+}
+```
+
+Step 4 — tests pass. Step 5 — commit: `"Include envelope coverage in station readiness"`
 
 ---
 
 ### Task 10: Store — portal auth & update flow integration
 
-**Files:** Modify: `src/seismic-admin/seismic-admin-store.ts` + test
+**Files:** Modify: `src/seismic-admin/seismic-admin-store.ts`, `src/seismic-admin/seismic-admin-store.test.ts`
 
-**10a. Portal auth state.** Add observable `portalReady = false` and
-`setPortalAuth(getJwt: () => Promise<string>)` which stores the getter (non-observable, like
-`deps`), builds the credentials provider + uploader lazily
-(`deps.envelopeUploader ?? createEnvelopeUploader({ getCredentials: createEnvelopeCredentialsProvider({ getJwt }) })`),
-and sets `portalReady`. Add `processEnvelopes?: typeof processEnvelopeCoverage` and
-`envelopeUploader?: EnvelopeUploader` to `SeismicAdminDeps`. Tests: `portalReady` flips.
-
-**10b. Update order + envelope step.** In `updateSingleStation`, insert between download (①)
-and the model loop (③):
+New store imports:
 
 ```ts
-// 2) Envelopes for days not fully covered in S3. Runs before events: envelopes are
-// the cheap byproduct of the raw data the events step also needs.
-if (!this.portalReady || !this.envelopeUploader) return false;
-try {
-  const run = this.deps.processEnvelopes ?? processEnvelopeCoverage;
-  const uploader = this.envelopeUploader;
-  await run({
-    stationData, range,
-    uploadTile: (level, tileIndex, tile) => uploader.uploadTile(stationData, level, tileIndex, tile),
-    onProgress: (done, total) => this.setFeedback(
-      `${prefix}${getStationLabel(stationData)} — envelopes: day ${done} of ${total}`),
-    onTileUploaded: (level, tileIndex) => {
-      if (level === 2) this.markTileUploaded(key, tileIndex);
-    },
-  });
-} catch (err) {
-  console.warn("Envelope update failed:", err);
-  this.setFeedback(`${prefix}Envelope update failed for ${getStationLabel(stationData)}.`);
-  ok = false;
-}
-await this.loadEnvelopeCoverage(stationData);   // reconcile with the actual listing
+import { FINEST_LEVEL } from "../../shared/seismic/envelope-config";
+import { createEnvelopeCredentialsProvider, createEnvelopeUploader, EnvelopeUploader }
+  from "../models/stores/seismic/envelope-uploader";
+import { processEnvelopeCoverage } from "../models/stores/seismic/seismic-envelope-processor";
 ```
 
-Tests (injected `processEnvelopes`): runs after download and before `processCoverage`;
-`onTileUploaded` reaches `markTileUploaded`; a processor throw sets `ok = false` but events
-still run; final reconcile listing happens.
+**⚠️ Existing-test impact:** `updateSingleStation` will bail out unless portal auth is set, so
+`primed()` must call `store.setPortalAuth(...)` (with a fake uploader) after `setAuthReady()`,
+and the call-order assertions gain the envelope step. Update `makeUpdateStore`:
 
-**Step 5:** Commit: `"Generate and upload envelopes in admin update flow"`
+```ts
+// added to makeUpdateStore's deps:
+envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+processEnvelopes: jest.fn(async (_options: any) => {
+  calls.push("envelopes");
+  return { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 };
+}),
+// and in primed(), after ctx.store.setAuthReady():
+ctx.store.setPortalAuth(async () => "fake-jwt");
+```
+
+The existing order assertion becomes:
+
+```ts
+expect(calls.filter((c: string) => !c.startsWith("coverage"))).toEqual([
+  "download", "envelopes", "process:compact-v1", "process:large-v1",
+]);
+```
+
+**10a. Portal auth state.**
+
+Step 1 — failing tests:
+
+```ts
+describe("portal auth", () => {
+  it("setPortalAuth flips portalReady", () => {
+    const store = new SeismicAdminStore({ cache: fakeCache() as any });
+    expect(store.portalReady).toBe(false);
+    store.setPortalAuth(async () => "jwt");
+    expect(store.portalReady).toBe(true);
+  });
+
+  it("updateStation reports failure when portal auth is missing", async () => {
+    // Prime by hand, deliberately skipping setPortalAuth.
+    const { store, calls } = makeUpdateStore();
+    store.setRange("2026-01-01", "2026-01-03");
+    await store.refresh();
+    store.setAuthReady();
+    calls.length = 0;
+    await store.updateStation(rc01Key);
+    expect(calls).not.toContain("envelopes");
+    expect(store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+  });
+});
+```
+
+Step 3 — implement. Add to `SeismicAdminDeps`:
+
+```ts
+processEnvelopes?: typeof processEnvelopeCoverage;
+envelopeUploader?: EnvelopeUploader;
+```
+
+Add state and action (declare `envelopeUploader` as a private field and exclude it from
+observability alongside `deps`/`cache`):
+
+```ts
+portalReady = false;
+private envelopeUploader?: EnvelopeUploader;
+
+// constructor: makeAutoObservable<SeismicAdminStore, "deps" | "cache" | "envelopeUploader">(
+//   this, { deps: false, cache: false, envelopeUploader: false }, { autoBind: true });
+
+/** Wire up the S3 upload path once a portal JWT source exists. env selects the
+ *  token-service environment ("production" default; "staging" for testing). */
+setPortalAuth(getJwt: () => Promise<string>, env?: "staging" | "production") {
+  this.envelopeUploader = this.deps.envelopeUploader ??
+    createEnvelopeUploader({ getCredentials: createEnvelopeCredentialsProvider({ getJwt, env }) });
+  this.portalReady = true;
+}
+```
+
+Step 4 — tests pass. Step 5 — commit: `"Add portal auth state to seismic admin store"`
+
+**10b. Update order + envelope step.**
+
+Step 1 — failing tests (on top of the fixture changes above):
+
+```ts
+it("updateStation runs envelopes after download and before events", async () => {
+  const { store, calls } = await primed();
+  await store.updateStation(rc01Key);
+  expect(calls.filter((c: string) => !c.startsWith("coverage"))).toEqual([
+    "download", "envelopes", "process:compact-v1", "process:large-v1",
+  ]);
+});
+
+it("passes the range and a station-bound uploadTile to processEnvelopes", async () => {
+  const { store, processEnvelopes, envelopeUploader } = await primed();
+  await store.updateStation(rc01Key);
+  const options = processEnvelopes.mock.calls[0][0];
+  expect(options.stationData).toMatchObject({ station: "RC01" });
+  expect(options.range).toEqual({
+    start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 3) + SECONDS_PER_DAY,
+  });
+  const tile = { mins: Int16Array.from([1]), maxs: Int16Array.from([2]) };
+  await options.uploadTile(2, 77, tile);
+  expect(envelopeUploader.uploadTile).toHaveBeenCalledWith(
+    expect.objectContaining({ station: "RC01" }), 2, 77, tile);
+});
+
+it("live-fills only finest-level tiles via onTileUploaded", async () => {
+  const processEnvelopes = jest.fn(async ({ onTileUploaded }: any) => {
+    onTileUploaded?.(0, 1);               // coarse level: ignored
+    onTileUploaded?.(FINEST_LEVEL, 56123);
+    return { uploadedTiles: 2, processedDays: 1, skippedDays: 0, totalDays: 1 };
+  });
+  const marked: Array<[string, number]> = [];
+  const { store } = await primed({ processEnvelopes });
+  store.markTileUploaded = (key: string, i: number) => { marked.push([key, i]); };
+  await store.updateStation(rc01Key);
+  expect(marked).toEqual([[rc01Key, 56123]]);
+});
+
+it("continues into events and reports failures when processEnvelopes rejects", async () => {
+  const processEnvelopes = jest.fn(async () => { throw new Error("upload died"); });
+  const { store, calls } = await primed({ processEnvelopes });
+  await store.updateStation(rc01Key);
+  expect(calls).toContain("process:compact-v1");   // events still ran
+  expect(store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+});
+
+it("reconciles envelope coverage from the listing after the envelope step", async () => {
+  const { store, listEnvelopeTiles } = await primed();
+  listEnvelopeTiles.mockClear();
+  await store.updateStation(rc01Key);
+  expect(listEnvelopeTiles).toHaveBeenCalled();
+});
+
+it("reports envelope day progress in feedback", async () => {
+  const seen: string[] = [];
+  const processEnvelopes = jest.fn(async ({ onProgress }: any) => {
+    onProgress?.(1, 3);
+    seen.push(store.feedback);
+    return { uploadedTiles: 0, processedDays: 1, skippedDays: 0, totalDays: 3 };
+  });
+  const ctx = await primed({ processEnvelopes });
+  const store = ctx.store;
+  await store.updateStation(rc01Key);
+  expect(seen).toEqual(["Rabbit Creek — envelopes: day 1 of 3"]);
+});
+```
+
+Step 3 — implement. Revised `updateSingleStation` (envelope step ② inserted; `let ok = true;`
+moves above it; doc comment updated):
+
+```ts
+/** Download the whole range, then generate + upload missing envelopes, then generate
+ *  events for each selected model's uncovered days. Returns false if anything failed. */
+private async updateSingleStation(key: string, prefix = ""): Promise<boolean> {
+  const stationData = this.stations.get(key);
+  const range = this.rangeSec;
+  if (!stationData || !range || !this.authReady) return false;
+  const uploader = this.envelopeUploader;
+  if (!this.portalReady || !uploader) return false;
+
+  // 1) Raw data for the whole range (existing flow, reports its own feedback).
+  await this.download(stationData, prefix);
+
+  let ok = true;
+
+  // 2) Envelopes for days not fully covered in S3 — before events: they are the
+  // cheap byproduct of the raw data the events step also needs.
+  try {
+    const run = this.deps.processEnvelopes ?? processEnvelopeCoverage;
+    await run({
+      stationData, range,
+      uploadTile: (level, tileIndex, tile) => uploader.uploadTile(stationData, level, tileIndex, tile),
+      onProgress: (done, total) => this.setFeedback(
+        `${prefix}${getStationLabel(stationData)} — envelopes: day ${done} of ${total}`),
+      onTileUploaded: (level, tileIndex) => {
+        if (level === FINEST_LEVEL) this.markTileUploaded(key, tileIndex);
+      },
+    });
+  } catch (err) {
+    console.warn("Envelope update failed:", err);
+    this.setFeedback(`${prefix}Envelope update failed for ${getStationLabel(stationData)}.`);
+    ok = false;
+  }
+  // Reconcile with the actual listing; the incremental updates above are an estimate.
+  await this.loadEnvelopeCoverage(stationData);
+
+  // 3) Events for uncovered days, model by model. Snapshot the live selection:
+  // ...existing model loop unchanged (drop its own `let ok = true;`)...
+  return ok;
+}
+```
+
+Step 4 — full suite passes. Step 5 — commit: `"Generate and upload envelopes in admin update flow"`
 
 ---
 
