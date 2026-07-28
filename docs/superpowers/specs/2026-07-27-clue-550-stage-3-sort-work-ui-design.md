@@ -388,6 +388,15 @@ should require `userIsRequestUser()`, or a class member can create a new documen
 `uid` and `concurrent: true`. That does not reopen the escalation closed above — a create cannot target an
 existing document — but it leaves that vector open once the update-path allowance above is removed.
 
+The same backfill unblocks a smaller cleanup. `getDocumentTitle` selects the group-document title on
+`type == "group"` **plus a `groupId`**, rather than on `kind`, because a group document may carry no stored
+`kind` — the kind is backfilled on open, but the lists that show these titles render before the documents are
+opened. The `groupId` term is what keeps a class-wide document (same `type`, no `groupId`) from being labelled
+"Group undefined Document" when its own kind is unregistered. Once the backfill has stamped `kind` on every
+group document, this becomes `kind == "group"` and the `groupId` term goes away with it: a class-wide document
+has its own kind and can no longer reach the branch at all. Breadcrumbs are in `document-kinds.ts` and the
+backfill script.
+
 Re-running the full `documents-rules.test.ts` suite (120 tests, including every pre-existing history-entry and
 document-update case) and the full `firebase-test` suite (366 tests across all 8 rule files) both passed after
 the fix. The seven tests added across both fix rounds remain as the regression guard.
