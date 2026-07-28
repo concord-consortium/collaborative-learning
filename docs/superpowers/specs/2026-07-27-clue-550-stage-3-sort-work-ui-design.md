@@ -313,20 +313,26 @@ A class-wide document's owner is the synthetic `class_<classHash>`, which never 
 denies history writes it denies them for group documents too — a pre-existing gap that has gone unnoticed
 because group documents are unreleased and are exercised in permissive dev/QA partitions.
 
-**This is established by an emulator test before anything is changed.** The test writes a metadata document
-whose `uid` is a synthetic group owner and has a class member attempt to create a history entry under it:
+**This was established by an emulator test before anything was changed.** Five characterization tests were added
+to the `history entries` block in `firebase-test/src/documents-rules.test.ts` and run against the Firestore
+emulator (`firebase emulators:exec --only firestore "npm test"`). A class member's attempt to create a history
+entry under a metadata document owned by a synthetic group (`group_myOffering_3`) or class-wide (`class_<hash>`)
+owner **was denied** — `PERMISSION_DENIED` at the `create` rule for the group case, the class-wide case, and the
+corresponding read. The two negative controls (a user outside the class, and a class member on a classmate's
+single-writer document) already failed as expected, confirming the axis under test — not just authentication —
+was what gated the positive cases.
 
-- If the write is **denied**, the rule is rebased onto the axis — create and read allowed when the parent
-  document carries `concurrent: true` and the requester's `class_hash` matches its `context_id`, in addition to
-  `userOwnsDocument()`. That continues Stage 1's pattern of rebasing rules onto `concurrent`, and covers group
-  and class-wide documents with one clause. It deliberately does **not** narrow group-document history to the
-  owning group: the auth token carries no group id, so the rules cannot express that, and the RTDB rules already
-  grant write on the whole `classes/<classHash>` subtree, so this matches the existing write surface rather than
-  widening it.
-- If the write is **allowed**, no rules change is needed and the test documents why.
+Because the writes were denied, the rule was rebased onto the `concurrent` axis: create and read are now allowed
+when the parent document carries `concurrent: true` and the requester's `class_hash` matches its `context_id`, in
+addition to `userOwnsDocument()`. This continues Stage 1's pattern of rebasing rules onto `concurrent`, and covers
+group and class-wide documents with one clause (`isConcurrentClassDocument()` in `firestore.rules`). It
+deliberately does **not** narrow group-document history to the owning group: the auth token carries no group id,
+so the rules cannot express that, and the RTDB rules already grant write on the whole `classes/<classHash>`
+subtree, so this matches the existing write surface rather than widening it.
 
-Either way the test remains as the regression guard, and the outcome is recorded in this spec before the PR
-opens.
+Re-running the full `documents-rules.test.ts` suite (118 tests, including every pre-existing history-entry case)
+and the full `firebase-test` suite (364 tests across all 8 rule files) both passed after the change. The five new
+tests remain as the regression guard.
 
 ## Carried forward from Stage 2
 

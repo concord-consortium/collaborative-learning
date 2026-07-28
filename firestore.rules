@@ -514,6 +514,16 @@ service cloud.firestore {
           return getDocumentOwner() == string(request.auth.token.platform_user_id);
         }
 
+        // A concurrent (multi-writer) document has a synthetic owner — `group_<offeringId>_<groupId>`
+        // or `class_<classHash>` — that never equals a real user id, so ownership cannot authorize
+        // its history. Every member of the document's class may append to it instead. This does not
+        // narrow a group document's history to its own group: the auth token carries no group id.
+        function isConcurrentClassDocument() {
+          let docData = getDocumentData();
+          return docData.get("concurrent", false) == true
+            && request.auth.token.class_hash == docData.context_id;
+        }
+
         function hasDocumentAccess() {
           return teacherCanAccessDocument() || researcherCanAccessDocument() || userCanAccessDocument();
         }
@@ -528,8 +538,9 @@ service cloud.firestore {
 
         // For writing individual history entries
         match /history/{entryId} {
-          allow create: if isAuthed() && userOwnsDocument();
-          allow read: if (isAuthed() && userOwnsDocument()) || teacherCanAccessDocument() || researcherCanAccessDocument();
+          allow create: if isAuthed() && (userOwnsDocument() || isConcurrentClassDocument());
+          allow read: if (isAuthed() && (userOwnsDocument() || isConcurrentClassDocument()))
+            || teacherCanAccessDocument() || researcherCanAccessDocument();
           allow delete: if false;
           allow update: if false;
         }
