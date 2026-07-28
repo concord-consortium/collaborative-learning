@@ -1,0 +1,175 @@
+import { quantize } from "../../../../shared/seismic/envelope-codec";
+import {
+  AMPLITUDE_RANGES, FINEST_LEVEL, LEVEL_SPACINGS, NO_DATA_SENTINEL, POINTS_PER_TILE
+} from "../../../../shared/seismic/envelope-config";
+import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
+import { ChannelMetadata, EnvelopeTileData, RawSegment, StationData, TimeRange }
+  from "../../../../shared/seismic/seismic-types";
+import { getTileDuration, getTileIndex, getTileIndicesForViewport } from "../../../../shared/seismic/tile-addressing";
+import { processEnvelopeCoverage } from "./seismic-envelope-processor";
+
+describe("processEnvelopeCoverage", () => {
+  const station: StationData = { network: "AK", station: "K204", location: "", channel: "HNZ" };
+
+  // A day index divisible by 35 makes the day start an exact multiple of the L2 tile
+  // duration (31500s) and of the L2 spacing (1.575s), so tile/point indices are exact.
+  const day = 19950;
+  const dayStart = day * SECONDS_PER_DAY;
+  const oneDayRange: TimeRange = { start: dayStart, end: dayStart + SECONDS_PER_DAY };
+
+  const H_RANGE = AMPLITUDE_RANGES.H;
+  const L2_SPACING = LEVEL_SPACINGS[FINEST_LEVEL]; // 1.575s
+  // At 40 Hz each L2 window holds exactly 63 samples, so window boundaries align with samples.
+  const SAMPLE_RATE = 40;
+  const SAMPLES_PER_WINDOW = Math.round(L2_SPACING * SAMPLE_RATE); // 63
+
+  function makeMetadata(overrides: Partial<ChannelMetadata> = {}): ChannelMetadata[] {
+    return [{
+      ...station,
+      startTime: "1970-01-01T00:00:00Z",
+      endTime: "",
+      scale: 1,
+      scaleFreq: 1,
+      scaleUnits: "m/s",
+      sampleRate: SAMPLE_RATE,
+      instrumentCode: "H",
+      ...overrides,
+    }];
+  }
+
+  /** A segment with one constant value per L2 window (63 samples each). */
+  function constantSegment(startTime: number, windowValues: number[]): RawSegment {
+    const samples = new Float64Array(windowValues.length * SAMPLES_PER_WINDOW);
+    windowValues.forEach((value, w) => samples.fill(value, w * SAMPLES_PER_WINDOW, (w + 1) * SAMPLES_PER_WINDOW));
+    return { startTime, sampleRate: SAMPLE_RATE, samples };
+  }
+
+  function makeOptions() {
+    return {
+      stationData: station,
+      range: oneDayRange,
+      uploadTile: jest.fn(async (level: number, tileIndex: number, tile: EnvelopeTileData) => {}),
+      listTiles: jest.fn(async () => new Set<number>()),
+      fetchMetadata: jest.fn(async () => makeMetadata()),
+      cache: { readDayChunk: jest.fn(async (): Promise<ArrayBuffer | null> => new ArrayBuffer(8)) },
+      parseDay: jest.fn((): RawSegment[] => []),
+    };
+  }
+
+  it("does nothing when the range is fully covered", async () => {
+    const options = makeOptions();
+    const covered = new Set(getTileIndicesForViewport(oneDayRange.start, oneDayRange.end, FINEST_LEVEL));
+    options.listTiles.mockResolvedValue(covered);
+    const onProgress = jest.fn();
+
+    const result = await processEnvelopeCoverage({ ...options, onProgress });
+
+    expect(result).toEqual({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
+    expect(options.fetchMetadata).not.toHaveBeenCalled();
+    expect(options.cache.readDayChunk).not.toHaveBeenCalled();
+    expect(options.uploadTile).not.toHaveBeenCalled();
+    expect(onProgress).toHaveBeenCalledWith(0, 0);
+  });
+
+  it("processes a missing day and uploads its tiles with correct contents", async () => {
+    const options = makeOptions();
+    // Four L2 windows at the start of the day: 0.01, spike window, 0.02, 0.02 ...
+    const segA = constantSegment(dayStart, [0.01, 0.01, 0.02, 0.02]);
+    segA.samples[70] = 0.05;   // in window 1 (samples 63..125)
+    segA.samples[71] = -0.05;
+    // ... plus one window at the start of the day's second L2 tile (31500s in).
+    const l2TileDuration = getTileDuration(FINEST_LEVEL);
+    const segB = constantSegment(dayStart + l2TileDuration, [0.03]);
+    options.parseDay.mockReturnValue([segA, segB]);
+    const onProgress = jest.fn();
+    const onTileUploaded = jest.fn();
+
+    const result = await processEnvelopeCoverage({ ...options, onProgress, onTileUploaded });
+
+    const q001 = quantize(0.01, H_RANGE);
+    const q002 = quantize(0.02, H_RANGE);
+    const q003 = quantize(0.03, H_RANGE);
+    const l2Tile0 = getTileIndex(dayStart, 2);
+    const l1Tile = getTileIndex(dayStart, 1);
+    const l0Tile = getTileIndex(dayStart, 0);
+
+    // The first L2 tile completes when segB advances past it, so it flushes with the day;
+    // the rest (second L2 tile, L1, L0) only flush at the forced span-end flush.
+    const uploads = options.uploadTile.mock.calls;
+    expect(uploads[0].slice(0, 2)).toEqual([2, l2Tile0]);
+    expect(uploads.map(call => call.slice(0, 2)).sort()).toEqual([
+      [0, l0Tile], [1, l1Tile], [2, l2Tile0], [2, l2Tile0 + 1],
+    ]);
+
+    // Quantized data round-trips into the right points of the right tiles.
+    const tileData = (level: number, tileIndex: number) =>
+      uploads.find(call => call[0] === level && call[1] === tileIndex)![2];
+    const tile0 = tileData(2, l2Tile0);
+    expect(tile0.mins.length).toBe(POINTS_PER_TILE[2]);
+    expect(Array.from(tile0.mins.slice(0, 5))).toEqual([q001, -32767, q002, q002, NO_DATA_SENTINEL]);
+    expect(Array.from(tile0.maxs.slice(0, 5))).toEqual([q001, 32767, q002, q002, NO_DATA_SENTINEL]);
+    const tile1 = tileData(2, l2Tile0 + 1);
+    expect(tile1.mins[0]).toBe(q003);
+    expect(tile1.maxs[0]).toBe(q003);
+    // L1 point 0 accumulates the day's first 100 L2 points; point 200 holds segB's window.
+    const l1Data = tileData(1, l1Tile);
+    expect(l1Data.mins[0]).toBe(-32767);
+    expect(l1Data.maxs[0]).toBe(32767);
+    expect(l1Data.mins[200]).toBe(q003);
+
+    expect(onProgress).toHaveBeenNthCalledWith(1, 0, 1);
+    expect(onProgress).toHaveBeenLastCalledWith(1, 1);
+    expect(onTileUploaded.mock.calls).toEqual(uploads.map(call => call.slice(0, 2)));
+    expect(result).toEqual({ uploadedTiles: uploads.length, processedDays: 1, skippedDays: 0, totalDays: 1 });
+  });
+
+  it("skips a day whose raw file is missing from the cache", async () => {
+    const options = makeOptions();
+    options.cache.readDayChunk.mockResolvedValue(null);
+    const onProgress = jest.fn();
+
+    const result = await processEnvelopeCoverage({ ...options, onProgress });
+
+    expect(result).toEqual({ uploadedTiles: 0, processedDays: 0, skippedDays: 1, totalDays: 1 });
+    expect(options.parseDay).not.toHaveBeenCalled();
+    expect(options.uploadTile).not.toHaveBeenCalled();
+    expect(onProgress).toHaveBeenLastCalledWith(1, 1);
+  });
+
+  it("processes segments in time order even when parseDay returns them out of order", async () => {
+    const options = makeOptions();
+    const early = constantSegment(dayStart, [0.01]);
+    // Starts one sample later and overlaps the same L2 window; when segments are processed
+    // in time order the later segment's point value wins (last write per point).
+    const late: RawSegment = {
+      startTime: dayStart + 1 / SAMPLE_RATE,
+      sampleRate: SAMPLE_RATE,
+      samples: new Float64Array(SAMPLES_PER_WINDOW - 1).fill(0.04),
+    };
+    options.parseDay.mockReturnValue([late, early]);
+
+    await processEnvelopeCoverage(options);
+
+    const l2Upload = options.uploadTile.mock.calls.find(call => call[0] === 2)!;
+    expect(l2Upload[1]).toBe(getTileIndex(dayStart, 2));
+    expect(l2Upload[2].mins[0]).toBe(quantize(0.04, H_RANGE));
+  });
+
+  it("rejects before reading the cache when channel metadata is missing", async () => {
+    const options = makeOptions();
+    options.fetchMetadata.mockResolvedValue(makeMetadata({ channel: "BHZ" }));
+
+    await expect(processEnvelopeCoverage(options)).rejects.toThrow("No metadata for channel HNZ");
+    expect(options.cache.readDayChunk).not.toHaveBeenCalled();
+    expect(options.uploadTile).not.toHaveBeenCalled();
+  });
+
+  it("rejects before reading the cache when the instrument code is unknown", async () => {
+    const options = makeOptions();
+    options.fetchMetadata.mockResolvedValue(makeMetadata({ instrumentCode: "X" }));
+
+    await expect(processEnvelopeCoverage(options)).rejects.toThrow('Unknown instrument code "X"');
+    expect(options.cache.readDayChunk).not.toHaveBeenCalled();
+    expect(options.uploadTile).not.toHaveBeenCalled();
+  });
+});
