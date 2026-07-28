@@ -3,7 +3,8 @@ import { AppConfigModel } from "../stores/app-config-model";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { UserModel } from "../stores/user";
 import { createDocumentModel } from "./document";
-import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
+import { GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication, SupportPublication }
+  from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
 import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
@@ -210,6 +211,8 @@ describe("document utils", () => {
     const groupedStudent = UserModel.create({
       id: "me", type: "student", name: "Me", classHash: "class-1", currentGroupId: "3"
     });
+    const teacher = UserModel.create({ id: "t1", type: "teacher", name: "Teacher", classHash: "class-1" });
+    const researcher = UserModel.create({ id: "r1", type: "researcher", name: "Researcher", classHash: "class-1" });
 
     const metadata = (props: Record<string, any>) =>
       DocumentMetadataModel.create({ uid: "someone-else", type: GroupDocument, key: "k", ...props });
@@ -276,6 +279,44 @@ describe("document utils", () => {
       expect(canUserEditDocument({ user: student })).toBe(false);
     });
 
+    it("refuses a user's own published document — publishing copies it under the publisher's uid," +
+       " it is not a live editable document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "me", type: ProblemPublication }), user: student
+      })).toBe(false);
+    });
+
+    it("refuses a researcher editing a class-wide document even though their classHash matches", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-1"
+        }),
+        user: researcher
+      })).toBe(false);
+    });
+
+    it("allows a teacher to edit a class-wide document belonging to their class", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-1"
+        }),
+        user: teacher
+      })).toBe(true);
+    });
+
+    it("refuses a class-wide document when context_id and the user's classHash are both empty", () => {
+      // Guards the `!!contextId &&` check: without it, an empty-string context_id would equal a
+      // user's default empty-string classHash and incorrectly grant access.
+      const noClassUser = UserModel.create({ id: "me", type: "student", name: "Me" });
+      expect(noClassUser.classHash).toBe("");
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: ""
+        }),
+        user: noClassUser
+      })).toBe(false);
+    });
+
     it("prefers the reactive metadata's group id over a still-loading document", () => {
       // A groupmate's document syncs into the metadata before its content finishes loading; reading
       // the metadata per field is what makes the Edit button appear without a reload.
@@ -288,6 +329,20 @@ describe("document utils", () => {
         documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
         user: groupedStudent
       })).toBe(true);
+    });
+
+    it("allows a user to edit their own document via the document-only path (no metadata)", () => {
+      const ownDocument = createDocumentModel({ uid: "me", type: ProblemDocument, key: "k" });
+      expect(canUserEditDocument({ document: ownDocument, user: student })).toBe(true);
+    });
+
+    it("allows any member of the class to edit a class-wide document via the document-only path" +
+       " (no metadata)", () => {
+      const classWideDocument = createDocumentModel({
+        uid: "someone-else", type: GroupDocument, key: "k", concurrent: true,
+        unit: "sas", contextId: "class-1"
+      });
+      expect(canUserEditDocument({ document: classWideDocument, user: student })).toBe(true);
     });
   });
 });
