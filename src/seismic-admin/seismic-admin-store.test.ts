@@ -512,6 +512,11 @@ describe("update (event generation)", () => {
         return { processed: 0, skipped: 0, total: 0 };
       }),
       listEnvelopeTiles: jest.fn(async () => allTiles()),
+      envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+      processEnvelopes: jest.fn(async (_options: any) => {
+        calls.push("envelopes");
+        return { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 };
+      }),
       ...overrides,
     };
     const store = new SeismicAdminStore(deps);
@@ -525,6 +530,7 @@ describe("update (event generation)", () => {
     ctx.store.setRange("2026-01-01", "2026-01-03");   // 3 days
     await ctx.store.refresh();
     ctx.store.setAuthReady();
+    ctx.store.setPortalAuth(async () => "fake-jwt");
     await flush();
     ctx.calls.length = 0;
     jest.clearAllMocks();
@@ -685,6 +691,27 @@ describe("update (event generation)", () => {
     await ctx.store.updateAllSelected();
     expect(ctx.store.feedback).toBe("Finished updating 2 stations; 1 had failures.");
   });
+
+  describe("portal auth", () => {
+    it("setPortalAuth flips portalReady", () => {
+      const store = new SeismicAdminStore({ cache: fakeCache() as any });
+      expect(store.portalReady).toBe(false);
+      store.setPortalAuth(async () => "jwt");
+      expect(store.portalReady).toBe(true);
+    });
+
+    it("updateStation reports failure when portal auth is missing", async () => {
+      // Primed by hand, deliberately skipping setPortalAuth.
+      const { store, calls } = makeUpdateStore();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      store.setAuthReady();
+      calls.length = 0;
+      await store.updateStation(rc01Key);
+      expect(calls).not.toContain("envelopes");
+      expect(store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+    });
+  });
 });
 
 describe("busy lockout", () => {
@@ -724,12 +751,14 @@ describe("busy lockout", () => {
       fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
       downloadStation: jest.fn(async () => {}),
       processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+      envelopeUploader: { uploadTile: jest.fn(async () => {}) },
       ...overrides,
     };
     const store = new SeismicAdminStore(deps);
     store.setRange("2026-01-01", "2026-01-03");
     await store.refresh();
     store.setAuthReady();
+    store.setPortalAuth(async () => "fake-jwt");
     await flush();
     jest.clearAllMocks();
     return { store, ...deps };

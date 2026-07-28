@@ -7,8 +7,12 @@ import { dayIndex, SECONDS_PER_DAY, utcDayFromString } from "../../shared/seismi
 import { ModelMetadata, SeismicEvent } from "../../shared/seismic/seismic-model-types";
 import { DayCoverageState, StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import {
+  createEnvelopeCredentialsProvider, createEnvelopeUploader, EnvelopeUploader
+} from "../models/stores/seismic/envelope-uploader";
 import { processUncoveredRanges, ProcessCoverageOptions } from "../models/stores/seismic/seismic-coverage-processor";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
+import { processEnvelopeCoverage } from "../models/stores/seismic/seismic-envelope-processor";
 import { getUncoveredRanges, loadEvents } from "../models/stores/seismic/seismic-event-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
 import { mergeStations, missingDayCount, getStationLabel } from "./utils/seismic-admin-utils";
@@ -62,6 +66,8 @@ export interface SeismicAdminDeps {
   };
   processCoverage?: (options: ProcessCoverageOptions) => Promise<{ processed: number; skipped: number; total: number }>;
   listEnvelopeTiles?: (s: StationData) => Promise<Set<number>>;
+  processEnvelopes?: typeof processEnvelopeCoverage;
+  envelopeUploader?: EnvelopeUploader;
 }
 
 export type CoverageLoadState = "pending" | "loaded" | "error";
@@ -111,10 +117,12 @@ export class SeismicAdminStore {
   envelopeCoverage = new Map<string, EnvelopeCoverageStats>();   // keyed by stationKey
   feedback = "";
   authReady = false;
+  portalReady = false;
   // True while a long-running operation (download/update/delete) is in flight, blocking other actions.
   isBusy = false;
 
   private cache: AdminCache;
+  private envelopeUploader?: EnvelopeUploader;
   // True once a selection has been persisted, so refresh() won't re-select everything.
   private hasSavedStationSelection = false;
   private hasSavedModelSelection = false;
@@ -140,9 +148,9 @@ export class SeismicAdminStore {
       for (const url of this.models.keys()) this.selectedModels.add(url);
     }
 
-    // `deps` and `cache` are injected dependencies, not observable state.
-    makeAutoObservable<SeismicAdminStore, "deps" | "cache">(
-      this, { deps: false, cache: false }, { autoBind: true });
+    // `deps`, `cache`, and `envelopeUploader` are injected dependencies, not observable state.
+    makeAutoObservable<SeismicAdminStore, "deps" | "cache" | "envelopeUploader">(
+      this, { deps: false, cache: false, envelopeUploader: false }, { autoBind: true });
   }
 
   private save() {
@@ -496,6 +504,14 @@ export class SeismicAdminStore {
     if (ready) void this.loadAllCoverageStats();
   }
 
+  /** Wire up the S3 upload path once a portal JWT source exists. env selects the
+   *  token-service environment ("production" default; "staging" for testing). */
+  setPortalAuth(getJwt: () => Promise<string>, env?: "staging" | "production") {
+    this.envelopeUploader = this.deps.envelopeUploader ??
+      createEnvelopeUploader({ getCredentials: createEnvelopeCredentialsProvider({ getJwt, env }) });
+    this.portalReady = true;
+  }
+
   async downloadStation(key: string) {
     await this.withBusy(async () => {
       const s = this.stations.get(key);
@@ -556,6 +572,9 @@ export class SeismicAdminStore {
     const stationData = this.stations.get(key);
     const range = this.rangeSec;
     if (!stationData || !range || !this.authReady) return false;
+
+    const uploader = this.envelopeUploader;
+    if (!this.portalReady || !uploader) return false;
 
     // 1) Raw data for the whole range (existing flow, reports its own feedback).
     await this.download(stationData, prefix);
