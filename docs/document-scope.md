@@ -66,7 +66,7 @@ No other stored shape satisfies `hasClassUnitScope`:
 | personal, learning log | `null` | — | — | no |
 | problem, planning, publications | set | set | — | no |
 | group | set | set | set | no |
-| exemplar (from curriculum) | unset | unset | — | no |
+| exemplar (from curriculum) | set | set | — | no |
 | class-wide slot | set | `null` | — | **yes** |
 
 **No `scopeLevel` enum and no unified `scope` struct.** Scope is multi-dimensional — a personal
