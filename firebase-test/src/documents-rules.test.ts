@@ -360,6 +360,23 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title" });
     });
 
+    it("a class member cannot set concurrent:true on a classmate's non-group document", async () => {
+      // `concurrent` is an authorization input for the history rule (isConcurrentClassDocument), so
+      // granting it here would let a class member hand themselves and every classmate history access
+      // to someone else's document.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id }}));
+      await expectUpdateToFail(db, kDocumentDocPath, { concurrent: true });
+    });
+
+    it("a class member can set concurrent:true on a classmate's group-typed document", async () => {
+      // The backfill paths (src/lib/db.ts on-open backfill, scripts/backfill-group-document-axes.ts)
+      // merge-update `concurrent` onto pre-existing group documents, so this must keep working.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "group" }}));
+      await expectUpdateToSucceed(db, kDocumentDocPath, { concurrent: true });
+    });
+
     it("authenticated students can't delete documents in their class", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
