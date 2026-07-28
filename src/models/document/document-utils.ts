@@ -145,9 +145,14 @@ interface ICanUserEditDocumentParams {
 /**
  * Whether this user may edit this document — the gate on every Edit button.
  *
- * A user may always edit their own document. Beyond that, only a `concurrent` (multi-writer)
- * document is editable by someone other than its owner, and then only from inside its scope: a
- * class-wide document by any member of its class, a group document by any member of its group.
+ * A published document is a read-only snapshot, not editable by anyone, including its own
+ * publisher — publishing copies the document under the publisher's uid, so the ownership check
+ * alone can't tell a live document from its published copy. A researcher never gets an edit
+ * affordance, even inside a class or group they observe. Beyond those exclusions, a user may
+ * always edit their own document; otherwise only a `concurrent` (multi-writer) document is
+ * editable by someone other than its owner, and then only from inside its scope: a class-wide
+ * document by any member of its class (teachers included — they belong to the class too), a group
+ * document by any member of its group.
  *
  * Fields are read from the reactive Firestore metadata, falling back per field to the lazily-fetched
  * full document. A groupmate's document appears in the metadata before its content finishes loading,
@@ -157,13 +162,16 @@ export function canUserEditDocument({
   document, documentMetadata, user
 }: ICanUserEditDocumentParams): boolean {
   const uid = documentMetadata?.uid ?? document?.uid;
+  const type = documentMetadata?.type ?? document?.type;
   const concurrent = documentMetadata?.concurrent ?? document?.concurrent;
   const groupId = documentMetadata?.groupId ?? document?.groupId;
   const unit = documentMetadata?.unit ?? document?.unit;
   const investigation = documentMetadata?.investigation ?? document?.investigation;
   const contextId = documentMetadata?.context_id ?? document?.contextId;
 
+  if (type && isPublishedType(type)) return false;
   if (!!uid && uid === user.id) return true;
+  if (user.isResearcher) return false;
   if (!concurrent) return false;
   if (hasClassUnitScope({ unit, investigation, groupId })) {
     return !!contextId && contextId === user.classHash;
