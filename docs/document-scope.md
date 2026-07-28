@@ -76,6 +76,28 @@ ordered level would be ambiguous. Named guards are added as consumers need them.
 A guard reads *stored fields only*. It must not consult the kind registry: Sort Work lists documents
 from other units, whose kinds are not registered in the current session.
 
+The same module provides `getCurriculumScopeLabel(doc)`, which names a document's curriculum scope
+from those fields — `"sas-1.2"` when it is scoped to a problem, `"sas"` when it is scoped to a unit
+and nothing narrower. Titles use it as a stand-in when a document's real title cannot be resolved.
+
+## Titling a document from another unit
+
+Under the Sort Work "All" filter a class sees every document it owns, including documents from units
+it has already worked through — the class hash spans units. Two title-resolution problems follow, and
+both are handled by treating a unit-declared title as belonging to its unit:
+
+- A kind declared by a unit that is not loaded has no registered title, and a class-wide document
+  stores no title of its own. `getDocumentDisplayTitle` names it from
+  `getDocumentKindLabel(kind)` plus the scope label — `"Driving Question Board (other)"`.
+- Two units may declare the *same* kind with different wording. `IDocumentKindInfo.unit` records
+  which unit's config declared a title, and `getDocumentTitle` returns it only for that unit's
+  documents, so a foreign document falls through to the label above rather than borrowing wording
+  that may not be its own.
+
+The kind label recovers the kind's identity, not the author's wording: a slot titled "Our Big
+Questions" in its own unit reads as "Driving Question Board" from elsewhere. Nothing loads another
+unit's config, so its authored title is not available.
+
 # View layer
 
 ## React Context

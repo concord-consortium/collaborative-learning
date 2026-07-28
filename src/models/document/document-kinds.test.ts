@@ -1,8 +1,8 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
-  getDocumentKindInfo, getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType,
-  getDocumentScopeFields, getDocumentTitle, isValidDocumentKind, registerDocumentKind,
-  resetDocumentKindRegistryForTests
+  getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields, getDocumentOwner,
+  getDocumentOwnerType, getDocumentScopeFields, getDocumentTitle, isValidDocumentKind,
+  registerDocumentKind, resetDocumentKindRegistryForTests
 } from "./document-kinds";
 
 describe("isValidDocumentKind", () => {
@@ -147,6 +147,42 @@ describe("document kinds registry", () => {
       // unit that has not loaded this session, the registry lookup above misses and this must not fall
       // through to the group-document label (which would read "Group undefined Document").
       expect(getDocumentTitle({ kind: "unregisteredClassWideKind", type: GroupDocument })).toBeUndefined();
+    });
+
+    describe("a title declared by a unit config", () => {
+      beforeEach(() => {
+        resetDocumentKindRegistryForTests();
+        registerDocumentKind("testUnitDeclaredKind", {
+          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          title: "Driving Question Board", unit: "sas"
+        });
+      });
+
+      it("names a document from the unit that declared it", () => {
+        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: GroupDocument, unit: "sas" }))
+          .toBe("Driving Question Board");
+      });
+
+      it("does not name a document from another unit that declares the same kind", () => {
+        // Only the current unit's config is loaded, and another unit may word the same kind
+        // differently, so its document falls through to the caller's fallback rather than borrowing
+        // this title.
+        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: GroupDocument, unit: "msa" }))
+          .toBeUndefined();
+      });
+    });
+  });
+
+  describe("getDocumentKindLabel", () => {
+    it("reads a camelCase kind as words", () => {
+      expect(getDocumentKindLabel("drivingQuestionBoard")).toBe("Driving Question Board");
+      expect(getDocumentKindLabel("group")).toBe("Group");
+    });
+
+    it("returns undefined when there is no kind", () => {
+      expect(getDocumentKindLabel(undefined)).toBeUndefined();
+      expect(getDocumentKindLabel(null)).toBeUndefined();
+      expect(getDocumentKindLabel("")).toBeUndefined();
     });
   });
 

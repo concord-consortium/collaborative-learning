@@ -204,6 +204,44 @@ describe("document utils", () => {
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
     });
+
+    describe("class-wide documents from another unit", () => {
+      // Under the Sort Work "All" filter a class sees every document it owns, including class-wide
+      // documents from units it has already worked through. Those units' configs are not loaded, so
+      // their kinds' titles cannot be looked up and the documents store no title of their own.
+      const unit = UnitModel.create({ code: "test", title: "test" });
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+
+      test("names the document by its kind and the unit it came from", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
+          unit: "other", investigation: null, problem: null
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board (other)");
+      });
+
+      test("does not borrow the current unit's title for another unit's document of the same kind", () => {
+        registerDocumentKind("testSharedKind", {
+          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          title: "Our Big Questions", unit: "test"
+        });
+        const ownUnitDoc = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
+        });
+        const otherUnitDoc = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
+        });
+        expect(getDocumentDisplayTitle(unit, ownUnitDoc, appConfig)).toBe("Our Big Questions");
+        expect(getDocumentDisplayTitle(unit, otherUnitDoc, appConfig)).toBe("Test Shared Kind (other)");
+      });
+
+      test("falls back to the kind alone when the document has no unit", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
+      });
+    });
   });
 
   describe("canUserEditDocument", () => {
