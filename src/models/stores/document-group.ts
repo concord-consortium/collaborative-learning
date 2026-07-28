@@ -200,7 +200,7 @@ export class DocumentGroup {
     this.documents.forEach((doc) => {
       const { sectionLabel, sortKey } = (() => {
         // A document scoped to a group belongs to that group, whoever created it.
-        if (hasGroupScope(doc)) return groupSection(doc.groupId as string);
+        if (hasGroupScope(doc)) return groupSection(doc.groupId);
         // A document scoped to the class and unit belongs to the class as a whole.
         if (hasClassUnitScope(doc)) {
           return { sectionLabel: kWholeClassSectionLabel, sortKey: { scope: "class" } as GroupSectionSortKey };
@@ -242,8 +242,7 @@ export class DocumentGroup {
         addDocToSection(doc, kNoNameSectionLabel);
       } else if (hasGroupScope(doc)) {
         // A group document is listed under every member of the group that owns it.
-        const groupId = doc.groupId ?? "unknownGroup";
-        const group = this.stores.groups.getGroupById(groupId);
+        const group = this.stores.groups.getGroupById(doc.groupId);
         group?.users.forEach(user => {
           addDocForUser(doc, user.classUser);
         });

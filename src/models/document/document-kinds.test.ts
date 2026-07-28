@@ -141,6 +141,13 @@ describe("document kinds registry", () => {
       expect(getDocumentTitle({ kind: PersonalDocument, type: PersonalDocument })).toBeUndefined();
       expect(getDocumentTitle({ type: "unregistered" })).toBeUndefined();
     });
+
+    it("does not mislabel a class-wide document with an unregistered kind as a group document", () => {
+      // A class-wide document also stores type:"group" but carries no groupId. If its kind belongs to a
+      // unit that has not loaded this session, the registry lookup above misses and this must not fall
+      // through to the group-document label (which would read "Group undefined Document").
+      expect(getDocumentTitle({ kind: "unregisteredClassWideKind", type: GroupDocument })).toBeUndefined();
+    });
   });
 
   describe("getDocumentScopeFields for a classUnit kind", () => {

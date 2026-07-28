@@ -178,10 +178,14 @@ interface IDocumentTitleFields {
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
   const registeredTitle = getDocumentKindInfo(document.kind)?.title;
   if (registeredTitle != null) return registeredTitle;
-  // Keyed on `type`, not `kind`: pre-existing group documents predate the `kind` axis and may have no stored
-  // `kind` yet. We backfill the kind on open but we need the title for the lists of documents before they
-  // are opened. Class-wide docs are new and always carry a `kind`, so their title is resolved above by kind.
-  if (document.type === GroupDocument) return `Group ${document.groupId} Document`;
+  // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
+  // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
+  // on the lookup above. Requiring `groupId` (not just `type === GroupDocument`) matters because a class-wide
+  // document also stores `type: "group"` but carries no `groupId` — if its `kind` is unregistered in this
+  // session (e.g. it belongs to a unit that has not loaded), the lookup above misses and execution reaches
+  // here; without the `groupId` check it would render as "Group undefined Document" instead of falling
+  // through to `undefined`, which callers already handle.
+  if (document.type === GroupDocument && document.groupId) return `Group ${document.groupId} Document`;
   return undefined;
 }
 
