@@ -17,6 +17,7 @@
 export interface IDocumentScopeFields {
   unit?: string | null;
   investigation?: string | null;
+  problem?: string | null;
   groupId?: string | null;
 }
 
@@ -41,4 +42,21 @@ export function hasGroupScope(doc: IDocumentScopeFields): doc is IDocumentScopeF
  */
 export function hasClassUnitScope(doc: IDocumentScopeFields): boolean {
   return !!doc.unit && !doc.investigation && !doc.groupId;
+}
+
+/**
+ * A short label for the curriculum a document belongs to: "sas-1.2" when it is scoped to a problem,
+ * "sas" when it is scoped to a unit and nothing narrower, undefined when it has no unit at all.
+ *
+ * Callers use it as a stand-in when a document's real title cannot be resolved, so the coordinates
+ * name the document instead. It reads the stored fields alone, so it describes a document from any
+ * unit, including one whose config is not loaded.
+ *
+ * An investigation with no problem ("sas-1.x") is not a shape any registered scope type produces; it
+ * is handled so a partial scope still reads as a scope rather than losing the investigation.
+ */
+export function getCurriculumScopeLabel(doc: IDocumentScopeFields): string | undefined {
+  if (!doc.unit) return undefined;
+  if (!doc.investigation) return doc.unit;
+  return `${doc.unit}-${doc.investigation}.${doc.problem ?? "x"}`;
 }

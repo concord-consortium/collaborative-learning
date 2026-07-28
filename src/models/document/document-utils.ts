@@ -10,8 +10,8 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { hasClassUnitScope } from "./document-scope";
-import { getDocumentTitle } from "./document-kinds";
+import { getCurriculumScopeLabel, hasClassUnitScope } from "./document-scope";
+import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
 
@@ -25,20 +25,35 @@ function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | ID
 }
 
 function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
-  const {type, unit, investigation, problem} = document;
   const problemModel = getProblemFromDoc(currentUnit, document);
   if (problemModel) {
-    if (isPlanningType(type)) {
+    if (isPlanningType(document.type)) {
       return `${problemModel.title}: Planning`;
     }
     return problemModel.title;
   }
 
   const upperType = upperFirst(document.type);
-  if (!unit) {
+  const scopeLabel = getCurriculumScopeLabel(document);
+  if (!scopeLabel) {
     return `${upperType} doc without ${translate("contentLevel.unit")}`;
   }
-  return `${upperType} doc from ${unit}-${investigation}.${problem}`;
+  return `${upperType} doc from ${scopeLabel}`;
+}
+
+/**
+ * A stand-in title for a document that stores none and whose kind resolves no title — a class-wide
+ * document from a unit whose config is not loaded, or one whose kind another unit also declares. The
+ * kind names what the document is; the curriculum scope says where it came from.
+ *
+ * The scope is read from the stored fields rather than assumed, because an unresolvable kind gives no
+ * indication of how the document is scoped.
+ */
+function getUnresolvedDocumentTitle(document: DocumentModelType | IDocumentMetadataModel) {
+  const kindLabel = getDocumentKindLabel(document.kind);
+  if (!kindLabel) return undefined;
+  const scopeLabel = getCurriculumScopeLabel(document);
+  return scopeLabel ? `${kindLabel} (${scopeLabel})` : kindLabel;
 }
 
 export function getDocumentTitleWithTimestamp(
@@ -71,7 +86,11 @@ export function getDocumentDisplayTitle(
   } else if (isProblemType(type) || isPlanningType(type)) {
     return getDocumentTitleFromProblem(unit, document);
   } else {
-    return getDocumentTitleWithTimestamp(document, appConfig);
+    const storedTitle = getDocumentTitleWithTimestamp(document, appConfig);
+    if (storedTitle) return storedTitle;
+    // Nothing stored and no kind title: name it by kind and scope if we can, otherwise return the
+    // stored value unchanged so callers see the same empty result as before.
+    return getUnresolvedDocumentTitle(document) ?? storedTitle;
   }
 }
 
