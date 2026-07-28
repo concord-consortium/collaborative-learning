@@ -1,4 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { listEnvelopeTileIndices } from "../../shared/seismic/envelope-coverage";
 import { classifyDayCoverage } from "../../shared/seismic/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
@@ -60,6 +61,7 @@ export interface SeismicAdminDeps {
     loadEvents: (s: StationData, model: string, range: TimeRange) => Promise<SeismicEvent[]>;
   };
   processCoverage?: (options: ProcessCoverageOptions) => Promise<{ processed: number; skipped: number; total: number }>;
+  listEnvelopeTiles?: (s: StationData) => Promise<Set<number>>;
 }
 
 export type CoverageLoadState = "pending" | "loaded" | "error";
@@ -69,6 +71,12 @@ export interface CoverageStats {
   state: CoverageLoadState;
   dayStates?: Map<number, DayCoverageState>;
   eventCount?: number;
+}
+
+/** One station's envelope coverage: the L2 tile indices listed from S3. */
+export interface EnvelopeCoverageStats {
+  state: CoverageLoadState;
+  tileIndices?: Set<number>;
 }
 
 export interface ModelStats {
@@ -100,6 +108,7 @@ export class SeismicAdminStore {
   selectedModels = new Set<string>();            // same keys; persisted
   modelMetadata = new Map<string, ModelMetadata | "error">();
   modelCoverage = new Map<string, CoverageStats>(); // keyed by coverageKey(stationKey, modelUrl)
+  envelopeCoverage = new Map<string, EnvelopeCoverageStats>();   // keyed by stationKey
   feedback = "";
   authReady = false;
   // True while a long-running operation (download/update/delete) is in flight, blocking other actions.
@@ -275,9 +284,29 @@ export class SeismicAdminStore {
     }
   }
 
+  /** Not gated on authReady — the S3 listing is anonymous. The listing is also
+   *  range-independent: day states are derived against the current range on read. */
+  async loadEnvelopeCoverage(station: StationConfig) {
+    const key = getStationChannelPrefix(station);
+    runInAction(() => this.envelopeCoverage.set(key, { state: "pending" }));
+    try {
+      const list = this.deps.listEnvelopeTiles ?? listEnvelopeTileIndices;
+      const tileIndices = await list(station);
+      runInAction(() => this.envelopeCoverage.set(key, { state: "loaded", tileIndices }));
+    } catch (err) {
+      console.warn("Failed to list envelope tiles:", err);
+      runInAction(() => this.envelopeCoverage.set(key, { state: "error" }));
+    }
+  }
+
+  envelopeCoverageFor(stationKey: string): EnvelopeCoverageStats {
+    return this.envelopeCoverage.get(stationKey) ?? { state: "pending" };
+  }
+
   /** Sequential on purpose: avoids a request stampede across stations × models. */
   async loadAllCoverageStats() {
     for (const station of this.selectedStationList) {
+      await this.loadEnvelopeCoverage(station);
       for (const url of this.selectedModels) {
         await this.loadCoverageStats(station, url);
       }

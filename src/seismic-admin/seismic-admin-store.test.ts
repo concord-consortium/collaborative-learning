@@ -1,7 +1,8 @@
+import { FINEST_LEVEL } from "../../shared/seismic/envelope-config";
 import { coverageKey, SeismicAdminStore } from "./seismic-admin-store";
 import { saveFilters } from "./utils/admin-persistence";
-import { dayIndex, SECONDS_PER_DAY, utcDay } from "../../shared/seismic/seismic-day";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { dayIndex, dayRange, SECONDS_PER_DAY, utcDay } from "../../shared/seismic/seismic-day";
+import { getStationChannelPrefix, getTileIndicesForViewport } from "../../shared/seismic/tile-addressing";
 
 function fakeCache(cached: number[] = []) {
   return {
@@ -785,6 +786,33 @@ describe("busy lockout", () => {
     await ctx.store.deleteAllSelected();
     expect(cache.deleteDaysInRange).toHaveBeenCalledTimes(1);
     expect(ctx.store.isBusy).toBe(false);
+  });
+});
+
+describe("envelope coverage", () => {
+  const d30 = dayIndex(utcDay(2026, 1, 30));
+  const dayTiles = (day: number) => {
+    const { start, end } = dayRange(day);
+    return getTileIndicesForViewport(start, end, FINEST_LEVEL);
+  };
+
+  it("loads tile listings per station without auth", async () => {
+    const listEnvelopeTiles = jest.fn(async () => new Set(dayTiles(d30)));
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");   // 3 days
+    await store.refresh();                        // note: no setAuthReady()
+    const key = [...store.stations.keys()][0];
+    expect(listEnvelopeTiles).toHaveBeenCalledTimes(1);
+    expect(store.envelopeCoverageFor(key).state).toBe("loaded");
+  });
+
+  it("records an error state when the listing fails", async () => {
+    const listEnvelopeTiles = jest.fn(async () => { throw new Error("nope"); });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+    expect(store.envelopeCoverageFor(key).state).toBe("error");
   });
 });
 
