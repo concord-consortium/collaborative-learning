@@ -148,13 +148,13 @@ export const DocumentModel = Tree.named("Document")
       return !!self.content;
     },
     get metadata(): IDocumentMetadata {
-      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent,
-              kind } = self;
+      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent, kind,
+              contextId } = self;
       // `groupId` is undefined for everything but a group document, matching the stored field it mirrors,
       // so this shape agrees with what Firestore holds. The author's group is deliberately absent: it is
       // not document metadata. Nothing writes this back to Firestore or Firebase today — it is used for
       // finding Firestore documents.
-      return { uid, groupId, type, key, createdAt, title, concurrent, kind,
+      return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, offeringId: self.offeringId, visibility } as IDocumentMetadata;
     },
