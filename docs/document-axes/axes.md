@@ -55,6 +55,18 @@ are set.
 - A **publication** broadens scope to the whole offering or class while its `owner` stays the
   publisher — `owner` and `scope` diverging is the signature of publishing.
 
+**Scope is two dimensions, not one level** — curriculum (unit → investigation → problem) and owner
+(class → group → user) — with the offering crossing both rather than sitting on either. A personal
+document is user-owned with no curriculum scope; a class-wide document is class-owned with unit
+curriculum scope. Neither is "more scoped" than the other, which is why scope cannot collapse to a
+single ordered `scopeLevel`. The model, the guards that read it, and where each stored shape sits are
+in [../document-scope.md](../document-scope.md).
+
+One consequence is worth noting here: the creation side names *combinations* rather than dimensions.
+A kind's registered `scopeType` (`class`, `classUnit`, `offering`, `group`) is shorthand for a
+pairing, and `offering` names the crossing point directly. That suits a creation preset, which must
+fix both dimensions at once, but it is not the vocabulary read-side consumers should use.
+
 **Scope also defines `canonical` slots.** A canonical slot *is* a scope that at most one document is
 expected to fill — "the problem doc for this user in this offering", "the group doc for this group"
 (see `canonical`).

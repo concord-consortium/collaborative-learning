@@ -19,9 +19,11 @@
 
 ## Summary — what this PR delivers
 
-1. **Scope guards** — two named predicates over the stored association fields (`hasGroupScope`,
-   `hasClassUnitScope`) in a new leaf module. This resolves the scope-modeling checkpoint the project deferred to
-   its richest consumer: **narrow named guards, no `scopeLevel` enum and no unified `scope` struct.**
+1. **Scope guards** — named predicates over the stored association fields, one per scope dimension
+   (`hasGroupOwnerScope`, `hasUnitCurriculumScope`), in a new leaf module. This resolves the scope-modeling
+   checkpoint the project deferred to its richest consumer: **scope is two independent dimensions — curriculum
+   (unit/investigation/problem) and owner (class/group/user) — read through per-dimension guards, with no
+   `scopeLevel` enum and no unified `scope` struct.**
 2. **Explicit-null scope fields for the `classUnit` scope**, so "scoped to a unit but not to a problem" is
    directly queryable, following the convention that a scope field written as `null` means *absent scope* —
    with a backfill pass added to Stage 1's one-shot script for documents created before the change.
@@ -57,35 +59,43 @@ already writes. No consumer needs a "this is a class-wide document" flag, and no
 consumer that asked that question would be branching on identity again, which is exactly what this project
 exists to remove.
 
-**Decision: two narrow guards, no general scope model.** A new leaf module
+**Decision: per-dimension guards, no general scope model.** A new leaf module
 `src/models/document/document-scope.ts` — structural parameter types only, no model imports, the same shape as
-`document-kinds.ts`:
+`document-kinds.ts`.
+
+Scope turns out to be **two dimensions** — curriculum (unit → investigation → problem) and owner (class →
+group → user) — with the offering crossing both rather than sitting on either. That is why no `scopeLevel`
+enum is introduced: a single ordered level cannot express a position on two axes at once. The model and the
+field-by-shape table live in `docs/document-scope.md`, added by this PR; what matters here is the shape of the
+API it produces:
 
 ```ts
-hasGroupScope(doc)     = !!doc.groupId
-hasClassUnitScope(doc) = !!doc.unit && !doc.investigation && !doc.groupId
+hasGroupOwnerScope(doc)     = !!doc.groupId
+hasUnitCurriculumScope(doc) = !!doc.unit && !doc.investigation && !doc.offeringId
 ```
 
-These read only stored association fields — no `type`, no `kind`, no `concurrent`. That matters for a real case:
-under the "All" filter Sort Work lists documents from *other* units of the same class, and a class-wide document
-from another unit has a `kind` that was never registered in this session (kinds are registered when the current
-unit loads). A registry lookup would silently misfile it; a field read cannot.
+Each guard answers about **one** dimension and reads only that dimension's fields, so its meaning does not
+depend on what the other dimension holds. A consumer needing a position on both asks both — a class-wide
+collaborative document is `hasUnitCurriculumScope` *and* not `hasGroupOwnerScope`. That is what drops the
+cross-dimension `!doc.groupId` term the curriculum guard would otherwise carry (a group document is already
+excluded by its `investigation`) and what makes `!doc.offeringId` belong: an offering assigns one problem, so
+it narrows this same dimension.
 
-`hasClassUnitScope` is unambiguous across every document shape CLUE stores today, which is why it needs no
-`concurrent` or `type` term to disambiguate:
+These read only stored association fields — no `type`, no `kind`, no `concurrent`. That matters for a real
+case: under the "All" filter Sort Work lists documents from *other* units of the same class, and a class-wide
+document from another unit has a `kind` that was never registered in this session (kinds are registered when
+the current unit loads). A registry lookup would silently misfile it; a field read cannot.
 
-| document | `unit` | `investigation` | `groupId` | matches? |
-|---|---|---|---|---|
-| personal, learning log | `null` | — | — | no (`unit` is null) |
-| problem, planning, publications | set | set | — | no (has `investigation`) |
-| group | set | set | set | no |
-| exemplar (from curriculum) | set | set | — | no (has `investigation`) |
-| class-wide slot | set | `null` | — | **yes** |
+**Two gaps, recorded rather than closed.** No guard reads the class or user levels of owner scope, because
+those live in `uid` (the class owner is a synthetic `class_<classHash>`). `byName` needs "owned by the class"
+and approximates it with `hasUnitCurriculumScope`, which is correct only while the one class-owned kind is
+also the one unit-scoped kind; the call site is commented to that effect. Separately, `offeringId` is written
+to Firestore at creation but is declared on neither `IDocumentMetadata` nor `DocumentMetadataModel`, so it
+never reaches a read-side consumer — the `!doc.offeringId` term is inert at today's call sites, and every
+document carrying an offering is excluded by its `investigation` instead. Both belong with the `owner` and
+`scope` axes' read sides, which are not in this stage.
 
-`docs/document-scope.md` gains a section recording these guards, the table above, and the decision not to
-introduce a `scopeLevel` enum — with the reasoning that the existing scopes differ along more than one axis (a
-personal document is class+owner scoped; a class-wide document is class+unit scoped), so a single ordered level
-would be ambiguous.
+`docs/document-scope.md` gains the section recording all of the above.
 
 ## Making the scope queryable: explicit-null fields
 
@@ -110,7 +120,7 @@ scope self-describing rather than defined by which fields happen to be missing.
 
 ### Backfilling existing documents
 
-A class-wide document created before this change has neither field, so `hasClassUnitScope` still accepts it
+A class-wide document created before this change has neither field, so `hasUnitCurriculumScope` still accepts it
 client-side (a missing field is falsy just as `null` is) but the new Firestore query does not match it — it
 would silently disappear from Sort Work under the Investigation and Problem filters. Class-wide documents are
 unreleased, so only dev/QA partitions hold any, but the fix is cheap and the tooling already exists: Stage 1's
@@ -136,7 +146,7 @@ Two details worth stating:
   in practice it is already filtered out — but if one ever lacked the field it would be mis-stamped with the
   *group* kind, silently breaking its title and its canonical-pointer slot. Selecting on `groupId` makes the
   two passes select disjoint sets by scope rather than relying on a value that a partial write could leave
-  missing. This is the same group-scope question `hasGroupScope` asks, expressed in the script.
+  missing. This is the same owner-scope question `hasGroupOwnerScope` asks, expressed in the script.
 - **The script is renamed to match what it now does.** `backfill-group-concurrent.ts` →
   `backfill-group-document-axes.ts`, with `backfillGroupConcurrent` → `backfillGroupDocumentAxes` and the test
   file renamed alongside it. It is no longer a one-field backfill: it normalizes the stored axes of every
@@ -180,8 +190,8 @@ equality-only, so Firestore serves it from single-field indexes with no composit
 ### `byGroup`
 
 ```ts
-if (hasGroupScope(doc))     return `${groupTerm} ${doc.groupId}`;
-if (hasClassUnitScope(doc)) return kWholeClassSectionLabel;   // "Whole Class"
+if (hasGroupOwnerScope(doc))     return `${groupTerm} ${doc.groupId}`;
+if (hasUnitCurriculumScope(doc)) return kWholeClassSectionLabel;   // "Whole Class"
 const group = this.stores.groups.groupForUser(doc.uid);
 return group ? `${groupTerm} ${group.id}` : `No ${groupTerm}`;
 ```
@@ -450,8 +460,8 @@ declares a `drivingQuestionBoard` slot, so they are live now.
 
 - `kind` → **done** — presentation now reads the registry (title in Stage 2, title bar here) and no consumer
   branches on kind.
-- `scope` → stays **in progress**, with the read side recorded: narrow named guards (`hasGroupScope`,
-  `hasClassUnitScope`) over stored association fields, and the checkpoint outcome that no `scopeLevel` enum or
+- `scope` → stays **in progress**, with the read side recorded: per-dimension guards (`hasGroupOwnerScope`,
+  `hasUnitCurriculumScope`) over stored association fields, and the checkpoint outcome that no `scopeLevel` enum or
   unified `scope` struct is introduced.
 - behavior modules → the edit-gate predicate and the `concurrent`-driven presentation added to the list of
   behaviors reading axes rather than `type`; the history-write rule outcome recorded once known.
