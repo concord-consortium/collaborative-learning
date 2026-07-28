@@ -440,6 +440,11 @@ adjust the cast (it includes `accessKeyId`, `secretAccessKey`, `sessionToken`, `
 
 ### Task 6: Portal OAuth utilities (`src/seismic-admin/utils/portal-auth.ts`)
 
+> **Superseded in review (code is authoritative):** the sketch below stores the bare token;
+> the implemented version persists `{ portal, token }` and returns the stored token only when
+> the current portal matches (plus trailing-slash normalization in `getPortalUrl` and
+> try/catch around sessionStorage). Don't reintroduce the unscoped version.
+
 **Files:** Create: `src/seismic-admin/utils/portal-auth.ts`, `src/seismic-admin/utils/portal-auth.test.ts`
 
 **Step 1: Failing tests** for the pure/storage parts (jsdom provides `sessionStorage` and lets
