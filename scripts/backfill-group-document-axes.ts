@@ -30,6 +30,10 @@
 // `concurrent` nor `uid` today: a truthy `concurrent` at create should imply `type == "group"`,
 // and/or the create should require userIsRequestUser(), or a class member can create a new document
 // stamped with a classmate's `uid` and `concurrent: true`.
+//
+// The first pass also unblocks a second cleanup: getDocumentTitle (src/models/document/document-kinds.ts)
+// selects the group-document title on `type == "group"` plus a groupId, because a group document may carry
+// no `kind`. Once every group document has one, that check becomes `kind == "group"`.
 
 import type { Firestore } from "firebase-admin/firestore";
 
