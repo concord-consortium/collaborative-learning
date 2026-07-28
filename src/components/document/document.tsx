@@ -9,7 +9,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
 import { CommentWithId } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
-import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
+import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
@@ -238,8 +238,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.isProblem || document.isPlanning) {
       return this.renderProblemTitleBar(type, hideButtons);
     }
-    if (document.isGroup) {
-      return this.renderGroupDocumentTitleBar(hideButtons);
+    if (document.concurrent) {
+      return this.renderCollaborativeTitleBar(hideButtons);
     }
     if (document.isPersonal || document.isLearningLog) {
       return this.renderOtherDocumentTitleBar(type, hideButtons);
@@ -314,13 +314,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private renderGroupDocumentTitleBar(hideButtons?: boolean) {
+  private renderCollaborativeTitleBar(hideButtons?: boolean) {
+    const { appConfig, unit } = this.stores;
     const { document } = this.props;
-    const title = `Group ${document.groupId} Document`;
+    // The title is a by-kind lookup in the kind registry: a group document resolves to its computed
+    // group label, a class-wide slot to the title its unit authored.
+    const title = getDocumentDisplayTitle(unit, document, appConfig) ?? "";
     return this.renderGenericTitleBar({
       title,
       hideButtons,
-      docType: "group",
+      // The kind is the stylesheet hook; documents predating the kind axis fall back to their type.
+      docType: document.kind ?? document.type,
     });
   }
 
