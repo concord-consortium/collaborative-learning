@@ -67,3 +67,13 @@ export async function fetchPortalFirebaseJwt(accessToken: string): Promise<strin
   if (!response.ok) throw new Error(`Portal JWT fetch failed: ${response.status}`);
   return (await response.json()).token;
 }
+
+/** Per-call JWT getter over a portal access token. A failed exchange means the token is
+ *  stale (e.g. expired), so it is cleared before rethrowing: the in-flight operation still
+ *  fails through the normal error path, but the next reload shows the login button again. */
+export function makePortalJwtGetter(accessToken: string): () => Promise<string> {
+  return () => fetchPortalFirebaseJwt(accessToken).catch(err => {
+    clearAccessToken();
+    throw err;
+  });
+}
