@@ -513,6 +513,15 @@ get its own file. Nothing to do for this task.
 
 ### Task 8: Envelope processor (`src/models/stores/seismic/seismic-envelope-processor.ts`)
 
+> **Superseded in review (code is authoritative):** the sketch below flushes non-forced per day
+> and force-flushes only at span end. The implemented version force-flushes EVERY day (fresh
+> pipeline state per day, no span-end flush): coverage is judged from L2 listings alone, so a
+> mid-span upload failure or closed tab would strand already-processed days' L0/L1
+> contributions forever. Forcing per day is safe because the S3 upload path union-merges
+> (min-of-mins/max-of-maxes; sentinels yield), so re-uploading a still-open coarse tile day
+> after day converges — and the midnight-straddling L2 window gets both days' contributions
+> merged instead of last-write-wins. Don't reintroduce the span-end-only flush.
+
 **Files:** Create: `src/models/stores/seismic/seismic-envelope-processor.ts` + test
 
 **Step 1: Failing tests.** All seams injected: `listTiles`, `cache` (readDayChunk), `parseDay`,

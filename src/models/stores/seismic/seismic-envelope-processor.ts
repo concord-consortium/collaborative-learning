@@ -86,8 +86,6 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
   };
 
   for (const span of spans) {
-    // Each span gets fresh pipeline state; boundary tiles are completed by merge-on-upload.
-    const state = createPipelineState();
     for (let day = span.startDay; day <= span.endDay; day++) {
       const buffer = await cache.readDayChunk(stationData, day);
       if (!buffer) {
@@ -96,6 +94,8 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
         updateProgress();
         continue;
       }
+      // Fresh state per day: the forced flush below fully drains it.
+      const state = createPipelineState();
       const segments = parseDay(buffer).sort((a, b) => a.startTime - b.startTime);
       for (const seg of segments) {
         // Only scale is epoch-dependent, so it alone is re-resolved per segment.
@@ -110,13 +110,17 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
           processL2Point(state, times[i], quantize(mins[i], rangeMax), quantize(maxs[i], rangeMax));
         }
       }
-      flushTiles(state, queueTile);
+
+      // Force-flush every tile each day, including open L0/L1 tiles. The S3 upload path
+      // union-merges, so re-uploading the same still-open tile day after day converges to
+      // the right values. This keeps already-processed days' L0/L1 contributions from being
+      // stranded in memory when a later upload fails or the tab closes, and it lets a midnight-straddling
+      // L2 window get both adjacent days' contributions merged in S3 instead of last-write-wins.
+      flushTiles(state, queueTile, true);
       await uploadPending();
       processedDays++;
       updateProgress();
     }
-    flushTiles(state, queueTile, true);
-    await uploadPending();
   }
 
   return { uploadedTiles, processedDays, skippedDays, totalDays };

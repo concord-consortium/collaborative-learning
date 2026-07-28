@@ -5,7 +5,8 @@ import {
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { ChannelMetadata, EnvelopeTileData, RawSegment, StationData, TimeRange }
   from "../../../../shared/seismic/seismic-types";
-import { getTileDuration, getTileIndex, getTileIndicesForViewport } from "../../../../shared/seismic/tile-addressing";
+import { getPointIndexInTile, getTileDuration, getTileIndex, getTileIndicesForViewport }
+  from "../../../../shared/seismic/tile-addressing";
 import { processEnvelopeCoverage } from "./seismic-envelope-processor";
 
 describe("processEnvelopeCoverage", () => {
@@ -93,10 +94,8 @@ describe("processEnvelopeCoverage", () => {
     const l1Tile = getTileIndex(dayStart, 1);
     const l0Tile = getTileIndex(dayStart, 0);
 
-    // The first L2 tile completes when segB advances past it, so it flushes with the day;
-    // the rest (second L2 tile, L1, L0) only flush at the forced span-end flush.
+    // Every tile — both L2s plus the still-open L1/L0 — uploads with the day's forced flush.
     const uploads = options.uploadTile.mock.calls;
-    expect(uploads[0].slice(0, 2)).toEqual([2, l2Tile0]);
     expect(uploads.map(call => call.slice(0, 2)).sort()).toEqual([
       [0, l0Tile], [1, l1Tile], [2, l2Tile0], [2, l2Tile0 + 1],
     ]);
@@ -153,6 +152,53 @@ describe("processEnvelopeCoverage", () => {
     const l2Upload = options.uploadTile.mock.calls.find(call => call[0] === 2)!;
     expect(l2Upload[1]).toBe(getTileIndex(dayStart, 2));
     expect(l2Upload[2].mins[0]).toBe(quantize(0.04, H_RANGE));
+  });
+
+  it("uploads a day-boundary L2 tile once per adjacent day, leaving the merge to the uploader", async () => {
+    const options = makeOptions();
+    const twoDayRange: TimeRange = { start: dayStart, end: dayStart + 2 * SECONDS_PER_DAY };
+    // The L2 grid does not align with midnight, so one window straddles the day boundary.
+    const midnight = dayStart + SECONDS_PER_DAY;
+    const windowStart = Math.floor(midnight / L2_SPACING) * L2_SPACING;
+    const day1Seg: RawSegment = {
+      startTime: windowStart,
+      sampleRate: SAMPLE_RATE,
+      samples: new Float64Array(Math.round((midnight - windowStart) * SAMPLE_RATE)).fill(0.01),
+    };
+    const day2Seg: RawSegment = {
+      startTime: midnight,
+      sampleRate: SAMPLE_RATE,
+      samples: new Float64Array(54).fill(0.02), // 1.35s: exactly the rest of the straddling window
+    };
+    options.parseDay.mockReturnValueOnce([day1Seg]).mockReturnValueOnce([day2Seg]);
+
+    const result = await processEnvelopeCoverage({ ...options, range: twoDayRange });
+
+    // Each day force-flushes its own contribution to the shared tile; the S3 uploader's
+    // union-merge combines them, so twice-uploaded is the observable here.
+    const boundaryTile = getTileIndex(windowStart, 2);
+    const point = getPointIndexInTile(windowStart, 2, boundaryTile);
+    const boundaryUploads = options.uploadTile.mock.calls.filter(
+      call => call[0] === 2 && call[1] === boundaryTile);
+    expect(boundaryUploads).toHaveLength(2);
+    expect(boundaryUploads[0][2].mins[point]).toBe(quantize(0.01, H_RANGE));
+    expect(boundaryUploads[1][2].mins[point]).toBe(quantize(0.02, H_RANGE));
+    expect(result.processedDays).toBe(2);
+  });
+
+  it("stops uploading and rejects when uploadTile rejects", async () => {
+    const options = makeOptions();
+    // One L2 window queues three tiles (L2, L1, L0) in the day's forced flush.
+    options.parseDay.mockReturnValue([constantSegment(dayStart, [0.01])]);
+    options.uploadTile
+      .mockImplementationOnce(async () => {})
+      .mockImplementationOnce(async () => { throw new Error("upload failed"); });
+    const onTileUploaded = jest.fn();
+
+    await expect(processEnvelopeCoverage({ ...options, onTileUploaded })).rejects.toThrow("upload failed");
+
+    expect(options.uploadTile).toHaveBeenCalledTimes(2);
+    expect(onTileUploaded).toHaveBeenCalledTimes(1);
   });
 
   it("rejects before reading the cache when channel metadata is missing", async () => {
