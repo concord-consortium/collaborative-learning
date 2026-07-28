@@ -199,6 +199,11 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   // session (e.g. it belongs to a unit that has not loaded), the lookup above misses and execution reaches
   // here; without the `groupId` check it would render as "Group undefined Document" instead of falling
   // through to `undefined`, which callers already handle.
+  //
+  // TRANSITIONAL: this reads `type` only because a group document may carry no `kind`. Once
+  // scripts/backfill-group-document-axes.ts has stamped `kind` on every group document in every
+  // environment, this becomes `document.kind === GroupDocument` and the `groupId` check goes away with it —
+  // a class-wide document has its own kind, so it can no longer reach this branch at all.
   if (document.type === GroupDocument && document.groupId) return `Group ${document.groupId} Document`;
   return undefined;
 }
