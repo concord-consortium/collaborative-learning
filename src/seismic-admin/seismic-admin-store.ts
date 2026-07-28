@@ -72,7 +72,7 @@ export interface CoverageStats {
 }
 
 export interface ModelStats {
-  eventCount: number;
+  eventCount?: number;
   coveredDays: Map<string, Set<number>>; // Days fully covered for each station, keyed by station key
   partialDays: Map<string, Set<number>>; // Days partially covered for each station, keyed by station key
   coveredDayCount: number; // Total days fully covered for all stations

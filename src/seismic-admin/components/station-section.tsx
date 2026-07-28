@@ -26,7 +26,7 @@ const CoverageSection = observer(function CoverageSection({ stationKey, stationL
   const stats = store.modelStats(model.metadataUrl, stationKey);
   const { eventCount, coveredDays, partialDays, coveredDayCount, totalDays } = stats;
 
-  const statsMessage = `${coveredDayCount} / ${totalDays} days · ${eventCount} events`;
+  const statsMessage = `${coveredDayCount} / ${totalDays} days · ${eventCount ?? 0} events`;
   const highlightedDays = stationKey ? coveredDays.get(stationKey) : undefined;
   const midDays = stationKey ? partialDays.get(stationKey) : undefined;
   const coverageState = stationKey ? store.coverageFor(stationKey, model.metadataUrl).state : "loaded";

@@ -800,7 +800,7 @@ and `eventCount`):
 private collectDayStats(
   stationKeys: Set<string>,
   getDayStates: (stationKey: string) => Map<number, DayCoverageState> | undefined
-): Omit<ModelStats, "eventCount"> {
+): ModelStats {
   const coveredDays = new Map<string, Set<number>>();
   const partialDays = new Map<string, Set<number>>();
   let coveredDayCount = 0;
@@ -839,11 +839,10 @@ envelopeDayStates(stationKey: string): Map<number, DayCoverageState> | undefined
   return classifyEnvelopeDayCoverage(stats.tileIndices, range);
 }
 
-/** Envelope coverage stats for one station, or all selected stations when stationKey
- *  is absent. eventCount is always 0 (reuses the ModelStats shape for the UI). */
+/** Envelope coverage stats for one station, or all selected stations when stationKey is absent. */
 envelopeStats(stationKey?: string): ModelStats {
   const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
-  return { eventCount: 0, ...this.collectDayStats(stations, sk => this.envelopeDayStates(sk)) };
+  return this.collectDayStats(stations, sk => this.envelopeDayStates(sk));
 }
 ```
 
