@@ -521,7 +521,8 @@ one-segment days (constant sample rate) so expected tile contents are computable
    `onTileUploaded` fired per upload; result counts `{processedDays: 1, skippedDays: 0}`.
 3. Missing day with no OPFS file → skippedDays incremented, no uploads for it.
 4. Segments processed in time order even when parseDay returns them out of order.
-5. Unknown instrument code → the span fails (throw), propagated to the caller.
+5. Missing channel metadata or unknown instrument code → the call rejects up front, before
+   any day is read or uploaded (the quantization range is resolved once per channel).
 
 **Step 3: Implement:**
 
@@ -587,6 +588,12 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
   const cache = options.cache ?? createOpfsCache();
   const parseDay = options.parseDay ?? defaultParseDay;
 
+  // instrumentCode is the channel code's 2nd character, identical across all of a channel's metadata epochs.
+  const channelMetadata = getMetadataForChannel(metadata, stationData, range.start);
+  if (!channelMetadata) throw new Error(`No metadata for channel ${stationData.channel}`);
+  const rangeMax = AMPLITUDE_RANGES[channelMetadata.instrumentCode];
+  if (!rangeMax) throw new Error(`Unknown instrument code "${channelMetadata.instrumentCode}"`);
+
   let uploadedTiles = 0;
   let processedDays = 0;
   let skippedDays = 0;
@@ -616,13 +623,9 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
       }
       const segments = parseDay(buffer).sort((a, b) => a.startTime - b.startTime);
       for (const seg of segments) {
-        const channelMetadata = getMetadataForChannel(metadata, stationData, seg.startTime);
-        if (!channelMetadata) {
-          throw new Error(`No metadata for channel ${stationData.channel}`);
-        }
-        const { scale, instrumentCode } = channelMetadata;
-        const rangeMax = AMPLITUDE_RANGES[instrumentCode];
-        if (!rangeMax) throw new Error(`Unknown instrument code "${instrumentCode}"`);
+        const segMetadata = getMetadataForChannel(metadata, stationData, seg.startTime);
+        if (!segMetadata) throw new Error(`No metadata for channel ${stationData.channel}`);
+        const { scale } = segMetadata;
         const physical = new Float64Array(seg.samples.length);
         for (let i = 0; i < seg.samples.length; i++) physical[i] = seg.samples[i] / scale;
         const { mins, maxs, times } =
