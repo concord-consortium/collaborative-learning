@@ -10,7 +10,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { getCurriculumScopeLabel, hasGroupOwnerScope, hasUnitCurriculumScope } from "./document-scope";
+import { getCurriculumScopeLabel, hasUnitCurriculumScope } from "./document-scope";
 import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
@@ -183,7 +183,6 @@ export function canUserEditDocument({
   const uid = documentMetadata?.uid ?? document?.uid;
   const type = documentMetadata?.type ?? document?.type;
   const concurrent = documentMetadata?.concurrent ?? document?.concurrent;
-  const groupId = documentMetadata?.groupId ?? document?.groupId;
   const unit = documentMetadata?.unit ?? document?.unit;
   const investigation = documentMetadata?.investigation ?? document?.investigation;
   const contextId = documentMetadata?.context_id ?? document?.contextId;
@@ -194,11 +193,27 @@ export function canUserEditDocument({
   if (!concurrent) return false;
   // Beyond this point the user must be inside the document's scope, asked at the narrowest level the
   // document is scoped to.
-  if (hasGroupOwnerScope({ groupId })) {
-    return !!user.currentGroupId && groupId === user.currentGroupId;
-  }
+  if (isUserInDocumentsGroup(uid, user)) return true;
   if (hasUnitCurriculumScope({ unit, investigation })) {
     return !!contextId && contextId === user.classHash;
   }
   return false;
+}
+
+/**
+ * Whether the user belongs to the group that owns this document.
+ *
+ * Compares owners rather than group ids. A group id is unique only within an offering — groups live
+ * at `offerings/<offeringId>/groups` — so the same group number in another offering is a different
+ * set of students. The owner (`group_<offeringId>_<groupId>`) carries the offering, which makes the
+ * comparison exact; Sort Work's "All" filter lists documents from every offering the class has
+ * worked through, so documents from another offering do reach this check.
+ *
+ * It also avoids reading `groupId` off a document model, where the field carries a different meaning:
+ * for a problem document it is the author's *current* group, refreshed as groups change, rather than
+ * the group that owns the document.
+ */
+function isUserInDocumentsGroup(uid: string | null | undefined, user: UserModelType): boolean {
+  if (!uid || !user.currentGroupId || !user.offeringId) return false;
+  return uid === user.userIdForGroupDocuments;
 }

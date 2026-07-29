@@ -246,8 +246,12 @@ describe("document utils", () => {
 
   describe("canUserEditDocument", () => {
     const student = UserModel.create({ id: "me", type: "student", name: "Me", classHash: "class-1" });
+    const kOffering = "off-1";
+    // A group document's owner, the same synthetic id the app stamps at creation.
+    const groupOwner = (groupId: string, offeringId = kOffering) => `group_${offeringId}_${groupId}`;
     const groupedStudent = UserModel.create({
-      id: "me", type: "student", name: "Me", classHash: "class-1", currentGroupId: "3"
+      id: "me", type: "student", name: "Me", classHash: "class-1",
+      currentGroupId: "3", offeringId: kOffering
     });
     const teacher = UserModel.create({ id: "t1", type: "teacher", name: "Teacher", classHash: "class-1" });
     const researcher = UserModel.create({ id: "r1", type: "researcher", name: "Researcher", classHash: "class-1" });
@@ -269,21 +273,39 @@ describe("document utils", () => {
 
     it("allows a member of the owning group to edit a group document", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
+        documentMetadata: metadata({
+          uid: groupOwner("3"), concurrent: true, groupId: "3", unit: "sas", investigation: "1"
+        }),
         user: groupedStudent
       })).toBe(true);
     });
 
     it("refuses another group's document", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({ concurrent: true, groupId: "7", unit: "sas", investigation: "1" }),
+        documentMetadata: metadata({
+          uid: groupOwner("7"), concurrent: true, groupId: "7", unit: "sas", investigation: "1"
+        }),
+        user: groupedStudent
+      })).toBe(false);
+    });
+
+    it("refuses the same group number in a different offering — a different set of students", () => {
+      // Sort Work's "All" filter lists documents from every offering the class has worked through,
+      // so this document does reach the check. Group ids are unique only within an offering.
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          uid: groupOwner("3", "other-offering"), concurrent: true, groupId: "3",
+          unit: "sas", investigation: "1"
+        }),
         user: groupedStudent
       })).toBe(false);
     });
 
     it("refuses a group document when the user is not in a group", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
+        documentMetadata: metadata({
+          uid: groupOwner("3"), concurrent: true, groupId: "3", unit: "sas", investigation: "1"
+        }),
         user: student
       })).toBe(false);
     });
@@ -355,18 +377,31 @@ describe("document utils", () => {
       })).toBe(false);
     });
 
-    it("prefers the reactive metadata's group id over a still-loading document", () => {
+    it("prefers the reactive metadata's owner over a still-loading document", () => {
       // A groupmate's document syncs into the metadata before its content finishes loading; reading
       // the metadata per field is what makes the Edit button appear without a reload.
       const stillLoading = createDocumentModel({
-        uid: "someone-else", type: GroupDocument, key: "k", concurrent: true
+        uid: "", type: GroupDocument, key: "k", concurrent: true
       });
-      expect(stillLoading.groupId).toBeUndefined();
       expect(canUserEditDocument({
         document: stillLoading,
-        documentMetadata: metadata({ concurrent: true, groupId: "3", unit: "sas", investigation: "1" }),
+        documentMetadata: metadata({
+          uid: groupOwner("3"), concurrent: true, groupId: "3", unit: "sas", investigation: "1"
+        }),
         user: groupedStudent
       })).toBe(true);
+    });
+
+    it("does not treat a document model's groupId as evidence of group ownership", () => {
+      // On a problem document, DocumentModel.groupId is the author's *current* group, refreshed as
+      // groups change (db-docs-content-listener) — not the group that owns the document. Only the
+      // owner decides ownership, so a matching groupId must not grant an edit on its own.
+      const authoredByAGroupmate = createDocumentModel({
+        uid: "someone-else", type: ProblemDocument, key: "k", concurrent: true,
+        groupId: "3", unit: "sas", investigation: "1"
+      });
+      expect(authoredByAGroupmate.groupId).toBe("3");
+      expect(canUserEditDocument({ document: authoredByAGroupmate, user: groupedStudent })).toBe(false);
     });
 
     it("allows a user to edit their own document via the document-only path (no metadata)", () => {
