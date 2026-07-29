@@ -264,7 +264,8 @@ export const DataflowGroupsOverlay = observer(function DataflowGroupsOverlay({ r
   // directly, so bounds stay current mid-gesture.
   const zoom = reteManager.mstContent.liveProgramZoom;
   const scale = zoom?.scale ?? 1;
-  const dx = zoom?.dx ?? 0, dy = zoom?.dy ?? 0;
+  const dx = zoom?.dx ?? 0;
+  const dy = zoom?.dy ?? 0;
 
   // Build a signature of everything that can move a wire endpoint (zoom, group identity/label/size,
   // member positions, exposed-socket wiring) so the effect below re-measures wires only when needed.
