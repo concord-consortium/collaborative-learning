@@ -3,9 +3,9 @@
  * `problem`, `offeringId`, `groupId`), stamped at creation from the kind's registered `scopeType`
  * (see document-kinds.ts).
  *
- * Scope has two dimensions — curriculum and owner — and each guard answers about one of them, reading
- * only that dimension's fields. A consumer needing a position on both asks both. See
- * docs/document-scope.md for the model, the field-by-shape table, and what is not covered yet.
+ * Each guard answers about one axis, reading only that axis's fields; a consumer needing a position on
+ * more than one asks each. See docs/document-axes/reading-axes-in-code.md for the field-by-shape table
+ * and what is not covered yet, and docs/document-axes/axes.md for what the axes mean.
  *
  * A guard reads stored fields only, never the kind registry: Sort Work lists documents from other
  * units, whose kinds are not registered in the current session.
