@@ -1616,7 +1616,7 @@ export class ReteManager implements INodeServices {
   // and its measured element size (converted from screen back to world units); falls back to the default
   // node dimensions when an element isn't measurable (e.g. a member hidden while its group is collapsed).
   // Returns null when no member is present. Used both to fit content and to place group overlays.
-  public calculateContentBounds = (nodeIds?: string[]) => {
+  public calculateContentBounds(nodeIds?: string[]) {
     const nodeList = nodeIds
       ? nodeIds.map(id => this.mstProgram.nodes.get(id))
       : [...this.mstProgram.nodes.values()];
@@ -1629,8 +1629,12 @@ export class ReteManager implements INodeServices {
       if (!node) continue;
       const { currentX: x, currentY: y } = node;
       const rect = this.area.nodeViews.get(node.id)?.element?.getBoundingClientRect();
-      const w = rect ? rect.width / k : kDefaultNodeWidth;   // screen px → world units
-      const h = rect ? rect.height / k : kDefaultNodeHeight;
+      // A zero-size rect means "not measurable", not "zero wide". A member hidden inside a collapsed
+      // group is display:none, and getBoundingClientRect reports all zeros for it rather than
+      // returning undefined — so test the dimensions, not just the rect, or hidden members collapse
+      // to a point and shrink the computed bounds.
+      const w = rect?.width ? rect.width / k : kDefaultNodeWidth;   // screen px → world units
+      const h = rect?.height ? rect.height / k : kDefaultNodeHeight;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
       maxX = Math.max(maxX, x + w);
@@ -1639,7 +1643,7 @@ export class ReteManager implements INodeServices {
 
     if (minX === Infinity) return null;
     return { minX, minY, maxX, maxY };
-  };
+  }
 
   private calculateFitTransform = (bounds: IContentBounds, containerWidth: number, containerHeight: number) => {
     const contentWidth = bounds.maxX - bounds.minX;
