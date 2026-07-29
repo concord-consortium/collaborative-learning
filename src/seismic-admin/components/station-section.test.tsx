@@ -94,11 +94,12 @@ describe("StationSection coverage rows", () => {
     await flush();
     const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
 
-    expect(container.querySelectorAll(".data-section.coverage").length).toBe(2);
+    // 2 models + 1 envelope = 3
+    expect(container.querySelectorAll(".data-section.coverage").length).toBe(3);
     expect(screen.getByText("Compact")).toBeInTheDocument();
     expect(screen.getByText("Large")).toBeInTheDocument();
     expect(screen.getAllByText("3 / 3 days · 2 events").length).toBe(2);
-    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(2);
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(3);
   });
 
   it("shows a three-state timeline including partial days", async () => {
@@ -119,7 +120,8 @@ describe("StationSection coverage rows", () => {
     const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
 
     expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
-    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+    // Only envelope coverage timeline is displayed
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(1);
   });
 
   it("shows zero stats and no timeline when coverage failed to load", async () => {
@@ -131,7 +133,8 @@ describe("StationSection coverage rows", () => {
     const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
 
     expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
-    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+    // Only envelope coverage timeline is displayed
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(1);
   });
 
   it("shows per-model aggregate lines with no timeline bars for all stations", async () => {
@@ -168,7 +171,7 @@ describe("StationSection coverage rows", () => {
       const { container } = renderSection(store, key);
 
       expect(screen.getByText("3 / 3 days")).toBeInTheDocument();
-      const timeline = container.querySelector(".data-section.envelopes .raw-timeline");
+      const timeline = container.querySelector(".data-section.coverage .raw-timeline");
       expect(timeline).toHaveAttribute("aria-label", "envelope coverage timeline for AK K204 HNZ");
     });
 
@@ -178,7 +181,7 @@ describe("StationSection coverage rows", () => {
       await flush();
       const { container } = renderSection(store, key);
 
-      const section = container.querySelector<HTMLElement>(".data-section.envelopes");
+      const section = container.querySelector<HTMLElement>(".data-section.coverage");
       expect(within(section!).getByText("Loading...")).toBeInTheDocument();
       expect(section!.querySelector(".raw-timeline")).toBeNull();
     });
@@ -189,7 +192,7 @@ describe("StationSection coverage rows", () => {
       const { container } = renderSection(store, key);
 
       expect(screen.getByText("Unable to list envelopes")).toBeInTheDocument();
-      expect(container.querySelector(".data-section.envelopes .raw-timeline")).toBeNull();
+      expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
     });
 
     it("shows an aggregate count line with no timeline bar for all stations", async () => {
@@ -202,7 +205,7 @@ describe("StationSection coverage rows", () => {
       );
 
       expect(screen.getByText("3 / 3 days")).toBeInTheDocument();
-      expect(container.querySelector(".data-section.envelopes .raw-timeline")).toBeNull();
+      expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
     });
   });
 
