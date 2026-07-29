@@ -37,7 +37,9 @@ interface Connection {
 interface Group {
   id: string;
   label: string;
-  nodeIds: string[];
+  // GroupModel.nodeIds is a `types.map` used as a set (key = value = node id), so its snapshot is
+  // an object keyed by node id — not an array. Matches the `nodes`/`connections`/`groups` maps above.
+  nodeIds: Record<string, string>;
   collapsed?: boolean;
 }
 
@@ -373,7 +375,7 @@ export function programToGraphviz(program: Program): string {
   groups.forEach(group => {
     lines.push(`  subgraph cluster_${String(group.id).replace(/\W/g, "_")} {`);
     lines.push(`    label="${escapeDotString(group.label)}";`);
-    group.nodeIds.forEach(nodeId => {
+    Object.keys(group.nodeIds).forEach(nodeId => {
       const decl = nodeDecls.get(nodeId);
       if (decl) {
         lines.push(`  ${decl}`);
