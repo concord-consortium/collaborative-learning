@@ -7,6 +7,7 @@ import { ChannelMetadata, EnvelopeTileData, RawSegment, StationData, TimeRange }
   from "../../../../shared/seismic/seismic-types";
 import { getPointIndexInTile, getTileDuration, getTileIndex, getTileIndicesForViewport }
   from "../../../../shared/seismic/tile-addressing";
+import { makeFakeDownloadService } from "./seismic-coverage-test-fakes";
 import { processEnvelopeCoverage } from "./seismic-envelope-processor";
 
 describe("processEnvelopeCoverage", () => {
@@ -52,7 +53,7 @@ describe("processEnvelopeCoverage", () => {
       uploadTile: jest.fn(async (level: number, tileIndex: number, tile: EnvelopeTileData) => {}),
       listTiles: jest.fn(async () => new Set<number>()),
       fetchMetadata: jest.fn(async () => makeMetadata()),
-      cache: { readDayChunk: jest.fn(async (): Promise<ArrayBuffer | null> => new ArrayBuffer(8)) },
+      downloadService: makeFakeDownloadService([day]),
       parseDay: jest.fn((): RawSegment[] => []),
     };
   }
@@ -67,7 +68,7 @@ describe("processEnvelopeCoverage", () => {
 
     expect(result).toEqual({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
     expect(options.fetchMetadata).not.toHaveBeenCalled();
-    expect(options.cache.readDayChunk).not.toHaveBeenCalled();
+    expect(options.downloadService.ensureRange).not.toHaveBeenCalled();
     expect(options.uploadTile).not.toHaveBeenCalled();
     expect(onProgress).toHaveBeenCalledWith(0, 0);
   });
@@ -122,9 +123,9 @@ describe("processEnvelopeCoverage", () => {
     expect(result).toEqual({ uploadedTiles: uploads.length, processedDays: 1, skippedDays: 0, totalDays: 1 });
   });
 
-  it("skips a day whose raw file is missing from the cache", async () => {
+  it("skips a day whose raw file cannot be read back", async () => {
     const options = makeOptions();
-    options.cache.readDayChunk.mockResolvedValue(null);
+    options.downloadService.readDay.mockResolvedValue(null);
     const onProgress = jest.fn();
 
     const result = await processEnvelopeCoverage({ ...options, onProgress });
@@ -155,7 +156,7 @@ describe("processEnvelopeCoverage", () => {
   });
 
   it("uploads a day-boundary L2 tile once per adjacent day, leaving the merge to the uploader", async () => {
-    const options = makeOptions();
+    const options = { ...makeOptions(), downloadService: makeFakeDownloadService([day, day + 1]) };
     const twoDayRange: TimeRange = { start: dayStart, end: dayStart + 2 * SECONDS_PER_DAY };
     // The L2 grid does not align with midnight, so one window straddles the day boundary.
     const midnight = dayStart + SECONDS_PER_DAY;
@@ -199,23 +200,75 @@ describe("processEnvelopeCoverage", () => {
 
     expect(options.uploadTile).toHaveBeenCalledTimes(2);
     expect(onTileUploaded).toHaveBeenCalledTimes(1);
+    expect(options.downloadService.cancel).toHaveBeenCalled();
   });
 
-  it("rejects before reading the cache when channel metadata is missing", async () => {
+  it("rejects before starting a download when channel metadata is missing", async () => {
     const options = makeOptions();
     options.fetchMetadata.mockResolvedValue(makeMetadata({ channel: "BHZ" }));
 
     await expect(processEnvelopeCoverage(options)).rejects.toThrow("No metadata for channel HNZ");
-    expect(options.cache.readDayChunk).not.toHaveBeenCalled();
+    expect(options.downloadService.ensureRange).not.toHaveBeenCalled();
     expect(options.uploadTile).not.toHaveBeenCalled();
   });
 
-  it("rejects before reading the cache when the instrument code is unknown", async () => {
+  it("rejects before starting a download when the instrument code is unknown", async () => {
     const options = makeOptions();
     options.fetchMetadata.mockResolvedValue(makeMetadata({ instrumentCode: "X" }));
 
     await expect(processEnvelopeCoverage(options)).rejects.toThrow('Unknown instrument code "X"');
-    expect(options.cache.readDayChunk).not.toHaveBeenCalled();
+    expect(options.downloadService.ensureRange).not.toHaveBeenCalled();
     expect(options.uploadTile).not.toHaveBeenCalled();
+  });
+
+  it("downloads each missing span separately with exact inclusive bounds, forwarding proxy", async () => {
+    const options = makeOptions();
+    const threeDayRange: TimeRange = { start: dayStart, end: dayStart + 3 * SECONDS_PER_DAY };
+    // Middle day fully covered; days 1 and 3 remain missing, forming two one-day spans.
+    const covered = new Set(getTileIndicesForViewport(
+      dayStart + SECONDS_PER_DAY, dayStart + 2 * SECONDS_PER_DAY, FINEST_LEVEL));
+    options.listTiles.mockResolvedValue(covered);
+
+    await processEnvelopeCoverage({ ...options, range: threeDayRange, proxy: true });
+
+    const { ensureRange } = options.downloadService;
+    expect(ensureRange).toHaveBeenCalledTimes(2);
+    expect(ensureRange).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      network: "AK", station: "K204", channel: "HNZ",
+      startSec: dayStart, endSec: dayStart, proxy: true,
+    }));
+    expect(ensureRange).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      startSec: dayStart + 2 * SECONDS_PER_DAY, endSec: dayStart + 2 * SECONDS_PER_DAY, proxy: true,
+    }));
+  });
+
+  it("counts empty and errored days as skipped without parsing them", async () => {
+    const options = { ...makeOptions(), downloadService: makeFakeDownloadService([]) };
+    options.range = { start: dayStart, end: dayStart + 2 * SECONDS_PER_DAY };
+    options.downloadService.emptyDays.push(day);
+    options.downloadService.erroredDays.push(day + 1);
+    const onProgress = jest.fn();
+
+    const result = await processEnvelopeCoverage({ ...options, onProgress });
+
+    expect(result).toEqual({ uploadedTiles: 0, processedDays: 0, skippedDays: 2, totalDays: 2 });
+    expect(options.parseDay).not.toHaveBeenCalled();
+    expect(onProgress).toHaveBeenLastCalledWith(2, 2);
+  });
+
+  it("reports each landed day through onDayDownloaded with its byte count", async () => {
+    const options = makeOptions();
+    options.downloadService.bytesForDay.mockReturnValue(123);
+    const onDayDownloaded = jest.fn();
+
+    await processEnvelopeCoverage({ ...options, onDayDownloaded });
+
+    expect(onDayDownloaded.mock.calls).toEqual([[day, 123]]);
+  });
+
+  it("cancels the download service when processing completes", async () => {
+    const options = makeOptions();
+    await processEnvelopeCoverage(options);
+    expect(options.downloadService.cancel).toHaveBeenCalled();
   });
 });

@@ -18,7 +18,7 @@ export function makeFakeDownloadService(days: number[]) {
       pending = days.filter(d => d * SECONDS_PER_DAY >= startSec && d * SECONDS_PER_DAY <= endSec);
     }),
     nextReadyDay: jest.fn(async () => pending.shift() ?? DONE),
-    readDay: jest.fn(async () => new ArrayBuffer(8)),
+    readDay: jest.fn(async (): Promise<ArrayBuffer | null> => new ArrayBuffer(8)),
     bytesForDay: jest.fn((_day: number) => 0),
     cancel: jest.fn(),
     erroredDays: [] as number[],
