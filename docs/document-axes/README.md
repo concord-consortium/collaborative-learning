@@ -29,12 +29,13 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 | `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524; class+unit pointer scope added CLUE-550 Stage 2 |
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
 | `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | done | CLUE-550 Stage 1 (stored + registry seeded); titles resolved by kind Stage 2; presentation wired Stage 3 (workspace title bar reads the registry; no consumer branches on kind); Stage 3 also scopes a unit-declared kind's definition to its unit — see "Static and dynamic kinds" in [axes.md](./axes.md) |
-| `owner` (authoring identity / provenance) | creation: kind-declared `ownerType` → owner `uid` (in the kind registry); read: getter over stored `uid` | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds via `getDocumentOwner`; read-side getter still to come) |
-| `scope` (owner + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields, keyed on a registered `scopeType`; read: consumers read the individual scope fields through named per-dimension guards (`hasGroupOwnerScope`, `hasUnitCurriculumScope`) rather than branching on `type` | in progress | CLUE-550 Stage 2 (creation side, every kind); Stage 3 (read side: guards in `document-scope.ts` split along the two dimensions — curriculum unit/investigation/problem and owner class/group/user; the unit curriculum scope states its absent curriculum fields explicitly so it is queryable). Still to come: guards for the class and user levels of owner scope, which live in `uid` |
+| `owner` (who the document belongs to) | creation: kind-declared `ownerType` → owner `uid` (`getDocumentOwner`) plus a group owner's stored `groupId` (`getDocumentOwnerFields`); read: `hasGroupOwner(doc)` over the stored `groupId`, `hasClassOwner(doc)` over the uid's `class_` prefix | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds); Stage 3 (both guards; `groupId` moved onto this axis, off the container). Still to come: the user level, and a getter that returns which owner a document has rather than testing for one |
+| `container` (where the document is kept: class → classUnit → offering) | creation: kind-declared `containerType`, stamped by `getDocumentLocationFields(kind, ctx)`; read: `isInClassUnitContainer(doc)`, over an `offeringId` now surfaced on both metadata types | in progress | CLUE-550 Stage 2 (creation side, every kind); Stage 3 (`containerType` replaces `scopeType`, with no group level — a group document is kept in the offering and owned by the group; the edit gate switched from a curriculum test to this one). Still to come: a guard for the class level, and a getter returning the container |
+| `curriculum` (what the document is about: nothing → unit → investigation → problem) | creation: fixed by the kind's `containerType`, since every container above the class is identified by a curriculum coordinate; read: `getCurriculumLabel(doc)` | in progress | CLUE-550 Stage 2 (creation side, every kind); Stage 3 (the label, and the unit level states its absent fields explicitly so it is queryable). No consumer asks a yes/no curriculum question, so no guard exists |
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
 | kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
 | behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis); Stage 3 (edit gate `canUserEditDocument`, collaborative thumbnail treatment, and the collaborative title bar all read `concurrent`) |
-| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner `uid` and scope fields stamped from the kind's `ownerType`/`scopeType`) |
+| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner and location fields stamped from the kind's `ownerType`/`containerType`) |
 
 Status values: `not started` / `in progress` / `done`.
 
@@ -46,18 +47,19 @@ history, non-owner write-sync, class-wide read access, the rules delete clause) 
 the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
 canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
 get-or-create convergence guaranteeing exactly one document per slot per class. Stage 2 also begins the
-`owner` and `scope` axes on the creation side, now for **every** kind: a document's owner `uid` is derived from
-the kind's registered `ownerType` (`user` / `group` / `class`) — class-wide documents owned by a class-scoped
-synthetic uid (`class_<classHash>`) — and its scope association fields from the kind's registered `scopeType`
-via `getDocumentScopeFields(kind, ctx)`, both resolved in the kind registry rather than a `type` switch. Because
-all kinds are registered, `createFirestoreMetadataDocument` derives owner and scope through these registry calls
+`owner`, `container`, and `curriculum` axes on the creation side, now for **every** kind: a document's owner
+`uid` is derived from the kind's registered `ownerType` (`user` / `group` / `class`) — class-wide documents
+owned by a synthetic class uid (`class_<classHash>`) — and the fields saying where it is kept and what it is
+about from the kind's registered container, both resolved in the kind registry rather than a `type` switch.
+Because all kinds are registered, `createFirestoreMetadataDocument` derives all of these through registry calls
 for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
 `type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
 into the kinds they publish.
 
-Stage 3 surfaces those documents: Sort Work sections them under "Whole Class" by scope rather than by
-type, a unit-scoped listener keeps them visible under the investigation and problem filters,
-presentation reads `concurrent` and the kind registry, and one predicate (`canUserEditDocument`)
-gates every Edit button. It also settles the deferred scope-modeling question: consumers read narrow
-named guards over the stored association fields, with no `scopeLevel` enum and no unified `scope`
-struct (see [reading-axes-in-code.md](./reading-axes-in-code.md)).
+Stage 3 surfaces those documents: Sort Work sections them under "Whole Class" by owner and curriculum
+rather than by type, a unit-scoped listener keeps them visible under the investigation and problem
+filters, presentation reads `concurrent` and the kind registry, and one predicate
+(`canUserEditDocument`) gates every Edit button. It also settles how these axes are modeled in code:
+consumers read narrow named guards over the stored fields, with no level enum and no unified struct;
+a kind declares `ownerType` and `containerType`; and `groupId` sits on the owner axis, so there is no
+group container level (see [reading-axes-in-code.md](./reading-axes-in-code.md)).

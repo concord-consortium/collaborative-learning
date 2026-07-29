@@ -8,7 +8,7 @@ import {
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
-import { hasGroupOwnerScope, hasUnitCurriculumScope } from "../document/document-scope";
+import { hasClassOwner, hasGroupOwner } from "../document/document-axes";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
@@ -195,21 +195,21 @@ export class DocumentGroup {
     const sortKeys: Map<string, GroupSectionSortKey> = new Map();
 
     const groupSection = (groupId: string) =>
-      ({ sectionLabel: `${groupTerm} ${groupId}`, sortKey: { scope: "group", groupId } as GroupSectionSortKey });
+      ({ sectionLabel: `${groupTerm} ${groupId}`, sortKey: { section: "group", groupId } as GroupSectionSortKey });
 
     this.documents.forEach((doc) => {
       const { sectionLabel, sortKey } = (() => {
-        // A document scoped to a group belongs to that group, whoever created it.
-        if (hasGroupOwnerScope(doc)) return groupSection(doc.groupId);
-        // A document that spans a whole unit is not one student's work; it belongs to the class.
-        if (hasUnitCurriculumScope(doc)) {
-          return { sectionLabel: kWholeClassSectionLabel, sortKey: { scope: "class" } as GroupSectionSortKey };
+        // A document owned by a group belongs to that group, whoever created it.
+        if (hasGroupOwner(doc)) return groupSection(doc.groupId);
+        // A class-owned document is not one student's work, so it sections under the class itself.
+        if (hasClassOwner(doc)) {
+          return { sectionLabel: kWholeClassSectionLabel, sortKey: { section: "class" } as GroupSectionSortKey };
         }
         // Otherwise it belongs to its owner, and so to whichever group its owner is in now.
         const group = this.stores.groups.groupForUser(doc.uid);
         return group
           ? groupSection(group.id)
-          : { sectionLabel: `No ${groupTerm}`, sortKey: { scope: "none" } as GroupSectionSortKey };
+          : { sectionLabel: `No ${groupTerm}`, sortKey: { section: "none" } as GroupSectionSortKey };
       })();
 
       if (!documentMap.has(sectionLabel)) {
@@ -237,17 +237,15 @@ export class DocumentGroup {
     };
 
     this.documents.forEach((doc) => {
-      // Owner scope decides the section, so it is asked first, narrowest level outward.
-      if (hasGroupOwnerScope(doc)) {
+      // The owner decides the section, so it is asked first, narrowest level outward.
+      if (hasGroupOwner(doc)) {
         // A group document is listed under every member of the group that owns it.
         const group = this.stores.groups.getGroupById(doc.groupId);
         group?.users.forEach(user => {
           addDocForUser(doc, user.classUser);
         });
-      } else if (hasUnitCurriculumScope(doc)) {
-        // A document spanning a whole unit is owned by the class, so it has no personal author. This
-        // reads curriculum scope to answer an owner-scope question: the class owner is a synthetic uid
-        // (`class_<classHash>`), and no guard reads it yet. Once one does, ask that instead.
+      } else if (hasClassOwner(doc)) {
+        // A class-owned document has no personal author to file it under.
         addDocToSection(doc, kNoNameSectionLabel);
       } else {
         addDocForUser(doc, this.stores.class.getUserById(doc.uid));

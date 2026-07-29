@@ -212,10 +212,10 @@ describe("sort-document-utils", () => {
     it("puts the whole-class section first, groups in numeric order, and no-group last", () => {
       const labels = ["No Group", "Group 10", "Whole Class", "Group 2"];
       const sorted = sortGroupSections(labels, keys([
-        ["No Group", { scope: "none" }],
-        ["Group 10", { scope: "group", groupId: "10" }],
-        ["Whole Class", { scope: "class" }],
-        ["Group 2", { scope: "group", groupId: "2" }],
+        ["No Group", { section: "none" }],
+        ["Group 10", { section: "group", groupId: "10" }],
+        ["Whole Class", { section: "class" }],
+        ["Group 2", { section: "group", groupId: "2" }],
       ]));
       expect(sorted).toEqual(["Whole Class", "Group 2", "Group 10", "No Group"]);
     });
@@ -223,9 +223,9 @@ describe("sort-document-utils", () => {
     it("orders non-numeric group ids after numeric ones, alphabetically", () => {
       const labels = ["Group b", "Group 3", "Group a"];
       const sorted = sortGroupSections(labels, keys([
-        ["Group b", { scope: "group", groupId: "b" }],
-        ["Group 3", { scope: "group", groupId: "3" }],
-        ["Group a", { scope: "group", groupId: "a" }],
+        ["Group b", { section: "group", groupId: "b" }],
+        ["Group 3", { section: "group", groupId: "3" }],
+        ["Group a", { section: "group", groupId: "a" }],
       ]));
       expect(sorted).toEqual(["Group 3", "Group a", "Group b"]);
     });
@@ -235,14 +235,14 @@ describe("sort-document-utils", () => {
       // per unit, so "Team 2" and "Group 2" must sort identically.
       const labels = ["Team 10", "Team 2"];
       const sorted = sortGroupSections(labels, keys([
-        ["Team 10", { scope: "group", groupId: "10" }],
-        ["Team 2", { scope: "group", groupId: "2" }],
+        ["Team 10", { section: "group", groupId: "10" }],
+        ["Team 2", { section: "group", groupId: "2" }],
       ]));
       expect(sorted).toEqual(["Team 2", "Team 10"]);
     });
 
     it("treats a label with no sort key as no-group", () => {
-      const sorted = sortGroupSections(["Mystery", "Whole Class"], keys([["Whole Class", { scope: "class" }]]));
+      const sorted = sortGroupSections(["Mystery", "Whole Class"], keys([["Whole Class", { section: "class" }]]));
       expect(sorted).toEqual(["Whole Class", "Mystery"]);
     });
   });
