@@ -567,8 +567,9 @@ export class SeismicAdminStore {
     });
   }
 
-  /** Download the whole range, generate + upload missing envelopes, then generate
-   *  events for each selected model's uncovered days. Returns false if anything failed. */
+  /** Generate + upload missing envelopes, then generate events for each selected model's
+   *  uncovered days. Each step downloads only the raw days it needs. Returns false if
+   *  anything failed. */
   private async updateSingleStation(key: string, prefix = ""): Promise<boolean> {
     const stationData = this.stations.get(key);
     const range = this.rangeSec;
@@ -579,16 +580,15 @@ export class SeismicAdminStore {
 
     let ok = true;
 
-    // 1) Raw data for the whole range (existing flow, reports its own feedback).
-    await this.download(stationData, prefix);
-    // 2) Envelopes for days not fully covered in S3.
+    // 1) Envelopes for days not fully covered in S3.
     try {
       const run = this.deps.processEnvelopes ?? processEnvelopeCoverage;
       await run({
-        stationData, range,
+        stationData, range, proxy: true,
         uploadTile: (level, tileIndex, tile) => uploader.uploadTile(stationData, level, tileIndex, tile),
         onProgress: (done, total) => this.setFeedback(
           `${prefix}${getStationLabel(stationData)} — envelopes: day ${done} of ${total}`),
+        onDayDownloaded: (day, bytes) => this.markDayCached(key, day, bytes),
         onTileUploaded: (level, tileIndex) => {
           if (level === FINEST_LEVEL) this.markTileUploaded(key, tileIndex);
         },
@@ -601,7 +601,7 @@ export class SeismicAdminStore {
     // Reconcile with the actual listing; the incremental updates above are an estimate.
     await this.loadEnvelopeCoverage(stationData);
 
-    // 3) Events for uncovered days, model by model. Snapshot the live selection:
+    // 2) Events for uncovered days, model by model. Snapshot the live selection:
     // a header toggle mid-run must not change this run's set.
     for (const url of [...this.selectedModels]) {
       const label = this.models.get(url)?.label ?? url;
@@ -619,6 +619,7 @@ export class SeismicAdminStore {
           onProgress: (progress, total) => this.setFeedback(
             `${prefix}${getStationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
           onDayCovered: day => this.markDayCovered(key, url, day),
+          onDayDownloaded: (day, bytes) => this.markDayCached(key, day, bytes),
         });
       } catch (err) {
         console.warn("Update failed:", err);
@@ -627,6 +628,9 @@ export class SeismicAdminStore {
       }
       await this.loadCoverageStats(stationData, url);
     }
+    // Reconcile with what's actually on disk; both steps may have downloaded raw days
+    // and the incremental markDayCached updates above are an estimate.
+    await this.loadStats(stationData);
     return ok;
   }
 

@@ -537,12 +537,13 @@ describe("update (event generation)", () => {
     return ctx;
   }
 
-  it("updateStation downloads the whole range, runs envelopes, then processes each selected model", async () => {
-    const { store, calls } = await primed();
+  it("updateStation runs envelopes then processes each selected model, with no full-range download", async () => {
+    const { store, calls, downloadStation } = await primed();
     await store.updateStation(rc01Key);
     expect(calls.filter((c: string) => !c.startsWith("coverage"))).toEqual([
-      "download", "envelopes", "process:compact-v1", "process:large-v1",
+      "envelopes", "process:compact-v1", "process:large-v1",
     ]);
+    expect(downloadStation).not.toHaveBeenCalled();
   });
 
   it("passes the endDate-inclusive range and the station to processCoverage", async () => {
@@ -563,7 +564,7 @@ describe("update (event generation)", () => {
     const { store, calls } = await primed();
     await store.updateStation(rc01Key);
     expect(calls).toEqual([
-      "download", "envelopes",
+      "envelopes",
       "process:compact-v1", "coverage:compact-v1",
       "process:large-v1", "coverage:large-v1",
     ]);
@@ -681,6 +682,40 @@ describe("update (event generation)", () => {
     expect(ctx.store.modelCoverage.get(coverageKey(rc01Key, compact.metadataUrl))).toEqual({ state: "error" });
   });
 
+  it("fills raw stats live as onDayDownloaded fires during envelopes and events", async () => {
+    const day1 = dayIndex(utcDay(2026, 1, 1)!);
+    const midRun: Array<{ missing: number; bytes: number }> = [];
+    const snapshot = () => {
+      const { missingCount, bytes } = ctx.store.statsFor(rc01Key);
+      midRun.push({ missing: missingCount, bytes });
+    };
+    const processEnvelopes = jest.fn(async ({ onDayDownloaded }: any) => {
+      onDayDownloaded?.(day1, 500);
+      snapshot();
+      return { uploadedTiles: 0, processedDays: 1, skippedDays: 0, totalDays: 1 };
+    });
+    const processCoverage = jest.fn(async ({ onDayDownloaded }: any) => {
+      onDayDownloaded?.(day1 + 1, 300);
+      snapshot();
+      return { processed: 1, skipped: 0, total: 1 };
+    });
+    const ctx = await primed({ models: [compact], processEnvelopes, processCoverage });
+
+    await ctx.store.updateStation(rc01Key);
+    // The 3-day range starts fully missing; each downloaded day fills in live.
+    expect(midRun).toEqual([
+      { missing: 2, bytes: 500 },
+      { missing: 1, bytes: 800 },
+    ]);
+  });
+
+  it("reconciles raw stats from the cache after the update", async () => {
+    const ctx = await primed();
+    await ctx.store.updateStation(rc01Key);
+    expect(ctx.cache.scanCachedDays).toHaveBeenCalled();
+    expect(ctx.cache.stationRawBytes).toHaveBeenCalled();
+  });
+
   it("summary counts failed stations", async () => {
     const processCoverage = jest.fn(async ({ stationData }: any) => {
       if (stationData.station === "RC02") throw new Error("boom");
@@ -700,6 +735,8 @@ describe("update (event generation)", () => {
     expect(options.stationData).toMatchObject({ station: "RC01" });
     // endDate is inclusive: the range extends through the end of Jan 3 UTC.
     expect(options.range).toEqual({ start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 3) + SECONDS_PER_DAY });
+    // Real EarthScope data via the proxy, matching the events flow — never the mock.
+    expect(options.proxy).toBe(true);
     const tile = { mins: Int16Array.from([1]), maxs: Int16Array.from([2]) };
     await options.uploadTile(2, 77, tile);
     expect(envelopeUploader.uploadTile).toHaveBeenCalledWith(
@@ -860,7 +897,7 @@ describe("busy lockout", () => {
     await Promise.all([first, second]);
 
     expect(processCoverage).toHaveBeenCalledTimes(1);
-    expect(ctx.downloadStation).toHaveBeenCalledTimes(1);
+    expect(ctx.downloadStation).not.toHaveBeenCalled();
   });
 
   it("ignores a download while an update is running", async () => {
@@ -869,13 +906,13 @@ describe("busy lockout", () => {
     const ctx = await primed({ processCoverage });
 
     const update = ctx.store.updateStation(rc01Key);
-    await flush();   // the update's own internal download has already run
+    await flush();   // let the update get underway
     const download = ctx.store.downloadStation(rc01Key);
     gate.resolve();
     await Promise.all([update, download]);
 
-    // Only the update's internal download ran; the second entry point was a no-op.
-    expect(ctx.downloadStation).toHaveBeenCalledTimes(1);
+    // The external download entry point was a no-op; updates never full-range download.
+    expect(ctx.downloadStation).not.toHaveBeenCalled();
     expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
   });
 
