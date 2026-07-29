@@ -498,6 +498,12 @@ describe("db", () => {
       });
       (db as any).openDocumentFromFirestoreMetadata = openStub;
       (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
+      // createDeclaredClassWideDocuments registers a declared kind before asking for its document, and
+      // getDocumentOwner throws for an unregistered kind rather than defaulting the owner to the caller.
+      registerDocumentKind("drivingQuestionBoard", {
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+        title: "DQB", unit: "msu"
+      });
     });
 
     it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {
