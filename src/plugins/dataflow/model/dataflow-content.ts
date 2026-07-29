@@ -71,6 +71,20 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
+    /**
+     * @deprecated Nothing reads or writes this. The canvas now fits all content on every load
+     * instead of restoring a saved pan/zoom, so the live transform lives in the volatile
+     * `liveProgramZoom` below.
+     *
+     * It is retained purely so that history playback still works on documents saved before that
+     * change. Panning used to call `setProgramZoom`, which recorded patches against nested paths
+     * like `/programZoom/dx`; if the property is absent those paths no longer resolve, MST throws,
+     * and `TreeManager` halts playback at that entry with a failure banner rather than skipping it.
+     *
+     * Removing it needs either a major version with a patch migration, or for history replay to
+     * tolerate paths that reference removed properties.
+     */
+    programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,

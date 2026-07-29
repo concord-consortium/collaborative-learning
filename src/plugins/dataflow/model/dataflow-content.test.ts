@@ -1,4 +1,4 @@
-import { getSnapshot } from "mobx-state-tree";
+import { applyPatch, getSnapshot } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn
 } from "./dataflow-content";
@@ -18,6 +18,15 @@ describe("DataflowContentModel", () => {
     expect(dcm.liveProgramZoom.dy).toBe(DEFAULT_PROGRAM_ZOOM.dy);
     expect(dcm.liveProgramZoom.scale).toBe(DEFAULT_PROGRAM_ZOOM.scale);
     expect(Object.values(getSnapshot(dcm.program.nodes)).length).toBe(0);
+  });
+
+  // `programZoom` is deprecated and unread, but must stay a persisted property: documents saved
+  // before the fit-on-load change recorded history patches against nested paths under it, and if
+  // the property is removed those paths no longer resolve, so TreeManager halts playback there.
+  // This fails if someone removes the property as dead code.
+  it("keeps programZoom resolvable so legacy history patches still replay", () => {
+    const dcm = defaultDataflowContent();
+    expect(() => applyPatch(dcm, { op: "replace", path: "/programZoom/dx", value: -10 })).not.toThrow();
   });
 
   it("should handle basic changes", () => {
