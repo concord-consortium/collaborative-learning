@@ -8,13 +8,13 @@ branch.
 
 - **Concepts — what the axes are, read out of current CLUE behavior:** [axes.md](./axes.md)
 - **Target — how the axes live in code (layers and boundaries):** [target-architecture.md](./target-architecture.md)
+- **Current state — what a consumer can read off a document today:** [reading-axes-in-code.md](./reading-axes-in-code.md)
 - **Research background (current-state evidence):** the findings doc, on the `document-type-decomposition`
   branch (~49KB; left there rather than imported).
 
 ### Related existing docs this roadmap evolves toward
 
 - [../document-types.md](../document-types.md) — the current `type` catalog these axes decompose.
-- [../document-scope.md](../document-scope.md) — the current scoping model the `scope` axis formalizes.
 - [../group-docs/README.md](../group-docs/README.md) — the group-document feature; its concurrency behavior is
   the first thing rebased onto the `concurrent` axis.
 
@@ -60,4 +60,4 @@ type, a unit-scoped listener keeps them visible under the investigation and prob
 presentation reads `concurrent` and the kind registry, and one predicate (`canUserEditDocument`)
 gates every Edit button. It also settles the deferred scope-modeling question: consumers read narrow
 named guards over the stored association fields, with no `scopeLevel` enum and no unified `scope`
-struct (see docs/document-scope.md).
+struct (see [reading-axes-in-code.md](./reading-axes-in-code.md)).
