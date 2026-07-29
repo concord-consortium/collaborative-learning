@@ -78,6 +78,7 @@ export const DocumentModel = Tree.named("Document")
     problem: types.maybe(types.string),
     investigation: types.maybe(types.string),
     unit: types.maybe(types.string),
+    offeringId: types.maybe(types.string),
     contextId: types.maybe(types.string), // the document's authoritative owning-class (Firestore context_id)
     concurrent: types.maybe(types.boolean),
     kind: types.maybe(types.string),
@@ -144,7 +145,7 @@ export const DocumentModel = Tree.named("Document")
       // Firestore documents.
       return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
-        problem: self.problem, unit: self.unit, visibility } as IDocumentMetadata;
+        problem: self.problem, unit: self.unit, offeringId: self.offeringId, visibility } as IDocumentMetadata;
     },
     getProperty(key: string) {
       return self.properties.get(key);

@@ -3,8 +3,8 @@ import { AppConfigModel } from "../stores/app-config-model";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { UserModel } from "../stores/user";
 import { createDocumentModel } from "./document";
-import { GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication, SupportPublication }
-  from "./document-types";
+import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
+  SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
 import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
@@ -194,7 +194,7 @@ describe("document utils", () => {
 
       test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
         registerDocumentKind("testClassWideTitle", {
-          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
           title: "Driving Question Board"
         });
         const metadata = DocumentMetadataModel.create({
@@ -222,7 +222,7 @@ describe("document utils", () => {
 
       test("does not borrow the current unit's title for another unit's document of the same kind", () => {
         registerDocumentKind("testSharedKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
           title: "Our Big Questions", unit: "test"
         });
         const ownUnitDoc = DocumentMetadataModel.create({
@@ -259,6 +259,16 @@ describe("document utils", () => {
     const metadata = (props: Record<string, any>) =>
       DocumentMetadataModel.create({ uid: "someone-else", type: GroupDocument, key: "k", ...props });
 
+    /**
+     * A group document as the app actually stamps it: kept in an offering, so it carries an
+     * `offeringId` and the owning class. Both matter — without the `offeringId` the document reads as
+     * class-wide, and the class check would then let any classmate edit another group's work.
+     */
+    const groupDocMetadata = (groupId: string, offeringId = kOffering) => metadata({
+      uid: groupOwner(groupId, offeringId), concurrent: true, groupId,
+      unit: "sas", investigation: "1", problem: "2", offeringId, context_id: "class-1"
+    });
+
     it("allows a user to edit their own document", () => {
       expect(canUserEditDocument({
         documentMetadata: metadata({ uid: "me", type: ProblemDocument }), user: student
@@ -273,19 +283,15 @@ describe("document utils", () => {
 
     it("allows a member of the owning group to edit a group document", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({
-          uid: groupOwner("3"), concurrent: true, groupId: "3", unit: "sas", investigation: "1"
-        }),
-        user: groupedStudent
+        documentMetadata: groupDocMetadata("3"), user: groupedStudent
       })).toBe(true);
     });
 
-    it("refuses another group's document", () => {
+    it("refuses another group's document, even to a classmate of its owners", () => {
+      // The document is in this student's own class, so only its offering keeps the class-wide branch
+      // from reaching it.
       expect(canUserEditDocument({
-        documentMetadata: metadata({
-          uid: groupOwner("7"), concurrent: true, groupId: "7", unit: "sas", investigation: "1"
-        }),
-        user: groupedStudent
+        documentMetadata: groupDocMetadata("7"), user: groupedStudent
       })).toBe(false);
     });
 
@@ -293,20 +299,13 @@ describe("document utils", () => {
       // Sort Work's "All" filter lists documents from every offering the class has worked through,
       // so this document does reach the check. Group ids are unique only within an offering.
       expect(canUserEditDocument({
-        documentMetadata: metadata({
-          uid: groupOwner("3", "other-offering"), concurrent: true, groupId: "3",
-          unit: "sas", investigation: "1"
-        }),
-        user: groupedStudent
+        documentMetadata: groupDocMetadata("3", "other-offering"), user: groupedStudent
       })).toBe(false);
     });
 
     it("refuses a group document when the user is not in a group", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({
-          uid: groupOwner("3"), concurrent: true, groupId: "3", unit: "sas", investigation: "1"
-        }),
-        user: student
+        documentMetadata: groupDocMetadata("3"), user: student
       })).toBe(false);
     });
 
@@ -323,6 +322,31 @@ describe("document utils", () => {
       expect(canUserEditDocument({
         documentMetadata: metadata({
           concurrent: true, unit: "sas", investigation: null, context_id: "class-2"
+        }),
+        user: student
+      })).toBe(false);
+    });
+
+    // An exemplar belongs to no offering, so it sits in the same container as a class-wide document
+    // and `isInClassUnitContainer` is true for it. What keeps it read-only is that it is single-writer.
+    it("refuses a curriculum exemplar", () => {
+      expect(canUserEditDocument({
+        document: createDocumentModel({
+          uid: "ivan_idea_1", type: ExemplarDocument, key: "ex-1",
+          unit: "sas", investigation: "1", problem: "2"
+        }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("refuses the metadata record written when a teacher comments on an exemplar", () => {
+      // Unlike the curriculum document it mirrors, this record is stamped with the commenting class's
+      // `context_id` (create-firestore-metadata-document.ts), so the class check inside the container
+      // branch would pass. Being single-writer is the only thing standing between it and an Edit button.
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          uid: "ivan_idea_1", type: ExemplarDocument,
+          unit: "sas", investigation: "1", problem: "2", context_id: "class-1"
         }),
         user: student
       })).toBe(false);

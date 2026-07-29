@@ -44,7 +44,7 @@ so this table doubles as a migration-progress view.
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
 | `canonical` | Firestore | group | not surfaced | No |
-| `offeringId` | Firestore + RTDB | problem family | not surfaced | No |
+| `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
 
 ### Dual-stored (Firestore + RTDB)
 
@@ -119,7 +119,7 @@ each other's documents, so teacher documents must keep writing it or that cross-
 breaks. Student and group documents have no network, so the field is null for them. It is declared on
 `IDocumentMetadata` and loaded into `DocumentMetadataModel.network`; no consumer reads it off the model yet.
 
-Fields such as `offeringId` and `canonical` are written to the Firestore doc but have no
+Fields such as `canonical` are written to the Firestore doc but have no
 `DocumentMetadataModel` prop; they reach `DocumentMetadataStore`'s `typecheck(DocumentMetadataModel, data)`
 unfiltered and validate only because MST's `typecheck` ignores properties the model does not declare —
 pinned by the `typecheck` tests in [mst.test.ts](../../src/models/mst.test.ts).
@@ -190,13 +190,14 @@ forbid setting it on create and permit a single one-time set on update. Not pres
 - **Location:** Firestore `documents/{key}.offeringId`; RTDB
   `/{classPath}/users/{uid}/documentMetadata/{key}/offeringId`
 - **Applies to:** the problem family — problem, planning, publication, supportPublication, group
-- **Runtime:** not surfaced on any document model
+- **Runtime:** `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId`
 - **Updated by:** nothing — creation only
-- **Reactive:** No
+- **Reactive:** No — immutable
 
-Listed here rather than under dual-stored because it is not in `IDocumentMetadata` and has no runtime
-representation; it exists to scope documents to an offering. It reaches Firestore only because
-`createFirestoreMetadataDocument` spreads the RTDB metadata object.
+Names the offering a document is kept in, and is the only positive marker of that container: an
+exemplar carries the same unit/investigation/problem as a problem document and is distinguished from
+it by nothing else. `canUserEditDocument` therefore depends on it — without it a group document reads
+as class-wide, and the class check would let any classmate edit another group's work.
 
 ---
 
