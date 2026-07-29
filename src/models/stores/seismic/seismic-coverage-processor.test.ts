@@ -172,6 +172,19 @@ describe("processUncoveredRanges", () => {
     expect(onDayCovered.mock.calls.map(c => c[0]).sort()).toEqual([feb1Day, feb1Day + 1]);
   });
 
+  it("reports each landed day through onDayDownloaded with its byte count", async () => {
+    const fakeService = makeFakeDownloadService([feb1Day, feb1Day + 1]);
+    fakeService.bytesForDay.mockImplementation((d: number) => (d === feb1Day ? 500 : 0));
+    const onDayDownloaded = jest.fn();
+    await processUncoveredRanges({
+      ...makeOptions(fakeService),
+      uncovered: [threeDayRange],
+      onDayDownloaded,
+    });
+
+    expect(onDayDownloaded.mock.calls).toEqual([[feb1Day, 500], [feb1Day + 1, 0]]);
+  });
+
   it("does not notify onDayCovered when marking coverage fails", async () => {
     (markCovered as jest.Mock).mockRejectedValueOnce(new Error("offline"));
     const fakeService = makeFakeDownloadService([feb1Day]);

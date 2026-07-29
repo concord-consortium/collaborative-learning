@@ -25,6 +25,8 @@ export interface ProcessCoverageOptions {
   /** Fires after a day's events + coverage are persisted; empty days included,
    *  errored days and failed persists excluded. */
   onDayCovered?: (day: number) => void;
+  /** Fires as each day's raw data lands in OPFS; bytes is 0 for already-cached days. */
+  onDayDownloaded?: (day: number, bytes: number) => void;
   /** Forwarded to the download service's raw-data fetches. */
   proxy?: boolean;
   /** Test seams; production defaults construct real ones. */
@@ -56,7 +58,7 @@ async function saveDayResults(
  *  Owns the runner lifecycle (loadModel/dispose). Returns day counts. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
-  const { stationData, metadata, onEvents, onProgress, onDayCovered, proxy, range } = options;
+  const { stationData, metadata, onEvents, onProgress, onDayCovered, onDayDownloaded, proxy, range } = options;
   const modelId = metadata.id;
 
   const uncovered = options.uncovered ?? await getUncoveredRanges(stationData, modelId, range);
@@ -93,6 +95,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
       for (;;) {
         const day = await downloadService.nextReadyDay();
         if (day === DONE) break;
+        onDayDownloaded?.(day, downloadService.bytesForDay(day));
 
         const buffer = await downloadService.readDay(day);
         if (!buffer) continue;
