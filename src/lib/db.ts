@@ -33,9 +33,10 @@ import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
-  getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType, getDocumentScopeFields,
-  registerDocumentKind
+  getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
+  getDocumentOwnerType, registerDocumentKind
 } from "../models/document/document-kinds";
+import { kClassOwnerPrefix } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -593,17 +594,19 @@ export class DB {
       return docSnapshot.data() as IDocumentMetadata;
     }
 
-    // Resolve every scope field (context_id, unit/investigation/problem, offering/group association) from the
-    // kind's registered scope — all kinds are registered, so getDocumentScopeFields handles each type. The
-    // runtime values come from the stores; they are valid here because createDocument validated them via
-    // validateDocumentKindCreation before writing (a group kind requires the user to be in a group, so
-    // currentGroupId is present).
-    const scopeFields = getDocumentScopeFields(kind, {
+    // Resolve where the document is kept and what it is about (context_id, unit/investigation/problem,
+    // offeringId) from the kind's registered container — all kinds are registered, so
+    // getDocumentLocationFields handles each type.
+    const locationFields = getDocumentLocationFields(kind, {
       ...this.currentProblemInfo,
       context_id: user.classHash,
       offeringId: user.offeringId,
-      groupId: user.currentGroupId,
     });
+
+    // The owner's stored fields beyond `uid`: a group owner's `groupId`. The runtime value comes from the
+    // stores; it is valid here because createDocument validated it via validateDocumentKindCreation before
+    // writing (a group kind requires the user to be in a group, so currentGroupId is present).
+    const ownerFields = getDocumentOwnerFields(kind, { groupId: user.currentGroupId });
 
     // `title` is stamped only when present so Firestore never sees `title: undefined`.
     const titleInfo: { title?: string } = {};
@@ -612,7 +615,7 @@ export class DB {
     }
 
     // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
-    // Every kind is registered now for scope/owner resolution, yet we deliberately do NOT persist `kind` on
+    // Every kind is registered now for location/owner resolution, yet we deliberately do NOT persist `kind` on
     // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
     // other document types, so we don't want to stamp a kind we'd then have to migrate.
     const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
@@ -627,7 +630,8 @@ export class DB {
       properties: {},
       uid: owner,
       ...titleInfo,
-      ...scopeFields,
+      ...ownerFields,
+      ...locationFields,
       ...kindFields
     };
     await documentRef.set(firestoreMetadata);
@@ -643,8 +647,8 @@ export class DB {
     };
   }
 
-  // Verify the stores hold the runtime context a document of this kind needs to construct its owner and scope
-  // fields. Throws when the context is missing. Currently only group-owned kinds have a requirement: their owner
+  // Verify the stores hold the runtime context a document of this kind needs to construct its owner and
+  // location fields. Throws when the context is missing. Only group-owned kinds have a requirement: their owner
   // id is `group_<offeringId>_<groupId>`, so both are required. The check lives here instead of the kind registry
   // because it is easier for now.
   private validateDocumentKindCreation(kind: string) {
@@ -780,9 +784,10 @@ export class DB {
     });
   }
 
-  // Class-scoped synthetic owner for this class's class-wide documents
+  // Synthetic owner uid for this class's class-wide documents. hasClassOwner reads the prefix back off
+  // a stored uid, so both sides share the constant.
   private get userIdForClassWideDocuments() {
-    return `class_${this.stores.user.classHash}`;
+    return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
   }
 
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
@@ -807,16 +812,17 @@ export class DB {
     if (!classWideDocs?.length) return;
     for (const classWideDoc of classWideDocs) {
       // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry and createDocument derives its owner and scope. Class-wide collaborative documents are always
-      // concurrent, class-owned (class_<classHash>), and class+unit scoped. The authored title is registered
-      // here (not stored per document) so it is resolved live by kind — an author changing it applies to every
-      // document of that kind (see getDocumentTitle). registerDocumentKind validates the kind and rejects a
-      // duplicate (both throw); skip a bad entry rather than crash startup.
+      // registry and createDocument derives its owner and location. Class-wide collaborative documents are
+      // always concurrent, class-owned (class_<classHash>), and kept in the class's copy of the unit, about
+      // that unit and nothing narrower. The authored title is registered here (not stored per document) so it
+      // is resolved live by kind — an author changing it applies to every document of that kind (see
+      // getDocumentTitle). registerDocumentKind validates the kind and rejects a duplicate (both throw); skip
+      // a bad entry rather than crash startup.
       try {
         registerDocumentKind(classWideDoc.kind, {
           metadataFields: { concurrent: true },
           ownerType: "class",
-          scopeType: "classUnit",
+          containerType: "classUnit",
           title: classWideDoc.title,
           // The same code stamped as the document's `unit` (see currentProblemInfo), so getDocumentTitle
           // can tell this unit's documents from another unit's that declares the same kind.

@@ -10,7 +10,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { getCurriculumScopeLabel, hasUnitCurriculumScope } from "./document-scope";
+import { getCurriculumLabel, isInClassUnitContainer } from "./document-axes";
 import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
@@ -34,26 +34,26 @@ function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: Docum
   }
 
   const upperType = upperFirst(document.type);
-  const scopeLabel = getCurriculumScopeLabel(document);
-  if (!scopeLabel) {
+  const curriculumLabel = getCurriculumLabel(document);
+  if (!curriculumLabel) {
     return `${upperType} doc without ${translate("contentLevel.unit")}`;
   }
-  return `${upperType} doc from ${scopeLabel}`;
+  return `${upperType} doc from ${curriculumLabel}`;
 }
 
 /**
  * A stand-in title for a document that stores none and whose kind resolves no title — a class-wide
  * document from a unit whose config is not loaded, or one whose kind another unit also declares. The
- * kind names what the document is; the curriculum scope says where it came from.
+ * kind names what the document is; the curriculum position says where it came from.
  *
- * The scope is read from the stored fields rather than assumed, because an unresolvable kind gives no
- * indication of how the document is scoped.
+ * The position is read from the stored fields rather than assumed, because an unresolvable kind gives
+ * no indication of where the document sits.
  */
 function getUnresolvedDocumentTitle(document: DocumentModelType | IDocumentMetadataModel) {
   const kindLabel = getDocumentKindLabel(document.kind);
   if (!kindLabel) return undefined;
-  const scopeLabel = getCurriculumScopeLabel(document);
-  return scopeLabel ? `${kindLabel} (${scopeLabel})` : kindLabel;
+  const curriculumLabel = getCurriculumLabel(document);
+  return curriculumLabel ? `${kindLabel} (${curriculumLabel})` : kindLabel;
 }
 
 export function getDocumentTitleWithTimestamp(
@@ -88,7 +88,7 @@ export function getDocumentDisplayTitle(
   } else {
     const storedTitle = getDocumentTitleWithTimestamp(document, appConfig);
     if (storedTitle) return storedTitle;
-    // Nothing stored and no kind title: name it by kind and scope if we can, otherwise return the
+    // Nothing stored and no kind title: name it by kind and curriculum position if we can, otherwise return the
     // stored value unchanged so callers see the same empty result as before.
     return getUnresolvedDocumentTitle(document) ?? storedTitle;
   }
@@ -148,7 +148,7 @@ export function isDocumentAccessibleToUser ({
  * `properties?: Record<string, string>` while the MST `DocumentMetadataModel` holds an observable
  * map there, so a metadata model instance is not assignable to it. `isDocumentAccessibleToUser`
  * sidesteps the same problem by taking `IDocumentMetadataBase`, which has no `properties` — this
- * adds the two axis/scope fields the base type lacks.
+ * adds the two axis fields the base type lacks.
  */
 type IEditPermissionMetadata = IDocumentMetadataBase & {
   concurrent?: boolean | null;
@@ -169,7 +169,7 @@ interface ICanUserEditDocumentParams {
  * alone can't tell a live document from its published copy. A researcher never gets an edit
  * affordance, even inside a class or group they observe. Beyond those exclusions, a user may
  * always edit their own document; otherwise only a `concurrent` (multi-writer) document is
- * editable by someone other than its owner, and then only from inside its scope: a class-wide
+ * editable by someone other than its owner, and then only by someone the document reaches: a class-wide
  * document by any member of its class (teachers included — they belong to the class too), a group
  * document by any member of its group.
  *
@@ -184,17 +184,17 @@ export function canUserEditDocument({
   const type = documentMetadata?.type ?? document?.type;
   const concurrent = documentMetadata?.concurrent ?? document?.concurrent;
   const unit = documentMetadata?.unit ?? document?.unit;
-  const investigation = documentMetadata?.investigation ?? document?.investigation;
+  const offeringId = documentMetadata?.offeringId ?? document?.offeringId;
   const contextId = documentMetadata?.context_id ?? document?.contextId;
 
   if (type && isPublishedType(type)) return false;
   if (!!uid && uid === user.id) return true;
   if (user.isResearcher) return false;
   if (!concurrent) return false;
-  // Beyond this point the user must be inside the document's scope, asked at the narrowest level the
-  // document is scoped to.
+  // Beyond this point the user must be inside the document's container, asked at the narrowest level the
+  // document is kept at. A group document is kept in an offering, so its group is asked first.
   if (isUserInDocumentsGroup(uid, user)) return true;
-  if (hasUnitCurriculumScope({ unit, investigation })) {
+  if (isInClassUnitContainer({ unit, offeringId })) {
     return !!contextId && contextId === user.classHash;
   }
   return false;

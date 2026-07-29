@@ -20,9 +20,13 @@ export type IDocumentKindMetadataFields = Pick<IDocumentMetadata, "kind" | "conc
 export type DocumentOwnerType = "user" | "group" | "class";
 
 /**
- * How a kind's `scope` axes (class, unit, investigation, problem, offering, group) are derived at creation.
+ * Which container a kind's documents are kept in, and with it their curriculum reach: "class" → the class,
+ * about no unit; "classUnit" → the class's copy of one unit, about that unit; "offering" → one assignment of
+ * a problem to a class, about that problem.
+ *
+ * One knob sets the container and curriculum axes values because that is the most convenient.
  */
-export type DocumentScopeType = "class" | "classUnit" | "offering" | "group";
+export type DocumentContainerType = "class" | "classUnit" | "offering";
 
 export interface IDocumentKindInfo {
   /** The kind key. Matches the value stored in a document's `kind` field. */
@@ -31,8 +35,8 @@ export interface IDocumentKindInfo {
   metadataFields: Omit<IDocumentKindMetadataFields, "kind">;
   /** How this kind's owner uid is derived (see DocumentOwnerType). */
   ownerType: DocumentOwnerType;
-  /** How this kind's scope axes are derived (see DocumentScopeType). */
-  scopeType: DocumentScopeType;
+  /** Which container this kind's documents live in, and their curriculum reach (see DocumentContainerType). */
+  containerType: DocumentContainerType;
   /**
    * Static document display title. Leave undefined for dynamic titles like
    * group documents or in the future problem documents.
@@ -115,42 +119,53 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
 }
 
 /**
- * The scope fields a document draws from its runtime context, supplied by the caller because they depend on
- * the user's class, current group, offering, unit, and problem. Doubles as the return shape of
- * getDocumentScopeFields (the subset a given kind actually stamps).
+ * The stored owner-axis fields besides `uid`. A group owner's `groupId` is stored alongside the owner uid
+ * that already encodes it (`group_<offeringId>_<groupId>`), so Firestore rules and group-member lookups can
+ * read the group without parsing the uid.
  */
-export interface IDocumentScopeContext {
+export interface IDocumentOwnerFields {
+  groupId?: string;
+}
+
+/**
+ * The owner fields to stamp on a new document of the given kind, beyond the owner uid getDocumentOwner
+ * returns. Only a group owner has one.
+ */
+export function getDocumentOwnerFields(
+  kind: string|null|undefined, ctx: { groupId?: string }
+): IDocumentOwnerFields {
+  if (getDocumentOwnerType(kind) !== "group" || !ctx.groupId) return {};
+  return { groupId: ctx.groupId };
+}
+
+/**
+ * The container and curriculum values a document draws from its runtime context, supplied by the caller
+ * because they depend on the user's class, offering, unit, and problem. Doubles as the return shape of
+ * getDocumentLocationFields (the subset a given kind actually stamps).
+ */
+export interface IDocumentLocationContext {
   unit: string | null;
   investigation?: string | null;
   problem?: string | null;
   context_id: string;
-  groupId?: string;
   offeringId?: string;
 }
 
 /**
- * The scope fields to stamp on a document of the given kind, selected by its registered `scopeType`.
+ * The container and curriculum fields to stamp on a document of the given kind, selected by its registered
+ * `containerType` — which fixes both, so one lookup answers for both axes.
  */
-export function getDocumentScopeFields(
-  kind: string|null|undefined, ctx: IDocumentScopeContext
-): IDocumentScopeContext {
-  const scopeType = getDocumentKindInfo(kind)?.scopeType;
-  switch (scopeType) {
-    case "group": return {
-      unit: ctx.unit,
-      investigation: ctx.investigation,
-      problem: ctx.problem,
-      context_id: ctx.context_id,
-      offeringId: ctx.offeringId,
-      groupId: ctx.groupId
-    };
+export function getDocumentLocationFields(
+  kind: string|null|undefined, ctx: IDocumentLocationContext
+): IDocumentLocationContext {
+  switch (getDocumentKindInfo(kind)?.containerType) {
     case "classUnit": return {
       unit: ctx.unit,
       context_id: ctx.context_id,
-      // Stated explicitly rather than omitted. A scope field written as null means "absent scope"
-      // (firestore.rules `hasScopeField`), the same convention class-scoped documents use for
-      // `unit: null`. It is what lets Sort Work query for documents scoped to a unit but not to a
-      // problem — Firestore cannot match a field that is missing.
+      // Stated explicitly rather than omitted. A curriculum field written as null means "not about an
+      // investigation or problem" (firestore.rules `hasScopeField`), the same convention class-contained
+      // documents use for `unit: null`. It is what lets Sort Work query for documents about a unit but not
+      // a problem — Firestore cannot match a field that is missing.
       investigation: null,
       problem: null
     };
@@ -222,16 +237,18 @@ export function getDocumentKindLabel(kind?: string | null): string | undefined {
 }
 
 function registerBuiltInDocumentKinds() {
+  // A group document is kept in the offering, like the problem documents beside it; what makes it a group's
+  // is its owner, which is also where its stored `groupId` comes from (see getDocumentOwnerFields).
   registerDocumentKind(GroupDocument, {
     metadataFields: { concurrent: true },
     ownerType: "group",
-    scopeType: "group"
+    containerType: "offering"
   });
 
   const personalLikeKindInfo = {
     metadataFields: { },
     ownerType: "user",
-    scopeType: "class"
+    containerType: "class"
   } as const;
   registerDocumentKind(PersonalDocument, personalLikeKindInfo);
   registerDocumentKind(LearningLogDocument, personalLikeKindInfo);
@@ -241,7 +258,7 @@ function registerBuiltInDocumentKinds() {
   const problemLikeKindInfo = {
     metadataFields: { },
     ownerType: "user",
-    scopeType: "offering"
+    containerType: "offering"
   } as const;
   registerDocumentKind(PlanningDocument, problemLikeKindInfo);
   registerDocumentKind(ProblemDocument, problemLikeKindInfo);

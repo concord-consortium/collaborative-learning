@@ -53,11 +53,11 @@ export const kNoNameSectionLabel = "No Name";
  * (`studentGroup` is overridable per unit) and has no number at all for some sections.
  */
 export type GroupSectionSortKey =
-  | { scope: "class" }
-  | { scope: "group"; groupId: string }
-  | { scope: "none" };
+  | { section: "class" }
+  | { section: "group"; groupId: string }
+  | { section: "none" };
 
-const kGroupSectionScopeOrder: Record<GroupSectionSortKey["scope"], number> = {
+const kGroupSectionOrder: Record<GroupSectionSortKey["section"], number> = {
   class: 0,
   group: 1,
   none: 2,
@@ -68,14 +68,14 @@ const kGroupSectionScopeOrder: Record<GroupSectionSortKey["scope"], number> = {
  * no-group section. A section with no sort key is ordered as if it had none.
  */
 export const sortGroupSections = (docMapKeys: string[], sortKeys: Map<string, GroupSectionSortKey>) => {
-  const keyFor = (label: string): GroupSectionSortKey => sortKeys.get(label) ?? { scope: "none" };
+  const keyFor = (label: string): GroupSectionSortKey => sortKeys.get(label) ?? { section: "none" };
   return docMapKeys.sort((a, b) => {
     const keyA = keyFor(a);
     const keyB = keyFor(b);
-    if (keyA.scope !== keyB.scope) {
-      return kGroupSectionScopeOrder[keyA.scope] - kGroupSectionScopeOrder[keyB.scope];
+    if (keyA.section !== keyB.section) {
+      return kGroupSectionOrder[keyA.section] - kGroupSectionOrder[keyB.section];
     }
-    if (keyA.scope === "group" && keyB.scope === "group") {
+    if (keyA.section === "group" && keyB.section === "group") {
       const numA = parseInt(keyA.groupId, 10);
       const numB = parseInt(keyB.groupId, 10);
       // Group ids are numeric in practice; order any non-numeric id after the numeric ones rather

@@ -1,7 +1,7 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
   getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields, getDocumentOwner,
-  getDocumentOwnerType, getDocumentScopeFields, getDocumentTitle, isValidDocumentKind,
+  getDocumentOwnerFields, getDocumentOwnerType, getDocumentLocationFields, getDocumentTitle, isValidDocumentKind,
   registerDocumentKind, resetDocumentKindRegistryForTests
 } from "./document-kinds";
 
@@ -30,23 +30,23 @@ describe("document kinds registry", () => {
 
   it("registerDocumentKind adds new kinds", () => {
     registerDocumentKind("testAddedKind",
-      { metadataFields: { concurrent: true }, ownerType: "user", scopeType: "class" });
+      { metadataFields: { concurrent: true }, ownerType: "user", containerType: "class" });
     expect(getDocumentKindInfo("testAddedKind")?.metadataFields.concurrent).toBe(true);
   });
 
   it("registerDocumentKind throws when a kind is registered more than once", () => {
     registerDocumentKind("testDuplicateKind",
-      { metadataFields: {}, ownerType: "user", scopeType: "class" });
+      { metadataFields: {}, ownerType: "user", containerType: "class" });
     expect(() => registerDocumentKind("testDuplicateKind",
-      { metadataFields: {}, ownerType: "user", scopeType: "class" })).toThrow(/already registered/);
+      { metadataFields: {}, ownerType: "user", containerType: "class" })).toThrow(/already registered/);
     // built-in kinds are registered at module load, so re-registering one throws too
     expect(() => registerDocumentKind(GroupDocument,
-      { metadataFields: { concurrent: true }, ownerType: "group", scopeType: "group" })).toThrow();
+      { metadataFields: { concurrent: true }, ownerType: "group", containerType: "offering" })).toThrow();
   });
 
   it("registerDocumentKind throws for a kind that is not a valid camelCase identifier", () => {
     expect(() => registerDocumentKind("not-camel-case",
-      { metadataFields: {}, ownerType: "user", scopeType: "class" })).toThrow(/not a valid identifier/);
+      { metadataFields: {}, ownerType: "user", containerType: "class" })).toThrow(/not a valid identifier/);
   });
 
   describe("getDocumentKindMetadataFields", () => {
@@ -63,11 +63,11 @@ describe("document kinds registry", () => {
     });
   });
 
-  describe("owner scope", () => {
+  describe("owner", () => {
     const ctx = { userId: "u-1", groupOwnerId: "group_off_3", classOwnerId: "class_c1" };
 
-    it("resolves user-scoped and unregistered kinds to the user as owner", () => {
-      expect(getDocumentOwnerType(PersonalDocument)).toBe("user");   // registered user-scoped kind
+    it("resolves user-owned and unregistered kinds to the user as owner", () => {
+      expect(getDocumentOwnerType(PersonalDocument)).toBe("user");   // registered user-owned kind
       expect(getDocumentOwnerType(undefined)).toBe("user");          // unregistered defaults to user
       expect(getDocumentOwner(PersonalDocument, ctx)).toBe("u-1");
     });
@@ -79,51 +79,69 @@ describe("document kinds registry", () => {
 
     it("resolves a class kind to the class owner", () => {
       registerDocumentKind("testDqb",
-        { metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit" });
+        { metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit" });
       expect(getDocumentOwnerType("testDqb")).toBe("class");
       expect(getDocumentOwner("testDqb", ctx)).toBe("class_c1");
     });
 
-    it("falls back to the user when the scope's synthetic owner was not supplied", () => {
+    it("falls back to the user when the synthetic owner was not supplied", () => {
       expect(getDocumentOwner(GroupDocument, { userId: "u-1" })).toBe("u-1");
     });
   });
 
-  describe("scope fields", () => {
+  describe("owner fields", () => {
+    it("stamps a groupId for a group-owned kind", () => {
+      expect(getDocumentOwnerFields(GroupDocument, { groupId: "3" })).toEqual({ groupId: "3" });
+    });
+
+    it("stamps nothing for a kind owned by a user or a class", () => {
+      expect(getDocumentOwnerFields(ProblemDocument, { groupId: "3" })).toEqual({});
+      expect(getDocumentOwnerFields(PersonalDocument, { groupId: "3" })).toEqual({});
+      expect(getDocumentOwnerFields(undefined, { groupId: "3" })).toEqual({});
+    });
+
+    it("stamps nothing when the group-owned kind has no group to record", () => {
+      expect(getDocumentOwnerFields(GroupDocument, {})).toEqual({});
+    });
+  });
+
+  describe("location fields", () => {
     const ctx = {
-      groupId: "3", offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
+      offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
     };
 
-    it("returns group + offering scope plus the problem context for the group kind", () => {
-      expect(getDocumentScopeFields(GroupDocument, ctx)).toEqual({
-        groupId: "3", offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
+    it("returns the offering and its problem for the group kind, with no owner fields among them", () => {
+      // A group document is kept in the offering like the problem documents beside it; its group is an
+      // owner field (getDocumentOwnerFields), not part of where it is kept.
+      expect(getDocumentLocationFields(GroupDocument, ctx)).toEqual({
+        offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
       });
     });
 
-    it("returns the unit and context_id for a class-unit kind, with curriculum scope stated as absent", () => {
+    it("returns the unit and context_id for a class-unit kind, stating the absent curriculum explicitly", () => {
       registerDocumentKind("testWordWall",
-        { metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit" });
-      expect(getDocumentScopeFields("testWordWall", ctx)).toEqual({
+        { metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit" });
+      expect(getDocumentLocationFields("testWordWall", ctx)).toEqual({
         unit: "msu", context_id: "class-h", investigation: null, problem: null
       });
     });
 
-    it("returns offering scope plus the problem context for an offering kind", () => {
-      expect(getDocumentScopeFields(ProblemDocument, ctx)).toEqual({
+    it("returns the offering and its problem for an offering kind", () => {
+      expect(getDocumentLocationFields(ProblemDocument, ctx)).toEqual({
         offeringId: "off-1", unit: "msu", investigation: "1", problem: "2", context_id: "class-h"
       });
     });
 
     it("returns only a null unit and context_id for a class kind and unregistered kinds", () => {
-      expect(getDocumentScopeFields(PersonalDocument, ctx)).toEqual({ unit: null, context_id: "class-h" });
-      expect(getDocumentScopeFields(undefined, ctx)).toEqual({ unit: null, context_id: "class-h" });
+      expect(getDocumentLocationFields(PersonalDocument, ctx)).toEqual({ unit: null, context_id: "class-h" });
+      expect(getDocumentLocationFields(undefined, ctx)).toEqual({ unit: null, context_id: "class-h" });
     });
   });
 
   describe("title", () => {
     it("returns a class-wide kind's registered static title", () => {
       registerDocumentKind("testDqbTitle", {
-        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
         title: "Driving Question Board"
       });
       expect(getDocumentTitle({ kind: "testDqbTitle", type: GroupDocument })).toBe("Driving Question Board");
@@ -153,7 +171,7 @@ describe("document kinds registry", () => {
       beforeEach(() => {
         resetDocumentKindRegistryForTests();
         registerDocumentKind("testUnitDeclaredKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
           title: "Driving Question Board", unit: "sas"
         });
       });
@@ -186,24 +204,24 @@ describe("document kinds registry", () => {
     });
   });
 
-  describe("getDocumentScopeFields for a classUnit kind", () => {
+  describe("getDocumentLocationFields for a classUnit kind", () => {
     const ctx = {
       unit: "sas", investigation: "1", problem: "2",
-      context_id: "class-hash", groupId: "3", offeringId: "off-1"
+      context_id: "class-hash", offeringId: "off-1"
     };
 
     beforeEach(() => {
       resetDocumentKindRegistryForTests();
       registerDocumentKind("testClassWideKind", {
-        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit"
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit"
       });
     });
 
-    it("stamps the unit and class, and states the absent curriculum scope explicitly", () => {
-      // `investigation`/`problem` are written as null rather than omitted: a null scope field means
-      // "absent scope" (firestore.rules hasScopeField), which is what makes the class+unit scope
-      // queryable — `where("investigation", "==", null)` cannot match a missing field.
-      expect(getDocumentScopeFields("testClassWideKind", ctx)).toEqual({
+    it("stamps the unit and class, and states the absent curriculum explicitly", () => {
+      // `investigation`/`problem` are written as null rather than omitted: a null field means "not about
+      // an investigation or problem" (firestore.rules hasScopeField), which is what makes a class+unit
+      // document queryable — `where("investigation", "==", null)` cannot match a missing field.
+      expect(getDocumentLocationFields("testClassWideKind", ctx)).toEqual({
         unit: "sas",
         context_id: "class-hash",
         investigation: null,
@@ -211,16 +229,14 @@ describe("document kinds registry", () => {
       });
     });
 
-    it("does not stamp an offering or a group", () => {
-      const fields = getDocumentScopeFields("testClassWideKind", ctx);
-      expect(fields.offeringId).toBeUndefined();
-      expect(fields.groupId).toBeUndefined();
+    it("does not stamp an offering", () => {
+      expect(getDocumentLocationFields("testClassWideKind", ctx).offeringId).toBeUndefined();
     });
 
-    it("leaves the group scope unchanged", () => {
-      expect(getDocumentScopeFields(GroupDocument, ctx)).toEqual({
+    it("leaves the group kind's location unchanged", () => {
+      expect(getDocumentLocationFields(GroupDocument, ctx)).toEqual({
         unit: "sas", investigation: "1", problem: "2",
-        context_id: "class-hash", offeringId: "off-1", groupId: "3"
+        context_id: "class-hash", offeringId: "off-1"
       });
     });
   });
