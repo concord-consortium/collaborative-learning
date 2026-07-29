@@ -26,7 +26,7 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 
 | Axis / component | Mechanism (target) | Status | Delivered by |
 |---|---|---|---|
-| `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524; class+unit pointer scope added CLUE-550 Stage 2 |
+| `canonical` (single pointed-to doc for a slot) | pointer slots addressed as container + owner + label, rule-enforced | done | CLUE-524; class+unit slots added CLUE-550 Stage 2; Stage 3 gave every slot an explicit owner segment, taken from the document's `uid` |
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
 | `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | done | CLUE-550 Stage 1 (stored + registry seeded); titles resolved by kind Stage 2; presentation wired Stage 3 (workspace title bar reads the registry; no consumer branches on kind); Stage 3 also scopes a unit-declared kind's definition to its unit — see "Static and dynamic kinds" in [axes.md](./axes.md) |
 | `owner` (who the document belongs to) | creation: kind-declared `ownerType` → owner `uid` (`getDocumentOwner`) plus a group owner's stored `groupId` (`getDocumentOwnerFields`); read: `hasGroupOwner(doc)` over the stored `groupId`, `hasClassOwner(doc)` over the uid's `class_` prefix | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds); Stage 3 (both guards; `groupId` moved onto this axis, off the container). Still to come: the user level, and a getter that returns which owner a document has rather than testing for one |
@@ -45,7 +45,7 @@ CLUE-550 ("class-wide collaborative documents") is the first concrete slice of t
 `concurrent` and `kind` stored axes plus a kind registry, then rebased group-document behavior (concurrent
 history, non-owner write-sync, class-wide read access, the rules delete clause) from `type === "group"` onto
 the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
-canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
+canonical-pointer engine: a class+unit slot alongside the existing offering+group one, with
 get-or-create convergence guaranteeing exactly one document per slot per class. Stage 2 also begins the
 `owner`, `container`, and `curriculum` axes on the creation side, now for **every** kind: a document's owner
 `uid` is derived from the kind's registered `ownerType` (`user` / `group` / `class`) — class-wide documents
@@ -62,4 +62,6 @@ filters, presentation reads `concurrent` and the kind registry, and one predicat
 (`canUserEditDocument`) gates every Edit button. It also settles how these axes are modeled in code:
 consumers read narrow named guards over the stored fields, with no level enum and no unified struct;
 a kind declares `ownerType` and `containerType`; and `groupId` sits on the owner axis, so there is no
-group container level (see [reading-axes-in-code.md](./reading-axes-in-code.md)).
+group container level (see [reading-axes-in-code.md](./reading-axes-in-code.md)). Canonical slots follow:
+each is addressed as its container plus its owner plus a label, with the owner segment read straight from
+the document's `uid` so the pointer path no longer depends on `groupId` at all.

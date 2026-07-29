@@ -66,10 +66,19 @@ describe("document kinds registry", () => {
   describe("owner", () => {
     const ctx = { userId: "u-1", groupOwnerId: "group_off_3", classOwnerId: "class_c1" };
 
-    it("resolves user-owned and unregistered kinds to the user as owner", () => {
+    it("resolves a user-owned kind to the user as owner", () => {
       expect(getDocumentOwnerType(PersonalDocument)).toBe("user");   // registered user-owned kind
-      expect(getDocumentOwnerType(undefined)).toBe("user");          // unregistered defaults to user
+      expect(getDocumentOwnerType(undefined)).toBe("user");          // the type query defaults to user
       expect(getDocumentOwner(PersonalDocument, ctx)).toBe("u-1");
+    });
+
+    it("throws rather than defaulting the owner of an unregistered kind", () => {
+      // Unlike getDocumentOwnerType, this must not fall back to the creating user: that would hand a
+      // group's or a class's document to whoever created it, and file it in that user's canonical slot.
+      // A unit-declared kind is registered only while its unit is loaded, so this is also what confines
+      // document creation to the kinds the current unit defines.
+      expect(() => getDocumentOwner("noSuchKind", ctx)).toThrow(/unregistered document kind/);
+      expect(() => getDocumentOwner(undefined, ctx)).toThrow(/unregistered document kind/);
     });
 
     it("resolves the built-in group kind to the group owner", () => {
@@ -219,7 +228,7 @@ describe("document kinds registry", () => {
 
     it("stamps the unit and class, and states the absent curriculum explicitly", () => {
       // `investigation`/`problem` are written as null rather than omitted: a null field means "not about
-      // an investigation or problem" (firestore.rules hasScopeField), which is what makes a class+unit
+      // an investigation or problem" (firestore.rules hasPresentField), which is what makes a class+unit
       // document queryable — `where("investigation", "==", null)` cannot match a missing field.
       expect(getDocumentLocationFields("testClassWideKind", ctx)).toEqual({
         unit: "sas",

@@ -81,8 +81,9 @@ what makes "about a unit but not a problem" a queryable condition.
   `kClassOwnerPrefix`, which is what keeps them from drifting, but the grammar is still a convention
   rather than something stored. The same is true of the group owner uid.
 - **Only one container level has a guard.** `isInClassUnitContainer` distinguishes classUnit from
-  offering; nothing names the class level, and no getter returns a document's container. The
-  canonical-pointer path is still built from the individual fields rather than from a container.
+  offering; nothing names the class level, and no getter returns a document's container. Canonical
+  pointer paths are assembled from the individual fields on both sides (`getCanonicalPointerPath` and
+  the rules' `canonicalPointerPath`) rather than from a container value.
 
 ## Titling a document from another unit
 

@@ -190,8 +190,11 @@ questions and are written by different code.
 - **Reactive:** No
 
 Claims a canonical label for a group document so concurrent creators converge on one document. The rules
-forbid setting it on create and permit a single one-time set on update. Not present in
-`IDocumentMetadata` or `DocumentMetadataModel` — it has no type coverage at all.
+forbid setting it on create and permit a single one-time set on update, and only when the pointer for
+this document's own slot already names it. That slot is a container plus an owner plus a label, and the
+rules locate it by building the path from the document's own fields — including its `uid` as the owner —
+so a document cannot claim a slot belonging to a different owner. Not present in `IDocumentMetadata` or
+`DocumentMetadataModel` — it has no type coverage at all.
 
 ### `offeringId`
 

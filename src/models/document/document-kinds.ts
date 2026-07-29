@@ -107,10 +107,23 @@ export function getDocumentOwnerType(kind?: string|null): DocumentOwnerType {
 }
 
 /**
- * The owner uid to stamp on a new document of the given kind
+ * The owner uid to stamp on a new document of the given kind.
+ *
+ * Throws for a kind that is not registered, rather than defaulting to the creating user the way
+ * getDocumentOwnerType does. Defaulting here would hand a group's or a class's document to whoever
+ * happened to create it, and because a canonical slot is addressed by its owner, would file it in that
+ * user's slot instead of the shared one — both silently.
+ *
+ * A unit-declared kind is registered only while the unit declaring it is loaded, so this also states the
+ * rule that a document may be created only for a kind the current unit defines. Reading documents from
+ * other units is unaffected: nothing on the read side resolves an owner (see document-axes.ts).
  */
 export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwnerContext): string {
-  switch (getDocumentOwnerType(kind)) {
+  const info = getDocumentKindInfo(kind);
+  if (!info) {
+    throw new Error(`Cannot resolve the owner of unregistered document kind "${kind}"`);
+  }
+  switch (info.ownerType) {
     case "group": return ctx.groupOwnerId ?? ctx.userId;
     case "class": return ctx.classOwnerId ?? ctx.userId;
     case "user":  return ctx.userId;
@@ -163,7 +176,7 @@ export function getDocumentLocationFields(
       unit: ctx.unit,
       context_id: ctx.context_id,
       // Stated explicitly rather than omitted. A curriculum field written as null means "not about an
-      // investigation or problem" (firestore.rules `hasScopeField`), the same convention class-contained
+      // investigation or problem" (firestore.rules `hasPresentField`), the same convention class-contained
       // documents use for `unit: null`. It is what lets Sort Work query for documents about a unit but not
       // a problem — Firestore cannot match a field that is missing.
       investigation: null,
