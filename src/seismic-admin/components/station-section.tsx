@@ -70,7 +70,7 @@ const ModelSection = observer(function ModelSection({ stationKey, stationLabel, 
 
   return (
     <CoverageSection
-      ariaLabel={`envelope coverage timeline for ${stationLabel}`}
+      ariaLabel={`${model.label} coverage timeline for ${stationLabel}`}
       coverageState={coverageState}
       errorMessage="Unable to download coverage"
       highlightedDays={highlightedDays}
