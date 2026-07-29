@@ -15,6 +15,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
 import { IDataSet } from "../../../models/data/data-set";
 import { getAttributeIdForNode } from "./utilities/recording-utilities";
+import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
 export const ConnectionModel = types
@@ -201,14 +202,10 @@ export const DataflowProgramModel = types.
       const node = self.nodes.get(nodeId);
       return node?.groupId ? self.groups.get(node.groupId) : undefined;
     },
-    // Next default group label ("Group 1", "Group 2", ...) based on existing labels.
+    // Next default group label ("Group 1", "Group 2", ...) based on existing labels. Uses the same
+    // helper that names nodes, so groups and blocks index identically.
     getNextGroupLabel() {
-      let max = 0;
-      self.groups.forEach(g => {
-        const m = /^Group (\d+)$/.exec(g.label);
-        if (m) max = Math.max(max, Number(m[1]));
-      });
-      return `Group ${max + 1}`;
+      return getNewIndexedName([...self.groups.values()].map(g => g.label), "Group");
     }
   }))
   .actions(self => ({
@@ -289,9 +286,6 @@ export const DataflowProgramModel = types.
       node.data.createNextTickEntry(undefined, self.currentTick);
       return node;
     },
-    removeNode(id: IDataflowNodeModel["id"]) {
-      self.nodes.delete(id);
-    },
     addConnection(connection: IConnectionModel) {
       self.connections.put(connection);
     },
@@ -328,6 +322,20 @@ export const DataflowProgramModel = types.
     },
     ungroupGroups(ids: string[]) {
       ids.forEach(id => self.ungroupGroup(id));
+    },
+    // Remove a node, keeping group membership consistent: drop it from its group and dissolve the
+    // group if that leaves it with fewer than 2 members. The bookkeeping lives here, rather than
+    // only in removeNodeAndConnections, so that every removal path is consistent by construction —
+    // NodeEditorMST.clear() calls this directly, and used to leave groups whose nodeIds referenced
+    // deleted nodes behind in the saved document. Defined after ungroupGroup so it can use `self`.
+    removeNode(id: IDataflowNodeModel["id"]) {
+      // Capture the group first: getGroupForNode reads node.groupId, which goes away with the node.
+      const group = self.getGroupForNode(id);
+      self.nodes.delete(id);
+      if (group) {
+        group.removeNodeId(id);
+        if (group.nodeIds.size < 2) self.ungroupGroup(group.id);
+      }
     }
   }))
   .actions(self => ({
@@ -345,15 +353,8 @@ export const DataflowProgramModel = types.
         self.removeConnection(connection.id);
       }
 
-      // Capture the node's group before removing the node (getGroupForNode reads node.groupId).
-      const group = self.getGroupForNode(nodeId);
+      // removeNode handles the group bookkeeping and auto-dissolve.
       self.removeNode(nodeId);
-
-      // Keep group membership consistent; auto-dissolve a group that drops below 2 members.
-      if (group) {
-        group.removeNodeId(nodeId);
-        if (group.nodeIds.size < 2) self.ungroupGroup(group.id);
-      }
       return removedConnections;
     }
   }));

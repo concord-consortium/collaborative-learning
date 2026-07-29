@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { GroupInputSocket, GroupOutputSocket, ReteManager } from "../../rete/rete-manager";
 import { IGroupModel } from "../../model/dataflow-program-model";
@@ -325,8 +325,10 @@ export const DataflowGroupsOverlay = observer(function DataflowGroupsOverlay({ r
   interfacesRef.current = interfaces;
   const signature = `${scale}:${dx}:${dy}|${collapsedKey}|${positionKeys.join("|")}`;
 
-  // Re-measure the collapsed groups' boundary wires after layout whenever the signature changes.
-  useEffect(() => {
+  // Re-measure the collapsed groups' boundary wires whenever the signature changes. Layout effect,
+  // not a plain effect: the paths come from getBoundingClientRect, so measuring after paint would
+  // show the previous frame's wires for one frame after anything moves.
+  useLayoutEffect(() => {
     const overlayEl = overlayRef.current;
     if (!overlayEl) { setWires([]); return; }
     const origin = overlayEl.getBoundingClientRect();

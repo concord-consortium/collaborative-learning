@@ -335,7 +335,8 @@ export class ReteManager implements INodeServices {
     // Read-only tiles fit via componentDidMount / the content reaction instead. Deferred so the DOM has
     // laid out node elements with real dimensions.
     if (!this.readOnly && this.mstProgram.nodes.size > 0) {
-      setTimeout(() => this.fitContent(), 100);
+      // Tracked so dispose() cancels it — the tile can unmount inside this window.
+      this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
     }
 
     // Notify after the area, connection, and render plugins have been configured
@@ -829,7 +830,7 @@ export class ReteManager implements INodeServices {
 
   // True when a node is hidden inside a collapsed group (its real sockets are display:none, so its
   // only visible/connectable sockets are the proxy dots the group chip draws in the overlay).
-  private isNodeInCollapsedGroup(nodeId: string): boolean {
+  public isNodeInCollapsedGroup(nodeId: string): boolean {
     const groupId = this.mstProgram?.nodes.get(nodeId)?.groupId;
     return !!groupId && !!this.mstProgram.groups.get(groupId)?.collapsed;
   }

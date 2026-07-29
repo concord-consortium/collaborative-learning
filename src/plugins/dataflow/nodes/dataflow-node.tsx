@@ -176,11 +176,10 @@ export const CustomDataflowNode = observer(
   sortByIndex(outputs);
   sortByIndex(controls);
 
-  // Members of a collapsed group are hidden (the group renders as a chip in the overlay). node.groupId
-  // gives an O(1) node→group lookup; reading the observable group keeps this reactive to collapse/expand
-  // and membership changes.
-  const memberGroupId = reteManager?.nodes.get(id)?.groupId;
-  const inCollapsedGroup = memberGroupId ? !!reteManager?.groups.get(memberGroupId)?.collapsed : false;
+  // Members of a collapsed group are hidden (the group renders as a chip in the overlay). The
+  // lookup is O(1) via node.groupId, and reading those observables here — inside the observer's
+  // render — keeps this reactive to collapse/expand and membership changes.
+  const inCollapsedGroup = !!reteManager?.isNodeInCollapsedGroup(id);
 
   const dynamicClasses = classNames({
     "selected": data.selected,
