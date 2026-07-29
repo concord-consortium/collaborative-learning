@@ -173,19 +173,19 @@ interface ICanUserEditDocumentParams {
  * document by any member of its class (teachers included — they belong to the class too), a group
  * document by any member of its group.
  *
- * Fields are read from the reactive Firestore metadata, falling back per field to the lazily-fetched
- * full document. A groupmate's document appears in the metadata before its content finishes loading,
- * and reading it per field is what lets the Edit button appear without a reload.
+ * The Firestore metadata is preferred over the loaded document, because it is reactive and arrives
+ * first: a groupmate's document is listed before its content finishes loading, and the Edit button
+ * appears without a reload. The document is the fallback for the workspace, which opens documents
+ * without looking their metadata up. Every field read here is stamped once at creation, so the two
+ * sources never disagree — which is why one is chosen outright rather than field by field.
  */
 export function canUserEditDocument({
   document, documentMetadata, user
 }: ICanUserEditDocumentParams): boolean {
-  const uid = documentMetadata?.uid ?? document?.uid;
-  const type = documentMetadata?.type ?? document?.type;
-  const concurrent = documentMetadata?.concurrent ?? document?.concurrent;
-  const unit = documentMetadata?.unit ?? document?.unit;
-  const offeringId = documentMetadata?.offeringId ?? document?.offeringId;
-  const contextId = documentMetadata?.context_id ?? document?.contextId;
+  const metadata = documentMetadata ?? document?.metadata;
+  if (!metadata) return false;
+
+  const { uid, type, concurrent, context_id: contextId } = metadata;
 
   if (type && isPublishedType(type)) return false;
   if (!!uid && uid === user.id) return true;
@@ -194,7 +194,7 @@ export function canUserEditDocument({
   // Beyond this point the user must be inside the document's container, asked at the narrowest level the
   // document is kept at. A group document is kept in an offering, so its group is asked first.
   if (isUserInDocumentsGroup(uid, user)) return true;
-  if (isInClassUnitContainer({ unit, offeringId })) {
+  if (isInClassUnitContainer(metadata)) {
     return !!contextId && contextId === user.classHash;
   }
   return false;
