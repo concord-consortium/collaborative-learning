@@ -4,9 +4,9 @@ import { ChannelMetadata, StationId, StationQuery, TimeRange } from "./seismic-t
 /**
  * Low-level fetchers for EarthScope's FDSN web services.
  *
- * By default returns pre-staged miniSEED files from S3 (mock data).
- * When the URL parameter `seismicProxy` is present, fetches live data from
- * the Concord CloudFront proxy instead.
+ * By default fetches live data from the Concord CloudFront proxy. When the URL
+ * parameter `mockSeismicData` is present, returns pre-staged miniSEED files
+ * from S3 instead.
  */
 
 // ---------------------------------------------------------------------------
@@ -22,8 +22,9 @@ function getUrlParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
 }
 
+/** The proxy is the default; `?mockSeismicData` opts out of it in favor of the mock files. */
 export function isProxyEnabled(): boolean {
-  return getUrlParam("seismicProxy") !== null;
+  return getUrlParam("mockSeismicData") === null;
 }
 
 export function getLocalBaseUrl(): string | null {
@@ -68,13 +69,13 @@ const MOCK_FILES: MockFile[] = [
 /**
  * Fetch raw seismic waveform data for a single station/channel/time range.
  *
- * **Current behaviour (mock):** Ignores network/station/channel and returns
- * the first mock file whose time range overlaps the request. Only one file is
- * returned per call — callers needing multiple days should make multiple calls
- * with day-aligned ranges.
+ * **Default (proxy):** Constructs an FDSN dataselect URL and fetches from
+ * EarthScope's API via the CloudFront proxy.
  *
- * **Future behaviour:** Will construct an FDSN dataselect URL and fetch from
- * EarthScope's API (via CloudFront proxy).
+ * **Mock mode (`?mockSeismicData`):** Ignores network/station/channel and
+ * returns the first mock file whose time range overlaps the request. Only one
+ * file is returned per call — callers needing multiple days should make
+ * multiple calls with day-aligned ranges.
  *
  * @returns The fetch `Response`. Callers choose how to consume it —
  *   `.arrayBuffer()`, streaming via `.body`, etc.
@@ -214,10 +215,10 @@ const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
 /**
  * Fetch the time ranges for which data actually exists for a station/channel.
  *
- * Proxy mode (`?seismicProxy`): queries the FDSN availability service through
+ * Proxy mode (the default): queries the FDSN availability service through
  * CloudFront and parses its pipe-delimited text response.
  *
- * Mock/local mode: the availability service is not mocked, so we assume the
+ * Mock/local mode (?mockSeismicData): the availability service is not mocked, so we assume the
  * entire requested range is available (one range). Callers then attempt every
  * day; the mock dataselect returns "no data" for days it doesn't cover.
  */

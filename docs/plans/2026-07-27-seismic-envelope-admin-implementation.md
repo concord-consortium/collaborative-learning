@@ -1223,7 +1223,7 @@ enough for an admin session. A failed JWT fetch surfaces through the update-flow
 
 1. `npm test -- --no-watchman` (full suite), `npm run lint:build`, `npm run check:types` — all clean.
 2. Manual end-to-end (requires the ops prerequisites; use the staging portal via `?portal=`):
-   `npm start` → `http://localhost:8080/seismic-admin/?seismicProxy` → log in with portal →
+   `npm start` → `http://localhost:8080/seismic-admin/` → log in with portal →
    pick one station and a **2-3 day range** → Update station → watch feedback progress through
    raw → envelopes → events; envelope timeline fills live; reload page → coverage persists
    (now read from S3); spot-check `curl "https://models-resources.s3.amazonaws.com/?list-type=2&prefix=collaborative-learning/envelopes/v2/"`;
