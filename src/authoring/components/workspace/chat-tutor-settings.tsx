@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CHAT_GENERIC_PROMPT } from "../../../../shared/chat-tutor-generic-prompt";
+import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../../shared/chat-tutor-default-intro";
 import { useCurriculum } from "../../hooks/use-curriculum";
 
 interface ChatTutorSettingsFormInputs {
+  chatTutorEnabled: boolean;
+  chatTutorIntro: string;
   replaceGenericPrompt: string;
   appendToGenericPrompt: string;
 }
@@ -26,8 +29,11 @@ const ChatTutorSettings: React.FC = () => {
   };
 
   const formDefaults: ChatTutorSettingsFormInputs = useMemo(() => {
-    const chatTutorPrompts = unitConfig?.config?.chatTutorPrompts;
+    const config = unitConfig?.config;
+    const chatTutorPrompts = config?.chatTutorPrompts;
     return {
+      chatTutorEnabled: config?.chatTutorEnabled ?? false,
+      chatTutorIntro: config?.chatTutorIntro ?? CHAT_TUTOR_DEFAULT_INTRO,
       replaceGenericPrompt: chatTutorPrompts?.replaceGenericPrompt ?? "",
       appendToGenericPrompt: chatTutorPrompts?.appendToGenericPrompt ?? "",
     };
@@ -44,8 +50,18 @@ const ChatTutorSettings: React.FC = () => {
   const onSubmit: SubmitHandler<ChatTutorSettingsFormInputs> = (data) => {
     const replaceGenericPrompt = data.replaceGenericPrompt.trim();
     const appendToGenericPrompt = data.appendToGenericPrompt.trim();
+    const chatTutorIntro = data.chatTutorIntro.trim();
     setUnitConfig(draft => {
       if (!draft) return;
+      // The enable flag is independent of the prompt overrides — toggling it never discards prompts.
+      if (data.chatTutorEnabled) draft.config.chatTutorEnabled = true;
+      else delete draft.config.chatTutorEnabled;
+      // Store the intro only when it's a non-empty customization; otherwise fall back to the default.
+      if (chatTutorIntro && chatTutorIntro !== CHAT_TUTOR_DEFAULT_INTRO) {
+        draft.config.chatTutorIntro = chatTutorIntro;
+      } else {
+        delete draft.config.chatTutorIntro;
+      }
       if (!replaceGenericPrompt && !appendToGenericPrompt) {
         delete draft.config.chatTutorPrompts;
         return;
@@ -68,6 +84,26 @@ const ChatTutorSettings: React.FC = () => {
         the <code>chatTutor</code> parameter to this authoring page&apos;s URL before
         opening a student preview (preview links inherit it).
       </p>
+
+      <fieldset className="enableChatTutor">
+        <label>
+          <input type="checkbox" {...register("chatTutorEnabled")} />
+          Enable the AI chat tutor for students in this unit
+        </label>
+        <p className="muted small">
+          When off, the prompt overrides below are still kept, and the <code>chatTutor</code> URL
+          param can be used to preview the tutor.
+        </p>
+      </fieldset>
+
+      <fieldset className="chatTutorIntro">
+        <label htmlFor="chatTutorIntro">Chat intro message</label>
+        <textarea id="chatTutorIntro" rows={4} {...register("chatTutorIntro")} />
+        <p className="muted small">
+          Shown at the top of the chat column when a student opens the tutor. It is display-only —
+          never sent to the AI as context. Leave it as the default to use the built-in greeting.
+        </p>
+      </fieldset>
 
       <details className="builtInPrompt">
         <summary>View built-in tutor prompt</summary>

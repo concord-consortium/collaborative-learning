@@ -442,38 +442,51 @@ $member-size: 18px;
 // AA-checked against the header palette: text 8.5:1, border 4.1:1 on the
 // $workspace-teal-light-5 header background; open state white on
 // $workspace-teal-dark-1 = 4.5:1.
+// Floating round "AIdeas" launcher pinned at the lower-right of the workspace. Rendered from the
+// header for store access, but position:fixed takes it out of the header bar and floats it over the
+// workspace. Hidden (unmounted) while the chat drawer is open.
 .app-header .right .chat-tutor-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 900;
   align-items: center;
   appearance: none;
-  background-color: $workspace-teal-light-5;
+  background-color: $problem-orange;
   border: solid 1.5px $charcoal;
-  border-radius: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
-  color: inherit;
+  color: $charcoal;
   cursor: pointer;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: center;
   font: inherit;
   font-weight: 600;
-  gap: 6px;
-  height: 40px;
-  padding: 0 10px;
+  gap: 1px;
+  width: 64px;
+  height: 64px;
+  padding: 0;
 
   @include focus-ring;
 
   &:hover {
-    background-color: $workspace-teal-light-3;
+    background-color: $problem-orange-light-1;
   }
 
-  &:active,
-  &[aria-expanded="true"] {
-    background-color: $workspace-teal-dark-1;
+  &:active {
+    background-color: $problem-orange-dark-1;
     border-color: white;
     color: white;
   }
 
   .chat-tutor-launcher-icon {
-    font-size: 16px;
+    display: block;
+  }
+
+  .chat-tutor-launcher-label {
+    font-size: 12px;
     line-height: 1;
   }
 }

@@ -137,6 +137,18 @@
       margin: auto 0;
       font-style: italic;
     }
+
+    // Persona greeting pinned at the top of the column. Visually distinct from real chat bubbles
+    // because it is not a conversation turn (never sent to the AI).
+    .chat-intro {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: $charcoal-light-7;
+      color: $charcoal-dark-2;
+      font-size: 13px;
+      line-height: 1.4;
+    }
   }
 
   .chat-row {
