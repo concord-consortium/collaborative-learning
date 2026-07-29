@@ -578,6 +578,8 @@ export class SeismicAdminStore {
     const uploader = this.envelopeUploader;
     if (!this.portalReady || !uploader) return false;
 
+    this.setFeedback(`${prefix}Updating ${getStationLabel(stationData)}...`);
+
     let ok = true;
 
     // 1) Envelopes for days not fully covered in S3.

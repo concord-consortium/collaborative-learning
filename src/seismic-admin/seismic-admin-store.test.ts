@@ -776,6 +776,18 @@ describe("update (event generation)", () => {
     expect(listEnvelopeTiles).toHaveBeenCalled();
   });
 
+  it("shows kickoff feedback before the envelope step starts", async () => {
+    const seen: string[] = [];
+    const processEnvelopes = jest.fn(async () => {
+      seen.push(ctx.store.feedback);
+      return { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 };
+    });
+    const ctx = await primed({ processEnvelopes });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(seen).toEqual(["Updating Rabbit Creek..."]);
+  });
+
   it("reports envelope day progress in feedback", async () => {
     const seen: string[] = [];
     const processEnvelopes = jest.fn(async ({ onProgress }: any) => {
