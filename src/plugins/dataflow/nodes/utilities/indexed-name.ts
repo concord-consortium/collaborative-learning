@@ -6,7 +6,11 @@
  * @returns the next available indexed name
  */
 export function getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
-  const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+(\\.\\d+)?)$`);
+  // Escape the stem: several node display names contain regex metacharacters — "Timer (on/off)"
+  // turned `(on/off)` into a capture group, so match[1] was "on/off" rather than the index, every
+  // parse produced NaN, and every new Timer was named "Timer (on/off) 1".
+  const escapedBaseName = baseName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const matchTypeAndNum = new RegExp(`^${escapedBaseName} *(\\d+(\\.\\d+)?)$`);
   const namedNums: number[] = existingNames
     .map(name => {
       const match = name?.match(matchTypeAndNum);

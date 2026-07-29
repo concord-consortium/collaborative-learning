@@ -14,6 +14,7 @@ import {
 } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "../nodes/rete-scheme";
 import { MarqueeSelection, Rect } from "../utilities/marquee-selection";
+import { accumulateOnModifier, ISelectionAccumulator } from "../utilities/selection-accumulator";
 import { NodeEditorMST } from "../nodes/node-editor-mst";
 import { INodeServices } from "../nodes/service-types";
 import { LogEventName } from "../../../lib/logger-types";
@@ -74,33 +75,13 @@ export interface GroupOutputSocket { nodeId: string; key: string; externals: Ext
 const kDefaultNodeWidth = 176;
 const kDefaultNodeHeight = 120;
 
-// Accumulate node selection while Shift, Ctrl, or Cmd is held. Mirrors
-// AreaExtensions.accumulateOnCtrl() but also allows Shift, the more natural multi-select modifier.
-function accumulateOnModifier() {
-  let pressed = false;
-  const isModifierKey = (e: KeyboardEvent) => e.key === "Shift" || e.key === "Control" || e.key === "Meta";
-  const keydown = (e: KeyboardEvent) => {
-    if (isModifierKey(e) || e.shiftKey || e.ctrlKey || e.metaKey) pressed = true;
-  };
-  const keyup = (e: KeyboardEvent) => { if (isModifierKey(e)) pressed = false; };
-  document.addEventListener("keydown", keydown);
-  document.addEventListener("keyup", keyup);
-  return {
-    active: () => pressed,
-    destroy: () => {
-      document.removeEventListener("keydown", keydown);
-      document.removeEventListener("keyup", keyup);
-    }
-  };
-}
-
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
   private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
   private selectable: ReturnType<typeof AreaExtensions.selectableNodes> | undefined;
-  private selectionAccumulator: ReturnType<typeof accumulateOnModifier> | undefined;
+  private selectionAccumulator: ISelectionAccumulator | undefined;
   private collapsedConnectionsDisposer: (() => void) | undefined;
   private marquee: MarqueeSelection | undefined;
   // Left-drag marquee-selects; the arrow keys pan instead. `canvasActive` gates arrow-panning to the
@@ -570,8 +551,19 @@ export class ReteManager implements INodeServices {
   private setupArrowKeyPan() {
     const container = this.area.container;
     if (!container) return;
+    // The groups overlay and the zoom control are siblings of the rete container, not descendants,
+    // so a plain container.contains() test deactivated arrow panning as soon as the user touched a
+    // group chip, a collapse toggle or a zoom button — the overlay interactions being the most
+    // likely thing to precede a pan. Accept those siblings too, matched by class rather than by
+    // testing the shared parent wholesale, so the hidden editing canvas doesn't claim pointer
+    // presses landing on the playback canvas in Done mode.
+    const editorEl = container.parentElement;
+    const inThisCanvas = (target: EventTarget | null) =>
+      (target instanceof Node && container.contains(target)) ||
+      (target instanceof Element && !!editorEl?.contains(target) &&
+        !!target.closest(".dataflow-groups-overlay, .program-editor-zoom"));
     const onDocPointerDown = (e: PointerEvent) => {
-      this.canvasActive = e.target instanceof Node && container.contains(e.target);
+      this.canvasActive = inThisCanvas(e.target);
       // Connections are committed via the keyboard, so any pointer press abandons an in-progress
       // connection — unless it lands on a highlighted candidate/source socket. Without this, starting a
       // connection (e.g. from a collapsed group's socket) and then clicking away would leave the

@@ -185,8 +185,12 @@ describe("DataflowGroupsOverlay", () => {
 
     it("draws one wire per boundary connection", () => {
       const iface = {
-        inputs: [{ nodeId: "n1", key: "num1", external: { connId: "c1", externalNodeId: "ext", externalKey: "o" } }],
-        outputs: [{ nodeId: "n2", key: "value", externals: [{ connId: "c2", externalNodeId: "ext", externalKey: "i" }] }],
+        inputs: [
+          { nodeId: "n1", key: "num1", external: { connId: "c1", externalNodeId: "ext", externalKey: "o" } }
+        ],
+        outputs: [
+          { nodeId: "n2", key: "value", externals: [{ connId: "c2", externalNodeId: "ext", externalKey: "i" }] }
+        ],
       };
       const { container } = renderOverlay({ collapsed: true, iface, resolvableExternals: ["ext"] });
       expect(container.querySelectorAll(".dataflow-group-wires path")).toHaveLength(2);
@@ -196,8 +200,12 @@ describe("DataflowGroupsOverlay", () => {
       // Both groups expose the same connection — one as an input, one as an output — so without
       // deduping by connection id the same route would be stroked twice.
       const iface = {
-        inputs: [{ nodeId: "n1", key: "num1", external: { connId: "shared", externalNodeId: "ext", externalKey: "o" } }],
-        outputs: [{ nodeId: "n2", key: "value", externals: [{ connId: "shared", externalNodeId: "ext", externalKey: "i" }] }],
+        inputs: [
+          { nodeId: "n1", key: "num1", external: { connId: "shared", externalNodeId: "ext", externalKey: "o" } }
+        ],
+        outputs: [
+          { nodeId: "n2", key: "value", externals: [{ connId: "shared", externalNodeId: "ext", externalKey: "i" }] }
+        ],
       };
       const { container } = renderOverlay({ collapsed: true, iface, resolvableExternals: ["ext"] });
       expect(container.querySelectorAll(".dataflow-group-wires path")).toHaveLength(1);

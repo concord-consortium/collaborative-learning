@@ -45,6 +45,13 @@ describe("DataflowProgramModel groups", () => {
     expect(program.groups.size).toBe(0);
   });
 
+  it("does not create a group from a repeated node id", () => {
+    // nodeIds is a map, so ["a","a"] would pass a naive length check but store one member.
+    const program = makeProgram(["a", "b"]);
+    expect(program.createGroup(["a", "a"])).toBeUndefined();
+    expect(program.groups.size).toBe(0);
+  });
+
   it("does not group nodes that are already in a group", () => {
     const program = makeProgram(["a", "b", "c"]);
     program.createGroup(["a", "b"]);

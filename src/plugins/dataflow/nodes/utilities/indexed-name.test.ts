@@ -38,6 +38,21 @@ describe('Indexed Name Test', () => {
       { existingNames: ["Timer", "Timer 3.93"],
         baseName: "Timer",
         expected: "Timer 4"
+      },
+      // Real display names contain regex metacharacters — see NodeTypes' "Timer (on/off)". Without
+      // escaping the stem, `(on/off)` became a capture group and every new node was named " 1".
+      { existingNames: ["Timer (on/off) 1"],
+        baseName: "Timer (on/off)",
+        expected: "Timer (on/off) 2"
+      },
+      { existingNames: ["Timer (on/off) 1", "Timer (on/off) 3"],
+        baseName: "Timer (on/off)",
+        expected: "Timer (on/off) 4"
+      },
+      // The stem must still match literally rather than as a pattern.
+      { existingNames: ["Timer XonY 2"],
+        baseName: "Timer (on/off)",
+        expected: "Timer (on/off) 1"
       }
     ];
 

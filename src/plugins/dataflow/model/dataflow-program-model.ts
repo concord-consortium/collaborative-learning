@@ -310,7 +310,10 @@ export const DataflowProgramModel = types.
     // Create a "super node" group from the given node ids. Requires ≥2 nodes that exist and are
     // not already in a group; returns the new group (or undefined if the request is invalid).
     createGroup(nodeIds: string[], label?: string) {
-      const validIds = nodeIds.filter(nodeId => self.nodes.has(nodeId) && !self.getGroupForNode(nodeId));
+      // Dedupe before counting: nodeIds is a map, so a repeated id would pass the >=2 check but
+      // yield a single member, leaving a group that breaks the >=2 invariant everything else assumes.
+      const validIds = [...new Set(nodeIds)]
+        .filter(nodeId => self.nodes.has(nodeId) && !self.getGroupForNode(nodeId));
       if (validIds.length < 2) return undefined;
       const id = uniqueId();
       const group = self.groups.put({ id, label: label ?? self.getNextGroupLabel(), collapsed: false });
