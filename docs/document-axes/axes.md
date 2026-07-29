@@ -39,6 +39,101 @@ Two tells that `owner` is its own thing:
   frozen copy the publisher can no longer edit, yet it still "belongs to" them for attribution and
   unpublish authority. Owner persists past write access.
 
+#### What the owner axis has to support
+
+Stated independently of how the owner is stored, so a change of representation can be checked against
+this list. Each requirement names where it is exercised today.
+
+**Assigning**
+
+1. **Resolve an owner at creation from the kind.** A kind declares whether its documents are owned by
+   the creating user, their group, or the class; creation turns that into a concrete owner
+   (`getDocumentOwner`, `document-kinds.ts`).
+
+**Authorizing**
+
+2. **Decide whether the authenticated user is the owner.** The rules compare a user-owned document's
+   owner against the JWT's `platform_user_id` — note, not `request.auth.uid` (`userOwnsDocument`,
+   `userIsRequestUser`, `userIsResourceUser` in `firestore.rules`).
+3. **Distinguish "owned by no user" from "owned by a different user".** A group- or class-owned
+   document must never satisfy (2) for anybody. This is why concurrent documents need their own
+   history grant (`isConcurrentClassDocument`). It requires owners to be unique *across* types, not
+   only within one.
+
+**Addressing**
+
+4. **Locate a document's content by its owner.** RTDB stores content at
+   `classes/<class>/users/<owner>/documents/<key>`, so an owner must serialize to a single key-safe
+   path segment — RTDB keys exclude `.` `$` `#` `[` `]` `/` (`firebase.ts`).
+5. **Rebuild the canonical-pointer path of a group-owned document.** Both the client and the rules
+   need the offering and the group as separate path segments
+   (`canonicalPointerPath` in `firestore.rules`, `getCanonicalPointerPath` in
+   `scoped-document-pointers.ts`).
+
+**Attributing and organizing**
+
+6. **Read a document's owner type directly off the document.** This is the requirement that most
+   constrains the representation, so it is worth stating concretely.
+
+   Sort Work's `byGroup` and `byName` getters (`document-group.ts`) each walk the whole list of
+   documents the class has produced and must place *every* one of them into exactly one section. Both
+   branch three ways on the owner type, and each branch resolves a different thing:
+
+   | owner type | `byGroup` section | `byName` section |
+   |---|---|---|
+   | group | `Group <N>`, from the group the document belongs to | one entry under **each member** of that group |
+   | class | `Whole Class` — a fixed section | `No Name` — the class is not a person |
+   | user | the group its **owner currently belongs to**, or `No Group` | the owner's `Last, First` |
+
+   Three things follow. The type selects *which lookup to perform* — a group registry lookup, no
+   lookup at all, or a class-user lookup — so it has to be known before any id is resolved. A
+   user-owned document is placed by an indirect route (its owner's current group, which can change),
+   so the owner type also decides whether the document's own association or its owner's present state
+   supplies the answer. And a group-owned document is emitted **several times**, once per member,
+   while the other two are emitted once — so the type changes the shape of the output, not just its
+   label.
+
+   The view is iterating documents it did not choose and cannot anticipate, including documents from
+   other units and offerings. It needs the owner type as a value it can read from each document, the
+   same way it reads a title.
+7. **Resolve a group owner to its group** — the members, and the "Group N" label. Needs the group
+   identifier on its own, and resolves against the **current offering's** group registry.
+8. **Resolve a user owner to a class user** — for the "Last, First" section label.
+9. **Decide whether the current user is inside a group owner** — the edit gate. Must be
+   offering-qualified: comparing bare group ids across offerings matches different cohorts
+   (`canUserEditDocument`).
+
+**Locating**
+
+10. **Find a group's pre-canonical document.** `findLegacyGroupDocument` filters on class, offering,
+    and group. This is the only Firestore query on an owner field, and it is transitional — it retires
+    with the canonical-pointer migration.
+
+#### Not required today
+
+**No Firestore query filters documents by owner type.** "Every document owned by a group in this
+class" and "every document owned by the class" are *grouping* operations, not queries: Sort Work
+fetches by `context_id` and projects client-side. Nor is there a query by user owner. (The one
+`where("uid", …)` elsewhere in the tree, in `on-user-doc-written.ts`, filters the `users` collection —
+those are user records, not document owners.)
+
+Worth stating explicitly, because it means the owner representation does **not** have to be queryable
+by type today. If that changes, it becomes the strongest argument for a stored discriminant.
+
+#### Possible future requirements
+
+- **Query by owner type** — a view that fetches only class-owned documents, or trims payload by owner.
+  Client-side projection would not suffice.
+- **More owner types** — a school, a network, a teacher cohort.
+- **Group-level authorization in the rules.** A group document's history is currently authorized
+  class-wide because the auth token carries no group id (noted at `isConcurrentClassDocument`). If
+  tokens ever carried one, the rules would have to recover the group from the owner.
+- **Owner transfer.** Because permissions are computed *from* the owner, reassigning it changes who
+  may act; it would need a privileged path rather than an ordinary update.
+- **Resolving a group owner outside the current offering.** Requirement 7 resolves only against the
+  current offering, so a group-owned document from an earlier offering — visible under Sort Work's
+  "All" filter — cannot render its members. `byName` drops such a document from the listing entirely.
+
 ### `scope` — where the document is attached
 
 **What it is.** The document's position in the org hierarchy (network / class / offering / group / user)
