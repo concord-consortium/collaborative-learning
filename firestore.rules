@@ -360,8 +360,7 @@ service cloud.firestore {
 
       match /documents/{docId} {
         // A scope field counts only when it holds a non-empty string. A field written as null counts as
-        // absent scope, not a value: class-scoped docs (personal, learning-log) store `unit: null`, and a
-        // bare `!= ""` test would read that null as present (`null != ""` is true in rules).
+        // absent scope.
         function hasScopeField(data, key) {
           return data.get(key, "") is string && data.get(key, "") != "";
         }
