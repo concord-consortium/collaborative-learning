@@ -9,6 +9,8 @@ import { DONE, type DayDownloadService } from "./seismic-download-service";
  * Serves only the ready days that fall within the most recent ensureRange call,
  * then DONE — mirroring the real service's reset-per-ensureRange drain contract.
  * Like the real downloader (daysInRange), the day containing endSec is INCLUDED.
+ * Unlike the real service, erroredDays/emptyDays are NOT reset by ensureRange —
+ * avoid multi-span tests that preload them.
  * `satisfies` pins the fake to the real service's API so drift breaks compilation.
  */
 export function makeFakeDownloadService(days: number[]) {

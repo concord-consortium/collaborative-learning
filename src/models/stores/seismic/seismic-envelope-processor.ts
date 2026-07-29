@@ -146,9 +146,9 @@ export async function processEnvelopeCoverage(options: ProcessEnvelopeOptions):
       }
 
       // Empty days (no data at EarthScope) can never get envelopes; errored days are NOT
-      // counted as processed, so a later run retries them. Report this span's via the live
-      // service arrays first, then fold them into skippedDays so they survive the next
-      // span's ensureRange reset.
+      // counted as processed, so a later run retries them. Count this span's errored/empty
+      // days via the live service arrays first, then fold them into skippedDays so they
+      // survive the next span's ensureRange reset.
       updateProgress();
       skippedDays += downloadService.erroredDays.length + downloadService.emptyDays.length;
     }
