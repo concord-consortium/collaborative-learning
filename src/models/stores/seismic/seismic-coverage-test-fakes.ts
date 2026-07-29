@@ -1,9 +1,8 @@
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
-import { DONE } from "./seismic-download-service";
-// Type-only import: erased at runtime, so requireActual-ing this module inside a
-// jest.mock factory never loads the processor (whose imports may be mid-mock).
-import type { CoverageDownloadService } from "./seismic-coverage-processor";
+// The DayDownloadService specifier is type-only: erased at runtime, so requireActual-ing
+// this module inside a jest.mock factory never loads anything extra mid-mock.
+import { DONE, type DayDownloadService } from "./seismic-download-service";
 
 /**
  * Fake SeismicDownloadService for tests.
@@ -20,10 +19,11 @@ export function makeFakeDownloadService(days: number[]) {
     }),
     nextReadyDay: jest.fn(async () => pending.shift() ?? DONE),
     readDay: jest.fn(async () => new ArrayBuffer(8)),
+    bytesForDay: jest.fn((_day: number) => 0),
     cancel: jest.fn(),
     erroredDays: [] as number[],
     emptyDays: [] as number[],
-  } satisfies CoverageDownloadService;
+  } satisfies DayDownloadService;
 }
 
 export type FakeDownloadService = ReturnType<typeof makeFakeDownloadService>;

@@ -4,14 +4,10 @@ import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-da
 import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
-import { DONE, SeismicDownloadService } from "./seismic-download-service";
+import { DayDownloadService, DONE, SeismicDownloadService } from "./seismic-download-service";
 import { getUncoveredRanges, markCovered, writeEvents } from "./seismic-event-service";
 
 export const DETECTION_THRESHOLD = 0.7;
-
-/** The subset of SeismicDownloadService the processor uses; tests inject fakes against it. */
-export type CoverageDownloadService = Pick<SeismicDownloadService,
-  "ensureRange" | "nextReadyDay" | "readDay" | "cancel" | "emptyDays" | "erroredDays">;
 
 export interface ProcessCoverageOptions {
   stationData: StationData;
@@ -32,7 +28,7 @@ export interface ProcessCoverageOptions {
   /** Forwarded to the download service's raw-data fetches. */
   proxy?: boolean;
   /** Test seams; production defaults construct real ones. */
-  downloadService?: CoverageDownloadService;
+  downloadService?: DayDownloadService;
   createRunner?: () => SeismicModelRunner;
 }
 
