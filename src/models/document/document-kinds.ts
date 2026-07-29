@@ -31,5 +31,5 @@ export function getDocumentKindMetadataFields(kind?: string|null): IDocumentKind
   return { kind: info.kind, ...info.metadataFields };
 }
 
-// Built-in kinds. The group document is the first concurrent kind.
+// Built-in kinds.
 registerDocumentKind({ kind: GroupDocument, metadataFields: { concurrent: true } });
