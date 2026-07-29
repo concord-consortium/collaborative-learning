@@ -7,9 +7,9 @@ readable by their teacher, shareable to their group*. Every one of those clauses
 decision, and different types make them differently.
 
 This document names those decisions as **axes**. Instead of asking "what type is this document?", we
-describe a document by **where it sits on each axis** — who owns it, where it is scoped, whether it is
-the canonical doc for its slot, whether it is multi-writer, who may do what to it. The type becomes
-just one of those axes (`kind`), not the thing everything hangs off.
+describe a document by **where it sits on each axis** — who owns it, where it is kept, what content it
+is about, whether it is the canonical doc for its slot, whether it is multi-writer, who may do what to
+it. The type becomes just one of those axes (`kind`), not the thing everything hangs off.
 
 **These axes are "virtual" today.** The current code does not store most of them as fields. But its
 *behavior* already fixes a value for every axis on every document — the four-up share toggle, the
@@ -22,7 +22,7 @@ refactoring tracked in this folder then makes the axes explicit; see
 > evidence (per code site) that backs it lives in the findings doc on the `document-type-decomposition`
 > branch.
 
-## The six axes
+## The seven axes
 
 ### `owner` — authoring identity and provenance
 
@@ -134,48 +134,68 @@ by type today. If that changes, it becomes the strongest argument for a stored d
   current offering, so a group-owned document from an earlier offering — visible under Sort Work's
   "All" filter — cannot render its members. `byName` drops such a document from the listing entirely.
 
-### `scope` — where the document is attached
+### `container` — where the document is kept
 
-**What it is.** The document's position in the org hierarchy (network / class / offering / group / user)
-and the curriculum hierarchy (unit / problem / section). A document attaches to whichever of these
-apply; the familiar labels ("this user's doc in this offering") are just names for which associations
-are set.
+**What it is.** The place a document belongs to, in a strict nesting: **class → classUnit →
+offering**. A classUnit is one class working through one unit. An offering is one assignment of one
+problem to that class, and every offering falls inside exactly one classUnit. Each document sits at
+exactly one of these, and never moves.
 
-**In today's behavior.** Scope is visible in *where CLUE looks for a document* and *when it applies*:
-- A **problem** or **planning** document is scoped to *one user in one offering* — you get a fresh one
-  per assignment, and it does not follow you to a different problem.
-- A **personal** document or **learning log** is scoped to *the user in the class*, with no offering —
-  which is why it is available across problems and used to carry notes between them.
-- A **group** document is scoped to *the group in the offering* (no single user).
-- A **publication** broadens scope to the whole offering or class while its `owner` stays the
-  publisher — `owner` and `scope` diverging is the signature of publishing.
+**In today's behavior.** The container is visible in *how long a document stays with you*:
+- A **personal** document or **learning log** is kept by the class. It is available no matter which
+  unit or assignment you are working on, which is why it is used to carry notes between problems.
+- A **class-wide collaborative** document (the driving question board) is kept by the class *and* the
+  unit — one per class per unit. Move to another unit and you get a different one.
+- A **problem** or **planning** document is kept by the assignment. You get a fresh one per
+  assignment, and it does not follow you to a different problem.
+- A **group** document is kept by the assignment too — its group-ness is *whose* it is, not where it
+  is kept.
 
-**Scope is two dimensions, not one level** — curriculum (unit → investigation → problem) and owner
-(class → group → user) — with the offering crossing both rather than sitting on either. A personal
-document is user-owned with no curriculum scope; a class-wide document is class-owned with unit
-curriculum scope. Neither is "more scoped" than the other, which is why scope cannot collapse to a
-single ordered `scopeLevel`. The model, the guards that read it, and where each stored shape sits are
-in [../document-scope.md](../document-scope.md).
+**Neither the user nor the group is a level here.** It is tempting to continue the nesting downward,
+since students are in groups and groups are in assignments. But a container has to be stable for as
+long as the things in it: group membership changes during an assignment and differs between
+assignments, and a single student's documents are kept at several different levels rather than under
+one place of their own. *Whose* a document is belongs to `owner`.
 
-One consequence is worth noting here: the creation side names *combinations* rather than dimensions.
-A kind's registered `scopeType` (`class`, `classUnit`, `offering`, `group`) is shorthand for a
-pairing, and `offering` names the crossing point directly. That suits a creation preset, which must
-fix both dimensions at once, but it is not the vocabulary read-side consumers should use.
+**The container defines `canonical` slots.** A canonical slot is a container plus an owner plus a
+label — "the group document for this group in this assignment", "the driving question board for this
+class in this unit" (see `canonical`).
 
-**Scope also defines `canonical` slots.** A canonical slot *is* a scope that at most one document is
-expected to fill — "the problem doc for this user in this offering", "the group doc for this group"
-(see `canonical`).
+**The container names permission principals.** "Readable by the class" means readable by whoever
+shares the document's class. So when a publication opens to the class, the audience is being named by
+where the document is kept. (Group-based audiences work the same way, but the group comes from
+`owner` rather than from the container.)
 
-**Scope also feeds `permissions`.** Scope is not purely positional. Its **class** and **group** associations
-double as *permission principals*: "readable by the class" means readable by whoever shares the document's
-class scope, and "readable by the group" means the members of its group scope. So when a publication
-opens to the class, or a group document is read and written by its members, the audience is being named
-*by scope*.
+### `curriculum` — what content the document is about
+
+**What it is.** Where the document sits in the curriculum: **nothing → unit → investigation →
+problem**. This is what the document is *about*, not where it is kept.
+
+**In today's behavior.** The curriculum position is visible in *when a document is offered to you*:
+- A **personal** document or **learning log** has no curriculum position at all — it is not about any
+  particular content.
+- A **class-wide collaborative** document is about a whole unit.
+- A **problem**, **planning**, or **group** document is about one problem.
+- An **exemplar** is about one problem — it is authored into the curriculum alongside that problem.
+
+It is also what the Sort Work filters match on: choosing an investigation or a problem narrows the
+list to documents about that part of the curriculum.
+
+**Why this is separate from `container`.** For most documents the two line up — kept by the class and
+about nothing, kept by a classUnit and about that unit, kept by an assignment and about that problem.
+Exemplars are the case that comes apart: an exemplar is about a specific problem, but it is not part
+of any assignment. It exists whether or not the class has ever been assigned that problem, so there is
+no assignment to keep it in. A document can be about a problem without being kept in that problem's
+assignment.
+
+A **publication** shows the same independence from the other direction: publishing broadens who can
+see a document without changing what it is about, while its `owner` stays the publisher — `owner`,
+`container`, and `curriculum` moving separately is the signature of publishing.
 
 ### `canonical` — the single doc for a slot
 
-**What it is.** Whether this is *the* one document expected to fill a given **scope** slot, as opposed
-to one of a growing collection.
+**What it is.** Whether this is *the* one document expected to fill a given **container** slot, as
+opposed to one of a growing collection.
 
 **In today's behavior.** Some documents are singletons, some are collections:
 - A user is meant to have **exactly one** problem document per offering (and a teacher one planning
@@ -215,7 +235,8 @@ type and to reason about its axes instead — so it is fair to ask why a type-sh
 all. It survives because a few things are genuinely *per-preset* and cannot be read off how a document
 behaves:
 - **Creation** — when a new document is made, something has to choose its starting axis values. "A new
-  problem is owned by its creator, scoped to this offering, canonical, single-writer, teacher-readable"
+  problem is owned by its creator, kept by this assignment, about that problem, canonical,
+  single-writer, teacher-readable"
   is a recipe belonging to a preset; the axes describe the result but cannot supply it.
 - **Presentation** — the label a document is shown under, its title bar, its icons and styling are
   chosen per preset, not consequences of its axis values.
@@ -267,8 +288,8 @@ kind's definition*:
 1. **Anything a dynamic kind supplies must be stamped at creation or degrade gracefully.** Values the
    definition contributes to a document's axes are written onto the document, so they survive the
    definition's absence. Anything not stamped — presentation, above all — must have a fallback derived from
-   stored fields alone. This is the same reason consumers read scope through guards over stored fields
-   rather than through the registry.
+   stored fields alone. This is the same reason consumers read a document's container and curriculum
+   from its stored associations rather than through the registry.
 2. **A dynamic kind's documents must carry the association that identifies the configuration that defined
    them.** For unit-declared kinds that association is `unit`. Kind names are not globally unique across
    configurations — two units may declare the same kind with different wording — so without it there is no
@@ -276,8 +297,8 @@ kind's definition*:
    wrong definition would be applied confidently.
 
 **This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce documents
-scoped to that unit or narrower, because rule 2 requires the `unit` association. It cannot produce
-class-scoped documents — the ones with no unit at all, like personal documents and learning logs. Making
+kept by that unit or narrower, because rule 2 requires the `unit` association. It cannot produce
+documents kept by the class — the ones with no unit at all, like personal documents and learning logs. Making
 *those* presets authorable is a reasonable future goal, but it is not a matter of adding entries to a unit
 config: it needs a configuration source loaded independently of the current unit (class- or site-level), so
 that a definition is present wherever its documents are, along with an association on the document naming
@@ -300,9 +321,9 @@ features:
 - A **multi-class support** grants read to a structured target audience across classes.
 - An **exemplar** grants read per student.
 
-Several of those audiences are named *by `scope`*: "the class can read" and "group members can
-read/write" resolve through the document's class and group associations. `permissions` supplies the *verbs*
-(read / write / publish / copy) and the per-document toggles; `scope` supplies *which* class or group
+Several of those audiences are named elsewhere: "the class can read" resolves through the document's
+`container`, and "group members can read/write" through its `owner`. `permissions` supplies the *verbs*
+(read / write / publish / copy) and the per-document toggles; the other axes supply *which* class or group
 those grants point at.
 
 Because `permissions` blends kind-defaults with a few stored per-document grants, it is the axis that
@@ -325,21 +346,24 @@ axes are already present, but *not* the definition. The point of this doc is the
 just where today's behavior happens to have placed things. `permissions` is collapsed to a short label
 because its real value (a composed grant set) does not fit a cell.
 
-| kind (`type`) | owner | scope | canonical | concurrent | permissions (shorthand) |
-|---|---|---|---|---|---|
-| `problem` | student/teacher | user-in-offering | yes (by convention) | no | owner + teacher read; group-read when shared |
-| `planning` | teacher | user-in-offering | yes (by convention) | no | owner + teacher read |
-| `personal` | student/teacher | user-in-class | no (collection) | no | owner + teacher read; class-read when public |
-| `learningLog` | student/teacher | user-in-class | no (collection) | no | owner + teacher read; class-read when public |
-| `group` | none (group user) | group-in-offering | yes (pointer) | **yes** | all group members read/write |
-| `problem` publication | publisher (retained) | offering | no, versioned | no | class read; frozen |
-| `personal`/`learningLog` publication | publisher (retained) | class | no, versioned | no | class read; frozen |
-| `support` (multi-class) | teacher (retained) | multi-class / offering | no | no | target audience read; frozen |
-| `exemplar` | synthetic author | class-less, curriculum-rooted | no | no | per-student read |
+| kind (`type`) | owner | container | curriculum | canonical | concurrent | permissions (shorthand) |
+|---|---|---|---|---|---|---|
+| `problem` | student/teacher | offering | problem | yes (by convention) | no | owner + teacher read; group-read when shared |
+| `planning` | teacher | offering | problem | yes (by convention) | no | owner + teacher read |
+| `personal` | student/teacher | class | none | no (collection) | no | owner + teacher read; class-read when public |
+| `learningLog` | student/teacher | class | none | no (collection) | no | owner + teacher read; class-read when public |
+| `group` | the group | offering | problem | yes (pointer) | **yes** | all group members read/write |
+| class-wide collaborative | the class | classUnit | unit | yes (pointer) | **yes** | all class members read/write |
+| `problem` publication | publisher (retained) | offering | problem | no, versioned | no | class read; frozen |
+| `personal`/`learningLog` publication | publisher (retained) | class | none | no, versioned | no | class read; frozen |
+| `support` (multi-class) | teacher (retained) | multi-class / offering | problem | no | no | target audience read; frozen |
+| `exemplar` | synthetic author | none until commented on | problem | no | no | per-student read |
 
 Reading the table the new way: a "group document" is not a special *kind of thing* — it is simply the
-document that happens to be *ownerless, group-scoped, canonical, concurrent, and group-read/write*. Any
-other document that took those same axis values would behave the same way. That is the shift this
+document that happens to be *group-owned, kept by an assignment, about that problem, canonical,
+concurrent, and group-read/write*. Any other document that took those same axis values would behave
+the same way. The class-wide collaborative document is the demonstration: it differs from a group
+document on `owner`, `container`, and `curriculum` alone, and behaves accordingly. That is the shift this
 folder is built around.
 
 ## Relationship to the other docs here
