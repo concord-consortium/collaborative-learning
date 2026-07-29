@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import React from "react";
+import CheckIcon from "../../assets/icons/check/check-selected.svg";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
 import { buildAuthorizeUrl } from "../utils/portal-auth";
 import { getStationLabel } from "../utils/seismic-admin-utils";
@@ -15,7 +16,17 @@ export const AdminHeader = observer(function AdminHeader() {
 
   return (
     <div className="admin-header">
-      <h3>Seismic Admin</h3>
+      <div className="title-row">
+        <h3>Seismic Admin</h3>
+        {store.portalReady
+          ? <div className="title-row">Portal: signed in <CheckIcon className="icon"/></div>
+          : (
+            <button onClick={() => { window.location.href = buildAuthorizeUrl(); }}>
+              Log in with Portal
+            </button>
+          )
+        }
+      </div>
       <div className="options">
         <div className="option-area">
           <div className="option-header">Date Range</div>
@@ -74,15 +85,6 @@ export const AdminHeader = observer(function AdminHeader() {
               </label>
             ))}
           </div>
-        </div>
-        <div className="option-area">
-          {store.portalReady
-            ? <div className="option-header">Portal: signed in</div>
-            : (
-              <button onClick={() => { window.location.href = buildAuthorizeUrl(); }}>
-                Log in with Portal
-              </button>
-            )}
         </div>
       </div>
       <FeedbackArea />
