@@ -335,20 +335,30 @@ export const DataflowGroupsOverlay = observer(function DataflowGroupsOverlay({ r
       return { x: r.left + r.width / 2 - origin.left, y: r.top + r.height / 2 - origin.top };
     };
     const paths: string[] = [];
+    // A connection between two collapsed groups is exposed by both of them, so without this it
+    // would be stroked twice over the same route.
+    const drawn = new Set<string>();
     interfacesRef.current.forEach(({ inputs, outputs }, groupId) => {
       // Open sockets get a dot but no wire; external-facing ones route to the outside node's socket.
       inputs.forEach(s => {
-        if (!s.external) return;
+        if (!s.external || drawn.has(s.external.connId)) return;
         const extEl = reteManager.getSocketElement(s.external.externalNodeId, s.external.externalKey, "output");
         const grpEl = socketRefs.current.get(inRefKey(groupId, s));
-        if (extEl && grpEl) paths.push(wirePath(center(extEl), center(grpEl)));
+        if (extEl && grpEl) {
+          paths.push(wirePath(center(extEl), center(grpEl)));
+          drawn.add(s.external.connId);
+        }
       });
       outputs.forEach(s => {
         const grpEl = socketRefs.current.get(outRefKey(groupId, s));
         if (!grpEl) return;
         s.externals.forEach(e => {
+          if (drawn.has(e.connId)) return;
           const extEl = reteManager.getSocketElement(e.externalNodeId, e.externalKey, "input");
-          if (extEl) paths.push(wirePath(center(grpEl), center(extEl)));
+          if (extEl) {
+            paths.push(wirePath(center(grpEl), center(extEl)));
+            drawn.add(e.connId);
+          }
         });
       });
     });

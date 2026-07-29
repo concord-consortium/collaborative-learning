@@ -838,8 +838,16 @@ export class ReteManager implements INodeServices {
   // data attributes the overlay tags it with. Undefined when that socket isn't exposed (consumed
   // internally, so no proxy is drawn).
   private proxySocketEl(nodeId: string, socketKey: string, side: "input" | "output"): HTMLElement | undefined {
-    return document.querySelector<HTMLElement>(
-      `[data-group-proxy][data-socket-side="${side}"][data-node-id="${nodeId}"][data-socket-key="${socketKey}"]`
+    // Scoped to this tile's own subtree, not the document. The same document can be mounted more
+    // than once at a time (a My Work thumbnail alongside the workspace, the compare pane, four-up),
+    // and those mounts share node ids — as do a curriculum program and a student's copy of it,
+    // since dataflow doesn't remap ids on copy. A document-wide query would return whichever mount
+    // comes first in DOM order. The overlay is a sibling of the rete container, so scope to their
+    // shared parent.
+    const root = this.area.container?.parentElement;
+    return root?.querySelector<HTMLElement>(
+      `.dataflow-groups-overlay [data-group-proxy][data-socket-side="${side}"]` +
+      `[data-node-id="${nodeId}"][data-socket-key="${socketKey}"]`
     ) ?? undefined;
   }
 
@@ -1081,6 +1089,11 @@ export class ReteManager implements INodeServices {
   // label, so we drill into the inner socket dot (`data-testid="<side>-socket"`) — the same element
   // rete anchors its own connections to — falling back to the wrapper if it isn't found.
   public getSocketElement(nodeId: string, key: string, side: "input" | "output") {
+    // When the far end is itself inside a collapsed group, its real socket is in a display:none
+    // subtree — present in the DOM but zero-size, so measuring it would anchor the wire at the
+    // viewport origin. The visible anchor is that group's chip proxy, as in getOutputSocketEl and
+    // getCompatibleTargets. Returning undefined when no proxy exists lets the caller drop the wire.
+    if (this.isNodeInCollapsedGroup(nodeId)) return this.proxySocketEl(nodeId, key, side);
     const wrapper = this.area.nodeViews.get(nodeId)?.element?.querySelector<HTMLElement>(
       `[data-socket-side="${side}"][data-socket-key="${key}"]`
     );
