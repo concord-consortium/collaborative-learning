@@ -34,7 +34,7 @@ import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
   getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
-  getDocumentOwnerType, registerDocumentKind
+  getDocumentOwnerType, IDocumentOwnerContext, registerDocumentKind
 } from "../models/document/document-kinds";
 import { kClassOwnerPrefix } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
@@ -111,10 +111,12 @@ export interface OpenDocumentOptions {
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
-  // Firestore path of the pointer slot for this scope.
-  pointerPath: string;
-  // The pointer slot's label. It must match the final segment of pointerPath and is written to the
-  // winning document's `canonical` field.
+  // The container holding the slot: the class, plus that container's own id when the document is kept
+  // below the class. The slot's owner is not passed — it is derived from `kind`, the same way the
+  // document's own `uid` is, so the pointer path and the document can never name different owners.
+  container: { classHash: string; offeringId?: string; unit?: string };
+  // The pointer slot's label. It is the path's final segment and is written to the winning document's
+  // `canonical` field.
   canonicalLabel: string;
   // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
   // a class-wide document keeps type === GroupDocument while its kind is the declared kind. The kind also drives
@@ -677,11 +679,7 @@ export class DB {
       // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner type:
       // the creating user, the synthetic group owner, or the synthetic class owner. It is also the document's
       // storage-path owner — a document the user owns resolves to their own path (getUserPath: owner || user.id).
-      const owner = getDocumentOwner(kind, {
-        userId: user.id,
-        groupOwnerId: user.userIdForGroupDocuments,
-        classOwnerId: this.userIdForClassWideDocuments
-      });
+      const owner = getDocumentOwner(kind, this.documentOwnerContext);
 
       const documentPath = this.firebase.getUserDocumentPath(user, undefined, owner);
       const documentRef = this.firebase.ref(documentPath).push();
@@ -769,14 +767,12 @@ export class DB {
     if (!groupId || !user.offeringId) {
       return Promise.reject("Cannot create group document because user is not in a group with an offering.");
     }
-    // The pointer slot is labeled "default" (the group's default canonical document), not by the
-    // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
-    const pointerPath = getCanonicalPointerPath(
-      { classHash: user.classHash, offeringId: user.offeringId, groupId }, kDefaultCanonicalDocumentLabel
-    );
-    // Regular group documents: the transitional `type` and `kind` coincide (both GroupDocument).
+    // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
+    // The slot is labeled "default" (the group's default canonical document) rather than by the
+    // document's type — see kDefaultCanonicalDocumentLabel. For a regular group document the
+    // transitional `type` and the `kind` coincide, both GroupDocument.
     return this.getOrCreateCanonicalDocument({
-      pointerPath,
+      container: { classHash: user.classHash, offeringId: user.offeringId },
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       type: GroupDocument,
       kind: GroupDocument,
@@ -793,12 +789,10 @@ export class DB {
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
-    const label = classWideDoc.kind;
-    const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
     return this.getOrCreateCanonicalDocument({
-      pointerPath,
-      canonicalLabel: label,
+      container: { classHash: user.classHash, unit: unit.code },
+      canonicalLabel: classWideDoc.kind,
       type: GroupDocument,
       kind: classWideDoc.kind
     });
@@ -838,8 +832,27 @@ export class DB {
     }
   }
 
+  // The candidate owner uids for a document created in this session. getDocumentOwner picks among them by
+  // the kind's registered owner type; both the document's stored `uid` and its canonical slot use this.
+  private get documentOwnerContext(): IDocumentOwnerContext {
+    const { user } = this.stores;
+    return {
+      userId: user.id,
+      groupOwnerId: user.userIdForGroupDocuments,
+      classOwnerId: this.userIdForClassWideDocuments
+    };
+  }
+
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
-    const { pointerPath, type, kind, canonicalLabel, findLegacy } = opts;
+    const { container, type, kind, canonicalLabel, findLegacy } = opts;
+    // The slot's owner is the same uid createDocument stamps on the document, from the same registry
+    // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
+    // path named a different owner would be rejected rather than silently mis-slotted.
+    const pointerPath = getCanonicalPointerPath({
+      ...container,
+      owner: getDocumentOwner(kind, this.documentOwnerContext),
+      label: canonicalLabel
+    });
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists.

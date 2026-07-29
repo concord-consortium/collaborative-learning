@@ -7,10 +7,13 @@ import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 const kOffering = "offering-1";
 const kGroup = "3";
 const kLabel = "default";
+// The owner segment of a slot path is the document's own `uid` — for a group document, the synthetic
+// group owner. It must match the uid on the document that claims the slot.
+const kGroupOwner = `group_${kOffering}_${kGroup}`;
 const kPointerPath =
-  `authed/test-portal/canonical/v1/classes/${thisClass}/offerings/${kOffering}/groups/${kGroup}/slots/${kLabel}`;
+  `authed/test-portal/canonical/v1/classes/${thisClass}/offerings/${kOffering}/owners/${kGroupOwner}/slots/${kLabel}`;
 const kOtherClassPointerPath =
-  `authed/test-portal/canonical/v1/classes/other-class/offerings/${kOffering}/groups/${kGroup}/slots/${kLabel}`;
+  `authed/test-portal/canonical/v1/classes/other-class/offerings/${kOffering}/owners/${kGroupOwner}/slots/${kLabel}`;
 // createdBy is the real user who created/claimed the pointer, not the document's synthetic owner.
 const validPointer = () => ({ documentKey: "doc-abc", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId });
 
@@ -52,7 +55,7 @@ describe("canonical pointers", () => {
 
 const kDocPath = `authed/test-portal/documents/group-doc-1`;
 const groupDoc = (extra: any = {}) => ({
-  uid: `group_${kOffering}_${kGroup}`, type: "group", key: "group-doc-1",
+  uid: kGroupOwner, type: "group", key: "group-doc-1",
   createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
   offeringId: kOffering, groupId: kGroup, ...extra
 });
@@ -117,12 +120,41 @@ describe("canonical flag integrity", () => {
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
   });
 
-  it("a document whose scope has no canonical shape (no group association) cannot claim canonical", async () => {
-    // Scope is read from the association fields. Without a group association the document has no
-    // canonical-pointer path (canonicalPointerPath() is null), so the claim is denied before any
-    // pointer is consulted — the update touches only `canonical`, so nothing else can reject it.
-    const { groupId, ...noGroupScope } = groupDoc();
-    await adminWriteDoc(kDocPath, { ...noGroupScope, createdAt: Date.now() });
+  it("a document whose container has no canonical shape cannot claim canonical", async () => {
+    // The container is read from the association fields. With neither an offering nor a unit the
+    // document has no canonical-pointer path (canonicalPointerPath() is null), so the claim is denied
+    // before any pointer is consulted — the update touches only `canonical`, so nothing else can
+    // reject it.
+    const { offeringId, ...noContainer } = groupDoc();
+    await adminWriteDoc(kDocPath, { ...noContainer, createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
+  });
+
+  it("a group document may set canonical when the slot for its own owner confirms it", async () => {
+    // The positive half of the pair below: the pointer sits at the slot for this document's own uid.
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc());
+    await admin.doc(kPointerPath).set({
+      documentKey: "group-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId
+    });
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kDocPath).update({ canonical: "default" }));
+  });
+
+  it("a document may not claim a slot belonging to another owner in the same container", async () => {
+    // The pointer exists and names this document, but at group 7's slot while the document's uid is
+    // group 3's. The path the rules build comes from the document's own `uid`, so it looks at group 3's
+    // slot, finds nothing, and denies the claim. This is what the owner segment buys: two groups in one
+    // offering cannot fill each other's slot.
+    const otherOwnersSlot =
+      `authed/test-portal/canonical/v1/classes/${thisClass}/offerings/${kOffering}` +
+      `/owners/group_${kOffering}_7/slots/${kLabel}`;
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(groupDoc());
+    await admin.doc(otherOwnersSlot).set({
+      documentKey: "group-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId
+    });
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
   });
@@ -144,10 +176,11 @@ describe("canonical flag integrity", () => {
 
 const kUnit = "msu";
 const kClassWideLabel = "drivingQuestionBoard";
+const kClassOwner = `class_${thisClass}`;
 const kClassWidePointerPath =
-  `authed/test-portal/canonical/v1/classes/${thisClass}/units/${kUnit}/slots/${kClassWideLabel}`;
+  `authed/test-portal/canonical/v1/classes/${thisClass}/units/${kUnit}/owners/${kClassOwner}/slots/${kClassWideLabel}`;
 const kOtherClassWidePointerPath =
-  `authed/test-portal/canonical/v1/classes/other-class/units/${kUnit}/slots/${kClassWideLabel}`;
+  `authed/test-portal/canonical/v1/classes/other-class/units/${kUnit}/owners/${kClassOwner}/slots/${kClassWideLabel}`;
 
 describe("class+unit canonical pointers", () => {
   it("a student in the class may create a class+unit pointer with the required keys", async () => {
@@ -184,7 +217,7 @@ describe("class+unit canonical pointers", () => {
 const kClassWideDocPath = `authed/test-portal/documents/dqb-doc-1`;
 const classWideDoc = (extra: any = {}) => ({
   // Owner is the class (class_<classHash>), shared across units; the unit lives in the canonical slot, not the uid.
-  uid: `class_${thisClass}`, type: "group", key: "dqb-doc-1",
+  uid: kClassOwner, type: "group", key: "dqb-doc-1",
   createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
   unit: kUnit, kind: kClassWideLabel, concurrent: true, ...extra
 });

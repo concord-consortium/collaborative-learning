@@ -378,32 +378,39 @@ service cloud.firestore {
       }
 
       match /documents/{docId} {
-        // A scope field counts only when it holds a non-empty string. A field written as null counts as
-        // absent scope.
-        function hasScopeField(data, key) {
+        // An association field counts as present only when it holds a non-empty string. A field written as
+        // null counts as absent, not as a value: class-contained docs (personal, learning-log) store
+        // `unit: null`, and a bare `!= ""` test would read that null as present (`null != ""` in rules).
+        function hasPresentField(data, key) {
           return data.get(key, "") is string && data.get(key, "") != "";
         }
 
-        // A document's scope is read from the association fields it carries, not from its `type`.
-        // True when `data`'s scope can hold a canonical pointer: it is anchored to an offering or a unit.
-        // (class+owner-only scopes — personal, learning-log — have no canonical pointer.)
-        function hasCanonicalScope(data) {
-          return hasScopeField(data, "offeringId") || hasScopeField(data, "unit");
+        // A document's container is read from the association fields it carries, not from its `type`.
+        // True when `data` is kept somewhere that can hold a canonical pointer: an offering or a unit.
+        // A document kept by the class alone (personal, learning-log) has no canonical pointer — a
+        // class-level slot would be a valid shape, but no create block grants one, so none can exist.
+        function hasCanonicalContainer(data) {
+          return hasPresentField(data, "offeringId") || hasPresentField(data, "unit");
         }
 
-        // The path of the canonical-pointer slot for `data`'s scope, or null if `data`'s scope has no canonical
-        // shape. Pointers live in a dedicated, versioned collection (canonical/v1/…); below the version the path
-        // is built segment-by-segment from the scope fields the document carries, so all scopes share one layout.
-        // Keep in lockstep with getCanonicalPointerPath in scoped-document-pointers.ts:
-        //   canonical/v1/classes/<context_id> / (offerings/<offeringId> | units/<unit>) / [groups/<groupId>] / slots/<label>
-        // The units segment is used only when there is no offering (an offering already pins a unit). A future
-        // problem/planning pointer will add a /users/<owner> segment after the offering.
+        // The path of `data`'s canonical-pointer slot, or null when `data` is kept somewhere that has no
+        // canonical shape. A slot is a container plus an owner plus a label. Pointers live in a dedicated,
+        // versioned collection (canonical/v1/…); below the version the path is built segment-by-segment
+        // from the fields the document carries. Keep in lockstep with getCanonicalPointerPath in
+        // scoped-document-pointers.ts:
+        //   canonical/v1/classes/<context_id> / [offerings/<offeringId> | units/<unit>] / owners/<uid> / slots/<label>
+        // Each container names only itself: an offering contributes its own id, not the classUnit it falls
+        // inside, so a new container level can be added later without moving the pointers that exist
+        // (pointers are immutable — no block below grants update or delete).
+        // The owner segment is the document's `uid`, synthetic owners included (`group_<offeringId>_<groupId>`,
+        // `class_<classHash>`). Reading the owner straight from `uid` is what keeps a group's identity out of
+        // this path construction: no groupId, and no owner type to infer.
         function canonicalPointerPath(portal, data, label) {
-          return hasCanonicalScope(data)
+          return hasCanonicalContainer(data)
             ? path("/databases/" + database + "/documents/authed/" + portal
                 + "/canonical/v1/classes/" + data.context_id
-                + (hasScopeField(data, "offeringId") ? "/offerings/" + data.offeringId : "/units/" + data.unit)
-                + (hasScopeField(data, "groupId") ? "/groups/" + data.groupId : "")
+                + (hasPresentField(data, "offeringId") ? "/offerings/" + data.offeringId : "/units/" + data.unit)
+                + "/owners/" + data.uid
                 + "/slots/" + label)
             : null;
         }
@@ -583,13 +590,16 @@ service cloud.firestore {
       }
 
       // Canonical-document pointers live in a dedicated, versioned collection (canonical/v1/…), not interleaved
-      // in the class/offering/group tree. Read and immutability are uniform across every scope, so they are
-      // stated once on the recursive wildcard below; create stays per-scope so each scope can authorize who may
-      // claim its slot (a single wildcard create could not be tightened per-scope — Firestore ORs allow rules).
+      // in the class/offering document tree. Read and immutability are uniform across every container, so they
+      // are stated once on the recursive wildcard below; create stays per-container so each container can
+      // authorize who may claim its slots (a single wildcard create could not be tightened per-container —
+      // Firestore ORs allow rules).
+      // The class leads the path because this read rule compares that segment to the caller's class claim; a
+      // synthetic group owner id could not supply the class.
       // Keep these paths in lockstep with getCanonicalPointerPath in scoped-document-pointers.ts.
       match /canonical/v1/classes/{classId} {
-        // Uniform for every scope: any class member may read their class's pointers; pointers are immutable.
-        match /{scopePath=**} {
+        // Uniform for every container: any class member may read their class's pointers; pointers are immutable.
+        match /{slotPath=**} {
           allow read:           if isAuthed() && request.auth.token.class_hash == classId;
           allow update, delete: if false;   // no block grants these — pointers are immutable
         }
@@ -600,12 +610,15 @@ service cloud.firestore {
             && request.resource.data.keys().hasAll(["documentKey", "createdAt", "createdBy"]);
         }
 
-        // Create is granted only per-scope, so each scope authorizes its own slot claim; a create at any path not
-        // matched by one of these blocks is denied by default (a new scope must add its own create block).
-        match /offerings/{offeringId}/groups/{groupId}/slots/{label} {
+        // Create is granted only per-container, so each container authorizes its own slot claims; a create at any
+        // path not matched by one of these blocks is denied by default. One block per container level, covering
+        // every owner: which owner may claim a slot is settled on the document side, where canonicalFieldOk
+        // requires the pointer at the path built from that document's own `uid` to already name it.
+        // A class-level slot (classes/<classId>/owners/<uid>/slots/<label>) has no block, so none can be created.
+        match /offerings/{offeringId}/owners/{ownerId}/slots/{label} {
           allow create: if canonicalPointerCreatable();
         }
-        match /units/{unit}/slots/{label} {
+        match /units/{unit}/owners/{ownerId}/slots/{label} {
           allow create: if canonicalPointerCreatable();
         }
       }
