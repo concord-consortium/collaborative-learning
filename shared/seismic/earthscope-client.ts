@@ -221,42 +221,54 @@ const AVAILABILITY_PATH = "/earthscope/cached/availability/1/query";
  * Mock/local mode (?mockSeismicData): the availability service is not mocked, so we assume the
  * entire requested range is available (one range). Callers then attempt every
  * day; the mock dataselect returns "no data" for days it doesn't cover.
+ *
+ * Availability is only an optimization to skip empty days, so a failed lookup
+ * (network error, or a retired endpoint returning e.g. 410 Gone) must not abort
+ * the whole download: it degrades to the same full-range assumption as mock mode.
+ * Aborts still propagate — a cancelled download should stop, not press on.
  */
 export async function fetchAvailability(
   query: StationQuery,
   options?: EarthscopeOptions
 ): Promise<TimeRange[]> {
   const { network, station, location, channel, startTime, endTime } = query;
+  const fullRange = (): TimeRange[] => [{
+    start: new Date(startTime).getTime() / 1000,
+    end: new Date(endTime).getTime() / 1000,
+  }];
   const proxy = options?.proxy ?? isProxyEnabled();
   if (!proxy) {
-    return [{
-      start: new Date(startTime).getTime() / 1000,
-      end: new Date(endTime).getTime() / 1000,
-    }];
+    return fullRange();
   }
   const base = options?.baseUrl ?? CLOUDFRONT_PROXY_URL;
   const params = new URLSearchParams({
     net: network, sta: station, cha: channel, loc: location || "--",
     start: startTime, end: endTime, format: "text",
   });
-  const response = await fetch(`${base}${AVAILABILITY_PATH}?${params}`, { signal: options?.signal });
-  if (!response.ok) {
-    throw new Error(`availability ${response.status}: ${response.statusText}`);
-  }
-
-  // Parse the whitespace-delimited FDSN availability text into [start, end) ranges.
-  // Columns: Network Station Location Channel Quality SampleRate Earliest Latest
-  const text = await response.text();
-  const ranges: TimeRange[] = [];
-  for (const line of text.trim().split("\n")) {
-    if (!line || line.startsWith("#")) continue;
-    const fields = line.trim().split(/\s+/);
-    if (fields.length < 8) continue;
-    const start = new Date(fields[6]).getTime() / 1000;
-    const end = new Date(fields[7]).getTime() / 1000;
-    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
-      ranges.push({ start, end });
+  try {
+    const response = await fetch(`${base}${AVAILABILITY_PATH}?${params}`, { signal: options?.signal });
+    if (!response.ok) {
+      throw new Error(`availability ${response.status}: ${response.statusText}`);
     }
+
+    // Parse the whitespace-delimited FDSN availability text into [start, end) ranges.
+    // Columns: Network Station Location Channel Quality SampleRate Earliest Latest
+    const text = await response.text();
+    const ranges: TimeRange[] = [];
+    for (const line of text.trim().split("\n")) {
+      if (!line || line.startsWith("#")) continue;
+      const fields = line.trim().split(/\s+/);
+      if (fields.length < 8) continue;
+      const start = new Date(fields[6]).getTime() / 1000;
+      const end = new Date(fields[7]).getTime() / 1000;
+      if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+        ranges.push({ start, end });
+      }
+    }
+    return ranges;
+  } catch (err) {
+    if (options?.signal?.aborted) throw err;
+    console.warn("Availability lookup failed; assuming the full requested range is available.", err);
+    return fullRange();
   }
-  return ranges;
 }
