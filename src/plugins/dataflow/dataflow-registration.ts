@@ -41,5 +41,9 @@ registerTileComponentInfo({
   Component: DataflowToolComponent,
   tileEltClass: "dataflow-tool-tile",
   Icon,
-  HeaderIcon
+  HeaderIcon,
+  // The tile manages its own selection so that Cmd/Ctrl/Shift-clicking nodes (to multi-select for
+  // grouping) does not toggle the tile out of selection and hide the toolbar. See the
+  // onPointerDownCapture handler in DataflowToolComponent.
+  tileHandlesOwnSelection: true
 });

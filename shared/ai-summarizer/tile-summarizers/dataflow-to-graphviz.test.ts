@@ -1,4 +1,8 @@
+import { getSnapshot } from "mobx-state-tree";
 import { programToGraphviz } from "./dataflow-to-graphviz";
+import {
+  DataflowNodeModel, DataflowProgramModel
+} from "../../../src/plugins/dataflow/model/dataflow-program-model";
 
 describe("programToGraphviz", () => {
   it("converts a dataflow program with math operation to graphviz format", () => {
@@ -157,5 +161,87 @@ describe("programToGraphviz", () => {
 }`;
 
     expect(result).toBe(expected);
+  });
+
+  it("wraps grouped nodes in a labeled Graphviz cluster", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        n1: { id: "n1", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 1", value: 1 } },
+        n2: { id: "n2", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 2", value: 2 } },
+        n3: { id: "n3", name: "Math", x: 0, y: 0,
+          data: { type: "Math", orderedDisplayName: "Math 1", mathOperator: "Add" } },
+      },
+      connections: {
+        c1: { id: "c1", source: "n1", sourceOutput: "num", target: "n3", targetInput: "num1" },
+      },
+      groups: {
+        g1: { id: "g1", label: "My Group", nodeIds: { n1: "n1", n2: "n2" }, collapsed: false },
+      },
+    };
+    const dot = programToGraphviz(program as any);
+    expect(dot).toContain("subgraph cluster_g1 {");
+    expect(dot).toContain('label="My Group";');
+
+    // Grouped members are declared inside the cluster; the ungrouped Math node is at the top level.
+    const clusterStart = dot.indexOf("subgraph cluster_g1");
+    const clusterBlock = dot.slice(clusterStart, dot.indexOf("}", clusterStart));
+    expect(clusterBlock).toContain("Number:Number 1");
+    expect(clusterBlock).toContain("Number:Number 2");
+    expect(clusterBlock).not.toContain("Math:Math 1");
+  });
+
+  it("escapes newlines and quotes in multi-line group labels", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        n1: { id: "n1", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 1", value: 1 } },
+        n2: { id: "n2", name: "Number", x: 0, y: 0,
+          data: { type: "Number", orderedDisplayName: "Number 2", value: 2 } },
+      },
+      connections: {},
+      groups: {
+        g1: { id: "g1", label: 'Line 1\nLine "2"', nodeIds: { n1: "n1", n2: "n2" }, collapsed: false },
+      },
+    };
+    const dot = programToGraphviz(program as any);
+    // Newlines become the DOT `\n` escape and quotes are escaped, keeping label="..." on one line.
+    expect(dot).toContain('label="Line 1\\nLine \\"2\\"";');
+    expect(dot).not.toContain("label=\"Line 1\nLine");
+  });
+
+  // The fixtures above hand-write the program shape, so they can drift from what the model
+  // actually persists. This one builds the program through the MST model and feeds the real
+  // snapshot in — `GroupModel.nodeIds` is a `types.map`, so its snapshot is an object keyed by
+  // node id, not an array. Treating it as an array threw `nodeIds.forEach is not a function`
+  // for every grouped document, which the hand-written fixtures could not catch.
+  it("handles a group from a real DataflowProgramModel snapshot", () => {
+    const program = DataflowProgramModel.create();
+    [["n1", 1], ["n2", 2], ["n3", 3]].forEach(([id, value]) => program.addNode(
+      DataflowNodeModel.create(
+        { id: id as string, name: "Number", x: 0, y: 0, data: { type: "Number", value: value as number } }
+      )
+    ));
+    program.createGroup(["n1", "n2"], "My Group");
+
+    const snapshot = JSON.parse(JSON.stringify(getSnapshot(program)));
+    const group = Object.values(snapshot.groups)[0] as { nodeIds: Record<string, string> };
+    expect(Array.isArray(group.nodeIds)).toBe(false);
+    expect(Object.keys(group.nodeIds).sort()).toEqual(["n1", "n2"]);
+
+    const dot = programToGraphviz(snapshot);
+    expect(dot).toContain('label="My Group";');
+    // The two members are declared inside the cluster and the third node stays at the top level.
+    // Each node's `value` identifies it here, since `orderedDisplayName` is only populated for a
+    // node attached to a live tile.
+    const clusterStart = dot.indexOf("subgraph cluster_");
+    const clusterBlock = dot.slice(clusterStart, dot.indexOf("}", clusterStart));
+    expect(clusterBlock).toContain("<td>value</td><td>1</td>");
+    expect(clusterBlock).toContain("<td>value</td><td>2</td>");
+    expect(clusterBlock).not.toContain("<td>value</td><td>3</td>");
+    expect(dot).toContain("<td>value</td><td>3</td>");
   });
 });
