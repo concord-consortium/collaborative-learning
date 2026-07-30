@@ -20,7 +20,7 @@ waveform fills in. In dev/demo/qa modes there is no portal JWT, so the button is
 does not verify. Instead, at click time we call the same portal endpoint CLUE already uses at launch —
 `GET {basePortalUrl}api/v1/jwt/firebase?firebase_app=token-service` — authorized with the stored
 portal JWT (`Bearer/JWT` header form, already used by standalone auth). No new sign-in route or OAuth
-flow. Task 8 corrects the design doc.
+flow. Task 9 corrects the design doc.
 
 **Tech Stack:** MST, MobX, React 17, Jest, existing `@concord-consortium/token-service` + `aws4fetch`
 deps from Part 1.
@@ -273,7 +273,7 @@ imported), add a property next to the caches and a method after `loadViewport`:
    * loads re-fetch them. Called after new envelope tiles are uploaded.
    */
   invalidateEnvelopes(stationData: StationData) {
-    const prefix = `${getStationChannelPrefix(stationData)}/L`;
+    const prefix = `${getStationChannelPrefix(stationData)}/`;
     for (const key of [...this.envelopeCache.keys()]) {
       if (key.startsWith(prefix)) this.envelopeCache.delete(key);
     }
@@ -634,11 +634,97 @@ git commit -m "Add envelope generation and upload to the Wave Runner content mod
 
 ---
 
-### Task 6: Enable and wire the Load Data toolbar button
+### Task 6: Move `getTokenServiceEnv` into the shared envelope config
+
+`getS3Bucket` in `shared/seismic/envelopes/envelope-config.ts` already parses the same
+`tokenServiceEnv` URL param that the admin's `getTokenServiceEnv` (in
+`src/seismic-admin/utils/portal-auth.ts`) parses. Move the function into the shared config — only
+the function, not the whole file: the rest of `portal-auth.ts` is admin-OAuth-specific — so the
+admin, the S3 bucket choice, and the Wave Runner toolbar (next task) share one definition.
+
+**Files:**
+- Modify: `shared/seismic/envelopes/envelope-config.ts:65-71`
+- Modify: `src/seismic-admin/utils/portal-auth.ts:64-68` (delete the function)
+- Modify: `src/seismic-admin/components/app.tsx:6` (import from the shared config)
+- Test: `shared/seismic/envelopes/envelope-config.test.ts` (tests move here from
+  `src/seismic-admin/utils/portal-auth.test.ts`)
+
+**Step 1: Move the tests**
+
+Delete the `describe("getTokenServiceEnv", ...)` block from
+`src/seismic-admin/utils/portal-auth.test.ts` (and remove `getTokenServiceEnv` from its import) and
+add to `shared/seismic/envelopes/envelope-config.test.ts`, with `getTokenServiceEnv` added to the
+imports from `./envelope-config`:
+
+```ts
+describe("getTokenServiceEnv", () => {
+  afterEach(() => history.replaceState(null, "", "/"));
+
+  it("defaults to production", () => {
+    expect(getTokenServiceEnv()).toBe("production");
+  });
+
+  it("returns staging when the tokenServiceEnv param asks for it", () => {
+    history.replaceState(null, "", "/?tokenServiceEnv=staging");
+    expect(getTokenServiceEnv()).toBe("staging");
+  });
+
+  it("treats any other param value as production", () => {
+    history.replaceState(null, "", "/?tokenServiceEnv=dev");
+    expect(getTokenServiceEnv()).toBe("production");
+  });
+});
+```
+
+**Step 2: Run the tests to make sure they fail**
+
+Run: `npx jest --no-watchman shared/seismic/envelopes/envelope-config.test.ts`
+Expected: FAIL — `getTokenServiceEnv` is not exported from `./envelope-config`.
+
+**Step 3: Implement**
+
+In `shared/seismic/envelopes/envelope-config.ts`, replace `getS3Bucket` with (the window-safe
+`getUrlParam` helper is already in this file, so Node scripts keep getting "production"):
+
+```ts
+/** Token-service environment for envelope uploads; ?tokenServiceEnv=staging for testing. */
+export function getTokenServiceEnv(): "staging" | "production" {
+  return getUrlParam("tokenServiceEnv") === "staging" ? "staging" : "production";
+}
+
+function getS3Bucket() {
+  return getTokenServiceEnv() === "staging" ? S3_STAGING_BUCKET : S3_BUCKET;
+}
+```
+
+Delete `getTokenServiceEnv` (and its doc comment) from `src/seismic-admin/utils/portal-auth.ts` and
+update the imports in `src/seismic-admin/components/app.tsx`:
+
+```ts
+import { getTokenServiceEnv } from "../../../shared/seismic/envelopes/envelope-config";
+import { consumeAccessTokenFromLocation, makePortalJwtGetter } from "../utils/portal-auth";
+```
+
+**Step 4: Run the tests to verify they pass**
+
+Run: `npx jest --no-watchman shared/seismic/envelopes/envelope-config.test.ts src/seismic-admin`
+Expected: PASS (including the remaining portal-auth tests).
+
+**Step 5: Commit**
+
+```bash
+git add shared/seismic/envelopes/envelope-config.ts shared/seismic/envelopes/envelope-config.test.ts \
+        src/seismic-admin/utils/portal-auth.ts src/seismic-admin/utils/portal-auth.test.ts \
+        src/seismic-admin/components/app.tsx
+git commit -m "Share getTokenServiceEnv between the admin and the envelope S3 config"
+```
+
+---
+
+### Task 7: Enable and wire the Load Data toolbar button
 
 **Files:**
 - Modify: `src/plugins/wave-runner/wave-runner-toolbar.tsx:22-39`
-- Modify: `src/utilities/url-params.ts` (QueryParams interface)
 - Modify: `src/plugins/wave-runner/components/data-setup.tsx:100,135,146`
 - Test: `src/plugins/wave-runner/components/wave-runner-tile.test.tsx`
 
@@ -678,17 +764,6 @@ passes already.
 
 **Step 3: Implement**
 
-Add to the `QueryParams` interface in `src/utilities/url-params.ts` (after the `targetUserId` entry):
-
-```ts
-  //
-  // seismic envelope upload parameters
-  //
-
-  // token-service environment for envelope uploads; "staging" for testing (production default)
-  tokenServiceEnv?: string;
-```
-
 Replace `LoadDataButton` in `src/plugins/wave-runner/wave-runner-toolbar.tsx`:
 
 ```tsx
@@ -703,7 +778,7 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
     if (!getJwt || !station) return;
     content.loadEnvelopeData({
       getJwt,
-      env: urlParams.tokenServiceEnv === "staging" ? "staging" : "production",
+      env: getTokenServiceEnv(),
       onEnvelopesUpdated: () => seismicQueryService.invalidateEnvelopes(station),
     });
   }
@@ -719,9 +794,9 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
 with the new imports:
 
 ```tsx
+import { getTokenServiceEnv } from "../../../shared/seismic/envelopes/envelope-config";
 import { useStores } from "../../hooks/use-stores";
 import { makeTokenServiceJwtGetter } from "../../lib/token-service-jwt";
-import { urlParams } from "../../utilities/url-params";
 ```
 
 Also block conflicting interactions while a load runs:
@@ -741,13 +816,13 @@ Expected: PASS (all).
 
 ```bash
 git add src/plugins/wave-runner/wave-runner-toolbar.tsx src/plugins/wave-runner/components/data-setup.tsx \
-        src/utilities/url-params.ts src/plugins/wave-runner/components/wave-runner-tile.test.tsx
+        src/plugins/wave-runner/components/wave-runner-tile.test.tsx
 git commit -m "Enable the Wave Runner Load Data button for portal-authenticated sessions"
 ```
 
 ---
 
-### Task 7: Load progress and error display
+### Task 8: Load progress and error display
 
 **Files:**
 - Modify: `src/plugins/wave-runner/components/status-and-output.tsx:26-29`
@@ -855,7 +930,7 @@ git commit -m "Show envelope load progress and errors in the Wave Runner status 
 
 ---
 
-### Task 8: Correct the design doc and stale comment
+### Task 9: Correct the design doc and stale comment
 
 **Files:**
 - Modify: `docs/plans/2026-07-27-seismic-envelope-admin-design.md` (Part 2 section, and the Part 2
@@ -893,7 +968,7 @@ git commit -m "Document the Wave Runner token-service JWT exchange"
 
 ---
 
-### Task 9: Full verification
+### Task 10: Full verification
 
 **Step 1: Type check**
 
@@ -925,8 +1000,9 @@ git add -A && git commit -m "Lint and type fixes for Wave Runner envelope loadin
 1. Launch CLUE from the staging portal with `?tokenServiceEnv=staging` added, place a Wave Runner
    tile, pick a station and a short date range (2–3 days) not yet covered in S3.
 2. Click **Load Data**: progress text should advance ("Loading data: day N of M..."), network tab
-   should show signed `PUT`s to `models-resources`, and the waveform should fill in after the run
-   (envelope cache invalidation → re-fetch).
+   should show signed `PUT`s to `models-resources-qa` (the staging bucket `getS3Bucket` selects for
+   `tokenServiceEnv=staging`), and the waveform should fill in after the run (envelope cache
+   invalidation → re-fetch).
 3. Click **Load Data** again for the same range: it should finish almost immediately (all days
    covered, no uploads).
 4. Open the same unit in dev mode (`?appMode=dev`): the Load Data button must be disabled.
