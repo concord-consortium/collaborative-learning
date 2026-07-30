@@ -321,8 +321,8 @@ describe("ThumbnailDocumentItem", () => {
     });
 
     it("does not mark a group-typed document that is not concurrent", () => {
-      // The red test: the transitional `type` alone no longer earns the treatment. A group document
-      // created before the concurrent axis existed loses it until the backfill script stamps the axis.
+      // The type alone is not sufficient: a group document gets the treatment only once the concurrent
+      // axis is stamped on it. Documents missing the axis are stamped by the backfill script.
       const { container } = renderItem({ documentProps: { type: GroupDocument } });
       expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("group");
     });
