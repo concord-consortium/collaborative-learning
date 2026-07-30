@@ -327,9 +327,10 @@ declare it. Anything reading properties from the Firestore metadata should treat
 - **Reactive:** No — immutable
 
 The owning group, and nothing else. It is a denormalization of the owner: the owner `uid` already encodes
-it (`group_<offeringId>_<groupId>`), and this field spares consumers from taking that apart. Consumers
-asking *whether* a document is group-owned use `hasGroupOwner` rather than reading the field
-(`src/models/document/document-axes.ts`).
+it (`group_<offeringId>_<groupId>`), and this field spares consumers from taking that apart when they need
+the group's *number*. It is not what makes a document group-owned — `hasGroupOwner`
+(`src/models/document/document-axes.ts`) reads the uid's prefix, so the uid stays the single authority on
+the owner and this field cannot contradict it.
 
 **A group id is unique only within an offering.** Group 3 of one assignment and group 3 of the next are
 different sets of students, so a bare group id must not be used to look a group up — `getGroupByOwnerId`

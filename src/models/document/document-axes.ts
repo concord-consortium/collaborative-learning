@@ -1,7 +1,7 @@
 /**
- * Guards over a document's stored axis fields (`context_id`, `unit`, `investigation`, `problem`,
- * `offeringId`, `groupId`), stamped at creation from the kind's registered `ownerType` and
- * `containerType` (see document-kinds.ts).
+ * Guards over a document's stored axis fields (`uid`, `unit`, `investigation`, `problem`,
+ * `offeringId`), stamped at creation from the kind's registered `ownerType` and `containerType`
+ * (see document-kinds.ts).
  *
  * Each guard answers about one axis, reading only that axis's fields; a consumer needing a position on
  * more than one asks each. See docs/document-axes/reading-axes-in-code.md for the field-by-shape table
@@ -10,6 +10,12 @@
  * A guard reads stored fields only, never the kind registry: Sort Work lists documents from other
  * units, whose kinds are not registered in the current session.
  */
+
+/**
+ * The prefix of the synthetic uid that owns a group's documents, `group_<offeringId>_<groupId>`. Shared
+ * by getGroupOwnerId, which mints the uid, and hasGroupOwner, which reads it back.
+ */
+export const kGroupOwnerPrefix = "group_";
 
 /**
  * The prefix of the synthetic uid that owns a class's documents, `class_<classHash>`. Shared by the
@@ -27,7 +33,7 @@ export const kClassOwnerPrefix = "class_";
  * uid apart.
  */
 export function getGroupOwnerId(offeringId: string, groupId: string): string {
-  return `group_${offeringId}_${groupId}`;
+  return `${kGroupOwnerPrefix}${offeringId}_${groupId}`;
 }
 
 /** The fields the guards read. Structural, so this stays a leaf module. */
@@ -37,17 +43,18 @@ export interface IDocumentAxisFields {
   investigation?: string | null;
   problem?: string | null;
   offeringId?: string | null;
-  groupId?: string | null;
 }
 
 /**
  * Owner axis: the document belongs to a single group, whoever created it.
  *
- * Only group-owned documents carry a `groupId`; others leave it unset so a stale group id can never
- * be read back, since a user's group may change (see DocumentMetadataModel.groupId).
+ * Like a class owner, a group owner has no field of its own — it is a synthetic uid, so this reads the
+ * uid's grammar. It tests the prefix rather than taking the uid apart; a caller that needs the group's
+ * number reads the `groupId` stored beside the uid (see getDocumentOwnerFields), and one that needs the
+ * group itself builds the whole owner id and compares (`Groups.getGroupByOwnerId`).
  */
-export function hasGroupOwner(doc: IDocumentAxisFields): doc is IDocumentAxisFields & { groupId: string } {
-  return !!doc.groupId;
+export function hasGroupOwner(doc: IDocumentAxisFields): boolean {
+  return !!doc.uid?.startsWith(kGroupOwnerPrefix);
 }
 
 /**
