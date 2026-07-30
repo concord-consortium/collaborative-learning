@@ -28,6 +28,9 @@ const applyLastUpdater = (seed: Record<string, any> = {}) => {
 const shareCheckbox = () =>
   screen.getByRole("checkbox", { name: "Show the share button on student documents" });
 
+const fourUpCheckbox = () =>
+  screen.getByRole("checkbox", { name: "Show the 4-up view button" });
+
 describe("DocumentSettings — Share Button", () => {
   beforeEach(() => {
     mockSetUnitConfig.mockClear();
@@ -70,5 +73,49 @@ describe("DocumentSettings — Share Button", () => {
     // Seed the draft with the existing false so the delete is observable.
     const mockDraft = applyLastUpdater({ showShare: false });
     expect(mockDraft.config.showShare).toBeUndefined();
+  });
+});
+
+describe("DocumentSettings — 4-up View", () => {
+  beforeEach(() => {
+    mockSetUnitConfig.mockClear();
+    for (const key of Object.keys(mockConfig)) delete mockConfig[key];
+    mockCurriculumValue.saveState = undefined;
+  });
+
+  it("defaults the 4-up checkbox to checked when the config is unset", () => {
+    render(<DocumentSettings />);
+    expect(fourUpCheckbox()).toBeChecked();
+  });
+
+  it("loads hide4up:true as unchecked", () => {
+    mockConfig.hide4up = true;
+    render(<DocumentSettings />);
+    expect(fourUpCheckbox()).not.toBeChecked();
+  });
+
+  it("stores hide4up:true when the box is unchecked", async () => {
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.click(fourUpCheckbox());
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater();
+    expect(mockDraft.config.hide4up).toBe(true);
+  });
+
+  it("removes hide4up when re-enabled (default shown is implicit)", async () => {
+    mockConfig.hide4up = true;
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.click(fourUpCheckbox()); // was unchecked; re-check it
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ hide4up: true });
+    expect(mockDraft.config.hide4up).toBeUndefined();
   });
 });

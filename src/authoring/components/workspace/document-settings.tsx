@@ -7,6 +7,7 @@ import { buildSectionDividerTemplate } from "../../utils/template-utils";
 interface DocumentSettingsFormInputs {
   defaultSharedDocuments: boolean;
   showShare: boolean;
+  show4up: boolean;
   showTextTitles: boolean;
   documentTemplateEnabled: boolean;
   planningTemplateEnabled: boolean;
@@ -23,6 +24,8 @@ const DocumentSettings: React.FC = () => {
     return {
       defaultSharedDocuments: config?.defaultSharedDocuments ?? false,
       showShare: config?.showShare ?? true,
+      // hide4up defaults false, so the 4-up button shows by default.
+      show4up: !config?.hide4up,
       // Titles are shown only when the unit explicitly opts in with text.hideTitle: false.
       showTextTitles: config?.settings?.text?.hideTitle === false,
       // Default to on when a legacy template already exists (flag undefined → applied at runtime).
@@ -52,6 +55,12 @@ const DocumentSettings: React.FC = () => {
         delete draft.config.showShare;
       } else {
         draft.config.showShare = false;
+      }
+      // Inverse of the showShare pattern: hide4up defaults false, so store true only to hide the button.
+      if (data.show4up) {
+        delete draft.config.hide4up;
+      } else {
+        draft.config.hide4up = true;
       }
       if (data.showTextTitles) {
         if (!draft.config.settings) draft.config.settings = {} as ISettings;
@@ -125,6 +134,21 @@ const DocumentSettings: React.FC = () => {
         <p className="muted small">
           When enabled (the default), students see the share/unshare toggle on their documents. Turn it
           off to hide sharing for this unit.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>4-up View</legend>
+        <label className="horizontal middle">
+          <input
+            type="checkbox"
+            {...register("show4up")}
+          />
+          <span>Show the 4-up view button</span>
+        </label>
+        <p className="muted small">
+          When enabled (the default), students see the button to switch to the 4-up group view. Turn it
+          off to hide it for this unit.
         </p>
       </fieldset>
 
