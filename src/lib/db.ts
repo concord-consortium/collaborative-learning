@@ -1093,8 +1093,8 @@ export class DB {
           });
           // Open the just-created document directly. This avoids waiting for required documents system to
           // resolve it. The required documents system has a race condition in this code path. We still need
-          // trigger the required documents system though since that is needed when createOtherDocument is
-          // called from the the startup code.
+          // to trigger the required documents system though since that is needed when createOtherDocument is
+          // called from the startup code.
           const document = await this.createDocumentModelFromOtherDocument(newDocument, documentType);
           documents.addRequiredDocumentPromises([documentType]);
           documents.resolveRequiredDocumentPromise(document);
