@@ -3,7 +3,7 @@ import { union } from "lodash";
 import { makeAutoObservable, runInAction } from "mobx";
 import { SnapshotIn, typecheck, unprotect } from "@concord-consortium/mobx-state-tree";
 
-import { IDocumentMetadata } from "../../../shared/shared";
+import { escapeKey, IDocumentMetadata } from "../../../shared/shared";
 import type { DB } from "../../lib/db";
 import { typeConverter } from "../../utilities/db-utils";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
@@ -133,11 +133,10 @@ export class DocumentMetadataStore {
 
   /**
    * Validated point read of a single document's metadata, scoped to the user's class. Throws if
-   * there is no such document or it fails validation; the error describes the query that was run
-   * (collection path, context_id, key) so a developer can understand why it was rejected. A
-   * duplicate (context_id, key) match is logged but not fatal — the document is still openable, so
-   * the first match is used. Concurrent reads for the same key share one query. Results are not
-   * cached here because the Firestore SDK is already caching the documents locally.
+   * there is no such document, it fails validation, or its context_id doesn't match the user's
+   * class; the error describes the doc path that was read so a developer can understand why it
+   * was rejected. Concurrent reads for the same key share one get. Results are not cached here
+   * because the Firestore SDK is already caching the documents locally.
    */
   fetchMetadata(key: string): Promise<IDocumentMetadata> {
     const inFlight = this.inFlightPointReads.get(key);
@@ -152,33 +151,30 @@ export class DocumentMetadataStore {
   private async pointReadMetadata(key: string): Promise<IDocumentMetadata> {
     const converter = typeConverter<IDocumentMetadata>();
     const classHash = this.stores.user.classHash;
-    // The context_id is required so the security rules know we aren't trying to get
-    // documents we don't have access to.
+    // Read the metadata doc directly by id. The doc id is escapeKey(key): every writer (the client
+    // createFirestoreMetadataDocument and the createFirestoreMetadataDocument_v2 cloud function)
+    // writes there, and the Sep 2025 migration consolidated all prefixed (network_/uid:) docs into
+    // this unprefixed doc. A get-by-id is strongly consistent immediately after the awaited write,
+    // unlike a context_id+key collection query whose index lag left just-created personal documents
+    // unopenable (CLUE-587).
     const documentsCollection = this.stores.db.firestore.collection("documents");
-    const query = documentsCollection
-      .withConverter(converter)
-      .where("context_id", "==", classHash)
-      .where("key", "==", key)
-      // A (context_id, key) pair should identify exactly one document; limit(2) reads only what we
-      // need to open one while still letting us detect (and log) a duplicate below.
-      .limit(2);
-    const snapshot = await query.get();
-    // Describe the query, not a single doc path: the read is a collection query on context_id + key
-    // (not a get() at documents/{key}), so this is where we actually looked. The collection path
-    // includes the space (e.g. demo/... vs authed/...), which distinguishes demo from production.
-    const where = `'${documentsCollection.path}' where context_id == '${classHash}' and key == '${key}'`;
-    if (snapshot.empty) {
-      throw new Error(`No Firestore metadata document found: queried ${where}`);
+    const docRef = documentsCollection.withConverter(converter).doc(escapeKey(key));
+    const snapshot = await docRef.get();
+    const where = `'${docRef.path}'`;
+    if (!snapshot.exists) {
+      throw new Error(`No Firestore metadata document found: read ${where}`);
     }
-    if (snapshot.docs.length > 1) {
-      // A data-integrity anomaly, not a reason to deny access: the document is still openable, so
-      // log it (console.error surfaces in Rollbar) and proceed with the first match rather than
-      // throwing and locking the user out of a document that exists.
-      console.error(`Multiple Firestore metadata documents found; using the first: queried ${where}`);
-    }
-    const metadata = this.metadataFromFirestoreData(snapshot.docs[0].data());
+    const metadata = this.metadataFromFirestoreData(snapshot.data() as IDocumentMetadata);
     if (!metadata) {
-      throw new Error(`Firestore metadata document failed validation (see logged typecheck error): found by ${where}`);
+      throw new Error(`Firestore metadata document failed validation (see logged typecheck error): read ${where}`);
+    }
+    // Preserve the class scoping the previous query enforced (context_id == classHash). The security
+    // rules also let teachers get network/other-class docs, but openDocument's callers expect only
+    // the current user's class, so reject a mismatch just as the empty class-scoped query did.
+    if (metadata.context_id !== classHash) {
+      throw new Error(
+        `Firestore metadata document context_id '${metadata.context_id}' does not match ` +
+        `class '${classHash}': read ${where}`);
     }
     return metadata;
   }
