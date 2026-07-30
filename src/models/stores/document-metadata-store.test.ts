@@ -57,15 +57,20 @@ function makeExemplarDoc(key: string, authoredCommentTag: string, tileTypes: str
 
 describe("DocumentMetadataStore", () => {
   describe("fetchMetadata", () => {
-    it("returns validated data via a get-by-id at the metadata doc path", async () => {
+    it("reads by the escaped document id (documents/{escapeKey(key)}), not the raw key", async () => {
+      // Use a key containing characters escapeKey rewrites (. and / -> _) so this fails if the
+      // code ever reads by the raw key instead of escapeKey(key). The stored `key` field keeps the
+      // raw key, matching real metadata docs (id is escaped, the field is not).
+      const rawKey = "sec.1/foo";
+      const escapedId = "sec_1_foo";
       const { store, getSpy, getRequestedId } = makeStore({
-        "doc-2": { uid: "u1", type: "problem", key: "doc-2", context_id: "class-1" }
+        [escapedId]: { uid: "u1", type: "problem", key: rawKey, context_id: "class-1" }
       });
-      const result = await store.fetchMetadata("doc-2");
-      expect(result?.key).toBe("doc-2");
+      const result = await store.fetchMetadata(rawKey);
+      expect(result?.key).toBe(rawKey);
       expect(getSpy).toHaveBeenCalledTimes(1);
-      // Read by document id, not a query.
-      expect(getRequestedId()).toBe("doc-2");
+      // Read by document id (escapeKey(key)), not a query and not the raw key.
+      expect(getRequestedId()).toBe(escapedId);
     });
 
     it("throws describing the doc path when the doc does not exist", async () => {
