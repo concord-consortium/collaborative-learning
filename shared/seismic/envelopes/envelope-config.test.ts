@@ -1,6 +1,6 @@
 import {
   LEVEL_SPACINGS, K_FACTOR, POINTS_PER_TILE, AMPLITUDE_RANGES,
-  NO_DATA_SENTINEL, NUM_LEVELS
+  NO_DATA_SENTINEL, NUM_LEVELS, getTokenServiceEnv
 } from "./envelope-config";
 
 describe("envelope-config", () => {
@@ -31,5 +31,23 @@ describe("envelope-config", () => {
 
   it("NO_DATA_SENTINEL is Int16 min", () => {
     expect(NO_DATA_SENTINEL).toBe(-32768);
+  });
+});
+
+describe("getTokenServiceEnv", () => {
+  afterEach(() => history.replaceState(null, "", "/"));
+
+  it("defaults to production", () => {
+    expect(getTokenServiceEnv()).toBe("production");
+  });
+
+  it("returns staging when the tokenServiceEnv param asks for it", () => {
+    history.replaceState(null, "", "/?tokenServiceEnv=staging");
+    expect(getTokenServiceEnv()).toBe("staging");
+  });
+
+  it("treats any other param value as production", () => {
+    history.replaceState(null, "", "/?tokenServiceEnv=dev");
+    expect(getTokenServiceEnv()).toBe("production");
   });
 });

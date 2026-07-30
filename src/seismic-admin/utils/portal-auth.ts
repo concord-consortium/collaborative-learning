@@ -61,12 +61,6 @@ export function clearAccessToken() {
   }
 }
 
-/** Token-service environment for envelope uploads; ?tokenServiceEnv=staging for testing. */
-export function getTokenServiceEnv(): "staging" | "production" {
-  const param = new URLSearchParams(window.location.search).get("tokenServiceEnv");
-  return param === "staging" ? "staging" : "production";
-}
-
 /** Exchange a portal access token for the portal-signed Firebase JWT token-service verifies. */
 export async function fetchPortalFirebaseJwt(accessToken: string): Promise<string> {
   const url = `${getPortalUrl()}/api/v1/jwt/firebase?firebase_app=token-service`;
