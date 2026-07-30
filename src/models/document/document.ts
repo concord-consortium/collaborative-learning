@@ -68,7 +68,18 @@ export const DocumentModel = Tree.named("Document")
     properties: types.map(types.string),
     content: types.maybe(DocumentContentModel),
     comments: types.map(TileCommentsModel),
+    /**
+     * The group that **owns** this document, from the stored metadata field. Set only on group
+     * documents; see DocumentMetadataModel.groupId.
+     */
     groupId: types.maybe(types.string),
+    /**
+     * The group its **author** belonged to — refreshed as membership changes for a live document,
+     * frozen at publish time for a publication. A fact about the author, not about the document, so it
+     * says nothing about who owns this. The four-up view and the content listener want this one; anything
+     * asking "whose document is this" wants `groupId` or the owner guards in document-axes.ts.
+     */
+    authorGroupId: types.maybe(types.string),
     visibility: types.maybe(VisibilityTypeEnum),
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
@@ -139,10 +150,10 @@ export const DocumentModel = Tree.named("Document")
     get metadata(): IDocumentMetadata {
       const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent, kind,
               contextId } = self;
-      // NOTE: we always return a groupId here even for non group documents. If this metadata is
-      // written to Firestore or Firebase this will probably fail because this groupId will be undefined.
-      // Currently it seems the metadata is not written to either place, it is just used for finding
-      // Firestore documents.
+      // `groupId` is undefined for everything but a group document, matching the stored field it mirrors,
+      // so this shape agrees with what Firestore holds. The author's group is deliberately absent: it is
+      // not document metadata. Nothing writes this back to Firestore or Firebase today — it is used for
+      // finding Firestore documents and for reading a document's axes.
       return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, offeringId: self.offeringId, visibility } as IDocumentMetadata;
@@ -249,8 +260,8 @@ export const DocumentModel = Tree.named("Document")
       self.saveState = state;
     },
 
-    setGroupId(groupId?: string) {
-      self.groupId = groupId;
+    setAuthorGroupId(authorGroupId?: string) {
+      self.authorGroupId = authorGroupId;
     },
 
     setShowPlaybackControls(newValue: boolean) {

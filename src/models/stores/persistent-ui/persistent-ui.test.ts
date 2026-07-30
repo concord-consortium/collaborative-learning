@@ -337,9 +337,10 @@ describe("PersistentUI", () => {
       mockDoc = {
         key: "doc1",
         type: "problem",
-        groupId: "group1",
+        // A problem document is its author's, so its group affiliation is the author's group.
+        authorGroupId: "group1",
         uid: "student1",
-        toJSON: () => ({ key: "doc1", type: "problem", groupId: "group1" })
+        toJSON: () => ({ key: "doc1", type: "problem", authorGroupId: "group1" })
       };
     });
 

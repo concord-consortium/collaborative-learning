@@ -45,6 +45,7 @@ so this table doubles as a migration-progress view.
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
 | `canonical` | Firestore | group | not surfaced | No |
 | `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
+| `groupId` | Firestore | group (the **owning** group) | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | No — immutable |
 
 ### Dual-stored (Firestore + RTDB)
 
@@ -53,7 +54,6 @@ so this table doubles as a migration-progress view.
 | `title` | both | personal, learningLog, publications | `DocumentModel.title`, `DocumentMetadataModel.title` | **Own docs only** |
 | `visibility` | both | problem, planning, personal, learningLog | `DocumentModel.visibility`, `DocumentMetadataModel.visibility` | Class-wide for problem; **see notes** for personal |
 | `properties` | both | most | `DocumentModel.properties` | **No** |
-| `groupId` | both | group, publication | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | Problem docs only, derived locally |
 | `createdAt` | both | all | `DocumentModel.createdAt` | No |
 | `uid` | both | all | `DocumentModel.uid` | No — immutable |
 | `type` | both | all | `DocumentModel.type` | No — immutable |
@@ -74,6 +74,15 @@ so this table doubles as a migration-progress view.
 | `groupUserConnections` | RTDB | publication | `DocumentModel.groupUserConnections` — **never populated** | No |
 | `lastEditedAt` | RTDB | all editable | not surfaced | No |
 | `evaluation` | RTDB | analyzable docs | not surfaced | No |
+
+### Derived (no stored field)
+
+Held on the runtime model only, computed from something other than the document's own metadata. Listed
+here so a reader looking for the stored field does not go hunting for one that does not exist.
+
+| Field | Derived from | Applies to | Runtime | Reactive |
+|---|---|---|---|---|
+| `authorGroupId` | the groups store, or a publication's publish-time snapshot | everything but group documents | `DocumentModel.authorGroupId` | Yes — to group membership |
 
 ---
 
@@ -308,21 +317,39 @@ declare it. Anything reading properties from the Firestore metadata should treat
 
 ### `groupId`
 
-- **Stores:** Firestore + RTDB
+- **Stores:** Firestore only
 - **Location:** Firestore `documents/{key}.groupId` (written only when truthy, so Firestore never sees
-  `undefined`); RTDB `DBPublication.groupId`
-- **Applies to:** group documents (the owning group) and publications (the author's group at publish
-  time)
+  `undefined`)
+- **Applies to:** group documents — the group that **owns** the document
 - **Runtime:** `DocumentModel.groupId`, `DocumentMetadataModel.groupId`
-- **Updated by:** nothing writes it after creation. `setGroupId` exists but has no sync watcher.
-- **Reactive:** Only for problem documents, and not from either store — `db-docs-content-listener` sets it
-  inside a MobX `autorun` from the *local groups store*
-  ([db-docs-content-listener.ts:65](../../src/lib/db-listeners/db-docs-content-listener.ts#L65)). So it
-  tracks group membership changes rather than document changes.
+- **Updated by:** nothing — creation only, stamped from the kind's `ownerType` by
+  `getDocumentOwnerFields`
+- **Reactive:** No — immutable
 
-`DocumentMetadataModel` documents the intent: for non-group documents this should be undefined, because
-the document owner's group can change and stale group ids are worse than absent ones. Sort Work's
-grouping reads the metadata model's `groupId`, so that path *is* reactive from Firestore.
+The owning group, and nothing else. It is a denormalization of the owner: the owner `uid` already encodes
+it (`group_<offeringId>_<groupId>`), and this field spares consumers from taking that apart. Consumers
+asking *whether* a document is group-owned use `hasGroupOwner` rather than reading the field
+(`src/models/document/document-axes.ts`).
+
+**A group id is unique only within an offering.** Group 3 of one assignment and group 3 of the next are
+different sets of students, so a bare group id must not be used to look a group up — `getGroupByOwnerId`
+matches on the whole owner id instead, and answers with nothing for a group outside the offering it
+holds.
+
+### `authorGroupId` (runtime only)
+
+- **Stores:** neither — derived
+- **Runtime:** `DocumentModel.authorGroupId`. No `DocumentMetadataModel` prop and no Firestore field.
+- **Filled by:** `groups.groupIdForUser(uid)` for problem, personal, and learning-log documents and their
+  publications; `DBPublication.groupId` for a problem publication, frozen at publish time
+- **Updated by:** `db-docs-content-listener` inside a MobX `autorun`, from the local groups store
+  ([db-docs-content-listener.ts:66](../../src/lib/db-listeners/db-docs-content-listener.ts#L66))
+- **Reactive:** Yes, to group membership changes — not to document changes
+
+The group the document's **author** belongs to. A fact about the author rather than about the document,
+which is why it is derived rather than stored: a student's group changes, and a frozen copy would go
+stale. The four-up view (`getProblemDocumentsForGroup`), Student Work routing, and the content listener's
+"whose documents do I monitor" test all want this one.
 
 ### `createdAt`
 

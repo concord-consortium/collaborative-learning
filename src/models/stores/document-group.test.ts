@@ -24,20 +24,20 @@ const kOffering = "offering-1";
 
 const mockDocumentsData: DocumentModelSnapshotType[] = [
   { uid: "1", //Joe
-    type: ProblemDocument, key:"Student 1 Problem Doc Group 5", groupId: "5", createdAt: 1,
+    type: ProblemDocument, key:"Student 1 Problem Doc Group 5", authorGroupId: "5", createdAt: 1,
     content: { tiles: [] } as DocumentContentSnapshotType
   },
   { uid: "2", //Scott
-    type: ProblemDocument, key:"Student 2 Problem Doc Group 3", groupId: "3", createdAt: 2,
+    type: ProblemDocument, key:"Student 2 Problem Doc Group 3", authorGroupId: "3", createdAt: 2,
     content: { tiles: [{ id: "textTool", content: {type: "Text" }}] } as DocumentContentSnapshotType
   },
   { uid: "3", //Dennis
-    type: ProblemDocument, key:"Student 3 Problem Doc Group 9", groupId: "9", createdAt: 3,
+    type: ProblemDocument, key:"Student 3 Problem Doc Group 9", authorGroupId: "9", createdAt: 3,
     content: { tiles: [
       { id: "drawingTool", content: { type: "Drawing", objects: [] }}] } as DocumentContentSnapshotType
   },
   { uid: "4", //Kirk
-    type: ProblemDocument, key:"Student 4 Problem Doc Group 3", groupId: "3", createdAt: 4,
+    type: ProblemDocument, key:"Student 4 Problem Doc Group 3", authorGroupId: "3", createdAt: 4,
     content: { tiles: [] } as DocumentContentSnapshotType
   },
   { uid: getGroupOwnerId(kOffering, "3"), // owned by the group, not by whoever created it
