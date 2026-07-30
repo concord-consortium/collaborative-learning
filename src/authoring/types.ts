@@ -35,7 +35,7 @@ export interface IUnit {
   investigations: IInvestigation[];
 }
 
-export interface IUnitConfig {
+export interface IUnitConfig extends IItemTemplateConfig {
   enableHistoryRoles: string[];
   disablePublish: boolean;
   placeholderText: string;
@@ -50,12 +50,16 @@ export interface IUnitConfig {
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
+  chatTutorPrompts?: IChatTutorPrompts;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;
   sortWorkConfig?: ISortWorkConfig;
   termOverrides?: Record<string, string>;
   defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  // "evenLayout" (default) splits the panes evenly; "wideContent" narrows the resources pane to its
+  // comments-open width so the workspace gets ~2/3 until comments are opened.
+  contentLayout?: "evenLayout" | "wideContent";
   defaultSharedDocuments?: boolean;
 }
 
@@ -138,6 +142,12 @@ export interface IAiPrompt {
   summarizer?: Summarizer;
 }
 
+// Optional per-unit overrides of the AI chat tutor's server-side generic prompt.
+export interface IChatTutorPrompts {
+  replaceGenericPrompt?: string;
+  appendToGenericPrompt?: string;
+}
+
 export interface ISection {
   initials: string;
   title: string;
@@ -165,17 +175,41 @@ export interface IProblem {
   title: string;
   subtitle: string;
   sections: string[];
-  config?: {
-    planningTemplate: IPlanningTemplate;
-  };
+  config?: IItemTemplateConfig;
   disabled?: any[];
 }
 
-export interface IPlanningTemplate {
-  overview?: { tiles: ITile[] };
-  launch?: { tiles: ITile[] };
-  explore?: { tiles: ITile[] };
-  summarize?: { tiles: ITile[] };
+// A section-divider marker in an authored template: a row with no tile, carrying the section flag
+// on its content. Mirrors the runtime authored format { content: { isSectionHeader, sectionId } }.
+export interface ISectionDividerTile {
+  content: { isSectionHeader: true; sectionId: string };
+}
+
+// A "put content here" placeholder for an empty section, mirroring the placeholder tile the default
+// sectioned problem document uses (createDefaultSectionedContent). Removed at runtime once content is added.
+export interface IPlaceholderTile {
+  content: { type: "Placeholder"; sectionId: string; containerType: string };
+}
+
+// A tile in a template is a normal authored tile, a section divider, or a section placeholder.
+export type ITemplateTile = ITile | ISectionDividerTile | IPlaceholderTile;
+
+// Preloaded document content ({ tiles }) copied into a new document on first creation.
+// Same authored shape as section content. See IAuthoredDocumentContent in the runtime.
+export interface ITemplateContent {
+  tiles: ITemplateTile[];
+}
+
+// Template-related config shared by the unit and by each problem/teacher-guide problem.
+// The `*Enabled` flags switch a template on/off WITHOUT deleting its content (mirrors how
+// `aiEvaluation` gates the persistent `aiPrompt`); content is only removed by an explicit delete.
+// planningTemplate is keyed by planning section type (defined per-unit), so a generic map matches
+// the authored JSON and the section-agnostic editor better than a fixed set of keys.
+export interface IItemTemplateConfig {
+  defaultDocumentTemplate?: ITemplateContent;
+  defaultDocumentTemplateEnabled?: boolean;
+  planningTemplate?: Record<string, ITemplateContent>;
+  planningTemplateEnabled?: boolean;
 }
 
 export interface ITile {

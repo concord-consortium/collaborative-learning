@@ -94,6 +94,28 @@ describe("downloadRange", () => {
     expect(fetchRaw).toHaveBeenCalledTimes(3); // not the 31st
   });
 
+  it("emits dayEmpty and does not cache a day whose fetch returns no data (0 bytes)", async () => {
+    const d31 = dayIndex(utcDay(2026, 1, 31));
+    // The 31st has no waveform data: dataselect answers 204, so fetchRaw yields 0 bytes.
+    const fetchRaw = jest.fn(async (q: any) =>
+      new Date(q.startTime).getTime() / 1000 === utcDay(2026, 1, 31)
+        ? new ArrayBuffer(0)
+        : new ArrayBuffer(1));
+    const writeDayChunk = jest.fn(async () => {});
+    const deps = makeDeps({
+      fetchRaw,
+      cache: { scanCachedDays: async () => new Set<number>(), writeDayChunk },
+    });
+    const { events, onEvent } = collect();
+    await downloadRange(deps, RANGE, onEvent);
+
+    // Reported empty, never written, and never counted as a written day.
+    expect(events.some(e => e.type === "dayEmpty" && (e as any).day === d31)).toBe(true);
+    expect(events.some(e => e.type === "dayWritten" && (e as any).day === d31)).toBe(false);
+    expect(writeDayChunk).not.toHaveBeenCalledWith(expect.anything(), d31, expect.anything());
+    expect(events.at(-1)).toEqual({ type: "done" });
+  });
+
   it("fetches the final day when the range ends on it (availability window must cover the whole day)", async () => {
     // Mimic the real endpoint: it only reports availability within the requested window.
     const dataStart = utcDay(2026, 1, 30), dataEnd = utcDay(2026, 2, 3); // station has data through Feb 2

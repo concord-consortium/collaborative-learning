@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
+import { initAdminFirebase } from "../utils/admin-firebase";
 import { loadCatalog } from "../utils/load-catalog";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { AdminBody } from "./admin-body";
@@ -14,11 +15,27 @@ export const App = observer(function App() {
   // (with location + label) merge with whatever is already in OPFS.
   useEffect(() => {
     let cancelled = false;
-    void loadCatalog().then(catalog => {
+    // Convert auth failure at the source so an unmount before the catalog resolves
+    // never leaves an unhandled rejection. Resolves to null on success, else the reason.
+    const authPromise = initAdminFirebase().then(
+      () => null,
+      err => {
+        console.warn("Seismic admin Firebase sign-in failed:", err);
+        return `${err?.message ?? err}`;
+      });
+    void loadCatalog().then(({ stations, models }) => {
       if (cancelled) return;
-      const created = new SeismicAdminStore({ catalog });
+      const created = new SeismicAdminStore({ stations, models });
       setStore(created);
       void created.refresh();
+      void authPromise.then(failure => {
+        if (cancelled) return;
+        if (failure === null) {
+          created.setAuthReady();
+        } else {
+          created.setFeedback(`Event database unavailable (sign-in failed: ${failure}).`);
+        }
+      });
     });
     return () => { cancelled = true; };
   }, []);

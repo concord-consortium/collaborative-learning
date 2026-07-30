@@ -1,6 +1,14 @@
-import { IInvestigation, IProblem, IUnit, IUnitFiles } from "../types";
+import { IInvestigation, IItemTemplateConfig, IProblem, IUnit, IUnitFiles } from "../types";
 
 export type CurriculumItem = IUnit | IInvestigation | IProblem;
+
+// A template editor page is shown when the template is enabled or already has content (so legacy
+// hand-authored templates remain editable even when the enable flag was never set). Shared by the
+// unit nav (left-nav) and the per-problem nav (getUnitChildrenTree) so the predicate stays in one place.
+export const hasDocumentTemplate = (config?: IItemTemplateConfig): boolean =>
+  !!(config?.defaultDocumentTemplateEnabled || config?.defaultDocumentTemplate);
+export const hasPlanningTemplate = (config?: IItemTemplateConfig): boolean =>
+  !!(config?.planningTemplateEnabled || config?.planningTemplate);
 
 export const getUnitItem = (unit: IUnit | undefined, pathParts: string[]): CurriculumItem | undefined => {
   if (!unit || pathParts.length === 0) {
@@ -223,6 +231,11 @@ export const getUnitChildrenTree = (
                 path
               };
             }) || [],
+            // Show a template editor page when its template is enabled or already has content.
+            ...(hasDocumentTemplate(problem.config)
+              ? [{ id: "documentTemplate", label: "Document Template" }] : []),
+            ...(hasPlanningTemplate(problem.config)
+              ? [{ id: "planningTemplate", label: "Planning Template" }] : []),
           ]
         })) || [],
       ]

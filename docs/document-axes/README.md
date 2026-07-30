@@ -3,8 +3,8 @@
 This folder tracks the incremental refactoring of CLUE's document-type system into explicit **axes**.
 Historically a single `type` field is switched on in ~90 places across client, rules, and functions. The
 target is to decompose `type` into orthogonal, mostly-stored axes so each document's meaning is read in one
-place, with `type`/`kind` dereferenced only inside a kind registry and a creation factory — never as a runtime
-branch.
+place, with `type`/`kind` dereferenced only inside a kind registry, a creation factory, and migration code
+(where `kind` is the cohort key) — never as a runtime branch.
 
 - **Concepts — what the axes are, read out of current CLUE behavior:** [axes.md](./axes.md)
 - **Target — how the axes live in code (layers and boundaries):** [target-architecture.md](./target-architecture.md)

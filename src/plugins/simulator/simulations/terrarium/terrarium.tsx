@@ -4,6 +4,7 @@ import { stepDuration, terrariumValues } from "../../../../../shared/simulations
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
+import { kVolatileVariableLabel } from "../../../shared-variables/variable-labels";
 
 import display from "./assets/display/display.png";
 import jarForeground from "./assets/jar_foreground/jar_foreground.png";
@@ -159,7 +160,7 @@ export const terrariumSimulation: ISimulation = {
   variables: [
     {
       displayName: "Temperature",
-      labels: ["input", "sensor:temperature"],
+      labels: ["input", "sensor:temperature", kVolatileVariableLabel],
       icon: iconUrl(temperatureKey),
       name: temperatureKey,
       value: minTemperature,
@@ -167,7 +168,7 @@ export const terrariumSimulation: ISimulation = {
     },
     {
       displayName: "Humidity",
-      labels: ["input", "sensor:humidity"],
+      labels: ["input", "sensor:humidity", kVolatileVariableLabel],
       icon: iconUrl(humidityKey),
       name: humidityKey,
       value: startHumidity,
@@ -175,26 +176,27 @@ export const terrariumSimulation: ISimulation = {
     },
     {
       displayName: "Raw Temperature",
+      labels: [kVolatileVariableLabel],
       name: rawTemperatureKey,
       value: minTemperature
     },
     {
       displayName: "Fan",
-      labels: ["output", "live-output:Fan", "decimalPlaces:0"],
+      labels: ["output", "live-output:Fan", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(fanKey),
       name: fanKey,
       value: 0
     },
     {
       displayName: "Heat Lamp",
-      labels: ["output", "live-output:Heat Lamp", "decimalPlaces:0"],
+      labels: ["output", "live-output:Heat Lamp", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(heatLampKey),
       name: heatLampKey,
       value: 0
     },
     {
       displayName: "Humidifier",
-      labels: ["output", "live-output:Humidifier", "decimalPlaces:0"],
+      labels: ["output", "live-output:Humidifier", "decimalPlaces:0", kVolatileVariableLabel],
       icon: iconUrl(humidifierKey),
       name: humidifierKey,
       value: 0
