@@ -93,8 +93,15 @@ describe("document kinds registry", () => {
       expect(getDocumentOwner("testDqb", ctx)).toBe("class_c1");
     });
 
-    it("falls back to the user when the synthetic owner was not supplied", () => {
-      expect(getDocumentOwner(GroupDocument, { userId: "u-1" })).toBe("u-1");
+    it("throws rather than falling back to the user when the synthetic owner is unavailable", () => {
+      // A student who is not in a group has no group owner id. Handing them the document instead would
+      // make it theirs rather than the group's, and file its canonical slot under them.
+      expect(() => getDocumentOwner(GroupDocument, { userId: "u-1" }))
+        .toThrow(/Cannot create a group-owned document/);
+      registerDocumentKind("testClassKindNoOwner",
+        { metadataFields: {}, ownerType: "class", containerType: "classUnit" });
+      expect(() => getDocumentOwner("testClassKindNoOwner", { userId: "u-1" }))
+        .toThrow(/Cannot create a class-owned document/);
     });
   });
 

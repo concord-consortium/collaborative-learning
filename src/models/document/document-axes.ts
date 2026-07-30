@@ -17,6 +17,19 @@
  */
 export const kClassOwnerPrefix = "class_";
 
+/**
+ * The synthetic uid that owns a group's documents. Every member of the group resolves to the same
+ * value, which is what makes the document the group's rather than its creator's.
+ *
+ * It is qualified by the offering because a group id is unique only within one: group 3 of this
+ * assignment and group 3 of the next are different sets of students. Callers that need to recognize a
+ * particular group's documents should build the id with this and compare, rather than parsing a stored
+ * uid apart.
+ */
+export function getGroupOwnerId(offeringId: string, groupId: string): string {
+  return `group_${offeringId}_${groupId}`;
+}
+
 /** The fields the guards read. Structural, so this stays a leaf module. */
 export interface IDocumentAxisFields {
   uid?: string | null;
