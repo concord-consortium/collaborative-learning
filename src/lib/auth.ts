@@ -101,9 +101,9 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
   });
 };
 
-export const getFirebaseJWTParams = (classHash?: string) => {
+export const getFirebaseJWTParams = (classHash?: string, firebaseApp = FIREBASE_APP_NAME) => {
   const params: Record<string,string> = {
-    firebase_app: FIREBASE_APP_NAME
+    firebase_app: firebaseApp
   };
   if (classHash) {
     params.class_hash = classHash;
@@ -118,10 +118,11 @@ export const getFirebaseJWTParams = (classHash?: string) => {
   return `?${(new URLSearchParams(params)).toString()}`;
 };
 
-export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string,
-                                              rawToken: string, classHash?: string) => {
+export const getFirebaseJWTWithBearerToken = (
+  basePortalUrl: string, type: string, rawToken: string, classHash?: string, firebaseApp?: string
+) => {
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
-    const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash)}`;
+    const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash, firebaseApp)}`;
     superagent
       .get(maybeAddResearcherParam(url))
       .set("Authorization", `${type} ${rawToken}`)
