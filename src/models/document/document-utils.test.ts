@@ -1,8 +1,11 @@
+import { IDocumentMetadata } from "../../../shared/shared";
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
+import { UserModel } from "../stores/user";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
-import { PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
-import { getDocumentDisplayTitle } from "./document-utils";
+import { DocumentModel } from "./document";
+import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
+import { canUserEditDocument, getDocumentDisplayTitle } from "./document-utils";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 describe("document utils", () => {
@@ -175,6 +178,69 @@ describe("document utils", () => {
         const title = getDocumentDisplayTitle(unit, metadata, appConfig);
         expect(title).toBe("Test Problem");
       });
+    });
+  });
+
+  describe("canUserEditDocument", () => {
+    const me = "student-1";
+    const myGroup = "3";
+
+    const user = (currentGroupId?: string) => UserModel.create({ id: me, currentGroupId });
+    const metadata = (props: Partial<IDocumentMetadata>): IDocumentMetadata =>
+      ({ key: "doc-1", uid: me, type: ProblemDocument, ...props });
+
+    it("allows editing the user's own document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: me }), user: user(myGroup)
+      })).toBe(true);
+    });
+
+    it("allows editing the user's own group document, even when created by another group member", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "student-2", type: GroupDocument, groupId: myGroup }), user: user(myGroup)
+      })).toBe(true);
+    });
+
+    it("does not allow editing another group's document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "student-9", type: GroupDocument, groupId: "7" }), user: user(myGroup)
+      })).toBe(false);
+    });
+
+    it("does not allow editing another student's (non-group) document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "student-2" }), user: user(myGroup)
+      })).toBe(false);
+    });
+
+    it("does not allow editing a group document when the user isn't in a group", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "student-2", type: GroupDocument, groupId: myGroup }), user: user()
+      })).toBe(false);
+    });
+
+    it("does not treat a missing document uid as a match", () => {
+      expect(canUserEditDocument({ user: user(myGroup) })).toBe(false);
+    });
+
+    it("recognizes an own-group doc from the document when no metadata is available", () => {
+      const document = DocumentModel.create({
+        key: "doc-1", uid: "student-2", type: GroupDocument, groupId: myGroup
+      });
+      expect(canUserEditDocument({ document, user: user(myGroup) })).toBe(true);
+    });
+
+    // The reactivity fix: the metadata is kept in sync by Firestore listeners while the lazily-fetched
+    // full document may still be missing the group id, so the metadata wins field by field.
+    it("prefers the metadata groupId over the document's", () => {
+      const document = DocumentModel.create({
+        key: "doc-1", uid: "student-2", type: GroupDocument
+      });
+      expect(document.groupId).toBeUndefined();
+      expect(canUserEditDocument({
+        document, documentMetadata: metadata({ uid: "student-2", type: GroupDocument, groupId: myGroup }),
+        user: user(myGroup)
+      })).toBe(true);
     });
   });
 });

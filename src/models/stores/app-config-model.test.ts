@@ -179,6 +179,50 @@ describe("ConfigurationManager", () => {
     });
   });
 
+  describe("contentLayout", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.contentLayout).toBeUndefined();
+    });
+
+    it("should return the configured value", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, contentLayout: "wideContent" }
+      });
+      expect(appConfig.contentLayout).toBe("wideContent");
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ contentLayout: "wideContent" }]);
+      expect(appConfig.contentLayout).toBe("wideContent");
+    });
+  });
+
+  describe("chatTutorPrompts", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.chatTutorPrompts).toBeUndefined();
+    });
+
+    it("should return the configured value", () => {
+      const chatTutorPrompts = {
+        replaceGenericPrompt: "You are a tutor.",
+        appendToGenericPrompt: "Focus on energy transfer."
+      };
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, chatTutorPrompts }
+      });
+      expect(appConfig.chatTutorPrompts).toEqual(chatTutorPrompts);
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ chatTutorPrompts: { appendToGenericPrompt: "unit-specific" } }]);
+      expect(appConfig.chatTutorPrompts).toEqual({ appendToGenericPrompt: "unit-specific" });
+    });
+  });
+
   it("should return undefined for groupDocumentsEnabled when not configured", () => {
     const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
     expect(appConfig.groupDocumentsEnabled).toBeUndefined();

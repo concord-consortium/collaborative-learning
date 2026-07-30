@@ -17,8 +17,10 @@ const iframeBaseURL = new URL(iframeBase, window.location.href);
 const validOrigin = iframeBaseURL.origin;
 
 interface IProps {
-  initialValue: string;
-  rawContent: string;
+  // The editor serializes these with JSON.stringify before handing them to the iframe / raw editor, so
+  // they may be either an already-serialized string or the content object itself (e.g. a template's { tiles }).
+  initialValue: unknown;
+  rawContent: unknown;
   onChange?: (value: string) => void;
   onRawChange?: (value: string) => void;
   headerContent?: React.ReactNode;

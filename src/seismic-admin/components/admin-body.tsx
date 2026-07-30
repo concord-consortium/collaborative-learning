@@ -9,8 +9,8 @@ export const AdminBody = observer(function AdminBody() {
 
   return (
     <div className="admin-body">
-      {store.selected.size > 1 && <StationSection />}
-      {store.selectedStations.map(station => {
+      {store.selectedStations.size > 1 && <StationSection />}
+      {store.selectedStationList.map(station => {
         const key = getStationChannelPrefix(station);
         return <StationSection key={key} stationKey={key} />;
       })}

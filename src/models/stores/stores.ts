@@ -29,6 +29,7 @@ import { NavTabModelType } from "../view/nav-tabs";
 import { Bookmarks } from "./bookmarks";
 import { CommentTags } from "./comment-tags";
 import { SortedDocuments } from "./sorted-documents";
+import { DocumentMetadataStore } from "./document-metadata-store";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 import { problemLoaded } from "../../lib/misc";
 import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
@@ -39,7 +40,7 @@ import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
-import { SeismicQueryService } from "./seismic-query-service";
+import { SeismicQueryService } from "./seismic/seismic-query-service";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -55,6 +56,7 @@ export interface IStores extends IBaseStores {
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
   loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  documentMetadata: DocumentMetadataStore;
   sortedDocuments: SortedDocuments;
   sectionDocuments: SectionDocuments;
   unitLoadedPromise: Promise<void>;
@@ -106,6 +108,7 @@ class Stores implements IStores{
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
+  documentMetadata: DocumentMetadataStore;
   sortedDocuments: SortedDocuments;
   sectionDocuments: SectionDocuments;
   unitLoadedPromise: Promise<void>;
@@ -180,6 +183,7 @@ class Stores implements IStores{
     this.userContextProvider = new UserContextProvider(this);
     this.bookmarks = new Bookmarks({db: this.db});
     this.commentTags = new CommentTags({db: this.db});
+    this.documentMetadata = new DocumentMetadataStore(this);
     this.sortedDocuments = new SortedDocuments(this);
     this.sectionDocuments = new SectionDocuments(this);
 

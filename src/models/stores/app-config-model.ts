@@ -73,7 +73,9 @@ export const AppConfigModel = types
     get docTimeStampPropertyName() { return self.configMgr.docTimeStampPropertyName; },
     get docDisplayIdPropertyName() { return self.configMgr.docDisplayIdPropertyName; },
     get defaultDocumentTemplate() { return self.configMgr.defaultDocumentTemplate; },
+    get defaultDocumentTemplateEnabled() { return self.configMgr.defaultDocumentTemplateEnabled; },
     get planningTemplate() { return self.configMgr.planningTemplate; },
+    get planningTemplateEnabled() { return self.configMgr.planningTemplateEnabled; },
     get defaultLearningLogTitle() { return self.configMgr.defaultLearningLogTitle; },
     get initialLearningLogTitle() { return self.configMgr.initialLearningLogTitle; },
     get defaultLearningLogDocument() { return self.configMgr.defaultLearningLogDocument; },
@@ -84,6 +86,7 @@ export const AppConfigModel = types
     get allowCustomCommentTags() { return self.configMgr.allowCustomCommentTags; },
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },
+    get chatTutorPrompts() { return self.configMgr.chatTutorPrompts; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
@@ -107,6 +110,7 @@ export const AppConfigModel = types
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
     get termOverrides() { return self.configMgr.termOverrides; },
     get defaultPanelLayout() { return self.configMgr.defaultPanelLayout; },
+    get contentLayout() { return self.configMgr.contentLayout; },
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
     get authorToolbar() {
       return ToolbarModel.create([

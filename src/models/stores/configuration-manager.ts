@@ -63,6 +63,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["aiPrompt"]>("aiPrompt");
   }
 
+  get chatTutorPrompts(){
+    return this.getProp<UC["chatTutorPrompts"]>("chatTutorPrompts");
+  }
+
   get autoAssignStudentsToIndividualGroups() {
     return this.getProp<UC["autoAssignStudentsToIndividualGroups"]>("autoAssignStudentsToIndividualGroups");
   }
@@ -191,8 +195,16 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultDocumentTemplate"]>("defaultDocumentTemplate");
   }
 
+  get defaultDocumentTemplateEnabled() {
+    return this.getProp<UC["defaultDocumentTemplateEnabled"]>("defaultDocumentTemplateEnabled");
+  }
+
   get planningTemplate() {
     return this.getProp<UC["planningTemplate"]>("planningTemplate");
+  }
+
+  get planningTemplateEnabled() {
+    return this.getProp<UC["planningTemplateEnabled"]>("planningTemplateEnabled");
   }
 
   get placeholder() {
@@ -229,6 +241,10 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get defaultPanelLayout() {
     return this.getProp<UC["defaultPanelLayout"]>("defaultPanelLayout");
+  }
+
+  get contentLayout() {
+    return this.getProp<UC["contentLayout"]>("contentLayout");
   }
 
   get defaultSharedDocuments() {

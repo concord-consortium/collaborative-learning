@@ -4,7 +4,7 @@ import { DBDocument } from "./db-types";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import {
-  LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
@@ -13,6 +13,8 @@ import { TextContentModelType } from "../models/tiles/text/text-content";
 import { ITileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
+import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../register-tile-types";
@@ -24,6 +26,10 @@ const mockFunctions = jest.fn();
 const mockAuthStateUnsubscribe = jest.fn();
 
 jest.mock("firebase/app", () => {
+  const mockFirestoreInstance = () => mockFirestore();
+  (mockFirestoreInstance as any).FieldValue = {
+    serverTimestamp: () => ({ _type: "serverTimestamp" })
+  };
   const mockFirebase = {
     apps: [],
     initializeApp: () => null,
@@ -36,7 +42,7 @@ jest.mock("firebase/app", () => {
       setPersistence: (persistence: string) => Promise.resolve()
     }),
     database: () => mockDatabase(),
-    firestore: () => mockFirestore(),
+    firestore: mockFirestoreInstance,
     functions: () => mockFunctions()
   };
   (mockFirebase.auth as any).Auth = { Persistence: { SESSION: "session"}};
@@ -253,6 +259,129 @@ describe("db", () => {
     });
   });
 
+  describe("getOrCreateGroupDocument", () => {
+    const openStub = jest.fn(async (m: any) => ({ opened: m.key }));
+    beforeEach(() => {
+      (db as any).openDocumentFromFirestoreMetadata = openStub;
+      (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
+      stores.user.setCurrentGroupId("3");
+    });
+
+    it("fast path: opens the pointer's documentKey when the pointer exists", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) }) })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
+      expect(result.opened).toBe("existing");
+    });
+
+    it("create path: mints a doc, wins the transaction, returns the created doc", async () => {
+      const setCalls: any[] = [];
+      const updateCalls: any[] = [];
+      const logSpy = jest.spyOn(Logger, "log").mockImplementation(() => null);
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({
+          get: async () => ({ exists: false }),
+          set: (_r: any, d: any) => setCalls.push(d),
+          update: (_r: any, d: any) => updateCalls.push(d)
+        }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
+      expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
+      expect(updateCalls[0]).toEqual({ canonical: "default" });
+      expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
+      expect(result.opened).toBeDefined();
+      logSpy.mockRestore();
+    });
+
+    it("legacy fallback: opens a pre-existing random-key group doc and backfills a pointer", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-doc" }) }] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }), set: (_r: any, d: any) => setCalls.push(d), update: () => {} }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect((db as any).openDocumentFromFirestoreMetadata).toHaveBeenCalledWith({ key: "legacy-doc" });
+      expect(setCalls[0]).toMatchObject({ documentKey: "legacy-doc" });   // pointer backfilled
+      expect(result.opened).toBe("legacy-doc");
+    });
+
+    it("lost race: cleans up the orphan and opens the winner's doc", async () => {
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "my-key" } }));
+      const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }), delete: () => Promise.resolve() }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({
+          get: async () => ({ exists: true, data: () => ({ documentKey: "winner" }) }),
+          set: () => {},
+          update: () => {}
+        }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const result: any = await db.getOrCreateGroupDocument();
+      expect(orphanSpy).toHaveBeenCalled();
+      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("winner");
+      expect(result.opened).toBe("winner");
+    });
+  });
+
+  it("writes group-document metadata to Firestore client-side (no contextId)", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    expect(written).toMatchObject({
+      context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3"
+    });
+    expect(written).not.toHaveProperty("contextId");
+    expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
+  });
+
+  it("writes context_id from self.classHash for documents with no top-level classHash", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    // Personal/learning-log metadata carries classHash only under `self`, never at the top level,
+    // so context_id must come from self.classHash or it would be written undefined.
+    const metadata: any = {
+      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
+      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
+    expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
+  });
+
   describe("document visibility with defaultSharedDocuments", () => {
     // Synchronous thenable that executes callbacks immediately, avoiding async
     // timing issues in the mock chain. Unwraps nested thenables like real Promises.
@@ -359,6 +488,82 @@ describe("db", () => {
 
       stores.documents.resolveRequiredDocumentPromise(docModel);
       await promise;
+    });
+  });
+
+  it("findFirestoreMetadata delegates to the document metadata store", async () => {
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const fake = { uid: "u1", type: "problem", key: "doc-x", context_id: "class-1" } as any;
+    const spy = jest.spyOn(stores.documentMetadata, "fetchMetadata").mockResolvedValue(fake);
+    const result = await db.findFirestoreMetadata("doc-x");
+    expect(spy).toHaveBeenCalledWith("doc-x");
+    expect(result).toBe(fake);
+    spy.mockRestore();
+  });
+
+  describe("openDocument Firestore metadata sourcing", () => {
+    function stubRtdb(metadataVal: any, documentVal: any) {
+      // openDocument calls getUserDocumentPath / getUserDocumentMetadataPath then ref(path).once("value")
+      jest.spyOn(db.firebase, "getUserDocumentPath").mockReturnValue("doc/path");
+      jest.spyOn(db.firebase, "getUserDocumentMetadataPath").mockReturnValue("meta/path");
+      jest.spyOn(db.firebase, "ref").mockImplementation((path?: string) => ({
+        once: () => Promise.resolve({ val: () => (path === "meta/path" ? metadataVal : documentVal) })
+      }) as any);
+    }
+
+    beforeEach(async () => {
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("applies context_id from passed-in firestoreMetadata to the model", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = { uid: "u1", type: "problem", key: "d1", context_id: "class-1" } as any;
+      const doc = await db.openDocument({
+        documentKey: "d1", type: "problem", userId: "u1", firestoreMetadata
+      } as any);
+      expect(doc.contextId).toBe("class-1");
+    });
+
+    it("fetches Firestore metadata from the store when none is passed", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const spy = jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockResolvedValue({ uid: "u1", type: "problem", key: "d2", context_id: "class-9" } as any);
+      const doc = await db.openDocument({ documentKey: "d2", type: "problem", userId: "u1" } as any);
+      expect(spy).toHaveBeenCalledWith("d2");
+      expect(doc.contextId).toBe("class-9");
+    });
+
+    it("propagates the rejection when the Firestore metadata fetch fails", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      // fetchMetadata now throws (describing its query) rather than returning undefined; openDocument
+      // lets that rejection flow through Promise.all to its catch. The message content is covered by
+      // the document-metadata-store tests; here we only assert the rejection propagates.
+      jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockRejectedValue(new Error("No Firestore metadata document found: queried 'x' where key == 'd3'"));
+      await expect(
+        db.openDocument({ documentKey: "d3", type: "problem", userId: "u1" } as any)
+      ).rejects.toThrow(/No Firestore metadata document found/);
+    });
+
+    it("a listener builder populates contextId via the store fetch", async () => {
+      jest.spyOn(db.firebase, "getUserDocumentPath").mockReturnValue("doc/path");
+      jest.spyOn(db.firebase, "getUserDocumentMetadataPath").mockReturnValue("meta/path");
+      jest.spyOn(db.firebase, "ref").mockImplementation((path?: string) => ({
+        once: () => Promise.resolve({
+          val: () => (path === "meta/path" ? { createdAt: 1, properties: {} } : { changeCount: 0 })
+        })
+      }) as any);
+      jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockResolvedValue({ uid: "u2", type: "personal", key: "pd1", context_id: "class-77" } as any);
+      jest.spyOn(stores.groups, "groupForUser").mockReturnValue(undefined as any);
+
+      const dbDocument = { title: "T", properties: {}, self: { uid: "u2", documentKey: "pd1" } } as any;
+      const doc = await db.createDocumentModelFromOtherDocument(dbDocument, "personal" as any);
+      expect(doc.contextId).toBe("class-77");
     });
   });
 

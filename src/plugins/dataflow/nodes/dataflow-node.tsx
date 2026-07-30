@@ -10,7 +10,7 @@ import { IBaseNode } from "./base-node";
 import { NodeEditorMST } from "./node-editor-mst";
 import { Delete } from "./delete";
 import { ControlNode } from "./control-node";
-import { ReteManager } from "./rete-manager";
+import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
 
@@ -176,11 +176,17 @@ export const CustomDataflowNode = observer(
   sortByIndex(outputs);
   sortByIndex(controls);
 
+  // Members of a collapsed group are hidden (the group renders as a chip in the overlay). The
+  // lookup is O(1) via node.groupId, and reading those observables here — inside the observer's
+  // render — keeps this reactive to collapse/expand and membership changes.
+  const inCollapsedGroup = !!reteManager?.isNodeInCollapsedGroup(id);
+
   const dynamicClasses = classNames({
     "selected": data.selected,
     "gate-active": node instanceof ControlNode && node.model.gateActive,
     "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
     "plot-open": showPlot,
+    "collapsed-hidden": inCollapsedGroup,
   });
 
   return (
