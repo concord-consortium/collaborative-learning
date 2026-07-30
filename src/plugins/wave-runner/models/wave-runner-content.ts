@@ -1,11 +1,16 @@
 import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
+import { EnvironmentName } from "@concord-consortium/token-service";
 import { eventDocId } from "../../../../shared/seismic/models/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { TimeRange } from "../../../../shared/seismic/seismic-types";
+import { EnvelopeTileData, TimeRange } from "../../../../shared/seismic/seismic-types";
+import {
+  createEnvelopeCredentialsProvider, createEnvelopeUploader, EnvelopeUploader
+} from "../../../models/stores/seismic/envelope-uploader";
 import { processUncoveredRanges } from "../../../models/stores/seismic/seismic-coverage-processor";
+import { processEnvelopeCoverage } from "../../../models/stores/seismic/seismic-envelope-processor";
 import { getUncoveredRanges, loadEvents } from "../../../models/stores/seismic/seismic-event-service";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
@@ -19,6 +24,18 @@ import { kWaveRunnerTileType } from "../wave-runner-types";
 
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
+}
+
+export interface ILoadEnvelopeDataOptions {
+  /** Exchanges the session's portal credentials for a token-service firebase JWT. */
+  getJwt: () => Promise<string>;
+  /** Token-service environment; "production" default. */
+  env?: EnvironmentName;
+  /** Called after a run that may have uploaded tiles so cached envelope data can be refreshed. */
+  onEnvelopesUpdated?: () => void;
+  /** Test seams; production defaults construct real ones. */
+  processEnvelopes?: typeof processEnvelopeCoverage;
+  uploader?: EnvelopeUploader;
 }
 
 export const WaveRunnerContentModel = TileContentModel
@@ -35,6 +52,10 @@ export const WaveRunnerContentModel = TileContentModel
     chunksProcessed: 0,
     chunksTotal: 0,
     runError: null as string | null,
+    isLoadingData: false,
+    loadDaysDone: 0,
+    loadDaysTotal: 0,
+    loadDataError: null as string | null,
     detectedEvents: [] as SeismicEvent[],
     selectedModelMetadata: null as ModelMetadata | null,
     modelLoadError: null as string | null,
@@ -125,6 +146,10 @@ export const WaveRunnerContentModel = TileContentModel
     updateChunkProgress(done: number, total: number) {
       self.chunksProcessed = done;
       self.chunksTotal = total;
+    },
+    updateLoadProgress(done: number, total: number) {
+      self.loadDaysDone = done;
+      self.loadDaysTotal = total;
     },
     addDetectedEvents(events: SeismicEvent[]) {
       const seen = new Set(self.detectedEvents.map(eventDocId));
@@ -251,7 +276,56 @@ export const WaveRunnerContentModel = TileContentModel
       } finally {
         self.isRunning = false;
       }
-    })
+    }),
+    /** Generate + upload any missing envelope tiles for the current station and date range
+     *  so the waveform display has data. */
+    loadEnvelopeData: flow(function* (options: ILoadEnvelopeDataOptions) {
+      if (self.isRunning || self.isLoadingData) return;
+      if (!self.station) return;
+      const station = self.station;
+
+      // Keep the shared seismogram in sync (the pre-upload behavior of Load Data).
+      self.loadData();
+
+      const startMs = new Date(`${self.startDate}T00:00:00Z`).getTime();
+      const endMs = new Date(`${self.endDate}T00:00:00Z`).getTime();
+      // endDate is inclusive, so equal dates are a valid single-day range.
+      if (isNaN(startMs) || isNaN(endMs) || endMs < startMs) {
+        self.loadDataError = "Invalid date range. End date must not be before start date.";
+        return;
+      }
+      const range: TimeRange = { start: startMs / 1000, end: endMs / 1000 + SECONDS_PER_DAY };
+
+      self.loadDataError = null;
+      self.isLoadingData = true;
+      self.loadDaysDone = 0;
+      self.loadDaysTotal = 0;
+
+      const uploader = options.uploader ?? createEnvelopeUploader({
+        getCredentials: createEnvelopeCredentialsProvider({ getJwt: options.getJwt, env: options.env }),
+      });
+
+      // Assume tiles may have landed unless the run reports otherwise: a thrown error can
+      // still have uploaded tiles first, so refresh conservatively.
+      let uploadedTiles = 1;
+      try {
+        const run = options.processEnvelopes ?? processEnvelopeCoverage;
+        const result = yield run({
+          stationData: station, range,
+          uploadTile: (level: number, tileIndex: number, tile: EnvelopeTileData) =>
+            uploader.uploadTile(station, level, tileIndex, tile),
+          onProgress: (done: number, total: number) => self.updateLoadProgress(done, total),
+        });
+        uploadedTiles = result.uploadedTiles;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        self.loadDataError = `Error loading data: ${message}`;
+        console.error("Wave Runner loadEnvelopeData error:", err);
+      } finally {
+        self.isLoadingData = false;
+        if (uploadedTiles > 0) options.onEnvelopesUpdated?.();
+      }
+    }),
   }));
 
 export interface WaveRunnerContentModelType extends Instance<typeof WaveRunnerContentModel> {}
