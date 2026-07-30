@@ -13,7 +13,7 @@ describe("DBDocumentsContentListener (personal documents)", () => {
   let db: any;
 
   const makeDoc = (key: string, uid: string, type: string = PersonalDocument) =>
-    ({ key, uid, type, setGroupId: jest.fn(), setContent: jest.fn() });
+    ({ key, uid, type, setAuthorGroupId: jest.fn(), setContent: jest.fn() });
 
   const makeRef = (path: string) => {
     if (!refsByPath[path]) {

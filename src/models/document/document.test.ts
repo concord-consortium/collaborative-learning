@@ -164,10 +164,12 @@ describe("document model", () => {
     });
   });
 
-  it("can set group id", () => {
+  it("can set the author's group id, without touching the owning group", () => {
+    expect(document.authorGroupId).toBeUndefined();
+    document.setAuthorGroupId("group-1");
+    expect(document.authorGroupId).toBe("group-1");
+    // The owning group comes from the stored metadata and is not what tracks the author's membership.
     expect(document.groupId).toBeUndefined();
-    document.setGroupId("group-1");
-    expect(document.groupId).toBe("group-1");
   });
 
   it("can set visibility", () => {
