@@ -178,6 +178,10 @@ interface ICanUserEditDocumentParams {
  * appears without a reload. The document is the fallback for the workspace, which opens documents
  * without looking their metadata up. Every field read here is stamped once at creation, so the two
  * sources never disagree — which is why one is chosen outright rather than field by field.
+ *
+ * This is an example of the `permissions` axis. See the
+ * `permissions` section of docs/document-axes/axes.md and "Not covered yet" in
+ * docs/document-axes/reading-axes-in-code.md.
  */
 export function canUserEditDocument({
   document, documentMetadata, user
