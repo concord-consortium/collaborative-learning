@@ -179,6 +179,24 @@ describe("SeismicQueryService loadViewport", () => {
   });
 });
 
+describe("SeismicQueryService invalidateEnvelopes", () => {
+  it("removes the station's envelope entries and bumps the version", () => {
+    const service = new SeismicQueryService();
+    const otherStation = { network: "AK", station: "DDM", channel: "HNZ" };
+    service.envelopeCache.set(envelopeCacheKey(stationData, 2, 5), "missing");
+    service.envelopeCache.set(envelopeCacheKey(stationData, 0, 0), "loading");
+    service.envelopeCache.set(envelopeCacheKey(otherStation, 2, 5), "missing");
+    expect(service.envelopeCacheVersion).toBe(0);
+
+    service.invalidateEnvelopes(stationData);
+
+    expect(service.envelopeCache.has(envelopeCacheKey(stationData, 2, 5))).toBe(false);
+    expect(service.envelopeCache.has(envelopeCacheKey(stationData, 0, 0))).toBe(false);
+    expect(service.envelopeCache.has(envelopeCacheKey(otherStation, 2, 5))).toBe(true);
+    expect(service.envelopeCacheVersion).toBe(1);
+  });
+});
+
 describe("getMetadata", () => {
   beforeEach(() => {
     mockFetch.mockReset();

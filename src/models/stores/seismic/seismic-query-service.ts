@@ -43,6 +43,9 @@ export class SeismicQueryService {
   /** Station metadata cache keyed by "{network}_{station}" */
   metadataCache: Map<string, ChannelMetadata[]> = observable.map();
 
+  /** Bumped by invalidateEnvelopes so viewport loaders know to re-fetch. */
+  envelopeCacheVersion = 0;
+
   /** In-flight AbortControllers keyed by callerId */
   private inflightByCallerId: Map<string, Map<string, AbortController>> = new Map();
 
@@ -90,6 +93,19 @@ export class SeismicQueryService {
     const { startTime, endTime, pixelWidth } = params;
     const level = this.selectLevel(startTime, endTime, pixelWidth);
     this.loadData(callerId, params, level);
+  }
+
+  /**
+   * Drop every cached envelope tile for a station — including "missing" markers and
+   * tiles whose S3 copies may have been merged with new data — so subsequent viewport
+   * loads re-fetch them. Called after new envelope tiles are uploaded.
+   */
+  invalidateEnvelopes(stationData: StationData) {
+    const prefix = `${getStationChannelPrefix(stationData)}/`;
+    for (const key of [...this.envelopeCache.keys()]) {
+      if (key.startsWith(prefix)) this.envelopeCache.delete(key);
+    }
+    this.envelopeCacheVersion++;
   }
 
   /**
