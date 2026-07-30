@@ -93,8 +93,8 @@ export class DBGroupsListener extends BaseListener {
   };
 
   private async updateGroupsFromDb(dbGroups: DBOfferingGroupMap) {
-    const {groups, class: clazz, portal} = this.db.stores;
-    groups.updateFromDB(dbGroups);
+    const {groups, class: clazz, portal, user} = this.db.stores;
+    groups.updateFromDB(dbGroups, user.offeringId);
     if (!groups.needToRefreshClass) return;
 
     // FIXME: if a user has launched CLUE and then the teacher removes them from the class, they can

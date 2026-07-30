@@ -1,6 +1,7 @@
 import { types, getEnv, SnapshotIn, applySnapshot, hasEnv } from "mobx-state-tree";
 import { DBOfferingGroup, DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
+import { getGroupOwnerId } from "../document/document-axes";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { UserModelType } from "./user";
 import { DocumentsModelType } from "./documents";
@@ -150,6 +151,12 @@ export function getGroupSnapshot(groupId: string, groupFromDB: DBOfferingGroup) 
 export const GroupsModel = types
   .model("Groups", {
     groupsMap: types.map(GroupModel),
+    /**
+     * The offering whose groups these are, recorded because a group id is unique only within one
+     * offering. Without it a group id read off a document from another assignment would resolve to the
+     * same-numbered group here — a different set of students. Set by updateFromDB.
+     */
+    offeringId: types.maybe(types.string),
   })
   .views(self => ({
     get allGroups() {
@@ -187,6 +194,15 @@ export const GroupsModel = types
     getGroupById(id?: string) {
       return self.allGroups.find(group => group.id === id);
     },
+    /**
+     * The group that a group owned document's uid names, or undefined when that group owner is not one of the
+     * groups in this offering.
+     */
+    getGroupByOwnerId(ownerId?: string) {
+      const { offeringId } = self;
+      if (!ownerId || !offeringId) return undefined;
+      return self.allGroups.find(group => getGroupOwnerId(offeringId, group.id) === ownerId);
+    },
   }))
   .views((self) => ({
     userInGroup(uid: string, groupId?: string) {
@@ -208,12 +224,14 @@ export const GroupsModel = types
     }
   }))
   .actions((self) => ({
-    updateFromDB(groups: DBOfferingGroupMap) {
+    // `offeringId` identifies the offering these groups belong to
+    updateFromDB(groups: DBOfferingGroupMap, offeringId?: string) {
       const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
       Object.entries(groups).forEach(([groupId, group]) => {
         groupsMapSnapshot[groupId] = getGroupSnapshot(groupId, group);
       });
       applySnapshot(self.groupsMap, groupsMapSnapshot);
+      self.offeringId = offeringId;
     }
   }));
 

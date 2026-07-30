@@ -3,12 +3,12 @@ import { makeAutoObservable } from "mobx";
 
 import {
   createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs, GroupSectionSortKey,
-  kNoNameSectionLabel, kWholeClassSectionLabel, sortDateSectionLabels, sortGroupSections, sortNameSectionLabels,
-  sortProblemSectionLabels
+  kNoNameSectionLabel, kWholeClassSectionLabel, NameSectionSortKey, sortDateSectionLabels, sortGroupSections,
+  sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
-import { hasClassOwner, hasGroupOwner } from "../document/document-axes";
+import { getCurriculumLabel, hasClassOwner, hasGroupOwner } from "../document/document-axes";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
@@ -225,34 +225,56 @@ export class DocumentGroup {
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    const addDocToSection = (doc: IDocumentMetadataModel, sectionLabel: string) => {
+    // Ordering information per section, so the comparator never parses the display label.
+    const sortKeys: Map<string, NameSectionSortKey> = new Map();
+    const addDocToSection = (
+      doc: IDocumentMetadataModel, sectionLabel: string, sortKey: NameSectionSortKey
+    ) => {
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+      sortKeys.set(sectionLabel, sortKey);
     };
     const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
       const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
-      addDocToSection(doc, sectionLabel);
+      addDocToSection(doc, sectionLabel, { section: "student" });
+    };
+    // One section per other assignment, not per group: a class works through many, and a section per
+    // group of each would swamp the sort. Every document in one offering shares a curriculum position,
+    // so that names the section.
+    const otherAssignmentSection = (doc: IDocumentMetadataModel) => {
+      const groupsTerm = upperWords(translate("studentGroups"));
+      const curriculumLabel = getCurriculumLabel(doc);
+      return curriculumLabel ? `${groupsTerm} from ${curriculumLabel}` : `Other ${groupsTerm}`;
     };
 
     this.documents.forEach((doc) => {
       // The owner decides the section, so it is asked first, narrowest level outward.
       if (hasGroupOwner(doc)) {
-        // A group document is listed under every member of the group that owns it.
-        const group = this.stores.groups.getGroupById(doc.groupId);
-        group?.users.forEach(user => {
-          addDocForUser(doc, user.classUser);
-        });
+        // A group document is listed under every member of the group that owns it. The group is looked
+        // up by owner, so one from another offering resolves to nothing rather than to this offering's
+        // same-numbered group — those are different students, and naming them would attribute the work
+        // to people who did not do it.
+        const group = this.stores.groups.getGroupByOwnerId(doc.uid);
+        if (group) {
+          group.users.forEach(user => {
+            addDocForUser(doc, user.classUser);
+          });
+        } else {
+          // Its members are not knowable from here, so file it by where the work came from. Keeping it
+          // out of the map entirely would drop it from this sort.
+          addDocToSection(doc, otherAssignmentSection(doc), { section: "otherAssignment" });
+        }
       } else if (hasClassOwner(doc)) {
         // A class-owned document has no personal author to file it under.
-        addDocToSection(doc, kNoNameSectionLabel);
+        addDocToSection(doc, kNoNameSectionLabel, { section: "noName" });
       } else {
         addDocForUser(doc, this.stores.class.getUserById(doc.uid));
       }
     });
 
-    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
+    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()), sortKeys);
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap: documentMap});
   }
 
