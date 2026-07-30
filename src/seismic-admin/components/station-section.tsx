@@ -50,7 +50,6 @@ const CoverageSection = observer(function CoverageSection({
 });
 
 interface IModelSectionProps {
-  // The station whose coverage is shown; absent for the all-stations aggregate.
   stationKey?: string;
   stationLabel: string;
   model: ModelListEntry;
@@ -83,7 +82,6 @@ const ModelSection = observer(function ModelSection({ stationKey, stationLabel, 
 });
 
 interface IEnvelopesSectionProps {
-  // The station whose envelope coverage is shown; absent for the all-stations aggregate.
   stationKey?: string;
   stationLabel: string;
 }
