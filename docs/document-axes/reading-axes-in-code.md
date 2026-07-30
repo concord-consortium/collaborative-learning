@@ -41,7 +41,7 @@ Those fields are stamped at creation from what the kind registered in
 `src/models/document/document-kinds.ts`. A kind declares two things:
 
 - `ownerType` — `"user"`, `"group"`, or `"class"`. It picks the owner `uid` (`getDocumentOwner`) and,
-  for a group owner, the stored `groupId` (`getDocumentOwnerFields`).
+  for a group owner, the `groupId` stored beside it (`getDocumentOwnerFields`).
 - `containerType` — `"class"`, `"classUnit"`, or `"offering"`. It picks the fields that say where the
   document is kept and what it is about (`getDocumentLocationFields`).
 
@@ -55,22 +55,30 @@ problem documents its members write; what makes it the group's is its owner. Its
 follows `ownerType: "group"`, and is a denormalization of an owner uid that already encodes it
 (`group_<offeringId>_<groupId>`).
 
-What still reads that stored field is worth knowing, because it has been shrinking. The Firestore rules
-no longer do — they build a canonical slot path from `uid`. Resolving a group document to its members no
-longer does either: a bare group id is unique only within an offering, so `getGroupByOwnerId` matches the
-whole owner id and answers with nothing for a group outside the offering it holds. What remains is Sort
-Work's group labels, the transitional group-document title, and the two queries that retire with the
-canonical-pointer migration — a Firestore query needs a stored field, which a uid grammar cannot provide.
+Both owner guards read the `uid`, testing the prefix its minter used — `kGroupOwnerPrefix`,
+`kClassOwnerPrefix`, each shared by the function that mints the uid and the guard that reads it back.
+Testing a prefix is not the same as taking a uid apart: nothing recovers an `offeringId` or a `groupId`
+out of one, which is lossy and is why `getGroupByOwnerId` builds the whole owner id and compares instead.
+
+That leaves the `uid` as the single authority on who a document belongs to — it is also what the
+canonical slot is addressed by and what the Firestore rules read — so what remains of the stored
+`groupId` is worth knowing, because it has been shrinking. It no longer answers *whether* a document is
+group-owned, and it no longer resolves a group document to its members. What remains is Sort Work's group
+labels, the transitional group-document title, and the two queries that retire with the canonical-pointer
+migration — a Firestore query needs a stored field, which a uid grammar cannot provide.
 
 ## What each stored shape looks like
 
-| document | `unit` | `investigation` | `offeringId` | `groupId` | container | curriculum | owner |
-|---|---|---|---|---|---|---|---|
-| personal, learning log | `null` | — | — | — | class | none | user |
-| problem, planning, publications | set | set | set | — | offering | problem | user |
-| group | set | set | set | set | offering | problem | **group** |
-| exemplar (from curriculum) | set | set | — | — | classUnit | problem | synthetic user |
-| class-wide slot | set | `null` | — | — | classUnit | **unit** | class |
+| document | `uid` | `unit` | `investigation` | `offeringId` | `groupId` | container | curriculum | owner |
+|---|---|---|---|---|---|---|---|---|
+| personal, learning log | the user | `null` | — | — | — | class | none | user |
+| problem, planning, publications | the user | set | set | set | — | offering | problem | user |
+| group | `group_<offeringId>_<groupId>` | set | set | set | set | offering | problem | **group** |
+| exemplar (from curriculum) | authoring persona | set | set | — | — | classUnit | problem | synthetic user |
+| class-wide slot | `class_<classHash>` | set | `null` | — | — | classUnit | **unit** | class |
+
+The owner column is read off the `uid` alone. `groupId` is set on exactly the row whose `uid` already
+encodes it, which is what makes it a denormalization rather than a second source.
 
 The `null`s are load-bearing. A class-wide document writes `investigation: null` and `problem: null`
 explicitly rather than omitting them, because Firestore cannot match a field that is missing — that is
