@@ -6,7 +6,14 @@ const ACCESS_TOKEN_KEY = "seismic-admin-portal-access-token";
 /** Portal base URL: the ?portal= param (bare host or full URL) or the default portal. */
 export function getPortalUrl(): string {
   const param = new URLSearchParams(window.location.search).get("portal");
-  return param ? `https://${param.replace(/^https?:\/\//, "").replace(/\/+$/, "")}` : DEFAULT_PORTAL_URL;
+  if (!param) return DEFAULT_PORTAL_URL;
+  try {
+    // Always use https; accept either a bare host or a full URL, but drop any path/query/hash.
+    const normalized = `https://${param.replace(/^https?:\/\//, "")}`;
+    return new URL(normalized).origin;
+  } catch {
+    return DEFAULT_PORTAL_URL;
+  }
 }
 
 /** OAuth2 implicit-flow authorize URL that redirects back to the current page (hash excluded). */

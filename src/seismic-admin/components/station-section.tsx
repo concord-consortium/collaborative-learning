@@ -2,9 +2,10 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { ModelListEntry } from "../../../shared/seismic/models/model-metadata";
-import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
 import CheckIcon from "../../assets/icons/check/check-selected.svg";
 import WarningIcon from "../../assets/icons/caution.svg";
+import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
+import { CoverageLoadState } from "../seismic-admin-store";
 import { formatBytes, getStationLabel } from "../utils/seismic-admin-utils";
 import { ConfirmModal } from "./confirm-modal";
 import { RawTimeline } from "./raw-timeline";
@@ -12,7 +13,7 @@ import "./station-section.scss";
 
 interface ICoverageSectionProps {
   ariaLabel: string;
-  coverageState: string;
+  coverageState: CoverageLoadState;
   errorMessage: string;
   highlightedDays?: Set<number>;
   midDays?: Set<number>;
