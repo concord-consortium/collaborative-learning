@@ -77,7 +77,7 @@ export const DocumentModel = Tree.named("Document")
      * The group its **author** belonged to — refreshed as membership changes for a live document,
      * frozen at publish time for a publication. A fact about the author, not about the document, so it
      * says nothing about who owns this. The four-up view and the content listener want this one; anything
-     * asking "whose document is this" wants `groupId`.
+     * asking "whose document is this" wants `groupId` or the owner guards in document-axes.ts.
      */
     authorGroupId: types.maybe(types.string),
     visibility: types.maybe(VisibilityTypeEnum),
@@ -153,7 +153,7 @@ export const DocumentModel = Tree.named("Document")
       // `groupId` is undefined for everything but a group document, matching the stored field it mirrors,
       // so this shape agrees with what Firestore holds. The author's group is deliberately absent: it is
       // not document metadata. Nothing writes this back to Firestore or Firebase today — it is used for
-      // finding Firestore documents.
+      // finding Firestore documents and for reading a document's axes.
       return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, offeringId: self.offeringId, visibility } as IDocumentMetadata;
