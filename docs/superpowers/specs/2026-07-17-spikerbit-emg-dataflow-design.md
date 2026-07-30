@@ -267,9 +267,10 @@ list — is what catches "connected, but this device can't do this output."
   entry point and is handed to the store once established; forcing both behind one
   interface method adds no value.
 - **No per-sensor support list yet.** Sensor channel-match stays protocol-based, so a
-  Spiker:bit (EMG only) marks an FSR channel present until it times out to `missing` rather
-  than immediately saying "this device doesn't provide FSR." The natural trigger for a
-  `sensors` list is the first EEG/ECG mode, when sensor sets genuinely diverge.
+  Spiker:bit (EMG only) relies on the liveness timeout to mark an FSR channel `missing` — it
+  satisfies the channel by protocol but never sends fsr data, so the freshness check flips it
+  to `missing` — rather than immediately saying "this device doesn't provide FSR." The natural
+  trigger for a `sensors` list is the first EEG/ECG mode, when sensor sets genuinely diverge.
 - **`SerialDevice` not renamed.** Now that it is transport-agnostic, a name like
   `DeviceConnection` would be more accurate, but the rename ripples the `stores.serialDevice`
   key across the app; deferred.

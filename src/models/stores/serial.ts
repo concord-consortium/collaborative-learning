@@ -68,6 +68,9 @@ export class SerialDevice {
     this.activeTransport = undefined;
     this.deviceFamily = undefined;
     this.localBuffer = "";
+    // Reset so a prior Web Serial session's value can't stick to a later WebUSB device, which
+    // never raises the browser connect/disconnect events this flag gates the connect-button UI on.
+    this.raisesWebSerialConnect = false;
     this.updateConnectionInfo(Date.now(), "disconnect");
   }
 

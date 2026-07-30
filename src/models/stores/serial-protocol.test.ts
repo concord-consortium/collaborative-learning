@@ -39,12 +39,28 @@ describe("parseKeyValueData", () => {
   });
 
   it("tolerates trailing whitespace between the value and the line ending", () => {
-    // The micro:bit firmware pads each serial line with spaces before \r\n,
+    // A board running older firmware pads each serial line with spaces before \r\n,
     // e.g. "emg:57                    \r\n". The value must still be parsed.
     const channels = [emgChannel()];
     const remaining = parseKeyValueData("emg:57                    \r\nemg:42                    \r\n", channels);
     expect(channels[0].value).toBe(42);
     expect(remaining).toBe("");
+  });
+
+  it("stamps lastMessageReceivedAt on a channel it updates so staleness can be detected", () => {
+    const channels = [emgChannel()];
+    const before = Date.now();
+    parseKeyValueData("emg:512\r\n", channels);
+    expect(channels[0].lastMessageReceivedAt).toBeGreaterThanOrEqual(before);
+  });
+
+  it("leaves lastMessageReceivedAt stale on a channel the stream never sends", () => {
+    // A Spiker:bit satisfies fsr by protocol but never emits it; the seeded-stale timestamp
+    // must not be refreshed, so the freshness check flips fsr to `missing`.
+    const emg = emgChannel();
+    const fsr: NodeChannelInfo = { ...emgChannel(), name: "fsr", channelId: "fsr", lastMessageReceivedAt: 1000 };
+    parseKeyValueData("emg:512\r\n", [emg, fsr]);
+    expect(fsr.lastMessageReceivedAt).toBe(1000);
   });
 });
 

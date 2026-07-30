@@ -227,10 +227,14 @@ export class LiveOutputNode extends BaseNode<
     const protocol = deviceProtocol(serialDevice.deviceFamily);
 
     if (protocol === "keyValue" && isNumberOutput){
-      if (kGripperOutputTypes.includes(outType)){
+      // Gate on the device's declared outputs, not just the protocol: Arduino and Spiker:bit
+      // share the keyValue protocol but a Spiker:bit has only a servo, so a gripper command
+      // (a bare integer the firmware can't distinguish from a servo angle) must not reach it,
+      // matching the "unsupported" state the option list already shows.
+      if (kGripperOutputTypes.includes(outType) && deviceSupportsOutput(serialDevice.deviceFamily, "gripper")){
         serialDevice.writeToOutForBBGripper(val, outType);
       }
-      if (kServoOutputTypes.includes(outType)){
+      if (kServoOutputTypes.includes(outType) && deviceSupportsOutput(serialDevice.deviceFamily, "servo")){
         serialDevice.writeToOutForServo(val, outType);
       }
     }

@@ -40,6 +40,14 @@ describe("SerialDevice active-transport routing", () => {
     expect(device.deviceFamily).toBeUndefined();
   });
 
+  it("clearActiveDevice resets raisesWebSerialConnect so it can't stick to a later device", () => {
+    const device = new SerialDevice();
+    device.setActiveDevice("arduino", fakeTransport([]), []);
+    device.setRaisesWebSerialConnect(true);
+    device.clearActiveDevice();
+    expect(device.raisesWebSerialConnect).toBe(false);
+  });
+
   it("ignores a stale transport's onDisconnect after a newer device has taken over", () => {
     const device = new SerialDevice();
     const transportA = fakeTransport([]);

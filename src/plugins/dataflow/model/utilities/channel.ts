@@ -36,7 +36,11 @@ const emgSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  protocol: "keyValue"
+  protocol: "keyValue",
+  // Seed as already-stale so a keyValue channel a connected device never sends (e.g. fsr/a1
+  // on a Spiker:bit) times out to `missing` instead of showing present at 0; parseKeyValueData
+  // refreshes this on each message, so channels the device does send stay present.
+  lastMessageReceivedAt: Date.now()
 };
 
 export const fsrSensorChannel: NodeChannelInfo = {
@@ -50,7 +54,8 @@ export const fsrSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  protocol: "keyValue"
+  protocol: "keyValue",
+  lastMessageReceivedAt: Date.now()
 };
 
 export const tmpSensorChannel: NodeChannelInfo = {
@@ -64,7 +69,8 @@ export const tmpSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  protocol: "keyValue"
+  protocol: "keyValue",
+  lastMessageReceivedAt: Date.now()
 };
 
 export const a1PinChannel: NodeChannelInfo = {
@@ -78,7 +84,8 @@ export const a1PinChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  protocol: "keyValue"
+  protocol: "keyValue",
+  lastMessageReceivedAt: Date.now()
 };
 
 interface MicroBitSensorChannelInfo {

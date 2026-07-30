@@ -88,7 +88,18 @@ export class SpikerbitDevice {
       // version. USB connection stays Connected through a flash (DAPLink interface chip is
       // untouched) and serial auto-reinitialises, so no explicit reconnect here.
       await this.connection.flash(flashDataSource, { partial: true, progress });
-      await this.queryVersion();
+      // Re-query to confirm the flash took, but proceed regardless: the board was just written
+      // with the known-good bundled hex, so a null/stale reply here is far more likely a serial
+      // re-init timing artifact than bad firmware, and aborting would discard a good flash while
+      // showing the user nothing. We warn rather than fail so a genuinely halted board (e.g. a
+      // partial flash whose reset was swallowed) still leaves a trace.
+      const confirmed = await this.queryVersion();
+      if (confirmed == null || confirmed < kSpikerbitFirmwareVersion) {
+        console.warn(
+          `Spiker:bit firmware version not confirmed after flash (got ${confirmed}, ` +
+          `expected ${kSpikerbitFirmwareVersion}); connecting anyway.`
+        );
+      }
     }
 
     // Route servo writes and inbound EMG through this WebUSB transport and mark the shared

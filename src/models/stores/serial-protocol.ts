@@ -4,9 +4,10 @@ import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel"
 // `buffer`, updating the matching channel's value, and returns the unconsumed remainder.
 // Unparseable complete lines are discarded to recover from corrupted serial data.
 // Extracted from SerialDevice.handleKeyValueStreamObj so the Spiker:bit WebUSB path can
-// reuse it. The `[ \t]*` before the line ending tolerates trailing whitespace: the
-// micro:bit firmware pads each line with spaces (e.g. "emg:57            \r\n"), while the
-// Arduino sends no padding — both parse correctly.
+// reuse it. The `[ \t]*` before the line ending tolerates trailing whitespace: a board
+// running older firmware pads each line with spaces (e.g. "emg:57            \r\n") — which
+// detectSpikerbitVersion must also parse — while the current v3 Spiker:bit firmware disables
+// padding (setWriteLinePadding(0)) and the Arduino never padded; all parse correctly.
 export function parseKeyValueData(buffer: string, channels: NodeChannelInfo[]): string {
   const pattern = /([a-z0-9]+):([0-9.]+)[ \t]*[\r][\n]/;
   // eslint-disable-next-line no-constant-condition
@@ -18,6 +19,9 @@ export function parseKeyValueData(buffer: string, channels: NodeChannelInfo[]): 
       const targetChannel = channels.find((c: NodeChannelInfo) => c.channelId === channel);
       if (targetChannel) {
         targetChannel.value = Math.round(Number(numStr));
+        // Stamp arrival time so the rete-manager freshness check can flip a channel to
+        // `missing` when its device stops sending it (e.g. a Spiker:bit never emits fsr/a1).
+        targetChannel.lastMessageReceivedAt = Date.now();
       }
     } else {
       const lineEndIndex = buffer.indexOf("\r\n");
