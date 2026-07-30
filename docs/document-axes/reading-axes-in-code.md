@@ -53,8 +53,14 @@ than for the container alone, because the fields it returns span both axes.
 There is no container level for a group. A group document is kept in the offering, alongside the
 problem documents its members write; what makes it the group's is its owner. Its `groupId` therefore
 follows `ownerType: "group"`, and is a denormalization of an owner uid that already encodes it
-(`group_<offeringId>_<groupId>`) — stored so Firestore rules and group-member lookups need not parse
-the uid.
+(`group_<offeringId>_<groupId>`).
+
+What still reads that stored field is worth knowing, because it has been shrinking. The Firestore rules
+no longer do — they build a canonical slot path from `uid`. Resolving a group document to its members no
+longer does either: a bare group id is unique only within an offering, so `getGroupByOwnerId` matches the
+whole owner id and answers with nothing for a group outside the offering it holds. What remains is Sort
+Work's group labels, the transitional group-document title, and the two queries that retire with the
+canonical-pointer migration — a Firestore query needs a stored field, which a uid grammar cannot provide.
 
 ## What each stored shape looks like
 

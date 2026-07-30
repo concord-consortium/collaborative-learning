@@ -124,11 +124,19 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
     throw new Error(`Cannot resolve the owner of unregistered document kind "${kind}"`);
   }
   switch (info.ownerType) {
-    case "group": return ctx.groupOwnerId ?? ctx.userId;
-    case "class": return ctx.classOwnerId ?? ctx.userId;
+    case "group": return required(ctx.groupOwnerId, kind, "group");
+    case "class": return required(ctx.classOwnerId, kind, "class");
     case "user":  return ctx.userId;
     default:      return ctx.userId;
   }
+}
+
+function required(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
+  if (!ownerId) {
+    throw new Error(`Cannot create a ${ownerType}-owned document of kind "${kind}": ` +
+      `no ${ownerType} owner id is available`);
+  }
+  return ownerId;
 }
 
 /**
