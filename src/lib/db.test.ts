@@ -362,6 +362,42 @@ describe("db", () => {
     expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
   });
 
+  it("stamps kind and concurrent on a group document's Firestore metadata", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: GroupDocument, createdAt: 123, classHash: "class-h", offeringId: "off-1",
+      self: { uid: "group_off-1_3", documentKey: "gk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "gk", "3");
+    expect(written).toMatchObject({ kind: "group", concurrent: true });
+    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
+  });
+
+  it("does NOT stamp kind/concurrent on a personal document", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const metadata: any = {
+      version: "1.0", type: PersonalDocument, createdAt: 123, title: "t",
+      self: { uid: "user-1", documentKey: "pk", classHash: "class-h" }
+    };
+    const written = await db.createFirestoreMetadataDocument(metadata, "pk");
+    expect(written).not.toHaveProperty("kind");
+    expect(written).not.toHaveProperty("concurrent");
+  });
+
   it("writes context_id from self.classHash for documents with no top-level classHash", async () => {
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
@@ -519,13 +555,17 @@ describe("db", () => {
       jest.restoreAllMocks();
     });
 
-    it("applies context_id from passed-in firestoreMetadata to the model", async () => {
+    it("applies context_id/concurrent/kind from passed-in firestoreMetadata to the model", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
-      const firestoreMetadata = { uid: "u1", type: "problem", key: "d1", context_id: "class-1" } as any;
+      const firestoreMetadata = {
+        uid: "u1", type: "problem", key: "d1", context_id: "class-1", concurrent: true, kind: "group"
+      } as any;
       const doc = await db.openDocument({
         documentKey: "d1", type: "problem", userId: "u1", firestoreMetadata
       } as any);
       expect(doc.contextId).toBe("class-1");
+      expect(doc.concurrent).toBe(true);
+      expect(doc.kind).toBe("group");
     });
 
     it("fetches Firestore metadata from the store when none is passed", async () => {
@@ -564,6 +604,51 @@ describe("db", () => {
       const dbDocument = { title: "T", properties: {}, self: { uid: "u2", documentKey: "pd1" } } as any;
       const doc = await db.createDocumentModelFromOtherDocument(dbDocument, "personal" as any);
       expect(doc.contextId).toBe("class-77");
+    });
+
+    it("backfills concurrent on a group-typed doc whose Firestore metadata lacks it", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ set: (data: any, opts: any) => { setCalls.push({ data, opts }); return Promise.resolve(); } })
+      }));
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = {
+        uid: "g", type: GroupDocument, key: "g1", context_id: "class-1"   // no concurrent/kind
+      } as any;
+      const doc = await db.openDocument({
+        documentKey: "g1", type: GroupDocument, userId: "g", firestoreMetadata
+      } as any);
+      // model gets the registry-derived value immediately
+      expect(doc.concurrent).toBe(true);
+      expect(doc.kind).toBe("group");
+      // and a merge write-back was issued
+      expect(setCalls.some(c => c.data.concurrent === true && c.data.kind === "group" && c.opts?.merge === true))
+        .toBe(true);
+    });
+
+    it("does NOT write back when concurrent is already true", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ set: (data: any) => { setCalls.push(data); return Promise.resolve(); } })
+      }));
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = {
+        uid: "g", type: GroupDocument, key: "g2", context_id: "class-1", concurrent: true, kind: "group"
+      } as any;
+      await db.openDocument({ documentKey: "g2", type: GroupDocument, userId: "g", firestoreMetadata } as any);
+      expect(setCalls.length).toBe(0);
+    });
+
+    it("does NOT write back for a non-concurrent kind (personal doc)", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ set: (data: any) => { setCalls.push(data); return Promise.resolve(); } })
+      }));
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = { uid: "u", type: "personal", key: "p1", context_id: "class-1" } as any;
+      const doc = await db.openDocument({ documentKey: "p1", type: "personal", userId: "u", firestoreMetadata } as any);
+      expect(doc.concurrent).toBeFalsy();
+      expect(setCalls.length).toBe(0);
     });
   });
 
