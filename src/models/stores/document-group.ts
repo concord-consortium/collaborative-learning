@@ -199,8 +199,10 @@ export class DocumentGroup {
 
     this.documents.forEach((doc) => {
       const { sectionLabel, sortKey } = (() => {
-        // A document owned by a group belongs to that group, whoever created it.
-        if (hasGroupOwner(doc)) return groupSection(doc.groupId);
+        // A document owned by a group belongs to that group, whoever created it. The section is labelled
+        // from the stored `groupId`, the one place the group's number is available without taking the
+        // owner uid apart; a group-owned document without one has no group to name and falls through.
+        if (hasGroupOwner(doc) && doc.groupId) return groupSection(doc.groupId);
         // A class-owned document is not one student's work, so it sections under the class itself.
         if (hasClassOwner(doc)) {
           return { sectionLabel: kWholeClassSectionLabel, sortKey: { section: "class" } as GroupSectionSortKey };

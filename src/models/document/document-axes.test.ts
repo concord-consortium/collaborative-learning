@@ -1,33 +1,42 @@
-import { getCurriculumLabel, hasClassOwner, hasGroupOwner, isInClassUnitContainer } from "./document-axes";
+import {
+  getCurriculumLabel, getGroupOwnerId, hasClassOwner, hasGroupOwner, isInClassUnitContainer
+} from "./document-axes";
 
 describe("document axis guards", () => {
   // One case per document shape CLUE stores, so the guards are pinned against every shape they
   // must distinguish rather than only the two this feature introduces. Each carries the uid its
   // owner would mint: a real user id, or one of the synthetic ones.
-  const personal = { uid: "u-1", unit: null, investigation: null, groupId: null };
-  const problem =
-    { uid: "u-1", unit: "sas", investigation: "1", problem: "2", offeringId: "off-1", groupId: null };
-  const group =
-    { uid: "group_off-1_3", unit: "sas", investigation: "1", problem: "2", offeringId: "off-1", groupId: "3" };
+  const personal = { uid: "u-1", unit: null, investigation: null };
+  const problem = { uid: "u-1", unit: "sas", investigation: "1", problem: "2", offeringId: "off-1" };
+  const group = {
+    uid: getGroupOwnerId("off-1", "3"), unit: "sas", investigation: "1", problem: "2", offeringId: "off-1"
+  };
   // Curriculum-authored, so it belongs to no offering and is owned by an authoring persona.
   const exemplar = { uid: "ivan_idea_1", unit: "qa", investigation: "1", problem: "1" };
-  const classWide = { uid: "class_h1", unit: "sas", investigation: null, groupId: null };
+  const classWide = { uid: "class_h1", unit: "sas", investigation: null };
   // Created before investigation/problem were stamped.
   const legacyClassWide = { uid: "class_h1", unit: "sas" };
 
   describe("hasGroupOwner", () => {
-    it("is true only when the document carries a group id", () => {
+    it("is true only for a document owned by the synthetic group uid", () => {
       expect(hasGroupOwner(group)).toBe(true);
-      expect(hasGroupOwner(personal)).toBe(false);
-      expect(hasGroupOwner(problem)).toBe(false);
-      expect(hasGroupOwner(exemplar)).toBe(false);
-      expect(hasGroupOwner(classWide)).toBe(false);
     });
 
-    it("reads only the owner dimension, whatever the curriculum scope holds", () => {
-      // The two dimensions are independent: a group id decides this guard on its own.
-      expect(hasGroupOwner({ groupId: "3" })).toBe(true);
-      expect(hasGroupOwner({ unit: "sas", groupId: "3" })).toBe(true);
+    it("is false for every other owner", () => {
+      expect(hasGroupOwner(personal)).toBe(false);   // a real user
+      expect(hasGroupOwner(problem)).toBe(false);    // a real user
+      expect(hasGroupOwner(classWide)).toBe(false);  // the synthetic class uid
+      expect(hasGroupOwner(exemplar)).toBe(false);   // a synthetic authoring persona
+    });
+
+    it("reads only the owner, whatever the document is about or where it is kept", () => {
+      expect(hasGroupOwner({ uid: getGroupOwnerId("off-1", "3") })).toBe(true);
+      expect(hasGroupOwner({ uid: getGroupOwnerId("off-1", "3"), unit: "sas", offeringId: "off-1" }))
+        .toBe(true);
+    });
+
+    it("is false when the document has no uid at all", () => {
+      expect(hasGroupOwner({ unit: "sas" })).toBe(false);
     });
   });
 
@@ -73,8 +82,8 @@ describe("document axis guards", () => {
     });
 
     it("reads only the container, whatever the owner holds", () => {
-      // A group id cannot decide this guard: it says who owns the document, not where it is kept.
-      expect(isInClassUnitContainer({ unit: "sas", groupId: "3" })).toBe(true);
+      // The owner cannot decide this guard: it says who the document belongs to, not where it is kept.
+      expect(isInClassUnitContainer({ uid: getGroupOwnerId("off-1", "3"), unit: "sas" })).toBe(true);
     });
 
     it("treats an empty-string unit as no unit", () => {
