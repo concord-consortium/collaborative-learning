@@ -7,7 +7,9 @@ import { dequantize } from "../../../../shared/seismic/envelopes/envelope-codec"
 import {
   getTileIndicesForViewport, getTileS3Key, getTileTimeRange
 } from "../../../../shared/seismic/envelopes/tile-addressing";
-import { getStationChannelPrefix, getStationPrefix } from "../../../../shared/seismic/station-addressing";
+import {
+  getLevelPrefix, getStationChannelPrefix, getStationPrefix
+} from "../../../../shared/seismic/station-addressing";
 import { fetchEnvelopeTile } from "../../../../shared/seismic/envelopes/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../../shared/seismic/earthscope-client";
 import { getMetadataForChannel } from "../../../../shared/seismic/channel-metadata-utils";
@@ -50,10 +52,13 @@ export class SeismicQueryService {
   private inflightByCallerId: Map<string, Map<string, AbortController>> = new Map();
 
   constructor() {
-    makeAutoObservable(this, {
+    makeAutoObservable<SeismicQueryService, "inflightByCallerId">(this, {
       envelopeCache: observable,
       rawCache: observable,
       metadataCache: observable,
+      // Internal bookkeeping — deep observability would replace inner Maps with
+      // observable copies, orphaning the ones registerInflight mutates.
+      inflightByCallerId: false,
     });
   }
 
@@ -101,9 +106,18 @@ export class SeismicQueryService {
    * loads re-fetch them. Called after new envelope tiles are uploaded.
    */
   invalidateEnvelopes(stationData: StationData) {
-    const prefix = `${getStationChannelPrefix(stationData)}/`;
+    const prefix = `${getLevelPrefix(stationData)}`;
     for (const key of [...this.envelopeCache.keys()]) {
       if (key.startsWith(prefix)) this.envelopeCache.delete(key);
+    }
+    // Abort in-flight envelope fetches so a stale pre-invalidation response can't repopulate the cache.
+    for (const [callerId, callerInflight] of [...this.inflightByCallerId]) {
+      for (const [key, controller] of [...callerInflight]) {
+        if (key.startsWith(prefix)) {
+          controller.abort();
+          this.removeInflight(callerId, key);
+        }
+      }
     }
     this.envelopeCacheVersion++;
   }

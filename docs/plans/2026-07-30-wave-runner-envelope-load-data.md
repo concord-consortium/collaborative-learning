@@ -277,11 +277,29 @@ imported), add a property next to the caches and a method after `loadViewport`:
     for (const key of [...this.envelopeCache.keys()]) {
       if (key.startsWith(prefix)) this.envelopeCache.delete(key);
     }
+    // Abort in-flight envelope fetches so a stale pre-invalidation response can't
+    // repopulate the cache. Envelope keys continue with "L{level}/"; raw fetches
+    // (".../raw/{chunk}") must keep running — aborting them would strand their
+    // rawCache "loading" markers.
+    for (const [callerId, callerInflight] of [...this.inflightByCallerId]) {
+      for (const [key, controller] of [...callerInflight]) {
+        if (key.startsWith(`${prefix}L`)) {
+          controller.abort();
+          this.removeInflight(callerId, key);
+        }
+      }
+    }
     this.envelopeCacheVersion++;
   }
 ```
 
 (`makeAutoObservable` in the constructor picks both up automatically — no annotation changes needed.)
+
+Also add a second test to the new describe block: with a signal-aware never-resolving fetch mock
+(rejects with `AbortError` on abort), start an envelope-level `loadViewport`, confirm the key is
+`"loading"`, call `invalidateEnvelopes`, flush microtasks, and assert the key is absent — proving a
+late pre-invalidation response cannot repopulate the cache (added during execution after code review
+found the in-flight race; the abort must not touch raw fetches).
 
 **Step 4: Run the tests to verify they pass**
 
