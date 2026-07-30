@@ -61,6 +61,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   // comments-open width so the workspace gets ~2/3 until comments are opened.
   contentLayout?: "evenLayout" | "wideContent";
   defaultSharedDocuments?: boolean;
+  showShare?: boolean;
 }
 
 export interface IAuthorTool {

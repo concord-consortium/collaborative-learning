@@ -127,4 +127,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   termOverrides?: Record<string, string>;
   // whether student documents (problem, personal, learning log) are shared by default
   defaultSharedDocuments?: boolean;
+  // whether the share/unshare toggle is shown on student documents. Default true. This is a
+  // definitive per-unit switch — it replaces the old implicit coupling to the Sort Work tab's presence.
+  showShare?: boolean;
 }

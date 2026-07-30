@@ -6,6 +6,7 @@ import { buildSectionDividerTemplate } from "../../utils/template-utils";
 
 interface DocumentSettingsFormInputs {
   defaultSharedDocuments: boolean;
+  showShare: boolean;
   showTextTitles: boolean;
   documentTemplateEnabled: boolean;
   planningTemplateEnabled: boolean;
@@ -21,6 +22,7 @@ const DocumentSettings: React.FC = () => {
   const formDefaults: DocumentSettingsFormInputs = useMemo(() => {
     return {
       defaultSharedDocuments: config?.defaultSharedDocuments ?? false,
+      showShare: config?.showShare ?? true,
       // Titles are shown only when the unit explicitly opts in with text.hideTitle: false.
       showTextTitles: config?.settings?.text?.hideTitle === false,
       // Default to on when a legacy template already exists (flag undefined → applied at runtime).
@@ -44,6 +46,12 @@ const DocumentSettings: React.FC = () => {
         draft.config.defaultSharedDocuments = true;
       } else {
         delete draft.config.defaultSharedDocuments;
+      }
+      // Default is true (button shown); only persist the non-default (hidden) so config stays minimal.
+      if (data.showShare) {
+        delete draft.config.showShare;
+      } else {
+        draft.config.showShare = false;
       }
       if (data.showTextTitles) {
         if (!draft.config.settings) draft.config.settings = {} as ISettings;
@@ -102,6 +110,21 @@ const DocumentSettings: React.FC = () => {
         <p className="muted small">
           When enabled, new student documents (problem, personal, and learning log)
           will be shared with classmates by default instead of being private.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Share Button</legend>
+        <label className="horizontal middle">
+          <input
+            type="checkbox"
+            {...register("showShare")}
+          />
+          <span>Show the share button on student documents</span>
+        </label>
+        <p className="muted small">
+          When enabled (the default), students see the share/unshare toggle on their documents. Turn it
+          off to hide sharing for this unit.
         </p>
       </fieldset>
 
