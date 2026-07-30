@@ -53,14 +53,17 @@ const ChatTutorSettings: React.FC = () => {
     const chatTutorIntro = data.chatTutorIntro.trim();
     setUnitConfig(draft => {
       if (!draft) return;
-      // The enable flag is independent of the prompt overrides — toggling it never discards prompts.
-      if (data.chatTutorEnabled) draft.config.chatTutorEnabled = true;
-      else delete draft.config.chatTutorEnabled;
-      // Store the intro only when it's a non-empty customization; otherwise fall back to the default.
-      if (chatTutorIntro && chatTutorIntro !== CHAT_TUTOR_DEFAULT_INTRO) {
-        draft.config.chatTutorIntro = chatTutorIntro;
-      } else {
+      // Write the enable flag explicitly (rather than deleting on uncheck): config merges bottom-up
+      // and take the first non-null value (problem → investigation → unit → defaults), so a stored
+      // `false` correctly overrides a `true` set at a higher level, whereas a deleted key would let
+      // that higher-level `true` win. Independent of the prompt overrides — toggling never discards them.
+      draft.config.chatTutorEnabled = data.chatTutorEnabled;
+      // Intro: storing the built-in default as "unset" (delete) lets units inherit future default
+      // changes; any other value is stored — including an empty string, which suppresses the intro.
+      if (chatTutorIntro === CHAT_TUTOR_DEFAULT_INTRO) {
         delete draft.config.chatTutorIntro;
+      } else {
+        draft.config.chatTutorIntro = chatTutorIntro;
       }
       if (!replaceGenericPrompt && !appendToGenericPrompt) {
         delete draft.config.chatTutorPrompts;
@@ -101,7 +104,8 @@ const ChatTutorSettings: React.FC = () => {
         <textarea id="chatTutorIntro" rows={4} {...register("chatTutorIntro")} />
         <p className="muted small">
           Shown at the top of the chat column when a student opens the tutor. It is display-only —
-          never sent to the AI as context. Leave it as the default to use the built-in greeting.
+          never sent to the AI as context, so a name or claim you write here is not known to the tutor.
+          Leave it as the default to inherit the built-in greeting, or clear it to show no intro.
         </p>
       </fieldset>
 

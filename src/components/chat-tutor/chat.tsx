@@ -213,7 +213,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       <div className="chat-messages" ref={listRef} data-testid="chat-messages">
         {introText &&
           <div className="chat-intro" data-testid="chat-intro">{introText}</div>}
-        {turns.length === 0 &&
+        {turns.length === 0 && !introText &&
           <div className="chat-empty" data-testid="chat-empty">Ask the tutor about your work.</div>}
         {turns.map(turn => (
           turn.variant === "debug"

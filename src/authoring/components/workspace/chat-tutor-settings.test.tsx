@@ -27,11 +27,13 @@ jest.mock("../../hooks/use-curriculum", () => ({
 
 // Runs the updater passed to setUnitConfig against a mock draft (seeded with the given pre-existing
 // config) and returns it.
-const applyLastUpdater = (chatTutorPrompts?: IChatTutorPrompts, chatTutorEnabled?: boolean) => {
+const applyLastUpdater = (
+  chatTutorPrompts?: IChatTutorPrompts, chatTutorEnabled?: boolean, chatTutorIntro?: string
+) => {
   const updaterFn = mockSetUnitConfig.mock.calls[0][0];
   const mockDraft: {
     config: { chatTutorPrompts?: IChatTutorPrompts; chatTutorEnabled?: boolean; chatTutorIntro?: string };
-  } = { config: { chatTutorPrompts, chatTutorEnabled } };
+  } = { config: { chatTutorPrompts, chatTutorEnabled, chatTutorIntro } };
   updaterFn(mockDraft);
   return mockDraft;
 };
@@ -143,16 +145,36 @@ describe("ChatTutorSettings", () => {
     expect(mockDraft.config.chatTutorIntro).toBe("Hi. I'm Ada Idea. Let's plan your circuit.");
   });
 
-  it("does not store the intro when left at the default", async () => {
+  it("loads a custom intro and removes the override when reset to the default", async () => {
+    mockConfig.chatTutorIntro = "Custom greeting.";
+    const user = userEvent.setup();
     render(<ChatTutorSettings />);
+
+    const intro = screen.getByLabelText("Chat intro message") as HTMLTextAreaElement;
+    expect(intro.value).toBe("Custom greeting."); // load path
+    await user.clear(intro);
+    await user.type(intro, CHAT_TUTOR_DEFAULT_INTRO);
     fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
-    const mockDraft = applyLastUpdater(undefined, undefined);
+    // Seed the draft with the existing custom intro so the delete is observable.
+    const mockDraft = applyLastUpdater(undefined, undefined, "Custom greeting.");
     expect(mockDraft.config.chatTutorIntro).toBeUndefined();
   });
 
-  it("disabling the tutor preserves existing prompts", async () => {
+  it("stores an empty string when the intro is cleared (suppresses it)", async () => {
+    const user = userEvent.setup();
+    render(<ChatTutorSettings />);
+
+    await user.clear(screen.getByLabelText("Chat intro message"));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater();
+    expect(mockDraft.config.chatTutorIntro).toBe("");
+  });
+
+  it("disabling the tutor writes false (so it overrides a higher-level true) and keeps prompts", async () => {
     mockConfig.chatTutorEnabled = true;
     mockConfig.chatTutorPrompts = { appendToGenericPrompt: "Focus on energy." };
     const user = userEvent.setup();
@@ -163,7 +185,7 @@ describe("ChatTutorSettings", () => {
 
     await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
     const mockDraft = applyLastUpdater({ appendToGenericPrompt: "Focus on energy." }, true);
-    expect(mockDraft.config.chatTutorEnabled).toBeUndefined();
+    expect(mockDraft.config.chatTutorEnabled).toBe(false);
     expect(mockDraft.config.chatTutorPrompts).toEqual({ appendToGenericPrompt: "Focus on energy." });
   });
 });

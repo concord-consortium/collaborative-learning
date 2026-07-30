@@ -138,9 +138,12 @@
       font-style: italic;
     }
 
-    // Persona greeting pinned at the top of the column. Visually distinct from real chat bubbles
-    // because it is not a conversation turn (never sent to the AI).
+    // Persona greeting pinned at the top of the column (sticky so it stays in view as messages scroll).
+    // Visually distinct from real chat bubbles because it is not a conversation turn (never sent to
+    // the AI). Its solid background keeps scrolling messages from showing through.
     .chat-intro {
+      position: sticky;
+      top: 0;
       flex: 0 0 auto;
       padding: 8px 12px;
       border-radius: 8px;

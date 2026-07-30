@@ -68,8 +68,9 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
   const header = `${documentTitle} · ${problemPath}`;
   const chat = useChat({ transport, header });
 
-  // Display-only persona intro (never part of the AI context) — unit override or the built-in default.
-  const introText = appConfig.chatTutorIntro || CHAT_TUTOR_DEFAULT_INTRO;
+  // Display-only persona intro (never part of the AI context). An unset value uses the built-in
+  // default; an authored empty string suppresses the intro entirely (?? keeps "" distinct from unset).
+  const introText = appConfig.chatTutorIntro ?? CHAT_TUTOR_DEFAULT_INTRO;
 
   return (
     <div

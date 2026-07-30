@@ -57,10 +57,23 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     (appConfig.chatTutorEnabled || !!urlParams.chatTutor)
       && user.isStudent && !!chatTutorDocumentKey && !!chatTutorDocument?.content;
 
+  // Restore focus to the launcher after the drawer closes. The launcher stays mounted but is hidden
+  // while the drawer is open, so it can't be focused synchronously here — the show/hide re-render is
+  // batched and commits after this handler returns. Defer to the effect below, which runs post-commit
+  // once the launcher is visible again (the drawer trap's escape handler returns "handled" specifically
+  // so this launcher-restore stands).
+  const pendingLauncherFocusRef = useRef(false);
   const handleCloseChatTutor = useCallback(() => {
+    pendingLauncherFocusRef.current = true;
     ui.setShowChatTutor(false);
-    chatTutorLauncherRef.current?.focus();
   }, [ui]);
+
+  useEffect(() => {
+    if (!isChatTutorOpen && pendingLauncherFocusRef.current) {
+      pendingLauncherFocusRef.current = false;
+      chatTutorLauncherRef.current?.focus();
+    }
+  }, [isChatTutorOpen]);
 
   // Don't leave the drawer flagged open after its document goes away, or it would
   // pop back open unrequested when a document loads again.
@@ -74,7 +87,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     type: "region",
     navigation: {
       containerRef: headerRef,
-      itemSelector: "button, .custom-select .header[role='button']",
+      // Exclude the floating launcher: it renders at the viewport corner, far from its DOM position
+      // in the header, so including it in horizontal header nav would teleport focus there.
+      itemSelector: "button:not(.chat-tutor-launcher), .custom-select .header[role='button']",
       orientation: "horizontal",
     },
   });
@@ -233,9 +248,10 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const renderChatTutorLauncher = () => {
-    // Floating round "AIdeas" button pinned at the workspace's lower-right; hidden while the chat
-    // drawer is open and reappears when it closes.
-    if (!showChatTutorLauncher || isChatTutorOpen) return null;
+    // Floating round "AIdeas" button pinned at the viewport's lower-right. Kept mounted (so the ref
+    // stays valid for focus restore on close and aria-controls resolves to the live drawer) but
+    // hidden while the chat drawer is open; it reappears when the drawer closes.
+    if (!showChatTutorLauncher) return null;
     // Feather "message-circle" speech-bubble path.
     const chatIconPath = "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8"
       + "-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48"
@@ -245,7 +261,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
         type="button"
         ref={chatTutorLauncherRef}
         className="chat-tutor-launcher"
+        hidden={isChatTutorOpen}
         aria-label="Open the AIdeas chat tutor"
+        aria-expanded={isChatTutorOpen}
         aria-controls="chat-tutor-sidebar"
         onClick={() => ui.setShowChatTutor(true)}
         data-testid="chat-tutor-launcher"
