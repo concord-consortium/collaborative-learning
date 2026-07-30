@@ -1,7 +1,8 @@
 import { FINEST_LEVEL, S3_PREFIX, TILE_BASE_URL } from "./envelope-config";
-import { dayIndex, dayRange } from "./seismic-day";
-import { DayCoverageState, DaySpan, StationData, TimeRange } from "./seismic-types";
-import { getS3Root, getStationChannelPrefix, getTileIndicesForViewport } from "./tile-addressing";
+import { dayIndex, dayRange } from "../seismic-day";
+import { DayCoverageState, DaySpan, StationData, TimeRange } from "../seismic-types";
+import { getStationChannelPrefix } from "../station-addressing";
+import { getS3Root, getTileIndicesForViewport } from "./tile-addressing";
 
 type ListFetchFn = (url: string) => Promise<Pick<Response, "ok" | "status" | "text">>;
 

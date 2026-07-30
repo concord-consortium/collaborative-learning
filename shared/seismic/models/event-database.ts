@@ -2,10 +2,10 @@
  * Seismic event database: pure constants, index math, Firestore path builders,
  * and coverage-bitmap helpers.
  */
-import { dayIndex, SECONDS_PER_DAY } from "./seismic-day";
+import { dayIndex, SECONDS_PER_DAY } from "../seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
-import { DayCoverageState, DaySpan, StationData, TimeRange } from "./seismic-types";
-import { encodeLocation, getStationPrefix } from "./tile-addressing";
+import { DayCoverageState, DaySpan, StationData, TimeRange } from "../seismic-types";
+import { encodeLocation, getStationPrefix } from "../station-addressing";
 
 /** Layout version -- update this when the constants below or the event doc schema change */
 export const EVENT_LAYOUT_VERSION = 1;

@@ -15,17 +15,16 @@ import {
 import { miniseed } from "seisplotjs/nodeonly";
 import {
   LEVEL_SPACINGS, FINEST_LEVEL, AMPLITUDE_RANGES, AWS_REGION, S3_BUCKET, S3_PREFIX
-} from "../../shared/seismic/envelope-config.js";
-import {
-  decodeLocation, getS3Root, getStationChannelPrefix, getTileS3Key
-} from "../../shared/seismic/tile-addressing.js";
-import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelope-codec.js";
-import { computeEnvelopesFromRaw } from "../../shared/seismic/envelope-compute.js";
+} from "../../shared/seismic/envelopes/envelope-config.js";
+import { getS3Root, getTileS3Key } from "../../shared/seismic/envelopes/tile-addressing.js";
+import { decodeLocation, getStationChannelPrefix } from "../../shared/seismic/station-addressing.js";
+import { encodeEnvelopeTile, quantize } from "../../shared/seismic/envelopes/envelope-codec.js";
+import { computeEnvelopesFromRaw } from "../../shared/seismic/envelopes/envelope-compute.js";
 import { fetchStationMetadata } from "../../shared/seismic/earthscope-client.js";
 import { getMetadataForChannel } from "../../shared/seismic/channel-metadata-utils.js";
 import {
   createPipelineState, processL2Point, flushTiles, type FlushTileFn
-} from "../../shared/seismic/envelope-pipeline.js";
+} from "../../shared/seismic/envelopes/envelope-pipeline.js";
 import type { ChannelMetadata, EnvelopeTileData, StationData } from "../../shared/seismic/seismic-types.js";
 
 // ---- Configuration ----

@@ -1,5 +1,5 @@
-import { encodeEnvelopeTile, decodeEnvelopeTile } from "../../../../shared/seismic/envelope-codec";
-import { ENVELOPE_LAYOUT_VERSION } from "../../../../shared/seismic/envelope-config";
+import { encodeEnvelopeTile, decodeEnvelopeTile } from "../../../../shared/seismic/envelopes/envelope-codec";
+import { ENVELOPE_LAYOUT_VERSION } from "../../../../shared/seismic/envelopes/envelope-config";
 import {
   createEnvelopeCredentialsProvider, createEnvelopeUploader, ENVELOPE_RESOURCE_ID
 } from "./envelope-uploader";

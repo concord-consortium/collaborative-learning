@@ -1,5 +1,3 @@
-// shared/seismic/envelope-config.ts
-
 /**
  * Envelope tile cache level configuration.
  *

@@ -1,7 +1,6 @@
-// shared/seismic/envelope-codec.ts
 import pako from "pako";
 import { NO_DATA_SENTINEL } from "./envelope-config";
-import type { EnvelopeTileData } from "./seismic-types";
+import type { EnvelopeTileData } from "../seismic-types";
 
 const MAX_INT16 = 32767;
 

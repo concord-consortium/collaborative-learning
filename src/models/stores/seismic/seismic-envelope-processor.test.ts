@@ -1,12 +1,12 @@
-import { quantize } from "../../../../shared/seismic/envelope-codec";
+import { quantize } from "../../../../shared/seismic/envelopes/envelope-codec";
 import {
   AMPLITUDE_RANGES, FINEST_LEVEL, LEVEL_SPACINGS, NO_DATA_SENTINEL, POINTS_PER_TILE
-} from "../../../../shared/seismic/envelope-config";
+} from "../../../../shared/seismic/envelopes/envelope-config";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { ChannelMetadata, EnvelopeTileData, RawSegment, StationData, TimeRange }
   from "../../../../shared/seismic/seismic-types";
 import { getPointIndexInTile, getTileDuration, getTileIndex, getTileIndicesForViewport }
-  from "../../../../shared/seismic/tile-addressing";
+  from "../../../../shared/seismic/envelopes/tile-addressing";
 import { makeFakeDownloadService } from "./seismic-coverage-test-fakes";
 import { processEnvelopeCoverage } from "./seismic-envelope-processor";
 

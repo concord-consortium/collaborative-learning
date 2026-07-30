@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { readFileSync } from "fs";
 import { createGenerator } from "ts-json-schema-generator";
 
-const schemaPath = resolve(__dirname, "../../src/public/schemas/seismic-model/v1.json");
+const schemaPath = resolve(__dirname, "../../../src/public/schemas/seismic-model/v1.json");
 const typesPath = resolve(__dirname, "seismic-model-types.ts");
 
 describe("ModelMetadata JSON Schema", () => {
@@ -12,7 +12,7 @@ describe("ModelMetadata JSON Schema", () => {
     const generated = createGenerator({
       path: typesPath,
       type: "ModelMetadata",
-      tsconfig: resolve(__dirname, "../../tsconfig.json"),
+      tsconfig: resolve(__dirname, "../../../tsconfig.json"),
       additionalProperties: true,
     }).createSchema("ModelMetadata");
 

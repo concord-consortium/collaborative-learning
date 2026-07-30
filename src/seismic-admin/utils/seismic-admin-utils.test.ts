@@ -2,7 +2,7 @@ import {
   missingDayCount, mergeStations, formatBytes, getStationLabel, timelineSegments
 } from "./seismic-admin-utils";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
-import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
+import { getStationChannelPrefix } from "../../../shared/seismic/station-addressing";
 
 describe("seismic-admin-utils", () => {
   it("builds an all-filled timeline segment when every day is highlighted", () => {

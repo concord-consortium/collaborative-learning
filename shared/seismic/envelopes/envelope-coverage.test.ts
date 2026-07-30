@@ -1,6 +1,6 @@
 import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices, missingEnvelopeDaySpans }
   from "./envelope-coverage";
-import { dayRange } from "./seismic-day";
+import { dayRange } from "../seismic-day";
 import { getTileIndicesForViewport } from "./tile-addressing";
 
 // Helper: fake ListObjectsV2 XML response

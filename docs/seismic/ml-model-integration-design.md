@@ -82,7 +82,7 @@ A curriculum unit can override the default model list to show only the models ap
 
 ### Architecture registry
 
-Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. The architecture registry lives in `shared/seismic/seismic-architectures.ts` alongside the runner, so it's available in both browser and Node environments:
+Model architectures (the TF.js layer definitions) must live in code because each architecture is a distinct programmatic construction. The architecture registry lives in `shared/seismic/models/seismic-architectures.ts` alongside the runner, so it's available in both browser and Node environments:
 
 ```typescript
 const ARCHITECTURES: Record<string, (metadata: ModelMetadata) => tf.LayersModel> = {
@@ -97,7 +97,7 @@ The `buildCompactModel` and `buildStandardModel` functions are adapted from the 
 
 ### Location
 
-`shared/seismic/seismic-model-runner.ts` — alongside the raw data fetcher and other shared seismic utilities.
+`shared/seismic/models/seismic-model-runner.ts` — alongside the raw data fetcher and other shared seismic utilities.
 
 The runner lives in `shared/seismic/` rather than in the Wave Runner plugin because it needs to run in both environments:
 
@@ -296,7 +296,7 @@ Deploying a model is an explicit action — pushing to main in either repo does 
 
 ### Format contract
 
-The `ModelMetadata` interface in CLUE (`shared/seismic/seismic-model-types.ts`) defines the metadata format. The export scripts in tiny-cnn-seismicML produce files matching this interface. Both sides should reference the `$schema` version and each other when making changes.
+The `ModelMetadata` interface in CLUE (`shared/seismic/models/seismic-model-types.ts`) defines the metadata format. The export scripts in tiny-cnn-seismicML produce files matching this interface. Both sides should reference the `$schema` version and each other when making changes.
 
 ### Schema management
 

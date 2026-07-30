@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
-import { ModelListEntry } from "../../../shared/seismic/model-metadata";
+import { ModelListEntry } from "../../../shared/seismic/models/model-metadata";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
 import CheckIcon from "../../assets/icons/check/check-selected.svg";
 import WarningIcon from "../../assets/icons/caution.svg";

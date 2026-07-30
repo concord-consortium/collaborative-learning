@@ -1,5 +1,5 @@
 import { StationData, StationConfig } from "../../../shared/seismic/seismic-types";
-import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
+import { getStationChannelPrefix } from "../../../shared/seismic/station-addressing";
 
 export type TimelineState = "filled" | "partial" | "empty";
 

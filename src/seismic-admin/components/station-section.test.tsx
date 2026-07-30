@@ -3,8 +3,9 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { StationSection } from "./station-section";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
-import { FINEST_LEVEL } from "../../../shared/seismic/envelope-config";
-import { getStationChannelPrefix, getTileIndicesForViewport } from "../../../shared/seismic/tile-addressing";
+import { FINEST_LEVEL } from "../../../shared/seismic/envelopes/envelope-config";
+import { getTileIndicesForViewport } from "../../../shared/seismic/envelopes/tile-addressing";
+import { getStationChannelPrefix } from "../../../shared/seismic/station-addressing";
 import { utcDay } from "../../../shared/seismic/seismic-day";
 
 const opfsStation = { network: "AK", station: "K204", channel: "HNZ" };

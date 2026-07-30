@@ -1,6 +1,6 @@
 import { decodeEnvelopeTile } from "./envelope-codec";
 import { S3_PREFIX, TILE_BASE_URL } from "./envelope-config";
-import { FetchEnvelopeTileParams, EnvelopeTileData } from "./seismic-types";
+import { FetchEnvelopeTileParams, EnvelopeTileData } from "../seismic-types";
 import { getTileS3Key, getS3Root } from "./tile-addressing";
 
 const DEFAULT_S3_BASE_URL = `${TILE_BASE_URL}${S3_PREFIX}`;

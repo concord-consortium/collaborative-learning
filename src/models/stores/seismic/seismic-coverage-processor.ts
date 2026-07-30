@@ -1,8 +1,8 @@
 import { miniseed } from "seisplotjs";
-import { uncoveredDaySpans } from "../../../../shared/seismic/event-database";
+import { uncoveredDaySpans } from "../../../../shared/seismic/models/event-database";
 import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
-import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+import { SeismicModelRunner } from "../../../../shared/seismic/models/seismic-model-runner";
+import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
 import { DayDownloadService, DONE, SeismicDownloadService } from "./seismic-download-service";
 import { getUncoveredRanges, markCovered, writeEvents } from "./seismic-event-service";

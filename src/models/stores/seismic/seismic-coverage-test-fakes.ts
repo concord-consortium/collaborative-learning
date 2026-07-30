@@ -1,5 +1,5 @@
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+import { SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 // The DayDownloadService specifier is type-only: erased at runtime, so requireActual-ing
 // this module inside a jest.mock factory never loads anything extra mid-mock.
 import { DONE, type DayDownloadService } from "./seismic-download-service";

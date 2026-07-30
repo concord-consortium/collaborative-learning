@@ -1,8 +1,9 @@
-import { FINEST_LEVEL } from "../../shared/seismic/envelope-config";
+import { FINEST_LEVEL } from "../../shared/seismic/envelopes/envelope-config";
 import { coverageKey, SeismicAdminStore } from "./seismic-admin-store";
 import { saveFilters } from "./utils/admin-persistence";
 import { dayIndex, dayRange, SECONDS_PER_DAY, utcDay } from "../../shared/seismic/seismic-day";
-import { getStationChannelPrefix, getTileIndicesForViewport } from "../../shared/seismic/tile-addressing";
+import { getTileIndicesForViewport } from "../../shared/seismic/envelopes/tile-addressing";
+import { getStationChannelPrefix } from "../../shared/seismic/station-addressing";
 
 function fakeCache(cached: number[] = []) {
   return {

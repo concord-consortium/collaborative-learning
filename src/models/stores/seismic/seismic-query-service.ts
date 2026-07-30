@@ -2,12 +2,13 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { DateTime } from "luxon";
 import {
   LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION
-} from "../../../../shared/seismic/envelope-config";
-import { dequantize } from "../../../../shared/seismic/envelope-codec";
+} from "../../../../shared/seismic/envelopes/envelope-config";
+import { dequantize } from "../../../../shared/seismic/envelopes/envelope-codec";
 import {
-  getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileS3Key, getTileTimeRange
-} from "../../../../shared/seismic/tile-addressing";
-import { fetchEnvelopeTile } from "../../../../shared/seismic/envelope-fetcher";
+  getTileIndicesForViewport, getTileS3Key, getTileTimeRange
+} from "../../../../shared/seismic/envelopes/tile-addressing";
+import { getStationChannelPrefix, getStationPrefix } from "../../../../shared/seismic/station-addressing";
+import { fetchEnvelopeTile } from "../../../../shared/seismic/envelopes/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../../shared/seismic/earthscope-client";
 import { getMetadataForChannel } from "../../../../shared/seismic/channel-metadata-utils";
 import { miniseed } from "seisplotjs";

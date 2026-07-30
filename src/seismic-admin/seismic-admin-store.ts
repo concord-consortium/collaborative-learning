@@ -1,13 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { FINEST_LEVEL } from "../../shared/seismic/envelope-config";
-import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices } from "../../shared/seismic/envelope-coverage";
-import { classifyDayCoverage } from "../../shared/seismic/event-database";
-import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
+import { FINEST_LEVEL } from "../../shared/seismic/envelopes/envelope-config";
+import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices } from "../../shared/seismic/envelopes/envelope-coverage";
+import { classifyDayCoverage } from "../../shared/seismic/models/event-database";
+import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/models/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
 import { dayIndex, SECONDS_PER_DAY, utcDayFromString } from "../../shared/seismic/seismic-day";
-import { ModelMetadata, SeismicEvent } from "../../shared/seismic/seismic-model-types";
+import { ModelMetadata, SeismicEvent } from "../../shared/seismic/models/seismic-model-types";
 import { DayCoverageState, StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { getStationChannelPrefix } from "../../shared/seismic/station-addressing";
 import {
   createEnvelopeCredentialsProvider, createEnvelopeUploader, EnvelopeUploader
 } from "../models/stores/seismic/envelope-uploader";

@@ -1,4 +1,3 @@
-// shared/seismic/envelope-codec.test.ts
 import { encodeEnvelopeTile, decodeEnvelopeTile, mergeEnvelopeTileData, quantize, dequantize } from "./envelope-codec";
 import { NO_DATA_SENTINEL, NUM_LEVELS, POINTS_PER_TILE } from "./envelope-config";
 

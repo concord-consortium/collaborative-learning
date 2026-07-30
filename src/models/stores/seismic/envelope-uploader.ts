@@ -1,11 +1,11 @@
 import { AwsClient } from "aws4fetch";
 import { Credentials, EnvironmentName, TokenServiceClient } from "@concord-consortium/token-service";
 import { decodeEnvelopeTile, encodeEnvelopeTile, mergeEnvelopeTileData }
-  from "../../../../shared/seismic/envelope-codec";
+  from "../../../../shared/seismic/envelopes/envelope-codec";
 import { AWS_REGION, ENVELOPE_LAYOUT_VERSION, S3_PREFIX, TILE_BASE_URL }
-  from "../../../../shared/seismic/envelope-config";
+  from "../../../../shared/seismic/envelopes/envelope-config";
 import { EnvelopeTileData, StationData } from "../../../../shared/seismic/seismic-types";
-import { getS3Root, getTileS3Key } from "../../../../shared/seismic/tile-addressing";
+import { getS3Root, getTileS3Key } from "../../../../shared/seismic/envelopes/tile-addressing";
 
 /** The subset of token-service `Credentials` the uploader needs to sign requests. */
 export interface AwsCredentials {

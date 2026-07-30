@@ -1,10 +1,12 @@
 import { miniseed } from "seisplotjs";
 import { getMetadataForChannel } from "../../../../shared/seismic/channel-metadata-utils";
-import { quantize } from "../../../../shared/seismic/envelope-codec";
-import { AMPLITUDE_RANGES, FINEST_LEVEL, LEVEL_SPACINGS } from "../../../../shared/seismic/envelope-config";
-import { computeEnvelopesFromRaw } from "../../../../shared/seismic/envelope-compute";
-import { listEnvelopeTileIndices, missingEnvelopeDaySpans } from "../../../../shared/seismic/envelope-coverage";
-import { createPipelineState, flushTiles, processL2Point } from "../../../../shared/seismic/envelope-pipeline";
+import { quantize } from "../../../../shared/seismic/envelopes/envelope-codec";
+import { AMPLITUDE_RANGES, FINEST_LEVEL, LEVEL_SPACINGS } from "../../../../shared/seismic/envelopes/envelope-config";
+import { computeEnvelopesFromRaw } from "../../../../shared/seismic/envelopes/envelope-compute";
+import { listEnvelopeTileIndices, missingEnvelopeDaySpans }
+  from "../../../../shared/seismic/envelopes/envelope-coverage";
+import { createPipelineState, flushTiles, processL2Point }
+  from "../../../../shared/seismic/envelopes/envelope-pipeline";
 import { fetchStationMetadata } from "../../../../shared/seismic/earthscope-client";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import {
