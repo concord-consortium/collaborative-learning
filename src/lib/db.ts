@@ -1159,7 +1159,7 @@ export class DB {
       throw new Error(`Cannot open document with visibility '${firestoreMetadata.visibility}'`);
     }
 
-    const { title, originDoc, problem, investigation, unit, groupId } = firestoreMetadata;
+    const { title, originDoc, problem, investigation, unit, offeringId, groupId } = firestoreMetadata;
 
     // Note: the createdAt field is not passed here because it hasn't been included in the
     // past. If it is needed in the future, it is probably safe to add it here.
@@ -1177,6 +1177,7 @@ export class DB {
       problem: problem ?? undefined,
       investigation: investigation ?? undefined,
       unit: unit ?? undefined,
+      offeringId: offeringId ?? undefined,
       groupId: groupId ?? undefined,
       visibility: visibility ?? undefined,
     });

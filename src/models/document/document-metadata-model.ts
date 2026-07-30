@@ -33,6 +33,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   investigation: types.maybeNull(types.string),
   problem: types.maybeNull(types.string),
   unit: types.maybeNull(types.string),
+  offeringId: types.maybeNull(types.string),
   visibility: types.maybeNull(types.string),
   concurrent: types.maybeNull(types.boolean),
   kind: types.maybeNull(types.string),
