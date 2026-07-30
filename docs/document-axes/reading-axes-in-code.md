@@ -98,6 +98,25 @@ what makes "about a unit but not a problem" a queryable condition.
   offering; nothing names the class level, and no getter returns a document's container. Canonical
   pointer paths are assembled from the individual fields on both sides (`getCanonicalPointerPath` and
   the rules' `canonicalPointerPath`) rather than from a container value.
+- **The `permissions` axis has no representation, so its consumers compose it by hand.** Permission
+  decisions are spread widely through the code — [axes.md](./axes.md) lists the four-up share toggle,
+  publications, group documents, multi-class supports, and exemplars — and each site works out its own
+  answer from whatever fields are nearest. The edit gate `canUserEditDocument` in
+  `src/models/document/document-utils.ts` is worth calling out as a **worked example**, not because it
+  came first but because it composes the whole question in a few readable lines: a `type` test for
+  published documents, an owner comparison, `concurrent`, then a reach test over the owner and the
+  container. In the target design a document instead references a named **permission policy** and a gate
+  like this collapses into resolving that policy. Two things follow, worth stating where the example is:
+  - **Its `type` test is the last type branch left inside that gate.** "A published document is frozen"
+    is a permission statement, and a policy is what should carry it. Its neighbor
+    `isDocumentAccessibleToUser` still branches on `type` for the same reason — read access is also a
+    permissions question — which is the clearest sign that these branches are waiting on the axis rather
+    than on any one consumer being cleaned up.
+  - **Its `concurrent` test likely goes the same way.** A policy that grants write to a class or a group
+    states the multi-writer case directly, so "is this document concurrent" stops being a separate
+    question a gate has to ask first. The container and owner tests that follow are then not permission
+    logic at all, but the resolution of *which* class or group the policy's grant points at — which the
+    guards above already answer.
 
 ## Titling a document from another unit
 
