@@ -23,7 +23,8 @@ export function makeTokenServiceJwtGetter(portal: Portal): (() => Promise<string
   return async () => {
     try {
       return await exchange();
-    } catch {
+    } catch (error) {
+      console.warn("Token-service JWT exchange failed; refreshing the portal JWT:", error);
       await portal.requestPortalJWT();
       return exchange();
     }
