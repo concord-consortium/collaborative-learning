@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { DownloadEvent, DownloadParams, DownloadRunner } from "../../../shared/seismic/seismic-downloader";
-import { createOpfsCache } from "../../../shared/seismic/opfs-seismic-cache";
-import { StationData } from "../../../shared/seismic/seismic-types";
+import { DownloadEvent, DownloadParams, DownloadRunner } from "../../../../shared/seismic/seismic-downloader";
+import { createOpfsCache } from "../../../../shared/seismic/opfs-seismic-cache";
+import { StationData } from "../../../../shared/seismic/seismic-types";
 
 export const DONE = Symbol("download-done");
 export type ReadyDay = number | typeof DONE;

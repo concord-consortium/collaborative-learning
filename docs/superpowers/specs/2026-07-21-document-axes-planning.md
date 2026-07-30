@@ -1,4 +1,4 @@
-# Document Axes: Register
+# Document Axes: Planning
 
 > **Status:** Decision record (not developer-facing reference). This is the analysis that *produced* the
 > document-axes docs — why *these* axes and not others, and what is deliberately *not* an axis. For what the
@@ -14,7 +14,7 @@
 > **Framing — "ideal world."** This document assumes we can change any code however we want (storage layout,
 > security rules, models, migrations). Overlaps are resolved under that assumption; current-code constraints
 > and migration cost are **out of scope** here and tracked as *Punted issues* (§G). The *current-state*
-> analysis (what the code does today) is a separate effort; this register is the *target* model (what the axes
+> analysis (what the code does today) is a separate effort; this document plans the *target* model (what the axes
 > should be in the ideal world).
 
 ## A. Document-intrinsic axes (the current working set)

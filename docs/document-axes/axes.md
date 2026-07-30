@@ -141,8 +141,8 @@ the code around it supply them implicitly.
 
 **What it is.** The permission set: who may `read`, `write`, `publish`, `copy`, and whether the content
 is `frozen` (no writer at all). It is *composed* — the shared defaults come from a **permission policy**
-(which the document's `kind` selects), and only the parts that genuinely vary per document are stored (the
-share toggle, a support's audience, an exemplar's per-student visibility).
+(selected by `kind` at creation and then referenced by the document), and only the parts that genuinely
+vary per document are stored (the share toggle, a support's audience, an exemplar's per-student visibility).
 
 **In today's behavior.** `permissions` is the busiest axis, and its behavior is spread across the most
 features:

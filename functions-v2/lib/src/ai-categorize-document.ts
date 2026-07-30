@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import {zodResponseFormat} from "openai/helpers/zod";
+import { AutoParseableResponseFormat } from "openai/lib/parser";
 import { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import {z} from "zod";
 import fs from "node:fs/promises";
@@ -54,6 +55,15 @@ export async function categorizeDocument(file: string, apiKey: string) {
   const image = await imageLoading;
   const url = `data:image/png;base64,${image}`;
   return categorizeUrl(url, apiKey);
+}
+
+// openai v6's zodResponseFormat infers the parsed type through a zod v3/v4
+// conditional that recurses infinitely (TS2589) on a dynamically-built schema,
+// so the inference is bypassed and the parsed shape stated directly.
+function categorizationResponseFormat(
+  responseSchema: Record<string, z.ZodType>
+): AutoParseableResponseFormat<Record<string, any>> {
+  return zodResponseFormat(z.object(responseSchema) as never, "categorization-response");
 }
 
 export function buildZodResponseSchema(aiPrompt: IAiPrompt) {
@@ -145,11 +155,11 @@ export async function categorizeUrl(url: string, apiKey: string, aiPrompt = defa
       throw new Error("aiPrompt must specify at least one response field for the schema.");
     }
 
-    return openai.beta.chat.completions.parse({
+    return openai.chat.completions.parse({
       model: "gpt-4o-mini",
       // model: "gpt-4o-2024-08-06",
       messages: buildImageMessages(aiPrompt, url),
-      response_format: zodResponseFormat(z.object(responseSchema), "categorization-response"),
+      response_format: categorizationResponseFormat(responseSchema),
     });
   } catch (error) {
     console.log("OpenAI error", error);
@@ -223,10 +233,10 @@ export async function categorizeSummary(summary: string, apiKey: string, firesto
     const relatedSummaries = await findRelatedSummaries(summary, apiKey, firestoreDocumentPath);
     logger.info("relatedSummaries", relatedSummaries);
 
-    return openai.beta.chat.completions.parse({
+    return openai.chat.completions.parse({
       model: "gpt-4o-mini",
       messages: buildSummaryMessages(aiPrompt, summary, relatedSummaries),
-      response_format: zodResponseFormat(z.object(responseSchema), "categorization-response"),
+      response_format: categorizationResponseFormat(responseSchema),
     });
   } catch (error) {
     console.log("OpenAI error", error);

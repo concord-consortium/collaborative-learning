@@ -1,6 +1,6 @@
 import { upperFirst } from "lodash";
 import { getParent } from "mobx-state-tree";
-import { IDocumentMetadataBase } from "../../../shared/shared";
+import { IDocumentMetadata, IDocumentMetadataBase } from "../../../shared/shared";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { translate } from "../../utilities/translation/translate";
 import { SectionModelType } from "../curriculum/section";
@@ -119,4 +119,31 @@ export function isDocumentAccessibleToUser ({
            || (isExemplarType(metadata.type) && documents.isExemplarVisible(metadata.key));
   }
   return false;
+}
+
+interface ICanUserEditDocumentParams {
+  document?: DocumentModelType;
+  // `properties` is omitted so an IDocumentMetadataModel can be passed: the model stores properties in an
+  // observable map rather than a Record. See the compile-time checks in document-metadata-model.ts.
+  documentMetadata?: Omit<IDocumentMetadata, "properties">;
+  user: UserModelType;
+}
+/**
+ * Whether the user can edit the document: true when it's their own document, or when it's a
+ * collaborative document owned by their group (created by any member of the group).
+ */
+export function canUserEditDocument({
+  document, documentMetadata, user
+}: ICanUserEditDocumentParams): boolean {
+  // Prefer the reactive Firestore metadata field-by-field, falling back to the lazily-fetched full document,
+  // so the answer updates as soon as a groupmate's document syncs rather than on the next reload.
+  const uid = documentMetadata?.uid ?? document?.uid;
+  const type = documentMetadata?.type ?? document?.type;
+  const groupId = documentMetadata?.groupId ?? document?.groupId;
+
+  if (!!uid && uid === user.id) return true;
+
+  // A collaborative (multi-writer) document is editable by the members of the group that owns it.
+  const isCollaborativeDoc = type === GroupDocument;
+  return isCollaborativeDoc && !!user.currentGroupId && groupId === user.currentGroupId;
 }
