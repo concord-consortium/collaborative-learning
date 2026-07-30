@@ -59,6 +59,14 @@ interface IBuildDocumentCollectionProps {
   labelMap?: Map<string, string>;
 }
 
+/**
+ * Which section of the "by group" sort a document belongs in.
+ */
+interface IGroupSection {
+  sectionLabel: string;
+  sortKey: GroupSectionSortKey;
+}
+
 /*
  * DocumentGroup
  *
@@ -194,24 +202,24 @@ export class DocumentGroup {
     // Ordering information per section, so the comparator never parses the display label.
     const sortKeys: Map<string, GroupSectionSortKey> = new Map();
 
-    const groupSection = (groupId: string) =>
-      ({ sectionLabel: `${groupTerm} ${groupId}`, sortKey: { section: "group", groupId } as GroupSectionSortKey });
+    const groupSection = (groupId: string): IGroupSection =>
+      ({ sectionLabel: `${groupTerm} ${groupId}`, sortKey: { section: "group", groupId } });
 
     this.documents.forEach((doc) => {
-      const { sectionLabel, sortKey } = (() => {
+      const { sectionLabel, sortKey } = ((): IGroupSection => {
         // A document owned by a group belongs to that group, whoever created it. The section is labelled
         // from the stored `groupId`, the one place the group's number is available without taking the
         // owner uid apart; a group-owned document without one has no group to name and falls through.
         if (hasGroupOwner(doc) && doc.groupId) return groupSection(doc.groupId);
         // A class-owned document is not one student's work, so it sections under the class itself.
         if (hasClassOwner(doc)) {
-          return { sectionLabel: kWholeClassSectionLabel, sortKey: { section: "class" } as GroupSectionSortKey };
+          return { sectionLabel: kWholeClassSectionLabel, sortKey: { section: "class" } };
         }
         // Otherwise it belongs to its owner, and so to whichever group its owner is in now.
         const group = this.stores.groups.groupForUser(doc.uid);
         return group
           ? groupSection(group.id)
-          : { sectionLabel: `No ${groupTerm}`, sortKey: { section: "none" } as GroupSectionSortKey };
+          : { sectionLabel: `No ${groupTerm}`, sortKey: { section: "none" } };
       })();
 
       if (!documentMap.has(sectionLabel)) {
