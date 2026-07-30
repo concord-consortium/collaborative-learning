@@ -57,7 +57,7 @@ for all document types. The kind axis fields (`kind`/`concurrent`) are stamped o
 into the kinds they publish.
 
 Stage 3 surfaces those documents: Sort Work sections them under "Whole Class" by owner and curriculum
-rather than by type, a unit-scoped listener keeps them visible under the investigation and problem
+rather than by type, a whole-unit listener keeps them visible under the investigation and problem
 filters, presentation reads `concurrent` and the kind registry, and one predicate
 (`canUserEditDocument`) gates every Edit button. It also settles how these axes are modeled in code:
 consumers read narrow named guards over the stored fields, with no level enum and no unified struct;

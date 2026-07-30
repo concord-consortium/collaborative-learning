@@ -301,7 +301,7 @@ describe("SortedDocuments.watchFirestoreMetaDataDocs", () => {
     firestore.listeners.find(l =>
       l.clauses.some(([field, , value]) => field === "investigation" && value === null));
 
-  it("adds a unit-scoped listener under the Problem filter", () => {
+  it("adds a whole-unit listener under the Problem filter", () => {
     sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
     const listener = unitScopedListener();
     expect(listener).toBeDefined();
@@ -312,12 +312,12 @@ describe("SortedDocuments.watchFirestoreMetaDataDocs", () => {
     ]);
   });
 
-  it("adds a unit-scoped listener under the Investigation filter", () => {
+  it("adds a whole-unit listener under the Investigation filter", () => {
     sortedDocuments.watchFirestoreMetaDataDocs("Investigation", "sas", 1, 2);
     expect(unitScopedListener()).toBeDefined();
   });
 
-  it("adds no unit-scoped listener under the All or Unit filters, which already include those docs", () => {
+  it("adds no whole-unit listener under the All or Unit filters, which already include those docs", () => {
     sortedDocuments.watchFirestoreMetaDataDocs("All", "sas", 1, 2);
     expect(unitScopedListener()).toBeUndefined();
 
@@ -326,7 +326,7 @@ describe("SortedDocuments.watchFirestoreMetaDataDocs", () => {
     expect(unitScopedListener()).toBeUndefined();
   });
 
-  it("surfaces unit-scoped documents in firestoreMetadataDocs", () => {
+  it("surfaces whole-unit documents in firestoreMetadataDocs", () => {
     sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
     unitScopedListener()?.emit([classWideMetadata]);
     expect(sortedDocuments.firestoreMetadataDocs.map(d => d.key)).toEqual(["Class Wide Doc"]);
@@ -339,14 +339,14 @@ describe("SortedDocuments.watchFirestoreMetaDataDocs", () => {
     expect(sortedDocuments.firestoreMetadataDocs.map(d => d.key)).toEqual(["Class Wide Doc"]);
   });
 
-  it("disposes the unit-scoped listener with the others", () => {
+  it("disposes the whole-unit listener with the others", () => {
     const dispose = sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
     const listener = unitScopedListener();
     dispose();
     expect(listener?.disposed).toBe(true);
   });
 
-  it("clears previously fetched unit-scoped documents when the filter no longer needs them", () => {
+  it("clears previously fetched whole-unit documents when the filter no longer needs them", () => {
     sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
     unitScopedListener()?.emit([classWideMetadata]);
     expect(sortedDocuments.firestoreMetadataDocs.length).toBe(1);
