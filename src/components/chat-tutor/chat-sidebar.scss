@@ -1,6 +1,6 @@
 @import "../vars";
 
-// Right-edge drawer, below the app header so the header launcher stays visible. It sits
+// Right-edge drawer, offset below the app header so it aligns with the workspace/resources columns. It sits
 // at the right edge with a fixed width; the workspace reserves the same width when the
 // drawer is open (see clue-app-content.scss) so content is bumped over, not overlaid.
 // The teal frame lives on the chat body (see chat.scss) so the header sits above it,

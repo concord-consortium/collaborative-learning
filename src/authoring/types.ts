@@ -51,6 +51,8 @@ export interface IUnitConfig extends IItemTemplateConfig {
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
   chatTutorPrompts?: IChatTutorPrompts;
+  chatTutorEnabled?: boolean;
+  chatTutorIntro?: string;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;
