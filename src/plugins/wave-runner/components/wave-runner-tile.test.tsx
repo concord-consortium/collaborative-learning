@@ -54,7 +54,12 @@ describe("WaveRunnerComponent", () => {
             { network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" },
             { network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "Dexter Display Mine" }
           ],
-          defaultStation: 0
+          defaultStation: 0,
+          models: [
+            { label: "Compact Model", metadataUrl: "https://models.example.com/v1/compact-v2/metadata.json" },
+            { label: "Placeholder (random weights)", metadataUrl: "placeholder:random-weights" }
+          ],
+          defaultModel: null
           }
         }
       }

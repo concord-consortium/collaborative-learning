@@ -20,14 +20,12 @@ uses a fixed set of labels so a missing fact shows up as an absent label rather 
 - **Runtime** — where it surfaces in memory
 - **Updated by** — what writes it after creation
 - **Reactive** — whether a change reaches the UI without a reload, by what mechanism, and *for whose
-  documents*
+  documents*. **Note: this is about the reading client.** Nearly every field is reactive for the user who
+  changed it, because they mutated the model directly. The interesting question — and the one this column
+  answers — is whether *another* user sees the change.
 
 Paths use the conventions from [document-types.md](../document-types.md): `/{classPath}` is
 `/{firebaseRoot}/classes/{classHash}`. Firestore paths are relative to `{root}/{space}/`.
-
-**"Reactive" is about the reading client.** Nearly every field is reactive for the user who changed it,
-because they mutated the model directly. The interesting question — and the one this column answers — is
-whether *another* user sees the change.
 
 ## Summary
 
@@ -75,6 +73,12 @@ so this table doubles as a migration-progress view.
 | `lastEditedAt` | RTDB | all editable | not surfaced | No |
 | `evaluation` | RTDB | analyzable docs | not surfaced | No |
 
+Some Firestore fields (e.g. `offeringId`, `canonical`) are written to the doc but have no
+`DocumentMetadataModel` prop, which is why they show as "not surfaced" above. They still reach
+`DocumentMetadataStore`'s `typecheck(DocumentMetadataModel, data)` unfiltered and validate only because
+MST's `typecheck` ignores properties the model does not declare — pinned by the `typecheck` tests in
+[mst.test.ts](../../src/models/mst.test.ts).
+
 ---
 
 ## Firestore-only fields
@@ -99,8 +103,7 @@ Also the query key for essentially every Firestore metadata read — both the `D
 read and the Sort Work watches filter on `where("context_id", "==", user.classHash)`.
 
 A camelCase `contextId` field was written to Firestore historically and ignored; it was removed in
-CLUE-524 and is not written today. [firestore-schema.md](../firestore-schema.md) still describes it as
-"currently ignored" — that line is stale.
+CLUE-524 and is not written today.
 
 ### `network`
 
@@ -118,11 +121,6 @@ captured as a snapshot at document-creation time. [firestore.rules](../../firest
 each other's documents, so teacher documents must keep writing it or that cross-teacher visibility silently
 breaks. Student and group documents have no network, so the field is null for them. It is declared on
 `IDocumentMetadata` and loaded into `DocumentMetadataModel.network`; no consumer reads it off the model yet.
-
-Fields such as `offeringId` and `canonical` are written to the Firestore doc but have no
-`DocumentMetadataModel` prop; they reach `DocumentMetadataStore`'s `typecheck(DocumentMetadataModel, data)`
-unfiltered and validate only because MST's `typecheck` ignores properties the model does not declare —
-pinned by the `typecheck` tests in [mst.test.ts](../../src/models/mst.test.ts).
 
 Storing the network this way is not good. A teacher can belong to multiple networks or switch networks, so
 a value frozen at creation time can later be wrong. The network association really belongs to the user (or

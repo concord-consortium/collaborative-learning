@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
-import { stationLabel } from "../utils/seismic-admin-utils";
+import { getStationLabel } from "../utils/seismic-admin-utils";
 import "./admin-header.scss";
 import { FeedbackArea } from "./feedback-area";
 
@@ -19,27 +19,59 @@ export const AdminHeader = observer(function AdminHeader() {
         <div className="option-area">
           <div className="option-header">Date Range</div>
           <div className="dates">
-            <label>Start <input type="date" value={store.startDate} onChange={e => setStart(e.target.value)} /></label>
-            <label>End <input type="date" value={store.endDate} onChange={e => setEnd(e.target.value)} /></label>
+            <label>
+              Start&nbsp;
+              <input
+                disabled={store.isBusy}
+                type="date"
+                value={store.startDate}
+                onChange={e => setStart(e.target.value)}
+              />
+            </label>
+            <label>
+              End&nbsp;
+              <input
+                disabled={store.isBusy}
+                type="date"
+                value={store.endDate}
+                onChange={e => setEnd(e.target.value)}
+              />
+            </label>
           </div>
         </div>
         <div className="option-area">
           <div className="option-header">Stations</div>
-          <div className="stations">
+          <div className="checkbox-list">
             {[...store.stations].map(([key, station]) => {
-              const checked = store.selected.has(key);
+              const checked = store.selectedStations.has(key);
               return (
-                <label className="station-checkbox" key={key}>
+                <label className="checkbox" key={key}>
                   <input
                     type="checkbox"
-                    disabled={checked && store.selected.size === 1}
+                    disabled={store.isBusy || (checked && store.selectedStations.size === 1)}
                     checked={checked}
-                    onChange={() => store.toggle(key)}
+                    onChange={() => store.toggleStation(key)}
                   />
-                  {stationLabel(station)}
+                  {getStationLabel(station)}
                 </label>
               );
             })}
+          </div>
+        </div>
+        <div className="option-area">
+          <div className="option-header">Models</div>
+          <div className="checkbox-list">
+            {[...store.models].map(([url, model]) => (
+              <label className="checkbox" key={url}>
+                <input
+                  disabled={store.isBusy}
+                  type="checkbox"
+                  checked={store.selectedModels.has(url)}
+                  onChange={() => store.toggleModel(url)}
+                />
+                {model.label}
+              </label>
+            ))}
           </div>
         </div>
       </div>

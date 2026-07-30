@@ -17,7 +17,11 @@ export interface ProblemConfiguration {
   // required tile types that aren't in the toolbar can be specified here
   tools?: string[]; // legacy use of `tools` preserved to avoid content changes
   defaultDocumentTemplate?: IAuthoredDocumentContent;
+  // Non-destructive switch for defaultDocumentTemplate: undefined (legacy) or true → apply the
+  // template; false → skip it while preserving the authored content. Mirrors `aiEvaluation`/`aiPrompt`.
+  defaultDocumentTemplateEnabled?: boolean;
   planningTemplate?: Record<string, IAuthoredDocumentContent>;
+  planningTemplateEnabled?: boolean;
   // text shown in "placeholder" tiles.
   // key is the container type, value is the text.
   // currently supported container types are "QuestionContent" for placeholder tiles inside Question tiles,
@@ -31,4 +35,8 @@ export interface ProblemConfiguration {
   // default panel layout when user first visits a problem
   // "split" (default) shows both panels; "workspace-only" collapses resources; "resources-only" collapses workspace
   defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  // how the resources and workspace panes divide the split view. "evenLayout" (default) splits evenly.
+  // "wideContent" narrows the resources pane to its comments-open width (~1/3) when both panes are shown
+  // and comments are closed, giving the workspace ~2/3; opening comments expands it back to the even split.
+  contentLayout?: "evenLayout" | "wideContent";
 }

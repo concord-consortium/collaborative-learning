@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from "react";
 import DeleteNodeIcon from "../assets/icons/delete-node.svg";
 import { useStopEventPropagation } from "./controls/custom-hooks";
-import { ReteManager } from "./rete-manager";
+import { ReteManager } from "../rete/rete-manager";
 import { handleBlockChildKeyDown } from "./dataflow-node";
 
 

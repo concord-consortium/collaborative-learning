@@ -8,41 +8,44 @@ import { onPatch, onSnapshot } from "mobx-state-tree";
 import { observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
-import { DataflowContentModelType, DEFAULT_PROGRAM_ZOOM } from "../model/dataflow-content";
+import { DataflowContentModelType } from "../model/dataflow-content";
 import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
-import { AreaExtra, Schemes } from "./rete-scheme";
-import { NodeEditorMST } from "./node-editor-mst";
-import { INodeServices } from "./service-types";
+import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { MarqueeSelection, Rect } from "../utilities/marquee-selection";
+import { accumulateOnModifier, ISelectionAccumulator } from "../utilities/selection-accumulator";
+import { NodeEditorMST } from "../nodes/node-editor-mst";
+import { INodeServices } from "../nodes/service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
+import { IBaseNode, IBaseNodeModel, NodeClass } from "../nodes/base-node";
 import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
-import { ControlNode } from "./control-node";
-import { CounterNode } from "./counter-node";
-import { DemoOutputNode } from "./demo-output-node";
-import { GeneratorNode } from "./generator-node";
-import { LiveOutputNode } from "./live-output-node";
-import { LogicNode } from "./logic-node";
-import { MathNode } from "./math-node";
-import { NumberNode } from "./number-node";
-import { SensorNode } from "./sensor-node";
-import { TimerNode } from "./timer-node";
-import { TransformNode } from "./transform-node";
+import { ControlNode } from "../nodes/control-node";
+import { CounterNode } from "../nodes/counter-node";
+import { DemoOutputNode } from "../nodes/demo-output-node";
+import { GeneratorNode } from "../nodes/generator-node";
+import { LiveOutputNode } from "../nodes/live-output-node";
+import { LogicNode } from "../nodes/logic-node";
+import { MathNode } from "../nodes/math-node";
+import { NumberNode } from "../nodes/number-node";
+import { SensorNode } from "../nodes/sensor-node";
+import { TimerNode } from "../nodes/timer-node";
+import { TransformNode } from "../nodes/transform-node";
 import { uniqueId } from "../../../utilities/js-utils";
-import { CustomDataflowNode } from "./dataflow-node";
-import { ValueControl, ValueControlComponent } from "./controls/value-control";
-import { NumberUnitsControl, NumberUnitsControlComponent } from "./controls/num-units-control";
-import { NumberControl, NumberControlComponent } from "./controls/num-control";
-import { DropdownListControl, DropdownListControlComponent } from "./controls/dropdown-list-control";
-import { DemoOutputControl, DemoOutputControlComponent } from "./controls/demo-output-control";
-import { PlotButtonControl, PlotButtonControlComponent } from "./controls/plot-button-control";
-import { InputValueControl, InputValueControlComponent } from "./controls/input-value-control";
-import { DataflowEngine } from "./engine/dataflow-engine";
-import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
+import { CustomDataflowNode } from "../nodes/dataflow-node";
+import { ValueControl, ValueControlComponent } from "../nodes/controls/value-control";
+import { NumberUnitsControl, NumberUnitsControlComponent } from "../nodes/controls/num-units-control";
+import { NumberControl, NumberControlComponent } from "../nodes/controls/num-control";
+import { DropdownListControl, DropdownListControlComponent } from "../nodes/controls/dropdown-list-control";
+import { DemoOutputControl, DemoOutputControlComponent } from "../nodes/controls/demo-output-control";
+import { PlotButtonControl, PlotButtonControlComponent } from "../nodes/controls/plot-button-control";
+import { InputValueControl, InputValueControlComponent } from "../nodes/controls/input-value-control";
+import { DataflowEngine } from "../nodes/engine/dataflow-engine";
+import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "../nodes/controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
-import { getSharedNodes } from "./utilities/shared-program-data-utilities";
+import { getSharedNodes } from "../nodes/utilities/shared-program-data-utilities";
+import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { serialSensorChannels } from "../model/utilities/channel";
@@ -50,37 +53,41 @@ import { serialSensorChannels } from "../model/utilities/channel";
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
-interface IContentBounds {
+export interface IContentBounds {
   maxX: number;
   maxY: number;
   minX: number;
   minY: number;
 }
 
- /**
-* Get an indexed name based on exiting names.
-* If existing names are "MyBase 1" and "MyBase 3" this will return "MyBase 5"
-* @param existingNames
-* @param baseName
-* @returns {string} indexed name
-*/
-export function getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
-  const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+(\\.\\d+)?)$`);
- const namedNums: number[] = existingNames.map(name => {
-   const match = name?.match(matchTypeAndNum);
-   return match ? parseInt(match[1], 10) : 0;
- })
- .map(n => isNaN(n) ? 0 : Math.round(n));
+// The far end of a boundary connection (a socket on a node outside the group).
+export interface ExternalEndpoint { connId: string; externalNodeId: string; externalKey: string; }
+// A member input socket exposed on a collapsed group. `external` is set when an outside node feeds
+// it; undefined means the input is open (a proxy dot with no wire).
+export interface GroupInputSocket { nodeId: string; key: string; external?: ExternalEndpoint; }
+// A member output socket exposed on a collapsed group. `externals` lists outside targets it feeds
+// (empty when the output is open).
+export interface GroupOutputSocket { nodeId: string; key: string; externals: ExternalEndpoint[]; }
 
- const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
- return `${baseName} ${nextNum}`;
-}
+// Fallback node dimensions (CSS px) used for group-bounds math when a member element isn't
+// measurable (hidden while collapsed, or not yet laid out just after expanding). Node width is
+// fixed ($node-width = 176); height varies, so this is an estimate refined on the next layout pass.
+const kDefaultNodeWidth = 176;
+const kDefaultNodeHeight = 120;
 
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
   private nodeSelector: ReturnType<typeof AreaExtensions.selector>;
+  private selectable: ReturnType<typeof AreaExtensions.selectableNodes> | undefined;
+  private selectionAccumulator: ISelectionAccumulator | undefined;
+  private collapsedConnectionsDisposer: (() => void) | undefined;
+  private marquee: MarqueeSelection | undefined;
+  // Left-drag marquee-selects; the arrow keys pan instead. `canvasActive` gates arrow-panning to the
+  // tile the user last interacted with (so arrows don't pan every dataflow tile on the page at once).
+  private canvasActive = false;
+  private arrowPanDisposer: (() => void) | undefined;
   public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
@@ -88,6 +95,7 @@ export class ReteManager implements INodeServices {
   public setupComplete: Promise<void>;
   private previousChannelIds = "";
   private fitTimeout: number | undefined;
+  private visibilityReapplyPending = false;
 
   constructor(
     private mstProgram: DataflowProgramModelType,
@@ -114,9 +122,26 @@ export class ReteManager implements INodeServices {
     area.area.setZoomHandler(null);
 
     this.nodeSelector = AreaExtensions.selector();
-    AreaExtensions.selectableNodes(area, this.nodeSelector, {
-      accumulating: AreaExtensions.accumulateOnCtrl()
+    this.selectionAccumulator = accumulateOnModifier();
+    this.selectable = AreaExtensions.selectableNodes(area, this.nodeSelector, {
+      accumulating: this.selectionAccumulator
     });
+
+    // Left-drag on the empty canvas marquee-selects nodes; the arrow keys pan the view. Read-only
+    // tiles get neither.
+    if (!this.readOnly) {
+      this.setupMarqueeSelection();
+      this.setupArrowKeyPan();
+    }
+
+    // Hide connections whose endpoints are in a collapsed group (those nodes are hidden). Member
+    // node elements hide declaratively via CustomDataflowNode; wires are hidden imperatively here
+    // because the connection renderer isn't reactive to group state.
+    this.collapsedConnectionsDisposer = reaction(
+      () => this.collapsedMemberKey(),
+      () => this.applyCollapsedConnectionVisibility(),
+      { fireImmediately: true }
+    );
 
     // Sync observable selection state when nodes are picked or the background is clicked.
     // This pipe runs after selectableNodes has updated the selector.
@@ -157,13 +182,28 @@ export class ReteManager implements INodeServices {
           nodeModel.setLivePosition(nodeView.position);
         }
       }
-      if (event === "translate" || event === "translated") {
+      // Keep the live zoom in sync on both pan (translate) and zoom, so anything driven off it (e.g. the
+      // group overlay, which mirrors this transform) stays aligned with the canvas at any zoom level.
+      // The zoom is not persisted — the canvas fits content on every load (see the init flow).
+      if (event === "translate" || event === "translated" || event === "zoom" || event === "zoomed") {
         this.mstContent.setLiveProgramZoom(area.area.transform);
+      }
+      return context;
+    });
 
-        // Persist the canonical zoom only in editable instances
-        if (!this.readOnly && event === "translated") {
-          this.mstContent.setProgramZoom(area.area.transform);
-        }
+    // A connection view's DOM is created asynchronously (React) after its model, so the
+    // fireImmediately pass of the collapsed-visibility reaction runs before the views exist — most
+    // visibly on load, where a connection into a collapsed group would otherwise stay drawn to its
+    // hidden member. Re-apply (coalesced to one call per microtask) whenever a connection view is
+    // (re)rendered so those wires hide as soon as they mount.
+    area.addPipe(context => {
+      if (context.type === "rendered" && (context.data as any)?.type === "connection"
+          && !this.visibilityReapplyPending) {
+        this.visibilityReapplyPending = true;
+        queueMicrotask(() => {
+          this.visibilityReapplyPending = false;
+          this.applyCollapsedConnectionVisibility();
+        });
       }
       return context;
     });
@@ -271,21 +311,13 @@ export class ReteManager implements INodeServices {
 
     AreaExtensions.simpleNodesOrder(area);
 
-    // Don't apply programZoom to read-only instances since they will be automatically sized to
-    // fit within the view.
-    if (!this.readOnly) {
-      const { programZoom } = this.mstContent;
-      const isDefaultZoom = programZoom.dx === DEFAULT_PROGRAM_ZOOM.dx
-        && programZoom.dy === DEFAULT_PROGRAM_ZOOM.dy
-        && programZoom.scale === DEFAULT_PROGRAM_ZOOM.scale;
-      if (isDefaultZoom && this.mstProgram.nodes.size > 0) {
-        // Tile was copied with default zoom — fit content to show all nodes.
-        // Use setTimeout to ensure DOM has rendered node elements with dimensions.
-        setTimeout(() => this.fitContentAndSave(), 100);
-      } else {
-        await this.area.area.zoom(programZoom.scale);
-        await this.area.area.translate(programZoom.dx, programZoom.dy);
-      }
+    // On restoration, fit all program elements into view (scaled + centered) rather than restoring a
+    // saved pan/zoom — this mirrors the read-only view and sidesteps stale/incorrect saved pans.
+    // Read-only tiles fit via componentDidMount / the content reaction instead. Deferred so the DOM has
+    // laid out node elements with real dimensions.
+    if (!this.readOnly && this.mstProgram.nodes.size > 0) {
+      // Tracked so dispose() cancels it — the tile can unmount inside this window.
+      this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
     }
 
     // Notify after the area, connection, and render plugins have been configured
@@ -486,6 +518,93 @@ export class ReteManager implements INodeServices {
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
 
+  // Disable the area's background drag (it panned on left-drag) and wire marquee selection so a
+  // left-drag on the empty canvas rubber-band-selects nodes instead.
+  private setupMarqueeSelection() {
+    const { area } = this;
+    area.area.setDragHandler(null);
+    if (!area.container) return;
+    this.marquee = new MarqueeSelection({
+      container: area.container,
+      getNodeRects: () => {
+        const rects: Array<{ id: string; rect: Rect }> = [];
+        area.nodeViews.forEach((view, id) => {
+          const el = view.element;
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) return; // skip hidden (e.g. collapsed-group members)
+          rects.push({ id, rect: r });
+        });
+        return rects;
+      },
+      onSelect: (ids, additive) => {
+        if (!additive) this.nodeSelector.unselectAll();
+        ids.forEach(id => this.selectable?.select(id, true));
+        this.syncSelection();
+      },
+    });
+  }
+
+  // Pan the canvas with the arrow keys. Scoped to the tile the user last interacted with, and it
+  // yields to node keyboard-nav / text editing (those handlers stopPropagation before this fires,
+  // and we double-check the focused element).
+  private setupArrowKeyPan() {
+    const container = this.area.container;
+    if (!container) return;
+    // The groups overlay and the zoom control are siblings of the rete container, not descendants,
+    // so a plain container.contains() test deactivated arrow panning as soon as the user touched a
+    // group chip, a collapse toggle or a zoom button — the overlay interactions being the most
+    // likely thing to precede a pan. Accept those siblings too, matched by class rather than by
+    // testing the shared parent wholesale, so the hidden editing canvas doesn't claim pointer
+    // presses landing on the playback canvas in Done mode.
+    const editorEl = container.parentElement;
+    const inThisCanvas = (target: EventTarget | null) =>
+      (target instanceof Node && container.contains(target)) ||
+      (target instanceof Element && !!editorEl?.contains(target) &&
+        !!target.closest(".dataflow-groups-overlay, .program-editor-zoom"));
+    const onDocPointerDown = (e: PointerEvent) => {
+      this.canvasActive = inThisCanvas(e.target);
+      // Connections are committed via the keyboard, so any pointer press abandons an in-progress
+      // connection — unless it lands on a highlighted candidate/source socket. Without this, starting a
+      // connection (e.g. from a collapsed group's socket) and then clicking away would leave the
+      // candidate-highlight rings stuck on their sockets until reload.
+      if (this.isConnecting && !(e.target instanceof Element
+          && e.target.closest(".connection-candidate, .connection-source"))) {
+        this.cancelConnecting();
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!this.canvasActive || e.altKey || e.ctrlKey || e.metaKey) return;
+      const step = e.shiftKey ? 120 : 40;
+      let dx = 0, dy = 0;
+      switch (e.key) {
+        case "ArrowLeft":  dx = step;  break;
+        case "ArrowRight": dx = -step; break;
+        case "ArrowUp":    dy = step;  break;
+        case "ArrowDown":  dy = -step; break;
+        default: return;
+      }
+      const active = document.activeElement;
+      if (active instanceof HTMLElement &&
+          (active.closest(".node, .dataflow-group-node") || active.tagName === "INPUT" ||
+           active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+      e.preventDefault();
+      void this.pan(dx, dy);
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    window.addEventListener("keydown", onKeyDown);
+    this.arrowPanDisposer = () => {
+      document.removeEventListener("pointerdown", onDocPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }
+
+  // Pan the view by a screen-space delta (positive dx moves content right).
+  public async pan(dx: number, dy: number) {
+    const t = this.area.area.transform;
+    await this.area.area.translate(t.x + dx, t.y + dy);
+  }
+
   /**
    * Focus the node's keyboard-focusable `.node` div.
    *
@@ -541,11 +660,17 @@ export class ReteManager implements INodeServices {
       if (node.id === sourceNodeId) continue;
       const view = this.area.nodeViews.get(node.id);
       if (!view?.element) continue;
+      // A collapsed group's members are display:none — their only visible, connectable sockets are the
+      // proxy dots on the group chip. Use those, and skip inputs consumed internally (no proxy exists)
+      // so they aren't offered as invisible targets.
+      const collapsed = this.isNodeInCollapsedGroup(node.id);
       for (const inputKey of Object.keys(node.inputs)) {
         if (!node.inputs[inputKey]) continue;
-        const socketEl = view.element.querySelector<HTMLElement>(
-          `[data-socket-side="input"][data-socket-key="${inputKey}"]`
-        );
+        const socketEl = collapsed
+          ? this.proxySocketEl(node.id, inputKey, "input")
+          : view.element.querySelector<HTMLElement>(
+              `[data-socket-side="input"][data-socket-key="${inputKey}"]`
+            );
         if (socketEl) candidates.push({ nodeId: node.id, inputKey, socketEl });
       }
     }
@@ -687,9 +812,35 @@ export class ReteManager implements INodeServices {
   }
 
   private getOutputSocketEl(nodeId: string, socketKey: string): HTMLElement | undefined {
+    // A collapsed member's real output socket is display:none; the connectable one is its chip proxy.
+    if (this.isNodeInCollapsedGroup(nodeId)) return this.proxySocketEl(nodeId, socketKey, "output");
     const view = this.area.nodeViews.get(nodeId);
     return view?.element?.querySelector<HTMLElement>(
       `[data-socket-side="output"][data-socket-key="${socketKey}"]`
+    ) ?? undefined;
+  }
+
+  // True when a node is hidden inside a collapsed group (its real sockets are display:none, so its
+  // only visible/connectable sockets are the proxy dots the group chip draws in the overlay).
+  public isNodeInCollapsedGroup(nodeId: string): boolean {
+    const groupId = this.mstProgram?.nodes.get(nodeId)?.groupId;
+    return !!groupId && !!this.mstProgram.groups.get(groupId)?.collapsed;
+  }
+
+  // The proxy socket dot a collapsed group draws for one of its exposed member sockets, located by the
+  // data attributes the overlay tags it with. Undefined when that socket isn't exposed (consumed
+  // internally, so no proxy is drawn).
+  private proxySocketEl(nodeId: string, socketKey: string, side: "input" | "output"): HTMLElement | undefined {
+    // Scoped to this tile's own subtree, not the document. The same document can be mounted more
+    // than once at a time (a My Work thumbnail alongside the workspace, the compare pane, four-up),
+    // and those mounts share node ids — as do a curriculum program and a student's copy of it,
+    // since dataflow doesn't remap ids on copy. A document-wide query would return whichever mount
+    // comes first in DOM order. The overlay is a sibling of the rete container, so scope to their
+    // shared parent.
+    const root = this.area.container?.parentElement;
+    return root?.querySelector<HTMLElement>(
+      `.dataflow-groups-overlay [data-group-proxy][data-socket-side="${side}"]` +
+      `[data-node-id="${nodeId}"][data-socket-key="${socketKey}"]`
     ) ?? undefined;
   }
 
@@ -831,6 +982,145 @@ export class ReteManager implements INodeServices {
       await this.removeNodeAndConnections(id);
     }
     this.syncSelection();
+  }
+
+  // The group ids that the current node selection belongs to (used to enable/perform Ungroup).
+  public getSelectedGroupIds(): string[] {
+    const groupIds = new Set<string>();
+    this.getSelectedNodeIds().forEach(id => {
+      const group = this.mstProgram.getGroupForNode(id);
+      if (group) groupIds.add(group.id);
+    });
+    return [...groupIds];
+  }
+
+  // True when the current selection can be grouped: >=2 selected nodes, none already in a group.
+  public canGroupSelection(): boolean {
+    const ids = this.getSelectedNodeIds();
+    return ids.length >= 2 && ids.every(id => !this.mstProgram.getGroupForNode(id));
+  }
+
+  // Group the selected nodes into a new "super node" (needs >=2 ungrouped selected nodes).
+  public groupSelectedNodes() {
+    return this.mstProgram.createGroup(this.getSelectedNodeIds());
+  }
+
+  public ungroupSelectedGroups() {
+    this.mstProgram.ungroupGroups(this.getSelectedGroupIds());
+  }
+
+  public toggleGroupCollapsed(groupId: string) {
+    const group = this.mstProgram.groups.get(groupId);
+    group?.setCollapsed(!group.collapsed);
+  }
+
+  // Sorted list of node ids that are hidden because their group is collapsed (reaction key).
+  private collapsedMemberKey() {
+    const ids: string[] = [];
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) ids.push(...g.nodeIds.keys()); });
+    return ids.sort().join(",");
+  }
+
+  // The external interface a collapsed group exposes: every member socket that isn't consumed
+  // internally. An input is exposed when it isn't fed by another member (open, or fed by an external
+  // node); an output is exposed when it isn't fully consumed by other members (open, or feeding at
+  // least one external node). Open sockets get a proxy dot with no wire; external-facing ones also
+  // route a boundary wire. This makes the collapsed group behave like a node — its free sockets
+  // stay connectable even when nothing is wired to them yet.
+  public getGroupInterface(nodeIds: string[]) {
+    const members = new Set(nodeIds);
+    const key = (nodeId: string, socketKey: string) => `${nodeId}::${socketKey}`;
+    const inputFedByMember = new Set<string>();
+    const inputExternal = new Map<string, ExternalEndpoint>();
+    const outputToMember = new Set<string>();
+    const outputExternals = new Map<string, ExternalEndpoint[]>();
+
+    this.mstProgram.connections.forEach(conn => {
+      const sourceIn = members.has(conn.source);
+      const targetIn = members.has(conn.target);
+      if (targetIn) {
+        const k = key(conn.target, conn.targetInput);
+        if (sourceIn) inputFedByMember.add(k);
+        else inputExternal.set(k, { connId: conn.id, externalNodeId: conn.source, externalKey: conn.sourceOutput });
+      }
+      if (sourceIn) {
+        const k = key(conn.source, conn.sourceOutput);
+        if (targetIn) {outputToMember.add(k);}
+        else {
+          const arr = outputExternals.get(k) ?? [];
+          arr.push({ connId: conn.id, externalNodeId: conn.target, externalKey: conn.targetInput });
+          outputExternals.set(k, arr);
+        }
+      }
+    });
+
+    const inputs: GroupInputSocket[] = [];
+    const outputs: GroupOutputSocket[] = [];
+    for (const nodeId of nodeIds) {
+      const node = this.editor.getNode(nodeId);
+      if (!node) continue;
+      for (const socketKey of Object.keys(node.inputs ?? {})) {
+        if (!node.inputs?.[socketKey]) continue;
+        const k = key(nodeId, socketKey);
+        if (inputFedByMember.has(k)) continue; // consumed internally
+        inputs.push({ nodeId, key: socketKey, external: inputExternal.get(k) });
+      }
+      for (const socketKey of Object.keys(node.outputs ?? {})) {
+        if (!node.outputs?.[socketKey]) continue;
+        const k = key(nodeId, socketKey);
+        const externals = outputExternals.get(k) ?? [];
+        if (outputToMember.has(k) && externals.length === 0) continue; // consumed internally
+        outputs.push({ nodeId, key: socketKey, externals });
+      }
+    }
+    return { inputs, outputs };
+  }
+
+  // The socket-dot DOM element for a node's socket (used to anchor collapsed-group boundary wires to
+  // external nodes' sockets). The overlay measures it relative to its own element so both wire ends
+  // share an origin. The `[data-socket-side][data-socket-key]` wrapper also contains the socket
+  // label, so we drill into the inner socket dot (`data-testid="<side>-socket"`) — the same element
+  // rete anchors its own connections to — falling back to the wrapper if it isn't found.
+  public getSocketElement(nodeId: string, key: string, side: "input" | "output") {
+    // When the far end is itself inside a collapsed group, its real socket is in a display:none
+    // subtree — present in the DOM but zero-size, so measuring it would anchor the wire at the
+    // viewport origin. The visible anchor is that group's chip proxy, as in getOutputSocketEl and
+    // getCompatibleTargets. Returning undefined when no proxy exists lets the caller drop the wire.
+    if (this.isNodeInCollapsedGroup(nodeId)) return this.proxySocketEl(nodeId, key, side);
+    const wrapper = this.area.nodeViews.get(nodeId)?.element?.querySelector<HTMLElement>(
+      `[data-socket-side="${side}"][data-socket-key="${key}"]`
+    );
+    return wrapper?.querySelector<HTMLElement>(`[data-testid="${side}-socket"]`) ?? wrapper ?? undefined;
+  }
+
+  // Hide/show connection views whose source or target node is in a collapsed group.
+  public applyCollapsedConnectionVisibility() {
+    const hidden = new Set<string>();
+    this.mstProgram.groups.forEach(g => { if (g.collapsed) g.nodeIds.forEach(id => hidden.add(id)); });
+    this.area.connectionViews.forEach((view, id) => {
+      const conn = this.mstProgram.connections.get(id);
+      const hide = !!conn && (hidden.has(conn.source) || hidden.has(conn.target));
+      if (view.element) view.element.style.display = hide ? "none" : "";
+    });
+  }
+
+  // Observable accessors for the groups overlay component.
+  public get groups() {
+    return this.mstProgram.groups;
+  }
+  public get nodes() {
+    return this.mstProgram.nodes;
+  }
+
+  // Screen-space bounding box (in .flow-tool pixels) around the given nodes — the world-unit
+  // calculateContentBounds converted to screen coordinates via the current area transform. Returns
+  // undefined if no member is currently measurable.
+  public getGroupScreenBounds(nodeIds: string[]) {
+    const bounds = this.calculateContentBounds(nodeIds);
+    if (!bounds) return undefined;
+    const { k, x: tx, y: ty } = this.area.area.transform;
+    const { minX, minY, maxX, maxY } = bounds;
+    return { left: tx + minX * k, top: ty + minY * k, width: (maxX - minX) * k, height: (maxY - minY) * k };
   }
 
   public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
@@ -1073,6 +1363,10 @@ export class ReteManager implements INodeServices {
 
   public dispose() {
     this.snapshotDisposer?.();
+    this.selectionAccumulator?.destroy();
+    this.collapsedConnectionsDisposer?.();
+    this.marquee?.destroy();
+    this.arrowPanDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;
@@ -1170,6 +1464,9 @@ export class ReteManager implements INodeServices {
       this.process();
       this.updateSharedProgramData();
     });
+
+    // Re-apply collapsed-group visibility in case connection views were (re)created above.
+    this.applyCollapsedConnectionVisibility();
   };
 
   public updateSharedProgramData = () => {
@@ -1243,10 +1540,13 @@ export class ReteManager implements INodeServices {
     return { width: containerWidth, height: containerHeight };
   }
 
+  /**
+   * Fit all nodes into view (scaled + centered). Runs on load for both read-only and editable tiles
+   * (see the init flow and componentDidMount) and reactively when a read-only tile's content changes.
+   * The fit is not persisted — it's recomputed on every load — so an editing user's in-session pan/zoom
+   * is left untouched until the next restoration.
+   */
   public async fitContent() {
-    // Only apply content fitting to read-only tiles
-    if (!this.readOnly) return;
-
     const dims = this.getContainerDimensions();
     if (!dims) {
       if (!this.disposed) {
@@ -1262,31 +1562,6 @@ export class ReteManager implements INodeServices {
 
     await this.area.area.zoom(scale);
     await this.area.area.translate(offsetX, offsetY);
-  }
-
-  /**
-   * Fit all nodes into view for an editable tile and persist the resulting zoom.
-   * Used when a tile is copied (programZoom is reset to default) so all nodes are visible.
-   */
-  private async fitContentAndSave() {
-    const dims = this.getContainerDimensions();
-    if (!dims) {
-      if (!this.disposed) {
-        this.fitTimeout = window.setTimeout(() => this.fitContentAndSave(), 100);
-      }
-      return;
-    }
-
-    const bounds = this.calculateContentBounds();
-    if (!bounds) return;
-
-    const { scale, offsetX, offsetY } = this.calculateFitTransform(bounds, dims.width, dims.height);
-
-    await this.area.area.zoom(scale);
-    await this.area.area.translate(offsetX, offsetY);
-
-    // Persist so future loads use this fitted zoom
-    this.mstContent.setProgramZoom(this.area.area.transform);
   }
 
   private scheduleFit = () => {
@@ -1330,39 +1605,38 @@ export class ReteManager implements INodeServices {
     );
   };
 
-  private calculateContentBounds = () => {
-    const nodes = this.mstProgram.nodes;
-    if (!nodes || nodes.size === 0) return null;
+  // World-unit bounding box of the given nodes (default: all nodes). Uses each node's current position
+  // and its measured element size (converted from screen back to world units); falls back to the default
+  // node dimensions when an element isn't measurable (e.g. a member hidden while its group is collapsed).
+  // Returns null when no member is present. Used both to fit content and to place group overlays.
+  public calculateContentBounds(nodeIds?: string[]) {
+    const nodeList = nodeIds
+      ? nodeIds.map(id => this.mstProgram.nodes.get(id))
+      : [...this.mstProgram.nodes.values()];
 
     const { k } = this.area.area.transform; // current zoom
     let minX = Infinity, minY = Infinity;
     let maxX = -Infinity, maxY = -Infinity;
 
-    nodes.forEach(node => {
-      const x = Number.isFinite(node.liveX) ? node.liveX : node.x;
-      const y = Number.isFinite(node.liveY) ? node.liveY : node.y;
+    for (const node of nodeList) {
+      if (!node) continue;
+      const { currentX: x, currentY: y } = node;
+      const rect = this.area.nodeViews.get(node.id)?.element?.getBoundingClientRect();
+      // A zero-size rect means "not measurable", not "zero wide". A member hidden inside a collapsed
+      // group is display:none, and getBoundingClientRect reports all zeros for it rather than
+      // returning undefined — so test the dimensions, not just the rect, or hidden members collapse
+      // to a point and shrink the computed bounds.
+      const w = rect?.width ? rect.width / k : kDefaultNodeWidth;   // screen px → world units
+      const h = rect?.height ? rect.height / k : kDefaultNodeHeight;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + w);
+      maxY = Math.max(maxY, y + h);
+    }
 
-      const nodeView = this.area.nodeViews.get(node.id);
-      if (nodeView?.element) {
-        const r = nodeView.element.getBoundingClientRect();
-        const nodeWidth = r.width / k;   // convert back to world units
-        const nodeHeight = r.height / k; // convert back to world units
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x + nodeWidth);
-        maxY = Math.max(maxY, y + nodeHeight);
-      } else {
-        const nodeWidth = 120;
-        const nodeHeight = 80;
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x + nodeWidth);
-        maxY = Math.max(maxY, y + nodeHeight);
-      }
-    });
-
+    if (minX === Infinity) return null;
     return { minX, minY, maxX, maxY };
-  };
+  }
 
   private calculateFitTransform = (bounds: IContentBounds, containerWidth: number, containerHeight: number) => {
     const contentWidth = bounds.maxX - bounds.minX;
@@ -1393,6 +1667,6 @@ export class ReteManager implements INodeServices {
   private async setZoom(zoom: number) {
     await this.area.area.zoom(zoom);
     const { transform } = this.area.area;
-    this.mstContent.setProgramZoom(transform);
+    this.mstContent.setLiveProgramZoom(transform);
   }
 }

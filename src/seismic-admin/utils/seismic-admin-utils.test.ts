@@ -1,14 +1,30 @@
-import { coverageSegments, missingDayCount, mergeStations, formatBytes, stationLabel } from "./seismic-admin-utils";
+import {
+  missingDayCount, mergeStations, formatBytes, getStationLabel, timelineSegments
+} from "./seismic-admin-utils";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
 import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
 
 describe("seismic-admin-utils", () => {
-  it("builds run-length coverage segments over [firstDay, lastDay]", () => {
-    const segs = coverageSegments(new Set([10, 12, 13]), 10, 13);
-    expect(segs).toEqual([
-      { startDay: 10, endDay: 10, highlighted: true },
-      { startDay: 11, endDay: 11, highlighted: false },
-      { startDay: 12, endDay: 13, highlighted: true },
+  it("builds an all-filled timeline segment when every day is highlighted", () => {
+    expect(timelineSegments(new Set([1, 2, 3]), new Set(), 1, 3)).toEqual([
+      { startDay: 1, endDay: 3, state: "filled" },
+    ]);
+  });
+
+  it("builds three-state timeline segments as runs of equal state", () => {
+    expect(timelineSegments(new Set([10, 11, 14, 15]), new Set([12]), 10, 15)).toEqual([
+      { startDay: 10, endDay: 11, state: "filled" },
+      { startDay: 12, endDay: 12, state: "partial" },
+      { startDay: 13, endDay: 13, state: "empty" },
+      { startDay: 14, endDay: 15, state: "filled" },
+    ]);
+  });
+
+  it("merges adjacent partial days into one timeline segment", () => {
+    expect(timelineSegments(new Set(), new Set([2, 3]), 1, 4)).toEqual([
+      { startDay: 1, endDay: 1, state: "empty" },
+      { startDay: 2, endDay: 3, state: "partial" },
+      { startDay: 4, endDay: 4, state: "empty" },
     ]);
   });
 
@@ -31,9 +47,9 @@ describe("seismic-admin-utils", () => {
   });
 
   it("includes the location code in the fallback label when present", () => {
-    expect(stationLabel({ network: "IU", station: "ANMO", location: "00", channel: "BHZ" }))
+    expect(getStationLabel({ network: "IU", station: "ANMO", location: "00", channel: "BHZ" }))
       .toBe("IU ANMO 00 BHZ");
-    expect(stationLabel({ network: "AK", station: "K204", channel: "HNZ" })).toBe("AK K204 HNZ");
+    expect(getStationLabel({ network: "AK", station: "K204", channel: "HNZ" })).toBe("AK K204 HNZ");
   });
 
   it("formats byte sizes", () => {

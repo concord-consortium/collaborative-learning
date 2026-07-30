@@ -1,3 +1,5 @@
+import { TimeRange } from "./seismic-types";
+
 /** Seconds in a UTC day. Day identity for the bulk cache is the UTC calendar day. */
 export const SECONDS_PER_DAY = 86400;
 export const MILLISECONDS_PER_DAY = SECONDS_PER_DAY * 1000;
@@ -21,6 +23,11 @@ export function utcDayFromString(dateString: string): number | undefined {
 /** Unix seconds → UTC day index (days since the Unix epoch). */
 export function dayIndex(unixSec: number): number {
   return Math.floor(unixSec / SECONDS_PER_DAY);
+}
+
+/** The time range for a single day. */
+export function dayRange(day: number): TimeRange {
+  return { start: day * SECONDS_PER_DAY, end: (day + 1) * SECONDS_PER_DAY };
 }
 
 /** Day index → UTC calendar year and day-of-year (1-based), for OPFS paths. */

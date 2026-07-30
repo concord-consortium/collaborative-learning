@@ -2,18 +2,18 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { DateTime } from "luxon";
 import {
   LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION
-} from "../../../shared/seismic/envelope-config";
-import { dequantize } from "../../../shared/seismic/envelope-codec";
+} from "../../../../shared/seismic/envelope-config";
+import { dequantize } from "../../../../shared/seismic/envelope-codec";
 import {
   getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileS3Key, getTileTimeRange
-} from "../../../shared/seismic/tile-addressing";
-import { fetchEnvelopeTile } from "../../../shared/seismic/envelope-fetcher";
-import { fetchRawSeismicData, fetchStationMetadata } from "../../../shared/seismic/earthscope-client";
+} from "../../../../shared/seismic/tile-addressing";
+import { fetchEnvelopeTile } from "../../../../shared/seismic/envelope-fetcher";
+import { fetchRawSeismicData, fetchStationMetadata } from "../../../../shared/seismic/earthscope-client";
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray, SeismicViewportParams, ViewportQueryResult, RawSegment,
   StationChannel, StationData, StationId, TimeRange, StationQuery
-} from "../../../shared/seismic/seismic-types";
+} from "../../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
 type RawCacheEntry = RawSegment[] | "loading" | "missing";

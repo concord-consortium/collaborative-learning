@@ -7,7 +7,7 @@
 > replacing the single document `type` field (switched on in ~90 places) with explicit, orthogonal axes. The
 > target architecture and per-axis roadmap live in [../../document-axes/README.md](../../document-axes/README.md)
 > ([axes.md](../../document-axes/axes.md), [target-architecture.md](../../document-axes/target-architecture.md),
-> and the axis-set decision record [2026-07-21-document-axes-register.md](2026-07-21-document-axes-register.md)).
+> and the axis-set decision record [2026-07-21-document-axes-planning.md](2026-07-21-document-axes-planning.md)).
 > The eventual product goal that motivates this axis set is class-wide collaborative documents (a per-class
 > Driving Question Board); those user-facing stages come later and are out of scope here (see
 > [Boundaries](#boundaries-and-non-goals)). This PR is foundational and has **no user-visible change**; the
@@ -182,7 +182,7 @@ Deferred to later stages of the document-axes work; see the roadmap
 
 - Document-axes roadmap and architecture: [../../document-axes/README.md](../../document-axes/README.md),
   [axes.md](../../document-axes/axes.md), [target-architecture.md](../../document-axes/target-architecture.md),
-  [2026-07-21-document-axes-register.md](2026-07-21-document-axes-register.md).
+  [2026-07-21-document-axes-planning.md](2026-07-21-document-axes-planning.md).
 - Firestore metadata sourcing prerequisite: [2026-07-17-firestore-metadata-as-document-source-design.md](2026-07-17-firestore-metadata-as-document-source-design.md).
 - CLUE-524 canonical pointers: [2026-07-11-scoped-singleton-document-pointers-design.md](2026-07-11-scoped-singleton-document-pointers-design.md).
 - Key code sites: `src/models/document/document-kinds.ts`, `src/lib/db.ts`,

@@ -71,13 +71,28 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
+    /**
+     * @deprecated Nothing reads or writes this. The canvas now fits all content on every load
+     * instead of restoring a saved pan/zoom, so the live transform lives in the volatile
+     * `liveProgramZoom` below.
+     *
+     * It is retained purely so that history playback still works on documents saved before that
+     * change. Panning used to call `setProgramZoom`, which recorded patches against nested paths
+     * like `/programZoom/dx`; if the property is absent those paths no longer resolve, MST throws,
+     * and `TreeManager` halts playback at that entry with a failure banner rather than skipping it.
+     *
+     * Removing it needs either a major version with a patch migration, or for history replay to
+     * tolerate paths that reference removed properties.
+     */
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
     channels: observable([]) as NodeChannelInfo[],
-    liveProgramZoom: ProgramZoom.create(getSnapshot(self.programZoom))
+    // Volatile (not persisted): the canvas fits all content on every load rather than restoring a
+    // saved pan/zoom, so this only tracks the live transform for the current session.
+    liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM)
   }))
   .views(self => ({
     get sharedModel() {
@@ -129,20 +144,24 @@ export const DataflowContentModel = TileContentModel
     get isUserResizable() {
       return true;
     },
-    get tileSnapshotForCopy() {
-      const snapshot = getSnapshot(self);
-      // Reset programZoom so the rete manager knows to fit content on first display
-      return { ...snapshot, programZoom: DEFAULT_PROGRAM_ZOOM };
-    },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
+      // Strip the transient per-tick buffers: a running program rewrites them every tick, which
+      // would re-serialize the export each tick and continuously reload authoring previews. They
+      // aren't curriculum content. Student saves use getSnapshot (not exportJson), so tick history
+      // there is unaffected.
+      const nodes = Object.fromEntries(
+        Object.entries(snapshot.program.nodes).map(([id, node]) => {
+          const n = node as any;
+          return [id, { ...n, data: { ...n.data, tickEntries: {} } }];
+        })
+      );
+      const program = { ...snapshot.program, recentTicks: [], nodes };
       if (options?.forHash) {
         // We only need the program for hashing
-        const {program} = snapshot;
         return stringify({program}, {maxLength: 120});
       }
-      // We used to strip out the recent values, maybe we should again?
-      return stringify(snapshot, {maxLength: 120});
+      return stringify({...snapshot, program}, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
@@ -272,10 +291,6 @@ export const DataflowContentModel = TileContentModel
       self.programDataRate = dataRate;
     },
     setLiveProgramZoom(transform: Transform) {
-      self.liveProgramZoom.update(transform);
-    },
-    setProgramZoom(transform: Transform) {
-      self.programZoom.update(transform);
       self.liveProgramZoom.update(transform);
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){

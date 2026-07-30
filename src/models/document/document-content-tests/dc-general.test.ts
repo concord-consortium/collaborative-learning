@@ -695,3 +695,57 @@ describe("DocumentContentModel -- createDefaultSectionedContent", () => {
     expect(content.rowCount).toBe(4);
   });
 });
+
+describe("DocumentContentModel -- section header export round-trip --", () => {
+  const sectionIdsIn = (tiles: any[]) =>
+    tiles.filter(t => t?.content?.isSectionHeader).map(t => t.content.sectionId);
+
+  it("drops section headers from the flat export by default", () => {
+    const content = createDocumentContent("[Header:A, Text, Header:B, Placeholder]");
+    expect(sectionIdsIn(parsedExport(content).tiles)).toEqual([]);
+  });
+
+  it("keeps section headers when includeSectionHeaders is set, and they survive a round-trip", () => {
+    const content = createDocumentContent("[Header:A, Text, Header:B, Placeholder]");
+    const exported = parsedExport(content, { includeSectionHeaders: true });
+    expect(sectionIdsIn(exported.tiles)).toEqual(["A", "B"]);
+
+    // Re-import the exported JSON (the load→edit→save path the template editor uses) and export
+    // again — the dividers must still be present.
+    const reimported = DocumentContentModel.create({ tiles: exported.tiles } as any);
+    const reexported = parsedExport(reimported, { includeSectionHeaders: true });
+    expect(sectionIdsIn(reexported.tiles)).toEqual(["A", "B"]);
+  });
+
+  const placeholderSectionIds = (tiles: any[]) =>
+    tiles.filter(t => t?.content?.type === "Placeholder").map(t => t.content.sectionId);
+
+  it("drops section placeholders from the flat export by default", () => {
+    const content = createDocumentContent("[Header:A, Placeholder, Header:B, Placeholder]");
+    expect(placeholderSectionIds(parsedExport(content, { includeSectionHeaders: true }).tiles)).toEqual([]);
+  });
+
+  it("keeps section placeholders when includePlaceholders is set, and they survive a round-trip", () => {
+    const content = createDocumentContent("[Header:A, Placeholder, Header:B, Placeholder]");
+    const opts = { includeSectionHeaders: true, includePlaceholders: true };
+    const exported = parsedExport(content, opts);
+    expect(placeholderSectionIds(exported.tiles)).toEqual(["A", "B"]);
+
+    // Re-import the exported JSON (the template editor's load→edit→save path) and export again —
+    // the "put content here" placeholders must still be present for each empty section.
+    const reimported = DocumentContentModel.create({ tiles: exported.tiles } as any);
+    expect(placeholderSectionIds(parsedExport(reimported, opts).tiles)).toEqual(["A", "B"]);
+  });
+
+  it("tolerates a placeholder marker with an empty containerType through the round-trip", () => {
+    // These fixture placeholders carry no containerType, so the export falls back to "".
+    const content = createDocumentContent("[Header:A, Placeholder, Header:B, Placeholder]");
+    const opts = { includeSectionHeaders: true, includePlaceholders: true };
+    const exported = parsedExport(content, opts);
+    const placeholder = exported.tiles.find((t: any) => t?.content?.type === "Placeholder");
+    expect(placeholder.content.containerType).toBe("");
+    // Re-importing the empty-containerType marker still yields a placeholder for each section.
+    const reimported = DocumentContentModel.create({ tiles: exported.tiles } as any);
+    expect(placeholderSectionIds(parsedExport(reimported, opts).tiles)).toEqual(["A", "B"]);
+  });
+});
