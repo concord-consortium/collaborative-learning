@@ -1,4 +1,5 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
+import { observable, runInAction } from "mobx";
 import React from "react";
 import { DateTime } from "luxon";
 import { WaveformPanel } from "./waveform-panel";
@@ -22,13 +23,15 @@ const mockQuery = jest.fn().mockReturnValue({
 });
 const mockLoadViewport = jest.fn();
 
+// Observable so envelopeCacheVersion bumps re-render the observer component
+const mockService = observable({
+  envelopeCacheVersion: 0,
+  query: mockQuery,
+  loadViewport: mockLoadViewport,
+});
+
 jest.mock("../../../hooks/use-stores", () => ({
-  useStores: () => ({
-    seismicQueryService: {
-      query: mockQuery,
-      loadViewport: mockLoadViewport,
-    },
-  }),
+  useStores: () => ({ seismicQueryService: mockService }),
 }));
 
 const START = DateTime.fromISO("2026-02-01T00:00:00Z");
@@ -66,5 +69,31 @@ describe("WaveformPanel", () => {
     );
     // ResizeObserver doesn't fire in jsdom, so pixelWidth stays 0
     expect(mockQuery).not.toHaveBeenCalled();
+  });
+
+  it("re-runs loadViewport when the envelope cache version is bumped", () => {
+    jest.useFakeTimers();
+    const OriginalResizeObserver = global.ResizeObserver;
+    // A ResizeObserver that reports a width immediately so pixelWidth > 0
+    global.ResizeObserver = class {
+      constructor(private cb: ResizeObserverCallback) {}
+      observe() { this.cb([{ contentRect: { width: 500 } }] as any, this as any); }
+      unobserve() { /* noop */ }
+      disconnect() { /* noop */ }
+    } as any;
+    try {
+      render(
+        <WaveformPanel sharedSeismogram={sharedSeismogram} startTime={START} endTime={END} />
+      );
+      act(() => { jest.advanceTimersByTime(200); });  // past the 150ms debounce
+      expect(mockLoadViewport).toHaveBeenCalledTimes(1);
+
+      act(() => { runInAction(() => { mockService.envelopeCacheVersion++; }); });
+      act(() => { jest.advanceTimersByTime(200); });
+      expect(mockLoadViewport).toHaveBeenCalledTimes(2);
+    } finally {
+      global.ResizeObserver = OriginalResizeObserver;
+      jest.useRealTimers();
+    }
   });
 });

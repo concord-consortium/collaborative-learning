@@ -42,6 +42,9 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     return () => resizeObserver.disconnect();
   }, []);
 
+  // Re-run loadViewport when cached envelope data is invalidated (e.g. after tile uploads).
+  const cacheVersion = seismicQueryService.envelopeCacheVersion;
+
   // Debounce loadViewport
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -55,7 +58,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [stationInfo, startTime, endTime, pixelWidth, seismicQueryService]);
+  }, [stationInfo, startTime, endTime, pixelWidth, seismicQueryService, cacheVersion]);
 
   // Query and render
   const queryResult = (stationInfo && pixelWidth > 0)
