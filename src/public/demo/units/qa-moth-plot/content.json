@@ -13,7 +13,8 @@
       },
       "dataflow": {
         "servoInputMode": "proportion",
-        "liveOutputTypes": ["Servo", "Gripper 2.0"]
+        "liveOutputTypes": ["Servo", "Gripper 2.0"],
+        "defaultSamplingRate": 10000
       },
       "datacard": {
         "tools": [

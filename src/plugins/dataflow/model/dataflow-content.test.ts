@@ -29,6 +29,21 @@ describe("DataflowContentModel", () => {
     expect(() => applyPatch(dcm, { op: "replace", path: "/programZoom/dx", value: -10 })).not.toThrow();
   });
 
+  // settings.dataflow.defaultSamplingRate seeds a new tile's rate; only known rate values apply.
+  const appConfigWith = (settings: Record<string, any>) =>
+    ({ getSetting: (key: string, group?: string) => settings[key] }) as any;
+
+  it("seeds programDataRate from settings.dataflow.defaultSamplingRate", () => {
+    const dcm = defaultDataflowContent({ appConfig: appConfigWith({ defaultSamplingRate: 10000 }) });
+    expect(dcm.programDataRate).toBe(10000);
+  });
+
+  it("falls back to the default rate for an unknown/absent defaultSamplingRate", () => {
+    expect(defaultDataflowContent().programDataRate).toBe(DEFAULT_DATA_RATE);
+    expect(defaultDataflowContent({ appConfig: appConfigWith({ defaultSamplingRate: 1234 }) })
+      .programDataRate).toBe(DEFAULT_DATA_RATE);
+  });
+
   it("should handle basic changes", () => {
     const dcm = defaultDataflowContent();
     dcm.setProgramDataRate(newDataRate);

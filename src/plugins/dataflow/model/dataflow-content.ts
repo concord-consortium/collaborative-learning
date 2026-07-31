@@ -6,10 +6,10 @@ import stringify from "json-stringify-pretty-compact";
 import { Transform } from "rete-area-plugin/_types/area";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
-import { DEFAULT_DATA_RATE } from "./utilities/node";
+import { DEFAULT_DATA_RATE, ProgramDataRates } from "./utilities/node";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { IDefaultContentOptions, ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
@@ -29,8 +29,13 @@ import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
 
-export function defaultDataflowContent(): DataflowContentModelType {
-  return DataflowContentModel.create();
+export function defaultDataflowContent(options?: IDefaultContentOptions): DataflowContentModelType {
+  // Unit-config (settings.dataflow.defaultSamplingRate): seed a new tile's sampling rate from the unit.
+  // Applied only at creation (never overwrites a saved rate); an unknown value falls back to the default.
+  const configuredRate = options?.appConfig?.getSetting("defaultSamplingRate", "dataflow");
+  const programDataRate = ProgramDataRates.some(r => r.val === configuredRate)
+    ? configuredRate as number : DEFAULT_DATA_RATE;
+  return DataflowContentModel.create({ programDataRate });
 }
 
 export const kDataflowDefaultHeight = 480;
