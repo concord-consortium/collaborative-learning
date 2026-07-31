@@ -66,15 +66,19 @@ describe("WaveRunnerComponent", () => {
     })
   });
 
-  function renderWithStores() {
-    stores.ui.setSelectedTileId(model.id);
+  function renderModel(model2: ReturnType<typeof TileModel.create>) {
+    stores.ui.setSelectedTileId(model2.id);
     return render(
       <Provider stores={stores}>
-        <TileModelContext.Provider value={model}>
-          <WaveRunnerComponent {...defaultProps} {...{model}} />
+        <TileModelContext.Provider value={model2}>
+          <WaveRunnerComponent {...defaultProps} {...{model: model2}} />
         </TileModelContext.Provider>
       </Provider>
     );
+  }
+
+  function renderWithStores() {
+    return renderModel(model);
   }
 
   beforeEach(() => {
@@ -150,14 +154,7 @@ describe("WaveRunnerComponent", () => {
 
   it("auto-selects the default station on mount", () => {
     const model2 = TileModel.create({ content: defaultWaveRunnerContent() });
-    stores.ui.setSelectedTileId(model2.id);
-    render(
-      <Provider stores={stores}>
-        <TileModelContext.Provider value={model2}>
-          <WaveRunnerComponent {...defaultProps} {...{model: model2}} />
-        </TileModelContext.Provider>
-      </Provider>
-    );
+    renderModel(model2);
     const tileContent = model2.content as any;
     expect(tileContent.station?.network).toBe("AK");
     expect(tileContent.station?.station).toBe("K204");
@@ -197,5 +194,43 @@ describe("WaveRunnerComponent", () => {
     renderWithStores();
     expect(screen.getByText("Choose a model")).toBeInTheDocument();
     expect(screen.getByText("Compact Model")).toBeInTheDocument();
+  });
+
+  it("shows envelope load progress while loading", async () => {
+    const content2 = defaultWaveRunnerContent();
+    const model2 = TileModel.create({ content: content2 });
+    content2.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage" });
+    let resolveRun: (v: unknown) => void = () => undefined;
+    const processEnvelopes = jest.fn((opts: any) => {
+      opts.onProgress(2, 5);
+      return new Promise(res => { resolveRun = res; });
+    });
+    const pending = content2.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes: processEnvelopes as any,
+    });
+    renderModel(model2);
+    expect(screen.getByText("Loading data: day 3 of 5...")).toBeInTheDocument();
+    resolveRun({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 5 });
+    await pending;
+  });
+
+  it("shows envelope load errors", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      const content2 = defaultWaveRunnerContent();
+      const model2 = TileModel.create({ content: content2 });
+      content2.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage" });
+      await content2.loadEnvelopeData({
+        getJwt: async () => "jwt",
+        uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+        processEnvelopes: jest.fn().mockRejectedValue(new Error("no credentials")) as any,
+      });
+      renderModel(model2);
+      expect(screen.getByText("Error loading data: no credentials")).toBeInTheDocument();
+    } finally {
+      consoleSpy.mockRestore();
+    }
   });
 });
