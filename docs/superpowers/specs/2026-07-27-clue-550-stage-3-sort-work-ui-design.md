@@ -1,5 +1,23 @@
 # CLUE-550 Stage 3 — Sort Work + workspace UI for class-wide documents — Design
 
+> **How this shipped.** Stage 3 grew past 47 changed files and went out as two stacked PRs, so this one
+> spec covers both. It remains a design record written before implementation, not a summary of either PR:
+>
+> - **#2940 — Stage 3a** (merges first): "Presentation off the axes" — the workspace title bar and the
+>   thumbnail treatment (Summary item 5, the consumer-table rows for `document.tsx` and
+>   `thumbnail-document-item.tsx`, and the implementation notes for both). It also carries two changes this
+>   spec does *not* describe, because they were found during implementation: surfacing `offeringId` on
+>   `IDocumentMetadataBase` and `DocumentMetadataModel`, and splitting `DocumentModel.groupId` into the
+>   owning group and a new `authorGroupId`.
+> - **#2942 — Stage 3b**: everything else — the axis guards, the Sort Work listener and sectioning, the edit
+>   predicate, and the Firestore rules changes.
+>
+> Two statements below were overtaken by #2940 and are left as written rather than edited, since this is a
+> record of the design as it stood: the claim that `offeringId` "never reaches a read-side consumer" and that
+> the `!doc.offeringId` term is "inert" is what #2940 changes. Names also drifted during implementation —
+> "scope" was split into the `owner`, `container`, and `curriculum` axes, and the guards were renamed to
+> match. [../../document-axes/](../../document-axes/) is the current-state record; this file is not.
+>
 > **Status:** Design spec for this PR. Self-contained: it describes exactly what this PR delivers and cites only
 > docs already in the repo.
 >
