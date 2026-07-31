@@ -49,6 +49,12 @@ if (newDocument) problemWorkspace.setPrimaryDocument(newDocument);  // this is w
 resolves *whichever instance is current when it fires* (see the `handleDocumentAdded` FIXME):
 
 1. A metadata-driven open pre-caches the new document in `openDocument`'s `documentFetchPromiseMap`.
+   The opener is `SortedDocuments.fetchFullDocument`, reached from `DocumentScroller`'s
+   `renderThumbnail` → `getDocument`, which opens any metadata doc it does not already have in the
+   documents store. `NavTabPanel` renders its tabs with `forceRenderTabPanel`, and
+   `SortWorkView`'s `watchFirestoreMetaDataDocs` effect runs on mount, so these scrollers cache
+   documents while another tab is the visible one — in the live repro `activeNavTab` was `problems`
+   with 52 thumbnails mounted.
 2. So when the listener opens the same document it gets an already-resolved cached promise and calls
    `resolveRequiredDocumentPromise` almost immediately — often **before** `createOtherDocument`
    installs (via `addRequiredDocumentPromises`) the fresh promise it then awaits.
@@ -67,7 +73,7 @@ resolved fine (Root cause 1's fix was already in place).
 
 **Two changes**, both on `src/lib/db.ts` / the metadata store.
 
-### Change 1 — `createOtherDocument` opens the created document directly (the fix)
+### Change 1 — the create paths open the created document directly (the fix)
 
 Instead of fishing the model out of the shared listener promise, `createOtherDocument` builds the
 model itself via `createDocumentModelFromOtherDocument` (the same builder the listener uses) and
@@ -81,6 +87,9 @@ documents.addRequiredDocumentPromises([documentType]);
 documents.resolveRequiredDocumentPromise(document);
 return document;
 ```
+
+`createProblemOrPlanningDocument` gets the same three lines, using
+`createDocumentModelFromProblemMetadata` as its builder (see Scope).
 
 **Only one model is created.** Both the direct open and the listener's later open of the same key
 funnel through `openDocument`, which dedupes by key via `documentFetchPromiseMap` — a race-free
@@ -113,6 +122,22 @@ The metadata doc lives at `documents/{escapeKey(key)}`:
 - Existing code already relies on this id for a just-created doc: the group-doc canonical path does
   `txn.update(firestore.doc(getSimpleDocumentPath(documentKey)), …)`.
 
+**The consolidation was verified complete, not assumed.** Scanning every metadata doc in the
+production root `authed/learn_concord_org/documents` (`scripts/check-metadata-doc-ids.ts`, a
+read-only `select("key")` pass that classifies each doc id) found:
+
+```
+{ total: 114616, reachable: 114613, curriculum: 0, prefixed: 0, mismatched: 3 }
+```
+
+No `[network]_[key]` or `uid:[user]_[key]` document survives, so nothing the old key-field query
+could reach is invisible to the get-by-id. The 3 exceptions are `cc-test_`-prefixed docs the
+migration skipped because their keys are not 20-character document keys — two `supportPublication`
+docs keyed by support name and one `exemplar` keyed by curriculum path. `fetchMetadata` is only
+called by `openDocument` with a `documentKey`; authored supports and exemplars reach the client
+through the supports listener and `exemplarMetadataDocs`, so none of the three is ever requested by
+this code path.
+
 A get-by-id is strongly consistent immediately after the awaited write, unlike the query. The
 Firestore security rules permit the get: `documents/{docId}` allows read when the caller owns the
 doc or the doc's `context_id` matches the caller's class (plus teacher-network branches); demo/qa/
@@ -126,10 +151,19 @@ to the rules' teacher-network branches.
 
 ## Scope
 
-- Only `createOtherDocument` (personal + learning-log documents) gets Change 1.
-  `createProblemOrPlanningDocument` uses the same promise pattern but is **safe**: problem/planning
-  documents are never created manually, only auto-created at startup via `guarantee*`, which
-  resolves the promise before creating — so the race cannot occur there.
+- `createProblemOrPlanningDocument` gets Change 1 as well. It used the identical promise pattern and
+  is **exposed to the same race** — an already-resolved *previous* promise is the precondition for
+  the failure, not protection from it, since `resolveRequiredDocumentPromise` targets whatever is in
+  `requiredDocuments[type]` **when it runs** and no-ops if that instance is already resolved. It is
+  in fact more exposed: `db-problem-documents-listener`'s `handleOfferingUser` takes an
+  `updateDocumentFromProblemDocument` branch when the document is already in the store and never
+  calls `resolveRequiredDocumentPromise` at all — a deterministic hang rather than a lost race.
+  Nor was it protected by being out of reach of the pre-cacher: `watchFirestoreMetaDataDocs` scopes
+  its query by class and unit/investigation/problem but **not** by document type, so problem and
+  planning documents get thumbnails and are pre-cached by the same `fetchFullDocument` path as
+  personal documents. All that stood between it and the same failure was whether a thumbnail for the
+  just-created document happened to render before the listener fired. Applying the same direct open
+  removes that dependence on timing.
 - Not touched: the missing `.catch` in `handleDocumentAdded`, and the broader "one required-document
   promise per type" FIXME. Change 1 removes the create path's dependence on that fragile handshake
   without reworking it.
@@ -146,9 +180,25 @@ to the rules' teacher-network branches.
     the required-document promise (reproduces the hang → fast, descriptive failure).
   - `createOtherDocument` refreshes `requiredDocuments[type]` with the created doc so startup dedup
     still sees it.
+  - `creates required problem document` / `creates required planning document` now assert the same
+    invariant for `createProblemOrPlanningDocument`: nothing resolves the required-document promise
+    externally, so `guarantee*` only settles if the create path opens and resolves it itself.
   - Opening the same document twice builds one model and adds it once (guards the dedup Change 1
     relies on; verified to fail if `openDocument`'s dedup is removed).
-  - Updated the two `createOtherDocument` visibility tests that relied on the old manual resolve.
+  - Updated the visibility tests that relied on the old manual resolve.
+
+  What these prove, precisely: with the model builder stubbed, the create tests show the create path
+  returns the builder's result instead of awaiting the required-document promise — the *dependency*
+  is gone. They do not exercise the race itself (no listener, no timing); that is covered by the
+  manual demo-build check below. The standard to aim for is `builds one model and adds it once`,
+  which mocks only leaf I/O (`stubRtdb`, `fetchMetadata`) and runs the real `openDocument`, and was
+  verified to fail when `openDocument`'s dedup is removed. Each behavior change above was checked
+  the same way — reverted the production change and confirmed the test fails.
+
+  Change 2 has **no test covering its actual justification**: the metadata-store fake models
+  `exists`/`data()` but cannot model a Firestore consistency window, so nothing in the suite
+  distinguishes a get-by-id from a query on the axis that motivated the change. That change rests on
+  the documented reasoning above, not on test evidence.
 - Full Jest suite green. Manually verified on a demo build: after a fresh reload the first
   Personal-document create opens immediately, a second also opens, and `requiredDocuments.personal`
   stays resolved.
