@@ -101,7 +101,7 @@ const EXPIRY_MARGIN_MS = 5 * 60 * 1000;
 type GetCredentialsClient = Pick<TokenServiceClient, "getCredentials">;
 
 export interface EnvelopeCredentialsDeps {
-  /** Returns a fresh portal-signed Firebase JWT (admin: via OAuth token; Wave Runner: rawFirebaseJWT). */
+  /** Returns a fresh portal-signed Firebase JWT (admin: via OAuth token; Wave Runner: portal-JWT exchange). */
   getJwt: () => Promise<string>;
   env?: EnvironmentName;
   /** Test seam. */
