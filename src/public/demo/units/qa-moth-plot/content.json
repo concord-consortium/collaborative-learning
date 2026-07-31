@@ -11,6 +11,10 @@
       "table": {
         "numFormat": ".2~f"
       },
+      "dataflow": {
+        "servoInputMode": "proportion",
+        "liveOutputTypes": ["Servo", "Gripper 2.0"]
+      },
       "datacard": {
         "tools": [
           "duplicate",

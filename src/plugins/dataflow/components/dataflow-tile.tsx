@@ -64,7 +64,23 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   public componentDidMount() {
     if (this.props.readOnly) {
       this.props.onRegisterTileApi(this.getAdditionalApi());
+    } else {
+      this.mirrorUnitOutputConfig();
     }
+  }
+
+  // Mirror the unit's Live Output config (settings.dataflow.*) onto the tile content so the snapshot-only
+  // AI summarizer (chat tutor + aiEvaluation) can see it. Only done in editable tiles (which persist);
+  // setOutputConfig stores only non-default values and is idempotent.
+  private mirrorUnitOutputConfig() {
+    const { appConfig } = this.stores;
+    const servoInputMode = appConfig.getSetting("servoInputMode", "dataflow");
+    const allowedOutputTypes = appConfig.getSetting("liveOutputTypes", "dataflow");
+    this.getContent().setOutputConfig({
+      servoInputMode: servoInputMode === "proportion" ? "proportion" : undefined,
+      allowedOutputTypes: Array.isArray(allowedOutputTypes) && allowedOutputTypes.length
+        ? allowedOutputTypes as string[] : undefined,
+    });
   }
 
   public componentWillUnmount() {

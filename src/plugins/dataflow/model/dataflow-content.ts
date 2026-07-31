@@ -65,6 +65,14 @@ const ProgramZoom = types.model({
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
+// Resolved per-unit Live Output config, mirrored onto the tile content (see the `outputConfig` prop).
+export interface IDataflowOutputConfig {
+  // "proportion" when settings.dataflow.servoInputMode is set; absent means degrees (the default).
+  servoInputMode?: string;
+  // settings.dataflow.liveOutputTypes when the option list is restricted; absent means the full list.
+  allowedOutputTypes?: string[];
+}
+
 export const DataflowContentModel = TileContentModel
   .named("DataflowTool")
   .props({
@@ -85,6 +93,10 @@ export const DataflowContentModel = TileContentModel
      * tolerate paths that reference removed properties.
      */
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
+    // Resolved unit output config (settings.dataflow.*), mirrored here so the snapshot-only AI tile
+    // summarizer — shared by the chat tutor and the functions-v2 aiEvaluation — can describe the
+    // block's setup to the AI. Populated from appConfig when the tile is editable; absent when default.
+    outputConfig: types.maybe(types.frozen<IDataflowOutputConfig>()),
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -289,6 +301,13 @@ export const DataflowContentModel = TileContentModel
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
+    },
+    setOutputConfig(config?: IDataflowOutputConfig) {
+      // Store only non-default values; a default config clears the field so default units carry nothing.
+      const next = config && (config.servoInputMode || config.allowedOutputTypes?.length) ? config : undefined;
+      // Idempotent — avoid churning the doc when the resolved config hasn't changed.
+      if (JSON.stringify(self.outputConfig) === JSON.stringify(next)) return;
+      self.outputConfig = next;
     },
     setLiveProgramZoom(transform: Transform) {
       self.liveProgramZoom.update(transform);

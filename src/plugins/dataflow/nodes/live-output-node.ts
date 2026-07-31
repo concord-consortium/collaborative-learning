@@ -145,8 +145,11 @@ export class LiveOutputNode extends BaseNode<
     const nodeValueInput = new ClassicPreset.Input(numSocket, "NodeValue");
     this.addInput("nodeValue", nodeValueInput);
 
+    // Editable views offer only the unit-allowed types; read-only views use the full list so a stored
+    // value always resolves (never renders "Select an option").
+    const liveOutputTypeOptions = this.readOnly ? NodeLiveOutputTypes : this.allowedLiveOutputTypes;
     const liveOutputControl =
-      new DropdownListControl(this, "liveOutputType", this.setLiveOutputTypeWrapper, NodeLiveOutputTypes);
+      new DropdownListControl(this, "liveOutputType", this.setLiveOutputTypeWrapper, liveOutputTypeOptions);
     this.addControl("liveOutputType", liveOutputControl);
 
     if (this.readOnly) {
@@ -166,10 +169,15 @@ export class LiveOutputNode extends BaseNode<
 
       if (!model.liveOutputType) {
         // Set the default value. This also updates the hubSelect depending on the connected device and
-        // and simulation.
+        // and simulation. Default to the first unit-allowed type (usually "Gripper 2.0", unless the unit
+        // restricts the list).
         // FIXME: this might cause problems with undo support since it is changing the state on node
         // initialization, we'll have to make sure this happens within the node creation action
-        this.setLiveOutputTypeWrapper("Gripper 2.0");
+        this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
+      } else if (!this.allowedLiveOutputTypes.some(t => t.name === model.liveOutputType)) {
+        // The unit config no longer allows the stored type — fall back to the first allowed option so
+        // the dropdown never renders blank.
+        this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
       }
       // Update the options now that we have a type
       this.setHubSelectOptions();
@@ -374,7 +382,7 @@ export class LiveOutputNode extends BaseNode<
       const roundedDisplayValue = Math.round((value / 10) * 10);
       return `${roundedDisplayValue}% closed`;
     } else if (kServoOutputTypes.includes(liveOutputType)) {
-      return `${Math.round((value / 10) * 10)}°`;
+      return servoDisplayMessage(value, this.servoProportionMode);
     }
 
     // We shouldn't hit this case but if we do then just pass the value through
@@ -401,6 +409,21 @@ export class LiveOutputNode extends BaseNode<
     return this.services.stores.serialDevice.deviceFamily;
   }
 
+  // Unit-config (settings.dataflow.servoInputMode): when "proportion" the Servo output accepts 0–1
+  // instead of 0–180 degrees. Defaults to degrees, so existing units are unaffected.
+  private get servoProportionMode() {
+    return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
+  // Unit-config (settings.dataflow.liveOutputTypes): restrict the Live Output type list to an allowed
+  // subset (by NodeLiveOutputTypes `name`). Absent / empty / malformed → the full list.
+  private get allowedLiveOutputTypes() {
+    const allowed = this.services.stores.appConfig.getSetting("liveOutputTypes", "dataflow");
+    if (!Array.isArray(allowed) || allowed.length === 0) return NodeLiveOutputTypes;
+    const filtered = NodeLiveOutputTypes.filter(t => allowed.includes(t.name));
+    return filtered.length > 0 ? filtered : NodeLiveOutputTypes;
+  }
+
   data({nodeValue}: {nodeValue?: number[]}) {
     // if there is not a valid input, use 0
     const value = getValueOrZero(nodeValue);
@@ -424,8 +447,11 @@ export class LiveOutputNode extends BaseNode<
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else if (kServoOutputTypes.includes(outputType)) {
-      // angles out of range move servo to nearest valid angle
-      const newValue = Math.min(Math.max(value, 0), 180);
+      // In proportion mode (unit setting) the Servo accepts 0–1 and we scale to the full 0–180 sweep;
+      // the stored value stays in degrees so the serial/hardware path is unchanged. Out-of-range angles
+      // clamp to the nearest valid angle.
+      const scaled = this.servoProportionMode ? value * 180 : value;
+      const newValue = Math.min(Math.max(scaled, 0), 180);
 
       // alternative: out of range value will not move sim servo
       // const isValidServoValue = value >= 0 && value <= 180;
@@ -461,4 +487,12 @@ function getPercentageAsInt(num: number){
   if (num > 1)  return 100;
   if (num < 0)  return 0;
   return Math.round(num * 100);
+}
+
+// The Servo output field label. The stored value is always the angle in degrees (0–180). In degrees
+// mode (default) it's shown as degrees; in proportion mode it's shown as % of full rotation, mirroring
+// the gripper's "% closed".
+export function servoDisplayMessage(value: number, proportionMode: boolean) {
+  if (proportionMode) return `${Math.round((value / 180) * 100)}% rotation`;
+  return `${Math.round((value / 10) * 10)}°`;
 }
