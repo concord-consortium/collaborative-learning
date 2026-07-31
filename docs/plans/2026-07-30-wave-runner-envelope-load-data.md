@@ -824,6 +824,11 @@ Also block conflicting interactions while a load runs:
 - In `data-setup.tsx`, the station select (line 100) and both date inputs (lines 135, 146) change
   `disabled={content.isRunning}` → `disabled={content.isRunning || content.isLoadingData}`.
   (The model select stays as-is — the model choice doesn't affect envelope loading.)
+- Defense in depth beyond the button states (added during execution after Task 5's review): in
+  `wave-runner-content.ts`, `runModel`'s guard becomes `if (self.isRunning || self.isLoadingData) return;`,
+  and `wave-runner-content.test.ts` gains a re-entrancy test — start `loadEnvelopeData` with a
+  never-resolving `processEnvelopes`, call `loadEnvelopeData` again, assert the second
+  `processEnvelopes` mock was not invoked (then resolve the first to finish cleanly).
 
 **Step 4: Run the tests to verify they pass**
 
