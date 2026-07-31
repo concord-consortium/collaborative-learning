@@ -1,30 +1,27 @@
 import { DocumentMetadataStore, IDocumentMetadataStoreStores } from "./document-metadata-store";
 
-// A minimal fake Firestore get-by-id chain: collection().withConverter().doc(id).get().
-// The store reads the metadata doc directly by its id (escapeKey(key)); docsByKey is keyed by
-// that id. A get-by-id returns the doc regardless of context_id — the store applies the
-// class-scoping check itself.
+// A minimal fake Firestore get-by-id chain: firestore.doc(path).withConverter().get(), where path
+// is getSimpleDocumentPath(key), i.e. documents/{escapeKey(key)}. docsByKey is keyed by that id.
+// A get-by-id returns the doc regardless of context_id — the store applies the class-scoping
+// check itself. The fake prepends a space to the path the way the Firestore wrapper's doc() does.
 function makeFakeDb(docsByKey: Record<string, any>) {
-  let requestedId = "";
+  let requestedPath = "";
   const getSpy = jest.fn(() => {
-    const value = docsByKey[requestedId];
+    const value = docsByKey[requestedPath.split("/").pop()!];
     return Promise.resolve(
       value ? { exists: true, data: () => value } : { exists: false, data: () => undefined }
     );
   });
   const docRef = {
     // The store reads docRef.path to describe where it looked in its error messages.
-    get path() { return `test-space/documents/${requestedId}`; },
+    get path() { return `test-space/${requestedPath}`; },
+    withConverter: () => docRef,
     get: () => getSpy(),
-  };
-  const collection = {
-    withConverter: () => collection,
-    doc: (id: string) => { requestedId = id; return docRef; },
   };
   return {
     getSpy,
-    getRequestedId: () => requestedId,
-    db: { firestore: { collection: () => collection } } as any,
+    getRequestedId: () => requestedPath.split("/").pop(),
+    db: { firestore: { doc: (path: string) => { requestedPath = path; return docRef; } } } as any,
   };
 }
 

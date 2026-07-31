@@ -3,7 +3,7 @@ import { union } from "lodash";
 import { makeAutoObservable, runInAction } from "mobx";
 import { SnapshotIn, typecheck, unprotect } from "@concord-consortium/mobx-state-tree";
 
-import { escapeKey, IDocumentMetadata } from "../../../shared/shared";
+import { getSimpleDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import type { DB } from "../../lib/db";
 import { typeConverter } from "../../utilities/db-utils";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
@@ -151,13 +151,12 @@ export class DocumentMetadataStore {
   private async pointReadMetadata(key: string): Promise<IDocumentMetadata> {
     const converter = typeConverter<IDocumentMetadata>();
     const classHash = this.stores.user.classHash;
-    // Read the metadata doc directly by id. The doc id is escapeKey(key): every writer (the client
-    // createFirestoreMetadataDocument and the createFirestoreMetadataDocument_v2 cloud function)
-    // writes there, and the Sep 2025 migration consolidated all prefixed (network_/uid:) docs into
-    // this unprefixed doc. A get-by-id is strongly consistent immediately after the awaited write,
-    // unlike a query which does not return the result immediately after.
-    const documentsCollection = this.stores.db.firestore.collection("documents");
-    const docRef = documentsCollection.withConverter(converter).doc(escapeKey(key));
+    // Read the metadata doc directly by id. getSimpleDocumentPath resolves to documents/{escapeKey(key)}:
+    // every writer (the client createFirestoreMetadataDocument and the createFirestoreMetadataDocument_v2
+    // cloud function) writes there, and the Sep 2025 migration consolidated all prefixed (network_/uid:)
+    // docs into this unprefixed doc. A get-by-id is strongly consistent immediately after the awaited
+    // write, unlike a query which does not return the result immediately after.
+    const docRef = this.stores.db.firestore.doc(getSimpleDocumentPath(key)).withConverter(converter);
     const snapshot = await docRef.get();
     const where = `'${docRef.path}'`;
     if (!snapshot.exists) {
@@ -170,6 +169,9 @@ export class DocumentMetadataStore {
     // Preserve the class scoping the previous query enforced (context_id == classHash). The security
     // rules also let teachers get network/other-class docs, but openDocument's callers expect only
     // the current user's class, so reject a mismatch just as the empty class-scoped query did.
+    // Note this is now an app-layer assertion rather than a constraint the query enforced: a
+    // mismatched doc the rules do allow (the caller's own doc, or a teacher's network/class doc) is
+    // delivered to the client and rejected here instead of never being returned.
     if (metadata.context_id !== classHash) {
       throw new Error(
         `Firestore metadata document context_id '${metadata.context_id}' does not match ` +
