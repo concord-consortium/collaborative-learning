@@ -11,4 +11,9 @@ declare module "*.svg" {
   export = _;
 }
 
+declare module "*.hex" {
+  const content: string;
+  export default content;
+}
+
 type Maybe<T> = T | undefined

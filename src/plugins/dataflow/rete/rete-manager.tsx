@@ -21,6 +21,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { IBaseNode, IBaseNodeModel, NodeClass } from "../nodes/base-node";
 import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
+import { channelSatisfiedBy } from "../model/utilities/device-capabilities";
 import { ControlNode } from "../nodes/control-node";
 import { CounterNode } from "../nodes/counter-node";
 import { DemoOutputNode } from "../nodes/demo-output-node";
@@ -1282,7 +1283,7 @@ export class ReteManager implements INodeServices {
       this.stores.serialDevice.setSerialNodesCount(0);
     }
 
-    if (serialNodesCt > 0 && !this.stores.serialDevice.hasPort()){
+    if (serialNodesCt > 0 && !this.stores.serialDevice.isConnected()){
       this.postSerialModal();
     }
   }
@@ -1302,7 +1303,7 @@ export class ReteManager implements INodeServices {
 
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
-        && !this.stores.serialDevice.hasPort()
+        && !this.stores.serialDevice.isConnected()
         && this.stores.serialDevice.serialNodesCount > 0
     ){
       alertMessage += btnMsg;
@@ -1336,9 +1337,9 @@ export class ReteManager implements INodeServices {
     // status should trigger updates.
     this.mstContent.channels.filter(c => c.usesSerial).forEach((channel) => {
       const { serialDevice } = this.stores;
-      if (serialDevice.hasPort()){
+      if (serialDevice.isConnected()){
         channel.serialConnected = true;
-        const deviceMismatch = serialDevice.deviceFamily !== channel.deviceFamily;
+        const deviceMismatch = !channelSatisfiedBy(serialDevice.deviceFamily, channel);
         const timeSinceActive = channel.usesSerial && channel.lastMessageReceivedAt
           ? Date.now() - channel.lastMessageReceivedAt: 0;
         channel.missing = deviceMismatch || timeSinceActive > 7000;

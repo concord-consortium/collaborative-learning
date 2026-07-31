@@ -1,0 +1,90 @@
+import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
+import { parseKeyValueData, detectSpikerbitVersion } from "./serial-protocol";
+
+function emgChannel(): NodeChannelInfo {
+  return {
+    name: "emg", displayName: "EMG",
+    channelId: "emg", missing: true, type: "emg-reading", units: "mV", value: 0,
+    virtual: false, usesSerial: true, serialConnected: null, protocol: "keyValue"
+  };
+}
+
+describe("parseKeyValueData", () => {
+  it("updates the matching channel value from a complete line", () => {
+    const channels = [emgChannel()];
+    const remaining = parseKeyValueData("emg:512\r\n", channels);
+    expect(channels[0].value).toBe(512);
+    expect(remaining).toBe("");
+  });
+
+  it("keeps an incomplete trailing line in the returned buffer", () => {
+    const channels = [emgChannel()];
+    const remaining = parseKeyValueData("emg:512\r\nemg:2", channels);
+    expect(channels[0].value).toBe(512);
+    expect(remaining).toBe("emg:2");
+  });
+
+  it("discards a corrupted complete line and recovers on the next", () => {
+    const channels = [emgChannel()];
+    const remaining = parseKeyValueData("emgNaN\r\nemg:7\r\n", channels);
+    expect(channels[0].value).toBe(7);
+    expect(remaining).toBe("");
+  });
+
+  it("consumes unknown channels without throwing", () => {
+    const channels = [emgChannel()];
+    const remaining = parseKeyValueData("fsr:3\r\nemg:9\r\n", channels);
+    expect(channels[0].value).toBe(9);
+    expect(remaining).toBe("");
+  });
+
+  it("tolerates trailing whitespace between the value and the line ending", () => {
+    // A board running older firmware pads each serial line with spaces before \r\n,
+    // e.g. "emg:57                    \r\n". The value must still be parsed.
+    const channels = [emgChannel()];
+    const remaining = parseKeyValueData("emg:57                    \r\nemg:42                    \r\n", channels);
+    expect(channels[0].value).toBe(42);
+    expect(remaining).toBe("");
+  });
+
+  it("stamps lastMessageReceivedAt on a channel it updates so staleness can be detected", () => {
+    const channels = [emgChannel()];
+    const before = Date.now();
+    parseKeyValueData("emg:512\r\n", channels);
+    expect(channels[0].lastMessageReceivedAt).toBeGreaterThanOrEqual(before);
+  });
+
+  it("leaves lastMessageReceivedAt stale on a channel the stream never sends", () => {
+    // A Spiker:bit satisfies fsr by protocol but never emits it; the seeded-stale timestamp
+    // must not be refreshed, so the freshness check flips fsr to `missing`.
+    const emg = emgChannel();
+    const fsr: NodeChannelInfo = { ...emgChannel(), name: "fsr", channelId: "fsr", lastMessageReceivedAt: 1000 };
+    parseKeyValueData("emg:512\r\n", [emg, fsr]);
+    expect(fsr.lastMessageReceivedAt).toBe(1000);
+  });
+});
+
+describe("detectSpikerbitVersion", () => {
+  it("returns the version and strips through the match when present", () => {
+    const { version, remaining } = detectSpikerbitVersion("noise CLUE-SPIKERBIT v1\r\nemg:5\r\n");
+    expect(version).toBe(1);
+    expect(remaining).toBe("emg:5\r\n");
+  });
+
+  it("returns null and the untouched buffer when absent", () => {
+    const { version, remaining } = detectSpikerbitVersion("emg:5\r\n");
+    expect(version).toBeNull();
+    expect(remaining).toBe("emg:5\r\n");
+  });
+
+  it("parses multi-digit versions", () => {
+    const { version } = detectSpikerbitVersion("CLUE-SPIKERBIT v12\r\n");
+    expect(version).toBe(12);
+  });
+
+  it("tolerates trailing whitespace after the version (micro:bit pads its lines)", () => {
+    const { version, remaining } = detectSpikerbitVersion("CLUE-SPIKERBIT v1              \r\nemg:5\r\n");
+    expect(version).toBe(1);
+    expect(remaining).toBe("emg:5\r\n");
+  });
+});
