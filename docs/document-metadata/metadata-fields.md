@@ -324,8 +324,9 @@ declare it. Anything reading properties from the Firestore metadata should treat
   `getDocumentOwnerFields`
 - **Reactive:** No — immutable
 
-The owning group, and nothing else. It is a denormalization of the owner: the owner `uid` already encodes
-it (`group_<offeringId>_<groupId>`), and this field spares consumers from taking that apart when they need
+The group that **owns** the document, and nothing else — not the group its author happens to be in, which
+is `authorGroupId` below. It is a denormalization of the owner: the owner `uid` already encodes it
+(`group_<offeringId>_<groupId>`), and this field spares consumers from taking that apart when they need
 the group's *number*. It is not what makes a document group-owned — `hasGroupOwner`
 (`src/models/document/document-axes.ts`) reads the uid's prefix, so the uid stays the single authority on
 the owner and this field cannot contradict it.
