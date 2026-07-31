@@ -542,11 +542,15 @@ export class DB {
                 return newDocumentRef.set(newDocument).then(() => newDocument);
             });
         })
-        .then((newDocument) => {
-          // reset the (presumably null) promise for this document type
+        .then(async (newDocument) => {
+          // Open the just-created document directly. This avoids waiting for required documents system to
+          // resolve it. The required documents system has a race condition in this code path. We still need
+          // to trigger the required documents system though since that is needed when
+          // createProblemOrPlanningDocument is called from the startup code.
+          const document = await this.createDocumentModelFromProblemMetadata(type, user.id, newDocument);
           documents.addRequiredDocumentPromises([type]);
-          // return the promise, which will be resolved by the DB listener
-          return documents.requiredDocuments[type].promise;
+          documents.resolveRequiredDocumentPromise(document);
+          return document;
         })
         .then(resolve)
         .catch(reject);
