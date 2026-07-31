@@ -1,6 +1,6 @@
 import { upperFirst } from "lodash";
 import { getParent } from "mobx-state-tree";
-import { IDocumentMetadataBase } from "../../../shared/shared";
+import { IDocumentMetadata, IDocumentMetadataBase } from "../../../shared/shared";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { translate } from "../../utilities/translation/translate";
 import { SectionModelType } from "../curriculum/section";

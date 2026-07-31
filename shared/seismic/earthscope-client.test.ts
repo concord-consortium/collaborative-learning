@@ -141,6 +141,39 @@ AK K204 -- HNZ M 100.0 2026-02-03T00:00:00.000000Z 2026-02-04T00:00:00.000000Z`;
     ]);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("falls back to the full requested range when the proxy endpoint fails (e.g. 410 Gone)", async () => {
+    setUrl("http://localhost/?seismicProxy");
+    fetchMock.mockResponseOnce("Gone", { status: 410, statusText: "Gone" });
+
+    const ranges = await fetchAvailability({ ...stationTimeRange, endTime: "2026-02-05T00:00:00.000Z" });
+
+    expect(ranges).toEqual([
+      { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 5) },
+    ]);
+  });
+
+  it("falls back to the full requested range when the proxy request throws (network error)", async () => {
+    setUrl("http://localhost/?seismicProxy");
+    fetchMock.mockRejectOnce(new Error("network down"));
+
+    const ranges = await fetchAvailability({ ...stationTimeRange, endTime: "2026-02-05T00:00:00.000Z" });
+
+    expect(ranges).toEqual([
+      { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 5) },
+    ]);
+  });
+
+  it("propagates aborts instead of falling back", async () => {
+    setUrl("http://localhost/?seismicProxy");
+    const controller = new AbortController();
+    controller.abort();
+    fetchMock.mockRejectOnce(new DOMException("aborted", "AbortError"));
+
+    await expect(
+      fetchAvailability(stationTimeRange, { signal: controller.signal })
+    ).rejects.toThrow();
+  });
 });
 
 describe("fetch config override", () => {

@@ -37,7 +37,7 @@ describe("AdminHeader", () => {
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toBeChecked();
     fireEvent.click(checkbox);
-    expect(store.selected.size).toBe(0);
+    expect(store.selectedStations.size).toBe(0);
   });
 
   it("applies a date change immediately", async () => {
@@ -59,6 +59,64 @@ describe("AdminHeader", () => {
 
     fireEvent.change(screen.getByLabelText(/Start/), { target: { value: "" } });
     expect(store.startDate).toBe("2026-01-01");
+  });
+
+  describe("model selection", () => {
+    const twoModels = [
+      { label: "Compact", metadataUrl: "https://x/compact.json" },
+      { label: "Large", metadataUrl: "https://x/large.json" },
+    ];
+
+    function makeModelStore() {
+      const store = new SeismicAdminStore({
+        cache: {
+          listStations: async () => [{ network: "AK", station: "K204", channel: "HNZ" }],
+          scanCachedDays: async () => new Set<number>(),
+          stationRawBytes: async () => 0,
+          deleteDaysInRange: async () => {},
+        } as any,
+        models: twoModels,
+      });
+      return store;
+    }
+
+    it("renders a checked checkbox per model and toggles selection", async () => {
+      const store = makeModelStore();
+      await store.refresh();
+      renderHeader(store);
+
+      expect(screen.getByRole("checkbox", { name: "Compact" })).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "Large" })).toBeChecked();
+
+      fireEvent.click(screen.getByRole("checkbox", { name: "Compact" }));
+      expect(store.selectedModels.has("https://x/compact.json")).toBe(false);
+      expect(screen.getByRole("checkbox", { name: "Compact" })).not.toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "Large" })).toBeChecked();
+    });
+
+    it("reflects a selection restored into the store", async () => {
+      const store = makeModelStore();
+      store.toggleModel("https://x/large.json");
+      await store.refresh();
+      renderHeader(store);
+
+      expect(screen.getByRole("checkbox", { name: "Compact" })).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "Large" })).not.toBeChecked();
+    });
+
+    it("never disables the last checked model — zero selected is legal", async () => {
+      const store = makeModelStore();
+      await store.refresh();
+      renderHeader(store);
+
+      fireEvent.click(screen.getByRole("checkbox", { name: "Large" }));
+      expect(screen.getByRole("checkbox", { name: "Compact" })).toBeEnabled();
+
+      fireEvent.click(screen.getByRole("checkbox", { name: "Compact" }));
+      expect(store.selectedModels.size).toBe(0);
+      expect(screen.getByRole("checkbox", { name: "Compact" })).toBeEnabled();
+      expect(screen.getByRole("checkbox", { name: "Large" })).toBeEnabled();
+    });
   });
 
   it("disables the checkbox of the only selected station", async () => {

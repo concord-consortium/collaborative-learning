@@ -438,3 +438,42 @@ $member-size: 18px;
     }
   }
 }
+
+// AA-checked against the header palette: text 8.5:1, border 4.1:1 on the
+// $workspace-teal-light-5 header background; open state white on
+// $workspace-teal-dark-1 = 4.5:1.
+.app-header .right .chat-tutor-launcher {
+  align-items: center;
+  appearance: none;
+  background-color: $workspace-teal-light-5;
+  border: solid 1.5px $charcoal;
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  font: inherit;
+  font-weight: 600;
+  gap: 6px;
+  height: 40px;
+  padding: 0 10px;
+
+  @include focus-ring;
+
+  &:hover {
+    background-color: $workspace-teal-light-3;
+  }
+
+  &:active,
+  &[aria-expanded="true"] {
+    background-color: $workspace-teal-dark-1;
+    border-color: white;
+    color: white;
+  }
+
+  .chat-tutor-launcher-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+}

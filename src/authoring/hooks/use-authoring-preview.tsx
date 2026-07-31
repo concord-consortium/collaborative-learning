@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useRef, ReactNode } from "react";
+import { uniqueId } from "../../utilities/js-utils";
 
 export type PreviewUserType = "student" | "teacher";
 
 export interface AuthoringPreview {
-  openPreview: (branch: string, unit: string, userType: PreviewUserType, problem?: string) => void;
+  // `fresh` launches the preview as a brand-new fake user (unique id) so its documents are created from
+  // scratch — needed to see template changes, since templates are only applied when a document is created.
+  openPreview: (branch: string, unit: string, userType: PreviewUserType, problem?: string, fresh?: boolean) => void;
   reloadAllPreviews: () => void;
 }
 
@@ -12,14 +15,17 @@ const AuthoringPreviewContext = createContext<AuthoringPreview | undefined>(unde
 export const AuthoringPreviewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const windowsRef = useRef<Window[]>([]);
 
-  const openPreview = (branch: string, unit: string, userType: PreviewUserType, problem?: string) => {
+  const openPreview =
+      (branch: string, unit: string, userType: PreviewUserType, problem?: string, fresh?: boolean) => {
     if (!branch || !unit) return;
 
     const runtimeUrl = new URL("..", window.location.href);
     const params = new URLSearchParams(window.location.search);
     params.set("unit", unit);
     params.set("authoringBranch", branch);
-    params.set("fakeUser", userType);
+    // A unique id makes this a new user with no existing documents, so creation-time content (templates)
+    // is applied fresh. Without it the preview reuses the default dev user and its persisted documents.
+    params.set("fakeUser", fresh ? `${userType}:${uniqueId()}` : userType);
     if (problem) {
       params.set("problem", problem);
     }

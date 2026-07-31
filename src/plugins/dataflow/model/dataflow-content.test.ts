@@ -1,4 +1,4 @@
-import { getSnapshot } from "mobx-state-tree";
+import { applyPatch, getSnapshot } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn
 } from "./dataflow-content";
@@ -14,20 +14,29 @@ describe("DataflowContentModel", () => {
     const dcm = defaultDataflowContent();
     expect(dcm.isUserResizable).toBe(true);
     expect(dcm.programDataRate).toBe(DEFAULT_DATA_RATE);
-    expect(dcm.programZoom.dx).toBe(DEFAULT_PROGRAM_ZOOM.dx);
-    expect(dcm.programZoom.dy).toBe(DEFAULT_PROGRAM_ZOOM.dy);
-    expect(dcm.programZoom.scale).toBe(DEFAULT_PROGRAM_ZOOM.scale);
+    expect(dcm.liveProgramZoom.dx).toBe(DEFAULT_PROGRAM_ZOOM.dx);
+    expect(dcm.liveProgramZoom.dy).toBe(DEFAULT_PROGRAM_ZOOM.dy);
+    expect(dcm.liveProgramZoom.scale).toBe(DEFAULT_PROGRAM_ZOOM.scale);
     expect(Object.values(getSnapshot(dcm.program.nodes)).length).toBe(0);
+  });
+
+  // `programZoom` is deprecated and unread, but must stay a persisted property: documents saved
+  // before the fit-on-load change recorded history patches against nested paths under it, and if
+  // the property is removed those paths no longer resolve, so TreeManager halts playback there.
+  // This fails if someone removes the property as dead code.
+  it("keeps programZoom resolvable so legacy history patches still replay", () => {
+    const dcm = defaultDataflowContent();
+    expect(() => applyPatch(dcm, { op: "replace", path: "/programZoom/dx", value: -10 })).not.toThrow();
   });
 
   it("should handle basic changes", () => {
     const dcm = defaultDataflowContent();
     dcm.setProgramDataRate(newDataRate);
-    dcm.setProgramZoom(newZoom);
+    dcm.setLiveProgramZoom(newZoom);
     expect(dcm.programDataRate).toBe(newDataRate);
-    expect(dcm.programZoom.dx).toBe(newZoom.x);
-    expect(dcm.programZoom.dy).toBe(newZoom.y);
-    expect(dcm.programZoom.scale).toBe(newZoom.k);
+    expect(dcm.liveProgramZoom.dx).toBe(newZoom.x);
+    expect(dcm.liveProgramZoom.dy).toBe(newZoom.y);
+    expect(dcm.liveProgramZoom.scale).toBe(newZoom.k);
   });
 
   it("should be to load a program", () => {
@@ -75,7 +84,6 @@ describe("DataflowContentModel", () => {
 
     // Do some sanity checking
     expect(exportedJson.programDataRate).toBe(1000);
-    expect(exportedJson.programZoom.dx).toBe(0);
 
     const { nodes, connections } = exportedJson.program;
     expect(Object.values(nodes).length).toBe(3);
