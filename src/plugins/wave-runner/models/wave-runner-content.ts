@@ -198,7 +198,7 @@ export const WaveRunnerContentModel = TileContentModel
   }))
   .actions(self => ({
     runModel: flow(function* () {
-      if (self.isRunning) return;
+      if (self.isRunning || self.isLoadingData) return;
       if (!self.selectedModelUrl) {
         self.runError = "No model selected";
         return;

@@ -174,6 +174,25 @@ describe("WaveRunnerComponent", () => {
     expect(toolbar).toContainHTML("Timeline It!");
   });
 
+  it("disables Load Data without portal credentials", () => {
+    renderWithStores();
+    const button = screen.getByRole("button", { name: "Load Data" });
+    expect(button).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("enables Load Data when the session has portal credentials and a station", () => {
+    stores.portal.rawPortalJWT = "portal-jwt";
+    stores.portal.basePortalUrl = "https://learn.example.com/";
+    try {
+      renderWithStores();
+      const button = screen.getByRole("button", { name: "Load Data" });
+      expect(button).not.toHaveAttribute("aria-disabled");
+    } finally {
+      stores.portal.rawPortalJWT = undefined as any;
+      stores.portal.basePortalUrl = undefined;
+    }
+  });
+
   it("renders model dropdown with available models", () => {
     renderWithStores();
     expect(screen.getByText("Choose a model")).toBeInTheDocument();

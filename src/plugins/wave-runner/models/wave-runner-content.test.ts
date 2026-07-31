@@ -551,6 +551,20 @@ describe("loadEnvelopeData", () => {
     expect(content.loadDataError).toMatch(/Invalid date range/);
   });
 
+  it("ignores a second call while a load is in flight", async () => {
+    const content = createContent();
+    let resolveRun: (v: unknown) => void = () => undefined;
+    const processEnvelopes = jest.fn(() => new Promise(res => { resolveRun = res; }));
+    const options = { getJwt, uploader: fakeUploader, processEnvelopes: processEnvelopes as any };
+    const first = content.loadEnvelopeData(options);
+    const second = content.loadEnvelopeData(options);
+    await second;
+    expect(processEnvelopes).toHaveBeenCalledTimes(1);
+    resolveRun({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
+    await first;
+    expect(content.isLoadingData).toBe(false);
+  });
+
   it("does nothing without a station", async () => {
     const content = WaveRunnerContentModel.create({});
     const processEnvelopes = jest.fn();
