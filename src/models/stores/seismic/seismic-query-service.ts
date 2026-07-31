@@ -106,7 +106,7 @@ export class SeismicQueryService {
    * loads re-fetch them. Called after new envelope tiles are uploaded.
    */
   invalidateEnvelopes(stationData: StationData) {
-    const prefix = `${getLevelPrefix(stationData)}`;
+    const prefix = getLevelPrefix(stationData);
     for (const key of [...this.envelopeCache.keys()]) {
       if (key.startsWith(prefix)) this.envelopeCache.delete(key);
     }
