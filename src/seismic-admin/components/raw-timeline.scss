@@ -14,6 +14,11 @@
       background: #4a90d9;
     }
 
+    // Visually between filled and empty: the filled color at reduced opacity.
+    &.partial {
+      background: rgba(74, 144, 217, 0.4);
+    }
+
     &.empty {
       background: transparent;
     }

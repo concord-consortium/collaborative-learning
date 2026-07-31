@@ -23,7 +23,8 @@ A good design lets you read any of these in one place:
 - **by-behavior** — how one behavior works (nav routing, publish, SortWork membership), reading axes.
 
 The current type-switch serves *none* of these well. The architecture serves all three, with the
-`kind → axis` mapping happening in exactly one place.
+`kind → axis` mapping defined in exactly one place (the registry), applied only when a document is
+created or migrated.
 
 ## Architecture overview — three layers
 
@@ -34,12 +35,12 @@ The current type-switch serves *none* of these well. The architecture serves all
   DocumentModel             the metadata wrapper + AXIS GETTERS (by-axis view)
         │                   — canonical, owner, scope, permissions, concurrent, kind
         │
-   ┌────┴───────────────┬────────────────────────┐
-   │                    │                         │
- Kind registry     Behavior modules          Creation factory
- (by-kind view)    (by-behavior view)        (the ONE kind→axis bridge)
- fn(doc)→config    fn(doc)→result            reads registry defaults,
- kind read here    read getters/registry     stamps axis values on a new doc
+   ┌────┴───────────────┬────────────────────────┬─────────────────────────┐
+   │                    │                        │                         │
+ Kind registry     Behavior modules        Creation factory          Migrations
+ (by-kind view)    (by-behavior view)      (kind→axis, new docs)     (kind→axis, existing docs)
+ fn(doc)→config    fn(doc)→result          reads registry defaults,  kind = cohort key;
+ kind read here    read getters/registry   stamps axes on a new doc  same registry defaults
                    never branch on kind
 ```
 
@@ -115,24 +116,63 @@ kind-looked-up) is hidden from callers:
 Both look identical to a caller. Behaviors that are CLUE/UI-specific live in their feature modules, not on the
 model — keeping the model un-entangled (see boundary).
 
-## The creation factory — the one `kind → axis` bridge
+## The creation factory — the `kind → axis` bridge for new documents
 
-Creating a document is the single place `kind` is turned into axis values: the factory reads
+Creating a document is where `kind` is turned into axis values for a *new* document: the factory reads
 `registry.defaults(kind)` and stamps `canonical`/`owner`/`scope`/`permissions`/`concurrent` onto the new
 `DocumentModel`. Copy and publish are the same shape with different templates (`registry.copyTemplate` /
 `registry.publishTemplate`) — a copy/publish is "make a new document from a template," per-axis
-(findings "Deriving new documents"). After creation, the document carries its own axis values; runtime never
-re-derives them from `kind`.
+(findings "Deriving new documents"). After creation, the document carries its own axis values; runtime
+behavior never re-derives them from `kind` — only a migration restamps them (next section).
 
-## The core rule — `kind` is read in exactly two places
+## The core rule — `kind` is read in exactly three places
 
 1. Inside the **kind registry** (which resolves `doc.kind` to config).
 2. Inside the **creation/derivation factory** (which maps `kind` to default axis values once).
+3. Inside **migration code** (which uses `kind` as the *cohort key*: "find every document of kind X and
+   stamp/update axis Y" — see below).
 
 Everywhere else — behaviors, rules, UI — reads **axes** (via getters) or calls **registry `fn(doc)`** or
 **behavior `fn(doc)`**. No `doc.type === X` / `isProblem()` anywhere else. Because the registry hides `kind`
-behind `fn(doc)`, this is enforceable by lint/grep: `doc.kind` / `.type` may appear only in the registry and
-factory modules.
+behind `fn(doc)`, this is enforceable by lint/grep: `doc.kind` / `.type` may appear only in the registry,
+factory, and migration modules.
+
+## Migrations — `kind` as the cohort key
+
+Existing documents do not have the new stored axes, so each stored axis has to be stamped onto the documents
+that predate it. `kind` is what makes that possible: it is the handle for *finding* the documents that should
+get a given value. This is the third reader of `kind`, and it is **not only transitional** — it stays after
+the decomposition is complete, because once behavior is per-document data, changing a kind's intended
+settings means migrating that kind's existing documents rather than changing one branch in code. That is the
+tradeoff the decomposition accepts, and a stored `kind` is what keeps the migration tractable — without it the
+cohort would be unfindable.
+
+Migrations take a few forms, all deriving their values from the **same registry defaults** the creation factory
+uses — so a kind's defaults are still written down once:
+
+- **At runtime in the client** — when a document is loaded, CLUE notices a missing axis value and stamps it
+  from the kind's defaults (the lazy-backfill pattern already used for scoped pointer slots). Cheapest: no
+  infrastructure and no downtime. But it only reaches documents someone actually opens, **and only works for
+  axes a client is allowed to write.**
+- **At runtime in a Cloud Function** — the same lazy, on-demand stamping, done in a trusted context. This is
+  what an axis needs when a client must not be able to set it.
+- **As admin scripts sweeping all the Firestore document metadata** — applies the cohort rule to every document
+  whether or not it is ever opened. Needed when security rules or queries must be able to assume the axis is
+  present on *every* document, and for cohort-wide changes to an already-migrated axis.
+
+**Which axes a client may stamp is a security question, not a convenience one.** Several axes are stored
+precisely so the security rules can enforce them (`permissions`, `canonical`, `concurrent`); for those, a
+client-writable backfill would let a client hand itself the value the rules are meant to police. So the rules
+stay tight and the stamping moves to a Cloud Function or an admin script. Client-side backfill is available
+only where the write would be legitimate coming from that user anyway.
+
+A migration also has to decide what to do with documents whose value was legitimately customized away from the
+old default — overwrite the cohort, or only fill in what is missing. That choice is per-migration policy, not
+something the architecture fixes.
+
+Axes that are **not** stored need none of this: presentation, creation defaults, copy/publish templates, and a
+permission policy's rules all live in code, so changing them changes every document at once with no migration
+(see "How each thing is realized").
 
 ## The boundary — metadata getters on the model, behaviors outside
 
@@ -151,12 +191,15 @@ are exactly the ones the boundary pushes out.
 ## How each thing is realized
 
 - **Stored per-doc** (rule-readable; migrate to change): `canonical`, `owner`, `concurrent`, the **scope**
-  association fields, and the **stored per-doc grants of `permissions`** — plus the `kind` tag. `owner` and
-  `concurrent` are exposed as getters on `DocumentModel`; the scope fields are read directly / via field guards
-  (see "Typed document shapes"), not necessarily behind a single `scope` getter.
-- **Looked up by `kind`** (registry `fn(doc)`; no storage, no migration): presentation, creation defaults,
-  copy/publish templates, `showInSortWork`, and the **shared grants of `permissions`** (via its referenced
-  permission policy).
+  association fields, the **permission-policy reference** and the **stored per-doc grants** of `permissions` —
+  plus the `kind` tag. `owner` and `concurrent` are exposed as getters on `DocumentModel`; the scope fields are
+  read directly / via field guards (see "Typed document shapes"), not necessarily behind a single `scope`
+  getter.
+- **Looked up by `kind`** (registry `fn(doc)`; no storage, no migration): presentation, creation defaults
+  (including *which* permission policy a new document references), copy/publish templates, `showInSortWork`.
+- **Looked up by policy name** (code-defined policy table, resolvable by both the runtime and
+  `firestore.rules`): the **shared grants of `permissions`**. Changing a policy's rules needs no migration;
+  changing which policy a document references does.
 - **Composed** (getter merges stored + lookup): `permissions` (see "Permissions composition").
 - **Derived** — two homes by the boundary: general document-intrinsic derivations are **getters on the
   model** (`frozen`, `isEditable`); CLUE/UI-specific derivations are external **behavior `fn(doc)`** (`navTab`,
@@ -171,8 +214,9 @@ are exactly the ones the boundary pushes out.
   association fields (`context`/`offeringId`/`groupId`/`problem`/`unit`) are consumed via field guards (see
   "Typed document shapes") rather than necessarily a single `scope` getter. **Loses** its type-view methods
   (`isProblem`, …), which become axis getters + external behaviors.
-- New modules: the **kind registry** (`fn(doc)` config), **behavior modules** per feature, and the
-  **creation/derivation factory**.
+- New modules: the **kind registry** (`fn(doc)` config), **behavior modules** per feature, the
+  **creation/derivation factory**, and **migration code** (client or Cloud Function backfill, plus metadata
+  sweep scripts).
 
 ### Caveats
 1. `DocumentModel` is not purely CLUE — the standalone doc-editor uses it with minimal metadata. So the clean
@@ -205,8 +249,8 @@ the fields it uses and narrows with a **type guard** — the type-system form of
 
 These guards are the typed siblings of the axis getters / registry `fn(doc)`: a guard like `hasOfferingScope`
 is `doc.scope`-shaped and lives with the axis layer, not scattered per feature. `.type`/`.kind` still appear
-only in the registry and factory (the core rule); a guard that tests `offeringId` is an axis-field check, not
-a kind check, so it is allowed everywhere.
+only in the registry, factory, and migration modules (the core rule); a guard that tests `offeringId` is an
+axis-field check, not a kind check, so it is allowed everywhere.
 
 **Already visible in the code.** Group and class-wide documents both store `type: "group"` yet have different
 scope shapes (group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). Those scope fields live
@@ -222,7 +266,8 @@ deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This s
 
 ## Enforcement
 
-- A lint rule / CI grep: `.type` / `.kind` reads are allowed **only** in the registry and factory modules.
+- A lint rule / CI grep: `.type` / `.kind` reads are allowed **only** in the registry, factory, and migration
+  modules.
 - Behavior and rules code reference axis getters or `fn(doc)` calls exclusively.
 - Consumers narrow document shapes with field/axis **type guards** (e.g. `hasOfferingScope`), never by `type`;
   a guard tests axis fields, so it is not a `.type`/`.kind` read.
@@ -230,9 +275,10 @@ deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This s
 
 ## Non-goals / out of scope (deferred)
 
-- **Migration** of ~90 existing `type`-switches and backfill of new stored axes onto existing documents — a
-  separate implementation-planning effort. This design describes the *target*, reached via the incremental
-  path: stand up the registry + getters first, then migrate the `type`-branches opportunistically.
+- **The per-axis migration plans** — which documents get backfilled when, and the conversion of the ~90
+  existing `type`-switches — are a separate implementation-planning effort ("Migrations" above fixes only the
+  mechanism and `kind`'s role in it). This design describes the *target*, reached via the incremental path:
+  stand up the registry + getters first, then migrate the `type`-branches opportunistically.
 - **Enforcing `permissions` on document content** — content access is largely unenforced in the RTDB today;
   deferred. The composed-permissions tension — security rules cannot run the
   client-side registry lookup — is addressed for the shared portion by **permission policies**: the document

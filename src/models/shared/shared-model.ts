@@ -52,3 +52,15 @@ export const SharedModel = types.model("SharedModel", {
 
 export interface SharedModelType extends Instance<typeof SharedModel> {}
 export type SharedModelSnapshotType = SnapshotIn<typeof SharedModel>;
+
+// A shared model may implement exportStableSnapshot() to customize its export serialization — e.g. to
+// drop transient runtime fields (per-tick/per-step values that churn every frame) that would otherwise
+// change the export continuously and reload authoring previews.
+//
+// The return is an OBJECT, not stringified JSON. When absent, the document serializes the full snapshot.
+export interface ISharedModelWithStableSnapshot {
+  exportStableSnapshot(): Record<string, unknown>;
+}
+export function sharedModelHasExportStableSnapshot(model: unknown): model is ISharedModelWithStableSnapshot {
+  return typeof (model as any)?.exportStableSnapshot === "function";
+}

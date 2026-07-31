@@ -1,8 +1,10 @@
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import React, { useCallback, useEffect, useRef } from "react";
 import { IBaseProps } from "../base";
 import { useStores } from "../../hooks/use-stores";
 import { usePanelVisibility } from "../../hooks/use-panel-visibility";
+import { shouldNarrowResources } from "./wide-content-layout";
 import { DocumentWorkspaceComponent } from "../document/document-workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
@@ -20,7 +22,8 @@ interface IProps extends IBaseProps {
 
 export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const stores = useStores();
-  const { persistentUI: { navTabContentShown, workspaceShown },
+  const { persistentUI: { navTabContentShown, workspaceShown, dividerPosition, showChatPanel },
+          appConfig,
           exemplarController,
           problem,
           ui: { standalone }
@@ -28,6 +31,13 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const hotKeys = useRef(new HotKeys());
   const saveIndicatorPortalRef = useRef<HTMLDivElement>(null);
   const { showLeftPanel, showRightPanel } = usePanelVisibility();
+  const wideContentActive = shouldNarrowResources({
+    contentLayout: appConfig.contentLayout,
+    showLeftPanel,
+    showRightPanel,
+    dividerPosition,
+    showChatPanel,
+  });
   const ariaLabels = getAriaLabels();
   const problemTitle = stores.isProblemLoaded
     ? problem.title + (problem.subtitle ? `: ${problem.subtitle}` : "")
@@ -53,7 +63,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
 
   return (
     <main
-      className="workspace"
+      className={classNames("workspace", { "wide-content-narrow": wideContentActive })}
       onKeyDown={(e) => hotKeys.current.dispatch(e)}>
       {problemTitle && <h1 className="visually-hidden">{problemTitle}</h1>}
       <div

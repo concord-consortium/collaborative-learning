@@ -1,7 +1,8 @@
+import { IDocumentMetadata } from "../../../shared/shared";
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
-import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { UserModel } from "../stores/user";
+import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { createDocumentModel } from "./document";
 import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
@@ -440,6 +441,14 @@ describe("document utils", () => {
         unit: "sas", contextId: "class-1"
       });
       expect(canUserEditDocument({ document: classWideDocument, user: student })).toBe(true);
+    });
+
+    it("allows a group member to edit their group's document via the document-only path (no metadata)", () => {
+      const groupDocument = createDocumentModel({
+        uid: groupOwner("3"), type: GroupDocument, key: "k", concurrent: true,
+        unit: "sas", investigation: "1", offeringId: kOffering
+      });
+      expect(canUserEditDocument({ document: groupDocument, user: groupedStudent })).toBe(true);
     });
   });
 });

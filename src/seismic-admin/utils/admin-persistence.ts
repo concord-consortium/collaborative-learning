@@ -4,7 +4,9 @@ export interface AdminFilters {
   startDate?: string;
   endDate?: string;
   // Selected station keys (getStationChannelPrefix). Absent means "never chosen".
-  selected?: string[];
+  selectedStations?: string[];
+  // Selected model metadata URLs. Absent means "never chosen".
+  selectedModels?: string[];
 }
 
 function isStringArray(value: unknown): value is string[] {
@@ -16,11 +18,12 @@ export function loadFilters(): AdminFilters {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
-    const { startDate, endDate, selected } = JSON.parse(raw) ?? {};
+    const { startDate, endDate, selectedStations, selectedModels } = JSON.parse(raw) ?? {};
     return {
       startDate: typeof startDate === "string" ? startDate : undefined,
       endDate: typeof endDate === "string" ? endDate : undefined,
-      selected: isStringArray(selected) ? selected : undefined,
+      selectedStations: isStringArray(selectedStations) ? selectedStations : undefined,
+      selectedModels: isStringArray(selectedModels) ? selectedModels : undefined,
     };
   } catch {
     return {};

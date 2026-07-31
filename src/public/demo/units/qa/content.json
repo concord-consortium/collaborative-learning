@@ -119,6 +119,7 @@
     "tools": ["Simulator", "Timeline"],
     "enableCommentRoles": ["student", "teacher", "researcher"],
     "showCommentTag": true,
+    "allowCustomCommentTags": true,
     "termOverrides": {
       "strategy": "Select QA Strategy"
     },
