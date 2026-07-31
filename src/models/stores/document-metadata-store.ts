@@ -155,8 +155,7 @@ export class DocumentMetadataStore {
     // createFirestoreMetadataDocument and the createFirestoreMetadataDocument_v2 cloud function)
     // writes there, and the Sep 2025 migration consolidated all prefixed (network_/uid:) docs into
     // this unprefixed doc. A get-by-id is strongly consistent immediately after the awaited write,
-    // unlike a context_id+key collection query whose index lag left just-created personal documents
-    // unopenable (CLUE-587).
+    // unlike a query which does not return the result immediately after.
     const documentsCollection = this.stores.db.firestore.collection("documents");
     const docRef = documentsCollection.withConverter(converter).doc(escapeKey(key));
     const snapshot = await docRef.get();
