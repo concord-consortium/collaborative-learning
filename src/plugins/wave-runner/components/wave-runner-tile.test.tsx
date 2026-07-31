@@ -7,7 +7,7 @@ jest.mock("uplot", () => {
   }));
 });
 
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
 import "../../../models/tiles/table/table-registration";
@@ -212,8 +212,10 @@ describe("WaveRunnerComponent", () => {
     });
     renderModel(model2);
     expect(screen.getByText("Loading data: day 3 of 5...")).toBeInTheDocument();
-    resolveRun({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 5 });
-    await pending;
+    await act(async () => {
+      resolveRun({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 5 });
+      await pending;
+    });
   });
 
   it("shows envelope load errors", async () => {
