@@ -10,9 +10,10 @@ import { numSocket } from "./num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed,
-  kServoOutputTypes} from "../model/utilities/node";
+  kServoOutputTypes, outputGateState, unsupportedOutputOption } from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
+import { deviceProtocol, deviceDisplayName, deviceSupportsOutput } from "../model/utilities/device-capabilities";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 import { getValueOrZero } from "./utilities/view-utilities";
 
@@ -66,7 +67,7 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
     const sharedVar = getSharedVar();
     console.log("setLiveOutputType.sharedVariable", sharedVar?.getAllOfType("live-output"));
     if (self.isGripperType) {
-      if (deviceFamily === "arduino") {
+      if (deviceSupportsOutput(deviceFamily, "gripper")) {
         // If we have a connected arduino we should have a gripper, prefer that
         self.setHubSelect(baseLiveOutputOptions.liveGripperOption.name);
       } else if (sharedVar) {
@@ -80,7 +81,7 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
     }
 
     if (self.isServoType) {
-      if (deviceFamily === "arduino") {
+      if (deviceSupportsOutput(deviceFamily, "servo")) {
         // If we have a connected arduino we should have a gripper, prefer that
         self.setHubSelect(baseLiveOutputOptions.liveServoOption.name);
       } else if (sharedVar) {
@@ -96,7 +97,7 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
     // When a relay type is selected this is used with the microbit where hubs need to be
     // selected. We can't just automatically choose a particular hub.
     if (self.isRelayType) {
-      if (deviceFamily === "microbit") {
+      if (deviceSupportsOutput(deviceFamily, "relay")) {
         // Prompt the user to select an option if there is a microbit connected
         self.setHubSelect("");
       } else if (sharedVar) {
@@ -223,17 +224,21 @@ export class LiveOutputNode extends BaseNode<
     const val = this.model.nodeValue ?? 0;
     const outType = this.model.liveOutputType;
     const isNumberOutput = val != null ? isFinite(val) : false;
-    const { deviceFamily } = serialDevice;
+    const protocol = deviceProtocol(serialDevice.deviceFamily);
 
-    if (deviceFamily === "arduino" && isNumberOutput){
-      if (kGripperOutputTypes.includes(outType)){
+    if (protocol === "keyValue" && isNumberOutput){
+      // Gate on the device's declared outputs, not just the protocol: Arduino and Spiker:bit
+      // share the keyValue protocol but a Spiker:bit has only a servo, so a gripper command
+      // (a bare integer the firmware can't distinguish from a servo angle) must not reach it,
+      // matching the "unsupported" state the option list already shows.
+      if (kGripperOutputTypes.includes(outType) && deviceSupportsOutput(serialDevice.deviceFamily, "gripper")){
         serialDevice.writeToOutForBBGripper(val, outType);
       }
-      if (kServoOutputTypes.includes(outType)){
+      if (kServoOutputTypes.includes(outType) && deviceSupportsOutput(serialDevice.deviceFamily, "servo")){
         serialDevice.writeToOutForServo(val, outType);
       }
     }
-    if (deviceFamily === "microbit"){
+    if (protocol === "radioHub"){
       // It is not clear when the channels would be falsey but that is how this
       // code was written before.
       if (!this.services.getChannels()) return;
@@ -263,7 +268,8 @@ export class LiveOutputNode extends BaseNode<
 
   setHubSelectOptions() {
     const options: ListOption[] = [];
-    const deviceFamily = this.deviceFamily;
+    const family = this.deviceFamily;
+    const connected = !!this.services.stores.serialDevice.isConnected();
     const sharedVar = this.getPotentialOutputVariable();
     const simOption = sharedVar && simulatedHub(sharedVar);
     const {
@@ -271,39 +277,34 @@ export class LiveOutputNode extends BaseNode<
       liveServoOption, noDeviceliveServoOption,
       genericWarningOption
     } = baseLiveOutputOptions;
-    const { isGripperType, isRelayType, isServoType, hubSelect } = this.model;
+    const { isGripperType, isRelayType, isServoType } = this.model;
 
     if (simOption) {
       options.push(simOption);
     }
 
     if (isRelayType) {
-      if (deviceFamily === "microbit") {
-        options.push(...NodeMicroBitHubs);
-      } else {
-        options.push(genericWarningOption);
+      switch (outputGateState(connected, family, "relay")) {
+        case "live": options.push(...NodeMicroBitHubs); break;
+        case "unsupported": options.push(unsupportedOutputOption("relay", deviceDisplayName(family))); break;
+        case "no-device": options.push(genericWarningOption); break;
       }
     }
 
     if (isGripperType) {
-      if (deviceFamily === "arduino") {
-        options.push(liveGripperOption);
-      } else {
-        options.push(noDeviceLiveGripperOption);
+      switch (outputGateState(connected, family, "gripper")) {
+        case "live": options.push(liveGripperOption); break;
+        case "unsupported": options.push(unsupportedOutputOption("gripper", deviceDisplayName(family))); break;
+        case "no-device": options.push(noDeviceLiveGripperOption); break;
       }
     }
 
     if (isServoType) {
-      if (deviceFamily === "arduino") {
-        options.push(liveServoOption);
-      } else {
-        options.push(noDeviceliveServoOption);
+      switch (outputGateState(connected, family, "servo")) {
+        case "live": options.push(liveServoOption); break;
+        case "unsupported": options.push(unsupportedOutputOption("servo", deviceDisplayName(family))); break;
+        case "no-device": options.push(noDeviceliveServoOption); break;
       }
-    }
-
-    if (!options.find(option => option.name === hubSelect)) {
-      // In certain cases, if we don't have an option for the current selection
-      // we might need to add one.
     }
 
     this.hubSelectControl.setOptions(options);
@@ -323,7 +324,7 @@ export class LiveOutputNode extends BaseNode<
     // of the options is changed
     runInAction(() => {
       hubsChannels
-      .filter(c => c.deviceFamily === "microbit")
+      .filter(c => c.protocol === "radioHub")
       .forEach(c => {
         // Incase there is a channel without a microbitId, skip it
         if (!c.microbitId) return;

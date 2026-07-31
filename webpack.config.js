@@ -178,6 +178,10 @@ module.exports = (env, argv) => {
           }
         },
         {
+          test: /\.hex$/i,
+          type: 'asset/source'
+        },
+        {
           // store placeholder image as file not data URI
           test: /image_placeholder\.png$/,
           type: 'asset/resource',

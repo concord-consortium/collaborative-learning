@@ -111,6 +111,15 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // server's built-in generic tutor prompt; appendToGenericPrompt is added after the
   // (possibly replaced) generic prompt
   chatTutorPrompts?: { replaceGenericPrompt?: string; appendToGenericPrompt?: string };
+  // if true, the AI chat tutor is enabled for students in this unit. The chatTutor URL param also
+  // enables it (so authors can preview it). Like other config this merges bottom-up (problem, then
+  // investigation, then unit), so a value set at a lower level overrides the unit's. Disabling
+  // preserves any chatTutorPrompts overrides above.
+  chatTutorEnabled?: boolean;
+  // optional per-unit intro message shown at the top of the chat tutor column. Display-only — it is
+  // never sent to the AI as context. Unset falls back to the built-in default; an empty string
+  // suppresses the intro entirely.
+  chatTutorIntro?: string;
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
   // if set it will be used to determine if the show ideas button is shown, otherwise
