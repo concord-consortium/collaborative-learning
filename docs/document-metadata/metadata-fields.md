@@ -316,19 +316,18 @@ declare it. Anything reading properties from the Firestore metadata should treat
   `undefined`)
 - **Applies to:** group documents — the group that **owns** the document
 - **Runtime:** `DocumentModel.groupId`, `DocumentMetadataModel.groupId`
-- **Updated by:** nothing — creation only, stamped from the kind's `ownerType` by
-  `getDocumentOwnerFields`
+- **Updated by:** nothing — creation only, stamped from the kind's registered `scopeType` by
+  `getDocumentScopeFields` ([document-kinds.ts](../../src/models/document/document-kinds.ts))
 - **Reactive:** No — immutable
 
-The owning group, and nothing else. It is a denormalization of the owner: the owner `uid` already encodes
-it (`group_<offeringId>_<groupId>`), and this field spares consumers from taking that apart. Consumers
-asking *whether* a document is group-owned use `hasGroupOwner` rather than reading the field
-(`src/models/document/document-axes.ts`).
+The group that **owns** the document, and nothing else — not the group its author happens to be in, which
+is `authorGroupId` below. It is a denormalization of the owner: the owner `uid` already encodes it
+(`group_<offeringId>_<groupId>`), so this field spares consumers from taking that apart when they need the
+group's number.
 
 **A group id is unique only within an offering.** Group 3 of one assignment and group 3 of the next are
-different sets of students, so a bare group id must not be used to look a group up — `getGroupByOwnerId`
-matches on the whole owner id instead, and answers with nothing for a group outside the offering it
-holds.
+different sets of students, so a bare group id is not a safe key to look a group up by. The owner `uid`
+carries the offering, which makes it the exact one.
 
 ### `authorGroupId` (runtime only)
 
