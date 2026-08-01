@@ -8,6 +8,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
 import { DataflowContentModelType } from "../model/dataflow-content";
+import { resolveAllowedOutputTypes } from "../model/utilities/node";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
@@ -69,17 +70,15 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   }
 
-  // Mirror the unit's Live Output config (settings.dataflow.*) onto the tile content so the snapshot-only
-  // AI summarizer (chat tutor + aiEvaluation) can see it. Only done in editable tiles (which persist);
-  // setOutputConfig stores only non-default values and is idempotent.
+  // Mirror the unit's resolved Live Output config onto the tile content so the snapshot-only AI
+  // summarizer (chat tutor + aiEvaluation) sees the same set the node dropdown enforces. Editable
+  // tiles only; setOutputConfig stores only non-default values and is idempotent.
   private mirrorUnitOutputConfig() {
     const { appConfig } = this.stores;
     const servoInputMode = appConfig.getSetting("servoInputMode", "dataflow");
-    const allowedOutputTypes = appConfig.getSetting("liveOutputTypes", "dataflow");
     this.getContent().setOutputConfig({
       servoInputMode: servoInputMode === "proportion" ? "proportion" : undefined,
-      allowedOutputTypes: Array.isArray(allowedOutputTypes) && allowedOutputTypes.length
-        ? allowedOutputTypes as string[] : undefined,
+      allowedOutputTypes: resolveAllowedOutputTypes(appConfig.getSetting("liveOutputTypes", "dataflow")),
     });
   }
 

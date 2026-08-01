@@ -9,7 +9,7 @@ import { INodeServices } from "./service-types";
 import { numSocket } from "./num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
-  kGripperOutputTypes, kMicroBitHubRelaysIndexed,
+  kGripperOutputTypes, kMicroBitHubRelaysIndexed, resolveAllowedOutputTypes,
   kServoOutputTypes, outputGateState, unsupportedOutputOption } from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
@@ -169,14 +169,12 @@ export class LiveOutputNode extends BaseNode<
 
       if (!model.liveOutputType) {
         // Set the default value. This also updates the hubSelect depending on the connected device and
-        // and simulation. Default to the first unit-allowed type (usually "Gripper 2.0", unless the unit
-        // restricts the list).
+        // simulation.
         // FIXME: this might cause problems with undo support since it is changing the state on node
         // initialization, we'll have to make sure this happens within the node creation action
         this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
       } else if (!this.allowedLiveOutputTypes.some(t => t.name === model.liveOutputType)) {
-        // The unit config no longer allows the stored type — fall back to the first allowed option so
-        // the dropdown never renders blank.
+        // Stored type is no longer unit-allowed; fall back so the dropdown never renders blank.
         this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
       }
       // Update the options now that we have a type
@@ -409,19 +407,13 @@ export class LiveOutputNode extends BaseNode<
     return this.services.stores.serialDevice.deviceFamily;
   }
 
-  // Unit-config (settings.dataflow.servoInputMode): when "proportion" the Servo output accepts 0–1
-  // instead of 0–180 degrees. Defaults to degrees, so existing units are unaffected.
   private get servoProportionMode() {
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
   }
 
-  // Unit-config (settings.dataflow.liveOutputTypes): restrict the Live Output type list to an allowed
-  // subset (by NodeLiveOutputTypes `name`). Absent / empty / malformed → the full list.
   private get allowedLiveOutputTypes() {
-    const allowed = this.services.stores.appConfig.getSetting("liveOutputTypes", "dataflow");
-    if (!Array.isArray(allowed) || allowed.length === 0) return NodeLiveOutputTypes;
-    const filtered = NodeLiveOutputTypes.filter(t => allowed.includes(t.name));
-    return filtered.length > 0 ? filtered : NodeLiveOutputTypes;
+    const names = resolveAllowedOutputTypes(this.services.stores.appConfig.getSetting("liveOutputTypes", "dataflow"));
+    return names ? NodeLiveOutputTypes.filter(t => names.includes(t.name)) : NodeLiveOutputTypes;
   }
 
   data({nodeValue}: {nodeValue?: number[]}) {

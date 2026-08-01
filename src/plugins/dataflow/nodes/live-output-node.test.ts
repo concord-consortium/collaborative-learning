@@ -1,4 +1,5 @@
 import { LiveOutputNode, servoDisplayMessage } from "./live-output-node";
+import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
 // Minimal fake SerialDevice that records which output writer the node invoked. The keyValue
 // branch of sendDataToSerialDevice reads only this.model and the device's deviceFamily, so an
@@ -116,5 +117,20 @@ describe("Live Output type restriction (settings.dataflow.liveOutputTypes)", () 
     expect(names(stubbedNode({}, { liveOutputTypes: [] })).length).toBeGreaterThan(1);
     expect(names(stubbedNode({}, { liveOutputTypes: ["Nonexistent"] })).length).toBeGreaterThan(1);
     expect(names(stubbedNode({}, { liveOutputTypes: "Servo" })).length).toBeGreaterThan(1);
+  });
+});
+
+// The dropdown and the AI-summary mirror share this resolver; undefined = unrestricted, so the AI note
+// never claims a restriction the UI doesn't show (including a setting that lists the full set).
+describe("resolveAllowedOutputTypes (settings.dataflow.liveOutputTypes)", () => {
+  it("returns the restricted names (in canonical order) for a genuine subset", () => {
+    expect(resolveAllowedOutputTypes(["Servo", "Fan"])).toEqual(["Fan", "Servo"]);
+  });
+  it("returns undefined when unrestricted (absent, empty, malformed, unknown-only, or the full list)", () => {
+    expect(resolveAllowedOutputTypes(undefined)).toBeUndefined();
+    expect(resolveAllowedOutputTypes([])).toBeUndefined();
+    expect(resolveAllowedOutputTypes("Servo")).toBeUndefined();
+    expect(resolveAllowedOutputTypes(["Nonexistent"])).toBeUndefined();
+    expect(resolveAllowedOutputTypes(NodeLiveOutputTypes.map(t => t.name))).toBeUndefined();
   });
 });

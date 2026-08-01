@@ -440,6 +440,15 @@ export const NodeLiveOutputTypes = [
   }
 ];
 
+// Resolves settings.dataflow.liveOutputTypes to the restricted list of type names, or undefined when
+// the unit does not restrict outputs (absent/empty/malformed/unknown-only, or the full list). Shared
+// by the node dropdown and the AI-summary mirror so both report the same set.
+export function resolveAllowedOutputTypes(setting: unknown): string[] | undefined {
+  if (!Array.isArray(setting)) return undefined;
+  const names = NodeLiveOutputTypes.map(t => t.name).filter(name => setting.includes(name));
+  return names.length > 0 && names.length < NodeLiveOutputTypes.length ? names : undefined;
+}
+
 function createNodeMicroBitHubs(arr: string[]) {
   return arr.map((id) => {
     return {
