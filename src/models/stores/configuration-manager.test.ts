@@ -219,6 +219,22 @@ describe("ConfigurationManager", () => {
     expect(configManager.defaultSharedDocuments).toBe(true);
   });
 
+  it("should return undefined for showShare when not configured", () => {
+    const configManager = new ConfigurationManager(defaults, []);
+    expect(configManager.showShare).toBeUndefined();
+  });
+
+  it("should return false for showShare when explicitly set to false", () => {
+    const configManager = new ConfigurationManager({ ...defaults, showShare: false }, []);
+    expect(configManager.showShare).toBe(false);
+  });
+
+  it("should let a false showShare override win over a true base (getProp tests != null)", () => {
+    const override: Partial<UnitConfiguration> = { showShare: false };
+    const configManager = new ConfigurationManager({ ...defaults, showShare: true }, [override]);
+    expect(configManager.showShare).toBe(false);
+  });
+
   it("should return false for allowCustomCommentTags when showCommentTag is not set", () => {
     const config = { ...defaults, allowCustomCommentTags: true };
     const configManager = new ConfigurationManager(config, []);

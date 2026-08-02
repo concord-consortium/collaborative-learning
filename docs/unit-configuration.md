@@ -111,6 +111,8 @@ which checks if the the aiEvaluation is set or if there are invisible exemplar d
 
 `hide4up`: (boolean | undefined) If true, the button that switches to 4up view is always hidden.
 
+`showShare`: (boolean | undefined) Whether the share/unshare toggle is shown on student documents (problem, personal, and learning log). Defaults to `true`. Set to `false` to hide sharing for the unit. Hiding the button does not unshare documents that are already shared.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.

@@ -14,6 +14,9 @@ interface IProps {
   // Optional scope line prepended as a heading to the copied transcript so a pasted
   // conversation is self-describing. Purely for the copy output.
   transcriptTitle?: string;
+  // Optional persona intro pinned at the top of the message column. Render-only: it is never a
+  // ChatTurn, so it never enters the AI context, the transport, or the copied transcript.
+  introText?: string;
 }
 
 // Build a plain-markdown transcript of the visible conversation for copy-to-clipboard.
@@ -96,7 +99,7 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
   );
 };
 
-export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle }) => {
+export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText }) => {
   const { turns, error, pending, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -208,7 +211,9 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
 
       <div className="chat-body">
       <div className="chat-messages" ref={listRef} data-testid="chat-messages">
-        {turns.length === 0 &&
+        {introText &&
+          <div className="chat-intro" data-testid="chat-intro">{introText}</div>}
+        {turns.length === 0 && !introText &&
           <div className="chat-empty" data-testid="chat-empty">Ask the tutor about your work.</div>}
         {turns.map(turn => (
           turn.variant === "debug"

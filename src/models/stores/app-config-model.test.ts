@@ -269,4 +269,24 @@ describe("ConfigurationManager", () => {
     });
   });
 
+  describe("showShare", () => {
+    it("should default to true when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.showShare).toBe(true);
+    });
+
+    it("should return false when explicitly set to false", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, showShare: false }
+      });
+      expect(appConfig.showShare).toBe(false);
+    });
+
+    it("should let a false override win over the default", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ showShare: false }]);
+      expect(appConfig.showShare).toBe(false);
+    });
+  });
+
 });

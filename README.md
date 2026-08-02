@@ -184,6 +184,8 @@ There are a number of URL parameters that can aid in testing:
 |`fakeAuthoringAuth`|`true`                |When set to true the authoring system fakes the GitHub login|
 |`authoringBranch`  |string                |When set to a value the runtime knows it should use the authoring api to get content using the specified branch|
 |`iframeUrl`        |string (escaped url)  |Used as the url for iframe interactive tiles, overriding the url specified in the unit's config.
+|`mockSeismicData`  |none                  |Seismic tiles fetch pre-staged sample miniSEED files from S3 instead of live EarthScope data via the CloudFront proxy, ignoring the requested station.|
+|`tokenServiceEnv`  |`staging`             |Seismic envelope uploads request credentials from the staging token-service and read/write envelope tiles in the staging bucket (`models-resources-qa`) instead of production.|
 
 The `unit` parameter can be in 3 forms:
 

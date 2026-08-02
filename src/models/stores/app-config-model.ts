@@ -87,6 +87,8 @@ export const AppConfigModel = types
     get aiEvaluation() { return self.configMgr.aiEvaluation; },
     get aiPrompt() { return self.configMgr.aiPrompt; },
     get chatTutorPrompts() { return self.configMgr.chatTutorPrompts; },
+    get chatTutorEnabled() { return self.configMgr.chatTutorEnabled; },
+    get chatTutorIntro() { return self.configMgr.chatTutorIntro; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
@@ -112,6 +114,8 @@ export const AppConfigModel = types
     get defaultPanelLayout() { return self.configMgr.defaultPanelLayout; },
     get contentLayout() { return self.configMgr.contentLayout; },
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
+    // Default true: the share toggle shows unless a unit explicitly hides it.
+    get showShare() { return self.configMgr.showShare ?? true; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

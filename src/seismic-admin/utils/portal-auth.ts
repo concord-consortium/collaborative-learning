@@ -1,7 +1,10 @@
 const DEFAULT_PORTAL_URL = "https://learn.concord.org";
 /** Must match the OAuth client registered in the portal for the admin page. */
 export const OAUTH_CLIENT_ID = "seismic-admin";
-const ACCESS_TOKEN_KEY = "seismic-admin-portal-access-token";
+const LAST_LOGIN_KEY = "seismic-admin-portal-last-login";
+/** Auto-login window: a login this recent means the portal session is probably
+ *  still alive, so a silent redirect will land back with a fresh token. */
+export const AUTO_LOGIN_MAX_AGE_MS = 8 * 60 * 60 * 1000;
 
 /** Portal base URL: the ?portal= param (bare host or full URL) or the default portal. */
 export function getPortalUrl(): string {
@@ -16,65 +19,80 @@ export function getPortalUrl(): string {
   }
 }
 
-/** OAuth2 implicit-flow authorize URL that redirects back to the current page (hash excluded). */
+/** OAuth2 implicit-flow authorize URL that redirects back to the current page (hash excluded).
+ *  The path is canonicalized (no index.html, trailing slash) to match the redirect URIs
+ *  registered for the portal's seismic-admin client; the portal errors on any mismatch. */
 export function buildAuthorizeUrl(): string {
-  const redirectUri = window.location.origin + window.location.pathname + window.location.search;
+  const path = window.location.pathname.replace(/index\.html$/, "").replace(/\/?$/, "/");
+  const redirectUri = window.location.origin + path + window.location.search;
   return `${getPortalUrl()}/auth/oauth_authorize?response_type=token` +
     `&client_id=${OAUTH_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 }
 
 /**
- * Access token from the OAuth redirect hash (persisting it with its issuing portal), else from
- * sessionStorage. A stored token is only returned when it was issued by the current portal;
- * a token for a different portal is stale and gets removed. Storage failures are treated as
- * "no stored token" so a storage-disabled browser can still complete the hash flow.
+ * Access token from the OAuth redirect hash; null when this page load isn't an
+ * OAuth return. The token is held in memory only — never persisted — but the
+ * successful login is recorded (portal + time) so a later load can silently
+ * re-run the redirect while the portal session is likely still alive. An OAuth
+ * error in the hash clears that record so a failed attempt can't loop.
  */
 export function consumeAccessTokenFromLocation(): string | null {
   const match = /access_token=([^&]+)/.exec(window.location.hash);
   if (match) {
-    try {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify({ portal: getPortalUrl(), token: match[1] }));
-    } catch {
-      // Persistence is a convenience; a failure here must not break login.
-    }
+    saveLastLogin();
     history.replaceState(null, "", window.location.pathname + window.location.search);
     return match[1];
   }
+  if (/(^#|[#&])error=/.test(window.location.hash)) {
+    clearLastLogin();
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+  return null;
+}
+
+function saveLastLogin() {
   try {
-    const raw = sessionStorage.getItem(ACCESS_TOKEN_KEY);
-    if (!raw) return null;
-    const { portal, token } = JSON.parse(raw) ?? {};
-    if (portal === getPortalUrl() && typeof token === "string") return token;
-    // Don't replay a token minted by one portal against another; drop the stale entry.
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    return null;
+    localStorage.setItem(LAST_LOGIN_KEY, JSON.stringify({ portal: getPortalUrl(), time: Date.now() }));
   } catch {
-    return null;
+    // Persistence is a convenience; a failure here must not break login.
   }
 }
 
-export function clearAccessToken() {
+export function clearLastLogin() {
   try {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(LAST_LOGIN_KEY);
   } catch {
     // Nothing useful to do if storage is unavailable.
   }
 }
 
+/** True when the last successful login was against the current portal within the window. */
+export function shouldAutoLogin(): boolean {
+  try {
+    const raw = localStorage.getItem(LAST_LOGIN_KEY);
+    if (!raw) return false;
+    const { portal, time } = JSON.parse(raw) ?? {};
+    return portal === getPortalUrl() && typeof time === "number" &&
+      Date.now() - time < AUTO_LOGIN_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
+}
+
+/** Silently re-run the OAuth redirect when the last login is fresh enough.
+ *  Returns true when navigation was started (the page is about to unload).
+ *  `navigate` is a test seam; production replaces the history entry so Back
+ *  from the round-trip doesn't land here and immediately redirect again. */
+export function attemptAutoLogin(navigate: (url: string) => void = url => window.location.replace(url)): boolean {
+  if (!shouldAutoLogin()) return false;
+  navigate(buildAuthorizeUrl());
+  return true;
+}
+
 /** Exchange a portal access token for the portal-signed Firebase JWT token-service verifies. */
-export async function fetchPortalFirebaseJwt(accessToken: string): Promise<string> {
+export async function fetchTokenServiceJwt(accessToken: string): Promise<string> {
   const url = `${getPortalUrl()}/api/v1/jwt/firebase?firebase_app=token-service`;
   const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!response.ok) throw new Error(`Portal JWT fetch failed: ${response.status}`);
   return (await response.json()).token;
-}
-
-/** Per-call JWT getter over a portal access token. A failed exchange means the token is
- *  stale (e.g. expired), so it is cleared before rethrowing: the in-flight operation still
- *  fails through the normal error path, but the next reload shows the login button again. */
-export function makePortalJwtGetter(accessToken: string): () => Promise<string> {
-  return () => fetchPortalFirebaseJwt(accessToken).catch(err => {
-    clearAccessToken();
-    throw err;
-  });
 }

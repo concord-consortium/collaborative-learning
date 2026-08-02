@@ -1,15 +1,18 @@
 import {
-  buildAuthorizeUrl, clearAccessToken, consumeAccessTokenFromLocation, fetchPortalFirebaseJwt, getPortalUrl,
-  makePortalJwtGetter
+  attemptAutoLogin, buildAuthorizeUrl, clearLastLogin, consumeAccessTokenFromLocation, fetchTokenServiceJwt,
+  getPortalUrl, shouldAutoLogin, AUTO_LOGIN_MAX_AGE_MS
 } from "./portal-auth";
 
-const ACCESS_TOKEN_KEY = "seismic-admin-portal-access-token";
+const LAST_LOGIN_KEY = "seismic-admin-portal-last-login";
 
 describe("portal-auth", () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    localStorage.clear();
     history.replaceState(null, "", "/seismic-admin/");
   });
+
+  const saveRecord = (portal: string, time: number) =>
+    localStorage.setItem(LAST_LOGIN_KEY, JSON.stringify({ portal, time }));
 
   describe("getPortalUrl", () => {
     it("defaults to learn.concord.org", () => {
@@ -43,60 +46,123 @@ describe("portal-auth", () => {
       const expectedRedirect = encodeURIComponent(`${window.location.origin}/seismic-admin/?x=1`);
       expect(url).toContain(`redirect_uri=${expectedRedirect}`);
     });
+
+    it("adds a trailing slash to a slash-less path so the redirect matches the registered URI", () => {
+      history.replaceState(null, "", "/seismic-admin?x=1");
+      const expectedRedirect = encodeURIComponent(`${window.location.origin}/seismic-admin/?x=1`);
+      expect(buildAuthorizeUrl()).toContain(`redirect_uri=${expectedRedirect}`);
+    });
+
+    it("canonicalizes away an explicit index.html", () => {
+      history.replaceState(null, "", "/seismic-admin/index.html");
+      const expectedRedirect = encodeURIComponent(`${window.location.origin}/seismic-admin/`);
+      const url = buildAuthorizeUrl();
+      expect(url).toContain(`redirect_uri=${expectedRedirect}`);
+      expect(url).not.toContain("index.html");
+    });
   });
 
   describe("consumeAccessTokenFromLocation", () => {
-    it("returns the token from the hash, stores it with its portal, and clears the hash", () => {
+    it("returns the token from the hash, records the login, and clears the hash", () => {
       history.replaceState(null, "", "/seismic-admin/?x=1#access_token=abc&token_type=bearer");
+      const before = Date.now();
       expect(consumeAccessTokenFromLocation()).toBe("abc");
-      expect(JSON.parse(sessionStorage.getItem(ACCESS_TOKEN_KEY)!))
-        .toEqual({ portal: "https://learn.concord.org", token: "abc" });
+      const record = JSON.parse(localStorage.getItem(LAST_LOGIN_KEY)!);
+      expect(record.portal).toBe("https://learn.concord.org");
+      expect(record.time).toBeGreaterThanOrEqual(before);
+      expect(record.time).toBeLessThanOrEqual(Date.now());
       expect(window.location.hash).toBe("");
       expect(window.location.pathname + window.location.search).toBe("/seismic-admin/?x=1");
     });
 
-    it("returns the stored token when there is no hash and the portal matches", () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY,
-        JSON.stringify({ portal: "https://learn.concord.org", token: "stored-token" }));
-      expect(consumeAccessTokenFromLocation()).toBe("stored-token");
+    it("never stores the token itself", () => {
+      history.replaceState(null, "", "/seismic-admin/#access_token=abc");
+      consumeAccessTokenFromLocation();
+      expect(JSON.stringify(localStorage)).not.toContain("abc");
+      expect(sessionStorage.length).toBe(0);
     });
 
-    it("does not return a token issued by a different portal, and removes it", () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY,
-        JSON.stringify({ portal: "https://learn.concord.org", token: "stored-token" }));
-      history.replaceState(null, "", "/seismic-admin/?portal=learn.staging.concord.org");
+    it("returns null when there is no OAuth hash", () => {
       expect(consumeAccessTokenFromLocation()).toBeNull();
-      expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+      expect(localStorage.getItem(LAST_LOGIN_KEY)).toBeNull();
     });
 
-    it("returns null on a malformed stored record", () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, "{not json");
+    it("clears the last-login record and the hash when the redirect returns an OAuth error", () => {
+      saveRecord("https://learn.concord.org", Date.now());
+      history.replaceState(null, "", "/seismic-admin/?x=1#error=access_denied");
       expect(consumeAccessTokenFromLocation()).toBeNull();
+      expect(localStorage.getItem(LAST_LOGIN_KEY)).toBeNull();
+      expect(window.location.hash).toBe("");
     });
 
-    it("returns null with no hash and no stored token", () => {
-      expect(consumeAccessTokenFromLocation()).toBeNull();
-    });
-
-    it("returns null when sessionStorage is unavailable", () => {
-      jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("disabled"); });
+    it("still returns the hash token when storage is unavailable", () => {
+      history.replaceState(null, "", "/seismic-admin/#access_token=abc");
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("disabled"); });
       try {
-        expect(consumeAccessTokenFromLocation()).toBeNull();
+        expect(consumeAccessTokenFromLocation()).toBe("abc");
       } finally {
         jest.restoreAllMocks();
       }
     });
   });
 
-  describe("clearAccessToken", () => {
-    it("removes the stored token", () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, "abc");
-      clearAccessToken();
-      expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+  describe("shouldAutoLogin", () => {
+    it("is true for a fresh record from the current portal", () => {
+      saveRecord("https://learn.concord.org", Date.now());
+      expect(shouldAutoLogin()).toBe(true);
+    });
+
+    it("is true just inside the window and false just past it", () => {
+      saveRecord("https://learn.concord.org", Date.now() - AUTO_LOGIN_MAX_AGE_MS + 60_000);
+      expect(shouldAutoLogin()).toBe(true);
+      saveRecord("https://learn.concord.org", Date.now() - AUTO_LOGIN_MAX_AGE_MS - 1);
+      expect(shouldAutoLogin()).toBe(false);
+    });
+
+    it("is false for a record from a different portal", () => {
+      saveRecord("https://learn.concord.org", Date.now());
+      history.replaceState(null, "", "/seismic-admin/?portal=learn.staging.concord.org");
+      expect(shouldAutoLogin()).toBe(false);
+    });
+
+    it("is false with no record, a malformed record, or unavailable storage", () => {
+      expect(shouldAutoLogin()).toBe(false);
+      localStorage.setItem(LAST_LOGIN_KEY, "{not json");
+      expect(shouldAutoLogin()).toBe(false);
+      saveRecord("https://learn.concord.org", Date.now());
+      jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("disabled"); });
+      try {
+        expect(shouldAutoLogin()).toBe(false);
+      } finally {
+        jest.restoreAllMocks();
+      }
     });
   });
 
-  describe("fetchPortalFirebaseJwt", () => {
+  describe("attemptAutoLogin", () => {
+    it("navigates to the authorize URL and returns true when the record is fresh", () => {
+      saveRecord("https://learn.concord.org", Date.now());
+      const navigate = jest.fn();
+      expect(attemptAutoLogin(navigate)).toBe(true);
+      expect(navigate).toHaveBeenCalledWith(buildAuthorizeUrl());
+    });
+
+    it("does not navigate and returns false without a fresh record", () => {
+      const navigate = jest.fn();
+      expect(attemptAutoLogin(navigate)).toBe(false);
+      expect(navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("clearLastLogin", () => {
+    it("removes the record", () => {
+      saveRecord("https://learn.concord.org", Date.now());
+      clearLastLogin();
+      expect(localStorage.getItem(LAST_LOGIN_KEY)).toBeNull();
+    });
+  });
+
+  describe("fetchTokenServiceJwt", () => {
     afterEach(() => {
       delete (global as any).fetch;
     });
@@ -107,7 +173,7 @@ describe("portal-auth", () => {
         json: () => Promise.resolve({ token: "firebase-jwt" }),
       });
       (global as any).fetch = mockFetch;
-      await expect(fetchPortalFirebaseJwt("abc")).resolves.toBe("firebase-jwt");
+      await expect(fetchTokenServiceJwt("abc")).resolves.toBe("firebase-jwt");
       expect(mockFetch).toHaveBeenCalledWith(
         "https://learn.concord.org/api/v1/jwt/firebase?firebase_app=token-service",
         { headers: { Authorization: "Bearer abc" } }
@@ -116,32 +182,7 @@ describe("portal-auth", () => {
 
     it("throws with the status on a non-OK response", async () => {
       (global as any).fetch = jest.fn().mockResolvedValue({ ok: false, status: 403 });
-      await expect(fetchPortalFirebaseJwt("abc")).rejects.toThrow("403");
-    });
-  });
-
-  describe("makePortalJwtGetter", () => {
-    afterEach(() => {
-      delete (global as any).fetch;
-    });
-
-    it("resolves with the JWT and keeps the stored token on success", async () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY,
-        JSON.stringify({ portal: "https://learn.concord.org", token: "abc" }));
-      (global as any).fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ token: "firebase-jwt" }),
-      });
-      await expect(makePortalJwtGetter("abc")()).resolves.toBe("firebase-jwt");
-      expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).not.toBeNull();
-    });
-
-    it("clears the stored token and rethrows when the exchange fails", async () => {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY,
-        JSON.stringify({ portal: "https://learn.concord.org", token: "abc" }));
-      (global as any).fetch = jest.fn().mockResolvedValue({ ok: false, status: 401 });
-      await expect(makePortalJwtGetter("abc")()).rejects.toThrow("401");
-      expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+      await expect(fetchTokenServiceJwt("abc")).rejects.toThrow("403");
     });
   });
 });

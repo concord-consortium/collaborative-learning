@@ -15,6 +15,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
 import { IDataSet } from "../../../models/data/data-set";
 import { getAttributeIdForNode } from "./utilities/recording-utilities";
+import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
 export const ConnectionModel = types
@@ -27,6 +28,39 @@ export const ConnectionModel = types
   });
 export interface IConnectionModel extends Instance<typeof ConnectionModel> {}
 export interface ConnectionModelSnapshotIn extends SnapshotIn<typeof ConnectionModel> {}
+
+/**
+ * A "super node" grouping: a labeled, collapsible container that references member node ids.
+ * Members stay in the flat `nodes` map (so the rete engine still sees a flat graph); the group is
+ * a parallel organizational layer. Adding this map is backward-compatible — old snapshots without
+ * `groups` load with an empty map, so no version bump is needed.
+ */
+export const GroupModel = types
+  .model("Group", {
+    id: types.identifier,
+    label: types.string,
+    // Member node ids, stored as a map used as a set (key = value = node id). A map gives O(1)
+    // add/remove/has and merges more cleanly than an array in collaborative (group) documents.
+    // Membership is mirrored on each node via `groupId` so node→group lookup is also O(1).
+    nodeIds: types.map(types.string),
+    collapsed: types.optional(types.boolean, false),
+  })
+  .actions(self => ({
+    setLabel(label: string) {
+      self.label = label;
+    },
+    setCollapsed(collapsed: boolean) {
+      self.collapsed = collapsed;
+    },
+    addNodeId(nodeId: string) {
+      self.nodeIds.set(nodeId, nodeId);
+    },
+    removeNodeId(nodeId: string) {
+      self.nodeIds.delete(nodeId);
+    }
+  }));
+export interface IGroupModel extends Instance<typeof GroupModel> {}
+export interface GroupModelSnapshotIn extends SnapshotIn<typeof GroupModel> {}
 
 /**
  * The ConnectionModelWrapper is needed because Rete keeps references to the
@@ -55,6 +89,9 @@ export const DataflowNodeModel = types.
     name: types.string,
     x: types.number,
     y: types.number,
+    // The group this node belongs to, if any. Mirrors GroupModel.nodeIds so node→group lookup is O(1);
+    // maintained by createGroup / ungroupGroup / removeNodeAndConnections.
+    groupId: types.maybe(types.string),
     data: types.union(
       ControlNodeModel,
       CounterNodeModel,
@@ -74,6 +111,12 @@ export const DataflowNodeModel = types.
     liveX: NaN,
     liveY: NaN,
   }))
+  .views(self => ({
+    // Current position: the live (mid-drag) value when set, else the committed x/y. Centralizes the
+    // x-vs-liveX selection that bounds calculations need, so it lives in one place.
+    get currentX() { return Number.isFinite(self.liveX) ? self.liveX : self.x; },
+    get currentY() { return Number.isFinite(self.liveY) ? self.liveY : self.y; },
+  }))
   .actions(self => ({
     setPosition(position: {x: number, y: number}) {
       self.x = self.liveX = position.x;
@@ -82,6 +125,9 @@ export const DataflowNodeModel = types.
     setLivePosition(position: {x: number, y: number}) {
       self.liveX = position.x;
       self.liveY = position.y;
+    },
+    setGroupId(groupId?: string) {
+      self.groupId = groupId;
     }
   }))
   .preProcessSnapshot((snapshot: any) => {
@@ -120,6 +166,7 @@ export const DataflowProgramModel = types.
     id: STATE_VERSION_CURRENT,
     nodes: types.map(DataflowNodeModel),
     connections: types.map(ConnectionModel),
+    groups: types.map(GroupModel),
     recentTicks: types.array(types.string),
   })
   .volatile(self => ({
@@ -150,6 +197,15 @@ export const DataflowProgramModel = types.
   .views(self => ({
     get connectionWrappers() {
       return [...self.connections.keys()].map(id => self.getConnectionWrapper(id)!);
+    },
+    getGroupForNode(nodeId: string) {
+      const node = self.nodes.get(nodeId);
+      return node?.groupId ? self.groups.get(node.groupId) : undefined;
+    },
+    // Next default group label ("Group 1", "Group 2", ...) based on existing labels. Uses the same
+    // helper that names nodes, so groups and blocks index identically.
+    getNextGroupLabel() {
+      return getNewIndexedName([...self.groups.values()].map(g => g.label), "Group");
     }
   }))
   .actions(self => ({
@@ -230,9 +286,6 @@ export const DataflowProgramModel = types.
       node.data.createNextTickEntry(undefined, self.currentTick);
       return node;
     },
-    removeNode(id: IDataflowNodeModel["id"]) {
-      self.nodes.delete(id);
-    },
     addConnection(connection: IConnectionModel) {
       self.connections.put(connection);
     },
@@ -240,6 +293,51 @@ export const DataflowProgramModel = types.
       self.connections.delete(id);
       if (self._connectionWrappers[id]) {
         delete self._connectionWrappers[id];
+      }
+    }
+  }))
+  .actions(self => ({
+    // Dissolve a single group: clear each member node's groupId, then remove the group. In its own
+    // actions block so createGroup / ungroupGroups / removeNodeAndConnections can call it via `self`.
+    ungroupGroup(id: string) {
+      const group = self.groups.get(id);
+      if (!group) return;
+      [...group.nodeIds.keys()].forEach(nodeId => self.nodes.get(nodeId)?.setGroupId(undefined));
+      self.groups.delete(id);
+    }
+  }))
+  .actions(self => ({
+    // Create a "super node" group from the given node ids. Requires ≥2 nodes that exist and are
+    // not already in a group; returns the new group (or undefined if the request is invalid).
+    createGroup(nodeIds: string[], label?: string) {
+      // Dedupe before counting: nodeIds is a map, so a repeated id would pass the >=2 check but
+      // yield a single member, leaving a group that breaks the >=2 invariant everything else assumes.
+      const validIds = [...new Set(nodeIds)]
+        .filter(nodeId => self.nodes.has(nodeId) && !self.getGroupForNode(nodeId));
+      if (validIds.length < 2) return undefined;
+      const id = uniqueId();
+      const group = self.groups.put({ id, label: label ?? self.getNextGroupLabel(), collapsed: false });
+      validIds.forEach(nodeId => {
+        group.addNodeId(nodeId);
+        self.nodes.get(nodeId)?.setGroupId(id);
+      });
+      return group;
+    },
+    ungroupGroups(ids: string[]) {
+      ids.forEach(id => self.ungroupGroup(id));
+    },
+    // Remove a node, keeping group membership consistent: drop it from its group and dissolve the
+    // group if that leaves it with fewer than 2 members. The bookkeeping lives here, rather than
+    // only in removeNodeAndConnections, so that every removal path is consistent by construction —
+    // NodeEditorMST.clear() calls this directly, and used to leave groups whose nodeIds referenced
+    // deleted nodes behind in the saved document. Defined after ungroupGroup so it can use `self`.
+    removeNode(id: IDataflowNodeModel["id"]) {
+      // Capture the group first: getGroupForNode reads node.groupId, which goes away with the node.
+      const group = self.getGroupForNode(id);
+      self.nodes.delete(id);
+      if (group) {
+        group.removeNodeId(id);
+        if (group.nodeIds.size < 2) self.ungroupGroup(group.id);
       }
     }
   }))
@@ -257,6 +355,8 @@ export const DataflowProgramModel = types.
         wrapper && removedConnections.push(wrapper);
         self.removeConnection(connection.id);
       }
+
+      // removeNode handles the group bookkeeping and auto-dissolve.
       self.removeNode(nodeId);
       return removedConnections;
     }

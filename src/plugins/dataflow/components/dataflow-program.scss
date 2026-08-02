@@ -8,9 +8,20 @@ $dataflow-toolbar-height: 364px;
   font-family: 'Ubuntu', sans-serif;
   font-weight: 400;
   height: 100%;
+  // Positioning context for the marquee-selection rectangle (a direct child).
+  position: relative;
 
   svg {
     z-index: -1;
+  }
+
+  // Rubber-band marquee drawn while left-dragging on the empty canvas.
+  .dataflow-marquee {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
+    border: 1px dashed #4a90d9;
+    background: rgba(74, 144, 217, 0.12);
   }
 }
 

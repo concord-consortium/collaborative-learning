@@ -154,6 +154,8 @@ export interface IDocumentMetadata extends IDocumentMetadataBase {
     id: string;
     index: number;
   }|null;
+  concurrent?: boolean|null;
+  kind?: string|null;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;

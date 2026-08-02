@@ -1,10 +1,10 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
+import { getTokenServiceEnv } from "../../../shared/seismic/envelopes/envelope-config";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
 import { initAdminFirebase } from "../utils/admin-firebase";
 import { loadCatalog } from "../utils/load-catalog";
-import { getTokenServiceEnv } from "../../../shared/seismic/envelopes/envelope-config";
-import { consumeAccessTokenFromLocation, makePortalJwtGetter } from "../utils/portal-auth";
+import { attemptAutoLogin, consumeAccessTokenFromLocation, fetchTokenServiceJwt } from "../utils/portal-auth";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { AdminBody } from "./admin-body";
 import { AdminHeader } from "./admin-header";
@@ -17,6 +17,11 @@ export const App = observer(function App() {
   // (with location + label) merge with whatever is already in OPFS.
   useEffect(() => {
     let cancelled = false;
+    // An OAuth return supplies a token in the hash. Otherwise, a fresh prior login
+    // means the portal session is probably alive: bounce through the portal before
+    // spinning anything up and come straight back with a token.
+    const accessToken = consumeAccessTokenFromLocation();
+    if (!accessToken && attemptAutoLogin()) return;
     // Convert auth failure at the source so an unmount before the catalog resolves
     // never leaves an unhandled rejection. Resolves to null on success, else the reason.
     const authPromise = initAdminFirebase().then(
@@ -30,12 +35,11 @@ export const App = observer(function App() {
       const created = new SeismicAdminStore({ stations, models });
       setStore(created);
       void created.refresh();
-      // JWTs are fetched per credentials refresh; the ~1h access token in sessionStorage is
-      // enough for an admin session. A failed JWT fetch surfaces through the update-flow
-      // errors, and the getter clears a stale token so the next reload can log in again.
-      const accessToken = consumeAccessTokenFromLocation();
+      // JWTs are fetched per credentials refresh from the in-memory token. A failed
+      // fetch surfaces through the update-flow errors; the last-login record survives,
+      // so the next reload silently re-authenticates instead of showing the button.
       if (accessToken) {
-        created.setPortalAuth(makePortalJwtGetter(accessToken), getTokenServiceEnv());
+        created.setPortalAuth(() => fetchTokenServiceJwt(accessToken), getTokenServiceEnv());
       }
       void authPromise.then(failure => {
         if (cancelled) return;

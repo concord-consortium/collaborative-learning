@@ -23,6 +23,7 @@ import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode, kDemoSiteStorageKey } from "./store-types";
 import { SerialDevice } from "./serial";
+import { initWebSerialConnectionEvents } from "./web-serial-transport";
 import { IBaseStores, IGitInfo } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
 import { Bookmarks } from "./bookmarks";
@@ -165,6 +166,7 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(this.serialDevice);
     this.ui = params?.ui || UIModel.create({
       learningLogWorkspace: {
         type: LearningLogWorkspace,
