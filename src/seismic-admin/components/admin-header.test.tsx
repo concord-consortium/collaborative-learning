@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminHeader } from "./admin-header";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
+import * as portalAuth from "../utils/portal-auth";
 
 function makeStore() {
   const listStations = jest.fn(async () => [{ network: "AK", station: "K204", channel: "HNZ" }]);
@@ -116,6 +117,44 @@ describe("AdminHeader", () => {
       expect(store.selectedModels.size).toBe(0);
       expect(screen.getByRole("checkbox", { name: "Compact" })).toBeEnabled();
       expect(screen.getByRole("checkbox", { name: "Large" })).toBeEnabled();
+    });
+  });
+
+  describe("portal login", () => {
+    it("shows a login button when portal auth is not ready", async () => {
+      const { store } = makeStore();
+      await store.refresh();
+      renderHeader(store);
+
+      expect(screen.getByRole("button", { name: "Log in with Portal" })).toBeInTheDocument();
+      expect(screen.queryByText("Portal: signed in")).toBeNull();
+    });
+
+    it("navigates to the authorize URL on click", async () => {
+      // jsdom only implements hash navigation, so observe the href assignment through one.
+      const authorizeSpy = jest.spyOn(portalAuth, "buildAuthorizeUrl").mockReturnValue("#portal-login");
+      const { store } = makeStore();
+      await store.refresh();
+      renderHeader(store);
+
+      try {
+        fireEvent.click(screen.getByRole("button", { name: "Log in with Portal" }));
+        expect(authorizeSpy).toHaveBeenCalled();
+        expect(window.location.hash).toBe("#portal-login");
+      } finally {
+        authorizeSpy.mockRestore();
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    });
+
+    it("shows a signed-in indicator instead of the button once portal auth is ready", async () => {
+      const { store } = makeStore();
+      await store.refresh();
+      store.setPortalAuth(async () => "fake-jwt");
+      renderHeader(store);
+
+      expect(screen.queryByRole("button", { name: "Log in with Portal" })).toBeNull();
+      expect(screen.getByText("Portal: signed in")).toBeInTheDocument();
     });
   });
 

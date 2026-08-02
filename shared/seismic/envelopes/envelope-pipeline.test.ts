@@ -1,8 +1,7 @@
-// shared/seismic/envelope-pipeline.test.ts
 import { createPipelineState, placePointInTile, processL2Point, flushTiles } from "./envelope-pipeline";
 import { LEVEL_SPACINGS, K_FACTOR, POINTS_PER_TILE, NUM_LEVELS, NO_DATA_SENTINEL } from "./envelope-config";
 import { getTileIndex, getTileTimeRange, getPointIndexInTile } from "./tile-addressing";
-import type { EnvelopeTileData } from "./seismic-types";
+import type { EnvelopeTileData } from "../seismic-types";
 
 describe("envelope-pipeline", () => {
   describe("createPipelineState", () => {

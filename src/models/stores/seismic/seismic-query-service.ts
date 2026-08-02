@@ -2,17 +2,19 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { DateTime } from "luxon";
 import {
   LEVEL_SPACINGS, AMPLITUDE_RANGES, NO_DATA_SENTINEL, RAW_CHUNK_DURATION
-} from "../../../../shared/seismic/envelope-config";
-import { dequantize } from "../../../../shared/seismic/envelope-codec";
+} from "../../../../shared/seismic/envelopes/envelope-config";
+import { dequantize } from "../../../../shared/seismic/envelopes/envelope-codec";
 import {
-  getStationChannelPrefix, getStationPrefix, getTileIndicesForViewport, getTileS3Key, getTileTimeRange
-} from "../../../../shared/seismic/tile-addressing";
-import { fetchEnvelopeTile } from "../../../../shared/seismic/envelope-fetcher";
+  getTileIndicesForViewport, getTileS3Key, getTileTimeRange
+} from "../../../../shared/seismic/envelopes/tile-addressing";
+import { getStationChannelPrefix, getStationPrefix } from "../../../../shared/seismic/station-addressing";
+import { fetchEnvelopeTile } from "../../../../shared/seismic/envelopes/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../../shared/seismic/earthscope-client";
+import { getMetadataForChannel } from "../../../../shared/seismic/channel-metadata-utils";
 import { miniseed } from "seisplotjs";
 import {
   EnvelopeTileData, ChannelMetadata, NullableNumberArray, SeismicViewportParams, ViewportQueryResult, RawSegment,
-  StationChannel, StationData, StationId, TimeRange, StationQuery
+  StationData, StationId, TimeRange, StationQuery
 } from "../../../../shared/seismic/seismic-types";
 
 type EnvelopeCacheEntry = EnvelopeTileData | "loading" | "missing";
@@ -95,7 +97,7 @@ export class SeismicQueryService {
    */
   async getMetadata(stationData: StationData, timeSec: number): Promise<ChannelMetadata | undefined> {
     const allMetadata = await this.getAllMetadata(stationData);
-    return this.getMetadataForChannel(allMetadata, stationData, timeSec);
+    return getMetadataForChannel(allMetadata, stationData, timeSec);
   }
 
   // --- Private helpers (general) ---
@@ -378,24 +380,6 @@ export class SeismicQueryService {
     return metadata;
   }
 
-  /**
-   * Finds the metadata entry matching the station's channel and location (blank and undefined
-   * location are equivalent) covering timeSec.
-   */
-  private getMetadataForChannel(
-    metadata: ChannelMetadata[], station: StationChannel, timeSec: number
-  ): ChannelMetadata | undefined {
-    const location = station.location ?? "";
-    const matching = metadata.filter(m => m.channel === station.channel && (m.location ?? "") === location);
-    for (const m of matching) {
-      const start = new Date(m.startTime).getTime() / 1000;
-      const end = m.endTime === "" ? Infinity : new Date(m.endTime).getTime() / 1000;
-      if (timeSec >= start && timeSec < end) return m;
-    }
-    // When no time matches, return the last metadata (or undefined if there aren't any)
-    return matching[matching.length - 1];
-  }
-
   private async fetchAndParseRaw(
     query: StationQuery, metadata: ChannelMetadata[], signal: AbortSignal
   ): Promise<RawSegment[]> {
@@ -409,7 +393,7 @@ export class SeismicQueryService {
     if (seismogram && seismogram.segments) {
       for (const seg of seismogram.segments) {
         const segStartTime = seg.startTime.toSeconds();
-        const sensitivity = this.getMetadataForChannel(metadata, query, segStartTime)?.scale ?? 1;
+        const sensitivity = getMetadataForChannel(metadata, query, segStartTime)?.scale ?? 1;
         const sampleRate = seg.sampleRate;
         const y = seg.y;
         const samples = new Float64Array(y.length);

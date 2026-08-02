@@ -5,14 +5,14 @@ import "../../../models/shared/shared-data-set-registration";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
 import { kWaveRunnerTileType } from "../wave-runner-types";
-import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/model-metadata";
+import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
 import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
 import appConfig from "../../../clue/app-config.json";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
 import {
   getUncoveredRanges, loadEvents, markCovered, writeEvents
 } from "../../../models/stores/seismic/seismic-event-service";
-import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
+import { SeismicModelRunner } from "../../../../shared/seismic/models/seismic-model-runner";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { makeFakeDownloadService } from "../../../models/stores/seismic/seismic-coverage-test-fakes";
 

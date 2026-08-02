@@ -1,4 +1,3 @@
-// shared/seismic/envelope-config.test.ts
 import {
   LEVEL_SPACINGS, K_FACTOR, POINTS_PER_TILE, AMPLITUDE_RANGES,
   NO_DATA_SENTINEL, NUM_LEVELS

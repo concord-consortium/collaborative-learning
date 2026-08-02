@@ -4,9 +4,9 @@ import {
   getChunkIndex, getChunkStart, getWindowIndex, groupWindowsByChunk, isWindowCovered, modelPath,
   setWindowBits, uncoveredDaySpans
 } from "./event-database";
-import { SECONDS_PER_DAY } from "./seismic-day";
+import { SECONDS_PER_DAY } from "../seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
-import { StationData, TimeRange } from "./seismic-types";
+import { StationData, TimeRange } from "../seismic-types";
 
 const stationData: StationData = { network: "AK", station: "K204", channel: "BHZ", location: "00" };
 const blankLocation: StationData = { network: "AK", station: "K204", channel: "BHZ" };

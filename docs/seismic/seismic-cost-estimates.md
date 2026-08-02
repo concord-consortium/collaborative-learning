@@ -43,7 +43,7 @@ For planning purposes, we use **~10 MB/station-year/channel** as a conservative 
 
 ## Tile level configuration — why L0–L2 with these spacings
 
-The level configuration in [envelope-config.ts](../../shared/seismic/envelope-config.ts) sets L0 spacing to 15,750 s (~6 months of data across a 1,000-point L0 tile) with a scale factor of K=100 between levels, and 20,000 points per L2 tile.
+The level configuration in [envelope-config.ts](../../shared/seismic/envelopes/envelope-config.ts) sets L0 spacing to 15,750 s (~6 months of data across a 1,000-point L0 tile) with a scale factor of K=100 between levels, and 20,000 points per L2 tile.
 
 ### Why 3 levels and not 4
 

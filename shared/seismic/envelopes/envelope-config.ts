@@ -1,5 +1,3 @@
-// shared/seismic/envelope-config.ts
-
 /**
  * Envelope tile cache level configuration.
  *
@@ -39,6 +37,9 @@ export const POINTS_PER_TILE = [
 /** Number of stored envelope levels. */
 export const NUM_LEVELS = LEVEL_SPACINGS.length;
 
+/** The finest (highest-resolution) stored envelope level. */
+export const FINEST_LEVEL = NUM_LEVELS - 1;
+
 /**
  * Fixed amplitude range per instrument type (second char of SEED channel code).
  * Physical units: H/L = m/s (velocity), N = m/s² (acceleration).
@@ -52,11 +53,31 @@ export const AMPLITUDE_RANGES: Record<string, number> = {
 /** Sentinel value for "no data" in Int16 envelope arrays. */
 export const NO_DATA_SENTINEL = -32768;
 
+function getUrlParam(name: string): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get(name);
+}
+
 /** S3 bucket where envelope tiles are stored. */
 export const S3_BUCKET = "models-resources";
+export const S3_STAGING_BUCKET = "models-resources-qa";
+
+function getS3Bucket() {
+  if (getUrlParam("tokenServiceEnv") === "staging") {
+    return S3_STAGING_BUCKET;
+  }
+
+  return S3_BUCKET;
+}
+
+/** AWS region of the envelope tile bucket. */
+export const AWS_REGION = "us-east-1";
 
 /** S3 key prefix for envelope tiles. */
 export const S3_PREFIX = "collaborative-learning/envelopes/";
+
+/** Base URL of the S3 bucket hosting envelope tiles. */
+export const TILE_BASE_URL = `https://${getS3Bucket()}.s3.amazonaws.com/`;
 
 /** Duration of each raw data fetch chunk in seconds. */
 export const RAW_CHUNK_DURATION = 7200; // 2 hours

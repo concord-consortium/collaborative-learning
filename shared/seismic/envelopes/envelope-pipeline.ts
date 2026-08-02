@@ -1,7 +1,6 @@
-// shared/seismic/envelope-pipeline.ts
 import { NUM_LEVELS, POINTS_PER_TILE, NO_DATA_SENTINEL, LEVEL_SPACINGS, K_FACTOR } from "./envelope-config";
 import { getTileIndex, getPointIndexInTile } from "./tile-addressing";
-import type { EnvelopeTileData } from "./seismic-types";
+import type { EnvelopeTileData } from "../seismic-types";
 
 /** Running min/max accumulator for a single coarser-level point. Values are quantized Int16. */
 export interface AccumulatorEntry {

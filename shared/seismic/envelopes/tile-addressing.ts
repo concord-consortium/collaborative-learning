@@ -1,5 +1,6 @@
+import type { StationData, TimeRange } from "../seismic-types";
+import { getStationChannelPrefix } from "../station-addressing";
 import { ENVELOPE_LAYOUT_VERSION, LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
-import type { StationData, StationId, TimeRange } from "./seismic-types";
 
 /** Duration of one tile in seconds at the given level. */
 export function getTileDuration(level: number): number {
@@ -47,47 +48,6 @@ export function getTileIndicesForViewport(startTime: number, endTime: number, le
 export function getPointIndexInTile(timestamp: number, level: number, tileIndex: number): number {
   const tileRange = getTileTimeRange(level, tileIndex);
   return Math.floor((timestamp - tileRange.start) / LEVEL_SPACINGS[level]);
-}
-
-/**
- * Constructs the S3 key prefix for all tiles of a given station.
- * Format: {network}_{station}
- */
-export function getStationPrefix(station: StationId): string {
-  return `${station.network}_${station.station}`;
-}
-
-/**
- * Inverse of getStationPrefix: "{network}_{station}" → { network, station }.
- */
-export function parseStationPrefix(prefix: string): StationId | undefined {
-  const sep = prefix.indexOf("_");
-  if (sep < 0) return undefined;
-
-  const network = prefix.slice(0, sep);
-  const station = prefix.slice(sep + 1);
-  if (!network || ! station) return undefined;
-
-  return { network, station };
-}
-
-/** Encode a SEED location code as a path segment. Blank (undefined or "") becomes "--". */
-export function encodeLocation(location?: string): string {
-  return location ? location : "--";
-}
-
-/** Inverse of encodeLocation: "--" becomes "". */
-export function decodeLocation(segment: string): string {
-  return segment === "--" ? "" : segment;
-}
-
-/**
- * Constructs the S3 key prefix for all tiles of a given station, location, and channel.
- * Format: {network}_{station}/{location}/{channel}
- */
-export function getStationChannelPrefix(stationData: StationData): string {
-  const { channel, location } = stationData;
-  return `${getStationPrefix(stationData)}/${encodeLocation(location)}/${channel}`;
 }
 
 /**
