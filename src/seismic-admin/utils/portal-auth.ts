@@ -78,8 +78,9 @@ export function shouldAutoLogin(): boolean {
 
 /** Silently re-run the OAuth redirect when the last login is fresh enough.
  *  Returns true when navigation was started (the page is about to unload).
- *  `navigate` is a test seam; production uses a real location change. */
-export function attemptAutoLogin(navigate: (url: string) => void = url => window.location.assign(url)): boolean {
+ *  `navigate` is a test seam; production replaces the history entry so Back
+ *  from the round-trip doesn't land here and immediately redirect again. */
+export function attemptAutoLogin(navigate: (url: string) => void = url => window.location.replace(url)): boolean {
   if (!shouldAutoLogin()) return false;
   navigate(buildAuthorizeUrl());
   return true;
