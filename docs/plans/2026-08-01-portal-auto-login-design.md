@@ -63,6 +63,16 @@ OAuth redirect hash — each successful round-trip is a confirmed login, so the
 `ACCESS_TOKEN_KEY` sessionStorage read/write/remove, and app.tsx's comment
 about the ~1h token in sessionStorage.
 
+## Implementation addenda
+
+Two changes made during implementation, superseding details above:
+
+- The silent redirect uses `window.location.replace` (not `assign`) so Back from
+  the round-trip doesn't land on a page that immediately re-redirects.
+- `buildAuthorizeUrl` canonicalizes the redirect path (strips `index.html`,
+  ensures a trailing slash): the portal 500s on any redirect_uri that doesn't
+  exactly match the client's registered URIs, which end in `/`.
+
 ## Testing
 
 - portal-auth.test.ts: hash consumption saves `{portal, time}` (not the token);
