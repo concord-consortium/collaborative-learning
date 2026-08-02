@@ -62,6 +62,20 @@ describe("portal-auth", () => {
       const expectedRedirect = encodeURIComponent(`${window.location.origin}/seismic-admin/?x=1`);
       expect(url).toContain(`redirect_uri=${expectedRedirect}`);
     });
+
+    it("adds a trailing slash to a slash-less path so the redirect matches the registered URI", () => {
+      history.replaceState(null, "", "/seismic-admin?x=1");
+      const expectedRedirect = encodeURIComponent(`${window.location.origin}/seismic-admin/?x=1`);
+      expect(buildAuthorizeUrl()).toContain(`redirect_uri=${expectedRedirect}`);
+    });
+
+    it("canonicalizes away an explicit index.html", () => {
+      history.replaceState(null, "", "/seismic-admin/index.html");
+      const expectedRedirect = encodeURIComponent(`${window.location.origin}/seismic-admin/`);
+      const url = buildAuthorizeUrl();
+      expect(url).toContain(`redirect_uri=${expectedRedirect}`);
+      expect(url).not.toContain("index.html");
+    });
   });
 
   describe("consumeAccessTokenFromLocation", () => {

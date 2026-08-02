@@ -19,9 +19,12 @@ export function getPortalUrl(): string {
   }
 }
 
-/** OAuth2 implicit-flow authorize URL that redirects back to the current page (hash excluded). */
+/** OAuth2 implicit-flow authorize URL that redirects back to the current page (hash excluded).
+ *  The path is canonicalized (no index.html, trailing slash) to match the redirect URIs
+ *  registered for the portal's seismic-admin client; the portal errors on any mismatch. */
 export function buildAuthorizeUrl(): string {
-  const redirectUri = window.location.origin + window.location.pathname + window.location.search;
+  const path = window.location.pathname.replace(/index\.html$/, "").replace(/\/?$/, "/");
+  const redirectUri = window.location.origin + path + window.location.search;
   return `${getPortalUrl()}/auth/oauth_authorize?response_type=token` +
     `&client_id=${OAUTH_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 }
