@@ -24,8 +24,6 @@ describe("App auto-login", () => {
   });
 
   it("redirects through the portal before loading the catalog when the last login is fresh", () => {
-    localStorage.setItem("seismic-admin-portal-last-login",
-      JSON.stringify({ portal: "https://learn.concord.org", time: Date.now() }));
     const attemptSpy = jest.spyOn(portalAuth, "attemptAutoLogin").mockReturnValue(true);
 
     render(<App />);
@@ -45,5 +43,20 @@ describe("App auto-login", () => {
     expect(attemptSpy).toHaveReturnedWith(false);
     // The app renders once the catalog resolves and the store exists.
     expect(await screen.findByRole("button", { name: /Log in/i })).toBeInTheDocument();
+  });
+
+  it("consumes the hash token, skips the redirect, and wires portal auth", async () => {
+    history.replaceState(null, "", "/seismic-admin/#access_token=abc");
+    const attemptSpy = jest.spyOn(portalAuth, "attemptAutoLogin");
+    const portalAuthSpy = jest.spyOn(SeismicAdminStore.prototype, "setPortalAuth");
+
+    render(<App />);
+
+    // The token is consumed from the hash synchronously, and an OAuth return never redirects.
+    expect(window.location.hash).toBe("");
+    expect(attemptSpy).not.toHaveBeenCalled();
+    // Once the catalog resolves, the store's portal auth is wired and the header reflects it.
+    expect(await screen.findByText(/Portal: signed in/)).toBeInTheDocument();
+    expect(portalAuthSpy).toHaveBeenCalled();
   });
 });
