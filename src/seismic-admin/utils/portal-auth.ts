@@ -68,7 +68,7 @@ export function getTokenServiceEnv(): "staging" | "production" {
 }
 
 /** Exchange a portal access token for the portal-signed Firebase JWT token-service verifies. */
-export async function fetchPortalFirebaseJwt(accessToken: string): Promise<string> {
+export async function fetchTokenServiceJwt(accessToken: string): Promise<string> {
   const url = `${getPortalUrl()}/api/v1/jwt/firebase?firebase_app=token-service`;
   const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!response.ok) throw new Error(`Portal JWT fetch failed: ${response.status}`);
@@ -78,8 +78,8 @@ export async function fetchPortalFirebaseJwt(accessToken: string): Promise<strin
 /** Per-call JWT getter over a portal access token. A failed exchange means the token is
  *  stale (e.g. expired), so it is cleared before rethrowing: the in-flight operation still
  *  fails through the normal error path, but the next reload shows the login button again. */
-export function makePortalJwtGetter(accessToken: string): () => Promise<string> {
-  return () => fetchPortalFirebaseJwt(accessToken).catch(err => {
+export function makeTokenServiceJwtGetter(accessToken: string): () => Promise<string> {
+  return () => fetchTokenServiceJwt(accessToken).catch(err => {
     clearAccessToken();
     throw err;
   });

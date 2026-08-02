@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
 import { initAdminFirebase } from "../utils/admin-firebase";
 import { loadCatalog } from "../utils/load-catalog";
-import { consumeAccessTokenFromLocation, getTokenServiceEnv, makePortalJwtGetter } from "../utils/portal-auth";
+import { consumeAccessTokenFromLocation, getTokenServiceEnv, makeTokenServiceJwtGetter } from "../utils/portal-auth";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { AdminBody } from "./admin-body";
 import { AdminHeader } from "./admin-header";
@@ -34,7 +34,7 @@ export const App = observer(function App() {
       // errors, and the getter clears a stale token so the next reload can log in again.
       const accessToken = consumeAccessTokenFromLocation();
       if (accessToken) {
-        created.setPortalAuth(makePortalJwtGetter(accessToken), getTokenServiceEnv());
+        created.setPortalAuth(makeTokenServiceJwtGetter(accessToken), getTokenServiceEnv());
       }
       void authPromise.then(failure => {
         if (cancelled) return;

@@ -1,6 +1,6 @@
 import {
-  buildAuthorizeUrl, clearAccessToken, consumeAccessTokenFromLocation, fetchPortalFirebaseJwt, getPortalUrl,
-  getTokenServiceEnv, makePortalJwtGetter
+  buildAuthorizeUrl, clearAccessToken, consumeAccessTokenFromLocation, fetchTokenServiceJwt, getPortalUrl,
+  getTokenServiceEnv, makeTokenServiceJwtGetter
 } from "./portal-auth";
 
 const ACCESS_TOKEN_KEY = "seismic-admin-portal-access-token";
@@ -112,7 +112,7 @@ describe("portal-auth", () => {
     });
   });
 
-  describe("fetchPortalFirebaseJwt", () => {
+  describe("fetchTokenServiceJwt", () => {
     afterEach(() => {
       delete (global as any).fetch;
     });
@@ -123,7 +123,7 @@ describe("portal-auth", () => {
         json: () => Promise.resolve({ token: "firebase-jwt" }),
       });
       (global as any).fetch = mockFetch;
-      await expect(fetchPortalFirebaseJwt("abc")).resolves.toBe("firebase-jwt");
+      await expect(fetchTokenServiceJwt("abc")).resolves.toBe("firebase-jwt");
       expect(mockFetch).toHaveBeenCalledWith(
         "https://learn.concord.org/api/v1/jwt/firebase?firebase_app=token-service",
         { headers: { Authorization: "Bearer abc" } }
@@ -132,11 +132,11 @@ describe("portal-auth", () => {
 
     it("throws with the status on a non-OK response", async () => {
       (global as any).fetch = jest.fn().mockResolvedValue({ ok: false, status: 403 });
-      await expect(fetchPortalFirebaseJwt("abc")).rejects.toThrow("403");
+      await expect(fetchTokenServiceJwt("abc")).rejects.toThrow("403");
     });
   });
 
-  describe("makePortalJwtGetter", () => {
+  describe("makeTokenServiceJwtGetter", () => {
     afterEach(() => {
       delete (global as any).fetch;
     });
@@ -148,7 +148,7 @@ describe("portal-auth", () => {
         ok: true,
         json: () => Promise.resolve({ token: "firebase-jwt" }),
       });
-      await expect(makePortalJwtGetter("abc")()).resolves.toBe("firebase-jwt");
+      await expect(makeTokenServiceJwtGetter("abc")()).resolves.toBe("firebase-jwt");
       expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).not.toBeNull();
     });
 
@@ -156,7 +156,7 @@ describe("portal-auth", () => {
       sessionStorage.setItem(ACCESS_TOKEN_KEY,
         JSON.stringify({ portal: "https://learn.concord.org", token: "abc" }));
       (global as any).fetch = jest.fn().mockResolvedValue({ ok: false, status: 401 });
-      await expect(makePortalJwtGetter("abc")()).rejects.toThrow("401");
+      await expect(makeTokenServiceJwtGetter("abc")()).rejects.toThrow("401");
       expect(sessionStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
     });
   });
