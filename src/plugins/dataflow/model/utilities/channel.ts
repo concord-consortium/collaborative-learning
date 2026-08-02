@@ -1,8 +1,6 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 
 export interface NodeChannelInfo {
-  hubId: string;
-  hubName: string;
   channelId: string;
   missing: boolean;
   type: string;
@@ -19,15 +17,15 @@ export interface NodeChannelInfo {
   outputTargetDevice?: string;
   outputTargetActuator?: string;
   timeFactor?: number;
-  deviceFamily?: string | undefined;
+  // The wire protocol this channel's data uses (see DeviceProtocol): "keyValue" or
+  // "radioHub". A connected device satisfies this channel when its protocol matches.
+  protocol?: string | undefined;
   lastMessageReceivedAt?: number | null;
   relaysState?: number[];
   microbitId?: string;
 }
 
 const emgSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
-  hubName: "Arduino",
   name: "emg",
   displayName: "EMG",
   channelId: "emg",
@@ -38,12 +36,14 @@ const emgSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue",
+  // Seed as already-stale so a keyValue channel a connected device never sends (e.g. fsr/a1
+  // on a Spiker:bit) times out to `missing` instead of showing present at 0; parseKeyValueData
+  // refreshes this on each message, so channels the device does send stay present.
+  lastMessageReceivedAt: Date.now()
 };
 
 export const fsrSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
-  hubName: "Arduino",
   name: "fsr",
   displayName: "Pressure",
   channelId: "fsr",
@@ -54,12 +54,11 @@ export const fsrSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue",
+  lastMessageReceivedAt: Date.now()
 };
 
 export const tmpSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
-  hubName: "Arduino",
   name: "tmp",
   displayName: "Temperature",
   channelId: "tmp",
@@ -70,12 +69,11 @@ export const tmpSensorChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue",
+  lastMessageReceivedAt: Date.now()
 };
 
 export const a1PinChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO",
-  hubName: "Arduino",
   name: "a1",
   displayName: "A1",
   channelId: "a1",
@@ -86,7 +84,8 @@ export const a1PinChannel: NodeChannelInfo = {
   virtual: false,
   usesSerial: true,
   serialConnected: null,
-  deviceFamily: "arduino"
+  protocol: "keyValue",
+  lastMessageReceivedAt: Date.now()
 };
 
 interface MicroBitSensorChannelInfo {
@@ -125,8 +124,8 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
     virtual: false,
     usesSerial: true,
     serialConnected: null,
-    deviceFamily: "microbit",
-    lastMessageRecievedAt: Date.now()
+    protocol: "radioHub",
+    lastMessageReceivedAt: Date.now()
   };
 
   const channels = sensors.map((s) => {
@@ -135,8 +134,6 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
     return {
       ...basis,
       microbitId: s.microBitId,
-      hubId: `MICROBIT-RADIO-${s.microBitId}`,
-      hubName: `microbit ${s.microBitId}`,
       name: `${s.type}-microbit-${s.microBitId}`,
       displayName: `${sensorTypeDisplayName} ${hubDisplayName}`,
       channelId: `${s.type.substring(0,1)}-${s.microBitId}`,
@@ -155,16 +152,14 @@ function createMicroBitRelayInfoChannels(hubs: MicroBitHubInfo[] ){
     type: "relays",
     usesSerial: true,
     serialConnected: null,
-    deviceFamily: "microbit",
-    lastMessageRecievedAt: Date.now()
+    protocol: "radioHub",
+    lastMessageReceivedAt: Date.now()
   };
 
   const channels = hubs.map((h) => {
     return {
       ...basis,
       microbitId: h.microBitId,
-      hubId: `MICROBIT-RADIO-${h.microBitId}`,
-      hubName: `microbit ${h.microBitId}`,
       name: `relays-microbit-${h.microBitId}`,
       channelId: `r-${h.microBitId}`,
       units: `b`
@@ -181,7 +176,3 @@ export const serialSensorChannels: NodeChannelInfo[] = [
   ...microBitSensorChannels, ...microBitRelayChannels
 ];
 
-export const kDeviceDisplayNames: Record<string, string> = {
-  "arduino": "Arduino",
-  "microbit": "micro:bit"
-};

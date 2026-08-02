@@ -439,41 +439,60 @@ $member-size: 18px;
   }
 }
 
-// AA-checked against the header palette: text 8.5:1, border 4.1:1 on the
-// $workspace-teal-light-5 header background; open state white on
-// $workspace-teal-dark-1 = 4.5:1.
+// Floating round "AIdeas" launcher. Rendered from the header for store access, but position:fixed
+// floats it over the workspace — its containing block is the viewport, not the workspace panel. Kept
+// mounted but hidden while the chat drawer is open.
+// Contrast (measured): $charcoal-dark-3 text on $problem-orange is 8.17:1 (default), 8.85:1 (hover),
+// and 6.42:1 (active $problem-orange-dark-1) — all clear AA 4.5:1; the 1.5px $charcoal border on a
+// white workspace is 4.95:1 (>3:1 non-text). focus-ring(2px) places the ring outside the button.
 .app-header .right .chat-tutor-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  // The header is its own stacking context (z-index: 20 above), so this only orders the launcher
+  // within it; modals/sidebars (z-index >= 100) still correctly paint over it.
+  z-index: 900;
   align-items: center;
   appearance: none;
-  background-color: $workspace-teal-light-5;
+  background-color: $problem-orange;
   border: solid 1.5px $charcoal;
-  border-radius: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
-  color: inherit;
+  color: $charcoal-dark-3;
   cursor: pointer;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: center;
   font: inherit;
   font-weight: 600;
-  gap: 6px;
-  height: 40px;
-  padding: 0 10px;
+  gap: 1px;
+  width: 64px;
+  height: 64px;
+  padding: 0;
 
-  @include focus-ring;
-
-  &:hover {
-    background-color: $workspace-teal-light-3;
+  // Higher specificity than the display:flex above, so `hidden` (drawer open) actually hides it.
+  &[hidden] {
+    display: none;
   }
 
-  &:active,
-  &[aria-expanded="true"] {
-    background-color: $workspace-teal-dark-1;
-    border-color: white;
-    color: white;
+  @include focus-ring(2px);
+
+  &:hover {
+    background-color: $problem-orange-light-1;
+  }
+
+  // Keep the dark text on the darker active fill — white on $problem-orange-dark-1 can't reach 4.5:1.
+  &:active {
+    background-color: $problem-orange-dark-1;
   }
 
   .chat-tutor-launcher-icon {
-    font-size: 16px;
+    display: block;
+  }
+
+  .chat-tutor-launcher-label {
+    font-size: 12px;
     line-height: 1;
   }
 }

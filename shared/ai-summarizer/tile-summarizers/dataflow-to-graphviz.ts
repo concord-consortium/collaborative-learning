@@ -34,11 +34,31 @@ interface Connection {
   targetInput: string;
 }
 
+interface Group {
+  id: string;
+  label: string;
+  // GroupModel.nodeIds is a `types.map` used as a set (key = value = node id), so its snapshot is
+  // an object keyed by node id — not an array. Matches the `nodes`/`connections`/`groups` maps above.
+  nodeIds: Record<string, string>;
+  collapsed?: boolean;
+}
+
 interface Program {
   id: string;
   nodes: Record<string, ProgramNode>;
   connections: Record<string, Connection>;
+  groups?: Record<string, Group>;
   recentTicks?: string[];
+}
+
+/** Escape a string for use inside a double-quoted Graphviz attribute value. */
+function escapeDotString(text: string): string {
+  // Escape backslashes and quotes, then turn newlines into DOT's `\n` line-break escape. Group
+  // labels are multi-line, so a raw newline inside label="..." would render unpredictably.
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r\n?|\n/g, '\\n');
 }
 
 interface NodeInput {
@@ -290,7 +310,9 @@ export function programToGraphviz(program: Program): string {
     return undefined;
   };
 
-  // Create nodes with HTML table labels
+  // Create nodes with HTML table labels, collected by id so grouped nodes can be emitted inside
+  // Graphviz clusters below.
+  const nodeDecls = new Map<string, string>();
   Object.values(program.nodes).forEach(node => {
     const ports = nodePorts.get(node.id);
     const nodeBaseData = node.data as NodeDataBase;
@@ -342,7 +364,28 @@ export function programToGraphviz(program: Program): string {
     labelLines.push('    </table>');
 
     const htmlLabel = labelLines.join('\n');
-    lines.push(`  "${readableId}" [label=<\n${htmlLabel}\n  >];`);
+    nodeDecls.set(node.id, `  "${readableId}" [label=<\n${htmlLabel}\n  >];`);
+  });
+
+  // Emit grouped nodes inside Graphviz clusters (labeled subgraphs) so the AI understands the
+  // student's groupings; ungrouped nodes are emitted at the top level. Boundary edges cross the
+  // cluster naturally.
+  const groups = program.groups ? Object.values(program.groups) : [];
+  const groupedNodeIds = new Set<string>();
+  groups.forEach(group => {
+    lines.push(`  subgraph cluster_${String(group.id).replace(/\W/g, "_")} {`);
+    lines.push(`    label="${escapeDotString(group.label)}";`);
+    Object.keys(group.nodeIds).forEach(nodeId => {
+      const decl = nodeDecls.get(nodeId);
+      if (decl) {
+        lines.push(`  ${decl}`);
+        groupedNodeIds.add(nodeId);
+      }
+    });
+    lines.push('  }');
+  });
+  nodeDecls.forEach((decl, nodeId) => {
+    if (!groupedNodeIds.has(nodeId)) lines.push(decl);
   });
 
   lines.push('');
