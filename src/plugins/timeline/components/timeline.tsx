@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { useStores } from "../../../hooks/use-stores";
@@ -6,6 +5,7 @@ import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { EventOverlay } from "./event-overlay";
+import { TimeLabel } from "./time-label";
 import { TimeMarkerOverlay } from "./time-marker-overlay";
 import { TimelineScrollbar } from "./timeline-scrollbar";
 
@@ -91,13 +91,11 @@ export const Timeline = observer(function Timeline() {
           </div>
           <div className="timeline-range-row">
             <div className="range-date range-start">
-              <div>{viewStartTime.toUTC().toLocaleString()}</div>
-              <div>{viewStartTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+              <TimeLabel time={viewStartTime} />
             </div>
             <div className="range-duration">{content.viewRangeDurationText ?? ""}</div>
             <div className="range-date range-end">
-              <div>{viewEndTime.toUTC().toLocaleString()}</div>
-              <div>{viewEndTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS)}</div>
+              <TimeLabel time={viewEndTime} />
             </div>
           </div>
           <TimelineScrollbar />
