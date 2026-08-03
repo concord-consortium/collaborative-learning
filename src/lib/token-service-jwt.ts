@@ -23,10 +23,12 @@ export function makeTokenServiceJwtGetter(portal: Portal): (() => Promise<string
   const { basePortalUrl, bearerToken } = portal;
 
   if (portal.rawPortalJWT && basePortalUrl) {
+    const base = basePortalUrl.endsWith("/") ? basePortalUrl : `${basePortalUrl}/`;
     // Reads rawPortalJWT at call time so the retry below picks up the refreshed value.
     const exchange = async () => {
       const [rawJwt] = await getFirebaseJWTWithBearerToken(
-        basePortalUrl, "Bearer/JWT", portal.rawPortalJWT, undefined, TOKEN_SERVICE_FIREBASE_APP);
+        base, "Bearer/JWT", portal.rawPortalJWT, undefined, TOKEN_SERVICE_FIREBASE_APP
+      );
       return rawJwt;
     };
     return async () => {
