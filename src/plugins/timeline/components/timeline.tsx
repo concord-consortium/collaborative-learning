@@ -6,6 +6,7 @@ import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { EventOverlay } from "./event-overlay";
+import { TimeMarkerOverlay } from "./time-marker-overlay";
 import { TimelineScrollbar } from "./timeline-scrollbar";
 
 import "./timeline.scss";
@@ -49,6 +50,27 @@ export const Timeline = observer(function Timeline() {
     });
   }, [seismicQueryService, stationData, viewStartSeconds]);
 
+  const timeFromMouseEvent = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!viewStartTime || !viewEndTime) return undefined;
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0) return undefined;
+    const fraction = (e.clientX - rect.left) / rect.width;
+    const rangeMs = viewEndTime.toMillis() - viewStartTime.toMillis();
+    return viewStartTime.plus({ milliseconds: fraction * rangeMs });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const time = timeFromMouseEvent(e);
+    if (time) content.setHoverTime(time);
+  };
+
+  const handleMouseLeave = () => content.clearHoverTime();
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const time = timeFromMouseEvent(e);
+    if (time) content.setPinnedTime(time);
+  };
+
   return (
     <div className="timeline-area">
       {sharedSeismogram && isValidDateTime(viewStartTime) && isValidDateTime(viewEndTime) ? (
@@ -60,8 +82,12 @@ export const Timeline = observer(function Timeline() {
               sharedSeismogram={sharedSeismogram}
               startTime={viewStartTime}
               endTime={viewEndTime}
+              onClick={handleClick}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={handleMouseMove}
             />
             <EventOverlay />
+            <TimeMarkerOverlay />
           </div>
           <div className="timeline-range-row">
             <div className="range-date range-start">
