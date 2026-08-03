@@ -25,8 +25,12 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
       {pinnedTime && isPctInView(pinnedPct) && (
         <>
           <div className="time-marker-line pinned" style={{ left: `${pinnedPct}%` }} />
-          <button className="time-marker-label pinned" style={{ left: `${pinnedPct}%` }}
-              onClick={handlePinnedLabelClick}>
+          <button
+            className="time-marker-label pinned"
+            onClick={handlePinnedLabelClick}
+            style={{ left: `${pinnedPct}%` }}
+            type="button"
+          >
             <TimeLabel time={pinnedTime} />
           </button>
         </>
