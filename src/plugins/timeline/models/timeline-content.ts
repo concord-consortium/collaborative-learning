@@ -23,6 +23,10 @@ export const TimelineContentModel = TileContentModel
     viewEndTimeISO: types.maybe(types.string),
     selectedEventIndex: types.optional(types.number, 0),
   })
+  .volatile(self => ({
+    hoverTime: undefined as DateTime | undefined,
+    pinnedTime: undefined as DateTime | undefined,
+  }))
   .views(self => ({
     get isUserResizable() {
       return true;
@@ -168,6 +172,18 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    setHoverTime(time: DateTime) {
+      self.hoverTime = time;
+    },
+    clearHoverTime() {
+      self.hoverTime = undefined;
+    },
+    setPinnedTime(time: DateTime) {
+      self.pinnedTime = time;
+    },
+    clearPinnedTime() {
+      self.pinnedTime = undefined;
+    },
     setViewRange(start: DateTime, end: DateTime) {
       if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;
       self.viewStartTimeISO = start.toISO() ?? undefined;

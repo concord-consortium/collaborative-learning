@@ -372,3 +372,35 @@ describe("event views", () => {
     expect(visible[2].windowStart.toUTC().toISO()).toBe("2026-02-03T23:00:00.000Z");
   });
 });
+
+describe("time markers", () => {
+  it("hoverTime and pinnedTime default to undefined", () => {
+    const content = TimelineContentModel.create();
+    expect(content.hoverTime).toBeUndefined();
+    expect(content.pinnedTime).toBeUndefined();
+  });
+
+  it("setHoverTime and clearHoverTime update hoverTime", () => {
+    const content = TimelineContentModel.create();
+    const time = DateTime.fromISO("2026-02-01T12:00:00.000Z");
+    content.setHoverTime(time);
+    expect(content.hoverTime?.toISO()).toBe(time.toISO());
+    content.clearHoverTime();
+    expect(content.hoverTime).toBeUndefined();
+  });
+
+  it("setPinnedTime and clearPinnedTime update pinnedTime", () => {
+    const content = TimelineContentModel.create();
+    const time = DateTime.fromISO("2026-02-01T12:00:00.000Z");
+    content.setPinnedTime(time);
+    expect(content.pinnedTime?.toISO()).toBe(time.toISO());
+    content.clearPinnedTime();
+    expect(content.pinnedTime).toBeUndefined();
+  });
+
+  it("marker times are volatile, not serialized", () => {
+    const content = TimelineContentModel.create();
+    content.setPinnedTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("pinnedTime");
+  });
+});
