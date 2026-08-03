@@ -1,7 +1,7 @@
 import { DB } from "./db";
 import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../models/stores/documents";
 import { DBDocument } from "./db-types";
-import { createDocumentModel } from "../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import {
   GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
@@ -75,6 +75,24 @@ describe("db", () => {
   afterEach(() => {
     db.disconnect();
   });
+
+  // Mocks the document write and the RTDB offering-user/document refs, and stubs the model builder
+  // `createProblemOrPlanningDocument` opens the created document with, so a create resolves with
+  // `newDocument` without a live listener or Firestore.
+  function stubProblemDocumentCreation(newDocument: DocumentModelType) {
+    jest.spyOn(db, "createDocument").mockResolvedValue({
+      document: { version: "1.0", self: { documentKey: "doc-1", uid: "1", classHash: "test" }, type: "mock" },
+      metadata: {}
+    } as any);
+    jest.spyOn(db, "createDocumentModelFromProblemMetadata").mockResolvedValue(newDocument);
+    mockDatabase.mockImplementation(() => ({
+      ref: () => ({
+        update: () => {},
+        set: () => Promise.resolve(),
+        once: () => Promise.resolve({ val: () => true })
+      })
+    }));
+  }
 
   it("connects/disconnects", async () => {
     expect.assertions(5);
@@ -168,26 +186,7 @@ describe("db", () => {
   it("creates required problem document", async () => {
     expect.assertions(3);
     const newDocument = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
-    mockDatabase.mockImplementation(() => ({
-      ref: () => ({
-        update: () => {},
-        once: () => ({
-          then: (callback: (snap: any) => any) => {
-            // offeringUserRef.once("value")
-            callback({ val: () => true });
-            return { then: () => ({
-              // this is where we actually create the document
-              then: (_callback: () => any) => {
-                // this is where we update the relevant promise
-                const docPromise = _callback();
-                stores.documents.resolveRequiredDocumentPromise(newDocument);
-                return docPromise;
-              }
-            })};
-          }
-        })
-      })
-    }));
+    stubProblemDocumentCreation(newDocument);
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
     stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
@@ -199,26 +198,7 @@ describe("db", () => {
   it("creates required planning document", async () => {
     expect.assertions(3);
     const newDocument = createDocumentModel({ uid: "1", type: PlanningDocument, key: "doc-1" });
-    mockDatabase.mockImplementation(() => ({
-      ref: () => ({
-        update: () => {},
-        once: () => ({
-          then: (callback: (snap: any) => any) => {
-            // offeringUserRef.once("value")
-            callback({ val: () => true });
-            return { then: () => ({
-              // this is where we actually create the document
-              then: (_callback: () => any) => {
-                // this is where we update the relevant promise
-                const docPromise = _callback();
-                stores.documents.resolveRequiredDocumentPromise(newDocument);
-                return docPromise;
-              }
-            })};
-          }
-        })
-      })
-    }));
+    stubProblemDocumentCreation(newDocument);
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
     stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
@@ -456,6 +436,9 @@ describe("db", () => {
       const mockSet = jest.fn();
       const docModel = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
       setupMocks(mockSet);
+      // createProblemOrPlanningDocument now opens the created doc directly via this builder; stub
+      // it so the create resolves without a live listener or Firestore.
+      jest.spyOn(db, "createDocumentModelFromProblemMetadata").mockResolvedValue(docModel as any);
       stores.appConfig.setConfigs([{ defaultSharedDocuments: true }]);
       await db.connect({appMode: "test", stores, dontStartListeners: true});
 
@@ -464,7 +447,6 @@ describe("db", () => {
       const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
       expect(docWritten![0].visibility).toBe("public");
 
-      stores.documents.resolveRequiredDocumentPromise(docModel);
       await promise;
     });
 
@@ -472,13 +454,13 @@ describe("db", () => {
       const mockSet = jest.fn();
       const docModel = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
       setupMocks(mockSet);
+      jest.spyOn(db, "createDocumentModelFromProblemMetadata").mockResolvedValue(docModel as any);
       await db.connect({appMode: "test", stores, dontStartListeners: true});
 
       const promise = db.createProblemOrPlanningDocument(ProblemDocument);
       const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
       expect(docWritten![0].visibility).toBe("private");
 
-      stores.documents.resolveRequiredDocumentPromise(docModel);
       await promise;
     });
 
@@ -486,6 +468,7 @@ describe("db", () => {
       const mockSet = jest.fn();
       const docModel = createDocumentModel({ uid: "1", type: PlanningDocument, key: "doc-1" });
       setupMocks(mockSet);
+      jest.spyOn(db, "createDocumentModelFromProblemMetadata").mockResolvedValue(docModel as any);
       stores.appConfig.setConfigs([{ defaultSharedDocuments: true }]);
       await db.connect({appMode: "test", stores, dontStartListeners: true});
 
@@ -493,7 +476,6 @@ describe("db", () => {
       const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
       expect(docWritten![0].visibility).toBe("private");
 
-      stores.documents.resolveRequiredDocumentPromise(docModel);
       await promise;
     });
 
@@ -501,6 +483,9 @@ describe("db", () => {
       const mockSet = jest.fn();
       const docModel = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
       setupMocks(mockSet);
+      // createOtherDocument now opens the created doc directly via this builder; stub it so the
+      // create resolves without a live listener or Firestore.
+      jest.spyOn(db, "createDocumentModelFromOtherDocument").mockReturnValue(docModel as any);
       stores.appConfig.setConfigs([{ defaultSharedDocuments: true }]);
       await db.connect({appMode: "test", stores, dontStartListeners: true});
 
@@ -508,7 +493,6 @@ describe("db", () => {
       const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
       expect(docWritten![0].visibility).toBe("public");
 
-      stores.documents.resolveRequiredDocumentPromise(docModel);
       await promise;
     });
 
@@ -516,14 +500,72 @@ describe("db", () => {
       const mockSet = jest.fn();
       const docModel = createDocumentModel({ uid: "1", type: LearningLogDocument, key: "doc-1" });
       setupMocks(mockSet);
+      // createOtherDocument now opens the created doc directly via this builder; stub it so the
+      // create resolves without a live listener or Firestore.
+      jest.spyOn(db, "createDocumentModelFromOtherDocument").mockReturnValue(docModel as any);
       await db.connect({appMode: "test", stores, dontStartListeners: true});
 
       const promise = db.createOtherDocument(LearningLogDocument);
       const docWritten = mockSet.mock.calls.find((c: any[]) => c[0]?.visibility);
       expect(docWritten![0].visibility).toBe("private");
 
-      stores.documents.resolveRequiredDocumentPromise(docModel);
       await promise;
+    });
+  });
+
+  describe("createOtherDocument opens the created document directly", () => {
+    // Mocks createDocument + the RTDB other-doc write, and stubs the model builder the DB listener
+    // would run, so createOtherDocument has a document to open without a live listener or Firestore.
+    function setup(docModel: any) {
+      jest.spyOn(db, "createDocument").mockResolvedValue({
+        document: { version: "1.0", self: { documentKey: "doc-1", uid: "1", classHash: "test" }, type: "mock" },
+        metadata: {},
+        firestoreMetadata: { key: "doc-1", type: "personal", uid: "1", context_id: "test" }
+      } as any);
+      mockDatabase.mockImplementation(() => ({
+        ref: () => ({
+          update: () => {},
+          set: () => Promise.resolve(undefined),
+          once: () => Promise.resolve({ val: () => true })
+        })
+      }));
+      jest.spyOn(db, "createDocumentModelFromOtherDocument").mockResolvedValue(docModel as any);
+    }
+
+    // Rejects if `promise` doesn't settle promptly, turning a hang (the CLUE-587 bug) into a fast,
+    // descriptive failure instead of a whole-test timeout.
+    function withinTick<T>(promise: Promise<T> | T, message: string): Promise<T> {
+      let timer: ReturnType<typeof setTimeout>;
+      return Promise.race([
+        Promise.resolve(promise),
+        new Promise<T>((_, reject) => { timer = setTimeout(() => reject(new Error(message)), 200); })
+      ]).finally(() => clearTimeout(timer));
+    }
+
+    it("resolves with the created document without the DB listener resolving the required promise", async () => {
+      const docModel = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
+      setup(docModel);
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+
+      // No listener is running and nothing calls resolveRequiredDocumentPromise externally.
+      const result = await withinTick(
+        db.createOtherDocument(PersonalDocument),
+        "createOtherDocument hung waiting on the required-document promise");
+      expect(result).toBe(docModel);
+    });
+
+    it("resolves the required-document promise with the created doc so startup dedup sees it", async () => {
+      const docModel = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
+      setup(docModel);
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+
+      await withinTick(
+        db.createOtherDocument(PersonalDocument),
+        "createOtherDocument hung waiting on the required-document promise");
+      const dedup = await withinTick(
+        stores.documents.requiredDocuments[PersonalDocument].promise,
+        "required-document promise was left unresolved");
+      expect(dedup).toBe(docModel);
     });
   });
 
@@ -604,6 +646,23 @@ describe("db", () => {
       const dbDocument = { title: "T", properties: {}, self: { uid: "u2", documentKey: "pd1" } } as any;
       const doc = await db.createDocumentModelFromOtherDocument(dbDocument, "personal" as any);
       expect(doc.contextId).toBe("class-77");
+    });
+
+    it("builds one model and adds it once when the same document is opened twice", async () => {
+      // After the CLUE-587 fix both the create path (which opens the doc directly) and the DB
+      // listener open the same stored document. openDocument must dedupe by key so only one model
+      // is built and added to the documents store.
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      jest.spyOn(stores.documentMetadata, "fetchMetadata")
+        .mockResolvedValue({ uid: "u2", type: "personal", key: "pd1", context_id: "class-1" } as any);
+      jest.spyOn(stores.groups, "groupForUser").mockReturnValue(undefined as any);
+
+      const dbDocument = { title: "T", properties: {}, self: { uid: "u2", documentKey: "pd1" } } as any;
+      const first = await db.createDocumentModelFromOtherDocument(dbDocument, "personal" as any);
+      const second = await db.createDocumentModelFromOtherDocument(dbDocument, "personal" as any);
+
+      expect(second).toBe(first);
+      expect(stores.documents.all.filter(d => d.key === "pd1")).toHaveLength(1);
     });
 
     it("backfills concurrent on a group-typed doc whose Firestore metadata lacks it", async () => {
