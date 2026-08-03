@@ -1,51 +1,38 @@
 import { DocumentMetadataStore, IDocumentMetadataStoreStores } from "./document-metadata-store";
 
-// A minimal fake Firestore query chain: collection().withConverter().where().where().limit().get().
-// It honors both the `context_id` and `key` filters so class-scoping is actually exercised:
-// a doc is only returned when the requested context_id matches the doc's context_id. A docsByKey
-// value may be an array to simulate duplicate (context_id, key) matches.
+// A minimal fake Firestore get-by-id chain: firestore.doc(path).withConverter().get(), where path
+// is getSimpleDocumentPath(key), i.e. documents/{escapeKey(key)}. docsByKey is keyed by that id.
+// A get-by-id returns the doc regardless of context_id — the store applies the class-scoping
+// check itself. The fake prepends a space to the path the way the Firestore wrapper's doc() does.
 function makeFakeDb(docsByKey: Record<string, any>) {
-  let requestedKey = "";
-  let requestedContextId = "";
-  let requestedLimit = Infinity;
+  let requestedPath = "";
   const getSpy = jest.fn(() => {
-    const value = docsByKey[requestedKey];
-    const candidates = (Array.isArray(value) ? value : value ? [value] : [])
-      .filter(data => data.context_id === requestedContextId)
-      .slice(0, requestedLimit);
+    const value = docsByKey[requestedPath.split("/").pop()!];
     return Promise.resolve(
-      candidates.length > 0
-        ? { empty: false, docs: candidates.map(data => ({ data: () => data })) }
-        : { empty: true, docs: [] }
+      value ? { exists: true, data: () => value } : { exists: false, data: () => undefined }
     );
   });
-  const query = {
-    // The store reads collection().path to describe where it looked in its not-found error.
-    path: "test-space/documents",
-    withConverter: () => query,
-    where: (field: string, _op: string, value: any) => {
-      if (field === "key") requestedKey = value;
-      if (field === "context_id") requestedContextId = value;
-      return query;
-    },
-    limit: (n: number) => { requestedLimit = n; return query; },
+  const docRef = {
+    // The store reads docRef.path to describe where it looked in its error messages.
+    get path() { return `test-space/${requestedPath}`; },
+    withConverter: () => docRef,
     get: () => getSpy(),
   };
   return {
     getSpy,
-    getRequestedContextId: () => requestedContextId,
-    db: { firestore: { collection: () => query } } as any,
+    getRequestedId: () => requestedPath.split("/").pop(),
+    db: { firestore: { doc: (path: string) => { requestedPath = path; return docRef; } } } as any,
   };
 }
 
 function makeStore(docsByKey: Record<string, any> = {}, exemplarDocuments: any[] = []) {
-  const { db, getSpy, getRequestedContextId } = makeFakeDb(docsByKey);
+  const { db, getSpy, getRequestedId } = makeFakeDb(docsByKey);
   const stores = {
     db,
     user: { classHash: "class-1" },
     documents: { exemplarDocuments },
   } as unknown as IDocumentMetadataStoreStores;
-  return { store: new DocumentMetadataStore(stores), getSpy, getRequestedContextId };
+  return { store: new DocumentMetadataStore(stores), getSpy, getRequestedId };
 }
 
 // A minimal fake exemplar document (shape read by the exemplarMetadataDocs getter).
@@ -67,44 +54,53 @@ function makeExemplarDoc(key: string, authoredCommentTag: string, tileTypes: str
 
 describe("DocumentMetadataStore", () => {
   describe("fetchMetadata", () => {
-    it("returns validated data on a valid point read (scoped by context_id)", async () => {
-      const { store, getSpy, getRequestedContextId } = makeStore({
-        "doc-2": { uid: "u1", type: "problem", key: "doc-2", context_id: "class-1" }
+    it("reads by the escaped document id (documents/{escapeKey(key)}), not the raw key", async () => {
+      // Use a key containing characters escapeKey rewrites (. and / -> _) so this fails if the
+      // code ever reads by the raw key instead of escapeKey(key). The stored `key` field keeps the
+      // raw key, matching real metadata docs (id is escaped, the field is not).
+      const rawKey = "sec.1/foo";
+      const escapedId = "sec_1_foo";
+      const { store, getSpy, getRequestedId } = makeStore({
+        [escapedId]: { uid: "u1", type: "problem", key: rawKey, context_id: "class-1" }
       });
-      const result = await store.fetchMetadata("doc-2");
-      expect(result?.key).toBe("doc-2");
+      const result = await store.fetchMetadata(rawKey);
+      expect(result?.key).toBe(rawKey);
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getRequestedContextId()).toBe("class-1");
+      // Read by document id (escapeKey(key)), not a query and not the raw key.
+      expect(getRequestedId()).toBe(escapedId);
     });
 
-    it("throws describing the query when the result is empty", async () => {
+    it("throws describing the doc path when the doc does not exist", async () => {
       const { store } = makeStore({});
-      // The error names the collection path (which carries the space) and the key it looked for.
+      // The error names the doc path (which carries the space and id) it read.
       await expect(store.fetchMetadata("nope"))
-        .rejects.toThrow(/No Firestore metadata document found.*test-space\/documents.*key == 'nope'/);
+        .rejects.toThrow(/No Firestore metadata document found.*test-space\/documents\/nope/);
     });
 
     it("throws for a doc in another class (context_id mismatch)", async () => {
-      const { store } = makeStore({
+      const { store, getSpy } = makeStore({
         "doc-x": { uid: "u1", type: "problem", key: "doc-x", context_id: "other-class" }
       });
-      await expect(store.fetchMetadata("doc-x")).rejects.toThrow(/No Firestore metadata document found/);
+      await expect(store.fetchMetadata("doc-x"))
+        .rejects.toThrow(/context_id 'other-class' does not match class 'class-1'/);
+      // The doc was read; the store rejected it on the class check.
+      expect(getSpy).toHaveBeenCalledTimes(1);
     });
 
-    it("throws when the point-read doc fails typecheck (fail-fast)", async () => {
+    it("throws when the doc fails typecheck (fail-fast)", async () => {
       // Missing the required `uid` field -> DocumentMetadataModel typecheck fails.
       const { store, getSpy } = makeStore({
         "bad-1": { type: "problem", key: "bad-1", context_id: "class-1" }
       });
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
       await expect(store.fetchMetadata("bad-1")).rejects.toThrow(/failed validation/);
-      // The query still ran; validation (not absence) is what rejected the doc.
+      // The read still ran; validation (not absence) is what rejected the doc.
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
     });
 
-    it("coalesces concurrent reads for the same key into a single query", async () => {
+    it("coalesces concurrent reads for the same key into a single get", async () => {
       const { store, getSpy } = makeStore({
         "doc-3": { uid: "u1", type: "problem", key: "doc-3", context_id: "class-1" }
       });
@@ -112,23 +108,6 @@ describe("DocumentMetadataStore", () => {
       expect(a?.key).toBe("doc-3");
       expect(b?.key).toBe("doc-3");
       expect(getSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it("logs and uses the first match when duplicate (context_id, key) docs exist", async () => {
-      // A duplicate is a data-integrity anomaly, not a reason to lock the user out: the document is
-      // still openable, so it resolves with the first match and reports the anomaly via console.error.
-      const { store } = makeStore({
-        "dup-1": [
-          { uid: "u1", type: "problem", key: "dup-1", context_id: "class-1" },
-          { uid: "u2", type: "problem", key: "dup-1", context_id: "class-1" },
-        ]
-      });
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
-      const result = await store.fetchMetadata("dup-1");
-      expect(result?.uid).toBe("u1");
-      expect(consoleErrorSpy)
-        .toHaveBeenCalledWith(expect.stringMatching(/Multiple Firestore metadata documents found/));
-      consoleErrorSpy.mockRestore();
     });
   });
 
