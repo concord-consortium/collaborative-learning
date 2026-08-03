@@ -62,7 +62,7 @@ export interface NodeType {
 export const NodeTypes: NodeType[] = [
   {
     name: "Sensor",
-    displayName: "Input",
+    displayName: "Sensor",
   },
   {
     name: "Number",
@@ -70,19 +70,21 @@ export const NodeTypes: NodeType[] = [
   },
   {
     name: "Generator",
-    displayName: "Generator",
+    displayName: "Waves",
   },
-  {
-    name: "Timer",
-    displayName: "Timer (on/off)"
-  },
+  // Timer block hidden from the palette. Kept in code (rete-manager registration, node class) so
+  // existing programs that already contain a Timer node still load.
+  // {
+  //   name: "Timer",
+  //   displayName: "Timer (on/off)"
+  // },
   {
     name: "Math",
     displayName: "Math",
   },
   {
     name: "Logic",
-    displayName: "Logic",
+    displayName: "Compare",
   },
   {
     name: "Transform",
@@ -94,11 +96,11 @@ export const NodeTypes: NodeType[] = [
   },
   {
     name: "Demo Output",
-    displayName: "Demo Output",
+    displayName: "Demo Device",
   },
   {
     name: "Live Output",
-    displayName: "Live Output",
+    displayName: "Live Device",
   }
 ];
 

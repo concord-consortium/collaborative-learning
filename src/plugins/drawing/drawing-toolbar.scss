@@ -42,7 +42,14 @@
     }
 
     &.fill-color {
-      width: 159px;
+      width: 255px;  // 8 columns: bold row (none…yellow) then pastel row (white…light-yellow, last slot empty)
+
+      // Grid (not the shared flex) so the 7-swatch pastel row lines up under the 8-swatch bold row.
+      .palette-buttons {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        justify-items: center;
+      }
     }
 
     .palette-buttons {
@@ -104,6 +111,13 @@
         &.light {
           .contrast-border {
             stroke: $charcoal-light-1;
+          }
+        }
+
+        // Pastel fill swatches: consistent 1px outline regardless of luminance.
+        &.outlined {
+          .contrast-border {
+            stroke: #949494;
           }
         }
 
