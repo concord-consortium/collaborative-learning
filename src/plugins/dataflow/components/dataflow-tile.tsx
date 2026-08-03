@@ -8,7 +8,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
 import { DataflowContentModelType } from "../model/dataflow-content";
-import { resolveAllowedOutputTypes } from "../model/utilities/node";
+import { resolveAllowedOutputTypes, warnUnknownLiveOutputSettings } from "../model/utilities/node";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
@@ -76,9 +76,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   private mirrorUnitOutputConfig() {
     const { appConfig } = this.stores;
     const servoInputMode = appConfig.getSetting("servoInputMode", "dataflow");
+    const liveOutputTypes = appConfig.getSetting("liveOutputTypes", "dataflow");
+    warnUnknownLiveOutputSettings(servoInputMode, liveOutputTypes);
     this.getContent().setOutputConfig({
       servoInputMode: servoInputMode === "proportion" ? "proportion" : undefined,
-      allowedOutputTypes: resolveAllowedOutputTypes(appConfig.getSetting("liveOutputTypes", "dataflow")),
+      allowedOutputTypes: resolveAllowedOutputTypes(liveOutputTypes),
     });
   }
 

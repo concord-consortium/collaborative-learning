@@ -145,9 +145,10 @@ export class LiveOutputNode extends BaseNode<
     const nodeValueInput = new ClassicPreset.Input(numSocket, "NodeValue");
     this.addInput("nodeValue", nodeValueInput);
 
-    // Editable views offer only the unit-allowed types; read-only views use the full list so a stored
-    // value always resolves (never renders "Select an option").
-    const liveOutputTypeOptions = this.readOnly ? NodeLiveOutputTypes : this.allowedLiveOutputTypes;
+    // Editable views offer the unit-allowed types plus the node's own stored type if a unit restriction
+    // would otherwise hide it; read-only views use the full list. Either way a stored value always
+    // resolves (never renders "Select an option") without overwriting persisted state.
+    const liveOutputTypeOptions = this.readOnly ? NodeLiveOutputTypes : this.editableLiveOutputTypeOptions;
     const liveOutputControl =
       new DropdownListControl(this, "liveOutputType", this.setLiveOutputTypeWrapper, liveOutputTypeOptions);
     this.addControl("liveOutputType", liveOutputControl);
@@ -168,13 +169,12 @@ export class LiveOutputNode extends BaseNode<
       this.hubSelectControl = new DropdownListControl(this, "hubSelect", model.setHubSelect, []);
 
       if (!model.liveOutputType) {
-        // Set the default value. This also updates the hubSelect depending on the connected device and
-        // simulation.
+        // New node: default to the first unit-allowed type. This also updates the hubSelect depending on
+        // the connected device and simulation. A node with a stored type is left untouched — the dropdown
+        // (editableLiveOutputTypeOptions) resolves it even when a unit restriction would hide it, so we
+        // never overwrite saved state.
         // FIXME: this might cause problems with undo support since it is changing the state on node
         // initialization, we'll have to make sure this happens within the node creation action
-        this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
-      } else if (!this.allowedLiveOutputTypes.some(t => t.name === model.liveOutputType)) {
-        // Stored type is no longer unit-allowed; fall back so the dropdown never renders blank.
         this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
       }
       // Update the options now that we have a type
@@ -413,7 +413,20 @@ export class LiveOutputNode extends BaseNode<
 
   private get allowedLiveOutputTypes() {
     const names = resolveAllowedOutputTypes(this.services.stores.appConfig.getSetting("liveOutputTypes", "dataflow"));
-    return names ? NodeLiveOutputTypes.filter(t => names.includes(t.name)) : NodeLiveOutputTypes;
+    // Preserve the author's order (first entry is the new-node default).
+    return names ? names.flatMap(name => NodeLiveOutputTypes.filter(t => t.name === name)) : NodeLiveOutputTypes;
+  }
+
+  // Editable dropdown options: the unit-allowed types, plus this node's stored type when a unit
+  // restriction would otherwise hide it — so a saved value resolves without being overwritten.
+  private get editableLiveOutputTypeOptions() {
+    const allowed = this.allowedLiveOutputTypes;
+    const stored = this.model.liveOutputType;
+    if (stored && !allowed.some(t => t.name === stored)) {
+      const storedType = NodeLiveOutputTypes.find(t => t.name === stored);
+      if (storedType) return [...allowed, storedType];
+    }
+    return allowed;
   }
 
   data({nodeValue}: {nodeValue?: number[]}) {
@@ -486,5 +499,5 @@ function getPercentageAsInt(num: number){
 // the gripper's "% closed".
 export function servoDisplayMessage(value: number, proportionMode: boolean) {
   if (proportionMode) return `${Math.round((value / 180) * 100)}% rotation`;
-  return `${Math.round((value / 10) * 10)}°`;
+  return `${Math.round(value)}°`;
 }

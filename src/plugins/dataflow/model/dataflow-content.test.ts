@@ -29,9 +29,10 @@ describe("DataflowContentModel", () => {
     expect(() => applyPatch(dcm, { op: "replace", path: "/programZoom/dx", value: -10 })).not.toThrow();
   });
 
-  // settings.dataflow.defaultSamplingRate seeds a new tile's rate; only known rate values apply.
+  // settings.dataflow.defaultSamplingRate seeds a new tile's rate; only known rate values apply. The
+  // stub honors the "dataflow" group so a dropped/typo'd group reads undefined and the test fails.
   const appConfigWith = (settings: Record<string, any>) =>
-    ({ getSetting: (key: string, group?: string) => settings[key] }) as any;
+    ({ getSetting: (key: string, group?: string) => group === "dataflow" ? settings[key] : undefined }) as any;
 
   it("seeds programDataRate from settings.dataflow.defaultSamplingRate", () => {
     const dcm = defaultDataflowContent({ appConfig: appConfigWith({ defaultSamplingRate: 10000 }) });

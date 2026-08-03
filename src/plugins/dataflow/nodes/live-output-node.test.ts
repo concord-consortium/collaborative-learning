@@ -52,12 +52,15 @@ describe("LiveOutputNode.sendDataToSerialDevice output gating (CLUE-567 #1)", ()
 
 // Object.create bypasses the constructor (as above); stub the bits the config getters / data() read:
 // services.stores.appConfig.getSetting, services.inTick (skip the serial side-effects), saveNodeValue.
+// The stub honors the `group` arg (production passes "dataflow"), so a dropped/typo'd group reads
+// undefined and the test fails — matching how real units nest under settings.dataflow.
 function stubbedNode(model: any, settings: Record<string, any> = {}) {
   const node: any = Object.create(LiveOutputNode.prototype);
   node.model = model;
   node.services = {
     inTick: false,
-    stores: { appConfig: { getSetting: (key: string) => settings[key] } },
+    stores: { appConfig: { getSetting: (key: string, group?: string) =>
+      group === "dataflow" ? settings[key] : undefined } },
   };
   node.saveNodeValue = (v: number) => { node.model.nodeValue = v; };
   node.saveOutputStatus = () => { /* noop */ };
@@ -65,9 +68,10 @@ function stubbedNode(model: any, settings: Record<string, any> = {}) {
 }
 
 describe("servoDisplayMessage (CLUE-581)", () => {
-  it("shows degrees by default", () => {
+  it("shows the rounded integer degree by default", () => {
     expect(servoDisplayMessage(90, false)).toBe("90°");
     expect(servoDisplayMessage(0, false)).toBe("0°");
+    expect(servoDisplayMessage(95, false)).toBe("95°"); // rounds to the degree, not the nearest 10
   });
   it("shows % rotation in proportion mode", () => {
     expect(servoDisplayMessage(0, true)).toBe("0% rotation");
@@ -118,13 +122,37 @@ describe("Live Output type restriction (settings.dataflow.liveOutputTypes)", () 
     expect(names(stubbedNode({}, { liveOutputTypes: ["Nonexistent"] })).length).toBeGreaterThan(1);
     expect(names(stubbedNode({}, { liveOutputTypes: "Servo" })).length).toBeGreaterThan(1);
   });
+  it("preserves the author's order so the first entry is the new-node default", () => {
+    expect(names(stubbedNode({}, { liveOutputTypes: ["Servo", "Gripper 2.0"] }))).toEqual(["Servo", "Gripper 2.0"]);
+  });
+});
+
+// Blocker fix (CLUE-581 #1): a stored type hidden by a unit restriction resolves in the editable dropdown
+// rather than being overwritten. The getter is pure — it must never mutate model.liveOutputType.
+describe("editableLiveOutputTypeOptions (settings.dataflow.liveOutputTypes)", () => {
+  const names = (node: LiveOutputNode) => ((node as any).editableLiveOutputTypeOptions as any[]).map(o => o.name);
+  it("appends a stored type that a restriction would hide, without mutating it", () => {
+    const node = stubbedNode({ liveOutputType: "Fan" }, { liveOutputTypes: ["Servo", "Gripper 2.0"] });
+    expect(names(node)).toEqual(["Servo", "Gripper 2.0", "Fan"]);
+    expect(node.model.liveOutputType).toBe("Fan");
+  });
+  it("does not duplicate a stored type already in the allowed list", () => {
+    const node = stubbedNode({ liveOutputType: "Servo" }, { liveOutputTypes: ["Servo", "Gripper 2.0"] });
+    expect(names(node)).toEqual(["Servo", "Gripper 2.0"]);
+  });
+  it("leaves an orphaned/unknown stored type alone (no add, no mutation)", () => {
+    const node = stubbedNode({ liveOutputType: "Light Bulb" }, {});
+    expect(names(node)).not.toContain("Light Bulb");
+    expect(node.model.liveOutputType).toBe("Light Bulb");
+  });
 });
 
 // The dropdown and the AI-summary mirror share this resolver; undefined = unrestricted, so the AI note
 // never claims a restriction the UI doesn't show (including a setting that lists the full set).
 describe("resolveAllowedOutputTypes (settings.dataflow.liveOutputTypes)", () => {
-  it("returns the restricted names (in canonical order) for a genuine subset", () => {
-    expect(resolveAllowedOutputTypes(["Servo", "Fan"])).toEqual(["Fan", "Servo"]);
+  it("returns the restricted names in the author's order for a genuine subset", () => {
+    expect(resolveAllowedOutputTypes(["Servo", "Fan"])).toEqual(["Servo", "Fan"]);
+    expect(resolveAllowedOutputTypes(["Fan", "Servo"])).toEqual(["Fan", "Servo"]);
   });
   it("returns undefined when unrestricted (absent, empty, malformed, unknown-only, or the full list)", () => {
     expect(resolveAllowedOutputTypes(undefined)).toBeUndefined();

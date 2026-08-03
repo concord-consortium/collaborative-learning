@@ -1,4 +1,4 @@
-import { TileHandlerParams } from "../ai-summarizer-types";
+import { IDataflowOutputConfig, TileHandlerParams } from "../ai-summarizer-types";
 import { programToGraphviz } from "./dataflow-to-graphviz";
 
 export function handleDataflowTile({ tile }: TileHandlerParams): string|undefined {
@@ -11,8 +11,7 @@ export function handleDataflowTile({ tile }: TileHandlerParams): string|undefine
 
   // Per-unit Live Output config (mirrored onto the content by the editable tile), so the AI gives valid
   // help. Only present when the unit restricts outputs and/or puts the Servo in proportion mode.
-  const outputConfig = tile.model.content.outputConfig as
-    { servoInputMode?: string; allowedOutputTypes?: string[] } | undefined;
+  const outputConfig = tile.model.content.outputConfig as IDataflowOutputConfig | undefined;
   if (outputConfig?.allowedOutputTypes?.length) {
     result += ` In this unit, the only Live Output types available are: ${outputConfig.allowedOutputTypes.join(", ")}.`;
   }

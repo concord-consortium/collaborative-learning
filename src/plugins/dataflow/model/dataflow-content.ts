@@ -23,6 +23,8 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
+import { withoutUndo } from "../../../models/history/without-undo";
+import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { NodeChannelInfo } from "./utilities/channel";
@@ -33,8 +35,12 @@ export function defaultDataflowContent(options?: IDefaultContentOptions): Datafl
   // Unit-config (settings.dataflow.defaultSamplingRate): seed a new tile's sampling rate from the unit.
   // Applied only at creation (never overwrites a saved rate); an unknown value falls back to the default.
   const configuredRate = options?.appConfig?.getSetting("defaultSamplingRate", "dataflow");
-  const programDataRate = ProgramDataRates.some(r => r.val === configuredRate)
-    ? configuredRate as number : DEFAULT_DATA_RATE;
+  const isKnownRate = ProgramDataRates.some(r => r.val === configuredRate);
+  if (configuredRate != null && !isKnownRate) {
+    console.warn(`settings.dataflow.defaultSamplingRate: ignoring unknown value ${JSON.stringify(configuredRate)}; ` +
+      `expected one of ${ProgramDataRates.map(r => r.val).join(", ")}.`);
+  }
+  const programDataRate = isKnownRate ? configuredRate as number : DEFAULT_DATA_RATE;
   return DataflowContentModel.create({ programDataRate });
 }
 
@@ -71,12 +77,8 @@ export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
 // Resolved per-unit Live Output config, mirrored onto the tile content (see the `outputConfig` prop).
-export interface IDataflowOutputConfig {
-  // "proportion" when settings.dataflow.servoInputMode is set; absent means degrees (the default).
-  servoInputMode?: string;
-  // settings.dataflow.liveOutputTypes when the option list is restricted; absent means the full list.
-  allowedOutputTypes?: string[];
-}
+// The type is shared with the AI summarizer (which can't import from src/plugins) — see ai-summarizer-types.
+export type { IDataflowOutputConfig };
 
 export const DataflowContentModel = TileContentModel
   .named("DataflowTool")
@@ -178,7 +180,11 @@ export const DataflowContentModel = TileContentModel
         // We only need the program for hashing
         return stringify({program}, {maxLength: 120});
       }
-      return stringify({...snapshot, program}, {maxLength: 120});
+      // outputConfig mirrors unit config only to reach the runtime AI summarizer; keep it out of
+      // exported curriculum JSON (the node reads appConfig live, so exports must not bake it in).
+      const exported = {...snapshot, program};
+      delete (exported as { outputConfig?: unknown }).outputConfig;
+      return stringify(exported, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
@@ -312,6 +318,8 @@ export const DataflowContentModel = TileContentModel
       const next = config && (config.servoInputMode || config.allowedOutputTypes?.length) ? config : undefined;
       // Idempotent — avoid churning the doc when the resolved config hasn't changed.
       if (JSON.stringify(self.outputConfig) === JSON.stringify(next)) return;
+      // This mirrors unit config on tile mount, not a user edit, so keep it off the undo stack.
+      withoutUndo({ unlessChildAction: true });
       self.outputConfig = next;
     },
     setLiveProgramZoom(transform: Transform) {
