@@ -1,6 +1,6 @@
 import {
   LEVEL_SPACINGS, K_FACTOR, POINTS_PER_TILE, AMPLITUDE_RANGES,
-  NO_DATA_SENTINEL, NUM_LEVELS, getTokenServiceEnv
+  NO_DATA_SENTINEL, NUM_LEVELS, getTileBaseUrl, getTokenServiceEnv
 } from "./envelope-config";
 
 describe("envelope-config", () => {
@@ -31,6 +31,19 @@ describe("envelope-config", () => {
 
   it("NO_DATA_SENTINEL is Int16 min", () => {
     expect(NO_DATA_SENTINEL).toBe(-32768);
+  });
+});
+
+describe("getTileBaseUrl", () => {
+  afterEach(() => history.replaceState(null, "", "/"));
+
+  it("uses the production bucket by default", () => {
+    expect(getTileBaseUrl()).toBe("https://models-resources.s3.amazonaws.com/");
+  });
+
+  it("reflects a tokenServiceEnv param added after module load (OAuth param restore)", () => {
+    history.replaceState(null, "", "/?tokenServiceEnv=staging");
+    expect(getTileBaseUrl()).toBe("https://models-resources-qa.s3.amazonaws.com/");
   });
 });
 

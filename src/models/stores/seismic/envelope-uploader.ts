@@ -4,7 +4,7 @@ import {
   decodeEnvelopeTile, encodeEnvelopeTile, mergeEnvelopeTileData
 } from "../../../../shared/seismic/envelopes/envelope-codec";
 import {
-  AWS_REGION, ENVELOPE_LAYOUT_VERSION, S3_PREFIX, TILE_BASE_URL
+  AWS_REGION, ENVELOPE_LAYOUT_VERSION, S3_PREFIX, getTileBaseUrl
 } from "../../../../shared/seismic/envelopes/envelope-config";
 import { EnvelopeTileData, StationData } from "../../../../shared/seismic/seismic-types";
 import { getS3Root, getTileS3Key } from "../../../../shared/seismic/envelopes/tile-addressing";
@@ -52,7 +52,7 @@ export function createEnvelopeUploader(deps: EnvelopeUploaderDeps): EnvelopeUplo
 
   return {
     async uploadTile(stationData, level, tileIndex, tile) {
-      const url = `${TILE_BASE_URL}${getS3Root(S3_PREFIX)}${getTileS3Key(stationData, level, tileIndex)}`;
+      const url = `${getTileBaseUrl()}${getS3Root(S3_PREFIX)}${getTileS3Key(stationData, level, tileIndex)}`;
       for (let attempt = 0; attempt <= MAX_CONFLICT_RETRIES; attempt++) {
         // no-store: a cached GET would produce a stale ETag and a spurious 412 loop.
         // TODO: This line logs a console error when the tile is missing. Figure out another way to determine if a
