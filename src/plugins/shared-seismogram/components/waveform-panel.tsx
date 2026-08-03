@@ -17,10 +17,13 @@ interface WaveformPanelProps {
   sharedSeismogram: SharedSeismogramType;
   startTime: DateTime;
   endTime: DateTime;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+  onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
+  onMouseMove?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function WaveformPanel({
-  mode = "waveform", sharedSeismogram, startTime, endTime,
+  mode = "waveform", sharedSeismogram, startTime, endTime, onClick, onMouseLeave, onMouseMove,
 }) {
   const { seismicQueryService } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -148,7 +151,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     ? { height: "60px"}
     : { height: "100px" };
   return (
-    <div className="waveform-panel">
+    <div className="waveform-panel" onClick={onClick} onMouseLeave={onMouseLeave} onMouseMove={onMouseMove}>
       <div ref={containerRef} className="waveform-panel-display" style={style} />
     </div>
   );
