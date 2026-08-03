@@ -374,6 +374,9 @@ describe("event views", () => {
 });
 
 describe("time markers", () => {
+  const viewStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
+  const viewEnd = DateTime.fromISO("2026-02-02T00:00:00.000Z");
+
   it("hoverTime and pinnedTime default to undefined", () => {
     const content = TimelineContentModel.create();
     expect(content.hoverTime).toBeUndefined();
@@ -402,5 +405,25 @@ describe("time markers", () => {
     const content = TimelineContentModel.create();
     content.setPinnedTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
     expect(JSON.parse(content.exportJson())).not.toHaveProperty("pinnedTime");
+  });
+
+  it("timeToViewPct returns undefined when there is no view range", () => {
+    const content = TimelineContentModel.create();
+    expect(content.timeToViewPct(viewStart)).toBeUndefined();
+  });
+
+  it("timeToViewPct maps times within the view range to 0-100", () => {
+    const content = TimelineContentModel.create();
+    content.setViewRange(viewStart, viewEnd);
+    expect(content.timeToViewPct(viewStart)).toBe(0);
+    expect(content.timeToViewPct(viewEnd)).toBe(100);
+    expect(content.timeToViewPct(viewStart.plus({ hours: 6 }))).toBe(25);
+  });
+
+  it("timeToViewPct maps times outside the view range to <0 or >100", () => {
+    const content = TimelineContentModel.create();
+    content.setViewRange(viewStart, viewEnd);
+    expect(content.timeToViewPct(viewStart.minus({ hours: 6 }))).toBe(-25);
+    expect(content.timeToViewPct(viewEnd.plus({ hours: 12 }))).toBe(150);
   });
 });

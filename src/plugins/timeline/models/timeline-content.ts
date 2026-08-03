@@ -67,6 +67,16 @@ export const TimelineContentModel = TileContentModel
       if (!self.viewStartTime || !self.viewEndTime) return undefined;
       return self.viewEndTime.diff(self.viewStartTime, "seconds").seconds;
     },
+    get viewStartMs() {
+      return self.viewStartTime?.toMillis();
+    },
+    get viewEndMs() {
+      return self.viewEndTime?.toMillis();
+    },
+    get viewRangeMs() {
+      if (!self.viewStartTime || !self.viewEndTime) return undefined;
+      return self.viewEndTime.diff(self.viewStartTime).milliseconds;
+    },
     get events(): TimelineEvent[] {
       const ds = self.sharedDataSet?.dataSet;
       if (!ds) return [];
@@ -156,6 +166,11 @@ export const TimelineContentModel = TileContentModel
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
       return `Event ${self.selectedEventIndex + 1}`;
+    },
+    timeToViewPct(time: DateTime): number | undefined {
+      const { viewStartMs, viewRangeMs } = self;
+      if (viewStartMs === undefined || viewRangeMs === undefined || viewRangeMs <= 0) return undefined;
+      return (time.toMillis() - viewStartMs) / viewRangeMs * 100;
     }
   }))
   .views(self => ({
