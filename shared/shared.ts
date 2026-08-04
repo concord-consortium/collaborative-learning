@@ -139,6 +139,7 @@ export interface IDocumentMetadataBase {
   investigation?: string|null;
   problem?: string|null;
   unit?: string|null;
+  offeringId?: string|null;
   groupId?: string|null;
 }
 

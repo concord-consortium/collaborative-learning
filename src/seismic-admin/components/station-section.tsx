@@ -1,17 +1,56 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
-import { ModelListEntry } from "../../../shared/seismic/model-metadata";
-import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
+import { ModelListEntry } from "../../../shared/seismic/models/model-metadata";
 import CheckIcon from "../../assets/icons/check/check-selected.svg";
 import WarningIcon from "../../assets/icons/caution.svg";
+import { useSeismicAdminStore } from "../hooks/use-seismic-admin-stores";
+import { CoverageLoadState } from "../seismic-admin-store";
 import { formatBytes, getStationLabel } from "../utils/seismic-admin-utils";
 import { ConfirmModal } from "./confirm-modal";
 import { RawTimeline } from "./raw-timeline";
 import "./station-section.scss";
 
 interface ICoverageSectionProps {
-  // The station whose coverage is shown; absent for the all-stations aggregate.
+  ariaLabel: string;
+  coverageState: CoverageLoadState;
+  errorMessage: string;
+  highlightedDays?: Set<number>;
+  midDays?: Set<number>;
+  stationKey?: string;
+  statsMessage: string;
+  title: string;
+}
+
+const CoverageSection = observer(function CoverageSection({
+  ariaLabel, coverageState, errorMessage, highlightedDays, midDays, stationKey, statsMessage, title
+}: ICoverageSectionProps) {
+  const store = useSeismicAdminStore();
+  const { firstDay, lastDay } = store;
+  const hasRange = firstDay !== undefined && lastDay !== undefined;
+
+  return (
+    <div className="data-section coverage">
+      <div className="data-section-header">
+        <div className="data-kind">{title}</div>
+        <div className="data-stats">{statsMessage}</div>
+      </div>
+      {hasRange && stationKey && (highlightedDays
+        ? (
+          <RawTimeline
+            ariaLabel={ariaLabel}
+            highlightedDays={highlightedDays}
+            partialDays={midDays}
+            firstDay={firstDay}
+            lastDay={lastDay}
+          />
+        ) : coverageState === "error" ? errorMessage : "Loading..."
+      )}
+    </div>
+  );
+});
+
+interface IModelSectionProps {
   stationKey?: string;
   stationLabel: string;
   model: ModelListEntry;
@@ -19,36 +58,58 @@ interface ICoverageSectionProps {
 
 /** One model's event coverage: a three-state timeline for a single station,
  *  or an aggregate text line (no bar) across all selected stations. */
-const CoverageSection = observer(function CoverageSection({ stationKey, stationLabel, model }: ICoverageSectionProps) {
+const ModelSection = observer(function ModelSection({ stationKey, stationLabel, model }: IModelSectionProps) {
   const store = useSeismicAdminStore();
-  const { firstDay, lastDay } = store;
-  const hasRange = firstDay !== undefined && lastDay !== undefined;
   const stats = store.modelStats(model.metadataUrl, stationKey);
   const { eventCount, coveredDays, partialDays, coveredDayCount, totalDays } = stats;
 
-  const statsMessage = `${coveredDayCount} / ${totalDays} days · ${eventCount} events`;
+  const statsMessage = `${coveredDayCount} / ${totalDays} days · ${eventCount ?? 0} events`;
   const highlightedDays = stationKey ? coveredDays.get(stationKey) : undefined;
   const midDays = stationKey ? partialDays.get(stationKey) : undefined;
   const coverageState = stationKey ? store.coverageFor(stationKey, model.metadataUrl).state : "loaded";
 
   return (
-    <div className="data-section coverage">
-      <div className="data-section-header">
-        <div className="data-kind">{model.label}</div>
-        <div className="data-stats">{statsMessage}</div>
-      </div>
-      {hasRange && stationKey && (highlightedDays
-        ? (
-          <RawTimeline
-            ariaLabel={`${model.label} coverage timeline for ${stationLabel}`}
-            highlightedDays={highlightedDays}
-            partialDays={midDays}
-            firstDay={firstDay}
-            lastDay={lastDay}
-          />
-        ) : coverageState === "error" ? "Unable to download coverage" : "Loading..."
-      )}
-    </div>
+    <CoverageSection
+      ariaLabel={`${model.label} coverage timeline for ${stationLabel}`}
+      coverageState={coverageState}
+      errorMessage="Unable to download coverage"
+      highlightedDays={highlightedDays}
+      midDays={midDays}
+      stationKey={stationKey}
+      statsMessage={statsMessage}
+      title={model.label}
+    />
+  );
+});
+
+interface IEnvelopesSectionProps {
+  stationKey?: string;
+  stationLabel: string;
+}
+
+/** S3 envelope coverage: a three-state timeline for a single station,
+ *  or an aggregate text line (no bar) across all selected stations. */
+const EnvelopesSection = observer(function EnvelopesSection({ stationKey, stationLabel }: IEnvelopesSectionProps) {
+  const store = useSeismicAdminStore();
+  const stats = store.envelopeStats(stationKey);
+  const { coveredDays, partialDays, coveredDayCount, totalDays } = stats;
+
+  const statsMessage = `${coveredDayCount} / ${totalDays} days`;
+  const highlightedDays = stationKey ? coveredDays.get(stationKey) : undefined;
+  const midDays = stationKey ? partialDays.get(stationKey) : undefined;
+  const coverageState = stationKey ? store.envelopeCoverageFor(stationKey).state : "loaded";
+
+  return (
+    <CoverageSection
+      ariaLabel={`envelope coverage timeline for ${stationLabel}`}
+      coverageState={coverageState}
+      errorMessage="Unable to list envelopes"
+      highlightedDays={highlightedDays}
+      midDays={midDays}
+      stationKey={stationKey}
+      statsMessage={statsMessage}
+      title="Envelopes"
+    />
   );
 });
 
@@ -88,8 +149,8 @@ export const StationSection = observer(function StationSection({ stationKey }: I
   const isFullyCovered = store.isFullyCovered(stationKey);
   const ReadyIcon = isFullyCovered ? CheckIcon : WarningIcon;
   const readyLabel = isFullyCovered ? "Ready" : "Not Ready!";
-  const updateDisabled = !store.authReady || store.selectedModels.size === 0 || isFullyCovered || store.isBusy ||
-    (allStations && selectedStations.size === 0);
+  const updateDisabled = !store.authReady || !store.portalReady || store.selectedModels.size === 0 ||
+    isFullyCovered || store.isBusy || (allStations && selectedStations.size === 0);
   const updateLabel = `Update ${allStations ? "all stations" : "station"}`;
   const update = () => {
     if (allStations) {
@@ -136,8 +197,9 @@ export const StationSection = observer(function StationSection({ stationKey }: I
               />
             )}
           </div>
+          <EnvelopesSection stationKey={stationKey} stationLabel={label} />
           {store.selectedModelList.map(model => (
-            <CoverageSection key={model.metadataUrl} stationKey={stationKey} stationLabel={label} model={model} />
+            <ModelSection key={model.metadataUrl} stationKey={stationKey} stationLabel={label} model={model} />
           ))}
         </div>
         <div className="station-actions">

@@ -2,10 +2,10 @@
  * Seismic event database: pure constants, index math, Firestore path builders,
  * and coverage-bitmap helpers.
  */
-import { dayIndex, SECONDS_PER_DAY } from "./seismic-day";
+import { dayIndex, SECONDS_PER_DAY } from "../seismic-day";
 import { SeismicEvent } from "./seismic-model-types";
-import { StationData, TimeRange } from "./seismic-types";
-import { encodeLocation, getStationPrefix } from "./tile-addressing";
+import { DayCoverageState, DaySpan, StationData, TimeRange } from "../seismic-types";
+import { encodeLocation, getStationPrefix } from "../station-addressing";
 
 /** Layout version -- update this when the constants below or the event doc schema change */
 export const EVENT_LAYOUT_VERSION = 1;
@@ -16,11 +16,6 @@ export const CHUNK_DURATION_S = 30 * SECONDS_PER_DAY; // 30 days
 export const WINDOW_DURATION_S = 10 * 60; // 10 minutes
 export const WINDOWS_PER_CHUNK = CHUNK_DURATION_S / WINDOW_DURATION_S; // 4320
 export const BYTES_PER_CHUNK = Math.ceil(WINDOWS_PER_CHUNK / 8); // 540
-
-export interface DaySpan {
-  startDay: number; // UTC day index (days since Unix epoch), inclusive
-  endDay: number;   // inclusive
-}
 
 export function getChunkIndex(timeSec: number): number {
   return Math.floor((timeSec - COVERAGE_EPOCH) / CHUNK_DURATION_S);
@@ -150,8 +145,6 @@ export function uncoveredDaySpans(gaps: TimeRange[], range: TimeRange): DaySpan[
   }
   return spans;
 }
-
-export type DayCoverageState = "covered" | "partial" | "uncovered";
 
 /**
  * Classify each UTC day index in [dayIndex(range.start), dayIndex(range.end - 1)]

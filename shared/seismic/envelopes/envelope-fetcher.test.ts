@@ -1,6 +1,6 @@
 import { fetchEnvelopeTile } from "./envelope-fetcher";
 import { encodeEnvelopeTile } from "./envelope-codec";
-import { FetchEnvelopeTileParams } from "./seismic-types";
+import { FetchEnvelopeTileParams } from "../seismic-types";
 
 // Mock global fetch
 const mockFetch = jest.fn();

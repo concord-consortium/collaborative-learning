@@ -173,7 +173,7 @@ $section-padding: 6px;
       position: relative;
       width: $list-item-width * $list-item-scale;
 
-      &.group {
+      &.concurrent {
         border-color: $classwork-purple;
       }
 
@@ -185,7 +185,7 @@ $section-padding: 6px;
         pointer-events: none;
       }
 
-      .group-doc-badge {
+      .concurrent-doc-badge {
         align-items: center;
         background-color: $classwork-purple;
         border-top-right-radius: 5px;

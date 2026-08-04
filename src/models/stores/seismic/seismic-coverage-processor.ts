@@ -1,17 +1,13 @@
 import { miniseed } from "seisplotjs";
-import { uncoveredDaySpans } from "../../../../shared/seismic/event-database";
+import { uncoveredDaySpans } from "../../../../shared/seismic/models/event-database";
 import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
-import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+import { SeismicModelRunner } from "../../../../shared/seismic/models/seismic-model-runner";
+import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
-import { DONE, SeismicDownloadService } from "./seismic-download-service";
+import { DayDownloadService, DONE, SeismicDownloadService } from "./seismic-download-service";
 import { getUncoveredRanges, markCovered, writeEvents } from "./seismic-event-service";
 
 export const DETECTION_THRESHOLD = 0.7;
-
-/** The subset of SeismicDownloadService the processor uses; tests inject fakes against it. */
-export type CoverageDownloadService = Pick<SeismicDownloadService,
-  "ensureRange" | "nextReadyDay" | "readDay" | "cancel" | "emptyDays" | "erroredDays">;
 
 export interface ProcessCoverageOptions {
   stationData: StationData;
@@ -29,10 +25,12 @@ export interface ProcessCoverageOptions {
   /** Fires after a day's events + coverage are persisted; empty days included,
    *  errored days and failed persists excluded. */
   onDayCovered?: (day: number) => void;
+  /** Fires as each day's raw data lands in OPFS; bytes is 0 for already-cached days. */
+  onDayDownloaded?: (day: number, bytes: number) => void;
   /** Forwarded to the download service's raw-data fetches. */
   proxy?: boolean;
   /** Test seams; production defaults construct real ones. */
-  downloadService?: CoverageDownloadService;
+  downloadService?: DayDownloadService;
   createRunner?: () => SeismicModelRunner;
 }
 
@@ -60,7 +58,7 @@ async function saveDayResults(
  *  Owns the runner lifecycle (loadModel/dispose). Returns day counts. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
-  const { stationData, metadata, onEvents, onProgress, onDayCovered, proxy, range } = options;
+  const { stationData, metadata, onEvents, onProgress, onDayCovered, onDayDownloaded, proxy, range } = options;
   const modelId = metadata.id;
 
   const uncovered = options.uncovered ?? await getUncoveredRanges(stationData, modelId, range);
@@ -97,6 +95,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
       for (;;) {
         const day = await downloadService.nextReadyDay();
         if (day === DONE) break;
+        onDayDownloaded?.(day, downloadService.bytesForDay(day));
 
         const buffer = await downloadService.readDay(day);
         if (!buffer) continue;

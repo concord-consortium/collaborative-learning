@@ -42,7 +42,8 @@ so this table doubles as a migration-progress view.
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
 | `canonical` | Firestore | group | not surfaced | No |
-| `offeringId` | Firestore + RTDB | problem family | not surfaced | No |
+| `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
+| `groupId` | Firestore | group (the **owning** group) | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | No — immutable |
 
 ### Dual-stored (Firestore + RTDB)
 
@@ -51,7 +52,6 @@ so this table doubles as a migration-progress view.
 | `title` | both | personal, learningLog, publications | `DocumentModel.title`, `DocumentMetadataModel.title` | **Own docs only** |
 | `visibility` | both | problem, planning, personal, learningLog | `DocumentModel.visibility`, `DocumentMetadataModel.visibility` | Class-wide for problem; **see notes** for personal |
 | `properties` | both | most | `DocumentModel.properties` | **No** |
-| `groupId` | both | group, publication | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | Problem docs only, derived locally |
 | `createdAt` | both | all | `DocumentModel.createdAt` | No |
 | `uid` | both | all | `DocumentModel.uid` | No — immutable |
 | `type` | both | all | `DocumentModel.type` | No — immutable |
@@ -73,11 +73,20 @@ so this table doubles as a migration-progress view.
 | `lastEditedAt` | RTDB | all editable | not surfaced | No |
 | `evaluation` | RTDB | analyzable docs | not surfaced | No |
 
-Some Firestore fields (e.g. `offeringId`, `canonical`) are written to the doc but have no
-`DocumentMetadataModel` prop, which is why they show as "not surfaced" above. They still reach
-`DocumentMetadataStore`'s `typecheck(DocumentMetadataModel, data)` unfiltered and validate only because
-MST's `typecheck` ignores properties the model does not declare — pinned by the `typecheck` tests in
+Some Firestore fields (e.g. `canonical`) are written to the doc but have no `DocumentMetadataModel`
+prop, which is why they show as "not surfaced" above. They still reach `DocumentMetadataStore`'s
+`typecheck(DocumentMetadataModel, data)` unfiltered and validate only because MST's `typecheck` ignores
+properties the model does not declare — pinned by the `typecheck` tests in
 [mst.test.ts](../../src/models/mst.test.ts).
+
+### Derived (no stored field)
+
+Held on the runtime model only, computed from something other than the document's own metadata. Listed
+here so a reader looking for the stored field does not go hunting for one that does not exist.
+
+| Field | Derived from | Applies to | Runtime | Reactive |
+|---|---|---|---|---|
+| `groupIdOfUserOwner` | the groups store, or a publication's publish-time snapshot | user-owned documents | `DocumentModel.groupIdOfUserOwner` | Yes — to group membership |
 
 ---
 
@@ -302,21 +311,40 @@ declare it. Anything reading properties from the Firestore metadata should treat
 
 ### `groupId`
 
-- **Stores:** Firestore + RTDB
+- **Stores:** Firestore only
 - **Location:** Firestore `documents/{key}.groupId` (written only when truthy, so Firestore never sees
-  `undefined`); RTDB `DBPublication.groupId`
-- **Applies to:** group documents (the owning group) and publications (the author's group at publish
-  time)
+  `undefined`)
+- **Applies to:** group documents — the group that **owns** the document
 - **Runtime:** `DocumentModel.groupId`, `DocumentMetadataModel.groupId`
-- **Updated by:** nothing writes it after creation. `setGroupId` exists but has no sync watcher.
-- **Reactive:** Only for problem documents, and not from either store — `db-docs-content-listener` sets it
-  inside a MobX `autorun` from the *local groups store*
-  ([db-docs-content-listener.ts:65](../../src/lib/db-listeners/db-docs-content-listener.ts#L65)). So it
-  tracks group membership changes rather than document changes.
+- **Updated by:** nothing — creation only, stamped from the kind's registered `scopeType` by
+  `getDocumentScopeFields` ([document-kinds.ts](../../src/models/document/document-kinds.ts))
+- **Reactive:** No — immutable
 
-`DocumentMetadataModel` documents the intent: for non-group documents this should be undefined, because
-the document owner's group can change and stale group ids are worse than absent ones. Sort Work's
-grouping reads the metadata model's `groupId`, so that path *is* reactive from Firestore.
+The group that **owns** the document, and nothing else — not the group its owning user happens to be in,
+which is `groupIdOfUserOwner` below. It is a denormalization of the owner: the owner `uid` already encodes it
+(`group_<offeringId>_<groupId>`), so this field spares consumers from taking that apart when they need the
+group's number.
+
+**A group id is unique only within an offering.** Group 3 of one assignment and group 3 of the next are
+different sets of students, so a bare group id is not a safe key to look a group up by. The owner `uid`
+carries the offering, which makes it the exact one.
+
+### `groupIdOfUserOwner` (runtime only)
+
+- **Stores:** neither — derived
+- **Runtime:** `DocumentModel.groupIdOfUserOwner`. No `DocumentMetadataModel` prop and no Firestore field.
+- **Filled by:** `groups.groupIdForUser(uid)` for problem, personal, and learning-log documents and their
+  publications; `DBPublication.groupId` for a problem publication, frozen at publish time
+- **Updated by:** `db-docs-content-listener` inside a MobX `autorun`, from the local groups store
+  ([db-docs-content-listener.ts:66](../../src/lib/db-listeners/db-docs-content-listener.ts#L66))
+- **Reactive:** Yes, to group membership changes — not to document changes
+
+The group the **user who owns** the document belongs to. Set only where the owner is a user (`ownerType:
+"user"` in the kind registry): a group- or class-owned document's synthetic `uid` is not a member of any
+group, so there is nobody to look up. A fact about that user's membership rather than about the document,
+which is why it is derived rather than stored: a student's group changes, and a frozen copy would go
+stale. The four-up view (`getProblemDocumentsForGroup`), Student Work routing, and the content listener's
+"whose documents do I monitor" test all want this one.
 
 ### `createdAt`
 
@@ -501,7 +529,7 @@ accounted for.
 |---|---|---|
 | `version` | every RTDB record | Always `"1.0"`. Never varied; no migration reads it. |
 | `self` | every RTDB record | `{ uid, classHash, documentKey }` — the record's own coordinates, echoed for records reached by query. Stripped before the Firestore write. |
-| `classHash` | RTDB `DBBaseProblemDocumentMetadata` | Duplicates `self.classHash`. Stripped before the Firestore write, where `context_id` serves the role. |
+| `classHash` | RTDB, problem family only | Duplicates `self.classHash` (which is present on every type) and is **write-only** — nothing reads the top-level copy; it is not included in the Firestore metadata, where `context_id` (sourced from `self.classHash`) serves the role. Personal/learning-log metadata **omit** it for no particular reason. This inconsistency is left as-is, we are hoping to remove the RTDB metadata so it doesn't make sense to clean it up. See [db.ts createDocument](../../src/lib/db.ts). |
 | `userId` | `DBPublication` | The publishing user. Plays the role `uid` plays elsewhere. |
 | `documentKey` | type-specific records | Points at the real document, needed because publication records are keyed by push key rather than document key. |
 | `teachers` | Firestore (legacy) | No code writes it to `documents/{key}` today; the rules still read it for legacy documents. |

@@ -144,6 +144,9 @@
     },
     "aiEvaluation": "mock",
     "groupDocumentsEnabled": true,
+    "classWideDocuments": [
+      { "kind": "drivingQuestionBoard", "title": "Driving Question Board" }
+    ],
     "navTabs": {
       "lazyLoadTabContents": true,
       "showNavPanel": true,

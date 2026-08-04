@@ -54,7 +54,8 @@ describe("fetchRawSeismicData", () => {
     setUrl("http://localhost/");
   });
 
-  it("fetches from mock S3 when no URL params are set", async () => {
+  it("fetches from mock S3 when the mockSeismicData URL param is set", async () => {
+    setUrl("http://localhost/?mockSeismicData");
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
 
     const response = await fetchRawSeismicData(stationTimeRange);
@@ -67,14 +68,13 @@ describe("fetchRawSeismicData", () => {
   });
 
   it("throws when mock has no data for the requested range", async () => {
+    setUrl("http://localhost/?mockSeismicData");
     await expect(
       fetchRawSeismicData({ ...stationLocation, startTime: "2020-01-01T00:00:00Z", endTime: "2020-01-02T00:00:00Z" })
     ).rejects.toThrow("No mock data available");
   });
 
-  it("fetches from proxy when seismicProxy URL param is set", async () => {
-    setUrl("http://localhost/?seismicProxy");
-
+  it("fetches from proxy when no URL params are set", async () => {
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
 
     const response = await fetchRawSeismicData(stationTimeRange);
@@ -87,7 +87,6 @@ describe("fetchRawSeismicData", () => {
   });
 
   it("passes location to proxy URL, mapping empty to '--'", async () => {
-    setUrl("http://localhost/?seismicProxy");
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
 
     await fetchRawSeismicData(stationTimeRange);
@@ -97,7 +96,6 @@ describe("fetchRawSeismicData", () => {
   });
 
   it("passes non-empty location to proxy URL", async () => {
-    setUrl("http://localhost/?seismicProxy");
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
 
     await fetchRawSeismicData({
@@ -123,7 +121,6 @@ AK K204 -- HNZ M 100.0 2026-02-03T00:00:00.000000Z 2026-02-04T00:00:00.000000Z`;
   });
 
   it("parses availability ranges into [startSec, endSec) pairs (proxy mode)", async () => {
-    setUrl("http://localhost/?seismicProxy");
     fetchMock.mockResponseOnce(AVAILABILITY_TEXT);
 
     const ranges = await fetchAvailability(stationTimeRange);
@@ -135,6 +132,7 @@ AK K204 -- HNZ M 100.0 2026-02-03T00:00:00.000000Z 2026-02-04T00:00:00.000000Z`;
   });
 
   it("falls back to the full requested range when not in proxy mode", async () => {
+    setUrl("http://localhost/?mockSeismicData");
     const ranges = await fetchAvailability({ ...stationTimeRange, endTime: "2026-02-05T00:00:00.000Z" });
     expect(ranges).toEqual([
       { start: utcDay(2026, 1, 30), end: utcDay(2026, 2, 5) },
@@ -185,19 +183,20 @@ AK K204 -- HNZ M 100.0 2026-02-03T00:00:00.000000Z 2026-02-04T00:00:00.000000Z`;
 
   beforeEach(() => {
     fetchMock.resetMocks();
-    setUrl("http://localhost/"); // no proxy/local param in the "page" URL
+    setUrl("http://localhost/?mockSeismicData"); // the "page" URL asks for mock data
   });
 
-  it("isProxyEnabled and getLocalBaseUrl reads the window params", () => {
-    setUrl("http://localhost/?seismicProxy");
+  it("isProxyEnabled and getLocalBaseUrl read the window params", () => {
+    setUrl("http://localhost/");
     expect(isProxyEnabled()).toEqual(true);
     expect(getLocalBaseUrl()).toEqual(null);
-    setUrl("http://localhost/?seismicLocal=http://data.local");
+    setUrl("http://localhost/?mockSeismicData");
     expect(isProxyEnabled()).toEqual(false);
+    setUrl("http://localhost/?seismicLocal=http://data.local");
     expect(getLocalBaseUrl()).toEqual("http://data.local");
   });
 
-  it("fetchRawSeismicData honors an explicit proxy even without the window param", async () => {
+  it("fetchRawSeismicData honors an explicit proxy despite the mock window param", async () => {
     fetchMock.mockResponseOnce(new ArrayBuffer(8) as any);
     await fetchRawSeismicData(stationTimeRange, { baseUrl: null, proxy: true });
     expect(fetchMock).toHaveBeenCalledWith(
@@ -205,7 +204,7 @@ AK K204 -- HNZ M 100.0 2026-02-03T00:00:00.000000Z 2026-02-04T00:00:00.000000Z`;
     );
   });
 
-  it("fetchAvailability honors an explicit proxy (hits the service, not the fallback)", async () => {
+  it("fetchAvailability honors an explicit proxy despite the mock window param", async () => {
     fetchMock.mockResponseOnce(AVAILABILITY_TEXT);
     const ranges = await fetchAvailability(
       { ...stationTimeRange, endTime: "2026-02-05T00:00:00.000Z" },

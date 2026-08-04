@@ -1,6 +1,6 @@
-// shared/seismic/envelope-codec.ts
 import pako from "pako";
-import type { EnvelopeTileData } from "./seismic-types";
+import { NO_DATA_SENTINEL } from "./envelope-config";
+import type { EnvelopeTileData } from "../seismic-types";
 
 const MAX_INT16 = 32767;
 
@@ -61,4 +61,26 @@ export function decodeEnvelopeTile(buffer: ArrayBuffer): EnvelopeTileData {
     mins: view.slice(0, pointCount),
     maxs: view.slice(pointCount, pointCount * 2),
   };
+}
+
+/**
+ * Merge two envelope tiles for the same tile index. A point where either side is
+ * sentinel takes the other side's value; where both have data, the result is
+ * min-of-mins / max-of-maxes — the correct envelope over the union of the raw
+ * samples each side covered, which makes incremental re-generation idempotent.
+ */
+export function mergeEnvelopeTileData(a: EnvelopeTileData, b: EnvelopeTileData): EnvelopeTileData {
+  const n = a.mins.length;
+  if (n !== b.mins.length) {
+    throw new Error(`Cannot merge envelope tiles of different sizes (${n} and ${b.mins.length})`);
+  }
+  const mins = new Int16Array(n);
+  const maxs = new Int16Array(n);
+  for (let i = 0; i < n; i++) {
+    const aHas = a.mins[i] !== NO_DATA_SENTINEL && a.maxs[i] !== NO_DATA_SENTINEL;
+    const bHas = b.mins[i] !== NO_DATA_SENTINEL && b.maxs[i] !== NO_DATA_SENTINEL;
+    mins[i] = aHas && bHas ? Math.min(a.mins[i], b.mins[i]) : aHas ? a.mins[i] : b.mins[i];
+    maxs[i] = aHas && bHas ? Math.max(a.maxs[i], b.maxs[i]) : aHas ? a.maxs[i] : b.maxs[i];
+  }
+  return { mins, maxs };
 }

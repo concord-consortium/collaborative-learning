@@ -1,7 +1,9 @@
+import { FINEST_LEVEL } from "../../shared/seismic/envelopes/envelope-config";
 import { coverageKey, SeismicAdminStore } from "./seismic-admin-store";
 import { saveFilters } from "./utils/admin-persistence";
-import { dayIndex, SECONDS_PER_DAY, utcDay } from "../../shared/seismic/seismic-day";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { dayIndex, dayRange, SECONDS_PER_DAY, utcDay } from "../../shared/seismic/seismic-day";
+import { getTileIndicesForViewport } from "../../shared/seismic/envelopes/tile-addressing";
+import { getStationChannelPrefix } from "../../shared/seismic/station-addressing";
 
 function fakeCache(cached: number[] = []) {
   return {
@@ -11,6 +13,9 @@ function fakeCache(cached: number[] = []) {
     deleteDaysInRange: jest.fn(async () => {}),
   };
 }
+
+// Tiles spanning far beyond any range these tests use -> every day classifies as covered.
+const allTiles = () => new Set(getTileIndicesForViewport(utcDay(2025, 12, 1), utcDay(2026, 3, 1), FINEST_LEVEL));
 
 beforeEach(() => window.localStorage.clear());
 
@@ -266,7 +271,9 @@ describe("coverage stats", () => {
     const fetchMetadata = jest.fn(async () => metadata);
     const store = new SeismicAdminStore({
       cache: emptyCache() as any, stations: [rc01], models: [model],
-      fetchMetadata, eventService, ...overrides,
+      fetchMetadata, eventService,
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
+      ...overrides,
     });
     return { store, eventService, fetchMetadata };
   }
@@ -398,6 +405,22 @@ describe("coverage stats", () => {
       expect(store.isFullyCovered()).toBe(false);
     });
 
+    it("is not fully covered while envelopes are missing, even when models are covered", async () => {
+      const { store } = makeCoverageStore({ listEnvelopeTiles: jest.fn(async () => new Set()) });
+      store.setAuthReady();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      expect(store.isFullyCovered(rc01Key)).toBe(false);   // model coverage IS complete here
+    });
+
+    it("is fully covered when both envelopes and all selected models are covered", async () => {
+      const { store } = makeCoverageStore();               // allTiles default
+      store.setAuthReady();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      expect(store.isFullyCovered(rc01Key)).toBe(true);
+    });
+
     it("scopes to one station when a key is given", async () => {
       const { store, eventService } = makeCoverageStore({ stations: [rc01, rc02] });
       // rc02 has an uncovered day; rc01 is fully covered.
@@ -489,6 +512,12 @@ describe("update (event generation)", () => {
         calls.push(`process:${metadata.id}`);
         return { processed: 0, skipped: 0, total: 0 };
       }),
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
+      envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+      processEnvelopes: jest.fn(async (_options: any) => {
+        calls.push("envelopes");
+        return { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 };
+      }),
       ...overrides,
     };
     const store = new SeismicAdminStore(deps);
@@ -502,18 +531,20 @@ describe("update (event generation)", () => {
     ctx.store.setRange("2026-01-01", "2026-01-03");   // 3 days
     await ctx.store.refresh();
     ctx.store.setAuthReady();
+    ctx.store.setPortalAuth(async () => "fake-jwt");
     await flush();
     ctx.calls.length = 0;
     jest.clearAllMocks();
     return ctx;
   }
 
-  it("updateStation downloads the whole range first, then processes each selected model in order", async () => {
-    const { store, calls } = await primed();
+  it("updateStation runs envelopes then processes each selected model, with no full-range download", async () => {
+    const { store, calls, downloadStation } = await primed();
     await store.updateStation(rc01Key);
     expect(calls.filter((c: string) => !c.startsWith("coverage"))).toEqual([
-      "download", "process:compact-v1", "process:large-v1",
+      "envelopes", "process:compact-v1", "process:large-v1",
     ]);
+    expect(downloadStation).not.toHaveBeenCalled();
   });
 
   it("passes the endDate-inclusive range and the station to processCoverage", async () => {
@@ -534,7 +565,7 @@ describe("update (event generation)", () => {
     const { store, calls } = await primed();
     await store.updateStation(rc01Key);
     expect(calls).toEqual([
-      "download",
+      "envelopes",
       "process:compact-v1", "coverage:compact-v1",
       "process:large-v1", "coverage:large-v1",
     ]);
@@ -652,6 +683,40 @@ describe("update (event generation)", () => {
     expect(ctx.store.modelCoverage.get(coverageKey(rc01Key, compact.metadataUrl))).toEqual({ state: "error" });
   });
 
+  it("fills raw stats live as onDayDownloaded fires during envelopes and events", async () => {
+    const day1 = dayIndex(utcDay(2026, 1, 1)!);
+    const midRun: Array<{ missing: number; bytes: number }> = [];
+    const snapshot = () => {
+      const { missingCount, bytes } = ctx.store.statsFor(rc01Key);
+      midRun.push({ missing: missingCount, bytes });
+    };
+    const processEnvelopes = jest.fn(async ({ onDayDownloaded }: any) => {
+      onDayDownloaded?.(day1, 500);
+      snapshot();
+      return { uploadedTiles: 0, processedDays: 1, skippedDays: 0, totalDays: 1 };
+    });
+    const processCoverage = jest.fn(async ({ onDayDownloaded }: any) => {
+      onDayDownloaded?.(day1 + 1, 300);
+      snapshot();
+      return { processed: 1, skipped: 0, total: 1 };
+    });
+    const ctx = await primed({ models: [compact], processEnvelopes, processCoverage });
+
+    await ctx.store.updateStation(rc01Key);
+    // The 3-day range starts fully missing; each downloaded day fills in live.
+    expect(midRun).toEqual([
+      { missing: 2, bytes: 500 },
+      { missing: 1, bytes: 800 },
+    ]);
+  });
+
+  it("reconciles raw stats from the cache after the update", async () => {
+    const ctx = await primed();
+    await ctx.store.updateStation(rc01Key);
+    expect(ctx.cache.scanCachedDays).toHaveBeenCalled();
+    expect(ctx.cache.stationRawBytes).toHaveBeenCalled();
+  });
+
   it("summary counts failed stations", async () => {
     const processCoverage = jest.fn(async ({ stationData }: any) => {
       if (stationData.station === "RC02") throw new Error("boom");
@@ -661,6 +726,101 @@ describe("update (event generation)", () => {
 
     await ctx.store.updateAllSelected();
     expect(ctx.store.feedback).toBe("Finished updating 2 stations; 1 had failures.");
+  });
+
+  it("passes the range and a station-bound uploadTile to processEnvelopes", async () => {
+    const { store, processEnvelopes, envelopeUploader } = await primed();
+    await store.updateStation(rc01Key);
+
+    const options = processEnvelopes.mock.calls[0][0];
+    expect(options.stationData).toMatchObject({ station: "RC01" });
+    // endDate is inclusive: the range extends through the end of Jan 3 UTC.
+    expect(options.range).toEqual({ start: utcDay(2026, 1, 1), end: utcDay(2026, 1, 3) + SECONDS_PER_DAY });
+    // Real EarthScope data via the proxy, matching the events flow — never the mock.
+    expect(options.proxy).toBe(true);
+    const tile = { mins: Int16Array.from([1]), maxs: Int16Array.from([2]) };
+    await options.uploadTile(2, 77, tile);
+    expect(envelopeUploader.uploadTile).toHaveBeenCalledWith(
+      expect.objectContaining({ station: "RC01" }), 2, 77, tile);
+  });
+
+  it("live-fills only finest-level tiles via onTileUploaded", async () => {
+    // markTileUploaded is a read-only MobX action, so observe its effect: the
+    // station's loaded (empty) tile set, captured mid-run before the post-step
+    // reconciliation reload replaces it with the listing again.
+    const midRun: Array<Set<number> | undefined> = [];
+    const processEnvelopes = jest.fn(async ({ onTileUploaded }: any) => {
+      onTileUploaded?.(0, 1);                   // coarse level: ignored
+      onTileUploaded?.(FINEST_LEVEL, 56123);
+      midRun.push(new Set(ctx.store.envelopeCoverage.get(rc01Key)?.tileIndices));
+      return { uploadedTiles: 2, processedDays: 1, skippedDays: 0, totalDays: 1 };
+    });
+    const ctx = await primed({ processEnvelopes, listEnvelopeTiles: jest.fn(async () => new Set<number>()) });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(midRun).toEqual([new Set([56123])]);
+  });
+
+  it("continues into events and reports failures when processEnvelopes rejects", async () => {
+    const processEnvelopes = jest.fn(async () => { throw new Error("upload died"); });
+    const { store, calls } = await primed({ processEnvelopes });
+
+    await store.updateStation(rc01Key);
+    expect(calls).toContain("process:compact-v1");   // events still ran
+    expect(store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+  });
+
+  it("reconciles envelope coverage from the listing after the envelope step", async () => {
+    const { store, listEnvelopeTiles } = await primed();
+    listEnvelopeTiles.mockClear();
+    await store.updateStation(rc01Key);
+    expect(listEnvelopeTiles).toHaveBeenCalled();
+  });
+
+  it("shows kickoff feedback before the envelope step starts", async () => {
+    const seen: string[] = [];
+    const processEnvelopes = jest.fn(async () => {
+      seen.push(ctx.store.feedback);
+      return { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 };
+    });
+    const ctx = await primed({ processEnvelopes });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(seen).toEqual(["Updating Rabbit Creek..."]);
+  });
+
+  it("reports envelope day progress in feedback", async () => {
+    const seen: string[] = [];
+    const processEnvelopes = jest.fn(async ({ onProgress }: any) => {
+      onProgress?.(1, 3);
+      seen.push(ctx.store.feedback);
+      return { uploadedTiles: 0, processedDays: 1, skippedDays: 0, totalDays: 3 };
+    });
+    const ctx = await primed({ processEnvelopes });
+
+    await ctx.store.updateStation(rc01Key);
+    expect(seen).toEqual(["Rabbit Creek — envelopes: day 1 of 3"]);
+  });
+
+  describe("portal auth", () => {
+    it("setPortalAuth flips portalReady", () => {
+      const store = new SeismicAdminStore({ cache: fakeCache() as any });
+      expect(store.portalReady).toBe(false);
+      store.setPortalAuth(async () => "jwt");
+      expect(store.portalReady).toBe(true);
+    });
+
+    it("updateStation reports failure when portal auth is missing", async () => {
+      // Primed by hand, deliberately skipping setPortalAuth.
+      const { store, calls } = makeUpdateStore();
+      store.setRange("2026-01-01", "2026-01-03");
+      await store.refresh();
+      store.setAuthReady();
+      calls.length = 0;
+      await store.updateStation(rc01Key);
+      expect(calls).not.toContain("envelopes");
+      expect(store.feedback).toBe("Finished updating Rabbit Creek with failures.");
+    });
   });
 });
 
@@ -701,12 +861,17 @@ describe("busy lockout", () => {
       fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
       downloadStation: jest.fn(async () => {}),
       processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
+      envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+      processEnvelopes: jest.fn(async () =>
+        ({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 })),
       ...overrides,
     };
     const store = new SeismicAdminStore(deps);
     store.setRange("2026-01-01", "2026-01-03");
     await store.refresh();
     store.setAuthReady();
+    store.setPortalAuth(async () => "fake-jwt");
     await flush();
     jest.clearAllMocks();
     return { store, ...deps };
@@ -745,7 +910,7 @@ describe("busy lockout", () => {
     await Promise.all([first, second]);
 
     expect(processCoverage).toHaveBeenCalledTimes(1);
-    expect(ctx.downloadStation).toHaveBeenCalledTimes(1);
+    expect(ctx.downloadStation).not.toHaveBeenCalled();
   });
 
   it("ignores a download while an update is running", async () => {
@@ -754,13 +919,13 @@ describe("busy lockout", () => {
     const ctx = await primed({ processCoverage });
 
     const update = ctx.store.updateStation(rc01Key);
-    await flush();   // the update's own internal download has already run
+    await flush();   // let the update get underway
     const download = ctx.store.downloadStation(rc01Key);
     gate.resolve();
     await Promise.all([update, download]);
 
-    // Only the update's internal download ran; the second entry point was a no-op.
-    expect(ctx.downloadStation).toHaveBeenCalledTimes(1);
+    // The external download entry point was a no-op; updates never full-range download.
+    expect(ctx.downloadStation).not.toHaveBeenCalled();
     expect(ctx.store.feedback).toBe("Finished updating Rabbit Creek.");
   });
 
@@ -785,6 +950,97 @@ describe("busy lockout", () => {
     await ctx.store.deleteAllSelected();
     expect(cache.deleteDaysInRange).toHaveBeenCalledTimes(1);
     expect(ctx.store.isBusy).toBe(false);
+  });
+});
+
+describe("envelope coverage", () => {
+  const d30 = dayIndex(utcDay(2026, 1, 30));
+  const dayTiles = (day: number) => {
+    const { start, end } = dayRange(day);
+    return getTileIndicesForViewport(start, end, FINEST_LEVEL);
+  };
+
+  it("loads tile listings per station without auth", async () => {
+    const listEnvelopeTiles = jest.fn(async () => new Set(dayTiles(d30)));
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");   // 3 days
+    await store.refresh();                        // note: no setAuthReady()
+    const key = [...store.stations.keys()][0];
+    expect(listEnvelopeTiles).toHaveBeenCalledTimes(1);
+    expect(store.envelopeCoverageFor(key).state).toBe("loaded");
+  });
+
+  it("records an error state when the listing fails", async () => {
+    const listEnvelopeTiles = jest.fn(async () => { throw new Error("nope"); });
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+    expect(store.envelopeCoverageFor(key).state).toBe("error");
+  });
+
+  it("classifies days and aggregates stats from the listed tiles", async () => {
+    // d30 fully covered, d31 partially (one tile), Feb 1 not at all.
+    const d31 = d30 + 1;
+    const listEnvelopeTiles = jest.fn(async () => new Set([...dayTiles(d30), dayTiles(d31)[0]]));
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+
+    expect(store.envelopeDayStates(key)?.get(d30)).toBe("covered");
+    expect(store.envelopeDayStates(key)?.get(d31)).toBe("partial");
+    expect(store.envelopeDayStates(key)?.get(d31 + 1)).toBe("uncovered");
+
+    const stats = store.envelopeStats(key);
+    expect(stats.coveredDayCount).toBe(1);
+    expect(stats.partialDayCount).toBe(1);
+    expect(stats.totalDays).toBe(3);
+    expect(stats.coveredDays.get(key)?.has(d30)).toBe(true);
+    expect(stats.partialDays.get(key)?.has(d31)).toBe(true);
+  });
+
+  it("aggregates envelope stats across all selected stations when stationKey is absent", async () => {
+    const rc01 = { network: "AK", station: "RC01", location: "", channel: "BHZ", label: "Rabbit Creek" };
+    const rc02 = { network: "AK", station: "RC02", location: "", channel: "BHZ", label: "Rabbit Creek 2" };
+    // A cache with no OPFS stations, so the store's stations come only from the catalog.
+    const emptyCache = {
+      listStations: jest.fn(async () => []),
+      scanCachedDays: jest.fn(async () => new Set<number>()),
+      stationRawBytes: jest.fn(async () => 0),
+      deleteDaysInRange: jest.fn(async () => {}),
+    };
+    // Same lister for both stations: d30 covered, d31 partial (boundary tile), Feb 1 uncovered.
+    const listEnvelopeTiles = jest.fn(async () => new Set(dayTiles(d30)));
+    const store = new SeismicAdminStore({
+      cache: emptyCache as any, stations: [rc01, rc02], listEnvelopeTiles,
+    });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    expect(store.selectedStations.size).toBe(2);
+
+    const stats = store.envelopeStats();
+    expect(stats.coveredDayCount).toBe(2);
+    expect(stats.partialDayCount).toBe(2);
+    expect(stats.totalDays).toBe(6);
+    expect(stats.coveredDays.get(getStationChannelPrefix(rc01))?.has(d30)).toBe(true);
+    expect(stats.coveredDays.get(getStationChannelPrefix(rc02))?.has(d30)).toBe(true);
+  });
+
+  it("marks uploaded tiles so days fill in live", async () => {
+    const listEnvelopeTiles = jest.fn(async () => new Set<number>());
+    const store = new SeismicAdminStore({ cache: fakeCache() as any, listEnvelopeTiles });
+    store.setRange("2026-01-30", "2026-02-01");
+    await store.refresh();
+    const key = [...store.stations.keys()][0];
+    expect(store.envelopeDayStates(key)?.get(d30)).toBe("uncovered");
+
+    dayTiles(d30).forEach(i => store.markTileUploaded(key, i));
+    expect(store.envelopeDayStates(key)?.get(d30)).toBe("covered");
+
+    // Unknown station: ignored, no entry synthesized.
+    store.markTileUploaded("nope", 1);
+    expect(store.envelopeCoverage.has("nope")).toBe(false);
   });
 });
 

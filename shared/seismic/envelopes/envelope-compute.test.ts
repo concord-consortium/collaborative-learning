@@ -1,4 +1,3 @@
-// shared/seismic/envelope-compute.test.ts
 import { computeEnvelopesFromRaw, rollUpEnvelopes } from "./envelope-compute";
 import { NO_DATA_SENTINEL } from "./envelope-config";
 

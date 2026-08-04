@@ -59,10 +59,11 @@ export class DBDocumentsContentListener extends BaseListener {
 
       documents.byType(ProblemDocument).forEach((document) => {
         // Besides collecting the documents to monitor, we also update the group
-        // id of the document. A new document could be added with an out of date
+        // its owning user is in. A new document could be added with an out of date
         // group id. Or a user's group can change. In both cases the document
-        // should be updated.
-        document.setGroupId(groups.groupIdForUser(document.uid));
+        // should be updated. This tracks that user's membership, not ownership:
+        // a problem document stays theirs whatever group they move to.
+        document.setGroupIdOfUserOwner(groups.groupIdForUser(document.uid));
 
         // Users don't monitor their own documents
         if ((document.uid === user.id)) {
@@ -72,7 +73,7 @@ export class DBDocumentsContentListener extends BaseListener {
         // RESEARCHER-ACCESS: should this be changed to isTeacherOrResearcher?
         // teachers monitor all problem documents
         // students only monitor documents in their group to save bandwidth
-        if (user.isTeacher || document.groupId === user.currentGroupId) {
+        if (user.isTeacher || document.groupIdOfUserOwner === user.currentGroupId) {
           documentsToMonitor.push(document);
         }
       });

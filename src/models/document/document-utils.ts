@@ -10,6 +10,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
+import { getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
 
@@ -59,13 +60,15 @@ export function getDocumentDisplayTitle(
   document: DocumentModelType | IDocumentMetadataModel,
   appConfig: AppConfigModelType
 ) {
+  // Titles resolvable by kind (class-wide slot titles, the group-document label) come from the registry.
+  const kindTitle = getDocumentTitle(document);
+  if (kindTitle != null) return kindTitle;
+
   const { type } = document;
   if (isSupportType(type)) {
     return document.getProperty("caption") || "Support";
   } else if (isProblemType(type) || isPlanningType(type)) {
     return getDocumentTitleFromProblem(unit, document);
-  } else if (type === GroupDocument) {
-    return `Group ${document.groupId} Document`;
   } else {
     return getDocumentTitleWithTimestamp(document, appConfig);
   }

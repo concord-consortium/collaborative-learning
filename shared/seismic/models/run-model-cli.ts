@@ -13,9 +13,9 @@
 
 import { parseArgs } from "node:util";
 import { miniseed } from "seisplotjs";
-import { fetchRawSeismicData } from "./earthscope-client";
+import { fetchRawSeismicData } from "../earthscope-client";
 import { PLACEHOLDER_METADATA } from "./model-metadata";
-import { MILLISECONDS_PER_DAY } from "./seismic-day";
+import { MILLISECONDS_PER_DAY } from "../seismic-day";
 import { SeismicModelRunner } from "./seismic-model-runner";
 import { ModelMetadata } from "./seismic-model-types";
 

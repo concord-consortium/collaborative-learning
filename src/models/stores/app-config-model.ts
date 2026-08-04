@@ -116,6 +116,7 @@ export const AppConfigModel = types
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
     // Default true: the share toggle shows unless a unit explicitly hides it.
     get showShare() { return self.configMgr.showShare ?? true; },
+    get classWideDocuments() { return self.configMgr.classWideDocuments; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),

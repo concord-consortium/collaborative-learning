@@ -1,12 +1,17 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { StationSection } from "./station-section";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
-import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
+import { FINEST_LEVEL } from "../../../shared/seismic/envelopes/envelope-config";
+import { getTileIndicesForViewport } from "../../../shared/seismic/envelopes/tile-addressing";
+import { getStationChannelPrefix } from "../../../shared/seismic/station-addressing";
 import { utcDay } from "../../../shared/seismic/seismic-day";
 
 const opfsStation = { network: "AK", station: "K204", channel: "HNZ" };
+
+// Tiles spanning far beyond any range these tests use -> every day classifies as covered.
+const allTiles = () => new Set(getTileIndicesForViewport(utcDay(2025, 12, 1), utcDay(2026, 3, 1), FINEST_LEVEL));
 
 // The store persists filters (setRange/toggles) to localStorage; isolate the tests.
 beforeEach(() => window.localStorage.clear());
@@ -76,6 +81,7 @@ describe("StationSection coverage rows", () => {
       models: [compact],
       fetchMetadata: jest.fn(async () => ({ id: "compact-v1" } as any)),
       eventService,
+      listEnvelopeTiles: jest.fn(async () => allTiles()),
       ...overrides,
     });
     store.setRange("2026-01-01", "2026-01-03");   // 3 days
@@ -89,11 +95,12 @@ describe("StationSection coverage rows", () => {
     await flush();
     const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
 
-    expect(container.querySelectorAll(".data-section.coverage").length).toBe(2);
+    // 2 models + 1 envelope = 3
+    expect(container.querySelectorAll(".data-section.coverage").length).toBe(3);
     expect(screen.getByText("Compact")).toBeInTheDocument();
     expect(screen.getByText("Large")).toBeInTheDocument();
     expect(screen.getAllByText("3 / 3 days · 2 events").length).toBe(2);
-    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(2);
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(3);
   });
 
   it("shows a three-state timeline including partial days", async () => {
@@ -114,7 +121,8 @@ describe("StationSection coverage rows", () => {
     const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
 
     expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
-    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+    // Only envelope coverage timeline is displayed
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(1);
   });
 
   it("shows zero stats and no timeline when coverage failed to load", async () => {
@@ -126,7 +134,8 @@ describe("StationSection coverage rows", () => {
     const { container } = renderSection(store, getStationChannelPrefix(opfsStation));
 
     expect(screen.getByText("0 / 3 days · 0 events")).toBeInTheDocument();
-    expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+    // Only envelope coverage timeline is displayed
+    expect(container.querySelectorAll(".data-section.coverage .raw-timeline").length).toBe(1);
   });
 
   it("shows per-model aggregate lines with no timeline bars for all stations", async () => {
@@ -145,6 +154,62 @@ describe("StationSection coverage rows", () => {
     expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
   });
 
+  describe("envelopes section", () => {
+    const key = getStationChannelPrefix(opfsStation);
+
+    it("renders between the raw data section and the model coverage sections", async () => {
+      const { store } = makeCoverageStore();
+      await store.refresh();
+      const { container } = renderSection(store, key);
+
+      const kinds = [...container.querySelectorAll(".data-kind")].map(el => el.textContent);
+      expect(kinds).toEqual(["Local Raw Data", "Envelopes", "Compact"]);
+    });
+
+    it("shows covered day counts and a timeline for a station", async () => {
+      const { store } = makeCoverageStore();
+      await store.refresh();   // envelope listing is not auth-gated
+      const { container } = renderSection(store, key);
+
+      expect(screen.getByText("3 / 3 days")).toBeInTheDocument();
+      const timeline = container.querySelector(".data-section.coverage .raw-timeline");
+      expect(timeline).toHaveAttribute("aria-label", "envelope coverage timeline for AK K204 HNZ");
+    });
+
+    it("shows a loading message while the envelope listing is pending", async () => {
+      const { store } = makeCoverageStore({ listEnvelopeTiles: jest.fn(() => new Promise(() => {})) });
+      void store.refresh();   // never settles: the envelope listing hangs
+      await flush();
+      const { container } = renderSection(store, key);
+
+      const section = container.querySelector<HTMLElement>(".data-section.coverage");
+      expect(within(section!).getByText("Loading...")).toBeInTheDocument();
+      expect(section!.querySelector(".raw-timeline")).toBeNull();
+    });
+
+    it("shows an error message when the envelope listing fails", async () => {
+      const { store } = makeCoverageStore({ listEnvelopeTiles: jest.fn(async () => { throw new Error("offline"); }) });
+      await store.refresh();
+      const { container } = renderSection(store, key);
+
+      expect(screen.getByText("Unable to list envelopes")).toBeInTheDocument();
+      expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+    });
+
+    it("shows an aggregate count line with no timeline bar for all stations", async () => {
+      const { store } = makeCoverageStore();
+      await store.refresh();
+      const { container } = render(
+        <SeismicAdminStoreContext.Provider value={store}>
+          <StationSection />
+        </SeismicAdminStoreContext.Provider>
+      );
+
+      expect(screen.getByText("3 / 3 days")).toBeInTheDocument();
+      expect(container.querySelector(".data-section.coverage .raw-timeline")).toBeNull();
+    });
+  });
+
   describe("update button", () => {
     const key = getStationChannelPrefix(opfsStation);
     const wholeDayGap = { start: day0, end: day0 + 24 * 60 * 60 };
@@ -152,6 +217,18 @@ describe("StationSection coverage rows", () => {
     it("is disabled before auth is ready", async () => {
       const { store } = makeCoverageStore();
       await store.refresh();
+      store.setPortalAuth(async () => "fake-jwt");
+      renderSection(store, key);
+
+      expect(screen.getByRole("button", { name: "Update station" })).toBeDisabled();
+    });
+
+    it("is disabled without portal auth even when coverage is incomplete", async () => {
+      const { store, eventService } = makeCoverageStore();
+      eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
+      await store.refresh();
+      store.setAuthReady();
+      await flush();
       renderSection(store, key);
 
       expect(screen.getByRole("button", { name: "Update station" })).toBeDisabled();
@@ -161,6 +238,7 @@ describe("StationSection coverage rows", () => {
       const { store } = makeCoverageStore({ models: [] });
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 
@@ -171,6 +249,7 @@ describe("StationSection coverage rows", () => {
       const { store } = makeCoverageStore();   // no gaps → fully covered
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 
@@ -182,6 +261,7 @@ describe("StationSection coverage rows", () => {
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 
@@ -193,6 +273,9 @@ describe("StationSection coverage rows", () => {
     const updateDeps = () => ({
       downloadStation: jest.fn(async () => {}),
       processCoverage: jest.fn(async () => ({ processed: 0, skipped: 0, total: 0 })),
+      envelopeUploader: { uploadTile: jest.fn(async () => {}) },
+      processEnvelopes: jest.fn(async () =>
+        ({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 })),
     });
 
     it("dispatches a single-station update on click", async () => {
@@ -201,6 +284,7 @@ describe("StationSection coverage rows", () => {
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 
@@ -215,6 +299,7 @@ describe("StationSection coverage rows", () => {
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       render(
         <SeismicAdminStoreContext.Provider value={store}>
@@ -232,6 +317,7 @@ describe("StationSection coverage rows", () => {
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       store.toggleStation(key);   // deselect the only station
       render(
@@ -250,12 +336,13 @@ describe("StationSection coverage rows", () => {
         finish = () => res({ processed: 0, skipped: 0, total: 0 });
       }));
       const { store, eventService } = makeCoverageStore({
-        downloadStation: jest.fn(async () => {}),
+        ...updateDeps(),
         processCoverage,
       });
       eventService.getUncoveredRanges.mockResolvedValue([wholeDayGap]);
       await store.refresh();
       store.setAuthReady();
+      store.setPortalAuth(async () => "fake-jwt");
       await flush();
       renderSection(store, key);
 

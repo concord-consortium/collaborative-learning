@@ -1,6 +1,5 @@
-// shared/seismic/envelope-compute.ts
 import { NO_DATA_SENTINEL } from "./envelope-config";
-import type { EnvelopeTileData } from "./seismic-types";
+import type { EnvelopeTileData } from "../seismic-types";
 
 /**
  * Compute envelope (min/max pairs) from raw samples using grid-aligned windows.
