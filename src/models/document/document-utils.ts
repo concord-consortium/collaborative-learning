@@ -210,10 +210,6 @@ export function canUserEditDocument({
  * set of students. The owner (`group_<offeringId>_<groupId>`) carries the offering, which makes the
  * comparison exact; Sort Work's "All" filter lists documents from every offering the class has
  * worked through, so documents from another offering do reach this check.
- *
- * It also avoids reading `groupId` off a document model, where the field carries a different meaning:
- * for a problem document it is the author's *current* group, refreshed as groups change, rather than
- * the group that owns the document.
  */
 function isUserInDocumentsGroup(uid: string | null | undefined, user: UserModelType): boolean {
   if (!uid || !user.currentGroupId || !user.offeringId) return false;

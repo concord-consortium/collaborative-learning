@@ -417,9 +417,9 @@ describe("document utils", () => {
     });
 
     it("does not treat a document model's groupId as evidence of group ownership", () => {
-      // On a problem document, DocumentModel.groupId is the author's *current* group, refreshed as
-      // groups change (db-docs-content-listener) — not the group that owns the document. Only the
-      // owner decides ownership, so a matching groupId must not grant an edit on its own.
+      // A `groupId` on the model does not make a document group-owned — only the owner uid does, via
+      // hasGroupOwner reading its prefix. So a group number matching the user's own must not grant an
+      // edit by itself.
       const authoredByAGroupmate = createDocumentModel({
         uid: "someone-else", type: ProblemDocument, key: "k", concurrent: true,
         groupId: "3", unit: "sas", investigation: "1"
