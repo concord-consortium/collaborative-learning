@@ -501,7 +501,7 @@ accounted for.
 |---|---|---|
 | `version` | every RTDB record | Always `"1.0"`. Never varied; no migration reads it. |
 | `self` | every RTDB record | `{ uid, classHash, documentKey }` — the record's own coordinates, echoed for records reached by query. Stripped before the Firestore write. |
-| `classHash` | RTDB `DBBaseProblemDocumentMetadata` | Duplicates `self.classHash`. Stripped before the Firestore write, where `context_id` serves the role. |
+| `classHash` | RTDB, problem family only | Duplicates `self.classHash` (which is present on every type) and is **write-only** — nothing reads the top-level copy; it is not included in the Firestore metadata, where `context_id` (sourced from `self.classHash`) serves the role. Personal/learning-log metadata **omit** it for no particular reason. This inconsistency is left as-is, we are hoping to remove the RTDB metadata so it doesn't make sense to clean it up. See [db.ts createDocument](../../src/lib/db.ts). |
 | `userId` | `DBPublication` | The publishing user. Plays the role `uid` plays elsewhere. |
 | `documentKey` | type-specific records | Points at the real document, needed because publication records are keyed by push key rather than document key. |
 | `teachers` | Firestore (legacy) | No code writes it to `documents/{key}` today; the rules still read it for legacy documents. |

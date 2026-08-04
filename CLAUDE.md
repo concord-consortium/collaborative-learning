@@ -90,6 +90,8 @@ See [tiles.md](tiles.md) for detailed tile documentation.
 
 **className construction**: When a JSX element has any conditional or computed class, use the `classnames` helper (`import classNames from "classnames"`) rather than template literals or string concatenation. Pass static classes as bare strings, conditional classes via the object form, and any precomputed class variable as another argument. Example: `classNames("history-entry-item", sourceClass, { expanded, "not-undoable": !undoable })`. A plain string literal is fine only when there are no conditions or interpolations at all.
 
+**Authoring configuration docs**: The unit `config` options (the `UnitConfiguration` interface in [src/models/stores/unit-configuration.ts](src/models/stores/unit-configuration.ts)) are documented for curriculum authors in [docs/unit-configuration.md](docs/unit-configuration.md). Whenever you add, remove, or change an authorable `config` property (or other authorable unit setting), update that doc in the same change to keep it in sync.
+
 ### URL Parameters for Testing
 
 | Parameter | Values | Purpose |

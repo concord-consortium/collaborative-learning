@@ -139,4 +139,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // whether the share/unshare toggle is shown on student documents. Default true. This is a
   // definitive per-unit switch — it replaces the old implicit coupling to the Sort Work tab's presence.
   showShare?: boolean;
+  // Class-wide collaborative documents for this unit. Each becomes one auto-created,
+  // concurrently-edited document per class per unit.
+  classWideDocuments?: Array<{ kind: string; title: string }>;
 }

@@ -53,7 +53,7 @@ view, and it is legitimate to put here because these are *data the document has*
 | axis | getter source |
 |---|---|
 | `owner` | existing `uid` (identity/provenance; may differ from scope for publications) |
-| `scope` | derived from `context` / `offeringId` / `groupId` / `problem` / `unit` (the org + curriculum associations) |
+| `scope` | the individual association fields `context` / `offeringId` / `groupId` / `problem` / `unit` (the org + curriculum associations). Consumed via field/axis **guards** (see "Typed document shapes"), not by branching on `type`; whether to also expose a single unified `scope` getter is an open question — the fields may be read directly |
 | `kind` | existing `type` (a stored tag — see Layer 2 for its uses) |
 | `canonical` | new stored field (pointer-slot occupancy) |
 | `permissions` | **composed getter** — merges *permission-policy grants* (from the document's referenced policy) with *stored per-doc grants* (the `visibility` share toggle, support audience, exemplar visibility). See "Permissions composition" below |
@@ -174,6 +174,38 @@ Axes that are **not** stored need none of this: presentation, creation defaults,
 permission policy's rules all live in code, so changing them changes every document at once with no migration
 (see "How each thing is realized").
 
+### Which documents get stamped — a gate that narrows as types are converted
+
+Every `type` is registered as a kind, so the registry can answer `kind → axis fields` for any document. Writing
+those fields into stored metadata is deliberately narrower: both stamp sites — creation
+(`createFirestoreMetadataDocument`) and the client-side lazy backfill when a document is opened (`db.ts`) —
+write the kind axis fields only for the types converted so far, which today means `type: "group"` (regular group
+documents and class-wide documents, which share that transitional type).
+
+The gate is a stage in the progression, not a permanent rule:
+
+- A type is **converted** once its `kind` is settled and its behavior is read from axes rather than from `type`
+  — at which point `type` is just the generic tag. The publication kinds are the clearest not-yet-settled case:
+  they may be folded into the kinds they publish, and a `kind` stamped before that decision is a value we would
+  have to migrate afterwards.
+- As each type is converted, **add it to the gate at both stamp sites**, so its documents begin carrying their
+  kind's axis fields.
+- Once every type has been converted the gate always passes, so it can be deleted and both sites stamp
+  unconditionally.
+
+Nothing is lost while a type waits: an unconverted document's axis values are still derived from the registry at
+runtime, they are simply not persisted onto that document yet.
+
+Widening the gate is not always enough by itself. The open-time backfill writes as the signed-in user, so it can
+only ever stamp values a client is allowed to write — and per "Which axes a client may stamp is a security
+question" above, an axis the rules *police* must not stay client-writable, since a client could then hand itself
+the value. A converted type whose axis feeds a rule therefore needs its stamp to come from creation, a Cloud
+Function, or an admin script rather than from the client-side backfill, and its rule tightened to reject
+after-the-fact changes. No stamp has had to move for this reason yet, but `concurrent` is the obvious candidate:
+it is stored so that rules *can* enforce it, so once a rule reads it, letting a client set it after creation
+would hand the client the value the rule is meant to police — the client-side backfill then has to be replaced
+by an admin sweep and the rule tightened to creation-only.
+
 ## The boundary — metadata getters on the model, behaviors outside
 
 The test for whether something belongs on `DocumentModel`:
@@ -190,9 +222,11 @@ are exactly the ones the boundary pushes out.
 
 ## How each thing is realized
 
-- **Stored per-doc** (getters on `DocumentModel`; rule-readable; migrate to change): `canonical`, `owner`,
-  `scope`, `concurrent`, the **permission-policy reference** and the **stored per-doc grants** of
-  `permissions` — plus the `kind` tag.
+- **Stored per-doc** (rule-readable; migrate to change): `canonical`, `owner`, `concurrent`, the **scope**
+  association fields, the **permission-policy reference** and the **stored per-doc grants** of `permissions` —
+  plus the `kind` tag. `owner` and `concurrent` are exposed as getters on `DocumentModel`; the scope fields are
+  read directly / via field guards (see "Typed document shapes"), not necessarily behind a single `scope`
+  getter.
 - **Looked up by `kind`** (registry `fn(doc)`; no storage, no migration): presentation, creation defaults
   (including *which* permission policy a new document references), copy/publish templates, `showInSortWork`.
 - **Looked up by policy name** (code-defined policy table, resolvable by both the runtime and
@@ -207,10 +241,11 @@ are exactly the ones the boundary pushes out.
 
 - `DocumentContentModel` — the generic tile container. **No change.** Already reused standalone by
   `src/models/curriculum/*` and the doc-editor.
-- `DocumentModel` — the metadata wrapper. **Gains** explicit axis getters (some over existing fields:
-  `owner`←`uid`, `scope`←`context`/`offeringId`/`groupId`/`problem`/`unit`, `kind`←`type`) and new stored
-  fields (`canonical`, `permissions`, `concurrent`). **Loses** its type-view methods (`isProblem`, …), which
-  become axis getters + external behaviors.
+- `DocumentModel` — the metadata wrapper. **Gains** explicit axis getters over existing fields
+  (`owner`←`uid`, `kind`←`type`) and new stored fields (`canonical`, `permissions`, `concurrent`). The **scope**
+  association fields (`context`/`offeringId`/`groupId`/`problem`/`unit`) are consumed via field guards (see
+  "Typed document shapes") rather than necessarily a single `scope` getter. **Loses** its type-view methods
+  (`isProblem`, …), which become axis getters + external behaviors.
 - New modules: the **kind registry** (`fn(doc)` config), **behavior modules** per feature, the
   **creation/derivation factory**, and **migration code** (client or Cloud Function backfill, plus metadata
   sweep scripts).
@@ -222,11 +257,52 @@ are exactly the ones the boundary pushes out.
 2. `DocumentModel` today mixes generic metadata (`title`, `key`), org-specific fields (`groupId`, `problem`),
    and behavior (`isProblem`). The cleanup keeps metadata + axis getters and evicts behavior.
 
+## Typed document shapes — requirement types + guards, not kind-discriminated shapes
+
+The persisted metadata types — `DBDocumentMetadata` in `src/lib/db-types.ts`, and the parallel
+`isProblem`/`isGroup` type-view methods on `DocumentModel` — are today a **discriminated union keyed on
+`type`**: a consumer narrows on `type === "problem"` to reach the fields that co-occur with it (`offeringId`,
+`problem`, `unit`). That is the same "branch on kind" pattern this refactor removes, expressed in the type
+system rather than in control flow. When `type` becomes just the `kind` tag (read only in the registry and
+factory), the discriminant is gone and these per-kind interfaces have nothing to switch on.
+
+**Target — declare what a consumer needs, then guard for it.** The kind-discriminated interfaces dissolve.
+Stored metadata is one generic base (`DBBaseDocumentMetadata`) carrying the axis fields (`owner`/`uid`, the
+`scope` association fields, `canonical`, `concurrent`, `kind`), with the org-specific ones optional. Code that
+needs particular fields does **not** ask "is this kind X"; it declares a **structural requirement type** for
+the fields it uses and narrows with a **type guard** — the type-system form of "read an axis, not the kind":
+
+- a requirement type names the fields a consumer needs, e.g.
+  `type OfferingScoped = DBBaseDocumentMetadata & { offeringId: string; unit: string }`;
+- a guard verifies a document satisfies it, e.g. `hasOfferingScope(doc): doc is OfferingScoped`, testing the
+  *scope fields*, never `type`;
+- consumers accept the requirement type and call the guard, so a function that needs an offering works for
+  **any** document in an offering scope, whatever its kind.
+
+These guards are the typed siblings of the axis getters / registry `fn(doc)`: a guard like `hasOfferingScope`
+is `doc.scope`-shaped and lives with the axis layer, not scattered per feature. `.type`/`.kind` still appear
+only in the registry, factory, and migration modules (the core rule); a guard that tests `offeringId` is an
+axis-field check, not a kind check, so it is allowed everywhere.
+
+**Already visible in the code.** Group and class-wide documents both store `type: "group"` yet have different
+scope shapes (group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). Those scope fields live
+in the Firestore `IDocumentMetadata`, stamped from the kind's registered scope — not from `type` — so a single
+`type: "group"` covers two shapes and only a guard on the scope fields tells them apart. (The RTDB
+`DBGroupDocMetadata` is now a single bare `type: "group"` shape shared by both, precisely because `type` can no
+longer carry the distinction.) This transitional shared `type: "group"` is the first concrete case motivating
+the guard approach ahead of `type` removal.
+
+**Deferred:** the concrete requirement-type set and guard inventory land with the field-shape work already
+deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This section fixes the *approach*
+(requirement types + guards), not the exact types.
+
 ## Enforcement
 
 - A lint rule / CI grep: `.type` / `.kind` reads are allowed **only** in the registry, factory, and migration
   modules.
 - Behavior and rules code reference axis getters or `fn(doc)` calls exclusively.
+- Consumers narrow document shapes with field/axis **type guards** (e.g. `hasOfferingScope`), never by `type`;
+  a guard tests axis fields, so it is not a `.type`/`.kind` read.
 - New security rules read stored axes (`canonical`, `owner`, `permissions`, `concurrent`) directly.
 
 ## Non-goals / out of scope (deferred)

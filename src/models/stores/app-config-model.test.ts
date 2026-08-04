@@ -289,4 +289,23 @@ describe("ConfigurationManager", () => {
     });
   });
 
+  describe("classWideDocuments", () => {
+    it("is undefined by default", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.classWideDocuments).toBeUndefined();
+    });
+
+    it("resolves the slots declared in the unit config layer", () => {
+      const appConfig = AppConfigModel.create({
+        config: {
+          ...unitConfigDefaults,
+          classWideDocuments: [{ kind: "drivingQuestionBoard", title: "Driving Question Board" }]
+        } as any
+      });
+      expect(appConfig.classWideDocuments).toEqual([
+        { kind: "drivingQuestionBoard", title: "Driving Question Board" }
+      ]);
+    });
+  });
+
 });

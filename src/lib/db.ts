@@ -8,7 +8,7 @@ import { observable, makeObservable } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
-  DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
+  DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
 import { DocumentModelType, createDocumentModel, isVisibilityType } from "../models/document/document";
@@ -32,7 +32,10 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
-import { getDocumentKindMetadataFields } from "../models/document/document-kinds";
+import {
+  getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType, getDocumentScopeFields,
+  registerClassWideDocumentKind
+} from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -46,7 +49,7 @@ import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
 import {
-  getGroupCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
+  getCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
 } from "./scoped-document-pointers";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
@@ -104,11 +107,26 @@ export interface OpenDocumentOptions {
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
+  // Firestore path of the pointer slot for this scope.
+  pointerPath: string;
   // The pointer slot's label. It must match the final segment of pointerPath and is written to the
   // winning document's `canonical` field.
   canonicalLabel: string;
-  groupUserId?: string;
+  // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
+  // a class-wide document keeps type === GroupDocument while its kind is the declared kind. The kind also drives
+  // the owner uid (createDocument derives it via the kind registry).
+  type: DBDocumentType;
+  kind: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
+}
+
+interface ICreateFirestoreMetadataDocumentOpts {
+  documentKey: string;
+  type: DBDocumentType;
+  kind: string;
+  owner: string;
+  createdAt: number;
+  title?: string;
 }
 
 export class DB {
@@ -167,6 +185,7 @@ export class DB {
             unitLoadedPromise.then(() => {
               this.listeners.start().then(resolve).catch(reject);
               exemplarController.initialize(this.stores);
+              this.createDeclaredClassWideDocuments();
 
               // After unit config is available, apply default panel layout for first-time visitors
               persistentUIReady.then(() => {
@@ -522,7 +541,7 @@ export class DB {
         .then(() => {
           // create the new document
           return this.createDocument({ type, content: JSON.stringify(content) })
-            .then(({document, metadata}) => {
+            .then(({document}) => {
                 const newDocument: DBOfferingUserProblemDocument = {
                   version: "1.0",
                   self: {
@@ -557,7 +576,9 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string, groupId?: string) {
+  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts) {
+    const { documentKey, type, kind, owner, createdAt, title } = opts;
+    const { user } = this.stores;
     const userContext = this.stores.userContextProvider.userContext;
 
     if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
@@ -573,41 +594,42 @@ export class DB {
     if (docSnapshot.exists) {
       return docSnapshot.data() as IDocumentMetadata;
     }
-    const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
 
-    let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
-    if ("offeringId" in metadata && metadata.offeringId != null) {
-      problemInfo = this.currentProblemInfo;
+    // Resolve every scope field (context_id, unit/investigation/problem, offering/group association) from the
+    // kind's registered scope. The runtime values come from the stores; they are valid here because
+    // createDocument validated them via validateDocumentKindCreation before writing (a group kind requires the
+    // user to be in a group, so currentGroupId is present).
+    const scopeFields = getDocumentScopeFields(kind, {
+      ...this.currentProblemInfo,
+      context_id: user.classHash,
+      offeringId: user.offeringId,
+      groupId: user.currentGroupId,
+    });
+
+    // `title` is stamped only when present so Firestore never sees `title: undefined`.
+    const titleInfo: { title?: string } = {};
+    if (title != null) {
+      titleInfo.title = title;
     }
 
-    // Group documents use a fake uid based on the group id; others use the current user.
-    const uid = metadata.type === GroupDocument ? metadata.self.uid : userContext.uid;
-
-    // Only set groupId when truthy so Firestore never sees `groupId: undefined`.
-    const groupInfo: { groupId?: string } = {};
-    if (groupId) {
-      groupInfo.groupId = groupId;
-    }
-
-    // Stamp the kind's axis fields. Sourcing the kind from `metadata.type` is temporary: it works only
-    // because `group` — the single registered kind today — has a kind key equal to its `type` value.
-    // In the future creation will be passed the kind explicitly.
-    const kindFields = getDocumentKindMetadataFields(metadata.type);
+    // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
+    // Every kind is registered now for scope/owner resolution, yet we deliberately do NOT persist `kind` on
+    // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
+    // other document types, so we don't want to stamp a kind we'd then have to migrate. Add a type here as it
+    // is converted — see "Which documents get stamped" in docs/document-axes/target-architecture.md.
+    const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
-      ...cleanedMetadata,
-      // `self` here is metadata.self (destructured above), whose classHash is populated for every
-      // document type. The top-level metadata.classHash exists only on problem/offering-type
-      // metadata, so reading it would be undefined for personal/learning-log documents.
-      context_id: self.classHash,
+      type,
+      createdAt,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
       // `network` section in docs/document-metadata/metadata-fields.md. Null for students/group docs.
       network: userContext.network || null,
       key: documentKey,
       properties: {},
-      uid,
-      ...problemInfo,
-      ...groupInfo,
+      uid: owner,
+      ...titleInfo,
+      ...scopeFields,
       ...kindFields
     };
     await documentRef.set(firestoreMetadata);
@@ -623,61 +645,90 @@ export class DB {
     };
   }
 
-  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
-    const { type, content, title } = params;
+  // The runtime context a group-scoped document needs, throwing when the user is not in a group with an
+  // offering. Both a group document's owner id and its canonical-pointer path are keyed on
+  // `group_<offeringId>_<groupId>`, so both values are required; returning them narrows them to strings.
+  private requireGroupContext() {
+    const { currentGroupId, offeringId } = this.stores.user;
+    if (!currentGroupId || !offeringId) {
+      throw new Error("Cannot create group document because user is not in a group with an offering.");
+    }
+    return { groupId: currentGroupId, offeringId };
+  }
+
+  // Verify the stores hold the runtime context a document of this kind needs to construct its owner and scope
+  // fields. Throws when the context is missing. Currently only group-owned kinds have a requirement. The check
+  // lives here instead of the kind registry because it is easier for now.
+  private validateDocumentKindCreation(kind: string) {
+    if (getDocumentOwnerType(kind) === "group") {
+      this.requireGroupContext();
+    }
+  }
+
+  public async createDocument(
+    params: { type: DBDocumentType, kind?: string, content?: string, title?: string }
+  ) {
+    // `kind` defaults to `type` so all documents have a kind, and we can
+    // start to use the kind registry to manage all documents.
+    const { type, kind = type, content, title } = params;
     const { user } = this.stores;
+
+    this.validateDocumentKindCreation(kind);
 
     return new Promise<{
       document: DBDocument,
-      metadata: DBDocumentMetadata,
       firestoreMetadata: IDocumentMetadata
     }>((resolve, reject) => {
-      let groupUserId: string | undefined;
-      let groupId: string | undefined;
-      if (type === GroupDocument) {
-        if (!user.currentGroupId) {
-          return reject("Cannot create group document because user is not in a group.");
-        }
-        // We only set the groupId in the metadata if this is a group document
-        // Other documents are specific to the user and the user might change groups so this groupId
-        // could become invalid.
-        groupId = user.currentGroupId;
-        // Group documents have a special user id based on the offering and group id
-        groupUserId = user.userIdForGroupDocuments;
-      }
+      // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner type:
+      // the creating user, the synthetic group owner, or the synthetic class owner. It is also the document's
+      // storage-path owner — a document the user owns resolves to their own path (getUserPath: owner || user.id).
+      const owner = getDocumentOwner(kind, {
+        userId: user.id,
+        groupOwnerId: user.userIdForGroupDocuments,
+        classOwnerId: this.userIdForClassWideDocuments
+      });
 
-      // If this is group document use a group user id instead of the current user id
-      const documentPath = this.firebase.getUserDocumentPath(user, undefined, groupUserId);
+      const documentPath = this.firebase.getUserDocumentPath(user, undefined, owner);
       const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
-      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId);
+      const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, owner);
       const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
 
       const self = {
-        uid: groupUserId ?? user.id,
+        uid: owner,
         documentKey,
         classHash
       };
 
-      let metadata: DBDocumentMetadata;
+      let rtdbMetadata: DBDocumentMetadata;
+      // `type` can't be included because it is part of a discriminated union and must be a fresh literal
+      const common = { version, self, createdAt } as const;
 
-      switch (type) {
-        case PersonalDocument:
-        case LearningLogDocument:
-        case PersonalPublication:
-        case LearningLogPublication:
-          metadata = {version, self, createdAt, type, title};
-          break;
-        case PlanningDocument:
-        case ProblemDocument:
-        case ProblemPublication:
-        case SupportPublication:
-        case GroupDocument:
-          metadata = {version, self, createdAt, type, classHash, offeringId};
-          break;
+      if (type === GroupDocument) {
+        // group + class-wide documents share the transitional type "group" and store only base RTDB metadata
+        rtdbMetadata = { ...common, type };
+      } else {
+        switch (type) {
+          case PersonalDocument:
+          case LearningLogDocument:
+          case PersonalPublication:
+          case LearningLogPublication:
+            rtdbMetadata = { ...common, type, title };
+            break;
+          case PlanningDocument:
+          case ProblemDocument:
+          case ProblemPublication:
+          case SupportPublication:
+            // The top-level `classHash` here is actually never read, it is left for legacy consistency in the RTDB.
+            // See docs/document-metadata/metadata-fields.md for details.
+            rtdbMetadata = { ...common, type, classHash, offeringId };
+            break;
+          default:
+            throw new Error(`Cannot create document of unsupported type '${type}'`);
+        }
       }
 
       const document: DBDocument = {version, self, type};
@@ -687,16 +738,19 @@ export class DB {
 
       return documentRef.set(document)
         .then(() => {
-          metadataRef.set(metadata);
+          metadataRef.set(rtdbMetadata);
           return metadataRef.once("value");
         })
         .then((metadataValue) => {
-          // This approach of reading the value that was written in the metadata
-          // causes the createdAt timestamp to be populated with a value
-          return this.createFirestoreMetadataDocument(metadataValue.val(), documentKey, groupId);
+          // Reading the value back resolves the server `createdAt` timestamp to a real number.
+          // This way the RTDB and Firestore metadata have the same createdAt value.
+          const resolvedCreatedAt: number = metadataValue.val().createdAt;
+          return this.createFirestoreMetadataDocument({
+            documentKey, type, kind, owner, createdAt: resolvedCreatedAt, title
+          });
         })
         .then((firestoreMetadata) => {
-          resolve({document, metadata, firestoreMetadata});
+          resolve({document, firestoreMetadata});
         })
         .catch(reject);
     });
@@ -715,27 +769,65 @@ export class DB {
 
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
-    const groupId = user.currentGroupId;
-    if (!groupId) {
-      return Promise.reject("Cannot create group document because user is not in a group.");
-    }
+    const { groupId, offeringId } = this.requireGroupContext();
     // The pointer slot is labeled "default" (the group's default canonical document), not by the
     // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
-    const pointerPath =
-      getGroupCanonicalPointerPath(user.classHash, user.offeringId, groupId, kDefaultCanonicalDocumentLabel);
-    return this.getOrCreateCanonicalDocument(pointerPath, GroupDocument, {
+    const pointerPath = getCanonicalPointerPath(
+      { classHash: user.classHash, offeringId, groupId }, kDefaultCanonicalDocumentLabel
+    );
+    // Regular group documents: the transitional `type` and `kind` coincide (both GroupDocument).
+    return this.getOrCreateCanonicalDocument({
+      pointerPath,
       canonicalLabel: kDefaultCanonicalDocumentLabel,
-      groupUserId: user.userIdForGroupDocuments,
+      type: GroupDocument,
+      kind: GroupDocument,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
     });
   }
 
-  private async getOrCreateCanonicalDocument(
-    pointerPath: string,
-    type: DBDocumentType,
-    opts: IGetOrCreateCanonicalDocumentOpts
-  ) {
-    const { canonicalLabel, groupUserId, findLegacy } = opts;
+  // Class-scoped synthetic owner for this class's class-wide documents
+  private get userIdForClassWideDocuments() {
+    return `class_${this.stores.user.classHash}`;
+  }
+
+  public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
+    const { user, unit } = this.stores;
+    // For a class-wide document the canonical-pointer label equals the document's kind.
+    const label = classWideDoc.kind;
+    const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
+    // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
+    return this.getOrCreateCanonicalDocument({
+      pointerPath,
+      canonicalLabel: label,
+      type: GroupDocument,
+      kind: classWideDoc.kind
+    });
+  }
+
+  // Auto-create each class-wide document the unit declares. Called once per unit open, after the unit is
+  // loaded. Each is created independently and fire-and-forget: the canonical-pointer engine converges all
+  // class members to one document per declared kind, so a failure here never blocks app startup.
+  private createDeclaredClassWideDocuments() {
+    const classWideDocs = this.stores.appConfig.classWideDocuments;
+    if (!classWideDocs?.length) return;
+    for (const classWideDoc of classWideDocs) {
+      // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
+      // registry and createDocument derives its owner and scope. Registration validates the kind and rejects a
+      // duplicate (both throw); skip a bad entry rather than crash startup.
+      try {
+        registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title);
+      } catch (err) {
+        console.error("Ignoring class-wide document:", classWideDoc.kind, err);
+        continue;
+      }
+      this.getOrCreateClassWideDocument(classWideDoc).catch((err) => {
+        console.error("Failed to create class-wide document", classWideDoc.kind, err);
+      });
+    }
+  }
+
+  private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
+    const { pointerPath, type, kind, canonicalLabel, findLegacy } = opts;
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists.
@@ -756,7 +848,7 @@ export class DB {
           if (!s.exists) {
             txn.set(pointerRef, {
               documentKey: legacy.key, createdAt: this.firestore.timestamp(),
-              createdBy: groupUserId ?? this.stores.user.id
+              createdBy: this.stores.user.id   // the real user backfilling the pointer, for provenance
             });
             txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
           }
@@ -768,7 +860,7 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
-    const { firestoreMetadata } = await this.createDocument({ type });
+    const { firestoreMetadata } = await this.createDocument({ type, kind });
     const documentKey = firestoreMetadata.key;
 
     const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));
@@ -776,14 +868,16 @@ export class DB {
       const s = await txn.get(pointerRef);
       if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
       txn.set(pointerRef, {
-        documentKey, createdAt: this.firestore.timestamp(), createdBy: groupUserId ?? user.id
+        documentKey, createdAt: this.firestore.timestamp(),
+        createdBy: user.id   // the real user who won the creation race, for provenance
       });
       txn.update(metadataRef, { canonical: canonicalLabel });
       return documentKey;
     });
 
     if (wonKey !== documentKey) {
-      await this.deleteOrphanDocument(documentKey, groupUserId);
+      // The orphan lives under its own owner's path; that owner is the uid createDocument stamped.
+      await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
       return this.openCanonicalDocumentByKey(wonKey);
     }
     if (type === GroupDocument) {
@@ -810,12 +904,13 @@ export class DB {
     return this.openDocumentFromFirestoreMetadata(metadata);
   }
 
-  // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan).
-  private async deleteOrphanDocument(documentKey: string, groupUserId?: string) {
+  // Best-effort cleanup of a document whose pointer claim was lost (a rare orphan). ownerId is the orphan's
+  // owner uid (its RTDB storage path is under that owner); undefined falls back to the current user's path.
+  private async deleteOrphanDocument(documentKey: string, ownerId?: string) {
     const { user } = this.stores;
     await Promise.all([
-      this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, groupUserId)).remove(),
-      this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey, groupUserId)).remove(),
+      this.firebase.ref(this.firebase.getUserDocumentPath(user, documentKey, ownerId)).remove(),
+      this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey, ownerId)).remove(),
       this.firestore.doc(getSimpleDocumentPath(documentKey)).delete()
     ]).catch(() => undefined);
   }
@@ -829,8 +924,8 @@ export class DB {
     }
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
+    return new Promise<{document: DBDocument}>((resolve, reject) => {
+      this.createDocument({ type: ProblemPublication, content }).then(({document}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.getGroupById(user.currentGroupId);
         const groupUserConnections: DBGroupUserConnections | undefined = userGroup && userGroup.activeUsers
@@ -855,7 +950,7 @@ export class DB {
         publicationRef.set(publication)
           .then(() => {
             logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
-            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+            resolve({document});
           })
           .catch(reject);
       });
@@ -871,9 +966,9 @@ export class DB {
     const publicationType = documentModel.type + "Publication" as DBDocumentType;
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
+    return new Promise<{document: DBDocument}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content, title: documentModel.title })
-      .then(({document, metadata}) => {
+      .then(({document}) => {
         const publicationPath = publicationType === "personalPublication"
                                 ? this.firebase.getPersonalPublicationsPath(user)
                                 : this.firebase.getLearningLogPublicationsPath(user);
@@ -893,7 +988,7 @@ export class DB {
         publicationRef.set(publication)
           .then(() => {
             logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
-            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+            resolve({document});
           })
           .catch(reject);
       });
@@ -968,7 +1063,14 @@ export class DB {
           const concurrent =
             firestoreMetadata.concurrent === true ? true : (kindMetadataFields.concurrent ?? undefined);
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
-          if (kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
+          // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
+          // it'd be possible for someone to add a concurrent field to another document type and then we'd
+          // accidentally update the firestore metadata. Add a type here as it is converted to the axes, and
+          // drop the check once they all are — but note this write-back is made by the signed-in user, so an
+          // axis the security rules enforce can't be stamped from here at all. See "Which documents get
+          // stamped" in docs/document-axes/target-architecture.md.
+          if (firestoreMetadata.type === GroupDocument
+              && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))
               .set(kindMetadataFields, { merge: true })
               .catch((err: any) => console.warn("group-doc concurrent backfill failed", documentKey, err));
@@ -1098,7 +1200,7 @@ export class DB {
 
     return new Promise<DocumentModelType | null>((resolve, reject) => {
       return this.createDocument({ type: documentType, content: JSON.stringify(content), title: docTitle })
-        .then(({document, metadata}) => {
+        .then(({document}) => {
           const {documentKey} = document.self;
           const newDocument: DBOtherDocument = {
             version: "1.0",
