@@ -1,13 +1,13 @@
 import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
 import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
-import { eventDocId } from "../../../../shared/seismic/event-database";
-import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/model-metadata";
+import { eventDocId } from "../../../../shared/seismic/models/event-database";
+import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { TimeRange } from "../../../../shared/seismic/seismic-types";
 import { processUncoveredRanges } from "../../../models/stores/seismic/seismic-coverage-processor";
 import { getUncoveredRanges, loadEvents } from "../../../models/stores/seismic/seismic-event-service";
-import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";

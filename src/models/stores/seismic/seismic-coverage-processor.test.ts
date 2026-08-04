@@ -1,6 +1,6 @@
 import { dayRange, SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
-import { SeismicModelRunner } from "../../../../shared/seismic/seismic-model-runner";
-import { ModelMetadata } from "../../../../shared/seismic/seismic-model-types";
+import { SeismicModelRunner } from "../../../../shared/seismic/models/seismic-model-runner";
+import { ModelMetadata } from "../../../../shared/seismic/models/seismic-model-types";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
 import { DETECTION_THRESHOLD, processUncoveredRanges } from "./seismic-coverage-processor";
 import { FakeDownloadService, makeFakeDownloadService, makeFakeModelRunner } from "./seismic-coverage-test-fakes";
@@ -170,6 +170,19 @@ describe("processUncoveredRanges", () => {
     });
 
     expect(onDayCovered.mock.calls.map(c => c[0]).sort()).toEqual([feb1Day, feb1Day + 1]);
+  });
+
+  it("reports each landed day through onDayDownloaded with its byte count", async () => {
+    const fakeService = makeFakeDownloadService([feb1Day, feb1Day + 1]);
+    fakeService.bytesForDay.mockImplementation((d: number) => (d === feb1Day ? 500 : 0));
+    const onDayDownloaded = jest.fn();
+    await processUncoveredRanges({
+      ...makeOptions(fakeService),
+      uncovered: [threeDayRange],
+      onDayDownloaded,
+    });
+
+    expect(onDayDownloaded.mock.calls).toEqual([[feb1Day, 500], [feb1Day + 1, 0]]);
   });
 
   it("does not notify onDayCovered when marking coverage fails", async () => {

@@ -67,6 +67,14 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["chatTutorPrompts"]>("chatTutorPrompts");
   }
 
+  get chatTutorEnabled(){
+    return this.getProp<UC["chatTutorEnabled"]>("chatTutorEnabled");
+  }
+
+  get chatTutorIntro(){
+    return this.getProp<UC["chatTutorIntro"]>("chatTutorIntro");
+  }
+
   get autoAssignStudentsToIndividualGroups() {
     return this.getProp<UC["autoAssignStudentsToIndividualGroups"]>("autoAssignStudentsToIndividualGroups");
   }
@@ -249,6 +257,10 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get defaultSharedDocuments() {
     return this.getProp<UC["defaultSharedDocuments"]>("defaultSharedDocuments");
+  }
+
+  get showShare() {
+    return this.getProp<UC["showShare"]>("showShare");
   }
 
   get classWideDocuments() {

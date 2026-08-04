@@ -51,6 +51,8 @@ export interface IUnitConfig extends IItemTemplateConfig {
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
   chatTutorPrompts?: IChatTutorPrompts;
+  chatTutorEnabled?: boolean;
+  chatTutorIntro?: string;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;
@@ -61,6 +63,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   // comments-open width so the workspace gets ~2/3 until comments are opened.
   contentLayout?: "evenLayout" | "wideContent";
   defaultSharedDocuments?: boolean;
+  showShare?: boolean;
 }
 
 export interface IAuthorTool {

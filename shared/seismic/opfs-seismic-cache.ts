@@ -1,7 +1,7 @@
 import { isDirectory } from "../file-system";
 import { dayToYearDoy } from "./seismic-day";
 import { StationData } from "./seismic-types";
-import { decodeLocation, encodeLocation, getStationPrefix, parseStationPrefix } from "./tile-addressing";
+import { decodeLocation, encodeLocation, getStationPrefix, parseStationPrefix } from "./station-addressing";
 
 export interface SeismicCache {
   writeDayChunk(station: StationData, day: number, bytes: ArrayBuffer): Promise<void>;

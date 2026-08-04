@@ -59,7 +59,7 @@ The model's `metadata.json` (in the ML repo) follows this template:
 | `weightsUrl` | Path to weights file, relative to the directory containing metadata.json. |
 
 The schema is defined by the `ModelMetadata` TypeScript interface at
-`shared/seismic/seismic-model-types.ts`. Full design:
+`shared/seismic/models/seismic-model-types.ts`. Full design:
 [ml-model-integration-design.md](../ml-model-integration-design.md).
 
 ## Step 3: Deploy

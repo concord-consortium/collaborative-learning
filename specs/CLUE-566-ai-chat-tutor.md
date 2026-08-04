@@ -25,6 +25,9 @@ interface, testable with both uncommitted draft config (authoring preview) and c
 - App-header launcher button, shown only when the `chatTutor` URL param is on, the user is a
   student, and a workspace document is open **with its content loaded** (a restored
   `primaryDocumentKey` does not imply loaded content; `documentSummarizer(undefined)` throws).
+  *(Superseded by CLUE-594: the launcher is now a floating round "AIdeas" button at the workspace's
+  lower-right — not in the header — and is enabled per-unit via `config.chatTutorEnabled` in addition
+  to the `chatTutor` URL param; a configurable render-only intro was also added.)*
 - Right-edge drawer under a new `src/components/chat-tutor/` directory (distinct from CLUE's
   existing `src/components/chat/` comment panel), restyled to CLUE's design system with
   WCAG-AA-verified contrast. *(Post-implementation change: the drawer is inline, not overlaying —
@@ -237,6 +240,9 @@ conversation (reverting to a prior prompt resumes that version's old conversatio
 
 **Decision**: **B — the `chatTutor` URL param.** A spike gate; per-unit config is a production
 concern. (Renamed from AP's `?chat` to avoid the existing chat-panel collision.)
+*(Superseded by CLUE-594: option A was implemented — a `chatTutorEnabled` `UnitConfiguration` boolean
+surfaced through `AppConfigModel`, with an authoring checkbox. The `chatTutor` URL param is retained as
+an author-preview override, so the gate is now `chatTutorEnabled || urlParams.chatTutor`.)*
 
 ---
 
