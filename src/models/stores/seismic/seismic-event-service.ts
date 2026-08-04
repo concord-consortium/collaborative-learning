@@ -4,10 +4,10 @@ import "firebase/firestore";
 import {
   BYTES_PER_CHUNK, coveragePath, eventDocId, eventsPath, findUncoveredRanges, getChunkIndex,
   groupWindowsByChunk, setWindowBits
-} from "../../../../shared/seismic/event-database";
-import { SeismicEvent } from "../../../../shared/seismic/seismic-model-types";
+} from "../../../../shared/seismic/models/event-database";
+import { SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { StationData, TimeRange } from "../../../../shared/seismic/seismic-types";
-import { encodeLocation, getStationPrefix } from "../../../../shared/seismic/tile-addressing";
+import { encodeLocation, getStationPrefix } from "../../../../shared/seismic/station-addressing";
 
 /**
  * Firestore I/O for the seismic event database.

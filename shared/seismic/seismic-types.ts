@@ -44,6 +44,15 @@ export interface TimeRange {
   end: number;
 }
 
+/** An inclusive range of UTC day indices (days since Unix epoch). */
+export interface DaySpan {
+  startDay: number;
+  endDay: number;
+}
+
+/** Coverage state of a single UTC day. */
+export type DayCoverageState = "covered" | "partial" | "uncovered";
+
 /** A single envelope data point with timestamp. */
 export interface EnvelopePoint {
   time: number;

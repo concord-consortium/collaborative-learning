@@ -113,7 +113,7 @@ Seismic data is identified by three components: **network** (e.g., `AK`), **stat
 
 2. **`{channel}`** is always a separate path segment, never folded into the station ID. Channel has different semantics (affects amplitude interpretation, sample rate) and different channels may share station-level metadata.
 
-3. **`{location}`** (the SEED location code) is a separate path segment between the station and the channel, in FDSN NSLC order. A blank location code is encoded as `--` in paths (the FDSN convention); see `encodeLocation`/`decodeLocation` in `shared/seismic/tile-addressing.ts`. It distinguishes multiple instruments at one station that share a channel code.
+3. **`{location}`** (the SEED location code) is a separate path segment between the station and the channel, in FDSN NSLC order. A blank location code is encoded as `--` in paths (the FDSN convention); see `encodeLocation`/`decodeLocation` in `shared/seismic/station-addressing.ts`. It distinguishes multiple instruments at one station that share a channel code.
 
 4. **Unified paths:**
 

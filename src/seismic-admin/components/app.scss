@@ -11,4 +11,31 @@ body {
     padding: 24px;
     color: #888;
   }
+
+  .icon {
+    height: 24px;
+    width: 24px;
+  }
+
+  button:enabled {
+    cursor: pointer;
+  }
+
+  button {
+    border-radius: 5px;
+    border-width: 1.5px;
+
+    &:enabled:hover {
+      background: #ddd;
+    }
+
+    &.danger {
+      color: #fff;
+      background: #c0392b;
+
+      &:enabled:hover {
+        background: #a0190b;
+      }
+    }
+  }
 }

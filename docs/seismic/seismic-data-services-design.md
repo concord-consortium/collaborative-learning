@@ -17,7 +17,7 @@ Three parts, each with a single responsibility:
 
 1. **Raw Data Fetcher** — makes a single HTTP request to EarthScope's dataselect endpoint, returns a `Response`. No caching, no parsing. Lives in `shared/seismic/earthscope-client.ts` alongside the existing metadata fetcher.
 
-2. **Envelope Tile Fetcher** — fetches a single envelope tile from S3, decodes gzipped Int16 buffers. No caching, no dequantization. Lives in `shared/seismic/envelope-fetcher.ts`.
+2. **Envelope Tile Fetcher** — fetches a single envelope tile from S3, decodes gzipped Int16 buffers. No caching, no dequantization. Lives in `shared/seismic/envelopes/envelope-fetcher.ts`.
 
 3. **Seismic Query Service** — the reactive layer. Lives on the `stores` object. Orchestrates parts 1 and 2, manages caching with MobX observables, and exposes a query API that the plot component observes. Handles level selection, multi-level fallback, and viewport-scoped cancellation.
 
@@ -93,7 +93,7 @@ The [browser-seismic-downloader](browser-seismic-downloader.md) will use this fu
 
 ### Location
 
-`shared/seismic/envelope-fetcher.ts` (new file)
+`shared/seismic/envelopes/envelope-fetcher.ts` (new file)
 
 ### Purpose
 

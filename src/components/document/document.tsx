@@ -14,7 +14,6 @@ import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/lo
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
 import { BaseComponent, IBaseProps } from "../base";
@@ -227,9 +226,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private showPersonalShareToggle() {
-    const tabNames = this.stores.appConfig.navTabs.tabSpecs.map(tab => tab.tab);
-    return tabNames.includes(ENavTab.kSortWork);
+  // Whether the share/unshare toggle is shown, driven by the definitive `showShare` unit setting
+  // (default true). Previously this was implicitly coupled to the presence of the Sort Work tab, which
+  // both hid the button in units that wanted it and showed it in units that didn't.
+  private shareButtonEnabled() {
+    return this.stores.appConfig.showShare;
   }
 
   private renderTitleBar(type: string) {
@@ -308,7 +309,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return this.renderGenericTitleBar({
       title: problemTitle,
       hideButtons,
-      showShareButton: type !== "planning",
+      showShareButton: type !== "planning" && this.shareButtonEnabled(),
       docType: type,
       show4up
     });
@@ -465,7 +466,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const isPrimary = this.isPrimary();
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
-    const showPersonalShareToggle = this.showPersonalShareToggle();
+    const showShareToggle = this.shareButtonEnabled();
     return (
       <div className={`titlebar ${type}`}>
         <div className="actions">
@@ -504,7 +505,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
-              {showPersonalShareToggle &&
+              {showShareToggle &&
                 <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
