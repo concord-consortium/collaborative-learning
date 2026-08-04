@@ -815,10 +815,9 @@ export class DB {
     for (const classWideDoc of classWideDocs) {
       // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
       // registry and createDocument derives its owner and location — registerClassWideDocumentKind supplies the
-      // shape every class-wide document shares. The unit is the same code stamped as the document's `unit` (see
-      // currentProblemInfo), so getDocumentTitle can tell this unit's documents from another unit's that
-      // declares the same kind. Registration validates the kind and rejects a duplicate (both throw); skip a bad
-      // entry rather than crash startup.
+      // shape every class-wide document shares. The unit passed is the same code stamped as the document's
+      // `unit` (see currentProblemInfo). Registration validates the kind and rejects a duplicate (both throw);
+      // skip a bad entry rather than crash startup.
       try {
         registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title, this.stores.unit.code);
       } catch (err) {
