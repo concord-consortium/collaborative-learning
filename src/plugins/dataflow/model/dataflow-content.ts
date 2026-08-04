@@ -6,10 +6,10 @@ import stringify from "json-stringify-pretty-compact";
 import { Transform } from "rete-area-plugin/_types/area";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
-import { DEFAULT_DATA_RATE } from "./utilities/node";
+import { DEFAULT_DATA_RATE, ProgramDataRates } from "./utilities/node";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { IDefaultContentOptions, ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
@@ -23,14 +23,25 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
+import { withoutUndo } from "../../../models/history/without-undo";
+import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
 
-export function defaultDataflowContent(): DataflowContentModelType {
-  return DataflowContentModel.create();
+export function defaultDataflowContent(options?: IDefaultContentOptions): DataflowContentModelType {
+  // Unit-config (settings.dataflow.defaultSamplingRate): seed a new tile's sampling rate from the unit.
+  // Applied only at creation (never overwrites a saved rate); an unknown value falls back to the default.
+  const configuredRate = options?.appConfig?.getSetting("defaultSamplingRate", "dataflow");
+  const isKnownRate = ProgramDataRates.some(r => r.val === configuredRate);
+  if (configuredRate != null && !isKnownRate) {
+    console.warn(`settings.dataflow.defaultSamplingRate: ignoring unknown value ${JSON.stringify(configuredRate)}; ` +
+      `expected one of ${ProgramDataRates.map(r => r.val).join(", ")}.`);
+  }
+  const programDataRate = isKnownRate ? configuredRate as number : DEFAULT_DATA_RATE;
+  return DataflowContentModel.create({ programDataRate });
 }
 
 export const kDataflowDefaultHeight = 480;
@@ -65,6 +76,10 @@ const ProgramZoom = types.model({
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
+// Resolved per-unit Live Output config, mirrored onto the tile content (see the `outputConfig` prop).
+// The type is shared with the AI summarizer (which can't import from src/plugins) — see ai-summarizer-types.
+export type { IDataflowOutputConfig };
+
 export const DataflowContentModel = TileContentModel
   .named("DataflowTool")
   .props({
@@ -85,6 +100,10 @@ export const DataflowContentModel = TileContentModel
      * tolerate paths that reference removed properties.
      */
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
+    // Resolved unit output config (settings.dataflow.*), mirrored here so the snapshot-only AI tile
+    // summarizer — shared by the chat tutor and the functions-v2 aiEvaluation — can describe the
+    // block's setup to the AI. Populated from appConfig when the tile is editable; absent when default.
+    outputConfig: types.maybe(types.frozen<IDataflowOutputConfig>()),
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -161,7 +180,11 @@ export const DataflowContentModel = TileContentModel
         // We only need the program for hashing
         return stringify({program}, {maxLength: 120});
       }
-      return stringify({...snapshot, program}, {maxLength: 120});
+      // outputConfig mirrors unit config only to reach the runtime AI summarizer; keep it out of
+      // exported curriculum JSON (the node reads appConfig live, so exports must not bake it in).
+      const exported = {...snapshot, program};
+      delete (exported as { outputConfig?: unknown }).outputConfig;
+      return stringify(exported, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
@@ -289,6 +312,15 @@ export const DataflowContentModel = TileContentModel
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
+    },
+    setOutputConfig(config?: IDataflowOutputConfig) {
+      // Store only non-default values; a default config clears the field so default units carry nothing.
+      const next = config && (config.servoInputMode || config.allowedOutputTypes?.length) ? config : undefined;
+      // Idempotent — avoid churning the doc when the resolved config hasn't changed.
+      if (JSON.stringify(self.outputConfig) === JSON.stringify(next)) return;
+      // This mirrors unit config on tile mount, not a user edit, so keep it off the undo stack.
+      withoutUndo({ unlessChildAction: true });
+      self.outputConfig = next;
     },
     setLiveProgramZoom(transform: Transform) {
       self.liveProgramZoom.update(transform);
