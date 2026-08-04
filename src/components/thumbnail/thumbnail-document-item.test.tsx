@@ -303,7 +303,7 @@ describe("ThumbnailDocumentItem", () => {
   describe("collaborative document treatment", () => {
     it("marks a concurrent document's thumbnail as collaborative", () => {
       const { container } = renderItem({ documentProps: { type: GroupDocument, concurrent: true } });
-      expect(container.querySelector(".scaled-list-item-container")).toHaveClass("group");
+      expect(container.querySelector(".scaled-list-item-container")).toHaveClass("concurrent");
     });
 
     it("marks a class-wide collaborative document, which carries no group id", () => {
@@ -312,19 +312,19 @@ describe("ThumbnailDocumentItem", () => {
       const { container } = renderItem({
         documentProps: { type: GroupDocument, concurrent: true, unit: "sas" }
       });
-      expect(container.querySelector(".scaled-list-item-container")).toHaveClass("group");
+      expect(container.querySelector(".scaled-list-item-container")).toHaveClass("concurrent");
     });
 
     it("does not mark a single-writer document as collaborative", () => {
       const { container } = renderItem({ documentProps: { type: ProblemDocument } });
-      expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("group");
+      expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("concurrent");
     });
 
     it("does not mark a group-typed document that is not concurrent", () => {
       // The type alone is not sufficient: a group document gets the treatment only once the concurrent
       // axis is stamped on it. Documents missing the axis are stamped by the backfill script.
       const { container } = renderItem({ documentProps: { type: GroupDocument } });
-      expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("group");
+      expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("concurrent");
     });
   });
 });

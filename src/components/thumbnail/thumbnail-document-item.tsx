@@ -102,9 +102,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
-  // Collaborative (multi-writer) documents get the shared-document treatment — a group document and
-  // a class-wide document are the same kind of thing here.
-  const group = !!document.concurrent;
+  const concurrent = !!document.concurrent;
   const isPrivate = !isDocumentAccessibleToUser({ document, documentMetadata, user, documents });
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
@@ -128,7 +126,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
         draggable={!!onDocumentDragStart && !isPrivate}
       >
         <div
-          className={classNames("scaled-list-item-container", { group })}
+          className={classNames("scaled-list-item-container", { concurrent })}
           // Small thumbnails are non-interactive previews: hide tile content from the a11y
           // tree (aria-hidden) and remove it from the tab order (inert). Large/scrollable
           // thumbnails are the 4-up replacement and must stay interactive (tiles selectable
@@ -150,8 +148,8 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
                 </div>
               : <ThumbnailPlaceHolderIcon />
           }
-          {group && (
-            <div className="group-doc-badge">
+          {concurrent && (
+            <div className="concurrent-doc-badge">
               <GroupIcon color="#fff" aria-hidden={true} focusable={false} />
             </div>
           )}

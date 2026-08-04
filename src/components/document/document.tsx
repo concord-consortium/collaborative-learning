@@ -239,7 +239,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       return this.renderProblemTitleBar(type, hideButtons);
     }
     if (document.concurrent) {
-      return this.renderCollaborativeTitleBar(hideButtons);
+      return this.renderConcurrentTitleBar(hideButtons);
     }
     if (document.isPersonal || document.isLearningLog) {
       return this.renderOtherDocumentTitleBar(type, hideButtons);
@@ -314,11 +314,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private renderCollaborativeTitleBar(hideButtons?: boolean) {
+  private renderConcurrentTitleBar(hideButtons?: boolean) {
     const { appConfig, unit } = this.stores;
     const { document } = this.props;
-    // The title is a by-kind lookup in the kind registry: a group document resolves to its computed
-    // group label, a class-wide slot to the title its unit authored.
     const title = getDocumentDisplayTitle(unit, document, appConfig) ?? "";
     return this.renderGenericTitleBar({
       title,
