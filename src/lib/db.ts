@@ -34,7 +34,7 @@ import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
   getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType, getDocumentScopeFields,
-  registerDocumentKind
+  registerClassWideDocumentKind
 } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
@@ -592,10 +592,9 @@ export class DB {
     }
 
     // Resolve every scope field (context_id, unit/investigation/problem, offering/group association) from the
-    // kind's registered scope — all kinds are registered, so getDocumentScopeFields handles each type. The
-    // runtime values come from the stores; they are valid here because createDocument validated them via
-    // validateDocumentKindCreation before writing (a group kind requires the user to be in a group, so
-    // currentGroupId is present).
+    // kind's registered scope. The runtime values come from the stores; they are valid here because
+    // createDocument validated them via validateDocumentKindCreation before writing (a group kind requires the
+    // user to be in a group, so currentGroupId is present).
     const scopeFields = getDocumentScopeFields(kind, {
       ...this.currentProblemInfo,
       context_id: user.classHash,
@@ -612,7 +611,8 @@ export class DB {
     // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
     // Every kind is registered now for scope/owner resolution, yet we deliberately do NOT persist `kind` on
     // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
-    // other document types, so we don't want to stamp a kind we'd then have to migrate.
+    // other document types, so we don't want to stamp a kind we'd then have to migrate. Add a type here as it
+    // is converted — see "Which documents get stamped" in docs/document-axes/target-architecture.md.
     const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
@@ -641,16 +641,23 @@ export class DB {
     };
   }
 
+  // The runtime context a group-scoped document needs, throwing when the user is not in a group with an
+  // offering. Both a group document's owner id and its canonical-pointer path are keyed on
+  // `group_<offeringId>_<groupId>`, so both values are required; returning them narrows them to strings.
+  private requireGroupContext() {
+    const { currentGroupId, offeringId } = this.stores.user;
+    if (!currentGroupId || !offeringId) {
+      throw new Error("Cannot create group document because user is not in a group with an offering.");
+    }
+    return { groupId: currentGroupId, offeringId };
+  }
+
   // Verify the stores hold the runtime context a document of this kind needs to construct its owner and scope
-  // fields. Throws when the context is missing. Currently only group-owned kinds have a requirement: their owner
-  // id is `group_<offeringId>_<groupId>`, so both are required. The check lives here instead of the kind registry
-  // because it is easier for now.
+  // fields. Throws when the context is missing. Currently only group-owned kinds have a requirement. The check
+  // lives here instead of the kind registry because it is easier for now.
   private validateDocumentKindCreation(kind: string) {
     if (getDocumentOwnerType(kind) === "group") {
-      const { currentGroupId, offeringId } = this.stores.user;
-      if (!currentGroupId || !offeringId) {
-        throw new Error("Cannot create group document because user is not in a group with an offering.");
-      }
+      this.requireGroupContext();
     }
   }
 
@@ -758,15 +765,11 @@ export class DB {
 
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
-    const groupId = user.currentGroupId;
-    // The group owner id and canonical-pointer path are both keyed on `group_<offeringId>_<groupId>`.
-    if (!groupId || !user.offeringId) {
-      return Promise.reject("Cannot create group document because user is not in a group with an offering.");
-    }
+    const { groupId, offeringId } = this.requireGroupContext();
     // The pointer slot is labeled "default" (the group's default canonical document), not by the
     // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
     const pointerPath = getCanonicalPointerPath(
-      { classHash: user.classHash, offeringId: user.offeringId, groupId }, kDefaultCanonicalDocumentLabel
+      { classHash: user.classHash, offeringId, groupId }, kDefaultCanonicalDocumentLabel
     );
     // Regular group documents: the transitional `type` and `kind` coincide (both GroupDocument).
     return this.getOrCreateCanonicalDocument({
@@ -805,18 +808,10 @@ export class DB {
     if (!classWideDocs?.length) return;
     for (const classWideDoc of classWideDocs) {
       // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry and createDocument derives its owner and scope. Class-wide collaborative documents are always
-      // concurrent, class-owned (class_<classHash>), and class+unit scoped. The authored title is registered
-      // here (not stored per document) so it is resolved live by kind — an author changing it applies to every
-      // document of that kind (see getDocumentTitle). registerDocumentKind validates the kind and rejects a
+      // registry and createDocument derives its owner and scope. Registration validates the kind and rejects a
       // duplicate (both throw); skip a bad entry rather than crash startup.
       try {
-        registerDocumentKind(classWideDoc.kind, {
-          metadataFields: { concurrent: true },
-          ownerType: "class",
-          scopeType: "classUnit",
-          title: classWideDoc.title
-        });
+        registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title);
       } catch (err) {
         console.error("Ignoring class-wide document:", classWideDoc.kind, err);
         continue;
@@ -1066,7 +1061,10 @@ export class DB {
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
           // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
           // it'd be possible for someone to add a concurrent field to another document type and then we'd
-          // accidentally update the firestore metadata.
+          // accidentally update the firestore metadata. Add a type here as it is converted to the axes, and
+          // drop the check once they all are — but note this write-back is made by the signed-in user, so an
+          // axis the security rules enforce can't be stamped from here at all. See "Which documents get
+          // stamped" in docs/document-axes/target-architecture.md.
           if (firestoreMetadata.type === GroupDocument
               && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))

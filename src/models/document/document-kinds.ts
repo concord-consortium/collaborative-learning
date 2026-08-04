@@ -28,13 +28,12 @@ export interface IDocumentKindInfo {
   kind: string;
   /** This kind's stamped fields, without `kind` — getDocumentKindMetadataFields adds it back. */
   metadataFields: Omit<IDocumentKindMetadataFields, "kind">;
-  /** How this kind's owner uid is derived (see DocumentOwnerType). */
+  /** How this kind's owner uid is derived. */
   ownerType: DocumentOwnerType;
-  /** How this kind's scope axes are derived (see DocumentScopeType). */
+  /** How this kind's scope axes are derived. */
   scopeType: DocumentScopeType;
   /**
-   * Static document display title. Leave undefined for dynamic titles like
-   * group documents or in the future problem documents.
+   * Static document display title. Leave undefined for dynamic titles.
    */
   title?: string;
 }
@@ -177,6 +176,22 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   // are opened. Class-wide docs are new and always carry a `kind`, so their title is resolved above by kind.
   if (document.type === GroupDocument) return `Group ${document.groupId} Document`;
   return undefined;
+}
+
+/**
+ * Register a kind declared by a unit's `classWideDocuments` configuration. Every class-wide collaborative
+ * document has the same shape — concurrent, owned by the synthetic class owner, scoped to the class + unit —
+ * so only the kind key and the authored title come from the configuration. The title is registered rather than
+ * stored per document so it resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind
+ * when the kind is malformed or already registered.
+ */
+export function registerClassWideDocumentKind(kind: string, title: string) {
+  registerDocumentKind(kind, {
+    metadataFields: { concurrent: true },
+    ownerType: "class",
+    scopeType: "classUnit",
+    title
+  });
 }
 
 function registerBuiltInDocumentKinds() {

@@ -53,4 +53,6 @@ via `getDocumentScopeFields(kind, ctx)`, both resolved in the kind registry rath
 all kinds are registered, `createFirestoreMetadataDocument` derives owner and scope through these registry calls
 for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
 `type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
-into the kinds they publish.
+into the kinds they publish. That gate widens as each type is converted; see
+[Which documents get stamped](./target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
+for how it is retired.

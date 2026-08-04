@@ -22,7 +22,7 @@ describe("document kinds registry", () => {
   });
 
   it("returns undefined for unregistered or missing kinds", () => {
-    expect(getDocumentKindInfo("unregistered-kind")).toBeUndefined();
+    expect(getDocumentKindInfo("unregisteredKind")).toBeUndefined();
     expect(getDocumentKindInfo(undefined)).toBeUndefined();
     expect(getDocumentKindInfo(null)).toBeUndefined();
   });
@@ -56,7 +56,7 @@ describe("document kinds registry", () => {
     });
 
     it("returns an empty object for unregistered or missing kinds", () => {
-      expect(getDocumentKindMetadataFields("unregistered-kind")).toEqual({});
+      expect(getDocumentKindMetadataFields("unregisteredKind")).toEqual({});
       expect(getDocumentKindMetadataFields(undefined)).toEqual({});
       expect(getDocumentKindMetadataFields(null)).toEqual({});
     });
