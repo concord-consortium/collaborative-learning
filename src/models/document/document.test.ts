@@ -164,10 +164,12 @@ describe("document model", () => {
     });
   });
 
-  it("can set group id", () => {
+  it("can set the owning user's group id, without touching the owning group", () => {
+    expect(document.groupIdOfUserOwner).toBeUndefined();
+    document.setGroupIdOfUserOwner("group-1");
+    expect(document.groupIdOfUserOwner).toBe("group-1");
+    // The owning group comes from the stored metadata and is not what tracks that user's membership.
     expect(document.groupId).toBeUndefined();
-    document.setGroupId("group-1");
-    expect(document.groupId).toBe("group-1");
   });
 
   it("can set visibility", () => {

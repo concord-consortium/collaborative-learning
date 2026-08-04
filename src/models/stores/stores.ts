@@ -206,9 +206,10 @@ class Stores implements IStores{
           // reaching the doc by key, who doesn't have its class/offering groups), then
           // route: Student Work when the group is present, otherwise Sort Work.
           when(
-            () => !!this.groups.getGroupById(doc.groupId) || this.db.listeners.isListening,
+            () => !!this.groups.getGroupById(doc.groupIdOfUserOwner) || this.db.listeners.isListening,
             () => {
-              const hasStudentWorkGroup = !!doc.groupId && !!this.groups.getGroupById(doc.groupId);
+              const hasStudentWorkGroup =
+                !!doc.groupIdOfUserOwner && !!this.groups.getGroupById(doc.groupIdOfUserOwner);
               this.persistentUI.openResourceDocument(
                 doc, this.appConfig, this.user, this.sortedDocuments,
                 { fromUrlStudentDocument: true, hasStudentWorkGroup }

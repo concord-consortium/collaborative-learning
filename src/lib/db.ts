@@ -103,6 +103,9 @@ export interface OpenDocumentOptions {
   problem?: string;
   investigation?: string;
   unit?: string;
+  offeringId?: string;
+  /** The group the document's owning user belongs to, not the group that owns the document */
+  groupIdOfUserOwner?: string;
   firestoreMetadata?: IDocumentMetadata;
 }
 
@@ -1023,7 +1026,7 @@ export class DB {
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
     const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
-           problem, investigation, unit} = options;
+           problem, investigation, unit, offeringId, groupIdOfUserOwner} = options;
     const existingPromise = this.documentFetchPromiseMap.get(documentKey);
     if (existingPromise) return existingPromise;
 
@@ -1107,6 +1110,8 @@ export class DB {
               problem,
               investigation,
               unit,
+              offeringId,
+              groupIdOfUserOwner,
               contextId: firestoreMetadata.context_id ?? undefined,
               concurrent,
               kind,
@@ -1162,7 +1167,7 @@ export class DB {
       throw new Error(`Cannot open document with visibility '${firestoreMetadata.visibility}'`);
     }
 
-    const { title, originDoc, problem, investigation, unit, groupId } = firestoreMetadata;
+    const { title, originDoc, problem, investigation, unit, offeringId, groupId } = firestoreMetadata;
 
     // Note: the createdAt field is not passed here because it hasn't been included in the
     // past. If it is needed in the future, it is probably safe to add it here.
@@ -1180,6 +1185,7 @@ export class DB {
       problem: problem ?? undefined,
       investigation: investigation ?? undefined,
       unit: unit ?? undefined,
+      offeringId: offeringId ?? undefined,
       groupId: groupId ?? undefined,
       visibility: visibility ?? undefined,
     });
@@ -1274,7 +1280,7 @@ export class DB {
     return this.openDocument({
       type,
       userId,
-      groupId: group?.id,
+      groupIdOfUserOwner: group?.id,
       documentKey,
       visibility: metadata.visibility,
       ...problemInfo
@@ -1289,8 +1295,8 @@ export class DB {
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
-    const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties});
+    const groupIdOfUserOwner = group && group.id;
+    return this.openDocument({type, userId: uid, documentKey, groupIdOfUserOwner, title, properties});
   }
 
   // handles published personal documents and published learning logs
@@ -1298,12 +1304,16 @@ export class DB {
     const {title, properties, uid, originDoc, self: {documentKey}, pubVersion} = publication;
 
     const group = this.stores.groups.groupForUser(uid);
-    const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc, pubVersion});
+    const groupIdOfUserOwner = group && group.id;
+    return this.openDocument({
+      type, userId: uid, documentKey, groupIdOfUserOwner, title, properties, originDoc, pubVersion
+    });
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    const {groupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
+    // The publication record's `groupId` is the publishing user's group at publish time — a snapshot of
+    // a fact about that user, which is why it lands on `groupIdOfUserOwner` rather than the owning group.
+    const {groupId: groupIdOfUserOwner, groupUserConnections, userId, documentKey, pubVersion} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
@@ -1318,7 +1328,7 @@ export class DB {
       documentKey,
       type: "publication",
       userId,
-      groupId,
+      groupIdOfUserOwner,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
       pubVersion,
