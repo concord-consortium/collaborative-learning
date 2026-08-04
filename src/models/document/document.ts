@@ -74,12 +74,13 @@ export const DocumentModel = Tree.named("Document")
      */
     groupId: types.maybe(types.string),
     /**
-     * The group its **author** belonged to — refreshed as membership changes for a live document,
-     * frozen at publish time for a publication. A fact about the author, not about the document, so it
-     * says nothing about who owns this. The four-up view and the content listener want this one; anything
-     * asking "whose document is this" wants `groupId`.
+     * The group the **user who owns** this document belongs to — refreshed as membership changes for a
+     * live document, frozen at publish time for a publication. Set only where the owner is a user, since
+     * a group- or class-owned document has no user to look up. It is a fact about that user's
+     * membership, not about the document, so it says nothing about who owns this. The four-up view and
+     * the content listener want this one; anything asking "whose document is this" wants `groupId`.
      */
-    authorGroupId: types.maybe(types.string),
+    groupIdOfUserOwner: types.maybe(types.string),
     visibility: types.maybe(VisibilityTypeEnum),
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
@@ -151,7 +152,7 @@ export const DocumentModel = Tree.named("Document")
       const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent,
               kind } = self;
       // `groupId` is undefined for everything but a group document, matching the stored field it mirrors,
-      // so this shape agrees with what Firestore holds. The author's group is deliberately absent: it is
+      // so this shape agrees with what Firestore holds. The owning user's group is deliberately absent: it is
       // not document metadata. Nothing writes this back to Firestore or Firebase today — it is used for
       // finding Firestore documents.
       return { uid, groupId, type, key, createdAt, title, concurrent, kind,
@@ -260,8 +261,8 @@ export const DocumentModel = Tree.named("Document")
       self.saveState = state;
     },
 
-    setAuthorGroupId(authorGroupId?: string) {
-      self.authorGroupId = authorGroupId;
+    setGroupIdOfUserOwner(groupIdOfUserOwner?: string) {
+      self.groupIdOfUserOwner = groupIdOfUserOwner;
     },
 
     setShowPlaybackControls(newValue: boolean) {

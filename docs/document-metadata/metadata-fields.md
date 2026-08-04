@@ -86,7 +86,7 @@ here so a reader looking for the stored field does not go hunting for one that d
 
 | Field | Derived from | Applies to | Runtime | Reactive |
 |---|---|---|---|---|
-| `authorGroupId` | the groups store, or a publication's publish-time snapshot | everything but group documents | `DocumentModel.authorGroupId` | Yes — to group membership |
+| `groupIdOfUserOwner` | the groups store, or a publication's publish-time snapshot | user-owned documents | `DocumentModel.groupIdOfUserOwner` | Yes — to group membership |
 
 ---
 
@@ -320,8 +320,8 @@ declare it. Anything reading properties from the Firestore metadata should treat
   `getDocumentScopeFields` ([document-kinds.ts](../../src/models/document/document-kinds.ts))
 - **Reactive:** No — immutable
 
-The group that **owns** the document, and nothing else — not the group its author happens to be in, which
-is `authorGroupId` below. It is a denormalization of the owner: the owner `uid` already encodes it
+The group that **owns** the document, and nothing else — not the group its owning user happens to be in,
+which is `groupIdOfUserOwner` below. It is a denormalization of the owner: the owner `uid` already encodes it
 (`group_<offeringId>_<groupId>`), so this field spares consumers from taking that apart when they need the
 group's number.
 
@@ -329,17 +329,19 @@ group's number.
 different sets of students, so a bare group id is not a safe key to look a group up by. The owner `uid`
 carries the offering, which makes it the exact one.
 
-### `authorGroupId` (runtime only)
+### `groupIdOfUserOwner` (runtime only)
 
 - **Stores:** neither — derived
-- **Runtime:** `DocumentModel.authorGroupId`. No `DocumentMetadataModel` prop and no Firestore field.
+- **Runtime:** `DocumentModel.groupIdOfUserOwner`. No `DocumentMetadataModel` prop and no Firestore field.
 - **Filled by:** `groups.groupIdForUser(uid)` for problem, personal, and learning-log documents and their
   publications; `DBPublication.groupId` for a problem publication, frozen at publish time
 - **Updated by:** `db-docs-content-listener` inside a MobX `autorun`, from the local groups store
   ([db-docs-content-listener.ts:66](../../src/lib/db-listeners/db-docs-content-listener.ts#L66))
 - **Reactive:** Yes, to group membership changes — not to document changes
 
-The group the document's **author** belongs to. A fact about the author rather than about the document,
+The group the **user who owns** the document belongs to. Set only where the owner is a user (`ownerType:
+"user"` in the kind registry): a group- or class-owned document's synthetic `uid` is not a member of any
+group, so there is nobody to look up. A fact about that user's membership rather than about the document,
 which is why it is derived rather than stored: a student's group changes, and a frozen copy would go
 stale. The four-up view (`getProblemDocumentsForGroup`), Student Work routing, and the content listener's
 "whose documents do I monitor" test all want this one.

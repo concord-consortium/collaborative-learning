@@ -111,12 +111,12 @@ export const DocumentsModel = types
 
     getProblemDocumentsForGroup(groupId: string) {
       return self.all.filter((document) => {
-        return (document.type === ProblemDocument) && (document.authorGroupId === groupId);
+        return (document.type === ProblemDocument) && (document.groupIdOfUserOwner === groupId);
       });
     },
 
     getLastPublishedProblemDocumentsForGroup(groupId: string) {
-      const groupPublications = self.byType(ProblemPublication).filter((pub) => pub.authorGroupId === groupId);
+      const groupPublications = self.byType(ProblemPublication).filter((pub) => pub.groupIdOfUserOwner === groupId);
       return extractLatestPublications(groupPublications, "uid");
     },
 

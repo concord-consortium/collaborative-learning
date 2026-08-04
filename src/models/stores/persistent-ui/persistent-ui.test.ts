@@ -338,9 +338,9 @@ describe("PersistentUI", () => {
         key: "doc1",
         type: "problem",
         // A problem document is its author's, so its group affiliation is the author's group.
-        authorGroupId: "group1",
+        groupIdOfUserOwner: "group1",
         uid: "student1",
-        toJSON: () => ({ key: "doc1", type: "problem", authorGroupId: "group1" })
+        toJSON: () => ({ key: "doc1", type: "problem", groupIdOfUserOwner: "group1" })
       };
     });
 

@@ -104,8 +104,8 @@ export interface OpenDocumentOptions {
   investigation?: string;
   unit?: string;
   offeringId?: string;
-  /** The group the document's author belonged to, not the owning group */
-  authorGroupId?: string;
+  /** The group the document's owning user belongs to, not the group that owns the document */
+  groupIdOfUserOwner?: string;
   firestoreMetadata?: IDocumentMetadata;
 }
 
@@ -1027,7 +1027,7 @@ export class DB {
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
     const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
-           problem, investigation, unit, offeringId, authorGroupId} = options;
+           problem, investigation, unit, offeringId, groupIdOfUserOwner} = options;
     const existingPromise = this.documentFetchPromiseMap.get(documentKey);
     if (existingPromise) return existingPromise;
 
@@ -1109,7 +1109,7 @@ export class DB {
               investigation,
               unit,
               offeringId,
-              authorGroupId,
+              groupIdOfUserOwner,
               contextId: firestoreMetadata.context_id ?? undefined,
               concurrent,
               kind,
@@ -1274,7 +1274,7 @@ export class DB {
     return this.openDocument({
       type,
       userId,
-      authorGroupId: group?.id,
+      groupIdOfUserOwner: group?.id,
       documentKey,
       visibility: metadata.visibility,
       ...problemInfo
@@ -1289,8 +1289,8 @@ export class DB {
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
-    const authorGroupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, authorGroupId, title, properties});
+    const groupIdOfUserOwner = group && group.id;
+    return this.openDocument({type, userId: uid, documentKey, groupIdOfUserOwner, title, properties});
   }
 
   // handles published personal documents and published learning logs
@@ -1298,16 +1298,16 @@ export class DB {
     const {title, properties, uid, originDoc, self: {documentKey}, pubVersion} = publication;
 
     const group = this.stores.groups.groupForUser(uid);
-    const authorGroupId = group && group.id;
+    const groupIdOfUserOwner = group && group.id;
     return this.openDocument({
-      type, userId: uid, documentKey, authorGroupId, title, properties, originDoc, pubVersion
+      type, userId: uid, documentKey, groupIdOfUserOwner, title, properties, originDoc, pubVersion
     });
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    // The publication record's `groupId` is the author's group at publish time — a snapshot of a fact
-    // about the author, which is why it lands on `authorGroupId` rather than the owning group.
-    const {groupId: authorGroupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
+    // The publication record's `groupId` is the publishing user's group at publish time — a snapshot of
+    // a fact about that user, which is why it lands on `groupIdOfUserOwner` rather than the owning group.
+    const {groupId: groupIdOfUserOwner, groupUserConnections, userId, documentKey, pubVersion} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
@@ -1322,7 +1322,7 @@ export class DB {
       documentKey,
       type: "publication",
       userId,
-      authorGroupId,
+      groupIdOfUserOwner,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
       pubVersion,
