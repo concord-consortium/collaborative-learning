@@ -30,7 +30,7 @@ describe("Firestore security rules", () => {
   const kDocumentDocPath = "authed/myPortal/documents/myDocument";
 
   interface ISpecDocumentDoc {
-    add?: Record<string, string | string[] | object>;
+    add?: Record<string, string | string[] | object | boolean>;
     remove?: string[];
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
@@ -375,6 +375,17 @@ describe("Firestore security rules", () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "group" }}));
       await expectUpdateToSucceed(db, kDocumentDocPath, { concurrent: true });
+    });
+
+    it("a class member cannot clear concurrent on a group document", async () => {
+      // Only the backfills write this field and both write `true`, so clearing it is nobody's
+      // legitimate operation. Allowing it would let any class member strip a group document's shared
+      // history access and its members' Edit button.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
+        add: { uid: student2Id, type: "group", concurrent: true }
+      }));
+      await expectUpdateToFail(db, kDocumentDocPath, { concurrent: false });
     });
 
     it("authenticated students can't delete documents in their class", async () => {

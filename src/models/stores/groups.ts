@@ -224,8 +224,11 @@ export const GroupsModel = types
     }
   }))
   .actions((self) => ({
-    // `offeringId` identifies the offering these groups belong to
-    updateFromDB(groups: DBOfferingGroupMap, offeringId?: string) {
+    // `offeringId` identifies the offering these groups belong to. Required rather than optional, and
+    // assigned unconditionally: these groups only mean anything paired with the offering they came
+    // from, so a caller that has none must say so and clear the stale one rather than leave the
+    // previous offering's id standing over a new set of groups.
+    updateFromDB(groups: DBOfferingGroupMap, offeringId: string | undefined) {
       const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
       Object.entries(groups).forEach(([groupId, group]) => {
         groupsMapSnapshot[groupId] = getGroupSnapshot(groupId, group);
