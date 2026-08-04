@@ -223,9 +223,8 @@ interface IDocumentTitleFields {
  */
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
   const info = getDocumentKindInfo(document.kind);
-  // A unit-declared title names that unit's documents only (see IDocumentKindInfo.unit). Lending it to
-  // a document from another unit would state a title confidently that its own unit may word
-  // differently; such a document falls through to a caller's fallback instead.
+  // A registered title names its own unit's documents only (see IDocumentKindInfo.unit); a document
+  // from another unit falls through to a caller's fallback.
   if (info?.title != null && (info.unit == null || info.unit === document.unit)) return info.title;
   // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
   // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
@@ -261,8 +260,8 @@ export function getDocumentKindLabel(kind?: string | null): string | undefined {
  * document has the same shape — concurrent, owned by the synthetic class owner, kept in the class's copy of
  * the unit and about that unit and nothing narrower — so only the kind key, the authored title, and the
  * declaring unit come from the configuration. The title is registered rather than stored per document so it
- * resolves live by kind, and the unit keeps it from naming another unit's documents of the same kind (see
- * getDocumentTitle). Throws like registerDocumentKind when the kind is malformed or already registered.
+ * resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind when the kind is malformed
+ * or already registered.
  */
 export function registerClassWideDocumentKind(kind: string, title: string, unit: string) {
   registerDocumentKind(kind, {

@@ -1,6 +1,6 @@
 import { upperFirst } from "lodash";
 import { getParent } from "mobx-state-tree";
-import { IDocumentMetadata, IDocumentMetadataBase } from "../../../shared/shared";
+import { IDocumentMetadataBase } from "../../../shared/shared";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { translate } from "../../utilities/translation/translate";
 import { SectionModelType } from "../curriculum/section";
@@ -42,12 +42,10 @@ function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: Docum
 }
 
 /**
- * A stand-in title for a document that stores none and whose kind resolves no title — a class-wide
- * document from a unit whose config is not loaded, or one whose kind another unit also declares. The
- * kind names what the document is; the curriculum position says where it came from.
- *
- * The position is read from the stored fields rather than assumed, because an unresolvable kind gives
- * no indication of where the document sits.
+ * A stand-in title for a document that stores none and whose kind resolves no title (see
+ * getDocumentTitle). The kind names what the document is; the curriculum position says where it came
+ * from, read from the stored fields because an unresolvable kind gives no indication of where the
+ * document sits.
  */
 function getUnresolvedDocumentTitle(document: DocumentModelType | IDocumentMetadataModel) {
   const kindLabel = getDocumentKindLabel(document.kind);

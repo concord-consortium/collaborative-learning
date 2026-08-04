@@ -1,4 +1,3 @@
-import { IDocumentMetadata } from "../../../shared/shared";
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
 import { UserModel } from "../stores/user";
