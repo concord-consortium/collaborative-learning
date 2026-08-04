@@ -73,9 +73,14 @@ take to lift it — they bound today's choices without being requirements in the
    `classes/<class>/users/<owner>/documents/<key>`, so an owner must serialize to a single key-safe
    path segment — RTDB keys exclude `.` `$` `#` `[` `]` `/`. *Note*: this is an implementation detail,
    so we could decide to change it, but that would require a large migration.
-6. **Rebuild the canonical-pointer path of a group-owned document.** Both the client and the rules
-   need the offering and the group as separate path segments. *Note*: this is also an implementation
-   detail. It is a new feature (2026-07), so could be revised.
+6. **Address a document's canonical-pointer slot by its owner.** A pointer path carries the owner as a
+   single segment — the document's `uid` verbatim, synthetic owners included:
+   `canonical/v1/classes/<class> / [offerings/<id> | units/<unit>] / owners/<uid> / slots/<label>`. The
+   offering in that path is the document's container, not something read back out of a group owner's
+   id, and no segment names the group. The client and the Firestore rules build the path independently
+   and have to agree on it, and the rules have only the document's stored fields to work from — so an
+   owner has to serialize to one Firestore path segment they can use. *Note*: this is also an
+   implementation detail. It is a new feature (2026-07), so could be revised.
 
 **Attributing and organizing**
 
@@ -103,8 +108,10 @@ take to lift it — they bound today's choices without being requirements in the
    The view iterates documents it did not choose and cannot anticipate, including documents from other
    units and offerings. It needs the owner type as a value it can read from each document, the same way
    it reads a title.
-8. **Resolve a group owner to its group** — the members, and the "Group N" label. The members come from
-   a group registry maintained for the **current offering**.
+8. **Resolve a group owner to its group's members** — for listing a group document under each student
+   who worked on it. The members come from a group registry maintained for the **current offering**.
+   The "Group N" label is not part of this: sectioning by group takes the number from the document's
+   stored group id, so it resolves nothing and works for a document from any offering.
 9. **Resolve a user owner to their name in the class** — for the "Last, First" section label.
 
 **Locating**
@@ -122,11 +129,23 @@ ever a query term, apart from the transitional case above.
 Worth stating explicitly, because it means the owner representation does **not** have to be queryable
 by type today. If that changes, it becomes the strongest argument for a stored owner type.
 
-#### Broken behavior
+#### Limitations
 
-- **Resolving a group owner outside the current offering.** Requirement 8 resolves only against the
-  current offering, so a group-owned document from an earlier offering — visible under Sort Work's
-  "All" filter — does not know its members. Sectioning by name drops such a document entirely.
+- **A group owner outside the current offering does not resolve.** Requirement 8 resolves only against
+  the current offering, so a group-owned document from an earlier one — visible under Sort Work's "All"
+  filter — does not know its members. Sectioning by name cannot list it under anybody, so it is filed by
+  where the work came from ("Groups from `<problem>`") rather than under this offering's group of the
+  same number, whose students did not write it. Lifting this needs a group registry that spans
+  offerings, not a change to how the owner is stored: the owner already identifies its offering.
+
+  **Sectioning by group is deliberately unaffected.** It needs only the group's number, which it takes
+  from the stored group id without resolving anything, so a document from another offering sections
+  under the same `Group <N>` section that a document from the current offering does. The two sorts
+  differ here because they are claiming different things: a group number is a label that reads the
+  same in every offering, while a student's name asserts *who did this work* — so the sort that cannot
+  answer that truthfully declines to answer it at all. Requirements 8 and 9 carry that asymmetry: only
+  the by-name sections resolve an owner to people. This approach of mixing different groups under the
+  same `Group <N>` section might change in the future.
 
 #### Possible future requirements
 
