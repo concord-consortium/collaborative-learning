@@ -98,10 +98,6 @@ class DataflowToolTile {
   getAmplitudeField() {
     return cy.get(`${getNodeText("generator")} [title='Set Amplitude']`);
   }
-  //Timer
-  getLabel(value) {
-    return cy.get(`${getNodeText("timer")} [title='Set Time ${value}'] label`);
-  }
   //Demo Output
   getAdvancedGrabberImages() {
     cy.get('.demo-output-image.grabber-paddle-image').should("exist");

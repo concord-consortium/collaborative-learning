@@ -134,7 +134,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode("number").should("not.exist");
     dataflowToolTile.getNode("transform").should("not.exist");
   });
-  it("Generator and Timer Nodes", () => {
+  it("Waves Node", () => {
     const generatorNode = "generator";
     loadEditor(false);
     clueCanvas.addTile("dataflow");
@@ -142,7 +142,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create generator node");
     dataflowToolTile.getCreateNodeButton(generatorNode).click();
     dataflowToolTile.getNode(generatorNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Generator");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Waves");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(generatorNode).click();
@@ -174,37 +174,9 @@ context('Dataflow Tool Tile', function () {
     cy.log("can delete generator node");
     dataflowToolTile.getDeleteNodeButton(generatorNode).click();
     dataflowToolTile.getNode(generatorNode).should("not.exist");
-
-    cy.log("Timer Node");
-    const timerNode = "timer";
-    loadEditor(false);
-    clueCanvas.addTile("dataflow");
-
-    cy.log("can create timer node");
-    dataflowToolTile.getCreateNodeButton(timerNode).click();
-    dataflowToolTile.getNode(timerNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
-
-    cy.log("timer node labels");
-    dataflowToolTile.getLabel("On").should('contain', "time on");
-    dataflowToolTile.getLabel("Off").should('contain', "time off");
-
-    cy.log("can toggle minigraph");
-    dataflowToolTile.getShowGraphButton(timerNode).click();
-    dataflowToolTile.getMinigraph(timerNode).should("exist");
-    dataflowToolTile.getShowGraphButton(timerNode).click();
-    dataflowToolTile.getMinigraph(timerNode).should("not.exist");
-
-    cy.log("verify node inputs outputs");
-    dataflowToolTile.getNodeInput().should("not.exist");
-    dataflowToolTile.getNodeOutput().should("exist");
-
-    cy.log("can delete timer node");
-    dataflowToolTile.getDeleteNodeButton(timerNode).click();
-    dataflowToolTile.getNode(timerNode).should("not.exist");
   });
 
-  it("Math and Logic Nodes", () => {
+  it("Math and Compare Nodes", () => {
     const mathNode = "math";
     loadEditor(false);
     clueCanvas.addTile("dataflow");
@@ -249,7 +221,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create logic node");
     dataflowToolTile.getCreateNodeButton(logicNode).click();
     dataflowToolTile.getNode(logicNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Logic");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Compare");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(logicNode).click();
@@ -350,7 +322,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(controlNode).click();
     dataflowToolTile.getNode(controlNode).should("not.exist");
   });
-  it("Demo Output and Live Output Nodes", {
+  it("Demo Device and Live Device Nodes", {
     // Without this, Cypress sometimes translates the program so the nodes/blocks
     // are underneath the title of the tile.
     scrollBehavior: "center"
@@ -362,7 +334,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create demo output node");
     dataflowToolTile.getCreateNodeButton(demoOutputNode).click();
     dataflowToolTile.getNode(demoOutputNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Demo Output");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Demo Device");
 
     cy.log("can change output type");
     const demoOutputType = "outputType";
@@ -436,7 +408,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create live output node");
     dataflowToolTile.getCreateNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Live Output");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Live Device");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(liveOutputNode).click();
@@ -504,7 +476,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("not.exist");
   });
-  it("Input Node and Record Data", () => {
+  it("Sensor Node and Record Data", () => {
     const sensorNode = "sensor";
     loadEditor(false);
     clueCanvas.addTile("dataflow");
@@ -512,7 +484,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create sensor node");
     dataflowToolTile.getCreateNodeButton(sensorNode).click();
     dataflowToolTile.getNode(sensorNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Input");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Sensor");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(sensorNode).click();
@@ -573,13 +545,13 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("Record Data");
     cy.log("can create a small program");
-    const nodes = ["timer", "demo-output"];
+    const nodes = ["number", "demo-output"];
     dataflowToolTile.getCreateNodeButton(nodes[0]).click();
     dataflowToolTile.getNode(nodes[0]).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Number 1");
     dataflowToolTile.getCreateNodeButton(nodes[1]).click();
     dataflowToolTile.getNode(nodes[1]).should("exist");
-    dataflowToolTile.getNode("timer").click(50, 10)
+    dataflowToolTile.getNode("number").click(50, 10)
       .trigger("pointerdown", 50, 10)
       .trigger("pointermove", dragXDestination, dragYDestination, { force: true })
       .trigger("pointerup", dragXDestination, dragYDestination, { force: true });

@@ -336,10 +336,10 @@ $top-space: 18px;
       position: absolute;
       right:15.5px;
       top: 119.5px;
-      background-color: $input-blue-lighter-1;
+      background-color: $input-purple-lighter-1;
       height: $std-height -1;
       width: 36px;
-      border:2px solid $input-blue-lighter-3;
+      border:2px solid $input-purple-lighter-3;
     }
   }
 }
@@ -434,51 +434,51 @@ $top-space: 18px;
 .node.number,
 .node.generator,
 .node.timer {
-  background-color: $input-blue;
-  border-color: $input-blue-outline;
+  background-color: $input-purple;
+  border: solid 2px $input-purple-outline;
   .close-node-button svg {
-    fill: lighten($input-blue-outline, 10%);
+    fill: lighten($input-purple-outline, 10%);
   }
   .node-type-letter {
-    border-color: $input-blue-outline;
+    border-color: $input-purple-outline;
   }
   .node-name input {
-    background-color: $input-blue-lighter-1;
-    border: 2px solid $input-blue-lighter-2;
+    background-color: $input-purple-lighter-1;
+    border: 2px solid $input-purple-lighter-2;
   }
   .node-select-container .icon svg {
-    fill: $input-blue-outline;
+    fill: $input-purple-outline;
   }
   .value-container {
-    background-color: $input-blue-lighter-3;
+    background-color: $input-purple-lighter-3;
     border: 2px solid white;
     &::after {
-      background-color: lighten($input-blue-outline, 10%);
+      background-color: lighten($input-purple-outline, 10%);
     }
   }
   .number-container {
     input {
-      border:2px solid $input-blue-lighter-2;
+      border:2px solid $input-purple-lighter-2;
     }
     .type-options select {
-      background-color: $input-blue-lighter-2;
-      border: 2px solid $input-blue-lighter-2;
+      background-color: $input-purple-lighter-2;
+      border: 2px solid $input-purple-lighter-2;
     }
   }
   .graph-button {
-    border: 2px solid lighten($input-blue-outline, 10%);
+    border: 2px solid lighten($input-purple-outline, 10%);
     &.active {
-      background-color: $input-blue-lighter-2;
+      background-color: $input-purple-lighter-2;
     }
     svg {
-      fill: lighten($input-blue-outline, 10%);
+      fill: lighten($input-purple-outline, 10%);
     }
   }
   .node-graph {
-    background-color: $input-blue-lighter-3;
+    background-color: $input-purple-lighter-3;
   }
   .scale-buttons {
-    color: $input-blue-outline;
+    color: $input-purple-outline;
   }
 }
 
@@ -487,51 +487,51 @@ $top-space: 18px;
 .node.logic,
 .node.transform,
 .node.control {
-  background-color: $operator-green;
-  border-color: $operator-green-outline;
+  background-color: $operator-blue;
+  border: solid 2px $operator-blue-outline;
   .close-node-button svg {
-    fill: lighten($operator-green-outline, 10%);
+    fill: lighten($operator-blue-outline, 10%);
   }
   .node-type-letter {
-    border-color: $operator-green-outline;
+    border-color: $operator-blue-outline;
   }
   .node-name input {
-    background-color: $operator-green-lighter-1;
-    border: 2px solid $operator-green-lighter-2;
+    background-color: $operator-blue-lighter-1;
+    border: 2px solid $operator-blue-lighter-2;
   }
   .node-select-container .icon svg {
-    fill: $operator-green-outline;
+    fill: $operator-blue-outline;
   }
   .value-container {
-    background-color: $operator-green-lighter-3;
+    background-color: $operator-blue-lighter-3;
     border: 2px solid white;
     &::after {
-      background-color: lighten($operator-green-outline, 10%);
+      background-color: lighten($operator-blue-outline, 10%);
     }
   }
   .number-container {
     input {
-      border:2px solid $operator-green-lighter-2;
+      border:2px solid $operator-blue-lighter-2;
     }
     .type-options select {
-      background-color: $operator-green-lighter-2;
-      border: 2px solid $operator-green-lighter-2;
+      background-color: $operator-blue-lighter-2;
+      border: 2px solid $operator-blue-lighter-2;
     }
   }
   .graph-button {
-    border: 2px solid lighten($operator-green-outline, 10%);
+    border: 2px solid lighten($operator-blue-outline, 10%);
     &.active {
-      background-color: $operator-green-lighter-2;
+      background-color: $operator-blue-lighter-2;
     }
     svg {
-      fill: lighten($operator-green-outline, 10%);
+      fill: lighten($operator-blue-outline, 10%);
     }
   }
   .node-graph {
-    background-color: $operator-green-lighter-3;
+    background-color: $operator-blue-lighter-3;
   }
   .scale-buttons {
-    color: $operator-green-outline;
+    color: $operator-blue-outline;
   }
 }
 
@@ -539,7 +539,7 @@ $top-space: 18px;
 .node.demo-output,
 .node.live-output {
   background-color: $output-yellow;
-  border-color: $output-yellow-outline;
+  border: solid 2px $output-yellow-outline;
   .close-node-button svg {
     fill: $output-yellow-element;
   }
