@@ -39,7 +39,8 @@ export const ColorSwatch: React.FC<IProps> = ({ color, isSelected, onSelectColor
   const isLightColor = !isNoneColor && isLightColorRequiringContrastOffset(color);
   const showBorder = isLightColor || !!outlined;
   return (
-    <div className={classNames("color-swatch", { light: isLightColor, outlined })} onClick={() => onSelectColor(color)}>
+    <div className={classNames("color-swatch", { light: isLightColor, outlined })} data-color={color}
+        onClick={() => onSelectColor(color)}>
       {isNoneColor
         ? <NoColorIcon />
         : <svg className="swatch" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">

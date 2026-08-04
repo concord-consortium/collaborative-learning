@@ -215,7 +215,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getFreehandDrawing().first().find("path").should("not.have.attr", "fill-color");
     drawToolTile.getDrawToolFillColor().click();
     cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
-    cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
+    cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch[data-color='#f7e58f']").click();
     drawToolTile.getFreehandDrawing().first().find("path").should("have.attr", "fill").and("eq", "#f7e58f");
 
     cy.log("deletes freehand drawing");
@@ -358,7 +358,7 @@ context('Draw Tool Tile', function () {
     // The rectangle is already selected, so we don't need to select it again
     drawToolTile.getDrawToolFillColor().click();
     cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
-    cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
+    cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch[data-color='#f7e58f']").click();
     drawToolTile.getRectangleDrawing().first().find("rect").should("have.attr", "fill").and("eq", "#f7e58f");
 
     cy.log("verify moving pre-selected object");

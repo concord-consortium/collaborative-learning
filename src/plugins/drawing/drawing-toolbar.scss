@@ -114,7 +114,8 @@
           }
         }
 
-        // Pastel fill swatches: consistent 1px outline regardless of luminance.
+        // Pastel fill swatches: consistent 1px outline regardless of luminance. Must follow the
+        // `.light` rule above — equal specificity, so source order decides for a swatch that is both.
         &.outlined {
           .contrast-border {
             stroke: #949494;

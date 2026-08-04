@@ -107,6 +107,7 @@ $button-label-text: $gray-text;
     &.transform,
     &.control {
       background-color: $operator-blue;
+      border: 1px solid $operator-blue-outline;
     }
     &.demo-output {
       background-color: $output-yellow;
