@@ -65,7 +65,8 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
     dataflowToolTile.getCreateNodeButton('number').focus();
 
     cy.realPress('Enter'); // Add first block (Number)
-    cy.realPress('ArrowDown');
+    // Palette order: Sensor, Number, Generator, Math, Logic, ... (Timer is hidden). From Number, two
+    // ArrowDowns reach Math; from Math, four more reach Demo Output.
     cy.realPress('ArrowDown');
     cy.realPress('ArrowDown');
     cy.realPress('Enter'); // Add second (Math)
