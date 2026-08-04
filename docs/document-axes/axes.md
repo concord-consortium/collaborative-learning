@@ -320,13 +320,22 @@ kind's definition*:
    way to tell whether a definition found under that name is the one the document was made from, and the
    wrong definition would be applied confidently.
 
-**This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce documents
-kept by that unit or narrower, because rule 2 requires the `unit` association. It cannot produce
-documents kept by the class — the ones with no unit at all, like personal documents and learning logs. Making
-*those* presets authorable is a reasonable future goal, but it is not a matter of adding entries to a unit
-config: it needs a configuration source loaded independently of the current unit (class- or site-level), so
-that a definition is present wherever its documents are, along with an association on the document naming
-that source. Until such a source exists, personal-like presets stay static.
+**This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce
+documents about that unit or narrower, because rule 2 requires the `unit` association and the
+curriculum axis is a nesting rooted at the unit — every position at or below it carries one. It cannot
+produce documents with no curriculum position at all, like personal documents and learning logs.
+Making *those* presets authorable is a reasonable future goal, but it is not just a matter of adding
+entries to a unit config: it needs a configuration source loaded independently of the current unit
+(class- or site-level), so that a definition is present wherever its documents are, along with an
+association on the document naming that source. Until such a source exists, personal-like presets stay
+static.
+
+**How a kind sets that today.** A kind declares only `containerType`, and `getDocumentLocationFields`
+derives both the container and curriculum axes' fields from it, so a document's curriculum position
+currently follows from its container: `class` yields no unit, `classUnit` the unit, `offering` the
+problem. The bound is stated on `curriculum` because that is what rule 2 constrains, and it survives
+the coupling being broken — a kind declaring a class container *and* a unit curriculum would stamp
+`unit` and satisfy rule 2, which a container-based bound would wrongly forbid.
 
 ### `permissions` — who may do what
 
