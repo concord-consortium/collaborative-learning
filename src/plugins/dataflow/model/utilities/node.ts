@@ -459,7 +459,10 @@ export function warnUnknownLiveOutputSettings(servoInputMode: unknown, liveOutpu
     console.warn(`settings.dataflow.servoInputMode: ignoring unknown value ${JSON.stringify(servoInputMode)}; ` +
       `expected "degrees" or "proportion".`);
   }
-  if (Array.isArray(liveOutputTypes)) {
+  if (liveOutputTypes != null && !Array.isArray(liveOutputTypes)) {
+    console.warn(`settings.dataflow.liveOutputTypes: expected an array of type names, got ` +
+      `${JSON.stringify(liveOutputTypes)}; ignoring.`);
+  } else if (Array.isArray(liveOutputTypes)) {
     const validNames = NodeLiveOutputTypes.map(t => t.name);
     const unknown = liveOutputTypes.filter(name => !validNames.includes(name));
     if (unknown.length) {

@@ -189,9 +189,10 @@ Additional Live Output / sampling keys (all optional; each defaults to today's b
   Output accepts an input from 0–1 instead of 0–180 degrees (mapping 0→0°, 1→180°) and its field reads
   `"<n>% rotation"`. The stored/hardware value stays in degrees, so the serial path is unchanged.
 - `liveOutputTypes`: an array of Live Output type names to offer in the block's dropdown, e.g.
-  `["Servo", "Gripper 2.0"]`. Absent, empty, or unknown-only means the full list. The author's order is
-  preserved and the first entry is the default for a new block. A block whose saved type is excluded
-  still shows and keeps that type (it is not overwritten).
+  `["Servo", "Gripper 2.0"]`. Absent, empty, unknown-only, or listing *every* type all mean the full
+  list (no restriction, standard order). For a genuine subset the author's order is preserved and the
+  first entry is the default for a new block. A block whose saved type is excluded still shows and keeps
+  that type (it is not overwritten).
 - `defaultSamplingRate`: the sampling rate (ms) seeded into a **newly created** Dataflow tile — one of
   `50`, `100`, `500`, `1000` (default), `10000`, `60000`. It never overwrites a tile's saved rate.
 

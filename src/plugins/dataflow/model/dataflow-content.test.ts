@@ -106,4 +106,12 @@ describe("DataflowContentModel", () => {
     expect(Object.values(connections).length).toBe(2);
   });
 
+  it("does not export outputConfig (it mirrors unit config only for the runtime AI summarizer)", () => {
+    const dcm = defaultDataflowContent();
+    dcm.setOutputConfig({ servoInputMode: "proportion", allowedOutputTypes: ["Servo"] });
+    expect(dcm.outputConfig).toBeDefined();
+    const exportedJson = JSON.parse(dcm.exportJson());
+    expect(exportedJson.outputConfig).toBeUndefined();
+  });
+
 });
