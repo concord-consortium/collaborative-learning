@@ -23,8 +23,7 @@
 
 1. **Unit configuration `classWideDocuments`** — an authored array of slots `{ kind, title }` on
    `UnitConfiguration`, read at runtime as `stores.appConfig.classWideDocuments`. This is the correct home for
-   the authored DQB title (resolves review issue #2: a curriculum-specific title no longer lives in generic
-   settings).
+   the authored DQB title: a curriculum-specific title no longer lives in generic settings.
 2. **A field-based canonical-pointer path builder in a dedicated, versioned collection** — the group-specific
    helper is replaced by one `getCanonicalPointerPath(scope, label)` that derives the path from the scope fields
    a document carries. Pointers move out of the interleaved class/offering/group tree into a top-level
@@ -37,7 +36,7 @@
    `canonical: <kind>`. Its RTDB content is owned by a class-scoped synthetic uid `class_<classHash>`.
 4. **Auto-creation on unit open** — one `getOrCreateClassWideDocument` per declared slot, fired when the unit
    finishes loading. The canonical-pointer transaction guarantees exactly one document per slot per class per
-   unit even under concurrent clients (resolves review issue #1: duplicate-doc race).
+   unit even under concurrent clients, so no duplicate-document race is possible.
 
 The stored `type` value stays `"group"` (the Stage 1-3 transitional convention). No new document type is
 introduced; no UI is wired.
@@ -202,23 +201,27 @@ registry also surfaces a developer mistake — a new built-in kind that is malfo
 load. (Built-in kinds register via `registerBuiltInDocumentKinds()`; a test-only reset re-registers them because
 the registry is module-global.)
 
-## Review issue #6 — first-session history ordering
+## First-session history ordering and the content-drift guard
 
-Issue #6 was a content-drift guard **globally weakened** in PR #2890 (a `history.length === 0` early return) to
-mask a DQB creation race where the Firestore metadata document did not yet exist when the first session began
-uploading history. This PR resolves #6 as follows:
+An earlier, rejected prototype of class-wide documents created the document and opened it before its Firestore
+metadata document was written. Its history manager could then subscribe and start uploading history for a
+document whose metadata did not yet exist, which `checkContentDriftAgainstHistory` reported as drift on the very
+first entry. That prototype suppressed the symptom by adding a `history.length === 0` early return to the guard.
 
-- **The revert is a no-op here.** PR #2890 was superseded and never merged; the `history.length === 0` early
-  return exists in neither this branch nor master (`checkContentDriftAgainstHistory` in
-  `firestore-history-manager.ts` has only the `!savedId` and `found` guards). There is nothing to revert — the
-  corruption guard is already intact for all concurrent documents.
-- **The real cause cannot occur on this creation path.** `getOrCreateCanonicalDocument` writes the Firestore
-  metadata document (and the pointer-claim `update` touches it) **before** the document is opened and its history
-  manager subscribes. So a freshly created DQB always has its metadata present before the first history write,
-  and — being empty with no saved `lastHistoryEntryId` — cannot produce a first-session drift false-positive.
+That approach was rejected. The drift guard is what detects a concurrent document whose saved content references
+history entries that never reached the chain, so an early return keyed on history length disables the check for
+the first entry of **every** concurrent document — a global loss of corruption detection to work around one
+creation path's ordering.
 
-This is **verified** by an emulator test (metadata readable before any history entry; two concurrent pointer
-claims converge to one documentKey) rather than by changing drift-guard code.
+This design fixes the ordering instead, so the guard needs no exception.
+`getOrCreateCanonicalDocument` writes the Firestore metadata document (and the pointer-claim `update` touches it)
+**before** the document is opened and its history manager subscribes. A freshly created class-wide document
+therefore always has its metadata present before the first history write, and — being empty, with no saved
+`lastHistoryEntryId` — takes the guard's existing `!savedId` early return rather than producing a false positive.
+`checkContentDriftAgainstHistory` keeps only its `!savedId` and `found` conditions, unchanged.
+
+The ordering is **verified** by an emulator test (metadata readable before any history entry; two concurrent
+pointer claims converge to one documentKey) rather than by drift-guard code.
 
 ## Security rules — what changed and what did not
 

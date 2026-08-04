@@ -321,7 +321,7 @@ export const PersistentUIModelV2 = types
         }
       }
       if (navTab === ENavTab.kStudentWork){
-        const groupId = doc.authorGroupId;
+        const groupId = doc.groupIdOfUserOwner;
         if (groupId) {
           docGroupId = groupId;
         }

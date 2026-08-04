@@ -28,9 +28,9 @@ services/seismic/versions/{version}/stations/{station}/locations/{location}/chan
   createdAt: Timestamp
 ```
 
-The `{version}` segment is `v{EVENT_LAYOUT_VERSION}` (e.g., `v1`), mirroring the envelope cache's `ENVELOPE_LAYOUT_VERSION`: bump the constant in [event-database.ts](../../shared/seismic/event-database.ts) whenever the layout constants (coverage epoch, window/chunk durations) or the event document schema change, and all clients switch to a fresh subtree rather than misinterpreting old data. The security rules match `{version}` as a wildcard, so a bump does not require a rules deploy.
+The `{version}` segment is `v{EVENT_LAYOUT_VERSION}` (e.g., `v1`), mirroring the envelope cache's `ENVELOPE_LAYOUT_VERSION`: bump the constant in [event-database.ts](../../shared/seismic/models/event-database.ts) whenever the layout constants (coverage epoch, window/chunk durations) or the event document schema change, and all clients switch to a fresh subtree rather than misinterpreting old data. The security rules match `{version}` as a wildcard, so a bump does not require a rules deploy.
 
-The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`), as produced by `getStationPrefix` in [tile-addressing.ts](../../shared/seismic/tile-addressing.ts). This is globally unique across data providers — station codes alone are only unique within a network. The `{location}` is the SEED location code encoded with `encodeLocation` (blank becomes `--`, since Firestore path segments cannot be empty); it is its own segment because a station can host multiple instruments that share a channel code but differ by location. The `{channel}` is a separate path segment because different channels (e.g., BHZ vs BNZ) have different sample rates and physical units, and the ML model produces different results for each. The station/location/channel ordering matches the envelope tile cache (`getStationChannelPrefix`). See [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems) for the full convention.
+The `{station}` key uses the FDSN network+station format: `{network}_{station}` (e.g., `AK_K204`), as produced by `getStationPrefix` in [station-addressing.ts](../../shared/seismic/station-addressing.ts). This is globally unique across data providers — station codes alone are only unique within a network. The `{location}` is the SEED location code encoded with `encodeLocation` (blank becomes `--`, since Firestore path segments cannot be empty); it is its own segment because a station can host multiple instruments that share a channel code but differ by location. The `{channel}` is a separate path segment because different channels (e.g., BHZ vs BNZ) have different sample rates and physical units, and the ML model produces different results for each. The station/location/channel ordering matches the envelope tile cache (`getStationChannelPrefix`). See [seismic-tiles-plan.md](seismic-tiles-plan.md#station-identification-across-systems) for the full convention.
 
 The document ID is `{windowStart}_{eventType}` (e.g., `1710720000000_earthquake`), where `windowStart` is epoch ms, matching `SeismicEvent.windowStart`. The composite key supports multiple events per window (a multi-class model may detect both traffic and earthquake in the same window) while providing natural deduplication — two users detecting the same event just overwrite with the same data.
 
@@ -273,7 +273,7 @@ async function getUncoveredRanges(
 
 ### Events: writing (after running the model)
 
-Events use the existing `SeismicEvent` type from [seismic-model-types.ts](../../shared/seismic/seismic-model-types.ts) (`windowStart`/`windowEnd` in epoch ms), which is what the model runner already produces.
+Events use the existing `SeismicEvent` type from [seismic-model-types.ts](../../shared/seismic/models/seismic-model-types.ts) (`windowStart`/`windowEnd` in epoch ms), which is what the model runner already produces.
 
 ```typescript
 function eventDocId(event: SeismicEvent): string {

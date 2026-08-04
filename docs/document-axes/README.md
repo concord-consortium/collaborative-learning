@@ -54,7 +54,9 @@ about from the kind's registered container, both resolved in the kind registry r
 Because all kinds are registered, `createFirestoreMetadataDocument` derives all of these through registry calls
 for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
 `type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
-into the kinds they publish.
+into the kinds they publish. That gate widens as each type is converted; see
+[Which documents get stamped](./target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
+for how it is retired.
 
 Stage 3 surfaces those documents: Sort Work sections them under "Whole Class" by owner and curriculum
 rather than by type, a whole-unit listener keeps them visible under the investigation and problem

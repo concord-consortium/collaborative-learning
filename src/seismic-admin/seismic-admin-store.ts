@@ -1,13 +1,19 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { classifyDayCoverage, DayCoverageState } from "../../shared/seismic/event-database";
-import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/model-metadata";
+import { FINEST_LEVEL } from "../../shared/seismic/envelopes/envelope-config";
+import { classifyEnvelopeDayCoverage, listEnvelopeTileIndices } from "../../shared/seismic/envelopes/envelope-coverage";
+import { classifyDayCoverage } from "../../shared/seismic/models/event-database";
+import { fetchModelMetadata, ModelListEntry } from "../../shared/seismic/models/model-metadata";
 import { createOpfsCache, SeismicCache } from "../../shared/seismic/opfs-seismic-cache";
 import { dayIndex, SECONDS_PER_DAY, utcDayFromString } from "../../shared/seismic/seismic-day";
-import { ModelMetadata, SeismicEvent } from "../../shared/seismic/seismic-model-types";
-import { StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
-import { getStationChannelPrefix } from "../../shared/seismic/tile-addressing";
+import { ModelMetadata, SeismicEvent } from "../../shared/seismic/models/seismic-model-types";
+import { DayCoverageState, StationConfig, StationData, TimeRange } from "../../shared/seismic/seismic-types";
+import { getStationChannelPrefix } from "../../shared/seismic/station-addressing";
+import {
+  createEnvelopeCredentialsProvider, createEnvelopeUploader, EnvelopeUploader
+} from "../models/stores/seismic/envelope-uploader";
 import { processUncoveredRanges, ProcessCoverageOptions } from "../models/stores/seismic/seismic-coverage-processor";
 import { DONE, SeismicDownloadService } from "../models/stores/seismic/seismic-download-service";
+import { processEnvelopeCoverage } from "../models/stores/seismic/seismic-envelope-processor";
 import { getUncoveredRanges, loadEvents } from "../models/stores/seismic/seismic-event-service";
 import { loadFilters, saveFilters } from "./utils/admin-persistence";
 import { mergeStations, missingDayCount, getStationLabel } from "./utils/seismic-admin-utils";
@@ -60,6 +66,9 @@ export interface SeismicAdminDeps {
     loadEvents: (s: StationData, model: string, range: TimeRange) => Promise<SeismicEvent[]>;
   };
   processCoverage?: (options: ProcessCoverageOptions) => Promise<{ processed: number; skipped: number; total: number }>;
+  listEnvelopeTiles?: (s: StationData) => Promise<Set<number>>;
+  processEnvelopes?: typeof processEnvelopeCoverage;
+  envelopeUploader?: EnvelopeUploader;
 }
 
 export type CoverageLoadState = "pending" | "loaded" | "error";
@@ -71,8 +80,14 @@ export interface CoverageStats {
   eventCount?: number;
 }
 
+/** One station's envelope coverage: the L2 tile indices listed from S3. */
+export interface EnvelopeCoverageStats {
+  state: CoverageLoadState;
+  tileIndices?: Set<number>;
+}
+
 export interface ModelStats {
-  eventCount: number;
+  eventCount?: number;
   coveredDays: Map<string, Set<number>>; // Days fully covered for each station, keyed by station key
   partialDays: Map<string, Set<number>>; // Days partially covered for each station, keyed by station key
   coveredDayCount: number; // Total days fully covered for all stations
@@ -100,12 +115,15 @@ export class SeismicAdminStore {
   selectedModels = new Set<string>();            // same keys; persisted
   modelMetadata = new Map<string, ModelMetadata | "error">();
   modelCoverage = new Map<string, CoverageStats>(); // keyed by coverageKey(stationKey, modelUrl)
+  envelopeCoverage = new Map<string, EnvelopeCoverageStats>();   // keyed by stationKey
   feedback = "";
   authReady = false;
+  portalReady = false;
   // True while a long-running operation (download/update/delete) is in flight, blocking other actions.
   isBusy = false;
 
   private cache: AdminCache;
+  private envelopeUploader?: EnvelopeUploader;
   // True once a selection has been persisted, so refresh() won't re-select everything.
   private hasSavedStationSelection = false;
   private hasSavedModelSelection = false;
@@ -131,9 +149,9 @@ export class SeismicAdminStore {
       for (const url of this.models.keys()) this.selectedModels.add(url);
     }
 
-    // `deps` and `cache` are injected dependencies, not observable state.
-    makeAutoObservable<SeismicAdminStore, "deps" | "cache">(
-      this, { deps: false, cache: false }, { autoBind: true });
+    // `deps`, `cache`, and `envelopeUploader` are injected dependencies, not observable state.
+    makeAutoObservable<SeismicAdminStore, "deps" | "cache" | "envelopeUploader">(
+      this, { deps: false, cache: false, envelopeUploader: false }, { autoBind: true });
   }
 
   private save() {
@@ -275,9 +293,29 @@ export class SeismicAdminStore {
     }
   }
 
+  /** Not gated on authReady — the S3 listing is anonymous. The listing is also
+   *  range-independent: day states are derived against the current range on read. */
+  async loadEnvelopeCoverage(station: StationConfig) {
+    const key = getStationChannelPrefix(station);
+    runInAction(() => this.envelopeCoverage.set(key, { state: "pending" }));
+    try {
+      const list = this.deps.listEnvelopeTiles ?? listEnvelopeTileIndices;
+      const tileIndices = await list(station);
+      runInAction(() => this.envelopeCoverage.set(key, { state: "loaded", tileIndices }));
+    } catch (err) {
+      console.warn("Failed to list envelope tiles:", err);
+      runInAction(() => this.envelopeCoverage.set(key, { state: "error" }));
+    }
+  }
+
+  envelopeCoverageFor(stationKey: string): EnvelopeCoverageStats {
+    return this.envelopeCoverage.get(stationKey) ?? { state: "pending" };
+  }
+
   /** Sequential on purpose: avoids a request stampede across stations × models. */
   async loadAllCoverageStats() {
     for (const station of this.selectedStationList) {
+      await this.loadEnvelopeCoverage(station);
       for (const url of this.selectedModels) {
         await this.loadCoverageStats(station, url);
       }
@@ -293,8 +331,19 @@ export class SeismicAdminStore {
       [...stats.dayStates.values()].every(s => s === "covered");
   }
 
+  /** Pending or errored envelope listings are NOT fully covered — unknown ≠ covered. */
+  envelopesFullyCovered(stationKey?: string): boolean {
+    const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
+    if (stationKeys.length === 0) return false;
+    return stationKeys.every(sk => {
+      const dayStates = this.envelopeDayStates(sk);
+      return !!dayStates && [...dayStates.values()].every(s => s === "covered");
+    });
+  }
+
   /** Pending or errored stats are NOT fully covered — unknown ≠ covered. */
   isFullyCovered(stationKey?: string): boolean {
+    if (!this.envelopesFullyCovered(stationKey)) return false;
     if (this.selectedModels.size === 0) return false;
     const stationKeys = stationKey ? [stationKey] : [...this.selectedStations];
     if (stationKeys.length === 0) return false;
@@ -307,30 +356,28 @@ export class SeismicAdminStore {
     return firstDay !== undefined && lastDay !== undefined ? lastDay - firstDay + 1 : 0;
   }
 
-  /** Coverage stats for a single model. When stationKey is present, the stats are just
-   *  for that station. When it is absent, stats are for all selected stations.
-   */
-  modelStats(modelUrl: string, stationKey?: string): ModelStats {
-    let eventCount = 0;
-    const coveredDays: Map<string, Set<number>> = new Map();
-    const partialDays: Map<string, Set<number>> = new Map();
+  /** Accumulate covered/partial day sets and counts across stations. Shared by modelStats and envelopeStats. */
+  private collectDayStats(
+    stationKeys: Set<string>,
+    getDayStates: (stationKey: string) => Map<number, DayCoverageState> | undefined
+  ): ModelStats {
+    const coveredDays = new Map<string, Set<number>>();
+    const partialDays = new Map<string, Set<number>>();
     let coveredDayCount = 0;
     let partialDayCount = 0;
     let totalDays = 0;
     const { rangeDays } = this;
 
-    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
-    stations.forEach(sk => {
+    stationKeys.forEach(sk => {
       totalDays += rangeDays;
-      const stats = this.modelCoverage.get(coverageKey(sk, modelUrl));
-      if (stats?.state !== "loaded") return;
+      const dayStates = getDayStates(sk);
+      if (!dayStates) return;
 
       const stationCoveredDays = new Set<number>();
       coveredDays.set(sk, stationCoveredDays);
       const stationPartialDays = new Set<number>();
       partialDays.set(sk, stationPartialDays);
-      eventCount += stats.eventCount ?? 0;
-      stats.dayStates?.forEach((state, day) => {
+      dayStates.forEach((state, day) => {
         if (state === "covered") {
           stationCoveredDays.add(day);
           coveredDayCount++;
@@ -341,7 +388,36 @@ export class SeismicAdminStore {
       });
     });
 
-    return { eventCount, coveredDays, partialDays, coveredDayCount, partialDayCount, totalDays };
+    return { coveredDays, partialDays, coveredDayCount, partialDayCount, totalDays };
+  }
+
+  /** Derived per-day envelope coverage for a station; undefined until its listing loads. */
+  envelopeDayStates(stationKey: string): Map<number, DayCoverageState> | undefined {
+    const stats = this.envelopeCoverage.get(stationKey);
+    const range = this.rangeSec;
+    if (stats?.state !== "loaded" || !stats.tileIndices || !range) return;
+    return classifyEnvelopeDayCoverage(stats.tileIndices, range);
+  }
+
+  /** Envelope coverage stats for one station, or all selected stations when stationKey is absent. */
+  envelopeStats(stationKey?: string): ModelStats {
+    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+    return this.collectDayStats(stations, sk => this.envelopeDayStates(sk));
+  }
+
+  /** Coverage stats for a single model. When stationKey is present, the stats are just
+   *  for that station. When it is absent, stats are for all selected stations.
+   */
+  modelStats(modelUrl: string, stationKey?: string): ModelStats {
+    const stations = stationKey ? new Set([stationKey]) : this.selectedStations;
+    let eventCount = 0;
+    stations.forEach(sk => {
+      const stats = this.modelCoverage.get(coverageKey(sk, modelUrl));
+      if (stats?.state === "loaded") eventCount += stats.eventCount ?? 0;
+    });
+    const dayStats = this.collectDayStats(stations,
+      sk => this.modelCoverage.get(coverageKey(sk, modelUrl))?.dayStates);
+    return { eventCount, ...dayStats };
   }
 
   async refresh() {
@@ -429,6 +505,14 @@ export class SeismicAdminStore {
     if (ready) void this.loadAllCoverageStats();
   }
 
+  /** Wire up the S3 upload path once a portal JWT source exists. env selects the
+   *  token-service environment ("production" default; "staging" for testing). */
+  setPortalAuth(getJwt: () => Promise<string>, env?: "staging" | "production") {
+    this.envelopeUploader = this.deps.envelopeUploader ??
+      createEnvelopeUploader({ getCredentials: createEnvelopeCredentialsProvider({ getJwt, env }) });
+    this.portalReady = true;
+  }
+
   async downloadStation(key: string) {
     await this.withBusy(async () => {
       const s = this.stations.get(key);
@@ -483,19 +567,44 @@ export class SeismicAdminStore {
     });
   }
 
-  /** Download the whole range, then generate events for each selected model's
-   *  uncovered days. Returns false if any model failed. */
+  /** Generate + upload missing envelopes, then generate events for each selected model's
+   *  uncovered days. Each step downloads only the raw days it needs. Returns false if
+   *  anything failed. */
   private async updateSingleStation(key: string, prefix = ""): Promise<boolean> {
     const stationData = this.stations.get(key);
     const range = this.rangeSec;
     if (!stationData || !range || !this.authReady) return false;
 
-    // 1) Raw data for the whole range (existing flow, reports its own feedback).
-    await this.download(stationData, prefix);
+    const uploader = this.envelopeUploader;
+    if (!this.portalReady || !uploader) return false;
+
+    this.setFeedback(`${prefix}Updating ${getStationLabel(stationData)}...`);
+
+    let ok = true;
+
+    // 1) Envelopes for days not fully covered in S3.
+    try {
+      const run = this.deps.processEnvelopes ?? processEnvelopeCoverage;
+      await run({
+        stationData, range, proxy: true,
+        uploadTile: (level, tileIndex, tile) => uploader.uploadTile(stationData, level, tileIndex, tile),
+        onProgress: (done, total) => this.setFeedback(
+          `${prefix}${getStationLabel(stationData)} — envelopes: day ${done} of ${total}`),
+        onDayDownloaded: (day, bytes) => this.markDayCached(key, day, bytes),
+        onTileUploaded: (level, tileIndex) => {
+          if (level === FINEST_LEVEL) this.markTileUploaded(key, tileIndex);
+        },
+      });
+    } catch (err) {
+      console.warn("Envelope update failed:", err);
+      this.setFeedback(`${prefix}Envelope update failed for ${getStationLabel(stationData)}.`);
+      ok = false;
+    }
+    // Reconcile with the actual listing; the incremental updates above are an estimate.
+    await this.loadEnvelopeCoverage(stationData);
 
     // 2) Events for uncovered days, model by model. Snapshot the live selection:
     // a header toggle mid-run must not change this run's set.
-    let ok = true;
     for (const url of [...this.selectedModels]) {
       const label = this.models.get(url)?.label ?? url;
       const metadata = await this.ensureModelMetadata(url);
@@ -512,6 +621,7 @@ export class SeismicAdminStore {
           onProgress: (progress, total) => this.setFeedback(
             `${prefix}${getStationLabel(stationData)} — ${label}: day ${progress} of ${total}`),
           onDayCovered: day => this.markDayCovered(key, url, day),
+          onDayDownloaded: (day, bytes) => this.markDayCached(key, day, bytes),
         });
       } catch (err) {
         console.warn("Update failed:", err);
@@ -520,6 +630,9 @@ export class SeismicAdminStore {
       }
       await this.loadCoverageStats(stationData, url);
     }
+    // Reconcile with what's actually on disk; both steps may have downloaded raw days
+    // and the incremental markDayCached updates above are an estimate.
+    await this.loadStats(stationData);
     return ok;
   }
 
@@ -530,6 +643,15 @@ export class SeismicAdminStore {
     const stats = this.modelCoverage.get(coverageKey(stationKey, modelUrl));
     if (stats?.state !== "loaded" || !stats.dayStates) return;
     stats.dayStates.set(day, "covered");
+  }
+
+  /** Fold a freshly-uploaded L2 tile into a station's envelope coverage so its timeline
+   *  fills in live. Ignored unless that station's coverage is already loaded — the
+   *  post-upload reload reconciles. */
+  markTileUploaded(stationKey: string, tileIndex: number) {
+    const stats = this.envelopeCoverage.get(stationKey);
+    if (stats?.state !== "loaded" || !stats.tileIndices) return;
+    stats.tileIndices.add(tileIndex);
   }
 
   /** Fold a freshly-downloaded day into a station's stats so its timeline fills in live. */

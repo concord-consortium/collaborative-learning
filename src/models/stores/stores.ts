@@ -23,6 +23,7 @@ import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode, kDemoSiteStorageKey } from "./store-types";
 import { SerialDevice } from "./serial";
+import { initWebSerialConnectionEvents } from "./web-serial-transport";
 import { IBaseStores, IGitInfo } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
 import { Bookmarks } from "./bookmarks";
@@ -165,6 +166,7 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(this.serialDevice);
     this.ui = params?.ui || UIModel.create({
       learningLogWorkspace: {
         type: LearningLogWorkspace,
@@ -204,10 +206,10 @@ class Stores implements IStores{
           // reaching the doc by key, who doesn't have its class/offering groups), then
           // route: Student Work when the group is present, otherwise Sort Work.
           when(
-            () => !!this.groups.getGroupById(doc.authorGroupId) || this.db.listeners.isListening,
+            () => !!this.groups.getGroupById(doc.groupIdOfUserOwner) || this.db.listeners.isListening,
             () => {
               const hasStudentWorkGroup =
-                !!doc.authorGroupId && !!this.groups.getGroupById(doc.authorGroupId);
+                !!doc.groupIdOfUserOwner && !!this.groups.getGroupById(doc.groupIdOfUserOwner);
               this.persistentUI.openResourceDocument(
                 doc, this.appConfig, this.user, this.sortedDocuments,
                 { fromUrlStudentDocument: true, hasStudentWorkGroup }

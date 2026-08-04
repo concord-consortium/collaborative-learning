@@ -174,6 +174,38 @@ Axes that are **not** stored need none of this: presentation, creation defaults,
 permission policy's rules all live in code, so changing them changes every document at once with no migration
 (see "How each thing is realized").
 
+### Which documents get stamped — a gate that narrows as types are converted
+
+Every `type` is registered as a kind, so the registry can answer `kind → axis fields` for any document. Writing
+those fields into stored metadata is deliberately narrower: both stamp sites — creation
+(`createFirestoreMetadataDocument`) and the client-side lazy backfill when a document is opened (`db.ts`) —
+write the kind axis fields only for the types converted so far, which today means `type: "group"` (regular group
+documents and class-wide documents, which share that transitional type).
+
+The gate is a stage in the progression, not a permanent rule:
+
+- A type is **converted** once its `kind` is settled and its behavior is read from axes rather than from `type`
+  — at which point `type` is just the generic tag. The publication kinds are the clearest not-yet-settled case:
+  they may be folded into the kinds they publish, and a `kind` stamped before that decision is a value we would
+  have to migrate afterwards.
+- As each type is converted, **add it to the gate at both stamp sites**, so its documents begin carrying their
+  kind's axis fields.
+- Once every type has been converted the gate always passes, so it can be deleted and both sites stamp
+  unconditionally.
+
+Nothing is lost while a type waits: an unconverted document's axis values are still derived from the registry at
+runtime, they are simply not persisted onto that document yet.
+
+Widening the gate is not always enough by itself. The open-time backfill writes as the signed-in user, so it can
+only ever stamp values a client is allowed to write — and per "Which axes a client may stamp is a security
+question" above, an axis the rules *police* must not stay client-writable, since a client could then hand itself
+the value. A converted type whose axis feeds a rule therefore needs its stamp to come from creation, a Cloud
+Function, or an admin script rather than from the client-side backfill, and its rule tightened to reject
+after-the-fact changes. No stamp has had to move for this reason yet, but `concurrent` is the obvious candidate:
+it is stored so that rules *can* enforce it, so once a rule reads it, letting a client set it after creation
+would hand the client the value the rule is meant to police — the client-side backfill then has to be replaced
+by an admin sweep and the rule tightened to creation-only.
+
 ## The boundary — metadata getters on the model, behaviors outside
 
 The test for whether something belongs on `DocumentModel`:

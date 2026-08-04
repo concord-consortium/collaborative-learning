@@ -34,7 +34,7 @@ import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
   getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
-  getDocumentOwnerType, IDocumentOwnerContext, registerDocumentKind
+  getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
 } from "../models/document/document-kinds";
 import { kClassOwnerPrefix } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
@@ -105,8 +105,8 @@ export interface OpenDocumentOptions {
   investigation?: string;
   unit?: string;
   offeringId?: string;
-  /** The group the document's author belonged to, not the owning group */
-  authorGroupId?: string;
+  /** The group the document's owning user belongs to, not the group that owns the document */
+  groupIdOfUserOwner?: string;
   firestoreMetadata?: IDocumentMetadata;
 }
 
@@ -567,11 +567,15 @@ export class DB {
                 return newDocumentRef.set(newDocument).then(() => newDocument);
             });
         })
-        .then((newDocument) => {
-          // reset the (presumably null) promise for this document type
+        .then(async (newDocument) => {
+          // Open the just-created document directly. This avoids waiting for required documents system to
+          // resolve it. The required documents system has a race condition in this code path. We still need
+          // to trigger the required documents system though since that is needed when
+          // createProblemOrPlanningDocument is called from the startup code.
+          const document = await this.createDocumentModelFromProblemMetadata(type, user.id, newDocument);
           documents.addRequiredDocumentPromises([type]);
-          // return the promise, which will be resolved by the DB listener
-          return documents.requiredDocuments[type].promise;
+          documents.resolveRequiredDocumentPromise(document);
+          return document;
         })
         .then(resolve)
         .catch(reject);
@@ -598,8 +602,7 @@ export class DB {
     }
 
     // Resolve where the document is kept and what it is about (context_id, unit/investigation/problem,
-    // offeringId) from the kind's registered container — all kinds are registered, so
-    // getDocumentLocationFields handles each type.
+    // offeringId) from the kind's registered container.
     const locationFields = getDocumentLocationFields(kind, {
       ...this.currentProblemInfo,
       context_id: user.classHash,
@@ -620,7 +623,8 @@ export class DB {
     // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
     // Every kind is registered now for location/owner resolution, yet we deliberately do NOT persist `kind` on
     // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
-    // other document types, so we don't want to stamp a kind we'd then have to migrate.
+    // other document types, so we don't want to stamp a kind we'd then have to migrate. Add a type here as it
+    // is converted — see "Which documents get stamped" in docs/document-axes/target-architecture.md.
     const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
     const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
@@ -650,16 +654,23 @@ export class DB {
     };
   }
 
+  // The runtime context a group-scoped document needs, throwing when the user is not in a group with an
+  // offering. Both a group document's owner id and its canonical-pointer path are keyed on
+  // `group_<offeringId>_<groupId>`, so both values are required; returning them narrows them to strings.
+  private requireGroupContext() {
+    const { currentGroupId, offeringId } = this.stores.user;
+    if (!currentGroupId || !offeringId) {
+      throw new Error("Cannot create group document because user is not in a group with an offering.");
+    }
+    return { groupId: currentGroupId, offeringId };
+  }
+
   // Verify the stores hold the runtime context a document of this kind needs to construct its owner and
-  // location fields. Throws when the context is missing. Only group-owned kinds have a requirement: their owner
-  // id is `group_<offeringId>_<groupId>`, so both are required. The check lives here instead of the kind registry
-  // because it is easier for now.
+  // location fields. Throws when the context is missing. Currently only group-owned kinds have a requirement.
+  // The check lives here instead of the kind registry because it is easier for now.
   private validateDocumentKindCreation(kind: string) {
     if (getDocumentOwnerType(kind) === "group") {
-      const { currentGroupId, offeringId } = this.stores.user;
-      if (!currentGroupId || !offeringId) {
-        throw new Error("Cannot create group document because user is not in a group with an offering.");
-      }
+      this.requireGroupContext();
     }
   }
 
@@ -763,17 +774,13 @@ export class DB {
 
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
-    const groupId = user.currentGroupId;
-    // The group owner id and canonical-pointer path are both keyed on `group_<offeringId>_<groupId>`.
-    if (!groupId || !user.offeringId) {
-      return Promise.reject("Cannot create group document because user is not in a group with an offering.");
-    }
+    const { groupId, offeringId } = this.requireGroupContext();
     // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
     // The slot is labeled "default" (the group's default canonical document) rather than by the
     // document's type — see kDefaultCanonicalDocumentLabel. For a regular group document the
     // transitional `type` and the `kind` coincide, both GroupDocument.
     return this.getOrCreateCanonicalDocument({
-      container: { classHash: user.classHash, offeringId: user.offeringId },
+      container: { classHash: user.classHash, offeringId },
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       type: GroupDocument,
       kind: GroupDocument,
@@ -807,22 +814,13 @@ export class DB {
     if (!classWideDocs?.length) return;
     for (const classWideDoc of classWideDocs) {
       // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry and createDocument derives its owner and location. Class-wide collaborative documents are
-      // always concurrent, class-owned (class_<classHash>), and kept in the class's copy of the unit, about
-      // that unit and nothing narrower. The authored title is registered here (not stored per document) so it
-      // is resolved live by kind — an author changing it applies to every document of that kind (see
-      // getDocumentTitle). registerDocumentKind validates the kind and rejects a duplicate (both throw); skip
-      // a bad entry rather than crash startup.
+      // registry and createDocument derives its owner and location — registerClassWideDocumentKind supplies the
+      // shape every class-wide document shares. The unit is the same code stamped as the document's `unit` (see
+      // currentProblemInfo), so getDocumentTitle can tell this unit's documents from another unit's that
+      // declares the same kind. Registration validates the kind and rejects a duplicate (both throw); skip a bad
+      // entry rather than crash startup.
       try {
-        registerDocumentKind(classWideDoc.kind, {
-          metadataFields: { concurrent: true },
-          ownerType: "class",
-          containerType: "classUnit",
-          title: classWideDoc.title,
-          // The same code stamped as the document's `unit` (see currentProblemInfo), so getDocumentTitle
-          // can tell this unit's documents from another unit's that declares the same kind.
-          unit: this.stores.unit.code
-        });
+        registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title, this.stores.unit.code);
       } catch (err) {
         console.error("Ignoring class-wide document:", classWideDoc.kind, err);
         continue;
@@ -1049,7 +1047,7 @@ export class DB {
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
     const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
-           problem, investigation, unit, offeringId, authorGroupId} = options;
+           problem, investigation, unit, offeringId, groupIdOfUserOwner} = options;
     const existingPromise = this.documentFetchPromiseMap.get(documentKey);
     if (existingPromise) return existingPromise;
 
@@ -1091,7 +1089,10 @@ export class DB {
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
           // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
           // it'd be possible for someone to add a concurrent field to another document type and then we'd
-          // accidentally update the firestore metadata.
+          // accidentally update the firestore metadata. Add a type here as it is converted to the axes, and
+          // drop the check once they all are — but note this write-back is made by the signed-in user, so an
+          // axis the security rules enforce can't be stamped from here at all. See "Which documents get
+          // stamped" in docs/document-axes/target-architecture.md.
           if (firestoreMetadata.type === GroupDocument
               && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))
@@ -1131,7 +1132,7 @@ export class DB {
               investigation,
               unit,
               offeringId,
-              authorGroupId,
+              groupIdOfUserOwner,
               contextId: firestoreMetadata.context_id ?? undefined,
               concurrent,
               kind,
@@ -1250,10 +1251,14 @@ export class DB {
           Logger.log(logEventName, {
             title: newDocument.title
           });
-          // reset the (presumably null) promise for this document type
+          // Open the just-created document directly. This avoids waiting for required documents system to
+          // resolve it. The required documents system has a race condition in this code path. We still need
+          // to trigger the required documents system though since that is needed when createOtherDocument is
+          // called from the startup code.
+          const document = await this.createDocumentModelFromOtherDocument(newDocument, documentType);
           documents.addRequiredDocumentPromises([documentType]);
-          // return the promise, which will be resolved by the DB listener
-          return documents.requiredDocuments[documentType].promise;
+          documents.resolveRequiredDocumentPromise(document);
+          return document;
         })
         .then(resolve)
         .catch(reject);
@@ -1296,7 +1301,7 @@ export class DB {
     return this.openDocument({
       type,
       userId,
-      authorGroupId: group?.id,
+      groupIdOfUserOwner: group?.id,
       documentKey,
       visibility: metadata.visibility,
       ...problemInfo
@@ -1311,8 +1316,8 @@ export class DB {
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
-    const authorGroupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, authorGroupId, title, properties});
+    const groupIdOfUserOwner = group && group.id;
+    return this.openDocument({type, userId: uid, documentKey, groupIdOfUserOwner, title, properties});
   }
 
   // handles published personal documents and published learning logs
@@ -1320,16 +1325,16 @@ export class DB {
     const {title, properties, uid, originDoc, self: {documentKey}, pubVersion} = publication;
 
     const group = this.stores.groups.groupForUser(uid);
-    const authorGroupId = group && group.id;
+    const groupIdOfUserOwner = group && group.id;
     return this.openDocument({
-      type, userId: uid, documentKey, authorGroupId, title, properties, originDoc, pubVersion
+      type, userId: uid, documentKey, groupIdOfUserOwner, title, properties, originDoc, pubVersion
     });
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    // The publication record's `groupId` is the author's group at publish time — a snapshot of a fact
-    // about the author, which is why it lands on `authorGroupId` rather than the owning group.
-    const {groupId: authorGroupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
+    // The publication record's `groupId` is the publishing user's group at publish time — a snapshot of
+    // a fact about that user, which is why it lands on `groupIdOfUserOwner` rather than the owning group.
+    const {groupId: groupIdOfUserOwner, groupUserConnections, userId, documentKey, pubVersion} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
@@ -1344,7 +1349,7 @@ export class DB {
       documentKey,
       type: "publication",
       userId,
-      authorGroupId,
+      groupIdOfUserOwner,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
       pubVersion,

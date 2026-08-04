@@ -164,11 +164,11 @@ describe("document model", () => {
     });
   });
 
-  it("can set the author's group id, without touching the owning group", () => {
-    expect(document.authorGroupId).toBeUndefined();
-    document.setAuthorGroupId("group-1");
-    expect(document.authorGroupId).toBe("group-1");
-    // The owning group comes from the stored metadata and is not what tracks the author's membership.
+  it("can set the owning user's group id, without touching the owning group", () => {
+    expect(document.groupIdOfUserOwner).toBeUndefined();
+    document.setGroupIdOfUserOwner("group-1");
+    expect(document.groupIdOfUserOwner).toBe("group-1");
+    // The owning group comes from the stored metadata and is not what tracks that user's membership.
     expect(document.groupId).toBeUndefined();
   });
 

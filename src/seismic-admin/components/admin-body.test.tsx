@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { AdminBody } from "./admin-body";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
-import { getStationChannelPrefix } from "../../../shared/seismic/tile-addressing";
+import { getStationChannelPrefix } from "../../../shared/seismic/station-addressing";
 
 const stationA = { network: "AK", station: "K204", channel: "HNZ" };
 const stationB = { network: "AK", station: "M205", channel: "HNZ" };

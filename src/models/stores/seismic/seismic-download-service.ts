@@ -6,6 +6,11 @@ import { StationData } from "../../../../shared/seismic/seismic-types";
 export const DONE = Symbol("download-done");
 export type ReadyDay = number | typeof DONE;
 
+/** The subset of SeismicDownloadService the coverage/envelope processors use;
+ *  tests inject fakes against it. */
+export type DayDownloadService = Pick<SeismicDownloadService,
+  "ensureRange" | "nextReadyDay" | "readDay" | "cancel" | "emptyDays" | "erroredDays" | "bytesForDay">;
+
 function defaultRunner(): DownloadRunner {
   return (params, onEvent, cancel) => {
     let cancelled = false;
