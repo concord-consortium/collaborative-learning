@@ -18,7 +18,7 @@ module.exports = {
       }
     },
     ignorePatterns: [
-      "build/", "node_modules/"
+      "build/", "node_modules/", "src/plugins/dataflow/firmware/"
     ],
     extends: [
       "eslint:recommended",

@@ -33,13 +33,12 @@ export interface IDocumentKindInfo {
   kind: string;
   /** This kind's stamped fields, without `kind` — getDocumentKindMetadataFields adds it back. */
   metadataFields: Omit<IDocumentKindMetadataFields, "kind">;
-  /** How this kind's owner uid is derived (see DocumentOwnerType). */
+  /** How this kind's owner uid is derived. */
   ownerType: DocumentOwnerType;
-  /** Which container this kind's documents live in, and their curriculum reach (see DocumentContainerType). */
+  /** Which container this kind's documents live in, and their curriculum reach. */
   containerType: DocumentContainerType;
   /**
-   * Static document display title. Leave undefined for dynamic titles like
-   * group documents or in the future problem documents.
+   * Static document display title. Leave undefined for dynamic titles.
    */
   title?: string;
   /**
@@ -255,6 +254,24 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
 export function getDocumentKindLabel(kind?: string | null): string | undefined {
   if (!kind) return undefined;
   return upperFirst(kind.replace(/([A-Z])/g, " $1"));
+}
+
+/**
+ * Register a kind declared by a unit's `classWideDocuments` configuration. Every class-wide collaborative
+ * document has the same shape — concurrent, owned by the synthetic class owner, kept in the class's copy of
+ * the unit and about that unit and nothing narrower — so only the kind key, the authored title, and the
+ * declaring unit come from the configuration. The title is registered rather than stored per document so it
+ * resolves live by kind, and the unit keeps it from naming another unit's documents of the same kind (see
+ * getDocumentTitle). Throws like registerDocumentKind when the kind is malformed or already registered.
+ */
+export function registerClassWideDocumentKind(kind: string, title: string, unit: string) {
+  registerDocumentKind(kind, {
+    metadataFields: { concurrent: true },
+    ownerType: "class",
+    containerType: "classUnit",
+    title,
+    unit
+  });
 }
 
 function registerBuiltInDocumentKinds() {

@@ -13,6 +13,7 @@ import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
+import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
 
 import "./chat-sidebar.scss";
 
@@ -67,6 +68,10 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
   const header = `${documentTitle} · ${problemPath}`;
   const chat = useChat({ transport, header });
 
+  // Display-only persona intro (never part of the AI context). An unset value uses the built-in
+  // default; an authored empty string suppresses the intro entirely (?? keeps "" distinct from unset).
+  const introText = appConfig.chatTutorIntro ?? CHAT_TUTOR_DEFAULT_INTRO;
+
   return (
     <div
       ref={containerRef}
@@ -78,7 +83,8 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
       data-testid="chat-tutor-sidebar"
     >
       <div ref={bodyRef} className="chat-tutor-sidebar-body">
-        <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header} />
+        <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header}
+              introText={introText} />
       </div>
     </div>
   );

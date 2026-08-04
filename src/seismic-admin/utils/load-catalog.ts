@@ -1,4 +1,4 @@
-import { ModelListEntry } from "../../../shared/seismic/model-metadata";
+import { ModelListEntry } from "../../../shared/seismic/models/model-metadata";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
 import appConfig from "../../clue/app-config.json";
 import curriculumConfigJson from "../../clue/curriculum-config.json";

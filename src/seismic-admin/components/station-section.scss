@@ -23,11 +23,6 @@
       background-color: #ffeebb;
       border-radius: 12px;
     }
-
-    .icon {
-      height: 24px;
-      width: 24px;
-    }
   }
 
   .station-body {
@@ -70,19 +65,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-
-      button:enabled {
-        cursor: pointer;
-      }
-
-      .danger {
-        color: #fff;
-        background: #c0392b;
-
-        &:enabled:hover {
-          background: #a0190b;
-        }
-      }
     }
   }
 }

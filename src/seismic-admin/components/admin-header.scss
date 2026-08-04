@@ -5,6 +5,22 @@
   padding: 8px 12px;
   background: #efefef;
 
+  .title-row {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-right: 16px;
+
+    button {
+      background-color: #ffeebb;
+      padding: 4px 8px;
+
+      &:enabled:hover {
+        background-color: #f0e0b0;
+      }
+    }
+  }
+
   .options {
     display: flex;
     flex-direction: column;

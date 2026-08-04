@@ -7,7 +7,7 @@ import { DropdownListControl, IDropdownListControl, ListOption } from "./control
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { numSocket } from "./num-socket";
 import { NodeSensorTypes, kSensorMissingMessage, kSensorSelectMessage } from "../model/utilities/node";
-import { NodeChannelInfo, kDeviceDisplayNames, serialSensorChannels } from "../model/utilities/channel";
+import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { kSimulatedChannelPrefix, niceNameFromSimulationChannelId } from "../model/utilities/simulated-channel";
 import { ValueWithUnitsControl } from "./controls/value-with-units-control";
 import { kEmptyValueString } from "./utilities/view-utilities";
@@ -132,14 +132,13 @@ export class SensorNode extends BaseNode<
 
   getChannelString(ch: NodeChannelInfo) {
     if (ch.missing) {
-      const deviceStr = kDeviceDisplayNames[`${ch.deviceFamily}`];
-      return `${kSensorMissingMessage} Connect ${deviceStr} for live ${ch.displayName}`;
+      return `${kSensorMissingMessage} Connect a device for live ${ch.displayName}`;
     }
     const chStr = ch.virtual
       ? `${ch.name} Demo Data`
       : ch.simulated
         ? `Simulated ${ch.name}`
-        : `${ch.hubName}:${ch.type}`;
+        : ch.displayName ?? ch.type;
     return chStr;
   }
 

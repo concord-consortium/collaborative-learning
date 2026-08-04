@@ -242,7 +242,7 @@ describe("class-wide document canonical claim", () => {
   });
 });
 
-describe("class-wide get-or-create convergence (#1, #6)", () => {
+describe("class-wide get-or-create convergence", () => {
   it("two concurrent claims on the same class+unit pointer converge to one documentKey", async () => {
     const a = initFirestore(studentAuth);
     const b = initFirestore({ uid: "77", platform_user_id: 77, user_type: "student", class_hash: thisClass });

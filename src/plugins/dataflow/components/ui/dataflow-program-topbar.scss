@@ -19,6 +19,41 @@ $gray-text: #242424;
     display: flex;
     width: 100%;
     justify-content: left;
+    position: relative;
+
+    .serial-device-menu {
+      position: absolute;
+      top: 32px;
+      left: 5px;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border: 2px solid #bcbcbc;
+      border-radius: 3px;
+
+      button {
+        padding: 4px 10px;
+        text-align: left;
+        background-color: white;
+        border: none;
+        border-bottom: 1px solid #eee;
+        font-size: 12px;
+        color: var(--gray-text);
+        cursor: pointer;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: $gray-light-hover;
+        }
+        &:active {
+          background-color: $gray-light-click;
+        }
+      }
+    }
 
     .icon-refresh {
       display: flex;
@@ -87,7 +122,7 @@ $gray-text: #242424;
       &:disabled {
         opacity: 0.6;
       }
-      &.physical-connection.no-port.nodes-in-need {
+      &.physical-connection.not-connected.nodes-in-need {
         background-color: $star-yellow;
         animation: slowpulse 1.5s linear infinite;
 
@@ -97,14 +132,14 @@ $gray-text: #242424;
           }
         }
       }
-      &.has-port {
+      &.connected {
         background-color: #82f982; //lightened "online button" green
       }
       &.nodes-in-need.no-physical-connection {
         background-color: $problem-orange-light-2;
         animation: slowpulse 1.5s linear infinite;
       }
-      &.has-port.no-physical-connection { //occurs if wire yanked out
+      &.connected.no-physical-connection { //occurs if wire yanked out
         background-color: $problem-orange-light-2;
         animation: slowpulse 1.5s linear infinite;
       }
