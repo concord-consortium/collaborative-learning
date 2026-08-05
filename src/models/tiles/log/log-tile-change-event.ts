@@ -16,20 +16,20 @@ interface IContext extends Record<string, any> {
   networkDocuments: DocumentsModelType;
 }
 
-function processTileChangeEvent(params: ITileChangeLogEvent, context: IContext) {
+function processTileChangeEvent(params: ITileChangeLogEvent, context?: IContext) {
   const { tileId, operation, change, ...others } = params;
-  const document = context.documents.findDocumentOfTile(tileId) ||
-                    context.networkDocuments.findDocumentOfTile(tileId);
+  // context (Logger.stores) is undefined when the Logger hasn't been initialized — e.g. component
+  // tests that trigger a tile-content change. Tolerate that rather than crash; the downstream
+  // Logger.log no-ops when logging is disabled. (Don't guard on isLoggingEnabled here: cypress stubs
+  // Logger.log and asserts these events reach it even though logging isn't "enabled".)
+  const document = context?.documents.findDocumentOfTile(tileId) ||
+                    context?.networkDocuments.findDocumentOfTile(tileId);
   const legacyChangeProps = { toolId: tileId, operation, ...change };
   const tileTitle = getTileTitleForLogging(tileId, document);
   return { document, tileId, ...legacyChangeProps, tileTitle, ...others };
 }
 
 export function logTileChangeEvent(event: LogEventName, _params: ITileChangeLogEvent) {
-  // Short-circuit when logging is off (mirrors Logger.log's own guard). Everything below bottoms out
-  // at Logger.log, which no-ops when disabled, so skipping avoids the document lookup — and avoids
-  // dereferencing the uninitialized Logger.stores (e.g. in component tests that trigger content changes).
-  if (!Logger.isLoggingEnabled) return;
   const params = processTileChangeEvent(_params, Logger.stores);
   if (isTileBaseEvent(params)) {
     logTileBaseEvent(event, params);
