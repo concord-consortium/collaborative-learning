@@ -43,3 +43,11 @@ export function getStationChannelPrefix(stationData: StationData): string {
   const { channel, location } = stationData;
   return `${getStationPrefix(stationData)}/${encodeLocation(location)}/${channel}`;
 }
+
+export function getLevelPrefix(stationData: StationData): string {
+  return `${getStationChannelPrefix(stationData)}/L`;
+}
+
+export function getLevelPath(stationData: StationData, level: number): string {
+  return `${getLevelPrefix(stationData)}${level}`;
+}

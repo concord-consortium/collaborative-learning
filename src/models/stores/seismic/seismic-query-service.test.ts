@@ -179,6 +179,60 @@ describe("SeismicQueryService loadViewport", () => {
   });
 });
 
+describe("SeismicQueryService invalidateEnvelopes", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  it("removes the station's envelope entries and bumps the invalidation count", () => {
+    const service = new SeismicQueryService();
+    const otherStation = { network: "AK", station: "DDM", channel: "HNZ" };
+    service.envelopeCache.set(envelopeCacheKey(stationData, 2, 5), "missing");
+    service.envelopeCache.set(envelopeCacheKey(stationData, 0, 0), "loading");
+    service.envelopeCache.set(envelopeCacheKey(otherStation, 2, 5), "missing");
+    expect(service.envelopeInvalidationCount).toBe(0);
+
+    service.invalidateEnvelopes(stationData);
+
+    expect(service.envelopeCache.has(envelopeCacheKey(stationData, 2, 5))).toBe(false);
+    expect(service.envelopeCache.has(envelopeCacheKey(stationData, 0, 0))).toBe(false);
+    expect(service.envelopeCache.has(envelopeCacheKey(otherStation, 2, 5))).toBe(true);
+    expect(service.envelopeInvalidationCount).toBe(1);
+  });
+
+  it("aborts in-flight envelope fetches so stale responses cannot repopulate the cache", async () => {
+    const encoded = encodeEnvelopeTile(new Int16Array([100]), new Int16Array([200]));
+    let resolveFetch: ((response: unknown) => void) | undefined;
+    mockFetch.mockImplementation((_url: string, options?: { signal?: AbortSignal }) =>
+      new Promise((resolve, reject) => {
+        resolveFetch = resolve;
+        options?.signal?.addEventListener("abort", () =>
+          reject(new DOMException("Aborted", "AbortError")));
+      })
+    );
+
+    const service = new SeismicQueryService();
+    const level = 1;
+    const range = getTileTimeRange(level, 0);
+    service.loadViewport("caller1", {
+      stationData,
+      startTime: DateTime.fromSeconds(range.start, { zone: "utc" }),
+      endTime: DateTime.fromSeconds(range.start + LEVEL_SPACINGS[level], { zone: "utc" }),
+      pixelWidth: 1,
+    });
+    const key = envelopeCacheKey(stationData, level, 0);
+    expect(service.envelopeCache.get(key)).toBe("loading");
+
+    service.invalidateEnvelopes(stationData);
+
+    // A stale response arriving after invalidation must not repopulate the cache
+    resolveFetch?.({ ok: true, status: 200, arrayBuffer: () => Promise.resolve(encoded) });
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(service.envelopeCache.has(key)).toBe(false);
+  });
+});
+
 describe("getMetadata", () => {
   beforeEach(() => {
     mockFetch.mockReset();

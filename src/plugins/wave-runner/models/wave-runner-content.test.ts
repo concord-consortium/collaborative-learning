@@ -473,3 +473,102 @@ describe("WaveRunnerContent", () => {
     });
   });
 });
+
+describe("loadEnvelopeData", () => {
+  const station = { network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport" };
+  const fakeUploader = { uploadTile: jest.fn().mockResolvedValue(undefined) };
+  const getJwt = jest.fn().mockResolvedValue("jwt");
+
+  function createContent() {
+    return WaveRunnerContentModel.create({ station, startDate: "2025-01-01", endDate: "2025-01-02" });
+  }
+
+  beforeEach(() => {
+    fakeUploader.uploadTile.mockClear();
+    getJwt.mockClear();
+  });
+
+  it("runs the envelope service over the day-aligned inclusive range", async () => {
+    const content = createContent();
+    const processEnvelopes = jest.fn().mockImplementation(async (callOpts: any) => {
+      callOpts.onProgress?.(1, 2);
+      return { uploadedTiles: 3, processedDays: 2, skippedDays: 0, totalDays: 2 };
+    });
+    const onEnvelopesUpdated = jest.fn();
+    await content.loadEnvelopeData({ getJwt, uploader: fakeUploader, processEnvelopes, onEnvelopesUpdated });
+
+    expect(processEnvelopes).toHaveBeenCalledTimes(1);
+    const opts = processEnvelopes.mock.calls[0][0];
+    // 2025-01-01 through the end of 2025-01-02 (endDate is inclusive)
+    expect(opts.range).toEqual({ start: Date.UTC(2025, 0, 1) / 1000, end: Date.UTC(2025, 0, 3) / 1000 });
+    expect(content.loadDaysDone).toBe(1);
+    expect(content.loadDaysTotal).toBe(2);
+    expect(content.isLoadingData).toBe(false);
+    expect(content.loadDataError).toBeNull();
+    expect(onEnvelopesUpdated).toHaveBeenCalled();
+  });
+
+  it("routes tile uploads through the uploader with the station", async () => {
+    const content = createContent();
+    const tile = { mins: new Int16Array(0), maxs: new Int16Array(0) };
+    const processEnvelopes = jest.fn().mockImplementation(async (opts: any) => {
+      await opts.uploadTile(2, 7, tile);
+      return { uploadedTiles: 1, processedDays: 1, skippedDays: 0, totalDays: 1 };
+    });
+    await content.loadEnvelopeData({ getJwt, uploader: fakeUploader, processEnvelopes });
+    expect(fakeUploader.uploadTile).toHaveBeenCalledWith(content.station, 2, 7, tile);
+  });
+
+  it("skips the refresh callback when nothing was uploaded", async () => {
+    const content = createContent();
+    const processEnvelopes = jest.fn().mockResolvedValue(
+      { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
+    const onEnvelopesUpdated = jest.fn();
+    await content.loadEnvelopeData({ getJwt, uploader: fakeUploader, processEnvelopes, onEnvelopesUpdated });
+    expect(onEnvelopesUpdated).not.toHaveBeenCalled();
+  });
+
+  it("reports errors and still refreshes since tiles may have uploaded before the failure", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      const content = createContent();
+      const processEnvelopes = jest.fn().mockRejectedValue(new Error("upload failed"));
+      const onEnvelopesUpdated = jest.fn();
+      await content.loadEnvelopeData({ getJwt, uploader: fakeUploader, processEnvelopes, onEnvelopesUpdated });
+      expect(content.loadDataError).toBe("Error loading data: upload failed");
+      expect(content.isLoadingData).toBe(false);
+      expect(onEnvelopesUpdated).toHaveBeenCalled();
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it("rejects an end date before the start date", async () => {
+    const content = WaveRunnerContentModel.create({ station, startDate: "2025-02-01", endDate: "2025-01-01" });
+    const processEnvelopes = jest.fn();
+    await content.loadEnvelopeData({ getJwt, uploader: fakeUploader, processEnvelopes });
+    expect(processEnvelopes).not.toHaveBeenCalled();
+    expect(content.loadDataError).toMatch(/Invalid date range/);
+  });
+
+  it("ignores a second call while a load is in flight", async () => {
+    const content = createContent();
+    let resolveRun: (v: unknown) => void = () => undefined;
+    const processEnvelopes = jest.fn(() => new Promise(res => { resolveRun = res; }));
+    const options = { getJwt, uploader: fakeUploader, processEnvelopes: processEnvelopes as any };
+    const first = content.loadEnvelopeData(options);
+    const second = content.loadEnvelopeData(options);
+    await second;
+    expect(processEnvelopes).toHaveBeenCalledTimes(1);
+    resolveRun({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
+    await first;
+    expect(content.isLoadingData).toBe(false);
+  });
+
+  it("does nothing without a station", async () => {
+    const content = WaveRunnerContentModel.create({});
+    const processEnvelopes = jest.fn();
+    await content.loadEnvelopeData({ getJwt, uploader: fakeUploader, processEnvelopes });
+    expect(processEnvelopes).not.toHaveBeenCalled();
+  });
+});

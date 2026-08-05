@@ -97,7 +97,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="dropdown"
             value={currentStationId ?? ""}
             onChange={handleStationChange}
-            disabled={!hasStations || content.isRunning}
+            disabled={!hasStations || content.isRunning || content.isLoadingData}
           >
             {!hasStations && <option value="">No stations configured</option>}
             {hasStations && !currentStationId && <option value="">Choose a station</option>}
@@ -132,7 +132,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             type="datetime-local"
             value={`${content.startDate}T00:00`}
             onChange={e => content.setStartDate(e.target.value.split("T")[0])}
-            disabled={content.isRunning}
+            disabled={content.isRunning || content.isLoadingData}
           />
         </div>
         <div className="field">
@@ -143,7 +143,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             type="datetime-local"
             value={`${content.endDate}T00:00`}
             onChange={e => content.setEndDate(e.target.value.split("T")[0])}
-            disabled={content.isRunning}
+            disabled={content.isRunning || content.isLoadingData}
           />
         </div>
       </div>
