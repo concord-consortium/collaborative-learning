@@ -19,6 +19,9 @@ import { SharedModelType } from "../../../models/shared/shared-model";
 
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
@@ -52,6 +55,18 @@ export type BackgroundLockInfo = {
 
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
+
+// The GraphModel has many actions; most are UI-state, selection, or styling (and some, like
+// setInteractionInProgress, fire on every drag frame). We log only the ones that represent a student
+// building/editing the graph — an allow-list is safer than trying to ignore the noisy majority.
+const kLoggedGraphActions = new Set([
+  "createEditableLayer",
+  "setAttributeID", "removeAttribute", "removeYAttributeID", "replaceYAttributeID", "setPrimaryRole",
+  "setAxis", "removeAxis",
+  "setPlotType",
+  "setXAttributeLabel", "setYAttributeLabel",
+  "addAdornment", "showAdornment", "hideAdornment"
+]);
 
 export const GraphModel = TileContentModel
   .named("GraphModel")
@@ -831,6 +846,19 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.config.handleDataSetChange();
       }
+    }
+  }))
+  .actions(self => ({
+    // Overrides the base no-op onTileAction (TileModel forwards every content action here). Log the
+    // allow-listed answer-relevant actions as GRAPH_TOOL_CHANGE so free-standing graph work reaches
+    // the Researcher report (via the QUESTION_ANSWERS_CHANGE side-effect of logTileChangeEvent).
+    onTileAction(call: ISerializedActionCall) {
+      if (!kLoggedGraphActions.has(call.name)) return;
+      logTileChangeEvent(LogEventName.GRAPH_TOOL_CHANGE, {
+        tileId: getTileIdFromContent(self) ?? "",
+        operation: call.name,
+        change: { args: call.args }
+      });
     }
   }));
 
