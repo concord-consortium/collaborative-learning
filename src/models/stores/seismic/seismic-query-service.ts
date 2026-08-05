@@ -46,7 +46,7 @@ export class SeismicQueryService {
   metadataCache: Map<string, ChannelMetadata[]> = observable.map();
 
   /** Bumped by invalidateEnvelopes so viewport loaders know to re-fetch. */
-  envelopeCacheVersion = 0;
+  envelopeInvalidationCount = 0;
 
   /** In-flight AbortControllers keyed by callerId */
   private inflightByCallerId: Map<string, Map<string, AbortController>> = new Map();
@@ -119,7 +119,7 @@ export class SeismicQueryService {
         }
       }
     }
-    this.envelopeCacheVersion++;
+    this.envelopeInvalidationCount++;
   }
 
   /**

@@ -46,7 +46,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   }, []);
 
   // Re-run loadViewport when cached envelope data is invalidated (e.g. after tile uploads).
-  const cacheVersion = seismicQueryService.envelopeCacheVersion;
+  const cacheVersion = seismicQueryService.envelopeInvalidationCount;
 
   // Debounce loadViewport
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);

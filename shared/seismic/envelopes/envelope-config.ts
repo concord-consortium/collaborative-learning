@@ -78,7 +78,9 @@ export const AWS_REGION = "us-east-1";
 export const S3_PREFIX = "collaborative-learning/envelopes/";
 
 /** Base URL of the S3 bucket hosting envelope tiles. */
-export const TILE_BASE_URL = `https://${getS3Bucket()}.s3.amazonaws.com/`;
+export function getTileBaseUrl() {
+  return `https://${getS3Bucket()}.s3.amazonaws.com/`;
+}
 
 /** Duration of each raw data fetch chunk in seconds. */
 export const RAW_CHUNK_DURATION = 7200; // 2 hours

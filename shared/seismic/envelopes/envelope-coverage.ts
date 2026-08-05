@@ -1,4 +1,4 @@
-import { FINEST_LEVEL, S3_PREFIX, TILE_BASE_URL } from "./envelope-config";
+import { FINEST_LEVEL, S3_PREFIX, getTileBaseUrl } from "./envelope-config";
 import { dayIndex, dayRange } from "../seismic-day";
 import { DayCoverageState, DaySpan, StationData, TimeRange } from "../seismic-types";
 import { getLevelPath } from "../station-addressing";
@@ -14,7 +14,7 @@ export async function listEnvelopeTileIndices(
   const indices = new Set<number>();
   let continuationToken: string | undefined;
   do {
-    let url = `${TILE_BASE_URL}?list-type=2&max-keys=1000&prefix=${encodeURIComponent(prefix)}`;
+    let url = `${getTileBaseUrl()}?list-type=2&max-keys=1000&prefix=${encodeURIComponent(prefix)}`;
     if (continuationToken) url += `&continuation-token=${encodeURIComponent(continuationToken)}`;
     const response = await fetchFn(url);
     if (!response.ok) throw new Error(`Envelope tile listing failed: ${response.status}`);
