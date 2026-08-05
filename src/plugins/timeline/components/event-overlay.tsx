@@ -8,21 +8,16 @@ import "./event-overlay.scss";
 
 export const EventOverlay = observer(function EventOverlay() {
   const content = useTimelineContent();
-  const startTime = content.viewStartTime;
-  const endTime = content.viewEndTime;
   const visibleEvents = content.visibleEvents;
   const colorWords = content.eventTypeColorWords;
 
   function getEventPosition(event: TimelineEvent) {
-    if (!startTime || !endTime) return null;
-    const viewStartMs = startTime.toMillis();
-    const viewEndMs = endTime.toMillis();
-    const viewDuration = viewEndMs - viewStartMs;
-    if (viewDuration <= 0) return null;
+    const startPct = content.timeToViewPct(event.windowStart);
+    const endPct = content.timeToViewPct(event.windowEnd);
+    if (startPct === undefined || endPct === undefined) return null;
 
-    const leftPct = (Math.max(event.windowStart.toMillis(), viewStartMs) - viewStartMs) / viewDuration * 100;
-    const rightPct = (Math.min(event.windowEnd.toMillis(), viewEndMs) - viewStartMs) / viewDuration * 100;
-    const widthPct = rightPct - leftPct;
+    const leftPct = Math.max(startPct, 0);
+    const widthPct = Math.min(endPct, 100) - leftPct;
 
     return { leftPct, widthPct };
   }
