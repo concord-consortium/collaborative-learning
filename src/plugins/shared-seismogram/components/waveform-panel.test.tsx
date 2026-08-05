@@ -23,9 +23,9 @@ const mockQuery = jest.fn().mockReturnValue({
 });
 const mockLoadViewport = jest.fn();
 
-// Observable so envelopeCacheVersion bumps re-render the observer component
+// Observable so envelopeInvalidationCount bumps re-render the observer component
 const mockService = observable({
-  envelopeCacheVersion: 0,
+  envelopeInvalidationCount: 0,
   query: mockQuery,
   loadViewport: mockLoadViewport,
 });
@@ -71,7 +71,7 @@ describe("WaveformPanel", () => {
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
-  it("re-runs loadViewport when the envelope cache version is bumped", () => {
+  it("re-runs loadViewport when the envelope invalidation count is bumped", () => {
     jest.useFakeTimers();
     const OriginalResizeObserver = global.ResizeObserver;
     // A ResizeObserver that reports a width immediately so pixelWidth > 0
@@ -88,7 +88,7 @@ describe("WaveformPanel", () => {
       act(() => { jest.advanceTimersByTime(200); });  // past the 150ms debounce
       expect(mockLoadViewport).toHaveBeenCalledTimes(1);
 
-      act(() => { runInAction(() => { mockService.envelopeCacheVersion++; }); });
+      act(() => { runInAction(() => { mockService.envelopeInvalidationCount++; }); });
       act(() => { jest.advanceTimersByTime(200); });
       expect(mockLoadViewport).toHaveBeenCalledTimes(2);
     } finally {
