@@ -26,6 +26,10 @@ function processTileChangeEvent(params: ITileChangeLogEvent, context: IContext) 
 }
 
 export function logTileChangeEvent(event: LogEventName, _params: ITileChangeLogEvent) {
+  // Short-circuit when logging is off (mirrors Logger.log's own guard). Everything below bottoms out
+  // at Logger.log, which no-ops when disabled, so skipping avoids the document lookup — and avoids
+  // dereferencing the uninitialized Logger.stores (e.g. in component tests that trigger content changes).
+  if (!Logger.isLoggingEnabled) return;
   const params = processTileChangeEvent(_params, Logger.stores);
   if (isTileBaseEvent(params)) {
     logTileBaseEvent(event, params);

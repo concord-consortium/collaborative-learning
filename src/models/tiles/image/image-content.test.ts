@@ -1,5 +1,9 @@
 import { defaultImageContent, ImageContentModel } from "./image-content";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import { logTileChangeEvent } from "../log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
+
+jest.mock("../log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
 describe("ImageContent", () => {
   it("should handle empty change lists", () => {
@@ -33,6 +37,17 @@ describe("ImageContent", () => {
     expect(content.filename).toBe("my/image/filename");
     expect(content.url).toBe("my/image/url");
     expect(content.hasValidImage).toBe(true);
+  });
+
+  it("logs an IMAGE_TOOL_CHANGE when the url is set (so the tile registers as answer work)", () => {
+    (logTileChangeEvent as jest.Mock).mockClear();
+    const content = ImageContentModel.create();
+    content.setUrl("my/image/url", "my/image/filename");
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.IMAGE_TOOL_CHANGE, {
+      tileId: "",
+      operation: "update",
+      change: { url: "my/image/url", filename: "my/image/filename" }
+    });
   });
 
   it("should update changes", () => {
