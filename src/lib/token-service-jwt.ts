@@ -27,7 +27,7 @@ export function makeTokenServiceJwtGetter(portal: Portal): (() => Promise<string
     // Reads rawPortalJWT at call time so the retry below picks up the refreshed value.
     const exchange = async () => {
       const [rawJwt] = await getFirebaseJWTWithBearerToken(
-        base, "Bearer/JWT", portal.rawPortalJWT, undefined, TOKEN_SERVICE_FIREBASE_APP
+        base, portal.rawPortalJWT, undefined, TOKEN_SERVICE_FIREBASE_APP
       );
       return rawJwt;
     };
@@ -47,7 +47,7 @@ export function makeTokenServiceJwtGetter(portal: Portal): (() => Promise<string
     const base = authDomain.endsWith("/") ? authDomain : `${authDomain}/`;
     return async () => {
       const [rawJwt] = await getFirebaseJWTWithBearerToken(
-        base, "Bearer", bearerToken, undefined, TOKEN_SERVICE_FIREBASE_APP);
+        base, bearerToken, undefined, TOKEN_SERVICE_FIREBASE_APP);
       return rawJwt;
     };
   }

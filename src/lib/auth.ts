@@ -119,13 +119,13 @@ export const getFirebaseJWTParams = (classHash?: string, firebaseApp = FIREBASE_
 };
 
 export const getFirebaseJWTWithBearerToken = (
-  basePortalUrl: string, type: string, rawToken: string, classHash?: string, firebaseApp?: string
+  basePortalUrl: string, rawToken: string, classHash?: string, firebaseApp?: string
 ) => {
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
     const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash, firebaseApp)}`;
     superagent
       .get(maybeAddResearcherParam(url))
-      .set("Authorization", `${type} ${rawToken}`)
+      .set("Authorization", `Bearer ${rawToken}`)
       .end((err, res) => {
         if (err) {
           reject(getErrorMessage(err, res));
@@ -252,9 +252,8 @@ export const authenticate = async (
   const uidAsString = `${portalJWT.uid}`;
   // TODO: figure out why we need to use bearer tokens here in normal mode
   // when we already have the portalJWT in all cases
-  const tokenType = user?.standaloneAuthUser ? "Bearer/JWT" : "Bearer";
   const rawToken = user?.standaloneAuthUser?.rawJWT ?? bearerToken;
-  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, tokenType, rawToken, classHash);
+  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, rawToken, classHash);
   const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
   const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 

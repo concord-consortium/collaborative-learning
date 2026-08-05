@@ -31,14 +31,14 @@ describe("makeTokenServiceJwtGetter", () => {
     const getJwt = makeTokenServiceJwtGetter(specPortal())!;
     await expect(getJwt()).resolves.toBe("ts-jwt");
     expect(mockExchange).toHaveBeenCalledWith(
-      "https://learn.example.com/", "Bearer/JWT", "portal-jwt", undefined, TOKEN_SERVICE_FIREBASE_APP);
+      "https://learn.example.com/", "portal-jwt", undefined, TOKEN_SERVICE_FIREBASE_APP);
   });
 
   it("refreshes the portal JWT and retries once when the exchange fails", async () => {
     const portal = specPortal();
     mockExchange
       .mockRejectedValueOnce(new Error("401"))
-      .mockImplementationOnce(async (_base, _type, jwt) => [`ts-jwt-for-${jwt}`, {}]);
+      .mockImplementationOnce(async (_base, jwt) => [`ts-jwt-for-${jwt}`, {}]);
     (portal.requestPortalJWT as jest.Mock).mockImplementation(async () => {
       (portal as { rawPortalJWT: string }).rawPortalJWT = "fresh-portal-jwt";
       return {};
@@ -70,7 +70,7 @@ describe("makeTokenServiceJwtGetter", () => {
       const getJwt = makeTokenServiceJwtGetter(fallbackPortal())!;
       await expect(getJwt()).resolves.toBe("ts-jwt");
       expect(mockExchange).toHaveBeenCalledWith(
-        "https://learn.example.com/", "Bearer", "access-token", undefined, TOKEN_SERVICE_FIREBASE_APP);
+        "https://learn.example.com/", "access-token", undefined, TOKEN_SERVICE_FIREBASE_APP);
     });
 
     it("returns undefined when the bearer token or authDomain is missing", () => {
@@ -87,7 +87,7 @@ describe("makeTokenServiceJwtGetter", () => {
       const getJwt = makeTokenServiceJwtGetter(portal)!;
       await getJwt();
       expect(mockExchange).toHaveBeenCalledWith(
-        "https://learn.example.com/", "Bearer/JWT", "portal-jwt", undefined, TOKEN_SERVICE_FIREBASE_APP);
+        "https://learn.example.com/", "portal-jwt", undefined, TOKEN_SERVICE_FIREBASE_APP);
     });
 
     it("does not refresh or retry when the bearer exchange fails", async () => {
