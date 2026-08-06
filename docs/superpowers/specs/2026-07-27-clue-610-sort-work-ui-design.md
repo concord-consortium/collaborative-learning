@@ -1,16 +1,22 @@
-# CLUE-550 Stage 3 — Sort Work + workspace UI for class-wide documents — Design
+# CLUE-610 — Sort Work + workspace UI for class-wide documents — Design
 
-> **How this shipped.** Stage 3 grew past 47 changed files and went out as two stacked PRs, so this one
-> spec covers both. It remains a design record written before implementation, not a summary of either PR:
+> **How this shipped.** This work grew past 47 changed files and went out as two stacked PRs, so this one
+> spec covers both. It remains a design record written before implementation, not a summary of either PR.
 >
-> - **#2940 — Stage 3a** (merges first): "Presentation off the axes" — the workspace title bar and the
+> It also ended up spanning **two stories**. It was designed and begun as Stage 3 of CLUE-550, and the
+> presentation half shipped under that story; the remaining half was split out into **CLUE-610** so the
+> release it lands in has its own story. CLUE-550 now covers the groundwork that reached production first.
+> References to CLUE-550 and to Stages 1–2 below are to that foundation and remain correct.
+>
+> - **#2940 — the presentation half** (merged first, under CLUE-550): the workspace title bar and the
 >   thumbnail treatment (Summary item 5, the consumer-table rows for `document.tsx` and
 >   `thumbnail-document-item.tsx`, and the implementation notes for both). It also carries two changes this
 >   spec does *not* describe, because they were found during implementation: surfacing `offeringId` on
 >   `IDocumentMetadataBase` and `DocumentMetadataModel`, and splitting `DocumentModel.groupId` into the
 >   owning group and a new `authorGroupId`.
-> - **#2942 — Stage 3b**: everything else — the axis guards, the Sort Work listener and sectioning, the edit
->   predicate, and the Firestore rules changes.
+> - **#2949 — everything else** (this story, CLUE-610): the axis guards, the Sort Work listener and
+>   sectioning, the edit predicate, and the Firestore rules changes. Replaces #2942, which was opened from
+>   the branch's earlier name; its review discussion stays readable there.
 >
 > Two statements below were overtaken by #2940 and are left as written rather than edited, since this is a
 > record of the design as it stood: the claim that `offeringId` "never reaches a read-side consumer" and that
@@ -21,19 +27,20 @@
 > **Status:** Design spec for this PR. Self-contained: it describes exactly what this PR delivers and cites only
 > docs already in the repo.
 >
-> **Where this fits.** Stage 1 landed the two stored axes (`concurrent`, `kind`) and rebased group-document
-> *behavior* onto them
+> **Where this fits.** CLUE-550's Stage 1 landed the two stored axes (`concurrent`, `kind`) and rebased
+> group-document *behavior* onto them
 > ([2026-07-23-clue-550-stage-1-document-axes-design.md](2026-07-23-clue-550-stage-1-document-axes-design.md)).
-> Stage 2 made the app auto-create a class-wide collaborative document — the Driving Question Board (DQB) is the
-> default slot — exactly once per class per unit, with **no UI**
+> Its Stage 2 made the app auto-create a class-wide collaborative document — the Driving Question Board (DQB) is
+> the default slot — exactly once per class per unit, with **no UI**
 > ([2026-07-23-clue-550-stage-2-class-wide-slots-design.md](2026-07-23-clue-550-stage-2-class-wide-slots-design.md)).
-> Stage 3 makes those documents **visible, sectioned, titled, and editable**. The roadmap lives at
+> Both shipped in 7.4.0 and are on production. **This work makes those documents visible, sectioned, titled,
+> and editable**, and goes out in 7.5.0. The roadmap lives at
 > [../../document-axes/README.md](../../document-axes/README.md).
 >
-> **Builds on:**
-> - **Stage 1** — the stored `concurrent`/`kind` axes and the kind registry.
-> - **Stage 2** — class-wide slot declaration (`classWideDocuments`), registry-derived owner/scope at creation,
->   and title resolution by kind (`getDocumentTitle`).
+> **Builds on** (all CLUE-550, already shipped):
+> - the stored `concurrent`/`kind` axes and the kind registry;
+> - class-wide slot declaration (`classWideDocuments`), registry-derived owner/scope at creation, and title
+>   resolution by kind (`getDocumentTitle`).
 
 ## Summary — what this PR delivers
 
@@ -56,7 +63,8 @@
    replacing the two inline gates (resolves review issue #4).
 7. **History-write authorization for synthetic document owners**, established by an emulator test first.
 
-The stored `type` value stays `"group"` (the Stage 1–3 transitional convention). Retiring it is Stage 4.
+The stored `type` value stays `"group"` (the transitional convention throughout this work). Retiring it is
+unscheduled follow-on work — see "Boundaries and non-goals".
 
 ## The scope-modeling checkpoint, resolved
 
@@ -443,7 +451,7 @@ declares a `drivingQuestionBoard` slot, so they are live now.
     `Group undefined`. That is what this stage's sectioning fixes.
   - `tile-activity-badges.tsx` gates on `type === GroupDocument`, so a class-wide document passes it. The
     activity listener is group-scoped, so only same-group members' presence appears on a class-wide document —
-    incomplete rather than incorrect, and exactly what Stage 4's unified class-scoped channel completes. No
+    incomplete rather than incorrect, and exactly what CLUE-611's unified class-scoped channel completes. No
     change here.
   - `document-workspace.tsx`'s `guaranteeInitialDocuments` re-opens a `type: "group"` primary document after a
     reload (group documents are not loaded automatically); a class-wide document restored as the primary
@@ -486,10 +494,12 @@ declares a `drivingQuestionBoard` slot, so they are live now.
 
 ## Boundaries and non-goals
 
-- **Presence is Stage 4.** The parallel group/class activity listener and broadcaster, the session/offering
-  dimension (review issue #5), and unified activity badges are not touched.
+- **Presence is deferred to CLUE-611.** The parallel group/class activity listener and broadcaster, the
+  session/offering dimension (review issue #5), and unified activity badges are not touched. On a class-wide
+  document the indicators therefore show only the viewer's own group — accepted for this release.
 - **The legacy type stays.** Documents still store `type: "group"`; flipping it to `"generic"` and removing
-  `GroupDocument`/`isGroup` is the Stage 4 closing cleanup.
+  `GroupDocument`/`isGroup` is unscheduled follow-on work. It is entangled with read access (below) and with
+  the transitional rules that CLUE-604 and CLUE-612 retire, so it cannot simply be done next.
 - **Read access still keys on `type`.** `isDocumentAccessibleToUser` continues to grant class-wide read via
   `metadata.type === GroupDocument`, which covers class-wide documents for free. Rebasing read access is
   deferred to the `permissions` axis, per Stage 1.
