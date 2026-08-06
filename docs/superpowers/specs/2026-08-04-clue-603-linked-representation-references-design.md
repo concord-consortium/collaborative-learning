@@ -1,6 +1,6 @@
 # CLUE-603 — Linked Representation References and Highlighting
 
-**Date:** 2026-08-04
+**Date:** 2026-08-04 · **Revised:** 2026-08-06
 **Jira:** [CLUE-603](https://concord-consortium.atlassian.net/browse/CLUE-603) — "Linked Representation Coachmarks in CLUE/Dataflow"
 **Epic:** CLUE-291 (DataFlow Vibe Coding) · **Grant:** GRANT-34 (402 FlowAI)
 **Follow-on:** [CLUE-598](https://concord-consortium.atlassian.net/browse/CLUE-598) — "AdaChat can return buttons that highlight Dataflow"
@@ -11,9 +11,16 @@ Build a reference system that lets one part of a CLUE document point at objects 
 another tile, plus an ephemeral highlight mechanism that makes those objects visually
 prominent when a reference is hovered or clicked.
 
-This story delivers the *mechanism* and demonstrates it with non-AI drivers. Teaching the
-AI to emit references, and rendering them as clickable buttons in an AI response, is
-CLUE-598.
+This story is **increment 1 of a planned sequence** (see "Planned increments" below). It
+delivers the smallest thing that works end to end: the reference and highlight machinery,
+Dataflow nodes as targets, and a text-tile variable chip as the driver. Everything else —
+additional target tiles, AI-emitted references, bidirectional highlighting — ships as
+separate stories and PRs.
+
+Leslie confirmed on 2026-08-06 that the stories may be reshaped freely, that the shortest
+path to something working is preferred over a complete first delivery, and that **extending
+the feature to another tile ranks above fleshing out Dataflow's object vocabulary**. The
+decomposition below reflects that priority.
 
 ## Goals
 
@@ -25,14 +32,18 @@ CLUE-598.
 
 ## Non-goals
 
-Explicitly out of scope, with the story that owns each:
+Explicitly out of scope, with the increment that owns each (numbers refer to "Planned
+increments"):
 
 | Deferred | Owner |
 |---|---|
-| AI emitting references; citation syntax; ids in the AI summary | CLUE-598 |
-| Rendering AI responses as clickable reference buttons | CLUE-598 |
-| Reverse direction (click a node → light up its references) | CLUE-598 |
-| Wires/connections and groups (supernodes) as targets | CLUE-598 |
+| Bidirectional highlighting (target → light up its references) | 2 |
+| Text tile as a *target* (both chip kinds) | 2 |
+| AI emitting references; citation syntax; ids in the AI summary | 3 (CLUE-598) |
+| Rendering AI responses as clickable reference elements | 3 (CLUE-598) |
+| Sketch/drawing tile as a target | 4 |
+| Wires/connections and groups (supernodes) as Dataflow targets | 5 |
+| Highlighting an arbitrary *range* of text | 6 |
 | Recasting the EMG Sensor as a purple chip | Leslie / design |
 | Any persistence of highlights | never — highlights are ephemeral by design |
 
@@ -151,7 +162,7 @@ It reuses the existing module-level pure helpers `simulatedChannel()` and
 `simulatedHubName()` so the string derivation has exactly one definition in the codebase.
 The scan mirrors the shape of `annotatableObjects` at `dataflow-content.ts:237-240`.
 
-Core stays generic, plugin knowledge stays in the plugin, and CLUE-598 inherits the hook
+Core stays generic, plugin knowledge stays in the plugin, and later increments inherit the hook
 for any other tile that needs it.
 
 ### 3. Highlight state
@@ -172,14 +183,25 @@ actions:   setHoveredRef(ref) / clearHoveredRef()
 
 views:     activeRef      = hoveredRef ?? pinnedRef
            activeSource   : "preview" | "pinned" | undefined
-           activeTargets  : Set<string>            // keys of `${tileId}/${objectId}`
-           isTargetActive(tileId, objectId): boolean
-           targetState(tileId, objectId): "preview" | "pinned" | undefined
+           isObjectActive(tileId, objectId): boolean
+           objectState(tileId, objectId): "preview" | "pinned" | undefined
 ```
 
-`activeTargets` is a MobX computed so the resolver scan runs once per reference change, not
-once per node per render — `isTargetActive` is called from inside every Dataflow node's
-render, so it must be an O(1) `Set` lookup.
+**The public surface is deliberately tile-facing queries, not an exposed target
+collection.** Internally `isObjectActive` is backed by a MobX computed `Set<string>` keyed
+`` `${tileId}/${objectId}` `` so the resolver scan runs once per reference change rather
+than once per node per render — it is called from inside every Dataflow node's render and
+must be an O(1) lookup. But that `Set` is an implementation detail and must not leak into
+the API.
+
+The reason is increment 6. A text *range* has no id and does not exist until it is resolved,
+so it cannot be represented as a `tileId/objectId` pair. Keeping the collection private
+means a later `activeRangesForTile(tileId): TextRange[]` can be added alongside
+`isObjectActive` without touching a single existing call site. Exposing the `Set` now would
+make that a breaking refactor across every consumer.
+
+Name the query `isObjectActive` rather than `isTargetActive` for the same reason: "target"
+will eventually cover more than objects.
 
 **Precedence: hover replaces pin, it does not add to it.** Exactly one reference is active
 at a time. While `hoveredRef` is set it is the active reference and the pinned reference's
@@ -187,15 +209,16 @@ targets are *not* highlighted; on mouse-out the active reference reverts to `pin
 rather than clearing.
 
 It follows that every active target shares a single state — `activeSource` is a property of
-the active reference, not of the individual target. `targetState(tileId, objectId)` is a
-convenience that returns `activeSource` when the target is active and `undefined` otherwise;
+the active reference, not of the individual target. `objectState(tileId, objectId)` is a
+convenience that returns `activeSource` when the object is active and `undefined` otherwise;
 it can never return `"pinned"` for one node while returning `"preview"` for another in the
 same render. The two values exist so a preview can be styled more lightly than a
 commitment.
 
-Target keys are `` `${tileId}/${objectId}` ``. Dataflow node ids are `nanoid(16)`, whose
+The internal key is `` `${tileId}/${objectId}` ``. Dataflow node ids are `nanoid(16)`, whose
 alphabet excludes `/`, so the separator is unambiguous for the ids this story handles. Any
-future kind whose object ids may contain `/` must use a structural key instead.
+future kind whose object ids may contain `/` must use a structural key instead — which the
+private-collection rule above makes a local change.
 
 ### 4. Rendering — in-tile
 
@@ -208,11 +231,13 @@ and already reads observables mid-render specifically to stay reactive — the c
 entry in that object:
 
 ```ts
+const emphasis = documentContent?.objectState(tileId, id);   // "pinned" | "preview" | undefined
+
 const dynamicClasses = classNames({
   selected: data.selected,
   // ...existing entries...
-  "highlight-pinned":  highlightState === "pinned",
-  "highlight-preview": highlightState === "preview",
+  "highlight-pinned":  emphasis === "pinned",
+  "highlight-preview": emphasis === "preview",
 });
 ```
 
@@ -225,18 +250,49 @@ The document content is reached via `getDocumentContentFromNode(node.model)`
 (`base-node.ts:96-102`). It returns `undefined` for detached trees, so the call site
 null-checks.
 
-In-tile rendering was chosen over a document-level overlay for this story because it gets
-two behaviors right by construction that an overlay would have to solve explicitly: the
-ring is clipped by the rete canvas's own overflow when a node is panned partly out of the
-tile viewport, and members of a collapsed group (which get `.collapsed-hidden` at
-`dataflow-node.tsx:189` rather than unmounting) simply show no ring. It also inherits rete's
-pan/zoom for free.
+#### Why in-tile rather than a document-level overlay
 
-The store and reference types are deliberately pixel-free. If CLUE-598 needs uniform
-emphasis across non-Dataflow tiles, a `HighlightLayer` can read the same state and resolve
-through the existing `tileApi.getObjectBoundingBox` without changing anything specified
-here. Dataflow already implements that method with live pan/zoom tracking
-(`dataflow-program.tsx:292-337`), so an overlay remains available at any time.
+The original draft of this spec justified in-tile partly on "Dataflow is the only tile that
+needs emphasis." That premise died when the increment sequence put two more target tiles
+ahead of Dataflow's object vocabulary, so the decision was re-tested against all three. It
+holds, on cost and on fidelity:
+
+| Tile | In-tile emphasis cost | Mechanism |
+|---|---|---|
+| Dataflow | ~1 line | One entry in the existing `classNames` at `dataflow-node.tsx:184` |
+| Text | ~10–15 lines / 3 files | Class on each chip component; `VariableComponent` is already an `observer` (`variables-plugin.tsx:254`), `HighlightComponent` needs `observer` added (`highlights-plugin.tsx:57`) |
+| Drawing | ~20–40 lines / 2–3 files | Generalize `highlightObject: string \| null` to a `Set` and reuse `renderSelectionBorders` (`drawing-layer.tsx:500-545`) with a distinct color |
+
+Roughly 35–55 lines across three tiles, against ~150–250 for a general overlay plus its
+measurement and invalidation machinery.
+
+Two further points favor in-tile:
+
+- **No coordinate correction is needed.** The drawing-tile-specific view transform at
+  `annotation-layer.tsx:456-491` exists *because* the overlay draws outside the tile:
+  read-only drawing tiles auto fit-to-view (`drawing-tile.tsx:90-102`) while read-only
+  `getObjectBoundingBox` returns untransformed content coordinates, so the overlay must
+  re-apply the transform itself. In-tile highlights render inside the tile's own transformed
+  space (`object-canvas` for drawing, the rete canvas for Dataflow) and sidestep that
+  entire class of problem — which would otherwise have to be generalized per tile.
+- **Clipping and hidden objects come free.** A Dataflow node panned partly out of the tile
+  viewport is clipped by the tile's own overflow, and members of a collapsed group (which
+  get `.collapsed-hidden` at `dataflow-node.tsx:189` rather than unmounting) simply show no
+  emphasis. An overlay needs explicit clipping and an is-it-laid-out check.
+
+This is one mental model, not two: **the tile owns its emphasis**, expressed in whatever
+idiom is native to it. Drawing's existing `renderSelectionBorders` is already a
+bounding-box rect drawn at layer level inside the tile's coordinate space — the same shape
+of solution as a class on a Dataflow node.
+
+**When to revisit.** The store and reference types are deliberately pixel-free, so a
+`HighlightLayer` can read the same state and resolve through `tileApi.getObjectBoundingBox`
+without changing anything specified here. All three tiles above already implement that
+method. Two triggers should prompt a re-evaluation: a target tile with no existing emphasis
+machinery and no natural coordinate space of its own, or increment 6 — text range
+highlighting is the first case where the overlay has a real advantage, because
+`Range.getClientRects()` returns one rect per visual line and handles wrapping natively
+(see increment 6).
 
 Incidental cleanup while in this file: `dataflow-node.tsx:194` builds `className` with a
 template literal, which `CLAUDE.md` requires be `classNames`.
@@ -278,8 +334,8 @@ no user-facing error.
 | Variable id does not resolve (deleted variable) | Resolver returns `[]`, no highlight. The chip already self-reports via `invalid reference:` (`variables-plugin.tsx:300`). |
 | Variable renamed | Association breaks silently — the node still holds the old derived string. Resolver returns `[]`; dev-mode console warning only. Pre-existing, inherited. |
 | `getDocumentContentFromNode` returns `undefined` | Guard and no-op. Occurs in detached trees and some tests. |
-| Targeted node deleted while pinned | `activeTargets` recomputes and the stale id stops matching. Self-healing — unlike sparrows, which orphan because `deleteTile` never touches `annotations` (`base-document-content.ts:950-984`). |
-| Targeted node is inside a collapsed group | `.collapsed-hidden` hides it, so no ring appears. Whether the group chip should signal a hidden match is deferred to CLUE-598 with groups. |
+| Targeted node deleted while pinned | The internal target set recomputes and the stale id stops matching. Self-healing — unlike sparrows, which orphan because `deleteTile` never touches `annotations` (`base-document-content.ts:950-984`). |
+| Targeted node is inside a collapsed group | `.collapsed-hidden` hides it, so no ring appears. Whether the group chip should signal a hidden match is deferred to increment 5 with groups. |
 | Read-only documents and teacher views | Highlighting works. It mutates nothing persisted, and is arguably most valuable there. |
 | Document switch | State dies with the content model. No cleanup code required. |
 | Same document in 4-up or thumbnails | All views sharing the content model highlight together. Acceptable and arguably desirable. |
@@ -297,7 +353,7 @@ fragility as a test rather than a comment.
 **Unit — highlight state** (`document-content-with-highlights.test.ts`): hover-beats-pin
 precedence; hovering reference B while reference A is pinned highlights only B's targets,
 not A's; mouse-out reverts to pinned rather than clearing; toggle pins and unpins;
-`activeTargets` recomputes when a targeted node is removed.
+`isObjectActive` goes false when a targeted node is removed.
 
 **Component — `DataflowNode`**: correct class for pinned, preview, and neither.
 
@@ -329,3 +385,110 @@ Modified:
    before the purple-chip work lands.
 3. Visual treatment of pinned vs preview emphasis — a design question, not an architectural
    one. The two classes exist regardless.
+
+## Planned increments
+
+Each row is a separate story and PR. Ordering is by Leslie's stated priority (another tile
+outranks Dataflow's object vocabulary) and by **driver availability** — an increment that
+adds a *target* is worthless until something can point at it.
+
+The recurring lesson from scoping these: **target support and source support are
+independent, and target support is uniformly cheap.** What actually constrains the sequence
+is sources.
+
+### 1 — This story (CLUE-603, reduced)
+
+Reference union + resolver registry, highlight state, Dataflow nodes as targets, text
+variable chip as source.
+
+### 2 — Bidirectional highlighting; text tile as target
+
+Add the inverse index (target → which references point at it) and make both text chip kinds
+render emphasis: variable chips (`variables-plugin.tsx`, already an `observer`) and
+highlight chips (`highlights-plugin.tsx:57`, needs `observer` added). Roughly 10–15 lines
+across 3 files.
+
+**Needs no new source.** Increment 1 already makes the variable chip a source; lighting it
+up in reverse — hover a Dataflow node, see which chip references it — is the whole feature.
+That makes this the cheapest route to "a second tile is a target," which is why it precedes
+the AI work.
+
+Note the two readings of "text tile as a target": the *narrow* one (the chip that is already
+a source lights up in reverse) ships here as a proof of concept; the *broad* one (Ada says
+"look at this") needs increment 3's driver. The target-side rendering is identical for both,
+so land both chip kinds here regardless of which driver arrives first.
+
+Read-only is not a concern: text chips render identically in read-only docs, 4-up cells and
+thumbnails, with no gating (`text-tile.tsx:343` passes `readOnly` only to `SlateEditor` and
+class names).
+
+### 3 — AI emits references (CLUE-598)
+
+The input-side work, which is most of the cost and is unrelated to anything in this spec.
+Two known obstacles:
+
+- **The AI cannot cite what it cannot name.** The DOT summary fed to the model deliberately
+  replaces node ids with readable `type:name` labels, disambiguated with `#N` on collision
+  (`dataflow-to-graphviz.ts:225-260`). Either emit real ids or build a label→id resolver.
+- **No AI surface can render interactive content today.** There is no `AdaChat` in the repo.
+  The AI tile renders via `markdown-to-jsx` (`ai-tile.tsx:154`), whose `options.overrides`
+  hook is the natural injection point but is unconfigured. The Chat Tutor renders raw text
+  with no markdown parser at all (`chat.tsx:222`). Which surface is meant changes the work
+  materially and should be settled with Leslie before this is estimated.
+
+### 4 — Sketch/drawing tile as target
+
+Generalize `highlightObject: string | null` to a `Set<string>` and reuse
+`renderSelectionBorders` (`drawing-layer.tsx:500-545`) with a distinct color — the smallest
+diff, and it already handles zoom-compensated stroke widths and group-adjusted bounding
+boxes. Roughly 20–40 lines across 2–3 files.
+
+Two decisions this increment must make:
+
+- **The read-only gate.** Drawing's existing highlight is hard-gated off by
+  `if (!this.props.readOnly)` (`drawing-layer.tsx:634`). If highlights must show in
+  read-only views, that gate changes.
+- **Group members.** Objects inside a `GroupObject` render within `scale(width, height)`
+  (`group.tsx:218-221`), so a stroke drawn on a child is non-uniformly distorted. This is
+  precisely why the existing highlight draws at layer level using the group-adjusted box
+  from `drawing-content.ts:158` — follow that, do not style the child.
+
+Sequenced after increment 3 because nothing can point at a sketch object until the AI can
+emit `object` references, or a new authored source is designed. Shipping it earlier would
+be dead code.
+
+### 5 — Dataflow wires and groups as targets
+
+Connections (`ConnectionModel`) and groups (`GroupModel`) both already have persistent
+`types.identifier` ids (`dataflow-program-model.ts:21-27, 33-62`) but appear in neither
+`annotatableObjects` nor `getObjectBoundingBox`. Wires are the expensive half: highlighting
+a bezier in the rete canvas is a different rendering problem from emphasizing a box.
+
+Lowest priority per Leslie. Benefits sparrows too if the objects are added to
+`annotatableObjects`.
+
+### 6 — Text range highlighting
+
+"Look at the first sentence of the second paragraph." **This cannot reuse any chip
+machinery**: highlight chips are inline *void* elements holding a copy of the text
+(`highlights-plugin.tsx:135-138`), so the model has no representation for a span of prose.
+
+Two viable mechanisms, neither cheap:
+
+- **Slate decorations** — the conceptually right tool, since decorations are ephemeral,
+  range-based, and never touch the document. But `@concord-consortium/slate-editor@0.13.0-pre.0`
+  does not expose `decorate` or `renderLeaf` in its public typings, and CLUE uses decorations
+  nowhere. This is cross-repo work on a shared library.
+- **Overlay using `Range.getClientRects()`** — returns one rect per visual line, so wrapping
+  is handled natively. Stays entirely within CLUE, but requires the `HighlightLayer` this
+  spec deferred. This is the first case where the overlay genuinely beats in-tile, so the
+  rendering decision should be re-opened here rather than assumed.
+
+The hard design problem is the **locator**: how to name a range durably. Slate paths and
+character offsets break on any edit. Quoted-text matching is what an AI naturally emits and
+degrades gracefully when the text changes. This wants its own design pass; it is recorded
+here so it is not mistaken for a small addition.
+
+Increment 1 accommodates this by keeping the resolved-target collection private (see
+"Highlight state"), so `{ kind: "textRange", ... }` slots into the existing union and
+`activeRangesForTile()` is added alongside `isObjectActive()` without breaking callers.
