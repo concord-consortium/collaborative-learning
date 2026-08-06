@@ -48,6 +48,8 @@ jest.mock("../../../utilities/color-utils.ts", () => {
   };
 });
 
+jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
 // Set up mock axes
 const hOrientation = "horizontal" as AxisOrientation;
 const vOrientation = "vertical" as AxisOrientation;
@@ -85,6 +87,8 @@ const mockAxes = {
 
 import { getSnapshot } from '@concord-consortium/mobx-state-tree';
 import { GraphModel, IGraphModel } from './graph-model';
+import { logTileChangeEvent } from '../../../models/tiles/log/log-tile-change-event';
+import { LogEventName } from '../../../lib/logger-types';
 import { kGraphTileType } from '../graph-defs';
 import {
   clueDataColorInfo, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
@@ -133,6 +137,23 @@ describe('GraphModel', () => {
     expect(graphModel.adornments[0].isVisible).toBe(false);
     graphModel.showAdornment('Movable Point');
     expect(graphModel.adornments[0].isVisible).toBe(true);
+  });
+
+  describe('onTileAction logging (CLUE-615)', () => {
+    const graphModel = GraphModel.create();
+    it('logs a GRAPH_TOOL_CHANGE for answer-relevant actions', () => {
+      (logTileChangeEvent as jest.Mock).mockClear();
+      graphModel.onTileAction({ name: "setPlotType", args: ["dotPlot"] });
+      expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.GRAPH_TOOL_CHANGE, {
+        tileId: "", operation: "setPlotType", change: { args: ["dotPlot"] }
+      });
+    });
+    it('ignores UI-state / styling actions', () => {
+      (logTileChangeEvent as jest.Mock).mockClear();
+      graphModel.onTileAction({ name: "setInteractionInProgress", args: [true] });
+      graphModel.onTileAction({ name: "setPointColor", args: ["#fff"] });
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+    });
   });
 
   it('should clear selected adornment instances', () => {

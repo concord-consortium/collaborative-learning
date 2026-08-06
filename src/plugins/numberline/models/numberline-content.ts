@@ -3,6 +3,9 @@ import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { TileContentModel } from "../../../models/tiles/tile-content";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { kNumberlineTileType, maxNumSelectedPoints } from "../numberline-tile-constants";
@@ -88,6 +91,13 @@ export const NumberlineContentModel = TileContentModel
       }));
     },
   }))
+  .actions(self => ({
+    logChange(operation: string, change: Record<string, any>) {
+      logTileChangeEvent(LogEventName.NUMBERLINE_TOOL_CHANGE, {
+        tileId: getTileIdFromContent(self) ?? "", operation, change
+      });
+    }
+  }))
   .actions(self =>({
     clearSelectedPoints() {
       for (const id in self.selectedPoints){
@@ -96,9 +106,11 @@ export const NumberlineContentModel = TileContentModel
     },
     setMin(num: number) {
       self.min = num;
+      self.logChange("setMin", { min: num });
     },
     setMax(num: number) {
       self.max = num;
+      self.logChange("setMax", { max: num });
     }
   }))
   .actions(self => ({
@@ -106,6 +118,7 @@ export const NumberlineContentModel = TileContentModel
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue, isOpen });
       self.points.set(id, pointModel);
+      self.logChange("createNewPoint", { id, xValue, isOpen });
       return pointModel;
     },
     setSelectedPoint(point: PointObjectModelType) {
@@ -116,13 +129,16 @@ export const NumberlineContentModel = TileContentModel
     },
     deleteSelectedPoints() {
       //For now - only one point can be selected
+      const ids = Object.keys(self.selectedPoints);
       for (const selectedPointId in self.selectedPoints){
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
       }
       self.clearSelectedPoints();
+      self.logChange("deleteSelectedPoints", { ids });
     },
     deleteAllPoints() {
       self.points.clear();
+      self.logChange("deleteAllPoints", {});
     },
   }))
   .actions(self => ({

@@ -1,4 +1,8 @@
 import { defaultAIContent, AIContentModel, kDefaultAIDescription } from "./ai-content";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../lib/logger-types";
+
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
 describe("AIContent", () => {
   it("has default content of 'hello world'", () => {
@@ -59,5 +63,30 @@ describe("AIContent", () => {
     expect(content.refreshCount).toBe(2);
     const json = JSON.parse(content.exportJson());
     expect(json.refreshCount).toBeUndefined();
+  });
+
+  it("logs an AI_TOOL_CHANGE on each content change", () => {
+    const content = AIContentModel.create();
+    (logTileChangeEvent as jest.Mock).mockClear();
+    content.setPrompt("ask something");
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setPrompt", change: { prompt: "ask something" }
+    });
+    content.setText("a response");
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setText", change: { text: "a response" }
+    });
+    content.setDescription("do this");
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setDescription", change: { description: "do this" }
+    });
+    content.setHidePrompt(true);
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setHidePrompt", change: { hidePrompt: true }
+    });
+    content.requestRefresh();
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "requestRefresh", change: { refreshCount: 1 }
+    });
   });
 });
