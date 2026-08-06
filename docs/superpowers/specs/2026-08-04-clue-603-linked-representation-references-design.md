@@ -332,6 +332,82 @@ opportunistically to whatever discrete element exists today; if none does, that 
 with the purple-chip work rather than blocking this story. The implementation plan resolves
 which.
 
+### 6. Demo setup — how the chip gets into the document
+
+No new authoring UI is required, but the demo only works in a document that satisfies
+several preconditions. They are recorded here because none of them are obvious and all of
+them are load-bearing.
+
+**Insertion UI already exists.** `src/plugins/shared-variables/slate/text-tile-buttons.tsx`
+registers three text-toolbar buttons:
+
+| Button | Toolbar name | Behavior |
+|---|---|---|
+| `NewVariableTextButton` (`:113`) | `new-variable` | Creates a brand-new variable and inserts a chip |
+| `InsertVariableTextButton` (`:147`) | `insert-variable` | **Picker** over existing SharedVariables; inserts chips referencing them |
+| `EditVariableTextButton` (`:181`) | `edit-variable` | Edits the variable behind the selected chip |
+
+`insert-variable` is the one that matters: it enumerates `variableBuckets(textContent,
+sharedModel)` over `sharedVariables.variables` and inserts `{ type: kVariableFormat,
+reference: variable.id }` (`:46-48`). Those are the same `Variable` instances the simulator
+created (`simulator-content.ts:188-194`), so a chip inserted this way points at variables
+Dataflow nodes are bound to. The chip binds by **id** and the node by **name**, but both
+resolve to the same MST node.
+
+**Three preconditions, all easy to get wrong:**
+
+1. **The plugin must be loaded.** `shared-variables-registration.ts` is only imported when a
+   **Dataflow, Diagram, or Simulator** tile type is registered (`register-tile-types.ts:32,
+   38, 70`). Registering `Text` alone does not pull it in.
+2. **The unit must enable the buttons.** They appear only if `settings.text.tools` lists
+   them; the app default in `src/clue/app-config.json` does **not**. Units that do:
+   `demo/units/qa`, `qa-variables`, `qa-no-group-share`, `qa-no-nav-panel`, and
+   `curriculum/dataflow/dataflow-example.json`.
+3. **A SharedVariables must exist.** All three buttons are disabled when
+   `variablesPlugin.sharedModel` is undefined (`text-tile-buttons.tsx:123, 157`). The text
+   tile never creates one — it auto-attaches to whatever the document already has
+   (`variables-plugin.tsx:173-212`), so the document needs a simulator (or diagram/drawing)
+   tile as the variable source.
+
+**A near-ready fixture exists.** `src/public/demo/docs/chipsimsetup.json` already contains a
+text tile, a Dataflow tile with a Sensor bound to `SIMresist_reading_key` and a Live Output
+on `Simulated Servo`, a Simulator tile (`potentiometer_chip_servo`), and a persisted
+`SharedVariables` with **explicit** variable ids whose `tiles` array already includes the
+text tile. The only missing piece is a chip in the text. Nothing in the repo currently
+contains an `m2s-variable` chip — `grep -rl "m2s-variable" src/public` returns nothing.
+
+**Authored chips round-trip**, which is what makes a deterministic test fixture possible:
+
+```html
+<p>The <span data-slate-type="m2s-variable" data-slate-reference="c9561nuH0CdjytQd"></span> signal…</p>
+```
+
+Emitted at `variables-plugin.tsx:282-288`, deserialized at `:315-322`, markers defined in
+`chip-serialization.ts:9-11`. Ordering is safe: `createEditor` runs `withVariables` before
+`asSlate()` (`text-tile.tsx:163, 166`).
+
+Critically, **authored variable ids are stable, not runtime-random**. `Variable.id` defaults
+to `nanoid(16)`, but `simulator-content.ts:190` looks variables up **by `name`** first and
+only calls `createVariable` when none is found. So a document that ships its own
+`SharedVariables` snapshot keeps its authored ids, and a chip can reference them by hand.
+
+**Recommendation for this story:** add a demo document modeled on `chipsimsetup.json` but
+using the EMG simulation (`EMG_and_claw`, whose `EMG` variable is `emg_key` with labels
+`input` / `sensor:emg-reading`, `brainwaves-gripper.tsx:217-225`), with an authored variable
+chip already in the text tile. That serves as both the manual demo and the Cypress fixture,
+and it matches CLUE-603's EMG narrative. `old-format-test-document.json` already carries EMG
+with fixed ids (`c9561nuH0CdjytQd`) and is the natural model for the shared-model block, but
+it is used by an existing smoke test (`cypress/e2e/smoke/single_student_canvas_test.js:269`)
+and should not be modified.
+
+**Cosmetic wrinkle, not blocking:** simulation variables appear under the insert dialog's
+"Unused variables" heading rather than "used by other tiles", because `getTileVariables`
+(`shared-variables-utils.ts:13-32`) only understands Diagram, Drawing and Text tiles and
+returns `[]` for Dataflow. Note that this is the *same* missing knowledge that
+`getObjectsForVariable` supplies, so the hook could later fix `variableBuckets` as a
+by-product. Out of scope here — recorded only so the misleading heading isn't mistaken for a
+bug introduced by this work.
+
 ## Error handling
 
 The posture is **fail quiet**. A reference that does not resolve produces no highlight and
@@ -365,9 +441,11 @@ not A's; mouse-out reverts to pinned rather than clearing; toggle pins and unpin
 
 **Component — `DataflowNode`**: correct class for pinned, preview, and neither.
 
-**Cypress — one spec**: hover a text variable chip → associated Dataflow nodes preview;
-mouse-out → preview clears; click → pins; click again → unpins. Node selectors already exist
-in `cypress/support/elements/tile/DataflowToolTile.js`.
+**Cypress — one spec**: load the EMG demo document from "Demo setup" (its authored chip makes
+the run deterministic), then hover the text variable chip → associated Dataflow nodes
+preview; mouse-out → preview clears; click → pins; click again → unpins. Node selectors
+already exist in `cypress/support/elements/tile/DataflowToolTile.js`. Use the doc-editor
+route pattern from `cypress/e2e/smoke/single_student_canvas_test.js:269`.
 
 No persistence tests, because nothing is persisted.
 
@@ -376,6 +454,8 @@ No persistence tests, because nothing is persisted.
 New:
 - `src/models/highlights/highlight-reference.ts` (+ test)
 - `src/models/document/document-content-with-highlights.ts` (+ test)
+- `src/public/demo/docs/<name>.json` — EMG demo document with an authored variable chip
+  (see "Demo setup"); serves as both the manual demo and the Cypress fixture
 - Cypress spec for the chip→node demo
 
 Modified:
@@ -393,6 +473,10 @@ Modified:
    before the purple-chip work lands.
 3. Visual treatment of pinned vs preview emphasis — a design question, not an architectural
    one. The two classes exist regardless.
+4. Whether the demo document should be a new EMG-based file or an added chip in the existing
+   `chipsimsetup.json` (which uses potentiometer/servo rather than EMG). A new file is
+   recommended so the story's EMG narrative is preserved and no existing fixture is
+   disturbed, but either works.
 
 ## Planned increments
 
