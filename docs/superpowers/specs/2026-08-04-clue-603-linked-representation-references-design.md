@@ -113,8 +113,8 @@ introduces. It is covered by a test (below) so the constraint is documented in c
 ### 1. Reference type
 
 ```ts
-// src/models/highlights/tile-reference.ts
-export type TileReference =
+// src/models/highlights/highlight-reference.ts
+export type HighlightReference =
   | { kind: "object";   tileId: string; objectId: string; objectType?: string }
   | { kind: "variable"; variableId: string };
 ```
@@ -127,11 +127,19 @@ Both resolvers ship in this story. The `object` resolver is an identity function
 lines, but shipping it is the point — an extension point with a single implementation is an
 unproven extension point.
 
+**On the name.** Not `TileReference` or `TileObjectReference`: the `variable` kind carries no
+`tileId` at all and deliberately resolves across multiple tiles, so any `Tile*` prefix
+misdescribes half the union shipping in increment 1. "Object" is also wrong going forward —
+in CLUE's vocabulary (`ClueObject`, `annotatableObjects`, `getObjectBoundingBox`) an object
+is a discrete addressable thing with an id, which increment 6's `{ kind: "textRange" }` is
+not. `HighlightReference` claims nothing false about tile-ness, granularity or multiplicity,
+and pairs cleanly with the resolved side: reference in, `IHighlightTarget` out.
+
 ### 2. Resolver registry and the tile hook
 
 ```ts
 export interface IHighlightTarget { tileId: string; objectId: string; objectType?: string }
-type ReferenceResolver = (ref: TileReference, content: DocumentContentModelType) => IHighlightTarget[];
+type ReferenceResolver = (ref: HighlightReference, content: DocumentContentModelType) => IHighlightTarget[];
 ```
 
 (`DocumentContentModelType` is the existing exported instance type at
@@ -139,7 +147,7 @@ type ReferenceResolver = (ref: TileReference, content: DocumentContentModelType)
 import, the resolver signature takes a narrow structural interface declaring only the
 members it uses — `tileMap` and the shared-model accessor.)
 
-A `Map<TileReference["kind"], ReferenceResolver>` in `tile-reference.ts`.
+A `Map<HighlightReference["kind"], ReferenceResolver>` in `highlight-reference.ts`.
 
 - **`object` resolver** — returns `[{ tileId, objectId, objectType }]`.
 - **`variable` resolver** — looks the variable up via `sharedVariables.getVariableById(id)`,
@@ -175,8 +183,8 @@ the existing linear chain (`Base → WithAnnotations → WithTileDragging → Do
 one changed line plus one new file. Update the chain comment at `document-content.ts:55-76`.
 
 ```
-volatile:  hoveredRef?: TileReference
-           pinnedRef?:  TileReference
+volatile:  hoveredRef?: HighlightReference
+           pinnedRef?:  HighlightReference
 
 actions:   setHoveredRef(ref) / clearHoveredRef()
            setPinnedRef(ref) / togglePinnedRef(ref) / clearPinnedRef()
@@ -342,7 +350,7 @@ no user-facing error.
 
 ## Testing
 
-**Unit — resolver registry** (`tile-reference.test.ts`): object-kind identity; variable-kind
+**Unit — resolver registry** (`highlight-reference.test.ts`): object-kind identity; variable-kind
 happy path; unknown kind; unresolvable variable id.
 
 **Unit — Dataflow `getObjectsForVariable`** (`dataflow-content.test.ts`): matches a Sensor
@@ -366,7 +374,7 @@ No persistence tests, because nothing is persisted.
 ## Files touched
 
 New:
-- `src/models/highlights/tile-reference.ts` (+ test)
+- `src/models/highlights/highlight-reference.ts` (+ test)
 - `src/models/document/document-content-with-highlights.ts` (+ test)
 - Cypress spec for the chip→node demo
 
