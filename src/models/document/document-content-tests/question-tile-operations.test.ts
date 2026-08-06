@@ -137,6 +137,9 @@ describe("Question tile operations", () => {
 
       // Question answers has changed so an event should be logged.
       expect(logSpy.mock.calls[1][0]).toBe(LogEventName.QUESTION_ANSWERS_CHANGE);
+      // The authored prompt is threaded into the event (CLUE-614 Ask 1). This fixture's question has no
+      // fixed-position prompt tile, so the value is undefined, but the key must be present for the report.
+      expect(logSpy.mock.calls[1][1]).toHaveProperty("prompt");
       expect(logSpy.mock.calls[1][1].answers).toEqual([
         {
           tileId: "question-1",

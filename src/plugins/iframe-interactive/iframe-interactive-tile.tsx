@@ -58,8 +58,8 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
-import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import {
   IShowModal,
   ICloseModal,
@@ -348,14 +348,14 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         }
       });
 
-      // Listen for log messages from the interactive
+      // Listen for log messages from the interactive. Route through logTileChangeEvent (like every other
+      // tile) so the event carries toolId/documentKey/containerIds/documentHistoryId/tileTitle; logging
+      // Logger.log directly bypasses that enrichment and leaves the report unable to link the work.
       phone.addListener("log", (logData: any) => {
-        // Use CLUE's Logger system
-        const logEventName = LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE;
-        Logger.log(logEventName, {
+        logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
           tileId: model.id,
-          tileType: "IframeInteractive",
-          ...logData
+          operation: logData?.event ?? logData?.action ?? "log",
+          change: logData ?? {}
         });
       });
 

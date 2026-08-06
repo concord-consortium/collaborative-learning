@@ -1,6 +1,6 @@
 import { uniqueId } from "../../../utilities/js-utils";
 import { DocumentContentModelType } from "../../document/document-content";
-import { isQuestionModel } from "./question-content";
+import { isQuestionModel, QuestionContentModelType } from "./question-content";
 import { kQuestionTileType } from "./question-types";
 import { kTextTileType, TextContentModelType } from "../text/text-content";
 
@@ -36,6 +36,27 @@ export function updateQuestionContentForCopy(content: any, acrossDocuments: bool
     return { ...content, locked: acrossDocuments, questionId: maybeNewId };
   }
   return content;
+}
+
+/**
+ * Returns the authored prompt of a Question tile as plain text: the content of its
+ * fixed-position "Question Prompt" Text tile (the same tile getQuestionAnswersAsJSON skips).
+ * Returns undefined if there is no such tile.
+ *
+ * @param doc - The document model
+ * @param questionContent - The Question tile's content
+ */
+export function getQuestionPrompt(
+  doc: DocumentContentModelType,
+  questionContent: QuestionContentModelType
+): string | undefined {
+  for (const id of questionContent.tileIds) {
+    const tile = doc.getTile(id);
+    if (tile?.isFixedPosition && tile.content?.type === kTextTileType) {
+      return (tile.content as TextContentModelType).asPlainText();
+    }
+  }
+  return undefined;
 }
 
 /**

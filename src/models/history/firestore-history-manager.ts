@@ -290,7 +290,10 @@ export class FirestoreHistoryManager {
 
   async moveToHistoryEntryAfterLoad(historyId: string) {
     await when(() => this.historyStatus === HistoryStatus.HISTORY_LOADED);
-    const entry = this.treeManager.findHistoryEntryIndex(historyId);
+    // logDocumentEvent emits the "first" sentinel for a change made before the document had any history
+    // entry (a student's first change). It never resolves via findHistoryEntryIndex; treat it as index 0
+    // — the earliest entry, which is what the emitter means — so first-change playback links land.
+    const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
     if (entry >= 0) {
       this.treeManager.goToHistoryEntry(entry);
     } else {

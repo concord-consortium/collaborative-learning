@@ -1,6 +1,7 @@
-import { updateQuestionContentForCopy, getQuestionAnswersAsJSON } from "./question-utils";
+import { updateQuestionContentForCopy, getQuestionAnswersAsJSON, getQuestionPrompt } from "./question-utils";
 import { kQuestionTileType } from "./question-types";
 import { DocumentContentModelType } from "../../document/document-content";
+import { QuestionContentModelType } from "./question-content";
 
 describe("question-utils", () => {
   describe("updateQuestionContentForCopy", () => {
@@ -165,6 +166,24 @@ describe("question-utils", () => {
           { tileId: "a2", type: "Drawing" }
         ] }
       ]);
+    });
+
+    describe("getQuestionPrompt", () => {
+      it("returns the plain text of the fixed-position prompt Text tile", () => {
+        const promptTile =
+          { id: "p1", isFixedPosition: true, content: { type: "Text", asPlainText: () => "What is 2+2?" } };
+        const answerTile = makeMockTextTile("a1", "4"); // not fixed-position
+        const questionContent = { type: kQuestionTileType, questionId: "QX", tileIds: ["p1", "a1"] };
+        const doc = makeMockDocument([], [promptTile, answerTile]);
+        expect(getQuestionPrompt(doc, questionContent as unknown as QuestionContentModelType)).toBe("What is 2+2?");
+      });
+
+      it("returns undefined when there is no fixed-position text tile", () => {
+        const answerTile = makeMockTextTile("a1", "4");
+        const questionContent = { type: kQuestionTileType, questionId: "QX", tileIds: ["a1"] };
+        const doc = makeMockDocument([], [answerTile]);
+        expect(getQuestionPrompt(doc, questionContent as unknown as QuestionContentModelType)).toBeUndefined();
+      });
     });
   });
 });

@@ -3,6 +3,8 @@ import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
 import { IframeInteractiveComponent } from "./iframe-interactive-tile";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../lib/logger-types";
 
 // Mock iframe-phone to avoid actual iframe communication in tests
 jest.mock("iframe-phone", () => ({
@@ -12,6 +14,8 @@ jest.mock("iframe-phone", () => ({
     post: jest.fn()
   }))
 }));
+
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
 // Mock stores hooks to avoid needing full stores context
 const mockIsSelectedTile = jest.fn(() => false);
@@ -292,5 +296,27 @@ describe("IframeInteractiveComponent", () => {
     const wrapper = screen.getByText("No URL configured in authoring").closest(".tile-content");
     expect(wrapper).toHaveClass("selected");
     mockIsSelectedTile.mockReturnValue(false);
+  });
+
+  it("routes interactive log messages through logTileChangeEvent (CLUE-614 Ask 4)", () => {
+    const iframePhone = require("iframe-phone");
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    // ParentEndpoint(el, initInteractive) invokes initInteractive when the iframe is ready; the mock
+    // doesn't, so call it to register the listeners (which read the already-assigned phoneRef.current).
+    const initInteractive = iframePhone.ParentEndpoint.mock.calls.at(-1)[1];
+    initInteractive();
+
+    const phone = iframePhone.ParentEndpoint.mock.results.at(-1).value;
+    const logHandler = phone.addListener.mock.calls.find((c: any[]) => c[0] === "log")[1];
+    logHandler({ event: "submit", value: 42 });
+
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
+      tileId: props.model.id,
+      operation: "submit",
+      change: { event: "submit", value: 42 }
+    });
   });
 });
