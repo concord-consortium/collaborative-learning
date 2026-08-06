@@ -326,6 +326,30 @@ describe("history loading", () => {
         expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADING);
       });
 
+      describe("moveToHistoryEntryAfterLoad", () => {
+        afterEach(() => jest.restoreAllMocks());
+
+        it("treats the 'first' sentinel as position 0", async () => {
+          const { treeManager, historyManager } = await mirrorMockHistory({
+            entries: [{ id: "a1" }, { id: "a2" }]
+          });
+          const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+          await historyManager.moveToHistoryEntryAfterLoad("first");
+          expect(goToSpy).toHaveBeenCalledWith(0);
+        });
+
+        it("warns and does not navigate for an unresolved id", async () => {
+          const { treeManager, historyManager } = await mirrorMockHistory({
+            entries: [{ id: "a1" }, { id: "a2" }]
+          });
+          const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+          const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+          await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+          expect(goToSpy).not.toHaveBeenCalled();
+          expect(warnSpy).toHaveBeenCalled();
+        });
+      });
+
     });
 
   });
