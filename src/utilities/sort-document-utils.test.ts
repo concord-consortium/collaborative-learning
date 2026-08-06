@@ -241,6 +241,20 @@ describe("sort-document-utils", () => {
       expect(sorted).toEqual(["Team 2", "Team 10"]);
     });
 
+    it("orders a digit-prefixed group id after the numeric ones, not alongside its leading digit", () => {
+      // Under `autoAssignStudentsToIndividualGroups` a group id is a user id, which in demo mode can be
+      // a nanoid — and a nanoid starts with a digit about one time in six. Reading only the leading
+      // digits would file "3xK9mQ" as group 3, tying it with the real group 3 and leaving the two in
+      // whatever order they arrived in.
+      const labels = ["Group 3xK9mQ", "Group 4", "Group 3"];
+      const sorted = sortGroupSections(labels, keys([
+        ["Group 3xK9mQ", { section: "group", groupId: "3xK9mQ" }],
+        ["Group 4", { section: "group", groupId: "4" }],
+        ["Group 3", { section: "group", groupId: "3" }],
+      ]));
+      expect(sorted).toEqual(["Group 3", "Group 4", "Group 3xK9mQ"]);
+    });
+
     it("treats a label with no sort key as no-group", () => {
       const sorted = sortGroupSections(["Mystery", "Whole Class"], keys([["Whole Class", { section: "class" }]]));
       expect(sorted).toEqual(["Whole Class", "Mystery"]);

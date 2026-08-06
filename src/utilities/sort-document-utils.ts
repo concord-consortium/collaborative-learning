@@ -80,6 +80,8 @@ const kGroupSectionOrder: Record<GroupSectionSortKey["section"], number> = {
   none: 2,
 };
 
+const kNumericGroupId = /^\d+$/;
+
 /**
  * Order "by group" sections: the whole class first, then groups by ascending numeric id, then the
  * no-group section. A section with no sort key is ordered as if it had none.
@@ -93,10 +95,13 @@ export const sortGroupSections = (docMapKeys: string[], sortKeys: Map<string, Gr
       return kGroupSectionOrder[keyA.section] - kGroupSectionOrder[keyB.section];
     }
     if (keyA.section === "group" && keyB.section === "group") {
-      const numA = parseInt(keyA.groupId, 10);
-      const numB = parseInt(keyB.groupId, 10);
-      // Group ids are numeric in practice; order any non-numeric id after the numeric ones rather
-      // than comparing NaN.
+      // A group id is usually a number, but not always: under
+      // `autoAssignStudentsToIndividualGroups` the group id is the user id, which in demo mode can be
+      // a nanoid. Only an all-digit id sorts numerically; the rest sort after those, by label. The
+      // check has to be the whole string — a leading-digit one would read a nanoid like "3xK9…" as
+      // group 3 and tie it with the real group 3.
+      const numA = kNumericGroupId.test(keyA.groupId) ? Number(keyA.groupId) : NaN;
+      const numB = kNumericGroupId.test(keyB.groupId) ? Number(keyB.groupId) : NaN;
       if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
       if (!isNaN(numA)) return -1;
       if (!isNaN(numB)) return 1;
