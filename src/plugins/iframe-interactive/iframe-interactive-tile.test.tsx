@@ -298,7 +298,8 @@ describe("IframeInteractiveComponent", () => {
     mockIsSelectedTile.mockReturnValue(false);
   });
 
-  it("routes interactive log messages through logTileChangeEvent (CLUE-614 Ask 4)", () => {
+  it("routes interactive state changes through logTileChangeEvent", () => {
+    jest.useFakeTimers();
     const iframePhone = require("iframe-phone");
     const props = createTestProps();
     props.content.setUrl("https://example.com/interactive");
@@ -309,14 +310,17 @@ describe("IframeInteractiveComponent", () => {
     const initInteractive = iframePhone.ParentEndpoint.mock.calls.at(-1)[1];
     initInteractive();
 
+    // Deliver a new interactive state; the enriched log fires from the debounced state setter.
     const phone = iframePhone.ParentEndpoint.mock.results.at(-1).value;
-    const logHandler = phone.addListener.mock.calls.find((c: any[]) => c[0] === "log")[1];
-    logHandler({ event: "submit", value: 42 });
+    const stateHandler = phone.addListener.mock.calls.find((c: any[]) => c[0] === "interactiveState")[1];
+    stateHandler({ answer: "42" });
+    jest.advanceTimersByTime(500); // flush the 500ms debounce
 
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
       tileId: props.model.id,
-      operation: "submit",
-      change: { event: "submit", value: 42 }
+      operation: "setInteractiveState",
+      change: { interactiveState: { answer: "42" } }
     });
+    jest.useRealTimers();
   });
 });

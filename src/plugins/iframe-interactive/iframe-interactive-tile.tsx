@@ -58,6 +58,7 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
+import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import {
@@ -195,8 +196,16 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   const debouncedSetState = useMemo(
     () => debounce((state: any) => {
       contentRef.current?.setInteractiveState(state);
+      // The persisted interactive state is the student's answer. Log it via logTileChangeEvent (like
+      // every other tile) so the event is enriched and the report can link/separate iframe work. This
+      // is the real answer signal — the "log" listener below carries analytics breadcrumbs, not state.
+      logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
+        tileId: model.id,
+        operation: "setInteractiveState",
+        change: { interactiveState: state }
+      });
     }, 500), // 500ms debounce
-    []
+    [model.id]
   );
 
   // Action to handle incoming interactive state with debouncing
@@ -348,14 +357,14 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         }
       });
 
-      // Listen for log messages from the interactive. Route through logTileChangeEvent (like every other
-      // tile) so the event carries toolId/documentKey/containerIds/documentHistoryId/tileTitle; logging
-      // Logger.log directly bypasses that enrichment and leaves the report unable to link the work.
+      // Log messages from the interactive are analytics breadcrumbs (button clicked, hint viewed), not
+      // state changes, so they stay on the un-enriched Logger.log path. The student's answer change is
+      // logged from debouncedSetState above.
       phone.addListener("log", (logData: any) => {
-        logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
+        Logger.log(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
           tileId: model.id,
-          operation: logData?.event ?? logData?.action ?? "log",
-          change: logData ?? {}
+          tileType: "IframeInteractive",
+          ...logData
         });
       });
 

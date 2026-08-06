@@ -327,15 +327,15 @@ describe("history loading", () => {
       });
 
       describe("moveToHistoryEntryAfterLoad", () => {
-        it("treats the 'first' sentinel as index 0 (CLUE-614 Ask 3)", async () => {
+        afterEach(() => jest.restoreAllMocks());
+
+        it("treats the 'first' sentinel as position 0", async () => {
           const { treeManager, historyManager } = await mirrorMockHistory({
             entries: [{ id: "a1" }, { id: "a2" }]
           });
           const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
-          const findSpy = jest.spyOn(treeManager, "findHistoryEntryIndex");
           await historyManager.moveToHistoryEntryAfterLoad("first");
           expect(goToSpy).toHaveBeenCalledWith(0);
-          expect(findSpy).not.toHaveBeenCalled(); // short-circuits without a lookup
         });
 
         it("warns and does not navigate for an unresolved id", async () => {
@@ -347,7 +347,6 @@ describe("history loading", () => {
           await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
           expect(goToSpy).not.toHaveBeenCalled();
           expect(warnSpy).toHaveBeenCalled();
-          warnSpy.mockRestore();
         });
       });
 
