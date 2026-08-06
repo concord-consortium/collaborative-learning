@@ -72,6 +72,18 @@ describe("AIContent", () => {
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
       tileId: "", operation: "setPrompt", change: { prompt: "ask something" }
     });
+    content.setText("a response");
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setText", change: { text: "a response" }
+    });
+    content.setDescription("do this");
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setDescription", change: { description: "do this" }
+    });
+    content.setHidePrompt(true);
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: "", operation: "setHidePrompt", change: { hidePrompt: true }
+    });
     content.requestRefresh();
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
       tileId: "", operation: "requestRefresh", change: { refreshCount: 1 }

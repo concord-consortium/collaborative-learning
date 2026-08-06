@@ -28,4 +28,19 @@ describe("NumberlineContent", () => {
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.NUMBERLINE_TOOL_CHANGE,
       { tileId: "", operation: "setMax", change: { max: 5 } });
   });
+
+  it("logs a NUMBERLINE_TOOL_CHANGE when points are deleted", () => {
+    const content = NumberlineContentModel.create();
+    const point = content.createAndSelectPoint(3, false);
+    (logTileChangeEvent as jest.Mock).mockClear();
+    content.deleteSelectedPoints();
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.NUMBERLINE_TOOL_CHANGE,
+      { tileId: "", operation: "deleteSelectedPoints", change: { ids: [point.id] } });
+
+    content.createNewPoint(1, false);
+    (logTileChangeEvent as jest.Mock).mockClear();
+    content.deleteAllPoints();
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.NUMBERLINE_TOOL_CHANGE,
+      { tileId: "", operation: "deleteAllPoints", change: {} });
+  });
 });
