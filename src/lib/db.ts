@@ -15,7 +15,7 @@ import { DocumentModelType, createDocumentModel, isVisibilityType } from "../mod
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, SupportPublication, GroupDocument, isAxesType, isDocumentType
+  ProblemPublication, SupportPublication, GroupDocument, AxesDocument, isAxesType, isDocumentType
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -724,8 +724,8 @@ export class DB {
       // `type` can't be included because it is part of a discriminated union and must be a fresh literal
       const common = { version, self, createdAt } as const;
 
-      if (type === GroupDocument) {
-        // group + class-wide documents share the transitional type "group" and store only base RTDB metadata
+      if (isAxesType(type)) {
+        // axes-typed documents (group + class-wide) store only base RTDB metadata
         rtdbMetadata = { ...common, type };
       } else {
         switch (type) {
@@ -789,12 +789,12 @@ export class DB {
     const { groupId, offeringId } = this.requireGroupContext();
     // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
     // The slot is labeled "default" (the group's default canonical document) rather than by the
-    // document's type — see kDefaultCanonicalDocumentLabel. For a regular group document the
-    // transitional `type` and the `kind` coincide, both GroupDocument.
+    // document's type — see kDefaultCanonicalDocumentLabel. Its `type` is the generic axes value while
+    // its `kind` is GroupDocument; the two axes are independent.
     return this.getOrCreateCanonicalDocument({
       container: { classHash: user.classHash, offeringId },
       canonicalLabel: kDefaultCanonicalDocumentLabel,
-      type: GroupDocument,
+      type: AxesDocument,
       kind: GroupDocument,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
     });
@@ -813,11 +813,11 @@ export class DB {
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
-    // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
+    // Its `type` is the generic axes value while its `kind` is the declared kind.
     const { documentKey } = await this.resolveCanonicalDocument({
       container: { classHash: user.classHash, unit: unit.code },
       canonicalLabel: classWideDoc.kind,
-      type: GroupDocument,
+      type: AxesDocument,
       kind: classWideDoc.kind
     });
     return documentKey;

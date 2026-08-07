@@ -282,7 +282,8 @@ describe("db", () => {
         }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateGroupDocument();
-      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
+      expect((db as any).createDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ type: AxesDocument, kind: GroupDocument }));
       expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
       expect(updateCalls[0]).toEqual({ canonical: "default" });
       expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
@@ -290,6 +291,27 @@ describe("db", () => {
       // The create path already has the metadata it just wrote, so opening it costs no extra read.
       expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
       logSpy.mockRestore();
+    });
+
+    it("creates a group document whose type is axes and whose kind is group", async () => {
+      // `type` and `kind` coincided only by accident while both were "group"; they separate here.
+      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({
+          get: async () => ({ exists: false }),
+          set: () => {},
+          update: () => {}
+        }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await db.getOrCreateGroupDocument();
+      const params = ((db as any).createDocument as jest.Mock).mock.calls[0][0];
+      expect(params.type).toBe(AxesDocument);
+      expect(params.kind).toBe(GroupDocument);
     });
 
     it("legacy fallback: opens a pre-existing random-key group doc and backfills a pointer", async () => {
@@ -370,6 +392,23 @@ describe("db", () => {
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     const written = await db.createFirestoreMetadataDocument({
       documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    });
+    expect(written).toMatchObject({ kind: "group", concurrent: true });
+    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
+  });
+
+  it("stamps kind and concurrent on an axes-typed document's Firestore metadata", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
     });
     expect(written).toMatchObject({ kind: "group", concurrent: true });
     expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
@@ -517,7 +556,7 @@ describe("db", () => {
       const result = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
-        type: GroupDocument,
+        type: AxesDocument,
         kind: "drivingQuestionBoard"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
