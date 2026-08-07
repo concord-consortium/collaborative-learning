@@ -493,6 +493,9 @@ describe("Firestore security rules", () => {
     // client writes has to keep creating. The fields are the ones createFirestoreMetadataDocument stamps,
     // selected by the kind's containerType: "offering" carries unit/investigation/problem/offeringId,
     // "class" carries unit: null, "classUnit" carries a unit with investigation and problem explicitly null.
+    // Group and class-wide documents are deliberately excluded from this list: they are the only two shapes
+    // the new create rule can reject, and their creation breaking in the window between the rules deploy and
+    // the app deploy is accepted.
     const offeringContained = { unit: cUnit, investigation: "1", problem: "2", offeringId };
     const classContained = { unit: null };
 
