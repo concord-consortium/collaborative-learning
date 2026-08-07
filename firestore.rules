@@ -205,10 +205,18 @@ service cloud.firestore {
         return userIsRequestUser() || documentOwnerIsCallersClass() || documentOwnerIsSelfConsistentGroup();
       }
 
+      // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
+      // tested here: the transitional `type: "group"` is on its way out, while the owner is the durable fact.
+      // The update side is governed by concurrentChangeOk.
+      function concurrentCreateOk() {
+        return request.resource.data.get("concurrent", false) != true
+          || documentOwnerIsCallersClass() || documentOwnerIsSelfConsistentGroup();
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
-          documentOwnerOk() &&
+          documentOwnerOk() && concurrentCreateOk() &&
           // The canonical label is granted solely by the pointer-claim transaction (an update,
           // gated by canonicalFieldOk), so a create carrying a non-blank `canonical` — including a
           // non-string like `true` — is rejected.

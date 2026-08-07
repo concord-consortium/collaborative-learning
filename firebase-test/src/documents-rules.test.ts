@@ -398,6 +398,34 @@ describe("Firestore security rules", () => {
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: "group__", type: "group" } }));
     });
 
+    it("a class member cannot create their own document already marked concurrent", async () => {
+      // `concurrent` is what isConcurrentClassDocument reads to grant every class member read and write on a
+      // document's history. A document owned by a real person must never carry it.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: studentId, concurrent: true } }));
+    });
+
+    it("a class member cannot create a classmate's document already marked concurrent", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: student2Id, concurrent: true } }));
+    });
+
+    it("a class-wide document may be created concurrent", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "group", unit: cUnit, concurrent: true }
+      }));
+    });
+
+    it("a group document may be created concurrent", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3", concurrent: true }
+      }));
+    });
+
     it("authenticated students can update documents in their class", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
