@@ -146,7 +146,7 @@ query is the same edit either way.
 | [db.ts:1125](../../../src/lib/db.ts#L1125) | the on-open `concurrent` backfill — "axis-native" |
 | [document.ts:124](../../../src/models/document/document.ts#L124) | the `isGroup` getter |
 | [document-utils.ts:133](../../../src/models/document/document-utils.ts#L133) | read access — a `permissions` question |
-| [document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241) | transitional title; see §6 for why this one is load-bearing |
+| [document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241) | the transitional group-document title — widening it is what keeps a half-swept document titled |
 | [document-types.ts:48-56](../../../src/models/document/document-types.ts#L48-L56) | `isSortableType` — Sort Work membership |
 | [document-title.tsx:28](../../../src/components/document/document-title.tsx#L28) | suppress the owner-name prefix |
 | [tile-activity-badges.tsx:64](../../../src/components/tiles/tile-activity-badges.tsx#L64) | presence indicators — "concurrent" (CLUE-611's territory) |
@@ -209,11 +209,19 @@ needingScope      -> { investigation: null, problem: null }
 The `type` rewrite is not disjoint from either — it applies to every document the query returns. Adding
 it as a third list would mean two batch operations against the same document reference.
 
-That is a correctness problem, not just an inelegance. `getDocumentTitle`
-([document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241)) selects the
-group-document title on `type === "group"` **and** a `groupId`, because a group document may carry no
-`kind` yet. A document that received `type: "axes"` but not yet `kind: "group"` matches neither that
-branch nor the registry lookup above it, and renders with no title at all.
+That is a correctness problem, not just an inelegance. A document that received `type: "axes"` but not
+the fields the other pass owes it sits in a state no code accounts for:
+
+- A **group document** with no `concurrent` opens without its concurrent history manager, and with no
+  `kind` has nothing to label its canonical-pointer slot — the slot label *is* the kind.
+- A **class-wide document** with no curriculum scope is invisible to Sort Work's unit-scoped query,
+  which selects on `investigation` and `problem` being explicitly null.
+
+> **Correction (2026-08-07, found in review).** An earlier draft justified this by claiming
+> `getDocumentTitle` ([document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241))
+> would leave such a document untitled. That is wrong: §5b widens that very branch to `isAxesType`,
+> which accepts both values, so a half-swept group document still matches it and still renders
+> "Group N Document". The hazards above are the real ones, and the merged write is still required.
 
 **So the script changes from two write lists to one merged write per document:** accumulate each
 document's fields into a per-reference map, then commit one `set(..., { merge: true })` per document.
