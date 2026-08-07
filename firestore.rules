@@ -118,7 +118,7 @@ service cloud.firestore {
     // `concurrent` added to preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at
     // document creation — which is already constrained: isValidDocumentCreateRequest requires a synthetic
     // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk). That
-    // deletion is CLUE-612, and it cannot ship in the same release as the migration that unblocks it.
+    // deletion is CLUE-612.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(["concurrent"].toSet())
