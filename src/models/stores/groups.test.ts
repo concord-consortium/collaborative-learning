@@ -1,6 +1,7 @@
 import { GroupsModel, GroupModel, GroupUserModel } from "./groups";
 import { ClassModel, ClassUserModel } from "./class";
 import { DBOfferingGroupMap } from "../../lib/db-types";
+import { getGroupOwnerId } from "../document/document-axes";
 
 describe("Groups model", () => {
 
@@ -52,6 +53,42 @@ describe("Groups model", () => {
     expect(groups.userInGroup("3", "1")).toBe(true);
     expect(groups.userInGroup("4", "1")).toBeFalsy();
     expect(groups.virtualDocumentForGroup("group-1")).toBeDefined();
+  });
+
+  describe("getGroupByOwnerId", () => {
+    const groupsFor = (offeringId?: string) =>
+      GroupsModel.create({ offeringId, groupsMap: { 3: GroupModel.create({ id: "3", users: [] }) } });
+
+    it("resolves a group document's owner to its group", () => {
+      const groups = groupsFor("off-1");
+      expect(groups.getGroupByOwnerId(getGroupOwnerId("off-1", "3"))?.id).toBe("3");
+    });
+
+    it("does not resolve the same group number from another offering", () => {
+      // The whole point: group 3 of another assignment is a different set of students, so it must not
+      // answer with this offering's group 3.
+      const groups = groupsFor("off-1");
+      expect(groups.getGroupByOwnerId(getGroupOwnerId("off-2", "3"))).toBeUndefined();
+    });
+
+    it("does not resolve a bare group id, a user uid, or a class owner", () => {
+      const groups = groupsFor("off-1");
+      expect(groups.getGroupByOwnerId("3")).toBeUndefined();
+      expect(groups.getGroupByOwnerId("student-1")).toBeUndefined();
+      expect(groups.getGroupByOwnerId("class_hash")).toBeUndefined();
+    });
+
+    it("resolves nothing until the store knows which offering it holds", () => {
+      expect(groupsFor(undefined).getGroupByOwnerId(getGroupOwnerId("off-1", "3"))).toBeUndefined();
+      expect(groupsFor("off-1").getGroupByOwnerId(undefined)).toBeUndefined();
+    });
+  });
+
+  it("records the offering its groups belong to when updating from db", () => {
+    const groups = GroupsModel.create({});
+    expect(groups.offeringId).toBeUndefined();
+    groups.updateFromDB({}, "off-7");
+    expect(groups.offeringId).toBe("off-7");
   });
 
   it("updates from db", () => {
@@ -133,11 +170,11 @@ describe("Groups model", () => {
 
     const groups = GroupsModel.create({}, {class: clazz});
 
-    groups.updateFromDB(dbGroupsWithoutUsers);
+    groups.updateFromDB(dbGroupsWithoutUsers, "off-1");
     expect(groups.allGroups.length).toEqual(1);
     expect(groups.allGroups[0].users.length).toEqual(0);
 
-    groups.updateFromDB(dbGroupsWithUsers);
+    groups.updateFromDB(dbGroupsWithUsers, "off-1");
     expect(groups.allGroups.length).toEqual(1);
     const group = groups.allGroups[0];
     expect(group.users.length).toEqual(3);

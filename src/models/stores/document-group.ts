@@ -2,13 +2,14 @@ import { FC, SVGProps } from "react";
 import { makeAutoObservable } from "mobx";
 
 import {
-  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs,
-  sortDateSectionLabels, sortGroupSectionLabels, sortNameSectionLabels, sortProblemSectionLabels
+  createDocMapByBookmarks, createTileTypeToDocumentsMap, getTagsWithDocs, GroupSectionSortKey,
+  kNoNameSectionLabel, kWholeClassSectionLabel, NameSectionSortKey, sortDateSectionLabels, sortGroupSections,
+  sortNameSectionLabels, sortProblemSectionLabels
 } from "../../utilities/sort-document-utils";
 import { upperWords } from "../../utilities/string-utils";
 import { translate } from "../../utilities/translation/translate";
+import { getCurriculumLabel, hasClassOwner, hasGroupOwner } from "../document/document-axes";
 import { IDocumentMetadataModel } from "../document/document-metadata-model";
-import { GroupDocument } from "../document/document-types";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { UnitModelType } from "../curriculum/unit";
@@ -56,6 +57,14 @@ interface IBuildDocumentCollectionProps {
   sortType: SecondarySortType;
   // Optional per-label display overrides, keyed by the ordinal-based grouping label.
   labelMap?: Map<string, string>;
+}
+
+/**
+ * Which section of the "by group" sort a document belongs in.
+ */
+interface IGroupSection {
+  sectionLabel: string;
+  sortKey: GroupSectionSortKey;
 }
 
 /*
@@ -190,49 +199,92 @@ export class DocumentGroup {
   get byGroup(): DocumentGroup[] {
     const groupTerm = upperWords(translate("studentGroup"));
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
+    // Ordering information per section, so the comparator never parses the display label.
+    const sortKeys: Map<string, GroupSectionSortKey> = new Map();
+
+    const groupSection = (groupId: string): IGroupSection =>
+      ({ sectionLabel: `${groupTerm} ${groupId}`, sortKey: { section: "group", groupId } });
+
     this.documents.forEach((doc) => {
-      const sectionLabel = (() => {
-        if (doc.type === GroupDocument) {
-          return `${groupTerm} ${doc.groupId}`;
+      const { sectionLabel, sortKey } = ((): IGroupSection => {
+        // A document owned by a group belongs to that group, whoever created it. The section is labelled
+        // from the stored `groupId`, the one place the group's number is available without taking the
+        // owner uid apart; a group-owned document without one has no group to name and falls through.
+        if (hasGroupOwner(doc) && doc.groupId) return groupSection(doc.groupId);
+        // A class-owned document is not one student's work, so it sections under the class itself.
+        if (hasClassOwner(doc)) {
+          return { sectionLabel: kWholeClassSectionLabel, sortKey: { section: "class" } };
         }
-        const userId = doc.uid;
-        const group = this.stores.groups.groupForUser(userId);
-        return group ? `${groupTerm} ${group.id}` : `No ${groupTerm}`;
+        // Otherwise it belongs to its owner, and so to whichever group its owner is in now.
+        const group = this.stores.groups.groupForUser(doc.uid);
+        return group
+          ? groupSection(group.id)
+          : { sectionLabel: `No ${groupTerm}`, sortKey: { section: "none" } };
       })();
 
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+      sortKeys.set(sectionLabel, sortKey);
     });
-    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
+
+    const sortedSectionLabels = sortGroupSections(Array.from(documentMap.keys()), sortKeys);
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap: documentMap});
   }
 
   get byName(): DocumentGroup[] {
     const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
-    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
-      const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
+    // Ordering information per section, so the comparator never parses the display label.
+    const sortKeys: Map<string, NameSectionSortKey> = new Map();
+    const addDocToSection = (
+      doc: IDocumentMetadataModel, sectionLabel: string, sortKey: NameSectionSortKey
+    ) => {
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, []);
       }
       documentMap.get(sectionLabel)?.push(doc);
+      sortKeys.set(sectionLabel, sortKey);
+    };
+    const addDocForUser = (doc: IDocumentMetadataModel, user: ClassUserModelType | undefined) => {
+      const sectionLabel = user ? `${user.lastName}, ${user.firstName}` : "Unknown";
+      addDocToSection(doc, sectionLabel, { section: "student" });
+    };
+    // One section per other assignment, not per group: a class works through many, and a section per
+    // group of each would swamp the sort. Every document in one offering shares a curriculum position,
+    // so that names the section.
+    const otherAssignmentSection = (doc: IDocumentMetadataModel) => {
+      const groupsTerm = upperWords(translate("studentGroups"));
+      const curriculumLabel = getCurriculumLabel(doc);
+      return curriculumLabel ? `${groupsTerm} from ${curriculumLabel}` : `Other ${groupsTerm}`;
     };
 
     this.documents.forEach((doc) => {
-      if (doc.type === GroupDocument) {
-        // Add group documents to each user in the group
-        const groupId = doc.groupId ?? "unknownGroup";
-        const group = this.stores.groups.getGroupById(groupId);
-        group?.users.forEach(user => {
-          addDocForUser(doc, user.classUser);
-        });
+      // The owner decides the section, so it is asked first, narrowest level outward.
+      if (hasGroupOwner(doc)) {
+        // A group document is listed under every member of the group that owns it. The group is looked
+        // up by owner, so one from another offering resolves to nothing rather than to this offering's
+        // same-numbered group — those are different students, and naming them would attribute the work
+        // to people who did not do it.
+        const group = this.stores.groups.getGroupByOwnerId(doc.uid);
+        if (group) {
+          group.users.forEach(user => {
+            addDocForUser(doc, user.classUser);
+          });
+        } else {
+          // Its members are not knowable from here, so file it by where the work came from. Keeping it
+          // out of the map entirely would drop it from this sort.
+          addDocToSection(doc, otherAssignmentSection(doc), { section: "otherAssignment" });
+        }
+      } else if (hasClassOwner(doc)) {
+        // A class-owned document has no personal author to file it under.
+        addDocToSection(doc, kNoNameSectionLabel, { section: "noName" });
       } else {
         addDocForUser(doc, this.stores.class.getUserById(doc.uid));
       }
     });
 
-    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
+    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()), sortKeys);
     return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap: documentMap});
   }
 

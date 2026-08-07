@@ -416,10 +416,10 @@ describe("db", () => {
   describe("class-wide document creation", () => {
     it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent (but not title)", async () => {
       // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
-      // getDocumentScopeFields returns the class `unit` (read from the stores' current unit). The authored title
+      // getDocumentLocationFields returns the class `unit` (read from the stores' current unit). The authored title
       // is registered too, to prove it is resolved by kind and NOT persisted into the Firestore metadata.
       registerDocumentKind("drivingQuestionBoard", {
-        metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
         title: "Driving Question Board"
       });
       // Rebuild stores with the classHash (→ context_id) and the current unit code the class-wide scope uses.
@@ -456,6 +456,12 @@ describe("db", () => {
         kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       expect(setPayloads[0].title).toBeUndefined();
+      // The class+unit scope states its absent curriculum fields explicitly so the scope is
+      // queryable; it must still carry no offering or group.
+      expect(setPayloads.some((d: any) =>
+        d.investigation === null && d.problem === null &&
+        d.offeringId === undefined && d.groupId === undefined
+      )).toBe(true);
     });
   });
 
@@ -472,6 +478,12 @@ describe("db", () => {
       });
       (db as any).openDocumentFromFirestoreMetadata = openStub;
       (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
+      // createDeclaredClassWideDocuments registers a declared kind before asking for its document, and
+      // getDocumentOwner throws for an unregistered kind rather than defaulting the owner to the caller.
+      registerDocumentKind("drivingQuestionBoard", {
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+        title: "DQB", unit: "msu"
+      });
     });
 
     it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {

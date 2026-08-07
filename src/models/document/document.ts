@@ -78,7 +78,8 @@ export const DocumentModel = Tree.named("Document")
      * live document, frozen at publish time for a publication. Set only where the owner is a user, since
      * a group- or class-owned document has no user to look up. It is a fact about that user's
      * membership, not about the document, so it says nothing about who owns this. The four-up view and
-     * the content listener want this one; anything asking "whose document is this" wants `groupId`.
+     * the content listener want this one; anything asking "whose document is this" wants `groupId` or
+     * the owner guards in document-axes.ts.
      */
     groupIdOfUserOwner: types.maybe(types.string),
     visibility: types.maybe(VisibilityTypeEnum),
@@ -149,13 +150,13 @@ export const DocumentModel = Tree.named("Document")
       return !!self.content;
     },
     get metadata(): IDocumentMetadata {
-      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent,
-              kind } = self;
+      const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent, kind,
+              contextId } = self;
       // `groupId` is undefined for everything but a group document, matching the stored field it mirrors,
       // so this shape agrees with what Firestore holds. The owning user's group is deliberately absent: it is
       // not document metadata. Nothing writes this back to Firestore or Firebase today — it is used for
-      // finding Firestore documents.
-      return { uid, groupId, type, key, createdAt, title, concurrent, kind,
+      // finding Firestore documents and for reading a document's axes.
+      return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, offeringId: self.offeringId, visibility } as IDocumentMetadata;
     },
