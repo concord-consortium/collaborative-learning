@@ -131,9 +131,10 @@ interface IGetOrCreateCanonicalDocumentOpts {
 // (createDeclaredClassWideDocuments) stops here; one that needs the document open passes the ref on.
 interface ICanonicalDocumentRef {
   documentKey: string;
-  // Present on the legacy and create paths, which read or write the metadata as part of their work. Absent on
-  // the pointer fast path, which reads only the pointer — fetching the metadata there is the cost this split
-  // exists to avoid.
+  // Present when the resolving path already read or wrote the metadata as part of its work: the legacy
+  // fallback, and the create path when it wins the pointer claim. Absent when the path only ever learns the
+  // documentKey — the pointer fast path, and the create path's lost-race branch — since fetching metadata
+  // beyond what's already in hand is the cost this split exists to avoid.
   firestoreMetadata?: IDocumentMetadata;
 }
 
@@ -858,6 +859,10 @@ export class DB {
     const { documentKey, firestoreMetadata } = await this.resolveCanonicalDocument(opts);
     return firestoreMetadata
       ? this.openDocumentFromFirestoreMetadata(firestoreMetadata)
+      // resolveCanonicalDocument omits firestoreMetadata only when documentKey names a document it confirmed
+      // exists without fetching its metadata — the fast path's pointer target, or the race loser's pointer
+      // target — so opening by key here always finds one. If that invariant is ever broken,
+      // openCanonicalDocumentByKey throws (the referenced document won't be found) rather than failing silently.
       : this.openCanonicalDocumentByKey(documentKey);
   }
 
