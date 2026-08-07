@@ -475,6 +475,7 @@ describe("Firestore security rules", () => {
     });
 
     it("lets a class member set concurrent on an axes-typed document", async () => {
+      db = initFirestore(studentAuth);
       // createdAt is read-only (preservesReadOnlyDocumentFields), so the write under test must carry the
       // same value the document was created with — a real update always does, since it starts from a read
       // of the existing document rather than fabricating a new createdAt.
@@ -488,6 +489,7 @@ describe("Firestore security rules", () => {
     });
 
     it("still refuses to clear concurrent on an axes-typed document", async () => {
+      db = initFirestore(studentAuth);
       const createdAt = mockTimestamp() as any;
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
         add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true, createdAt }
