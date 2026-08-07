@@ -195,6 +195,13 @@ service cloud.firestore {
       // therefore create a document owned by another group in their own offering. Closing it needs a group
       // claim in the portal-minted token, or membership mirrored into Firestore — see the owner axis in
       // docs/document-axes/README.md.
+      // Residual, accepted: the token corroborates that the caller belongs to the class named in
+      // `class_<class_hash>`, but not that the caller is entitled to mint a document under that owner. Any
+      // class member can create any number of `class_<class_hash>`-owned, `concurrent: true` documents, each
+      // sectioned under "Whole Class" in Sort Work with the whole class granted read and write on its
+      // history. This is narrower than admitting any `uid` at all, and it is inherent to the design — a
+      // class can only converge on one document if any of its members can mint it. See the owner axis in
+      // docs/document-axes/README.md.
       function documentOwnerIsCallersClass() {
         return request.resource.data.uid == "class_" + request.auth.token.class_hash;
       }
