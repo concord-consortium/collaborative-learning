@@ -480,6 +480,42 @@ describe("Firestore security rules", () => {
 
   });
 
+  describe("document shapes the deployed client creates", () => {
+    // The create rules deploy a release ahead of the app that satisfies them, so each shape the deployed
+    // client writes has to keep creating. The fields are the ones createFirestoreMetadataDocument stamps,
+    // selected by the kind's containerType: "offering" carries unit/investigation/problem/offeringId,
+    // "class" carries unit: null, "classUnit" carries a unit with investigation and problem explicitly null.
+    const offeringContained = { unit: cUnit, investigation: "1", problem: "2", offeringId };
+    const classContained = { unit: null };
+
+    const kDeployedShapes: Array<{ name: string; fields: Record<string, any> }> = [
+      { name: "problem document", fields: { type: "problem", ...offeringContained } },
+      { name: "planning document", fields: { type: "planning", ...offeringContained } },
+      { name: "problem publication", fields: { type: "publication", ...offeringContained } },
+      { name: "personal document", fields: { type: "personal", title: "My Doc", ...classContained } },
+      { name: "learning log", fields: { type: "learningLog", title: "My Log", ...classContained } },
+      { name: "personal publication",
+        fields: { type: "personalPublication", title: "My Doc", ...classContained } },
+      { name: "learning log publication",
+        fields: { type: "learningLogPublication", title: "My Log", ...classContained } }
+    ];
+
+    kDeployedShapes.forEach(({ name, fields }) => {
+      it(`a student can create a ${name}`, async () => {
+        db = initFirestore(studentAuth);
+        await expectWriteToSucceed(db, kDocumentDocPath,
+          specDocumentDoc({ add: { uid: studentId, properties: {}, ...fields } }));
+      });
+    });
+
+    it("a teacher can create a document in a class they teach", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await expectWriteToSucceed(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: teacherId, properties: {}, ...offeringContained } }));
+    });
+  });
+
   describe("history entries", () => {
     const kDocumentHistoryDocPath = `${kDocumentDocPath}/history/myHistoryEntry`;
     interface ISpecHisoryDoc {
