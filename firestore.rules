@@ -99,14 +99,14 @@ service cloud.firestore {
 
     // TRANSITIONAL: `concurrent` is an authorization input for the history rule below
     // (isConcurrentClassDocument), so letting any class member set it on any document would let them
-    // grant themselves history access to a classmate's document. It stays writable on `type ==
-    // "group"` documents only, and then only to `true`, because two backfill paths merge-update it onto
+    // grant themselves history access to a classmate's document. It stays writable on axes-typed
+    // documents only, and then only to `true`, because two backfill paths merge-update it onto
     // pre-existing group documents that predate the field: the on-open backfill in src/lib/db.ts and the
     // one-shot scripts/backfill-group-document-axes.ts. Both write only `true`, so clearing the field is
     // nobody's legitimate operation, and permitting it would let a class member strip a group document's
     // shared history and edit access. `type` itself is read-only (preservesReadOnlyDocumentFields),
     // so it cannot be flipped first to unlock this.
-    // Residual: a class member can still create a `type: "group"` document owned by themselves with no
+    // Residual: a class member can still create an axes-typed document owned by themselves with no
     // `concurrent` field — both create rules permit that — and then any classmate can update it to
     // `concurrent: true`, because this function tests only the document's `type`, never its owner. That
     // grants the whole class read and write access to that one document's history. It is not a way into
@@ -121,8 +121,9 @@ service cloud.firestore {
     // deletion is CLUE-612.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      let docType = resource.data.get("type", "");
       return !affectedFieldsSet.hasAny(["concurrent"].toSet())
-        || (resource.data.get("type", "") == "group"
+        || ((docType == "group" || docType == "axes")
             && request.resource.data.get("concurrent", false) == true);
     }
 
@@ -220,7 +221,7 @@ service cloud.firestore {
       }
 
       // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
-      // tested here: the transitional `type: "group"` is on its way out, while the owner is the durable fact.
+      // tested here: the transitional type value is on its way out, while the owner is the durable fact.
       // The update side is governed by concurrentChangeOk.
       function concurrentCreateOk() {
         return request.resource.data.get("concurrent", false) == false
@@ -496,11 +497,11 @@ service cloud.firestore {
         allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
         // teachers can only delete their own documents
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
-        // Allows class members to delete the non-winning (non-canonical) group documents from the
+        // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
-          && resource.data.type == "group"
+          && (resource.data.type == "group" || resource.data.type == "axes")
           && !isCanonicalValue(resource.data.get('canonical', ""));
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||

@@ -358,28 +358,28 @@ describe("Firestore security rules", () => {
     it("a class member can create their class's class-wide document", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: `class_${thisClass}`, type: "group", unit: cUnit, investigation: null, problem: null }
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, investigation: null, problem: null }
       }));
     });
 
     it("a class member cannot create a document owned by another class", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: `class_${otherClass}`, type: "group", unit: cUnit }
+        add: { uid: `class_${otherClass}`, type: "axes", unit: cUnit }
       }));
     });
 
     it("a class member can create a group document whose owner agrees with its offering and group", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3" }
+        add: { uid: `group_${offeringId}_3`, type: "axes", offeringId, groupId: "3" }
       }));
     });
 
     it("a class member cannot create a group document whose owner names another offering", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: "group_9999_3", type: "group", offeringId, groupId: "3" }
+        add: { uid: "group_9999_3", type: "axes", offeringId, groupId: "3" }
       }));
     });
 
@@ -389,13 +389,13 @@ describe("Firestore security rules", () => {
       // is recorded on the owner axis in docs/document-axes/README.md.
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "4" }
+        add: { uid: `group_${offeringId}_3`, type: "axes", offeringId, groupId: "4" }
       }));
     });
 
     it("a class member cannot create a group-shaped owner with no offering or group of its own", async () => {
       db = initFirestore(studentAuth);
-      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: "group__", type: "group" } }));
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: "group__", type: "axes" } }));
     });
 
     it("a class member cannot create their own document already marked concurrent", async () => {
@@ -423,14 +423,14 @@ describe("Firestore security rules", () => {
     it("a class-wide document may be created concurrent", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: `class_${thisClass}`, type: "group", unit: cUnit, concurrent: true }
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true }
       }));
     });
 
     it("a group document may be created concurrent", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3", concurrent: true }
+        add: { uid: `group_${offeringId}_3`, type: "axes", offeringId, groupId: "3", concurrent: true }
       }));
     });
 
@@ -472,6 +472,29 @@ describe("Firestore security rules", () => {
         add: { uid: student2Id, type: "group", concurrent: true }
       }));
       await expectUpdateToFail(db, kDocumentDocPath, { concurrent: false });
+    });
+
+    it("lets a class member set concurrent on an axes-typed document", async () => {
+      // createdAt is read-only (preservesReadOnlyDocumentFields), so the write under test must carry the
+      // same value the document was created with — a real update always does, since it starts from a read
+      // of the existing document rather than fabricating a new createdAt.
+      const createdAt = mockTimestamp() as any;
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, createdAt }
+      }));
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true, createdAt }
+      }));
+    });
+
+    it("still refuses to clear concurrent on an axes-typed document", async () => {
+      const createdAt = mockTimestamp() as any;
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true, createdAt }
+      }));
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: false, createdAt }
+      }));
     });
 
     it("authenticated students can't delete documents in their class", async () => {
@@ -711,7 +734,7 @@ describe("Firestore security rules", () => {
       // Every member of the class must still be able to append history to it.
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
-        add: { uid: "group_myOffering_3", type: "group", concurrent: true, groupId: "3" },
+        add: { uid: "group_myOffering_3", type: "axes", concurrent: true, groupId: "3" },
         remove: ["teachers"]
       }));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
@@ -720,7 +743,7 @@ describe("Firestore security rules", () => {
     it("class member can create a history entry on a class-wide concurrent document", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
-        add: { uid: `class_${thisClass}`, type: "group", concurrent: true, unit: "sas" },
+        add: { uid: `class_${thisClass}`, type: "axes", concurrent: true, unit: "sas" },
         remove: ["teachers"]
       }));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
@@ -729,7 +752,7 @@ describe("Firestore security rules", () => {
     it("class member can read history on a concurrent document they do not own", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
-        add: { uid: `class_${thisClass}`, type: "group", concurrent: true, unit: "sas" },
+        add: { uid: `class_${thisClass}`, type: "axes", concurrent: true, unit: "sas" },
         remove: ["teachers"]
       }));
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
@@ -740,7 +763,7 @@ describe("Firestore security rules", () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
         add: {
-          uid: "class_someOtherClass", type: "group", concurrent: true, unit: "sas",
+          uid: "class_someOtherClass", type: "axes", concurrent: true, unit: "sas",
           context_id: otherClass
         },
         remove: ["teachers"]

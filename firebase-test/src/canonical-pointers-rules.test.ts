@@ -82,6 +82,23 @@ describe("deleting group documents", () => {
   });
 });
 
+describe("deleting axes-typed documents", () => {
+  const axesDoc = (extra: any = {}) => groupDoc({ type: "axes", ...extra });
+
+  it("a class member may delete a non-canonical axes-typed document", async () => {
+    const admin = initFirestore(teacherAuth);
+    await admin.doc(kDocPath).set(axesDoc());               // no canonical flag
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kDocPath).delete());
+  });
+
+  it("a class member may NOT delete a canonical axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, { ...axesDoc(), canonical: "default", createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).delete());
+  });
+});
+
 describe("canonical flag integrity", () => {
   it("create is denied if the doc arrives pre-flagged canonical", async () => {
     db = initFirestore(studentAuth);
