@@ -126,6 +126,17 @@ interface IGetOrCreateCanonicalDocumentOpts {
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
 
+// What resolving a canonical slot yields: the key of the one document the class has converged on, plus its
+// Firestore metadata when the resolving path already holds it. A caller that only needs the class to converge
+// (createDeclaredClassWideDocuments) stops here; one that needs the document open passes the ref on.
+interface ICanonicalDocumentRef {
+  documentKey: string;
+  // Present on the legacy and create paths, which read or write the metadata as part of their work. Absent on
+  // the pointer fast path, which reads only the pointer — fetching the metadata there is the cost this split
+  // exists to avoid.
+  firestoreMetadata?: IDocumentMetadata;
+}
+
 interface ICreateFirestoreMetadataDocumentOpts {
   documentKey: string;
   type: DBDocumentType;
@@ -841,7 +852,16 @@ export class DB {
     };
   }
 
+  // Resolve the slot and open what it points at. The metadata the resolver returns is used when it has one,
+  // so opening a document the resolver just created or found by query costs no extra read.
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
+    const { documentKey, firestoreMetadata } = await this.resolveCanonicalDocument(opts);
+    return firestoreMetadata
+      ? this.openDocumentFromFirestoreMetadata(firestoreMetadata)
+      : this.openCanonicalDocumentByKey(documentKey);
+  }
+
+  private async resolveCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts): Promise<ICanonicalDocumentRef> {
     const { container, type, kind, canonicalLabel, findLegacy } = opts;
     // The slot's owner is the same uid createDocument stamps on the document, from the same registry
     // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
@@ -853,13 +873,11 @@ export class DB {
     });
     const pointerRef = this.firestore.doc(pointerPath);
 
-    // 1. Fast path: pointer already exists.
+    // 1. Fast path: pointer already exists. Only the pointer is read — the metadata is left to whoever
+    // opens the document.
     const pointerSnap = await pointerRef.get();
     if (pointerSnap.exists) {
-      // Every pointer is written with a documentKey by the claim/backfill transactions below, so
-      // it is always present here. If that invariant is ever broken, openCanonicalDocumentByKey
-      // throws (the referenced document won't be found) rather than failing silently.
-      return this.openCanonicalDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
+      return { documentKey: (pointerSnap.data() as ICanonicalPointer).documentKey };
     }
 
     // 2. Legacy fallback: pre-pointer group docs are found by query; backfill a pointer.
@@ -877,7 +895,7 @@ export class DB {
           }
         }).catch(() => undefined); // If the backfill txn throws (e.g. a concurrent caller already
         // claimed the pointer), swallow it — we still return the legacy doc below either way.
-        return this.openDocumentFromFirestoreMetadata(legacy);
+        return { documentKey: legacy.key, firestoreMetadata: legacy };
       }
     }
 
@@ -901,12 +919,12 @@ export class DB {
     if (wonKey !== documentKey) {
       // The orphan lives under its own owner's path; that owner is the uid createDocument stamped.
       await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
-      return this.openCanonicalDocumentByKey(wonKey);
+      return { documentKey: wonKey };
     }
     if (type === GroupDocument) {
       Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
     }
-    return this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+    return { documentKey, firestoreMetadata };
   }
 
   private async findLegacyGroupDocument(groupId: string): Promise<IDocumentMetadata | undefined> {
