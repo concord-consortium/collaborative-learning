@@ -223,7 +223,7 @@ service cloud.firestore {
       // tested here: the transitional `type: "group"` is on its way out, while the owner is the durable fact.
       // The update side is governed by concurrentChangeOk.
       function concurrentCreateOk() {
-        return request.resource.data.get("concurrent", false) != true
+        return request.resource.data.get("concurrent", false) == false
           || documentOwnerIsCallersClass() || documentOwnerIsSelfConsistentGroup();
       }
 

@@ -412,6 +412,14 @@ describe("Firestore security rules", () => {
         specDocumentDoc({ add: { uid: student2Id, concurrent: true } }));
     });
 
+    it("a class member cannot create their own document with a truthy non-boolean concurrent value", async () => {
+      // concurrentCreateOk tests `concurrent` against `== false`, not `!= true`, so a non-boolean like the
+      // string "true" cannot slip past the owner check the way it would under a `!= true` test.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: studentId, concurrent: "true" } }));
+    });
+
     it("a class-wide document may be created concurrent", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
