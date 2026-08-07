@@ -1,8 +1,8 @@
 import firebase from "firebase";
 import {
-  adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
+  adminWriteDoc, cUnit, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, network1, network2, noNetwork, otherClass, prepareEachTest,
+  initFirestore, mockTimestamp, network1, network2, noNetwork, offeringId, otherClass, prepareEachTest,
   researcherAuth,
   researcherId,
   student2Id,
@@ -30,7 +30,7 @@ describe("Firestore security rules", () => {
   const kDocumentDocPath = "authed/myPortal/documents/myDocument";
 
   interface ISpecDocumentDoc {
-    add?: Record<string, string | string[] | object | boolean>;
+    add?: Record<string, string | string[] | object | boolean | null>;
     remove?: string[];
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
@@ -340,12 +340,62 @@ describe("Firestore security rules", () => {
 
     it("authenticated students can create documents in their class", async () => {
       db = initFirestore(studentAuth);
-      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc());
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({ add: { uid: studentId } }));
     });
 
     it("authenticated students can't create documents in a different class", async () => {
       db = initFirestore(studentAuth);
-      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { context_id: otherClass }}));
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: studentId, context_id: otherClass } }));
+    });
+
+    it("a class member cannot create a document owned by a classmate", async () => {
+      // The document would then appear under that classmate's name in Sort Work.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id } }));
+    });
+
+    it("a class member can create their class's class-wide document", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "group", unit: cUnit, investigation: null, problem: null }
+      }));
+    });
+
+    it("a class member cannot create a document owned by another class", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${otherClass}`, type: "group", unit: cUnit }
+      }));
+    });
+
+    it("a class member can create a group document whose owner agrees with its offering and group", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a class member cannot create a group document whose owner names another offering", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: "group_9999_3", type: "group", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a class member cannot create a group document whose owner names another group", async () => {
+      // The uid must agree with the document's own groupId. Nothing here proves the caller is IN group 3 —
+      // group membership lives in the Realtime Database and the token carries no group claim. That residual
+      // is recorded on the owner axis in docs/document-axes/README.md.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "4" }
+      }));
+    });
+
+    it("a class member cannot create a group-shaped owner with no offering or group of its own", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: "group__", type: "group" } }));
     });
 
     it("authenticated students can update documents in their class", async () => {

@@ -176,9 +176,39 @@ service cloud.firestore {
         return canonical == null || canonical == "";
       }
 
+      // A document's `uid` is its owner. Three shapes are legitimate, and each is corroborated either by the
+      // caller's token or by fields the document itself carries:
+      //   - the caller (an ordinary problem, personal, learning-log, planning or publication document);
+      //   - the synthetic class owner of the caller's own class (a class-wide document);
+      //   - the synthetic group owner, required to agree with the offering and group the document records.
+      // Keep the two synthetic formats in lockstep with kClassOwnerPrefix and getGroupOwnerId in
+      // src/models/document/document-axes.ts.
+      // Residual, accepted: nothing here proves the caller is a member of that group, because group
+      // membership lives in the Realtime Database and the token carries no group claim. A student can
+      // therefore create a document owned by another group in their own offering. Closing it needs a group
+      // claim in the portal-minted token, or membership mirrored into Firestore — see the owner axis in
+      // docs/document-axes/README.md.
+      function documentOwnerIsCallersClass() {
+        return request.resource.data.uid == "class_" + request.auth.token.class_hash;
+      }
+
+      function documentOwnerIsSelfConsistentGroup() {
+        let data = request.resource.data;
+        let offering = data.get("offeringId", "");
+        let group = data.get("groupId", "");
+        return offering is string && offering != ""
+          && group is string && group != ""
+          && data.uid == "group_" + offering + "_" + group;
+      }
+
+      function documentOwnerOk() {
+        return userIsRequestUser() || documentOwnerIsCallersClass() || documentOwnerIsSelfConsistentGroup();
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          documentOwnerOk() &&
           // The canonical label is granted solely by the pointer-claim transaction (an update,
           // gated by canonicalFieldOk), so a create carrying a non-blank `canonical` — including a
           // non-string like `true` — is rejected.
