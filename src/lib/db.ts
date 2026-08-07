@@ -126,6 +126,18 @@ interface IGetOrCreateCanonicalDocumentOpts {
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
 
+// What resolving a canonical slot yields: the key of the one document the class has converged on, plus its
+// Firestore metadata when the resolving path already holds it. A caller that only needs the class to converge
+// (createDeclaredClassWideDocuments) stops here; one that needs the document open passes the ref on.
+interface ICanonicalDocumentRef {
+  documentKey: string;
+  // Present when the resolving path already read or wrote the metadata as part of its work: the legacy
+  // fallback, and the create path when it wins the pointer claim. Absent when the path only ever learns the
+  // documentKey — the pointer fast path, and the create path's lost-race branch — since fetching metadata
+  // beyond what's already in hand is the cost this split exists to avoid.
+  firestoreMetadata?: IDocumentMetadata;
+}
+
 interface ICreateFirestoreMetadataDocumentOpts {
   documentKey: string;
   type: DBDocumentType;
@@ -794,21 +806,28 @@ export class DB {
     return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
   }
 
+  // Resolves the class onto its one document for this slot and stops there. The document is opened when
+  // someone opens it — from Sort Work (SortedDocuments.fetchFullDocument) or, after a reload with it as the
+  // primary document, from DocumentWorkspace — so unit load pays one pointer read rather than a metadata
+  // read, an RTDB fetch, and a history subscription for every student on every load.
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
-    return this.getOrCreateCanonicalDocument({
+    const { documentKey } = await this.resolveCanonicalDocument({
       container: { classHash: user.classHash, unit: unit.code },
       canonicalLabel: classWideDoc.kind,
       type: GroupDocument,
       kind: classWideDoc.kind
     });
+    return documentKey;
   }
 
   // Auto-create each class-wide document the unit declares. Called once per unit open, after the unit is
-  // loaded. Each is created independently and fire-and-forget: the canonical-pointer engine converges all
-  // class members to one document per declared kind, so a failure here never blocks app startup.
+  // loaded. Each is resolved but not opened: converging the class on one document per slot has to happen at
+  // unit load, opening it does not. Each is resolved independently and fire-and-forget: the canonical-pointer
+  // engine converges all class members to one document per declared kind, so a failure here never blocks app
+  // startup.
   private createDeclaredClassWideDocuments() {
     const classWideDocs = this.stores.appConfig.classWideDocuments;
     if (!classWideDocs?.length) return;
@@ -841,7 +860,20 @@ export class DB {
     };
   }
 
+  // Resolve the slot and open what it points at. The metadata the resolver returns is used when it has one,
+  // so opening a document the resolver just created or found by query costs no extra read.
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
+    const { documentKey, firestoreMetadata } = await this.resolveCanonicalDocument(opts);
+    return firestoreMetadata
+      ? this.openDocumentFromFirestoreMetadata(firestoreMetadata)
+      // resolveCanonicalDocument omits firestoreMetadata only when documentKey names a document it confirmed
+      // exists without fetching its metadata — the fast path's pointer target, or the race loser's pointer
+      // target — so opening by key here always finds one. If that invariant is ever broken,
+      // openCanonicalDocumentByKey throws (the referenced document won't be found) rather than failing silently.
+      : this.openCanonicalDocumentByKey(documentKey);
+  }
+
+  private async resolveCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts): Promise<ICanonicalDocumentRef> {
     const { container, type, kind, canonicalLabel, findLegacy } = opts;
     // The slot's owner is the same uid createDocument stamps on the document, from the same registry
     // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
@@ -853,13 +885,11 @@ export class DB {
     });
     const pointerRef = this.firestore.doc(pointerPath);
 
-    // 1. Fast path: pointer already exists.
+    // 1. Fast path: pointer already exists. Only the pointer is read — the metadata is left to whoever
+    // opens the document.
     const pointerSnap = await pointerRef.get();
     if (pointerSnap.exists) {
-      // Every pointer is written with a documentKey by the claim/backfill transactions below, so
-      // it is always present here. If that invariant is ever broken, openCanonicalDocumentByKey
-      // throws (the referenced document won't be found) rather than failing silently.
-      return this.openCanonicalDocumentByKey((pointerSnap.data() as ICanonicalPointer).documentKey);
+      return { documentKey: (pointerSnap.data() as ICanonicalPointer).documentKey };
     }
 
     // 2. Legacy fallback: pre-pointer group docs are found by query; backfill a pointer.
@@ -877,7 +907,7 @@ export class DB {
           }
         }).catch(() => undefined); // If the backfill txn throws (e.g. a concurrent caller already
         // claimed the pointer), swallow it — we still return the legacy doc below either way.
-        return this.openDocumentFromFirestoreMetadata(legacy);
+        return { documentKey: legacy.key, firestoreMetadata: legacy };
       }
     }
 
@@ -901,12 +931,12 @@ export class DB {
     if (wonKey !== documentKey) {
       // The orphan lives under its own owner's path; that owner is the uid createDocument stamped.
       await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
-      return this.openCanonicalDocumentByKey(wonKey);
+      return { documentKey: wonKey };
     }
     if (type === GroupDocument) {
       Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
     }
-    return this.openDocumentFromFirestoreMetadata(firestoreMetadata);
+    return { documentKey, firestoreMetadata };
   }
 
   private async findLegacyGroupDocument(groupId: string): Promise<IDocumentMetadata | undefined> {
