@@ -3,7 +3,7 @@ import { Provider } from "mobx-react";
 import React from "react";
 import { ClassModel } from "../../models/stores/class";
 import { createDocumentModel } from "../../models/document/document";
-import { DocumentType, GroupDocument, ProblemDocument } from "../../models/document/document-types";
+import { AxesDocument, DocumentType, GroupDocument, ProblemDocument } from "../../models/document/document-types";
 import { DocumentsModel } from "../../models/stores/documents";
 import { GroupActivityModel } from "../../models/stores/group-activity";
 import { GroupModel, GroupsModel, GroupUserModel } from "../../models/stores/groups";
@@ -113,7 +113,7 @@ describe("TileActivityBadges", () => {
     expect(container.querySelector(".tile-activity-badges")).toBeNull();
   });
 
-  it("renders nothing when document type is not 'group'", () => {
+  it("renders nothing when document type is not an axes type", () => {
     const stores = buildStores({ documentType: ProblemDocument, numFocused: 2 });
     const { container } = render(
       <Provider stores={stores}>
@@ -121,6 +121,16 @@ describe("TileActivityBadges", () => {
       </Provider>
     );
     expect(container.querySelector(".tile-activity-badges")).toBeNull();
+  });
+
+  it("renders badges for an axes-typed document", () => {
+    const stores = buildStores({ documentType: AxesDocument, numFocused: 2 });
+    render(
+      <Provider stores={stores}>
+        <TileActivityBadges documentKey={kDocKey} tileId={kTileId} hovered={false} selected={false} />
+      </Provider>
+    );
+    expect(screen.getAllByTestId("activity-badge")).toHaveLength(2);
   });
 
   it.each([1, 2, 3, 4])("renders %i badges", (n) => {

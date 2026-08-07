@@ -1,6 +1,6 @@
 import { getSnapshot, Instance } from "mobx-state-tree";
-import { createDocumentModel, DocumentModelType, SaveState } from "./document";
-import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
+import { createDocumentModel, DocumentModel, DocumentModelType, SaveState } from "./document";
+import { AxesDocument, ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
 import { expectEntryToBeComplete } from "../history/undo-store-test-utils";
@@ -365,5 +365,12 @@ describe("DocumentModel concurrent/kind stored props", () => {
   it("defaults concurrent to falsy when absent", () => {
     const doc = createDocumentModel({ uid: "u", type: "personal", key: "k2", createdAt: 1 });
     expect(doc.concurrent).toBeFalsy();
+  });
+
+  it("treats an axes-typed document as a group document", () => {
+    const doc = DocumentModel.create({
+      uid: "u", type: AxesDocument, key: "k-axes", createdAt: 1, concurrent: true, kind: "group"
+    });
+    expect(doc.isGroup).toBe(true);
   });
 });

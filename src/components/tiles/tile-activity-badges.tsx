@@ -4,7 +4,7 @@ import React from "react";
 import { Tooltip } from "react-tippy";
 import { useStores } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
-import { GroupDocument } from "../../models/document/document-types";
+import { isAxesType } from "../../models/document/document-types";
 
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 
@@ -59,9 +59,9 @@ export const TileActivityBadges = observer(function TileActivityBadges({
 }: IProps) {
   const { groupActivity, groups, documents, user } = useStores();
 
-  // Only render for group documents
+  // Only render for documents that several people edit together
   const document = documents.getDocument(documentKey);
-  if (document?.type !== GroupDocument) return null;
+  if (!document || !isAxesType(document.type)) return null;
 
   const focused = groupActivity.usersFocusedOnTile(documentKey, tileId, user.id);
   if (focused.length === 0) return null;

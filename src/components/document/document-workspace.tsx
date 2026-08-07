@@ -7,7 +7,7 @@ import { GroupVirtualDocumentComponent } from "../../components/document/group-v
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
 import {
-  DocumentDragKey, GroupDocument, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+  DocumentDragKey, isAxesType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import { kImageTileType } from "../../models/tiles/image/image-content";
@@ -206,7 +206,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       // documents, so if the primary document is one of those, make sure it is opened properly.
       try {
         const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
-        if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
+        if (primaryDocMetadata && isAxesType(primaryDocMetadata.type)) {
           db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
         }
       } catch (e) {
