@@ -9,11 +9,15 @@
 //   class-wide, missing curriculum scope    -> { investigation: null, problem: null }
 //
 // The passes are merged per document rather than committed independently because the rename overlaps
-// both: a document holding type:"axes" without kind:"group" matches neither getDocumentTitle branch
-// and renders with no title. The first pass restores the concurrent history manager for group
-// documents that carry no stored `concurrent` value. The second states a class-wide document's absent
-// curriculum scope explicitly, which is what makes it findable by Sort Work's unit-scoped query. All
-// three are additive and batched; re-running is a no-op because the query no longer matches.
+// both, and a partial write leaves a real gap: a group document with `type: "axes"` but no
+// `concurrent` opens without its concurrent history manager, and without `kind` it has nothing to
+// label its canonical-pointer slot (the slot label is the kind). A class-wide document with
+// `type: "axes"` but no explicit curriculum scope is invisible to Sort Work's unit-scoped query,
+// which selects on `investigation` and `problem` being explicitly null. The first pass restores the
+// concurrent history manager for group documents that carry no stored `concurrent` value. The second
+// states a class-wide document's absent curriculum scope explicitly, which is what makes it findable
+// by that query. All three are additive and batched; re-running is a no-op because the query no
+// longer matches.
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
 // The `documents` collection-group query needs a single-field COLLECTION_GROUP index on `type`
@@ -48,8 +52,8 @@ export interface BackfillResult {
 }
 
 /**
- * Run both backfill passes. Pure (no admin initialization) so it can be unit-tested with a mock
- * Firestore.
+ * Run both scope-selected passes plus the type rename, as one merged write per document. Pure (no
+ * admin initialization) so it can be unit-tested with a mock Firestore.
  */
 export async function backfillGroupDocumentAxes(
   db: Firestore,
@@ -73,8 +77,9 @@ export async function backfillGroupDocumentAxes(
   }
 
   // One merged write per document, not one per pass. The type rename applies to every document the
-  // query returns, so it overlaps both passes; committing them separately would leave a document
-  // holding type:"axes" without its kind, which getDocumentTitle answers with no title at all.
+  // query returns, so it overlaps both passes; committing them separately could leave a group document
+  // with type:"axes" but no concurrent history manager or kind, or a class-wide document with
+  // type:"axes" but no explicit curriculum scope — invisible to Sort Work's unit-scoped query.
   const fields = new Map<FirebaseFirestore.DocumentReference, Record<string, unknown>>();
   const fieldsFor = (ref: FirebaseFirestore.DocumentReference) => {
     const existing = fields.get(ref);

@@ -109,8 +109,9 @@ describe("backfillGroupDocumentAxes", () => {
   });
 
   it("writes type together with concurrent in a single merged write", async () => {
-    // One write per document, never two: a document that received type:"axes" but not yet kind:"group"
-    // matches neither getDocumentTitle branch and would render with no title at all.
+    // One write per document, never two: a group document that received type:"axes" but not yet
+    // concurrent+kind opens without its concurrent history manager and with nothing to label its
+    // canonical-pointer slot (the slot label is the kind).
     const db = makeDb([mkGroupDoc("a")]);
     const res = await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: false, ...quiet });
     expect(res).toEqual({ total: 1, concurrentUpdated: 1, scopeUpdated: 0, typeUpdated: 1 });
