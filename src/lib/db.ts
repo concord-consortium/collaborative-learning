@@ -806,21 +806,28 @@ export class DB {
     return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
   }
 
+  // Resolves the class onto its one document for this slot and stops there. The document is opened when
+  // someone opens it — from Sort Work (SortedDocuments.fetchFullDocument) or, after a reload with it as the
+  // primary document, from DocumentWorkspace — so unit load pays one pointer read rather than a metadata
+  // read, an RTDB fetch, and a history subscription for every student on every load.
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
-    return this.getOrCreateCanonicalDocument({
+    const { documentKey } = await this.resolveCanonicalDocument({
       container: { classHash: user.classHash, unit: unit.code },
       canonicalLabel: classWideDoc.kind,
       type: GroupDocument,
       kind: classWideDoc.kind
     });
+    return documentKey;
   }
 
   // Auto-create each class-wide document the unit declares. Called once per unit open, after the unit is
-  // loaded. Each is created independently and fire-and-forget: the canonical-pointer engine converges all
-  // class members to one document per declared kind, so a failure here never blocks app startup.
+  // loaded. Each is resolved but not opened: converging the class on one document per slot has to happen at
+  // unit load, opening it does not. Each is resolved independently and fire-and-forget: the canonical-pointer
+  // engine converges all class members to one document per declared kind, so a failure here never blocks app
+  // startup.
   private createDeclaredClassWideDocuments() {
     const classWideDocs = this.stores.appConfig.classWideDocuments;
     if (!classWideDocs?.length) return;

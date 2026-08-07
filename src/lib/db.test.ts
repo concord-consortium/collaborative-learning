@@ -486,19 +486,21 @@ describe("db", () => {
       });
     });
 
-    it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {
+    it("fast path: returns the pointer's documentKey without opening the document", async () => {
       mockFirestore.mockImplementation(() => ({
         doc: (p: string) => ({
           get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) })
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
-      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
-      expect(result.opened).toBe("existing");
+      const result = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      expect(result).toBe("existing");
+      // The point of the deferral: one pointer read, and none of the work that opening entails.
+      expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
+      expect(openStub).not.toHaveBeenCalled();
     });
 
-    it("create path: mints a class-wide doc and claims the class+unit pointer", async () => {
+    it("create path: mints a class-wide doc, claims the pointer, and does not open it", async () => {
       const setCalls: any[] = [];
       const updateCalls: any[] = [];
       (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "dqb-key" } }));
@@ -510,14 +512,15 @@ describe("db", () => {
              set: (_r: any, d: any) => setCalls.push(d),
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      const result = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
         kind: "drivingQuestionBoard"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
-      expect(result.opened).toBeDefined();
+      expect(result).toBe("dqb-key");
+      expect(openStub).not.toHaveBeenCalled();
     });
   });
 
