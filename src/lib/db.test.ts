@@ -287,6 +287,8 @@ describe("db", () => {
       expect(updateCalls[0]).toEqual({ canonical: "default" });
       expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
       expect(result.opened).toBeDefined();
+      // The create path already has the metadata it just wrote, so opening it costs no extra read.
+      expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
       logSpy.mockRestore();
     });
 
