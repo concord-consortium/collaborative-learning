@@ -1,11 +1,11 @@
 # Design: rename the generic document `type` from `"group"` to `"axes"`
 
 > **Status:** design.
-> **Story:** folds into CLUE-610 (7.5.0) — decided, but **not yet applied to the story**. Verified
-> 2026-08-07 that CLUE-610 does not mention this work, and no other CLUE issue does either: the rename
-> was considered early on and dropped before the story was written. Drafted wording for the CLUE-610 and
-> CLUE-604 Jira updates lives in a session handoff note kept outside version control — ask whoever
-> picked up this work for it rather than looking for it in this repo's history.
+> **Story:** folds into CLUE-610 (7.5.0), and the story now says so. The rename was considered early on
+> and dropped before CLUE-610 was written, so it was absent from every CLUE issue until 2026-08-08, when
+> CLUE-610 gained the rename and its release requirements and CLUE-604's step 2 was restated around the
+> merged write. CLUE-612 was re-read and needs nothing: it is written entirely in terms of the shared
+> marker, never the type value.
 > **Relates to:** CLUE-604 (the one-time backfill sweep, 7.6.0) and CLUE-612 (rules tightening, 7.7.0).
 > **Scope:** one release's worth of app + rules changes, **plus the sweep-script changes** — the script
 > is modified here and *run* by CLUE-604 (see "Division of labour with CLUE-604" in §7). No behavior
