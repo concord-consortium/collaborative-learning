@@ -119,6 +119,10 @@ service cloud.firestore {
     // document creation — which is already constrained: isValidDocumentCreateRequest requires a synthetic
     // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk). That
     // deletion is CLUE-612.
+    // Both `"group"` and `"axes"` are live document values until CLUE-604's sweep has run in every
+    // environment: pre-sweep documents still store `"group"`, newly-created ones already store `"axes"`.
+    // Neither branch below is dead code — dropping `"group"` here before the sweep has completed would
+    // deny every not-yet-swept document the `concurrent` write this function exists to allow.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       let docType = resource.data.get("type", "");
@@ -499,6 +503,9 @@ service cloud.firestore {
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
+        // Both `"group"` and `"axes"` are live document values until CLUE-604's sweep has run in every
+        // environment. Neither branch below is dead code — dropping `"group"` here before the sweep has
+        // completed would leave the losing side of a race undeletable for every not-yet-swept document.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
           && (resource.data.type == "group" || resource.data.type == "axes")

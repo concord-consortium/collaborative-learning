@@ -3,9 +3,9 @@
 > **Status:** design.
 > **Story:** folds into CLUE-610 (7.5.0) — decided, but **not yet applied to the story**. Verified
 > 2026-08-07 that CLUE-610 does not mention this work, and no other CLUE issue does either: the rename
-> was considered early on and dropped before the story was written. The wording to add, and the
-> corresponding CLUE-604 edits, are drafted under "Jira edits to make" in
-> [2026-08-07-document-axes-next-migration-session-context.md](./2026-08-07-document-axes-next-migration-session-context.md).
+> was considered early on and dropped before the story was written. Drafted wording for the CLUE-610 and
+> CLUE-604 Jira updates lives in a session handoff note kept outside version control — ask whoever
+> picked up this work for it rather than looking for it in this repo's history.
 > **Relates to:** CLUE-604 (the one-time backfill sweep, 7.6.0) and CLUE-612 (rules tightening, 7.7.0).
 > **Scope:** one release's worth of app + rules changes, **plus the sweep-script changes** — the script
 > is modified here and *run* by CLUE-604 (see "Division of labour with CLUE-604" in §7). No behavior
@@ -111,7 +111,7 @@ only; the stored value is `"axes"` regardless.
 | [db.ts:797](../../../src/lib/db.ts#L797) | `getOrCreateGroupDocument`. `type` becomes `AxesDocument`; `kind` stays `GroupDocument` — they coincide today only by accident, and this is where they stop. |
 | [db.ts:820](../../../src/lib/db.ts#L820) | `getOrCreateClassWideDocument`. `kind` is the unit-declared kind. |
 | [db.ts:727](../../../src/lib/db.ts#L727) | Selects the bare RTDB metadata shape. Writes the new value to RTDB too. |
-| [db-types.ts:108-110](../../../src/lib/db-types.ts#L108-L110) | `DBGroupDocMetadata.type` literal becomes `"axes"`. Worth renaming the interface to match what it holds. |
+| [db-types.ts:108-110](../../../src/lib/db-types.ts#L108-L110) | `DBGroupDocMetadata.type` widens from `"group"` to `"group" \| "axes"` — the writer starts sending the new value, but the field stays a union so it can still hold whatever a pre-existing RTDB record already stored. Worth renaming the interface to match what it holds. |
 | [db-types.ts:32-37](../../../src/lib/db-types.ts#L32-L37) | `DBDocumentType`, the union `db.ts`'s RTDB write path is typed against ([db.ts:690](../../../src/lib/db.ts#L690)). Gains `"axes"`; keeps `"group"` for the documents already in RTDB. |
 | [db-types.ts:139-141](../../../src/lib/db-types.ts#L139-L141) | `DBGroupDocument.type`, the RTDB *content* shape, alongside the metadata one above. |
 
@@ -129,7 +129,9 @@ alongside the existing `isProblemType` / `isPersonalType` family:
 
 ```ts
 // TRANSITIONAL: accepts the pre-sweep value too. After CLUE-604's sweep, drop GroupDocument here.
-export function isAxesType(type: string) {
+// Declared as a type guard, not a plain boolean, so callers that narrow a discriminated union off
+// `type` (db.ts:727) still compile.
+export function isAxesType(type: string): type is typeof AxesDocument | typeof GroupDocument {
   return type === AxesDocument || type === GroupDocument;
 }
 ```
@@ -209,19 +211,19 @@ needingScope      -> { investigation: null, problem: null }
 The `type` rewrite is not disjoint from either — it applies to every document the query returns. Adding
 it as a third list would mean two batch operations against the same document reference.
 
-That is a correctness problem, not just an inelegance. A document that received `type: "axes"` but not
-the fields the other pass owes it sits in a state no code accounts for:
+That is a correctness problem, not just an inelegance. `type` is the script's own work-queue key: the
+driving query is `where("type", "==", "group")`, so the moment a document's `type` flips to `"axes"` it
+stops matching and can never be returned by a re-run. Committing `type` in a batch operation separate
+from the axis fields would therefore make write order load-bearing across the 400-document chunk
+boundary — a document whose `type` landed while its axis-field write failed would be permanently
+half-migrated with no recovery path, because the script could no longer find it to retry. Merging also
+halves the writes for any document that needs a backfill.
 
-- A **group document** with no `concurrent` opens without its concurrent history manager, and with no
-  `kind` has nothing to label its canonical-pointer slot — the slot label *is* the kind.
-- A **class-wide document** with no curriculum scope is invisible to Sort Work's unit-scoped query,
-  which selects on `investigation` and `problem` being explicitly null.
-
-> **Correction (2026-08-07, found in review).** An earlier draft justified this by claiming
-> `getDocumentTitle` ([document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241))
-> would leave such a document untitled. That is wrong: §5b widens that very branch to `isAxesType`,
-> which accepts both values, so a half-swept group document still matches it and still renders
-> "Group N Document". The hazards above are the real ones, and the merged write is still required.
+> **Correction (2026-08-07, found in review).** Two earlier drafts justified the merged write with
+> hazards that turned out to be false when checked against the code (a half-swept document losing its
+> title, opening without its concurrent history manager, or losing its canonical-pointer slot label —
+> all widened or unaffected elsewhere). The argument above, derived directly from the script's own query,
+> is the one that survives verification.
 
 **So the script changes from two write lists to one merged write per document:** accumulate each
 document's fields into a per-reference map, then commit one `set(..., { merge: true })` per document.
@@ -250,6 +252,19 @@ safe precisely because nothing reads it.
    coordination.
 
 Only step 1 is deadline-bound.
+
+**The deploy instant itself is a second collision, distinct from the drain-vs-sweep one above.** Everything
+in §2 and step 2 reasons about an old client meeting an already-*swept* document — that risk is retired by
+draining before the sweep runs. But from the moment 7.5.0's writers ship, newly created group and class-wide
+documents store `"axes"` while pre-7.5.0 clients are still running, and no drain can happen first because the
+writers and the drain start at the same instant. An old bundle meeting one of those brand-new documents fails
+outright: `openDocumentFromFirestoreMetadata` throws (`isDocumentType` doesn't know `"axes"`), the document is
+invisible to `isSortableType` in Sort Work, and `isDocumentAccessibleToUser` denies students. This is accepted
+rather than designed around: the exposure is narrow (only a group's or class's *first* document, minted during
+the mixed window — existing documents keep storing `"group"` and are unaffected), and deferring the writers to
+7.6.0 forces exactly the second sweep this design exists to prevent. The mitigation is operational, not code:
+**deploy 7.5.0 outside class hours**, so the population of pre-7.5.0 clients still running when the writers
+flip is as close to zero as scheduling can make it.
 
 ### Division of labour with CLUE-604
 

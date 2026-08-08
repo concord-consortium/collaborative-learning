@@ -8,16 +8,20 @@
 //   group-scoped, missing `concurrent`      -> { concurrent: true, kind: "group" }
 //   class-wide, missing curriculum scope    -> { investigation: null, problem: null }
 //
-// The passes are merged per document rather than committed independently because the rename overlaps
-// both, and a partial write leaves a real gap: a group document with `type: "axes"` but no
-// `concurrent` opens without its concurrent history manager, and without `kind` it has nothing to
-// label its canonical-pointer slot (the slot label is the kind). A class-wide document with
-// `type: "axes"` but no explicit curriculum scope is invisible to Sort Work's unit-scoped query,
-// which selects on `investigation` and `problem` being explicitly null. The first pass restores the
-// concurrent history manager for group documents that carry no stored `concurrent` value. The second
-// states a class-wide document's absent curriculum scope explicitly, which is what makes it findable
-// by that query. All three are additive and batched; re-running is a no-op because the query no
-// longer matches.
+// The passes are merged per document rather than committed independently because `type` is the query's
+// own key: the driving query below is `where("type", "==", "group")`, so the instant a document's
+// `type` lands as "axes" it stops matching and a re-run can never see it again to retry a failed axis-
+// field write. Committing `type` in a separate batch from the axis fields would make write order
+// load-bearing across the 400-document chunk boundary — a document whose `type` landed while its
+// axis-field write failed would be permanently half-migrated with no recovery path. Merging also halves
+// the writes for any document that needs a backfill. The first pass restores the concurrent history
+// manager for group documents that carry no stored `concurrent` value. The second states a class-wide
+// document's absent curriculum scope explicitly, which is what makes it findable by that query. All
+// three are additive and batched; re-running is a no-op because the query no longer matches.
+//
+// Write volume changed shape with the type rename: every matched document now gets a write (`snap.size`
+// of them), not just the ones needing a `concurrent`/scope backfill as before. Size a dry-run count or
+// duration estimate off `snap.size`, not off `needingConcurrent.length + needingScope.length`.
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
 // The `documents` collection-group query needs a single-field COLLECTION_GROUP index on `type`
@@ -76,10 +80,9 @@ export async function backfillGroupDocumentAxes(
     return { total: snap.size, concurrentUpdated: 0, scopeUpdated: 0, typeUpdated: 0 };
   }
 
-  // One merged write per document, not one per pass. The type rename applies to every document the
-  // query returns, so it overlaps both passes; committing them separately could leave a group document
-  // with type:"axes" but no concurrent history manager or kind, or a class-wide document with
-  // type:"axes" but no explicit curriculum scope — invisible to Sort Work's unit-scoped query.
+  // One merged write per document, not one per pass. `type` is the query's own key (see above), so a
+  // document whose `type` write committed separately from — and ahead of — its axis-field write would
+  // drop out of the query and could never be found again to finish migrating.
   const fields = new Map<FirebaseFirestore.DocumentReference, Record<string, unknown>>();
   const fieldsFor = (ref: FirebaseFirestore.DocumentReference) => {
     const existing = fields.get(ref);

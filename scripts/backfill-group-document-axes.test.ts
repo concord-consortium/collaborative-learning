@@ -2,18 +2,42 @@ import type { Firestore } from "firebase-admin/firestore";
 import { backfillGroupDocumentAxes } from "./backfill-group-document-axes";
 
 // Minimal Firestore-admin stand-in: a collection-group query returning canned docs, and a batch recorder.
+//
+// `calls` pins down what the script actually queries with — collectionGroup() and where()'s arguments —
+// so a test can assert the query predicate itself, not just its mocked-out result. Without this, a script
+// that queried `type == "axes"` (and so never converged) would pass the suite identically to the real one.
+//
+// `batch()` hands out a fresh recorder each call, so `batches` exposes each commit's writes separately —
+// needed to assert where a run splits across the 400-document chunk boundary. `writes` stays a flattened
+// view across every batch so existing assertions that treat it as one flat list are unaffected.
 function makeDb(docs: any[]) {
-  const writes: any[] = [];
-  const batch = {
-    set: (ref: any, data: any, opts: any) => { writes.push({ ref, data, opts }); },
-    commit: () => Promise.resolve(),
-  };
+  const batches: { writes: any[]; commit: () => Promise<void> }[] = [];
+  const calls: { collectionGroup?: string; where?: [string, string, any] } = {};
   return {
-    writes,
-    collectionGroup: () => ({
-      where: () => ({ get: () => Promise.resolve({ size: docs.length, docs }) }),
-    }),
-    batch: () => batch,
+    batches,
+    get writes() {
+      return batches.flatMap((b) => b.writes);
+    },
+    calls,
+    collectionGroup: (collectionId: string) => {
+      calls.collectionGroup = collectionId;
+      return {
+        where: (field: string, op: string, value: any) => {
+          calls.where = [field, op, value];
+          return { get: () => Promise.resolve({ size: docs.length, docs }) };
+        },
+      };
+    },
+    batch: () => {
+      const writes: any[] = [];
+      const b = {
+        writes,
+        set: (ref: any, data: any, opts: any) => { writes.push({ ref, data, opts }); },
+        commit: () => Promise.resolve(),
+      };
+      batches.push(b);
+      return b;
+    },
   };
 }
 
@@ -109,9 +133,9 @@ describe("backfillGroupDocumentAxes", () => {
   });
 
   it("writes type together with concurrent in a single merged write", async () => {
-    // One write per document, never two: a group document that received type:"axes" but not yet
-    // concurrent+kind opens without its concurrent history manager and with nothing to label its
-    // canonical-pointer slot (the slot label is the kind).
+    // One write per document, never two: the driving query is type=="group", so a document whose type
+    // write committed separately from (and ahead of) its concurrent+kind write would drop out of the
+    // query the instant `type` landed, and a re-run could never find it again to finish the job.
     const db = makeDb([mkGroupDoc("a")]);
     const res = await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: false, ...quiet });
     expect(res).toEqual({ total: 1, concurrentUpdated: 1, scopeUpdated: 0, typeUpdated: 1 });
@@ -152,5 +176,27 @@ describe("backfillGroupDocumentAxes", () => {
     const res = await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: false, ...quiet });
     expect(res).toEqual({ total: 0, concurrentUpdated: 0, scopeUpdated: 0, typeUpdated: 0 });
     expect(db.writes.length).toBe(0);
+  });
+
+  it("queries the documents collection group for the pre-rename type, not the value it writes", async () => {
+    // The genuine idempotency property is that the queried value differs from the written value. A
+    // script that queried type=="axes" instead would never converge, yet would pass every other test
+    // in this file — this is the one assertion that pins the query itself down.
+    const db = makeDb([mkGroupDoc("a", true)]);
+    await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: false, ...quiet });
+    expect(db.calls.collectionGroup).toBe("documents");
+    expect(db.calls.where).toEqual(["type", "==", "group"]);
+  });
+
+  it("splits a 401-document run into two batches of 400 and 1", async () => {
+    // A dropped final commit (the `n % 400 !== 0` tail) currently passes every other test in this file,
+    // since none of them feeds enough documents to reach a chunk boundary. This one does.
+    const docs = Array.from({ length: 401 }, (_, i) => mkGroupDoc(`d${i}`, true));
+    const db = makeDb(docs);
+    const res = await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: false, ...quiet });
+    expect(res.total).toBe(401);
+    expect(db.batches.length).toBe(2);
+    expect(db.batches[0].writes.length).toBe(400);
+    expect(db.batches[1].writes.length).toBe(1);
   });
 });

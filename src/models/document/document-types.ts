@@ -39,7 +39,7 @@ export function isExemplarType(type: string) {
 // TRANSITIONAL: accepts the pre-sweep value too. Documents created before this change store
 // "group", and CLUE-604's one-time sweep rewrites them to "axes". Once that sweep has run against
 // every environment, drop GroupDocument from this predicate — that is the single edit that closes
-// the transitional window for all ten call sites.
+// the transitional window for every call site.
 // Declared as a type guard so callers that build a discriminated union off `type` still narrow.
 export function isAxesType(type: string): type is typeof AxesDocument | typeof GroupDocument {
   return type === AxesDocument || type === GroupDocument;

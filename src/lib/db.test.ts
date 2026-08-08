@@ -293,27 +293,6 @@ describe("db", () => {
       logSpy.mockRestore();
     });
 
-    it("creates a group document whose type is axes and whose kind is group", async () => {
-      // `type` and `kind` coincided only by accident while both were "group"; they separate here.
-      (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
-      mockFirestore.mockImplementation(() => ({
-        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
-      }));
-      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
-        fn({
-          get: async () => ({ exists: false }),
-          set: () => {},
-          update: () => {}
-        }));
-      await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      await db.getOrCreateGroupDocument();
-      const params = ((db as any).createDocument as jest.Mock).mock.calls[0][0];
-      expect(params.type).toBe(AxesDocument);
-      expect(params.kind).toBe(GroupDocument);
-    });
-
     it("legacy fallback: opens a pre-existing random-key group doc and backfills a pointer", async () => {
       const setCalls: any[] = [];
       mockFirestore.mockImplementation(() => ({

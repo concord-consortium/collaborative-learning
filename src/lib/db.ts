@@ -1110,8 +1110,10 @@ export class DB {
           // metadata lacks it. The kind registry is the source of truth for which kinds are concurrent: derive
           // the value so the opened model's history manager runs in concurrent mode this session, and best-
           // effort write it back so the stored field converges (the batch script covers never-opened docs).
-          // A group document's `type` doubles as its registered kind name; an axes-typed document with no
-          // stored `kind` reads the same way, so it looks itself up under that same registered name.
+          // The kind registry has no "axes" entry, so every axes-typed document is looked up under the
+          // group kind here, whose `concurrent: true` is what every axes-typed document needs. A
+          // class-wide document's own stored `kind` still wins below (`kind ?? kindMetadataFields.kind`),
+          // so this lookup only ever supplies `concurrent`.
           const kindMetadataFields = getDocumentKindMetadataFields(
             isAxesType(firestoreMetadata.type) ? GroupDocument : firestoreMetadata.type
           );
