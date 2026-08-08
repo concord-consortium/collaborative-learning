@@ -4,7 +4,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { useStores } from "../../hooks/use-stores";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import classNames from "classnames";
-import { GroupDocument } from "../../models/document/document-types";
+import { isAxesType } from "../../models/document/document-types";
 
 interface IProps {
   document: Maybe<DocumentModelType>;
@@ -25,7 +25,7 @@ export const DocumentTitle: React.FC<IProps> = observer(function DocumentTitle(p
     if (!document) {
       return "";
     }
-    if (document.type === GroupDocument) {
+    if (isAxesType(document.type)) {
       // getDocumentDisplayTitle uses the group id as the title so we don't need to
       // duplicate that here.
       return "";
