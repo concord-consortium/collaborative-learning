@@ -10,13 +10,21 @@ import { backfillGroupDocumentAxes } from "./backfill-group-document-axes";
 // `batch()` hands out a fresh recorder each call, so `batches` exposes each commit's writes separately —
 // needed to assert where a run splits across the 400-document chunk boundary. `writes` stays a flattened
 // view across every batch so existing assertions that treat it as one flat list are unaffected.
+//
+// Each recorder tracks whether it was actually committed, and `committed` filters to those. Counting
+// allocations instead would not distinguish a run that commits its final partial batch from one that
+// drops it — and a dropped final commit silently under-migrates, which is the failure this mock exists
+// to make visible.
 function makeDb(docs: any[]) {
-  const batches: { writes: any[]; commit: () => Promise<void> }[] = [];
+  const batches: { writes: any[]; committed: boolean; commit: () => Promise<void> }[] = [];
   const calls: { collectionGroup?: string; where?: [string, string, any] } = {};
   return {
     batches,
     get writes() {
       return batches.flatMap((b) => b.writes);
+    },
+    get committed() {
+      return batches.filter((b) => b.committed);
     },
     calls,
     collectionGroup: (collectionId: string) => {
@@ -32,8 +40,9 @@ function makeDb(docs: any[]) {
       const writes: any[] = [];
       const b = {
         writes,
+        committed: false,
         set: (ref: any, data: any, opts: any) => { writes.push({ ref, data, opts }); },
-        commit: () => Promise.resolve(),
+        commit: () => { b.committed = true; return Promise.resolve(); },
       };
       batches.push(b);
       return b;
@@ -188,15 +197,24 @@ describe("backfillGroupDocumentAxes", () => {
     expect(db.calls.where).toEqual(["type", "==", "group"]);
   });
 
-  it("splits a 401-document run into two batches of 400 and 1", async () => {
-    // A dropped final commit (the `n % 400 !== 0` tail) currently passes every other test in this file,
-    // since none of them feeds enough documents to reach a chunk boundary. This one does.
+  it("commits a 401-document run as two batches of 400 and 1", async () => {
+    // No other test in this file feeds enough documents to reach a chunk boundary, so neither the split
+    // nor the tail commit is pinned anywhere else. Asserting on `committed` rather than `batches` is what
+    // makes this fail if the `n % 400 !== 0` tail commit is dropped — allocating the batch is not the
+    // same as committing it, and a dropped tail silently under-migrates the last partial chunk.
     const docs = Array.from({ length: 401 }, (_, i) => mkGroupDoc(`d${i}`, true));
     const db = makeDb(docs);
     const res = await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: false, ...quiet });
     expect(res.total).toBe(401);
-    expect(db.batches.length).toBe(2);
-    expect(db.batches[0].writes.length).toBe(400);
-    expect(db.batches[1].writes.length).toBe(1);
+    expect(db.committed.length).toBe(2);
+    expect(db.committed[0].writes.length).toBe(400);
+    expect(db.committed[1].writes.length).toBe(1);
+  });
+
+  it("commits nothing when a dry run finds documents to migrate", async () => {
+    // Pairs with the assertion above: `committed` must stay empty even though the query matched.
+    const db = makeDb([mkGroupDoc("a"), mkClassWideDoc("c")]);
+    await backfillGroupDocumentAxes(db as unknown as Firestore, { dryRun: true, ...quiet });
+    expect(db.committed.length).toBe(0);
   });
 });

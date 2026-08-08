@@ -136,10 +136,10 @@ export function isAxesType(type: string): type is typeof AxesDocument | typeof G
 }
 ```
 
-The alternative — eleven inline two-value comparisons — makes step 4's cleanup eleven separate edits
-where a missed one is silent, whereas the predicate collapses it to editing one function. It costs the
-later per-site rebase nothing: each site still holds its own call, so replacing one with a real axis
-query is the same edit either way.
+The alternative — an inline two-value comparison at every call site — makes §7's cleanup one separate
+edit per site, where a missed one is silent, whereas the predicate collapses it to editing one function.
+It costs the later per-site rebase nothing: each site still holds its own call, so replacing one with a
+real axis query is the same edit either way.
 
 | Site | Means |
 |---|---|
@@ -220,10 +220,13 @@ half-migrated with no recovery path, because the script could no longer find it 
 halves the writes for any document that needs a backfill.
 
 > **Correction (2026-08-07, found in review).** Two earlier drafts justified the merged write with
-> hazards that turned out to be false when checked against the code (a half-swept document losing its
-> title, opening without its concurrent history manager, or losing its canonical-pointer slot label —
-> all widened or unaffected elsewhere). The argument above, derived directly from the script's own query,
-> is the one that survives verification.
+> hazards that turned out to be false when checked against the code: a half-swept document losing its
+> title (§5b widens that branch to `isAxesType`, which accepts both values); a group document opening
+> without its concurrent history manager (`db.ts` derives `concurrent` from the kind registry for *any*
+> axes-typed document); and a group document losing its canonical-pointer slot label (a **group**
+> document's slot label is the constant `kDefaultCanonicalDocumentLabel`, not its kind — the label *is*
+> the kind for a **class-wide** document, which is why the script's own selector comment still says so).
+> The argument above, derived directly from the script's own query, is the one that survives verification.
 
 **So the script changes from two write lists to one merged write per document:** accumulate each
 document's fields into a per-reference map, then commit one `set(..., { merge: true })` per document.
@@ -243,18 +246,22 @@ safe precisely because nothing reads it.
 
 ## 7. Sequencing
 
-1. **7.5.0** — app accepts both values everywhere and writes `"axes"` on creation. Rules deploy
-   accepting both.
-2. **Drain** — the same drain CLUE-604's sweep already requires. No additional wait.
-3. **Sweep** — run the restructured script, which now also rewrites `type`.
-4. **Cleanup, whenever** — drop the accept-both branches and the `GroupDocument` type constant. After
+1. **7.5.0** — app accepts both values everywhere and writes `"axes"` on creation. **Deadline-bound**:
+   if 7.5.0 has already been cut, re-plan rather than proceeding (§2, §9).
+2. **Rules deploy** — `npm run deploy:firestore:rules`. The rules deploy independently of the app
+   bundle, so this is its own artifact to sequence; it must precede the sweep, and it may as well
+   accompany the 7.5.0 release.
+3. **Drain** — the same drain CLUE-604's sweep already requires. No additional wait.
+4. **Sweep** — CLUE-604 runs the restructured script, which now also rewrites `type`. Shipping the
+   script is not running it.
+5. **Cleanup, whenever** — drop the accept-both branches and the `GroupDocument` type constant. After
    the sweep no document stores `"group"`, so these are inert; removing them needs no drain and no
    coordination.
 
 Only step 1 is deadline-bound.
 
 **The deploy instant itself is a second collision, distinct from the drain-vs-sweep one above.** Everything
-in §2 and step 2 reasons about an old client meeting an already-*swept* document — that risk is retired by
+in §2 and step 3 reasons about an old client meeting an already-*swept* document — that risk is retired by
 draining before the sweep runs. But from the moment 7.5.0's writers ship, newly created group and class-wide
 documents store `"axes"` while pre-7.5.0 clients are still running, and no drain can happen first because the
 writers and the drain start at the same instant. An old bundle meeting one of those brand-new documents fails
@@ -333,7 +340,7 @@ wrong.
   (`group-virtual-document.tsx:54`), a drawing-object type, a sticky-note audience, a Sort Work section
   key, or the `DocumentOwnerType` `"group"`, which is the *owner* axis and stays. Re-run it at
   implementation time rather than trusting this list, and leave the `GroupDocument` constant in place
-  until step 4 so the compiler keeps pointing at anything still using it.
+  until §7's cleanup step so the compiler keeps pointing at anything still using it.
 - **The `kind` / `type` coincidence for group documents.** A group document's `kind` is `"group"` and,
   today, so is its `type`. They separate here. Anything that happens to rely on their being equal would
   break, and nothing found so far does — but it is the kind of coupling that hides in tests.

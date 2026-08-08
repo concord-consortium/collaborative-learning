@@ -1112,8 +1112,9 @@ export class DB {
           // effort write it back so the stored field converges (the batch script covers never-opened docs).
           // The kind registry has no "axes" entry, so every axes-typed document is looked up under the
           // group kind here, whose `concurrent: true` is what every axes-typed document needs. A
-          // class-wide document's own stored `kind` still wins below (`kind ?? kindMetadataFields.kind`),
-          // so this lookup only ever supplies `concurrent`.
+          // class-wide document's own stored `kind` still wins below (`kind ?? kindMetadataFields.kind`);
+          // a group document with no stored `kind` takes the group kind's from this lookup, and the
+          // write-back below sends these fields whole.
           const kindMetadataFields = getDocumentKindMetadataFields(
             isAxesType(firestoreMetadata.type) ? GroupDocument : firestoreMetadata.type
           );
