@@ -28,6 +28,8 @@ import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summa
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { NodeChannelInfo } from "./utilities/channel";
+import { simulatedChannel } from "./utilities/simulated-channel";
+import { simulatedHubName } from "./utilities/simulated-output";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -238,6 +240,22 @@ export const DataflowContentModel = TileContentModel
         objectId: node.id,
         objectType: "Node",
       }));
+    },
+    // Only Sensor and Live Output nodes bind to a variable, and both do it via a derived string
+    // rather than the variable id. simulatedChannel/simulatedHubName are the single definition of
+    // those strings — always go through them rather than rebuilding "SIM"/"Simulated " inline.
+    getObjectsForVariable(variableId: string): IClueTileObject[] {
+      const variable = self.sharedVariables?.getVariableById(variableId);
+      if (!variable) return [];
+      const channelId = simulatedChannel(variable).channelId;
+      const hubName = simulatedHubName(variable);
+      return [...self.program.nodes.values()]
+        .filter(node => {
+          const data = node.data as any;
+          return (data.type === "Sensor" && data.sensor === channelId)
+            || (data.type === "Live Output" && data.hubSelect === hubName);
+        })
+        .map(node => ({ objectId: node.id, objectType: "Node" }));
     },
   }))
   .actions(self => tileContentAPIActions({

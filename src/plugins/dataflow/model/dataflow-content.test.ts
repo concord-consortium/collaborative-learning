@@ -1,4 +1,4 @@
-import { applyPatch, getSnapshot } from "mobx-state-tree";
+import { applyPatch, getSnapshot, unprotect } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn
 } from "./dataflow-content";
@@ -112,6 +112,91 @@ describe("DataflowContentModel", () => {
     expect(dcm.outputConfig).toBeDefined();
     const exportedJson = JSON.parse(dcm.exportJson());
     expect(exportedJson.outputConfig).toBeUndefined();
+  });
+
+  describe("getObjectsForVariable", () => {
+    // A DataflowContentModel with no shared model attached: sharedVariables is undefined, so the
+    // variable lookup fails and the scan must not run.
+    it("returns [] when the tile has no shared variables", () => {
+      const dcm = defaultDataflowContent();
+      expect(dcm.getObjectsForVariable("anyId")).toEqual([]);
+    });
+
+    // Stub the sharedVariables view so this test exercises the matching logic without standing up
+    // a whole document + SharedModelDocumentManager. The real wiring is covered by the Cypress
+    // spec in Task 7.
+    const withStubbedVariables = (dcm: any, variable: any) => {
+      unprotect(dcm);
+      Object.defineProperty(dcm, "sharedVariables", {
+        configurable: true,
+        get: () => ({ getVariableById: (id: string) => (id === variable.id ? variable : undefined) })
+      });
+      return dcm;
+    };
+
+    const emgVariable = {
+      id: "var-emg",
+      name: "emg_key",
+      displayName: "EMG",
+      getType: () => undefined,
+      computedUnit: "",
+      computedValue: 0
+    };
+
+    it("matches a Sensor node bound to the variable's simulated channel", () => {
+      const dcm = defaultDataflowContent();
+      dcm.program.addNodeSnapshot({
+        id: "sensor-1", name: "Sensor", x: 0, y: 0,
+        data: { type: "Sensor", sensor: "SIMemg_key" }
+      } as any);
+      withStubbedVariables(dcm, emgVariable);
+      expect(dcm.getObjectsForVariable("var-emg"))
+        .toEqual([{ objectId: "sensor-1", objectType: "Node" }]);
+    });
+
+    it("matches a Live Output node bound to the variable's simulated hub", () => {
+      const dcm = defaultDataflowContent();
+      dcm.program.addNodeSnapshot({
+        id: "output-1", name: "Live Output", x: 0, y: 0,
+        data: { type: "Live Output", liveOutputType: "Grabber", hubSelect: "Simulated EMG" }
+      } as any);
+      withStubbedVariables(dcm, emgVariable);
+      expect(dcm.getObjectsForVariable("var-emg"))
+        .toEqual([{ objectId: "output-1", objectType: "Node" }]);
+    });
+
+    it("excludes node types that cannot bind to a variable", () => {
+      const dcm = defaultDataflowContent();
+      dcm.program.addNodeSnapshot({
+        id: "number-1", name: "Number", x: 0, y: 0, data: { type: "Number", nodeValue: 5 }
+      } as any);
+      withStubbedVariables(dcm, emgVariable);
+      expect(dcm.getObjectsForVariable("var-emg")).toEqual([]);
+    });
+
+    it("returns [] for an unknown variable id", () => {
+      const dcm = defaultDataflowContent();
+      dcm.program.addNodeSnapshot({
+        id: "sensor-1", name: "Sensor", x: 0, y: 0,
+        data: { type: "Sensor", sensor: "SIMemg_key" }
+      } as any);
+      withStubbedVariables(dcm, emgVariable);
+      expect(dcm.getObjectsForVariable("no-such-variable")).toEqual([]);
+    });
+
+    // Documents the known pre-existing fragility rather than hiding it: because the binding is a
+    // derived string rather than an id, renaming a variable silently orphans its nodes. If this
+    // test starts failing, someone has changed the binding to be id-based — update the spec's
+    // "variable<->node binding" section before changing this test.
+    it("misses a renamed variable, because binding is by derived string", () => {
+      const dcm = defaultDataflowContent();
+      dcm.program.addNodeSnapshot({
+        id: "sensor-1", name: "Sensor", x: 0, y: 0,
+        data: { type: "Sensor", sensor: "SIMemg_key" }
+      } as any);
+      withStubbedVariables(dcm, { ...emgVariable, name: "renamed_key" });
+      expect(dcm.getObjectsForVariable("var-emg")).toEqual([]);
+    });
   });
 
 });
