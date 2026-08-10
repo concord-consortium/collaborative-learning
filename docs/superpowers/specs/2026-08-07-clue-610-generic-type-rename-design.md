@@ -85,7 +85,8 @@ After the sweep, no Firestore document stores `type: "group"`. No behavior chang
 - **Sweeping the RTDB `type`.** See §6.
 - **Removing `type` altogether.** It is still required by `DocumentModel`, by `isDocumentMetadata`, and
   by the sweep script's own query. Removing it is a much later step.
-- **Removing the accept-both readers.** That cleanup is a follow-up with no drain requirement (§7).
+- **Removing the accept-both readers.** They come out with CLUE-604's other code removals in 7.6.0,
+  gated on the sweep having run everywhere — the same gate those removals already have (§7).
 
 ## 4. The value and its constant
 
@@ -246,19 +247,72 @@ safe precisely because nothing reads it.
 
 ## 7. Sequencing
 
-1. **7.5.0** — app accepts both values everywhere and writes `"axes"` on creation. **Deadline-bound**:
-   if 7.5.0 has already been cut, re-plan rather than proceeding (§2, §9).
-2. **Rules deploy** — `npm run deploy:firestore:rules`. The rules deploy independently of the app
-   bundle, so this is its own artifact to sequence; it must precede the sweep, and it may as well
-   accompany the 7.5.0 release.
-3. **Drain** — the same drain CLUE-604's sweep already requires. No additional wait.
-4. **Sweep** — CLUE-604 runs the restructured script, which now also rewrites `type`. Shipping the
-   script is not running it.
-5. **Cleanup, whenever** — drop the accept-both branches and the `GroupDocument` type constant. After
-   the sweep no document stores `"group"`, so these are inert; removing them needs no drain and no
-   coordination.
+This slots into the release plan already agreed for the CLUE-550 line of work:
 
-Only step 1 is deadline-bound.
+| Release | Contains | Story |
+|---|---|---|
+| 7.4.0 | The groundwork, already tagged. Class-wide documents are created but unreachable. | CLUE-550 |
+| **7.5.0** | Class-wide documents become visible and usable — **and this rename**. | **CLUE-610** |
+| 7.6.0 | The one-time data migration, then deleting the app code that only copes with older data. | CLUE-604 |
+| 7.7.0 | Tightening the database rules the migration unblocks. | CLUE-612 |
+
+1. **Rules deploy, ahead of the 7.5.0 release** — `npm run deploy:firestore:rules`. Rules deploy
+   independently of the app bundle, and the house order is rules first. Here that is required rather
+   than merely conventional, and step 7 goes the other way round for a reason — see "Why the rules move
+   first here and last in 7.7.0" below.
+2. **7.5.0 — CLUE-610 (this design).** The app accepts both values everywhere and writes `"axes"` on
+   creation. **Deadline-bound**: if 7.5.0 has already been cut, re-plan rather than proceeding (§2, §9).
+3. **Drain** — the same drain CLUE-604's sweep already requires. No additional wait.
+4. **Run the sweep — not a release.** CLUE-604's step 2: dry-run then `APPLY=1`, against each
+   environment in turn. This is an operational step gated on step 3 having actually happened, and it is
+   deliberately separate from any version going out. **Shipping the script is not running it** — this
+   design ships it in 7.5.0; the run is CLUE-604's.
+5. **7.6.0 — CLUE-604's code removals, including this design's app-side cleanup.** CLUE-604 already
+   removes two of the accept-both readers (§5b). The rest belong in the same pass: every other
+   accept-both reader, and `"group"` in `isAxesType`, `isSortableType`, and `DocumentTypeEnumValues`.
+   They share CLUE-604's gate exactly — safe once the sweep has run everywhere, unsafe before — so
+   there is no reason to leave them trailing as unscheduled cleanup, and every reason not to.
+   This has to follow step 4 rather than accompany it: the removals are only safe once no unmigrated
+   document remains.
+6. **Drain again.**
+7. **7.7.0 — CLUE-612, plus this design's rules-side cleanup.** CLUE-612 is a rules-only change, so
+   here the rules deploy *is* the release; there is no app code to sequence ahead of. It tightens
+   `concurrent` to be settable only at creation, and can carry this design's last leftover: dropping
+   the `"group"` branch from the canonical-race delete (§5c). `concurrentChangeOk` is deleted wholesale
+   by CLUE-612, so its own branch needs no separate handling.
+
+Only step 2 is deadline-bound. Steps 1 and 4 are the two that are not a release going out.
+
+**Two things survive the cleanup rather than being dropped with it.** The `GroupDocument` constant
+stays: it is still the group kind's registered name (`registerDocumentKind(GroupDocument, …)`, and
+`kind: GroupDocument` at creation), and the `kind` axis is not renamed. And `"group"` stays in the RTDB
+type declarations (§5a), because RTDB is never swept and keeps a permanent mix of both values.
+
+### Why the rules move first here and last in 7.7.0
+
+Both are rules changes, and they sit on opposite sides of their releases. The rule is **direction**:
+
+- **A widening rules change goes first.** Step 1 accepts one more `type` value and takes nothing away, so
+  deploying it against the currently-live app changes no decision. It *must* precede the app that starts
+  writing the new value, or that app's writes hit rules that do not know the value yet.
+- **A narrowing rules change goes last, after a drain.** Step 7 stops accepting a write that older
+  bundles still make. Rules apply to every client at once, so it cannot ship until the app that made that
+  write is not merely deployed over but *gone from people's browsers*.
+
+For step 7 the write in question is the on-open `concurrent` backfill. Two independent things retire it:
+CLUE-604's step 3 deletes the code in 7.6.0, and the sweep (step 4) removes the unmigrated documents that
+would trigger it in the first place. Neither is enough on its own, because a browser still running the
+7.5.0 bundle *contains* the backfill — hence step 6's drain, and hence 7.6.0 and 7.7.0 being separate
+releases at all. That gap is the whole reason CLUE-612 exists as its own story.
+
+**Why step 1's rules must precede the app rather than merely accompany it.** The widening is monotone — an added
+`||` term at each clause, no operand removed — so deploying it against the currently-live app changes no
+decision, which is what makes rules-first safe. The reverse order is not: once the app writes `"axes"`, two
+class members can race to create the same canonical document, and the loser's cleanup delete is governed by
+[firestore.rules:511](../../../firestore.rules#L511), which under un-widened rules matches only `"group"`.
+That delete runs through `deleteOrphanDocument`, which is best-effort and swallows its own error
+([db.ts:962-969](../../../src/lib/db.ts#L962-L969)) — so the failure is silent, and the symptom is Firestore
+metadata quietly accumulating for documents nobody can reach.
 
 **The deploy instant itself is a second collision, distinct from the drain-vs-sweep one above.** Everything
 in §2 and step 3 reasons about an old client meeting an already-*swept* document — that risk is retired by
@@ -304,11 +358,9 @@ Both accept-both branches therefore live for exactly one release. That is correc
 without them, a document the sweep had rewritten would lose its title between the sweep and 7.6.0 — but
 the two stories should not both claim these sites.
 
-**CLUE-604's step 2 text needs updating.** It currently spells out exactly what the script writes ("Two
-passes: group-scoped documents missing `concurrent` get `{ concurrent: true, kind: "group" }`;
-class-wide documents missing curriculum scope get `{ investigation: null, problem: null }`"). Once the
-script also writes `type: "axes"` and commits one merged write per document (§6), that description is
-wrong.
+**CLUE-604's step 2 text has been updated** (2026-08-08). It used to spell out two independent passes,
+which stopped being true once the script also wrote `type: "axes"` and merged its writes per document
+(§6). It now describes the merged write and says the script's changes arrive with CLUE-610.
 
 ## 8. Testing
 
@@ -340,7 +392,8 @@ wrong.
   (`group-virtual-document.tsx:54`), a drawing-object type, a sticky-note audience, a Sort Work section
   key, or the `DocumentOwnerType` `"group"`, which is the *owner* axis and stays. Re-run it at
   implementation time rather than trusting this list, and leave the `GroupDocument` constant in place
-  until §7's cleanup step so the compiler keeps pointing at anything still using it.
+  in place — it survives the cleanup anyway as the group kind's name (§7), so until then the compiler
+  keeps pointing at anything still using it as a *type*.
 - **The `kind` / `type` coincidence for group documents.** A group document's `kind` is `"group"` and,
   today, so is its `type`. They separate here. Anything that happens to rely on their being equal would
   break, and nothing found so far does — but it is the kind of coupling that hides in tests.
