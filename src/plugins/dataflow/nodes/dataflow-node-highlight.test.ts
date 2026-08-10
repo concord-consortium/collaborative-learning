@@ -2,7 +2,6 @@
 // exported as highlightClassesFor so it can be unit tested directly. Rendering CustomDataflowNode
 // itself requires a full rete editor + area plugin, which is not worth standing up here; the
 // rendered result is covered by Cypress in highlight_references_spec.js.
-import { getTileIdFromNode } from "../../../utilities/mst-utils";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../../../models/document/document-content";
 import { registerTileTypes } from "../../../register-tile-types";
 import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
@@ -21,18 +20,6 @@ function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
 }
 
 describe("Dataflow node highlight wiring", () => {
-  it("finds the containing tile id from a node model", () => {
-    const content = createDocumentContentModel({
-      tiles: [{ id: "df1", content: { type: "Dataflow" } as any }]
-    });
-    const dataflowContent = content.getTileContent("df1") as any;
-    dataflowContent.program.addNodeSnapshot({
-      id: "node-1", name: "Number", x: 0, y: 0, data: { type: "Number", nodeValue: 1 }
-    } as any);
-    const node = dataflowContent.program.nodes.get("node-1");
-    expect(getTileIdFromNode(node.data)).toBe("df1");
-  });
-
   it("reports the emphasis state for a targeted node", () => {
     const content = createDocumentContentModel({
       tiles: [{ id: "df1", content: { type: "Dataflow" } as any }]

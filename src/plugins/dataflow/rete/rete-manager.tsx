@@ -100,7 +100,10 @@ export class ReteManager implements INodeServices {
 
   constructor(
     private mstProgram: DataflowProgramModelType,
-    private tileId: string,
+    // Public because node components need it: rete mounts each node in its own React root, so
+    // TileModelContext (and every other CLUE context) is out of reach inside a node. The
+    // reteManager prop is how nodes get ambient tile information.
+    public readonly tileId: string,
     div: HTMLElement,
     public mstContent: DataflowContentModelType,
     public stores: IStores,

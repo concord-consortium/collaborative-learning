@@ -13,7 +13,7 @@ import { ControlNode } from "./control-node";
 import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
-import { getDocumentContentFromNode, getTileIdFromNode } from "../../../utilities/mst-utils";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import { HighlightState } from "../../../models/document/document-content-with-highlights";
 
 const { RefSocket, RefControl } = Presets.classic;
@@ -195,7 +195,7 @@ export const CustomDataflowNode = observer(
   // Keep these reads in the render body: objectState is memoized only while a reaction observes
   // it, so hoisting into a useMemo or callback makes every node re-resolve the whole document.
   // getDocumentContentFromNode returns undefined for detached trees (tests, standalone editors).
-  const tileId = getTileIdFromNode(model);
+  const tileId = reteManager?.tileId;
   const documentContent = getDocumentContentFromNode(model);
   const emphasis = tileId ? documentContent?.objectState(tileId, id) : undefined;
 
