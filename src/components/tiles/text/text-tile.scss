@@ -78,4 +78,9 @@
     }
   }
 
+  // The variable chip is clickable (it pins a highlight), so it should not present a text cursor.
+  .slate-variable-chip {
+    cursor: pointer;
+  }
+
 }

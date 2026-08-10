@@ -20,6 +20,8 @@ import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../../compone
 
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { DocumentContentModelType } from "../../../models/document/document-content";
 
 // Returns the references of all variable chip elements in a Slate value.
 function collectVariableReferences(value: EditorValue): Set<string> {
@@ -251,6 +253,31 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
+/**
+ * Builds the chip's highlight handlers. Exported and parameterized rather than defined inline
+ * so the behavior is unit-testable without standing up a Slate editor.
+ *
+ * Both arguments are optional because either can legitimately be absent: getDocumentContentFromNode
+ * returns undefined for detached trees (tests, standalone editors), and a malformed chip element
+ * may carry no reference. Both cases no-op rather than throw.
+ */
+export function makeChipHighlightHandlers(
+  documentContent: DocumentContentModelType | undefined,
+  variableId: string | undefined
+) {
+  return {
+    onMouseEnter: () => {
+      if (variableId) documentContent?.setHoveredRef({ kind: "variable", variableId });
+    },
+    onMouseLeave: () => {
+      documentContent?.clearHoveredRef();
+    },
+    onClick: () => {
+      if (variableId) documentContent?.togglePinnedRef({ kind: "variable", variableId });
+    },
+  };
+}
+
 const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
@@ -262,6 +289,16 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   const [chipEl, setChipEl] = useState<HTMLSpanElement | null>(null);
 
   const reference = isVariableElement(element) ? element.reference : undefined;
+
+  // The chip drives the document's ephemeral highlight state: hovering previews the Dataflow
+  // nodes bound to this variable, clicking pins them. Nothing here is persisted.
+  //
+  // Deliberately no preventDefault/stopPropagation: the chip is an inline void inside a
+  // contentEditable, and Slate's own selection handling has to keep working alongside this.
+  const documentContent = variablesPlugin
+    ? getDocumentContentFromNode(variablesPlugin.textContent)
+    : undefined;
+  const highlightHandlers = makeChipHighlightHandlers(documentContent, reference);
 
   // Publish the chip's bbox in `.text-tool-wrapper` coordinates. Skips zero-sized
   // measurements so the registry only sees real layout. useChipMeasurement handles
@@ -291,7 +328,14 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   const selectedClass = isHighlighted ? "slate-selected" : undefined;
   const variable = variablesPlugin?.variables.find(v => v.id === element.reference);
   return (
-    <span className={classes} {...attributes} contentEditable={false}>
+    <span
+      className={classes}
+      {...attributes}
+      contentEditable={false}
+      onMouseEnter={highlightHandlers.onMouseEnter}
+      onMouseLeave={highlightHandlers.onMouseLeave}
+      onClick={highlightHandlers.onClick}
+    >
       {children}
       { variable ?
         <span ref={setChipEl} className="variable-chip-measure-wrapper">
