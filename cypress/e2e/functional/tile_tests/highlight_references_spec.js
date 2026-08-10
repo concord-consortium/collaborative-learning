@@ -11,6 +11,7 @@ const SENSOR_NODE = ".node.sensor";
 // `.primary-workspace` doesn't exist on /editor/, but `.canvas-area` does (it's rendered by
 // EditableDocumentContent regardless of route), so we select tiles under it directly.
 const TEXT_EDITOR = ".canvas-area .text-tool-editor";
+const TEXT_TILE = ".canvas-area .text-tool";
 const VARIABLE_CHIP = ".slate-variable-chip";
 
 // The demo document ships an authored variable chip, so this spec never has to drive the
@@ -95,14 +96,19 @@ context("Highlight references", () => {
     cy.get("@chip").click();
     cy.get(SENSOR_NODE).first().should("have.class", "highlight-pinned");
 
-    // The demo document deliberately ends its paragraph with the chip, so End puts the caret
-    // directly after it and one Backspace removes it. Clicking the chip does NOT select it —
-    // Slate places the caret beside an inline void rather than selecting it, so Backspace would
-    // eat the preceding character instead. Focusing via the editor also matters: the chip is
-    // contentEditable={false}, so a click on it alone leaves keystrokes with no target.
-    // See the note on { force: true } in the previous test.
-    cy.get("@editor").click("right", { force: true });
-    cy.realPress("End");
+    // Focus the way TextToolTile.enterText does (TextToolTile.js:15-24): focus the tile, then
+    // click the editor, with a wait because the editor is briefly inaccessible after render.
+    // Clicking the chip alone will not focus anything — it is contentEditable={false}.
+    cy.wait(500);
+    cy.get(TEXT_TILE).first().focus();
+    cy.get("@editor").click("left");
+
+    // Select the whole paragraph and delete, rather than walking the caret to the chip. An
+    // earlier version pressed End then Backspace, which passed locally and failed in CI: End
+    // goes to the end of the *visual* line, and CI's viewport wraps this paragraph differently,
+    // so Backspace ate a character of the prose instead of the chip. Selecting everything is
+    // independent of both wrapping and caret position.
+    cy.realPress([Cypress.platform === "darwin" ? "Meta" : "Control", "a"]);
     cy.realPress("Backspace");
 
     cy.get(VARIABLE_CHIP).should("not.exist");
