@@ -3,7 +3,7 @@ import { applySnapshot, getSnapshot, Instance, SnapshotIn } from "mobx-state-tre
 import { cloneDeep, each } from "lodash";
 import { IDragTilesData,
          IDocumentContentAddTileOptions } from "./document-content-types";
-import { DocumentContentModelWithTileDragging } from "./drag-tiles";
+import { DocumentContentModelWithHighlights } from "./document-content-with-highlights";
 import { IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotOutType, TileRowSnapshotType } from "./tile-row";
 import {
   ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotationSnapshot, updateArrowAnnotationTileIds
@@ -53,12 +53,13 @@ const updateRowMap = (rowMap: Record<string, TileRowSnapshotOutType>, tileIdMap:
 };
 
 /**
- * The DocumentContentModel builds on the combination of 3 other parts:
+ * The DocumentContentModel builds on the combination of 4 other parts:
  * - BaseDocumentContentModel
- * - DocumentContentModelWithTileDragging
  * - DocumentContentModelWithAnnotations
+ * - DocumentContentModelWithTileDragging
+ * - DocumentContentModelWithHighlights
  *
- * These three parts were split out so we could reduce the size of a single
+ * These parts were split out so we could reduce the size of a single
  * document content model file. This splitting is constrained by a couple
  * of factors:
  * - the code needs to support actions that can apply "atomically" to the
@@ -74,7 +75,7 @@ const updateRowMap = (rowMap: Record<string, TileRowSnapshotOutType>, tileIdMap:
  * Note: the name "DocumentContent" is important because it is used in other
  * parts of the code to find a MST parent with this name.
  */
-export const DocumentContentModel = DocumentContentModelWithTileDragging.named("DocumentContent")
+export const DocumentContentModel = DocumentContentModelWithHighlights.named("DocumentContent")
 .views(self => ({
   snapshotWithUniqueIds(asTemplate = false) {
     const snapshot = cloneDeep(getSnapshot(self));
