@@ -641,6 +641,7 @@ Create `src/models/document/document-content-with-highlights.test.ts`:
 ```ts
 // Must be first so mocks are set up before any other imports
 import "./document-content-tests/dc-test-utils";
+import { getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { registerTileTypes } from "../../register-tile-types";
 import { IDocumentImportSnapshot } from "./document-content-import-types";
@@ -722,10 +723,27 @@ describe("DocumentContentModelWithHighlights", () => {
     expect(content.isObjectActive("t1", "b")).toBe(true);
   });
 
+  it("reports the pinned state while hovering the reference that is already pinned", () => {
+    content.setPinnedRef(refA);
+    content.setHoveredRef(refA);
+    // Not "preview" — hovering your own pinned chip must not visually downgrade it.
+    expect(content.objectState("t1", "a")).toBe("pinned");
+  });
+
   it("does not expose the resolved target collection", () => {
     // Guards rule 2 above: a future textRange kind cannot be expressed as tileId/objectId, so
-    // the collection must stay private. If this fails, someone widened the public API.
-    expect((content as any).activeTargets).toBeUndefined();
+    // the collection must stay private. Probe the REAL name — an earlier version of this test
+    // probed a name the implementation never used, so it could not fail.
+    expect((content as any).activeTargetKeys).toBeUndefined();
+  });
+
+  it("keeps highlight state out of the document snapshot", () => {
+    // Guards the plan's single most important constraint. Without this, a future `.props()`
+    // addition would make highlights persist to Firebase and pass the entire suite silently.
+    const before = JSON.stringify(getSnapshot(content));
+    content.setPinnedRef(refA);
+    content.setHoveredRef(refB);
+    expect(JSON.stringify(getSnapshot(content))).toBe(before);
   });
 });
 ```
@@ -740,10 +758,15 @@ Expected: FAIL — `content.setHoveredRef is not a function`.
 Create `src/models/document/document-content-with-highlights.ts`:
 
 ```ts
+import { computed } from "mobx";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
+import type { DocumentContentModelType } from "./document-content";
 import {
   HighlightReference, highlightTargetKey, resolveHighlightReference, sameHighlightReference
 } from "../highlights/highlight-reference";
+
+/** The two ways an object can be emphasized. Task 5 imports this for its CSS-class mapping. */
+export type HighlightState = "preview" | "pinned";
 
 /**
  * This is one part of the DocumentContentModel. It holds the ephemeral highlight state that
@@ -772,43 +795,59 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
     get activeRef(): HighlightReference | undefined {
       return self.hoveredRef ?? self.pinnedRef;
     },
-    get activeSource(): "preview" | "pinned" | undefined {
-      if (self.hoveredRef) return "preview";
+    /**
+     * Hovering the reference that is already pinned keeps reporting "pinned" — otherwise a user
+     * mousing over the chip they just pinned would see the emphasis downgrade to preview and
+     * restore on mouse-out, which is flicker with no meaning. Hover still replaces pin for any
+     * DIFFERENT reference.
+     */
+    get activeSource(): HighlightState | undefined {
+      if (self.hoveredRef) {
+        return self.pinnedRef && sameHighlightReference(self.hoveredRef, self.pinnedRef)
+          ? "pinned"
+          : "preview";
+      }
       if (self.pinnedRef) return "pinned";
       return undefined;
     },
   }))
-  .views(self => ({
+  .views(self => {
     /**
-     * PRIVATE. Resolved once per reference change rather than once per node per render —
-     * isObjectActive is called from inside every Dataflow node's render and must be O(1).
+     * PRIVATE BY CONSTRUCTION — a closure local, not a view. MST publishes every `.views()`
+     * getter as an instance member, so writing this as a getter would make it public, typed API
+     * on every document in the app. A text range (a planned later increment) has no id and
+     * cannot be expressed as a tileId/objectId pair, so exposing this collection would make that
+     * a breaking refactor.
      *
-     * Do not export this or add a public view that returns it. A text range (a planned later
-     * increment) has no id and cannot be expressed as a tileId/objectId pair, so widening the
-     * API to expose this collection would make that a breaking refactor.
+     * Memoization caveat: MobX only caches a computed while some reaction observes it. Read from
+     * inside an observer/reaction — which is how Task 5's Dataflow node reads it — this resolves
+     * once per reference change. Read outside any reaction, EVERY access re-resolves, sweeping
+     * every tile's getObjectsForVariable. `objectState` reads it again after `isObjectActive`
+     * already did, so an outside-reaction caller pays that twice. Callers must be observers.
      */
-    get activeTargetKeys(): Set<string> {
+    const activeTargetKeys = computed(() => {
       const ref = self.activeRef;
       if (!ref) return new Set<string>();
-      const targets = resolveHighlightReference(ref, self as any);
+      const targets = resolveHighlightReference(ref, self as unknown as DocumentContentModelType);
       return new Set(targets.map(target => highlightTargetKey(target.tileId, target.objectId)));
-    },
-  }))
-  .views(self => ({
-    isObjectActive(tileId: string, objectId: string) {
-      return self.activeTargetKeys.has(highlightTargetKey(tileId, objectId));
-    },
-    /**
-     * Every active target shares one state, because only one reference is active at a time.
-     * This can never return "pinned" for one object while returning "preview" for another in
-     * the same render.
-     */
-    objectState(tileId: string, objectId: string): "preview" | "pinned" | undefined {
-      return self.activeTargetKeys.has(highlightTargetKey(tileId, objectId))
-        ? self.activeSource
-        : undefined;
-    },
-  }))
+    });
+
+    return {
+      isObjectActive(tileId: string, objectId: string) {
+        return activeTargetKeys.get().has(highlightTargetKey(tileId, objectId));
+      },
+      /**
+       * Every active target shares one state, because only one reference is active at a time.
+       * This can never return "pinned" for one object while returning "preview" for another in
+       * the same render.
+       */
+      objectState(tileId: string, objectId: string): HighlightState | undefined {
+        return activeTargetKeys.get().has(highlightTargetKey(tileId, objectId))
+          ? self.activeSource
+          : undefined;
+      },
+    };
+  })
   .actions(self => ({
     setHoveredRef(ref: HighlightReference) {
       self.hoveredRef = ref;
