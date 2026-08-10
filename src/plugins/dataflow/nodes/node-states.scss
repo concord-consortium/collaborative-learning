@@ -65,8 +65,20 @@
 // document-content-with-highlights.ts. Preview (hover) reads lighter than pinned (click) so a
 // hover does not look like a commitment. outline is used rather than border so the node's own
 // box model and rete's positioning are unaffected.
+//
+// The preview ring deliberately does NOT reuse $input-purple (#a5b2ff): that is the input
+// nodes' own fill color and measures 2.02:1 against the white .flow-tool canvas, below the 3:1
+// WCAG 1.4.11 minimum for a non-text state indicator. $highlight-preview-ring is the nearest
+// accessible neighbor in the same hue family at exactly 3.0:1.
+//
+// Known limitation, tracked separately for design: $input-purple-outline is also the Sensor
+// node's own border color, so a pinned ring currently reads as a thicker border rather than as
+// emphasis. Picking an emphasis color that reads as emphasis across every node family (control
+// green, data purple, and the rest) is a design decision, not a code one.
+$highlight-preview-ring: #788cff;
+
 .node.highlight-preview {
-  outline: 3px dashed $input-purple;
+  outline: 3px dashed $highlight-preview-ring;
   outline-offset: 2px;
 }
 
