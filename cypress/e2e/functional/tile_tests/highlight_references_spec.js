@@ -78,4 +78,35 @@ context("Highlight references", () => {
     // The chip itself must survive the edit — typing should not have deleted or corrupted it.
     cy.get(VARIABLE_CHIP).should("exist");
   });
+
+  // Regression: deleting a chip must release the highlight it owns. Clicking the chip is the
+  // only way to unpin, so a pin that outlives its chip can never be dismissed and would stay on
+  // screen for the rest of the session. React also does not fire onMouseLeave for an element
+  // that unmounts under the cursor, so the preview has the same problem.
+  //
+  // This needs a real Slate unmount, which is why it lives here rather than in a unit test.
+  it("releases a pinned highlight when its chip is deleted", () => {
+    // The /editor/ route renders the document more than once, so scope the interaction to one
+    // editor. The assertions below still check every rendering: all of them read the same
+    // content model, so deleting the chip must clear it from all of them.
+    cy.get(TEXT_EDITOR).first().as("editor");
+    cy.get("@editor").find(VARIABLE_CHIP).first().as("chip");
+
+    cy.get("@chip").click();
+    cy.get(SENSOR_NODE).first().should("have.class", "highlight-pinned");
+
+    // The demo document deliberately ends its paragraph with the chip, so End puts the caret
+    // directly after it and one Backspace removes it. Clicking the chip does NOT select it —
+    // Slate places the caret beside an inline void rather than selecting it, so Backspace would
+    // eat the preceding character instead. Focusing via the editor also matters: the chip is
+    // contentEditable={false}, so a click on it alone leaves keystrokes with no target.
+    // See the note on { force: true } in the previous test.
+    cy.get("@editor").click("right", { force: true });
+    cy.realPress("End");
+    cy.realPress("Backspace");
+
+    cy.get(VARIABLE_CHIP).should("not.exist");
+    cy.get(SENSOR_NODE).should("not.have.class", "highlight-pinned");
+    cy.get(SENSOR_NODE).should("not.have.class", "highlight-preview");
+  });
 });

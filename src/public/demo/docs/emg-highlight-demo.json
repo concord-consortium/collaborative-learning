@@ -22,7 +22,7 @@
         "type": "Text",
         "format": "html",
         "text": [
-          "<p>Watch the <span data-slate-type=\"m2s-variable\" data-slate-reference=\"c9561nuH0CdjytQd\"></span> signal drive your program.</p>"
+          "<p>Watch this signal drive your program: <span data-slate-type=\"m2s-variable\" data-slate-reference=\"c9561nuH0CdjytQd\"></span></p>"
         ]
       }
     },

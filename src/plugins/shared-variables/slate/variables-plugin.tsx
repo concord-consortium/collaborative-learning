@@ -22,6 +22,7 @@ import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import { DocumentContentModelType } from "../../../models/document/document-content";
+import { HighlightReference } from "../../../models/highlights/highlight-reference";
 
 // Returns the references of all variable chip elements in a Slate value.
 function collectVariableReferences(value: EditorValue): Set<string> {
@@ -253,19 +254,39 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
+function isOwnVariableRef(ref: HighlightReference | undefined, variableId: string) {
+  return ref?.kind === "variable" && ref.variableId === variableId;
+}
+
 /**
  * Clears the document's hoveredRef, but only if it still points at this chip's variable.
- * Several chips share one document, so onMouseLeave and the unmount-cleanup effect both need
- * this guard to avoid clearing a preview another chip owns.
+ * Several chips share one document, so this guard keeps one chip from clearing a preview
+ * another chip owns.
  */
 export function clearHoveredRefIfOwn(
   documentContent: DocumentContentModelType | undefined,
   variableId: string | undefined
 ) {
   if (!variableId) return;
-  const hovered = documentContent?.hoveredRef;
-  if (hovered?.kind === "variable" && hovered.variableId === variableId) {
+  if (isOwnVariableRef(documentContent?.hoveredRef, variableId)) {
     documentContent?.clearHoveredRef();
+  }
+}
+
+/**
+ * Releases BOTH refs this chip owns. Used on unmount: clicking the chip is the only way to
+ * unpin, so a pin outliving its chip could never be dismissed and would stay on screen for the
+ * rest of the session. Mouse-leave deliberately does not use this — leaving a pinned chip must
+ * keep the pin.
+ */
+export function releaseOwnHighlightRefs(
+  documentContent: DocumentContentModelType | undefined,
+  variableId: string | undefined
+) {
+  if (!variableId) return;
+  clearHoveredRefIfOwn(documentContent, variableId);
+  if (isOwnVariableRef(documentContent?.pinnedRef, variableId)) {
+    documentContent?.clearPinnedRef();
   }
 }
 
@@ -319,8 +340,10 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   // pointed at a reference whose chip no longer exists, leaving a stale preview ring on the
   // Dataflow node until some unrelated chip's mouseleave happens to fire. The guard inside
   // clearHoveredRefIfOwn keeps this from clobbering a different chip's active preview.
+  // React does not fire onMouseLeave for an element that unmounts under the cursor, and a pinned
+  // highlight can only be dismissed by clicking the chip — so a deleted chip must release both.
   useEffect(() => {
-    return () => clearHoveredRefIfOwn(documentContent, reference);
+    return () => releaseOwnHighlightRefs(documentContent, reference);
   }, [documentContent, reference]);
 
   // Publish the chip's bbox in `.text-tool-wrapper` coordinates. Skips zero-sized

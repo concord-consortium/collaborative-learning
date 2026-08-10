@@ -11,7 +11,7 @@ import { registerTileTypes } from "../../../register-tile-types";
 import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
 import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
-import { clearHoveredRefIfOwn, makeChipHighlightHandlers } from "./variables-plugin";
+import { clearHoveredRefIfOwn, makeChipHighlightHandlers, releaseOwnHighlightRefs } from "./variables-plugin";
 
 registerTileTypes(["Text"]);
 
@@ -127,5 +127,56 @@ describe("clearHoveredRefIfOwn", () => {
 
   it("no-ops when there is no document content", () => {
     expect(() => clearHoveredRefIfOwn(undefined, "var-emg")).not.toThrow();
+  });
+});
+
+describe("releaseOwnHighlightRefs", () => {
+  // Clicking the chip is the only way to unpin, so a pin whose chip has been deleted can never
+  // be dismissed. Unmount has to release the pin as well as the preview.
+  it("clears a pinned highlight the chip owns", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setPinnedRef({ kind: "variable", variableId: "var-emg" });
+
+    releaseOwnHighlightRefs(content, "var-emg");
+
+    expect(content.activeRef).toBeUndefined();
+  });
+
+  it("clears a hovered highlight the chip owns", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setHoveredRef({ kind: "variable", variableId: "var-emg" });
+
+    releaseOwnHighlightRefs(content, "var-emg");
+
+    expect(content.activeRef).toBeUndefined();
+  });
+
+  it("clears both when the chip owns the pin and is also being hovered", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setPinnedRef({ kind: "variable", variableId: "var-emg" });
+    content.setHoveredRef({ kind: "variable", variableId: "var-emg" });
+
+    releaseOwnHighlightRefs(content, "var-emg");
+
+    expect(content.activeRef).toBeUndefined();
+  });
+
+  it("leaves a pin belonging to a different variable alone", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setPinnedRef({ kind: "variable", variableId: "var-gripper" });
+
+    releaseOwnHighlightRefs(content, "var-emg");
+
+    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+  });
+
+  it("no-ops when variableId is undefined or there is no document content", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setPinnedRef({ kind: "variable", variableId: "var-gripper" });
+
+    releaseOwnHighlightRefs(content, undefined);
+    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+
+    expect(() => releaseOwnHighlightRefs(undefined, "var-emg")).not.toThrow();
   });
 });
