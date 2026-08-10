@@ -14,7 +14,7 @@ import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
-import { HighlightState } from "../../../models/document/document-content-with-highlights";
+import type { HighlightState } from "../../../models/document/document-content-with-highlights";
 
 const { RefSocket, RefControl } = Presets.classic;
 

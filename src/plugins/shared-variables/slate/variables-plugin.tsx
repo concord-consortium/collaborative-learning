@@ -21,8 +21,8 @@ import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../../compone
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
-import { DocumentContentModelType } from "../../../models/document/document-content";
-import { HighlightReference } from "../../../models/highlights/highlight-reference";
+import type { DocumentContentModelType } from "../../../models/document/document-content";
+import type { HighlightReference } from "../../../models/highlights/highlight-reference";
 
 // Returns the references of all variable chip elements in a Slate value.
 function collectVariableReferences(value: EditorValue): Set<string> {
