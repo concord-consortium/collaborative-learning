@@ -3,9 +3,9 @@ import {
   resolveHighlightReference, sameHighlightReference
 } from "./highlight-reference";
 
-// The resolvers take the document content model, but neither the object resolver nor these
-// tests read anything off it, so a bare cast keeps this file free of MST setup. The variable
-// resolver gets real document content in its own test (Task 3).
+// The resolvers take the document content model, but the object resolver never reads it, so a
+// bare cast keeps this file free of MST setup. The variable resolver, which does read it, gets
+// real document content in its own describe block below.
 const noContent = {} as any;
 
 describe("highlightTargetKey", () => {

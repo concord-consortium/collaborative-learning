@@ -192,9 +192,9 @@ export const CustomDataflowNode = observer(
   // render — keeps this reactive to collapse/expand and membership changes.
   const inCollapsedGroup = !!reteManager?.isNodeInCollapsedGroup(id);
 
-  // Reading these observables inside the observer's render is what keeps emphasis reactive —
-  // the same pattern as inCollapsedGroup above. getDocumentContentFromNode returns undefined
-  // for detached trees (tests, standalone editors), so both lookups are optional.
+  // Keep these reads in the render body: objectState is memoized only while a reaction observes
+  // it, so hoisting into a useMemo or callback makes every node re-resolve the whole document.
+  // getDocumentContentFromNode returns undefined for detached trees (tests, standalone editors).
   const tileId = getTileIdFromNode(model);
   const documentContent = getDocumentContentFromNode(model);
   const emphasis = tileId ? documentContent?.objectState(tileId, id) : undefined;

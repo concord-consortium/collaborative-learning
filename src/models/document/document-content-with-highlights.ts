@@ -60,20 +60,12 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
     },
   }))
   .views(self => {
-    // PRIVATE BY CONSTRUCTION: a closure local, not a `.views()` getter. MST publishes every
-    // `.views()` getter as a public instance member, so putting this Set behind a getter (as an
-    // earlier version of this file did) would make it public, typed API on every document in
-    // the app regardless of any doc comment saying otherwise. A future text-range reference kind
-    // has no id and cannot be expressed as a tileId/objectId pair, so exposing this collection
-    // would make that a breaking refactor. Only `isObjectActive` and `objectState` below are
-    // returned from this views block.
+    // A private closure variable for encapsulation. Keep it that way: a text-range reference kind
+    // has no id and cannot be expressed as a tileId/objectId pair, so callers must go through
+    // `isObjectActive`/`objectState` rather than the target collection itself.
     //
-    // Memoization note: this `computed` only caches its result while some MobX reaction (an
-    // `autorun`, or an `observer`-wrapped React component's render, as Task 5's Dataflow node
-    // components are) is actively observing it. Read from within such a reaction, repeated
-    // `.get()` calls in the same tick share one resolve. Read from OUTSIDE any reaction — e.g. a
-    // plain function call, or a test — every `.get()` re-resolves the reference from scratch,
-    // walking every tile in the document again.
+    // This `computed` only caches while a MobX reaction observes it. Callers should read it from
+    // inside an `observer` — outside one, every `.get()` re-resolves, walking every tile again.
     const activeTargetKeys = computed(() => {
       const ref = self.activeRef;
       if (!ref) return new Set<string>();

@@ -255,13 +255,8 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
 
 /**
  * Clears the document's hoveredRef, but only if it still points at this chip's variable.
- * Used both by onMouseLeave and by the unmount-cleanup effect in VariableComponent below,
- * since neither should clobber a different chip's active preview: without the guard, a
- * malformed chip's mouseleave (variableId undefined) or one chip's unmount could clear
- * another chip's in-progress preview.
- *
- * Exported and parameterized rather than defined inline so the behavior is unit-testable
- * without standing up a Slate editor.
+ * Several chips share one document, so onMouseLeave and the unmount-cleanup effect both need
+ * this guard to avoid clearing a preview another chip owns.
  */
 export function clearHoveredRefIfOwn(
   documentContent: DocumentContentModelType | undefined,

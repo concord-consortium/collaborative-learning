@@ -80,8 +80,8 @@ describe("makeChipHighlightHandlers", () => {
     expect(content.activeRef).toBeUndefined();
   });
 
-  // Regression: onMouseLeave used to call clearHoveredRef() unconditionally, so a malformed
-  // chip (no reference) mouse-leaving could wipe an unrelated chip's active preview.
+  // A chip may only clear the preview it owns: several chips share one document, so an
+  // unconditional clear would let any chip wipe another's.
   it("a malformed chip's mouseleave does not clobber another chip's active preview", () => {
     const content = createDocumentContentModel({ tiles: [] });
     const emg = makeChipHighlightHandlers(content, "var-emg");

@@ -123,8 +123,8 @@ describe("DataflowContentModel", () => {
     });
 
     // Stub the sharedVariables view so this test exercises the matching logic without standing up
-    // a whole document + SharedModelDocumentManager. The real wiring is covered by the Cypress
-    // spec in Task 7.
+    // a whole document + SharedModelDocumentManager. The real shared-model wiring is covered
+    // end to end by cypress/e2e/functional/tile_tests/highlight_references_spec.js.
     const withStubbedVariables = (dcm: any, variable: any) => {
       unprotect(dcm);
       Object.defineProperty(dcm, "sharedVariables", {
