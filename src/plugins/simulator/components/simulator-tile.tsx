@@ -94,7 +94,8 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
               simRef,
               frame: _steps,
               variables: content.variables || [],
-              programData: content.sharedProgramData
+              programData: content.sharedProgramData,
+              tileId: model.id
             }) }
           </div>
         )}

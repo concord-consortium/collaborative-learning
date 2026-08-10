@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
 import { useResizeDetector } from "react-resize-detector";
-import { VariableSlider } from "@concord-consortium/diagram-view";
-
 import { potentiometerAndServoValues } from "../../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
+import { SimulatorSlider } from "../../components/ui/simulator-slider";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { findVariable } from "../simulation-utilities";
@@ -94,7 +93,7 @@ const NodeColumn = ({ nodes, extraCount, columnLabel }: INodeColumnProps) => {
   );
 };
 
-function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, programData }: ISimulationProps) {
+function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, programData, tileId }: ISimulationProps) {
   const { tile } = useTileModelContext();
   const canvasMethods = useCanvasMethodsContext();
   const { height: resizeHeight, width: resizeWidth } = useResizeDetector({ targetRef: simRef });
@@ -198,12 +197,14 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
       <div className="controls">
         <div className="slider area">
           <div className="slider-wrapper">
-            <VariableSlider
+            <SimulatorSlider
               className="pot-slider"
               max={maxPotAngle}
               min={minPotAngle}
               step={5}
               variable={potAngleVar}
+              variables={variables}
+              tileId={tileId}
             />
             <div className="slider-labels">
               <div className="low">low</div>
