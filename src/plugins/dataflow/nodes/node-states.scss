@@ -60,3 +60,17 @@
     animation: none;
   }
 }
+
+// Ephemeral highlight driven by a HighlightReference. Never persisted; see
+// document-content-with-highlights.ts. Preview (hover) reads lighter than pinned (click) so a
+// hover does not look like a commitment. outline is used rather than border so the node's own
+// box model and rete's positioning are unaffected.
+.node.highlight-preview {
+  outline: 3px dashed $input-purple;
+  outline-offset: 2px;
+}
+
+.node.highlight-pinned {
+  outline: 3px solid $input-purple-outline;
+  outline-offset: 2px;
+}

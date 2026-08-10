@@ -13,6 +13,7 @@ import { ControlNode } from "./control-node";
 import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
+import { getDocumentContentFromNode, getTileIdFromNode } from "../../../utilities/mst-utils";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -181,17 +182,30 @@ export const CustomDataflowNode = observer(
   // render — keeps this reactive to collapse/expand and membership changes.
   const inCollapsedGroup = !!reteManager?.isNodeInCollapsedGroup(id);
 
-  const dynamicClasses = classNames({
-    "selected": data.selected,
-    "gate-active": node instanceof ControlNode && node.model.gateActive,
-    "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
-    "plot-open": showPlot,
-    "collapsed-hidden": inCollapsedGroup,
-  });
+  // Reading these observables inside the observer's render is what keeps emphasis reactive —
+  // the same pattern as inCollapsedGroup above. getDocumentContentFromNode returns undefined
+  // for detached trees (tests, standalone editors), so both lookups are optional.
+  const tileId = getTileIdFromNode(model);
+  const documentContent = getDocumentContentFromNode(model);
+  const emphasis = tileId ? documentContent?.objectState(tileId, id) : undefined;
+
+  const dynamicClasses = classNames(
+    "node",
+    model.type.toLowerCase().replace(/ /g, "-"),
+    {
+      "selected": data.selected,
+      "gate-active": node instanceof ControlNode && node.model.gateActive,
+      "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
+      "plot-open": showPlot,
+      "collapsed-hidden": inCollapsedGroup,
+      "highlight-pinned": emphasis === "pinned",
+      "highlight-preview": emphasis === "preview",
+    }
+  );
 
   return (
     <div
-      className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
+      className={dynamicClasses}
       data-testid="node"
       tabIndex={0}
       role="group"

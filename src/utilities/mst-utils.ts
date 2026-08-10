@@ -36,6 +36,14 @@ export function getDocumentContentFromNode(target: IAnyStateTreeNode): DocumentC
   return getParentWithTypeName(target, "DocumentContent") as DocumentContentModelType;
 }
 
+/**
+ * Returns the id of the TileModel containing `target`, if any. "TileModel" is the MST type
+ * name; see getParentWithTypeName for why we match on the name rather than the type.
+ */
+export function getTileIdFromNode(target: IAnyStateTreeNode): string | undefined {
+  return getParentWithTypeName(target, "TileModel")?.id;
+}
+
 export function getContentIdFromNode(target: IAnyStateTreeNode) {
   return getDocumentContentFromNode(target)?.contentId;
 }
