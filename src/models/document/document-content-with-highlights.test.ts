@@ -1,5 +1,6 @@
 // Must be first so mocks are set up before any other imports
 import "./document-content-tests/dc-test-utils";
+import { getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { registerTileTypes } from "../../register-tile-types";
 import { IDocumentImportSnapshot } from "./document-content-import-types";
@@ -81,9 +82,40 @@ describe("DocumentContentModelWithHighlights", () => {
     expect(content.isObjectActive("t1", "b")).toBe(true);
   });
 
+  // Without this, hovering the chip you just pinned would visually downgrade the highlight to
+  // "preview" and then flicker back to "pinned" on mouse-out, with no meaningful state change.
+  it("reports pinned, not preview, when hovering the reference that is already pinned", () => {
+    content.setPinnedRef(refA);
+    content.setHoveredRef(refA);
+    expect(content.activeSource).toBe("pinned");
+    expect(content.objectState("t1", "a")).toBe("pinned");
+  });
+
   it("does not expose the resolved target collection", () => {
     // Guards rule 2 above: a future textRange kind cannot be expressed as tileId/objectId, so
-    // the collection must stay private. If this fails, someone widened the public API.
-    expect((content as any).activeTargets).toBeUndefined();
+    // the collection must stay private (isObjectActive/objectState only). If this fails,
+    // someone widened the public API by re-exposing the resolved-target Set.
+    //
+    // Runtime check first: property must genuinely be absent from the instance, not just
+    // differently named (a prior version of this test asserted a name — `activeTargets` — that
+    // was never the property, so it always passed regardless of what was exposed).
+    //
+    // Type-level check second: the `@ts-expect-error` below only suppresses a real compiler
+    // error. If `activeTargetKeys` is ever reintroduced as a public `.views()` getter, this
+    // directive becomes unused and `npm run check:types` fails with
+    // "Unused '@ts-expect-error' directive", catching the regression even before a human
+    // notices the runtime assertion below would also start failing.
+    // @ts-expect-error activeTargetKeys is intentionally not public API
+    expect(content.activeTargetKeys).toBeUndefined();
+  });
+
+  // Guards the plan's #1 global constraint: highlight state is per-user/per-session and must
+  // never be persisted or synced. A future `.props()` addition here would pass every other test
+  // in this file while silently breaking that guarantee.
+  it("keeps highlight state out of the document snapshot", () => {
+    const before = JSON.stringify(getSnapshot(content));
+    content.setPinnedRef(refA);
+    content.setHoveredRef(refB);
+    expect(JSON.stringify(getSnapshot(content))).toBe(before);
   });
 });
