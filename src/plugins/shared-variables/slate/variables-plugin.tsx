@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import classNames from "classnames/dedupe";
 
 import {
@@ -254,6 +254,27 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
 };
 
 /**
+ * Clears the document's hoveredRef, but only if it still points at this chip's variable.
+ * Used both by onMouseLeave and by the unmount-cleanup effect in VariableComponent below,
+ * since neither should clobber a different chip's active preview: without the guard, a
+ * malformed chip's mouseleave (variableId undefined) or one chip's unmount could clear
+ * another chip's in-progress preview.
+ *
+ * Exported and parameterized rather than defined inline so the behavior is unit-testable
+ * without standing up a Slate editor.
+ */
+export function clearHoveredRefIfOwn(
+  documentContent: DocumentContentModelType | undefined,
+  variableId: string | undefined
+) {
+  if (!variableId) return;
+  const hovered = documentContent?.hoveredRef;
+  if (hovered?.kind === "variable" && hovered.variableId === variableId) {
+    documentContent?.clearHoveredRef();
+  }
+}
+
+/**
  * Builds the chip's highlight handlers. Exported and parameterized rather than defined inline
  * so the behavior is unit-testable without standing up a Slate editor.
  *
@@ -269,9 +290,7 @@ export function makeChipHighlightHandlers(
     onMouseEnter: () => {
       if (variableId) documentContent?.setHoveredRef({ kind: "variable", variableId });
     },
-    onMouseLeave: () => {
-      documentContent?.clearHoveredRef();
-    },
+    onMouseLeave: () => clearHoveredRefIfOwn(documentContent, variableId),
     onClick: () => {
       if (variableId) documentContent?.togglePinnedRef({ kind: "variable", variableId });
     },
@@ -299,6 +318,15 @@ const VariableComponent = observer(function({ attributes, children, element }: R
     ? getDocumentContentFromNode(variablesPlugin.textContent)
     : undefined;
   const highlightHandlers = makeChipHighlightHandlers(documentContent, reference);
+
+  // React does not fire onMouseLeave for an element that unmounts out from under the cursor
+  // (e.g. Backspace deletes the chip while it's hovered). Without this, hoveredRef would stay
+  // pointed at a reference whose chip no longer exists, leaving a stale preview ring on the
+  // Dataflow node until some unrelated chip's mouseleave happens to fire. The guard inside
+  // clearHoveredRefIfOwn keeps this from clobbering a different chip's active preview.
+  useEffect(() => {
+    return () => clearHoveredRefIfOwn(documentContent, reference);
+  }, [documentContent, reference]);
 
   // Publish the chip's bbox in `.text-tool-wrapper` coordinates. Skips zero-sized
   // measurements so the registry only sees real layout. useChipMeasurement handles

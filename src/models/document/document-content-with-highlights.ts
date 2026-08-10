@@ -19,6 +19,12 @@ import type { DocumentContentModelType } from "./document-content";
  *
  * The pattern mirrors DataSet's volatile caseSelection/attributeSelection, which is how
  * table<->graph linked selection already works.
+ *
+ * Some scaffolding here has no production caller yet and is intentional, not dead code:
+ * `isObjectActive` is currently only used by `objectState`; `IHighlightTarget.objectType` is
+ * populated but never read; and the "object" reference kind has no production producer. These
+ * exist for later increments (see the design spec's "Planned increments") that reference
+ * non-variable objects directly. Don't delete them as unused.
  */
 
 /** The two states an active reference's targets can be rendered in. */
@@ -67,9 +73,7 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
     // components are) is actively observing it. Read from within such a reaction, repeated
     // `.get()` calls in the same tick share one resolve. Read from OUTSIDE any reaction — e.g. a
     // plain function call, or a test — every `.get()` re-resolves the reference from scratch,
-    // walking every tile in the document again. `objectState` below re-reads this same computed
-    // after `isObjectActive` already read it for the same call; that's free inside a reaction
-    // but doubles the work outside one.
+    // walking every tile in the document again.
     const activeTargetKeys = computed(() => {
       const ref = self.activeRef;
       if (!ref) return new Set<string>();

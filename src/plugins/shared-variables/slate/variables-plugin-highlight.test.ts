@@ -1,6 +1,8 @@
-// The chip's handlers are extracted into makeChipHighlightHandlers so they can be tested
-// without standing up a Slate editor. The rendered interaction (that the handlers are actually
-// attached to the right element) is covered by Cypress in Task 7.
+// The chip's handlers are extracted into makeChipHighlightHandlers, and the shared clear-if-own
+// guard into clearHoveredRefIfOwn, so they can be tested without standing up a Slate editor.
+// The rendered interaction (that the handlers are actually attached to the right element, and
+// that unmounting a hovered chip clears its preview) is covered by Cypress in
+// highlight_references_spec.js.
 import "../../../models/document/document-content-tests/dc-test-utils";
 import {
   DocumentContentModel, DocumentContentSnapshotType
@@ -9,7 +11,7 @@ import { registerTileTypes } from "../../../register-tile-types";
 import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
 import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
-import { makeChipHighlightHandlers } from "./variables-plugin";
+import { clearHoveredRefIfOwn, makeChipHighlightHandlers } from "./variables-plugin";
 
 registerTileTypes(["Text"]);
 
@@ -76,5 +78,54 @@ describe("makeChipHighlightHandlers", () => {
     handlers.onMouseEnter();
     handlers.onClick();
     expect(content.activeRef).toBeUndefined();
+  });
+
+  // Regression: onMouseLeave used to call clearHoveredRef() unconditionally, so a malformed
+  // chip (no reference) mouse-leaving could wipe an unrelated chip's active preview.
+  it("a malformed chip's mouseleave does not clobber another chip's active preview", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    const emg = makeChipHighlightHandlers(content, "var-emg");
+    const malformed = makeChipHighlightHandlers(content, undefined);
+
+    emg.onMouseEnter();
+    malformed.onMouseLeave();
+
+    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-emg" });
+  });
+});
+
+// clearHoveredRefIfOwn is also called from VariableComponent's unmount-cleanup effect (React
+// does not fire onMouseLeave for an element that unmounts under the cursor, e.g. Backspace
+// deleting a hovered chip). It is exercised directly here rather than by mounting a Slate editor.
+describe("clearHoveredRefIfOwn", () => {
+  it("clears the hoveredRef when it still points at this chip's variable", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setHoveredRef({ kind: "variable", variableId: "var-emg" });
+
+    clearHoveredRefIfOwn(content, "var-emg");
+
+    expect(content.activeRef).toBeUndefined();
+  });
+
+  it("does not clobber a different chip's active preview", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setHoveredRef({ kind: "variable", variableId: "var-gripper" });
+
+    clearHoveredRefIfOwn(content, "var-emg");
+
+    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+  });
+
+  it("no-ops when variableId is undefined", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    content.setHoveredRef({ kind: "variable", variableId: "var-gripper" });
+
+    clearHoveredRefIfOwn(content, undefined);
+
+    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+  });
+
+  it("no-ops when there is no document content", () => {
+    expect(() => clearHoveredRefIfOwn(undefined, "var-emg")).not.toThrow();
   });
 });

@@ -14,6 +14,7 @@ import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
 import { getDocumentContentFromNode, getTileIdFromNode } from "../../../utilities/mst-utils";
+import { HighlightState } from "../../../models/document/document-content-with-highlights";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -36,6 +37,15 @@ function sortByIndex<T extends [string, undefined | { index?: number }][]>(entri
 
 function inputClass(s?: string) {
   return s ? "input " + s.toLowerCase().replace(/ /g, "-") : "input";
+}
+
+// Exported for unit testing (see dataflow-node-highlight.test.ts) since rendering the
+// full CustomDataflowNode requires a rete editor and area plugin.
+export function highlightClassesFor(emphasis: HighlightState | undefined) {
+  return {
+    "highlight-pinned": emphasis === "pinned",
+    "highlight-preview": emphasis === "preview",
+  };
 }
 
 // Keyboard-actionable descendants of a block, returned in DOM order. Hand-curated
@@ -198,8 +208,7 @@ export const CustomDataflowNode = observer(
       "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
       "plot-open": showPlot,
       "collapsed-hidden": inCollapsedGroup,
-      "highlight-pinned": emphasis === "pinned",
-      "highlight-preview": emphasis === "preview",
+      ...highlightClassesFor(emphasis),
     }
   );
 

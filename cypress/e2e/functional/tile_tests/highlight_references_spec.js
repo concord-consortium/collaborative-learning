@@ -36,26 +36,20 @@ context("Highlight references", () => {
     // onMouseEnter/onMouseLeave props via native "mouseover"/"mouseout" listeners at the root
     // (see registerDirectEvent('onMouseEnter', ['mouseout', 'mouseover']) in react-dom), so
     // dispatching a raw "mouseenter"/"mouseleave" DOM event never reaches React's handlers.
-    //
-    // { force: true } below routes around the dev-server's build-error overlay iframe
-    // (a pre-existing, unrelated compile error in envelope-uploader.ts — see repo CLAUDE.md
-    // "Baseline to ignore") which otherwise covers the page and fails Cypress's actionability
-    // check; it does not affect what's being asserted. This mirrors the existing { force: true }
-    // usage on trigger()/click() elsewhere in this suite, e.g. dataflow_tool_spec.js.
-    cy.get("@chip").trigger("mouseover", { force: true });
+    cy.get("@chip").trigger("mouseover");
     cy.get(SENSOR_NODE).should("have.class", "highlight-preview");
 
     // Mouse-out clears the preview.
-    cy.get("@chip").trigger("mouseout", { force: true });
+    cy.get("@chip").trigger("mouseout");
     cy.get(SENSOR_NODE).should("not.have.class", "highlight-preview");
 
     // Click pins, and it survives moving the mouse away.
-    cy.get("@chip").click({ force: true });
-    cy.get("@chip").trigger("mouseout", { force: true });
+    cy.get("@chip").click();
+    cy.get("@chip").trigger("mouseout");
     cy.get(SENSOR_NODE).should("have.class", "highlight-pinned");
 
     // Clicking again unpins.
-    cy.get("@chip").click({ force: true });
+    cy.get("@chip").click();
     cy.get(SENSOR_NODE).should("not.have.class", "highlight-pinned");
   });
 
@@ -65,13 +59,17 @@ context("Highlight references", () => {
   it("still allows normal text editing in a tile that contains a variable chip", () => {
     cy.get(VARIABLE_CHIP).should("exist");
 
-    // { force: true }: see comment in the previous test — unrelated dev-server overlay iframe.
-    //
     // cy.realType/cy.realPress (from cypress-real-events), not cy.type(): slate-react listens
     // for native `beforeinput` events via addEventListener, not React synthetic props, and
     // cy.type() never dispatches those, so typed characters would silently never reach the
     // editor. This mirrors TextToolTile.js's _dispatchKeystrokes, which documents the same
     // constraint for every other text-tile Cypress helper in this suite.
+    //
+    // { force: true }: verified cause, not a workaround for a stale build error. Clicking at
+    // "right" targets a point in the top-right corner of the editor's bounding box that is
+    // genuinely covered by the tile's `.tool-tile-drag-handle` SVG icon, which CLUE renders
+    // absolutely-positioned over that corner of every tile. force:true bypasses Cypress's
+    // actionability/covering check for this one click; it does not affect what's asserted below.
     cy.get(TEXT_EDITOR).click("right", { force: true });
     cy.realPress("End");
     cy.realType(" Typed after the chip.");
