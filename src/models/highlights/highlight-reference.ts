@@ -64,3 +64,18 @@ registerReferenceResolver("object", ref => {
   if (ref.kind !== "object") return [];
   return [{ tileId: ref.tileId, objectId: ref.objectId, objectType: ref.objectType }];
 });
+
+registerReferenceResolver("variable", (ref, content) => {
+  if (ref.kind !== "variable") return [];
+  const targets: IHighlightTarget[] = [];
+  content.tileMap.forEach(tile => {
+    // Tiles opt in by implementing getObjectsForVariable; the rest are skipped. The cast is
+    // needed because tile.content is the union of every registered tile content model.
+    const tileContent = tile.content as any;
+    const objects = tileContent?.getObjectsForVariable?.(ref.variableId);
+    objects?.forEach((object: { objectId: string; objectType?: string }) => {
+      targets.push({ tileId: tile.id, objectId: object.objectId, objectType: object.objectType });
+    });
+  });
+  return targets;
+});
