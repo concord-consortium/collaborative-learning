@@ -128,10 +128,29 @@ describe("resolveHighlightReference", () => {
   });
 
   it("uses the most recently registered resolver for a kind", () => {
-    registerReferenceResolver("object", () => [{ tileId: "stub", objectId: "stub" }]);
+    // The registry is module-global, so this test must restore the real resolver rather than
+    // leaving a stub behind for every test that runs after it in this file.
+    const originalResults = resolveHighlightReference(
+      { kind: "object", tileId: "t", objectId: "o" }, noContent
+    );
+    const restore = () => registerReferenceResolver("object", ref => {
+      if (ref.kind !== "object") return [];
+      return [{ tileId: ref.tileId, objectId: ref.objectId, objectType: ref.objectType }];
+    });
+
+    try {
+      registerReferenceResolver("object", () => [{ tileId: "stub", objectId: "stub" }]);
+      expect(resolveHighlightReference(
+        { kind: "object", tileId: "t", objectId: "o" }, noContent
+      )).toEqual([{ tileId: "stub", objectId: "stub" }]);
+    } finally {
+      restore();
+    }
+
+    // The real resolver is back in place for anything that runs after this.
     expect(resolveHighlightReference(
       { kind: "object", tileId: "t", objectId: "o" }, noContent
-    )).toEqual([{ tileId: "stub", objectId: "stub" }]);
+    )).toEqual(originalResults);
   });
 });
 ```
@@ -219,7 +238,7 @@ registerReferenceResolver("object", ref => {
 Run: `npm test -- src/models/highlights/highlight-reference.test.ts`
 Expected: PASS, 7 tests.
 
-Note: the last test permanently replaces the `object` resolver in that Jest module instance. It is written last on purpose so it cannot affect the earlier assertions. Do not reorder it.
+Note: the registry is module-global, so the last test restores the real `object` resolver in a `finally` block and then asserts the restoration took. Keep that structure — without it the stub leaks into every test that runs after it.
 
 - [ ] **Step 5: Lint and type-check**
 
@@ -1046,7 +1065,7 @@ git commit -m "CLUE-603: render highlight emphasis on Dataflow nodes"
 
 **Interfaces:**
 - Consumes: `setHoveredRef`, `clearHoveredRef`, `togglePinnedRef` (Task 4).
-- Produces: nothing other tasks consume.
+- Produces: `makeChipHighlightHandlers(documentContent: DocumentContentModelType | undefined, variableId: string | undefined): { onMouseEnter(): void; onMouseLeave(): void; onClick(): void }`, exported from `variables-plugin.tsx`. No later task consumes it; it is exported so the behavior is unit-testable without a Slate editor.
 
 **The Slate risk, and the rule that manages it:** the chip is an inline void element inside a `contentEditable` region, so clicking it already means something to Slate. The click handler must **not** call `preventDefault()` or `stopPropagation()` — pinning and Slate's own chip selection have to coexist. Verify manually (Step 5) that typing, selecting, and deleting text in the tile still behave normally. If they do not, fall back to hover-only while editable and click-to-pin only when read-only.
 
@@ -1054,9 +1073,12 @@ git commit -m "CLUE-603: render highlight emphasis on Dataflow nodes"
 
 Create `src/plugins/shared-variables/slate/variables-plugin-highlight.test.ts`:
 
+The handlers must be **testable without a Slate editor**, so they are built by an exported factory rather than defined inline in the component. Write the test against that factory.
+
 ```ts
-// Rendering VariableComponent requires a full Slate editor, so this test pins down the state
-// transitions the chip's handlers drive. The rendered interaction is covered by Cypress (Task 7).
+// The chip's handlers are extracted into makeChipHighlightHandlers so they can be tested
+// without standing up a Slate editor. The rendered interaction (that the handlers are actually
+// attached to the right element) is covered by Cypress in Task 7.
 import "../../../models/document/document-content-tests/dc-test-utils";
 import {
   DocumentContentModel, DocumentContentSnapshotType
@@ -1065,6 +1087,7 @@ import { registerTileTypes } from "../../../register-tile-types";
 import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
 import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
+import { makeChipHighlightHandlers } from "./variables-plugin";
 
 registerTileTypes(["Text"]);
 
@@ -1076,45 +1099,69 @@ function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
   return content;
 }
 
-describe("variable chip highlight interaction", () => {
-  it("previews on hover and reverts on mouse-out", () => {
+describe("makeChipHighlightHandlers", () => {
+  it("previews on mouse-enter and clears on mouse-leave", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    const ref = { kind: "variable" as const, variableId: "var-emg" };
+    const handlers = makeChipHighlightHandlers(content, "var-emg");
 
-    content.setHoveredRef(ref);
+    handlers.onMouseEnter();
+    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-emg" });
     expect(content.activeSource).toBe("preview");
 
-    content.clearHoveredRef();
+    handlers.onMouseLeave();
     expect(content.activeRef).toBeUndefined();
   });
 
-  it("pins on click and unpins on a second click of the same chip", () => {
+  it("pins on click and unpins on a second click", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    const ref = { kind: "variable" as const, variableId: "var-emg" };
+    const handlers = makeChipHighlightHandlers(content, "var-emg");
 
-    content.togglePinnedRef(ref);
+    handlers.onClick();
     expect(content.activeSource).toBe("pinned");
 
-    content.togglePinnedRef(ref);
+    handlers.onClick();
     expect(content.activeRef).toBeUndefined();
   });
 
-  it("keeps the pin while hovering a different chip, then restores it", () => {
+  it("lets a hovered chip take over from a pinned one, then restores the pin", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.togglePinnedRef({ kind: "variable", variableId: "var-emg" });
-    content.setHoveredRef({ kind: "variable", variableId: "var-gripper" });
+    const emg = makeChipHighlightHandlers(content, "var-emg");
+    const gripper = makeChipHighlightHandlers(content, "var-gripper");
+
+    emg.onClick();
+    gripper.onMouseEnter();
     expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
 
-    content.clearHoveredRef();
+    gripper.onMouseLeave();
     expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-emg" });
+  });
+
+  // A chip whose element has no reference, or that lives in a detached tree, must no-op rather
+  // than throw. getDocumentContentFromNode returns undefined for detached trees.
+  it("no-ops when there is no document content", () => {
+    const handlers = makeChipHighlightHandlers(undefined, "var-emg");
+    expect(() => {
+      handlers.onMouseEnter();
+      handlers.onMouseLeave();
+      handlers.onClick();
+    }).not.toThrow();
+  });
+
+  it("no-ops when there is no variable reference", () => {
+    const content = createDocumentContentModel({ tiles: [] });
+    const handlers = makeChipHighlightHandlers(content, undefined);
+
+    handlers.onMouseEnter();
+    handlers.onClick();
+    expect(content.activeRef).toBeUndefined();
   });
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [ ] **Step 2: Run test to verify it fails**
 
 Run: `npm test -- src/plugins/shared-variables/slate/variables-plugin-highlight.test.ts`
-Expected: PASS — these assertions exercise Task 4's actions, which already exist. This test exists to lock the chip's intended state transitions before wiring the handlers, so a later change to precedence breaks here with a chip-specific message.
+Expected: FAIL — `makeChipHighlightHandlers is not a function` / has no exported member.
 
 - [ ] **Step 3: Wire the handlers into the chip**
 
@@ -1122,9 +1169,39 @@ In `src/plugins/shared-variables/slate/variables-plugin.tsx`, add the import:
 
 ```ts
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { DocumentContentModelType } from "../../../models/document/document-content";
 ```
 
-Inside `VariableComponent`, after the existing `const reference = ...` line (264), add:
+Add the exported factory at module scope, above `VariableComponent`:
+
+```ts
+/**
+ * Builds the chip's highlight handlers. Exported and parameterized rather than defined inline
+ * so the behavior is unit-testable without standing up a Slate editor.
+ *
+ * Both arguments are optional because either can legitimately be absent: getDocumentContentFromNode
+ * returns undefined for detached trees (tests, standalone editors), and a malformed chip element
+ * may carry no reference. Both cases no-op rather than throw.
+ */
+export function makeChipHighlightHandlers(
+  documentContent: DocumentContentModelType | undefined,
+  variableId: string | undefined
+) {
+  return {
+    onMouseEnter: () => {
+      if (variableId) documentContent?.setHoveredRef({ kind: "variable", variableId });
+    },
+    onMouseLeave: () => {
+      documentContent?.clearHoveredRef();
+    },
+    onClick: () => {
+      if (variableId) documentContent?.togglePinnedRef({ kind: "variable", variableId });
+    },
+  };
+}
+```
+
+Then inside `VariableComponent`, after the existing `const reference = ...` line (264), add:
 
 ```tsx
   // The chip drives the document's ephemeral highlight state: hovering previews the Dataflow
@@ -1135,16 +1212,7 @@ Inside `VariableComponent`, after the existing `const reference = ...` line (264
   const documentContent = variablesPlugin
     ? getDocumentContentFromNode(variablesPlugin.textContent)
     : undefined;
-
-  const handleMouseEnter = () => {
-    if (reference) documentContent?.setHoveredRef({ kind: "variable", variableId: reference });
-  };
-  const handleMouseLeave = () => {
-    documentContent?.clearHoveredRef();
-  };
-  const handleClick = () => {
-    if (reference) documentContent?.togglePinnedRef({ kind: "variable", variableId: reference });
-  };
+  const highlightHandlers = makeChipHighlightHandlers(documentContent, reference);
 ```
 
 Then attach them to the outer span in the returned JSX (lines 293-303), leaving everything else unchanged:
@@ -1155,9 +1223,9 @@ Then attach them to the outer span in the returned JSX (lines 293-303), leaving 
       className={classes}
       {...attributes}
       contentEditable={false}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      onMouseEnter={highlightHandlers.onMouseEnter}
+      onMouseLeave={highlightHandlers.onMouseLeave}
+      onClick={highlightHandlers.onClick}
     >
       {children}
       { variable ?
