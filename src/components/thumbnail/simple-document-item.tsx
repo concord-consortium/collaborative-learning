@@ -38,6 +38,7 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
       aria-label={titleWithUser}
       className={classNames("simple-document-item", { selected, private: isPrivate })}
       data-test="simple-document-item"
+      data-document-key={document.key}
       title={titleWithUser}
       type="button"
       onClick={handleClick}

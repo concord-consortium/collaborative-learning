@@ -28,18 +28,22 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
   const [leftArrowDisabled, setLeftArrowDisabled] = useState(true);
   const [rightArrowDisabled, setRightArrowDisabled] = useState(false);
   const sortedGroupDocuments = sortDocumentsInGroup(documentGroup);
-  // Gate on visibleCount > 0: before the ResizeObserver fires, visibleCount is 0
-  // and handleScroll's scrollAmount would be 0 — a silent no-op click. Render the
-  // buttons only once we have a measurement, so a click always actually scrolls.
+  // Gate on visibleCount > 0: before the ResizeObserver fires, the row has no measured width, so
+  // there is nothing to scroll by — a silent no-op click. Render the buttons only once we have a
+  // measurement, so a click always actually scrolls.
   const showScrollButtons = visibleCount > 0 && visibleCount < docCount;
 
   // Each document in the group is represented by a square box. The group of document boxes is displayed in
   // a single row. If there are more boxes than can fit within the row's width, scroll buttons are added
   // to either side of the list so the user can scroll through it.
   const handleScroll = (direction: "left" | "right") => {
-    if (docListContainerRef.current) {
-      const scrollAmount = visibleCount * scrollUnit;
-      docListContainerRef.current.scrollBy({
+    const docListContainer = docListContainerRef.current;
+    if (docListContainer) {
+      // The row's width changes as the scroll buttons take their place beside it, so both directions
+      // measure at click time: they have to move by the same amount for the row to reach its start
+      // again. Whole boxes only, so a click never leaves one half out of view.
+      const scrollAmount = Math.floor(docListContainer.clientWidth / scrollUnit) * scrollUnit;
+      docListContainer.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth"
       });

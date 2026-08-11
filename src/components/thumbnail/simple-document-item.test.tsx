@@ -73,6 +73,11 @@ describe("SimpleDocumentItem", () => {
     expect(syntheticOwnerItem.getAttribute("title")).toBe(syntheticLabel);
   });
 
+  it("identifies which document it stands for, the same way a thumbnail does", () => {
+    const { item, document } = renderItem();
+    expect(item).toHaveAttribute("data-document-key", document.key);
+  });
+
   it("sets aria-current='true' when the document is selected", () => {
     const { item } = renderItem({ selected: true });
     expect(item).toHaveAttribute("aria-current", "true");
