@@ -13,8 +13,6 @@ import {
   arduinoFrames, armFrames, gripperFrames, panFrames, steamFrames, temperatureGripperFrames
 } from "./brainwaves-gripper-assets";
 
-// We shouldn't need to import the rc-slider css, but for some reason we do.
-import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
 // Variable names

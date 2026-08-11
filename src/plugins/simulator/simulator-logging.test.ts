@@ -30,8 +30,9 @@ describe("logSimulatorVariableChange", () => {
       change: {
         name: "mode",
         value: 1,
-        // Snapshot captures the current output/derived values (incl. undefined).
-        variables: { mode: 1, pressure: 42, emg: undefined }
+        // Snapshot captures the current output/derived values; unset values are
+        // null so they survive JSON.stringify (undefined keys would be dropped).
+        variables: { mode: 1, pressure: 42, emg: null }
       }
     });
   });

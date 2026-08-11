@@ -6,10 +6,14 @@ import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event
 // moment a student changes a control so the logged event carries the resulting
 // output/derived values as answer context — without the simulation loop
 // (step(), which never calls this) ever emitting an event.
-function variablesSnapshot(variables: VariableType[]): Record<string, number | undefined> {
-  const snapshot: Record<string, number | undefined> = {};
+//
+// Unset values are encoded as null rather than undefined: the event is sent via
+// JSON.stringify (logger.ts), which drops undefined-valued keys, so an unset
+// variable would otherwise vanish from the "all current values" snapshot.
+function variablesSnapshot(variables: VariableType[]): Record<string, number | null> {
+  const snapshot: Record<string, number | null> = {};
   for (const variable of variables) {
-    if (variable.name != null) snapshot[variable.name] = variable.currentValue;
+    if (variable.name != null) snapshot[variable.name] = variable.currentValue ?? null;
   }
   return snapshot;
 }

@@ -18,7 +18,7 @@ const FRAMES = 100;
 describe("simulation loop logging", () => {
   beforeEach(() => mockLogTileChangeEvent.mockReset());
 
-  describe.each(Object.entries(simulations))("simulation '%s'", (key, simulation) => {
+  describe.each(Object.entries(simulations))("simulation '%s'", (_key, simulation) => {
     it("emits no tile-change events while free-running", () => {
       const variables: VariableType[] = simulation.variables.map(v => Variable.create(v));
       const findByName = (name: string) => variables.find(v => v.name === name);
