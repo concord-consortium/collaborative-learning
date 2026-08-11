@@ -63,8 +63,14 @@
 
 // Ephemeral highlight driven by a HighlightReference. Never persisted; see
 // document-content-with-highlights.ts. Preview (hover) reads lighter than pinned (click) so a
-// hover does not look like a commitment. outline is used rather than border so the node's own
-// box model and rete's positioning are unaffected.
+// hover does not look like a commitment.
+//
+// Drawn as a ::after layer rather than with `outline`. An element gets only one outline — the
+// same constraint the socket rules below :96 work around — and `.node` already spends its
+// outline on the keyboard focus ring (`@include focus-ring(2px)` in dataflow-node.scss). Since
+// this file is imported after that one and `.node.highlight-preview` has the same specificity
+// as `.node:focus-visible`, an outline here would silently win and leave a focused node with no
+// focus indicator. A pseudo-element keeps highlight and focus independently visible.
 //
 // The preview ring deliberately does NOT reuse $input-purple (#a5b2ff): that is the input
 // nodes' own fill color and measures 2.02:1 against the white .flow-tool canvas, below the 3:1
@@ -77,12 +83,26 @@
 // green, data purple, and the rest) is a design decision, not a code one.
 $highlight-preview-ring: #788cff;
 
-.node.highlight-preview {
-  outline: 3px dashed $highlight-preview-ring;
-  outline-offset: 2px;
+.node.highlight-preview,
+.node.highlight-pinned {
+  // The ring is drawn outside the node's box, so the node must establish a containing block.
+  // rete positions the wrapping nodeView, not `.node` itself, so this does not disturb layout.
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    // 3px ring sitting 2px outside the node edge, matching the previous outline-offset.
+    inset: -5px;
+    border-radius: 10px; // .node's 5px radius + the 5px inset
+    pointer-events: none;
+  }
 }
 
-.node.highlight-pinned {
-  outline: 3px solid $input-purple-outline;
-  outline-offset: 2px;
+.node.highlight-preview::after {
+  border: 3px dashed $highlight-preview-ring;
+}
+
+.node.highlight-pinned::after {
+  border: 3px solid $input-purple-outline;
 }
