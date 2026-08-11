@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "corpus": "synthetic-corpus",
+  "documents": {
+    "ai": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "ai-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "AI"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "bar-graph": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "bar-graph-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "BarGraph"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "data-card": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "data-card-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "DataCard"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "dataflow": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "dataflow-fixture-marker",
+      "computedModality": "mixed",
+      "tileTypes": [
+        "Dataflow"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "full"
+    },
+    "diagram": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "diagram-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Diagram"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "drawing": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "drawing-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Drawing"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "stub",
+      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The stub handler emits one sentence — that weak summary is the measurement, not a failure."
+    },
+    "empty": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "empty-fixture-marker",
+      "computedModality": "empty",
+      "tileTypes": [],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "full",
+      "notes": "Intentionally contentless, so there is nowhere to embed the distinctive string."
+    },
+    "error-test": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "error-test-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "ErrorTest"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "expression": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "expression-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Expression"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "geometry": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "geometry-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Geometry"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "graph": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "graph-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Graph"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "full"
+    },
+    "iframe-interactive": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "iframe-interactive-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "IframeInteractive"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "image": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "image-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Image"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "stub"
+    },
+    "mixed": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "mixed-fixture-marker",
+      "computedModality": "mixed",
+      "tileTypes": [
+        "Text",
+        "Drawing"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "full",
+      "notes": "handlerTier describes the Text tile that carries the marker. The Drawing tile is stub tier, and its text object is what the drawing instance-level check looks for."
+    },
+    "numberline": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "numberline-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Numberline"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "placeholder": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "placeholder-fixture-marker",
+      "computedModality": "empty",
+      "tileTypes": [
+        "Placeholder"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "full",
+      "notes": "A section a student has not started. The placeholder handler emits nothing, so the marker appears via the section heading."
+    },
+    "question": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "question-fixture-marker",
+      "computedModality": "text-only",
+      "tileTypes": [
+        "Question",
+        "Text"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "partial",
+      "notes": "The authored prompt is not student text; the response tile is what makes this document text-only."
+    },
+    "simulator": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "simulator-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Simulator"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "partial",
+      "notes": "The simulator handler describes the built-in simulation, not the tile, so the marker rides in the tile title."
+    },
+    "starter": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "starter-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Starter"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "table": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "table-fixture-marker",
+      "computedModality": "text-only",
+      "tileTypes": [
+        "Table"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "full"
+    },
+    "text": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "text-fixture-marker",
+      "computedModality": "text-only",
+      "tileTypes": [
+        "Text"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "full"
+    },
+    "timeline": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "timeline-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Timeline"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
+    "unknown": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "unknown-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "SomeFutureTile"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback",
+      "notes": "An unregistered tile type, which is what \"Unknown\" means in practice. It is conservatively classified as needing an image."
+    },
+    "wave-runner": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "wave-runner-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "WaveRunner"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    }
+  }
+}

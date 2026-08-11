@@ -1,0 +1,63 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "question-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "question-tile": {
+      "id": "question-tile",
+      "content": {
+        "type": "Question",
+        "questionId": "question-fixture-marker",
+        "rowOrder": [
+          "question-row-1",
+          "question-row-2"
+        ],
+        "rowMap": {
+          "question-row-1": {
+            "id": "question-row-1",
+            "tiles": [
+              {
+                "tileId": "question-prompt"
+              }
+            ]
+          },
+          "question-row-2": {
+            "id": "question-row-2",
+            "tiles": [
+              {
+                "tileId": "question-response"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "question-prompt": {
+      "id": "question-prompt",
+      "content": {
+        "type": "Text",
+        "format": "markdown",
+        "text": "What problem does your design solve?"
+      }
+    },
+    "question-response": {
+      "id": "question-response",
+      "content": {
+        "type": "Text",
+        "format": "markdown",
+        "text": "It keeps the lunchbox shut on the bus."
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "timeline-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "timeline-tile": {
+      "id": "timeline-tile",
+      "content": {
+        "type": "Timeline",
+        "fixtureMarker": "timeline-fixture-marker",
+        "startTime": 0,
+        "endTime": 60
+      }
+    }
+  }
+}

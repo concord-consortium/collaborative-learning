@@ -1,0 +1,98 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "graph-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "graph-tile": {
+      "id": "graph-tile",
+      "content": {
+        "type": "Graph",
+        "plotType": "scatterPlot",
+        "xAttributeLabel": "graph-fixture-marker",
+        "yAttributeLabel": "Height (cm)",
+        "axes": {
+          "bottom": {
+            "min": 0,
+            "max": 10
+          },
+          "left": {
+            "min": 0,
+            "max": 25
+          }
+        },
+        "layers": [
+          {
+            "editable": true,
+            "config": {
+              "dataset": "graph-data",
+              "_attributeDescriptions": {
+                "x": {
+                  "attributeID": "graph-data-x"
+                }
+              },
+              "_yAttributeDescriptions": [
+                {
+                  "attributeID": "graph-data-y"
+                }
+              ]
+            }
+          }
+        ],
+        "adornments": []
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-graph-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-graph-data",
+        "providerId": "graph-tile",
+        "dataSet": {
+          "id": "graph-data",
+          "name": "Latch trials",
+          "attributes": [
+            {
+              "id": "graph-data-x",
+              "name": "Trial",
+              "values": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "graph-data-y",
+              "name": "Height (cm)",
+              "values": [
+                "12",
+                "19"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "graph-data-case-1"
+            },
+            {
+              "__id__": "graph-data-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "graph-tile"
+      ]
+    }
+  }
+}

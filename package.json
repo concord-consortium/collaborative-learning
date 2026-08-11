@@ -33,6 +33,7 @@
       "/functions-v1/",
       "/functions-v2/",
       "/authoring-api/",
+      "/scripts/ai-harness/",
       "/.yalc/"
     ],
     "transform": {
