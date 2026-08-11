@@ -8,10 +8,6 @@ export interface ISimulationProps {
   frame: number;
   variables: VariableType[];
   programData?: SharedProgramDataType;
-  // The Simulator tile's id, threaded so student control handlers can attribute
-  // a SIMULATOR_TOOL_CHANGE to this tile. Optional because the step()-only
-  // callers (ISimulation.step) don't need it.
-  tileId?: string;
 }
 
 export interface ISimulation {

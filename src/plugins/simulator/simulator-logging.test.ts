@@ -21,7 +21,7 @@ describe("logSimulatorVariableChange", () => {
     const pressure = fakeVariable("pressure", 42);
     const emg = fakeVariable("emg", undefined);
 
-    logSimulatorVariableChange("sim-1", mode, 1, [mode, pressure, emg]);
+    logSimulatorVariableChange("sim-1", mode, [mode, pressure, emg]);
 
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(1);
     expect(mockLogTileChangeEvent).toHaveBeenCalledWith(LogEventName.SIMULATOR_TOOL_CHANGE, {
@@ -39,7 +39,7 @@ describe("logSimulatorVariableChange", () => {
 
   it("includes a valueLabel when one is supplied (discrete controls like mode buttons)", () => {
     const mode = fakeVariable("simulation_mode_key", 1);
-    logSimulatorVariableChange("sim-1", mode, 1, [mode], "Temperature");
+    logSimulatorVariableChange("sim-1", mode, [mode], "Temperature");
     expect(mockLogTileChangeEvent.mock.calls[0][1].change).toEqual({
       name: "simulation_mode_key",
       value: 1,
@@ -50,7 +50,7 @@ describe("logSimulatorVariableChange", () => {
 
   it("omits valueLabel when none is supplied (continuous controls like sliders)", () => {
     const emg = fakeVariable("targetEMG", 280);
-    logSimulatorVariableChange("sim-1", emg, 280, [emg]);
+    logSimulatorVariableChange("sim-1", emg, [emg]);
     expect(mockLogTileChangeEvent.mock.calls[0][1].change).not.toHaveProperty("valueLabel");
   });
 
@@ -58,7 +58,7 @@ describe("logSimulatorVariableChange", () => {
     const named = fakeVariable("a", 3);
     const unnamed = fakeVariable(undefined as unknown as string, 9);
 
-    logSimulatorVariableChange("sim-2", named, 3, [named, unnamed]);
+    logSimulatorVariableChange("sim-2", named, [named, unnamed]);
 
     const change = mockLogTileChangeEvent.mock.calls[0][1].change;
     expect(change.variables).toEqual({ a: 3 });

@@ -28,10 +28,13 @@ function variablesSnapshot(variables: VariableType[]): Record<string, number | n
 // discrete controls whose numeric value is an opaque enum (e.g. a mode button:
 // 0 -> "Pressure"). Continuous controls (sliders) omit it — the number is the
 // meaning.
+//
+// The logged value is read from `variable.currentValue`, so callers must apply
+// the change before logging (setValue / commit); the snapshot then reflects the
+// post-change state.
 export function logSimulatorVariableChange(
   tileId: string,
   variable: VariableType,
-  value: number | undefined,
   variables: VariableType[],
   valueLabel?: string
 ) {
@@ -40,7 +43,7 @@ export function logSimulatorVariableChange(
     operation: "setValue",
     change: {
       name: variable.name,
-      value,
+      value: variable.currentValue,
       ...(valueLabel != null ? { valueLabel } : {}),
       variables: variablesSnapshot(variables),
     },

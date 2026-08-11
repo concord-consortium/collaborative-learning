@@ -9,15 +9,29 @@ jest.mock("../../../../models/tiles/log/log-tile-change-event", () => ({
   logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent(...args)
 }));
 
+// tileId comes from context; variables (for the rendered EMG SimulatorSlider)
+// come from useSimulatorContent.
+const mockCtx: { variables: VariableType[] } = { variables: [] };
+jest.mock("../../../../components/tiles/hooks/use-tile-model-context", () => ({
+  useTileModelContext: () => ({ tile: { id: "sim-1" } })
+}));
+jest.mock("../../hooks/use-simulator-content", () => ({
+  useSimulatorContent: () => ({ variables: mockCtx.variables })
+}));
+
 describe("BrainwavesGripper mode buttons", () => {
-  beforeEach(() => mockLogTileChangeEvent.mockReset());
+  beforeEach(() => {
+    mockLogTileChangeEvent.mockReset();
+    mockCtx.variables = [];
+  });
 
   it("logs one SIMULATOR_TOOL_CHANGE when a mode button is clicked", () => {
     const variables: VariableType[] =
       brainwavesGripperSimulation.variables.map(v => Variable.create(v));
+    mockCtx.variables = variables;
     const Component = brainwavesGripperSimulation.component!;
 
-    render(<Component frame={0} variables={variables} tileId="sim-1" />);
+    render(<Component frame={0} variables={variables} />);
     fireEvent.click(screen.getByText("Temperature"));
 
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(1);

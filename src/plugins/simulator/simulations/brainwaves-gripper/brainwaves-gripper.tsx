@@ -3,6 +3,7 @@ import React from "react";
 import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
 import { brainwavesGripperValues } from "../../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
+import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
 import { SelectionButton } from "../../components/ui/selection-button";
 import { SimulatorSlider } from "../../components/ui/simulator-slider";
 import { logSimulatorVariableChange } from "../../simulator-logging";
@@ -103,14 +104,15 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
   );
 }
 
-function BrainwavesGripperComponent({ frame, variables, tileId }: ISimulationProps) {
+function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
+  const { tile } = useTileModelContext();
   const modeVariable = findVariable(simulationModeKey, variables);
   const targetEMGVariable = findVariable(targetEMGKey, variables);
 
   const selectMode = (mode: number, label: string) => {
     modeVariable?.setValue(mode);
-    if (tileId && modeVariable) {
-      logSimulatorVariableChange(tileId, modeVariable, mode, variables, label);
+    if (tile?.id && modeVariable) {
+      logSimulatorVariableChange(tile.id, modeVariable, variables, label);
     }
   };
 
@@ -129,8 +131,6 @@ function BrainwavesGripperComponent({ frame, variables, tileId }: ISimulationPro
             min={40}
             step={40}
             variable={targetEMGVariable}
-            variables={variables}
-            tileId={tileId}
           />
           <div className="slider-labels">
             <div className="open">relaxed</div>

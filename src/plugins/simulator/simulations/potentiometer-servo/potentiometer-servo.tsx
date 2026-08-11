@@ -93,7 +93,7 @@ const NodeColumn = ({ nodes, extraCount, columnLabel }: INodeColumnProps) => {
   );
 };
 
-function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, programData, tileId }: ISimulationProps) {
+function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, programData }: ISimulationProps) {
   const { tile } = useTileModelContext();
   const canvasMethods = useCanvasMethodsContext();
   const { height: resizeHeight, width: resizeWidth } = useResizeDetector({ targetRef: simRef });
@@ -203,8 +203,6 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
               min={minPotAngle}
               step={5}
               variable={potAngleVar}
-              variables={variables}
-              tileId={tileId}
             />
             <div className="slider-labels">
               <div className="low">low</div>
