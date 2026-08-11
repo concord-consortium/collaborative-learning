@@ -35,10 +35,11 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByNoneOption().click();
     sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
     cy.get('.section-header-arrow').eq(1).should("have.class", "up");
-    let prevFocusDocTitle = "";
-    sortWork.getSortWorkItem().first().find('div').invoke('text').then((docText) => {
-      prevFocusDocTitle = docText.trim();
-    });
+    let prevFocusDocKey = "";
+    cy.get(".sort-work-view .sorted-sections .list-item").first()
+      .invoke('attr', 'data-document-key').then((docKey) => {
+        prevFocusDocKey = docKey;
+      });
     sortWork.getSortWorkItem().first().click();
     cy.get('.close-doc-button').click();
     cy.get('.section-header-arrow').eq(1).should("have.class", "up");
@@ -49,9 +50,9 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByNameOption().click();
     cy.get(".sort-work-view .sorted-sections .simple-document-item.selected")
       .should("exist")
-      .invoke("attr", "title")
-      .then((docTitle2) => {
-        expect(docTitle2).to.equal(prevFocusDocTitle);
+      .invoke("attr", "data-document-key")
+      .then((docKey2) => {
+        expect(docKey2).to.equal(prevFocusDocKey);
       });
 
     cy.log("when primary sort is switched, there should be no expanded sections, and no highlighted documents");
