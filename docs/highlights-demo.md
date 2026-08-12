@@ -12,6 +12,11 @@ see the note on reference kinds in [highlights.md](highlights.md).
 `src/public/demo/docs/emg-highlight-demo.json` is the worked example, and the fixture for
 `cypress/e2e/functional/tile_tests/highlight_references_spec.js`.
 
+It carries a Sketch tile holding two variable chips — one for EMG, one for Gripper. The second is
+load-bearing rather than decorative: the feature exists to direct attention to one specific thing,
+so a reference that lit *every* variable chip would be a failure rather than an enhancement, and
+asserting the Gripper chip stays dark is what proves it discriminates.
+
 ## Three preconditions gate the variable-chip toolbar buttons
 
 None are obvious, and all three must hold or the buttons are absent or disabled:
