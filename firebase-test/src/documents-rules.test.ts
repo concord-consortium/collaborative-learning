@@ -2,7 +2,8 @@ import firebase from "firebase";
 import {
   adminWriteDoc, cUnit, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, network1, network2, noNetwork, offeringId, otherClass, prepareEachTest,
+  initFirestore, mockTimestamp, network1, network2, noNetwork, offeringId, otherClass, otherOfferingId,
+  prepareEachTest,
   researcherAuth,
   researcherId,
   student2Id,
@@ -376,10 +377,24 @@ describe("Firestore security rules", () => {
       }));
     });
 
+    it("a class member cannot create a group document in another offering of their class", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${otherOfferingId}_3`, type: "group", offeringId: otherOfferingId, groupId: "3" }
+      }));
+    });
+
     it("a class member cannot create a group document whose owner names another offering", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: "group_9999_3", type: "group", offeringId, groupId: "3" }
+        add: { uid: `group_${otherOfferingId}_3`, type: "group", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a caller whose token carries no offering cannot create a group document", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3" }
       }));
     });
 

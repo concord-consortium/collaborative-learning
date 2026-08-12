@@ -87,15 +87,24 @@ what makes "about a unit but not a problem" a queryable condition.
 ## What the rules enforce
 
 A document's owner is pinned when it is created: `firestore.rules` admits a new document only if its `uid`
-is the caller's own, their own class (`class_<class_hash>`, corroborated by the token claim), or a group
-whose id agrees with the document's own `offeringId` and `groupId`. `concurrent: true` is admitted only
+is the caller's own, their own class (`class_<class_hash>`), or a group in their own offering
+(`group_<offering_id>_<groupId>`) that agrees with the document's own `groupId`. Both synthetic owners are
+corroborated by a token claim rather than by the document — `class_hash` for the class, `offering_id` for
+the offering — so neither can be aimed anywhere the caller is not. `concurrent: true` is admitted only
 alongside one of the two synthetic owners, so no real-user-owned document can be created class-shared.
 
-**The group case is agreement, not membership.** Group membership lives in the Realtime Database, which the
-rules cannot read, and the auth token carries no group claim — so a student can still create a document
-owned by another group in their own offering. They cannot create one owned by a classmate, by a group in
-another offering, or by another class. Closing the gap needs a group claim in the portal-minted token or
-group membership mirrored into Firestore, and it is why the owner axis is still in progress.
+**`offering_id` is a learner-only claim.** The portal mints it for a student launched into one offering, and
+deliberately omits it for a teacher or researcher so they are not confined to a single offering. That lines
+up with who creates group documents: `getOrCreateGroupDocument` requires the caller to be in a group, and
+only students are. A caller without the claim is denied, which is the safe direction — if teachers ever need
+to create group-owned documents, this rule is what has to change.
+
+**What remains is membership, not offering.** Nothing proves the caller is in the group they name: group
+membership lives in the Realtime Database, which the rules cannot read, and the token carries no group
+claim. So a student can still create a document owned by another group *in their own offering*. They cannot
+create one owned by a classmate, by a group in another offering, or by another class. Closing the gap needs
+a group claim in the portal-minted token or group membership mirrored into Firestore, and it is why the
+owner axis is still in progress.
 
 **The class case has a residual of its own, accepted rather than tracked as work.** The token corroborates
 that the caller belongs to the class named in `class_<class_hash>`, not that they are entitled to mint a

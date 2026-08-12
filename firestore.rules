@@ -187,7 +187,8 @@ service cloud.firestore {
       // caller's token or by fields the document itself carries:
       //   - the caller (an ordinary problem, personal, learning-log, planning or publication document);
       //   - the synthetic class owner of the caller's own class (a class-wide document);
-      //   - the synthetic group owner, required to agree with the offering and group the document records.
+      //   - the synthetic group owner, required to name the caller's own offering and to agree with the
+      //     group the document records.
       // Keep the two synthetic formats in lockstep with kClassOwnerPrefix and getGroupOwnerId in
       // src/models/document/document-axes.ts.
       // Residual, accepted: nothing here proves the caller is a member of that group, because group
@@ -206,17 +207,24 @@ service cloud.firestore {
         return request.resource.data.uid == "class_" + request.auth.token.class_hash;
       }
 
-      function documentOwnerIsSelfConsistentGroup() {
+      // The offering comes from the caller's token, not from the document: `offering_id` is minted only for a
+      // learner — a student launched into one offering — which is exactly who creates a group document
+      // (getOrCreateGroupDocument requires the caller to be in a group, and only students are). A teacher's
+      // or researcher's token omits the claim deliberately, so that they are not confined to one offering;
+      // neither creates a group-owned document. Without the claim the comparison fails and the create is
+      // denied, which is the safe direction.
+      function documentOwnerIsCallersGroup() {
         let data = request.resource.data;
         let offering = data.get("offeringId", "");
         let group = data.get("groupId", "");
         return offering is string && offering != ""
           && group is string && group != ""
+          && offering == string(request.auth.token.get("offering_id", ""))
           && data.uid == "group_" + offering + "_" + group;
       }
 
       function documentOwnerOk() {
-        return userIsRequestUser() || documentOwnerIsCallersClass() || documentOwnerIsSelfConsistentGroup();
+        return userIsRequestUser() || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
       }
 
       // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
@@ -224,7 +232,7 @@ service cloud.firestore {
       // The update side is governed by concurrentChangeOk.
       function concurrentCreateOk() {
         return request.resource.data.get("concurrent", false) == false
-          || documentOwnerIsCallersClass() || documentOwnerIsSelfConsistentGroup();
+          || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
       }
 
       function isValidDocumentCreateRequest() {

@@ -101,10 +101,20 @@ Every client-side create of `authed/{portal}/documents/*` goes through one funct
 |---|---|---|---|
 | `user` | problem, planning, personal, learning log, all publications and copies | `user.id` | Fully — `user.id` is `portalJWT.uid`, which is the `platform_user_id` claim |
 | `class` | class-wide documents | `class_<classHash>` | Fully — `class_hash` is a token claim |
-| `group` | group documents | `group_<offeringId>_<groupId>` | Partly — both segments are also stored as the document's own `offeringId`/`groupId`, so the uid can be required to agree with them; but no claim proves the caller is *in* that group |
+| `group` | group documents | `group_<offeringId>_<groupId>` | Partly — the offering is the `offering_id` claim, so the uid can be required to name the caller's own offering and to agree with the document's `groupId`; but no claim proves the caller is *in* that group |
 
 The gap is the third row's second half, and it is not closeable from Firestore rules today: group membership
 lives in the Realtime Database, which rules cannot read, and the auth token carries no group claim.
+
+**The offering comes from the token, not the document.** `offering_id` is minted only for a learner — the
+portal omits it for a teacher or researcher so they are not confined to one offering
+(`Api::V1::JwtController#firebase` in the portal). That matches who creates group documents:
+`getOrCreateGroupDocument` requires the caller to be in a group, and only students are. It survives a reload,
+too: `convertURLToOAuth2` rewrites the launch URL with `resourceLinkId`, which CLUE sends as
+`resource_link_id`, and the portal resolves that back to the student's learner for that offering. Testing the
+uid against the document's own `offeringId` alone would have been no test at all — both sides are
+client-controlled — which would have let a student mint the group owner, and then claim the canonical slot,
+for any offering of their class.
 
 **Residual after this change:** a student can create a document owned by another group *in their own
 offering*. They cannot create one owned by a classmate, by another group in another offering, or by another
@@ -116,8 +126,8 @@ into Firestore; both are larger than this story and neither is scheduled.
 ### The rule
 
 Extend `isValidDocumentCreateRequest` with an owner test — the `uid` must be one of the three corroborated
-shapes above — and a `concurrent` test: `concurrent: true` is permitted only alongside a synthetic
-(`class_`/`group_`) owner. A real-user-owned document can no longer be created class-shared, which is what
+shapes above, with both synthetic shapes anchored to a token claim (`class_hash`, `offering_id`) — and a
+`concurrent` test: `concurrent: true` is permitted only alongside a synthetic (`class_`/`group_`) owner. A real-user-owned document can no longer be created class-shared, which is what
 gave the whole class read and write on its history via `isConcurrentClassDocument`.
 
 **Deliberately not done: a `keys().hasOnly(...)` allowlist on the create.** See the deployment section — an
@@ -173,8 +183,9 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
   - create with own `uid` — allowed; with a classmate's `uid` — denied.
   - create with `class_<class_hash>` matching the caller's claim — allowed; with another class's hash —
     denied.
-  - create with `group_<offeringId>_<groupId>` agreeing with the document's own fields — allowed; with an
-    `offeringId` or `groupId` that disagrees — denied.
+  - create with `group_<offeringId>_<groupId>` naming the caller's own offering and agreeing with the
+    document's `groupId` — allowed; with a `groupId` that disagrees, with a self-consistent document in
+    another offering of the caller's class, or from a caller whose token carries no `offering_id` — denied.
   - create with `concurrent: true` and a real-user `uid` — denied; with a synthetic owner — allowed.
   - **Deployed-app compatibility:** one create per type the deployed client writes — problem, planning,
     personal, learning log, problem publication, personal/learning-log publication, and a copy — each in the
