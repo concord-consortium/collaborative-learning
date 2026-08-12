@@ -202,13 +202,15 @@ document that has since been replaced.
 
 Consequences for testing:
 
-- Anything that depends on two tiles sharing ephemeral, non-persisted state
-  (volatile fields such as highlight refs, hover state, selection) **cannot be
-  manually verified on this route** — the two tiles may simply be in different
-  trees. Use the real CLUE app instead.
+- Anything depending on two tiles sharing ephemeral, non-persisted state
+  (volatile fields such as highlight refs, hover state, selection) is
+  **unreliable on this route unless you pass `noStorage=true` and turn the
+  read-only copies off** — otherwise the two tiles may simply be in different
+  trees. With both of those done, the single editable pane is a valid place to
+  verify such behavior, and is what the highlight spec uses.
 - A spec asserting such cross-tile behavior with unscoped selectors can pass
   because *some* pane happens to line up, while the feature does nothing in the
-  pane a human is looking at. Scope per pane, or test elsewhere.
+  pane a human is looking at. Scope per pane, or disable the extra panes.
 - Assertions that a tile does *not* exist after a deletion have historically held
   unscoped, but given the above, do not assume it.
 

@@ -683,6 +683,10 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
 
     return objects.map(object => {
       if (object.animating) return null;
+      // Follow the same visibility rule as conditionallyRenderObject: an object the drawing
+      // renderer omits must not get a ring drawn around empty space. Note the rule is not simply
+      // `visible` — a hidden object that is selected still renders, and should still be ringed.
+      if (!object.visible && !content.isIdSelected(object.id)) return null;
       const box = content.getObjectBoundingBox(object.id);
       if (!box) return null;
 
