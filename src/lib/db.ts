@@ -126,15 +126,17 @@ interface IGetOrCreateCanonicalDocumentOpts {
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
 
-// What resolving a canonical slot yields: the key of the one document the class has converged on, plus its
-// Firestore metadata when the resolving path already holds it. A caller that only needs the class to converge
-// (createDeclaredClassWideDocuments) stops here; one that needs the document open passes the ref on.
-interface ICanonicalDocumentRef {
+// What resolving a canonical slot yields: the key of the one document all of the clients resolving that slot
+// have converged on, plus its Firestore metadata when the resolving path already holds it. A caller that only
+// needs the clients to converge (createDeclaredClassWideDocuments) stops here; one that needs the document
+// open passes it on to the open path.
+interface IResolvedCanonicalDocument {
   documentKey: string;
   // Present when the resolving path already read or wrote the metadata as part of its work: the legacy
   // fallback, and the create path when it wins the pointer claim. Absent when the path only ever learns the
-  // documentKey — the pointer fast path, and the create path's lost-race branch — since fetching metadata
-  // beyond what's already in hand is the cost this split exists to avoid.
+  // documentKey — the pointer fast path, and the create path's lost-race branch. Neither goes and fetches the
+  // Firestore metadata: resolving is separated from opening precisely so a caller that only needs convergence
+  // pays nothing extra for a document it is not going to open.
   firestoreMetadata?: IDocumentMetadata;
 }
 
@@ -806,11 +808,12 @@ export class DB {
     return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
   }
 
-  // Resolves the class onto its one document for this slot and stops there. The document is opened when
-  // someone opens it — from Sort Work (SortedDocuments.fetchFullDocument) or, after a reload with it as the
-  // primary document, from DocumentWorkspace — so unit load pays one pointer read rather than a metadata
-  // read, an RTDB fetch, and a history subscription for every student on every load.
-  public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
+  // Resolves the class onto its one document for this slot and stops there, returning that document's key
+  // rather than the document. It is opened when someone opens it — from Sort Work
+  // (SortedDocuments.fetchFullDocument) or, after a reload with it as the primary document, from
+  // DocumentWorkspace — so unit load pays one pointer read rather than a metadata read, an RTDB fetch, and a
+  // history subscription for every student on every load.
+  public async resolveClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
@@ -843,7 +846,7 @@ export class DB {
         console.error("Ignoring class-wide document:", classWideDoc.kind, err);
         continue;
       }
-      this.getOrCreateClassWideDocument(classWideDoc).catch((err) => {
+      this.resolveClassWideDocument(classWideDoc).catch((err) => {
         console.error("Failed to create class-wide document", classWideDoc.kind, err);
       });
     }
@@ -873,7 +876,7 @@ export class DB {
       : this.openCanonicalDocumentByKey(documentKey);
   }
 
-  private async resolveCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts): Promise<ICanonicalDocumentRef> {
+  private async resolveCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts): Promise<IResolvedCanonicalDocument> {
     const { container, type, kind, canonicalLabel, findLegacy } = opts;
     // The slot's owner is the same uid createDocument stamps on the document, from the same registry
     // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose

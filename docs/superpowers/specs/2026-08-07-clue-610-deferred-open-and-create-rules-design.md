@@ -48,16 +48,18 @@ Measured in #2949 against `demo/units/qa` on a live Firestore project: **670ms a
 
 Separate *converging on one document per slot* from *opening it*. `getOrCreateCanonicalDocument` splits into:
 
-- a resolver that returns `{ documentKey, firestoreMetadata? }` — the pointer fast path returns the key alone;
-  the legacy-group fallback and the create path also return the metadata they already hold;
-- the existing behavior, layered on top: open from the metadata when present, otherwise
-  `openCanonicalDocumentByKey(documentKey)`.
+- `resolveCanonicalDocument`, returning `{ documentKey, firestoreMetadata? }` — the pointer fast path returns
+  the key alone; the legacy-group fallback and the create path also return the metadata they already hold;
+- `getOrCreateCanonicalDocument`, the existing behavior layered on top: open from the metadata when present,
+  otherwise `openCanonicalDocumentByKey(documentKey)`.
 
 `getOrCreateGroupDocument` keeps the opening behavior — it is called from `document-workspace.tsx` at the
 moment a user opens the document, so there is nothing to defer. Returning the metadata from the legacy and
 create paths is what keeps a group document's open at exactly its current read count.
 
-`createDeclaredClassWideDocuments` uses the resolver only. On the fast path that is a single
+`createDeclaredClassWideDocuments` uses the resolver only, through `getOrCreateClassWideDocument` — renamed
+`resolveClassWideDocument`, since it now yields the slot's `documentKey` rather than an opened document, and
+the `getOrCreate*` name belongs to the methods that still open one. On the fast path that is a single
 `pointerRef.get()` per declared slot and nothing else — no second read, no RTDB fetch, no history
 subscription. The slow path (first student in the class) still creates the document, since creating it is the
 point; it just does not open it afterwards.
@@ -157,8 +159,10 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 
 ## 4. Recording the direction
 
-- `docs/document-axes/README.md` — the owner-axis row gains what the rules can and cannot corroborate about a
-  document's owner, and names the group-membership residual as the reason the axis is still `in progress`.
+- `docs/document-axes/axes-current-state.md` (renamed from `reading-axes-in-code.md`, since enforcement is now
+  part of what it records) — a "What the rules enforce" section states what the rules can and cannot
+  corroborate about a document's owner, and both residuals. The `README.md` owner-axis row names the
+  group-membership residual as the reason the axis is still `in progress` and points there.
 - `firestore.rules` — the TRANSITIONAL comment above `concurrentChangeOk` currently describes the create-side
   work as still to do. Rewrite it to describe what is now enforced and what remains for CLUE-612 (making
   `concurrent` read-only after creation, once CLUE-604's migration has drained).
@@ -224,7 +228,8 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 - Preceding stage: [2026-07-27-clue-610-sort-work-ui-design.md](2026-07-27-clue-610-sort-work-ui-design.md) —
   "Carried forward from Stage 2" records the 700ms measurement this branch acts on.
 - Roadmap: [../../document-axes/README.md](../../document-axes/README.md).
-- Key code sites: `src/lib/db.ts` (`createDeclaredClassWideDocuments`, `getOrCreateCanonicalDocument`,
-  `createFirestoreMetadataDocument`), `src/models/stores/sorted-documents.ts` (`fetchFullDocument`),
+- Key code sites: `src/lib/db.ts` (`createDeclaredClassWideDocuments`, `resolveClassWideDocument`,
+  `resolveCanonicalDocument`, `getOrCreateCanonicalDocument`, `createFirestoreMetadataDocument`),
+  `src/models/stores/sorted-documents.ts` (`fetchFullDocument`),
   `firestore.rules` (`isValidDocumentCreateRequest`, `concurrentChangeOk`),
   `firebase-test/src/documents-rules.test.ts`.

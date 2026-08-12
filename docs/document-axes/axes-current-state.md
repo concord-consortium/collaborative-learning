@@ -1,10 +1,10 @@
-# Reading the axes in code, today
+# Reading and enforcing the axes in code, today
 
-> **Purpose:** what a consumer can actually read off a document right now, and how. [axes.md](./axes.md)
-> defines the axes in terms of behavior and deliberately avoids naming code;
-> [target-architecture.md](./target-architecture.md) describes where the code is heading. This doc is the
-> current state in between — the helpers that exist, the stored fields behind them, and what is not
-> covered yet.
+> **Purpose:** what a consumer can actually read off a document right now, how it gets stamped, and what
+> the security rules hold it to. [axes.md](./axes.md) defines the axes in terms of behavior and
+> deliberately avoids naming code; [target-architecture.md](./target-architecture.md) describes where the
+> code is heading. This doc is the current state in between — the helpers that exist, the stored fields
+> behind them, the enforcement around them, and what is not covered yet.
 
 ## The guards
 
@@ -83,6 +83,26 @@ encodes it, which is what makes it a denormalization rather than a second source
 The `null`s are load-bearing. A class-wide document writes `investigation: null` and `problem: null`
 explicitly rather than omitting them, because Firestore cannot match a field that is missing — that is
 what makes "about a unit but not a problem" a queryable condition.
+
+## What the rules enforce
+
+A document's owner is pinned when it is created: `firestore.rules` admits a new document only if its `uid`
+is the caller's own, their own class (`class_<class_hash>`, corroborated by the token claim), or a group
+whose id agrees with the document's own `offeringId` and `groupId`. `concurrent: true` is admitted only
+alongside one of the two synthetic owners, so no real-user-owned document can be created class-shared.
+
+**The group case is agreement, not membership.** Group membership lives in the Realtime Database, which the
+rules cannot read, and the auth token carries no group claim — so a student can still create a document
+owned by another group in their own offering. They cannot create one owned by a classmate, by a group in
+another offering, or by another class. Closing the gap needs a group claim in the portal-minted token or
+group membership mirrored into Firestore, and it is why the owner axis is still in progress.
+
+**The class case has a residual of its own, accepted rather than tracked as work.** The token corroborates
+that the caller belongs to the class named in `class_<class_hash>`, not that they are entitled to mint a
+document under that owner: any class member can create any number of `class_<class_hash>`-owned,
+`concurrent: true` documents, each sectioned under "Whole Class" in Sort Work with the whole class granted
+read and write on its history. Convergence on one class document requires that any class member can mint
+it, so this is inherent to the design rather than something to close.
 
 ## Not covered yet
 
