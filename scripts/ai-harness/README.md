@@ -27,7 +27,11 @@ npm test
 
 This package has its own jest, and the root package's jest is told to skip it
 (`testPathIgnorePatterns` in the root `package.json`) — these tests are ESM with NodeNext-style `.js`
-specifiers and cannot run under the root CommonJS runner.
+specifiers and cannot run under the root CommonJS runner. CI runs them anyway, as two steps in the
+`jest` job of `.github/workflows/ci.yml`: several of these tests are tripwires on production code
+(a new tile type without a capability record, a drifted prompt copy, an openai/zod version that has
+fallen out of lockstep, a tile summarizer that stopped carrying content), and nobody changing that
+code would think to run them by hand.
 
 For `run` you also need an OpenAI key, either in the environment or in `scripts/.env`:
 

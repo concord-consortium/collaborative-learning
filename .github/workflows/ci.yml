@@ -44,6 +44,8 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             authoring-api/package-lock.json
+            shared/package-lock.json
+            scripts/ai-harness/package-lock.json
       - name: Install Dependencies
         run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
       - name: Install Authoring API Dependencies
@@ -52,6 +54,17 @@ jobs:
       - name: Run Authoring API Tests
         working-directory: ./authoring-api
         run: npm test
+      # The harness is a dev-only tool, but several of its tests are tripwires on production code:
+      # they fail when a new tile type is registered without a capability record, when the committed
+      # copy of the default AI prompt drifts from shared/, when openai/zod versions fall out of
+      # lockstep, or when a tile summarizer stops carrying content. Nobody changing that code would
+      # think to run these by hand, so they run on every PR rather than behind a path filter.
+      - name: Install AI Harness Dependencies
+        working-directory: ./scripts/ai-harness
+        run: npm ci
+      - name: Run AI Harness Tests
+        working-directory: ./scripts/ai-harness
+        run: npm run typecheck && npm test
       - name: Cache Jest cache
         uses: actions/cache@v3
         with:
