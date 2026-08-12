@@ -16,6 +16,13 @@ import { registerTileComponentInfo } from "../../models/tiles/tile-component-inf
 // required before tile creation
 import "../../register-tile-types";
 
+// Spy on the SELECT_TILE emit so we can assert both mouse and keyboard selection
+// reach it (the real helper is a no-op without an initialized Logger).
+const mockLogTileFocusEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-focus-event", () => ({
+  logTileFocusEvent: (...args: any[]) => mockLogTileFocusEvent(...args)
+}));
+
 // --- Test tile type for focus trap tests ---
 
 const kTestFocusTrapType = "TestFocusTrap";
@@ -273,6 +280,33 @@ describe("TileComponent focus trap", () => {
     mockToolbarElement = null;
     mockTitleElement = null;
     mockContentElement = null;
+  });
+
+  // --- SELECT_TILE logging (mouse + keyboard) ---
+
+  describe("SELECT_TILE logging", () => {
+    beforeEach(() => mockLogTileFocusEvent.mockReset());
+
+    it("logs when a tile is selected via the mouse (mousedown)", () => {
+      const { tileElement, tileModel } = renderFocusTrapTile();
+      fireEvent.mouseDown(tileElement);
+      expect(mockLogTileFocusEvent).toHaveBeenCalledWith(tileModel.id, false);
+    });
+
+    it("logs when a tile is selected via the keyboard (Enter on the focused container)", () => {
+      const { tileElement, tileModel } = renderFocusTrapTile();
+      act(() => { tileElement.focus(); });
+      fireEvent.keyDown(tileElement, { key: "Enter" });
+      expect(mockLogTileFocusEvent).toHaveBeenCalledWith(tileModel.id, false);
+    });
+
+    it("does not log again when an already-selected tile is clicked", () => {
+      const { tileElement } = renderFocusTrapTile();
+      fireEvent.mouseDown(tileElement); // selects + logs once
+      mockLogTileFocusEvent.mockClear();
+      fireEvent.mouseDown(tileElement); // already selected → no new event
+      expect(mockLogTileFocusEvent).not.toHaveBeenCalled();
+    });
   });
 
   // --- ARIA Attributes ---

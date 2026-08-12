@@ -9,6 +9,15 @@ import { TextContentModel } from "../tiles/text/text-content";
 import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
+const mockLogTileFocusEvent = jest.fn();
+jest.mock("../tiles/log/log-tile-focus-event", () => ({
+  logTileFocusEvent: (...args: any[]) => mockLogTileFocusEvent(...args)
+}));
+
+function makeTile(id: string) {
+  return TileModel.create({ id, content: TextContentModel.create({ text: "" }) });
+}
+
 describe("ui model", () => {
   let ui: UIModelType;
   let persistentUI: PersistentUIModelType;
@@ -78,6 +87,41 @@ describe("ui model", () => {
     ui.setSelectedTile();
     expect(ui.selectedTileIds).toStrictEqual([]);
     expect(ui.isSelectedTile(tile)).toBe(false);
+  });
+
+  it("logs SELECT_TILE once when a tile newly enters the selection, not on re-select/deselect", () => {
+    // Every mouse/keyboard/drag selection path funnels through setSelectedTile /
+    // setSelectedTileId, so this choke-point covers all of them.
+    mockLogTileFocusEvent.mockReset();
+    const tileA = makeTile("A");
+
+    ui.setSelectedTile(tileA);                 // new → log A (editable)
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("A", false);
+
+    ui.setSelectedTile(tileA);                 // already selected → no log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+
+    ui.setSelectedTileId("B");                 // the mouse-click setter → new → log B
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("B", false);
+
+    ui.setSelectedTile(tileA, { append: true }); // shift-click adds A back → log A
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
+
+    ui.setSelectedTile(tileA, { append: true }); // shift-click again deselects A → no log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
+
+    ui.setSelectedTile();                       // clear → no log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
+  });
+
+  it("flags read-only selections (resources panel / class work) in the SELECT_TILE event", () => {
+    mockLogTileFocusEvent.mockReset();
+    const tile = makeTile("R");
+    ui.setSelectedTile(tile, { append: false, readOnly: true });
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("R", true);
   });
 
   it("allows divider position to be set", () => {

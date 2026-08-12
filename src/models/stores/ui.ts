@@ -4,6 +4,7 @@ import { UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { logTileFocusEvent } from "../tiles/log/log-tile-focus-event";
 import { ITileModel } from "../tiles/tile-model";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
@@ -131,7 +132,8 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
-    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean, dragging?: boolean}) => {
+    const setOrAppendTileIdToSelection =
+        (tileId?: string, options?: {append: boolean, dragging?: boolean, readOnly?: boolean}) => {
       if (tileId) {
         const tileIdIndex = self.selectedTileIds.indexOf(tileId);
         const isCurrentlySelected = tileIdIndex >= 0;
@@ -153,6 +155,16 @@ export const UIModel = types
           self.selectedTileIds.replace([tileId]);
         }
         // clicking on an already-selected tile doesn't change selection
+        //
+        // Log a SELECT_TILE only when the tile newly enters the selection — a
+        // repeat click on an already-selected tile is a no-op above, and this
+        // never fires on deselect/clear. Every selection path funnels here
+        // (mouse via handlePointerDown / the tile's own click handler, keyboard
+        // via the focus trap's onFocusEnter, drag), so both mouse and keyboard
+        // focus are covered by this one hook.
+        if (!isCurrentlySelected) {
+          logTileFocusEvent(tileId, !!options?.readOnly);
+        }
       } else {
         self.selectedTileIds.clear();
       }
@@ -197,10 +209,10 @@ export const UIModel = types
         self.errorContent = undefined;
       },
 
-      setSelectedTile(tile?: ITileModel, options?: {append: boolean, dragging?: boolean}) {
+      setSelectedTile(tile?: ITileModel, options?: {append: boolean, dragging?: boolean, readOnly?: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string, options?: {append: boolean, dragging?: boolean}) {
+      setSelectedTileId(tileId: string, options?: {append: boolean, dragging?: boolean, readOnly?: boolean}) {
         setOrAppendTileIdToSelection(tileId, options);
       },
       removeTileIdFromSelection(tileId: string) {
@@ -293,7 +305,7 @@ function _userSelectTile(ui: UIModelType, model: ITileModel,
   if (options.readOnly && options.container) {
     model = options.container;
   }
-  ui.setSelectedTile(model, { append: !!options.append });
+  ui.setSelectedTile(model, { append: !!options.append, readOnly: !!options.readOnly });
 }
 
 // Sometimes we get multiple selection events for a single click.
