@@ -148,3 +148,88 @@ Symptom of getting this wrong: tests pass/fail against an unrelated repo's dev
 server, the cypress config log prints the desired baseUrl but
 `cy.window().then(w => w.location.href)` shows the default port. Verify by
 having a test print `window.location.href`.
+
+### Running one cypress spec in CI
+
+A full `CI Regression` cycle is ~10 minutes and only runs when a PR carries the
+`run regression` label. To iterate on a single spec, dispatch the **Manual
+Regression** workflow, whose `single-test` job runs exactly one spec (~2 min):
+
+```bash
+gh workflow run manual-regression.yml --ref <branch> \
+  -f branch=<branch> -f browser=chrome \
+  -f test=functional/tile_tests/<your>_spec.js
+```
+
+The `test` input is a `choice`, so **a new spec must be added to the list in
+[.github/workflows/manual-regression.yml](.github/workflows/manual-regression.yml)
+before it can be dispatched.** Add it when you add the spec.
+
+### `/editor/` renders the document more than once
+
+The standalone doc-editor route mounts the same document in **three** panes — the
+main editable one, a Read Only Local copy, and a Read Only Remote (emulated) copy.
+Any unscoped count in a spec — `cy.get('.tile-row')`, `cy.get('.some-tile')` — is
+therefore 3× what the document contains, and `.first()` matters when interacting.
+
+**Always pass `noStorage=true` when testing cross-tile behavior on this route.**
+The doc-editor restores a document from `sessionStorage` and builds a model from
+it ([doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx):32-42),
+then *replaces* that model once the `document=` param finishes loading. An
+`onSnapshot` effect writes the document back to session storage on every change,
+so a fixture with a running Simulator repopulates it constantly.
+
+The consequence is nasty: tile types that register **lazily** (Drawing among
+them) can stay bound to the superseded document instance while eagerly-present
+tiles move to the newly loaded one, leaving **two document-content instances in a
+single pane**. Anything depending on shared ephemeral state — highlight refs,
+hover, selection, all volatile and per-document — then silently does nothing
+between the two groups of tiles.
+
+This does not reproduce under Cypress, which starts with clean session storage.
+It reproduces immediately in a browser tab you have been using for a while, and
+presents as "the feature works in CI and does nothing on my screen." Symptom to
+recognize: `window.currentDocument.content.activeRef` is `undefined` while the
+effect of that ref is plainly visible in another tile.
+
+**The panes do NOT reliably share one content model.** Instrumenting
+`getDocumentContentFromNode` from inside tile components on this route turned up
+**four distinct document-content instances** on a single page, with the text tile
+and the drawing tiles resolving to different ones — and the text tile's instance
+changing between two consecutive hovers, while the drawing layers stayed on their
+original instances. So a component can end up holding a `model` prop from a
+document that has since been replaced.
+
+Consequences for testing:
+
+- Anything that depends on two tiles sharing ephemeral, non-persisted state
+  (volatile fields such as highlight refs, hover state, selection) **cannot be
+  manually verified on this route** — the two tiles may simply be in different
+  trees. Use the real CLUE app instead.
+- A spec asserting such cross-tile behavior with unscoped selectors can pass
+  because *some* pane happens to line up, while the feature does nothing in the
+  pane a human is looking at. Scope per pane, or test elsewhere.
+- Assertions that a tile does *not* exist after a deletion have historically held
+  unscoped, but given the above, do not assume it.
+
+Also: `.primary-workspace` does not exist on this route (it is a CLUE workspace
+class), so page objects built on it — including most of `cypress/support/elements`
+— do not work there. Select directly, or pass a different `workspaceClass`.
+
+### Branch preview URLs
+
+Branch builds deploy to `https://collaborative-learning.concord.org/branch/[name]/`,
+but the deploy action **strips a leading ticket prefix** from the folder name:
+branch `CLUE-603-linked-representation-references` deploys to
+`/branch/linked-representation-references/`. Guessing the full branch name gives a
+404. The real URL is on the GitHub deployment status:
+
+```bash
+D=$(gh api repos/{owner}/{repo}/deployments \
+  --jq '[.[] | select(.ref=="refs/heads/<branch>")][0].id')
+gh api repos/{owner}/{repo}/deployments/$D/statuses --jq '.[0].environment_url'
+```
+
+Relative `unit=` / `document=` URL params work on these deploys: they are resolved
+against the webpack public path (the branch root) rather than the page, via
+`getAssetUrl` — see the comment in `doc-editor-app.tsx`.
