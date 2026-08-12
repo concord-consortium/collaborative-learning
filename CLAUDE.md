@@ -192,27 +192,36 @@ presents as "the feature works in CI and does nothing on my screen." Symptom to
 recognize: `window.currentDocument.content.activeRef` is `undefined` while the
 effect of that ref is plainly visible in another tile.
 
-**The panes do NOT reliably share one content model.** Instrumenting
-`getDocumentContentFromNode` from inside tile components on this route turned up
-**four distinct document-content instances** on a single page, with the text tile
-and the drawing tiles resolving to different ones — and the text tile's instance
-changing between two consecutive hovers, while the drawing layers stayed on their
-original instances. So a component can end up holding a `model` prop from a
-document that has since been replaced.
+**The three panes are two models, by design.** The editable pane and the Read
+Only Local copy share the same `document`; the Read Only Remote copy renders a
+separate `remoteDocument`
+([doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx):293,299),
+rebuilt from a snapshot on every document change. So a ring, selection, or other
+volatile state set in the editable pane will never appear in the remote copy —
+that is expected, not a bug.
+
+Instrumenting `getDocumentContentFromNode` from inside tile components turned up
+*more* instances than that — four on one page, with the text tile and the drawing
+tiles on different ones. Those extras came from the sessionStorage restore
+described above, not from the panes. With `noStorage=true` the pane count alone
+does not split tiles across trees.
 
 Consequences for testing:
 
-- Anything depending on two tiles sharing ephemeral, non-persisted state
-  (volatile fields such as highlight refs, hover state, selection) is
-  **unreliable on this route unless you pass `noStorage=true` and turn the
-  read-only copies off** — otherwise the two tiles may simply be in different
-  trees. With both of those done, the single editable pane is a valid place to
-  verify such behavior, and is what the highlight spec uses.
-- A spec asserting such cross-tile behavior with unscoped selectors can pass
-  because *some* pane happens to line up, while the feature does nothing in the
-  pane a human is looking at. Scope per pane, or disable the extra panes.
-- Assertions that a tile does *not* exist after a deletion have historically held
-  unscoped, but given the above, do not assume it.
+- **`noStorage=true` is the part that matters for correctness.** Without it, two
+  tiles that depend on shared ephemeral state (highlight refs, hover, selection —
+  all volatile and per-document) may sit in different trees and silently fail to
+  talk to each other. With it, the editable pane is a valid place to verify such
+  behavior by hand, panes and all.
+- Disabling the read-only copies is about *assertions*, not correctness. The
+  remote copy is a separate document, so an unscoped selector can be satisfied by
+  a match there while the editable pane shows nothing. Scope per pane, or turn
+  the copies off via the `clue-doc-editor-settings` localStorage key — the
+  highlight spec does the latter.
+- Assertions that a tile does *not* exist after a deletion do hold unscoped: the
+  local read-only copy shares the editable pane's model, and the remote copy is
+  rebuilt from the snapshot, so all three follow the deletion. The exception is
+  the sessionStorage split above — one more reason to pass `noStorage=true`.
 
 Also: `.primary-workspace` does not exist on this route (it is a CLUE workspace
 class), so page objects built on it — including most of `cypress/support/elements`
