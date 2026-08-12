@@ -25,6 +25,7 @@ Here are the basic development operations you can do after you cd into the `func
 $ cd functions-v2
 $ nvm use 20      # Recent version of node is required for these functions
 $ npm install     # install local dependencies
+$ npm --prefix ../shared ci   # ../shared has its own openai/zod; the build needs them
 $ npm run lint    # lint the functions code
 $ npm run test    # runs jest (unit) tests for the functions code (requires emulator, see below)
 $ npm run build   # build the functions code (transpile TypeScript)
