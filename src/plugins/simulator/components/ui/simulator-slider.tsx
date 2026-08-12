@@ -21,6 +21,9 @@ interface ISimulatorSliderProps {
 // Logging on release (not per-drag) yields one event per interaction and keeps
 // the drag stream out of the log. The tile id and variable snapshot come from
 // context rather than props.
+//
+// Stopgap: CLUE-627 will add an onChangeComplete prop to VariableSlider in
+// diagram-view and delete this component in favor of it.
 export function SimulatorSlider({ className, max, min, step, variable }: ISimulatorSliderProps) {
   const { tile } = useTileModelContext();
   const content = useSimulatorContent();
