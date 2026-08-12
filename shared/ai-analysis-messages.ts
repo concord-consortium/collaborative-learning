@@ -14,10 +14,10 @@ export interface IAiPrompt {
 }
 
 export interface AgreementInfo {
-  content: string,
-  tags: string[],
+  content: string;
+  tags: string[];
 }
-export type Agreements = Record<AgreementValue, AgreementInfo[]>
+export type Agreements = Record<AgreementValue, AgreementInfo[]>;
 
 export interface RelatedSummary {
   summary: string;
