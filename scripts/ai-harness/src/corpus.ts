@@ -28,6 +28,9 @@ export interface CorpusPaths {
 }
 
 export function corpusPaths(dataRoot: string, corpus: string): CorpusPaths {
+  if (!kDocumentIdPattern.test(corpus)) {
+    throw new Error(`--corpus must match ${kDocumentIdPattern}, got "${corpus}"`);
+  }
   const root = path.join(dataRoot, "corpus", corpus);
   return {
     root,
@@ -153,9 +156,7 @@ export function importCorpus(options: ImportOptions): ImportResult {
     throw new Error(`--source must be one of ${importableSources.join(", ")}; ` +
       `"${source}" documents are only produced by the (gated) pull command`);
   }
-  if (!kDocumentIdPattern.test(corpus)) {
-    throw new Error(`--corpus must match ${kDocumentIdPattern}, got "${corpus}"`);
-  }
+  const paths = corpusPaths(dataRoot, corpus);
 
   const sourceDir = path.resolve(from);
   const documentsDir = fs.existsSync(path.join(sourceDir, "documents"))
@@ -165,7 +166,6 @@ export function importCorpus(options: ImportOptions): ImportResult {
     throw new Error(`--from must name a directory containing document JSON files, got "${from}"`);
   }
 
-  const paths = corpusPaths(dataRoot, corpus);
   const existing = fs.existsSync(paths.manifest) ? readManifest(paths) : null;
   const previous = new Map((existing?.documents ?? []).map((entry) => [entry.id, entry]));
 

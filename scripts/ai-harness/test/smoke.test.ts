@@ -145,6 +145,13 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     expect(requests.length).toBeGreaterThan(before);
   });
 
+  it.each([["represent", ["--variants", "default"]], ["plan", ["--experiment", "experiments/text-baselines.json"]],
+    ["run", ["--experiment", "experiments/text-baselines.json", "--max-cost", "1.00"]]])(
+    "%s refuses a corpus name that escapes the data root", async (command, rest) => {
+      await expect(main([command, "--corpus", "../../escaped", ...rest], deps))
+        .rejects.toThrow(/--corpus must match/);
+    });
+
   it("reports modality breakdowns, statuses and costs", async () => {
     output.length = 0;
     await main(["report", "--results", resultsFile], deps);

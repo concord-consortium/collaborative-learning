@@ -28,6 +28,34 @@ const imageDoc = {
   tileMap: { t1: { id: "t1", content: { type: "Image" } } }
 };
 
+describe("corpus names cannot escape the artifact root", () => {
+  const dataRoot = "/repo/scripts/ai-harness/data";
+
+  it("builds paths under data/corpus for a valid name", () => {
+    expect(corpusPaths(dataRoot, "synthetic-corpus").root)
+      .toBe(path.join(dataRoot, "corpus", "synthetic-corpus"));
+  });
+
+  it.each([
+    ["../../escaped"],
+    [".."],
+    ["../results"],
+    ["nested/name"],
+    ["/absolute"],
+    ["Capitalised"],
+    ["has space"],
+    [""]
+  ])("refuses %s", (corpus) => {
+    expect(() => corpusPaths(dataRoot, corpus)).toThrow(/--corpus must match/);
+  });
+
+  it("is enforced for every command, not only import", () => {
+    expect(() => importCorpus({
+      from: ".", corpus: "../../escaped", source: "synthetic", prune: false, dataRoot, now
+    })).toThrow(/--corpus must match/);
+  });
+});
+
 describe("import", () => {
   it("writes a manifest with content hashes and computed modalities", () => {
     const dataRoot = makeTestDataRoot("import-basic");
