@@ -207,7 +207,6 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
   return mapRelatedSummaries(docs);
 }
 
-/** The relevant fields of a document found by the related-summaries search. */
 export interface RelatedSummarySource {
   summary?: unknown;
   aiAgreements?: Record<string, AiAgreement>;
@@ -215,7 +214,8 @@ export interface RelatedSummarySource {
 
 /**
  * Maps the documents found by the related-summaries search into the entries injected into the AI
- * prompt. Documents without agreements or a usable summary are skipped. Exported for unit testing.
+ * prompt. Documents missing `aiAgreements` (null/undefined)  or a usable summary are skipped.
+ * Exported for unit testing.
  */
 export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
   const relatedSummaries: RelatedSummary[] = [];
