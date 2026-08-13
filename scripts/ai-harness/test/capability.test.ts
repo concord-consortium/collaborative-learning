@@ -158,6 +158,42 @@ describe("Question traversal", () => {
     expect(result.tiles.find((tile) => tile.tileId === "inner-prompt")).toMatchObject({ hasStudentText: false });
   });
 
+  it("keeps a Question nested inside a prompt authored all the way down", () => {
+    // The whole subtree is curriculum content. Recomputing role from row position let the nested
+    // question's own later rows count as student work and flipped the document's modality.
+    const content = doc([[{ tileId: "outer" }]], {
+      outer: questionTile([["inner"], ["response"]], "outer"),
+      inner: questionTile([["inner-prompt"], ["inner-image"]], "inner"),
+      "inner-prompt": textTile("Look at this diagram:"),
+      "inner-image": { content: { type: "Image" } },
+      response: textTile("   ")
+    });
+
+    const result = classifyDocument(content);
+    expect(result.tiles.find((tile) => tile.tileId === "inner-image")).toMatchObject({
+      role: "prompt", hasStudentText: false, requiresVisualRepresentation: false
+    });
+    // The student wrote nothing and the image is the author's, so there is no student work here.
+    expect(result.computedModality).toBe("empty");
+  });
+
+  it("still classifies a Question nested in a response by its own rows", () => {
+    const content = doc([[{ tileId: "outer" }]], {
+      outer: questionTile([["outer-prompt"], ["inner"]], "outer"),
+      "outer-prompt": textTile("Outer prompt"),
+      inner: questionTile([["inner-prompt"], ["inner-image"]], "inner"),
+      "inner-prompt": textTile("Inner prompt"),
+      "inner-image": { content: { type: "Image" } }
+    });
+
+    const result = classifyDocument(content);
+    expect(result.tiles.find((tile) => tile.tileId === "inner-prompt")).toMatchObject({ role: "prompt" });
+    expect(result.tiles.find((tile) => tile.tileId === "inner-image")).toMatchObject({
+      role: "student", requiresVisualRepresentation: true
+    });
+    expect(result.computedModality).toBe("visual-only");
+  });
+
   it("stops recursing at the depth cap instead of looping forever", () => {
     const tileMap: Record<string, any> = {};
     const depth = kMaxQuestionDepth + 4;

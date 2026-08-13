@@ -139,6 +139,8 @@ function rowsOf(container: any): RowLike[] {
  * top-level tileMap, exactly as handleQuestionTile() in shared/ai-summarizer does):
  * - the first row holds the authored prompt, which is not student work and contributes nothing;
  * - the remaining rows are the student response and classify individually by their own types;
+ * - a Question nested inside a prompt stays authored all the way down: its own rows do not get to
+ *   reintroduce "student", because the whole subtree is curriculum content;
  * - a missing tile reference is skipped and recorded as a warning;
  * - a tile referenced twice counts once;
  * - nested Questions recurse, up to kMaxQuestionDepth.
@@ -179,7 +181,10 @@ export function classifyDocument(content: any): DocumentClassification {
       questionRows.forEach((row, rowIndex) => {
         for (const ref of row.tiles ?? []) {
           if (!ref?.tileId) continue;
-          visit(ref.tileId, rowIndex === 0 ? "prompt" : "student", depth + 1);
+          // Role is inherited, not recomputed from row position: once we are inside an authored
+          // prompt, everything below it is authored too. Recomputing would let a Question nested in
+          // a prompt hand "student" back to its own later rows.
+          visit(ref.tileId, role === "prompt" || rowIndex === 0 ? "prompt" : "student", depth + 1);
         }
       });
       return;
