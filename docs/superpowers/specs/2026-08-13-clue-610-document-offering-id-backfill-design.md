@@ -125,7 +125,12 @@ Neither existing script is the right host:
 
 `getOfferingIdFromFirebaseMetadata` moves to `scripts/lib/`, and
 `find-documents-missing-metadata.ts` switches to the shared copy. Behavior is unchanged; the move is
-mechanical.
+mechanical, except that the extracted function takes its `database` and base path as arguments
+rather than closing over module scope, so it can be tested and reused.
+
+The new module must not use `import.meta`. `scripts/lib/script-utils.ts` does, which is why
+`backfill-group-document-axes.ts` imports it lazily inside `main()` — a Jest test cannot load it.
+The lookup needs to be statically importable by both the script and its tests.
 
 The reason to share rather than duplicate is forward-looking. When the app stops reading RTDB
 metadata, that tree becomes a candidate for removal, and the question at that point is whether
@@ -176,6 +181,18 @@ Firestore path:
 | `demo/<name>/documents/…` | `/demo/<name>/portals/demo/classes` |
 
 The portal segment is already underscore-escaped in the Firestore path, so it is used as-is.
+
+### One RTDB read per document, run concurrently
+
+Each candidate gets its own read of `documentMetadata/<key>`. Caching by user is not worth doing:
+the scan is ordered by document id, document ids are random, so two documents belonging to the same
+user essentially never fall in the same page and a bounded cache would hit approximately never.
+Getting clustering instead would mean ordering by `uid`, which needs a new composite
+collection-group index — a real cost, to save reads that are individually tiny.
+
+Latency is handled by concurrency rather than by caching: within each page, candidates are resolved
+in fixed-size chunks with `Promise.all`. This keeps memory bounded by the page rather than by the
+run, and keeps the number of in-flight RTDB reads fixed.
 
 **Any other path shape is counted and skipped, never fatal.** So is a missing RTDB subtree. Some
 demo spaces never received earlier migrations and will have absent or stale trees; a run must
