@@ -35,23 +35,24 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByNoneOption().click();
     sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
     cy.get('.section-header-arrow').eq(1).should("have.class", "up");
-    let prevFocusDocTitle = "";
-    sortWork.getSortWorkItem().first().find('div').invoke('text').then((docText) => {
-      prevFocusDocTitle = docText.trim();
-    });
+    let prevFocusDocKey = "";
+    sortWork.getSortWorkListItem().first()
+      .invoke('attr', 'data-document-key').then((docKey) => {
+        prevFocusDocKey = docKey;
+      });
     sortWork.getSortWorkItem().first().click();
     cy.get('.close-doc-button').click();
     cy.get('.section-header-arrow').eq(1).should("have.class", "up");
-    cy.get(".sort-work-view .sorted-sections .list-item").first().should("have.class", "selected");
+    sortWork.getSortWorkListItem().first().should("have.class", "selected");
 
     cy.log("change the secondary sort and verify that the section remains expanded and the document is highlighted");
     sortWork.getSecondarySortByMenu().click();
     sortWork.getSecondarySortByNameOption().click();
-    cy.get(".sort-work-view .sorted-sections .simple-document-item.selected")
+    sortWork.getSimpleDocumentItem().filter(".selected")
       .should("exist")
-      .invoke("attr", "title")
-      .then((docTitle2) => {
-        expect(docTitle2).to.equal(prevFocusDocTitle);
+      .invoke("attr", "data-document-key")
+      .then((docKey2) => {
+        expect(docKey2).to.equal(prevFocusDocKey);
       });
 
     cy.log("when primary sort is switched, there should be no expanded sections, and no highlighted documents");
@@ -61,6 +62,6 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByMenu().click();
     sortWork.getSecondarySortByNoneOption().click();
     cy.get('.section-header-arrow').click({multiple: true});
-    cy.get(".sort-work-view .sorted-sections .list-item").should("not.have.class", "selected");
+    sortWork.getSortWorkListItem().should("not.have.class", "selected");
   });
 });

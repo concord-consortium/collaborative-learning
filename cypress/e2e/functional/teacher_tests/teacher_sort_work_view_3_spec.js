@@ -1,5 +1,6 @@
 import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 import SortedWork from "../../../support/elements/common/SortedWork";
+import { getSettledProp } from "../../../support/helpers/settled";
 
 let sortWork = new SortedWork;
 let dashboard = new TeacherDashboard;
@@ -41,19 +42,24 @@ describe('SortWorkView Tests', () => {
       cy.wrap($el).find("[data-testid=doc-group]").should("have.length", 1);
       cy.wrap($el).find("[data-testid=doc-group-label]").should("not.exist");
     });
-    // The Investigation layout renders one set of scroll buttons per
-    // section-document-list, so scope the scroll-behavior assertions to a
-    // single section to avoid multi-element subjects on `.click()`.
-    cy.get("[data-testid=section-document-list]").first().within(() => {
-      cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
+    // The Investigation layout renders one set of scroll buttons per section-document-list, and only
+    // for a section whose documents overflow the row, so scope the scroll-behavior assertions to the
+    // "No Group" section — the one large enough to scroll — to avoid multi-element subjects on `.click()`.
+    sortWork.getSortWorkGroup("No Group").find("[data-testid=section-document-list]").within(() => {
+      // The row scrolls smoothly, and narrows once the scroll buttons take their place beside it —
+      // which is also what sets how far one click scrolls. Read both only once they hold still, or a
+      // click lands part-way through a scroll, or on a row about to be a different width.
+      const docRow = "[data-testid=doc-group-list]";
+      getSettledProp(docRow, "clientWidth").should("be.gt", 0);
+      getSettledProp(docRow, "scrollLeft").should("be.eq", 0);
       cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
       cy.get("[data-testid=scroll-button-right]").should("exist").and("not.be.disabled");
       cy.get("[data-testid=scroll-button-right]").click();
+      getSettledProp(docRow, "scrollLeft").should("be.gt", 0);
       cy.get("[data-testid=scroll-button-left]").should("exist").and("not.be.disabled");
-      cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.gt", 0);
       cy.get("[data-testid=scroll-button-left]").click();
+      getSettledProp(docRow, "scrollLeft").should("be.eq", 0);
       cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
-      cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
     });
 
     // Apply secondary sort
@@ -80,7 +86,9 @@ describe('SortWorkView Tests', () => {
     });
 
     cy.log('verify can switch groups sorted by two means using arrows');
-    sortWork.getSimpleDocumentItem().eq(1).click();
+    // Open a document in the "No Group" section, the only one holding enough documents to be split
+    // across more than one name sub-group for the arrows to move between.
+    sortWork.getSimpleDocumentGroupItem("No Group").eq(1).click();
     cy.get('.header-text').should('not.contain.text', '1, Teacher');
     cy.get('.header-text').should('contain.text', '10, Student');
     cy.get('.switch-sort-group-button.left').click();
