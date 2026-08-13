@@ -59,6 +59,9 @@ jobs:
       # copy of the default AI prompt drifts from shared/, when openai/zod versions fall out of
       # lockstep, or when a tile summarizer stops carrying content. Nobody changing that code would
       # think to run these by hand, so they run on every PR rather than behind a path filter.
+      # ../../shared's own openai and zod, which the harness imports through
+      # shared/ai-analysis-messages.ts, are installed by the root package's postinstall
+      # (`npm ci --prefix shared`) during "Install Dependencies" above.
       - name: Install AI Harness Dependencies
         working-directory: ./scripts/ai-harness
         run: npm ci
