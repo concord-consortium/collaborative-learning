@@ -1,6 +1,10 @@
 import {
   classifyDocument, getSpaceFromFirestorePath, kOfferingContainedTypes
 } from "./backfill-document-offering-id";
+import { backfillDocumentOfferingId } from "./backfill-document-offering-id";
+import type { IBucketCounts } from "./backfill-document-offering-id";
+import type { IMetadataDatabase } from "./lib/document-metadata-lookup";
+import type { Firestore } from "firebase-admin/firestore";
 
 describe("kOfferingContainedTypes", () => {
   it("lists exactly the offering-contained type values, including both generic axes values", () => {
@@ -98,5 +102,200 @@ describe("classifyDocument", () => {
       delete data[missing];
       expect(classifyDocument(data, kPath)).toEqual({ kind: "counted", bucket: "unusableDocument" });
     }
+  });
+});
+
+// Minimal RTDB stand-in. `nodes` maps a full path to the value stored there; a path absent from the
+// map reads back as a non-existent node. `throwOn` makes a path reject, so a transport failure stays
+// distinguishable from a missing node. `reads` records every path read, which is how a test asserts
+// that a class-wide document was never looked up at all.
+function makeRtdb(nodes: Record<string, any>, throwOn: string[] = []) {
+  const reads: string[] = [];
+  const db: IMetadataDatabase & { reads: string[] } = {
+    reads,
+    ref: (path: string) => ({
+      once: (_eventType: "value") => {
+        reads.push(path);
+        if (throwOn.includes(path)) return Promise.reject(new Error("rtdb unavailable"));
+        const value = nodes[path];
+        return Promise.resolve({ exists: () => value !== undefined, val: () => value });
+      }
+    })
+  };
+  return db;
+}
+
+// Minimal Firestore-admin stand-in supporting the exact chain the script builds:
+//   collectionGroup("documents").where("type","==",t).orderBy("__name__")[.startAfter(d)].limit(n).get()
+//
+// `docsByType` supplies the canned result per queried type, so pagination can be exercised by handing
+// one type more documents than a page holds. `calls` records the query shape itself: a script that
+// queried the wrong type string would return an empty, confident census and pass every other test.
+function makeDb(docsByType: Record<string, any[]>) {
+  const batches: { writes: any[]; committed: boolean; set: any; commit: () => Promise<void> }[] = [];
+  const calls: { collectionGroup?: string; types: string[]; orderBy: string[] } =
+    { types: [], orderBy: [] };
+
+  const makeQuery = (all: any[], after: any) => ({
+    orderBy: (field: string) => { calls.orderBy.push(field); return makeQuery(all, after); },
+    startAfter: (doc: any) => makeQuery(all, doc),
+    limit: (n: number) => ({
+      get: () => {
+        const start = after ? all.findIndex((d) => d.ref.path === after.ref.path) + 1 : 0;
+        const docs = all.slice(start, start + n);
+        return Promise.resolve({ docs, size: docs.length, empty: docs.length === 0 });
+      }
+    })
+  });
+
+  return {
+    batches,
+    calls,
+    get writes() { return batches.flatMap((b) => b.writes); },
+    get committed() { return batches.filter((b) => b.committed); },
+    collectionGroup: (collectionId: string) => {
+      calls.collectionGroup = collectionId;
+      return {
+        where: (_field: string, _op: string, value: string) => {
+          calls.types.push(value);
+          return makeQuery(docsByType[value] ?? [], undefined);
+        }
+      };
+    },
+    batch: () => {
+      const writes: any[] = [];
+      const b = {
+        writes,
+        committed: false,
+        set: (ref: any, data: any, opts: any) => { writes.push({ ref, data, opts }); },
+        commit: () => { b.committed = true; return Promise.resolve(); }
+      };
+      batches.push(b);
+      return b;
+    }
+  };
+}
+
+const mkDoc = (path: string, data: any) => ({ ref: { path }, data: () => data });
+
+const kSpace = "authed/learn_concord_org";
+const kBase = "/authed/portals/learn_concord_org/classes";
+const mdPath = (ctx: string, uid: string, key: string) =>
+  `${kBase}/${ctx}/users/${uid}/documentMetadata/${key}`;
+
+const quiet = { log: () => undefined };
+
+const run = (db: any, rtdb: any, options: any = {}) =>
+  backfillDocumentOfferingId(db as unknown as Firestore, rtdb, { ...quiet, ...options });
+
+const bucket = (counts: IBucketCounts, name: keyof IBucketCounts) => counts[name];
+
+describe("backfillDocumentOfferingId — scanning", () => {
+  it("queries the documents collection group once per offering-contained type, ordered by name", async () => {
+    const db = makeDb({});
+    await run(db, makeRtdb({}), { dryRun: true });
+    expect(db.calls.collectionGroup).toBe("documents");
+    expect(db.calls.types).toEqual([
+      "problem", "planning", "publication", "supportPublication", "group", "axes"
+    ]);
+    // Ordered by document id so the cursor is total and stable. Ordering on a field would need a
+    // composite collection-group index that does not exist.
+    expect(new Set(db.calls.orderBy)).toEqual(new Set(["__name__"]));
+  });
+
+  it("resolves an offeringId from the RTDB metadata node", async () => {
+    const doc = mkDoc(`${kSpace}/documents/a`,
+      { type: "problem", context_id: "c1", uid: "u1", key: "k1" });
+    const rtdb = makeRtdb({ [mdPath("c1", "u1", "k1")]: { offeringId: "2001" } });
+    const res = await run(makeDb({ problem: [doc] }), rtdb, { dryRun: true });
+    expect(res.scanned).toBe(1);
+    expect(bucket(res.totals, "resolved")).toBe(1);
+    expect(res.byType.problem.resolved).toBe(1);
+    expect(res.bySpace[kSpace].resolved).toBe(1);
+  });
+
+  it("separates a missing metadata node from a node without the field", async () => {
+    const docs = [
+      mkDoc(`${kSpace}/documents/a`, { type: "problem", context_id: "c1", uid: "u1", key: "k1" }),
+      mkDoc(`${kSpace}/documents/b`, { type: "problem", context_id: "c1", uid: "u1", key: "k2" })
+    ];
+    const rtdb = makeRtdb({ [mdPath("c1", "u1", "k2")]: { type: "problem" } });
+    const res = await run(makeDb({ problem: docs }), rtdb, { dryRun: true });
+    expect(bucket(res.totals, "noMetadataNode")).toBe(1);
+    expect(bucket(res.totals, "nodeWithoutOfferingId")).toBe(1);
+  });
+
+  it("counts a failed RTDB read separately and keeps scanning", async () => {
+    // A transport error is not evidence that the document has no offering. It must not be filed under
+    // either not-found bucket, and it must not abort the run.
+    const docs = [
+      mkDoc(`${kSpace}/documents/a`, { type: "problem", context_id: "c1", uid: "u1", key: "k1" }),
+      mkDoc(`${kSpace}/documents/b`, { type: "problem", context_id: "c1", uid: "u1", key: "k2" })
+    ];
+    const rtdb = makeRtdb({ [mdPath("c1", "u1", "k2")]: { offeringId: "2001" } },
+      [mdPath("c1", "u1", "k1")]);
+    const res = await run(makeDb({ problem: docs }), rtdb, { dryRun: true });
+    expect(bucket(res.totals, "lookupError")).toBe(1);
+    expect(bucket(res.totals, "resolved")).toBe(1);
+    expect(res.scanned).toBe(2);
+  });
+
+  it("survives a space whose RTDB tree does not exist, and attributes it to that space", async () => {
+    // Some demo spaces never received earlier migrations. Their unresolved documents must be visible as
+    // theirs rather than folded into a global number.
+    const docs = [
+      mkDoc(`${kSpace}/documents/a`, { type: "problem", context_id: "c1", uid: "u1", key: "k1" }),
+      mkDoc("demo/OLD/documents/b", { type: "problem", context_id: "c2", uid: "u2", key: "k2" })
+    ];
+    const rtdb = makeRtdb({ [mdPath("c1", "u1", "k1")]: { offeringId: "2001" } });
+    const res = await run(makeDb({ problem: docs }), rtdb, { dryRun: true });
+    expect(res.bySpace[kSpace].resolved).toBe(1);
+    expect(res.bySpace["demo/OLD"].noMetadataNode).toBe(1);
+    expect(res.bySpace["demo/OLD"].resolved).toBe(0);
+  });
+
+  it("never looks up a class-wide document", async () => {
+    const docs = [mkDoc(`${kSpace}/documents/a`,
+      { type: "axes", context_id: "c1", uid: "class_hash", key: "k1" })];
+    const rtdb = makeRtdb({});
+    const res = await run(makeDb({ axes: docs }), rtdb, { dryRun: true });
+    expect(bucket(res.totals, "skippedClassWide")).toBe(1);
+    expect(rtdb.reads).toEqual([]);
+  });
+
+  it("pages through a type with more documents than one page holds", async () => {
+    const docs = Array.from({ length: 7 }, (_, i) =>
+      mkDoc(`${kSpace}/documents/d${i}`,
+        { type: "problem", context_id: "c1", uid: "u1", key: `k${i}` }));
+    const nodes: Record<string, any> = {};
+    docs.forEach((_, i) => { nodes[mdPath("c1", "u1", `k${i}`)] = { offeringId: "2001" }; });
+    const res = await run(makeDb({ problem: docs }), makeRtdb(nodes),
+      { dryRun: true, pageSize: 3 });
+    expect(res.scanned).toBe(7);
+    expect(bucket(res.totals, "resolved")).toBe(7);
+  });
+
+  it("reads every candidate exactly once when the page size divides the count evenly", async () => {
+    // A cursor bug that re-reads or skips the last document of a page shows up here and nowhere else.
+    const docs = Array.from({ length: 6 }, (_, i) =>
+      mkDoc(`${kSpace}/documents/d${i}`,
+        { type: "problem", context_id: "c1", uid: "u1", key: `k${i}` }));
+    const rtdb = makeRtdb({});
+    const res = await run(makeDb({ problem: docs }), rtdb, { dryRun: true, pageSize: 3 });
+    expect(res.scanned).toBe(6);
+    expect(rtdb.reads.length).toBe(6);
+    expect(new Set(rtdb.reads).size).toBe(6);
+  });
+
+  it("writes and commits nothing on a dry run that found work", async () => {
+    const doc = mkDoc(`${kSpace}/documents/a`,
+      { type: "problem", context_id: "c1", uid: "u1", key: "k1" });
+    const db = makeDb({ problem: [doc] });
+    const res = await run(db, makeRtdb({ [mdPath("c1", "u1", "k1")]: { offeringId: "2001" } }),
+      { dryRun: true });
+    expect(bucket(res.totals, "resolved")).toBe(1);
+    expect(res.written).toBe(0);
+    expect(db.committed.length).toBe(0);
+    expect(db.writes.length).toBe(0);
   });
 });

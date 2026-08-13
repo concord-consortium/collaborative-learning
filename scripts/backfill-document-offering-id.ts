@@ -18,6 +18,8 @@
 // Apply (performs the writes):                APPLY=1 npx tsx scripts/backfill-document-offering-id.ts
 
 import type { Firestore } from "firebase-admin/firestore";
+import { getOfferingIdFromFirebaseMetadata } from "./lib/document-metadata-lookup.js";
+import type { IMetadataDatabase } from "./lib/document-metadata-lookup.js";
 
 /**
  * The `type` values of documents kept in an offering, per the `containerType: "offering"` entries in
@@ -97,4 +99,133 @@ export function classifyDocument(data: any, docPath: string): Classification {
   const key = data?.key;
   if (!contextId || !uid || !key) return { kind: "counted", bucket: "unusableDocument" };
   return { kind: "lookup", space, contextId, uid, key };
+}
+
+/** One tally per outcome. Kept as a flat record so totals, per-type, and per-space all share a shape. */
+export type IBucketCounts = Record<CountedBucket, number>;
+
+export interface IBackfillOfferingIdResult {
+  scanned: number;
+  written: number;
+  totals: IBucketCounts;
+  byType: Record<string, IBucketCounts>;
+  bySpace: Record<string, IBucketCounts>;
+}
+
+const kAllBuckets: CountedBucket[] = [
+  "resolved", "alreadySet", "noMetadataNode", "nodeWithoutOfferingId",
+  "unusableDocument", "unknownSpace", "skippedClassWide", "lookupError"
+];
+
+const emptyCounts = (): IBucketCounts =>
+  Object.fromEntries(kAllBuckets.map((b) => [b, 0])) as IBucketCounts;
+
+/** A document whose space could not be derived still needs somewhere to be counted. */
+const kUnknownSpaceLabel = "unknown";
+
+/**
+ * Run `fn` over `items` a chunk at a time. Latency here is dominated by one small RTDB read per
+ * document, so the reads are overlapped; the chunking is what keeps the number in flight fixed
+ * regardless of page size.
+ */
+async function mapInChunks<T, R>(items: T[], size: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += size) {
+    results.push(...await Promise.all(items.slice(i, i + size).map(fn)));
+  }
+  return results;
+}
+
+/**
+ * Yield each page of one type's documents, ordered by document id.
+ *
+ * Paginated rather than fetched whole: this query's result set is every document of that type in every
+ * space, which will not fit in memory. Ordered by document id because that is the one total order
+ * available without a composite collection-group index.
+ */
+async function* iterateDocuments(db: Firestore, type: string, pageSize: number) {
+  let cursor: any;
+  for (;;) {
+    const base = db.collectionGroup("documents").where("type", "==", type).orderBy("__name__");
+    const query = cursor ? (base as any).startAfter(cursor) : base;
+    const snapshot = await (query as any).limit(pageSize).get();
+    const docs = snapshot.docs;
+    if (docs.length === 0) return;
+    yield docs;
+    if (docs.length < pageSize) return;
+    cursor = docs[docs.length - 1];
+  }
+}
+
+/**
+ * Census, and optionally repair, the `offeringId` of every offering-contained document.
+ *
+ * Idempotency works differently here than in scripts/backfill-group-document-axes.ts, whose whole
+ * design rests on the field it writes being the field it queries. Firestore cannot query for a missing
+ * field, so candidates are found by `type` and filtered in memory on the absence of `offeringId`. A
+ * re-run therefore rescans everything; it is still a no-op for anything already repaired, because a
+ * repaired document now fails that in-memory filter.
+ *
+ * Pure of admin initialization so it can be unit tested with a mock Firestore and a mock database.
+ */
+export async function backfillDocumentOfferingId(
+  db: Firestore,
+  database: IMetadataDatabase,
+  { dryRun = true, log = console.log, pageSize = 300, concurrency = 25 }: {
+    dryRun?: boolean; log?: (message: string) => void; pageSize?: number; concurrency?: number;
+  } = {}
+): Promise<IBackfillOfferingIdResult> {
+  const result: IBackfillOfferingIdResult = {
+    scanned: 0, written: 0, totals: emptyCounts(), byType: {}, bySpace: {}
+  };
+
+  const count = (type: string, spaceLabel: string, b: CountedBucket) => {
+    result.totals[b] += 1;
+    (result.byType[type] ??= emptyCounts())[b] += 1;
+    (result.bySpace[spaceLabel] ??= emptyCounts())[b] += 1;
+  };
+
+  for (const type of kOfferingContainedTypes) {
+    for await (const docs of iterateDocuments(db, type, pageSize)) {
+      result.scanned += docs.length;
+      const classified = docs.map((doc: any) => ({ doc, c: classifyDocument(doc.data(), doc.ref.path) }));
+
+      for (const { doc, c } of classified) {
+        if (c.kind !== "counted") continue;
+        const space = getSpaceFromFirestorePath(doc.ref.path);
+        count(type, space?.label ?? kUnknownSpaceLabel, c.bucket);
+      }
+
+      const candidates = classified.filter((x) => x.c.kind === "lookup");
+      // The lookups overlap, but each returns its resolution rather than writing. Writing from inside
+      // concurrent callbacks would let one callback add to a batch another callback is already
+      // committing, so the batch is fed sequentially from the results instead (see Task 4).
+      await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
+        try {
+          const lookup = await getOfferingIdFromFirebaseMetadata(
+            database, c.space.firebaseBasePath, c.contextId, c.uid, c.key
+          );
+          if (lookup.status !== "found") {
+            // The two non-found statuses are named identically to their buckets, so they count themselves.
+            count(type, c.space.label, lookup.status);
+            return undefined;
+          }
+          count(type, c.space.label, "resolved");
+          return { ref: doc.ref, offeringId: lookup.offeringId };
+        } catch (error) {
+          count(type, c.space.label, "lookupError");
+          log(`lookup failed for ${doc.ref.path}: ${error}`);
+          return undefined;
+        }
+      });
+    }
+  }
+
+  log(`scanned ${result.scanned}; ` +
+      kAllBuckets.map((b) => `${b}: ${result.totals[b]}`).join(", "));
+  // Said out loud because a Firestore equality query on `type` cannot return a document that has no
+  // `type` field, so such documents are invisible to this census rather than counted as clean.
+  log("documents with no `type` field are not reachable by these queries and are not counted");
+  if (dryRun) log("DRY RUN — set APPLY=1 to write");
+  return result;
 }
