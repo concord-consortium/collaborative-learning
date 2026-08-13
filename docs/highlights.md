@@ -8,6 +8,14 @@ Highlights are **ephemeral**: per-user, per-session, never persisted, never sync
 and never visible to anyone else viewing the same document. This is the single most important
 property of the system — see [Highlight state](#highlight-state).
 
+**A highlight is not selection**, even though a user driving one by hand makes the two look
+alike. Selection is *operational*: it is the implicit argument to the next action — delete, drag,
+group, toolbar buttons — and it is suppressed in read-only views. A highlight is *informational*:
+it says "look here" without arming anything, it must render in read-only documents, 4-up cells
+and thumbnails, and it has to outlive the user's next click, or acting on the guidance would
+destroy the guidance. Keep them separate, and give a tile its own highlight rendering rather than
+reusing its selection style.
+
 Compare [annotations.md](annotations.md), which covers sparrows. Sparrows solve a related
 problem (addressing objects inside tiles) and highlights reuse that *concept*, but not its
 implementation: a sparrow is persisted document content describing an arrow between two
@@ -34,20 +42,39 @@ A registry maps each `kind` to a resolver that turns a reference into `IHighligh
 `resolveHighlightReference` fails quiet: an unknown kind or an unresolvable reference yields
 no targets and no error.
 
+**Which kind matters, and why the multi-tile behavior is not the feature.** `object` is the kind
+the system exists for: an AI saying "click that button in the Dataflow tile" should light that
+button and nothing else. `variable` fans out across tiles, and that fan-out is a property of the
+*kind*, not of highlighting — it exists because a variable chip is currently the only way a user
+can name something in another tile. Treat the variable kind as scaffolding: useful, worth keeping,
+but do not derive the system's semantics from how it behaves. Nothing today produces an `object`
+reference, which is a UI limitation rather than a design one, and it resolves when AI-emitted
+references land.
+
 ## Setting up a tile to be a highlight *target*
 
 A target tile renders emphasis on its own objects. There is no overlay layer — see
 [Why in-tile rendering](#why-in-tile-rendering).
 
-1. **Read the state.** Call `documentContent.objectState(tileId, objectId)`, which returns
+1. **Read the state.** Call `documentContent.objectHighlightState(tileId, objectId)`, which returns
    `"pinned" | "preview" | undefined`. Reach the document content with
    `getDocumentContentFromNode(someModelNode)` (`src/utilities/mst-utils.ts`); it returns
    `undefined` for detached trees, so null-check it.
-2. **Render emphasis** in whatever idiom is native to the tile. Dataflow adds a CSS class to
-   its node (`dataflow-node.tsx`, styles in `nodes/node-states.scss`).
+2. **Render emphasis** in whatever idiom is native to the tile. Dataflow adds a CSS class to its
+   node (`dataflow-node.tsx`, styles in `nodes/node-states.scss`); the text tile's variable chip
+   does the same (`variables-plugin.tsx`, styles in `text-tile.scss`).
 
-**The call must happen inside a MobX `observer`'s render body.** `objectState` is backed by a
-computed that MobX only caches while a reaction observes it. Read from outside one — a
+Use `highlightClassesFor` (`src/models/highlights/highlight-classes.ts`) for the class names, and
+the ring colors in `src/components/highlight-vars.scss`, rather than defining either locally. One
+reference should read the same way wherever it lands; a tile whose emphasis is not CSS-driven can
+still use the shared colors.
+
+Note the text chip renders its highlight **separately from its Slate selection style**. That is
+the concrete form of the rule above: the two states must be able to disagree, so a tile that
+already has a selection appearance needs a second, distinct one for highlights.
+
+**The call must happen inside a MobX `observer`'s render body.** `objectHighlightState` is backed
+by a computed that MobX only caches while a reaction observes it. Read from outside one — a
 `useMemo`, a callback, a non-observer component — every access re-resolves the reference,
 sweeping every tile in the document. Since this is called once per object per render, hoisting
 it turns a linear render into a quadratic one.
@@ -61,14 +88,14 @@ Actions on the document content model:
 
 | Action | Use |
 |---|---|
-| `setHoveredRef(ref)` / `clearHoveredRef()` | Hover preview |
-| `setPinnedRef(ref)` / `clearPinnedRef()` | Pin |
-| `togglePinnedRef(ref)` | Click behavior — pins, or unpins if already pinned to the same ref |
+| `setHoveredHighlightRef(ref)` / `clearHoveredHighlightRef()` | Hover preview |
+| `setPinnedHighlightRef(ref)` / `clearPinnedHighlightRef()` | Pin |
+| `togglePinnedHighlightRef(ref)` | Click behavior — pins, or unpins if already pinned to the same ref |
 
 Two rules a source must respect:
 
 - **Clear only what you own.** Several sources share one document. Before clearing, confirm
-  the active reference is yours — see `clearHoveredRefIfOwn`.
+  the active reference is yours — see `clearHoveredHighlightRefIfOwn`.
 - **Release on unmount.** React does not fire `onMouseLeave` for an element that unmounts under
   the cursor, and a pinned highlight can normally only be dismissed by clicking its source
   again. A source that disappears while pinned would strand the highlight on screen for the
@@ -105,7 +132,7 @@ a no-op default. The variable resolver's optional call is load-bearing; do not "
 
 `DocumentContentModelWithHighlights` (`src/models/document/document-content-with-highlights.ts`)
 is a composition layer on the document content model holding two **volatile** fields:
-`hoveredRef` and `pinnedRef`. The pattern mirrors `DataSet`'s volatile `caseSelection`, which is
+`hoveredHighlightRef` and `pinnedHighlightRef`. The pattern mirrors `DataSet`'s volatile `caseSelection`, which is
 how table↔graph linked selection already works.
 
 **Adding a `.props()` entry to that file would persist highlights to Firebase and make them
@@ -118,7 +145,7 @@ to the pin rather than clearing. The exception is hovering the reference that is
 which keeps reporting `"pinned"` so a user's own pinned source does not flicker on hover.
 
 The resolved-target collection is deliberately a **closure local, not a `.views()` getter** —
-MST publishes every view getter as public typed API. Only `isObjectActive` and `objectState`
+MST publishes every view getter as public typed API. Only `isObjectHighlighted` and `objectHighlightState`
 are public, because a future text-range reference kind has no id and cannot be expressed as a
 `tileId/objectId` pair.
 
@@ -142,48 +169,23 @@ The state and reference types are deliberately pixel-free, so an overlay remains
    because `Range.getClientRects()` returns one rect per visual line and handles wrapping
    natively.
 
-## Authoring a document that exercises this
+## Trying it by hand
 
-`src/public/demo/docs/emg-highlight-demo.json` is the worked example, and the fixture for
-`cypress/e2e/functional/tile_tests/highlight_references_spec.js`.
-
-**Three preconditions gate the variable-chip toolbar buttons.** None are obvious, and all three
-must hold or the buttons are absent or disabled:
-
-1. **The plugin must be loaded.** `shared-variables-registration.ts` is only imported when a
-   **Dataflow, Diagram, or Simulator** tile type is registered (`src/register-tile-types.ts`).
-   Registering `Text` alone does not pull it in.
-2. **The unit must enable the buttons.** `new-variable` / `insert-variable` / `edit-variable`
-   appear only if the unit lists them in `settings.text.tools`; the app default in
-   `src/clue/app-config.json` does not. Units that do: `demo/units/qa`, `qa-variables`,
-   `qa-no-group-share`, `qa-no-nav-panel`, and `curriculum/dataflow/dataflow-example.json`.
-3. **A SharedVariables must already exist.** The text tile never creates one — it auto-attaches
-   to whatever the document has. So the document needs a Simulator (or Diagram/Drawing) tile as
-   the variable source.
-
-`insert-variable` is a picker over the document's existing variables, so a student can point a
-chip at a simulation variable without authoring anything.
-
-**Authored chips round-trip**, which is what makes a deterministic test fixture possible:
-
-```html
-<p>Watch this signal drive your program:
-   <span data-slate-type="m2s-variable" data-slate-reference="c9561nuH0CdjytQd"></span></p>
-```
-
-The attribute names come from `src/components/tiles/text/plugins/chip-serialization.ts`.
-Authored variable ids are **stable, not runtime-random**: `Variable.id` defaults to a nanoid,
-but the simulator looks variables up by `name` first and only mints an id when none is found.
-So a document shipping its own `SharedVariables` snapshot keeps the ids it declares, and a chip
-can reference them by hand.
+See [highlights-demo.md](highlights-demo.md) for how to author a document a user can drive the
+highlight from. That is entirely about the variable chip and is not needed to add a new tile.
 
 ## Known limitations
 
-- **Pinned and preview rings reuse the Dataflow input palette.** The pinned ring is currently
-  the same color as the Sensor node's own border, so it reads as a thicker border rather than as
-  emphasis. Choosing an emphasis color that works across every node family is a design decision.
-  (The preview ring was moved off `$input-purple` because that color measured 2.02:1 against the
-  white canvas, below WCAG 1.4.11's 3:1 minimum for a non-text indicator.)
+- **The pinned ring collides with the Dataflow input palette.** `$highlight-pinned-ring` is the
+  same value as the Sensor node's own border color, so on that one node it reads as a thicker
+  border rather than as emphasis. Choosing an emphasis color that works across every node family
+  is a design decision. (The preview ring was moved off `$input-purple` because that color
+  measured 2.02:1 against the white canvas, below WCAG 1.4.11's 3:1 minimum for a non-text
+  indicator.) Both values live in `src/components/highlight-vars.scss`.
+- **Only variable references exist today, so nothing can point at one specific object.** The
+  `object` kind is fully resolved but has no producer — see [References](#references). Until
+  AI-emitted references land, every highlight fans out to everything associated with a variable,
+  which is the opposite of what "look at this one thing" needs.
 - **Sources are mouse-only.** The variable chip has no `role`, `tabIndex`, or key handler, so
   keyboard and assistive-technology users cannot pin a highlight.
 - **Dataflow exposes only nodes.** Connections and groups have stable ids but are not yet
