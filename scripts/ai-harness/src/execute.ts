@@ -182,6 +182,8 @@ export class JsonlWriter {
 }
 
 export function readResultRows(file: string): ResultRow[] {
+  // A missing file means "nothing has run yet", which is exactly what resume needs on a fresh
+  // --output. Callers for which a missing file is a mistake — `report` — check before calling.
   if (!fs.existsSync(file)) return [];
   return fs.readFileSync(file, "utf8")
     .split("\n")
@@ -289,6 +291,7 @@ export interface RunSummary {
   written: number;
   resumed: number;
   cacheHits: number;
+  /** Requests actually dispatched, counting every retry — not tasks completed. */
   apiCalls: number;
   stoppedOnCeiling: boolean;
   reservedPeakUsd: number;
@@ -425,6 +428,9 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
       while (attempts <= retries) {
         attempts += 1;
         try {
+          // Counted here, per dispatch: a request that succeeds on its third try made three calls,
+          // and one that exhausts its retries made three and reported none.
+          summary.apiCalls += 1;
           result = await createCompletion({ request: task.request, aiPrompt: task.aiPrompt });
           break;
         } catch (error) {
@@ -452,10 +458,11 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
         continue;
       }
 
-      summary.apiCalls += 1;
-      // The call happened, so the money is spent whatever the response turned out to be.
+      // The call happened, so the money is spent whatever the response turned out to be — and any
+      // earlier attempts that failed on the way here were dispatched too, so they are charged on the
+      // same basis the all-failed path uses rather than being written off.
       const incurredThisRunUsd = priceTokens(result.usage.promptTokens, result.usage.completionTokens, pricing);
-      ledger.settle(reservation, incurredThisRunUsd);
+      ledger.settleAfterFailedAttempts(reservation, incurredThisRunUsd, attempts - 1, 1 + retries);
 
       if (result.parsed == null && result.refusal == null) {
         // A response with neither a parsed object nor a refusal is a failure, the same way production

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { ResponseCache } from "../src/cache.js";
-import { CostLedger } from "../src/cost.js";
+import { CostLedger, priceTokens } from "../src/cost.js";
 import {
   CompletionResult, JsonlWriter, RunTask, currentRunMeta, isTransientError, readResultRows, runTasks
 } from "../src/execute.js";
@@ -240,6 +240,110 @@ describe("retries", () => {
     let attempts = 0;
     await run(dataRoot, tasks, async () => { attempts += 1; throw new Error("invalid request"); });
     expect(attempts).toBe(1);
+  });
+});
+
+describe("a request that succeeds after failed attempts", () => {
+  const runOnce = async (dataRoot: string, ledger: CostLedger, createCompletion: () => Promise<CompletionResult>) =>
+    runTasks({
+      corpus: "synthetic-corpus",
+      experiment: experiment as any,
+      experimentSha256: "hash",
+      tasks: [makeTask("text", "text-default", "a summary", 0.03)],
+      outputFile: path.join(dataRoot, "results.jsonl"),
+      ledger,
+      cache: new ResponseCache(path.join(dataRoot, "cache"), { read: false, write: false }),
+      pricing: testPricing,
+      runMeta: testRunMeta,
+      createCompletion,
+      sleep: async () => undefined
+    });
+
+  it("charges the earlier dispatched attempts, not only the response that came back", async () => {
+    const dataRoot = makeTestDataRoot("retry-cost");
+    const ledger = new CostLedger(10);
+    let attempts = 0;
+    const summary = await runOnce(dataRoot, ledger, async () => {
+      attempts += 1;
+      if (attempts < 3) throw Object.assign(new Error("rate limited"), { status: 429 });
+      return completion();
+    });
+
+    // The response itself is tiny; the two failed attempts are two thirds of a $0.03 reservation.
+    const responseOnly = priceTokens(100, 20, testPricing);
+    expect(summary.written).toBe(1);
+    expect(ledger.incurredUsd).toBeCloseTo(responseOnly + 0.02, 10);
+    expect(ledger.incurredUsd).toBeGreaterThan(responseOnly);
+  });
+
+  it("charges nothing extra when the first attempt succeeds", async () => {
+    const dataRoot = makeTestDataRoot("retry-cost-clean");
+    const ledger = new CostLedger(10);
+    await runOnce(dataRoot, ledger, async () => completion());
+    expect(ledger.incurredUsd).toBeCloseTo(priceTokens(100, 20, testPricing), 10);
+  });
+
+  it("accounts the same way whether the request eventually succeeds or not", async () => {
+    // The two paths must agree about the identical event: an attempt that went out and came back
+    // with nothing.
+    const failedOnly = new CostLedger(10);
+    await runOnce(makeTestDataRoot("retry-cost-allfail"), failedOnly, async () => {
+      throw Object.assign(new Error("gone"), { status: 500 });
+    });
+
+    const succeeded = new CostLedger(10);
+    let attempts = 0;
+    await runOnce(makeTestDataRoot("retry-cost-mixed"), succeeded, async () => {
+      attempts += 1;
+      if (attempts < 3) throw Object.assign(new Error("gone"), { status: 500 });
+      return completion();
+    });
+
+    // Three failed attempts cost the whole reservation; two failed plus a response cost two thirds
+    // of it plus the response.
+    expect(failedOnly.incurredUsd).toBeCloseTo(0.03, 10);
+    expect(succeeded.incurredUsd).toBeCloseTo(0.02 + priceTokens(100, 20, testPricing), 10);
+  });
+});
+
+describe("apiCalls counts dispatches, which is what the CLI reports", () => {
+  const runWith = async (name: string, createCompletion: () => Promise<CompletionResult>) => {
+    const dataRoot = makeTestDataRoot(name);
+    return runTasks({
+      corpus: "synthetic-corpus",
+      experiment: experiment as any,
+      experimentSha256: "hash",
+      tasks: [makeTask("text", "text-default", "a summary")],
+      outputFile: path.join(dataRoot, "results.jsonl"),
+      ledger: new CostLedger(10),
+      cache: new ResponseCache(path.join(dataRoot, "cache"), { read: false, write: false }),
+      pricing: testPricing,
+      runMeta: testRunMeta,
+      createCompletion,
+      sleep: async () => undefined
+    });
+  };
+
+  it("counts every attempt when a request succeeds on its third", async () => {
+    let attempts = 0;
+    const summary = await runWith("apicalls-retry", async () => {
+      attempts += 1;
+      if (attempts < 3) throw Object.assign(new Error("rate limited"), { status: 429 });
+      return completion();
+    });
+    expect(summary.apiCalls).toBe(3);
+  });
+
+  it("counts the attempts of a request that exhausts its retries, rather than reporting none", async () => {
+    const summary = await runWith("apicalls-exhausted", async () => {
+      throw Object.assign(new Error("rate limited"), { status: 429 });
+    });
+    expect(summary.apiCalls).toBe(3);
+    expect(summary.written).toBe(1);
+  });
+
+  it("counts one for a request that succeeds immediately, and none for a cache hit", async () => {
+    expect((await runWith("apicalls-clean", async () => completion())).apiCalls).toBe(1);
   });
 });
 

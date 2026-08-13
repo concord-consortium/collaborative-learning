@@ -68,17 +68,29 @@ export function worstCaseUsd(request: HarnessRequest, pricing: ModelPricing, ret
   return priceTokens(inputTokens, outputTokens, pricing) * (1 + retries);
 }
 
+export interface Reservation {
+  id: number;
+  amountUsd: number;
+}
+
+/**
+ * What dispatched attempts that returned nothing are charged: their share of the reservation, which
+ * covered (1 + retries) attempts. A guess, but in the honest direction — see the README's note on the
+ * enforced bound.
+ */
+export function failedAttemptShareUsd(
+  reservation: Reservation, failedAttempts: number, totalAttempts: number
+): number {
+  if (failedAttempts <= 0 || totalAttempts <= 0) return 0;
+  return Math.min(reservation.amountUsd * (failedAttempts / totalAttempts), reservation.amountUsd);
+}
+
 export class CostCeilingExceeded extends Error {
   constructor(public readonly requested: number, public readonly remaining: number) {
     super(`Reserving $${requested.toFixed(4)} would exceed --max-cost; ` +
       `only $${remaining.toFixed(4)} is left. No further requests were dispatched.`);
     this.name = "CostCeilingExceeded";
   }
-}
-
-export interface Reservation {
-  id: number;
-  amountUsd: number;
 }
 
 /**
@@ -166,7 +178,18 @@ export class CostLedger {
    * free, without pretending we know what the provider actually billed.
    */
   settleFailedAttempt(reservation: Reservation, attempts: number, totalAttempts: number): void {
-    const share = totalAttempts > 0 ? reservation.amountUsd * (Math.max(1, attempts) / totalAttempts) : 0;
-    this.settle(reservation, Math.min(share, reservation.amountUsd));
+    this.settle(reservation, failedAttemptShareUsd(reservation, attempts, totalAttempts));
+  }
+
+  /**
+   * Settles a request that eventually succeeded after one or more dispatched attempts returned
+   * nothing. The earlier attempts are charged on the same basis as a request that never succeeded —
+   * they went out, so the provider may have billed them. Charging only the final response would make
+   * the two paths disagree about the identical event and let real spend drift past the ceiling.
+   */
+  settleAfterFailedAttempts(
+    reservation: Reservation, actualUsd: number, failedAttempts: number, totalAttempts: number
+  ): void {
+    this.settle(reservation, actualUsd + failedAttemptShareUsd(reservation, failedAttempts, totalAttempts));
   }
 }
