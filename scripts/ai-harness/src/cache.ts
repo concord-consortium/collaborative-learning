@@ -61,8 +61,14 @@ export function validateCacheEntry(value: unknown, key: string): CacheEntry | un
   const meta = entry.responseOriginMeta;
   if (meta === null || typeof meta !== "object" || typeof meta.date !== "string") return undefined;
 
-  if (entry.status === "refusal" && typeof entry.refusal !== "string") return undefined;
-  if (entry.status === "success" && entry.parsed === undefined) return undefined;
+  // The cache must agree with the run loop about what a usable response is. A completion carrying
+  // neither parsed content nor refusal text is classified there as an "unparsed" error and never
+  // cached, so an entry in either of those shapes is damaged rather than replayable — treat it as a
+  // miss and let the request go out again, instead of quietly serving an error back as a success.
+  if (entry.status === "refusal" && (typeof entry.refusal !== "string" || entry.refusal.length === 0)) {
+    return undefined;
+  }
+  if (entry.status === "success" && entry.parsed == null) return undefined;
 
   return entry as CacheEntry;
 }

@@ -228,12 +228,36 @@ describe("a damaged cache entry is a miss, not a crash", () => {
     ["missing origin meta", { ...good, responseOriginMeta: undefined }],
     ["origin meta without a date", { ...good, responseOriginMeta: { modelReturned: "m" } }],
     ["a success without parsed", { ...good, parsed: undefined }],
+    // The run loop calls a response with no parsed content an "unparsed" error and never caches it,
+    // so an entry in that shape cannot be replayed as a success.
+    ["a success whose parsed is null", { ...good, parsed: null }],
     ["a refusal without refusal text", { ...good, status: "refusal", refusal: undefined }],
+    ["a refusal whose text is empty", { ...good, status: "refusal", refusal: "" }],
     ["missing raw", { ...good, raw: undefined }],
     ["a bare array", []],
     ["null", null]
   ])("treats %s as a miss", (_label, value) => {
     expect(validateCacheEntry(value, "abc")).toBeUndefined();
+  });
+
+  it("retries a null-parsed entry rather than replaying it as a success", async () => {
+    const dataRoot = makeTestDataRoot("cache-null-parsed");
+    const tasks = [makeTask("text", "text-default", "a summary")];
+    const cache = new ResponseCache(path.join(dataRoot, "cache"));
+
+    // Hand-written or left by an older build: a status the run loop would never produce.
+    const file = cache.pathFor(tasks[0].requestKey);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify({
+      schemaVersion: 1, key: tasks[0].requestKey, status: "success", parsed: null, raw: {},
+      usage: { promptTokens: 10, completionTokens: 5 }, responseOriginMeta: originalOrigin
+    }));
+
+    let calls = 0;
+    const result = await run(dataRoot, tasks, async () => { calls += 1; return completion(); }, { cache });
+    expect(calls).toBe(1);
+    expect(result.rows[0].status).toBe("success");
+    expect((result.rows[0] as SuccessResultRow).response.parsed).not.toBeNull();
   });
 
   it("does not hand a truncated entry to the run loop", async () => {
