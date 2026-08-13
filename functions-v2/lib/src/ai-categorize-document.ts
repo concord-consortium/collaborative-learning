@@ -202,10 +202,26 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
       distanceMeasure: "EUCLIDEAN",
     });
   const snapshot = await query.get();
+  const docs: RelatedSummarySource[] = [];
+  snapshot.forEach((doc) => docs.push(doc.data() as RelatedSummarySource));
+  return mapRelatedSummaries(docs);
+}
+
+/** The relevant fields of a document found by the related-summaries search. */
+export interface RelatedSummarySource {
+  summary?: unknown;
+  aiAgreements?: Record<string, AiAgreement>;
+}
+
+/**
+ * Maps the documents found by the related-summaries search into the entries injected into the AI
+ * prompt. Documents without agreements or a usable summary are skipped. Exported for unit testing.
+ */
+export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
   const relatedSummaries: RelatedSummary[] = [];
-  snapshot.forEach((doc) => {
-    const aiAgreements: Record<AgreementValue, AiAgreement> = doc.data().aiAgreements || undefined;
-    if (aiAgreements) {
+  for (const data of docs) {
+    const aiAgreements = data.aiAgreements || undefined;
+    if (aiAgreements && typeof data.summary === "string" && data.summary.length > 0) {
       const agreements = Object.values(aiAgreements).reduce<Agreements>((acc, cur) => {
         const value = cur.value as AgreementValue;
         acc[value] = acc[value] || [];
@@ -213,11 +229,11 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
         return acc;
       }, {} as Agreements);
       relatedSummaries.push({
-        summary,
+        summary: data.summary,
         agreements,
       });
     }
-  });
+  }
   return relatedSummaries;
 }
 
