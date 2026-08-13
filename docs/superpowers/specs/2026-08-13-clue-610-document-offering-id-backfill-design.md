@@ -99,8 +99,14 @@ is already on the Firestore document.
 
 This is deliberately **not** done. Group documents are recent enough that their Firestore metadata
 should already carry `offeringId`; any that does not is a signal about how they were created, and
-papering over it with a derivation would hide that signal. They are counted, not repaired. If the
-census finds a meaningful number, the derivation is a two-line addition at that point.
+papering over it with a derivation would hide that signal. If the census finds a meaningful number,
+the derivation is a two-line addition at that point.
+
+They are not exempt from the ordinary lookup, though — a group document whose RTDB node happens to
+carry an `offeringId` is repaired like any other. What is withheld is the *derivation from the uid*,
+not repair as such. In practice the RTDB lookup will answer for almost none of them, so their census
+line will read as `noMetadataNode` or `nodeWithoutOfferingId` by construction rather than because
+anything is wrong.
 
 ## Architecture
 
@@ -144,15 +150,19 @@ that audit a matter of finding its callers.
 ```ts
 db.collectionGroup("documents")
   .where("type", "==", t)
-  .orderBy(FieldPath.documentId())
+  .orderBy("__name__")
   .startAfter(lastDoc)
   .limit(PAGE_SIZE)
 ```
 
+`"__name__"` as a string rather than `FieldPath.documentId()`, so the module needs no runtime
+`firebase-admin` import and stays loadable by Jest. On a collection-group query this orders by full
+resource path, so results arrive clustered by space.
+
 Per-type rather than one `in` query: cursor pagination over an `in` filter is the one behavior this
-design would rather not depend on for a long production run, each type is independently resumable,
-and the census partitions by type regardless. The required `COLLECTION_GROUP` ascending index on
-`documents.type` already exists in `firestore.indexes.json`, so no index deploy is needed.
+design would rather not depend on for a long production run, and the census partitions by type
+regardless. The required `COLLECTION_GROUP` ascending index on `documents.type` already exists in
+`firestore.indexes.json`, so no index deploy is needed.
 
 Paginated rather than a single `.get()` — unlike its sibling, which loads a few hundred group
 documents at once. This query's result set is every problem document in every space, which will not
@@ -237,6 +247,31 @@ Every other bucket is reported and left untouched. **What to do about documents 
 resolved is deliberately not decided here** — it is decided from the production dry run's numbers.
 Leaving them alone is the only policy that keeps the run re-runnable while that question is open.
 
+## Operating the run
+
+Three properties matter to whoever runs this against real data.
+
+**The environment is derived, never named.** The Realtime Database URL comes from the service
+account key's own `project_id`, and the script logs the account, the project, and the URL before it
+does anything. A hardcoded URL beside a credential-derived Firestore handle is a way to read one
+environment's offerings and write them onto another environment's documents — and because a staging
+space is often seeded from production, the keys can match and the census would report it as a clean
+success.
+
+**`written` counts committed writes, not queued ones.** The increment happens after `commit()`
+resolves. A run that dies with a partial batch outstanding therefore under-reports rather than
+over-reports, which is the safe direction: the operator is never told that documents landed when
+they did not.
+
+**A failed run still reports.** The census prints from a `finally`, and each type logs its own
+counts as it completes, so a run that dies after hours still says how far it got and what it found.
+The error itself propagates — nothing is swallowed.
+
+**There is no resume.** A re-run is safe, because the in-memory filter on the absence of
+`offeringId` makes repaired documents drop out on their own, but it restarts from the first type.
+For a run large enough that this matters, the per-type log lines are the record of what a failed
+attempt covered.
+
 ## Testing
 
 Unit tests against a mock Firestore and a mock RTDB, in the sibling's style:
@@ -254,7 +289,11 @@ Unit tests against a mock Firestore and a mock RTDB, in the sibling's style:
 - An unrecognized Firestore path shape produces counts, not an exception.
 - A class-wide document is classified before the `alreadySet` check, so one that wrongly carries an
   `offeringId` still reports as `skippedClassWide` rather than being hidden.
-- The dry run writes and commits nothing.
+- The dry run writes and commits nothing — including the *default* dry run, called with no options
+  at all, since every other test passes the flag explicitly and would not notice the default flip.
+- Every scanned document is counted exactly once: the buckets sum to the scanned total.
+- A non-string `offeringId` is treated as absent rather than written back, since the app compares
+  that field against a string and a number would leave the document matching nothing.
 
 ## Sequencing
 
