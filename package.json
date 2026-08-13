@@ -67,8 +67,7 @@
       "mobx-state-tree": "@concord-consortium/mobx-state-tree",
       "@cortex-js/compute-engine": "@concord-consortium/compute-engine",
       "@concord-consortium/codap-formulas/(.*)": "<rootDir>/node_modules/@concord-consortium/codap-formulas/dist/$1",
-      "@concord-consortium/codap-utilities/(.*)": "<rootDir>/node_modules/@concord-consortium/codap-utilities/dist/$1",
-      "^(\\.{1,2}/.*)\\.js$": "$1"
+      "@concord-consortium/codap-utilities/(.*)": "<rootDir>/node_modules/@concord-consortium/codap-utilities/dist/$1"
     },
     "moduleFileExtensions": [
       "ts",

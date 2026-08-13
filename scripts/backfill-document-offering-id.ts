@@ -18,8 +18,11 @@
 // Apply (performs the writes):                APPLY=1 npx tsx scripts/backfill-document-offering-id.ts
 
 import type { Firestore } from "firebase-admin/firestore";
-import { getOfferingIdFromFirebaseMetadata } from "./lib/document-metadata-lookup.js";
-import type { IMetadataDatabase } from "./lib/document-metadata-lookup.js";
+// Specified without the `.js` extension that the other scripts here use. This module is loaded by a
+// Jest test, and Jest resolves only the extensionless form to the sibling `.ts` file; tsx resolves
+// either form, so running the script is unaffected.
+import { getOfferingIdFromFirebaseMetadata } from "./lib/document-metadata-lookup";
+import type { IMetadataDatabase } from "./lib/document-metadata-lookup";
 
 /**
  * The `type` values of documents kept in an offering, per the `containerType: "offering"` entries in
