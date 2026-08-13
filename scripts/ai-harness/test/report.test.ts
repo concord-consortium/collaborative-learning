@@ -1,5 +1,6 @@
 import {
-  assertSingleCorpusAndExperiment, formatSummaryTable, historicalIsComparable, summarizeResults
+  assertSingleCorpusAndExperiment, formatSummaryTable, historicalIsComparable, partitionSuperseded,
+  summarizeResults
 } from "../src/report.js";
 import { ManifestDocument, ResultRow } from "../src/schemas.js";
 import { testRunMeta } from "./helpers.js";
@@ -167,5 +168,73 @@ describe("a billed error row counts toward the totals", () => {
     const unbilled = summarizeResults(rows, "results.jsonl").groups.find((g) => g.runId === "(all runs)")!;
     expect(unbilled.cost.incurredUsd).toBeCloseTo(0.0015, 10);
     expect(unbilled.statuses.error).toBe(1);
+  });
+});
+
+describe("a re-run supersedes the row it replaces", () => {
+  const success = (docId: string, requestKey: string, category: string, tokens: number): ResultRow => ({
+    ...base, docId, modality: "text-only", requestKey, status: "success",
+    response: { parsed: { category }, raw: {} },
+    usage: { promptTokens: tokens, completionTokens: 10, source: "api" },
+    cost: { modeledUsd: 0.001, incurredThisRunUsd: 0.001 }, responseOriginMeta: origin
+  });
+
+  it("keeps the later row and sets the earlier one aside", () => {
+    const { current, superseded } = partitionSuperseded([
+      success("text", "old", "form", 1000), success("text", "new", "function", 1000)
+    ]);
+    expect(current.map((row) => row.requestKey)).toEqual(["new"]);
+    expect(superseded.map((row) => row.requestKey)).toEqual(["old"]);
+  });
+
+  it("counts a re-run document once, not twice", () => {
+    // Editing a prompt and re-running into the same output file used to double every total and split
+    // the category distribution between the old answer and the new one.
+    const summary = summarizeResults(
+      [success("text", "old", "form", 1000), success("text", "new", "function", 1000)], "r.jsonl");
+    const overall = summary.groups.find((group) => group.runId === "(all runs)")!;
+
+    expect(overall.docs).toBe(1);
+    expect(overall.statuses.success).toBe(1);
+    expect(overall.categories).toEqual({ function: 1 });
+    expect(overall.tokens.promptTotal).toBe(1000);
+    expect(overall.cost.incurredUsd).toBeCloseTo(0.001, 10);
+  });
+
+  it("reports the superseded spend rather than losing it", () => {
+    const summary = summarizeResults(
+      [success("text", "old", "form", 1000), success("text", "new", "function", 1000)], "r.jsonl");
+    expect(summary.rows).toBe(2);
+    expect(summary.currentRows).toBe(1);
+    expect(summary.superseded).toEqual({ rows: 1, incurredUsd: 0.001 });
+    expect(formatSummaryTable(summary)).toContain("1 superseded row(s) excluded");
+  });
+
+  it("treats an error followed by a successful retry as one success", () => {
+    const failed: ResultRow = {
+      ...base, docId: "text", modality: "text-only", requestKey: "k", status: "error",
+      error: { type: "APIError", message: "boom", attempts: 3 }
+    };
+    const summary = summarizeResults([failed, success("text", "k", "form", 500)], "r.jsonl");
+    const overall = summary.groups.find((group) => group.runId === "(all runs)")!;
+    expect(overall.statuses).toEqual({ success: 1, refusal: 0, error: 0, skipped: 0 });
+    expect(summary.superseded.rows).toBe(1);
+  });
+
+  it("leaves a file with no re-runs completely unchanged", () => {
+    const summary = summarizeResults(rows, "results.jsonl");
+    expect(summary.superseded).toEqual({ rows: 0, incurredUsd: 0 });
+    expect(summary.currentRows).toBe(rows.length);
+    expect(formatSummaryTable(summary)).not.toContain("superseded");
+  });
+
+  it("keeps distinct documents and runs separate", () => {
+    const summary = summarizeResults([
+      success("text", "a", "form", 100), success("table", "b", "user", 100)
+    ], "r.jsonl");
+    const overall = summary.groups.find((group) => group.runId === "(all runs)")!;
+    expect(overall.docs).toBe(2);
+    expect(overall.statuses.success).toBe(2);
+    expect(summary.superseded.rows).toBe(0);
   });
 });

@@ -314,11 +314,23 @@ function commandReport(flags: Record<string, string | true>, deps: HarnessDeps):
   // Reports are derived from student work, so both the file read and the summary written beside it
   // stay inside the data root.
   const resultsFile = resolveDataPath(required(flags, "results"), "--results", dataRootFor(deps));
+  // readResultRows treats a missing file as "no rows", which is what `run` needs when it creates a
+  // fresh output file. For `report` that is a typo waiting to be misread as a result: an all-zeros
+  // table and an empty summary.json written over whatever was there before.
+  if (!fs.existsSync(resultsFile)) {
+    throw new Error(`No results file at ${resultsFile}. Run \`harness.ts run\` first, or check ` +
+      "--results — the default output path is data/results/<corpus>-<experiment>.jsonl.");
+  }
   const rows = readResultRows(resultsFile);
+  if (rows.length === 0) {
+    throw new Error(`${resultsFile} contains no result rows, so there is nothing to report.`);
+  }
   const summary = summarizeResults(rows, resultsFile, deps.now?.());
   const summaryFile = resolveDataPath(summaryPathFor(resultsFile), "--results", dataRootFor(deps));
   log(formatSummaryTable(summary));
-  log(`\nWrote ${writeSummary(summary, summaryFile)}`);
+  log(`\nRead ${summary.rows} row(s) from ${resultsFile}; ` +
+    `${summary.currentRows} current, ${summary.superseded.rows} superseded by a later re-run.`);
+  log(`Wrote ${writeSummary(summary, summaryFile)}`);
 }
 
 function requireApiKey(): string {

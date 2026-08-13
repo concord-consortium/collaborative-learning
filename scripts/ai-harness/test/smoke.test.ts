@@ -178,6 +178,20 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     expect(modalities).toEqual(new Set(["all", "text-only", "visual-only", "mixed", "empty"]));
   });
 
+  it("refuses to report on a results file that is not there", async () => {
+    // Silently reporting zero rows turned a mistyped path into an all-zeros table and an empty
+    // summary.json written over the previous one.
+    await expect(main(["report", "--results", path.join(dataRoot, "results", "typo.jsonl")], deps))
+      .rejects.toThrow(/No results file at .*typo\.jsonl/);
+  });
+
+  it("refuses to report on an empty results file", async () => {
+    const empty = path.join(dataRoot, "results", "empty.jsonl");
+    fs.writeFileSync(empty, "");
+    await expect(main(["report", "--results", empty], deps))
+      .rejects.toThrow(/contains no result rows/);
+  });
+
   it("keeps everything it generated inside the harness data directory", () => {
     const relative = path.relative(path.join(dataRoot, "..", ".."), dataRoot);
     expect(relative.startsWith("..")).toBe(false);

@@ -36,12 +36,49 @@ export interface GroupSummary {
   categories: Record<string, number>;
 }
 
+export interface SupersededSummary {
+  /** Rows in the file that a later re-run replaced. */
+  rows: number;
+  /** What those rows cost. Real money, so it is reported rather than dropped. */
+  incurredUsd: number;
+}
+
 export interface ReportSummary {
   schemaVersion: number;
   results: string;
   generatedAt: string;
+  /** Every row in the file, superseded ones included. */
   rows: number;
+  /** Rows the groups below are computed from: the latest outcome per (document, run). */
+  currentRows: number;
+  superseded: SupersededSummary;
   groups: GroupSummary[];
+}
+
+/**
+ * Splits a results file into the outcomes that still stand and the ones a later run replaced.
+ *
+ * Resume deliberately appends rather than rewrites: a changed document, prompt, representation or
+ * generation setting produces a new request key, so it re-runs and lands beside the old row. Summing
+ * both would double-count tokens and cost and split the category distribution between a superseded
+ * answer and the current one — so aggregation uses the last row per (document, run), which is the
+ * most recent because the writer only ever appends. An error row followed by a successful retry is
+ * the same case: the success is the outcome, the error is history.
+ */
+export function partitionSuperseded(rows: ResultRow[]): { current: ResultRow[]; superseded: ResultRow[] } {
+  const lastIndexForPair = new Map<string, number>();
+  rows.forEach((row, index) => lastIndexForPair.set(`${row.docId} ${row.runId}`, index));
+  const current: ResultRow[] = [];
+  const superseded: ResultRow[] = [];
+  rows.forEach((row, index) => {
+    if (lastIndexForPair.get(`${row.docId} ${row.runId}`) === index) current.push(row);
+    else superseded.push(row);
+  });
+  return { current, superseded };
+}
+
+function incurredUsdOf(rows: ResultRow[]): number {
+  return rows.reduce((total, row) => total + (("cost" in row && row.cost) ? row.cost.incurredThisRunUsd : 0), 0);
 }
 
 function mean(values: number[]): number {
@@ -178,6 +215,7 @@ export function assertSingleCorpusAndExperiment(rows: ResultRow[], resultsFile: 
 
 export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Date = new Date()): ReportSummary {
   assertSingleCorpusAndExperiment(rows, resultsFile);
+  const { current, superseded } = partitionSuperseded(rows);
   // The cross-run aggregate is kept out of the keyed map rather than stored under its display label,
   // so an experiment that happens to define a run called "(all runs)" cannot merge into it.
   const groups = new Map<string, Accumulator>();
@@ -192,7 +230,7 @@ export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Da
     return accumulator;
   };
 
-  for (const row of rows) {
+  for (const row of current) {
     accumulate(get(row.runId, row.modality), row);
     accumulate(get(row.runId, "all"), row);
     accumulate(overall, row);
@@ -203,6 +241,8 @@ export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Da
     results: resultsFile,
     generatedAt: now.toISOString(),
     rows: rows.length,
+    currentRows: current.length,
+    superseded: { rows: superseded.length, incurredUsd: incurredUsdOf(superseded) },
     groups: [...groups.values(), overall].map(finish)
   };
 }
@@ -237,7 +277,13 @@ export function formatSummaryTable(summary: ReportSummary): string {
   for (const group of summary.groups) rows.push(kColumns.map((column) => column.value(group)));
   const widths = kColumns.map((_, index) => Math.max(...rows.map((row) => row[index].length)));
   const line = (row: string[]) => row.map((cell, index) => cell.padEnd(widths[index])).join("  ").trimEnd();
-  return [line(rows[0]), widths.map((width) => "-".repeat(width)).join("  "), ...rows.slice(1).map(line)].join("\n");
+  const table = [line(rows[0]), widths.map((width) => "-".repeat(width)).join("  "),
+    ...rows.slice(1).map(line)].join("\n");
+  if (summary.superseded.rows === 0) return table;
+  // Stated rather than silently dropped: the spend was real, and a reader should know the file holds
+  // outcomes that a later run replaced.
+  return `${table}\n\n${summary.superseded.rows} superseded row(s) excluded from the totals above ` +
+    `(replaced by a later re-run); they cost $${summary.superseded.incurredUsd.toFixed(4)}.`;
 }
 
 export function summaryPathFor(resultsFile: string): string {
