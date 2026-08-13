@@ -188,6 +188,22 @@ export async function backfillDocumentOfferingId(
     (result.bySpace[spaceLabel] ??= emptyCounts())[b] += 1;
   };
 
+  // Batched at Firestore's 400-write limit. `batch` stays undefined until there is something to write,
+  // so a run with no work commits nothing at all.
+  const kBatchSize = 400;
+  let batch: any;
+  let pending = 0;
+
+  const queueWrite = async (ref: any, offeringId: string) => {
+    batch ??= (db as any).batch();
+    batch.set(ref, { offeringId }, { merge: true });
+    result.written += 1;
+    if (++pending % kBatchSize === 0) {
+      await batch.commit();
+      batch = undefined;
+    }
+  };
+
   for (const type of kOfferingContainedTypes) {
     for await (const docs of iterateDocuments(db, type, pageSize)) {
       result.scanned += docs.length;
@@ -203,7 +219,7 @@ export async function backfillDocumentOfferingId(
       // The lookups overlap, but each returns its resolution rather than writing. Writing from inside
       // concurrent callbacks would let one callback add to a batch another callback is already
       // committing, so the batch is fed sequentially from the results instead (see Task 4).
-      await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
+      const resolved = await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
         try {
           const lookup = await getOfferingIdFromFirebaseMetadata(
             database, c.space.firebaseBasePath, c.contextId, c.uid, c.key
@@ -221,8 +237,19 @@ export async function backfillDocumentOfferingId(
           return undefined;
         }
       });
+
+      // Fed sequentially, never from inside the concurrent callbacks above: `queueWrite` awaits a
+      // commit and then clears `batch`, so a concurrent caller could otherwise add a write to a batch
+      // that is already being committed.
+      if (!dryRun) {
+        for (const write of resolved) {
+          if (write) await queueWrite(write.ref, write.offeringId);
+        }
+      }
     }
   }
+
+  if (batch && pending % kBatchSize !== 0) await batch.commit();
 
   log(`scanned ${result.scanned}; ` +
       kAllBuckets.map((b) => `${b}: ${result.totals[b]}`).join(", "));
@@ -231,4 +258,28 @@ export async function backfillDocumentOfferingId(
   log("documents with no `type` field are not reachable by these queries and are not counted");
   if (dryRun) log("DRY RUN — set APPLY=1 to write");
   return result;
+}
+
+async function main() {
+  // Imported lazily so the Jest test can import backfillDocumentOfferingId without loading
+  // firebase-admin or the import.meta-using script-utils module.
+  const admin = (await import("firebase-admin")).default;
+  const { getScriptRootFilePath } = await import("./lib/script-utils.js");
+  admin.initializeApp({
+    credential: admin.credential.cert(getScriptRootFilePath("serviceAccountKey.json")),
+    databaseURL: "https://collaborative-learning-ec215.firebaseio.com"
+  });
+  const result = await backfillDocumentOfferingId(
+    admin.firestore(), admin.database(), { dryRun: process.env.APPLY !== "1" }
+  );
+  console.log("done", JSON.stringify(result, null, 2));
+  process.exit(0);
+}
+
+// Run only when invoked directly (via tsx), never when imported by the Jest test.
+if (!process.env.JEST_WORKER_ID) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }

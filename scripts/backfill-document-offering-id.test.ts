@@ -299,3 +299,75 @@ describe("backfillDocumentOfferingId — scanning", () => {
     expect(db.writes.length).toBe(0);
   });
 });
+
+describe("backfillDocumentOfferingId — writing", () => {
+  const resolvedDocs = (n: number) => Array.from({ length: n }, (_, i) =>
+    mkDoc(`${kSpace}/documents/d${i}`,
+      { type: "problem", context_id: "c1", uid: "u1", key: `k${i}` }));
+  const resolvedNodes = (n: number) => {
+    const nodes: Record<string, any> = {};
+    for (let i = 0; i < n; i++) nodes[mdPath("c1", "u1", `k${i}`)] = { offeringId: `200${i}` };
+    return nodes;
+  };
+
+  it("merge-writes only the offeringId onto a resolved document", async () => {
+    const db = makeDb({ problem: resolvedDocs(1) });
+    const res = await run(db, makeRtdb(resolvedNodes(1)), { dryRun: false });
+    expect(res.written).toBe(1);
+    expect(db.writes).toEqual([{
+      ref: { path: `${kSpace}/documents/d0` },
+      data: { offeringId: "2000" },
+      opts: { merge: true }
+    }]);
+    expect(db.committed.length).toBe(1);
+  });
+
+  it("writes nothing for any bucket other than resolved", async () => {
+    // Everything the script cannot resolve is reported and left alone. That is what keeps the run
+    // re-runnable while the policy for unresolvable documents is still open.
+    const docs = [
+      mkDoc(`${kSpace}/documents/a`, { type: "problem", context_id: "c1", uid: "u1", key: "k1" }),
+      mkDoc(`${kSpace}/documents/b`, { type: "problem", offeringId: "9", context_id: "c1", uid: "u1", key: "k2" }),
+      mkDoc(`${kSpace}/documents/c`, { type: "problem", uid: "u1", key: "k3" }),
+      mkDoc("qa/x/documents/d", { type: "problem", context_id: "c1", uid: "u1", key: "k4" })
+    ];
+    const db = makeDb({ problem: docs });
+    const res = await run(db, makeRtdb({}), { dryRun: false });
+    expect(res.written).toBe(0);
+    expect(db.writes).toEqual([]);
+  });
+
+  it("never writes to a class-wide document under either generic type value", async () => {
+    // The single most damaging bug available here: an offeringId on a class-wide document makes
+    // isInClassUnitContainer misread it, which is precisely what this change exists to prevent.
+    for (const type of ["group", "axes"]) {
+      const docs = [mkDoc(`${kSpace}/documents/cw`,
+        { type, context_id: "c1", uid: "class_hash", key: "k1" })];
+      const db = makeDb({ [type]: docs });
+      // A node exists that WOULD resolve, so this fails loudly if the class-wide guard is dropped.
+      const res = await run(db, makeRtdb({ [mdPath("c1", "class_hash", "k1")]: { offeringId: "2001" } }),
+        { dryRun: false });
+      expect(db.writes).toEqual([]);
+      expect(res.written).toBe(0);
+    }
+  });
+
+  it("commits a 401-document run as two batches of 400 and 1", async () => {
+    // Asserting on committed batches rather than allocated ones is what makes this fail if the final
+    // partial commit is dropped — a dropped tail silently under-migrates and reports success.
+    const db = makeDb({ problem: resolvedDocs(401) });
+    const res = await run(db, makeRtdb(resolvedNodes(401)), { dryRun: false, pageSize: 150 });
+    expect(res.written).toBe(401);
+    expect(db.committed.length).toBe(2);
+    expect(db.committed[0].writes.length).toBe(400);
+    expect(db.committed[1].writes.length).toBe(1);
+  });
+
+  it("commits nothing when there is nothing to write", async () => {
+    const db = makeDb({ problem: [
+      mkDoc(`${kSpace}/documents/a`, { type: "problem", offeringId: "9", context_id: "c1", uid: "u1", key: "k1" })
+    ] });
+    await run(db, makeRtdb({}), { dryRun: false });
+    expect(db.committed.length).toBe(0);
+  });
+});
