@@ -161,8 +161,13 @@ resource path, so results arrive clustered by space.
 
 Per-type rather than one `in` query: cursor pagination over an `in` filter is the one behavior this
 design would rather not depend on for a long production run, and the census partitions by type
-regardless. The required `COLLECTION_GROUP` ascending index on `documents.type` already exists in
-`firestore.indexes.json`, so no index deploy is needed.
+regardless.
+
+The queries need a `COLLECTION_GROUP` ascending index on `documents.type`. It is declared in
+`firestore.indexes.json`, but **declared is not deployed** — that file was reconciled against
+*production's* indexes, so the index exists there and had to be created in staging before a run
+could get past its first query. Each environment needs it present before either sweep script runs,
+and neither script degrades gracefully without it: the first query fails outright.
 
 Paginated rather than a single `.get()` — unlike its sibling, which loads a few hundred group
 documents at once. This query's result set is every problem document in every space, which will not

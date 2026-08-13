@@ -11,8 +11,11 @@
 // left untouched.
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
-// The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type` that
-// is already declared in firestore.indexes.json.
+// The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type`.
+// It is declared in firestore.indexes.json, but that file was reconciled against production's
+// indexes — each environment needs the index actually deployed to it, and the first query fails
+// outright without one. Deploy with `firebase deploy --only firestore:indexes --project <alias>`, or
+// use the one-click link Firestore prints in the error.
 //
 // Dry run (reports counts, writes nothing):   npx tsx scripts/backfill-document-offering-id.ts
 // Apply (performs the writes):                APPLY=1 npx tsx scripts/backfill-document-offering-id.ts
@@ -282,11 +285,22 @@ async function main() {
   const { getScriptRootFilePath } = await import("./lib/script-utils.js");
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
-  // Derived from the credential rather than hardcoded, because this script reads offeringIds from the
-  // Realtime Database and writes them to Firestore. A URL naming a different project than the
-  // credential would copy one environment's offerings onto another environment's documents, and the
-  // census would report it as a clean success.
-  const databaseURL = `https://${serviceAccount.project_id}.firebaseio.com`;
+  // Looked up from the credential's project rather than hardcoded, because this script reads
+  // offeringIds from the Realtime Database and writes them to Firestore. A URL naming a different
+  // project than the credential would copy one environment's offerings onto another environment's
+  // documents, and the census would report it as a clean success.
+  //
+  // Looked up rather than derived: the two projects do not share a host pattern, so a key whose
+  // project is not listed here fails loudly instead of being pointed at a plausible guess. Keep in
+  // step with the `databaseURL` values in src/lib/firebase-config.ts.
+  const databaseURL = process.env.DATABASE_URL ?? {
+    "collaborative-learning-ec215": "https://collaborative-learning-ec215.firebaseio.com",
+    "collaborative-learning-staging": "https://collaborative-learning-staging-default-rtdb.firebaseio.com"
+  }[serviceAccount.project_id as string];
+  if (!databaseURL) {
+    throw new Error(`No Realtime Database URL known for project "${serviceAccount.project_id}". ` +
+      `Add it above, or set DATABASE_URL.`);
+  }
   console.log(`- Service account: ${serviceAccount.client_email}`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);
   console.log(`- Realtime Database URL: ${databaseURL}`);
