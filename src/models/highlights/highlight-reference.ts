@@ -1,7 +1,5 @@
-// The type-only import is deliberate. document-content.ts -> document-content-with-highlights.ts
-// -> this file, so a value import would close a runtime require cycle. `import type` is erased
-// at compile time and breaks it. Do not change this to a value import.
-import type { DocumentContentModelType } from "../document/document-content";
+// Resolvers only need to walk the document's tiles, so they take the base content model.
+import type { BaseDocumentContentModelType } from "../document/base-document-content";
 
 /**
  * A resolved, concrete thing a tile can render emphasis on.
@@ -23,7 +21,7 @@ export type HighlightReference =
   | { kind: "variable"; variableId: string };
 
 export type ReferenceResolver =
-  (ref: HighlightReference, content: DocumentContentModelType) => IHighlightTarget[];
+  (ref: HighlightReference, content: BaseDocumentContentModelType) => IHighlightTarget[];
 
 const gResolvers = new Map<HighlightReference["kind"], ReferenceResolver>();
 
@@ -37,7 +35,7 @@ export function registerReferenceResolver(
  * Resolve a reference to its targets. Fails quiet: an unknown kind yields no targets.
  */
 export function resolveHighlightReference(
-  ref: HighlightReference, content: DocumentContentModelType
+  ref: HighlightReference, content: BaseDocumentContentModelType
 ): IHighlightTarget[] {
   return gResolvers.get(ref.kind)?.(ref, content) ?? [];
 }

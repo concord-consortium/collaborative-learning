@@ -31,69 +31,69 @@ describe("DocumentContentModelWithHighlights", () => {
   });
 
   it("has no active highlight by default", () => {
-    expect(content.activeRef).toBeUndefined();
-    expect(content.activeSource).toBeUndefined();
-    expect(content.isObjectActive("t1", "a")).toBe(false);
+    expect(content.highlightRef).toBeUndefined();
+    expect(content.highlightState).toBeUndefined();
+    expect(content.isObjectHighlighted("t1", "a")).toBe(false);
   });
 
   it("reports a hovered reference as a preview", () => {
-    content.setHoveredRef(refA);
-    expect(content.isObjectActive("t1", "a")).toBe(true);
-    expect(content.objectState("t1", "a")).toBe("preview");
+    content.setHoveredHighlightRef(refA);
+    expect(content.isObjectHighlighted("t1", "a")).toBe(true);
+    expect(content.objectHighlightState("t1", "a")).toBe("preview");
   });
 
   it("reports a pinned reference as pinned", () => {
-    content.setPinnedRef(refA);
-    expect(content.objectState("t1", "a")).toBe("pinned");
+    content.setPinnedHighlightRef(refA);
+    expect(content.objectHighlightState("t1", "a")).toBe("pinned");
   });
 
-  it("returns undefined objectState for an object that is not active", () => {
-    content.setPinnedRef(refA);
-    expect(content.objectState("t1", "b")).toBeUndefined();
+  it("returns undefined objectHighlightState for an object that is not active", () => {
+    content.setPinnedHighlightRef(refA);
+    expect(content.objectHighlightState("t1", "b")).toBeUndefined();
   });
 
   // The precedence rule: hover REPLACES pin rather than adding to it.
   it("hides the pinned targets while a different reference is hovered", () => {
-    content.setPinnedRef(refA);
-    content.setHoveredRef(refB);
-    expect(content.isObjectActive("t1", "b")).toBe(true);
-    expect(content.isObjectActive("t1", "a")).toBe(false);
+    content.setPinnedHighlightRef(refA);
+    content.setHoveredHighlightRef(refB);
+    expect(content.isObjectHighlighted("t1", "b")).toBe(true);
+    expect(content.isObjectHighlighted("t1", "a")).toBe(false);
   });
 
   it("reverts to the pinned reference on mouse-out rather than clearing", () => {
-    content.setPinnedRef(refA);
-    content.setHoveredRef(refB);
-    content.clearHoveredRef();
-    expect(content.isObjectActive("t1", "a")).toBe(true);
-    expect(content.objectState("t1", "a")).toBe("pinned");
+    content.setPinnedHighlightRef(refA);
+    content.setHoveredHighlightRef(refB);
+    content.clearHoveredHighlightRef();
+    expect(content.isObjectHighlighted("t1", "a")).toBe(true);
+    expect(content.objectHighlightState("t1", "a")).toBe("pinned");
   });
 
   it("toggles a pinned reference off when the same reference is toggled again", () => {
-    content.togglePinnedRef(refA);
-    expect(content.isObjectActive("t1", "a")).toBe(true);
-    content.togglePinnedRef(refA);
-    expect(content.isObjectActive("t1", "a")).toBe(false);
+    content.togglePinnedHighlightRef(refA);
+    expect(content.isObjectHighlighted("t1", "a")).toBe(true);
+    content.togglePinnedHighlightRef(refA);
+    expect(content.isObjectHighlighted("t1", "a")).toBe(false);
   });
 
   it("replaces the pinned reference when a different one is toggled", () => {
-    content.togglePinnedRef(refA);
-    content.togglePinnedRef(refB);
-    expect(content.isObjectActive("t1", "a")).toBe(false);
-    expect(content.isObjectActive("t1", "b")).toBe(true);
+    content.togglePinnedHighlightRef(refA);
+    content.togglePinnedHighlightRef(refB);
+    expect(content.isObjectHighlighted("t1", "a")).toBe(false);
+    expect(content.isObjectHighlighted("t1", "b")).toBe(true);
   });
 
   // Without this, hovering the chip you just pinned would visually downgrade the highlight to
   // "preview" and then flicker back to "pinned" on mouse-out, with no meaningful state change.
   it("reports pinned, not preview, when hovering the reference that is already pinned", () => {
-    content.setPinnedRef(refA);
-    content.setHoveredRef(refA);
-    expect(content.activeSource).toBe("pinned");
-    expect(content.objectState("t1", "a")).toBe("pinned");
+    content.setPinnedHighlightRef(refA);
+    content.setHoveredHighlightRef(refA);
+    expect(content.highlightState).toBe("pinned");
+    expect(content.objectHighlightState("t1", "a")).toBe("pinned");
   });
 
   it("does not expose the resolved target collection", () => {
     // Guards rule 2 above: a future textRange kind cannot be expressed as tileId/objectId, so
-    // the collection must stay private (isObjectActive/objectState only). If this fails,
+    // the collection must stay private (isObjectHighlighted/objectHighlightState only). If this fails,
     // someone widened the public API by re-exposing the resolved-target Set.
     //
     // Runtime check first: property must genuinely be absent from the instance, not just
@@ -114,8 +114,8 @@ describe("DocumentContentModelWithHighlights", () => {
   // in this file while silently breaking that guarantee.
   it("keeps highlight state out of the document snapshot", () => {
     const before = JSON.stringify(getSnapshot(content));
-    content.setPinnedRef(refA);
-    content.setHoveredRef(refB);
+    content.setPinnedHighlightRef(refA);
+    content.setHoveredHighlightRef(refB);
     expect(JSON.stringify(getSnapshot(content))).toBe(before);
   });
 });

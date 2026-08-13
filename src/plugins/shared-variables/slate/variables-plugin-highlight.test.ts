@@ -1,5 +1,5 @@
 // The chip's handlers are extracted into makeChipHighlightHandlers, and the shared clear-if-own
-// guard into clearHoveredRefIfOwn, so they can be tested without standing up a Slate editor.
+// guard into clearHoveredHighlightRefIfOwn, so they can be tested without standing up a Slate editor.
 // The rendered interaction (that the handlers are actually attached to the right element, and
 // that unmounting a hovered chip clears its preview) is covered by Cypress in
 // highlight_references_spec.js.
@@ -11,7 +11,7 @@ import { registerTileTypes } from "../../../register-tile-types";
 import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
 import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
-import { clearHoveredRefIfOwn, makeChipHighlightHandlers, releaseOwnHighlightRefs } from "./variables-plugin";
+import { clearHoveredHighlightRefIfOwn, makeChipHighlightHandlers, releaseOwnHighlightRefs } from "./variables-plugin";
 
 registerTileTypes(["Text"]);
 
@@ -29,11 +29,11 @@ describe("makeChipHighlightHandlers", () => {
     const handlers = makeChipHighlightHandlers(content, "var-emg");
 
     handlers.onMouseEnter();
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-emg" });
-    expect(content.activeSource).toBe("preview");
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-emg" });
+    expect(content.highlightState).toBe("preview");
 
     handlers.onMouseLeave();
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   it("pins on click and unpins on a second click", () => {
@@ -41,10 +41,10 @@ describe("makeChipHighlightHandlers", () => {
     const handlers = makeChipHighlightHandlers(content, "var-emg");
 
     handlers.onClick();
-    expect(content.activeSource).toBe("pinned");
+    expect(content.highlightState).toBe("pinned");
 
     handlers.onClick();
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   it("lets a hovered chip take over from a pinned one, then restores the pin", () => {
@@ -54,10 +54,10 @@ describe("makeChipHighlightHandlers", () => {
 
     emg.onClick();
     gripper.onMouseEnter();
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-gripper" });
 
     gripper.onMouseLeave();
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-emg" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-emg" });
   });
 
   // A chip whose element has no reference, or that lives in a detached tree, must no-op rather
@@ -77,7 +77,7 @@ describe("makeChipHighlightHandlers", () => {
 
     handlers.onMouseEnter();
     handlers.onClick();
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   // A chip may only clear the preview it owns: several chips share one document, so an
@@ -90,43 +90,43 @@ describe("makeChipHighlightHandlers", () => {
     emg.onMouseEnter();
     malformed.onMouseLeave();
 
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-emg" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-emg" });
   });
 });
 
-// clearHoveredRefIfOwn is also called from VariableComponent's unmount-cleanup effect (React
+// clearHoveredHighlightRefIfOwn is also called from VariableComponent's unmount-cleanup effect (React
 // does not fire onMouseLeave for an element that unmounts under the cursor, e.g. Backspace
 // deleting a hovered chip). It is exercised directly here rather than by mounting a Slate editor.
-describe("clearHoveredRefIfOwn", () => {
-  it("clears the hoveredRef when it still points at this chip's variable", () => {
+describe("clearHoveredHighlightRefIfOwn", () => {
+  it("clears the hoveredHighlightRef when it still points at this chip's variable", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setHoveredRef({ kind: "variable", variableId: "var-emg" });
+    content.setHoveredHighlightRef({ kind: "variable", variableId: "var-emg" });
 
-    clearHoveredRefIfOwn(content, "var-emg");
+    clearHoveredHighlightRefIfOwn(content, "var-emg");
 
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   it("does not clobber a different chip's active preview", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setHoveredRef({ kind: "variable", variableId: "var-gripper" });
+    content.setHoveredHighlightRef({ kind: "variable", variableId: "var-gripper" });
 
-    clearHoveredRefIfOwn(content, "var-emg");
+    clearHoveredHighlightRefIfOwn(content, "var-emg");
 
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-gripper" });
   });
 
   it("no-ops when variableId is undefined", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setHoveredRef({ kind: "variable", variableId: "var-gripper" });
+    content.setHoveredHighlightRef({ kind: "variable", variableId: "var-gripper" });
 
-    clearHoveredRefIfOwn(content, undefined);
+    clearHoveredHighlightRefIfOwn(content, undefined);
 
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-gripper" });
   });
 
   it("no-ops when there is no document content", () => {
-    expect(() => clearHoveredRefIfOwn(undefined, "var-emg")).not.toThrow();
+    expect(() => clearHoveredHighlightRefIfOwn(undefined, "var-emg")).not.toThrow();
   });
 });
 
@@ -135,47 +135,47 @@ describe("releaseOwnHighlightRefs", () => {
   // be dismissed. Unmount has to release the pin as well as the preview.
   it("clears a pinned highlight the chip owns", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setPinnedRef({ kind: "variable", variableId: "var-emg" });
+    content.setPinnedHighlightRef({ kind: "variable", variableId: "var-emg" });
 
     releaseOwnHighlightRefs(content, "var-emg");
 
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   it("clears a hovered highlight the chip owns", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setHoveredRef({ kind: "variable", variableId: "var-emg" });
+    content.setHoveredHighlightRef({ kind: "variable", variableId: "var-emg" });
 
     releaseOwnHighlightRefs(content, "var-emg");
 
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   it("clears both when the chip owns the pin and is also being hovered", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setPinnedRef({ kind: "variable", variableId: "var-emg" });
-    content.setHoveredRef({ kind: "variable", variableId: "var-emg" });
+    content.setPinnedHighlightRef({ kind: "variable", variableId: "var-emg" });
+    content.setHoveredHighlightRef({ kind: "variable", variableId: "var-emg" });
 
     releaseOwnHighlightRefs(content, "var-emg");
 
-    expect(content.activeRef).toBeUndefined();
+    expect(content.highlightRef).toBeUndefined();
   });
 
   it("leaves a pin belonging to a different variable alone", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setPinnedRef({ kind: "variable", variableId: "var-gripper" });
+    content.setPinnedHighlightRef({ kind: "variable", variableId: "var-gripper" });
 
     releaseOwnHighlightRefs(content, "var-emg");
 
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-gripper" });
   });
 
   it("no-ops when variableId is undefined or there is no document content", () => {
     const content = createDocumentContentModel({ tiles: [] });
-    content.setPinnedRef({ kind: "variable", variableId: "var-gripper" });
+    content.setPinnedHighlightRef({ kind: "variable", variableId: "var-gripper" });
 
     releaseOwnHighlightRefs(content, undefined);
-    expect(content.activeRef).toEqual({ kind: "variable", variableId: "var-gripper" });
+    expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-gripper" });
 
     expect(() => releaseOwnHighlightRefs(undefined, "var-emg")).not.toThrow();
   });

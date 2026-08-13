@@ -1,5 +1,5 @@
-// The emphasis class is derived from objectState, and the emphasis -> class-name mapping is
-// exported as highlightClassesFor so it can be unit tested directly. Rendering CustomDataflowNode
+// The emphasis class is derived from objectHighlightState, and the emphasis -> class-name mapping is
+// shared as highlightClassesFor (models/highlights) so it can be unit tested directly. Rendering CustomDataflowNode
 // itself requires a full rete editor + area plugin, which is not worth standing up here; the
 // rendered result is covered by Cypress in highlight_references_spec.js.
 import { DocumentContentModel, DocumentContentSnapshotType } from "../../../models/document/document-content";
@@ -7,7 +7,7 @@ import { registerTileTypes } from "../../../register-tile-types";
 import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
 import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
-import { highlightClassesFor } from "./dataflow-node";
+import { highlightClassesFor } from "../../../models/highlights/highlight-classes";
 
 registerTileTypes(["Dataflow"]);
 
@@ -24,9 +24,9 @@ describe("Dataflow node highlight wiring", () => {
     const content = createDocumentContentModel({
       tiles: [{ id: "df1", content: { type: "Dataflow" } as any }]
     });
-    content.setPinnedRef({ kind: "object", tileId: "df1", objectId: "node-1" });
-    expect(content.objectState("df1", "node-1")).toBe("pinned");
-    expect(content.objectState("df1", "node-2")).toBeUndefined();
+    content.setPinnedHighlightRef({ kind: "object", tileId: "df1", objectId: "node-1" });
+    expect(content.objectHighlightState("df1", "node-1")).toBe("pinned");
+    expect(content.objectHighlightState("df1", "node-2")).toBeUndefined();
   });
 });
 

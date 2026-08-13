@@ -43,7 +43,7 @@ describe("sameHighlightReference", () => {
 });
 
 describe("the variable resolver", () => {
-  // A minimal stand-in for DocumentContentModelType. The resolver only walks tileMap and calls
+  // A minimal stand-in for the content model. The resolver only walks tileMap and calls
   // getObjectsForVariable, so this is the entire surface it touches.
   const contentWithTiles = (tiles: Array<{ id: string; objects?: any[] }>) => ({
     tileMap: new Map(tiles.map(t => [t.id, {

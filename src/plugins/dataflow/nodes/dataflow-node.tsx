@@ -14,7 +14,7 @@ import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
-import type { HighlightState } from "../../../models/document/document-content-with-highlights";
+import { highlightClassesFor } from "../../../models/highlights/highlight-classes";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -37,15 +37,6 @@ function sortByIndex<T extends [string, undefined | { index?: number }][]>(entri
 
 function inputClass(s?: string) {
   return s ? "input " + s.toLowerCase().replace(/ /g, "-") : "input";
-}
-
-// Exported for unit testing (see dataflow-node-highlight.test.ts) since rendering the
-// full CustomDataflowNode requires a rete editor and area plugin.
-export function highlightClassesFor(emphasis: HighlightState | undefined) {
-  return {
-    "highlight-pinned": emphasis === "pinned",
-    "highlight-preview": emphasis === "preview",
-  };
 }
 
 // Keyboard-actionable descendants of a block, returned in DOM order. Hand-curated
@@ -192,12 +183,12 @@ export const CustomDataflowNode = observer(
   // render — keeps this reactive to collapse/expand and membership changes.
   const inCollapsedGroup = !!reteManager?.isNodeInCollapsedGroup(id);
 
-  // Keep these reads in the render body: objectState is memoized only while a reaction observes
-  // it, so hoisting into a useMemo or callback makes every node re-resolve the whole document.
+  // Keep these reads in the render body: objectHighlightState is memoized only while a reaction
+  // observes it, so hoisting into a useMemo or callback makes every node re-resolve the document.
   // getDocumentContentFromNode returns undefined for detached trees (tests, standalone editors).
   const tileId = reteManager?.tileId;
   const documentContent = getDocumentContentFromNode(model);
-  const emphasis = tileId ? documentContent?.objectState(tileId, id) : undefined;
+  const emphasis = tileId ? documentContent?.objectHighlightState(tileId, id) : undefined;
 
   const dynamicClasses = classNames(
     "node",

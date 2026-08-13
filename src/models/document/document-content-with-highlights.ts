@@ -3,10 +3,6 @@ import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import {
   HighlightReference, highlightTargetKey, resolveHighlightReference, sameHighlightReference
 } from "../highlights/highlight-reference";
-// Type-only import: document-content.ts -> document-content-with-highlights.ts -> this file
-// would close a runtime require cycle if this were a value import. See the equivalent note in
-// highlight-reference.ts. Do not change this to a value import.
-import type { DocumentContentModelType } from "./document-content";
 
 /**
  * This is one part of the DocumentContentModel. It holds the ephemeral highlight state that
@@ -17,98 +13,99 @@ import type { DocumentContentModelType } from "./document-content";
  * other people viewing the same document. Adding a `.props()` entry to this file would
  * change all three of those things.
  *
- * The pattern mirrors DataSet's volatile caseSelection/attributeSelection, which is how
- * table<->graph linked selection already works.
+ * A highlight is deliberately NOT selection, even though the two can look alike. Selection is
+ * operational — it is the implicit argument to the next action (delete, drag, group, toolbar
+ * buttons) — and it is suppressed in read-only views. A highlight is informational: it says
+ * "look here" without arming anything, and it must render in read-only documents, 4-up cells
+ * and thumbnails. A highlight also has to outlive the user's next click, or acting on the
+ * guidance would destroy it.
  *
  * Some scaffolding here has no production caller yet and is intentional, not dead code:
- * `isObjectActive` is currently only used by `objectState`; `IHighlightTarget.objectType` is
- * populated but never read; and the "object" reference kind has no production producer. These
- * exist for later increments (see the design spec's "Planned increments") that reference
- * non-variable objects directly. Don't delete them as unused.
+ * `IHighlightTarget.objectType` is populated but never read, and the "object" reference kind
+ * has no production producer. Both exist for AI-emitted references (see docs/highlights.md),
+ * which point at a single object directly rather than resolving a variable across tiles.
  */
 
-/** The two states an active reference's targets can be rendered in. */
+/** The two states a highlighted object can be rendered in. */
 export type HighlightState = "preview" | "pinned";
 
 export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDragging
   .named("DocumentContentModelWithHighlights")
   .volatile(self => ({
-    hoveredRef: undefined as HighlightReference | undefined,
-    pinnedRef: undefined as HighlightReference | undefined,
+    hoveredHighlightRef: undefined as HighlightReference | undefined,
+    pinnedHighlightRef: undefined as HighlightReference | undefined,
   }))
   .views(self => ({
     /**
-     * Exactly one reference is active at a time. Hover REPLACES pin rather than adding to it:
-     * while previewing you want to see what you are previewing, and on mouse-out this reverts
-     * to the pinned reference rather than clearing.
+     * Exactly one reference is highlighted at a time. Hover REPLACES pin rather than adding to
+     * it: while previewing you want to see what you are previewing, and on mouse-out this
+     * reverts to the pinned reference rather than clearing.
      */
-    get activeRef(): HighlightReference | undefined {
-      return self.hoveredRef ?? self.pinnedRef;
+    get highlightRef(): HighlightReference | undefined {
+      return self.hoveredHighlightRef ?? self.pinnedHighlightRef;
     },
-    get activeSource(): HighlightState | undefined {
-      if (self.hoveredRef) {
+    get highlightState(): HighlightState | undefined {
+      if (self.hoveredHighlightRef) {
         // Hovering the reference that is already pinned must not visually downgrade it to
         // "preview" — that would flicker back to "pinned" on mouse-out for no meaningful
         // reason. Rule 1 (hover replaces pin) still applies for any *different* reference.
-        if (self.pinnedRef && sameHighlightReference(self.hoveredRef, self.pinnedRef)) {
+        if (self.pinnedHighlightRef
+            && sameHighlightReference(self.hoveredHighlightRef, self.pinnedHighlightRef)) {
           return "pinned";
         }
         return "preview";
       }
-      if (self.pinnedRef) return "pinned";
+      if (self.pinnedHighlightRef) return "pinned";
       return undefined;
     },
   }))
   .views(self => {
     // A private closure variable for encapsulation. Keep it that way: a text-range reference kind
     // has no id and cannot be expressed as a tileId/objectId pair, so callers must go through
-    // `isObjectActive`/`objectState` rather than the target collection itself.
-    //
-    // This `computed` only caches while a MobX reaction observes it. Callers should read it from
-    // inside an `observer` — outside one, every `.get()` re-resolves, walking every tile again.
-    const activeTargetKeys = computed(() => {
-      const ref = self.activeRef;
+    // `isObjectHighlighted`/`objectHighlightState` rather than the target collection itself.
+    const highlightedTargetKeys = computed(() => {
+      const ref = self.highlightRef;
       if (!ref) return new Set<string>();
-      const targets = resolveHighlightReference(ref, self as unknown as DocumentContentModelType);
+      const targets = resolveHighlightReference(ref, self);
       return new Set(targets.map(target => highlightTargetKey(target.tileId, target.objectId)));
     });
 
+    function isObjectHighlighted(tileId: string, objectId: string) {
+      return highlightedTargetKeys.get().has(highlightTargetKey(tileId, objectId));
+    }
+
     return {
-      isObjectActive(tileId: string, objectId: string) {
-        return activeTargetKeys.get().has(highlightTargetKey(tileId, objectId));
-      },
+      isObjectHighlighted,
       /**
-       * Every active target shares one state, because only one reference is active at a time.
-       * This can never return "pinned" for one object while returning "preview" for another in
-       * the same render.
+       * Every highlighted object shares one state, because only one reference is highlighted at
+       * a time. This can never return "pinned" for one object while returning "preview" for
+       * another in the same render.
        */
-      objectState(tileId: string, objectId: string): HighlightState | undefined {
-        return activeTargetKeys.get().has(highlightTargetKey(tileId, objectId))
-          ? self.activeSource
-          : undefined;
+      objectHighlightState(tileId: string, objectId: string): HighlightState | undefined {
+        return isObjectHighlighted(tileId, objectId) ? self.highlightState : undefined;
       },
     };
   })
   .actions(self => ({
-    setHoveredRef(ref: HighlightReference) {
-      self.hoveredRef = ref;
+    setHoveredHighlightRef(ref: HighlightReference) {
+      self.hoveredHighlightRef = ref;
     },
-    clearHoveredRef() {
-      self.hoveredRef = undefined;
+    clearHoveredHighlightRef() {
+      self.hoveredHighlightRef = undefined;
     },
-    setPinnedRef(ref: HighlightReference) {
-      self.pinnedRef = ref;
+    setPinnedHighlightRef(ref: HighlightReference) {
+      self.pinnedHighlightRef = ref;
     },
-    clearPinnedRef() {
-      self.pinnedRef = undefined;
+    clearPinnedHighlightRef() {
+      self.pinnedHighlightRef = undefined;
     },
   }))
   .actions(self => ({
-    togglePinnedRef(ref: HighlightReference) {
-      if (self.pinnedRef && sameHighlightReference(self.pinnedRef, ref)) {
-        self.clearPinnedRef();
+    togglePinnedHighlightRef(ref: HighlightReference) {
+      if (self.pinnedHighlightRef && sameHighlightReference(self.pinnedHighlightRef, ref)) {
+        self.clearPinnedHighlightRef();
       } else {
-        self.setPinnedRef(ref);
+        self.setPinnedHighlightRef(ref);
       }
     },
   }));
