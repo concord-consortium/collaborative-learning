@@ -1,5 +1,6 @@
 import {
-  classifyDocument, getSpaceFromFirestorePath, kOfferingContainedTypes
+  classifyDocument, getSpaceFromFirestorePath, getSpaceLabel, getTestPartitionLabel,
+  kOfferingContainedTypes
 } from "./backfill-document-offering-id";
 import { backfillDocumentOfferingId } from "./backfill-document-offering-id";
 import type { IBucketCounts } from "./backfill-document-offering-id";
@@ -39,14 +40,42 @@ describe("getSpaceFromFirestorePath", () => {
   it("returns undefined for a path shape it does not recognize", () => {
     // A collection-group query reaches every `documents` collection anywhere in the database. An
     // unrecognized root must be counted and skipped, never guessed at and never fatal.
-    expect(getSpaceFromFirestorePath("qa/whatever/documents/abc")).toBeUndefined();
+    expect(getSpaceFromFirestorePath("nosuchroot/whatever/documents/abc")).toBeUndefined();
     expect(getSpaceFromFirestorePath("authed//documents/abc")).toBeUndefined();
     expect(getSpaceFromFirestorePath("authed/learn_concord_org/other/abc")).toBeUndefined();
   });
 });
 
+describe("getTestPartitionLabel", () => {
+  it("names the unsecured appMode partitions", () => {
+    // A staging census found 68 qa and 46 dev documents. They are keyed by user id rather than
+    // portal, so they match no portal space, and without this they would be reported as an
+    // unrecognized path shape — an anomaly worth investigating rather than scratch data.
+    expect(getTestPartitionLabel("qa/1kACXbrVxTZ0GSAIhSNcnu8C4zi1/documents/abc")).toBe("qa");
+    expect(getTestPartitionLabel("dev/01R1IX5dp0NhTgPCWfgYiyCQ5rt2/documents/abc")).toBe("dev");
+    expect(getTestPartitionLabel("test/someuid/documents/abc")).toBe("test");
+  });
+
+  it("does not claim real spaces or unrecognized shapes", () => {
+    expect(getTestPartitionLabel("authed/learn_concord_org/documents/abc")).toBeUndefined();
+    expect(getTestPartitionLabel("demo/CLUE/documents/abc")).toBeUndefined();
+    expect(getTestPartitionLabel("nosuchroot/x/documents/abc")).toBeUndefined();
+    expect(getTestPartitionLabel("qa/x/other/abc")).toBeUndefined();
+  });
+});
+
+describe("getSpaceLabel", () => {
+  it("labels every root shape, falling back to unknown", () => {
+    expect(getSpaceLabel("authed/learn_concord_org/documents/abc")).toBe("authed/learn_concord_org");
+    expect(getSpaceLabel("demo/CLUE/documents/abc")).toBe("demo/CLUE");
+    expect(getSpaceLabel("qa/someuid/documents/abc")).toBe("qa");
+    expect(getSpaceLabel("nosuchroot/x/documents/abc")).toBe("unknown");
+  });
+});
+
 describe("classifyDocument", () => {
   const kPath = "authed/learn_concord_org/documents/abc";
+  const kLabel = "authed/learn_concord_org";
   const problem = { type: "problem", context_id: "class-1", uid: "user-1", key: "doc-1" };
 
   it("sends an offering-contained document with no offeringId to the lookup", () => {
@@ -61,7 +90,7 @@ describe("classifyDocument", () => {
 
   it("counts a document that already has an offeringId", () => {
     expect(classifyDocument({ ...problem, offeringId: "2001" }, kPath))
-      .toEqual({ kind: "counted", bucket: "alreadySet" });
+      .toEqual({ kind: "counted", bucket: "alreadySet", spaceLabel: kLabel });
   });
 
   it("skips a class-wide document under either generic type value", () => {
@@ -69,7 +98,7 @@ describe("classifyDocument", () => {
     // Writing one would corrupt isInClassUnitContainer, which is the guard this change exists to fix.
     for (const type of ["group", "axes"]) {
       expect(classifyDocument({ type, context_id: "class-1", uid: "class_hash", key: "doc-1" }, kPath))
-        .toEqual({ kind: "counted", bucket: "skippedClassWide" });
+        .toEqual({ kind: "counted", bucket: "skippedClassWide", spaceLabel: kLabel });
     }
   });
 
@@ -78,7 +107,19 @@ describe("classifyDocument", () => {
     // reporting it as alreadySet would hide it behind a bucket that reads like success.
     expect(classifyDocument(
       { type: "axes", context_id: "class-1", uid: "class_hash", key: "doc-1", offeringId: "2001" }, kPath
-    )).toEqual({ kind: "counted", bucket: "skippedClassWide" });
+    )).toEqual({ kind: "counted", bucket: "skippedClassWide", spaceLabel: kLabel });
+  });
+
+  it("skips a test-partition document whatever else is true of it", () => {
+    // Asked before every other question, because a scratch partition's documents are out of scope
+    // regardless of their contents. Each of these would otherwise land in a different bucket.
+    expect(classifyDocument(problem, "qa/someuid/documents/abc"))
+      .toEqual({ kind: "counted", bucket: "skippedTestPartition", spaceLabel: "qa" });
+    expect(classifyDocument({ ...problem, offeringId: "2001" }, "dev/someuid/documents/abc"))
+      .toEqual({ kind: "counted", bucket: "skippedTestPartition", spaceLabel: "dev" });
+    expect(classifyDocument({ type: "axes", context_id: "c", uid: "class_hash", key: "k" },
+      "test/someuid/documents/abc"))
+      .toEqual({ kind: "counted", bucket: "skippedTestPartition", spaceLabel: "test" });
   });
 
   it("sends a group-scoped document to the lookup under either generic type value", () => {
@@ -92,15 +133,18 @@ describe("classifyDocument", () => {
   });
 
   it("counts a document whose Firestore path is in no known space", () => {
-    expect(classifyDocument(problem, "qa/whatever/documents/abc"))
-      .toEqual({ kind: "counted", bucket: "unknownSpace" });
+    // Genuinely unrecognized, as distinct from a known-and-ignored test partition. Keeping the two
+    // apart is what lets a non-zero unknownSpace count mean "look at this".
+    expect(classifyDocument(problem, "nosuchroot/whatever/documents/abc"))
+      .toEqual({ kind: "counted", bucket: "unknownSpace", spaceLabel: "unknown" });
   });
 
   it("counts a document missing any field the lookup needs", () => {
     for (const missing of ["context_id", "uid", "key"]) {
       const data: any = { ...problem };
       delete data[missing];
-      expect(classifyDocument(data, kPath)).toEqual({ kind: "counted", bucket: "unusableDocument" });
+      expect(classifyDocument(data, kPath))
+        .toEqual({ kind: "counted", bucket: "unusableDocument", spaceLabel: kLabel });
     }
   });
 });
@@ -329,7 +373,8 @@ describe("backfillDocumentOfferingId — writing", () => {
       mkDoc(`${kSpace}/documents/a`, { type: "problem", context_id: "c1", uid: "u1", key: "k1" }),
       mkDoc(`${kSpace}/documents/b`, { type: "problem", offeringId: "9", context_id: "c1", uid: "u1", key: "k2" }),
       mkDoc(`${kSpace}/documents/c`, { type: "problem", uid: "u1", key: "k3" }),
-      mkDoc("qa/x/documents/d", { type: "problem", context_id: "c1", uid: "u1", key: "k4" })
+      mkDoc("nosuchroot/x/documents/d", { type: "problem", context_id: "c1", uid: "u1", key: "k4" }),
+      mkDoc("qa/x/documents/e", { type: "problem", context_id: "c1", uid: "u1", key: "k5" })
     ];
     const db = makeDb({ problem: docs });
     const res = await run(db, makeRtdb({}), { dryRun: false });
@@ -340,6 +385,10 @@ describe("backfillDocumentOfferingId — writing", () => {
     expect(res.totals.alreadySet).toBe(1);
     expect(res.totals.unusableDocument).toBe(1);
     expect(res.totals.unknownSpace).toBe(1);
+    expect(res.totals.skippedTestPartition).toBe(1);
+    // The test partition is labelled as itself, not lumped in with genuinely unrecognized paths.
+    expect(res.bySpace.qa.skippedTestPartition).toBe(1);
+    expect(res.bySpace.unknown.unknownSpace).toBe(1);
     // Every scanned document is counted exactly once, so a miscounted bucket cannot hide.
     const summed = Object.values(res.totals).reduce((a, b) => a + b, 0);
     expect(summed).toBe(res.scanned);

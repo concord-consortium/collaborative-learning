@@ -67,6 +67,28 @@ export function getSpaceFromFirestorePath(docPath: string): IFirestoreSpace | un
   return undefined;
 }
 
+/**
+ * The Firestore roots holding data for the unsecured `appMode` partitions, keyed by user id rather
+ * than by portal. These are scratch spaces — scripts/delete-qa-user-data.ts exists to purge one of
+ * them — so their documents are out of scope entirely rather than merely unrecognized.
+ */
+const kTestPartitionRoots = ["qa", "dev", "test"];
+
+/** The partition root a path belongs to, or undefined if it is not one of them. */
+export function getTestPartitionLabel(docPath: string): string | undefined {
+  const [root, name, collection] = docPath.split("/");
+  if (!name || collection !== "documents") return undefined;
+  return kTestPartitionRoots.includes(root) ? root : undefined;
+}
+
+/** A document whose root matches nothing known still needs a label to be counted under. */
+export const kUnknownSpaceLabel = "unknown";
+
+/** How a scanned document is reported in the per-space tallies. */
+export function getSpaceLabel(docPath: string): string {
+  return getSpaceFromFirestorePath(docPath)?.label ?? getTestPartitionLabel(docPath) ?? kUnknownSpaceLabel;
+}
+
 /** Every outcome a scanned document can be counted under. */
 export type CountedBucket =
   | "resolved"
@@ -75,11 +97,15 @@ export type CountedBucket =
   | "nodeWithoutOfferingId"
   | "unusableDocument"
   | "unknownSpace"
+  | "skippedTestPartition"
   | "skippedClassWide"
   | "lookupError";
 
+// `spaceLabel` travels with the classification so the path is parsed once. Deriving it again at the
+// counting site is what let a qa/dev document be counted under a bucket that says nothing is wrong
+// while being labelled as belonging to no known space.
 export type Classification =
-  | { kind: "counted"; bucket: CountedBucket }
+  | { kind: "counted"; bucket: CountedBucket; spaceLabel: string }
   | { kind: "lookup"; space: IFirestoreSpace; contextId: string; uid: string; key: string };
 
 const isGenericAxesType = (type: unknown) => type === "group" || type === "axes";
@@ -92,18 +118,22 @@ const isGenericAxesType = (type: unknown) => type === "group" || type === "axes"
  * under a bucket that reads like success.
  */
 export function classifyDocument(data: any, docPath: string): Classification {
+  const spaceLabel = getSpaceLabel(docPath);
+  const counted = (bucket: CountedBucket): Classification => ({ kind: "counted", bucket, spaceLabel });
+  // Asked first because it is a scope question rather than a property of the document: a scratch
+  // partition's documents are not ours to repair whatever else is true of them, and reporting them
+  // under any other bucket overstates how much real data the run covered.
+  if (getTestPartitionLabel(docPath)) return counted("skippedTestPartition");
   // A generic axes document with no groupId is class-wide: class-unit-contained, correctly without an
   // offering. Writing one would corrupt the guard this script exists to make safe.
-  if (isGenericAxesType(data?.type) && !data?.groupId) {
-    return { kind: "counted", bucket: "skippedClassWide" };
-  }
-  if (data?.offeringId) return { kind: "counted", bucket: "alreadySet" };
+  if (isGenericAxesType(data?.type) && !data?.groupId) return counted("skippedClassWide");
+  if (data?.offeringId) return counted("alreadySet");
   const space = getSpaceFromFirestorePath(docPath);
-  if (!space) return { kind: "counted", bucket: "unknownSpace" };
+  if (!space) return counted("unknownSpace");
   const contextId = data?.context_id;
   const uid = data?.uid;
   const key = data?.key;
-  if (!contextId || !uid || !key) return { kind: "counted", bucket: "unusableDocument" };
+  if (!contextId || !uid || !key) return counted("unusableDocument");
   return { kind: "lookup", space, contextId, uid, key };
 }
 
@@ -120,14 +150,11 @@ export interface IBackfillOfferingIdResult {
 
 const kAllBuckets: CountedBucket[] = [
   "resolved", "alreadySet", "noMetadataNode", "nodeWithoutOfferingId",
-  "unusableDocument", "unknownSpace", "skippedClassWide", "lookupError"
+  "unusableDocument", "unknownSpace", "skippedTestPartition", "skippedClassWide", "lookupError"
 ];
 
 const emptyCounts = (): IBucketCounts =>
   Object.fromEntries(kAllBuckets.map((b) => [b, 0])) as IBucketCounts;
-
-/** A document whose space could not be derived still needs somewhere to be counted. */
-const kUnknownSpaceLabel = "unknown";
 
 /**
  * Run `fn` over `items` a chunk at a time. Latency here is dominated by one small RTDB read per
@@ -226,10 +253,9 @@ export async function backfillDocumentOfferingId(
         result.scanned += docs.length;
         const classified = docs.map((doc: any) => ({ doc, c: classifyDocument(doc.data(), doc.ref.path) }));
 
-        for (const { doc, c } of classified) {
+        for (const { c } of classified) {
           if (c.kind !== "counted") continue;
-          const space = getSpaceFromFirestorePath(doc.ref.path);
-          count(type, space?.label ?? kUnknownSpaceLabel, c.bucket);
+          count(type, c.spaceLabel, c.bucket);
         }
 
         const candidates = classified.filter((x) => x.c.kind === "lookup");

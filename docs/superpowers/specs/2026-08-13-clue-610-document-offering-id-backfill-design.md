@@ -194,8 +194,11 @@ Firestore path:
 |---|---|
 | `authed/<portal>/documents/…` | `/authed/portals/<portal>/classes` |
 | `demo/<name>/documents/…` | `/demo/<name>/portals/demo/classes` |
+| `qa`/`dev`/`test` `/<uid>/documents/…` | none — skipped, see `skippedTestPartition` |
 
-The portal segment is already underscore-escaped in the Firestore path, so it is used as-is.
+The portal segment is already underscore-escaped in the Firestore path, so it is used as-is. The
+partition roots are keyed by *user id* rather than by portal, which is why they cannot be treated as
+just another space.
 
 ### One RTDB read per document, run concurrently
 
@@ -228,8 +231,17 @@ that bucket:
 | `nodeWithoutOfferingId` | The node exists, but has no `offeringId` field |
 | `unusableDocument` | No `context_id`, `uid`, or `key` to look up with |
 | `unknownSpace` | Firestore path matched no known space shape |
+| `skippedTestPartition` | A `qa`/`dev`/`test` appMode partition — scratch data, out of scope |
 | `skippedClassWide` | `group`- or `axes`-typed with no `groupId` — correctly has no offering |
 | `lookupError` | The RTDB read threw |
+
+`skippedTestPartition` is asked **first**, ahead of every other question, because it is about scope
+rather than about the document: a scratch partition's documents are not ours to repair whatever else
+is true of them. It exists because a staging census found 68 `qa` and 46 `dev` documents — over half
+the run — and those roots are keyed by user id rather than by portal, so they match no portal space.
+Without a bucket of their own they would report as an unrecognized path shape, which reads as an
+anomaly to investigate rather than as scratch data. Keeping the two apart is what lets a non-zero
+`unknownSpace` mean "look at this".
 
 Counted per type and per space.
 
