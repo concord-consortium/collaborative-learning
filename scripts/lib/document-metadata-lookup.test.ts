@@ -69,4 +69,10 @@ describe("getOfferingIdFromFirebaseMetadata", () => {
     await expect(getOfferingIdFromFirebaseMetadata(db, kBasePath, "class-1", "user-1", "doc-1"))
       .rejects.toThrow("rtdb unavailable");
   });
+
+  it("treats a non-string offeringId as absent", async () => {
+    const db = makeRtdb({ [kPath]: { offeringId: 2001 } });
+    expect(await getOfferingIdFromFirebaseMetadata(db, kBasePath, "class-1", "user-1", "doc-1"))
+      .toEqual({ status: "nodeWithoutOfferingId" });
+  });
 });

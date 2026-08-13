@@ -189,74 +189,88 @@ export async function backfillDocumentOfferingId(
   };
 
   // Batched at Firestore's 400-write limit. `batch` stays undefined until there is something to write,
-  // so a run with no work commits nothing at all.
+  // so a run with no work commits nothing at all. `written` counts only committed writes, so a run that
+  // dies mid-flight cannot over-report what actually landed.
   const kBatchSize = 400;
   let batch: any;
-  let pending = 0;
+  let queuedInBatch = 0;
+
+  const commitBatch = async () => {
+    await batch.commit();
+    result.written += queuedInBatch;
+    queuedInBatch = 0;
+    batch = undefined;
+  };
 
   const queueWrite = async (ref: any, offeringId: string) => {
     batch ??= (db as any).batch();
     batch.set(ref, { offeringId }, { merge: true });
-    result.written += 1;
-    if (++pending % kBatchSize === 0) {
-      await batch.commit();
-      batch = undefined;
-    }
+    if (++queuedInBatch === kBatchSize) await commitBatch();
   };
 
-  for (const type of kOfferingContainedTypes) {
-    for await (const docs of iterateDocuments(db, type, pageSize)) {
-      result.scanned += docs.length;
-      const classified = docs.map((doc: any) => ({ doc, c: classifyDocument(doc.data(), doc.ref.path) }));
+  const report = () => {
+    log(`scanned ${result.scanned}; ` +
+        kAllBuckets.map((b) => `${b}: ${result.totals[b]}`).join(", "));
+    // Said out loud because a Firestore equality query on `type` cannot return a document that has no
+    // `type` field, so such documents are invisible to this census rather than counted as clean.
+    log("documents with no `type` field are not reachable by these queries and are not counted");
+    if (dryRun) log("DRY RUN — set APPLY=1 to write");
+  };
 
-      for (const { doc, c } of classified) {
-        if (c.kind !== "counted") continue;
-        const space = getSpaceFromFirestorePath(doc.ref.path);
-        count(type, space?.label ?? kUnknownSpaceLabel, c.bucket);
-      }
+  try {
+    for (const type of kOfferingContainedTypes) {
+      for await (const docs of iterateDocuments(db, type, pageSize)) {
+        result.scanned += docs.length;
+        const classified = docs.map((doc: any) => ({ doc, c: classifyDocument(doc.data(), doc.ref.path) }));
 
-      const candidates = classified.filter((x) => x.c.kind === "lookup");
-      // The lookups overlap, but each returns its resolution rather than writing. Writing from inside
-      // concurrent callbacks would let one callback add to a batch another callback is already
-      // committing, so the batch is fed sequentially from the results instead (see Task 4).
-      const resolved = await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
-        try {
-          const lookup = await getOfferingIdFromFirebaseMetadata(
-            database, c.space.firebaseBasePath, c.contextId, c.uid, c.key
-          );
-          if (lookup.status !== "found") {
-            // The two non-found statuses are named identically to their buckets, so they count themselves.
-            count(type, c.space.label, lookup.status);
+        for (const { doc, c } of classified) {
+          if (c.kind !== "counted") continue;
+          const space = getSpaceFromFirestorePath(doc.ref.path);
+          count(type, space?.label ?? kUnknownSpaceLabel, c.bucket);
+        }
+
+        const candidates = classified.filter((x) => x.c.kind === "lookup");
+        // The lookups overlap, but each returns its resolution rather than writing. Writing from inside
+        // concurrent callbacks would let one callback add to a batch another callback is already
+        // committing, so the batch is fed sequentially from the results instead (see Task 4).
+        const resolved = await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
+          try {
+            const lookup = await getOfferingIdFromFirebaseMetadata(
+              database, c.space.firebaseBasePath, c.contextId, c.uid, c.key
+            );
+            if (lookup.status !== "found") {
+              // The two non-found statuses are named identically to their buckets, so they count themselves.
+              count(type, c.space.label, lookup.status);
+              return undefined;
+            }
+            count(type, c.space.label, "resolved");
+            return { ref: doc.ref, offeringId: lookup.offeringId };
+          } catch (error) {
+            count(type, c.space.label, "lookupError");
+            log(`lookup failed for ${doc.ref.path}: ${error}`);
             return undefined;
           }
-          count(type, c.space.label, "resolved");
-          return { ref: doc.ref, offeringId: lookup.offeringId };
-        } catch (error) {
-          count(type, c.space.label, "lookupError");
-          log(`lookup failed for ${doc.ref.path}: ${error}`);
-          return undefined;
-        }
-      });
+        });
 
-      // Fed sequentially, never from inside the concurrent callbacks above: `queueWrite` awaits a
-      // commit and then clears `batch`, so a concurrent caller could otherwise add a write to a batch
-      // that is already being committed.
-      if (!dryRun) {
-        for (const write of resolved) {
-          if (write) await queueWrite(write.ref, write.offeringId);
+        // Fed sequentially, never from inside the concurrent callbacks above: `queueWrite` awaits a
+        // commit and then clears `batch`, so a concurrent caller could otherwise add a write to a batch
+        // that is already being committed.
+        if (!dryRun) {
+          for (const write of resolved) {
+            if (write) await queueWrite(write.ref, write.offeringId);
+          }
         }
       }
+      // Emitted per type so a run that dies partway still shows how far it got. A re-run is safe but
+      // starts over from the first type, so this is the only record of what a failed run covered.
+      log(`finished ${type}: ${JSON.stringify(result.byType[type] ?? {})}`);
     }
+
+    if (batch) await commitBatch();
+  } finally {
+    report();
   }
 
-  if (batch && pending % kBatchSize !== 0) await batch.commit();
-
-  log(`scanned ${result.scanned}; ` +
-      kAllBuckets.map((b) => `${b}: ${result.totals[b]}`).join(", "));
-  // Said out loud because a Firestore equality query on `type` cannot return a document that has no
-  // `type` field, so such documents are invisible to this census rather than counted as clean.
-  log("documents with no `type` field are not reachable by these queries and are not counted");
-  if (dryRun) log("DRY RUN — set APPLY=1 to write");
   return result;
 }
 
@@ -264,11 +278,19 @@ async function main() {
   // Imported lazily so the Jest test can import backfillDocumentOfferingId without loading
   // firebase-admin or the import.meta-using script-utils module.
   const admin = (await import("firebase-admin")).default;
+  const fs = (await import("fs")).default;
   const { getScriptRootFilePath } = await import("./lib/script-utils.js");
-  admin.initializeApp({
-    credential: admin.credential.cert(getScriptRootFilePath("serviceAccountKey.json")),
-    databaseURL: "https://collaborative-learning-ec215.firebaseio.com"
-  });
+  const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+  const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
+  // Derived from the credential rather than hardcoded, because this script reads offeringIds from the
+  // Realtime Database and writes them to Firestore. A URL naming a different project than the
+  // credential would copy one environment's offerings onto another environment's documents, and the
+  // census would report it as a clean success.
+  const databaseURL = `https://${serviceAccount.project_id}.firebaseio.com`;
+  console.log(`- Service account: ${serviceAccount.client_email}`);
+  console.log(`- Firebase project: ${serviceAccount.project_id}`);
+  console.log(`- Realtime Database URL: ${databaseURL}`);
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccountFile), databaseURL });
   const result = await backfillDocumentOfferingId(
     admin.firestore(), admin.database(), { dryRun: process.env.APPLY !== "1" }
   );

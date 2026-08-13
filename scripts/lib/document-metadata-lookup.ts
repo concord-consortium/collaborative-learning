@@ -50,7 +50,9 @@ export async function getOfferingIdFromFirebaseMetadata(
   const value = snapshot.exists() ? snapshot.val() : undefined;
   if (!value) return { status: "noMetadataNode" };
   // An unresolved offering is stored as "", which must not be written back as if it were an offering.
+  // Required to be a string: the app compares this field against a string in Firestore queries, so a
+  // number written back here would leave the document looking repaired but matching nothing.
   const offeringId = value.offeringId;
-  if (!offeringId) return { status: "nodeWithoutOfferingId" };
+  if (!offeringId || typeof offeringId !== "string") return { status: "nodeWithoutOfferingId" };
   return { status: "found", offeringId };
 }

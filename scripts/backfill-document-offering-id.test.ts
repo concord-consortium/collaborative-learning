@@ -335,6 +335,14 @@ describe("backfillDocumentOfferingId — writing", () => {
     const res = await run(db, makeRtdb({}), { dryRun: false });
     expect(res.written).toBe(0);
     expect(db.writes).toEqual([]);
+    // Each document must land in its own bucket, not merely fail to be written.
+    expect(res.totals.noMetadataNode).toBe(1);
+    expect(res.totals.alreadySet).toBe(1);
+    expect(res.totals.unusableDocument).toBe(1);
+    expect(res.totals.unknownSpace).toBe(1);
+    // Every scanned document is counted exactly once, so a miscounted bucket cannot hide.
+    const summed = Object.values(res.totals).reduce((a, b) => a + b, 0);
+    expect(summed).toBe(res.scanned);
   });
 
   it("never writes to a class-wide document under either generic type value", async () => {
@@ -368,6 +376,17 @@ describe("backfillDocumentOfferingId — writing", () => {
       mkDoc(`${kSpace}/documents/a`, { type: "problem", offeringId: "9", context_id: "c1", uid: "u1", key: "k1" })
     ] });
     await run(db, makeRtdb({}), { dryRun: false });
+    expect(db.committed.length).toBe(0);
+  });
+
+  it("defaults to a dry run when no options are given", async () => {
+    // Every other test passes dryRun explicitly, so nothing else would catch the default flipping.
+    const db = makeDb({ problem: resolvedDocs(1) });
+    const res = await backfillDocumentOfferingId(
+      db as unknown as Firestore, makeRtdb(resolvedNodes(1))
+    );
+    expect(res.written).toBe(0);
+    expect(db.writes).toEqual([]);
     expect(db.committed.length).toBe(0);
   });
 });
