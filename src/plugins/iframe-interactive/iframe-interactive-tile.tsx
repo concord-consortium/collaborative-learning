@@ -58,8 +58,8 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
-import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import {
   IShowModal,
   ICloseModal,
@@ -195,8 +195,18 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   const debouncedSetState = useMemo(
     () => debounce((state: any) => {
       contentRef.current?.setInteractiveState(state);
+      // Log the genuine student-state change (debounced, and only reached when
+      // handleInteractiveState's JSON-diff guard saw an actual change). Routes
+      // through logTileChangeEvent so an interactive inside a Question also
+      // fires QUESTION_ANSWERS_CHANGE. This is the meaningful change — distinct
+      // from the interactive's chatty "log" breadcrumbs, which we no longer log.
+      logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
+        tileId: model.id,
+        operation: "setInteractiveState",
+        change: { interactiveState: state }
+      });
     }, 500), // 500ms debounce
-    []
+    [model.id]
   );
 
   // Action to handle incoming interactive state with debouncing
@@ -348,16 +358,11 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         }
       });
 
-      // Listen for log messages from the interactive
-      phone.addListener("log", (logData: any) => {
-        // Use CLUE's Logger system
-        const logEventName = LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE;
-        Logger.log(logEventName, {
-          tileId: model.id,
-          tileType: "IframeInteractive",
-          ...logData
-        });
-      });
+      // Interactives emit "log" messages for their own analytics (init,
+      // mouseover, etc.) — a burst of them on load. These are breadcrumbs, not
+      // tile-content changes, so CLUE does not log them (they previously flooded
+      // the log as IFRAME_INTERACTIVE_TOOL_CHANGE). The meaningful change is the
+      // interactiveState update, logged from debouncedSetState above.
 
       // Handle modal requests (optional - can show modal dialogs)
       phone.addListener("showModal", (modalOptions: IShowModal) => {

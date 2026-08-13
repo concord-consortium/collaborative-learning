@@ -41,7 +41,15 @@ jest.mock("../../models/stores/ui", () => ({
   userSelectTile: jest.fn()
 }));
 
+// Spy on the tile-change emit to assert genuine state changes log (and that the
+// interactive's "log" breadcrumbs no longer do).
+const mockLogTileChangeEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({
+  logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent(...args)
+}));
+
 // NOW import the component after the mock is set up
+import { LogEventName } from "../../lib/logger-types";
 import { IframeInteractiveComponent } from "./iframe-interactive-tile";
 
 // Import registration to ensure tile type is registered
@@ -131,6 +139,37 @@ describe("IframeInteractiveComponent Integration Tests", () => {
       const content = props.model.content as any;
       expect(content.interactiveState).toEqual(newState);
     }, { timeout: 1000 });
+  });
+
+  it("logs IFRAME_INTERACTIVE_TOOL_CHANGE for a genuine interactive-state change", async () => {
+    const props = createDefaultProps();
+    render(<IframeInteractiveComponent {...props} />);
+
+    const newState = { answer: "42", submitted: true };
+    await waitFor(() => expect(listeners.interactiveState).toBeDefined());
+    listeners.interactiveState(newState);
+
+    await waitFor(() => {
+      expect(mockLogTileChangeEvent).toHaveBeenCalledWith(
+        LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE,
+        {
+          tileId: props.model.id,
+          operation: "setInteractiveState",
+          change: { interactiveState: newState }
+        }
+      );
+    }, { timeout: 1000 });
+  });
+
+  it("does not wire a 'log' breadcrumb listener, so interactive log messages are not logged", async () => {
+    const props = createDefaultProps();
+    render(<IframeInteractiveComponent {...props} />);
+
+    // Other listeners register, but "log" no longer does — the interactive's
+    // init/mouseover breadcrumbs have no handler and never reach the logger.
+    await waitFor(() => expect(listeners.interactiveState).toBeDefined());
+    expect(listeners.log).toBeUndefined();
+    expect(mockLogTileChangeEvent).not.toHaveBeenCalled();
   });
 
   it("polls for interactive state every 2 seconds", async () => {
