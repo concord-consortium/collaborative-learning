@@ -54,6 +54,52 @@ context("Highlight references", () => {
     cy.get(SENSOR_NODE).should("not.have.class", "highlight-pinned");
   });
 
+  // The chip renders its own highlight rather than borrowing the selection style, so the two can
+  // be told apart. Without this the chip has no highlight indicator at all: a highlight it owns is
+  // invisible on the chip itself, and the Dataflow ring looks orphaned.
+  it("shows the highlight on the chip itself, in the same states as its targets", () => {
+    cy.get(VARIABLE_CHIP).first().as("chip");
+
+    cy.get("@chip").should("not.have.class", "highlight-preview");
+    cy.get("@chip").should("not.have.class", "highlight-pinned");
+
+    cy.get("@chip").trigger("mouseover");
+    cy.get("@chip").should("have.class", "highlight-preview");
+    cy.get(SENSOR_NODE).should("have.class", "highlight-preview");
+
+    cy.get("@chip").trigger("mouseout");
+    cy.get("@chip").should("not.have.class", "highlight-preview");
+
+    cy.get("@chip").click();
+    cy.get("@chip").should("have.class", "highlight-pinned");
+    cy.get(SENSOR_NODE).should("have.class", "highlight-pinned");
+  });
+
+  // Regression for the review of this PR: with the chip's highlight borrowed from Slate selection,
+  // clicking elsewhere in the text dropped the chip's indicator while the Dataflow node stayed lit,
+  // so the two disagreed and the ring looked stranded. The highlight is deliberately NOT selection
+  // — it has to outlive the caret moving away — so the correct behavior is that both stay lit.
+  it("keeps the chip and its targets in agreement when the selection moves away", () => {
+    cy.get(TEXT_EDITOR).first().as("editor");
+    cy.get("@editor").find(VARIABLE_CHIP).first().as("chip");
+
+    cy.get("@chip").click();
+    cy.get("@chip").should("have.class", "highlight-pinned");
+    cy.get(SENSOR_NODE).first().should("have.class", "highlight-pinned");
+
+    // Move the Slate selection off the chip without touching the highlight. realClick, not click:
+    // a forced synthetic click gets past the tile's drag-handle overlay but never places a caret,
+    // so the selection would not actually move and the assertion below would pass vacuously.
+    cy.get("@editor").find("p").first().realClick({ position: "left" });
+
+    // `slate-selected` is applied to the inner VariableChip, not to `.slate-variable-chip`, so
+    // this has to look inside the chip — asserting not.have.class on the outer span would pass
+    // whether or not the selection ever moved.
+    cy.get("@chip").find(".slate-selected").should("not.exist");
+    cy.get("@chip").should("have.class", "highlight-pinned");
+    cy.get(SENSOR_NODE).first().should("have.class", "highlight-pinned");
+  });
+
   // Guards against a regression from wiring hover/click handlers onto the chip (a Slate inline
   // void element) inside the text tile's contentEditable: those handlers must not interfere
   // with normal Slate typing/selection behavior around the chip.

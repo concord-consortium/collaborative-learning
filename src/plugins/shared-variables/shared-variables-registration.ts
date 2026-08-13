@@ -32,6 +32,32 @@ registerSharedModelInfo({
 // when the textContent is collected, its plugin entry goes with it.
 const gPluginByContent = new WeakMap<TextContentModelType, VariablesPlugin>();
 
+/**
+ * Every variable chip in the editor, as addressable objects. A chip's objectId is the id of the
+ * variable it references, which is what lets a variable reference and a direct object reference
+ * name the same chip.
+ */
+function variableChipObjects(textContent: TextContentModelType): IClueTileObject[] {
+  // Read textContent.editor BEFORE the WeakMap lookup so MobX tracks it even when
+  // the plugin isn't yet registered. The text tile sets the editor (via setEditor)
+  // immediately after createSlatePlugin populates the WeakMap, so once that observable
+  // changes, the next re-evaluation will find both editor and plugin.
+  const editor = textContent.editor;
+  const plugin = gPluginByContent.get(textContent);
+  if (!plugin || !editor) return [];
+  // Track the revision so MobX re-evaluates when variable chips are added or removed.
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  const _pluginRevision = plugin.variableChipsRevision;
+  const objects: IClueTileObject[] = [];
+  for (const [node] of Editor.nodes(editor, { at: [], mode: "all" })) {
+    const anyNode = node as any;
+    if (anyNode?.type === kVariableFormat && typeof anyNode.reference === "string") {
+      objects.push({ objectId: anyNode.reference, objectType: kVariableFormat });
+    }
+  }
+  return objects;
+}
+
 registerTextPluginInfo({
   pluginName: kVariableTextPluginName,
   createSlatePlugin(textContent) {
@@ -41,24 +67,10 @@ registerTextPluginInfo({
     return plugin;
   },
   getAnnotatableObjects(textContent): IClueTileObject[] {
-    // Read textContent.editor BEFORE the WeakMap lookup so MobX tracks it even when
-    // the plugin isn't yet registered. The text tile sets the editor (via setEditor)
-    // immediately after createSlatePlugin populates the WeakMap, so once that observable
-    // changes, the next re-evaluation will find both editor and plugin.
-    const editor = textContent.editor;
-    const plugin = gPluginByContent.get(textContent);
-    if (!plugin || !editor) return [];
-    // Track the revision so MobX re-evaluates when variable chips are added or removed.
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    const _pluginRevision = plugin.variableChipsRevision;
-    const objects: IClueTileObject[] = [];
-    for (const [node] of Editor.nodes(editor, { at: [], mode: "all" })) {
-      const anyNode = node as any;
-      if (anyNode?.type === kVariableFormat && typeof anyNode.reference === "string") {
-        objects.push({ objectId: anyNode.reference, objectType: kVariableFormat });
-      }
-    }
-    return objects;
+    return variableChipObjects(textContent);
+  },
+  getObjectsForVariable(textContent, variableId): IClueTileObject[] {
+    return variableChipObjects(textContent).filter(object => object.objectId === variableId);
   },
 });
 

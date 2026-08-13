@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "../../../components/highlight-vars";
 @import "../components/dataflow-vars";
 
 @keyframes pulse {
@@ -72,16 +73,8 @@
 // as `.node:focus-visible`, an outline here would silently win and leave a focused node with no
 // focus indicator. A pseudo-element keeps highlight and focus independently visible.
 //
-// The preview ring deliberately does NOT reuse $input-purple (#a5b2ff): that is the input
-// nodes' own fill color and measures 2.02:1 against the white .flow-tool canvas, below the 3:1
-// WCAG 1.4.11 minimum for a non-text state indicator. $highlight-preview-ring is the nearest
-// accessible neighbor in the same hue family at exactly 3.0:1.
-//
-// Known limitation, tracked separately for design: $input-purple-outline is also the Sensor
-// node's own border color, so a pinned ring currently reads as a thicker border rather than as
-// emphasis. Picking an emphasis color that reads as emphasis across every node family (control
-// green, data purple, and the rest) is a design decision, not a code one.
-$highlight-preview-ring: #788cff;
+// The ring colors themselves live in components/highlight-vars, shared with every other target
+// tile; the accessibility rationale and the known pinned-color limitation are recorded there.
 
 .node.highlight-preview,
 .node.highlight-pinned {
@@ -104,5 +97,5 @@ $highlight-preview-ring: #788cff;
 }
 
 .node.highlight-pinned::after {
-  border: 3px solid $input-purple-outline;
+  border: 3px solid $highlight-pinned-ring;
 }

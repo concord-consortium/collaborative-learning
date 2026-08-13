@@ -21,6 +21,7 @@ import { kSlateChipTypeAttr, kVariableChipReferenceAttr } from "../../../compone
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { highlightClassesFor } from "../../../models/highlights/highlight-classes";
 import type { DocumentContentModelType } from "../../../models/document/document-content";
 import type { HighlightReference } from "../../../models/highlights/highlight-reference";
 
@@ -51,7 +52,8 @@ export class VariablesPlugin implements ITextPlugin {
   private previousVariableIds: Set<string> = new Set();
   private chipBoxesCacheTick = observable({ count: 0 });
   private stores: IStores | undefined;
-  private tileId: string | undefined;
+  // Read by the chip component so it can ask the document whether it is highlighted.
+  tileId: string | undefined;
   // Bumped when variable chips are added to or removed from the Slate editor. Read by
   // the variables plugin's `getAnnotatableObjects` so `annotatableObjects` re-evaluates
   // when the chip set changes — Slate's editor state isn't otherwise observable.
@@ -259,17 +261,17 @@ function isOwnVariableRef(ref: HighlightReference | undefined, variableId: strin
 }
 
 /**
- * Clears the document's hoveredRef, but only if it still points at this chip's variable.
+ * Clears the document's hoveredHighlightRef, but only if it still points at this chip's variable.
  * Several chips share one document, so this guard keeps one chip from clearing a preview
  * another chip owns.
  */
-export function clearHoveredRefIfOwn(
+export function clearHoveredHighlightRefIfOwn(
   documentContent: DocumentContentModelType | undefined,
   variableId: string | undefined
 ) {
   if (!variableId) return;
-  if (isOwnVariableRef(documentContent?.hoveredRef, variableId)) {
-    documentContent?.clearHoveredRef();
+  if (isOwnVariableRef(documentContent?.hoveredHighlightRef, variableId)) {
+    documentContent?.clearHoveredHighlightRef();
   }
 }
 
@@ -284,9 +286,9 @@ export function releaseOwnHighlightRefs(
   variableId: string | undefined
 ) {
   if (!variableId) return;
-  clearHoveredRefIfOwn(documentContent, variableId);
-  if (isOwnVariableRef(documentContent?.pinnedRef, variableId)) {
-    documentContent?.clearPinnedRef();
+  clearHoveredHighlightRefIfOwn(documentContent, variableId);
+  if (isOwnVariableRef(documentContent?.pinnedHighlightRef, variableId)) {
+    documentContent?.clearPinnedHighlightRef();
   }
 }
 
@@ -304,11 +306,11 @@ export function makeChipHighlightHandlers(
 ) {
   return {
     onMouseEnter: () => {
-      if (variableId) documentContent?.setHoveredRef({ kind: "variable", variableId });
+      if (variableId) documentContent?.setHoveredHighlightRef({ kind: "variable", variableId });
     },
-    onMouseLeave: () => clearHoveredRefIfOwn(documentContent, variableId),
+    onMouseLeave: () => clearHoveredHighlightRefIfOwn(documentContent, variableId),
     onClick: () => {
-      if (variableId) documentContent?.togglePinnedRef({ kind: "variable", variableId });
+      if (variableId) documentContent?.togglePinnedHighlightRef({ kind: "variable", variableId });
     },
   };
 }
@@ -316,7 +318,9 @@ export function makeChipHighlightHandlers(
 const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
-  const isHighlighted = useSelected();
+  // Slate selection, which is NOT the highlight state below. The two are deliberately separate:
+  // selection is operational (it is what the next edit acts on), a highlight is informational.
+  const isSelected = useSelected();
   const isSerializing = useSerializing();
   // useState + callback ref so the effect in useChipMeasurement re-runs when the chip
   // element appears — the chip is conditionally rendered (only when the variable
@@ -335,13 +339,23 @@ const VariableComponent = observer(function({ attributes, children, element }: R
     : undefined;
   const highlightHandlers = makeChipHighlightHandlers(documentContent, reference);
 
+  // The chip renders its own emphasis rather than borrowing the selection style. Without this the
+  // chip has no highlight indicator at all, so clicking away leaves the Dataflow ring looking
+  // orphaned and clicking the chip again appears to select it while turning the ring off.
+  //
+  // Keep this read in the render body: objectHighlightState is memoized only while a reaction
+  // observes it. The chip's objectId is its variable id, which is what makes it reachable both by
+  // a variable reference and by a direct object reference. See docs/highlights.md.
+  const tileId = variablesPlugin?.tileId;
+  const emphasis = tileId && reference
+    ? documentContent?.objectHighlightState(tileId, reference)
+    : undefined;
+
   // React does not fire onMouseLeave for an element that unmounts out from under the cursor
-  // (e.g. Backspace deletes the chip while it's hovered). Without this, hoveredRef would stay
-  // pointed at a reference whose chip no longer exists, leaving a stale preview ring on the
-  // Dataflow node until some unrelated chip's mouseleave happens to fire. The guard inside
-  // clearHoveredRefIfOwn keeps this from clobbering a different chip's active preview.
-  // React does not fire onMouseLeave for an element that unmounts under the cursor, and a pinned
-  // highlight can only be dismissed by clicking the chip — so a deleted chip must release both.
+  // (e.g. Backspace deletes the chip while it's hovered), and a pinned highlight can only be
+  // dismissed by clicking the chip — so a deleted chip must release both refs, or it strands a
+  // ring on the Dataflow node for the rest of the session. The guard inside
+  // clearHoveredHighlightRefIfOwn keeps this from clobbering a different chip's active preview.
   useEffect(() => {
     return () => releaseOwnHighlightRefs(documentContent, reference);
   }, [documentContent, reference]);
@@ -370,8 +384,8 @@ const VariableComponent = observer(function({ attributes, children, element }: R
     return <span {...attributes} {...serializeAttrs}>{children}</span>;
   }
 
-  const classes = classNames(kSlateVoidClass, kVariableClass);
-  const selectedClass = isHighlighted ? "slate-selected" : undefined;
+  const classes = classNames(kSlateVoidClass, kVariableClass, highlightClassesFor(emphasis));
+  const selectedClass = isSelected ? "slate-selected" : undefined;
   const variable = variablesPlugin?.variables.find(v => v.id === element.reference);
   return (
     <span
