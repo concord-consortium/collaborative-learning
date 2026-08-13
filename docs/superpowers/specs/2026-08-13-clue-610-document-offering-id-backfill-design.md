@@ -214,8 +214,14 @@ that bucket:
 | `unusableDocument` | No `context_id`, `uid`, or `key` to look up with |
 | `unknownSpace` | Firestore path matched no known space shape |
 | `skippedClassWide` | `group`- or `axes`-typed with no `groupId` — correctly has no offering |
+| `lookupError` | The RTDB read threw |
 
 Counted per type and per space.
+
+The extracted lookup **throws** on a read failure rather than returning undefined, so that a
+transport error is never silently counted as "this document has no offering". Each caller decides:
+the backfill counts it into `lookupError` and carries on, and `find-documents-missing-metadata.ts`
+keeps the try/catch it has today at its own call site.
 
 `noMetadataNode` and `nodeWithoutOfferingId` are different diagnoses pointing at different causes,
 and separating them is the point: the first says the consolidated metadata tree was never written
@@ -244,7 +250,10 @@ Unit tests against a mock Firestore and a mock RTDB, in the sibling's style:
 - The page boundary splits and the final partial batch is actually committed, asserted on commits
   rather than on batch allocations.
 - A missing RTDB subtree produces counts, not an exception.
+- A throwing RTDB read produces a `lookupError` count and the scan continues.
 - An unrecognized Firestore path shape produces counts, not an exception.
+- A class-wide document is classified before the `alreadySet` check, so one that wrongly carries an
+  `offeringId` still reports as `skippedClassWide` rather than being hidden.
 - The dry run writes and commits nothing.
 
 ## Sequencing
