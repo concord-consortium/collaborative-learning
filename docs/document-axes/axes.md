@@ -343,6 +343,41 @@ problem. The bound is stated on `curriculum` because that is what rule 2 constra
 the coupling being broken — a kind declaring a class container *and* a unit curriculum would stamp
 `unit` and satisfy rule 2, which a container-based bound would wrongly forbid.
 
+## Axis profiles — naming a combination of axis values
+
+The axes describe a document one question at a time, but people do not talk that way. Nobody says "a
+unit-level, class-owned, canonical, concurrent document" — they say **a class-wide document**. That
+shorthand is not sloppiness; it names a real thing, a *combination* of positions that documents are
+actually created at. This section gives that thing a name: an **axis profile**.
+
+A profile is a named bundle of axis values. `classWide` is one. So are the two the code has always had
+without naming them — the bundle shared by personal documents, learning logs, and their publications, and
+the bundle shared by problem, planning, and problem-like publications. They live in
+`src/models/document/document-axis-profiles.ts`, which is therefore the complete list of axis combinations
+the application supports.
+
+**A profile is not a `kind`.** Many kinds share one: what makes a learning log different from a personal
+document is presentation and its creation recipe, not any axis. `kind` says which preset a document came
+from; its profile says where that preset put it on the axes.
+
+**Profiles are what keep `kind` open-ended without the axes being.** A unit config declares kinds, but it
+declares no axis values — every kind is registered against a profile written in code. So a configuration
+can add a document to an existing combination and cannot invent one, and the set of combinations stays
+reviewable in one file rather than growing with the units.
+
+**A profile is recorded, not resolved.** Each document stores the name of the profile it was created from,
+in `axisProfile`. That exists for one reason: a migration that changes what a profile means has to find
+every document created from it, and selecting those by their axis values would mean querying the very
+fields the migration is there to change — a query that has to be rewritten every time the answer moves.
+Because it is provenance rather than a cache, it stays true after such a migration: it says which profile
+the document was made from, not what its axes hold now.
+
+**Nothing in the running application reads it.** The field is deliberately absent from `IDocumentMetadata`,
+`DocumentMetadataModel`, and `DocumentModel`, so it is not reachable from the app at all — reading it would
+require widening a type first. That keeps the axes the only way to ask how a document behaves, which is the
+point of this whole folder: `hasClassOwner(doc)` and the guards beside it stay the way behavior is decided,
+and the profile name stays a record for migrations and offline analysis.
+
 ### `permissions` — who may do what
 
 **What it is.** The permission set: who may `read`, `write`, `publish`, `copy`, and whether the content

@@ -42,6 +42,7 @@ so this table doubles as a migration-progress view.
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
 | `canonical` | Firestore | group | not surfaced | No |
+| `axisProfile` | Firestore | group | not surfaced — deliberately | No |
 | `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
 | `groupId` | Firestore | group (the **owning** group) | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | No — immutable |
 
@@ -78,6 +79,9 @@ prop, which is why they show as "not surfaced" above. They still reach `Document
 `typecheck(DocumentMetadataModel, data)` unfiltered and validate only because MST's `typecheck` ignores
 properties the model does not declare — pinned by the `typecheck` tests in
 [mst.test.ts](../../src/models/mst.test.ts).
+
+`axisProfile` relies on the same behavior, but by design rather than by omission: leaving it undeclared is
+what keeps the running app from reading it. See its section below.
 
 ### Derived (no stored field)
 
@@ -386,6 +390,30 @@ identity of a document.
 
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
+
+### `axisProfile`
+
+The name of the [axis profile](../document-axes/axes.md#axis-profiles--naming-a-combination-of-axis-values)
+the document was created from — the named bundle of axis values it started at (`classWide`, `group`,
+`personalLike`, `problemLike`).
+
+- **Stores:** Firestore only
+- **Location:** `documents/{key}.axisProfile`
+- **Applies to:** `type: "group"` documents (group + class-wide) — the same gate as `kind`
+- **Runtime:** **none, deliberately** — declared on no runtime type
+- **Updated by:** nothing — creation only, from the registered kind's profile
+- **Reactive:** No
+
+Exists for migrations. A migration that changes what a profile means has to find every document created
+from it; selecting those by their axis values would mean querying the fields the migration is about to
+change, and would need rewriting each time they move. Because the field records *provenance* — which
+profile the document was made from — it stays true after such a migration rather than going stale.
+
+It is absent from `IDocumentMetadata`, `DocumentMetadataModel`, and `DocumentModel` on purpose, so the
+running app cannot read it and cannot come to branch on it; the axis guards stay the only way to ask how a
+document behaves. Reading it would mean widening a type first, which is a visible change rather than an
+accident. Like `canonical`, it survives `DocumentMetadataStore`'s validation because MST's `typecheck`
+ignores undeclared properties (see the note under the summary tables).
 
 ### `unit`, `investigation`, `problem`
 
