@@ -38,10 +38,6 @@ export interface IDocumentKindInfo {
   /** Which container this kind's documents live in, and their curriculum reach. */
   containerType: DocumentContainerType;
   /**
-   * Static document display title. Leave undefined for dynamic titles.
-   */
-  title?: string;
-  /**
    * The unit code whose config declared this kind. Set for kinds declared by a unit config; undefined
    * for the built-in kinds, which are unit-independent.
    *
@@ -250,26 +246,24 @@ export function getDocumentLocationFields(
  * The minimal document fields getDocumentTitle reads. Structural so the registry stays a leaf module that
  * doesn't import the document models.
  */
-interface IDocumentTitleFields extends IKindScopedDocumentFields {
+interface IDocumentTitleFields {
+  kind?: string | null;
   type?: string;
   groupId?: string | null;
 }
 
 /**
- * The display title for a document based on its kind
+ * The display title a document's kind supplies, for the kinds whose name is a property of the kind itself
+ * rather than of the document. A class-wide document is not one of them: its name is authored per slot and
+ * stored on the document at creation, so it is read from the document like any other stored title.
  */
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
-  // A document whose definition is not loaded resolves no title here and falls through to a caller's
-  // fallback, which names it from its stored fields instead.
-  const info = getKindDefinitionFor(document);
-  if (info?.title != null) return info.title;
   // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
   // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
   // on the lookup above. Requiring `groupId` (not just `type === GroupDocument`) matters because a class-wide
-  // document also stores `type: "group"` but carries no `groupId` — if its `kind` is unregistered in this
-  // session (e.g. it belongs to a unit that has not loaded), the lookup above misses and execution reaches
-  // here; without the `groupId` check it would render as "Group undefined Document" instead of falling
-  // through to `undefined`, which callers already handle.
+  // document also stores `type: "group"` but carries no `groupId`, so without the `groupId` check it would
+  // render as "Group undefined Document" instead of falling through to `undefined`, which callers already
+  // handle by reading its stored title.
   //
   // TRANSITIONAL: this reads `type` only because a group document may carry no `kind`. Once
   // scripts/backfill-group-document-axes.ts has stamped `kind` on every group document in every
@@ -281,11 +275,11 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
 
 /**
  * A readable label derived from the kind string alone: "drivingQuestionBoard" → "Driving Question
- * Board". Registry-free by design, so it can name a document whose kind was declared by a unit config
- * that is not loaded — the case getDocumentTitle cannot answer.
+ * Board". Registry-free by design, so it can name a document no other source names — one created before
+ * its title was stored, or one whose kind stores no title at all.
  *
- * It recovers the kind's identity, not the author's wording: a slot titled "Our Big Questions" in its
- * own unit reads as "Driving Question Board" from elsewhere.
+ * It recovers the kind's identity, not the author's wording: a slot titled "Our Big Questions" reads as
+ * "Driving Question Board" here.
  */
 export function getDocumentKindLabel(kind?: string | null): string | undefined {
   if (!kind) return undefined;
@@ -295,17 +289,16 @@ export function getDocumentKindLabel(kind?: string | null): string | undefined {
 /**
  * Register a kind declared by a unit's `classWideDocuments` configuration. Every class-wide collaborative
  * document has the same shape — concurrent, owned by the synthetic class owner, kept in the class's copy of
- * the unit and about that unit and nothing narrower — so only the kind key, the authored title, and the
- * declaring unit come from the configuration. The title is registered rather than stored per document so it
- * resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind when the kind is malformed
- * or already registered.
+ * the unit and about that unit and nothing narrower — so only the kind key and the declaring unit come from
+ * the configuration. The authored title is not registered: it is stamped onto each document at creation, so
+ * it travels with the document instead of being resolved from a definition that may not be loaded. Throws
+ * like registerDocumentKind when the kind is malformed or already registered.
  */
-export function registerClassWideDocumentKind(kind: string, title: string, unit: string) {
+export function registerClassWideDocumentKind(kind: string, unit: string) {
   registerDocumentKind(kind, {
     metadataFields: { concurrent: true },
     ownerType: "class",
     containerType: "classUnit",
-    title,
     unit
   });
 }

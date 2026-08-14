@@ -82,6 +82,18 @@ export function isInClassUnitContainer(doc: IDocumentAxisFields): boolean {
 }
 
 /**
+ * Curriculum axis: the document is about a whole unit and nothing narrower.
+ *
+ * Distinct from the container question `isInClassUnitContainer` asks: this reads what the document is
+ * *about*, so it holds for a document kept anywhere as long as its curriculum position stops at the unit.
+ * Its consumer is presentation — a name authored at unit scope identifies its document only within that
+ * unit, so displaying one elsewhere has to say which unit it came from.
+ */
+export function isAboutUnitOnly(doc: IDocumentAxisFields): boolean {
+  return !!doc.unit && !doc.investigation && !doc.problem;
+}
+
+/**
  * A short label for a document's curriculum position: "sas-1.2" when it is about a problem, "sas" when
  * it is about a unit and nothing narrower, undefined when it has no unit at all.
  *

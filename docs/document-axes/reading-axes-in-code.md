@@ -32,8 +32,8 @@ from other units, whose kinds are not registered in the current session.
 
 The module also provides `getCurriculumLabel(doc)`, which names a document's curriculum position —
 `"sas-1.2"` for a problem, `"sas"` for a unit. Titles use it as a stand-in when a document's real
-title cannot be resolved. Nothing currently asks a yes/no question about the curriculum axis, so no
-guard for it exists.
+title cannot be resolved. The one yes/no question asked about the curriculum axis is
+`isAboutUnitOnly(doc)`, which titling uses to recognize a name authored at unit scope.
 
 ## How a kind declares its axes
 
@@ -121,17 +121,22 @@ what makes "about a unit but not a problem" a queryable condition.
 ## Titling a document from another unit
 
 Under Sort Work's "All" filter a class sees every document it owns, including documents from units it
-has already worked through — the class hash spans units. Two title-resolution problems follow, and both
-are handled by treating a unit-declared title as belonging to its unit:
+has already worked through — the class hash spans units. A class-wide document's authored title is
+stamped onto it at creation, so it names the document from anywhere, without its unit's config being
+loaded.
 
-- A kind declared by a unit that is not loaded has no registered title, and a class-wide document
-  stores no title of its own. `getDocumentDisplayTitle` names it from `getDocumentKindLabel(kind)` plus
-  the curriculum label — `"Driving Question Board (other)"`.
-- Two units may declare the *same* kind with different wording. `IDocumentKindInfo.unit` records which
-  unit's config declared a title, and `getDocumentTitle` returns it only for that unit's documents, so
-  a foreign document falls through to the label above rather than borrowing wording that may not be its
-  own.
+What the stored title cannot do by itself is tell two documents apart: a title is authored to be unique
+within one unit's config, and two units may each author a "Driving Question Board". So a title authored
+at unit scope — `isAboutUnitOnly(doc)` — is shown with its unit code when the document is not from the
+unit being viewed: `"Our Big Questions (other)"`. The unit *code* rather than its name, because nothing
+loads another unit's config.
 
-The kind label recovers the kind's identity, not the author's wording: a slot titled "Our Big Questions"
-in its own unit reads as "Driving Question Board" from elsewhere. Nothing loads another unit's config,
-so its authored title is not available.
+This is one instance of a general rule: **a title identifies a document only within the scope its author
+controlled, so displaying it outside that scope means adding back the coordinate that restores
+identification.** A student-authored personal document title is unique within nothing, and is
+disambiguated by creation time instead (`getDocumentTitleWithTimestamp`) — the same rule reaching for a
+different coordinate.
+
+A document created before its title was stored has none, and falls back to `getDocumentKindLabel(kind)`
+plus the curriculum label — `"Driving Question Board (other)"`. That recovers the kind's identity rather
+than the author's wording: a slot titled "Our Big Questions" reads as "Driving Question Board".

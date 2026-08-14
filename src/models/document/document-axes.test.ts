@@ -1,5 +1,5 @@
 import {
-  getCurriculumLabel, getGroupOwnerId, hasClassOwner, hasGroupOwner, isInClassUnitContainer
+  getCurriculumLabel, getGroupOwnerId, hasClassOwner, hasGroupOwner, isAboutUnitOnly, isInClassUnitContainer
 } from "./document-axes";
 
 describe("document axis guards", () => {
@@ -88,6 +88,29 @@ describe("document axis guards", () => {
 
     it("treats an empty-string unit as no unit", () => {
       expect(isInClassUnitContainer({ unit: "", offeringId: null })).toBe(false);
+    });
+  });
+
+  describe("isAboutUnitOnly", () => {
+    it("is true for a document about a whole unit", () => {
+      expect(isAboutUnitOnly(classWide)).toBe(true);
+      expect(isAboutUnitOnly(legacyClassWide)).toBe(true);
+    });
+
+    it("is false for a document about something narrower than its unit", () => {
+      expect(isAboutUnitOnly(problem)).toBe(false);
+      expect(isAboutUnitOnly(group)).toBe(false);
+      // The case that separates this from isInClassUnitContainer: an exemplar is kept in the class's copy
+      // of the unit, but it is about one problem, so its name is not authored at unit scope.
+      expect(isAboutUnitOnly(exemplar)).toBe(false);
+    });
+
+    it("is false for a document about no curriculum at all", () => {
+      expect(isAboutUnitOnly(personal)).toBe(false);
+    });
+
+    it("treats an empty-string unit as no unit", () => {
+      expect(isAboutUnitOnly({ unit: "" })).toBe(false);
     });
   });
 

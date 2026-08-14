@@ -414,13 +414,12 @@ describe("db", () => {
   });
 
   describe("class-wide document creation", () => {
-    it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent (but not title)", async () => {
+    it("createFirestoreMetadataDocument stamps class+unit scope, kind, concurrent, and the title", async () => {
       // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
-      // getDocumentLocationFields returns the class `unit` (read from the stores' current unit). The authored title
-      // is registered too, to prove it is resolved by kind and NOT persisted into the Firestore metadata.
+      // getDocumentLocationFields returns the class `unit` (read from the stores' current unit). The kind carries
+      // no title: the authored one is passed in and persisted, so it travels with the document.
       registerDocumentKind("drivingQuestionBoard", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-        title: "Driving Question Board"
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit"
       });
       // Rebuild stores with the classHash (→ context_id) and the current unit code the class-wide scope uses.
       stores = specStores({
@@ -438,24 +437,22 @@ describe("db", () => {
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner
-      // is passed directly. No title is passed — a class-wide doc's title is resolved live by kind at display.
+      // and the authored title are passed directly.
       const written: any = await db.createFirestoreMetadataDocument({
         documentKey: "dqb-1", type: GroupDocument, kind: "drivingQuestionBoard",
-        owner: "class_class-1", createdAt: 1
+        owner: "class_class-1", createdAt: 1, title: "Driving Question Board"
       });
       expect(written).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu",
+        type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
         kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
-      expect(written.title).toBeUndefined();       // title is looked up by kind, never stored
       expect(written.offeringId).toBeUndefined();
       expect(written.groupId).toBeUndefined();
       expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
       expect(setPayloads[0]).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu",
+        type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
         kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
-      expect(setPayloads[0].title).toBeUndefined();
       // The class+unit scope states its absent curriculum fields explicitly so the scope is
       // queryable; it must still carry no offering or group.
       expect(setPayloads.some((d: any) =>
@@ -482,7 +479,7 @@ describe("db", () => {
       // getDocumentOwner throws for an unregistered kind rather than defaulting the owner to the caller.
       registerDocumentKind("drivingQuestionBoard", {
         metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-        title: "DQB", unit: "msu"
+        unit: "msu"
       });
     });
 
@@ -511,10 +508,11 @@ describe("db", () => {
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
-      // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
+      // The authored title is threaded into createDocument, which stamps it onto the new document.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
-        kind: "drivingQuestionBoard"
+        kind: "drivingQuestionBoard",
+        title: "DQB"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
       expect(result.opened).toBeDefined();
