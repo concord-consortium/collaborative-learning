@@ -163,16 +163,21 @@ Per-type rather than one `in` query: cursor pagination over an `in` filter is th
 design would rather not depend on for a long production run, and the census partitions by type
 regardless.
 
-The queries need a `COLLECTION_GROUP` ascending index on `documents.type`. It is declared in
-`firestore.indexes.json`, but **declared is not deployed**: as of 2026-08-13 it was absent from
-*both* staging and production. It was added to the file alongside
-`scripts/backfill-group-document-axes.ts`, which needs the same index and has not been run either.
+The queries need a `COLLECTION_GROUP` ascending index on `documents.type`. It was declared in
+`firestore.indexes.json` alongside `scripts/backfill-group-document-axes.ts`, which needs the same
+index — but **declared is not deployed**, and it turned out to exist in neither environment. Nothing
+had exercised it, because neither sweep script had been run.
 
-So this is a prerequisite for the CLUE-604 sweep in every environment, for both scripts, and neither
-degrades gracefully without it — the first query fails outright. Deploy with
-`firebase deploy --only firestore:indexes --project <alias>`, and check the diff against what is
-deployed first: staging carries three indexes absent from the file, so a `--force` deploy there
-would delete them.
+**It was deployed to staging and production on 2026-08-13, so CLUE-604 does not need to repeat it.**
+Indexes persist, and `.firebaserc` defines only those two projects. Recorded here because the
+symptom is otherwise baffling: without the index the very first query fails outright, and both sweep
+scripts fail identically.
+
+A caution that outlives this: `firestore.indexes.json` is neither a complete record of what is
+deployed nor fully deployed itself. Staging carries indexes the file does not declare — including
+`summaries` vector indexes the file could not recreate, having no dimension config for them — so a
+`--force` deploy there, the natural reflex when the CLI warns about undeclared indexes, would delete
+them. Always diff against the deployed set first.
 
 Paginated rather than a single `.get()` — unlike its sibling, which loads a few hundred group
 documents at once. This query's result set is every problem document in every space, which will not

@@ -11,12 +11,13 @@
 // left untouched.
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
-// The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type`.
-// It is declared in firestore.indexes.json, but declared is not deployed — each environment needs it
-// actually created, and the first query fails outright without one. Deploy with
+// The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type`,
+// declared in firestore.indexes.json and deployed to staging and production on 2026-08-13. A new
+// environment would need it created before this script or backfill-group-document-axes.ts can run at
+// all — the first query fails outright without it. Deploy with
 // `firebase deploy --only firestore:indexes --project <alias>`, or use the one-click link Firestore
-// prints in the error. Check the diff against deployed indexes first: an environment may carry
-// indexes absent from the file, which a --force deploy would delete.
+// prints in the error. Diff against the deployed indexes first: an environment may carry indexes
+// absent from the file, which a --force deploy would delete.
 //
 // Dry run (reports counts, writes nothing):   npx tsx scripts/backfill-document-offering-id.ts
 // Apply (performs the writes):                APPLY=1 npx tsx scripts/backfill-document-offering-id.ts
