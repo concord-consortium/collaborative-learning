@@ -37,15 +37,6 @@ export interface IDocumentKindInfo {
   ownerType: DocumentOwnerType;
   /** Which container this kind's documents live in, and their curriculum reach. */
   containerType: DocumentContainerType;
-  /**
-   * The unit code whose config declared this kind. Set for kinds declared by a unit config; undefined
-   * for the built-in kinds, which are unit-independent.
-   *
-   * Kind names are not unique across configurations — two units may declare the same kind with different
-   * wording — and only the current unit's config is loaded. getKindDefinitionFor compares this against a
-   * document's own `unit` so one unit's definition is never applied to another unit's document.
-   */
-  unit?: string;
 }
 
 /**
@@ -64,10 +55,13 @@ export interface IDocumentOwnerContext {
 
 const kDocumentKindPattern = /^[a-z][a-zA-Z0-9]*$/;
 /**
- * A document `kind` is used as a Firestore path segment (the canonical-pointer slot) as well as the registry
- * key, so a kind is restricted to a camelCase identifier: a lowercase letter followed by letters/digits, with
- * no separators or special characters. This matches the built-in document type strings (e.g.
- * "learningLogPublication") and keeps the value safe as a Firestore document id.
+ * A camelCase identifier: a lowercase letter followed by letters/digits, with no separators or special
+ * characters. This matches the built-in document type strings (e.g. "learningLogPublication") and keeps the
+ * value safe as a Firestore document id.
+ *
+ * Required of a `kind`, which is the registry key, and of a `variant`, which a unit config supplies and
+ * which becomes the canonical-pointer slot's label — a Firestore path segment. The variant is the value
+ * that has to be checked at runtime; the kinds are all written in code.
  */
 export function isValidDocumentKind(value: string): boolean {
   return kDocumentKindPattern.test(value);
@@ -87,46 +81,11 @@ export function registerDocumentKind(kind: string, info: Omit<IDocumentKindInfo,
 }
 
 /**
- * Look a kind up by name alone, without asking which configuration defined it. Creation is the only
- * caller: a document being created takes its kind from the config in hand, so the definition found is
- * necessarily the one it is made from. Anything reading an existing document must use
- * getKindDefinitionFor instead.
+ * Every kind is registered by the application at startup, so a kind name resolves to the same definition
+ * in every session and for every document, whichever unit it came from.
  */
 export function getDocumentKindInfo(kind?: string|null) {
   return kind ? gDocumentKindInfoMap[kind] : undefined;
-}
-
-/**
- * The fields that identify which definition a document was made from: its kind, and the association
- * naming the configuration that declared that kind. Structural, so this stays a leaf module.
- */
-export interface IKindScopedDocumentFields {
-  kind?: string | null;
-  unit?: string | null;
-}
-
-/**
- * This document's kind definition, or undefined when no definition applicable to it is loaded.
- *
- * The single entry point for reading a kind definition off an existing document. It takes the document
- * rather than the kind because a kind name does not identify a definition on its own: a kind declared by a
- * unit config exists only while that unit is loaded, and two units may declare the same kind meaning
- * different things (see IDocumentKindInfo.unit). Matching the document's `unit` against the definition's is
- * what tells a definition that governs this document from one that merely shares its name.
- *
- * Undefined therefore means "no definition to read here", not "no such kind" — the document may well have
- * been created from a perfectly good definition belonging to a unit that is not loaded. Sort Work lists
- * documents from every unit a class has worked through, so this is ordinary rather than exceptional, and a
- * caller must answer from the document's stored fields instead. Anything a definition contributes that
- * cannot be recovered that way has to be stamped onto the document at creation.
- */
-export function getKindDefinitionFor(doc: IKindScopedDocumentFields): IDocumentKindInfo | undefined {
-  const info = getDocumentKindInfo(doc.kind);
-  if (!info) return undefined;
-  // A built-in kind declares no unit: it is registered by the application, so it governs its documents
-  // wherever they came from.
-  if (info.unit != null && info.unit !== doc.unit) return undefined;
-  return info;
 }
 
 /** A kind's full stamp set (its metadataFields plus the `kind` key), or `{}` if the kind is unregistered. */
@@ -147,10 +106,6 @@ export function getDocumentOwnerType(kind?: string|null): DocumentOwnerType {
  * getDocumentOwnerType does. Defaulting here would hand a group's or a class's document to whoever
  * happened to create it, and because a canonical slot is addressed by its owner, would file it in that
  * user's slot instead of the shared one — both silently.
- *
- * A unit-declared kind is registered only while the unit declaring it is loaded, so this also states the
- * rule that a document may be created only for a kind the current unit defines. Reading documents from
- * other units is unaffected: nothing on the read side resolves an owner (see document-axes.ts).
  */
 export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwnerContext): string {
   const info = getDocumentKindInfo(kind);
@@ -287,21 +242,11 @@ export function getDocumentKindLabel(kind?: string | null): string | undefined {
 }
 
 /**
- * Register a kind declared by a unit's `classWideDocuments` configuration. Every class-wide collaborative
- * document has the same shape — concurrent, owned by the synthetic class owner, kept in the class's copy of
- * the unit and about that unit and nothing narrower — so only the kind key and the declaring unit come from
- * the configuration. The authored title is not registered: it is stamped onto each document at creation, so
- * it travels with the document instead of being resolved from a definition that may not be loaded. Throws
- * like registerDocumentKind when the kind is malformed or already registered.
+ * The kind shared by every class-wide collaborative document. A unit config declares how many of them there
+ * are and what each is called, but not what they are: they all have the same shape, so they are one kind,
+ * and a document's `variant` says which of them it is.
  */
-export function registerClassWideDocumentKind(kind: string, unit: string) {
-  registerDocumentKind(kind, {
-    metadataFields: { concurrent: true },
-    ownerType: "class",
-    containerType: "classUnit",
-    unit
-  });
-}
+export const ClassWideDocument = "classWide";
 
 function registerBuiltInDocumentKinds() {
   // A group document is kept in the offering, like the problem documents beside it; what makes it a group's
@@ -310,6 +255,14 @@ function registerBuiltInDocumentKinds() {
     metadataFields: { concurrent: true },
     ownerType: "group",
     containerType: "offering"
+  });
+
+  // Owned by the class as a whole and kept in the class's copy of the unit, so it is about that unit and
+  // nothing narrower. Every class-wide document a unit declares shares this, whatever it is called.
+  registerDocumentKind(ClassWideDocument, {
+    metadataFields: { concurrent: true },
+    ownerType: "class",
+    containerType: "classUnit"
   });
 
   const personalLikeKindInfo = {

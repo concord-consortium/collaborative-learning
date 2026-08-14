@@ -6,7 +6,7 @@ import { createDocumentModel } from "./document";
 import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
-import { registerDocumentKind } from "./document-kinds";
+import { ClassWideDocument } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 describe("document utils", () => {
@@ -193,13 +193,10 @@ describe("document utils", () => {
       });
 
       test("a class-wide document uses the title stored on it, not one resolved from its kind", () => {
-        registerDocumentKind("testClassWideTitle", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-          unit: "test"
-        });
         const metadata = DocumentMetadataModel.create({
           // type stays "group"; the kind supplies no title, so the stored one names the document.
-          type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1",
+          type: GroupDocument, kind: ClassWideDocument, variant: "drivingQuestionBoard",
+          uid: "class_c1", key: "dqb-1",
           title: "Driving Question Board", unit: "test", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
@@ -217,7 +214,8 @@ describe("document utils", () => {
         // added back because that is the scope the title was authored to be unique within — two units may
         // each author a "Driving Question Board".
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
+          type: GroupDocument, kind: ClassWideDocument, variant: "drivingQuestionBoard",
+          uid: "class_c1", key: "dqb-other",
           title: "Our Big Questions", unit: "other", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Our Big Questions (other)");
@@ -225,7 +223,8 @@ describe("document utils", () => {
 
       test("does not add the unit to a document from the unit being viewed", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-own",
+          type: GroupDocument, kind: ClassWideDocument, variant: "drivingQuestionBoard",
+          uid: "class_c1", key: "dqb-own",
           title: "Our Big Questions", unit: "test", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Our Big Questions");
@@ -233,7 +232,8 @@ describe("document utils", () => {
 
       test("falls back to the kind and unit for a document created before titles were stored", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-untitled",
+          type: GroupDocument, kind: ClassWideDocument, variant: "drivingQuestionBoard",
+          uid: "class_c1", key: "dqb-untitled",
           unit: "other", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board (other)");
@@ -241,7 +241,8 @@ describe("document utils", () => {
 
       test("falls back to the kind alone when the document has no unit", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
+          type: GroupDocument, kind: ClassWideDocument, variant: "drivingQuestionBoard",
+          uid: "class_c1", key: "dqb-no-unit"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });

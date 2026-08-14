@@ -47,7 +47,9 @@ function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: Docum
  * stored fields because an unnamed document gives no other indication of where it sits.
  */
 function getUnresolvedDocumentTitle(document: DocumentModelType | IDocumentMetadataModel) {
-  const kindLabel = getDocumentKindLabel(document.kind);
+  // The variant before the kind: several documents share a kind, so the kind alone would name them all
+  // alike ("Class Wide"), while the variant is what says which one this is.
+  const kindLabel = getDocumentKindLabel(document.variant ?? document.kind);
   if (!kindLabel) return undefined;
   const curriculumLabel = getCurriculumLabel(document);
   return curriculumLabel ? `${kindLabel} (${curriculumLabel})` : kindLabel;

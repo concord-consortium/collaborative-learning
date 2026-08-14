@@ -289,52 +289,38 @@ needed a separate preset concept — `type` does both jobs at once. The part tha
 defaults, the permission baseline, and copy/publish templates have no separate existence today; `type` and
 the code around it supply them implicitly.
 
-#### Static and dynamic kinds
+#### Kinds and variants
 
-A preset does not have to be written in code. Kinds come from two sources:
+Every kind is written in code and registered at startup, so a kind name means the same thing in every
+session and for every document. A unit config does not declare kinds; it declares **variants**.
 
-- **Static kinds** are registered by the application itself. They exist for the whole session, everywhere,
-  and are the same for every user.
-- **Dynamic kinds** are declared in configuration that is loaded at runtime — today, a unit's
-  `classWideDocuments`, which registers a kind when that unit loads. This is what lets "add another
-  class-wide document" be an authoring change rather than a code change, and it is the direction the
-  roadmap wants: a preset is data.
+A variant says *which* of a kind's documents this one is, for a kind a unit has several of. The kind fixes
+everything the variants share — a class-wide document's owner, container, curriculum reach, and
+concurrency are all properties of `classWide`, not of any one class-wide document — and the variant
+carries only the identity that separates them: which canonical slot it fills, what it is called, how it is
+styled. This is what lets "add another class-wide document" be an authoring change rather than a code
+change, without a preset being data.
 
-Dynamic kinds carry a constraint that static kinds do not, and it is a property of *where the definition
-is loaded from*, not of the kind itself: **a dynamic kind's definition is only present when its
-configuration is loaded.** Only the current unit's config is loaded, so for a unit-declared kind the
-definition is absent for every document from any other unit — while those documents remain visible, because
-Sort Work's unfiltered view spans every unit a class has worked through.
+A variant is unconstrained data from a config, so it carries the obligations a configured value always
+does:
 
-Two rules follow, and both are really the same rule — *a document must remain interpretable without its
-kind's definition*:
+1. **A variant must be a usable identifier.** It is the canonical slot's label, and so a Firestore path
+   segment, checked by `isValidDocumentKind` before a document is created from it. Two entries sharing one
+   would contend for the same slot, so a duplicate is dropped.
+2. **A variant must be interpretable without the config that declared it.** Sort Work's unfiltered view
+   spans every unit a class has worked through, so a document's variant is routinely read in a session
+   where its unit's config is not loaded. Nothing looks a variant up — it is stamped on the document and
+   read back from there, and what it can't supply on its own (the authored title) is stamped alongside it.
 
-1. **Anything a dynamic kind supplies must be stamped at creation or degrade gracefully.** Values the
-   definition contributes to a document's axes are written onto the document, so they survive the
-   definition's absence. Anything not stamped — presentation, above all — must have a fallback derived from
-   stored fields alone. This is the same reason consumers read a document's container and curriculum
-   from its stored associations rather than through the registry.
-2. **A dynamic kind's documents must carry the association that identifies the configuration that defined
-   them.** For unit-declared kinds that association is `unit`. Kind names are not globally unique across
-   configurations — two units may declare the same kind with different wording — so without it there is no
-   way to tell whether a definition found under that name is the one the document was made from, and the
-   wrong definition would be applied confidently.
+What it does *not* carry is a question about which definition applies. There is only one definition — the
+kind's — and it is present everywhere. A variant naming a document in one unit cannot be confused with the
+same variant in another, because nothing resolves a variant to anything.
 
-   `getKindDefinitionFor(doc)` is where this rule lives in code: it is the one way to read a kind definition
-   off an existing document, and it compares the two associations before returning anything. Creation looks
-   kinds up by name instead (`getDocumentKindInfo`), which is sound because a document being created takes
-   its kind from the configuration in hand. Keeping every read behind one function is what makes rule 1's
-   fallback obligation checkable — a consumer either handles the undefined case or does not compile.
-
-**This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce
-documents about that unit or narrower, because rule 2 requires the `unit` association and the
-curriculum axis is a nesting rooted at the unit — every position at or below it carries one. It cannot
-produce documents with no curriculum position at all, like personal documents and learning logs.
-Making *those* presets authorable is a reasonable future goal, but it is not just a matter of adding
-entries to a unit config: it needs a configuration source loaded independently of the current unit
-(class- or site-level), so that a definition is present wherever its documents are, along with an
-association on the document naming that source. Until such a source exists, personal-like presets stay
-static.
+**This bounds what a unit config can declare.** It can add variants of kinds that already exist, not new
+kinds. A personal-like document authored per unit is not expressible: personal documents have no
+curriculum position, so nothing on them would say which config declared them, and there is no `personal`
+variant axis for a config to extend. Making *those* presets authorable needs a configuration source loaded
+independently of the current unit (class- or site-level), the same as before.
 
 **How a kind sets that today.** A kind declares only `containerType`, and `getDocumentLocationFields`
 derives both the container and curriculum axes' fields from it, so a document's curriculum position

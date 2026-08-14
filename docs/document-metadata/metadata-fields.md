@@ -387,6 +387,23 @@ identity of a document.
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
 
+### `variant`
+
+Which of a kind's documents this one is, for a kind a unit config declares several of. Only class-wide
+documents carry one today.
+
+- **Stores:** Firestore only
+- **Location:** Firestore `documents/{key}.variant`
+- **Applies to:** class-wide collaborative documents
+- **Runtime:** `DocumentModel.variant`, `DocumentMetadataModel.variant` — no setters
+- **Updated by:** nothing — creation only, stamped from the unit config's `classWideDocuments` entry
+- **Reactive:** No — immutable
+
+The variant equals the document's `canonical` slot label, which is what keeps a unit's several class-wide
+documents in separate slots; the kind they share could not. It is also the stylesheet hook and the
+last-resort display label, since the kind is identical across all of them. Stamped rather than looked up:
+Sort Work lists documents from units whose configs are not loaded.
+
 ### `unit`, `investigation`, `problem`
 
 - **Stores:** Firestore + RTDB *(declared)*
