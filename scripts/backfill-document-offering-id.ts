@@ -12,13 +12,20 @@
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
 // The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type`.
-// It is declared in firestore.indexes.json, but that file was reconciled against production's
-// indexes — each environment needs the index actually deployed to it, and the first query fails
-// outright without one. Deploy with `firebase deploy --only firestore:indexes --project <alias>`, or
-// use the one-click link Firestore prints in the error.
+// It is declared in firestore.indexes.json, but declared is not deployed — each environment needs it
+// actually created, and the first query fails outright without one. Deploy with
+// `firebase deploy --only firestore:indexes --project <alias>`, or use the one-click link Firestore
+// prints in the error. Check the diff against deployed indexes first: an environment may carry
+// indexes absent from the file, which a --force deploy would delete.
 //
 // Dry run (reports counts, writes nothing):   npx tsx scripts/backfill-document-offering-id.ts
 // Apply (performs the writes):                APPLY=1 npx tsx scripts/backfill-document-offering-id.ts
+//
+// TYPES limits the scan to a comma-separated subset of the types below, for sampling a large
+// environment before committing to a full sweep. PAGE_SIZE tunes the query page (default 300).
+// DATABASE_URL overrides the Realtime Database URL chosen from the credential's project.
+//
+//   TYPES=planning PAGE_SIZE=1000 npx tsx scripts/backfill-document-offering-id.ts
 
 import type { Firestore } from "firebase-admin/firestore";
 // Specified without the `.js` extension that the other scripts here use. This module is loaded by a
@@ -191,6 +198,32 @@ async function* iterateDocuments(db: Firestore, type: string, pageSize: number) 
 }
 
 /**
+ * The types a run should scan, from a comma-separated `TYPES`. Every name is checked against the known
+ * set and an unknown one throws: a typo would otherwise scan nothing and report a confident, empty
+ * census, which is indistinguishable from "this type is clean".
+ */
+export function parseTypes(raw: string | undefined): readonly string[] {
+  const requested = (raw ?? "").split(",").map((t) => t.trim()).filter(Boolean);
+  if (requested.length === 0) return kOfferingContainedTypes;
+  const unknown = requested.filter((t) => !kOfferingContainedTypes.includes(t as any));
+  if (unknown.length > 0) {
+    throw new Error(`TYPES names unknown type(s): ${unknown.join(", ")}. ` +
+      `Known types are: ${kOfferingContainedTypes.join(", ")}`);
+  }
+  return requested;
+}
+
+/** The page size from `PAGE_SIZE`. Rejects anything that is not a positive integer. */
+export function parsePageSize(raw: string | undefined, fallback: number): number {
+  if (!raw) return fallback;
+  const size = Number(raw);
+  if (!Number.isInteger(size) || size < 1) {
+    throw new Error(`PAGE_SIZE must be a positive integer, got "${raw}"`);
+  }
+  return size;
+}
+
+/**
  * Census, and optionally repair, the `offeringId` of every offering-contained document.
  *
  * Idempotency works differently here than in scripts/backfill-group-document-axes.ts, whose whole
@@ -204,8 +237,10 @@ async function* iterateDocuments(db: Firestore, type: string, pageSize: number) 
 export async function backfillDocumentOfferingId(
   db: Firestore,
   database: IMetadataDatabase,
-  { dryRun = true, log = console.log, pageSize = 300, concurrency = 25 }: {
+  { dryRun = true, log = console.log, pageSize = 300, concurrency = 25,
+    types = kOfferingContainedTypes }: {
     dryRun?: boolean; log?: (message: string) => void; pageSize?: number; concurrency?: number;
+    types?: readonly string[];
   } = {}
 ): Promise<IBackfillOfferingIdResult> {
   const result: IBackfillOfferingIdResult = {
@@ -248,7 +283,7 @@ export async function backfillDocumentOfferingId(
   };
 
   try {
-    for (const type of kOfferingContainedTypes) {
+    for (const type of types) {
       for await (const docs of iterateDocuments(db, type, pageSize)) {
         result.scanned += docs.length;
         const classified = docs.map((doc: any) => ({ doc, c: classifyDocument(doc.data(), doc.ref.path) }));
@@ -327,12 +362,19 @@ async function main() {
     throw new Error(`No Realtime Database URL known for project "${serviceAccount.project_id}". ` +
       `Add it above, or set DATABASE_URL.`);
   }
+  // Parsed before anything connects, so a bad value costs nothing.
+  const types = parseTypes(process.env.TYPES);
+  const pageSize = parsePageSize(process.env.PAGE_SIZE, 300);
+  const dryRun = process.env.APPLY !== "1";
   console.log(`- Service account: ${serviceAccount.client_email}`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);
   console.log(`- Realtime Database URL: ${databaseURL}`);
+  console.log(`- Types: ${types.join(", ")}`);
+  console.log(`- Page size: ${pageSize}`);
+  console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will write"}`);
   admin.initializeApp({ credential: admin.credential.cert(serviceAccountFile), databaseURL });
   const result = await backfillDocumentOfferingId(
-    admin.firestore(), admin.database(), { dryRun: process.env.APPLY !== "1" }
+    admin.firestore(), admin.database(), { dryRun, types, pageSize }
   );
   console.log("done", JSON.stringify(result, null, 2));
   process.exit(0);

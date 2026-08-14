@@ -164,10 +164,15 @@ design would rather not depend on for a long production run, and the census part
 regardless.
 
 The queries need a `COLLECTION_GROUP` ascending index on `documents.type`. It is declared in
-`firestore.indexes.json`, but **declared is not deployed** — that file was reconciled against
-*production's* indexes, so the index exists there and had to be created in staging before a run
-could get past its first query. Each environment needs it present before either sweep script runs,
-and neither script degrades gracefully without it: the first query fails outright.
+`firestore.indexes.json`, but **declared is not deployed**: as of 2026-08-13 it was absent from
+*both* staging and production. It was added to the file alongside
+`scripts/backfill-group-document-axes.ts`, which needs the same index and has not been run either.
+
+So this is a prerequisite for the CLUE-604 sweep in every environment, for both scripts, and neither
+degrades gracefully without it — the first query fails outright. Deploy with
+`firebase deploy --only firestore:indexes --project <alias>`, and check the diff against what is
+deployed first: staging carries three indexes absent from the file, so a `--force` deploy there
+would delete them.
 
 Paginated rather than a single `.get()` — unlike its sibling, which loads a few hundred group
 documents at once. This query's result set is every problem document in every space, which will not

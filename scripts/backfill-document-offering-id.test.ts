@@ -1,6 +1,6 @@
 import {
   classifyDocument, getSpaceFromFirestorePath, getSpaceLabel, getTestPartitionLabel,
-  kOfferingContainedTypes
+  kOfferingContainedTypes, parsePageSize, parseTypes
 } from "./backfill-document-offering-id";
 import { backfillDocumentOfferingId } from "./backfill-document-offering-id";
 import type { IBucketCounts } from "./backfill-document-offering-id";
@@ -61,6 +61,44 @@ describe("getTestPartitionLabel", () => {
     expect(getTestPartitionLabel("demo/CLUE/documents/abc")).toBeUndefined();
     expect(getTestPartitionLabel("nosuchroot/x/documents/abc")).toBeUndefined();
     expect(getTestPartitionLabel("qa/x/other/abc")).toBeUndefined();
+  });
+});
+
+describe("parseTypes", () => {
+  it("defaults to every offering-contained type", () => {
+    expect(parseTypes(undefined)).toEqual(kOfferingContainedTypes);
+    expect(parseTypes("")).toEqual(kOfferingContainedTypes);
+    expect(parseTypes("  ,  ")).toEqual(kOfferingContainedTypes);
+  });
+
+  it("accepts a subset, trimming whitespace", () => {
+    expect(parseTypes("planning")).toEqual(["planning"]);
+    expect(parseTypes(" problem , planning ")).toEqual(["problem", "planning"]);
+  });
+
+  it("throws on an unknown type rather than scanning nothing", () => {
+    // The failure this prevents is silent: an unrecognized type matches no document, so the run
+    // reports a clean empty census that is indistinguishable from "this type has no problems".
+    // "problemPublication" is the specific typo worth guarding — the stored value is "publication".
+    expect(() => parseTypes("problemPublication")).toThrow(/unknown type/i);
+    expect(() => parseTypes("problem,nope")).toThrow(/nope/);
+  });
+});
+
+describe("parsePageSize", () => {
+  it("falls back when unset", () => {
+    expect(parsePageSize(undefined, 300)).toBe(300);
+    expect(parsePageSize("", 300)).toBe(300);
+  });
+
+  it("accepts a positive integer", () => {
+    expect(parsePageSize("1000", 300)).toBe(1000);
+  });
+
+  it("rejects anything else", () => {
+    for (const bad of ["0", "-5", "1.5", "lots"]) {
+      expect(() => parsePageSize(bad, 300)).toThrow(/positive integer/);
+    }
   });
 });
 
@@ -245,6 +283,13 @@ describe("backfillDocumentOfferingId — scanning", () => {
     // Ordered by document id so the cursor is total and stable. Ordering on a field would need a
     // composite collection-group index that does not exist.
     expect(new Set(db.calls.orderBy)).toEqual(new Set(["__name__"]));
+  });
+
+  it("queries only the types it was given", async () => {
+    // Sampling one type is how a large environment gets a cheap first look before a full sweep.
+    const db = makeDb({});
+    await run(db, makeRtdb({}), { dryRun: true, types: ["planning"] });
+    expect(db.calls.types).toEqual(["planning"]);
   });
 
   it("resolves an offeringId from the RTDB metadata node", async () => {
