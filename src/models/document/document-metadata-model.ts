@@ -37,6 +37,7 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   visibility: types.maybeNull(types.string),
   concurrent: types.maybeNull(types.boolean),
   kind: types.maybeNull(types.string),
+  variant: types.maybeNull(types.string),
   lastHistoryEntry: types.maybeNull(types.model({
     id: types.string,
     index: types.number,

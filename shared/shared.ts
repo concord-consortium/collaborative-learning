@@ -157,6 +157,10 @@ export interface IDocumentMetadata extends IDocumentMetadataBase {
   }|null;
   concurrent?: boolean|null;
   kind?: string|null;
+  // Which of a kind's several documents this one is, for kinds a unit config declares more than one of.
+  // The kind fixes the axis values they share; the variant is the only thing telling them apart, so it is
+  // also the canonical-pointer slot label that keeps them in separate slots.
+  variant?: string|null;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;

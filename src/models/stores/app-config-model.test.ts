@@ -299,11 +299,11 @@ describe("ConfigurationManager", () => {
       const appConfig = AppConfigModel.create({
         config: {
           ...unitConfigDefaults,
-          classWideDocuments: [{ kind: "drivingQuestionBoard", title: "Driving Question Board" }]
+          classWideDocuments: [{ variant: "drivingQuestionBoard", title: "Driving Question Board" }]
         } as any
       });
       expect(appConfig.classWideDocuments).toEqual([
-        { kind: "drivingQuestionBoard", title: "Driving Question Board" }
+        { variant: "drivingQuestionBoard", title: "Driving Question Board" }
       ]);
     });
   });

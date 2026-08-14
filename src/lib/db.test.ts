@@ -3,7 +3,9 @@ import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../mo
 import { DBDocument } from "./db-types";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
-import { registerDocumentKind, resetDocumentKindRegistryForTests } from "../models/document/document-kinds";
+import {
+  ClassWideDocument, registerDocumentKind, resetDocumentKindRegistryForTests
+} from "../models/document/document-kinds";
 import {
   GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -414,13 +416,10 @@ describe("db", () => {
   });
 
   describe("class-wide document creation", () => {
-    it("createFirestoreMetadataDocument stamps class+unit scope, kind, concurrent, and the title", async () => {
-      // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
-      // getDocumentLocationFields returns the class `unit` (read from the stores' current unit). The kind carries
-      // no title: the authored one is passed in and persisted, so it travels with the document.
-      registerDocumentKind("drivingQuestionBoard", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit"
-      });
+    it("stamps class+unit scope, kind, variant, concurrent, and the title", async () => {
+      // The class-wide kind is a built-in, so nothing has to register it: getDocumentKindMetadataFields
+      // returns its axis fields and getDocumentLocationFields the class `unit` in every session. The
+      // authored title and the variant are passed in and persisted, so they travel with the document.
       // Rebuild stores with the classHash (→ context_id) and the current unit code the class-wide scope uses.
       stores = specStores({
         appMode: "test",
@@ -436,22 +435,23 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner
-      // and the authored title are passed directly.
+      // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner,
+      // variant, and the authored title are passed directly.
       const written: any = await db.createFirestoreMetadataDocument({
-        documentKey: "dqb-1", type: GroupDocument, kind: "drivingQuestionBoard",
+        documentKey: "dqb-1", type: GroupDocument, kind: ClassWideDocument,
+        variant: "drivingQuestionBoard",
         owner: "class_class-1", createdAt: 1, title: "Driving Question Board"
       });
       expect(written).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
-        kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
+        kind: ClassWideDocument, variant: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       expect(written.offeringId).toBeUndefined();
       expect(written.groupId).toBeUndefined();
       expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
       expect(setPayloads[0]).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu", title: "Driving Question Board",
-        kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
+        kind: ClassWideDocument, variant: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       // The class+unit scope states its absent curriculum fields explicitly so the scope is
       // queryable; it must still carry no offering or group.
@@ -475,12 +475,8 @@ describe("db", () => {
       });
       (db as any).openDocumentFromFirestoreMetadata = openStub;
       (db as any).findFirestoreMetadata = jest.fn(async (k: string) => ({ key: k }));
-      // createDeclaredClassWideDocuments registers a declared kind before asking for its document, and
-      // getDocumentOwner throws for an unregistered kind rather than defaulting the owner to the caller.
-      registerDocumentKind("drivingQuestionBoard", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-        unit: "msu"
-      });
+      // Nothing registers a kind here: the class-wide kind is a built-in, so getDocumentOwner resolves the
+      // class owner without a unit config having declared anything.
     });
 
     it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {
@@ -490,7 +486,7 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      const result: any = await db.getOrCreateClassWideDocument({ variant: "drivingQuestionBoard", title: "DQB" });
       expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
       expect(result.opened).toBe("existing");
     });
@@ -507,11 +503,13 @@ describe("db", () => {
              set: (_r: any, d: any) => setCalls.push(d),
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
-      // The authored title is threaded into createDocument, which stamps it onto the new document.
+      const result: any = await db.getOrCreateClassWideDocument({ variant: "drivingQuestionBoard", title: "DQB" });
+      // The variant and the authored title are threaded into createDocument, which stamps them onto the new
+      // document. The kind is the shared one, so it is not what tells this document from the next.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
-        kind: "drivingQuestionBoard",
+        kind: ClassWideDocument,
+        variant: "drivingQuestionBoard",
         title: "DQB"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
@@ -839,8 +837,8 @@ describe("db", () => {
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
-          { kind: "drivingQuestionBoard", title: "DQB" },
-          { kind: "wordWall", title: "Word Wall" }
+          { variant: "drivingQuestionBoard", title: "DQB" },
+          { variant: "wordWall", title: "Word Wall" }
         ] } as any
       });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
@@ -848,7 +846,7 @@ describe("db", () => {
       // allow the fire-and-forget promises to settle
       await new Promise(r => setTimeout(r, 0));
       expect((db as any).getOrCreateClassWideDocument).toHaveBeenCalledTimes(2);
-      expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard", "wordWall"]);
+      expect(created.map((s: any) => s.variant)).toEqual(["drivingQuestionBoard", "wordWall"]);
     });
 
     it("does nothing when no class-wide documents are declared", async () => {
@@ -860,41 +858,44 @@ describe("db", () => {
       expect((db as any).getOrCreateClassWideDocument).not.toHaveBeenCalled();
     });
 
-    it("skips entries whose kind is not a valid camelCase identifier", async () => {
+    it("skips entries whose variant is not a valid camelCase identifier", async () => {
+      // The variant is the canonical slot's label, so it has to be a usable Firestore path segment — the
+      // same constraint the kind carried when the kind was what a unit declared.
       const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
       const created: any[] = [];
       (db as any).getOrCreateClassWideDocument =
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
-          { kind: "driving-question-board", title: "invalid (kebab-case)" },
-          { kind: "drivingQuestionBoard", title: "DQB" }
+          { variant: "driving-question-board", title: "invalid (kebab-case)" },
+          { variant: "drivingQuestionBoard", title: "DQB" }
         ] } as any
       });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       (db as any).createDeclaredClassWideDocuments();
       await new Promise(r => setTimeout(r, 0));
-      expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard"]);
+      expect(created.map((s: any) => s.variant)).toEqual(["drivingQuestionBoard"]);
       expect(errorSpy).toHaveBeenCalled();
       errorSpy.mockRestore();
     });
 
-    it("skips a second entry whose kind duplicates an already-registered kind", async () => {
+    it("skips a second entry whose variant duplicates an earlier one", async () => {
+      // Two entries sharing a variant would contend for one canonical slot, so the later one is dropped.
+      // A variant colliding with a *kind* name is fine now — they are different namespaces.
       const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
       const created: any[] = [];
       (db as any).getOrCreateClassWideDocument =
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
-          { kind: "drivingQuestionBoard", title: "DQB" },
-          { kind: "drivingQuestionBoard", title: "duplicate" },  // duplicate kind: registration throws → skipped
-          { kind: "group", title: "collides with a built-in kind" }  // also skipped
+          { variant: "drivingQuestionBoard", title: "DQB" },
+          { variant: "drivingQuestionBoard", title: "duplicate" }
         ] } as any
       });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       (db as any).createDeclaredClassWideDocuments();
       await new Promise(r => setTimeout(r, 0));
-      expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard"]);
+      expect(created.map((s: any) => s.variant)).toEqual(["drivingQuestionBoard"]);
       expect(errorSpy).toHaveBeenCalled();
       errorSpy.mockRestore();
     });

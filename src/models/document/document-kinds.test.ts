@@ -1,7 +1,7 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
-  getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields, getDocumentOwner,
-  getDocumentOwnerFields, getDocumentOwnerType, getDocumentLocationFields, getDocumentTitle, getKindDefinitionFor,
+  ClassWideDocument, getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields, getDocumentOwner,
+  getDocumentOwnerFields, getDocumentOwnerType, getDocumentLocationFields, getDocumentTitle,
   isValidDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "./document-kinds";
 
@@ -154,39 +154,20 @@ describe("document kinds registry", () => {
     });
   });
 
-  describe("getKindDefinitionFor", () => {
-    it("resolves a built-in kind for a document from any unit, since no unit declared it", () => {
-      expect(getKindDefinitionFor({ kind: GroupDocument, unit: "sas" })?.ownerType).toBe("group");
-      expect(getKindDefinitionFor({ kind: GroupDocument })?.ownerType).toBe("group");
+  describe("the class-wide kind", () => {
+    it("is registered at startup with the axis values every class-wide document shares", () => {
+      const info = getDocumentKindInfo(ClassWideDocument);
+      expect(info?.ownerType).toBe("class");
+      expect(info?.containerType).toBe("classUnit");
+      expect(info?.metadataFields.concurrent).toBe(true);
     });
 
-    it("returns undefined when the kind is unregistered or absent", () => {
-      expect(getKindDefinitionFor({ kind: "unregisteredKind", unit: "sas" })).toBeUndefined();
-      expect(getKindDefinitionFor({ unit: "sas" })).toBeUndefined();
-    });
-
-    describe("a kind declared by a unit config", () => {
-      beforeEach(() => {
-        resetDocumentKindRegistryForTests();
-        registerDocumentKind("testScopedKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-          unit: "sas"
-        });
-      });
-
-      it("resolves for a document from the unit that declared it", () => {
-        expect(getKindDefinitionFor({ kind: "testScopedKind", unit: "sas" })?.ownerType).toBe("class");
-      });
-
-      it("returns undefined for a document from another unit declaring the same kind", () => {
-        // The loaded definition is not the one this document was made from, and the other unit may mean
-        // something different by the name, so nothing here governs it.
-        expect(getKindDefinitionFor({ kind: "testScopedKind", unit: "msa" })).toBeUndefined();
-      });
-
-      it("returns undefined for a document with no unit at all", () => {
-        expect(getKindDefinitionFor({ kind: "testScopedKind" })).toBeUndefined();
-      });
+    it("resolves the same for a document from any unit", () => {
+      // The definition is written in code rather than declared by a unit config, so it is present in every
+      // session — there is nothing to scope it to and nothing to be absent.
+      expect(getDocumentOwnerType(ClassWideDocument)).toBe("class");
+      expect(getDocumentKindMetadataFields(ClassWideDocument))
+        .toEqual({ kind: ClassWideDocument, concurrent: true });
     });
   });
 
@@ -209,11 +190,7 @@ describe("document kinds registry", () => {
       // A class-wide document also stores type:"group" but carries no groupId, so it must not fall through
       // to the group-document label (which would read "Group undefined Document"). Returning undefined is
       // what sends the caller to the document's stored title.
-      registerDocumentKind("testClassWideKind", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit", unit: "sas"
-      });
-      expect(getDocumentTitle({ kind: "testClassWideKind", type: GroupDocument })).toBeUndefined();
-      expect(getDocumentTitle({ kind: "unregisteredClassWideKind", type: GroupDocument })).toBeUndefined();
+      expect(getDocumentTitle({ kind: ClassWideDocument, type: GroupDocument })).toBeUndefined();
     });
   });
 

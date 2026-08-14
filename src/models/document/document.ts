@@ -95,6 +95,7 @@ export const DocumentModel = Tree.named("Document")
     contextId: types.maybe(types.string), // the document's authoritative owning-class (Firestore context_id)
     concurrent: types.maybe(types.boolean),
     kind: types.maybe(types.string),
+    variant: types.maybe(types.string),
   })
   .volatile(self => ({
     treeMonitor: undefined as TreeMonitor | undefined,
@@ -151,12 +152,12 @@ export const DocumentModel = Tree.named("Document")
     },
     get metadata(): IDocumentMetadata {
       const { uid, groupId, type, key, createdAt, title, originDoc, properties, visibility, concurrent, kind,
-              contextId } = self;
+              variant, contextId } = self;
       // `groupId` is undefined for everything but a group document, matching the stored field it mirrors,
       // so this shape agrees with what Firestore holds. The owning user's group is deliberately absent: it is
       // not document metadata. Nothing writes this back to Firestore or Firebase today — it is used for
       // finding Firestore documents and for reading a document's axes.
-      return { uid, groupId, type, key, createdAt, title, concurrent, kind, context_id: contextId,
+      return { uid, groupId, type, key, createdAt, title, concurrent, kind, variant, context_id: contextId,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
         problem: self.problem, unit: self.unit, offeringId: self.offeringId, visibility } as IDocumentMetadata;
     },

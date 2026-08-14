@@ -34,7 +34,7 @@ import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
   getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
-  getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
+  ClassWideDocument, getDocumentOwnerType, IDocumentOwnerContext, isValidDocumentKind
 } from "../models/document/document-kinds";
 import { kClassOwnerPrefix } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
@@ -123,8 +123,11 @@ interface IGetOrCreateCanonicalDocumentOpts {
   // the owner uid (createDocument derives it via the kind registry).
   type: DBDocumentType;
   kind: string;
-  // The document's stored title, for kinds whose name is authored per slot. Stamped once at creation so it
-  // travels with the document; kinds that take their name from the kind itself pass none.
+  // Which of the kind's documents this is, when a unit declares more than one. Also the slot label, so the
+  // variants of one kind occupy separate slots.
+  variant?: string;
+  // The document's stored title, for kinds whose name is authored per document. Stamped once at creation so
+  // it travels with the document; kinds that take their name from the kind itself pass none.
   title?: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
@@ -133,6 +136,7 @@ interface ICreateFirestoreMetadataDocumentOpts {
   documentKey: string;
   type: DBDocumentType;
   kind: string;
+  variant?: string;
   owner: string;
   createdAt: number;
   title?: string;
@@ -586,7 +590,7 @@ export class DB {
   }
 
   async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts) {
-    const { documentKey, type, kind, owner, createdAt, title } = opts;
+    const { documentKey, type, kind, variant, owner, createdAt, title } = opts;
     const { user } = this.stores;
     const userContext = this.stores.userContextProvider.userContext;
 
@@ -617,10 +621,14 @@ export class DB {
     // writing (a group kind requires the user to be in a group, so currentGroupId is present).
     const ownerFields = getDocumentOwnerFields(kind, { groupId: user.currentGroupId });
 
-    // `title` is stamped only when present so Firestore never sees `title: undefined`.
+    // `title` and `variant` are stamped only when present so Firestore never sees an undefined value.
     const titleInfo: { title?: string } = {};
     if (title != null) {
       titleInfo.title = title;
+    }
+    const variantInfo: { variant?: string } = {};
+    if (variant != null) {
+      variantInfo.variant = variant;
     }
 
     // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
@@ -640,6 +648,7 @@ export class DB {
       properties: {},
       uid: owner,
       ...titleInfo,
+      ...variantInfo,
       ...ownerFields,
       ...locationFields,
       ...kindFields
@@ -678,11 +687,11 @@ export class DB {
   }
 
   public async createDocument(
-    params: { type: DBDocumentType, kind?: string, content?: string, title?: string }
+    params: { type: DBDocumentType, kind?: string, variant?: string, content?: string, title?: string }
   ) {
     // `kind` defaults to `type` so all documents have a kind, and we can
     // start to use the kind registry to manage all documents.
-    const { type, kind = type, content, title } = params;
+    const { type, kind = type, variant, content, title } = params;
     const { user } = this.stores;
 
     this.validateDocumentKindCreation(kind);
@@ -754,7 +763,7 @@ export class DB {
           // This way the RTDB and Firestore metadata have the same createdAt value.
           const resolvedCreatedAt: number = metadataValue.val().createdAt;
           return this.createFirestoreMetadataDocument({
-            documentKey, type, kind, owner, createdAt: resolvedCreatedAt, title
+            documentKey, type, kind, variant, owner, createdAt: resolvedCreatedAt, title
           });
         })
         .then((firestoreMetadata) => {
@@ -797,41 +806,40 @@ export class DB {
     return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
   }
 
-  public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
+  public async getOrCreateClassWideDocument(classWideDoc: { variant: string; title: string }) {
     const { user, unit } = this.stores;
-    // For a class-wide document the canonical-pointer label equals the document's kind.
-    // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
-    // The authored title is stamped on the document, so it names the document in units whose config does
-    // not declare this kind — which is every unit but this one.
+    // Every class-wide document shares the kind; the variant is what separates them, so it is the
+    // canonical-pointer label — otherwise a unit's several class-wide documents would contend for one slot.
+    // The document's transitional `type` stays GroupDocument.
     return this.getOrCreateCanonicalDocument({
       container: { classHash: user.classHash, unit: unit.code },
-      canonicalLabel: classWideDoc.kind,
+      canonicalLabel: classWideDoc.variant,
       type: GroupDocument,
-      kind: classWideDoc.kind,
+      kind: ClassWideDocument,
+      variant: classWideDoc.variant,
       title: classWideDoc.title
     });
   }
 
   // Auto-create each class-wide document the unit declares. Called once per unit open, after the unit is
   // loaded. Each is created independently and fire-and-forget: the canonical-pointer engine converges all
-  // class members to one document per declared kind, so a failure here never blocks app startup.
+  // class members to one document per declared variant, so a failure here never blocks app startup.
   private createDeclaredClassWideDocuments() {
     const classWideDocs = this.stores.appConfig.classWideDocuments;
     if (!classWideDocs?.length) return;
+    const seen = new Set<string>();
     for (const classWideDoc of classWideDocs) {
-      // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry and createDocument derives its owner and location — registerClassWideDocumentKind supplies the
-      // shape every class-wide document shares. The unit passed is the same code stamped as the document's
-      // `unit` (see currentProblemInfo). Registration validates the kind and rejects a duplicate (both throw);
-      // skip a bad entry rather than crash startup.
-      try {
-        registerClassWideDocumentKind(classWideDoc.kind, this.stores.unit.code);
-      } catch (err) {
-        console.error("Ignoring class-wide document:", classWideDoc.kind, err);
+      // The variant becomes a Firestore path segment (the slot label), so it has to be a valid identifier,
+      // and two entries sharing one would contend for the same slot. Skip a bad entry rather than crash
+      // startup, the way duplicate kind registration used to.
+      const { variant } = classWideDoc;
+      if (!isValidDocumentKind(variant) || seen.has(variant)) {
+        console.error("Ignoring class-wide document with an invalid or duplicate variant:", variant);
         continue;
       }
+      seen.add(variant);
       this.getOrCreateClassWideDocument(classWideDoc).catch((err) => {
-        console.error("Failed to create class-wide document", classWideDoc.kind, err);
+        console.error("Failed to create class-wide document", variant, err);
       });
     }
   }
@@ -848,7 +856,7 @@ export class DB {
   }
 
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
-    const { container, type, kind, title, canonicalLabel, findLegacy } = opts;
+    const { container, type, kind, variant, title, canonicalLabel, findLegacy } = opts;
     // The slot's owner is the same uid createDocument stamps on the document, from the same registry
     // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
     // path named a different owner would be rejected rather than silently mis-slotted.
@@ -889,7 +897,7 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
-    const { firestoreMetadata } = await this.createDocument({ type, kind, title });
+    const { firestoreMetadata } = await this.createDocument({ type, kind, variant, title });
     const documentKey = firestoreMetadata.key;
 
     const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));
@@ -1092,6 +1100,7 @@ export class DB {
           const concurrent =
             firestoreMetadata.concurrent === true ? true : (kindMetadataFields.concurrent ?? undefined);
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
+          const variant = firestoreMetadata.variant ?? undefined;
           // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
           // it'd be possible for someone to add a concurrent field to another document type and then we'd
           // accidentally update the firestore metadata. Add a type here as it is converted to the axes, and
@@ -1115,7 +1124,7 @@ export class DB {
                                   type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0,
                                   contextId: firestoreMetadata.context_id ?? undefined,
-                                  concurrent, kind });
+                                  concurrent, kind, variant });
           }
 
           const content = this.parseDocumentContent(document);
@@ -1141,6 +1150,7 @@ export class DB {
               contextId: firestoreMetadata.context_id ?? undefined,
               concurrent,
               kind,
+              variant,
             });
             // Stash the envelope's lastHistoryEntryId for the drift check that
             // runs once the Firestore history loads. Skipped (undefined) for

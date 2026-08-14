@@ -145,7 +145,7 @@
     "aiEvaluation": "mock",
     "groupDocumentsEnabled": true,
     "classWideDocuments": [
-      { "kind": "drivingQuestionBoard", "title": "Driving Question Board" }
+      { "variant": "drivingQuestionBoard", "title": "Driving Question Board" }
     ],
     "navTabs": {
       "lazyLoadTabContents": true,

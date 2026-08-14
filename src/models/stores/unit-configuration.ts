@@ -140,6 +140,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // definitive per-unit switch — it replaces the old implicit coupling to the Sort Work tab's presence.
   showShare?: boolean;
   // Class-wide collaborative documents for this unit. Each becomes one auto-created,
-  // concurrently-edited document per class per unit.
-  classWideDocuments?: Array<{ kind: string; title: string }>;
+  // concurrently-edited document per class per unit. `variant` names which one, and separates their
+  // canonical slots; they all share the `classWide` kind.
+  classWideDocuments?: Array<{ variant: string; title: string }>;
 }
