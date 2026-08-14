@@ -320,6 +320,12 @@ kind's definition*:
    way to tell whether a definition found under that name is the one the document was made from, and the
    wrong definition would be applied confidently.
 
+   `getKindDefinitionFor(doc)` is where this rule lives in code: it is the one way to read a kind definition
+   off an existing document, and it compares the two associations before returning anything. Creation looks
+   kinds up by name instead (`getDocumentKindInfo`), which is sound because a document being created takes
+   its kind from the configuration in hand. Keeping every read behind one function is what makes rule 1's
+   fallback obligation checkable — a consumer either handles the undefined case or does not compile.
+
 **This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce
 documents about that unit or narrower, because rule 2 requires the `unit` association and the
 curriculum axis is a nesting rooted at the unit — every position at or below it carries one. It cannot

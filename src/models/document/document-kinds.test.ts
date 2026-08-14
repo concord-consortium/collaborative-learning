@@ -1,8 +1,8 @@
 import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
   getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields, getDocumentOwner,
-  getDocumentOwnerFields, getDocumentOwnerType, getDocumentLocationFields, getDocumentTitle, isValidDocumentKind,
-  registerDocumentKind, resetDocumentKindRegistryForTests
+  getDocumentOwnerFields, getDocumentOwnerType, getDocumentLocationFields, getDocumentTitle, getKindDefinitionFor,
+  isValidDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "./document-kinds";
 
 describe("isValidDocumentKind", () => {
@@ -151,6 +151,43 @@ describe("document kinds registry", () => {
     it("returns only a null unit and context_id for a class kind and unregistered kinds", () => {
       expect(getDocumentLocationFields(PersonalDocument, ctx)).toEqual({ unit: null, context_id: "class-h" });
       expect(getDocumentLocationFields(undefined, ctx)).toEqual({ unit: null, context_id: "class-h" });
+    });
+  });
+
+  describe("getKindDefinitionFor", () => {
+    it("resolves a built-in kind for a document from any unit, since no unit declared it", () => {
+      expect(getKindDefinitionFor({ kind: GroupDocument, unit: "sas" })?.ownerType).toBe("group");
+      expect(getKindDefinitionFor({ kind: GroupDocument })?.ownerType).toBe("group");
+    });
+
+    it("returns undefined when the kind is unregistered or absent", () => {
+      expect(getKindDefinitionFor({ kind: "unregisteredKind", unit: "sas" })).toBeUndefined();
+      expect(getKindDefinitionFor({ unit: "sas" })).toBeUndefined();
+    });
+
+    describe("a kind declared by a unit config", () => {
+      beforeEach(() => {
+        resetDocumentKindRegistryForTests();
+        registerDocumentKind("testScopedKind", {
+          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          title: "Driving Question Board", unit: "sas"
+        });
+      });
+
+      it("resolves for a document from the unit that declared it", () => {
+        expect(getKindDefinitionFor({ kind: "testScopedKind", unit: "sas" })?.title)
+          .toBe("Driving Question Board");
+      });
+
+      it("returns undefined for a document from another unit declaring the same kind", () => {
+        // The loaded definition is not the one this document was made from, and the other unit may mean
+        // something different by the name, so nothing here governs it.
+        expect(getKindDefinitionFor({ kind: "testScopedKind", unit: "msa" })).toBeUndefined();
+      });
+
+      it("returns undefined for a document with no unit at all", () => {
+        expect(getKindDefinitionFor({ kind: "testScopedKind" })).toBeUndefined();
+      });
     });
   });
 
