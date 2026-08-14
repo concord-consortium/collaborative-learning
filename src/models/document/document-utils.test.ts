@@ -192,14 +192,15 @@ describe("document utils", () => {
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Group 3 Document");
       });
 
-      test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
+      test("a class-wide document uses the title stored on it, not one resolved from its kind", () => {
         registerDocumentKind("testClassWideTitle", {
           metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-          title: "Driving Question Board"
+          unit: "test"
         });
         const metadata = DocumentMetadataModel.create({
-          // type stays "group"; the title comes from the kind, and no `title` is stored on the doc.
-          type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
+          // type stays "group"; the kind supplies no title, so the stored one names the document.
+          type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1",
+          title: "Driving Question Board", unit: "test", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
@@ -207,32 +208,35 @@ describe("document utils", () => {
 
     describe("class-wide documents from another unit", () => {
       // Under the Sort Work "All" filter a class sees every document it owns, including class-wide
-      // documents from units it has already worked through. Those units' configs are not loaded, so
-      // their kinds' titles cannot be looked up and the documents store no title of their own.
+      // documents from units it has already worked through, whose configs are not loaded.
       const unit = UnitModel.create({ code: "test", title: "test" });
       const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
 
-      test("names the document by its kind and the unit it came from", () => {
+      test("names the document by its stored title, said to be from its own unit", () => {
+        // The title travels with the document, so it reads the same wherever it is listed. The unit is
+        // added back because that is the scope the title was authored to be unique within — two units may
+        // each author a "Driving Question Board".
         const metadata = DocumentMetadataModel.create({
           type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
+          title: "Our Big Questions", unit: "other", investigation: null, problem: null
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Our Big Questions (other)");
+      });
+
+      test("does not add the unit to a document from the unit being viewed", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-own",
+          title: "Our Big Questions", unit: "test", investigation: null, problem: null
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Our Big Questions");
+      });
+
+      test("falls back to the kind and unit for a document created before titles were stored", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-untitled",
           unit: "other", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board (other)");
-      });
-
-      test("does not borrow the current unit's title for another unit's document of the same kind", () => {
-        registerDocumentKind("testSharedKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-          title: "Our Big Questions", unit: "test"
-        });
-        const ownUnitDoc = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
-        });
-        const otherUnitDoc = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
-        });
-        expect(getDocumentDisplayTitle(unit, ownUnitDoc, appConfig)).toBe("Our Big Questions");
-        expect(getDocumentDisplayTitle(unit, otherUnitDoc, appConfig)).toBe("Test Shared Kind (other)");
       });
 
       test("falls back to the kind alone when the document has no unit", () => {

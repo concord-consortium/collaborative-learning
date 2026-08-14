@@ -123,6 +123,9 @@ interface IGetOrCreateCanonicalDocumentOpts {
   // the owner uid (createDocument derives it via the kind registry).
   type: DBDocumentType;
   kind: string;
+  // The document's stored title, for kinds whose name is authored per slot. Stamped once at creation so it
+  // travels with the document; kinds that take their name from the kind itself pass none.
+  title?: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
 
@@ -798,11 +801,14 @@ export class DB {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
+    // The authored title is stamped on the document, so it names the document in units whose config does
+    // not declare this kind — which is every unit but this one.
     return this.getOrCreateCanonicalDocument({
       container: { classHash: user.classHash, unit: unit.code },
       canonicalLabel: classWideDoc.kind,
       type: GroupDocument,
-      kind: classWideDoc.kind
+      kind: classWideDoc.kind,
+      title: classWideDoc.title
     });
   }
 
@@ -819,7 +825,7 @@ export class DB {
       // `unit` (see currentProblemInfo). Registration validates the kind and rejects a duplicate (both throw);
       // skip a bad entry rather than crash startup.
       try {
-        registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title, this.stores.unit.code);
+        registerClassWideDocumentKind(classWideDoc.kind, this.stores.unit.code);
       } catch (err) {
         console.error("Ignoring class-wide document:", classWideDoc.kind, err);
         continue;
@@ -842,7 +848,7 @@ export class DB {
   }
 
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
-    const { container, type, kind, canonicalLabel, findLegacy } = opts;
+    const { container, type, kind, title, canonicalLabel, findLegacy } = opts;
     // The slot's owner is the same uid createDocument stamps on the document, from the same registry
     // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
     // path named a different owner would be rejected rather than silently mis-slotted.
@@ -883,7 +889,7 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
-    const { firestoreMetadata } = await this.createDocument({ type, kind });
+    const { firestoreMetadata } = await this.createDocument({ type, kind, title });
     const documentKey = firestoreMetadata.key;
 
     const metadataRef = this.firestore.doc(getSimpleDocumentPath(documentKey));

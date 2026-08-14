@@ -10,7 +10,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { getCurriculumLabel, isInClassUnitContainer } from "./document-axes";
+import { getCurriculumLabel, isAboutUnitOnly, isInClassUnitContainer } from "./document-axes";
 import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
@@ -42,16 +42,35 @@ function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: Docum
 }
 
 /**
- * A stand-in title for a document that stores none and whose kind resolves no title (see
- * getDocumentTitle). The kind names what the document is; the curriculum position says where it came
- * from, read from the stored fields because an unresolvable kind gives no indication of where the
- * document sits.
+ * A stand-in title for a document that stores none and whose kind supplies none (see getDocumentTitle).
+ * The kind names what the document is; the curriculum position says where it came from, read from the
+ * stored fields because an unnamed document gives no other indication of where it sits.
  */
 function getUnresolvedDocumentTitle(document: DocumentModelType | IDocumentMetadataModel) {
   const kindLabel = getDocumentKindLabel(document.kind);
   if (!kindLabel) return undefined;
   const curriculumLabel = getCurriculumLabel(document);
   return curriculumLabel ? `${kindLabel} (${curriculumLabel})` : kindLabel;
+}
+
+/**
+ * A stored title identifies its document only within the scope whoever wrote it was naming. Shown outside
+ * that scope it can collide — two units may each author a "Driving Question Board" — so this adds back the
+ * coordinate that tells them apart.
+ *
+ * Applied to titles authored at unit scope, which is the case the unit code answers: the document is about
+ * a whole unit, so its unit is the scope its name was unique within. A title authored at a narrower scope
+ * needs a narrower coordinate, and one authored by a student is disambiguated by time instead
+ * (getDocumentTitleWithTimestamp) — the same rule, reaching for whichever coordinate restores identity.
+ *
+ * The unit *code* rather than its name, because only the current unit's curriculum is loaded, so another
+ * unit's title is not resolvable from here.
+ */
+function withUnitScope(
+  title: string, document: DocumentModelType | IDocumentMetadataModel, currentUnit: UnitModelType
+) {
+  if (!isAboutUnitOnly(document) || document.unit === currentUnit.code) return title;
+  return `${title} (${document.unit})`;
 }
 
 export function getDocumentTitleWithTimestamp(
@@ -74,7 +93,8 @@ export function getDocumentDisplayTitle(
   document: DocumentModelType | IDocumentMetadataModel,
   appConfig: AppConfigModelType
 ) {
-  // Titles resolvable by kind (class-wide slot titles, the group-document label) come from the registry.
+  // The one title a kind still supplies: the group-document label, which names the group rather than the
+  // document and so belongs to no single one of them.
   const kindTitle = getDocumentTitle(document);
   if (kindTitle != null) return kindTitle;
 
@@ -85,7 +105,7 @@ export function getDocumentDisplayTitle(
     return getDocumentTitleFromProblem(unit, document);
   } else {
     const storedTitle = getDocumentTitleWithTimestamp(document, appConfig);
-    if (storedTitle) return storedTitle;
+    if (storedTitle) return withUnitScope(storedTitle, document, unit);
     // Nothing stored and no kind title: name it by kind and curriculum position if we can, otherwise return the
     // stored value unchanged so callers see the same empty result as before.
     return getUnresolvedDocumentTitle(document) ?? storedTitle;

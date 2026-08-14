@@ -170,13 +170,12 @@ describe("document kinds registry", () => {
         resetDocumentKindRegistryForTests();
         registerDocumentKind("testScopedKind", {
           metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-          title: "Driving Question Board", unit: "sas"
+          unit: "sas"
         });
       });
 
       it("resolves for a document from the unit that declared it", () => {
-        expect(getKindDefinitionFor({ kind: "testScopedKind", unit: "sas" })?.title)
-          .toBe("Driving Question Board");
+        expect(getKindDefinitionFor({ kind: "testScopedKind", unit: "sas" })?.ownerType).toBe("class");
       });
 
       it("returns undefined for a document from another unit declaring the same kind", () => {
@@ -192,16 +191,9 @@ describe("document kinds registry", () => {
   });
 
   describe("title", () => {
-    it("returns a class-wide kind's registered static title", () => {
-      registerDocumentKind("testDqbTitle", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-        title: "Driving Question Board"
-      });
-      expect(getDocumentTitle({ kind: "testDqbTitle", type: GroupDocument })).toBe("Driving Question Board");
-    });
-
-    it("returns the group-document label for a type:group doc with no registered title", () => {
-      // Regular group docs (kind "group", which registers no title) and legacy group docs (no kind).
+    it("returns the group-document label for a type:group doc", () => {
+      // Regular group docs (kind "group") and legacy group docs (no kind). The label names the group, not
+      // the document, so it comes from the kind rather than from anything stored per document.
       expect(getDocumentTitle({ kind: GroupDocument, type: GroupDocument, groupId: "3" }))
         .toBe("Group 3 Document");
       expect(getDocumentTitle({ type: GroupDocument, groupId: "4" })).toBe("Group 4 Document");
@@ -213,34 +205,15 @@ describe("document kinds registry", () => {
       expect(getDocumentTitle({ type: "unregistered" })).toBeUndefined();
     });
 
-    it("does not mislabel a class-wide document with an unregistered kind as a group document", () => {
-      // A class-wide document also stores type:"group" but carries no groupId. If its kind belongs to a
-      // unit that has not loaded this session, the registry lookup above misses and this must not fall
-      // through to the group-document label (which would read "Group undefined Document").
+    it("supplies no title for a class-wide document, which stores its own", () => {
+      // A class-wide document also stores type:"group" but carries no groupId, so it must not fall through
+      // to the group-document label (which would read "Group undefined Document"). Returning undefined is
+      // what sends the caller to the document's stored title.
+      registerDocumentKind("testClassWideKind", {
+        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit", unit: "sas"
+      });
+      expect(getDocumentTitle({ kind: "testClassWideKind", type: GroupDocument })).toBeUndefined();
       expect(getDocumentTitle({ kind: "unregisteredClassWideKind", type: GroupDocument })).toBeUndefined();
-    });
-
-    describe("a title declared by a unit config", () => {
-      beforeEach(() => {
-        resetDocumentKindRegistryForTests();
-        registerDocumentKind("testUnitDeclaredKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
-          title: "Driving Question Board", unit: "sas"
-        });
-      });
-
-      it("names a document from the unit that declared it", () => {
-        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: GroupDocument, unit: "sas" }))
-          .toBe("Driving Question Board");
-      });
-
-      it("does not name a document from another unit that declares the same kind", () => {
-        // Only the current unit's config is loaded, and another unit may word the same kind
-        // differently, so its document falls through to the caller's fallback rather than borrowing
-        // this title.
-        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: GroupDocument, unit: "msa" }))
-          .toBeUndefined();
-      });
     });
   });
 
