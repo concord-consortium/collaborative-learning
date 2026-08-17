@@ -109,11 +109,14 @@ private settle = debounce((cause: VisibilityCause, extra?: object) => {
 `.flush()` on `componentWillUnmount` so a pending snapshot isn't lost. A burst of scroll events (or a
 resize drag) collapses to a single event ~500ms after motion stops.
 
-**No event when nothing is visible.** A collapsed/hidden pane (e.g. the resources panel at
-`dividerPosition === kDividerMin`) keeps its `DocumentContentComponent` *mounted*, so global triggers
-(window resize, `documentChange` on reload) still call the emit — but the container then measures 0×0
-and `computeVisibleTiles` returns empty. The emit is skipped whenever `visibleTiles` is empty, so a
-document that isn't on screen is never reported.
+**No event when the pane is collapsed / nothing is visible.** A collapsed pane (e.g. the resources
+panel at `dividerPosition === kDividerMin`) keeps its `DocumentContentComponent` *mounted*, so global
+triggers (window resize, `documentChange` on reload) still call the emit. The panel collapses via
+`flex: 0` + `overflow-x: clip`, so the inner container can still report a non-zero width (and the
+vertical-only `computeVisibleTiles` would still see "visible" tiles) — measured geometry is therefore
+unreliable. So the emit keys off the app's own collapse state: it is skipped when the document is
+inside a `.resizable-panel.collapsed` ancestor, and also skipped when `visibleTiles` is empty (an
+on-screen but empty document). A document whose pane is collapsed is never reported.
 
 ## Triggers — wired per instrumented document (no global registry)
 
