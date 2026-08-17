@@ -45,7 +45,8 @@ Payload:
 
 ```ts
 {
-  cause: "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange" | "commentsToggle",
+  cause: "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange"
+       | "commentsToggle" | "comparisonToggle",
   documentId,        // the document whose visibility is reported (key, or curriculum section path)
   documentType,      // saved docs only — problem/personal/learningLog/publication/…
   documentTitle,     // saved docs only, when the doc has a title
@@ -120,6 +121,13 @@ Each instrumented `DocumentContentComponent` wires its own four sources and alwa
 | `dividerResize` | MobX `reaction` on `persistentUI.dividerPosition` | `settle("dividerResize", { dividerPosition })` |
 | `documentChange` | an instrumented view first shows a document (mount) or swaps to a different one — `content.contentId` changes (open new doc / switch resource tab or section) | `componentDidMount` + `componentDidUpdate` → `settle("documentChange")` |
 | `commentsToggle` | the comment/chat panel opens or closes | MobX `reaction` on `persistentUI.showChatPanel` → `settle("commentsToggle")` |
+| `comparisonToggle` | the comparison panel is shown/hidden — this both reflows the **primary** document (to half width) and reveals/hides the comparison document | MobX `reaction` on `persistentUI.problemWorkspace.comparisonVisible` → `settle("comparisonToggle")` |
+
+(Showing a comparison document already mounts an instrumented full view, so the comparison doc itself
+also emits a `documentChange`; the shared per-instance settle coalesces that with `comparisonToggle`
+into one event for that view. The value of `comparisonToggle` is capturing the **primary** doc's
+reflow, which no other trigger covers. A **group virtual** comparison document renders via a separate,
+non-instrumented component and is out of scope.)
 
 The `documentChange` snapshot rides the same 500ms settle, so a view that mounts (or swaps documents)
 emits its initial visible-tiles snapshot once layout has settled. Switching a resource tab to a
