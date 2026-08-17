@@ -267,6 +267,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private emitTileVisibility = (cause: VisibilityCause, extra: IVisibilityLogExtra = {}) => {
     const { content } = this.props;
     if (!this.domElement || !content) return;
+    // Don't report a document whose pane is collapsed. A collapsed ResizablePanel keeps this
+    // component mounted (so window-resize / reload triggers still fire) and, because the panel uses
+    // `flex: 0` + `overflow-x: clip`, the inner container can still report a non-zero width — so we
+    // key off the app's own collapse state (the `.collapsed` class) rather than measured geometry.
+    if (this.domElement.closest(".resizable-panel.collapsed")) return;
     const containerRect = this.domElement.getBoundingClientRect();
     const nodes = this.domElement.querySelectorAll<HTMLElement>(".tool-tile[data-tool-id]");
     const tiles: ITileExtent[] = [];
@@ -285,9 +290,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       });
     });
     const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
-    // Don't report a document that isn't actually on screen: a collapsed/hidden pane keeps this
-    // component mounted (so window-resize / reload triggers still fire) but its container measures
-    // 0×0, so nothing is visible. Skip the event when no tile is showing.
+    // Nothing to report if the (on-screen) container has no tile in the viewport, e.g. an empty doc.
     if (visibleTiles.length === 0) return;
     const documentContext = getDocumentLogContext(content);
     if (documentContext.documentId == null && this.props.documentId != null) {
