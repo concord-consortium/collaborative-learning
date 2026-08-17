@@ -1,7 +1,7 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
-import { throttle } from "lodash";
+import { debounce, throttle } from "lodash";
 import classNames from "classnames";
 import { DocumentDndContext } from "./document-dnd-context";
 import { BaseComponent, IBaseProps } from "../base";
@@ -19,6 +19,10 @@ import { RowListComponent } from "./row-list";
 import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
 import { ContainerContext } from "./container-context";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
+import { buildVisibilityLogParams, computeVisibleTiles,
+  type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
 
 import "./document-content.scss";
 
@@ -228,6 +232,40 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  // CLUE-629: gather each rendered tile's vertical extent + type/title, then log the visible ones.
+  private emitTileVisibility = (cause: VisibilityCause, extra: IVisibilityLogExtra = {}) => {
+    const { content } = this.props;
+    if (!this.domElement || !content) return;
+    const containerRect = this.domElement.getBoundingClientRect();
+    const nodes = this.domElement.querySelectorAll<HTMLElement>(".tool-tile[data-tool-id]");
+    const tiles: ITileExtent[] = [];
+    nodes.forEach((node) => {
+      const tileId = node.dataset.toolId;
+      if (!tileId) return;
+      const rect = node.getBoundingClientRect();
+      const tile = content.getTile(tileId);
+      tiles.push({
+        tileId,
+        tileType: tile?.content.type ?? "unknown",
+        tileTitle: tile?.computedTitle ?? "<no title>",
+        top: rect.top,
+        bottom: rect.bottom,
+        height: rect.height
+      });
+    });
+    const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
+    const documentId = this.props.documentId ?? getDocumentIdentifier(content);
+    const params = buildVisibilityLogParams(
+      cause, documentId, containerRect.height, tiles.length, visibleTiles, extra
+    );
+    Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, params);
+  };
+
+  // Trailing debounce = "the student stopped scrolling / dragging"; one event ~500ms after motion ends.
+  private settleVisibilityLog = debounce((cause: VisibilityCause, extra?: IVisibilityLogExtra) => {
+    this.emitTileVisibility(cause, extra);
+  }, 500);
+
   // updates the list of all row we can see the bottom of
   private updateVisibleRows = () => {
     const { content } = this.props;
@@ -303,6 +341,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const yScroll = this.domElement?.scrollTop || 0;
     tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
     this.props.onScroll?.(xScroll, yScroll);
+    if (this.props.logTileVisibility) this.settleVisibilityLog("scroll");
   }, 50);
 
   private getTileTitle(id: string) {
