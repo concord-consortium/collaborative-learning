@@ -26,6 +26,7 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   context: string;
   documentId?: string;
+  logTileVisibility?: boolean;
   onScroll?: (x: number, y: number) => void;
   readOnly?: boolean;
   scale?: number;
