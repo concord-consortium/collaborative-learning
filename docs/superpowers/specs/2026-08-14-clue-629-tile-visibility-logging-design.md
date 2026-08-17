@@ -109,6 +109,12 @@ private settle = debounce((cause: VisibilityCause, extra?: object) => {
 `.flush()` on `componentWillUnmount` so a pending snapshot isn't lost. A burst of scroll events (or a
 resize drag) collapses to a single event ~500ms after motion stops.
 
+**No event when nothing is visible.** A collapsed/hidden pane (e.g. the resources panel at
+`dividerPosition === kDividerMin`) keeps its `DocumentContentComponent` *mounted*, so global triggers
+(window resize, `documentChange` on reload) still call the emit — but the container then measures 0×0
+and `computeVisibleTiles` returns empty. The emit is skipped whenever `visibleTiles` is empty, so a
+document that isn't on screen is never reported.
+
 ## Triggers — wired per instrumented document (no global registry)
 
 Each instrumented `DocumentContentComponent` wires its own four sources and always reports **itself**:

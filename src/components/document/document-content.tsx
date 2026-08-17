@@ -285,6 +285,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       });
     });
     const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
+    // Don't report a document that isn't actually on screen: a collapsed/hidden pane keeps this
+    // component mounted (so window-resize / reload triggers still fire) but its container measures
+    // 0×0, so nothing is visible. Skip the event when no tile is showing.
+    if (visibleTiles.length === 0) return;
     const documentContext = getDocumentLogContext(content);
     if (documentContext.documentId == null && this.props.documentId != null) {
       documentContext.documentId = this.props.documentId;
