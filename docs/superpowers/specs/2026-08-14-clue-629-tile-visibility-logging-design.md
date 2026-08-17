@@ -45,7 +45,7 @@ Payload:
 
 ```ts
 {
-  cause: "scroll" | "windowResize" | "dividerResize" | "tileResize",
+  cause: "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange" | "commentsToggle",
   documentId,        // the document whose visibility is reported (key, or curriculum section path)
   documentType,      // saved docs only — problem/personal/learningLog/publication/…
   documentTitle,     // saved docs only, when the doc has a title
@@ -118,6 +118,13 @@ Each instrumented `DocumentContentComponent` wires its own four sources and alwa
 | `tileResize` | row-height drag commit `handleRowResizeDrop` (`:809-817`) | `settle("tileResize", { resizedRowId })` (keyboard row-resize via `tile-row.tsx` is a deferred follow-up) |
 | `windowResize` | `window.addEventListener("resize", …)` on mount (removed on unmount) | `settle("windowResize")` |
 | `dividerResize` | MobX `reaction` on `persistentUI.dividerPosition` | `settle("dividerResize", { dividerPosition })` |
+| `documentChange` | an instrumented view first shows a document (mount) or swaps to a different one — `content.contentId` changes (open new doc / switch resource tab or section) | `componentDidMount` + `componentDidUpdate` → `settle("documentChange")` |
+| `commentsToggle` | the comment/chat panel opens or closes | MobX `reaction` on `persistentUI.showChatPanel` → `settle("commentsToggle")` |
+
+The `documentChange` snapshot rides the same 500ms settle, so a view that mounts (or swaps documents)
+emits its initial visible-tiles snapshot once layout has settled. Switching a resource tab to a
+non-document view (a thumbnail browser) has no instrumented `DocumentContentComponent`, so it stays
+silent, as intended.
 
 Consequence: a **global** change (window/divider) emits one event **per mounted instrumented
 full-document view**, each with its own snapshot — which is what researchers want. The divider's new
