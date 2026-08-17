@@ -64,7 +64,7 @@ jobs:
       # (`npm ci --prefix shared`) during "Install Dependencies" above.
       - name: Install AI Harness Dependencies
         working-directory: ./scripts/ai-harness
-        run: npm ci
+        run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
       - name: Run AI Harness Tests
         working-directory: ./scripts/ai-harness
         run: npm run typecheck && npm test

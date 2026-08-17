@@ -159,7 +159,7 @@ describe("resume identity spans the corpus and the experiment", () => {
 });
 
 describe("a dispatched request that fails is not treated as free", () => {
-  it("settles its single-attempt share instead of releasing the whole reservation", async () => {
+  it("charges the whole reservation when every attempt it paid for was dispatched", async () => {
     const dataRoot = makeTestDataRoot("failed-attempt-cost");
     const tasks = [makeTask("text", "text-default", "a summary", 0.03)];
     const ledger = new CostLedger(10);
@@ -380,7 +380,7 @@ describe("the JSONL writer", () => {
 });
 
 describe("the writer survives a failing append", () => {
-  // Not asked for by the review, but B1/B2 changed behaviour that nothing else covers.
+  // The writer's queue-poisoning and shutdown behavior is not covered anywhere else.
   it("keeps writing after one append fails, and reports the failure once from close()", async () => {
     const dataRoot = makeTestDataRoot("writer-poison");
     const writer = new JsonlWriter(path.join(dataRoot, "rows.jsonl"));

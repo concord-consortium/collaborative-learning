@@ -30,11 +30,9 @@ const emptySchemaPrompt: IAiPrompt = {
 describe("shared/ai-analysis-messages in functions-v2", () => {
   describe("running against functions-v2's installed openai and zod", () => {
     test("the builders and categorizationResponseFormat produce a usable request", () => {
-      // jest.config.js maps openai and zod to functions-v2's copies for every importer, including
-      // ../shared, so this proves the builders run correctly against the copies the deployed function
-      // resolves — one zod, so these instanceof checks cannot detect a version drift between
-      // shared/node_modules and functions-v2/node_modules. That is the lockfile-lockstep test's job
-      // (scripts/ai-harness/test/versions.test.ts).
+      // jest.config.js gives every importer, ../shared included, one copy of zod, so this proves the
+      // builders run against the copies the deployed function resolves. It cannot detect version
+      // drift; that is the lockstep test's job (scripts/ai-harness/test/versions.test.ts).
       const responseSchema = buildZodResponseSchema(fullPrompt);
       expect(responseSchema).toEqual({
         category: expect.any(ZodEnum),

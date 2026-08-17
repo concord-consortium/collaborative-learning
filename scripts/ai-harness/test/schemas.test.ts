@@ -114,7 +114,7 @@ describe("experiment validation", () => {
 
   it("rejects a name that would escape the default results path", () => {
     // The name becomes a path segment in data/results/<corpus>-<name>.jsonl.
-    for (const name of ["../../escaped", "has spaces", "Capitalised", "with/slash"]) {
+    for (const name of ["../../escaped", "has spaces", "Capitalized", "with/slash"]) {
       expect(() => validateExperimentFile(
         { schemaVersion: 1, name, runs: [run] }, "experiment.json", context))
         .toThrow(/name must match/);

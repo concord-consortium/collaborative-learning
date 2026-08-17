@@ -3,9 +3,9 @@ import path from "node:path";
 import { repoRoot } from "./helpers.js";
 
 /**
- * Acceptance criterion 3. `shared/` has its own openai and zod so the harness can import
+ * `shared/` has its own openai and zod so the harness can import
  * shared/ai-analysis-messages.ts directly, while the deployed function resolves both from
- * functions-v2/node_modules. Behaviour parity requires the versions to be identical, and nothing
+ * functions-v2/node_modules. Behavior parity requires the versions to be identical, and nothing
  * else would notice if they drifted.
  */
 const lockfiles = {

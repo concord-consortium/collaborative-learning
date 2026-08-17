@@ -42,7 +42,7 @@ describe("corpus names cannot escape the artifact root", () => {
     ["../results"],
     ["nested/name"],
     ["/absolute"],
-    ["Capitalised"],
+    ["Capitalized"],
     ["has space"],
     [""]
   ])("refuses %s", (corpus) => {
@@ -93,7 +93,7 @@ describe("import", () => {
       .toThrow(/document id "Not Valid" must match/);
   });
 
-  it("rejects a traversal attempt at the id pattern, the first line of defence", () => {
+  it("rejects a traversal attempt at the id pattern, the first line of defense", () => {
     const dataRoot = makeTestDataRoot("import-escape");
     const from = sourceDir(dataRoot, { "a-text.json": textDoc });
     fs.renameSync(path.join(from, "a-text.json"), path.join(from, "..-escape.json"));

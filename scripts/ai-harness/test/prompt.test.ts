@@ -7,7 +7,7 @@ import { sha256Canonical, validatePromptFile } from "../src/schemas.js";
 const promptFile = path.join(harnessRoot, "prompts", "categorize-design-default.json");
 
 /**
- * Acceptance criterion 11. The committed prompt is a copy of production's built-in default, and this
+ * The committed prompt is a copy of production's built-in default, and this
  * is what stops the copy drifting away from it unnoticed.
  */
 describe("the committed default prompt", () => {
