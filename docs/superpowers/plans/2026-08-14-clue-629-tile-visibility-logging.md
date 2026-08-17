@@ -35,8 +35,7 @@
 Create `src/components/document/tile-visibility.test.ts`:
 
 ```ts
-import { computeVisibleTiles } from "./tile-visibility";
-import type { ITileExtent, IViewportBounds } from "./tile-visibility";
+import { computeVisibleTiles, type ITileExtent, type IViewportBounds } from "./tile-visibility";
 
 const viewport: IViewportBounds = { top: 0, bottom: 100 };
 const extent = (over: Partial<ITileExtent>): ITileExtent => ({
@@ -169,11 +168,18 @@ git commit -m "feat(CLUE-629): pure vertical tile-visibility computation"
 
 - [ ] **Step 1: Add the failing test**
 
-Append to `src/components/document/tile-visibility.test.ts`:
+First, add `buildVisibilityLogParams` to the **existing** top-of-file import in
+`src/components/document/tile-visibility.test.ts` — do NOT add a second `import` from
+`./tile-visibility` (the repo's `no-duplicate-imports` ESLint rule, set to error, forbids it). The
+import line becomes:
 
 ```ts
-import { buildVisibilityLogParams } from "./tile-visibility";
+import { buildVisibilityLogParams, computeVisibleTiles, type ITileExtent, type IViewportBounds } from "./tile-visibility";
+```
 
+Then append this describe block to the end of the file:
+
+```ts
 describe("buildVisibilityLogParams", () => {
   const tiles = [{ tileId: "t1", tileType: "Text", tileTitle: "A", percentVisible: 100 }];
 
@@ -403,9 +409,12 @@ Then add these imports below the existing import block (after line 21, before th
 ```ts
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { buildVisibilityLogParams, computeVisibleTiles } from "./tile-visibility";
-import type { ITileExtent, IVisibilityLogExtra, VisibilityCause } from "./tile-visibility";
+import { buildVisibilityLogParams, computeVisibleTiles,
+  type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
 ```
+
+(Keep it a **single** `import` statement from `./tile-visibility` — the repo's `no-duplicate-imports`
+rule forbids splitting value and type imports from the same module into two statements.)
 
 - [ ] **Step 2: Add the debounced emit and geometry gather as class members**
 
