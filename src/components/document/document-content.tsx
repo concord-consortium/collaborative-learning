@@ -69,6 +69,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private scrollDisposer: IReactionDisposer;
   private pickUpReactionDisposer: IReactionDisposer;
   private visibilityDividerDisposer?: IReactionDisposer;
+  private visibilityCommentsDisposer?: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -158,6 +159,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           () => this.stores.persistentUI.dividerPosition,
           (dividerPosition) => this.settleVisibilityLog("dividerResize", { dividerPosition })
         );
+        this.visibilityCommentsDisposer = reaction(
+          () => this.stores.persistentUI.showChatPanel,
+          () => this.settleVisibilityLog("commentsToggle")
+        );
+        // Initial snapshot of what's visible when this view first shows a document.
+        this.settleVisibilityLog("documentChange");
       }
     }
   }
@@ -171,10 +178,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // CLUE-629: stop visibility triggers and flush any pending snapshot (DOM is still mounted here).
     window.removeEventListener("resize", this.handleWindowResizeForVisibility);
     this.visibilityDividerDisposer?.();
+    this.visibilityCommentsDisposer?.();
     this.settleVisibilityLog.flush();
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    if (this.props.logTileVisibility &&
+        this.props.content?.contentId !== prevProps.content?.contentId) {
+      this.settleVisibilityLog("documentChange");
+    }
     // recalculate after render
     requestAnimationFrame(() => {
       this.updateVisibleRows();

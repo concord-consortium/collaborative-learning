@@ -95,4 +95,11 @@ describe("buildVisibilityLogParams", () => {
     expect(p.dividerPosition).toBeUndefined();
     expect(p.resizedRowId).toBeUndefined();
   });
+
+  it("passes a documentChange cause through with only core fields", () => {
+    const p = buildVisibilityLogParams("documentChange", { documentId: "d" }, 100, 1, tiles);
+    expect(p).toEqual({
+      cause: "documentChange", documentId: "d", viewportHeight: 100, tileCount: 1, visibleTiles: tiles
+    });
+  });
 });
