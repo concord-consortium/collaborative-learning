@@ -30,21 +30,21 @@ import type { HighlightState } from "../../../models/document/document-content-w
  * Picks out the objects the document is currently highlighting, and the one state they share.
  *
  * A single state rather than a per-object one is not a simplification: only one reference is
- * active at a time, so objectState can never report "pinned" for one object and "preview" for
+ * active at a time, so objectHighlightState can never report "pinned" for one object and "preview" for
  * another in the same render. See docs/highlights.md.
  *
- * `objectState` is passed in rather than read here so this stays a pure function. The caller must
+ * `objectHighlightState` is passed in rather than read here so this stays a pure function. The caller must
  * invoke it from inside an observer's render body — the backing computed is only memoized while a
  * reaction observes it.
  */
 export function collectHighlightedObjects(
   objects: DrawingObjectType[],
-  objectState: (objectId: string) => HighlightState | undefined
+  objectHighlightState: (objectId: string) => HighlightState | undefined
 ): { objects: DrawingObjectType[], state: HighlightState | undefined } {
   const highlighted: DrawingObjectType[] = [];
   let state: HighlightState | undefined;
   objects.forEach(object => {
-    const objectHighlight = objectState(object.id);
+    const objectHighlight = objectHighlightState(object.id);
     if (objectHighlight) {
       highlighted.push(object);
       state = objectHighlight;
@@ -734,14 +734,14 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     // directs attention instead, and must show in read-only documents, 4-up cells and thumbnails
     // exactly as text chips and Dataflow nodes do. See docs/highlights.md.
     //
-    // Keep the objectState reads in the render body: it is memoized only while a reaction observes
+    // Keep the objectHighlightState reads in the render body: it is memoized only while a reaction observes
     // it. objectMap rather than `objects` because it recurses into groups, matching the set
     // getObjectsForVariable reports; renderHighlightBorders then uses the group-adjusted box.
     const documentContent = getDocumentContentFromNode(this.getContent());
     const allObjects = Object.values(this.getContent().objectMap).filter(o => !!o);
     const highlighted = collectHighlightedObjects(
       allObjects as DrawingObjectType[],
-      objectId => documentContent?.objectState(this.props.model.id, objectId)
+      objectId => documentContent?.objectHighlightState(this.props.model.id, objectId)
     );
 
     // If an offset value for the drawing is provided, the `object-canvas` group will be translated to place

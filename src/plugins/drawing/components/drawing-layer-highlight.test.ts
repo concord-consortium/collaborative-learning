@@ -1,4 +1,4 @@
-// The highlight objects/state are derived from objectState, and that derivation is exported as
+// The highlight objects/state are derived from objectHighlightState, and that derivation is exported as
 // collectHighlightedObjects so it can be unit tested directly. Rendering the drawing layer itself
 // requires a full tile environment and SVG layout, which is not worth standing up here; the
 // rendered result is covered by Cypress in highlight_references_spec.js.

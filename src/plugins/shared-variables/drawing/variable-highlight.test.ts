@@ -85,10 +85,10 @@ describe("a variable reference in the document", () => {
     drawing.addObject(variableChip("chip1", "v1"));
     drawing.addObject(variableChip("chip2", "v2"));
 
-    document.setHoveredRef({ kind: "variable", variableId: "v1" });
+    document.setHoveredHighlightRef({ kind: "variable", variableId: "v1" });
 
-    expect(document.objectState("draw1", "chip1")).toBe("preview");
-    expect(document.objectState("draw1", "chip2")).toBeUndefined();
+    expect(document.objectHighlightState("draw1", "chip1")).toBe("preview");
+    expect(document.objectHighlightState("draw1", "chip2")).toBeUndefined();
   });
 
   it("reports the pinned state for every chip bound to the variable", () => {
@@ -97,9 +97,9 @@ describe("a variable reference in the document", () => {
     drawing.addObject(variableChip("chip1", "v1"));
     drawing.addObject(variableChip("chip2", "v1"));
 
-    document.setPinnedRef({ kind: "variable", variableId: "v1" });
+    document.setPinnedHighlightRef({ kind: "variable", variableId: "v1" });
 
-    expect(document.objectState("draw1", "chip1")).toBe("pinned");
-    expect(document.objectState("draw1", "chip2")).toBe("pinned");
+    expect(document.objectHighlightState("draw1", "chip1")).toBe("pinned");
+    expect(document.objectHighlightState("draw1", "chip2")).toBe("pinned");
   });
 });
