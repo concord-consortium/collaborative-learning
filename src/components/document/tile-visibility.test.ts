@@ -1,4 +1,9 @@
-import { computeVisibleTiles, type ITileExtent, type IViewportBounds } from "./tile-visibility";
+import {
+  buildVisibilityLogParams,
+  computeVisibleTiles,
+  type ITileExtent,
+  type IViewportBounds
+} from "./tile-visibility";
 
 const viewport: IViewportBounds = { top: 0, bottom: 100 };
 const extent = (over: Partial<ITileExtent>): ITileExtent => ({
@@ -45,5 +50,34 @@ describe("computeVisibleTiles", () => {
       extent({ tileId: "b", top: 50, bottom: 90, height: 40 })
     ]);
     expect(result.map(t => t.tileId)).toEqual(["a", "b"]);
+  });
+});
+
+describe("buildVisibilityLogParams", () => {
+  const tiles = [{ tileId: "t1", tileType: "Text", tileTitle: "A", percentVisible: 100 }];
+
+  it("includes the core fields and no cause-specific fields for scroll", () => {
+    const p = buildVisibilityLogParams("scroll", "doc1", 640, 3, tiles);
+    expect(p).toEqual({
+      cause: "scroll", documentId: "doc1", viewportHeight: 640, tileCount: 3, visibleTiles: tiles
+    });
+  });
+
+  it("adds dividerPosition only for dividerResize", () => {
+    const p = buildVisibilityLogParams("dividerResize", "doc1", 640, 3, tiles, { dividerPosition: 100 });
+    expect(p.dividerPosition).toBe(100);
+    expect(p.resizedRowId).toBeUndefined();
+  });
+
+  it("adds resizedRowId only for tileResize", () => {
+    const p = buildVisibilityLogParams("tileResize", "doc1", 640, 3, tiles, { resizedRowId: "row9" });
+    expect(p.resizedRowId).toBe("row9");
+    expect(p.dividerPosition).toBeUndefined();
+  });
+
+  it("ignores cause-specific extras that do not match the cause", () => {
+    const p = buildVisibilityLogParams("scroll", "doc1", 640, 3, tiles, { dividerPosition: 50, resizedRowId: "r" });
+    expect(p.dividerPosition).toBeUndefined();
+    expect(p.resizedRowId).toBeUndefined();
   });
 });

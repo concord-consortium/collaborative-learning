@@ -46,3 +46,27 @@ export function computeVisibleTiles(viewport: IViewportBounds, tiles: ITileExten
   }
   return visible;
 }
+
+export interface IVisibilityLogExtra {
+  dividerPosition?: number;
+  resizedRowId?: string;
+}
+
+/** Assembles TILE_VISIBILITY_CHANGE params, attaching each cause-specific field only for its cause. */
+export function buildVisibilityLogParams(
+  cause: VisibilityCause,
+  documentId: string | undefined,
+  viewportHeight: number,
+  tileCount: number,
+  visibleTiles: IVisibleTile[],
+  extra: IVisibilityLogExtra = {}
+): Record<string, any> {
+  const params: Record<string, any> = { cause, documentId, viewportHeight, tileCount, visibleTiles };
+  if (cause === "dividerResize" && extra.dividerPosition != null) {
+    params.dividerPosition = extra.dividerPosition;
+  }
+  if (cause === "tileResize" && extra.resizedRowId != null) {
+    params.resizedRowId = extra.resizedRowId;
+  }
+  return params;
+}
