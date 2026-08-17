@@ -46,7 +46,10 @@ Payload:
 ```ts
 {
   cause: "scroll" | "windowResize" | "dividerResize" | "tileResize",
-  documentId,        // the document whose visibility is reported
+  documentId,        // the document whose visibility is reported (key, or curriculum section path)
+  documentType,      // saved docs only — problem/personal/learningLog/publication/…
+  documentTitle,     // saved docs only, when the doc has a title
+  documentOwner,     // saved docs only — owner uid (identifies whose doc, e.g. in Sort Work)
   tileCount,         // total tiles in the document (denominator: "how many of N are visible")
   viewportHeight,    // scroll container clientHeight, for context
   visibleTiles: [    // only tiles with percentVisible > 0, in document order
