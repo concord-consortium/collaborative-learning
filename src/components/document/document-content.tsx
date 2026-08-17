@@ -68,6 +68,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
   private pickUpReactionDisposer: IReactionDisposer;
+  private visibilityDividerDisposer?: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -150,6 +151,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           }
         }
       );
+
+      if (this.props.logTileVisibility) {
+        window.addEventListener("resize", this.handleWindowResizeForVisibility);
+        this.visibilityDividerDisposer = reaction(
+          () => this.stores.persistentUI.dividerPosition,
+          (dividerPosition) => this.settleVisibilityLog("dividerResize", { dividerPosition })
+        );
+      }
     }
   }
 
@@ -159,6 +168,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     document.removeEventListener("keydown", this.handlePickUpKeyDown);
     this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
     this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+    // CLUE-629: stop visibility triggers and flush any pending snapshot (DOM is still mounted here).
+    window.removeEventListener("resize", this.handleWindowResizeForVisibility);
+    this.visibilityDividerDisposer?.();
+    this.settleVisibilityLog.flush();
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -265,6 +278,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private settleVisibilityLog = debounce((cause: VisibilityCause, extra?: IVisibilityLogExtra) => {
     this.emitTileVisibility(cause, extra);
   }, 500);
+
+  private handleWindowResizeForVisibility = () => this.settleVisibilityLog("windowResize");
 
   // updates the list of all row we can see the bottom of
   private updateVisibleRows = () => {
