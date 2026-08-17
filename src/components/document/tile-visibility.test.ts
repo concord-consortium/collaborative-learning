@@ -34,6 +34,12 @@ describe("computeVisibleTiles", () => {
     expect(result[0].percentVisible).toBe(33);
   });
 
+  it("keeps a barely-visible tile at 1% instead of rounding it away", () => {
+    // tile 97..1097 (height 1000); viewport bottom 100 => 3px of 1000 = 0.3% => clamped up to 1
+    const result = computeVisibleTiles(viewport, [extent({ top: 97, bottom: 1097, height: 1000 })]);
+    expect(result[0].percentVisible).toBe(1);
+  });
+
   it("omits tiles scrolled fully above or below, and zero-height tiles", () => {
     const result = computeVisibleTiles(viewport, [
       extent({ tileId: "above", top: -100, bottom: -10, height: 90 }),

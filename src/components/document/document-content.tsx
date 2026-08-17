@@ -290,7 +290,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       documentContext.documentId = this.props.documentId;
     }
     const params = buildVisibilityLogParams(
-      cause, documentContext, containerRect.height, tiles.length, visibleTiles, extra
+      cause, documentContext, this.domElement.clientHeight, tiles.length, visibleTiles, extra
     );
     Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, params);
   };

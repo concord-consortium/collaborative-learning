@@ -36,15 +36,16 @@ export function computeVisibleTiles(viewport: IViewportBounds, tiles: ITileExten
   for (const tile of tiles) {
     if (tile.height <= 0) continue;
     const overlap = Math.min(tile.bottom, viewport.bottom) - Math.max(tile.top, viewport.top);
-    const percentVisible = Math.round((Math.max(0, overlap) / tile.height) * 100);
-    if (percentVisible > 0) {
-      visible.push({
-        tileId: tile.tileId,
-        tileType: tile.tileType,
-        tileTitle: tile.tileTitle,
-        percentVisible
-      });
-    }
+    if (overlap <= 0) continue;
+    // Any positive overlap counts as visible: clamp to at least 1% so a barely-on-screen tile
+    // (whose fraction would round to 0) isn't dropped, honoring the 1..100 percentVisible contract.
+    const percentVisible = Math.max(1, Math.round((overlap / tile.height) * 100));
+    visible.push({
+      tileId: tile.tileId,
+      tileType: tile.tileType,
+      tileTitle: tile.tileTitle,
+      percentVisible
+    });
   }
   return visible;
 }
