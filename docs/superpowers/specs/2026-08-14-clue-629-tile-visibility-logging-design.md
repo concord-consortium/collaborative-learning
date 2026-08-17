@@ -53,9 +53,13 @@ Payload:
     { tileId, tileType, tileTitle, percentVisible }   // percentVisible: integer 0–100
   ],
   dividerPosition,   // present ONLY when cause === "dividerResize" (0 | 50 | 100)
-  resizedTileId      // present ONLY when cause === "tileResize"
+  resizedRowId       // present ONLY when cause === "tileResize" (row height is the resize unit)
 }
 ```
+
+The vertical-geometry math and the params assembly are extracted into a pure module
+(`src/components/document/tile-visibility.ts`) so they are unit-testable without mounting the heavy,
+MobX-injected `DocumentContentComponent` (which has no existing test harness).
 
 - `tileType` = the tile model's `content.type`; `tileTitle` = `getTileTitleForLogging(tileId, document)`
   (i.e. `content.getTile(tileId)?.computedTitle ?? "<no title>"`) — both pulled from the document
@@ -108,7 +112,7 @@ Each instrumented `DocumentContentComponent` wires its own four sources and alwa
 | Cause | Source | Call |
 |---|---|---|
 | `scroll` | existing `.document-content` scroll listener (`document-content.tsx:79/213`) | `settle("scroll")` |
-| `tileResize` | row-height commit paths `handleRowResizeDrop` (`:809-817`), `handleRequestRowHeight` (`tile-row.tsx:151-159`) | `settle("tileResize", { resizedTileId })` |
+| `tileResize` | row-height drag commit `handleRowResizeDrop` (`:809-817`) | `settle("tileResize", { resizedRowId })` (keyboard row-resize via `tile-row.tsx` is a deferred follow-up) |
 | `windowResize` | `window.addEventListener("resize", …)` on mount (removed on unmount) | `settle("windowResize")` |
 | `dividerResize` | MobX `reaction` on `persistentUI.dividerPosition` | `settle("dividerResize", { dividerPosition })` |
 
@@ -154,11 +158,11 @@ no document key — the plan pins what identifier to log for it (e.g. the sectio
 - **Settle/heuristic**: fake timers → many `scroll` calls collapse to one event after 500ms;
   `.flush()` on unmount emits a pending snapshot.
 - **Payload/cause**: mock `Logger.log`; assert `visibleTiles` entries carry `{tileId, tileType,
-  tileTitle, percentVisible}`; `dividerPosition` present only on `dividerResize`; `resizedTileId`
+  tileTitle, percentVisible}`; `dividerPosition` present only on `dividerResize`; `resizedRowId`
   present only on `tileResize`.
 - **Trigger wiring**: dispatch `window` resize → one event `cause:"windowResize"`; change
   `persistentUI.dividerPosition` → event `cause:"dividerResize"` with the new position; a row-height
-  commit → event `cause:"tileResize"` with `resizedTileId`.
+  commit → event `cause:"tileResize"` with `resizedRowId`.
 - **Gating**: a `CanvasComponent` mounted without the prop (thumbnail / 4-up) wires nothing and logs
   nothing; an `EditableDocumentContent`-based full view (and the resources doc) logs.
 
@@ -167,7 +171,7 @@ no document key — the plan pins what identifier to log for it (e.g. the sectio
 Open a document with several tiles in `authed` mode with `?debug=logger` (or `DEBUG_LOGGER`). Scroll →
 one `TILE_VISIBILITY_CHANGE` (`cause:"scroll"`) ~½s after stopping, with the right tiles/percentages.
 Resize the window, toggle the divider between half and full, and drag a row's height → confirm one
-event per change with the correct `cause` (and `dividerPosition`/`resizedTileId`). Repeat for a
+event per change with the correct `cause` (and `dividerPosition`/`resizedRowId`). Repeat for a
 document opened full in **Sort Work** and **Class Work** and for a **comparison** view (all reached via
 `EditableDocumentContent`). Confirm free-running (no interaction) emits nothing, and that thumbnails
 and 4-up cells stay silent.
@@ -191,7 +195,7 @@ as a fallback.
   `DocumentContent` via `...others`).
 - `src/components/navigation/problem-panel.tsx` — set `logTileVisibility` on the resources
   `CanvasComponent` (the only full view outside the `EditableDocumentContent` funnel).
-- `src/components/document/tile-row.tsx` — `resizedTileId` on row-height commit.
+- `src/components/document/document-content.tsx` — `handleRowResizeDrop` fires `settle("tileResize", { resizedRowId })`.
 - Reference (do not reinvent): `src/lib/logger.ts` (`createLogMessage`, `isLoggingEnabled`),
   `src/models/tiles/log/log-tile-document-event.ts` / `log-tile-copy-event.ts` (per-tile
   `tileId`/`tileType`/`tileTitle` shape), `src/lib/logger-utils.ts` (`getTileTitleForLogging`),
