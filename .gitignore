@@ -18,6 +18,9 @@ docs/drafts
 src/public/ai/dataset*
 src/public/ai/screenshotDataset*
 
+# Everything the AI evaluation harness derives from documents
+scripts/ai-harness/data/
+
 # VSCode project settings
 .vscode/*
 !.vscode/launch.json

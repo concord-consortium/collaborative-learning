@@ -1,0 +1,26 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "error-test-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "error-test-tile": {
+      "id": "error-test-tile",
+      "content": {
+        "type": "ErrorTest",
+        "fixtureMarker": "error-test-fixture-marker",
+        "failureMode": "render"
+      }
+    }
+  }
+}

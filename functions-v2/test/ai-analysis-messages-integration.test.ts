@@ -30,8 +30,9 @@ const emptySchemaPrompt: IAiPrompt = {
 describe("shared/ai-analysis-messages in functions-v2", () => {
   describe("running against functions-v2's installed openai and zod", () => {
     test("the builders and categorizationResponseFormat produce a usable request", () => {
-      // zod types imported here come from functions-v2/node_modules; the builders use whichever copy
-      // resolves for shared/. These instanceof checks fail if the two ever drift apart.
+      // jest.config.js gives every importer, ../shared included, one copy of zod, so this proves the
+      // builders run against the copies the deployed function resolves. It cannot detect version
+      // drift; that is the lockstep test's job (scripts/ai-harness/test/versions.test.ts).
       const responseSchema = buildZodResponseSchema(fullPrompt);
       expect(responseSchema).toEqual({
         category: expect.any(ZodEnum),

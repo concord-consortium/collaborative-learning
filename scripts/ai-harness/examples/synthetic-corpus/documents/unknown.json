@@ -1,0 +1,26 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "unknown-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "unknown-tile": {
+      "id": "unknown-tile",
+      "content": {
+        "type": "SomeFutureTile",
+        "fixtureMarker": "unknown-fixture-marker",
+        "label": "a tile type this build of CLUE has never heard of"
+      }
+    }
+  }
+}

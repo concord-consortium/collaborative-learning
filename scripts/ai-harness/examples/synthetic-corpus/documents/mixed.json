@@ -1,0 +1,64 @@
+{
+  "rowOrder": [
+    "row-1",
+    "row-2"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "mixed-text-tile"
+        }
+      ]
+    },
+    "row-2": {
+      "id": "row-2",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "mixed-drawing-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "mixed-text-tile": {
+      "id": "mixed-text-tile",
+      "content": {
+        "type": "Text",
+        "format": "markdown",
+        "text": "We drew the latch and then wrote up why it works. mixed-fixture-marker"
+      }
+    },
+    "mixed-drawing-tile": {
+      "id": "mixed-drawing-tile",
+      "content": {
+        "type": "Drawing",
+        "objects": [
+          {
+            "type": "rectangle",
+            "x": 5,
+            "y": 5,
+            "width": 90,
+            "height": 45,
+            "fill": "#ffffff",
+            "stroke": "#000000",
+            "strokeWidth": 2,
+            "strokeDashArray": "solid"
+          },
+          {
+            "type": "text",
+            "x": 12,
+            "y": 60,
+            "width": 120,
+            "height": 20,
+            "stroke": "#000000",
+            "text": "hinge"
+          }
+        ]
+      }
+    }
+  }
+}

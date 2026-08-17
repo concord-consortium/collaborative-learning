@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "effectiveDate": "2026-08-11",
+  "models": {
+    "gpt-4o-mini": {
+      "inputPerMTokUsd": 0.15,
+      "outputPerMTokUsd": 0.6,
+      "maxOutputTokens": 1024
+    }
+  }
+}
