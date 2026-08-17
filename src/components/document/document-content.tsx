@@ -868,6 +868,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const row = content.getRowRecursive(dragResizeRow.id);
       row?.setRowHeight(dragResizeRow.newHeight);
       this.setState({ dragResizeRow: undefined });
+      if (this.props.logTileVisibility) {
+        this.settleVisibilityLog("tileResize", { resizedRowId: dragResizeRow.id });
+      }
     }
   };
 
