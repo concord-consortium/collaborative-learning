@@ -70,6 +70,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private pickUpReactionDisposer: IReactionDisposer;
   private visibilityDividerDisposer?: IReactionDisposer;
   private visibilityCommentsDisposer?: IReactionDisposer;
+  private visibilityComparisonDisposer?: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -163,6 +164,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           () => this.stores.persistentUI.showChatPanel,
           () => this.settleVisibilityLog("commentsToggle")
         );
+        this.visibilityComparisonDisposer = reaction(
+          () => this.stores.persistentUI.problemWorkspace.comparisonVisible,
+          () => this.settleVisibilityLog("comparisonToggle")
+        );
         // Initial snapshot of what's visible when this view first shows a document.
         this.settleVisibilityLog("documentChange");
       }
@@ -179,6 +184,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     window.removeEventListener("resize", this.handleWindowResizeForVisibility);
     this.visibilityDividerDisposer?.();
     this.visibilityCommentsDisposer?.();
+    this.visibilityComparisonDisposer?.();
     this.settleVisibilityLog.flush();
   }
 

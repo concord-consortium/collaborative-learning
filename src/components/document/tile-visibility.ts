@@ -2,7 +2,8 @@
 // vertical-% math and the log-params assembly can be unit-tested without mounting DocumentContent.
 
 export type VisibilityCause =
-  "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange" | "commentsToggle";
+  "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange"
+  | "commentsToggle" | "comparisonToggle";
 
 export interface IVisibleTile {
   tileId: string;
