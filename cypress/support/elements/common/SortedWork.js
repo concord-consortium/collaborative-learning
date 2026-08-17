@@ -23,14 +23,20 @@ class SortedWork {
   getPrimarySortByProblemOption(){
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-problem"]');
   }
+  getSortWorkListItem() {
+    return cy.get(".sort-work-view .sorted-sections .list-item");
+  }
   getSortWorkItem() {
-    return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
+    return this.getSortWorkListItem().find(".footer .info");
   }
   getSortWorkItemByTitle(title) {
     return this.getSortWorkItem().contains(title);
   }
   getSortWorkGroup(groupName) {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().parent();
+  }
+  getSortWorkGroupItem(groupName) {
+    return this.getSortWorkGroup(groupName).find(".list-item .footer .info");
   }
   getSortWorkSubgroup(groupName, subgroupName) {
     return this.getSortWorkGroup(groupName)
@@ -142,6 +148,9 @@ class SortedWork {
 
   getSimpleDocumentItem() {
     return cy.get('.sort-work-view .sorted-sections .simple-document-item');
+  }
+  getSimpleDocumentGroupItem(groupName) {
+    return this.getSortWorkGroup(groupName).find('.simple-document-item');
   }
 
   getPrimarySortLabelForItem(sortWorkItemIdx, isSimpleDocument = false) {
