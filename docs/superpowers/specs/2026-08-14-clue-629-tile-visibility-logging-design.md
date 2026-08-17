@@ -23,8 +23,10 @@ are the same event.
 
 ### Decisions (confirmed with product)
 
-- **Scope: two document views** — the main **editable workspace** document and the **resources
-  reading panel** document. Exclude thumbnails, 4-up cells, doc-editor, and comparison views.
+- **Scope: all full-document views** — the **editable workspace**, the **resources reading panel**,
+  documents opened full in **Class Work / My Work** and **Sort Work**, and the **comparison** view.
+  Exclude thumbnails and 4-up group cells. (Standalone doc-editor / iframe authoring hosts share the
+  same full-view component but don't run in a logging-enabled mode, so they never emit.)
 - **Percentage: vertical only** — `visibleHeight / tileHeight`. (A tile scrolled off the side reads as
   fully visible; documents scroll vertically, so this matches "scrolled into view".)
 - **One event with a `cause` field** (not four event names).
@@ -110,9 +112,9 @@ Each instrumented `DocumentContentComponent` wires its own four sources and alwa
 | `windowResize` | `window.addEventListener("resize", …)` on mount (removed on unmount) | `settle("windowResize")` |
 | `dividerResize` | MobX `reaction` on `persistentUI.dividerPosition` | `settle("dividerResize", { dividerPosition })` |
 
-Consequence: a **global** change (window/divider) with both panels mounted emits one event **per
-panel** (workspace + resources), each with its own snapshot — which is what researchers want. The
-divider's new position rides only on the `dividerResize` events.
+Consequence: a **global** change (window/divider) emits one event **per mounted instrumented
+full-document view**, each with its own snapshot — which is what researchers want. The divider's new
+position rides only on the `dividerResize` events.
 
 We deliberately do **not** trigger off the generic container `ResizeObserver`/`useResizeDetector`
 (`canvas.tsx:440`) — divider and window reflows already come through the explicit sources above, and
@@ -120,17 +122,30 @@ using the container observer too would double-count them.
 
 ## Scoping — which documents are instrumented
 
-An explicit opt-in boolean prop (working name `logTileVisibility`) threaded to
-`DocumentContentComponent` from exactly two mount sites:
+An explicit opt-in boolean prop (working name `logTileVisibility`), consumed in
+`DocumentContentComponent`; only when set does the component wire the listeners/reaction and emit. It
+rides the render funnel that already exists (every view bottoms out at `CanvasComponent` →
+`DocumentContentComponent`, which already receives a `context` prop):
 
-- **Workspace**: `EditableDocumentContent` → `OneUpCanvas` → `CanvasComponent` → `DocumentContent`
-  (`src/components/document/editable-document-content.tsx`).
-- **Resources reading doc**: `src/components/navigation/problem-panel.tsx`.
+- **The full-view choke point is `EditableDocumentContent` → `OneUpCanvas`** (always `context="1-up"`),
+  used for the **workspace, comparison, Class Work / My Work opened docs (`document-view.tsx`), and
+  Sort Work opened docs (`sort-work-document-area.tsx`)** — and **never** for thumbnails or 4-up. So
+  defaulting `logTileVisibility = true` inside `EditableDocumentContent` covers all four with no
+  per-caller edits.
+- **The one full view outside that funnel is the resources reading doc**
+  (`navigation/problem-panel.tsx`), which calls `CanvasComponent` directly (`context="left-nav"`) —
+  set the prop explicitly there.
+- **Thumbnails** (`thumbnail/*`) and **4-up cells** (`four-up.tsx`) also call `CanvasComponent`
+  directly but never set the prop, so they stay silent. (We avoid gating on the fragile `context`
+  string set, whose thumbnail values literally include `"my-work"`/`"class-work"`.)
 
-Only when the prop is set does the component wire the listeners/reaction and emit. This avoids fragile
-`readOnly`/document-type heuristics and keeps thumbnails, 4-up, doc-editor, and comparison views
-silent. Pinning the exact prop-threading path through the `Canvas`/`DocumentContent` layers is the
-first task of the implementation plan.
+Plumbing (pass-through only, no gating logic): add `logTileVisibility?: boolean` to `canvas.tsx`
+`IProps` (it already flows to `DocumentContentComponent` via `...others`), receive it in
+`document-content.tsx`, and add + forward it through `editable-document-content.tsx`.
+
+Note: the resources doc renders curriculum `section.content` rather than a saved document, so it has
+no document key — the plan pins what identifier to log for it (e.g. the section path) in the
+`documentId` slot.
 
 ## Testing (jest)
 
@@ -144,15 +159,18 @@ first task of the implementation plan.
 - **Trigger wiring**: dispatch `window` resize → one event `cause:"windowResize"`; change
   `persistentUI.dividerPosition` → event `cause:"dividerResize"` with the new position; a row-height
   commit → event `cause:"tileResize"` with `resizedTileId`.
-- **Gating**: a document mounted without `logTileVisibility` wires nothing and logs nothing.
+- **Gating**: a `CanvasComponent` mounted without the prop (thumbnail / 4-up) wires nothing and logs
+  nothing; an `EditableDocumentContent`-based full view (and the resources doc) logs.
 
 ## Verification (manual)
 
 Open a document with several tiles in `authed` mode with `?debug=logger` (or `DEBUG_LOGGER`). Scroll →
 one `TILE_VISIBILITY_CHANGE` (`cause:"scroll"`) ~½s after stopping, with the right tiles/percentages.
 Resize the window, toggle the divider between half and full, and drag a row's height → confirm one
-event per change with the correct `cause` (and `dividerPosition`/`resizedTileId`). Confirm free-running
-(no interaction) emits nothing, and that thumbnails/4-up stay silent.
+event per change with the correct `cause` (and `dividerPosition`/`resizedTileId`). Repeat for a
+document opened full in **Sort Work** and **Class Work** and for a **comparison** view (all reached via
+`EditableDocumentContent`). Confirm free-running (no interaction) emits nothing, and that thumbnails
+and 4-up cells stay silent.
 
 ## Known minor gap
 
@@ -167,9 +185,12 @@ as a fallback.
 - `src/components/document/document-content.tsx` — `computeVisibleTiles`, `settle`, scroll/window/
   divider/tile-resize wiring, `logTileVisibility` gating (refactor shared geometry with
   `updateVisibleRows`).
-- `src/components/document/editable-document-content.tsx`, `canvas.tsx` — thread `logTileVisibility`
-  to the workspace document.
-- `src/components/navigation/problem-panel.tsx` — thread `logTileVisibility` to the resources doc.
+- `src/components/document/editable-document-content.tsx` — default `logTileVisibility` true; covers
+  workspace, comparison, Class Work / My Work, and Sort Work full views via `OneUpCanvas`.
+- `src/components/document/canvas.tsx` — add `logTileVisibility` to `IProps` (flows to
+  `DocumentContent` via `...others`).
+- `src/components/navigation/problem-panel.tsx` — set `logTileVisibility` on the resources
+  `CanvasComponent` (the only full view outside the `EditableDocumentContent` funnel).
 - `src/components/document/tile-row.tsx` — `resizedTileId` on row-height commit.
 - Reference (do not reinvent): `src/lib/logger.ts` (`createLogMessage`, `isLoggingEnabled`),
   `src/models/tiles/log/log-tile-document-event.ts` / `log-tile-copy-event.ts` (per-tile
