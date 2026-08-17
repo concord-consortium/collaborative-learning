@@ -31,11 +31,22 @@ describe("the committed synthetic corpus", () => {
 
   it("covers every registered tile type, plus a mixed and an empty document", () => {
     const covered = new Set(Object.values(expectations.documents).flatMap((entry) => entry.tileTypes));
-    // The Unknown fixture stands in for the "Unknown" registration with a made-up type string.
-    covered.add("Unknown");
-    for (const tileType of tileTypes) expect([...covered]).toContain(tileType);
+    // "Unknown" is deliberately not in `covered`: it is the registration for a type this build does
+    // not know, so the fixture standing in for it declares a made-up type instead. Asserting that is
+    // what the old `covered.add("Unknown")` gave away — adding the string made this unfailable.
+    for (const tileType of tileTypes) {
+      if (tileType === "Unknown") continue;
+      expect([...covered]).toContain(tileType);
+    }
     expect(Object.values(expectations.documents).map((entry) => entry.computedModality))
       .toEqual(expect.arrayContaining(["text-only", "visual-only", "mixed", "empty"]));
+  });
+
+  it("stands in for the Unknown registration with a type this build does not register", () => {
+    const unknownFixture = expectations.documents.unknown;
+    expect(unknownFixture).toBeDefined();
+    const registered = tileTypes as readonly string[];
+    expect(unknownFixture.tileTypes.filter((type) => !registered.includes(type))).not.toEqual([]);
   });
 });
 
@@ -69,8 +80,12 @@ describe.each(docIds)("fixture %s", (docId) => {
     expect(types).toEqual([...expectation.tileTypes].sort());
   });
 
-  it("summarizes with the default variant", () => {
-    if (!expectation.defaultSummaryMustSucceed) return;
+  // Skipped rather than silently passing when a fixture declares it cannot summarize: an early
+  // `return` inside the test made a `false` flag indistinguishable from a passing assertion.
+  const itDefault = expectation.defaultSummaryMustSucceed ? it : it.skip;
+  const itMinimal = expectation.minimalSummaryMustSucceed ? it : it.skip;
+
+  itDefault("summarizes with the default variant", () => {
     const summary = textVariants.default.render(content);
     expect(summary.length).toBeGreaterThan(0);
     if (expectation.expectDistinctiveInDefaultSummary) {
@@ -79,8 +94,7 @@ describe.each(docIds)("fixture %s", (docId) => {
     }
   });
 
-  it("summarizes with the minimal variant", () => {
-    if (!expectation.minimalSummaryMustSucceed) return;
+  itMinimal("summarizes with the minimal variant", () => {
     expect(textVariants.minimal.render(content).length).toBeGreaterThan(0);
   });
 });
