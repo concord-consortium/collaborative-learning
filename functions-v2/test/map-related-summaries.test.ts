@@ -1,9 +1,10 @@
 import {AiAgreement} from "../src/on-document-summarized";
+import {AgreementValue} from "../../shared/shared";
 import {mapRelatedSummaries, RelatedSummarySource} from "../lib/src/ai-categorize-document";
 
 jest.mock("firebase-functions/logger");
 
-function agreement(value: AiAgreement["value"], content = "a comment", tags: string[] = []): AiAgreement {
+function agreement(value: AgreementValue, content = "a comment", tags: string[] = []): AiAgreement {
   return {version: 1, value, content, tags};
 }
 
@@ -42,15 +43,14 @@ describe("mapRelatedSummaries", () => {
     expect(entry.agreements.no).toBeUndefined();
   });
 
-  it("skips documents without agreements", () => {
+  it("skips documents with no aiAgreements map, but keeps an empty one", () => {
     const docs: RelatedSummarySource[] = [
       {summary: "No agreements here"},
       {summary: "Empty agreements", aiAgreements: {}},
       {summary: "Has agreements", aiAgreements: {c1: agreement("yes")}},
     ];
 
-    // An empty aiAgreements object is truthy, so it passes the guard and yields an entry with no
-    // grouped agreements — matching the original behavior; only a missing map is skipped.
+    // Matches the original behavior: an empty map yields an entry with no grouped agreements.
     expect(mapRelatedSummaries(docs).map((entry) => entry.summary)).toEqual([
       "Empty agreements",
       "Has agreements",
