@@ -9,7 +9,7 @@ import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight, TileRowHandle } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
-import { getDocumentIdentifier } from "../../models/document/document-utils";
+import { getDocumentIdentifier, getDocumentLogContext } from "../../models/document/document-utils";
 import { IDropRowInfo, TileRowModelType } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -267,9 +267,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       });
     });
     const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
-    const documentId = this.props.documentId ?? getDocumentIdentifier(content);
+    const documentContext = getDocumentLogContext(content);
+    if (documentContext.documentId == null && this.props.documentId != null) {
+      documentContext.documentId = this.props.documentId;
+    }
     const params = buildVisibilityLogParams(
-      cause, documentId, containerRect.height, tiles.length, visibleTiles, extra
+      cause, documentContext, containerRect.height, tiles.length, visibleTiles, extra
     );
     Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, params);
   };

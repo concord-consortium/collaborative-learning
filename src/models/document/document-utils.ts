@@ -93,6 +93,33 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
+export interface IDocumentLogContext {
+  documentId?: string;
+  documentType?: string;
+  documentTitle?: string;
+  documentOwner?: string;
+}
+
+/**
+ * Log-friendly identity of a document's content: key/type/title/owner for a saved document, or the
+ * curriculum section path (as documentId) for section content. Absent fields are omitted.
+ */
+export function getDocumentLogContext(content?: DocumentContentModelType): IDocumentLogContext {
+  if (!content) return {};
+  const parent = getParent(content);
+  if (Object.hasOwn(parent, "key")) {
+    const doc = parent as DocumentModelType;
+    const context: IDocumentLogContext = {
+      documentId: doc.key,
+      documentType: doc.type,
+      documentOwner: doc.uid
+    };
+    if (doc.title != null) context.documentTitle = doc.title;
+    return context;
+  }
+  return { documentId: getSectionPath(parent as SectionModelType) };
+}
+
 interface IIsDocumentAccessibleToUserParams {
   document?: DocumentModelType;
   documentMetadata?: IDocumentMetadataBase;

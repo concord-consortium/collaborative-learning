@@ -52,16 +52,23 @@ export interface IVisibilityLogExtra {
   resizedRowId?: string;
 }
 
+export interface IVisibilityDocumentContext {
+  documentId?: string;
+  documentType?: string;
+  documentTitle?: string;
+  documentOwner?: string;
+}
+
 /** Assembles TILE_VISIBILITY_CHANGE params, attaching each cause-specific field only for its cause. */
 export function buildVisibilityLogParams(
   cause: VisibilityCause,
-  documentId: string | undefined,
+  documentContext: IVisibilityDocumentContext,
   viewportHeight: number,
   tileCount: number,
   visibleTiles: IVisibleTile[],
   extra: IVisibilityLogExtra = {}
 ): Record<string, any> {
-  const params: Record<string, any> = { cause, documentId, viewportHeight, tileCount, visibleTiles };
+  const params: Record<string, any> = { cause, ...documentContext, viewportHeight, tileCount, visibleTiles };
   if (cause === "dividerResize" && extra.dividerPosition != null) {
     params.dividerPosition = extra.dividerPosition;
   }

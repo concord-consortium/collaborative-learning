@@ -57,26 +57,41 @@ describe("buildVisibilityLogParams", () => {
   const tiles = [{ tileId: "t1", tileType: "Text", tileTitle: "A", percentVisible: 100 }];
 
   it("includes the core fields and no cause-specific fields for scroll", () => {
-    const p = buildVisibilityLogParams("scroll", "doc1", 640, 3, tiles);
+    const p = buildVisibilityLogParams("scroll", { documentId: "doc1" }, 640, 3, tiles);
     expect(p).toEqual({
       cause: "scroll", documentId: "doc1", viewportHeight: 640, tileCount: 3, visibleTiles: tiles
     });
   });
 
+  it("spreads full document context (type/title/owner) into the params", () => {
+    const ctx = { documentId: "k1", documentType: "problem", documentTitle: "P1", documentOwner: "u9" };
+    const p = buildVisibilityLogParams("scroll", ctx, 640, 3, tiles);
+    expect(p).toEqual({
+      cause: "scroll", documentId: "k1", documentType: "problem", documentTitle: "P1",
+      documentOwner: "u9", viewportHeight: 640, tileCount: 3, visibleTiles: tiles
+    });
+  });
+
   it("adds dividerPosition only for dividerResize", () => {
-    const p = buildVisibilityLogParams("dividerResize", "doc1", 640, 3, tiles, { dividerPosition: 100 });
+    const p = buildVisibilityLogParams(
+      "dividerResize", { documentId: "doc1" }, 640, 3, tiles, { dividerPosition: 100 }
+    );
     expect(p.dividerPosition).toBe(100);
     expect(p.resizedRowId).toBeUndefined();
   });
 
   it("adds resizedRowId only for tileResize", () => {
-    const p = buildVisibilityLogParams("tileResize", "doc1", 640, 3, tiles, { resizedRowId: "row9" });
+    const p = buildVisibilityLogParams(
+      "tileResize", { documentId: "doc1" }, 640, 3, tiles, { resizedRowId: "row9" }
+    );
     expect(p.resizedRowId).toBe("row9");
     expect(p.dividerPosition).toBeUndefined();
   });
 
   it("ignores cause-specific extras that do not match the cause", () => {
-    const p = buildVisibilityLogParams("scroll", "doc1", 640, 3, tiles, { dividerPosition: 50, resizedRowId: "r" });
+    const p = buildVisibilityLogParams(
+      "scroll", { documentId: "doc1" }, 640, 3, tiles, { dividerPosition: 50, resizedRowId: "r" }
+    );
     expect(p.dividerPosition).toBeUndefined();
     expect(p.resizedRowId).toBeUndefined();
   });
