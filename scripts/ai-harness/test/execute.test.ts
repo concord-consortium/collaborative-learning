@@ -347,6 +347,49 @@ describe("apiCalls counts dispatches, which is what the CLI reports", () => {
   });
 });
 
+describe("a task that is never sent never builds its request", () => {
+  it("does not read the picture for a task served from the cache", async () => {
+    // The other half of building requests at dispatch: the cache is consulted first, so a run that
+    // is entirely cache hits never assembles a single data URL. For an image corpus that is the
+    // difference between reading every PNG off disk and reading none of them.
+    const dataRoot = makeTestDataRoot("cache-hit-builds-nothing");
+    const cacheDirectory = path.join(dataRoot, "cache");
+    const task = makeTask("text", "text-default", "a summary");
+    let builds = 0;
+    const counted: RunTask = {
+      ...task,
+      makeRequest: () => {
+        builds += 1;
+        return task.makeRequest();
+      }
+    };
+    const runInto = (file: string) => runTasks({
+      corpus: "synthetic-corpus",
+      experiment: experiment as any,
+      experimentSha256: "hash",
+      tasks: [counted],
+      outputFile: path.join(dataRoot, file),
+      ledger: new CostLedger(10),
+      cache: new ResponseCache(cacheDirectory),
+      pricing: testPricing,
+      runMeta: testRunMeta,
+      createCompletion: async () => completion(),
+      sleep: async () => undefined
+    });
+
+    // The first run dispatches, so it builds exactly one request — once for the task, not once per
+    // attempt — and fills the cache.
+    const first = await runInto("first.jsonl");
+    expect({ apiCalls: first.apiCalls, builds }).toEqual({ apiCalls: 1, builds: 1 });
+
+    // A fresh output file, so resume does not skip the task before the cache is even consulted.
+    builds = 0;
+    const second = await runInto("second.jsonl");
+    expect({ cacheHits: second.cacheHits, apiCalls: second.apiCalls, builds })
+      .toEqual({ cacheHits: 1, apiCalls: 0, builds: 0 });
+  });
+});
+
 describe("the JSONL writer", () => {
   it("produces whole, non-interleaved rows under concurrency", async () => {
     const dataRoot = makeTestDataRoot("writer-queue");

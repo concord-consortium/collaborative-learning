@@ -6,9 +6,10 @@ import { corpusPaths, readRepresentation, representationPath } from "../src/corp
 import {
   dataUrlFor, imageRepresentationPath, readImageEnvelope, resolveImageFile, sha256Bytes
 } from "../src/represent-image.js";
-import { CompletionRequest, CompletionResult } from "../src/execute.js";
+import { CompletionRequest, CompletionResult, buildTasks, kDefaultModel } from "../src/execute.js";
+import { loadPricingConfig, pricingFor } from "../src/cost.js";
 import { ReportSummary } from "../src/report.js";
-import { ResultRow } from "../src/schemas.js";
+import { ExperimentFile, ResultRow } from "../src/schemas.js";
 import { harnessRoot, isContainedBy } from "../src/files.js";
 import { listFilesUnder, makeTestDataRoot, makeTestPng, readLines } from "./helpers.js";
 
@@ -271,6 +272,51 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     const expected = buildImageMessages(defaultAiPrompt, dataUrlFor(bytes));
     const sent = requests.find((request) => JSON.stringify(request.messages) === JSON.stringify(expected));
     expect(sent).toBeDefined();
+  });
+
+  it("reads the picture when the request is built, not when the task is", async () => {
+    // A locally captured PNG becomes a base64 data URL roughly a third larger than the file. Held on
+    // every task from `buildTasks` until the run ended, a corpus of real captures was hundreds of
+    // megabytes resident before the first call went out. Tasks now carry a `makeRequest` function
+    // instead, and the bytes are read when it is called.
+    //
+    // Retention is not observable, so this pins the behaviour that follows from it: swap the file
+    // on disk after the tasks are built, and the request picks up the new bytes. An eagerly built
+    // request would still be carrying the old ones.
+    const { tasks } = buildTasks({
+      corpusPaths: paths,
+      experiment: {
+        schemaVersion: 1,
+        name: "lazy-image",
+        runs: [{
+          id: "image-puppeteer",
+          message: "image-only",
+          imageMode: "puppeteer-full-height",
+          prompt: "categorize-design-default"
+        }]
+      } as ExperimentFile,
+      promptsDir: path.join(harnessRoot, "prompts"),
+      pricing: pricingFor(loadPricingConfig(), kDefaultModel)
+    });
+    const task = tasks.find((entry) => entry.docId === "drawing")!;
+
+    const file = imageRepresentationPath(paths, "puppeteer-full-height", "drawing");
+    const png = resolveImageFile(file, readImageEnvelope(file).images[0]);
+    const original = fs.readFileSync(png);
+    const replaced = makeTestPng(120, 130);
+    expect(replaced).not.toEqual(original);
+    try {
+      fs.writeFileSync(png, replaced);
+      const sent = JSON.stringify(task.makeRequest().apiRequest.messages);
+      expect(sent).toContain(dataUrlFor(replaced));
+      expect(sent).not.toContain(dataUrlFor(original));
+    } finally {
+      fs.writeFileSync(png, original);
+    }
+    // With the file restored, the request is the one the key was built from — which is the case
+    // that matters, since `buildTasks` hashes the file and refuses a stale envelope before any of
+    // this. The swap above only says *where* the read happens.
+    expect(JSON.stringify(task.makeRequest().apiRequest.messages)).toContain(dataUrlFor(original));
   });
 
   it("reports image-only and text-only side by side rather than summed", async () => {

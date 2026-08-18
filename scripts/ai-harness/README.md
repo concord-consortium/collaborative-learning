@@ -235,6 +235,18 @@ It is a **local** backend, not an offline one. The CLUE page it loads may still 
 or other assets from elsewhere. If offline operation ever has to be a guarantee, the backend must
 intercept and reject non-localhost requests, and a test must assert it.
 
+**A cold dev server can time out the first documents in a run.** `render` drives four pages at a
+time, and the 30-second budget is *per document, covering load, readiness and the capture together*.
+Against a `npm start` server that is still compiling chunks on demand, the first batch pays that
+compile cost and the capture is what runs out of budget — the failure reads `capturing the iframe
+did not finish within the 30000ms budget`, with a clean console and a page screenshot showing a
+perfectly rendered document. Re-run the command: it re-attempts only what failed, against a server
+that is now warm.
+
+Neither the concurrency nor the per-document timeout is reachable from the command line today —
+both are injectable for tests only, so re-running is the only lever. Flags for them are noted
+against milestone 3 in [the plan](../../docs/plans/CLUE-371-harness-plan.md).
+
 `npm ci` in this directory now installs puppeteer, which downloads a Chromium build on first
 install. If your environment blocks that download, set `PUPPETEER_SKIP_DOWNLOAD=true` to skip it and
 `PUPPETEER_EXECUTABLE_PATH` to an existing Chromium — the browser is only needed for the local
