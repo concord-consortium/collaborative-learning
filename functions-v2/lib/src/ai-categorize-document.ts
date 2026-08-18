@@ -22,15 +22,21 @@ interface IAiPrompt {
   discussionPrompt?: string;
 }
 
-interface AgreementInfo {
+export interface AgreementInfo {
   content: string,
   tags: string[],
 }
-type Agreements = Record<AgreementValue, AgreementInfo[]>
+export type Agreements = Partial<Record<AgreementValue, AgreementInfo[]>>
 
-interface RelatedSummary {
+export interface RelatedSummary {
   summary: string;
   agreements: Agreements;
+}
+
+/** The fields `mapRelatedSummaries` reads off a document returned by the related-summaries search. */
+export interface RelatedSummarySource {
+  summary?: unknown;
+  aiAgreements?: Record<string, AiAgreement>;
 }
 
 const defaultAiPrompt: IAiPrompt = {
@@ -202,22 +208,30 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
       distanceMeasure: "EUCLIDEAN",
     });
   const snapshot = await query.get();
+  return mapRelatedSummaries(snapshot.docs.map((doc) => doc.data() as RelatedSummarySource));
+}
+
+/**
+ * Maps the documents found by the related-summaries search into the entries injected into the AI
+ * prompt. A document with an empty `aiAgreements` map still yields an entry; only a missing map is
+ * skipped. Exported for unit testing.
+ */
+export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
   const relatedSummaries: RelatedSummary[] = [];
-  snapshot.forEach((doc) => {
-    const aiAgreements: Record<AgreementValue, AiAgreement> = doc.data().aiAgreements || undefined;
-    if (aiAgreements) {
-      const agreements = Object.values(aiAgreements).reduce<Agreements>((acc, cur) => {
+  for (const data of docs) {
+    if (data.aiAgreements && typeof data.summary === "string" && data.summary.length > 0) {
+      const agreements = Object.values(data.aiAgreements).reduce<Agreements>((acc, cur) => {
         const value = cur.value as AgreementValue;
         acc[value] = acc[value] || [];
         acc[value].push({content: cur.content, tags: cur.tags});
         return acc;
-      }, {} as Agreements);
+      }, {});
       relatedSummaries.push({
-        summary,
+        summary: data.summary,
         agreements,
       });
     }
-  });
+  }
   return relatedSummaries;
 }
 
