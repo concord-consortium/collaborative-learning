@@ -36,7 +36,7 @@ import {
   getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
   getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
 } from "../models/document/document-kinds";
-import { kClassOwnerPrefix } from "../models/document/document-axes";
+import { getClassOwnerId } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -788,10 +788,10 @@ export class DB {
     });
   }
 
-  // Synthetic owner uid for this class's class-wide documents. hasClassOwner reads the prefix back off
-  // a stored uid, so both sides share the constant.
+  // Synthetic owner uid for this class's class-wide documents, minted by the same function hasClassOwner
+  // reads back, so the two cannot drift.
   private get userIdForClassWideDocuments() {
-    return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
+    return getClassOwnerId(this.stores.user.classHash);
   }
 
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {

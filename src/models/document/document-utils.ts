@@ -86,8 +86,6 @@ export function getDocumentDisplayTitle(
   } else {
     const storedTitle = getDocumentTitleWithTimestamp(document, appConfig);
     if (storedTitle) return storedTitle;
-    // Nothing stored and no kind title: name it by kind and curriculum position if we can, otherwise return the
-    // stored value unchanged so callers see the same empty result as before.
     return getUnresolvedDocumentTitle(document) ?? storedTitle;
   }
 }
