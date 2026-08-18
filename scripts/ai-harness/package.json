@@ -6,11 +6,13 @@
   "type": "module",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:render": "tsx test/local-render.integration.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "openai": "6.45.0",
+    "puppeteer": "22.13.0",
     "zod": "3.25.76"
   },
   "devDependencies": {

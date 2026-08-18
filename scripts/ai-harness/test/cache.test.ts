@@ -177,6 +177,10 @@ describe("errors", () => {
     const dataRoot = makeTestDataRoot("cache-unparsed");
     const tasks = [makeTask("text", "text-default", "a summary")];
 
+    // A hand-built `CompletionResult`, which is fine here: this test is about what the *run loop*
+    // and the cache do with an unusable response, not about whether the backend can produce one.
+    // That the real backend now delivers this shape rather than throwing is covered separately, in
+    // test/openai-backend.test.ts, which drives `openAiCompletion` against a stubbed SDK.
     const first = await run(dataRoot, tasks,
       async () => completion({ parsed: null, refusal: null, finish_reason: "length" }));
 

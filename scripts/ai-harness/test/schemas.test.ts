@@ -82,6 +82,7 @@ describe("validators name the file and the field", () => {
 describe("experiment validation", () => {
   const context = {
     knownTextVariants: ["default", "minimal"],
+    knownImageModes: ["puppeteer-full-height", "shutterbug-production-current"],
     promptExists: (name: string) => name === "categorize-design-default"
   };
   const run = {
@@ -130,15 +131,19 @@ describe("experiment validation", () => {
 
 describe("result rows are a discriminated union on status", () => {
   const common = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     experiment: "text-baselines",
     experimentSha256: "abc",
     runId: "text-default",
     corpus: "synthetic-corpus",
     docId: "text",
     modality: "text-only",
+    computedModality: "text-only",
     message: "text-only",
-    textVariant: "default",
+    representation: {
+      kind: "text" as const, variantId: "default", variantVersion: 1,
+      sourceContentSha256: "0".repeat(64)
+    },
     prompt: { name: "categorize-design-default", sha256: "def" },
     requestKey: "key",
     runMeta: testRunMeta
@@ -286,9 +291,11 @@ describe("aiPrompt validation", () => {
 
 describe("error rows may carry what a billed failure cost", () => {
   const common = {
-    schemaVersion: 1, experiment: "text-baselines", experimentSha256: "abc", runId: "text-default",
-    corpus: "synthetic-corpus", docId: "text", modality: "text-only", message: "text-only",
-    textVariant: "default", prompt: { name: "p", sha256: "d" }, requestKey: "key", runMeta: testRunMeta,
+    schemaVersion: 2, experiment: "text-baselines", experimentSha256: "abc", runId: "text-default",
+    corpus: "synthetic-corpus", docId: "text", modality: "text-only",
+    computedModality: "text-only", message: "text-only",
+    representation: { kind: "text", variantId: "default", variantVersion: 1,
+      sourceContentSha256: "0".repeat(64) }, prompt: { name: "p", sha256: "d" }, requestKey: "key", runMeta: testRunMeta,
     status: "error", error: { type: "unparsed", message: "no parsed response", attempts: 1 }
   };
   const usage = { promptTokens: 700, completionTokens: 1024, source: "api" };

@@ -5,7 +5,7 @@
  * silently dropped from the counts.
  */
 import path from "node:path";
-import { ManifestDocument, Modality, ResultRow, kSchemaVersion } from "./schemas.js";
+import { ManifestDocument, MessageShape, Modality, ResultRow, kSchemaVersion } from "./schemas.js";
 import { writeJsonFile } from "./corpus.js";
 
 /**
@@ -18,9 +18,21 @@ export const kAllRunsLabel = "(all runs)";
 
 export interface GroupSummary {
   runId: string;
+  /**
+   * Which message shape this group covers, or "all". Reported alongside the run because an image-only
+   * run and a text-only run measure different things: summing them into one total would produce a
+   * number that answers no question anyone asked.
+   */
+  message: MessageShape | "all";
   /** "all" aggregates every modality for that run. */
   modality: Modality | "all";
   docs: number;
+  /**
+   * How many of this group's rows were grouped under a human's `modalityOverride` rather than the
+   * classifier's answer. A non-zero count means part of this row is a judgement call, and the reader
+   * should know which part before comparing groups.
+   */
+  overriddenModality: number;
   cacheHits: number;
   statuses: { success: number; refusal: number; error: number; skipped: number };
   tokens: {
@@ -31,6 +43,12 @@ export interface GroupSummary {
     promptMedian: number;
     completionMean: number;
     completionMedian: number;
+    /**
+     * The harness's pre-flight image-token estimate, summed over the rows that sent a picture. Zero
+     * for a text group. `promptTotal` is what the API actually billed and stays authoritative; this
+     * says how much of it was the image.
+     */
+    imageEstimatedTotal: number;
   };
   cost: { modeledUsd: number; incurredUsd: number };
   categories: Record<string, number>;
@@ -95,26 +113,34 @@ function median(values: number[]): number {
 
 interface Accumulator {
   runId: string | typeof kAllRunsKey;
+  message: MessageShape | "all";
   modality: Modality | "all";
   docs: Set<string>;
+  overriddenModality: Set<string>;
   cacheHits: number;
   statuses: GroupSummary["statuses"];
   promptTokens: number[];
   completionTokens: number[];
+  imageEstimatedTotal: number;
   modeledUsd: number;
   incurredUsd: number;
   categories: Record<string, number>;
 }
 
-function newAccumulator(runId: string | typeof kAllRunsKey, modality: Modality | "all"): Accumulator {
+function newAccumulator(
+  runId: string | typeof kAllRunsKey, message: MessageShape | "all", modality: Modality | "all"
+): Accumulator {
   return {
     runId,
+    message,
     modality,
     docs: new Set(),
+    overriddenModality: new Set(),
     cacheHits: 0,
     statuses: { success: 0, refusal: 0, error: 0, skipped: 0 },
     promptTokens: [],
     completionTokens: [],
+    imageEstimatedTotal: 0,
     modeledUsd: 0,
     incurredUsd: 0,
     categories: {}
@@ -123,6 +149,11 @@ function newAccumulator(runId: string | typeof kAllRunsKey, modality: Modality |
 
 function accumulate(accumulator: Accumulator, row: ResultRow): void {
   accumulator.docs.add(row.docId);
+  // Counted by document rather than by row, so it lines up with the `docs` column beside it.
+  if (row.modality !== row.computedModality) accumulator.overriddenModality.add(row.docId);
+  // Counted for every status, including errors and skips: what a picture would have cost is a fact
+  // about the request, not about whether the model answered.
+  accumulator.imageEstimatedTotal += row.promptImageTokensEstimated ?? 0;
   switch (row.status) {
     case "success": {
       accumulator.statuses.success += 1;
@@ -175,8 +206,10 @@ function finish(accumulator: Accumulator): GroupSummary {
   const completionTotal = accumulator.completionTokens.reduce((total, value) => total + value, 0);
   return {
     runId: accumulator.runId === kAllRunsKey ? kAllRunsLabel : accumulator.runId,
+    message: accumulator.message,
     modality: accumulator.modality,
     docs: accumulator.docs.size,
+    overriddenModality: accumulator.overriddenModality.size,
     cacheHits: accumulator.cacheHits,
     statuses: accumulator.statuses,
     tokens: {
@@ -186,7 +219,8 @@ function finish(accumulator: Accumulator): GroupSummary {
       promptMean: mean(accumulator.promptTokens),
       promptMedian: median(accumulator.promptTokens),
       completionMean: mean(accumulator.completionTokens),
-      completionMedian: median(accumulator.completionTokens)
+      completionMedian: median(accumulator.completionTokens),
+      imageEstimatedTotal: accumulator.imageEstimatedTotal
     },
     cost: { modeledUsd: accumulator.modeledUsd, incurredUsd: accumulator.incurredUsd },
     categories: accumulator.categories
@@ -219,20 +253,25 @@ export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Da
   // The cross-run aggregate is kept out of the keyed map rather than stored under its display label,
   // so an experiment that happens to define a run called "(all runs)" cannot merge into it.
   const groups = new Map<string, Accumulator>();
-  const overall = newAccumulator(kAllRunsKey, "all");
-  const get = (runId: string, modality: Modality | "all") => {
-    const key = `${runId} ${modality}`;
+  const overall = newAccumulator(kAllRunsKey, "all", "all");
+  const get = (
+    runId: string | typeof kAllRunsKey, message: MessageShape | "all", modality: Modality | "all"
+  ) => {
+    const key = `${String(runId)} ${message} ${modality}`;
     let accumulator = groups.get(key);
     if (!accumulator) {
-      accumulator = newAccumulator(runId, modality);
+      accumulator = newAccumulator(runId, message, modality);
       groups.set(key, accumulator);
     }
     return accumulator;
   };
 
   for (const row of current) {
-    accumulate(get(row.runId, row.modality), row);
-    accumulate(get(row.runId, "all"), row);
+    accumulate(get(row.runId, row.message, row.modality), row);
+    accumulate(get(row.runId, row.message, "all"), row);
+    // The per-shape aggregate across runs: this is what puts image-only and text-only totals side by
+    // side instead of merging them into a single meaningless sum.
+    accumulate(get(kAllRunsKey, row.message, "all"), row);
     accumulate(overall, row);
   }
 
@@ -249,14 +288,22 @@ export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Da
 
 const kColumns: { header: string; value: (group: GroupSummary) => string }[] = [
   { header: "run", value: (group) => group.runId },
+  { header: "message", value: (group) => group.message },
   { header: "modality", value: (group) => group.modality },
   { header: "docs", value: (group) => String(group.docs) },
+  // "-" rather than 0 so an untouched corpus does not look like it was checked and found clean.
+  { header: "overridden", value: (group) =>
+    group.overriddenModality === 0 ? "-" : String(group.overriddenModality) },
   { header: "ok", value: (group) => String(group.statuses.success) },
   { header: "refused", value: (group) => String(group.statuses.refusal) },
   { header: "errors", value: (group) => String(group.statuses.error) },
   { header: "skipped", value: (group) => String(group.statuses.skipped) },
   { header: "cached", value: (group) => String(group.cacheHits) },
   { header: "tok in", value: (group) => String(group.tokens.promptTotal) },
+  // What the harness estimated the pictures cost, beside what the API actually billed for the whole
+  // prompt. "-" rather than 0 where no image was sent, so the two cases cannot be confused.
+  { header: "img tok est", value: (group) =>
+    group.tokens.imageEstimatedTotal === 0 ? "-" : String(group.tokens.imageEstimatedTotal) },
   { header: "tok out", value: (group) => String(group.tokens.completionTotal) },
   { header: "in mean", value: (group) => group.tokens.promptMean.toFixed(0) },
   { header: "in med", value: (group) => group.tokens.promptMedian.toFixed(0) },
@@ -286,8 +333,17 @@ export function formatSummaryTable(summary: ReportSummary): string {
     `(replaced by a later re-run); they cost $${summary.superseded.incurredUsd.toFixed(4)}.`;
 }
 
+/**
+ * The summary sits beside its results file and is named after it.
+ *
+ * A single `summary.json` per directory was the wrong shape: the default output directory is
+ * `data/results/`, so every experiment's summary landed on the same path and reporting on one
+ * silently overwrote another's — the normal case, not an edge one.
+ */
 export function summaryPathFor(resultsFile: string): string {
-  return path.join(path.dirname(resultsFile), "summary.json");
+  const directory = path.dirname(resultsFile);
+  const base = path.basename(resultsFile, path.extname(resultsFile));
+  return path.join(directory, `${base}.summary.json`);
 }
 
 export function writeSummary(summary: ReportSummary, summaryFile: string): string {

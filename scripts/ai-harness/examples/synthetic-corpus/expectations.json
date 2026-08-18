@@ -2,6 +2,22 @@
   "schemaVersion": 1,
   "corpus": "synthetic-corpus",
   "documents": {
+    "adversarial-text": {
+      "computedModality": "text-only",
+      "tileTypes": [
+        "Text"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "full",
+      "distinctiveString": "adversarial-fixture-marker",
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "notes": "Student text that closes a script element, plus quotes, ampersands, U+2028/U+2029 and a literal backslash escape. Renders through the same generator all three modes share; see test/render-html.test.ts."
+    },
     "ai": {
       "expectDistinctiveInDefaultSummary": false,
       "defaultSummaryMustSucceed": true,

@@ -6,15 +6,17 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   CorpusManifest, CorpusSource, ManifestDocument, Modality, RepresentationEnvelope,
   kDocumentIdPattern, kSchemaVersion, sha256Canonical, validateCorpusManifest, validateRepresentationEnvelope
 } from "./schemas.js";
 import { classifyDocument } from "./capability.js";
+import { removeImageRepresentation } from "./represent-image.js";
+import { harnessRoot, isContainedBy, readJsonFile, writeJsonFile } from "./files.js";
 
-/** The scripts/ai-harness directory. */
-export const harnessRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+// Re-exported so the many modules that reach for these through `corpus.js` keep working; they are
+// defined in files.ts so that represent-image.ts can use them without importing this module.
+export { harnessRoot, isContainedBy, readJsonFile, realPathAsFarAsExists, writeJsonFile } from "./files.js";
 
 export function defaultDataRoot(): string {
   return path.join(harnessRoot, "data");
@@ -40,25 +42,6 @@ export function corpusPaths(dataRoot: string, corpus: string): CorpusPaths {
   };
 }
 
-export function readJsonFile(file: string): unknown {
-  let text: string;
-  try {
-    text = fs.readFileSync(file, "utf8");
-  } catch {
-    throw new Error(`${file}: cannot be read`);
-  }
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    throw new Error(`${file}: is not valid JSON (${(error as Error).message})`);
-  }
-}
-
-export function writeJsonFile(file: string, value: unknown): void {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
-}
-
 export function readManifest(paths: CorpusPaths): CorpusManifest {
   return validateCorpusManifest(readJsonFile(paths.manifest), paths.manifest);
 }
@@ -78,8 +61,7 @@ export function readCorpusDocument(paths: CorpusPaths, entry: ManifestDocument):
  */
 export function resolveCorpusFile(paths: CorpusPaths, entry: ManifestDocument): string {
   const resolved = path.resolve(paths.root, entry.file);
-  const relative = path.relative(paths.root, resolved);
-  if (relative === "" || relative.startsWith("..") || path.isAbsolute(relative)) {
+  if (!isContainedBy(resolved, paths.root)) {
     throw new Error(`${paths.manifest}: document "${entry.id}" has a file "${entry.file}" that ` +
       `resolves outside the corpus directory (${resolved})`);
   }
@@ -267,8 +249,20 @@ export function removeDocumentArtifacts(paths: CorpusPaths, entry: ManifestDocum
   }
   if (fs.existsSync(paths.representations)) {
     for (const variantId of fs.readdirSync(paths.representations)) {
-      remove(path.join(paths.representations, variantId, `${entry.id}.json`));
+      const file = path.join(paths.representations, variantId, `${entry.id}.json`);
+      // An image representation owns PNGs beside its envelope. Deleting the envelope alone would
+      // leave the picture of a student's document behind — exactly what --prune exists to prevent.
+      if (variantId.startsWith("image-")) removed.push(...removeImageRepresentation(file));
+      else remove(file);
     }
+  }
+  // Whatever a failed render left behind for this document goes too.
+  for (const modeId of fs.existsSync(path.join(paths.root, "render-errors"))
+    ? fs.readdirSync(path.join(paths.root, "render-errors")) : []) {
+    const directory = path.join(paths.root, "render-errors", modeId, entry.id);
+    if (!fs.existsSync(directory)) continue;
+    fs.rmSync(directory, { recursive: true, force: true });
+    removed.push(directory);
   }
   return removed;
 }

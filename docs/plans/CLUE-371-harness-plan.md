@@ -32,7 +32,7 @@ This is spike work: promising, but not yet a mandated feature, and the plan may 
 
 - `scripts/ai/download-documents.ts` — pulls documents from Firebase into local files (`firebase-admin` + `serviceAccountKey.json`). The corpus-pull command adapts this, with selection driven by `done`-queue records.
 - `scripts/ai/document-screenshots.ts` — puppeteer screenshots of documents rendered in the standalone doc editor against a local CLUE server. Second image backend.
-- `scripts/shutterbug.ts` — posts a document to Shutterbug the same way production does (same `generateHtml` iframe approach). Production-parity image backend.
+- `scripts/shutterbug.ts` — posts a document to Shutterbug using the same `generateHtml` iframe approach as production. **Not production parity as-is** (correction, 2026-08-13): it sends `height: 500, fullPage: true` where production sends `height: 1500` with no `fullPage`. Implementation doc 2 defines three named render modes so the true production baseline stays separate from improved variants.
 - `scripts/lib/` + `scripts/README.md` conventions (`npx tsx`, `scripts/.env`, `serviceAccountKey.json`) — the harness follows them.
 - `src/components/doc-editor/doc-editor-app.tsx` — proves `documentSummarizerWithDrawings` (SVG drawing handler) runs anywhere React is importable, including a node script here. The harness can prototype SVG-in-markdown drawings today even though the deployed function can't use that handler yet.
 
