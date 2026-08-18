@@ -34,8 +34,11 @@ describe("instance-level checks", () => {
   });
 
   it("reads slate content through the markdown converter before deciding", () => {
-    const empty = JSON.stringify({ object: "value", document: { children: [{ type: "paragraph", children: [{ text: "" }] }] } });
-    const filled = JSON.stringify({ object: "value", document: { children: [{ type: "paragraph", children: [{ text: "hi" }] }] } });
+    const slate = (text: string) => JSON.stringify({
+      object: "value", document: { children: [{ type: "paragraph", children: [{ text }] }] }
+    });
+    const empty = slate("");
+    const filled = slate("hi");
     expect(textTileHasContent({ type: "Text", format: "slate", text: empty })).toBe(false);
     expect(textTileHasContent({ type: "Text", format: "slate", text: filled })).toBe(true);
   });

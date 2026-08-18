@@ -20,7 +20,7 @@ import {
 import { getTextVariant } from "./represent-text.js";
 import {
   dataUrlFor, imageRepresentationIsUsable, imageRepresentationPath, readImageEnvelope, resolveImageFile,
-  sha256Bytes, singleImageOf
+  singleImageOf
 } from "./represent-image.js";
 import { readPngHeader } from "./png.js";
 import { createHash } from "node:crypto";

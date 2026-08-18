@@ -281,7 +281,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     expect(table).toContain("img tok est");
 
     const summary = JSON.parse(
-      fs.readFileSync(path.join(dataRoot, "results", "image-corpus__image-vs-text.summary.json"), "utf8")) as ReportSummary;
+      fs.readFileSync(path.join(dataRoot, "results", "image-corpus__image-vs-text.summary.json"), "utf8"),
+    ) as ReportSummary;
     const imageAll = summary.groups.find((group) =>
       group.runId === "(all runs)" && group.message === "image-only" && group.modality === "all")!;
     const textAll = summary.groups.find((group) =>

@@ -221,7 +221,7 @@ function isPrivateHost(hostname: string): boolean {
     if (!mapped) return false;
     const high = parseInt(mapped[1], 16);
     const low = parseInt(mapped[2], 16);
-    return isPrivateIpv4(`${high >> 8}.${high & 0xff}.${low >> 8}.${low & 0xff}`);
+    return isPrivateIpv4([high, low].flatMap((group) => [Math.floor(group / 256), group % 256]).join("."));
   }
   return isPrivateIpv4(host);
 }

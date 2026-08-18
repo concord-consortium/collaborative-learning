@@ -23,6 +23,7 @@ apart after the fact.
 cd scripts/ai-harness
 npm ci                 # not `npm install` — the lockfile is the contract (see "Version lockstep")
 npm run typecheck
+npm run lint           # the root `npm run lint` glob does not reach this directory
 npm test
 ```
 

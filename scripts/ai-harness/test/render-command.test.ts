@@ -1,11 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
-import { corpusPaths, importCorpus } from "../src/corpus.js";
+import { corpusPaths, harnessRoot, importCorpus } from "../src/corpus.js";
 import {
   imageRepresentationPath, readImageEnvelope, renderErrorDir, resolveImageFile
 } from "../src/represent-image.js";
-import { harnessRoot } from "../src/corpus.js";
 import { readPngInfo } from "../src/png.js";
 import { makeTestDataRoot, makeTestPng } from "./helpers.js";
 

@@ -218,7 +218,8 @@ describe("freshness", () => {
     // Same byte count, different pixels: only the hash catches this one.
     const { envelopeFile, envelope, bytes, identity: expected } = writeOne("replaced");
     const swapped = Buffer.from(bytes);
-    swapped[swapped.length - 5] ^= 0xff;
+    // A different value in the same number of bytes: only the hash catches this.
+    swapped[swapped.length - 5] = (swapped[swapped.length - 5] + 1) % 256;
     fs.writeFileSync(resolveImageFile(envelopeFile, envelope.images[0]), swapped);
     const result = imageRepresentationFreshness(envelope, expected, envelopeFile);
     expect(result.fresh).toBe(false);

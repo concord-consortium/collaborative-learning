@@ -3,22 +3,13 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { harnessRoot } from "../src/corpus.js";
 import type { RunTask } from "../src/execute.js";
-import type { HarnessRequest, InputImageAccounting } from "../src/messages.js";
-import { requestKeyFor } from "../src/messages.js";
+import { HarnessRequest, InputImageAccounting, requestKeyFor } from "../src/messages.js";
 import { kRetries } from "../src/cost.js";
 import type { ModelPricing, RunMeta } from "../src/schemas.js";
 
 /** The repository root — two levels up from scripts/ai-harness. */
 export const repoRoot = path.resolve(harnessRoot, "..", "..");
 
-/**
- * Scratch space for tests. It lives inside `data/` because nothing the harness generates is ever
- * written outside that (gitignored) tree.
- *
- * Removed again when the suite finishes, not merely at the start of the next run: a full corpus of
- * documents and rendered PNGs per suite, left on disk indefinitely, adds up. Set
- * `KEEP_TEST_DATA=1` to keep it for inspection after a failure.
- */
 const testDataRoots: string[] = [];
 
 // Registered once, when this module is first imported by a test file, rather than per call: some
@@ -31,6 +22,14 @@ if (typeof afterAll === "function") {
   });
 }
 
+/**
+ * Scratch space for tests. It lives inside `data/` because nothing the harness generates is ever
+ * written outside that (gitignored) tree.
+ *
+ * Removed again when the suite finishes, not merely at the start of the next run: a full corpus of
+ * documents and rendered PNGs per suite, left on disk indefinitely, adds up. Set `KEEP_TEST_DATA=1`
+ * to keep it for inspection after a failure.
+ */
 export function makeTestDataRoot(name: string): string {
   const directory = path.join(harnessRoot, "data", "test-runs", name);
   fs.rmSync(directory, { recursive: true, force: true });
@@ -130,6 +129,9 @@ export function makeTestPng(widthPx: number, heightPx: number, fill = 0x40): Buf
   ]);
 }
 
+// CRC32 is defined in terms of shifts and exclusive-or; writing it any other way would be an
+// obfuscation rather than a clarification.
+/* eslint-disable no-bitwise */
 const crcTable = Array.from({ length: 256 }, (_, index) => {
   let value = index;
   for (let bit = 0; bit < 8; bit += 1) value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
@@ -141,6 +143,7 @@ function crc32(bytes: Buffer): number {
   for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
   return (crc ^ 0xffffffff) >>> 0;
 }
+/* eslint-enable no-bitwise */
 
 export function makeTask(docId: string, runId: string, text: string, worstCase = 0.01): RunTask {
   const request = makeRequest(text);

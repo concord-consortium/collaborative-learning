@@ -78,8 +78,9 @@ describe("serving the rendering unit", () => {
     try {
       // No "/../content.json" case: the URL parser collapses that to "/content.json" before the
       // request is sent, so it would be testing fetch rather than this server.
-      for (const path of ["/", "/etc/passwd", "/content.json.map", "/units/qa/content.json"]) {
-        expect({ path, status: (await fetch(`${origin}${path}`)).status }).toEqual({ path, status: 404 });
+      for (const requested of ["/", "/etc/passwd", "/content.json.map", "/units/qa/content.json"]) {
+        expect({ requested, status: (await fetch(`${origin}${requested}`)).status })
+          .toEqual({ requested, status: 404 });
       }
       // A query string is still the unit — CLUE may append a cache-buster.
       expect((await fetch(`${server.unitUrl}?v=2`)).status).toBe(200);

@@ -7,6 +7,7 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint -c ../../.eslintrc.js . --ext .ts",
     "test:render": "tsx test/local-render.integration.ts"
   },
   "dependencies": {

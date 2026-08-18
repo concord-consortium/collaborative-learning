@@ -411,7 +411,7 @@ export function validateExperimentFile(
   const runs = asArray(record.runs, file, "runs");
   if (runs.length === 0) fail(file, "runs", "must contain at least one run");
   const seen = new Set<string>();
-  const validated = runs.map((entry, index) => {
+  const validatedRuns = runs.map((entry, index) => {
     const field = `runs[${index}]`;
     const run = asObject(entry, file, field);
     const id = asString(run.id, file, `${field}.id`);
@@ -447,7 +447,7 @@ export function validateExperimentFile(
     }
     return validated;
   });
-  return { schemaVersion: kSchemaVersion, name, runs: validated };
+  return { schemaVersion: kSchemaVersion, name, runs: validatedRuns };
 }
 
 // ---------------------------------------------------------------------------
@@ -899,7 +899,10 @@ function validateResultCommon(record: Record<string, unknown>, file: string): Re
     computedModality: asEnum(record.computedModality, modalities, file, "computedModality"),
     message: asEnum(record.message, messageShapes, file, "message"),
     representation: validateRepresentationDescriptor(record.representation, file, "representation"),
-    prompt: { name: asString(prompt.name, file, "prompt.name"), sha256: asString(prompt.sha256, file, "prompt.sha256") },
+    prompt: {
+      name: asString(prompt.name, file, "prompt.name"),
+      sha256: asString(prompt.sha256, file, "prompt.sha256")
+    },
     requestKey: null,
     runMeta: {
       date: asString(runMeta.date, file, "runMeta.date"),
