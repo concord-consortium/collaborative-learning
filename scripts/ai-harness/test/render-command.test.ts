@@ -222,6 +222,46 @@ describe("render refuses what it cannot do", () => {
       .rejects.toThrow(/--capture-height must be a positive whole number/);
   });
 
+  it("says when a mode cannot report what it drew, against a unit that is not the harness's", async () => {
+    // A hosted service renders somewhere else, so `unknownTiles` is null and the unknown-tile
+    // warning below can never fire. Rendering the corpus against `mods` therefore produced valid
+    // PNGs of "Unknown" placeholders with nothing saying so.
+    const dataRoot = makeTestDataRoot("render-unobserved");
+    const output: string[] = [];
+    // An empty corpus, so the warning is all this exercises: the Shutterbug modes post to a real
+    // service, and there is nothing to render here.
+    const empty = path.join(dataRoot, "no-documents");
+    fs.mkdirSync(empty, { recursive: true });
+    await main(["import", "--from", empty, "--corpus", "empty-corpus"],
+      { dataRoot, log: (message: string) => output.push(message) });
+    output.length = 0;
+    await main(["render", "--corpus", "empty-corpus", "--mode", "shutterbug-parameterized"],
+      deps(dataRoot, null, output));
+    expect(output.join("\n"))
+      .toMatch(/renders against unit "mods" and cannot report what it drew/);
+    // The local mode renders against the harness's own unit and can see inside the page, so it says
+    // nothing of the sort.
+    output.length = 0;
+    await main(["render", "--corpus", "empty-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, null, output));
+    expect(output.join("\n")).not.toMatch(/cannot report what it drew/);
+  });
+
+  it("logs a failure to close the backend rather than letting it replace the real error", async () => {
+    // Thrown from a `finally`, a close failure replaces whatever was already in flight — so a
+    // browser that failed to launch surfaced as "close failed", which says nothing about why the
+    // render did not happen.
+    const { dataRoot, order } = setUp("render-close-failure");
+    const output: string[] = [];
+    const browser = browserThatFails(new Set(), order);
+    (browser as any).close = async () => { throw new Error("Chromium is gone"); };
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browser, output));
+    expect(output.join("\n")).toMatch(/closing the render backend failed: Chromium is gone/);
+    // And the run itself still reported what it did.
+    expect(output.join("\n")).toMatch(/Rendered 25 document\(s\)/);
+  });
+
   it("rejects an unknown mode", async () => {
     const { dataRoot } = setUp("render-bad-mode");
     await expect(main(["render", "--corpus", "render-corpus", "--mode", "screenshot"],

@@ -38,6 +38,15 @@ export function escapeHtmlAttribute(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * The height the iframe starts at, before anything resizes it.
+ *
+ * Exported because `puppeteer.ts` compares against it to decide whether the frame needs growing to
+ * cover the document. Two independent literals would silently uncouple: the resize guard would stop
+ * firing and a viewport-sized capture would be recorded as a full-document one.
+ */
+export const kInitialFrameHeightPx = 500;
+
 export interface RenderHtmlOptions {
   /** The document content, as an object — not a string of JSON. */
   content: unknown;
@@ -70,7 +79,7 @@ export function iframeUrlFor(clueUrl: string, unit: string): string {
  * ignores it either way.
  */
 export function generateRenderHtml(options: RenderHtmlOptions): string {
-  const { content, clueUrl, unit, initialHeightPx = 500 } = options;
+  const { content, clueUrl, unit, initialHeightPx = kInitialFrameHeightPx } = options;
   const serialized = escapeJsonForScript(JSON.stringify(content));
   const source = escapeHtmlAttribute(iframeUrlFor(clueUrl, unit));
   return `

@@ -11,7 +11,23 @@ const noSleep = async () => undefined;
 
 interface Call { url: string; init?: RequestInit }
 
-/** A fetch that answers the POST with `{url}` and the download with PNG bytes. */
+/** A response body that really streams, the way `fetch` delivers one. */
+export function streamingBody(bytes: Buffer, pieces = 1): AsyncIterable<Uint8Array> {
+  const size = Math.ceil(bytes.length / pieces);
+  return {
+    async *[Symbol.asyncIterator]() {
+      for (let at = 0; at < bytes.length; at += size) yield bytes.subarray(at, at + size);
+    }
+  };
+}
+
+/**
+ * A fetch that answers the POST with `{url}` and the download with PNG bytes.
+ *
+ * Both replies carry a real streaming `body`, because that is what the code under test reads: the
+ * POST's is bounded before it is parsed, and the download's is read chunk by chunk under a byte
+ * limit. A fake offering only `json()` or `arrayBuffer()` exercised neither path.
+ */
 function fakeFetch(options: {
   calls?: Call[];
   postResponses?: Partial<Response>[];
@@ -27,7 +43,7 @@ function fakeFetch(options: {
         ok: true,
         status: 200,
         statusText: "OK",
-        json: async () => ({ url: "https://images.example.test/shot.png" }),
+        body: streamingBody(Buffer.from(JSON.stringify({ url: "https://images.example.test/shot.png" }))),
         ...next
       } as Response;
     }
@@ -35,12 +51,17 @@ function fakeFetch(options: {
       ok: true,
       status: 200,
       statusText: "OK",
+      url: "https://images.example.test/shot.png",
       headers: new Headers({ "content-type": "image/png" }),
-      arrayBuffer: async () => png.buffer.slice(png.byteOffset, png.byteOffset + png.byteLength),
+      body: streamingBody(png, 4),
       ...options.download
     } as Response;
   };
 }
+
+/** A POST reply whose body is `text`, for the cases that are about what came back. */
+const postBody = (text: string): Partial<Response> =>
+  ({ body: streamingBody(Buffer.from(text)) } as Partial<Response>);
 
 describe("production parity", () => {
   it("generates exactly today's production request", () => {
@@ -175,17 +196,17 @@ describe("the network contract", () => {
   });
 
   it("refuses a response that is not JSON", async () => {
-    await expect(backend({ postResponses: [{ json: async () => { throw new Error("Unexpected token <"); } }] })
+    await expect(backend({ postResponses: [postBody("<html>502 Bad Gateway</html>")] })
       .render({ docId: "doc", content: document })).rejects.toThrow(/was not JSON/);
   });
 
   it("refuses a JSON body with no url", async () => {
-    await expect(backend({ postResponses: [{ json: async () => ({ error: "nope" }) }] })
+    await expect(backend({ postResponses: [postBody(JSON.stringify({ error: "nope" }))] })
       .render({ docId: "doc", content: document })).rejects.toThrow(/has no "url" string/);
   });
 
   it("refuses a non-https image URL", async () => {
-    await expect(backend({ postResponses: [{ json: async () => ({ url: "http://images.test/shot.png" }) }] })
+    await expect(backend({ postResponses: [postBody(JSON.stringify({ url: "http://images.test/shot.png" }))] })
       .render({ docId: "doc", content: document })).rejects.toThrow(/non-https image URL/);
   });
 
@@ -198,7 +219,7 @@ describe("the network contract", () => {
     // A `.png` suffix is not evidence of PNG bytes.
     const html = Buffer.from("<html><body>error</body></html>");
     await expect(backend({
-      download: { arrayBuffer: async () => html.buffer.slice(html.byteOffset, html.byteOffset + html.byteLength) }
+      download: { body: streamingBody(html) } as any
     }).render({ docId: "doc", content: document })).rejects.toThrow(/is not a usable PNG/);
   });
 
@@ -225,9 +246,7 @@ describe("the network contract", () => {
     // than be committed.
     const tall = makeTestPng(1000, 30_000);
     const backendWithLimits = shutterbugProductionCurrent({
-      fetchImpl: fakeFetch({ download: {
-        arrayBuffer: async () => new Uint8Array(tall).buffer
-      } }),
+      fetchImpl: fakeFetch({ download: { body: streamingBody(tall, 3) } as any }),
       sleep: noSleep
     });
     await expect(backendWithLimits.render({ docId: "endless", content: document }))

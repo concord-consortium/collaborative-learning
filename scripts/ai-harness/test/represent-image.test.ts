@@ -330,6 +330,37 @@ describe("pruning", () => {
       .toEqual([]);
   });
 
+  it("deletes orphaned PNGs left by a crash, which have no envelope at all", () => {
+    // The PNGs are written first and the envelope last, so a crash mid-render leaves pictures with
+    // nothing naming them. Returning early on a missing envelope left them there, and --prune then
+    // kept a rendered picture of a document that is no longer in the corpus.
+    const envelopeFile = imageRepresentationPath(paths, "puppeteer-full-height", "crashed");
+    const directory = path.dirname(envelopeFile);
+    fs.mkdirSync(directory, { recursive: true });
+    const orphans = ["crashed-1.png", "crashed-2.png"].map((name) => path.join(directory, name));
+    for (const orphan of orphans) fs.writeFileSync(orphan, makeTestPng(8, 8));
+    // Another document's picture, which must survive.
+    const bystander = path.join(directory, "crashed-later-1.png");
+    fs.writeFileSync(bystander, makeTestPng(8, 8));
+
+    expect(removeImageRepresentation(envelopeFile).sort()).toEqual(orphans.sort());
+    for (const orphan of orphans) expect(fs.existsSync(orphan)).toBe(false);
+    expect(fs.existsSync(bystander)).toBe(true);
+  });
+
+  it("deletes a temporary file left by an interrupted write of a picture", () => {
+    // A kill during `writeFileAtomically` leaves `<docId>-1.png.<pid>.<uuid>.tmp` holding the same
+    // pixels as the picture it was about to become. Nothing else ever looks at it again.
+    const envelopeFile = imageRepresentationPath(paths, "puppeteer-full-height", "interrupted");
+    const directory = path.dirname(envelopeFile);
+    fs.mkdirSync(directory, { recursive: true });
+    const temporary = path.join(directory,
+      `interrupted-1.png.${process.pid}.f81d4fae-7dec-11d0-a765-00a0c91e6bf6.tmp`);
+    fs.writeFileSync(temporary, makeTestPng(8, 8));
+    expect(removeImageRepresentation(envelopeFile)).toEqual([temporary]);
+    expect(fs.existsSync(temporary)).toBe(false);
+  });
+
   it("deletes the PNGs of an envelope it cannot parse, not just the envelope", () => {
     // Leaving the images while deleting the only file that names them is exactly what --prune
     // exists to prevent: an unreachable picture of a student's document.

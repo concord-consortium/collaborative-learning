@@ -179,6 +179,9 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     const printed = output.join("\n");
     expect(printed).toContain("3 run(s) × 25 document(s) = 75 call(s)");
     expect(printed).toContain("[image-only, --mode puppeteer-full-height");
+    // Where the pictures came from, resolved rather than described. Every render target value has a
+    // default, and a default nobody states is one nobody checks.
+    expect(printed).toMatch(/renders against: http:\/\/localhost:8080 \(--clue-url\), unit harness-render/);
     expect(printed).toMatch(/image tokens \(estimated, auto priced at the high rate\): \d{4,}/);
     expect(requests).toHaveLength(0);
   });

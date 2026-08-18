@@ -25,7 +25,7 @@ import {
 import { readPngHeader } from "./png.js";
 import { createHash } from "node:crypto";
 import { git } from "./files.js";
-import { kDefaultRenderLimits } from "./backends/types.js";
+import { kDefaultRenderLimits, redirectDowngradeReason } from "./backends/types.js";
 import { renderBackendIdentity } from "./backends/index.js";
 import {
   ExperimentFile, ExperimentRun, ManifestDocument, ModelPricing, RepresentationDescriptor,
@@ -75,7 +75,16 @@ export interface RunTask {
   promptName: string;
   promptSha256: string;
   aiPrompt: IAiPrompt;
-  request: HarnessRequest;
+  /**
+   * Builds the request this task will send, on demand.
+   *
+   * A function rather than the request itself, because for a locally captured image the request
+   * holds the picture: a 4 MB PNG becomes a ~5.5 MB base64 data URL, and one of those per task meant
+   * an entire corpus's pixels sat in memory from `buildTasks` until the run ended — around 275 MB
+   * for 25 documents across two image runs, before the first call went out. The request is now built
+   * once here for the key and the cost reservation, released, and built again at dispatch.
+   */
+  makeRequest: () => HarnessRequest;
   requestKey: string;
   worstCaseUsd: number;
   /**
@@ -155,7 +164,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
         `"${envelope.docId}" / variant "${envelope.variantId}" at version ${envelope.variantVersion}). ` +
         `Run: harness.ts represent --corpus ${manifest.name} --variants ${variant.id}`);
     }
-    const request = buildRequest({
+    const makeRequest = () => buildRequest({
       model,
       aiPrompt,
       message: run.message,
@@ -169,7 +178,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
       variantVersion: variant.variantVersion,
       sourceContentSha256: envelope.sourceContentSha256
     };
-    return { request, representation, hostedImages: [] as { url: string; sha256: string }[] };
+    return { makeRequest, representation, hostedImages: [] as { url: string; sha256: string }[] };
   };
 
   /** Everything an image-only run needs for one document. */
@@ -196,14 +205,16 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
 
     // Exactly one image, never the first of several — see singleImageOf.
     const image = singleImageOf(envelope, file);
-    // A hosted render sends the URL production sends; a local capture sends its bytes inline, the
-    // way production's categorizeDocument() does with a local file.
-    const imageUrl = image.url ?? dataUrlFor(fs.readFileSync(resolveImageFile(file, image)));
-    const request = buildImageRequest({
+    // The path is resolved now — it is a check, and a stale envelope should fail here rather than
+    // at dispatch — but the bytes are read only when the request is actually built.
+    const imageFile = image.url ? null : resolveImageFile(file, image);
+    const makeRequest = () => buildImageRequest({
       model,
       aiPrompt,
       message: run.message,
-      imageUrl,
+      // A hosted render sends the URL production sends; a local capture sends its bytes inline, the
+      // way production's categorizeDocument() does with a local file.
+      imageUrl: image.url ?? dataUrlFor(fs.readFileSync(imageFile!)),
       accounting: { sha256: image.sha256, widthPx: image.widthPx, heightPx: image.heightPx },
       generationSettings
     });
@@ -217,7 +228,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
       imageSha256s: envelope.images.map((entry) => entry.sha256)
     };
     return {
-      request,
+      makeRequest,
       representation,
       hostedImages: image.url ? [{ url: image.url, sha256: image.sha256 }] : []
     };
@@ -227,9 +238,12 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
   for (const run of experiment.runs) {
     const { aiPrompt, sha256 } = loadPrompt(run.prompt);
     for (const document of manifest.documents) {
-      const { request, representation, hostedImages } = run.message === "text-only"
+      const { makeRequest, representation, hostedImages } = run.message === "text-only"
         ? textInput(run, document, aiPrompt)
         : imageInput(run, document, aiPrompt);
+      // Built once for the key and the reservation, then released. Holding on to it is what put a
+      // whole corpus of base64-encoded pixels in memory before the first call went out.
+      const request = makeRequest();
       const imageTokensEstimated = request.inputAccounting.images
         .reduce((total, image) => total + estimateImageTokens(image, pricing.imageTokens), 0);
       tasks.push({
@@ -241,7 +255,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
         promptName: run.prompt,
         promptSha256: sha256,
         aiPrompt,
-        request,
+        makeRequest,
         requestKey: requestKeyFor(request),
         worstCaseUsd: worstCaseUsd(request, pricing, retries),
         retries,
@@ -507,6 +521,14 @@ export function hostedImageCheck(
     try {
       const response = await fetch(url, { redirect: "follow", signal: controller.signal });
       if (!response.ok) return `HTTP ${response.status} ${response.statusText}`;
+      // Redirects are followed, so the URL that answered need not be the one that was checked. This
+      // is where a redirect to plain http, or to an address on this machine, is caught.
+      const downgraded = redirectDowngradeReason(url, response.url || url);
+      if (downgraded) return downgraded;
+      const contentType = response.headers?.get?.("content-type") ?? null;
+      if (contentType && !contentType.toLowerCase().startsWith("image/png")) {
+        return `served content-type "${contentType}", not image/png`;
+      }
       const declared = Number(response.headers?.get?.("content-length") ?? NaN);
       if (Number.isFinite(declared) && declared > maxBytes) {
         return `declares ${declared} bytes, over the ${maxBytes} limit`;
@@ -557,6 +579,28 @@ export function hostedImageCheck(
       clearTimeout(timer);
     }
   };
+}
+
+/**
+ * `Promise.all` with a cap on how many run at once, preserving input order in the result.
+ *
+ * Used where the work is unbounded in size as well as in count — every item is a download — so
+ * "start them all and wait" is not a neutral choice.
+ */
+async function mapWithConcurrency<T, R>(
+  items: T[], concurrency: number, run: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const worker = async () => {
+    for (;;) {
+      const index = next++;
+      if (index >= items.length) return;
+      results[index] = await run(items[index]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(concurrency, items.length)) }, worker));
+  return results;
 }
 
 export class HostedImageUnusable extends Error {
@@ -638,8 +682,11 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
     task.hostedImages.map((image) => [`${image.url}\u0001${image.sha256}`, image] as const)));
   if (hostedImages.size > 0) {
     const check = options.checkHostedImage ?? hostedImageCheck();
-    const reasons = new Map(await Promise.all([...hostedImages].map(async ([key, image]) =>
-      [key, await check(image.url, image.sha256)] as const)));
+    // At the run loop's own concurrency rather than all at once. Each download is allowed up to
+    // 20 MB, so a 25-document corpus checked with `Promise.all` could have half a gigabyte in
+    // flight and 25 simultaneous connections to one host.
+    const reasons = new Map(await mapWithConcurrency([...hostedImages], concurrency,
+      async ([key, image]) => [key, await check(image.url, image.sha256)] as const));
     const failures = pending.flatMap((task) => task.hostedImages
       .map((image) => ({ image, reason: reasons.get(`${image.url}\u0001${image.sha256}`) }))
       .filter((checked) => checked.reason != null)
@@ -748,13 +795,16 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
       let attempts = 0;
       let lastError: unknown;
       let result: CompletionResult | undefined;
+      // Built here, at dispatch, and dropped when this task finishes — see `makeRequest`. Every
+      // attempt sends the same request, so it is built once per task rather than once per attempt.
+      const request = task.makeRequest();
       while (attempts <= retries) {
         attempts += 1;
         try {
           // Counted here, per dispatch: a request that succeeds on its third try made three calls,
           // and one that exhausts its retries made three and reported none.
           summary.apiCalls += 1;
-          result = await createCompletion({ request: task.request, aiPrompt: task.aiPrompt });
+          result = await createCompletion({ request, aiPrompt: task.aiPrompt });
           break;
         } catch (error) {
           lastError = error;

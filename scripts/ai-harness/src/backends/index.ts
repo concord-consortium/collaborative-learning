@@ -11,8 +11,8 @@ import { git } from "../files.js";
 import { RenderBackend } from "./types.js";
 import { kPuppeteerBackendVersion, puppeteerBackend } from "./puppeteer.js";
 import {
-  kProductionClueUrl, kProductionShutterbugUrl, kShutterbugBackendVersion, shutterbugParameterized,
-  shutterbugProductionCurrent
+  kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
+  kShutterbugBackendVersion, kStagingShutterbugUrl, shutterbugParameterized, shutterbugProductionCurrent
 } from "./shutterbug.js";
 import { kHarnessRenderUnitId } from "./render-unit.js";
 
@@ -30,6 +30,14 @@ export interface RenderModeDescriptor {
   backendVersion: number;
   /** One line for `plan` and the README: what has to be true before this mode can run. */
   prerequisites: string;
+  /**
+   * What this mode renders against with no flags: CLUE URL, unit, endpoint, capture height.
+   *
+   * `plan` prints it. Every one of those has a default, and a default nobody states is one nobody
+   * checks — omitting `--shutterbug-url` quietly posts student work at staging, which is the right
+   * conservative choice and still worth saying out loud before a run.
+   */
+  renderTargetSummary: string;
   /**
    * The unit identifier this mode renders with, or null when the mode fixes its own. A mode with a
    * unit here also needs that unit served — see `needsUnitServer`.
@@ -80,6 +88,8 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     backendId: "puppeteer",
     backendVersion: kPuppeteerBackendVersion,
     prerequisites: `a CLUE dev server at ${kDefaultClueUrl} (npm start); no OpenAI key`,
+    renderTargetSummary: `${kDefaultClueUrl} (--clue-url), unit ${kHarnessRenderUnitId} (--unit), ` +
+      "captured full-document",
     defaultUnit: kHarnessRenderUnitId,
     needsUnitServer: true,
     // This mode always captures the whole document, so accepting a capture height and dropping it
@@ -99,6 +109,8 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     backendId: "shutterbug",
     backendVersion: kShutterbugBackendVersion,
     prerequisites: `network access to ${kProductionShutterbugUrl} and ${kProductionClueUrl}; no OpenAI key`,
+    renderTargetSummary: `${kProductionClueUrl}, unit ${kProductionUnit}, via ` +
+      `${kProductionShutterbugUrl}, clipped at ${kProductionCaptureHeightPx}px (none configurable)`,
     defaultUnit: null,
     needsUnitServer: false,
     // Frozen by definition: this mode exists to reproduce today's production request exactly.
@@ -108,7 +120,13 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
   "shutterbug-parameterized": {
     backendId: "shutterbug",
     backendVersion: kShutterbugBackendVersion,
-    prerequisites: "network access to the configured Shutterbug endpoint and CLUE URL; no OpenAI key",
+    // Named rather than described: "the configured endpoint" told a reader nothing about where a
+    // run with no flags actually posts student work.
+    prerequisites: `network access to the Shutterbug endpoint (${kStagingShutterbugUrl} unless ` +
+      `--shutterbug-url says otherwise) and the CLUE URL; no OpenAI key`,
+    renderTargetSummary: `${kProductionClueUrl} (--clue-url), unit ${kProductionUnit} (--unit), via ` +
+      `${kStagingShutterbugUrl} (--shutterbug-url), clipped at ${kProductionCaptureHeightPx}px ` +
+      "(--capture-height)",
     defaultUnit: null,
     needsUnitServer: false,
     unusableFlags: [],

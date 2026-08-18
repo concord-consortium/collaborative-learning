@@ -136,7 +136,7 @@ export function makeTask(docId: string, runId: string, text: string, worstCase =
     promptName: "categorize-design-default",
     promptSha256: "prompt-hash",
     aiPrompt: { systemPrompt: "You are a teaching assistant.", mainPrompt: "Evaluate this.", discussionPrompt: "?" },
-    request,
+    makeRequest: () => request,
     requestKey: requestKeyFor(request),
     worstCaseUsd: worstCase,
     retries: kRetries,

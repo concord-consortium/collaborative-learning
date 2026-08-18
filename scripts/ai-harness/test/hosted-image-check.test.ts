@@ -97,9 +97,18 @@ describe("verifying a hosted image", () => {
     })).toMatch(/HTTP 404/);
   });
 
-  it("fails when what comes back is not a PNG at all", async () => {
+  it("fails when the server says it is serving something other than a PNG", async () => {
     expect(await check((_request, response) => {
       response.writeHead(200, { "content-type": "text/html" });
+      response.end("<html>503</html>");
+    })).toMatch(/served content-type "text\/html", not image\/png/);
+  });
+
+  it("fails when what comes back is not a PNG at all, whatever the content type claims", async () => {
+    // The declared type is a claim, not evidence: a service can return an HTML error page under an
+    // `image/png` header, and the bytes are what decide.
+    expect(await check((_request, response) => {
+      response.writeHead(200, { "content-type": "image/png" });
       response.end("<html>503</html>");
     })).toMatch(/is not a usable PNG/);
   });

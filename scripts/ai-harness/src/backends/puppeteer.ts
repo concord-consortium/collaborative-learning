@@ -12,7 +12,7 @@
  */
 import { RenderTarget } from "../schemas.js";
 import { readPngInfo } from "../png.js";
-import { generateRenderHtml, iframeUrlFor } from "./render-html.js";
+import { generateRenderHtml, iframeUrlFor, kInitialFrameHeightPx } from "./render-html.js";
 import {
   RenderBackend, RenderDiagnostics, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
   checkEncodedSize, kDefaultRenderLimits
@@ -187,8 +187,12 @@ export interface FrameMeasurement {
  * construction, which is why production never hit it.
  */
 export interface RenderPageServer {
-  /** Registers a document's HTML and returns the URL to navigate to. */
-  serve(docId: string, html: string): string;
+  /**
+   * Registers a document's HTML and returns the URL to navigate to, plus a `forget` that drops it
+   * again. The page holds the whole document, so it is dropped as soon as the render is done rather
+   * than kept until the server closes.
+   */
+  serve(docId: string, html: string): { url: string; forget(): void };
   close(): Promise<void>;
 }
 
@@ -196,7 +200,16 @@ export async function startRenderPageServer(): Promise<RenderPageServer> {
   const http = await import("node:http");
   const pages = new Map<string, string>();
   const server = http.createServer((request, response) => {
-    const key = decodeURIComponent((request.url ?? "").split("?")[0].replace(/^\//, ""));
+    let key: string;
+    try {
+      key = decodeURIComponent((request.url ?? "").split("?")[0].replace(/^\//, ""));
+    } catch {
+      // `decodeURIComponent` throws on a malformed percent sequence, and this handler is
+      // synchronous, so an unhandled throw here takes the whole process down.
+      response.writeHead(400, { "content-type": "text/plain" });
+      response.end("bad request");
+      return;
+    }
     const html = pages.get(key);
     if (html === undefined) {
       response.writeHead(404, { "content-type": "text/plain" });
@@ -215,7 +228,10 @@ export async function startRenderPageServer(): Promise<RenderPageServer> {
     // Keyed per document, so concurrent pages cannot serve each other's HTML.
     serve(docId: string, html: string) {
       pages.set(docId, html);
-      return `http://127.0.0.1:${port}/${encodeURIComponent(docId)}`;
+      return {
+        url: `http://127.0.0.1:${port}/${encodeURIComponent(docId)}`,
+        forget: () => { pages.delete(docId); }
+      };
     },
     close: () => new Promise<void>((resolve) => server.close(() => resolve()))
   };
@@ -311,19 +327,26 @@ function isFatalRequestFailure(url: string): boolean {
  */
 export function expectedTileCount(content: unknown): number {
   const rowMap = (content as { rowMap?: Record<string, { tiles?: { tileId?: string }[] }> })?.rowMap;
-  if (rowMap) {
-    const ids = new Set<string>();
-    for (const row of Object.values(rowMap)) {
-      for (const tile of row?.tiles ?? []) if (tile?.tileId) ids.add(tile.tileId);
-    }
-    return ids.size;
+  const ids = new Set<string>();
+  for (const row of Object.values(rowMap ?? {})) {
+    for (const tile of row?.tiles ?? []) if (tile?.tileId) ids.add(tile.tileId);
   }
+  // An empty walk falls through to the tile map rather than answering 0. A present-but-empty
+  // `rowMap` used to take this branch and expect no tiles at all, which any state satisfies —
+  // including a page that has not finished loading, whose screenshot is blank.
+  if (ids.size > 0) return ids.size;
   const tileMap = (content as { tileMap?: Record<string, unknown> })?.tileMap;
   return tileMap ? Object.keys(tileMap).length : 0;
 }
 
-/** The iframe's starting height, matching the generated page. */
-export const kInitialFrameHeightPx = 500;
+/**
+ * The iframe's starting height, re-exported from the module that writes it into the page.
+ *
+ * One constant rather than two coupled literals: this is what the resize guard compares against, so
+ * if the page's starting height and this ever diverged, the guard would stop firing and a
+ * viewport-sized capture would be recorded as a full-document one.
+ */
+export { kInitialFrameHeightPx };
 
 /** Room for the document's own chrome — margins and the annotation layer — above the tile rows. */
 const kDocumentChromePx = 80;
@@ -403,7 +426,7 @@ async function waitUntilSettled(
   // the tiles has settled". A document whose tile legitimately never draws — the ErrorTest fixture
   // renders an error boundary and no tile at all — must still be captured, so the second clock
   // accepts what is there once it has been quiet for a good while longer.
-  const graceMs = Math.max(stableForMs * 6, stableForMs);
+  const graceMs = stableForMs * 6;
   let previous: FrameMeasurement | undefined;
   let stableSince: number | undefined;
   let quietSince: number | undefined;
@@ -498,8 +521,15 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
       const pendingServer = pageServerPromise;
       browserPromise = undefined;
       pageServerPromise = undefined;
-      if (pendingBrowser) await (await pendingBrowser).close();
-      if (pendingServer) await (await pendingServer).close();
+      // Both are closed whatever either one does. Awaiting the browser first meant a crashed
+      // Chromium — whose `close()` rejects — left the loopback page server listening, and its open
+      // handle keeps the CLI alive after the error has been printed.
+      const results = await Promise.allSettled([
+        pendingBrowser?.then((browser) => browser.close()),
+        pendingServer?.then((server) => server.close())
+      ]);
+      const failed = results.find((result) => result.status === "rejected");
+      if (failed) throw (failed as PromiseRejectedResult).reason;
     },
 
     async render(request: RenderRequest): Promise<RenderOutcome> {
@@ -511,6 +541,7 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
       const page = await browser.newPage();
       const contextOf = (): RenderFailed["context"] =>
         ({ url, heightPx: state.heightPx, consoleOutput: state.consoleOutput });
+      let forgetPage = () => undefined as void;
       try {
         // Anything that stops the page from being what it claims to be is fatal. A render failure is
         // a bug to look at, not a transient — there is no retry.
@@ -531,9 +562,11 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
 
         await page.setViewport({ width: viewportWidthPx, height: 1024 });
         const html = generateRenderHtml({ content: request.content, clueUrl, unit: unitUrl });
+        const served = pageServer.serve(request.docId, html);
+        forgetPage = served.forget;
         // Navigated to, not injected: `setContent` leaves an opaque origin and CLUE cannot read
         // localStorage from inside it.
-        await page.goto(pageServer.serve(request.docId, html), {
+        await page.goto(served.url, {
           waitUntil: "domcontentloaded",
           timeout: deadline.requireRemaining(request.docId, "the page was loaded", contextOf())
         });
@@ -549,10 +582,13 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         let measured = await waitUntilSettled(
           frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
 
-        if (state.fatal.length > 0) {
-          throw new RenderFailed(request.docId, `the page reported ${state.fatal.length} error(s): ` +
-            state.fatal.join("; "), contextOf());
-        }
+        const failOnFatal = () => {
+          if (state.fatal.length > 0) {
+            throw new RenderFailed(request.docId, `the page reported ${state.fatal.length} error(s): ` +
+              state.fatal.join("; "), contextOf());
+          }
+        };
+        failOnFatal();
 
         // Size the iframe to the document, then let it settle again.
         //
@@ -568,6 +604,10 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
           measured = await waitUntilSettled(
             frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
         }
+        // Checked again after the resize. A fatal console line or a failed script request during the
+        // second settle used to land in the evidence file without failing the render, so the
+        // document was captured and stored as if nothing had gone wrong.
+        failOnFatal();
         // The guarantee that nothing is cut off is made by construction — the frame is sized to
         // cover the tile rows, and the capture is checked against them below — rather than by a DOM
         // overflow reading. Measured directly, `.document-content` reports zero overflow at every
@@ -639,6 +679,9 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         }
         throw error;
       } finally {
+        // The served page holds the whole document. Dropped here rather than at `close()`, so the
+        // server does not accumulate every document in the corpus for the length of the run.
+        forgetPage();
         await page.close();
       }
     }

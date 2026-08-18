@@ -302,7 +302,6 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
   // The unit server serves the same CLUE deployment the backend renders against.
   const clueUrl = backendOptions.clueUrl ?? kDefaultClueUrl;
 
-
   let rendered = 0;
   let reused = 0;
   const failures: string[] = [];
@@ -318,6 +317,21 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     // Built once, after the unit server is up, so the backend knows where its unit is served.
     const renderer = getRenderBackend(modeId, { ...backendOptions, unitUrl: unitServer?.unitUrl });
     openBackend = renderer;
+
+    // Nothing will notice if these renders are pictures of the wrong thing.
+    //
+    // CLUE registers tile types from the unit's own configuration, so a unit that does not declare
+    // the corpus's tile types draws them with the placeholder component — a perfectly valid PNG of
+    // an "Unknown" box. The `unknownTiles` warning below is what normally catches that, and it
+    // needs a backend that can see inside the page. A hosted service renders somewhere else and
+    // reports nothing, so for the Shutterbug modes (which render against `mods`) both halves are
+    // missing at once, and the run just says it rendered every document.
+    if (renderer.renderTarget.unit !== kHarnessRenderUnitId && renderer.kind === "network") {
+      log(`warning: --mode ${modeId} renders against unit "${renderer.renderTarget.unit}" and cannot ` +
+        "report what it drew. Any tile type that unit does not register draws as an unknown-tile " +
+        "placeholder, and nothing here will say so — check the pictures before trusting a run that " +
+        "uses them.");
+    }
 
     if (renderer.renderTarget.clueRevision === null) {
       // Recorded as unknown rather than guessed. A target whose code can change underneath a stored
@@ -411,13 +425,16 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     };
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
   } finally {
-    // Nested: if closing the backend throws — a crashed Chromium, say — the unit server still has
-    // to come down, or its open handle keeps the CLI alive after the error has been printed.
+    // A close failure is logged, never thrown. Rethrowing it from a `finally` replaces whatever was
+    // already in flight, so a Chromium launch failure would surface as a close failure — the wrong
+    // error, and the one that says nothing about why the render did not happen. The unit server
+    // still has to come down either way, or its open handle keeps the CLI alive.
     try {
       if (openBackend?.close) await openBackend.close();
-    } finally {
-      await unitServer?.close();
+    } catch (error) {
+      log(`warning: closing the render backend failed: ${(error as Error).message}`);
     }
+    await unitServer?.close();
   }
 
   log(`Rendered ${rendered} document(s) with --mode ${modeId}, reused ${reused} still-fresh ` +
@@ -464,6 +481,11 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
       ? ` [image-only, --mode ${run.imageMode}; ${renderMode(run.imageMode!).prerequisites}]`
       : ` [text-only, ${run.textVariant}]`;
     log(`  ${run.id}: ${runTasksForRun.length} call(s), worst case $${runTotal.toFixed(4)}${shape}`);
+    if (run.message === "image-only") {
+      // Where the pictures came from, resolved rather than described. Every render target value has
+      // a default, and omitting `--shutterbug-url` posts student work at staging without saying so.
+      log(`    renders against: ${renderMode(run.imageMode!).renderTargetSummary}`);
+    }
     if (imageTokens > 0) {
       // Reserved at the high-detail rate, because the shared builder sends `auto` and the provider
       // publishes an exact formula only for explicit low and high.

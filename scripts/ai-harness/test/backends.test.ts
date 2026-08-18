@@ -2,9 +2,12 @@ import {
   getRenderBackend, isRenderModeId, kDefaultRenderModeId, renderModeIds
 } from "../src/backends/index.js";
 import {
-  BrowserLike, ElementLike, FrameLike, FrameMeasurement, PageLike, RenderFailed, puppeteerBackend
+  BrowserLike, ElementLike, FrameLike, FrameMeasurement, PageLike, RenderFailed, expectedTileCount,
+  puppeteerBackend, startRenderPageServer
 } from "../src/backends/puppeteer.js";
-import { RenderLimitExceeded, checkCaptureSize, checkEncodedSize } from "../src/backends/types.js";
+import {
+  RenderLimitExceeded, checkCaptureSize, checkEncodedSize, isPublicHttpsUrl, redirectDowngradeReason
+} from "../src/backends/types.js";
 import { makeTestPng } from "./helpers.js";
 
 const document = { rowOrder: [], rowMap: {}, tileMap: {} };
@@ -119,7 +122,7 @@ function fakeBrowser(options: FakeOptions = {}) {
 
 /** A page server that hands back URLs without opening a socket. */
 const fakePageServer = async () => ({
-  serve: (docId: string) => `http://127.0.0.1:9/${docId}`,
+  serve: (docId: string) => ({ url: `http://127.0.0.1:9/${docId}`, forget: () => undefined }),
   close: async () => undefined
 });
 
@@ -390,6 +393,71 @@ describe("the puppeteer backend", () => {
     expect(state.closedBrowser).toBe(1);
   });
 
+  it("closes the page server even when the browser refuses to close", async () => {
+    // A crashed Chromium rejects on close. Closing the browser first and awaiting it meant the
+    // loopback page server was never closed, and its open handle keeps the CLI alive after the
+    // error has already been printed.
+    const fake = fakeBrowser();
+    (fake.browser as any).close = async () => { throw new Error("Chromium is gone"); };
+    let pageServerClosed = 0;
+    const backend = puppeteerBackend({
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser,
+      startPageServer: async () => ({
+        serve: (docId: string) => ({ url: `http://127.0.0.1:9/${docId}`, forget: () => undefined }),
+        close: async () => { pageServerClosed += 1; }
+      }),
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await backend.open!();
+    // The failure still surfaces — it is just no longer allowed to skip the other close.
+    await expect(backend.close!()).rejects.toThrow(/Chromium is gone/);
+    expect(pageServerClosed).toBe(1);
+  });
+
+  it("fails a render whose page breaks during the settle after the resize", async () => {
+    // The fatal check ran once, right after the first settle. Anything that went wrong while the
+    // resized frame settled again landed in the evidence file without failing the render, so a
+    // broken page was captured and stored as though nothing had happened.
+    const fake = fakeBrowser();
+    let resized = false;
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser().browser.newPage();
+      const handlers: ((payload: any) => void)[] = [];
+      (page as any).on = (event: string, handler: (payload: any) => void) => {
+        if (event === "console") handlers.push(handler);
+      };
+      (page as any).evaluate = async (script: unknown) => {
+        if (/frame\.height = \d+/.test(String(script))) resized = true;
+        return undefined;
+      };
+      (page as any).frames = () => [{
+        url: () => "http://localhost:8080/iframe.html",
+        evaluate: async (script: unknown) => {
+          if (String(script).includes("innerText")) return "marker";
+          // Only once the frame has been resized: this is the settle whose failures used to be
+          // recorded as evidence without failing anything.
+          if (resized) {
+            for (const handler of handlers) {
+              handler({ type: () => "error", text: () => "Failed to fetch dynamically imported module: tile.js" });
+            }
+          }
+          return { ...settledMeasurement, contentRowsHeightPx: 1800 };
+        }
+      }];
+      return page;
+    };
+    const backend = puppeteerBackend({
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await expect(backend.render({ docId: "late-failure", content: document }))
+      .rejects.toThrow(/reported \d+ error\(s\).*dynamically imported module/s);
+    // The failure really is the late one — the frame had already been resized when it happened.
+    expect(resized).toBe(true);
+  });
+
   it("spends one timeout budget across every phase, not one per phase", async () => {
     // The budget used to be handed out fresh to each phase, so a stuck document could burn several
     // times the documented per-document timeout. One deadline now covers load, readiness and
@@ -467,6 +535,97 @@ describe("the puppeteer backend", () => {
     });
     await expect(backend.render({ docId: "huge", content: document }))
       .rejects.toThrow(/encoded image is \d+ bytes, over the 10 limit/);
+  });
+});
+
+describe("the loopback page server", () => {
+  it("serves a document's page, then forgets it", async () => {
+    // The page holds the whole document. Keeping every one of them until the run ends meant the
+    // server accumulated the entire corpus in memory.
+    const server = await startRenderPageServer();
+    try {
+      const served = server.serve("drawing", "<p>a document</p>");
+      expect(await (await fetch(served.url)).text()).toBe("<p>a document</p>");
+      served.forget();
+      expect((await fetch(served.url)).status).toBe(404);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("answers 400 for a malformed URL rather than taking the process down", async () => {
+    // `decodeURIComponent` throws on a stray `%`, and the request handler is synchronous, so an
+    // unhandled throw there is not a 404 — it is the whole harness exiting mid-run.
+    const server = await startRenderPageServer();
+    try {
+      const { port } = new URL(server.serve("x", "<p>x</p>").url);
+      expect((await fetch(`http://127.0.0.1:${port}/%zz`)).status).toBe(400);
+      // And the server is still answering afterwards.
+      expect((await fetch(server.serve("y", "<p>y</p>").url)).status).toBe(200);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+describe("how many tiles a document should draw", () => {
+  it("counts the tiles named by the rows", () => {
+    expect(expectedTileCount({
+      rowMap: { r1: { tiles: [{ tileId: "a" }, { tileId: "b" }] }, r2: { tiles: [{ tileId: "c" }] } }
+    })).toBe(3);
+  });
+
+  it("falls through to the tile map when the rows name nothing", () => {
+    // A present-but-empty `rowMap` used to answer 0, and "at least 0 tiles" is satisfied by any
+    // stable state at all — including a page that has not finished loading, whose picture is blank.
+    expect(expectedTileCount({ rowMap: {}, tileMap: { a: {}, b: {} } })).toBe(2);
+    expect(expectedTileCount({ rowMap: { r1: { tiles: [] } }, tileMap: { a: {} } })).toBe(1);
+  });
+
+  it("answers zero only when the document really has no tiles", () => {
+    expect(expectedTileCount({ rowMap: {}, tileMap: {} })).toBe(0);
+    expect(expectedTileCount({})).toBe(0);
+  });
+});
+
+describe("which hosted URLs may be fetched", () => {
+  it("accepts a public https URL", () => {
+    expect(isPublicHttpsUrl("https://images.example.test/shot.png")).toBe(true);
+    expect(isPublicHttpsUrl("https://8.8.8.8/shot.png")).toBe(true);
+  });
+
+  it("refuses plain http and anything unparseable", () => {
+    expect(isPublicHttpsUrl("http://images.example.test/shot.png")).toBe(false);
+    expect(isPublicHttpsUrl("images.example.test/shot.png")).toBe(false);
+  });
+
+  it("refuses loopback and the private ranges, in both address families", () => {
+    for (const host of [
+      "localhost", "127.0.0.1", "127.1.2.3", "0.0.0.0", "10.0.0.5", "172.16.0.1", "172.31.255.255",
+      "192.168.1.1", "169.254.169.254", "[::1]", "[::]", "[fd00::1]", "[fe80::1]",
+      "[::ffff:127.0.0.1]"
+    ]) {
+      expect({ host, allowed: isPublicHttpsUrl(`https://${host}/shot.png`) })
+        .toEqual({ host, allowed: false });
+    }
+    // Just outside the private block, so the range check is a range and not a prefix match.
+    expect(isPublicHttpsUrl("https://172.32.0.1/shot.png")).toBe(true);
+  });
+
+  it("refuses a redirect that lands somewhere less safe than where it was asked to go", () => {
+    const from = "https://images.example.test/shot.png";
+    expect(redirectDowngradeReason(from, from)).toBeNull();
+    expect(redirectDowngradeReason(from, "https://cdn.example.test/shot.png")).toBeNull();
+    expect(redirectDowngradeReason(from, "http://images.example.test/shot.png"))
+      .toMatch(/not a public https URL/);
+    expect(redirectDowngradeReason(from, "https://127.0.0.1:9/shot.png"))
+      .toMatch(/not a public https URL/);
+  });
+
+  it("leaves a deliberately local URL alone, since it cannot be downgraded", () => {
+    // The rule is "no worse than what was asked for". An operator pointing the harness at a local
+    // server has not been redirected anywhere they did not choose.
+    expect(redirectDowngradeReason("http://127.0.0.1:9/a.png", "http://127.0.0.1:9/b.png")).toBeNull();
   });
 });
 
