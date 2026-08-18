@@ -56,16 +56,19 @@ export type BackgroundLockInfo = {
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
 
-// The GraphModel has many actions; most are UI-state, selection, or styling (and some, like
-// setInteractionInProgress, fire on every drag frame). We log only the ones that represent a student
-// building/editing the graph — an allow-list is safer than trying to ignore the noisy majority.
+// The GraphModel has many actions; most are UI-state, selection, or styling. We log only the ones that
+// represent a student building/editing the graph — an allow-list is safer than ignoring the noisy
+// majority. Only actions that reach onTileAction as ROOT calls from a UI handler belong here (see the
+// onTileAction comment below): actions that fire only nested inside another action (e.g. setPrimaryRole/
+// setPlotType/setAxis/removeAxis via GraphController.handleAttributeAssignment, or showAdornment/
+// hideAdornment via handleSharedVariablesUpdate) never reach here on a student edit and would only log
+// on document load when the graph replays its auto-assigned attributes, so they are deliberately absent.
 const kLoggedGraphActions = new Set([
   "createEditableLayer",
-  "setAttributeID", "removeAttribute", "removeYAttributeID", "replaceYAttributeID", "setPrimaryRole",
-  "setAxis", "removeAxis",
-  "setPlotType",
+  "addPoint",
+  "setAttributeID", "removeAttribute", "removeYAttributeID", "replaceYAttributeID",
   "setXAttributeLabel", "setYAttributeLabel",
-  "addAdornment", "showAdornment", "hideAdornment"
+  "addAdornment"
 ]);
 
 export const GraphModel = TileContentModel
@@ -849,9 +852,15 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    // Overrides the base no-op onTileAction (TileModel forwards every content action here). Log the
-    // allow-listed answer-relevant actions as GRAPH_TOOL_CHANGE so free-standing graph work reaches
-    // the Researcher report (via the QUESTION_ANSWERS_CHANGE side-effect of logTileChangeEvent).
+    // Overrides the base no-op onTileAction. Only OUTERMOST actions reach here (document.ts registers
+    // onAction with default options), and the listener runs BEFORE the action mutates state — so an
+    // action that only ever fires nested inside another action will not be seen here. Log the
+    // allow-listed answer-relevant actions as GRAPH_TOOL_CHANGE so free-standing graph work reaches the
+    // Researcher report (via the QUESTION_ANSWERS_CHANGE side-effect of logTileChangeEvent).
+    // Note: some actions (e.g. addAdornment) pass MST nodes as arguments, which serialize to
+    // { $MST_UNSERIALIZABLE: true }, so change.args is not meaningful for them; the operation name is.
+    // Out of scope: dragging an EXISTING point mutates the shared DataSet (setCanonicalCaseValues in
+    // scatterdots.tsx), which lives outside the tile subtree and so is not reachable via onTileAction.
     onTileAction(call: ISerializedActionCall) {
       if (!kLoggedGraphActions.has(call.name)) return;
       logTileChangeEvent(LogEventName.GRAPH_TOOL_CHANGE, {

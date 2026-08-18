@@ -12,6 +12,14 @@ export function defaultAIContent(): AIContentModelType {
   return AIContentModel.create({});
 }
 
+// Module-level logging helper following the logBarGraphEvent/logGeometryEvent convention, so the
+// setters stay pure mutations. Call sites log deliberately (on blur/commit, not on every keystroke).
+export function logAiEvent(model: AIContentModelType, operation: string, change: Record<string, any>) {
+  logTileChangeEvent(LogEventName.AI_TOOL_CHANGE, {
+    tileId: getTileIdFromContent(model) ?? "", operation, change
+  });
+}
+
 export const AIContentModel = TileContentModel
   .named("AIContent")
   .props({
@@ -28,36 +36,29 @@ export const AIContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    logChange(operation: string, change: Record<string, any>) {
-      logTileChangeEvent(LogEventName.AI_TOOL_CHANGE, {
-        tileId: getTileIdFromContent(self) ?? "", operation, change
-      });
-    }
-  }))
-  .actions(self => ({
     exportJson() {
       const { refreshCount: _, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
+    // The setters below are pure mutations wired to controlled inputs (they fire on every keystroke).
+    // Logging happens deliberately from the component's blur handlers via logAiEvent, not here.
     setDescription(desc: string) {
       self.description = desc;
-      self.logChange("setDescription", { description: desc });
     },
     setHidePrompt(hide: boolean) {
       self.hidePrompt = hide;
-      self.logChange("setHidePrompt", { hidePrompt: hide });
     },
     setPrompt(prompt: string) {
       self.prompt = prompt;
-      self.logChange("setPrompt", { prompt });
     },
+    // setText is only called by the AI-response effect on mount/refresh, never by a student, so it must
+    // not emit an answer-change event. The student-triggered requestRefresh below is what gets logged.
     setText(text: string) {
       self.text = text;
-      self.logChange("setText", { text });
     },
     requestRefresh() {
       self.refreshCount++;
-      self.logChange("requestRefresh", { refreshCount: self.refreshCount });
+      logAiEvent(self as AIContentModelType, "requestRefresh", { refreshCount: self.refreshCount });
     }
   }));
 

@@ -65,6 +65,10 @@ jest.mock("../../models/document/document-utils", () => ({
   getDocumentIdentifier: jest.fn(() => "test-doc-content-id")
 }));
 
+// Logger.stores is uninitialized in this component test; mock the change logger so setPrompt/setText
+// don't crash when the AI content logs changes.
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
 describe("AIComponent", () => {
   const content = defaultAIContent();
   const model = TileModel.create({content});

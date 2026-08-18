@@ -1,6 +1,8 @@
 import { defaultAIContent, AIContentModel, kDefaultAIDescription } from "./ai-content";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../lib/logger-types";
+import { TileModel } from "../../models/tiles/tile-model";
+import "./ai-registration";
 
 jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
@@ -65,28 +67,27 @@ describe("AIContent", () => {
     expect(json.refreshCount).toBeUndefined();
   });
 
-  it("logs an AI_TOOL_CHANGE on each content change", () => {
+  // The content setters are pure mutations wired to controlled inputs; they must not log on every
+  // keystroke, and setText is driven by the AI-response effect on load, not by a student.
+  it("does not log when the content setters mutate state", () => {
     const content = AIContentModel.create();
     (logTileChangeEvent as jest.Mock).mockClear();
     content.setPrompt("ask something");
-    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
-      tileId: "", operation: "setPrompt", change: { prompt: "ask something" }
-    });
     content.setText("a response");
-    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
-      tileId: "", operation: "setText", change: { text: "a response" }
-    });
     content.setDescription("do this");
-    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
-      tileId: "", operation: "setDescription", change: { description: "do this" }
-    });
     content.setHidePrompt(true);
-    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
-      tileId: "", operation: "setHidePrompt", change: { hidePrompt: true }
-    });
+    expect(logTileChangeEvent).not.toHaveBeenCalled();
+  });
+
+  // requestRefresh is the student-triggered action (the "Update" button), so it logs, and it carries
+  // the real tile id when the content is hosted in a tile.
+  it("logs an AI_TOOL_CHANGE with the tile id when the student requests a refresh", () => {
+    const content = AIContentModel.create();
+    const tile = TileModel.create({ content });
+    (logTileChangeEvent as jest.Mock).mockClear();
     content.requestRefresh();
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
-      tileId: "", operation: "requestRefresh", change: { refreshCount: 1 }
+      tileId: tile.id, operation: "requestRefresh", change: { refreshCount: 1 }
     });
   });
 });

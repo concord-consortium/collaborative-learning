@@ -1,6 +1,8 @@
 import { NumberlineContentModel } from "./numberline-content";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
+import { TileModel } from "../../../models/tiles/tile-model";
+import "../numberline-registration";
 
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
@@ -42,5 +44,28 @@ describe("NumberlineContent", () => {
     content.deleteAllPoints();
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.NUMBERLINE_TOOL_CHANGE,
       { tileId: "", operation: "deleteAllPoints", change: {} });
+  });
+
+  // Repositioning a point (drag commit) is the most common way an answer gets revised. Wrap the
+  // content in a tile so the logged event carries the real tile id, not "".
+  it("logs setPointXValue with the tile id when a dragged point is committed", () => {
+    const content = NumberlineContentModel.create();
+    const tile = TileModel.create({ content });
+    const point = content.createNewPoint(1, false);
+    point.setDragXValue(2.5);
+    (logTileChangeEvent as jest.Mock).mockClear();
+    content.setPointXValue(point);
+    expect(point.xValue).toBe(2.5);
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.NUMBERLINE_TOOL_CHANGE,
+      { tileId: tile.id, operation: "setPointXValue", change: { id: point.id, xValue: 2.5 } });
+  });
+
+  // A drag "end" also fires on a plain selection click with no movement; that must not log.
+  it("does not log setPointXValue when the point did not move", () => {
+    const content = NumberlineContentModel.create();
+    const point = content.createNewPoint(1, false);
+    (logTileChangeEvent as jest.Mock).mockClear();
+    content.setPointXValue(point);
+    expect(logTileChangeEvent).not.toHaveBeenCalled();
   });
 });

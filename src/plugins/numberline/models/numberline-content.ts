@@ -140,6 +140,16 @@ export const NumberlineContentModel = TileContentModel
       self.points.clear();
       self.logChange("deleteAllPoints", {});
     },
+    // Commit a point drag (called from the drag "end" handler) and log the repositioning — the most
+    // common way a numberline answer gets revised, which was previously unlogged. Only log when the
+    // point actually moved, so a plain selection click (which also fires drag "end") doesn't emit.
+    setPointXValue(point: PointObjectModelType) {
+      const moved = point.dragXValue !== undefined;
+      point.setXValueToDragValue();
+      if (moved) {
+        self.logChange("setPointXValue", { id: point.id, xValue: point.xValue });
+      }
+    },
   }))
   .actions(self => ({
     createAndSelectPoint(xValue: number, isOpen: boolean) {

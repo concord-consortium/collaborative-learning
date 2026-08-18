@@ -345,7 +345,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       })
       .on("end", (e, p) => {
         if (!readOnly) {
-          p.setXValueToDragValue();
+          content.setPointXValue(p);
         }
       });
 
