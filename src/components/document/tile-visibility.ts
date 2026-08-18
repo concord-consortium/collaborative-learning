@@ -10,6 +10,7 @@ export interface IVisibleTile {
   tileType: string;
   tileTitle: string;
   percentVisible: number; // whole percent, 1..100 (tiles at 0 are dropped)
+  containerId?: string;   // the tile this one is nested in, for tiles inside a container tile
 }
 
 /** A tile's vertical extent, in the same coordinate space as the viewport bounds. */
@@ -20,6 +21,7 @@ export interface ITileExtent {
   top: number;
   bottom: number;
   height: number;
+  containerId?: string;
 }
 
 export interface IViewportBounds {
@@ -30,6 +32,10 @@ export interface IViewportBounds {
 /**
  * For each tile, the fraction of its height inside the viewport, rounded to a whole percent. Tiles
  * with 0% visible (scrolled off, or zero height) are omitted. Input order is preserved.
+ *
+ * A tile nested in a container tile is reported alongside its container, so the entries can overlap
+ * on screen and their percentages do not sum to a share of the viewport. `containerId` says which
+ * entries are nested, so a consumer can aggregate over containers or over their contents.
  */
 export function computeVisibleTiles(viewport: IViewportBounds, tiles: ITileExtent[]): IVisibleTile[] {
   const visible: IVisibleTile[] = [];
@@ -40,12 +46,14 @@ export function computeVisibleTiles(viewport: IViewportBounds, tiles: ITileExten
     // Any positive overlap counts as visible: clamp to at least 1% so a barely-on-screen tile
     // (whose fraction would round to 0) isn't dropped, honoring the 1..100 percentVisible contract.
     const percentVisible = Math.max(1, Math.round((overlap / tile.height) * 100));
-    visible.push({
+    const entry: IVisibleTile = {
       tileId: tile.tileId,
       tileType: tile.tileType,
       tileTitle: tile.tileTitle,
       percentVisible
-    });
+    };
+    if (tile.containerId) entry.containerId = tile.containerId;
+    visible.push(entry);
   }
   return visible;
 }

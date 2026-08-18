@@ -50,6 +50,22 @@ describe("computeVisibleTiles", () => {
     expect(result).toEqual([]);
   });
 
+  it("carries containerId for a tile nested in a container tile", () => {
+    const result = computeVisibleTiles(viewport, [
+      extent({ tileId: "question", tileType: "Question", tileTitle: "Q1", top: 0, bottom: 80, height: 80 }),
+      extent({ tileId: "prompt", top: 10, bottom: 40, height: 30, containerId: "question" })
+    ]);
+    expect(result).toEqual([
+      { tileId: "question", tileType: "Question", tileTitle: "Q1", percentVisible: 100 },
+      { tileId: "prompt", tileType: "Text", tileTitle: "T", percentVisible: 100, containerId: "question" }
+    ]);
+  });
+
+  it("omits containerId entirely for a top-level tile", () => {
+    const [result] = computeVisibleTiles(viewport, [extent({ top: 0, bottom: 50, height: 50 })]);
+    expect("containerId" in result).toBe(false);
+  });
+
   it("preserves input order among visible tiles", () => {
     const result = computeVisibleTiles(viewport, [
       extent({ tileId: "a", top: 0, bottom: 40, height: 40 }),

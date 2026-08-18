@@ -49,10 +49,11 @@ Payload:
   cause: "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange"
        | "commentsToggle" | "comparisonToggle",
   // …plus the document's identity, in the same fields every other document event uses (below)
-  tileCount,         // total tiles in the document (denominator: "how many of N are visible")
+  tileCount,         // rendered tiles in the document (denominator: "how many of N are visible")
   viewportHeight,    // scroll container clientHeight, for context
   visibleTiles: [    // only tiles with percentVisible > 0, in document order
-    { tileId, tileType, tileTitle, percentVisible }   // percentVisible: integer 1–100
+    { tileId, tileType, tileTitle, percentVisible,  // percentVisible: integer 1–100
+      containerId }  // present ONLY for a tile nested inside a container tile
   ],
   dividerPosition,   // present ONLY when cause === "dividerResize" (0 | 50 | 100)
   resizedRowId       // present ONLY when cause === "tileResize" (row height is the resize unit)
@@ -60,13 +61,27 @@ Payload:
 ```
 
 **Identity comes from the shared log helpers, not from fields named here.** A saved document is
-logged through `logDocumentEvent` (`documentKey`, `documentUid`, `documentType`, `documentTitle`, …)
-and the resources reading doc through `logCurriculumEvent` (`curriculum`, `curriculumFacet`,
-`curriculumSection`) — the same fields history, comment, and tile events already carry, so this event
-joins with them. `getDocumentLogParams(content)` turns the content model into whichever of
-`{ document }` / `{ curriculum }` applies, and `logDocumentOrCurriculumEvent` dispatches on it. That
-dispatch already existed, copied inline in `log-history-event.ts` and `log-comment-event.ts`; it is
-extracted so all three share it.
+logged as `documentKey` / `documentUid` / `documentType` / `documentTitle`, and the resources reading
+doc through `logCurriculumEvent` as `curriculum` / `curriculumFacet` / `curriculumSection` — the same
+fields history, comment, and tile events already carry, so this event joins with them.
+`getDocumentLogParams(content)` produces whichever applies and `logDocumentOrCurriculumEvent`
+dispatches on it; that dispatch already existed, copied inline in `log-history-event.ts` and
+`log-comment-event.ts`, and is extracted so all three share it.
+
+Identity only, though: the state fields `logDocumentEvent` adds for a full document event
+(`documentProperties`, `documentVisibility`, `documentChanges`, `documentHistoryId`) are omitted,
+since none of the causes here can change a document's content and this event fires far more often
+than the events those fields were written for. `getDocumentIdentityParams` defines the four identity
+names once, for this event and for `logDocumentEvent` alike.
+
+**Container tiles and their contents both appear.** The DOM query matches a container tile (a
+Question tile, say) and each tile nested inside it, and both are worth reporting: the container is
+what the student sees as one object, its contents are what they read. Their extents overlap, so
+`visibleTiles` entries are not disjoint and their percentages are not shares of the viewport —
+`containerId` marks the nested ones so a consumer can aggregate over containers or over contents
+without double-counting. **Placeholder tiles are excluded** from `visibleTiles` and from `tileCount`:
+a placeholder is an empty layout slot rather than content, and an untouched Question tile ships with
+one.
 
 The vertical-geometry math and the params assembly are extracted into a pure module
 (`src/components/document/tile-visibility.ts`) so they are unit-testable without mounting the heavy,
@@ -89,10 +104,12 @@ container ref (`this.domElement`) and already computes a row-level version in `u
 ```
 containerRect = this.domElement.getBoundingClientRect()
 for each tile node (this.domElement.querySelectorAll('.tool-tile[data-tool-id]')):
+  skip placeholder tiles
   tileRect = node.getBoundingClientRect()
+  containerId = node.parentElement.closest('.tool-tile[data-tool-id]')?.dataset.toolId
   visibleH = max(0, min(tileRect.bottom, containerRect.bottom) − max(tileRect.top, containerRect.top))
-  percentVisible = Math.round(visibleH / tileRect.height * 100)
-  if percentVisible > 0: record { tileId: node.dataset.toolId, percentVisible }
+  percentVisible = max(1, Math.round(visibleH / tileRect.height * 100))
+  if visibleH > 0: record { tileId: node.dataset.toolId, percentVisible, containerId }
 ```
 
 Then enrich each record with `tileType`/`tileTitle` from the content model (`content.getTile(tileId)`).

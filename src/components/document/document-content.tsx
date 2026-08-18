@@ -10,6 +10,7 @@ import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getDocumentIdentifier, getDocumentLogParams } from "../../models/document/document-utils";
+import { isPlaceholderContent } from "../../models/tiles/placeholder/placeholder-content";
 import { logDocumentOrCurriculumEvent } from "../../models/document/log-document-event";
 import { IDropRowInfo, TileRowModelType } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
@@ -286,15 +287,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     nodes.forEach((node) => {
       const tileId = node.dataset.toolId;
       if (!tileId) return;
-      const rect = node.getBoundingClientRect();
       const tile = content.getTile(tileId);
+      // A placeholder is an empty layout slot, not something the student can be said to have seen.
+      if (isPlaceholderContent(tile?.content)) return;
+      const rect = node.getBoundingClientRect();
+      // Container tiles render their contents as tiles too, so the query above matches both. Record
+      // which entries are nested rather than dropping either: the container is what the student sees
+      // as one thing, while its contents are what they read.
+      const containerNode = node.parentElement?.closest<HTMLElement>(".tool-tile[data-tool-id]");
       tiles.push({
         tileId,
         tileType: tile?.content.type ?? "unknown",
         tileTitle: tile?.computedTitle ?? "<no title>",
         top: rect.top,
         bottom: rect.bottom,
-        height: rect.height
+        height: rect.height,
+        containerId: containerNode?.dataset.toolId
       });
     });
     const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
