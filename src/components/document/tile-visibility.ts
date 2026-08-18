@@ -1,4 +1,4 @@
-// Pure helpers for CLUE-629 tile-visibility logging. Deliberately free of React / DOM / MobX so the
+// Pure helpers for tile-visibility logging. Deliberately free of React / DOM / MobX so the
 // vertical-% math and the log-params assembly can be unit-tested without mounting DocumentContent.
 
 export type VisibilityCause =

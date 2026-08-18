@@ -274,7 +274,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  // CLUE-629: gather each rendered tile's vertical extent + type/title, then log the visible ones.
+  // Gathers each rendered tile's vertical extent + type/title, then logs the visible ones.
   private emitTileVisibility = (cause: VisibilityCause, extra: IVisibilityLogExtra = {}) => {
     const { content } = this.props;
     if (!this.domElement || !content) return;
