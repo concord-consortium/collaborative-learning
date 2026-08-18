@@ -6,13 +6,17 @@ import { ManifestDocument, ResultRow } from "../src/schemas.js";
 import { testRunMeta } from "./helpers.js";
 
 const base = {
-  schemaVersion: 1 as const,
+  schemaVersion: 2 as const,
   experiment: "text-baselines",
   experimentSha256: "hash",
   runId: "text-default",
   corpus: "synthetic-corpus",
+  computedModality: "text-only" as const,
   message: "text-only" as const,
-  textVariant: "default",
+  representation: {
+    kind: "text" as const, variantId: "default", variantVersion: 1,
+    sourceContentSha256: "0".repeat(64)
+  },
   prompt: { name: "categorize-design-default", sha256: "p" },
   runMeta: testRunMeta
 };

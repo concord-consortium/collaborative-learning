@@ -7,8 +7,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { HarnessRequest } from "./messages.js";
-import { ModelPricing, PricingConfig, canonicalJson, validatePricingConfig } from "./schemas.js";
+import { HarnessRequest, InputImageAccounting } from "./messages.js";
+import {
+  ImageTokenPricing, ModelPricing, PricingConfig, canonicalJson, validatePricingConfig
+} from "./schemas.js";
 
 const kPricingFile = path.join(path.dirname(fileURLToPath(import.meta.url)), "pricing.json");
 
@@ -47,10 +49,112 @@ export function estimateTokensForText(text: string): number {
   return Math.ceil(asciiChars / kCharsPerToken) + wideChars;
 }
 
-/** Conservative input-token estimate: the message text plus the response schema. */
-export function estimateInputTokens(request: HarnessRequest): number {
-  return estimateTokensForText(canonicalJson(request.messages)) +
-    estimateTokensForText(canonicalJson(request.responseFormat));
+/**
+ * How many input tokens one image costs.
+ *
+ * At `detail: "low"` it is a flat figure. Otherwise the image is scaled down to fit the long-side
+ * bound and then, if its short side is still over the short-side bound, down again so the short side
+ * meets it — scaling **down only**, which is what the provider does. The result is divided into
+ * tiles and charged a base plus a per-tile rate.
+ *
+ * `detail: "auto"` is reserved at the **high** rate. The provider publishes an exact formula only for
+ * explicit low and high, and the shared builder sends `auto`, so the harness assumes the expensive
+ * branch. That is deliberately conservative: a reservation that is too small is the failure that
+ * matters, and the README says so alongside the other ceiling caveats.
+ */
+export function estimateImageTokens(
+  image: Pick<InputImageAccounting, "widthPx" | "heightPx" | "detail">, pricing: ImageTokenPricing
+): number {
+  if (image.detail === "low") return pricing.detailLowFlat;
+  if (!Number.isInteger(image.widthPx) || !Number.isInteger(image.heightPx) ||
+      image.widthPx <= 0 || image.heightPx <= 0) {
+    throw new Error(`Cannot price a ${image.widthPx}×${image.heightPx} image: both dimensions must be ` +
+      "positive integers. Image dimensions are read from the stored PNG when a representation is written.");
+  }
+
+  let { widthPx: width, heightPx: height } = image;
+  const longSide = Math.max(width, height);
+  if (longSide > pricing.maxLongSide) {
+    const scale = pricing.maxLongSide / longSide;
+    width *= scale;
+    height *= scale;
+  }
+  const shortSide = Math.min(width, height);
+  if (shortSide > pricing.maxShortSide) {
+    const scale = pricing.maxShortSide / shortSide;
+    width *= scale;
+    height *= scale;
+  }
+
+  const tiles = Math.ceil(width / pricing.tileSize) * Math.ceil(height / pricing.tileSize);
+  return pricing.base + pricing.perTile * tiles;
+}
+
+/**
+ * Splits a message list into the parts the character heuristic prices and a count of the image parts
+ * it must not.
+ *
+ * Image parts are dropped from the text side entirely: a base64 data URL for one screenshot runs to
+ * about half a megabyte, which the ÷3 heuristic would read as ~170k input tokens — enough to blow
+ * past any sane `--max-cost` before a single call went out.
+ */
+function splitMessagesForEstimate(messages: HarnessRequest["apiRequest"]["messages"]) {
+  const textOnly: unknown[] = [];
+  const imageParts: { detail?: string }[] = [];
+  for (const message of messages) {
+    const content = (message as { content?: unknown }).content;
+    if (!Array.isArray(content)) {
+      textOnly.push(message);
+      continue;
+    }
+    const kept = content.filter((part) => {
+      const typed = part as { type?: string; image_url?: { detail?: string } };
+      if (typed?.type !== "image_url") return true;
+      imageParts.push({ detail: typed.image_url?.detail });
+      return false;
+    });
+    textOnly.push({ ...(message as object), content: kept });
+  }
+  return { textOnly, imageParts };
+}
+
+/**
+ * Conservative input-token estimate: the message text plus the response schema, with every image part
+ * priced by the image-token formula instead of by its characters.
+ *
+ * The estimator cannot get an image's dimensions from the request — for the Shutterbug modes the
+ * message holds nothing but a hosted URL — so they come from `inputAccounting`, which travels beside
+ * the payload. If the two ever disagree about how many images there are, or about the detail setting,
+ * that is a wiring bug that would silently under-reserve, so it stops the run.
+ */
+export function estimateInputTokens(request: HarnessRequest, imagePricing?: ImageTokenPricing): number {
+  const { apiRequest, inputAccounting } = request;
+  const { textOnly, imageParts } = splitMessagesForEstimate(apiRequest.messages);
+
+  if (imageParts.length !== inputAccounting.images.length) {
+    throw new Error(`The request carries ${imageParts.length} image part(s) but ` +
+      `${inputAccounting.images.length} accounting entr(y/ies). Input accounting must describe every ` +
+      "image in the request, or the reservation would be estimated from base64 characters.");
+  }
+  let imageTokens = 0;
+  if (imageParts.length > 0) {
+    if (!imagePricing) {
+      throw new Error("This request contains images, but no imageTokens pricing was supplied. " +
+        "Add an imageTokens block for this model to src/pricing.json.");
+    }
+    inputAccounting.images.forEach((image, index) => {
+      const sent = imageParts[index].detail;
+      if (sent !== undefined && sent !== image.detail) {
+        throw new Error(`Image ${index} is sent with detail "${sent}" but accounted for as ` +
+          `"${image.detail}". The two must agree or the reservation prices the wrong thing.`);
+      }
+      imageTokens += estimateImageTokens(image, imagePricing);
+    });
+  }
+
+  return estimateTokensForText(canonicalJson(textOnly)) +
+    estimateTokensForText(canonicalJson(apiRequest.responseFormat)) +
+    imageTokens;
 }
 
 export function priceTokens(promptTokens: number, completionTokens: number, pricing: ModelPricing): number {
@@ -63,8 +167,8 @@ export function priceTokens(promptTokens: number, completionTokens: number, pric
  * way to `max_completion_tokens`, and every retry being used.
  */
 export function worstCaseUsd(request: HarnessRequest, pricing: ModelPricing, retries: number = kRetries): number {
-  const inputTokens = estimateInputTokens(request);
-  const outputTokens = request.generationSettings.max_completion_tokens;
+  const inputTokens = estimateInputTokens(request, pricing.imageTokens);
+  const outputTokens = request.apiRequest.generationSettings.max_completion_tokens;
   return priceTokens(inputTokens, outputTokens, pricing) * (1 + retries);
 }
 
@@ -74,9 +178,10 @@ export interface Reservation {
 }
 
 /**
- * What dispatched attempts that returned nothing are charged: their share of the reservation, which
- * covered (1 + retries) attempts. A guess, but in the honest direction — see the README's note on the
- * enforced bound.
+ * What dispatched attempts that returned nothing are charged: one attempt's share of the reservation
+ * per attempt dispatched, up to the whole reservation. The reservation covered (1 + retries)
+ * attempts, so a request that burns all three is charged the entire reservation, not a third of it.
+ * A guess, but in the honest direction — see the README's note on the enforced bound.
  */
 export function failedAttemptShareUsd(
   reservation: Reservation, failedAttempts: number, totalAttempts: number
@@ -174,8 +279,9 @@ export class CostLedger {
 
   /**
    * Settles a dispatched request that failed before returning usage. The reservation covered
-   * (1 + retries) attempts; charging its single-attempt share keeps a run of failures from looking
-   * free, without pretending we know what the provider actually billed.
+   * (1 + retries) attempts; charging one attempt's share per attempt dispatched — the whole
+   * reservation if every attempt was used — keeps a run of failures from looking free, without
+   * pretending we know what the provider actually billed.
    */
   settleFailedAttempt(reservation: Reservation, attempts: number, totalAttempts: number): void {
     this.settle(reservation, failedAttemptShareUsd(reservation, attempts, totalAttempts));

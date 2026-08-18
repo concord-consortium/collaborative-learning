@@ -8,6 +8,16 @@ import { createHash } from "node:crypto";
 
 export const kSchemaVersion = 1;
 
+/**
+ * Result rows are version 2 from milestone 2 on.
+ *
+ * Milestone 1's rows carried a required `textVariant` string, which an image-only row has nothing
+ * honest to put in. It is replaced by a `representation` descriptor that both kinds populate — so a
+ * version-1 row cannot be read as a version-2 one, and is refused with an instruction to re-run
+ * rather than being silently mis-read.
+ */
+export const kResultSchemaVersion = 2;
+
 // ---------------------------------------------------------------------------
 // Canonical serialization
 // ---------------------------------------------------------------------------
@@ -354,14 +364,21 @@ export function validatePromptFile(value: unknown, file: string): PromptFile {
 // Experiment file
 // ---------------------------------------------------------------------------
 
-/** Milestone 1 runs text-only messages. `image-only` and `mixed` arrive in milestones 2 and 3. */
-export const messageShapes = ["text-only"] as const;
+/** Milestone 2 runs text-only and image-only messages. `mixed` arrives in milestone 3. */
+export const messageShapes = ["text-only", "image-only"] as const;
 export type MessageShape = typeof messageShapes[number];
 
+/**
+ * A run names one representation, and which one depends on its message shape: `text-only` runs carry
+ * a `textVariant`, `image-only` runs carry an `imageMode`. The other field is refused rather than
+ * ignored — a `text-only` run with an `imageMode` set is a mistake about what is being measured, and
+ * silently dropping it would produce a result table that looks fine and answers a different question.
+ */
 export interface ExperimentRun {
   id: string;
   message: MessageShape;
-  textVariant: string;
+  textVariant?: string;
+  imageMode?: string;
   prompt: string;
 }
 
@@ -374,6 +391,8 @@ export interface ExperimentFile {
 export interface ExperimentValidationContext {
   /** Text representation variants this build knows how to produce. */
   knownTextVariants: readonly string[];
+  /** Render modes this build knows how to produce. */
+  knownImageModes: readonly string[];
   /** Returns true when `prompts/<name>.json` exists. */
   promptExists: (name: string) => boolean;
 }
@@ -398,21 +417,35 @@ export function validateExperimentFile(
     const id = asString(run.id, file, `${field}.id`);
     if (seen.has(id)) fail(file, `${field}.id`, `duplicates an earlier run id "${id}"`);
     seen.add(id);
-    const textVariant = asString(run.textVariant, file, `${field}.textVariant`);
-    if (!context.knownTextVariants.includes(textVariant)) {
-      fail(file, `${field}.textVariant`,
-        `must be one of ${context.knownTextVariants.join(", ")}, got "${textVariant}"`);
-    }
+    const message = asEnum(run.message, messageShapes, file, `${field}.message`);
     const prompt = asString(run.prompt, file, `${field}.prompt`);
     if (!context.promptExists(prompt)) {
       fail(file, `${field}.prompt`, `names a prompt file that does not exist: prompts/${prompt}.json`);
     }
-    return {
-      id,
-      message: asEnum(run.message, messageShapes, file, `${field}.message`),
-      textVariant,
-      prompt
-    };
+
+    const validated: ExperimentRun = { id, message, prompt };
+    if (message === "text-only") {
+      if (run.imageMode !== undefined) {
+        fail(file, `${field}.imageMode`, 'must not be set on a "text-only" run, which sends no image');
+      }
+      const textVariant = asString(run.textVariant, file, `${field}.textVariant`);
+      if (!context.knownTextVariants.includes(textVariant)) {
+        fail(file, `${field}.textVariant`,
+          `must be one of ${context.knownTextVariants.join(", ")}, got "${textVariant}"`);
+      }
+      validated.textVariant = textVariant;
+    } else {
+      if (run.textVariant !== undefined) {
+        fail(file, `${field}.textVariant`, 'must not be set on an "image-only" run, which sends no summary');
+      }
+      const imageMode = asString(run.imageMode, file, `${field}.imageMode`);
+      if (!context.knownImageModes.includes(imageMode)) {
+        fail(file, `${field}.imageMode`,
+          `must be one of ${context.knownImageModes.join(", ")}, got "${imageMode}"`);
+      }
+      validated.imageMode = imageMode;
+    }
+    return validated;
   });
   return { schemaVersion: kSchemaVersion, name, runs: validated };
 }
@@ -446,19 +479,225 @@ export function validateRepresentationEnvelope(value: unknown, file: string): Re
 }
 
 // ---------------------------------------------------------------------------
+// Image representation envelope
+// ---------------------------------------------------------------------------
+
+/** What a capture covers. `fixed-height` is the Shutterbug modes' clipped capture. */
+export const captureModes = ["full-document", "fixed-height"] as const;
+export type CaptureMode = typeof captureModes[number];
+
+/** What one stored image is a picture of. `tile` is written by nothing yet; it arrives in M3. */
+export const imagePurposes = ["full-document", "tile"] as const;
+export type ImagePurpose = typeof imagePurposes[number];
+
+/** OpenAI's image detail setting. The shared builder hardcodes `auto`; M3 adds the other two. */
+export const imageDetails = ["low", "high", "auto"] as const;
+export type ImageDetail = typeof imageDetails[number];
+
+/**
+ * What a render was produced against. Structured rather than a description string, because it is
+ * compared field by field for freshness: `http://localhost:8080` serves different code tomorrow, and
+ * so does a mutable branch deployment, so the CLUE revision is part of the target rather than an
+ * afterthought.
+ */
+export interface RenderTarget {
+  clueUrl: string;
+  unit: string;
+  /** The CLUE commit (plus dirty flag) or build id that was rendered. `null` when it is unknowable. */
+  clueRevision: string | null;
+  shutterbugUrl: string | null;
+  viewportWidthPx: number;
+  captureMode: CaptureMode;
+  /** The clip height for `fixed-height`; `null` for a full-document capture. */
+  captureHeightPx: number | null;
+}
+
+export interface EnvelopeImage {
+  /** A bare filename, resolved against the envelope's own directory. */
+  file: string;
+  /** sha256 of the file bytes. */
+  sha256: string;
+  mimeType: string;
+  widthPx: number;
+  heightPx: number;
+  bytes: number;
+  /** The hosted URL for a Shutterbug render; `null` for a locally captured one. */
+  url: string | null;
+  tileId: string | null;
+  purpose: ImagePurpose;
+}
+
+export interface ImageEnvelope {
+  schemaVersion: number;
+  docId: string;
+  kind: "image";
+  /** The render mode that produced this, e.g. `puppeteer-full-height`. */
+  modeId: string;
+  /** The backend the mode uses, e.g. `puppeteer`. */
+  backendId: string;
+  backendVersion: number;
+  renderTarget: RenderTarget;
+  sourceContentSha256: string;
+  generatedAt: string;
+  /**
+   * Always an array, even though milestone 2 always writes exactly one full-document image: the
+   * model, the validators and the freshness checks all handle N so milestone 3's per-tile capture is
+   * additive rather than a format change. Request construction separately requires exactly one.
+   */
+  images: EnvelopeImage[];
+}
+
+const kSha256Pattern = /^[0-9a-f]{64}$/;
+
+function asSha256(value: unknown, file: string, field: string): string {
+  const text = asString(value, file, field);
+  if (!kSha256Pattern.test(text)) fail(file, field, `must be a 64-character hex sha256, got "${text}"`);
+  return text;
+}
+
+/**
+ * `file` names an image beside the envelope and nothing else. The path is containment-checked again
+ * when it is resolved, but a bare-filename rule here means a hand-edited envelope cannot even
+ * describe a file elsewhere.
+ */
+function asBareFilename(value: unknown, file: string, field: string): string {
+  const text = asString(value, file, field);
+  if (text.length === 0 || text.includes("/") || text.includes("\\") || text === "." || text === "..") {
+    fail(file, field, `must be a bare filename beside the envelope, got "${text}"`);
+  }
+  return text;
+}
+
+export function validateRenderTarget(value: unknown, file: string, field: string): RenderTarget {
+  const record = asObject(value, file, field);
+  const captureMode = asEnum(record.captureMode, captureModes, file, `${field}.captureMode`);
+  const captureHeightPx = record.captureHeightPx == null
+    ? null
+    : asPositiveInteger(record.captureHeightPx, file, `${field}.captureHeightPx`);
+  // A clipped capture that forgot to say how far it clipped, or a full-document capture claiming a
+  // clip height, would both compare "equal" to a target that means something else.
+  if (captureMode === "fixed-height" && captureHeightPx === null) {
+    fail(file, `${field}.captureHeightPx`, 'is required when captureMode is "fixed-height"');
+  }
+  if (captureMode === "full-document" && captureHeightPx !== null) {
+    fail(file, `${field}.captureHeightPx`, 'must be null when captureMode is "full-document"');
+  }
+  return {
+    clueUrl: asString(record.clueUrl, file, `${field}.clueUrl`),
+    unit: asString(record.unit, file, `${field}.unit`),
+    clueRevision: asOptionalString(record.clueRevision, file, `${field}.clueRevision`),
+    shutterbugUrl: asOptionalString(record.shutterbugUrl, file, `${field}.shutterbugUrl`),
+    viewportWidthPx: asPositiveInteger(record.viewportWidthPx, file, `${field}.viewportWidthPx`),
+    captureMode,
+    captureHeightPx
+  };
+}
+
+/** The provenance an image envelope and an image result-row descriptor both carry. */
+function validateImageProvenance(record: Record<string, unknown>, file: string, field = "") {
+  const at = (name: string) => (field ? `${field}.${name}` : name);
+  return {
+    modeId: asString(record.modeId, file, at("modeId")),
+    backendId: asString(record.backendId, file, at("backendId")),
+    backendVersion: asPositiveInteger(record.backendVersion, file, at("backendVersion")),
+    renderTarget: validateRenderTarget(record.renderTarget, file, at("renderTarget")),
+    sourceContentSha256: asString(record.sourceContentSha256, file, at("sourceContentSha256"))
+  };
+}
+
+export function validateImageEnvelope(value: unknown, file: string): ImageEnvelope {
+  const record = asObject(value, file, "representation");
+  checkSchemaVersion(record, file);
+  if (record.kind !== "image") {
+    fail(file, "kind", `must be "image", got ${describe(record.kind)}`);
+  }
+  const images = asArray(record.images, file, "images").map((entry, index) => {
+    const field = `images[${index}]`;
+    const image = asObject(entry, file, field);
+    return {
+      file: asBareFilename(image.file, file, `${field}.file`),
+      sha256: asSha256(image.sha256, file, `${field}.sha256`),
+      mimeType: asString(image.mimeType, file, `${field}.mimeType`),
+      widthPx: asPositiveInteger(image.widthPx, file, `${field}.widthPx`),
+      heightPx: asPositiveInteger(image.heightPx, file, `${field}.heightPx`),
+      bytes: asPositiveInteger(image.bytes, file, `${field}.bytes`),
+      url: asOptionalString(image.url, file, `${field}.url`),
+      tileId: asOptionalString(image.tileId, file, `${field}.tileId`),
+      purpose: asEnum(image.purpose, imagePurposes, file, `${field}.purpose`)
+    };
+  });
+  const filenames = new Set<string>();
+  for (const image of images) {
+    if (filenames.has(image.file)) fail(file, "images", `lists the file "${image.file}" more than once`);
+    filenames.add(image.file);
+  }
+  return {
+    schemaVersion: kSchemaVersion,
+    docId: asString(record.docId, file, "docId"),
+    kind: "image",
+    ...validateImageProvenance(record, file),
+    generatedAt: asString(record.generatedAt, file, "generatedAt"),
+    images
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Pricing config
 // ---------------------------------------------------------------------------
+
+/**
+ * How one image is priced in input tokens. Images are not billed by the characters of their data
+ * URL, so the character heuristic that prices text would read a 500 KB screenshot as ~170k tokens
+ * and refuse every run before it started.
+ *
+ * `detailLowFlat` is the whole cost at `detail: "low"`. Otherwise the image is scaled to fit inside
+ * `maxLongSide` and then down to `maxShortSide` on its short side, divided into `tileSize` squares,
+ * and charged `base` plus `perTile` per tile.
+ */
+export interface ImageTokenPricing {
+  detailLowFlat: number;
+  base: number;
+  perTile: number;
+  tileSize: number;
+  maxShortSide: number;
+  maxLongSide: number;
+}
 
 export interface ModelPricing {
   inputPerMTokUsd: number;
   outputPerMTokUsd: number;
   maxOutputTokens: number;
+  imageTokens: ImageTokenPricing;
 }
 
 export interface PricingConfig {
   schemaVersion: number;
   effectiveDate: string;
   models: Record<string, ModelPricing>;
+}
+
+/**
+ * Every field is a positive integer. Zero or a negative anywhere here would price a screenshot at
+ * nothing, which is exactly the failure the image cost model exists to prevent, so it is refused
+ * rather than allowed through as "cheap".
+ */
+export function validateImageTokenPricing(value: unknown, file: string, field: string): ImageTokenPricing {
+  const record = asObject(value, file, field);
+  const pricing = {
+    detailLowFlat: asPositiveInteger(record.detailLowFlat, file, `${field}.detailLowFlat`),
+    base: asPositiveInteger(record.base, file, `${field}.base`),
+    perTile: asPositiveInteger(record.perTile, file, `${field}.perTile`),
+    tileSize: asPositiveInteger(record.tileSize, file, `${field}.tileSize`),
+    maxShortSide: asPositiveInteger(record.maxShortSide, file, `${field}.maxShortSide`),
+    maxLongSide: asPositiveInteger(record.maxLongSide, file, `${field}.maxLongSide`)
+  };
+  // The two bounds are applied in order — fit the long side, then the short side — so a config where
+  // the short-side bound is the larger of the two describes a scaling rule that cannot happen.
+  if (pricing.maxShortSide > pricing.maxLongSide) {
+    fail(file, `${field}.maxShortSide`,
+      `must not exceed maxLongSide (${pricing.maxLongSide}), got ${pricing.maxShortSide}`);
+  }
+  return pricing;
 }
 
 export function validatePricingConfig(value: unknown, file: string): PricingConfig {
@@ -472,7 +711,8 @@ export function validatePricingConfig(value: unknown, file: string): PricingConf
     validated[model] = {
       inputPerMTokUsd: asNonNegativeNumber(pricing.inputPerMTokUsd, file, `${field}.inputPerMTokUsd`),
       outputPerMTokUsd: asNonNegativeNumber(pricing.outputPerMTokUsd, file, `${field}.outputPerMTokUsd`),
-      maxOutputTokens: asPositiveInteger(pricing.maxOutputTokens, file, `${field}.maxOutputTokens`)
+      maxOutputTokens: asPositiveInteger(pricing.maxOutputTokens, file, `${field}.maxOutputTokens`),
+      imageTokens: validateImageTokenPricing(pricing.imageTokens, file, `${field}.imageTokens`)
     };
   }
   return {
@@ -488,6 +728,49 @@ export function validatePricingConfig(value: unknown, file: string): PricingConf
 
 export const resultStatuses = ["success", "refusal", "error", "skipped"] as const;
 export type ResultStatus = typeof resultStatuses[number];
+
+/**
+ * Which representation a row was produced from, in enough detail to find it again.
+ *
+ * Both kinds carry `sourceContentSha256`, so a row can always be tied back to the exact document
+ * content it describes. The image side carries the whole render target because that is what a
+ * screenshot's provenance *is*: the same document rendered against a different CLUE build is a
+ * different picture. `runId` alone would lose all of it.
+ *
+ * This is also the extension point milestone 3's mixed rows need.
+ */
+export type RepresentationDescriptor =
+  | { kind: "text"; variantId: string; variantVersion: number; sourceContentSha256: string }
+  | {
+      kind: "image";
+      modeId: string;
+      backendId: string;
+      backendVersion: number;
+      renderTarget: RenderTarget;
+      sourceContentSha256: string;
+      imageSha256s: string[];
+    };
+
+export function validateRepresentationDescriptor(
+  value: unknown, file: string, field: string
+): RepresentationDescriptor {
+  const record = asObject(value, file, field);
+  const kind = asEnum(record.kind, ["text", "image"] as const, file, `${field}.kind`);
+  if (kind === "text") {
+    return {
+      kind,
+      variantId: asString(record.variantId, file, `${field}.variantId`),
+      variantVersion: asNumber(record.variantVersion, file, `${field}.variantVersion`),
+      sourceContentSha256: asString(record.sourceContentSha256, file, `${field}.sourceContentSha256`)
+    };
+  }
+  return {
+    kind,
+    ...validateImageProvenance(record, file, field),
+    imageSha256s: asArray(record.imageSha256s, file, `${field}.imageSha256s`)
+      .map((hash, index) => asSha256(hash, file, `${field}.imageSha256s[${index}]`))
+  };
+}
 
 export interface RunMeta {
   date: string;
@@ -523,9 +806,25 @@ export interface ResultRowCommon {
   runId: string;
   corpus: string;
   docId: string;
+  /**
+   * The modality this row is grouped under: the human override when the manifest carries one,
+   * otherwise the classifier's answer.
+   */
   modality: Modality;
+  /**
+   * What the classifier computed, recorded alongside. Without it a hand-set `modalityOverride`
+   * silently regroups a document and nothing in the results says a human rather than the classifier
+   * put it there — so a reader cannot tell a measurement from a judgement call.
+   */
+  computedModality: Modality;
   message: MessageShape;
-  textVariant: string;
+  representation: RepresentationDescriptor;
+  /**
+   * The harness's pre-flight image-token estimate for this row's images, at the configured pricing.
+   * Present only on rows that sent an image. The API's `usage.promptTokens` stays authoritative for
+   * what was billed; this is recorded so a report can say how much of the prompt was picture.
+   */
+  promptImageTokensEstimated?: number;
   prompt: { name: string; sha256: string };
   /** The cache key, which doubles as resume identity. `null` on skipped rows: they build no request. */
   requestKey: string | null;
@@ -574,19 +873,32 @@ export interface SkippedResultRow extends ResultRowCommon {
 export type ResultRow = SuccessResultRow | RefusalResultRow | ErrorResultRow | SkippedResultRow;
 
 function validateResultCommon(record: Record<string, unknown>, file: string): ResultRowCommon {
-  checkSchemaVersion(record, file);
+  if (record.schemaVersion !== kResultSchemaVersion) {
+    // Named specifically rather than as a generic version mismatch: a version-1 row describes its
+    // representation with a bare `textVariant` string, which cannot be turned into a descriptor
+    // after the fact, and reading one as though it were current would attribute image rows to a
+    // text variant that never ran.
+    const wasV1 = record.schemaVersion === 1;
+    fail(file, "schemaVersion", `must be ${kResultSchemaVersion}, got ${describe(record.schemaVersion)}` +
+      (wasV1
+        ? ". These are milestone 1 result rows, which recorded a textVariant instead of a " +
+          "representation descriptor. They cannot be upgraded in place — re-run the experiment into " +
+          "a fresh --output. The response cache means unchanged requests will not be paid for twice."
+        : ""));
+  }
   const prompt = asObject(record.prompt, file, "prompt");
   const runMeta = asObject(record.runMeta, file, "runMeta");
-  return {
-    schemaVersion: kSchemaVersion,
+  const common: ResultRowCommon = {
+    schemaVersion: kResultSchemaVersion,
     experiment: asString(record.experiment, file, "experiment"),
     experimentSha256: asString(record.experimentSha256, file, "experimentSha256"),
     runId: asString(record.runId, file, "runId"),
     corpus: asString(record.corpus, file, "corpus"),
     docId: asString(record.docId, file, "docId"),
     modality: asEnum(record.modality, modalities, file, "modality"),
+    computedModality: asEnum(record.computedModality, modalities, file, "computedModality"),
     message: asEnum(record.message, messageShapes, file, "message"),
-    textVariant: asString(record.textVariant, file, "textVariant"),
+    representation: validateRepresentationDescriptor(record.representation, file, "representation"),
     prompt: { name: asString(prompt.name, file, "prompt.name"), sha256: asString(prompt.sha256, file, "prompt.sha256") },
     requestKey: null,
     runMeta: {
@@ -596,6 +908,20 @@ function validateResultCommon(record: Record<string, unknown>, file: string): Re
       gitDirty: asBoolean(runMeta.gitDirty, file, "runMeta.gitDirty")
     }
   };
+  if (record.promptImageTokensEstimated !== undefined) {
+    // Reports sum this, so a negative would quietly subtract from the image-token total.
+    common.promptImageTokensEstimated =
+      asNonNegativeNumber(record.promptImageTokensEstimated, file, "promptImageTokensEstimated");
+  }
+  // An estimate on a row that sent no image, or its absence on one that did, would put a number in
+  // the report's image column that belongs to nothing.
+  const sentAnImage = common.representation.kind === "image";
+  if (sentAnImage !== (common.promptImageTokensEstimated !== undefined)) {
+    fail(file, "promptImageTokensEstimated",
+      `must be ${sentAnImage ? "set" : "absent"} on a row whose representation is ` +
+      `"${common.representation.kind}"`);
+  }
+  return common;
 }
 
 function validateUsage(value: unknown, file: string): ResultUsage {

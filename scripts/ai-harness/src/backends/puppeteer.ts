@@ -1,0 +1,646 @@
+/**
+ * The default render mode: build the page production sends to Shutterbug, load it in headless
+ * Chromium, and screenshot the iframe.
+ *
+ * This renders through the *same* iframe pathway production's screenshots use — same HTML, same
+ * `iframe.html?unwrapped&readOnly` entry point, same `initialValue` message. The only difference is
+ * who takes the picture, and that the picture is the whole document rather than production's first
+ * 1500 pixels. The harness captures reality; production's clipping is a production concern.
+ *
+ * Puppeteer is imported lazily so that every other module here — and every test that does not drive
+ * a browser — loads without it.
+ */
+import { RenderTarget } from "../schemas.js";
+import { readPngInfo } from "../png.js";
+import { generateRenderHtml, iframeUrlFor } from "./render-html.js";
+import {
+  RenderBackend, RenderDiagnostics, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
+  checkEncodedSize, kDefaultRenderLimits
+} from "./types.js";
+
+/**
+ * The slice of puppeteer this backend uses, written out structurally so a test can supply a fake
+ * browser and so the module type-checks whether or not puppeteer is installed.
+ */
+export interface ElementLike {
+  boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>;
+  screenshot(options: { type: "png" }): Promise<Uint8Array | Buffer>;
+}
+
+export interface FrameLike {
+  url(): string;
+  evaluate<T>(fn: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
+}
+
+export interface PageLike {
+  setViewport(viewport: { width: number; height: number }): Promise<void>;
+  /** Used only to capture what a failing page looked like before it is closed. */
+  screenshot(options: { type: "png" }): Promise<Uint8Array | Buffer>;
+  goto(url: string, options?: { waitUntil?: string; timeout?: number }): Promise<unknown>;
+  evaluate<T>(fn: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
+  waitForFunction(
+    fn: string | ((...args: any[]) => unknown),
+    options?: { timeout?: number; polling?: number },
+    ...args: any[]
+  ): Promise<unknown>;
+  $(selector: string): Promise<ElementLike | null>;
+  frames(): FrameLike[];
+  on(event: string, handler: (payload: any) => void): void;
+  close(): Promise<void>;
+}
+
+export interface BrowserLike {
+  newPage(): Promise<PageLike>;
+  close(): Promise<void>;
+}
+
+/**
+ * 2: the render page is served over loopback HTTP and navigated to, rather than injected with
+ * `setContent`, and readiness is measured inside the CLUE frame rather than taken from the
+ * `updateHeight` message. Version 1 produced no pixels at all against a real CLUE server — see the
+ * comments on `startRenderPageServer` and `kMeasureFrameScript`.
+ */
+export const kPuppeteerBackendVersion = 2;
+
+/** Production's screenshots are about this wide once the iframe fills Shutterbug's page. */
+export const kDefaultViewportWidthPx = 960;
+
+/** How long the height has to stay put before rendering counts as settled. */
+export const kDefaultStableForMs = 500;
+
+/**
+ * Per document, covering load, settle and capture — one deadline for the whole render, not one per
+ * phase. Given separately to `setContent` and to each of the four readiness waits, a stuck document
+ * could spend five times this before the capture even began.
+ */
+export const kDefaultRenderTimeoutMs = 30_000;
+
+export class RenderFailed extends Error {
+  constructor(
+    public readonly docId: string,
+    public readonly detail: string,
+    public readonly context: {
+      url: string;
+      heightPx: number | null;
+      consoleOutput: string[];
+      /**
+       * What the page looked like when it failed. Attached where one could be taken — a visual
+       * failure often leaves an empty console and a half-drawn page, and the picture is then the
+       * only evidence of what went wrong.
+       */
+      screenshot?: Buffer;
+    }
+  ) {
+    super(`${docId}: ${detail} (rendering ${context.url}; last reported height ` +
+      `${context.heightPx ?? "none"})`);
+    this.name = "RenderFailed";
+  }
+}
+
+export interface PuppeteerBackendOptions {
+  clueUrl: string;
+  /**
+   * The unit's stable identifier — what goes into the render target and is compared for freshness.
+   */
+  unit: string;
+  /**
+   * Where CLUE actually fetches the unit from, when that is not the identifier itself. The harness's
+   * own rendering unit is served on an ephemeral loopback port, and a port number changes on every
+   * run — recording *that* would make every stored render look stale immediately.
+   */
+  unitUrl?: string;
+  /** The CLUE commit plus dirty flag being rendered. `null` is recorded and warned about. */
+  clueRevision: string | null;
+  viewportWidthPx?: number;
+  limits?: RenderLimits;
+  timeoutMs?: number;
+  stableForMs?: number;
+  /** How often the frame is measured while waiting. Lowered in tests to keep them quick. */
+  pollIntervalMs?: number;
+  /** Injected by tests. The default lazily imports puppeteer and launches headless Chromium. */
+  launch?: () => Promise<BrowserLike>;
+  /** Injected by tests, so a fake browser needs no real loopback server. */
+  startPageServer?: () => Promise<RenderPageServer>;
+}
+
+async function launchPuppeteer(): Promise<BrowserLike> {
+  const puppeteer = await import("puppeteer");
+  const browser = await (puppeteer as any).default.launch({ headless: true });
+  return browser as BrowserLike;
+}
+
+/**
+ * What is measured inside the CLUE frame, both to decide when rendering has settled and to report
+ * what was drawn.
+ *
+ * The height comes from `#app`, not from the `updateHeight` message. CLUE posts
+ * `document.body.scrollHeight` (src/iframe/iframe.tsx), and in this build the body has no scroll
+ * height — the content lives inside `#app` — so the message reports 0 for a perfectly rendered
+ * document, and waiting on it could never succeed. Measuring inside the frame is available to the
+ * harness precisely because it drives the browser; production cannot, which is why an explicit
+ * "document rendered" message remains the right production-side fix.
+ *
+ * `tool-tile` is the class every tile carries, and the placeholder component adds `placeholder-tile`
+ * alongside it. An unregistered tile type becomes an `Unknown` content model drawn by that
+ * component, and nothing is logged when it happens — so this count is the only way a render notices
+ * that the unit did not register what the document uses.
+ */
+const kMeasureFrameScript = `(() => {
+  const app = document.getElementById('app');
+  const rows = document.querySelectorAll('.tile-row');
+  let rowsHeight = 0;
+  rows.forEach((row) => { rowsHeight += row.getBoundingClientRect().height; });
+  return {
+    contentHeightPx: app ? app.scrollHeight : 0,
+    // The document's own height — the tile rows themselves. CLUE lays out to fill its viewport (the
+    // iframe element) rather than to its content, so nothing else reports how tall the document
+    // actually is: the scroller always matches the frame exactly, at any frame height. Sizing the
+    // frame from this is what makes the capture the whole document rather than a viewport of it.
+    contentRowsHeightPx: Math.ceil(rowsHeight),
+    totalTiles: document.querySelectorAll('.tool-tile').length,
+    unknownTiles: document.querySelectorAll('.placeholder-tile').length,
+    fontsReady: !document.fonts || document.fonts.status === 'loaded'
+  };
+})()`;
+
+/**
+ * The rendered text, read once after settling rather than on every poll: it is a full layout and
+ * text serialization of the document, and only the final value is ever used.
+ */
+const kReadDocumentTextScript = "document.body ? document.body.innerText : ''";
+
+export interface FrameMeasurement {
+  contentHeightPx: number;
+  contentRowsHeightPx: number;
+  totalTiles: number;
+  unknownTiles: number;
+  fontsReady: boolean;
+}
+
+/**
+ * The generated page, served over loopback HTTP.
+ *
+ * `page.setContent` was the obvious way to do this, and it is the reason version 1 rendered nothing:
+ * it leaves the document on an opaque origin, so Chromium denies storage access to the CLUE iframe
+ * and CLUE throws reading `localStorage` before it finishes booting. Serving the same HTML from a
+ * real http origin gives the embedded application the origin it expects. Shutterbug does this by
+ * construction, which is why production never hit it.
+ */
+export interface RenderPageServer {
+  /** Registers a document's HTML and returns the URL to navigate to. */
+  serve(docId: string, html: string): string;
+  close(): Promise<void>;
+}
+
+export async function startRenderPageServer(): Promise<RenderPageServer> {
+  const http = await import("node:http");
+  const pages = new Map<string, string>();
+  const server = http.createServer((request, response) => {
+    const key = decodeURIComponent((request.url ?? "").split("?")[0].replace(/^\//, ""));
+    const html = pages.get(key);
+    if (html === undefined) {
+      response.writeHead(404, { "content-type": "text/plain" });
+      response.end("not found");
+      return;
+    }
+    response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+    response.end(html);
+  });
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const { port } = server.address() as { port: number };
+  return {
+    // Keyed per document, so concurrent pages cannot serve each other's HTML.
+    serve(docId: string, html: string) {
+      pages.set(docId, html);
+      return `http://127.0.0.1:${port}/${encodeURIComponent(docId)}`;
+    },
+    close: () => new Promise<void>((resolve) => server.close(() => resolve()))
+  };
+}
+
+/**
+ * One deadline for a whole document's render, shared by every phase.
+ *
+ * Each phase asks for the time that is left rather than getting a fresh allowance, so the budget is
+ * what it says it is however many phases a document gets stuck in.
+ */
+class RenderDeadline {
+  private readonly expiresAt: number;
+
+  constructor(public readonly totalMs: number, now: number = Date.now()) {
+    this.expiresAt = now + totalMs;
+  }
+
+  remainingMs(now: number = Date.now()): number {
+    return this.expiresAt - now;
+  }
+
+  /** Time left for the next phase, or a failure when the budget is already gone. */
+  requireRemaining(docId: string, what: string, context: RenderFailed["context"]): number {
+    const remaining = this.remainingMs();
+    if (remaining <= 0) {
+      throw new RenderFailed(docId,
+        `the ${this.totalMs}ms budget for this document ran out before ${what}`, context);
+    }
+    return remaining;
+  }
+}
+
+/**
+ * Waits for a page function to become true, turning puppeteer's own timeout into a `RenderFailed`
+ * that says which document, which URL and what height was last reported.
+ */
+async function waitFor(
+  page: PageLike, docId: string, what: string, script: string,
+  deadline: RenderDeadline, contextOf: () => RenderFailed["context"]
+): Promise<void> {
+  const timeout = deadline.requireRemaining(docId, what, contextOf());
+  try {
+    await page.waitForFunction(script, { timeout, polling: 100 });
+  } catch (error) {
+    throw new RenderFailed(docId, `${what} (${(error as Error).message})`, contextOf());
+  }
+}
+
+interface RenderState {
+  heightPx: number | null;
+  consoleOutput: string[];
+  fatal: string[];
+}
+
+/**
+ * What actually means the document did not render, as opposed to noise.
+ *
+ * Treating every console error and every failed request as fatal was too blunt to survive contact
+ * with a real CLUE server: it logs React key warnings at error level, and it probes for an optional
+ * `teacher-guide/content.json` that legitimately 404s. Neither says anything about whether the
+ * document drew. What does: an uncaught exception, and a module that failed to load — a tile type
+ * whose dynamic import fails renders nothing while everything around it looks fine.
+ *
+ * Everything is still written to the evidence file either way; this only decides what fails a render.
+ */
+const kFatalConsolePatterns = [
+  /Failed to fetch dynamically imported module/i,
+  /Loading chunk \S+ failed/i,
+  /ChunkLoadError/i,
+  /Unable to find tile model/i
+];
+
+function isFatalConsoleLine(line: string): boolean {
+  return kFatalConsolePatterns.some((pattern) => pattern.test(line));
+}
+
+/** A failed script request means code that should have run did not. Other assets are not fatal. */
+function isFatalRequestFailure(url: string): boolean {
+  return /\.m?js(\?|$)/i.test(url);
+}
+
+/**
+ * How many tiles the document we are about to send should draw.
+ *
+ * Waiting for the frame to show at least this many replaces a pure timing heuristic with a fact.
+ * "Height and tile count unchanged for a while" is satisfiable *before* CLUE has finished loading
+ * its dynamically imported tile modules — the page has a stable height and zero tiles — which
+ * produced a clean, empty screenshot for a document that renders fine given another second.
+ *
+ * A lower bound on purpose: tiles nested inside a Question tile are not counted here, and counting
+ * them low only ever makes the wait end sooner than it could have, never sooner than it should.
+ */
+export function expectedTileCount(content: unknown): number {
+  const rowMap = (content as { rowMap?: Record<string, { tiles?: { tileId?: string }[] }> })?.rowMap;
+  if (rowMap) {
+    const ids = new Set<string>();
+    for (const row of Object.values(rowMap)) {
+      for (const tile of row?.tiles ?? []) if (tile?.tileId) ids.add(tile.tileId);
+    }
+    return ids.size;
+  }
+  const tileMap = (content as { tileMap?: Record<string, unknown> })?.tileMap;
+  return tileMap ? Object.keys(tileMap).length : 0;
+}
+
+/** The iframe's starting height, matching the generated page. */
+export const kInitialFrameHeightPx = 500;
+
+/** Room for the document's own chrome — margins and the annotation layer — above the tile rows. */
+const kDocumentChromePx = 80;
+
+/**
+ * An overflow this small, which growing the frame does not reduce, is a rounding or border artifact
+ * rather than a clipped document — some containers report a scrollHeight a few pixels over their
+ * clientHeight however tall they are made. Anything larger that will not shrink is a real clip, and
+ * fails rather than being recorded as a full-document capture.
+ */
+const kOverflowTolerancePx = 16;
+
+async function setFrameHeight(page: PageLike, heightPx: number): Promise<void> {
+  await page.evaluate(`(() => {
+    const frame = document.getElementById('clue-frame');
+    if (frame) frame.height = ${Math.ceil(heightPx)} + 'px';
+  })()`);
+}
+
+/**
+ * Bounds an operation that has no timeout of its own by what is left of the document's budget.
+ *
+ * `page.$`, `boundingBox()` and `screenshot()` take no timeout, so checking the clock before the
+ * capture bounded only the decision to start it, not the capture itself — a wedged page or a
+ * pathological encode could run indefinitely past a budget documented as covering it.
+ *
+ * The losing operation is not cancellable; the page is closed in the caller's `finally`, which
+ * settles it. Its result is swallowed so a late rejection is never unhandled.
+ */
+async function withinDeadline<T>(
+  operation: Promise<T>, docId: string, what: string, deadline: RenderDeadline,
+  contextOf: () => RenderFailed["context"]
+): Promise<T> {
+  const remaining = deadline.requireRemaining(docId, what, contextOf());
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new RenderFailed(docId,
+          `${what} did not finish within the ${deadline.totalMs}ms budget for this document`,
+          contextOf())), remaining);
+      })
+    ]);
+  } finally {
+    clearTimeout(timer);
+    operation.catch(() => undefined);
+  }
+}
+
+/** The CLUE frame, once it exists. Polled rather than awaited: frames appear asynchronously. */
+async function waitForClueFrame(
+  page: PageLike, docId: string, deadline: RenderDeadline, pollIntervalMs: number,
+  contextOf: () => RenderFailed["context"]
+): Promise<FrameLike> {
+  for (;;) {
+    deadline.requireRemaining(docId, "the CLUE iframe appeared", contextOf());
+    const frame = page.frames().find((candidate) => candidate.url().includes("iframe.html"));
+    if (frame) return frame;
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+}
+
+/**
+ * Polls the frame until it has drawn something and stopped changing.
+ *
+ * "Stopped changing" is the height holding still for `stableForMs`, with the fonts reported loaded.
+ * Neither `networkidle0` nor a single height reading proves rendering finished: dynamically imported
+ * tile modules and async tile content settle well after the first paint, and some pages never go
+ * network-idle at all.
+ */
+async function waitUntilSettled(
+  frame: FrameLike, docId: string, deadline: RenderDeadline, stableForMs: number,
+  pollIntervalMs: number, expectedTiles: number, contextOf: () => RenderFailed["context"]
+): Promise<FrameMeasurement> {
+  // Two clocks: one for "everything has settled, tiles included", and one for "everything except
+  // the tiles has settled". A document whose tile legitimately never draws — the ErrorTest fixture
+  // renders an error boundary and no tile at all — must still be captured, so the second clock
+  // accepts what is there once it has been quiet for a good while longer.
+  const graceMs = Math.max(stableForMs * 6, stableForMs);
+  let previous: FrameMeasurement | undefined;
+  let stableSince: number | undefined;
+  let quietSince: number | undefined;
+  for (;;) {
+    deadline.requireRemaining(docId,
+      `the document finished rendering (expected ${expectedTiles} tile(s))`, contextOf());
+    let measured: FrameMeasurement;
+    try {
+      measured = await frame.evaluate<FrameMeasurement>(kMeasureFrameScript);
+    } catch {
+      // The frame can navigate or reload underneath us; try again until the deadline says otherwise.
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+      continue;
+    }
+    const quiet = measured.contentHeightPx > 0 && measured.fontsReady &&
+      previous?.contentHeightPx === measured.contentHeightPx &&
+      previous?.totalTiles === measured.totalTiles;
+    // Every tile the document declares has appeared, so this is not a stable *empty* page — the
+    // state a purely timing-based wait would happily accept while CLUE was still loading its
+    // dynamically imported tile modules.
+    const complete = quiet && measured.totalTiles >= expectedTiles;
+
+    if (!quiet) {
+      quietSince = undefined;
+      stableSince = undefined;
+    } else {
+      quietSince ??= Date.now();
+      if (complete) {
+        stableSince ??= Date.now();
+        if (Date.now() - stableSince >= stableForMs) return measured;
+      } else {
+        stableSince = undefined;
+        if (Date.now() - quietSince >= graceMs) return measured;
+      }
+    }
+    previous = measured;
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+}
+
+export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBackend {
+  const {
+    clueUrl, unit, clueRevision,
+    // Loaded from wherever it is served; recorded under its stable identifier.
+    unitUrl = unit,
+    viewportWidthPx = kDefaultViewportWidthPx,
+    limits = kDefaultRenderLimits,
+    timeoutMs = kDefaultRenderTimeoutMs,
+    stableForMs = kDefaultStableForMs,
+    pollIntervalMs = 100
+  } = options;
+  const launch = options.launch ?? launchPuppeteer;
+  const startPageServer = options.startPageServer;
+
+  const renderTarget: RenderTarget = {
+    clueUrl,
+    unit,
+    clueRevision,
+    shutterbugUrl: null,
+    viewportWidthPx,
+    captureMode: "full-document",
+    captureHeightPx: null
+  };
+
+  // The launch promise, not the browser: two concurrent first-renders would both read an undefined
+  // `browser`, both launch Chromium, and `close()` would then shut down only one of them, leaving
+  // the other process alive. `render` awaits `open()` first today, so this is latent rather than
+  // active — but a second entry point would find it.
+  let browserPromise: Promise<BrowserLike> | undefined;
+  const openBrowser = () => (browserPromise ??= launch());
+  // The render page has to come from a real http origin; see startRenderPageServer.
+  let pageServerPromise: Promise<RenderPageServer> | undefined;
+  const openPageServer = () => (pageServerPromise ??= (startPageServer ?? startRenderPageServer)());
+
+  return {
+    modeId: "puppeteer-full-height",
+    backendId: "puppeteer",
+    backendVersion: kPuppeteerBackendVersion,
+    // "local", not "offline": the CLUE page it loads may still pull fonts, images or other assets
+    // from elsewhere. Guaranteeing offline operation would mean intercepting and rejecting every
+    // non-localhost request, and a test asserting it.
+    kind: "local",
+    prerequisites: `a CLUE dev server at ${clueUrl} (npm start); no OpenAI key`,
+    renderTarget,
+
+    // One browser and one page server for the whole run; a page per document, closed in a finally.
+    async open() {
+      await Promise.all([openBrowser(), openPageServer()]);
+    },
+    async close() {
+      const pendingBrowser = browserPromise;
+      const pendingServer = pageServerPromise;
+      browserPromise = undefined;
+      pageServerPromise = undefined;
+      if (pendingBrowser) await (await pendingBrowser).close();
+      if (pendingServer) await (await pendingServer).close();
+    },
+
+    async render(request: RenderRequest): Promise<RenderOutcome> {
+      const [browser, pageServer] = await Promise.all([openBrowser(), openPageServer()]);
+      const url = iframeUrlFor(clueUrl, unitUrl);
+      // One budget for the whole document: load, every readiness wait, and the capture.
+      const deadline = new RenderDeadline(timeoutMs);
+      const state: RenderState = { heightPx: null, consoleOutput: [], fatal: [] };
+      const page = await browser.newPage();
+      const contextOf = (): RenderFailed["context"] =>
+        ({ url, heightPx: state.heightPx, consoleOutput: state.consoleOutput });
+      try {
+        // Anything that stops the page from being what it claims to be is fatal. A render failure is
+        // a bug to look at, not a transient — there is no retry.
+        page.on("pageerror", (error: Error) => {
+          state.fatal.push(`page error: ${error.message}`);
+          state.consoleOutput.push(`page error: ${error.message}`);
+        });
+        page.on("console", (message: { type(): string; text(): string }) => {
+          const line = `${message.type()}: ${message.text()}`;
+          state.consoleOutput.push(line);
+          if (isFatalConsoleLine(line)) state.fatal.push(line);
+        });
+        page.on("requestfailed", (failed: { url(): string; failure(): { errorText: string } | null }) => {
+          const line = `request failed: ${failed.url()} (${failed.failure()?.errorText ?? "unknown"})`;
+          state.consoleOutput.push(line);
+          if (isFatalRequestFailure(failed.url())) state.fatal.push(line);
+        });
+
+        await page.setViewport({ width: viewportWidthPx, height: 1024 });
+        const html = generateRenderHtml({ content: request.content, clueUrl, unit: unitUrl });
+        // Navigated to, not injected: `setContent` leaves an opaque origin and CLUE cannot read
+        // localStorage from inside it.
+        await page.goto(pageServer.serve(request.docId, html), {
+          waitUntil: "domcontentloaded",
+          timeout: deadline.requireRemaining(request.docId, "the page was loaded", contextOf())
+        });
+
+        await waitFor(page, request.docId, "the render page never posted the document to the iframe",
+          "window.__clueRender && window.__clueRender.initialValuePosted === true",
+          deadline, contextOf);
+
+        // The CLUE frame, then its content — measured inside the frame rather than taken from the
+        // `updateHeight` message, which reports 0 for a perfectly rendered document.
+        const frame = await waitForClueFrame(page, request.docId, deadline, pollIntervalMs, contextOf);
+        const expectedTiles = expectedTileCount(request.content);
+        let measured = await waitUntilSettled(
+          frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
+
+        if (state.fatal.length > 0) {
+          throw new RenderFailed(request.docId, `the page reported ${state.fatal.length} error(s): ` +
+            state.fatal.join("; "), contextOf());
+        }
+
+        // Size the iframe to the document, then let it settle again.
+        //
+        // CLUE lays out to fill its viewport rather than to its content, so at the default 500px the
+        // capture is a viewport of the document, not the document — and for a long one the rest is
+        // simply absent, with nothing in the DOM reporting that it was cut off. The tile rows are
+        // the only thing that says how tall the document really is.
+        const wantedHeightPx = Math.max(
+          kInitialFrameHeightPx, measured.contentRowsHeightPx + kDocumentChromePx);
+        if (wantedHeightPx > kInitialFrameHeightPx) {
+          checkCaptureSize(request.docId, viewportWidthPx, Math.ceil(wantedHeightPx), limits);
+          await setFrameHeight(page, wantedHeightPx);
+          measured = await waitUntilSettled(
+            frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
+        }
+        // The guarantee that nothing is cut off is made by construction — the frame is sized to
+        // cover the tile rows, and the capture is checked against them below — rather than by a DOM
+        // overflow reading. Measured directly, `.document-content` reports zero overflow at every
+        // frame height, while the same selector read during a settle reports a constant ~75px for
+        // documents whose content is a third of the frame; whatever that describes, it is not "the
+        // document is cut off".
+        state.heightPx = measured.contentHeightPx;
+
+        // Every step of the capture is inside the budget, not merely started inside it.
+        const element = await withinDeadline(
+          page.$("#clue-frame"), request.docId, "finding the iframe", deadline, contextOf);
+        if (!element) {
+          throw new RenderFailed(request.docId, "the render page has no #clue-frame element", contextOf());
+        }
+        const box = await withinDeadline(
+          element.boundingBox(), request.docId, "measuring the iframe", deadline, contextOf);
+        if (!box || box.width <= 0 || box.height <= 0) {
+          throw new RenderFailed(request.docId,
+            `the iframe has no visible area (${JSON.stringify(box)})`, contextOf());
+        }
+        // Checked before the capture, so an unreasonable document fails cheaply rather than after
+        // Chromium has tried to encode it.
+        checkCaptureSize(request.docId, Math.ceil(box.width), Math.ceil(box.height), limits);
+        // The capture really does cover the document, rather than a viewport of it. This is the
+        // check that keeps `captureMode: "full-document"` honest.
+        if (Math.ceil(box.height) + kOverflowTolerancePx < measured.contentRowsHeightPx) {
+          throw new RenderFailed(request.docId,
+            `the capture is ${Math.ceil(box.height)}px tall but the document's tiles are ` +
+            `${measured.contentRowsHeightPx}px, so it would be a clipped capture recorded as a ` +
+            "full-document one", contextOf());
+        }
+
+        const bytes = Buffer.from(await withinDeadline(
+          element.screenshot({ type: "png" }), request.docId, "capturing the iframe", deadline, contextOf));
+        checkEncodedSize(request.docId, bytes, limits);
+        // Decoded here as well as when the envelope is written: a screenshot that is not a PNG means
+        // the capture path itself is broken, and that is worth saying at the point it happened.
+        readPngInfo(bytes, `${request.docId} screenshot`);
+
+        const diagnostics: RenderDiagnostics = {
+          reportedHeightPx: measured.contentHeightPx,
+          unknownTiles: measured.unknownTiles,
+          totalTiles: measured.totalTiles,
+          documentText: await withinDeadline(
+            frame.evaluate<string>(kReadDocumentTextScript), request.docId, "reading the document text",
+            deadline, contextOf).catch(() => null),
+          consoleWarnings: state.consoleOutput.filter((line) => line.startsWith("warning:"))
+        };
+        return {
+          images: [{ bytes, url: null, tileId: null, purpose: "full-document" }],
+          diagnostics
+        };
+      } catch (error) {
+        // Evidence is attached to *any* failure, not only to a RenderFailed. A navigation error, a
+        // size-limit rejection or a raw protocol error is exactly when the console output and a
+        // picture of the page are most wanted, and those used to arrive carrying neither.
+        const context = error instanceof RenderFailed ? error.context : contextOf();
+        if (!context.screenshot) {
+          try {
+            // Best effort, and never allowed to replace the real error: a page too broken to render
+            // is often too broken to screenshot.
+            context.screenshot = Buffer.from(await page.screenshot({ type: "png" }));
+          } catch {
+            // Nothing to add; the error itself still stands.
+          }
+        }
+        if (!(error instanceof RenderFailed) && error instanceof Error) {
+          (error as Error & { context?: RenderFailed["context"] }).context = context;
+        }
+        throw error;
+      } finally {
+        await page.close();
+      }
+    }
+  };
+}

@@ -37,7 +37,7 @@ describe("every request carries a completion cap", () => {
       markdown: "# CLUE Document Summary",
       generationSettings: { max_completion_tokens: pricing.maxOutputTokens }
     });
-    expect(request.generationSettings.max_completion_tokens).toBe(pricing.maxOutputTokens);
+    expect(request.apiRequest.generationSettings.max_completion_tokens).toBe(pricing.maxOutputTokens);
   });
 
   it("makes the cap part of the request key, so changing it re-runs", () => {
@@ -55,8 +55,8 @@ describe("the reservation formula", () => {
 
   it("never estimates fewer tokens than the message text divided by the chars-per-token divisor", () => {
     const request = makeRequest("a".repeat(3000));
-    const messageChars = canonicalJson(request.messages).length;
-    const schemaChars = canonicalJson(request.responseFormat).length;
+    const messageChars = canonicalJson(request.apiRequest.messages).length;
+    const schemaChars = canonicalJson(request.apiRequest.responseFormat).length;
     expect(estimateInputTokens(request))
       .toBeGreaterThanOrEqual(Math.ceil((messageChars + schemaChars) / kCharsPerToken));
   });
@@ -153,7 +153,12 @@ describe("an actual-cost overshoot is detected and reported", () => {
     expect(summary.stoppedOnCeiling).toBe(true);
     expect(summary.overshootUsd).toBeGreaterThan(0);
     expect(summary.apiCalls).toBeLessThan(tasks.length);
-    expect(messages.join("\n")).toMatch(/passed the --max-cost ceiling by \$/);
+    // Worded from incurred spend and stated against the ceiling, rather than reporting committed
+    // reservations as if they were money already spent.
+    expect(messages.join("\n")).toMatch(/Spend has reached the --max-cost ceiling: \$[\d.]+ incurred/);
+    expect(messages.join("\n")).toMatch(/against a \$0\.0500 ceiling/);
+    // Here the actuals really did exceed the ceiling, so both overshoots are real.
+    expect(summary.committedOvershootUsd).toBeGreaterThan(0);
   });
 });
 

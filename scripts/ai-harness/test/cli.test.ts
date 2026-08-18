@@ -4,6 +4,7 @@ import { parseArgs, resolveDataPath } from "../harness.js";
 
 const known = {
   import: ["from", "corpus", "source", "prune"],
+  render: ["corpus", "mode", "clue-url", "unit", "shutterbug-url", "capture-height", "refresh"],
   run: ["corpus", "experiment", "max-cost", "output", "no-cache", "refresh-cache"]
 };
 
@@ -20,6 +21,17 @@ describe("argv parsing", () => {
 
   it("rejects an unknown command", () => {
     expect(() => parseArgs(["explode"], known)).toThrow(/Unknown command "explode"/);
+  });
+
+  it("reads the render command's flags, with --refresh boolean", () => {
+    expect(parseArgs(["render", "--corpus", "c", "--mode", "puppeteer-full-height",
+      "--clue-url", "http://localhost:8083", "--refresh"], known).flags)
+      .toEqual({ corpus: "c", mode: "puppeteer-full-height", "clue-url": "http://localhost:8083", refresh: true });
+  });
+
+  it("rejects a render flag that belongs to another command", () => {
+    expect(() => parseArgs(["render", "--variants", "default"], known))
+      .toThrow(/Unknown flag "--variants" for command "render"/);
   });
 
   it("rejects an unknown flag", () => {

@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`production parity generates exactly today's production request 1`] = `
+"
+    <script>const initialValue={"rowOrder":[],"rowMap":{},"tileMap":{}}</script>
+    <!-- height will be updated when iframe sends updateHeight message -->
+    <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
+      allow='serial'
+      src="https://collaborative-learning.concord.org/branch/shutterbug-support/iframe.html?unit=mods&amp;unwrapped&amp;readOnly"
+    ></iframe>
+    <script>
+      const clueFrame = document.getElementById('clue-frame')
+      window.__clueRender = { initialValuePosted: false }
+      function sendInitialValueToEditor() {
+        if (!clueFrame.contentWindow) {
+          console.warn("iframe doesn't have contentWindow");
+          return;
+        }
+        window.addEventListener("message", (event) => {
+          // Production assigns this unconditionally, so a height of 0 collapses its iframe to
+          // "0px". Guarded here because the local mode sizes the frame itself after settling and a
+          // late zero would wipe the capture. See the README on what parity does and does not cover.
+          if (event.data && event.data.type === "updateHeight") {
+            const height = Number(event.data.height);
+            if (!Number.isFinite(height) || height <= 0) return;
+            document.getElementById("clue-frame").height = height + "px";
+          }
+        })
+        clueFrame.contentWindow.postMessage(
+          { initialValue: JSON.stringify(initialValue) },
+          "*"
+        );
+        window.__clueRender.initialValuePosted = true;
+      }
+      clueFrame.addEventListener('load', sendInitialValueToEditor);
+    </script>
+  "
+`;

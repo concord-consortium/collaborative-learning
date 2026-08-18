@@ -4,22 +4,44 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
-import OpenAI from "openai";
+import OpenAI, { APIConnectionError } from "openai";
 import { VERSION as kOpenAiSdkVersion } from "openai/version";
 import type { IAiPrompt, RelatedSummary } from "../../../shared/ai-analysis-messages.js";
 import {
-  CorpusPaths, harnessRoot, readJsonFile, readManifest, readRepresentation, representationIsFresh,
-  representationPath
+  CorpusPaths, readJsonFile, readManifest, readRepresentation, representationIsFresh, representationPath
 } from "./corpus.js";
 import { CacheEntry, ResponseCache } from "./cache.js";
-import { CostCeilingExceeded, CostLedger, kRetries, priceTokens, worstCaseUsd } from "./cost.js";
-import { HarnessRequest, buildRequest, requestKeyFor, responseFormatFor } from "./messages.js";
+import {
+  CostCeilingExceeded, CostLedger, estimateImageTokens, kRetries, priceTokens, worstCaseUsd
+} from "./cost.js";
+import {
+  HarnessRequest, buildImageRequest, buildRequest, chatCompletionParams, requestKeyFor, responseFormatFor
+} from "./messages.js";
 import { getTextVariant } from "./represent-text.js";
 import {
-  ExperimentFile, ExperimentRun, ManifestDocument, ModelPricing, ResponseOriginMeta, ResultRow, RunMeta,
-  effectiveModality, kSchemaVersion, validatePromptFile, validateResultRow
+  dataUrlFor, imageRepresentationIsUsable, imageRepresentationPath, readImageEnvelope, resolveImageFile,
+  sha256Bytes, singleImageOf
+} from "./represent-image.js";
+import { readPngHeader } from "./png.js";
+import { createHash } from "node:crypto";
+import { git } from "./files.js";
+import { kDefaultRenderLimits } from "./backends/types.js";
+import { renderBackendIdentity } from "./backends/index.js";
+import {
+  ExperimentFile, ExperimentRun, ManifestDocument, ModelPricing, RepresentationDescriptor,
+  ResponseOriginMeta, ResultRow, RunMeta, effectiveModality, kResultSchemaVersion, kSchemaVersion,
+  validatePromptFile, validateResultRow
 } from "./schemas.js";
+
+/**
+ * Enough of the file to read the IHDR chunk; the rest is hashed and discarded.
+ *
+ * The hosted-image check is deliberately header-only. It never has the whole file in memory — the
+ * body streams past and only these leading bytes are kept — so it cannot run the truncation check
+ * that `readPngInfo` does. It does not need to: a body that stops early produces a different
+ * sha256, and the sha256 comparison below is the check that actually matters here.
+ */
+const kPngHeaderBytes = 64;
 
 export const kDefaultModel = "gpt-4o-mini";
 export const kDefaultConcurrency = 4;
@@ -27,15 +49,6 @@ export const kDefaultConcurrency = 4;
 // ---------------------------------------------------------------------------
 // Run metadata
 // ---------------------------------------------------------------------------
-
-function git(args: string[]): string | null {
-  try {
-    return execFileSync("git", args, { cwd: harnessRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
-      .trim();
-  } catch {
-    return null;
-  }
-}
 
 export function currentRunMeta(now: Date = new Date()): RunMeta {
   const status = git(["status", "--porcelain"]);
@@ -55,13 +68,34 @@ export interface RunTask {
   docId: string;
   runId: string;
   run: ExperimentRun;
+  /** The modality this row is grouped under — the override when there is one. */
   modality: ManifestDocument["computedModality"];
+  /** What the classifier said, recorded so a report can show where a human overrode it. */
+  computedModality: ManifestDocument["computedModality"];
   promptName: string;
   promptSha256: string;
   aiPrompt: IAiPrompt;
   request: HarnessRequest;
   requestKey: string;
   worstCaseUsd: number;
+  /**
+   * How many retries `worstCaseUsd` was reserved for. Carried on the task rather than read
+   * independently by the run loop: the two used to be separate reads of `options.retries`, with
+   * nothing tying them together, so a caller passing `retries: 5` to `buildTasks` and not to
+   * `runTasks` would reserve for three attempts and dispatch six. The invariant that makes
+   * `--max-cost` a bound is now code rather than convention.
+   */
+  retries: number;
+  /** What this row will record about where its input came from. */
+  representation: RepresentationDescriptor;
+  /** The image-token share of the input estimate; 0 for a text run. */
+  imageTokensEstimated: number;
+  /**
+   * Hosted images this task's request points at, each with the sha256 the envelope recorded for it.
+   * A local capture sends its bytes inline and has none. `run` checks these still serve exactly
+   * those pixels before it spends anything on the task.
+   */
+  hostedImages: { url: string; sha256: string }[];
 }
 
 export interface BuildTasksOptions {
@@ -85,6 +119,8 @@ export interface BuildTasksResult {
 export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
   const { corpusPaths: paths, experiment, promptsDir, pricing } = options;
   const model = options.model ?? kDefaultModel;
+  // Resolved once, stamped on every task, and read back per task when dispatching.
+  const retries = options.retries ?? kRetries;
   const manifest = readManifest(paths);
   const prompts = new Map<string, { aiPrompt: IAiPrompt; sha256: string }>();
 
@@ -98,48 +134,120 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
     return entry;
   };
 
+  const generationSettings = { max_completion_tokens: pricing.maxOutputTokens };
+
+  /** Everything a text-only run needs for one document. */
+  const textInput = (run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt) => {
+    const variant = getTextVariant(run.textVariant!);
+    const file = representationPath(paths, variant.id, document.id);
+    if (!fs.existsSync(file)) {
+      throw new Error(`Missing representation ${file}. Run: harness.ts represent --corpus ${manifest.name} ` +
+        `--variants ${variant.id}`);
+    }
+    const envelope = readRepresentation(file);
+    if (!representationIsFresh(envelope, {
+      docId: document.id,
+      variantId: variant.id,
+      contentSha256: document.contentSha256,
+      variantVersion: variant.variantVersion
+    })) {
+      throw new Error(`Stale or mismatched representation ${file} (it reports docId ` +
+        `"${envelope.docId}" / variant "${envelope.variantId}" at version ${envelope.variantVersion}). ` +
+        `Run: harness.ts represent --corpus ${manifest.name} --variants ${variant.id}`);
+    }
+    const request = buildRequest({
+      model,
+      aiPrompt,
+      message: run.message,
+      markdown: envelope.markdown,
+      relatedSummaries: document.relatedSummaries as unknown as RelatedSummary[],
+      generationSettings
+    });
+    const representation: RepresentationDescriptor = {
+      kind: "text",
+      variantId: variant.id,
+      variantVersion: variant.variantVersion,
+      sourceContentSha256: envelope.sourceContentSha256
+    };
+    return { request, representation, hostedImages: [] as { url: string; sha256: string }[] };
+  };
+
+  /** Everything an image-only run needs for one document. */
+  const imageInput = (run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt) => {
+    const modeId = run.imageMode!;
+    const backend = renderBackendIdentity(modeId);
+    const file = imageRepresentationPath(paths, modeId, document.id);
+    if (!fs.existsSync(file)) {
+      throw new Error(`Missing image representation ${file}. Run: harness.ts render --corpus ` +
+        `${manifest.name} --mode ${modeId}`);
+    }
+    const envelope = readImageEnvelope(file);
+    const usable = imageRepresentationIsUsable(envelope, {
+      docId: document.id,
+      modeId,
+      backendId: backend.backendId,
+      backendVersion: backend.backendVersion,
+      contentSha256: document.contentSha256
+    }, file);
+    if (!usable.fresh) {
+      throw new Error(`Stale or damaged image representation ${file}:\n  ${usable.reasons.join("\n  ")}\n` +
+        `Run: harness.ts render --corpus ${manifest.name} --mode ${modeId} --refresh`);
+    }
+
+    // Exactly one image, never the first of several — see singleImageOf.
+    const image = singleImageOf(envelope, file);
+    // A hosted render sends the URL production sends; a local capture sends its bytes inline, the
+    // way production's categorizeDocument() does with a local file.
+    const imageUrl = image.url ?? dataUrlFor(fs.readFileSync(resolveImageFile(file, image)));
+    const request = buildImageRequest({
+      model,
+      aiPrompt,
+      message: run.message,
+      imageUrl,
+      accounting: { sha256: image.sha256, widthPx: image.widthPx, heightPx: image.heightPx },
+      generationSettings
+    });
+    const representation: RepresentationDescriptor = {
+      kind: "image",
+      modeId,
+      backendId: envelope.backendId,
+      backendVersion: envelope.backendVersion,
+      renderTarget: envelope.renderTarget,
+      sourceContentSha256: envelope.sourceContentSha256,
+      imageSha256s: envelope.images.map((entry) => entry.sha256)
+    };
+    return {
+      request,
+      representation,
+      hostedImages: image.url ? [{ url: image.url, sha256: image.sha256 }] : []
+    };
+  };
+
   const tasks: RunTask[] = [];
   for (const run of experiment.runs) {
-    const variant = getTextVariant(run.textVariant);
     const { aiPrompt, sha256 } = loadPrompt(run.prompt);
     for (const document of manifest.documents) {
-      const file = representationPath(paths, variant.id, document.id);
-      if (!fs.existsSync(file)) {
-        throw new Error(`Missing representation ${file}. Run: harness.ts represent --corpus ${manifest.name} ` +
-          `--variants ${variant.id}`);
-      }
-      const envelope = readRepresentation(file);
-      if (!representationIsFresh(envelope, {
-        docId: document.id,
-        variantId: variant.id,
-        contentSha256: document.contentSha256,
-        variantVersion: variant.variantVersion
-      })) {
-        throw new Error(`Stale or mismatched representation ${file} (it reports docId ` +
-          `"${envelope.docId}" / variant "${envelope.variantId}" at version ${envelope.variantVersion}). ` +
-          `Run: harness.ts represent --corpus ${manifest.name} --variants ${variant.id}`);
-      }
-
-      const relatedSummaries = document.relatedSummaries as unknown as RelatedSummary[];
-      const request = buildRequest({
-        model,
-        aiPrompt,
-        message: run.message,
-        markdown: envelope.markdown,
-        relatedSummaries,
-        generationSettings: { max_completion_tokens: pricing.maxOutputTokens }
-      });
+      const { request, representation, hostedImages } = run.message === "text-only"
+        ? textInput(run, document, aiPrompt)
+        : imageInput(run, document, aiPrompt);
+      const imageTokensEstimated = request.inputAccounting.images
+        .reduce((total, image) => total + estimateImageTokens(image, pricing.imageTokens), 0);
       tasks.push({
         docId: document.id,
         runId: run.id,
         run,
         modality: effectiveModality(document),
+        computedModality: document.computedModality,
         promptName: run.prompt,
         promptSha256: sha256,
         aiPrompt,
         request,
         requestKey: requestKeyFor(request),
-        worstCaseUsd: worstCaseUsd(request, pricing, options.retries)
+        worstCaseUsd: worstCaseUsd(request, pricing, retries),
+        retries,
+        representation,
+        imageTokensEstimated,
+        hostedImages
       });
     }
   }
@@ -228,16 +336,41 @@ export function openAiCompletion(apiKey: string): CreateCompletion {
   // reservation forever.
   const client = new OpenAI({ apiKey, maxRetries: 0, timeout: 120_000 });
   return async ({ request, aiPrompt }) => {
-    const completion: any = await client.chat.completions.parse({
-      model: request.model,
-      messages: request.messages,
-      response_format: responseFormatFor(aiPrompt),
-      max_completion_tokens: request.generationSettings.max_completion_tokens
-    });
+    const responseFormat = responseFormatFor(aiPrompt);
+    // `create`, not `parse`. `parse` throws LengthFinishReasonError (and its content-filter sibling)
+    // from inside `parseChatCompletion` *before* it returns, whenever a choice's finish_reason is
+    // `length` or `content_filter`. Every request here sets max_completion_tokens, so hitting the cap
+    // is the likeliest way to get an unusable response — and with `parse` the throw landed in the
+    // retry loop's catch, producing an error row with no usage, no cost and no finish_reason. The
+    // response was billed; the row said nothing about it.
+    //
+    // Production parity is untouched, because parity is a property of the *request*, and the request
+    // is identical: `parse` is `create` plus a throwing parse step, which is done below instead.
+    //
+    // Only `apiRequest` is ever sent. `inputAccounting` travels beside it, for the cost model and the
+    // cache key, and must not leak into the payload.
+    const completion: any = await client.chat.completions.create({
+      ...chatCompletionParams(request),
+      response_format: responseFormat
+    } as any);
     const choice = completion.choices?.[0];
     const message = choice?.message ?? {};
+    // The same parse the SDK would have run, but only where it can succeed. A truncated or
+    // filtered completion falls through with `parsed: null`, which the run loop already handles as
+    // an "unparsed" error — and now that row carries what the call cost.
+    let parsed: unknown = null;
+    const unusableFinish = choice?.finish_reason === "length" || choice?.finish_reason === "content_filter";
+    if (!unusableFinish && typeof message.content === "string" && message.refusal == null) {
+      try {
+        parsed = responseFormat.$parseRaw(message.content);
+      } catch {
+        // Malformed JSON against a strict schema. Same outcome as a truncation: an unparsed row that
+        // still records its usage, rather than an error that loses it.
+        parsed = null;
+      }
+    }
     return {
-      parsed: message.parsed ?? null,
+      parsed,
       refusal: message.refusal ?? null,
       finish_reason: choice?.finish_reason ?? null,
       raw: completion,
@@ -254,20 +387,69 @@ export function openAiCompletion(apiKey: string): CreateCompletion {
   };
 }
 
-/** 429, 5xx and network failures are worth another try; nothing else is. */
+const kTransientCodes =
+  ["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN", "EPIPE", "ENOTFOUND"];
+
+/**
+ * 429, 5xx and network failures are worth another try; nothing else is.
+ *
+ * The `APIConnectionError` check has to come first, and cannot be replaced by the checks below it.
+ * The SDK wraps every network-level failure — DNS, socket reset, and this file's own 120s timeout —
+ * in `APIConnectionError` or `APIConnectionTimeoutError`, and those report `name: "Error"`,
+ * `status: undefined` and `code: undefined`, with the original code buried on `.cause`. Since
+ * `openAiCompletion` sets `maxRetries: 0` precisely so the harness owns retries, missing them meant
+ * a connection blip produced one attempt and an error row rather than the two retries the spec asks
+ * for.
+ */
 export function isTransientError(error: unknown): boolean {
+  if (error instanceof APIConnectionError) return true;
   const status = (error as any)?.status ?? (error as any)?.response?.status;
   // 408 request timeout and 409 conflict join 429 and 5xx: the SDK's own retry policy covered these,
-  // and A1 turned that off, so the harness's policy has to.
+  // and `openAiCompletion` sets maxRetries: 0, so the harness's policy has to.
   if (typeof status === "number") return [408, 409, 429].includes(status) || status >= 500;
-  const code = (error as any)?.code;
-  return typeof code === "string" &&
-    ["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN", "EPIPE", "ENOTFOUND"].includes(code);
+  // The wrapped cause as well as the top level: a raw Node error reaching here would carry `code`
+  // itself, but an SDK-wrapped one carries it one level down.
+  const code = (error as any)?.code ?? (error as any)?.cause?.code;
+  return typeof code === "string" && kTransientCodes.includes(code);
 }
 
 // ---------------------------------------------------------------------------
 // The run loop
 // ---------------------------------------------------------------------------
+
+/**
+ * Resume identity for one (document, run) outcome.
+ *
+ * It spans the corpus and the experiment definition as well as the request: without them, two
+ * corpora sharing a document id — or the same experiment edited between runs — would resume each
+ * other's rows, because the requestKey covers the request but not which corpus or experiment
+ * produced it.
+ *
+ * Exported so `run`'s `--no-cache` / `--refresh-cache` guard can ask the same question the run loop
+ * asks, rather than a looser one that happened to agree most of the time.
+ */
+export function resumeKeyFor(row: {
+  corpus: string; experimentSha256: string; docId: string; runId: string; requestKey: string | null;
+}): string {
+  return `${row.corpus}\u0001${row.experimentSha256}\u0001${row.docId}\u0001${row.runId}\u0001${row.requestKey}`;
+}
+
+/**
+ * A name for an error that actually distinguishes one failure from another.
+ *
+ * `(error as any).name` was always "Error": no SDK error class assigns `name`, so a rate limit, a
+ * bad request, a connection timeout and a truncated completion all recorded the same thing and the
+ * field told a reader nothing. The constructor name does the job, and the HTTP status goes with it
+ * where there is one.
+ */
+export function errorTypeOf(error: unknown): string {
+  const constructorName = (error as any)?.constructor?.name;
+  const base = typeof constructorName === "string" && constructorName.length > 0
+    ? constructorName
+    : (error as any)?.name ?? "Error";
+  const status = (error as any)?.status ?? (error as any)?.response?.status;
+  return typeof status === "number" ? `${base}(${status})` : base;
+}
 
 export interface RunOptions {
   corpus: string;
@@ -281,10 +463,113 @@ export interface RunOptions {
   runMeta: RunMeta;
   createCompletion: CreateCompletion;
   concurrency?: number;
-  retries?: number;
+  // No `retries` here on purpose. It lives on each RunTask, stamped by `buildTasks` when the
+  // reservation was computed, so the attempts dispatched and the attempts paid for cannot disagree.
+  // An option here would be silently ignored — the same trap in a new place.
   /** Overridden in tests so retries do not actually sleep. */
   sleep?: (ms: number) => Promise<void>;
   log?: (message: string) => void;
+  /**
+   * Confirms a hosted image still serves the pixels that were evaluated, returning null when it does
+   * and a reason when it does not. Overridden in tests; defaults to a real bounded download. Only
+   * ever called for tasks that point at one, so a local-capture or text run touches no network.
+   */
+  checkHostedImage?: HostedImageCheck;
+}
+
+/**
+ * A hosted render's URL is stored in the envelope and never rotates on its own, because reuse-if-fresh
+ * skips the Shutterbug call entirely. What happens in practice is that it quietly stops resolving
+ * while the envelope still looks perfectly valid — and the run then fails partway through, after
+ * money has been spent on the tasks that went first. Checking costs one HEAD request per distinct
+ * URL and turns that into a clear instruction before anything is dispatched.
+ */
+export type HostedImageCheck = (url: string, expectedSha256: string) => Promise<string | null>;
+
+/**
+ * Downloads a hosted image and confirms it is still the picture that was evaluated — returning null
+ * when it is, or a reason when it is not.
+ *
+ * Reachability is not enough. The request key, the cache entry and the row's provenance all use the
+ * sha256 captured when the image was rendered; if the URL later serves different pixels, a HEAD check
+ * passes, the model analyses the new image, and the answer is filed under the old hash. That would
+ * quietly break the one thing the cache key is supposed to guarantee.
+ *
+ * The body is hashed as it arrives and abandoned the moment it passes the encoded-size limit renders
+ * use, so a URL that has started serving something enormous fails instead of being read into memory.
+ */
+export function hostedImageCheck(
+  timeoutMs = 30_000, maxBytes = kDefaultRenderLimits.maxEncodedBytes
+): HostedImageCheck {
+  return async (url: string, expectedSha256: string) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { redirect: "follow", signal: controller.signal });
+      if (!response.ok) return `HTTP ${response.status} ${response.statusText}`;
+      const declared = Number(response.headers?.get?.("content-length") ?? NaN);
+      if (Number.isFinite(declared) && declared > maxBytes) {
+        return `declares ${declared} bytes, over the ${maxBytes} limit`;
+      }
+      // Iterated rather than buffered: `arrayBuffer()` reads the whole body first, so a response
+      // with no declared length would be pulled into memory in full before the limit was noticed.
+      const body = response.body as unknown as AsyncIterable<Uint8Array> | null;
+      if (!body) return "the response had no readable body";
+      const digest = createHash("sha256");
+      const head: Buffer[] = [];
+      let headBytes = 0;
+      let total = 0;
+      let overLimit = false;
+      try {
+        for await (const chunk of body) {
+          total += chunk.byteLength;
+          if (total > maxBytes) {
+            overLimit = true;
+            // Releases the socket rather than draining a body we have already rejected. It also
+            // makes the read throw, which is why this loop has its own catch: the outer one would
+            // report a deliberate abort as a timeout.
+            controller.abort();
+            break;
+          }
+          digest.update(chunk);
+          // Only the header is kept, for the PNG check; the rest is hashed and dropped.
+          if (headBytes < kPngHeaderBytes) {
+            head.push(Buffer.from(chunk));
+            headBytes += chunk.byteLength;
+          }
+        }
+      } catch (error) {
+        if (!overLimit) throw error;
+      }
+      if (overLimit) return `is over the ${maxBytes} limit`;
+      try {
+        readPngHeader(Buffer.concat(head), url);
+      } catch (error) {
+        return (error as Error).message;
+      }
+      const actual = digest.digest("hex");
+      return actual === expectedSha256
+        ? null
+        : `now serves different pixels (sha256 ${actual}, expected ${expectedSha256})`;
+    } catch (error) {
+      return controller.signal.aborted ? `timed out after ${timeoutMs}ms` : (error as Error).message;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+}
+
+export class HostedImageUnusable extends Error {
+  constructor(public readonly failures: { docId: string; runId: string; url: string; reason: string }[]) {
+    const listed = failures.slice(0, 5)
+      .map((failure) => `  ${failure.docId} (${failure.runId}): ${failure.url}\n    ${failure.reason}`)
+      .join("\n");
+    super(`${failures.length} hosted image(s) can no longer be evaluated as rendered:\n${listed}` +
+      `${failures.length > 5 ? `\n  …and ${failures.length - 5} more` : ""}\n` +
+      "Hosted renders expire, and a fresh envelope will not re-request one. Re-render with " +
+      "`harness.ts render --mode <mode> --refresh`. Nothing was dispatched.");
+    this.name = "HostedImageUnusable";
+  }
 }
 
 export interface RunSummary {
@@ -296,8 +581,16 @@ export interface RunSummary {
   stoppedOnCeiling: boolean;
   reservedPeakUsd: number;
   incurredUsd: number;
-  /** How far actual spend ended up past `--max-cost`, or 0. See the README on the enforced bound. */
+  /** How far *incurred* spend ended up past `--max-cost`, or 0. Usually 0 even when the run stopped. */
   overshootUsd: number;
+  /**
+   * How far the committed total — settled spend plus outstanding reservations — ended up past the
+   * ceiling. This is what `hasExceededCeiling` trips on, and it can be non-zero while `overshootUsd`
+   * is 0, which is the ordinary case for a run that stopped early.
+   */
+  committedOvershootUsd: number;
+  /** Tasks that were never dispatched because the run stopped. 0 when everything ran. */
+  notDispatched: number;
 }
 
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -307,7 +600,6 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
     corpus, experiment, experimentSha256, tasks, outputFile, ledger, cache, pricing, runMeta, createCompletion
   } = options;
   const concurrency = options.concurrency ?? kDefaultConcurrency;
-  const retries = options.retries ?? kRetries;
   const sleep = options.sleep ?? defaultSleep;
   const log = options.log ?? (() => undefined);
 
@@ -317,23 +609,20 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
   // Resume identity also spans the corpus and the experiment definition. Without them, two corpora
   // sharing a document id (or the same experiment edited between runs) would resume each other's
   // rows: the requestKey covers the request, but not which corpus or experiment produced it.
-  const resumeKey = (row: { corpus: string; experimentSha256: string; docId: string; runId: string;
-    requestKey: string | null }) =>
-    `${row.corpus}\u0001${row.experimentSha256}\u0001${row.docId}\u0001${row.runId}\u0001${row.requestKey}`;
   const completed = new Set<string>();
   for (const row of readResultRows(outputFile)) {
     if (row.status === "error" || row.requestKey === null) continue;
-    completed.add(resumeKey(row));
+    completed.add(resumeKeyFor(row));
   }
 
   const writer = new JsonlWriter(outputFile);
   const summary: RunSummary = {
     written: 0, resumed: 0, cacheHits: 0, apiCalls: 0, stoppedOnCeiling: false, reservedPeakUsd: 0,
-    incurredUsd: 0, overshootUsd: 0
+    incurredUsd: 0, overshootUsd: 0, committedOvershootUsd: 0, notDispatched: 0
   };
 
   const taskResumeKey = (task: RunTask) =>
-    resumeKey({ corpus, experimentSha256, docId: task.docId, runId: task.runId, requestKey: task.requestKey });
+    resumeKeyFor({ corpus, experimentSha256, docId: task.docId, runId: task.runId, requestKey: task.requestKey });
   const pending = tasks.filter((task) => {
     if (completed.has(taskResumeKey(task))) {
       summary.resumed += 1;
@@ -342,16 +631,41 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
     return true;
   });
 
+  // Before anything is dispatched, and only for tasks that actually point at a hosted image. A
+  // cache hit would not need the URL, but it is checked all the same: a run that half-succeeds on
+  // cached rows and then fails on the rest is worse to reason about than one that refuses up front.
+  const hostedImages = new Map(pending.flatMap((task) =>
+    task.hostedImages.map((image) => [`${image.url}\u0001${image.sha256}`, image] as const)));
+  if (hostedImages.size > 0) {
+    const check = options.checkHostedImage ?? hostedImageCheck();
+    const reasons = new Map(await Promise.all([...hostedImages].map(async ([key, image]) =>
+      [key, await check(image.url, image.sha256)] as const)));
+    const failures = pending.flatMap((task) => task.hostedImages
+      .map((image) => ({ image, reason: reasons.get(`${image.url}\u0001${image.sha256}`) }))
+      .filter((checked) => checked.reason != null)
+      .map((checked) => ({
+        docId: task.docId, runId: task.runId, url: checked.image.url, reason: checked.reason!
+      })));
+    if (failures.length > 0) throw new HostedImageUnusable(failures);
+    log(`Verified ${hostedImages.size} hosted image(s) still serve the pixels that were rendered.`);
+  }
+
   const common = (task: RunTask) => ({
-    schemaVersion: kSchemaVersion,
+    schemaVersion: kResultSchemaVersion,
     experiment: experiment.name,
     experimentSha256,
     runId: task.runId,
     corpus,
     docId: task.docId,
     modality: task.modality,
+    computedModality: task.computedModality,
     message: task.run.message,
-    textVariant: task.run.textVariant,
+    representation: task.representation,
+    // Only on rows that actually sent a picture, so the report's image column never shows a number
+    // belonging to nothing.
+    ...(task.representation.kind === "image"
+      ? { promptImageTokensEstimated: task.imageTokensEstimated }
+      : {}),
     prompt: { name: task.promptName, sha256: task.promptSha256 },
     requestKey: task.requestKey,
     runMeta
@@ -389,15 +703,22 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
   const worker = async (): Promise<void> => {
     for (;;) {
       if (stopped) return;
+      const index = next++;
+      // Checked before the ceiling, not after. The other way round, the worker that wrote the final
+      // row came back for one more turn, found the ledger over its ceiling and set stoppedOnCeiling
+      // — so a run that completed every task still reported stopping early.
+      if (index >= pending.length) return;
       if (ledger.hasExceededCeiling) {
         stopped = true;
         summary.stoppedOnCeiling = true;
-        log(`Actual spend has passed the --max-cost ceiling by $${ledger.overshootUsd.toFixed(4)}; ` +
-          "no further requests were dispatched.");
+        // Worded from incurred spend, because that is what "spend" means to a reader. The ledger
+        // trips on the committed total (settled plus outstanding reservations), which is the right
+        // thing to stop on but is not money out of the door.
+        log(`Spend has reached the --max-cost ceiling: $${ledger.incurredUsd.toFixed(4)} incurred ` +
+          `against a $${ledger.maxCostUsd.toFixed(4)} ceiling, with $${ledger.committedUsd.toFixed(4)} ` +
+          "committed once outstanding reservations are counted. No further requests were dispatched.");
         return;
       }
-      const index = next++;
-      if (index >= pending.length) return;
       const task = pending[index];
 
       const cached = cache.get(task.requestKey);
@@ -422,6 +743,8 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
         throw error;
       }
 
+      // From the task, so the number of attempts dispatched is the number the reservation paid for.
+      const retries = task.retries;
       let attempts = 0;
       let lastError: unknown;
       let result: CompletionResult | undefined;
@@ -442,14 +765,18 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
 
       if (!result) {
         // The request went out, so the provider may have billed for it even though nothing usable
-        // came back. Charging its single-attempt share is honest in the direction that matters: a
-        // long run of failures must not look free. Errors are never cached.
+        // came back. It is charged one attempt's share of the reservation per attempt dispatched —
+        // the whole reservation when every attempt was used — which is honest in the direction that
+        // matters: a long run of failures must not look free. Errors are never cached.
         ledger.settleFailedAttempt(reservation, attempts, 1 + retries);
         await writer.write({
           ...common(task),
           status: "error",
           error: {
-            type: (lastError as any)?.name ?? "Error",
+            // The constructor name, not `.name`: no SDK error class assigns `name`, so a 429, a
+            // 400, a timeout and a truncation all recorded "Error" and the field distinguished
+            // nothing. The status goes in too, where there is one.
+            type: errorTypeOf(lastError),
             message: (lastError as Error)?.message ?? String(lastError),
             attempts
           }
@@ -518,6 +845,12 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
 
   summary.reservedPeakUsd = ledger.reservedPeakUsd;
   summary.incurredUsd = ledger.incurredUsd;
-  summary.overshootUsd = ledger.overshootUsd;
+  summary.overshootUsd = Math.max(0, ledger.incurredUsd - ledger.maxCostUsd);
+  summary.committedOvershootUsd = ledger.overshootUsd;
+  // Counted from what is left rather than tracked as we go, so it is right however the run ended.
+  // `written` already includes cache hits — a hit writes a row — so subtracting `cacheHits` as well
+  // double-counted them, under-reporting the skipped work and, with enough hits, driving this to 0
+  // and suppressing the "stopped early" message for a run that really did stop.
+  summary.notDispatched = Math.max(0, pending.length - summary.written);
   return summary;
 }
