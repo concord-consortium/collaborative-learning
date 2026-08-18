@@ -1,10 +1,12 @@
-import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
 import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-data";
 import { brainwavesGripperValues } from "../../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
+import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { VariableSlider } from "@concord-consortium/diagram-view";
 import { SelectionButton } from "../../components/ui/selection-button";
+import { logSimulatorVariableChange } from "../../simulator-logging";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
 import { kVolatileVariableLabel } from "../../../shared-variables/variable-labels";
@@ -12,8 +14,6 @@ import {
   arduinoFrames, armFrames, gripperFrames, panFrames, steamFrames, temperatureGripperFrames
 } from "./brainwaves-gripper-assets";
 
-// We shouldn't need to import the rc-slider css, but for some reason we do.
-import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
 // Variable names
@@ -105,8 +105,16 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
 }
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
+  const { tile } = useTileModelContext();
   const modeVariable = findVariable(simulationModeKey, variables);
   const targetEMGVariable = findVariable(targetEMGKey, variables);
+
+  const selectMode = (mode: number, label: string) => {
+    modeVariable?.setValue(mode);
+    if (tile?.id && modeVariable) {
+      logSimulatorVariableChange(tile.id, modeVariable, variables, label);
+    }
+  };
 
   return (
     <div className="bwg-component">
@@ -123,6 +131,9 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
             min={40}
             step={40}
             variable={targetEMGVariable}
+            onChangeComplete={(variable) => {
+              if (tile?.id) logSimulatorVariableChange(tile.id, variable, variables);
+            }}
           />
           <div className="slider-labels">
             <div className="open">relaxed</div>
@@ -131,14 +142,14 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
         </div>
         <div className="mode-selection-container">
           <SelectionButton
-            onClick={() => modeVariable?.setValue(simulationModePressure)}
+            onClick={() => selectMode(simulationModePressure, "Pressure")}
             position="left"
             selected={modeVariable?.currentValue === simulationModePressure}
           >
             Pressure
           </SelectionButton>
           <SelectionButton
-            onClick={() => modeVariable?.setValue(simulationModeTemperature)}
+            onClick={() => selectMode(simulationModeTemperature, "Temperature")}
             position="right"
             selected={modeVariable?.currentValue === simulationModeTemperature}
           >
