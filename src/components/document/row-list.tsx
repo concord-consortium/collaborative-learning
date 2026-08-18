@@ -38,6 +38,14 @@ export const RowListComponent = observer((props: IProps) => {
     console.warn("RowListComponent: duplicate row ids in rowOrder — rows will be dropped on render",
       { docId, duplicateRowIds });
   }
+  // Also: a rowId in rowOrder with no entry in rowMap renders `null` below (no `.tile-row`), which
+  // would drop rows without any duplicate key. Report it with the total count so we can see whether
+  // the model actually has all the expected rows (the tiles_copy "32 vs 22" question).
+  const orphanRowIds = rowOrder.filter(rowId => !rowMap.get(rowId));
+  if (orphanRowIds.length > 0) {
+    console.warn("RowListComponent: rowOrder ids missing from rowMap — these render nothing",
+      { docId, rowOrderCount: rowOrder.length, rowMapSize: rowMap.size, orphanRowIds });
+  }
 
   return (
     <>
