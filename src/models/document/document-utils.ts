@@ -11,6 +11,7 @@ import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
 import { getDocumentTitle } from "./document-kinds";
+import { getDocumentIdentityParams } from "./log-document-event";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
 
@@ -94,15 +95,19 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
 }
 
 /**
- * Identifies a document's content for logging, in the form the log helpers expect: `document` for a
- * saved document, `curriculum` (the section path) for curriculum section content. Pass the result to
- * `logDocumentOrCurriculumEvent`, which expands it into that family's canonical fields.
+ * Identifies a document's content for logging: the canonical identity fields for a saved document,
+ * or `curriculum` (the section path) for curriculum section content. Pass the result to
+ * `logDocumentOrCurriculumEvent`, which expands the section path into its facet/section fields and
+ * passes the already-named document fields through.
+ *
+ * This carries identity only. An event that reports on the document's *content* should pass
+ * `{ document }` instead, so `logDocumentEvent` can add the properties/visibility/history fields.
  */
 export function getDocumentLogParams(content?: DocumentContentModelType): Record<string, any> {
   if (!content) return {};
   const parent = getParent(content);
   return Object.hasOwn(parent, "key")
-          ? { document: parent as DocumentModelType }
+          ? getDocumentIdentityParams(parent as DocumentModelType)
           : { curriculum: getSectionPath(parent as SectionModelType) };
 }
 

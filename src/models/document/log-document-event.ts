@@ -90,15 +90,27 @@ export function setTargetDocumentProperties(
   }
 }
 
+/**
+ * The fields that say *which* document an event is about. Events that describe something other than
+ * the document's content — where it sits on screen, say — can log these on their own and skip the
+ * state fields that `logDocumentEvent` adds.
+ */
+export function getDocumentIdentityParams(
+  document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel
+) {
+  return {
+    documentUid: document.uid,
+    documentKey: document.key,
+    documentType: document.type,
+    documentTitle: document.title || ""
+  };
+}
+
 function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContext) {
   const { document, targetDocument, ...others } = params;
   const documentProps = getAllDocumentProperties(document, user);
 
   const {
-    uid: documentUid,
-    key: documentKey,
-    type: documentType,
-    title: documentTitle,
     properties: documentProperties,
     visibility: documentVisibility,
     changes: documentChanges,
@@ -107,10 +119,7 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContex
   } = documentProps;
 
   const result = {
-    documentUid,
-    documentKey,
-    documentType,
-    documentTitle,
+    ...getDocumentIdentityParams(document),
     documentProperties,
     documentVisibility,
     documentChanges,
