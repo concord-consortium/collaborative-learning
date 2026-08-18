@@ -24,6 +24,21 @@ export const RowListComponent = observer((props: IProps) => {
   const dropRowInfo = useContext(DropRowContext);
   const rowRefs = useContext(RowRefsContext);
 
+  // CLUE-615/tiles_copy diagnostic: React silently drops list children that share a `key`, so a
+  // duplicate row id in rowOrder renders fewer `.tile-row` elements than exist — a candidate cause
+  // of the flaky "32 rows but got 22" copy-to-workspace regression. Warn (naming the duplicates) so
+  // the next CI failure is diagnosable. Fires only when duplicates exist; log-only, no behavior change.
+  const seenRowIds = new Set<string>();
+  const duplicateRowIds: string[] = [];
+  for (const rowId of rowOrder) {
+    if (seenRowIds.has(rowId)) duplicateRowIds.push(rowId);
+    else seenRowIds.add(rowId);
+  }
+  if (duplicateRowIds.length > 0) {
+    console.warn("RowListComponent: duplicate row ids in rowOrder — rows will be dropped on render",
+      { docId, duplicateRowIds });
+  }
+
   return (
     <>
       {rowOrder.map((rowId, index) => {
