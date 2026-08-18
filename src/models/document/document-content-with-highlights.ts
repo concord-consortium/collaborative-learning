@@ -19,11 +19,6 @@ import {
  * "look here" without arming anything, and it must render in read-only documents, 4-up cells
  * and thumbnails. A highlight also has to outlive the user's next click, or acting on the
  * guidance would destroy it.
- *
- * Some scaffolding here has no production caller yet and is intentional, not dead code:
- * `IHighlightTarget.objectType` is populated but never read, and the "object" reference kind
- * has no production producer. Both exist for AI-emitted references (see docs/highlights.md),
- * which point at a single object directly rather than resolving a variable across tiles.
  */
 
 /** The two states a highlighted object can be rendered in. */
@@ -70,7 +65,8 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
       return new Set(targets.map(target => highlightTargetKey(target.tileId, target.objectId)));
     });
 
-    function isObjectHighlighted(tileId: string, objectId: string) {
+    function isObjectHighlighted(tileId?: string, objectId?: string) {
+      if (!tileId || !objectId) return false;
       return highlightedTargetKeys.get().has(highlightTargetKey(tileId, objectId));
     }
 
@@ -81,7 +77,7 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
        * a time. This can never return "pinned" for one object while returning "preview" for
        * another in the same render.
        */
-      objectHighlightState(tileId: string, objectId: string): HighlightState | undefined {
+      objectHighlightState(tileId?: string, objectId?: string): HighlightState | undefined {
         return isObjectHighlighted(tileId, objectId) ? self.highlightState : undefined;
       },
     };

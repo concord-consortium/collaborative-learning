@@ -3,9 +3,9 @@ import {
   resolveHighlightReference, sameHighlightReference
 } from "./highlight-reference";
 
-// The resolvers take the document content model, but the object resolver never reads it, so a
-// bare cast keeps this file free of MST setup. The variable resolver, which does read it, gets
-// real document content in its own describe block below.
+// Resolvers take the document content model, but the object resolver never reads it, so a bare
+// cast keeps this file free of MST setup. The variable resolver, which does read it, is
+// registered by the shared-variables plugin and tested there.
 const noContent = {} as any;
 
 describe("highlightTargetKey", () => {
@@ -39,57 +39,6 @@ describe("sameHighlightReference", () => {
       { kind: "object", tileId: "t1", objectId: "v1" },
       { kind: "variable", variableId: "v1" }
     )).toBe(false);
-  });
-});
-
-describe("the variable resolver", () => {
-  // A minimal stand-in for the content model. The resolver only walks tileMap and calls
-  // getObjectsForVariable, so this is the entire surface it touches.
-  const contentWithTiles = (tiles: Array<{ id: string; objects?: any[] }>) => ({
-    tileMap: new Map(tiles.map(t => [t.id, {
-      id: t.id,
-      content: t.objects
-        ? { getObjectsForVariable: () => t.objects }
-        : {} // a tile that does not implement the hook at all
-    }]))
-  }) as any;
-
-  it("collects objects from every tile that implements the hook", () => {
-    const content = contentWithTiles([
-      { id: "df1", objects: [{ objectId: "n1", objectType: "Node" }] },
-      { id: "df2", objects: [{ objectId: "n2", objectType: "Node" }] }
-    ]);
-    expect(resolveHighlightReference({ kind: "variable", variableId: "v1" }, content)).toEqual([
-      { tileId: "df1", objectId: "n1", objectType: "Node" },
-      { tileId: "df2", objectId: "n2", objectType: "Node" }
-    ]);
-  });
-
-  it("skips tiles that do not implement the hook", () => {
-    const content = contentWithTiles([
-      { id: "text1" },
-      { id: "df1", objects: [{ objectId: "n1", objectType: "Node" }] }
-    ]);
-    expect(resolveHighlightReference({ kind: "variable", variableId: "v1" }, content))
-      .toEqual([{ tileId: "df1", objectId: "n1", objectType: "Node" }]);
-  });
-
-  it("returns [] when no tile has a matching object", () => {
-    const content = contentWithTiles([{ id: "df1", objects: [] }]);
-    expect(resolveHighlightReference({ kind: "variable", variableId: "v1" }, content)).toEqual([]);
-  });
-
-  // Self-healing: resolution is re-run against current state every time, so a target that
-  // disappears simply stops being returned. This is why a deleted node cannot leave a stale
-  // highlight behind — unlike sparrows, which orphan because deleteTile never touches
-  // `annotations` (base-document-content.ts:950-984).
-  it("drops targets that no longer exist", () => {
-    const objects = [{ objectId: "n1", objectType: "Node" }];
-    const content = contentWithTiles([{ id: "df1", objects }]);
-    expect(resolveHighlightReference({ kind: "variable", variableId: "v1" }, content)).toHaveLength(1);
-
-    objects.length = 0;   // the node was deleted from the program
-    expect(resolveHighlightReference({ kind: "variable", variableId: "v1" }, content)).toEqual([]);
   });
 });
 

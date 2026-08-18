@@ -37,8 +37,11 @@ type HighlightReference =
   resolve to objects across several tiles. Note it carries no `tileId` — that is why the type
   is not called `TileReference`.
 
-A registry maps each `kind` to a resolver that turns a reference into `IHighlightTarget[]`
-(`{tileId, objectId, objectType?}`). Resolvers register themselves as a module side effect.
+A registry maps each `kind` to a resolver that turns a reference into `IHighlightTarget[]` — an
+alias of the annotation system's `IClueObjectSnapshot`, so the two addressing schemes cannot drift
+apart. Resolvers register themselves as a module side effect, and a resolver belongs wherever its
+kind's knowledge lives: the `object` resolver is here, but the `variable` one is registered by
+`shared-variables-registration.ts`, so core never has to know what a variable is.
 `resolveHighlightReference` fails quiet: an unknown kind or an unresolvable reference yields
 no targets and no error.
 
@@ -124,9 +127,10 @@ A consequence worth knowing: **renaming a variable silently breaks its associati
 nodes that use it.** That is pre-existing behavior of the binding, not of highlights, and it is
 pinned down by a test so it cannot regress unnoticed.
 
-Note that roughly half the registered tile content models do not route through
-`tileContentAPIViews`, so `getObjectsForVariable` is genuinely `undefined` on them rather than
-a no-op default. The variable resolver's optional call is load-bearing; do not "simplify" it.
+A tile that never implements this still answers it. `TileContentModel` itself calls
+`tileContentAPIViews({})` (`tile-content.ts`, "add empty apis so they are available on the generic
+type"), and every registered content model extends it, so the default returning `[]` is always
+present. The resolver can therefore call the hook directly — no optional call, no cast.
 
 ## Highlight state
 

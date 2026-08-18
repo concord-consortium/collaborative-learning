@@ -52,7 +52,6 @@ export class VariablesPlugin implements ITextPlugin {
   private previousVariableIds: Set<string> = new Set();
   private chipBoxesCacheTick = observable({ count: 0 });
   private stores: IStores | undefined;
-  // Read by the chip component so it can ask the document whether it is highlighted.
   tileId: string | undefined;
   // Bumped when variable chips are added to or removed from the Slate editor. Read by
   // the variables plugin's `getAnnotatableObjects` so `annotatableObjects` re-evaluates
@@ -346,10 +345,7 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   // Keep this read in the render body: objectHighlightState is memoized only while a reaction
   // observes it. The chip's objectId is its variable id, which is what makes it reachable both by
   // a variable reference and by a direct object reference. See docs/highlights.md.
-  const tileId = variablesPlugin?.tileId;
-  const emphasis = tileId && reference
-    ? documentContent?.objectHighlightState(tileId, reference)
-    : undefined;
+  const emphasis = documentContent?.objectHighlightState(variablesPlugin?.tileId, reference);
 
   // React does not fire onMouseLeave for an element that unmounts out from under the cursor
   // (e.g. Backspace deletes the chip while it's hovered), and a pinned highlight can only be

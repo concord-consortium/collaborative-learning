@@ -1,6 +1,7 @@
 import { Editor } from "@concord-consortium/slate-editor";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
 import { IClueTileObject } from "../../models/annotations/clue-object";
+import { IHighlightTarget, registerReferenceResolver } from "../../models/highlights/highlight-reference";
 import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { TextContentModelType } from "../../models/tiles/text/text-content";
@@ -130,3 +131,19 @@ registerGraphSharedModelUpdateFunction(
     }
   }
 );
+
+/**
+ * Resolves a variable reference to every object bound to that variable, across all tiles. Lives
+ * here rather than in the highlight core so core code does not have to know what a variable is;
+ * each tile answers for itself via getObjectsForVariable.
+ */
+registerReferenceResolver("variable", (ref, content) => {
+  if (ref.kind !== "variable") return [];
+  const targets: IHighlightTarget[] = [];
+  content.tileMap.forEach(tile => {
+    tile.content.getObjectsForVariable(ref.variableId).forEach(object => {
+      targets.push({ tileId: tile.id, objectId: object.objectId, objectType: object.objectType });
+    });
+  });
+  return targets;
+});
