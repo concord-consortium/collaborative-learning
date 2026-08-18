@@ -4,8 +4,8 @@ import { demoStreams } from "../../../../../shared/assets/data/dataflow/demo-dat
 import { brainwavesGripperValues } from "../../../../../shared/simulations/brainwaves-gripper/brainwaves-gripper";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { VariableSlider } from "@concord-consortium/diagram-view";
 import { SelectionButton } from "../../components/ui/selection-button";
-import { SimulatorSlider } from "../../components/ui/simulator-slider";
 import { logSimulatorVariableChange } from "../../simulator-logging";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
@@ -125,12 +125,15 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
       />
       <div className="controls">
         <div className="slider-wrapper">
-          <SimulatorSlider
+          <VariableSlider
             className="emg-slider"
             max={440}
             min={40}
             step={40}
             variable={targetEMGVariable}
+            onChangeComplete={(variable) => {
+              if (tile?.id) logSimulatorVariableChange(tile.id, variable, variables);
+            }}
           />
           <div className="slider-labels">
             <div className="open">relaxed</div>
