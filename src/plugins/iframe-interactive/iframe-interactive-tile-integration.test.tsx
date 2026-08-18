@@ -133,6 +133,26 @@ describe("IframeInteractiveComponent Integration Tests", () => {
     }, { timeout: 1000 });
   });
 
+  it("does not persist or log interactive state in read-only mode", async () => {
+    // In read-only/report mode a teacher's view must not persist or log the student's state — that
+    // would attribute a phantom answer-change to the teacher's uid. The listener is still registered,
+    // but debouncedSetState returns early, so the content is never written.
+    const props = createDefaultProps();
+    props.readOnly = true;
+    render(<IframeInteractiveComponent {...props} />);
+
+    await waitFor(() => {
+      expect(listeners.interactiveState).toBeDefined();
+    });
+
+    listeners.interactiveState({ answer: "phantom" });
+
+    // Give the 500ms debounce time to (not) fire, then assert the phantom state was never persisted —
+    // interactiveState remains the empty default rather than the delivered value.
+    await new Promise(resolve => setTimeout(resolve, 700));
+    expect((props.model.content as any).interactiveState).toEqual({});
+  });
+
   it("polls for interactive state every 2 seconds", async () => {
     jest.useFakeTimers();
     const props = createDefaultProps();

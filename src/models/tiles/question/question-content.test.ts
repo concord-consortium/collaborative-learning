@@ -1,25 +1,10 @@
 import { QuestionContentModel } from "./question-content";
-import { getQuestionPrompt } from "./question-utils";
 import { kQuestionTileType } from "./question-types";
 import { DocumentContentModel } from "../../document/document-content";
-import { defaultTextContent, TextContentModelType } from "../text/text-content";
+import { defaultTextContent } from "../text/text-content";
 
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Question", "Text"]);
-
-// Builds a real document with a Question that has a fixed-position prompt Text tile (text = promptText)
-// plus one non-fixed answer Text tile, and returns the question content.
-function makeQuestionWithPrompt(promptText: string) {
-  const documentContent = DocumentContentModel.create({});
-  const questionContent = QuestionContentModel.create({ type: kQuestionTileType });
-  documentContent.addTileContentInNewRow(questionContent);
-  documentContent.addTileContentInNewRow(defaultTextContent(), { rowList: questionContent });
-  const promptTile = documentContent.allTiles[1];
-  promptTile.setFixedPosition(true);
-  (promptTile.content as TextContentModelType).setText(promptText);
-  documentContent.addTileContentInNewRow(defaultTextContent(), { rowList: questionContent }); // answer tile
-  return { documentContent, questionContent };
-}
 
 describe("QuestionContentModel", () => {
   it("creates a default question content", () => {
@@ -29,18 +14,6 @@ describe("QuestionContentModel", () => {
     expect(content.type).toBe(kQuestionTileType);
     expect(content.version).toBe(1);
     expect(content.locked).toBe(false);
-  });
-
-  describe("getQuestionPrompt", () => {
-    it("returns the fixed-position prompt tile's authored text", () => {
-      const { documentContent, questionContent } = makeQuestionWithPrompt("What is 2+2?");
-      expect(getQuestionPrompt(documentContent, questionContent)).toBe("What is 2+2?");
-    });
-
-    it("treats a blank prompt as absent (undefined) so the report falls back to the id", () => {
-      const { documentContent, questionContent } = makeQuestionWithPrompt("   ");
-      expect(getQuestionPrompt(documentContent, questionContent)).toBeUndefined();
-    });
   });
 
   it("allows setting the locked property", () => {

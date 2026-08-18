@@ -761,13 +761,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
                 };
               result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
             }
-          } else {
-            // CLUE-615/tiles_copy: a copied tile whose serialized content is empty/unparseable is
-            // silently dropped here (no row created). Log it so an intermittent short copy (e.g. the
-            // flaky "32 rows but got 22" regression) names the culprit instead of vanishing.
-            console.warn(
-              "copyTilesIntoExistingRow: skipped a copied tile with no content (missing from the copy)",
-              { originalTileId: tile.tileId, newTileId: tile.newTileId, hadSerializedContent: !!tile.tileContent });
           }
           results.push(result);
         });
@@ -819,13 +812,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
                 result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
               }
             }
-          } else {
-            // CLUE-615/tiles_copy: a copied tile whose serialized content is empty/unparseable is
-            // silently dropped here (no row created). Log it so an intermittent short copy (e.g. the
-            // flaky "32 rows but got 22" regression) names the culprit instead of vanishing.
-            console.warn(
-              "copyTilesIntoNewRows: skipped a copied tile with no content (missing from the copy)",
-              { originalTileId: tile.tileId, newTileId: tile.newTileId, hadSerializedContent: !!tile.tileContent });
           }
           results.push(result);
         });

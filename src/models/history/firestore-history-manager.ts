@@ -289,11 +289,19 @@ export class FirestoreHistoryManager {
   }
 
   async moveToHistoryEntryAfterLoad(historyId: string) {
-    await when(() => this.historyStatus === HistoryStatus.HISTORY_LOADED);
-    // logDocumentEvent emits the "first" sentinel for a change made before the document had any history
-    // entry (a student's first change). It never resolves via findHistoryEntryIndex; treat it as
-    // position 0 — before any history entry is applied — matching how a resolved id maps to the position
-    // before its entry (the same off-by-one CLUE-613 addresses), so first-change playback links land.
+    // Wait for history loading to reach a terminal status. Waiting only for HISTORY_LOADED would never
+    // settle — leaking this promise and its MobX reaction — when the document is NO_HISTORY or hit
+    // HISTORY_ERROR, and NO_HISTORY is exactly the case the "first" sentinel below is emitted for.
+    await when(() =>
+      this.historyStatus === HistoryStatus.HISTORY_LOADED ||
+      this.historyStatus === HistoryStatus.NO_HISTORY ||
+      this.historyStatus === HistoryStatus.HISTORY_ERROR);
+    if (this.historyStatus !== HistoryStatus.HISTORY_LOADED) {
+      console.warn("moveToHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
+      return;
+    }
+    // "first" is the sentinel logDocumentEvent emits for a change made before the document had any
+    // history entry, so it never resolves via findHistoryEntryIndex; it maps to position 0.
     const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
     if (entry >= 0) {
       this.treeManager.goToHistoryEntry(entry);

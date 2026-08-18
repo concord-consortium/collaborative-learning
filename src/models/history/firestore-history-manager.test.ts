@@ -348,6 +348,18 @@ describe("history loading", () => {
           expect(goToSpy).not.toHaveBeenCalled();
           expect(warnSpy).toHaveBeenCalled();
         });
+
+        it("resolves (rather than hanging) and warns when the document has no history", async () => {
+          // NO_HISTORY is a terminal status, so the when() must settle; waiting only for HISTORY_LOADED
+          // would leak the promise. This is the case the "first" sentinel is most likely to hit.
+          const { treeManager, historyManager } = await mirrorMockHistory({ entries: [] });
+          expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
+          const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+          const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+          await historyManager.moveToHistoryEntryAfterLoad("first");
+          expect(goToSpy).not.toHaveBeenCalled();
+          expect(warnSpy).toHaveBeenCalled();
+        });
       });
 
     });

@@ -16,10 +16,17 @@ interface IContext extends Record<string, any> {
   networkDocuments: DocumentsModelType;
 }
 
-function processTileChangeEvent(params: ITileChangeLogEvent, context: IContext) {
+function processTileChangeEvent(params: ITileChangeLogEvent, context?: IContext) {
   const { tileId, operation, change, ...others } = params;
-  const document = context.documents.findDocumentOfTile(tileId) ||
-                    context.networkDocuments.findDocumentOfTile(tileId);
+  // context (Logger.stores) is undefined before initializeLogger runs — e.g. an iframe posting its
+  // state from a setTimeout on load. Stay null-safe and fall through to the un-enriched Logger.log
+  // (isTileBaseEvent returns false for a null document) instead of throwing inside that callback.
+  const document = context?.documents?.findDocumentOfTile(tileId) ||
+                    context?.networkDocuments?.findDocumentOfTile(tileId);
+  if (!document) {
+    // Make the un-enriched path observable: no sectionId/tileTitle/containerIds/QUESTION_ANSWERS_CHANGE.
+    console.warn(`logTileChangeEvent: no document found for tile ${tileId}; logging without enrichment`);
+  }
   const legacyChangeProps = { toolId: tileId, operation, ...change };
   const tileTitle = getTileTitleForLogging(tileId, document);
   return { document, tileId, ...legacyChangeProps, tileTitle, ...others };

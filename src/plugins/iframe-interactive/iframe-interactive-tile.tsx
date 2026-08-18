@@ -96,9 +96,7 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T &
   return debounced;
 }
 
-interface IIframeInteractiveComponentProps extends ITileProps {
-  // Note: onLog and onHintChange removed - will use Logger directly
-}
+type IIframeInteractiveComponentProps = ITileProps;
 
 // Error Boundary for tile isolation
 class IframeInteractiveErrorBoundary extends React.Component<
@@ -195,17 +193,22 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   // Interactive controls (sliders, text inputs) can send updates very frequently
   const debouncedSetState = useMemo(
     () => debounce((state: any) => {
+      // In read-only/report mode (e.g. a teacher viewing a student's document in the dashboard or 4-up)
+      // the interactive can still post its state on load. Persisting or logging it would attribute a
+      // phantom answer-change to the teacher's uid, corrupting the report — so do nothing when read-only.
+      if (readOnly) return;
       contentRef.current?.setInteractiveState(state);
-      // The persisted interactive state is the student's answer. Log it via logTileChangeEvent (like
-      // every other tile) so the event is enriched and the report can link/separate iframe work. This
-      // is the real answer signal — the "log" listener below carries analytics breadcrumbs, not state.
+      // The persisted interactive state is the student's answer, so it is logged as a tile change (the
+      // "log" listener below carries analytics breadcrumbs, not state). tileType matches the breadcrumb
+      // payload so consumers can key on it consistently across both shapes of this event.
       logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
         tileId: model.id,
+        tileType: "IframeInteractive",
         operation: "setInteractiveState",
         change: { interactiveState: state }
       });
     }, 500), // 500ms debounce
-    [model.id]
+    [model.id, readOnly]
   );
 
   // Action to handle incoming interactive state with debouncing
@@ -357,9 +360,7 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         }
       });
 
-      // Log messages from the interactive are analytics breadcrumbs (button clicked, hint viewed), not
-      // state changes, so they stay on the un-enriched Logger.log path. The student's answer change is
-      // logged from debouncedSetState above.
+      // These are analytics breadcrumbs (button clicked, hint viewed), not a state change.
       phone.addListener("log", (logData: any) => {
         Logger.log(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
           tileId: model.id,

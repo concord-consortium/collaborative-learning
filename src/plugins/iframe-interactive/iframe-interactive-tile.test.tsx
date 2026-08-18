@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
@@ -310,17 +310,24 @@ describe("IframeInteractiveComponent", () => {
     const initInteractive = iframePhone.ParentEndpoint.mock.calls.at(-1)[1];
     initInteractive();
 
-    // Deliver a new interactive state; the enriched log fires from the debounced state setter.
+    // Deliver a new interactive state; the enriched log fires from the debounced state setter. Wrap the
+    // debounce flush in act() so the resulting observer re-render is flushed inside the test.
     const phone = iframePhone.ParentEndpoint.mock.results.at(-1).value;
     const stateHandler = phone.addListener.mock.calls.find((c: any[]) => c[0] === "interactiveState")[1];
-    stateHandler({ answer: "42" });
-    jest.advanceTimersByTime(500); // flush the 500ms debounce
+    act(() => {
+      stateHandler({ answer: "42" });
+      jest.advanceTimersByTime(500); // flush the 500ms debounce
+    });
 
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
       tileId: props.model.id,
+      tileType: "IframeInteractive",
       operation: "setInteractiveState",
       change: { interactiveState: { answer: "42" } }
     });
+  });
+
+  afterEach(() => {
     jest.useRealTimers();
   });
 });

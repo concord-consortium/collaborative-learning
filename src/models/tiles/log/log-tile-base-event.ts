@@ -72,7 +72,7 @@ function logAnswerChange(questionTile: ITileModel, document: DocumentModelType) 
   if (isQuestionModel(questionTile.content) && document.content) {
     const questionId = questionTile.content.questionId;
     const answers = getQuestionAnswersAsJSON(document.content, questionId);
-    // Top-level `prompt` key the report reads for the column header (falls back to questionId when absent).
+    // undefined when the question has no authored prompt; JSON.stringify then drops the key.
     const prompt = getQuestionPrompt(document.content, questionTile.content);
     const params: ITileBaseLogEvent = {
       document,
