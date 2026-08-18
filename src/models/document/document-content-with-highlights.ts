@@ -29,6 +29,12 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
   .volatile(self => ({
     hoveredHighlightRef: undefined as HighlightReference | undefined,
     pinnedHighlightRef: undefined as HighlightReference | undefined,
+    // Which source set each ref. A reference cannot identify its own source — two sources can
+    // cite the same object, and a variable reference names no source at all — so a source that
+    // wants to release only what it set has to be told apart by something else. Sources that
+    // outlive nothing (an AI-emitted reference has no owning component) can leave this unset.
+    hoveredHighlightSource: undefined as string | undefined,
+    pinnedHighlightSource: undefined as string | undefined,
   }))
   .views(self => ({
     /**
@@ -83,25 +89,49 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
     };
   })
   .actions(self => ({
-    setHoveredHighlightRef(ref: HighlightReference) {
+    setHoveredHighlightRef(ref: HighlightReference, source?: string) {
       self.hoveredHighlightRef = ref;
+      self.hoveredHighlightSource = source;
     },
     clearHoveredHighlightRef() {
       self.hoveredHighlightRef = undefined;
+      self.hoveredHighlightSource = undefined;
     },
-    setPinnedHighlightRef(ref: HighlightReference) {
+    setPinnedHighlightRef(ref: HighlightReference, source?: string) {
       self.pinnedHighlightRef = ref;
+      self.pinnedHighlightSource = source;
     },
     clearPinnedHighlightRef() {
       self.pinnedHighlightRef = undefined;
+      self.pinnedHighlightSource = undefined;
     },
   }))
   .actions(self => ({
-    togglePinnedHighlightRef(ref: HighlightReference) {
-      if (self.pinnedHighlightRef && sameHighlightReference(self.pinnedHighlightRef, ref)) {
+    /**
+     * Release a highlight only if this source is the one that set it. Several sources share one
+     * document, so a source going away must not clear a highlight another source owns — including
+     * when both cite the same thing, which is exactly when comparing references cannot tell them
+     * apart.
+     */
+    clearHoveredHighlightRefIfOwn(source: string | undefined) {
+      if (source && self.hoveredHighlightSource === source) self.clearHoveredHighlightRef();
+    },
+    clearPinnedHighlightRefIfOwn(source: string | undefined) {
+      if (source && self.pinnedHighlightSource === source) self.clearPinnedHighlightRef();
+    },
+    /**
+     * Clicking a source that already owns the pin releases it. Clicking a *different* source
+     * takes the pin over rather than releasing it, even when both cite the same thing — otherwise
+     * asking to see something a second control already points at would turn it off.
+     */
+    togglePinnedHighlightRef(ref: HighlightReference, source?: string) {
+      const ownsPin = self.pinnedHighlightRef
+        && sameHighlightReference(self.pinnedHighlightRef, ref)
+        && self.pinnedHighlightSource === source;
+      if (ownsPin) {
         self.clearPinnedHighlightRef();
       } else {
-        self.setPinnedHighlightRef(ref);
+        self.setPinnedHighlightRef(ref, source);
       }
     },
   }));

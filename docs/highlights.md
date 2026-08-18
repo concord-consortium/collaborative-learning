@@ -82,27 +82,43 @@ by a computed that MobX only caches while a reaction observes it. Read from outs
 sweeping every tile in the document. Since this is called once per object per render, hoisting
 it turns a linear render into a quadratic one.
 
-## Setting up a tile to be a highlight *source*
+## Setting up a highlight *source*
 
-A source tile drives the state. The text-tile variable chip is the reference implementation
-(`src/plugins/shared-variables/slate/variables-plugin.tsx`).
+A source drives the state. The text-tile variable chip is the reference implementation
+(`src/plugins/shared-variables/slate/variables-plugin.tsx`), but a source need not be a tile —
+anything that can reach the document content qualifies, and an AdaChat button will be the first
+that isn't one.
 
 Actions on the document content model:
 
 | Action | Use |
 |---|---|
-| `setHoveredHighlightRef(ref)` / `clearHoveredHighlightRef()` | Hover preview |
-| `setPinnedHighlightRef(ref)` / `clearPinnedHighlightRef()` | Pin |
-| `togglePinnedHighlightRef(ref)` | Click behavior — pins, or unpins if already pinned to the same ref |
+| `setHoveredHighlightRef(ref, source?)` / `clearHoveredHighlightRef()` | Hover preview |
+| `setPinnedHighlightRef(ref, source?)` / `clearPinnedHighlightRef()` | Pin |
+| `togglePinnedHighlightRef(ref, source?)` | Click behavior |
+| `clearHoveredHighlightRefIfOwn(source)` / `clearPinnedHighlightRefIfOwn(source)` | Release on unmount |
+
+**`source` identifies the source instance, and a reference cannot stand in for it.** Two sources
+can cite the same object, and a variable reference names no source at all — so ownership has to be
+tracked separately or a source will release a highlight it never set. That was a real bug: with two
+chips for one variable, deleting the tile containing either one cleared the highlight everywhere,
+including on the chip the user had actually clicked.
+
+Pass a per-instance id (the chip uses a `useRef` id, not the variable id). A source with no owning
+component — an AI-emitted reference — can leave it unset, in which case nothing own-releases it.
 
 Two rules a source must respect:
 
-- **Clear only what you own.** Several sources share one document. Before clearing, confirm
-  the active reference is yours — see `clearHoveredHighlightRefIfOwn`.
+- **Clear only what you own.** Several sources share one document, so clear through the
+  `…IfOwn` actions rather than unconditionally.
 - **Release on unmount.** React does not fire `onMouseLeave` for an element that unmounts under
   the cursor, and a pinned highlight can normally only be dismissed by clicking its source
   again. A source that disappears while pinned would strand the highlight on screen for the
   rest of the session. See `releaseOwnHighlightRefs` and the unmount effect that calls it.
+
+Clicking a source that already owns the pin releases it; clicking a *different* source takes the
+pin over rather than releasing it, even when both cite the same thing — otherwise asking to see
+something a second control already points at would turn it off.
 
 ## Contributing objects for a variable
 

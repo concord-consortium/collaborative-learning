@@ -1,5 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import classNames from "classnames/dedupe";
+import { uniqueId } from "lodash";
 
 import {
   BaseElement, CustomEditor, CustomElement, Editor, EditorValue, isCustomElement, kSlateVoidClass,
@@ -255,63 +256,50 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
-function isOwnVariableRef(ref: HighlightReference | undefined, variableId: string) {
-  return ref?.kind === "variable" && ref.variableId === variableId;
-}
-
 /**
- * Clears the document's hoveredHighlightRef, but only if it still points at this chip's variable.
- * Several chips share one document, so this guard keeps one chip from clearing a preview
- * another chip owns.
- */
-export function clearHoveredHighlightRefIfOwn(
-  documentContent: DocumentContentModelType | undefined,
-  variableId: string | undefined
-) {
-  if (!variableId) return;
-  if (isOwnVariableRef(documentContent?.hoveredHighlightRef, variableId)) {
-    documentContent?.clearHoveredHighlightRef();
-  }
-}
-
-/**
- * Releases BOTH refs this chip owns. Used on unmount: clicking the chip is the only way to
- * unpin, so a pin outliving its chip could never be dismissed and would stay on screen for the
- * rest of the session. Mouse-leave deliberately does not use this — leaving a pinned chip must
- * keep the pin.
- */
-export function releaseOwnHighlightRefs(
-  documentContent: DocumentContentModelType | undefined,
-  variableId: string | undefined
-) {
-  if (!variableId) return;
-  clearHoveredHighlightRefIfOwn(documentContent, variableId);
-  if (isOwnVariableRef(documentContent?.pinnedHighlightRef, variableId)) {
-    documentContent?.clearPinnedHighlightRef();
-  }
-}
-
-/**
- * Builds the chip's highlight handlers. Exported and parameterized rather than defined inline
- * so the behavior is unit-testable without standing up a Slate editor.
+ * Builds the chip's highlight handlers. Exported and parameterized rather than defined inline so
+ * the behavior is unit-testable without standing up a Slate editor.
  *
- * Both arguments are optional because either can legitimately be absent: getDocumentContentFromNode
+ * `source` identifies this chip instance. Two chips can reference the same variable, so the
+ * reference alone cannot say which chip set a highlight — see the ownership note on
+ * clearHoveredHighlightRefIfOwn.
+ *
+ * Every argument is optional because each can legitimately be absent: getDocumentContentFromNode
  * returns undefined for detached trees (tests, standalone editors), and a malformed chip element
- * may carry no reference. Both cases no-op rather than throw.
+ * may carry no reference. Those cases no-op rather than throw.
  */
 export function makeChipHighlightHandlers(
   documentContent: DocumentContentModelType | undefined,
-  variableId: string | undefined
+  variableId: string | undefined,
+  source?: string
 ) {
   return {
     onMouseEnter: () => {
-      if (variableId) documentContent?.setHoveredHighlightRef({ kind: "variable", variableId });
+      if (variableId) {
+        documentContent?.setHoveredHighlightRef({ kind: "variable", variableId }, source);
+      }
     },
-    onMouseLeave: () => clearHoveredHighlightRefIfOwn(documentContent, variableId),
+    onMouseLeave: () => documentContent?.clearHoveredHighlightRefIfOwn(source),
     onClick: () => {
-      if (variableId) documentContent?.togglePinnedHighlightRef({ kind: "variable", variableId });
+      if (variableId) {
+        documentContent?.togglePinnedHighlightRef({ kind: "variable", variableId }, source);
+      }
     },
   };
+}
+
+/**
+ * Releases both refs this chip owns. Used on unmount: React does not fire onMouseLeave for an
+ * element that unmounts under the cursor, and clicking the chip is the only way to unpin, so a
+ * chip that disappears while pinned would strand the highlight for the rest of the session.
+ * Mouse-leave deliberately does not use this — leaving a pinned chip must keep the pin.
+ */
+export function releaseOwnHighlightRefs(
+  documentContent: DocumentContentModelType | undefined,
+  source: string | undefined
+) {
+  documentContent?.clearHoveredHighlightRefIfOwn(source);
+  documentContent?.clearPinnedHighlightRefIfOwn(source);
 }
 
 const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
@@ -325,6 +313,10 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   // element appears — the chip is conditionally rendered (only when the variable
   // resolves), and a useRef wouldn't trigger a re-run when `.current` changes.
   const [chipEl, setChipEl] = useState<HTMLSpanElement | null>(null);
+  // Identifies this chip instance as a highlight source. Per-instance rather than per-variable:
+  // two chips can reference the same variable, and each must be able to release only its own
+  // highlight. useRef so it survives re-renders and differs between mounted chips.
+  const highlightSource = useRef(uniqueId("chip-highlight-")).current;
 
   const reference = isVariableElement(element) ? element.reference : undefined;
 
@@ -336,7 +328,7 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   const documentContent = variablesPlugin
     ? getDocumentContentFromNode(variablesPlugin.textContent)
     : undefined;
-  const highlightHandlers = makeChipHighlightHandlers(documentContent, reference);
+  const highlightHandlers = makeChipHighlightHandlers(documentContent, reference, highlightSource);
 
   // The chip renders its own emphasis rather than borrowing the selection style. Without this the
   // chip has no highlight indicator at all, so clicking away leaves the Dataflow ring looking
@@ -350,11 +342,11 @@ const VariableComponent = observer(function({ attributes, children, element }: R
   // React does not fire onMouseLeave for an element that unmounts out from under the cursor
   // (e.g. Backspace deletes the chip while it's hovered), and a pinned highlight can only be
   // dismissed by clicking the chip — so a deleted chip must release both refs, or it strands a
-  // ring on the Dataflow node for the rest of the session. The guard inside
-  // clearHoveredHighlightRefIfOwn keeps this from clobbering a different chip's active preview.
+  // ring on the Dataflow node for the rest of the session. Releasing by source rather than by
+  // reference is what keeps a chip from clearing a highlight another chip owns.
   useEffect(() => {
-    return () => releaseOwnHighlightRefs(documentContent, reference);
-  }, [documentContent, reference]);
+    return () => releaseOwnHighlightRefs(documentContent, highlightSource);
+  }, [documentContent, highlightSource]);
 
   // Publish the chip's bbox in `.text-tool-wrapper` coordinates. Skips zero-sized
   // measurements so the registry only sees real layout. useChipMeasurement handles
