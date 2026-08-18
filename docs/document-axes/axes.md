@@ -222,9 +222,17 @@ see a document without changing what it is about, while its `owner` stays the pu
 document is one of a growing collection instead.
 
 **Which slot, not whether.** A container can have several single-document roles at the same time, so the
-axis has to name the one this document fills. The class-wide documents are the demonstration: within one
-class and one unit there are several canonical documents at once — the driving question board, the word
-wall — and a yes/no value could not say which of them a given document is.
+axis has to name the one this document fills.
+
+This is already true of the oldest documents CLUE has. A teacher in one offering has both a problem
+document and a planning document — each the single one of its role, and sharing `owner`, `container`, and
+`curriculum` exactly. The slot is what tells them apart. Nothing enforces either singleton today, so
+nothing has had to name the two roles; the moment something does, a document marked "canonical" is
+ambiguous unless it says which of the two it is.
+
+The class-wide documents make the same point with enforcement behind it: within one class and one unit
+there are several canonical documents at once — the driving question board, the word wall — and a yes/no
+value could not say which of them a given document is.
 
 **A slot is not a `kind`.** A kind is the recipe a document was made from; a slot is a position in a
 container. They line up today only because each class-wide kind happens to define one slot. Nothing says
