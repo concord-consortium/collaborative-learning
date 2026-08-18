@@ -327,6 +327,14 @@ deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This s
 - Whether `DocumentModel` should be split further into a generic wrapper + a CLUE metadata mixin, or left as
   one model with the getters (leaning: leave as one; the getters-vs-behaviors boundary already delivers the
   clarity, and a further split risks churn for little gain).
+- What `kind` a publish template targets: its source's kind, or a publication kind of its own. Copying settles
+  the same question by naming a kind outright (axes.md, "Copies and publications, read as deltas"), but
+  publishing holds `owner`, `container`, and `curriculum` still and moves only `canonical` and `permissions`
+  — all stated on the axes — so a second kind buys nothing unless some per-kind fact about a publication is
+  not determined by its axes. Today's four publication types are not evidence either way; that is `type`
+  doing every job at once. (Leaning: keep the source's kind. The cost is that a nav-tab section selects
+  documents by a list of type names, so the authored `navTabs` configs — in this repo and in
+  `clue-curriculum` — would have to select on axes instead.)
 
 ## References
 

@@ -265,7 +265,8 @@ behaves:
 - **Presentation** — the label a document is shown under, its title bar, its icons and styling are
   chosen per preset, not consequences of its axis values.
 - **Copy and publish** — what a copy or a publication of a document should look like (which axes change,
-  which carry over) is a per-preset recipe.
+  which carry over, and what kind the result takes) is a per-preset recipe. Worked examples are in
+  [Copies and publications, read as deltas](#copies-and-publications-read-as-deltas).
 - **Permission defaults** — the baseline of who may do what (e.g. "the owner may read and write, the teacher
   may read") is shared by every document of a kind. Rather than copy those rules onto each document, a kind
   points the document at a named **permission policy** (see `permissions`), and several kinds can share one
@@ -395,6 +396,8 @@ because its real value (a composed grant set) does not fit a cell.
 | class-wide collaborative | the class | classUnit | unit | yes (pointer) | **yes** | all class members read/write |
 | `problem` publication | publisher (retained) | offering | problem | no, versioned | no | class read; frozen |
 | `personal`/`learningLog` publication | publisher (retained) | class | none | no, versioned | no | class read; frozen |
+| copy of a `problem` doc → `personal` | **the copier** | class | none | no (collection) | no | owner + teacher read; class-read when public |
+| copy of a `personal`/`learningLog` doc → same kind | **the copier** | class | none | no (collection) | no | owner + teacher read; class-read when public |
 | `support` (multi-class) | teacher (retained) | multi-class / offering | problem | no | no | target audience read; frozen |
 | `exemplar` | synthetic author | none until commented on | problem | no | no | per-student read |
 
@@ -404,6 +407,35 @@ concurrent, and group-read/write*. Any other document that took those same axis 
 the same way. The class-wide collaborative document is the demonstration: it differs from a group
 document on `owner`, `container`, and `curriculum` alone, and behaves accordingly. That is the shift this
 folder is built around.
+
+### Copies and publications, read as deltas
+
+The two publication rows and the two copy rows are not new shapes; they are what the publish and copy
+templates (see `kind`) produce when applied to a row above them. Reading them against their source is what
+a template *is*:
+
+- **Publishing a `problem` document** moves `canonical` (yes → no, versioned) and `permissions` (owner +
+  teacher read → class read, frozen) and holds `owner`, `container`, and `curriculum` still. Holding those
+  three is the substance of publishing: it changes who may see the document, not whose it is or what it is
+  about. Publishing a `personal` document or a learning log is the same delta applied to a different row.
+- **Copying a `problem` document** moves exactly the three axes publishing holds still: `owner` becomes the
+  copier, `container` drops from the offering to the class, `curriculum` drops from the problem to none. It
+  also gives up `canonical` — there is one problem document per assignment, and a copy is not it. The result
+  lands on the `personal` row exactly, and `kind` follows: the copy *is* a personal document, presented and
+  listed as one, so the template names that kind rather than carrying the source's over.
+- **Copying a `personal` document or a learning log** moves `owner` alone, and only when the source was
+  someone else's — which is why its row and its source row are otherwise identical.
+
+So a template sets `kind` along with the axes; it is neither carried over automatically nor derivable from
+the axes the template produced. What `kind` a *publication* takes is not settled — see "Open questions" in
+[target-architecture.md](./target-architecture.md).
+
+Two more things follow. The copy template is not one recipe per kind so much as one destination — "a
+document of the copier's own, about nothing in particular" — which is why copying a problem document and
+copying a personal document converge. And the copy of a problem document is the case that argues for
+templates being per-kind at all: no rule over the axes alone says a copy should stop being about the problem
+it came from. That is a decision about what copying is *for*, which is exactly the sort of thing a preset
+holds.
 
 ## Relationship to the other docs here
 
