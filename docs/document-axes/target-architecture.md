@@ -55,7 +55,7 @@ view, and it is legitimate to put here because these are *data the document has*
 | `owner` | existing `uid` (identity/provenance; may differ from scope for publications) |
 | `scope` | the individual association fields `context` / `offeringId` / `groupId` / `problem` / `unit` (the org + curriculum associations). Consumed via field/axis **guards** (see "Typed document shapes"), not by branching on `type`; whether to also expose a single unified `scope` getter is an open question — the fields may be read directly |
 | `kind` | existing `type` (a stored tag — see Layer 2 for its uses) |
-| `canonical` | new stored field (pointer-slot occupancy) |
+| `canonical` | new stored field holding the label of the pointer slot this document fills — not a flag; several documents can be canonical in one container, one per label |
 | `permissions` | **composed getter** — merges *permission-policy grants* (from the document's referenced policy) with *stored per-doc grants* (the `visibility` share toggle, support audience, exemplar visibility). See "Permissions composition" below |
 | `concurrent` | new stored field (multi-writer; marks special stored state, rule-readable) |
 

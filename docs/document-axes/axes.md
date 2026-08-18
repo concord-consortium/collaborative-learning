@@ -218,15 +218,29 @@ see a document without changing what it is about, while its `owner` stays the pu
 
 ### `canonical` — the single doc for a slot
 
-**What it is.** Whether this is *the* one document expected to fill a given **container** slot, as
-opposed to one of a growing collection.
+**What it is.** *Which* **container** slot this document is the one document for — or none, when the
+document is one of a growing collection instead.
+
+**Which slot, not whether.** A container can have several single-document roles at the same time, so the
+axis has to name the one this document fills. The class-wide documents are the demonstration: within one
+class and one unit there are several canonical documents at once — the driving question board, the word
+wall — and a yes/no value could not say which of them a given document is.
+
+**A slot is not a `kind`.** A kind is the recipe a document was made from; a slot is a position in a
+container. They line up today only because each class-wide kind happens to define one slot. Nothing says
+they must: a class could want two documents of the same kind — an opening board and a closing one — which
+is two slots filled from one recipe. The group document already leaves room for this. Its slot is named
+"the default one" rather than "the group kind's", so a second group slot could be added without inventing
+a kind to name it.
 
 **In today's behavior.** Some documents are singletons, some are collections:
 - A user is meant to have **exactly one** problem document per offering (and a teacher one planning
   document) — the primary workspace. It is canonical *by convention*; the database does not enforce it,
   and bugs have produced duplicates, which is precisely the fragility making `canonical` worth naming
   explicitly.
-- A group has **one** group document per offering — canonical, and here backed by a real pointer.
+- A group has **one** group document per offering — canonical, and here enforced rather than assumed.
+- A class has **one** class-wide document per declared kind per unit — several slots in one container,
+  each enforced the same way.
 - **Personal** documents and **learning logs** are the opposite: a user may create as many as they
   like. There is no single canonical one — the slot is a collection.
 - **Publications** are non-canonical and versioned: publishing the same document repeatedly stacks up
@@ -384,22 +398,23 @@ policy. (This is a structure *within* `permissions`, not a separate axis.)
 This table is a **snapshot of how each current type sits on the axes** — useful for seeing that the
 axes are already present, but *not* the definition. The point of this doc is the axes; the types are
 just where today's behavior happens to have placed things. `permissions` is collapsed to a short label
-because its real value (a composed grant set) does not fit a cell.
+because its real value (a composed grant set) does not fit a cell. The `canonical` column names *which*
+slot a document fills rather than answering yes/no, since a container can have more than one.
 
-| kind (`type`) | owner | container | curriculum | canonical | concurrent | permissions (shorthand) |
+| kind (`type`) | owner | container | curriculum | canonical (which slot) | concurrent | permissions (shorthand) |
 |---|---|---|---|---|---|---|
-| `problem` | student/teacher | offering | problem | yes (by convention) | no | owner + teacher read; group-read when shared |
-| `planning` | teacher | offering | problem | yes (by convention) | no | owner + teacher read |
-| `personal` | student/teacher | class | none | no (collection) | no | owner + teacher read; class-read when public |
-| `learningLog` | student/teacher | class | none | no (collection) | no | owner + teacher read; class-read when public |
-| `group` | the group | offering | problem | yes (pointer) | **yes** | all group members read/write |
-| class-wide collaborative | the class | classUnit | unit | yes (pointer) | **yes** | all class members read/write |
-| `problem` publication | publisher (retained) | offering | problem | no, versioned | no | class read; frozen |
-| `personal`/`learningLog` publication | publisher (retained) | class | none | no, versioned | no | class read; frozen |
-| copy of a `problem` doc → `personal` | **the copier** | class | none | no (collection) | no | owner + teacher read; class-read when public |
-| copy of a `personal`/`learningLog` doc → same kind | **the copier** | class | none | no (collection) | no | owner + teacher read; class-read when public |
-| `support` (multi-class) | teacher (retained) | multi-class / offering | problem | no | no | target audience read; frozen |
-| `exemplar` | synthetic author | none until commented on | problem | no | no | per-student read |
+| `problem` | student/teacher | offering | problem | the user's one problem doc (by convention) | no | owner + teacher read; group-read when shared |
+| `planning` | teacher | offering | problem | the user's one planning doc (by convention) | no | owner + teacher read |
+| `personal` | student/teacher | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| `learningLog` | student/teacher | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| `group` | the group | offering | problem | the group's one doc (enforced) | **yes** | all group members read/write |
+| class-wide collaborative | the class | classUnit | unit | the class's one doc per declared kind (enforced) | **yes** | all class members read/write |
+| `problem` publication | publisher (retained) | offering | problem | none — versioned | no | class read; frozen |
+| `personal`/`learningLog` publication | publisher (retained) | class | none | none — versioned | no | class read; frozen |
+| copy of a `problem` doc → `personal` | **the copier** | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| copy of a `personal`/`learningLog` doc → same kind | **the copier** | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| `support` (multi-class) | teacher (retained) | multi-class / offering | problem | none | no | target audience read; frozen |
+| `exemplar` | synthetic author | none until commented on | problem | none | no | per-student read |
 
 Reading the table the new way: a "group document" is not a special *kind of thing* — it is simply the
 document that happens to be *group-owned, kept by an assignment, about that problem, canonical,
@@ -414,13 +429,15 @@ The two publication rows and the two copy rows are not new shapes; they are what
 templates (see `kind`) produce when applied to a row above them. Reading them against their source is what
 a template *is*:
 
-- **Publishing a `problem` document** moves `canonical` (yes → no, versioned) and `permissions` (owner +
-  teacher read → class read, frozen) and holds `owner`, `container`, and `curriculum` still. Holding those
-  three is the substance of publishing: it changes who may see the document, not whose it is or what it is
-  about. Publishing a `personal` document or a learning log is the same delta applied to a different row.
+- **Publishing a `problem` document** moves `canonical` (a publication fills no slot, and versions stack up)
+  and `permissions` (owner + teacher read → class read, frozen) and holds `owner`, `container`, and
+  `curriculum` still. Holding those three is the substance of publishing: it changes who may see the
+  document, not whose it is or what it is about. Publishing a `personal` document or a learning log is the
+  same delta applied to a different row.
 - **Copying a `problem` document** moves exactly the three axes publishing holds still: `owner` becomes the
   copier, `container` drops from the offering to the class, `curriculum` drops from the problem to none. It
-  also gives up `canonical` — there is one problem document per assignment, and a copy is not it. The result
+  is also not the assignment's primary workspace, so it gives up the one slot its source held — held by
+  convention rather than by enforcement, but held. The result
   lands on the `personal` row exactly, and `kind` follows: the copy *is* a personal document, presented and
   listed as one, so the template names that kind rather than carrying the source's over.
 - **Copying a `personal` document or a learning log** moves `owner` alone, and only when the source was
