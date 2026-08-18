@@ -174,20 +174,35 @@ export function makeTask(docId: string, runId: string, text: string, worstCase =
  * `fs.readdirSync(root, { recursive: true })` walks those too, which for the harness root is tens of
  * thousands of entries and several seconds. This is for taking a before-and-after picture of what a
  * command wrote.
+ *
+ * A directory that disappears mid-walk is skipped rather than thrown on. Jest runs suites in
+ * parallel workers, and every one of them removes its own scratch directory when it finishes — so
+ * walking the harness root means walking a tree that other processes are actively deleting from. A
+ * directory that has gone is not a file anyone wrote.
  */
 export function listFilesUnder(root: string): string[] {
   const found: string[] = [];
   const walk = (directory: string) => {
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(directory, { withFileTypes: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+      throw error;
+    }
+    for (const entry of entries) {
       if (entry.name === "node_modules" || entry.name === ".git") continue;
       const full = path.join(directory, entry.name);
       if (entry.isDirectory()) walk(full);
       else found.push(full);
     }
   };
-  if (fs.existsSync(root)) walk(root);
+  walk(root);
   return found.sort();
 }
+
+/** Where `makeTestDataRoot` puts every suite's scratch directory. */
+export const testRunsRoot = path.join(harnessRoot, "data", "test-runs");
 
 export function readLines(file: string): unknown[] {
   return fs.readFileSync(file, "utf8").split("\n").filter((line) => line.length > 0).map((line) => JSON.parse(line));

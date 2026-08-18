@@ -11,7 +11,9 @@ import { loadPricingConfig, pricingFor } from "../src/cost.js";
 import { ReportSummary } from "../src/report.js";
 import { ExperimentFile, ResultRow } from "../src/schemas.js";
 import { harnessRoot, isContainedBy } from "../src/files.js";
-import { listFilesUnder, makeTestDataRoot, makeTestPng, readLines } from "./helpers.js";
+import {
+  listFilesUnder, makeTestDataRoot, makeTestPng, readLines, testRunsRoot
+} from "./helpers.js";
 
 /**
  * The mocked end-to-end path extended through an `image-only` run, with no browser and no network.
@@ -397,7 +399,14 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     // two-deep path, and it inspected no generated file at all. This looks at what really appeared
     // under the harness root while the suite ran.
     const dataDir = path.join(harnessRoot, "data");
-    const appeared = listFilesUnder(harnessRoot).filter((file) => !filesBefore.has(file));
+    // Other suites' scratch directories are excluded, so this is about what *this* suite wrote.
+    // Jest runs them in parallel, so without this the diff picks up their files too — which would
+    // let the count below pass on somebody else's work.
+    const mine = (file: string) =>
+      !file.startsWith(testRunsRoot + path.sep) || file.startsWith(dataRoot + path.sep);
+    const appeared = listFilesUnder(harnessRoot)
+      .filter((file) => !filesBefore.has(file))
+      .filter(mine);
     // This suite has run a full import, represent, render, run and report by now, so plenty did.
     expect(appeared.length).toBeGreaterThan(documentIds().length);
     for (const file of appeared) {
