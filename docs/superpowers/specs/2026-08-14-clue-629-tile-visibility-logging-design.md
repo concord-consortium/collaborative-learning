@@ -32,7 +32,8 @@ are the same event.
 - **One event with a `cause` field** (not four event names).
 - **Per-tile payload mirrors tile-copy events**: `tileId`, `tileType`, `tileTitle`, plus
   `percentVisible`. We deliberately omit the heavy `serializedObject` snapshot that copy events carry.
-- **"Stopped" heuristic**: trailing `debounce(…, 500ms)`, `.flush()` on unmount.
+- **"Stopped" heuristic**: trailing `debounce(…, 500ms)`; a pending scroll snapshot is flushed on
+  unmount, a pending layout cause is dropped there.
 - **Independent of CLUE-628.**
 
 ## The event
@@ -98,16 +99,29 @@ maintaining two independent rect scans.
 One shared debounced settle per instrumented component:
 
 ```ts
-private settle = debounce((cause: VisibilityCause, extra?: object) => {
+private settle = debounce(() => {
   const visibleTiles = this.computeVisibleTiles();
   Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, {
-    cause, documentId, tileCount, viewportHeight, visibleTiles, ...extra
+    cause: this.pendingCause, documentId, tileCount, viewportHeight, visibleTiles,
+    ...this.pendingExtra
   });
 }, 500);
 ```
 
-`.flush()` on `componentWillUnmount` so a pending snapshot isn't lost. A burst of scroll events (or a
-resize drag) collapses to a single event ~500ms after motion stops.
+A burst of scroll events (or a resize drag) collapses to a single event ~500ms after motion stops.
+
+**Which cause survives the coalescing.** The cause and its extras are held on the component rather
+than passed as debounce arguments, because lodash keeps only the last call's arguments. A layout
+change reflows the document and so provokes a scroll of its own (the container clamps or resets
+`scrollTop`), which would otherwise relabel every layout cause as `scroll` and discard the
+`dividerPosition`/`resizedRowId` riding with it. So a `scroll` never displaces a pending layout
+cause (`nextVisibilityCause`), and extras accumulate across the coalesced triggers.
+
+**Unmount.** A pending `scroll` snapshot is flushed while the DOM is still mounted, since nothing
+else will report it. A pending *layout* cause is dropped instead: a view being torn down can only
+measure the pre-change layout, and whichever view replaces it reports the settled one. This matters
+for the comparison toggle, which remounts the primary document's component tree — flushing there
+would emit a `comparisonToggle` event carrying the pre-toggle geometry.
 
 **No event when the pane is collapsed / nothing is visible.** A collapsed pane (e.g. the resources
 panel at `dividerPosition === kDividerMin`) keeps its `DocumentContentComponent` *mounted*, so global
@@ -183,7 +197,10 @@ no document key — the plan pins what identifier to log for it (e.g. the sectio
 - **Geometry** (`computeVisibleTiles`): mock container + tile `getBoundingClientRect` → assert
   percentages for fully-visible (100), partial-top, partial-bottom, and fully-off (excluded).
 - **Settle/heuristic**: fake timers → many `scroll` calls collapse to one event after 500ms;
-  `.flush()` on unmount emits a pending snapshot.
+  a pending `scroll` snapshot is emitted on unmount, a pending layout cause is not.
+- **Cause priority** (`nextVisibilityCause`): a `scroll` arriving after a pending layout cause keeps
+  the layout cause; a layout cause displaces a pending `scroll`; the newest of two layout causes
+  wins.
 - **Payload/cause**: mock `Logger.log`; assert `visibleTiles` entries carry `{tileId, tileType,
   tileTitle, percentVisible}`; `dividerPosition` present only on `dividerResize`; `resizedRowId`
   present only on `tileResize`.

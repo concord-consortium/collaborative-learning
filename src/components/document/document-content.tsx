@@ -21,7 +21,7 @@ import { RowRefsContext } from "./row-refs-context";
 import { ContainerContext } from "./container-context";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { buildVisibilityLogParams, computeVisibleTiles,
+import { buildVisibilityLogParams, computeVisibleTiles, nextVisibilityCause,
   type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
 
 import "./document-content.scss";
@@ -71,6 +71,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private visibilityDividerDisposer?: IReactionDisposer;
   private visibilityCommentsDisposer?: IReactionDisposer;
   private visibilityComparisonDisposer?: IReactionDisposer;
+  private pendingVisibilityCause?: VisibilityCause;
+  private pendingVisibilityExtra: IVisibilityLogExtra = {};
 
   constructor(props: IProps) {
     super(props);
@@ -158,18 +160,18 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         window.addEventListener("resize", this.handleWindowResizeForVisibility);
         this.visibilityDividerDisposer = reaction(
           () => this.stores.persistentUI.dividerPosition,
-          (dividerPosition) => this.settleVisibilityLog("dividerResize", { dividerPosition })
+          (dividerPosition) => this.queueVisibilityLog("dividerResize", { dividerPosition })
         );
         this.visibilityCommentsDisposer = reaction(
           () => this.stores.persistentUI.showChatPanel,
-          () => this.settleVisibilityLog("commentsToggle")
+          () => this.queueVisibilityLog("commentsToggle")
         );
         this.visibilityComparisonDisposer = reaction(
           () => this.stores.persistentUI.problemWorkspace.comparisonVisible,
-          () => this.settleVisibilityLog("comparisonToggle")
+          () => this.queueVisibilityLog("comparisonToggle")
         );
         // Initial snapshot of what's visible when this view first shows a document.
-        this.settleVisibilityLog("documentChange");
+        this.queueVisibilityLog("documentChange");
       }
     }
   }
@@ -180,18 +182,24 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     document.removeEventListener("keydown", this.handlePickUpKeyDown);
     this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
     this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
-    // CLUE-629: stop visibility triggers and flush any pending snapshot (DOM is still mounted here).
+    // Stop the visibility triggers. A pending scroll snapshot is flushed while the DOM is still
+    // mounted here, but a pending layout cause is dropped: this view is being torn down, so it can
+    // only report the pre-change layout, and whichever view replaces it reports the settled one.
     window.removeEventListener("resize", this.handleWindowResizeForVisibility);
     this.visibilityDividerDisposer?.();
     this.visibilityCommentsDisposer?.();
     this.visibilityComparisonDisposer?.();
-    this.settleVisibilityLog.flush();
+    if (this.pendingVisibilityCause === "scroll") {
+      this.settleVisibilityLog.flush();
+    } else {
+      this.settleVisibilityLog.cancel();
+    }
   }
 
   public componentDidUpdate(prevProps: IProps) {
     if (this.props.logTileVisibility &&
         this.props.content?.contentId !== prevProps.content?.contentId) {
-      this.settleVisibilityLog("documentChange");
+      this.queueVisibilityLog("documentChange");
     }
     // recalculate after render
     requestAnimationFrame(() => {
@@ -303,11 +311,24 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   // Trailing debounce = "the student stopped scrolling / dragging"; one event ~500ms after motion ends.
-  private settleVisibilityLog = debounce((cause: VisibilityCause, extra?: IVisibilityLogExtra) => {
+  private settleVisibilityLog = debounce(() => {
+    const cause = this.pendingVisibilityCause;
+    if (!cause) return;
+    const extra = this.pendingVisibilityExtra;
+    this.pendingVisibilityCause = undefined;
+    this.pendingVisibilityExtra = {};
     this.emitTileVisibility(cause, extra);
   }, 500);
 
-  private handleWindowResizeForVisibility = () => this.settleVisibilityLog("windowResize");
+  // Queues a snapshot for the next settle. Extras accumulate across the coalesced triggers so the
+  // divider position or the resized row still rides along with the cause that reports it.
+  private queueVisibilityLog = (cause: VisibilityCause, extra?: IVisibilityLogExtra) => {
+    this.pendingVisibilityCause = nextVisibilityCause(this.pendingVisibilityCause, cause);
+    if (extra) Object.assign(this.pendingVisibilityExtra, extra);
+    this.settleVisibilityLog();
+  };
+
+  private handleWindowResizeForVisibility = () => this.queueVisibilityLog("windowResize");
 
   // updates the list of all row we can see the bottom of
   private updateVisibleRows = () => {
@@ -384,7 +405,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const yScroll = this.domElement?.scrollTop || 0;
     tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
     this.props.onScroll?.(xScroll, yScroll);
-    if (this.props.logTileVisibility) this.settleVisibilityLog("scroll");
+    if (this.props.logTileVisibility) this.queueVisibilityLog("scroll");
   }, 50);
 
   private getTileTitle(id: string) {
@@ -897,7 +918,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       row?.setRowHeight(dragResizeRow.newHeight);
       this.setState({ dragResizeRow: undefined });
       if (this.props.logTileVisibility) {
-        this.settleVisibilityLog("tileResize", { resizedRowId: dragResizeRow.id });
+        this.queueVisibilityLog("tileResize", { resizedRowId: dragResizeRow.id });
       }
     }
   };

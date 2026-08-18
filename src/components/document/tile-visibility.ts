@@ -50,6 +50,16 @@ export function computeVisibleTiles(viewport: IViewportBounds, tiles: ITileExten
   return visible;
 }
 
+/**
+ * The cause to report when another trigger arrives before the pending snapshot settles. A layout
+ * change often provokes a scroll of its own (the container clamps or resets scrollTop as the
+ * document reflows), so a scroll never displaces a pending layout cause; otherwise the newest
+ * cause wins.
+ */
+export function nextVisibilityCause(pending: VisibilityCause | undefined, incoming: VisibilityCause) {
+  return incoming === "scroll" && pending && pending !== "scroll" ? pending : incoming;
+}
+
 export interface IVisibilityLogExtra {
   dividerPosition?: number;
   resizedRowId?: string;

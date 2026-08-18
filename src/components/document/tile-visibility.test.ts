@@ -1,6 +1,7 @@
 import {
   buildVisibilityLogParams,
   computeVisibleTiles,
+  nextVisibilityCause,
   type ITileExtent,
   type IViewportBounds
 } from "./tile-visibility";
@@ -107,5 +108,33 @@ describe("buildVisibilityLogParams", () => {
     expect(p).toEqual({
       cause: "documentChange", documentId: "d", viewportHeight: 100, tileCount: 1, visibleTiles: tiles
     });
+  });
+});
+
+describe("nextVisibilityCause", () => {
+  it("takes the incoming cause when nothing is pending", () => {
+    expect(nextVisibilityCause(undefined, "scroll")).toBe("scroll");
+    expect(nextVisibilityCause(undefined, "dividerResize")).toBe("dividerResize");
+  });
+
+  it("keeps a pending layout cause when a scroll follows it", () => {
+    // Reflowing the document clamps or resets scrollTop, so the layout change is the real cause.
+    expect(nextVisibilityCause("dividerResize", "scroll")).toBe("dividerResize");
+    expect(nextVisibilityCause("documentChange", "scroll")).toBe("documentChange");
+    expect(nextVisibilityCause("tileResize", "scroll")).toBe("tileResize");
+    expect(nextVisibilityCause("comparisonToggle", "scroll")).toBe("comparisonToggle");
+  });
+
+  it("lets a layout cause displace a pending scroll", () => {
+    expect(nextVisibilityCause("scroll", "dividerResize")).toBe("dividerResize");
+    expect(nextVisibilityCause("scroll", "windowResize")).toBe("windowResize");
+  });
+
+  it("keeps the newest of two layout causes", () => {
+    expect(nextVisibilityCause("dividerResize", "tileResize")).toBe("tileResize");
+  });
+
+  it("stays on scroll while only scrolling", () => {
+    expect(nextVisibilityCause("scroll", "scroll")).toBe("scroll");
   });
 });
