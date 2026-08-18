@@ -192,7 +192,7 @@ where the document is kept. (Group-based audiences work the same way, but the gr
 
 ### `curriculum` — what content the document is about
 
-**What it is.** Where the document sits in the curriculum: **nothing → unit → investigation →
+**What it is.** Where the document sits in the curriculum: **none → unit → investigation →
 problem**. This is what the document is *about*, not where it is kept.
 
 **In today's behavior.** The curriculum position is visible in *when a document is offered to you*:
@@ -206,7 +206,7 @@ It is also what the Sort Work filters match on: choosing an investigation or a p
 list to documents about that part of the curriculum.
 
 **Why this is separate from `container`.** For most documents the two line up — kept by the class and
-about nothing, kept by a classUnit and about that unit, kept by an assignment and about that problem.
+about none of it, kept by a classUnit and about that unit, kept by an assignment and about that problem.
 Exemplars are the case that comes apart: an exemplar is about a specific problem, but it is not part
 of any assignment. It exists whether or not the class has ever been assigned that problem, so there is
 no assignment to keep it in. A document can be about a problem without being kept in that problem's
