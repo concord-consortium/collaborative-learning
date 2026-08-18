@@ -43,6 +43,16 @@ export function imageFileName(docId: string, index: number): string {
   return `${docId}-${index + 1}.png`;
 }
 
+/**
+ * Matches exactly the files `imageFileName` produces for one document.
+ *
+ * A `startsWith(`${docId}-`)` test is not enough: document ids may contain hyphens, so writing `a`
+ * would treat `a-b-1.png` — document `a-b`'s picture — as its own orphan and delete it.
+ */
+export function isImageFileFor(docId: string, name: string): boolean {
+  return new RegExp(`^${docId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d+\\.png$`).test(name);
+}
+
 export function readImageEnvelope(file: string): ImageEnvelope {
   return validateImageEnvelope(readJsonFile(file), file);
 }
@@ -251,9 +261,8 @@ export function writeImageRepresentation(options: WriteImageRepresentationOption
   // `removeImageRepresentation` when `--prune` runs. Rendered student work would survive pruning.
   // Milestone 2 always writes exactly one image; milestone 3's per-tile capture makes this reachable.
   const written = new Set(images.map((image) => image.file));
-  const prefix = `${options.docId}-`;
   for (const name of fs.existsSync(directory) ? fs.readdirSync(directory) : []) {
-    if (name.startsWith(prefix) && name.endsWith(".png") && !written.has(name)) {
+    if (isImageFileFor(options.docId, name) && !written.has(name)) {
       fs.rmSync(path.join(directory, name), { force: true });
     }
   }
@@ -308,8 +317,18 @@ export function removeImageRepresentation(envelopeFile: string): string[] {
       }
     }
   } catch {
-    // An unreadable envelope still gets deleted below; its images are unreachable either way, and
-    // guessing at filenames from a file we could not parse would be worse than leaving them.
+    // The envelope is unreadable, so its images cannot be listed — but leaving them while deleting
+    // the only file that names them is exactly the outcome `--prune` exists to prevent: an
+    // unreachable picture of a student's document. Filenames are deterministic, so the document's
+    // own images can be removed without the envelope.
+    const docId = path.basename(envelopeFile, path.extname(envelopeFile));
+    const directory = path.dirname(path.resolve(envelopeFile));
+    for (const name of fs.existsSync(directory) ? fs.readdirSync(directory) : []) {
+      if (!isImageFileFor(docId, name)) continue;
+      const orphan = path.join(directory, name);
+      fs.rmSync(orphan, { force: true });
+      removed.push(orphan);
+    }
   }
   fs.rmSync(envelopeFile);
   removed.push(envelopeFile);

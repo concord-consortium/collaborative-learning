@@ -24,6 +24,22 @@ describe("reading a PNG header", () => {
     expect(() => readPngInfo(jpeg, "photo.jpg")).toThrow(/not the PNG signature/);
   });
 
+  it("refuses a file that has a valid header but no image after it", () => {
+    // Signature plus IHDR and nothing else: the shape a truncated download takes. Accepting it
+    // meant storing it and eventually sending it to the model.
+    const headerOnly = makeTestPng(64, 64).subarray(0, 8 + 12 + 13);
+    expect(() => readPngInfo(headerOnly, "truncated.png"))
+      .toThrow(/chunk stream does not end with a complete IEND chunk/);
+  });
+
+  it("refuses a PNG whose trailing chunks were cut off", () => {
+    const whole = makeTestPng(64, 64);
+    expect(() => readPngInfo(whole.subarray(0, whole.length - 20), "cut.png"))
+      .toThrow(/truncated or is not a whole PNG/);
+    // The whole file still reads.
+    expect(readPngInfo(whole, "whole.png")).toEqual({ widthPx: 64, heightPx: 64 });
+  });
+
   it("refuses a file truncated before its header is complete", () => {
     expect(() => readPngInfo(makeTestPng(10, 10).subarray(0, 12), "truncated.png"))
       .toThrow(/only 12 byte\(s\) long/);

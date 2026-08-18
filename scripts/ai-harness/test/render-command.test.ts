@@ -144,6 +144,26 @@ describe("a failure that is not a RenderFailed still leaves evidence", () => {
   });
 });
 
+describe("evidence from a previous attempt is not reused", () => {
+  it("clears the directory before writing this failure's evidence", async () => {
+    const { dataRoot, paths, order } = setUp("render-stale-evidence");
+    const output: string[] = [];
+    const directory = renderErrorDir(paths, "puppeteer-full-height", order[0]);
+    fs.mkdirSync(directory, { recursive: true });
+    fs.writeFileSync(path.join(directory, "screenshot.png"), "an older attempt's picture");
+    fs.writeFileSync(path.join(directory, "stale.txt"), "left over");
+
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browserThatFails(new Set([order[0]]), order), output)))
+      .rejects.toThrow(/failed to render/);
+
+    // The stale file is gone, and the screenshot is this attempt's rather than the old text.
+    expect(fs.existsSync(path.join(directory, "stale.txt"))).toBe(false);
+    expect(fs.readFileSync(path.join(directory, "screenshot.png"), "utf8"))
+      .not.toContain("an older attempt");
+  });
+});
+
 describe("--prune removes a document's pictures too", () => {
   it("deletes image envelopes, their PNGs and any render errors", async () => {
     const { dataRoot, paths, order } = setUp("render-prune");

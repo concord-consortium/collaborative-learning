@@ -17,7 +17,9 @@ exports[`the generated render page matches its snapshot 1`] = `
           return;
         }
         window.addEventListener("message", (event) => {
-          // Kept for parity with production's page, which sizes the frame from this message.
+          // Production assigns this unconditionally, so a height of 0 collapses its iframe to
+          // "0px". Guarded here because the local mode sizes the frame itself after settling and a
+          // late zero would wipe the capture. See the README on what parity does and does not cover.
           if (event.data && event.data.type === "updateHeight") {
             const height = Number(event.data.height);
             if (!Number.isFinite(height) || height <= 0) return;

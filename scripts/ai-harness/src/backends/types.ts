@@ -6,6 +6,7 @@
  * Keeping the split means the Shutterbug backends can be tested with a fake `fetch` and the
  * puppeteer backend with a fake browser, with no file system or network in either case.
  */
+import { createHash } from "node:crypto";
 import { ImagePurpose, RenderTarget } from "../schemas.js";
 
 export interface RenderRequest {
@@ -137,6 +138,35 @@ export function checkCaptureSize(
     throw new RenderLimitExceeded(docId,
       `the capture would be ${widthPx}×${heightPx} = ${pixels} pixels, over the ${limits.maxPixels} limit`);
   }
+}
+
+/**
+ * Reads a response body under a byte limit, hashing as it goes.
+ *
+ * `await response.arrayBuffer()` reads the whole body before anything can check its size, so a
+ * chunked response — or one that understates its length — is in memory before the guard runs. This
+ * stops at the limit instead, and returns the sha256 so callers do not have to keep a second copy
+ * of the bytes to hash them.
+ */
+export async function readBodyWithin(
+  response: Response, maxBytes: number
+): Promise<{ bytes: Buffer; sha256: string } | { overLimit: true }> {
+  const body = response.body as unknown as AsyncIterable<Uint8Array> | null;
+  if (!body) {
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > maxBytes) return { overLimit: true };
+    return { bytes, sha256: createHash("sha256").update(bytes).digest("hex") };
+  }
+  const digest = createHash("sha256");
+  const chunks: Buffer[] = [];
+  let total = 0;
+  for await (const chunk of body) {
+    total += chunk.byteLength;
+    if (total > maxBytes) return { overLimit: true };
+    digest.update(chunk);
+    chunks.push(Buffer.from(chunk));
+  }
+  return { bytes: Buffer.concat(chunks), sha256: digest.digest("hex") };
 }
 
 export function checkEncodedSize(docId: string, bytes: Buffer, limits: RenderLimits): void {

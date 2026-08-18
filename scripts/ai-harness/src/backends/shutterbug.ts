@@ -15,7 +15,7 @@ import { NotAPngError, readPngInfo } from "../png.js";
 import { generateRenderHtml } from "./render-html.js";
 import {
   RenderBackend, RenderLimitExceeded, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
-  checkEncodedSize, kDefaultRenderLimits, kUnobservedDiagnostics
+  kDefaultRenderLimits, kUnobservedDiagnostics, readBodyWithin
 } from "./types.js";
 
 /** Exactly what production uses today. Changing any of these changes what "parity" means. */
@@ -29,6 +29,19 @@ export const kStagingShutterbugUrl = "https://api.concord.org/shutterbug-staging
 export const kShutterbugViewportWidthPx = 1000;
 
 export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
+
+/** https anywhere, http only on loopback. */
+export function isAcceptableShutterbugUrl(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.protocol === "https:") return true;
+  return url.protocol === "http:" &&
+    ["localhost", "127.0.0.1", "[::1]", "::1"].includes(url.hostname);
+}
 
 export interface ShutterbugOptions {
   modeId: string;
@@ -113,8 +126,11 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
   const fetchImpl: FetchLike = options.fetchImpl ?? ((url, init) => fetch(url, init));
 
   // Inferring the endpoint from anything would eventually post student work at the wrong service.
-  if (!/^https?:\/\//.test(shutterbugUrl)) {
-    throw new Error(`--shutterbug-url must be an http(s) URL, got "${shutterbugUrl}"`);
+  // Plaintext is refused off-loopback: this posts the whole document, and the harness treats
+  // document content as sensitive everywhere it flows. A local Shutterbug over http is still fine.
+  if (!isAcceptableShutterbugUrl(shutterbugUrl)) {
+    throw new Error(`--shutterbug-url must be an https URL, or http on loopback for a local ` +
+      `Shutterbug; got "${shutterbugUrl}". The whole document is posted to it.`);
   }
   // Checked once, at construction, against the height the mode is configured with: an unreasonable
   // --capture-height should be refused before any student work is posted anywhere, not after.
@@ -185,8 +201,10 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
   };
 
   const download = async (docId: string, url: string): Promise<Buffer> => {
-    const response = await withTimeout(downloadTimeoutMs, `the download of ${url}`, (signal) =>
-      fetchImpl(url, { redirect: "follow", signal }));
+    // The whole download, body included, is inside one timeout. Bounding only the fetch left a
+    // stalled body able to hang indefinitely once the headers had arrived.
+    return withTimeout(downloadTimeoutMs, `the download of ${url}`, async (signal) => {
+    const response = await fetchImpl(url, { redirect: "follow", signal });
     if (!response.ok) {
       throw new ShutterbugError(docId, `downloading ${url} answered ${response.status} ${response.statusText}`);
     }
@@ -199,8 +217,12 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
       throw new ShutterbugError(docId,
         `${url} declares ${declaredLength} bytes, over the ${limits.maxEncodedBytes} limit`);
     }
-    const bytes = Buffer.from(await response.arrayBuffer());
-    checkEncodedSize(docId, bytes, limits);
+    const read = await readBodyWithin(response, limits.maxEncodedBytes);
+    if ("overLimit" in read) {
+      throw new ShutterbugError(docId,
+        `${url} is over the ${limits.maxEncodedBytes} byte limit`);
+    }
+    const { bytes } = read;
     let info;
     try {
       info = readPngInfo(bytes, url);
@@ -213,6 +235,7 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     // screenshot compresses to very little. The dimensions are checked on what actually arrived.
     checkCaptureSize(docId, info.widthPx, info.heightPx, limits);
     return bytes;
+    });
   };
 
   return {

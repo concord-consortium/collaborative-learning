@@ -388,6 +388,9 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
         } catch (error) {
           failures.push(document.id);
           const directory = renderErrorDir(paths, renderer.modeId, document.id);
+          // Cleared first: a previous attempt's screenshot and console output would otherwise be
+          // presented as evidence for this error, and would keep an older copy of the document.
+          fs.rmSync(directory, { recursive: true, force: true });
           fs.mkdirSync(directory, { recursive: true });
           fs.writeFileSync(path.join(directory, "error.txt"),
             `${(error as Error).stack ?? String(error)}\n`, "utf8");
@@ -408,8 +411,13 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     };
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
   } finally {
-    if (openBackend?.close) await openBackend.close();
-    await unitServer?.close();
+    // Nested: if closing the backend throws — a crashed Chromium, say — the unit server still has
+    // to come down, or its open handle keeps the CLI alive after the error has been printed.
+    try {
+      if (openBackend?.close) await openBackend.close();
+    } finally {
+      await unitServer?.close();
+    }
   }
 
   log(`Rendered ${rendered} document(s) with --mode ${modeId}, reused ${reused} still-fresh ` +

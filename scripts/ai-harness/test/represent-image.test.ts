@@ -117,6 +117,16 @@ describe("writing an image representation", () => {
     expect(fs.existsSync(resolveImageFile(other, readImageEnvelope(other).images[0]))).toBe(true);
   });
 
+  it("does not delete another document's PNG whose id shares a prefix", () => {
+    // Document ids may contain hyphens, so a `startsWith(`${docId}-`)` test made writing `a` treat
+    // `a-b-1.png` — document `a-b`'s picture — as its own orphan and delete it.
+    const { envelopeFile: neighbour } = writeOne("aa-bb");
+    const victim = resolveImageFile(neighbour, readImageEnvelope(neighbour).images[0]);
+    expect(fs.existsSync(victim)).toBe(true);
+    writeOne("aa");
+    expect(fs.existsSync(victim)).toBe(true);
+  });
+
   it("leaves no temporary files behind", () => {
     const { envelopeFile } = writeOne("tidy");
     const directory = path.dirname(envelopeFile);
@@ -318,6 +328,17 @@ describe("pruning", () => {
   it("does nothing when there is nothing there", () => {
     expect(removeImageRepresentation(imageRepresentationPath(paths, "puppeteer-full-height", "absent")))
       .toEqual([]);
+  });
+
+  it("deletes the PNGs of an envelope it cannot parse, not just the envelope", () => {
+    // Leaving the images while deleting the only file that names them is exactly what --prune
+    // exists to prevent: an unreachable picture of a student's document.
+    const { envelopeFile, envelope } = writeOne("corrupt-with-png");
+    const image = resolveImageFile(envelopeFile, envelope.images[0]);
+    fs.writeFileSync(envelopeFile, "{ not json");
+    const removed = removeImageRepresentation(envelopeFile);
+    expect(fs.existsSync(image)).toBe(false);
+    expect(removed).toEqual(expect.arrayContaining([image, envelopeFile]));
   });
 
   it("still deletes an envelope it cannot parse", () => {

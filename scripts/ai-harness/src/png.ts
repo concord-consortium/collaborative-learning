@@ -22,6 +22,35 @@ export class NotAPngError extends Error {
   }
 }
 
+/**
+ * Walks the chunk stream and insists it ends with IEND.
+ *
+ * The signature and IHDR alone are not evidence of a usable image: 29 bytes carrying both, and
+ * nothing else, would otherwise be accepted, stored, and eventually sent to the model. Walking the
+ * declared chunk lengths catches a truncated download for the cost of a few reads — the chunk CRCs
+ * are deliberately not verified, since the concern here is truncation and wrong content rather than
+ * bit rot, and the file's sha256 is recorded separately.
+ */
+function walkChunks(bytes: Buffer, source: string): void {
+  let offset = 8;
+  let sawEnd = false;
+  while (offset + 12 <= bytes.length) {
+    const length = bytes.readUInt32BE(offset);
+    const type = bytes.subarray(offset + 4, offset + 8).toString("latin1");
+    // length + type + data + crc
+    offset += 12 + length;
+    if (type === "IEND") {
+      sawEnd = true;
+      break;
+    }
+  }
+  if (!sawEnd || offset > bytes.length) {
+    throw new NotAPngError(source,
+      `its chunk stream does not end with a complete IEND chunk within ${bytes.length} byte(s), ` +
+      "so the file is truncated or is not a whole PNG");
+  }
+}
+
 export interface PngInfo {
   widthPx: number;
   heightPx: number;
@@ -49,6 +78,7 @@ export function readPngInfo(bytes: Buffer, source: string): PngInfo {
   if (declaredLength !== kIhdrLength) {
     throw new NotAPngError(source, `its IHDR chunk declares ${declaredLength} bytes, not ${kIhdrLength}`);
   }
+  walkChunks(bytes, source);
   const widthPx = bytes.readUInt32BE(16);
   const heightPx = bytes.readUInt32BE(20);
   // A zero dimension is legal to write down and impossible to render, and it would make the image

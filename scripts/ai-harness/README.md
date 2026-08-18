@@ -170,9 +170,28 @@ modes are named and separate, and an improvement never gets folded into the base
 | `shutterbug-parameterized` | yes | `--clue-url` | `--unit` | `--capture-height` |
 
 **`shutterbug-production-current` is the parity baseline.** It reproduces today's production request
-exactly — endpoint, CLUE URL, unit, height, and no `fullPage` — bug for bug, clipping included. A
-snapshot test pins it so it cannot drift while the other modes evolve, and it has been verified by
-hand against the real service. It is not a recommendation; it is what production does today. Nothing about it is configurable, and passing `--clue-url` or
+— the production endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, no
+`fullPage`, and a bare string body with no `content-type`, exactly as production sends. A snapshot
+test pins it so it cannot drift while the other modes evolve, and it has been verified by hand
+against the real service.
+
+**Two deliberate differences from production's HTML**, both from sharing one hardened generator
+across all three modes rather than keeping a third near-copy:
+
+- The document is escaped before it goes into the `<script>` element. Production does not escape it,
+  which is the injection bug reported under "Findings for elsewhere". Reproducing a vulnerability in
+  the harness's own code is not a baseline worth having. The escaped form parses back to an
+  identical object, so this changes the render only for a document that would have triggered the
+  bug.
+- The height message is applied only when it is a positive number; production assigns it
+  unconditionally, so a `height: 0` message collapses production's iframe to `0px` and leaves the
+  harness's at its initial height. Against the deployment production actually renders through this
+  is unobservable — it posts 650 then 190 — but it would diverge on a target that reports 0, which
+  is the scenario "Findings for elsewhere" describes. If reproducing that collapse ever becomes the
+  point, the guard is the one line to make mode-specific.
+
+So the mode is parity of the *request* and of the render target, not a byte-for-byte copy of
+production's page. It is not a recommendation; it is what production does today. Nothing about it is configurable, and passing `--clue-url` or
 `--unit` to it is an error rather than a silently ignored flag.
 
 **`puppeteer-full-height` renders through the same iframe pathway** production's screenshots use —

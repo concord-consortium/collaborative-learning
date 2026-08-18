@@ -305,14 +305,25 @@ const kColumns: { header: string; value: (group: GroupSummary) => string }[] = [
   { header: "img tok est", value: (group) =>
     group.tokens.imageEstimatedTotal === 0 ? "-" : String(group.tokens.imageEstimatedTotal) },
   { header: "tok out", value: (group) => String(group.tokens.completionTotal) },
-  { header: "in mean", value: (group) => group.tokens.promptMean.toFixed(0) },
-  { header: "in med", value: (group) => group.tokens.promptMedian.toFixed(0) },
-  { header: "out mean", value: (group) => group.tokens.completionMean.toFixed(0) },
-  { header: "out med", value: (group) => group.tokens.completionMedian.toFixed(0) },
+  // Averages are blank on a row that spans more than one message shape. A mean prompt size across
+  // image-only and text-only rows is arithmetic over two incomparable populations — a ~14,000-token
+  // screenshot and a ~400-token summary — and reads as a fact about neither. Sums stay: "what did
+  // this file cost" is a real question.
+  { header: "in mean", value: (group) => mixedShapes(group) ? "-" : group.tokens.promptMean.toFixed(0) },
+  { header: "in med", value: (group) => mixedShapes(group) ? "-" : group.tokens.promptMedian.toFixed(0) },
+  { header: "out mean", value: (group) =>
+    mixedShapes(group) ? "-" : group.tokens.completionMean.toFixed(0) },
+  { header: "out med", value: (group) =>
+    mixedShapes(group) ? "-" : group.tokens.completionMedian.toFixed(0) },
   { header: "modeled $", value: (group) => group.cost.modeledUsd.toFixed(4) },
   { header: "incurred $", value: (group) => group.cost.incurredUsd.toFixed(4) },
   { header: "categories", value: (group) => formatCategories(group.categories) }
 ];
+
+/** True when a row aggregates more than one message shape, making per-row averages meaningless. */
+function mixedShapes(group: GroupSummary): boolean {
+  return group.message === "all";
+}
 
 function formatCategories(categories: Record<string, number>): string {
   const entries = Object.entries(categories).sort(([a], [b]) => a.localeCompare(b));

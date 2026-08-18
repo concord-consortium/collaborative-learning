@@ -117,9 +117,16 @@ describe("the parameterized mode", () => {
     expect(backend.renderTarget.captureHeightPx).toBe(4000);
   });
 
-  it("refuses an endpoint that is not an http(s) URL", () => {
+  it("refuses a plaintext endpoint off loopback, which would post the document in the clear", () => {
     expect(() => shutterbugParameterized({ shutterbugUrl: "shutterbug-staging" }))
-      .toThrow(/must be an http\(s\) URL/);
+      .toThrow(/must be an https URL/);
+    expect(() => shutterbugParameterized({ shutterbugUrl: "http://shutterbug.example.test" }))
+      .toThrow(/must be an https URL/);
+    // A local Shutterbug over http is a real development setup and stays allowed.
+    expect(() => shutterbugParameterized({ shutterbugUrl: "http://localhost:4000" })).not.toThrow();
+    expect(() => shutterbugParameterized({ shutterbugUrl: "http://127.0.0.1:4000" })).not.toThrow();
+    expect(() => shutterbugParameterized({ shutterbugUrl: "https://api.concord.org/shutterbug-staging" }))
+      .not.toThrow();
   });
 });
 
@@ -207,8 +214,9 @@ describe("the network contract", () => {
       sleep: noSleep,
       limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 10 }
     });
+    // Stopped while reading rather than after buffering the whole body.
     await expect(backendWithTinyLimit.render({ docId: "doc", content: document }))
-      .rejects.toThrow(RenderLimitExceeded);
+      .rejects.toThrow(/is over the 10 byte limit/);
   });
 
   it("refuses a capture whose dimensions exceed the limits, even when the bytes are small", async () => {
