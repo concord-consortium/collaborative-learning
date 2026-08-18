@@ -9,31 +9,48 @@ import { harnessRoot } from "../src/corpus.js";
 import { readPngInfo } from "../src/png.js";
 import { makeTestDataRoot, makeTestPng } from "./helpers.js";
 
-/** A browser whose pages fail for the documents named in `failFor`. */
-function browserThatFails(failFor: Set<string>, order: string[]) {
+/**
+ * A browser whose pages fail for the documents named in `failFor`.
+ *
+ * The frame this fake reports is taller than the 500px the generated page starts at, so every
+ * render here goes through the resize the backend does for a real document — and the element's box
+ * follows the height the backend set, the way a real one does. A fake that reported no
+ * `contentRowsHeightPx` skipped the resize and the clipped-capture guard entirely, because both
+ * compare against it and every comparison with `undefined` is false.
+ */
+function browserThatFails(failFor: Set<string>, order: string[], contentRowsHeightPx = 900) {
   let index = 0;
+  /** Every height the backend asked the frame to take, newest last. */
+  const frameHeights: number[] = [];
   return {
+    frameHeights,
     newPage: async () => {
       const docId = order[index++];
       return {
         setViewport: async () => undefined,
         screenshot: async () => makeTestPng(40, 40),
         goto: async () => undefined,
-        evaluate: async () => 1000 as never,
+        evaluate: async (script: unknown) => {
+          const match = /frame\.height = (\d+)/.exec(String(script));
+          if (match) frameHeights.push(Number(match[1]));
+          return undefined as never;
+        },
         waitForFunction: async () => {
           if (failFor.has(docId)) throw new Error("Waiting failed: 30000ms exceeded");
           return true;
         },
         $: async () => ({
-          boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1000 }),
-          screenshot: async () => makeTestPng(960, 1000)
+          boundingBox: async () => ({
+            x: 0, y: 0, width: 960, height: frameHeights.at(-1) ?? 500
+          }),
+          screenshot: async () => makeTestPng(960, frameHeights.at(-1) ?? 500)
         }),
         frames: () => [{
           url: () => "http://localhost:8080/iframe.html?unwrapped&readOnly",
           evaluate: async () => ({
             // High enough to satisfy any fixture's expected tile count; this fake renders every document
             // in the committed corpus, and a count below the document's own would never settle.
-            contentHeightPx: 1000, totalTiles: 99, unknownTiles: 0,
+            contentHeightPx: 1000, contentRowsHeightPx, totalTiles: 99, unknownTiles: 0,
             fontsReady: true, documentText: "x"
           }) as never
         }],
@@ -112,9 +129,14 @@ describe("a document that fails to render", () => {
     // The second run reuses the 24 that worked and only re-attempts the one that did not.
     output.length = 0;
     const stillFailing = order.filter((docId) => docId === "drawing");
+    // A taller document than the default fake reports, to show the frame is sized to the tiles
+    // rather than left at the 500px the page starts at.
+    const browser = browserThatFails(new Set(), stillFailing, 2000);
     await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
-      deps(dataRoot, browserThatFails(new Set(), stillFailing), output));
+      deps(dataRoot, browser, output));
     expect(output.join("\n")).toMatch(/Rendered 1 document\(s\).*reused 24 still-fresh.*0 failed/s);
+    // 2000px of tiles plus the document's own chrome, so the capture covers the whole document.
+    expect(Math.max(...browser.frameHeights)).toBeGreaterThanOrEqual(2000);
     expect(fs.existsSync(imageRepresentationPath(paths, "puppeteer-full-height", "drawing"))).toBe(true);
     // The document renders now, so last run's evidence is gone — including a PNG of student work
     // that no envelope would refer to.

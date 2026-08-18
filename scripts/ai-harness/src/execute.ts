@@ -22,7 +22,7 @@ import {
   dataUrlFor, imageRepresentationIsUsable, imageRepresentationPath, readImageEnvelope, resolveImageFile,
   sha256Bytes, singleImageOf
 } from "./represent-image.js";
-import { readPngInfo } from "./png.js";
+import { readPngHeader } from "./png.js";
 import { createHash } from "node:crypto";
 import { git } from "./files.js";
 import { kDefaultRenderLimits } from "./backends/types.js";
@@ -33,7 +33,14 @@ import {
   validatePromptFile, validateResultRow
 } from "./schemas.js";
 
-/** Enough of the file to read the IHDR chunk; the rest is hashed and discarded. */
+/**
+ * Enough of the file to read the IHDR chunk; the rest is hashed and discarded.
+ *
+ * The hosted-image check is deliberately header-only. It never has the whole file in memory — the
+ * body streams past and only these leading bytes are kept — so it cannot run the truncation check
+ * that `readPngInfo` does. It does not need to: a body that stops early produces a different
+ * sha256, and the sha256 comparison below is the check that actually matters here.
+ */
 const kPngHeaderBytes = 64;
 
 export const kDefaultModel = "gpt-4o-mini";
@@ -536,7 +543,7 @@ export function hostedImageCheck(
       }
       if (overLimit) return `is over the ${maxBytes} limit`;
       try {
-        readPngInfo(Buffer.concat(head), url);
+        readPngHeader(Buffer.concat(head), url);
       } catch (error) {
         return (error as Error).message;
       }

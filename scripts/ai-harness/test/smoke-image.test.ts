@@ -31,15 +31,26 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   const pendingDocs: string[] = [];
   let lastRenderedDoc = "";
 
+  /** How tall this fake says the document's tile rows are — taller than the page's 500px default. */
+  const contentRowsHeightPx = 1340;
+  /** Every height the backend asked a frame to take, across every render in this suite. */
+  const frameHeights: number[] = [];
+
   const fakeBrowser = () => ({
     newPage: async () => ({
       setViewport: async () => undefined,
       screenshot: async () => makeTestPng(40, 40),
       goto: async () => undefined,
-      evaluate: async () => 1420 as never,
+      evaluate: async (script: unknown) => {
+        const match = /frame\.height = (\d+)/.exec(String(script));
+        if (match) frameHeights.push(Number(match[1]));
+        return undefined as never;
+      },
       waitForFunction: async () => true,
       $: async () => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1420 }),
+        // Follows the height the backend set, the way a real element's box does. A fixed box let a
+        // render that never resized still look like a full-document capture.
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: frameHeights.at(-1) ?? 500 }),
         // The docId is not visible here, so each capture takes the next document off the queue.
         screenshot: async () => {
           lastRenderedDoc = pendingDocs.shift() ?? lastRenderedDoc;
@@ -50,7 +61,9 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
         url: () => "http://localhost:8080/iframe.html?unit=harness-render&unwrapped&readOnly",
         evaluate: async () => ({
           // High enough for any fixture in the committed corpus — see render-command.test.ts.
-          contentHeightPx: 1420, totalTiles: 99, unknownTiles: 0,
+          // Without `contentRowsHeightPx` the backend compares against `undefined`, skips the
+          // resize, and skips the guard that keeps `captureMode: "full-document"` honest.
+          contentHeightPx: 1420, contentRowsHeightPx, totalTiles: 99, unknownTiles: 0,
           fontsReady: true, documentText: "marker"
         }) as never
       }],
@@ -113,6 +126,9 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     // The recorded unit is a stable identifier, never an ephemeral loopback URL.
     expect(envelope.renderTarget.unit).toBe("harness-render");
     expect(envelope.renderTarget.captureMode).toBe("full-document");
+    // "Full document" is earned by resizing the frame to cover the tile rows, so the frame really
+    // has to have grown past the 500px the generated page starts at.
+    expect(Math.max(...frameHeights)).toBeGreaterThanOrEqual(contentRowsHeightPx);
     expect(fs.existsSync(resolveImageFile(file, envelope.images[0]))).toBe(true);
     expect(output.join("\n")).toMatch(/Rendered 25 document\(s\)/);
 

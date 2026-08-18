@@ -29,6 +29,31 @@ const servePng = (bytes: Buffer): Handler => (_request, response) => {
   response.end(bytes);
 };
 
+/**
+ * Serves `bytes` split at `boundaries`, as separate chunks on the wire.
+ *
+ * Consecutive `response.write` calls are coalesced into one network packet, and the reading side
+ * then sees a single chunk — which is exactly the case a single `response.end(bytes)` already
+ * covers. The pause between pieces is what makes them arrive separately.
+ */
+const inPieces = (bytes: Buffer, boundaries: number[]): Handler => (_request, response) => {
+  const edges = [0, ...boundaries, bytes.length];
+  response.writeHead(200, { "content-type": "image/png", "content-length": String(bytes.length) });
+  const writePiece = (index: number) => {
+    const piece = bytes.subarray(edges[index], edges[index + 1]);
+    // The last piece ends the response in the same turn it is written. Scheduling one more timer
+    // for a bare `end()` would leave the request open after the reader already had every declared
+    // byte, and `server.close()` then waits several seconds for it.
+    if (index + 2 >= edges.length) {
+      response.end(piece);
+      return;
+    }
+    response.write(piece);
+    setTimeout(() => writePiece(index + 1), 20);
+  };
+  writePiece(0);
+};
+
 async function check(handler: Handler, expected = pngSha, maxBytes?: number) {
   const server = await serving(handler);
   try {
@@ -41,6 +66,13 @@ async function check(handler: Handler, expected = pngSha, maxBytes?: number) {
 describe("verifying a hosted image", () => {
   it("passes when the bytes are the ones that were rendered", async () => {
     expect(await check(servePng(png))).toBeNull();
+  });
+
+  it("passes when the body arrives in more than one piece", async () => {
+    // The ordinary case over a real network, and the one a single `response.end(bytes)` fixture
+    // cannot reach: only the leading bytes are kept for the PNG check, so a check that expects a
+    // whole file in those bytes fails every hosted image whose body is split across chunks.
+    expect(await check(inPieces(png, [32, 200]))).toBeNull();
   });
 
   it("fails when the same URL now serves different pixels", async () => {

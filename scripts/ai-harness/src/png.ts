@@ -57,12 +57,19 @@ export interface PngInfo {
 }
 
 /**
- * Reads width and height from `bytes`, throwing `NotAPngError` when it is not a PNG.
+ * Reads width and height from the first 29 bytes of `bytes`, without looking at anything after the
+ * IHDR chunk.
+ *
+ * Use this when only the leading bytes are in hand — a streamed response whose body is hashed and
+ * discarded as it arrives, for instance. It answers "are these PNG bytes, and what size is the
+ * image?" and nothing else; it cannot tell a whole file from a truncated one, because the evidence
+ * for that is at the end of the file. Anywhere the whole file is available, call `readPngInfo`
+ * instead.
  *
  * `source` only ever appears in the error message — a file path, a URL, or a description of where
  * the bytes came from.
  */
-export function readPngInfo(bytes: Buffer, source: string): PngInfo {
+export function readPngHeader(bytes: Buffer, source: string): PngInfo {
   if (bytes.length < 8 + 4 + 4 + kIhdrLength) {
     throw new NotAPngError(source, `it is only ${bytes.length} byte(s) long`);
   }
@@ -78,7 +85,6 @@ export function readPngInfo(bytes: Buffer, source: string): PngInfo {
   if (declaredLength !== kIhdrLength) {
     throw new NotAPngError(source, `its IHDR chunk declares ${declaredLength} bytes, not ${kIhdrLength}`);
   }
-  walkChunks(bytes, source);
   const widthPx = bytes.readUInt32BE(16);
   const heightPx = bytes.readUInt32BE(20);
   // A zero dimension is legal to write down and impossible to render, and it would make the image
@@ -87,4 +93,16 @@ export function readPngInfo(bytes: Buffer, source: string): PngInfo {
     throw new NotAPngError(source, `its IHDR reports a ${widthPx}×${heightPx} image`);
   }
   return { widthPx, heightPx };
+}
+
+/**
+ * Reads width and height from a complete PNG file, throwing `NotAPngError` when `bytes` is not one.
+ *
+ * This is `readPngHeader` plus the truncation check: the chunk stream is walked and has to end with
+ * a complete IEND chunk, so a download that stopped early is refused rather than stored.
+ */
+export function readPngInfo(bytes: Buffer, source: string): PngInfo {
+  const info = readPngHeader(bytes, source);
+  walkChunks(bytes, source);
+  return info;
 }
