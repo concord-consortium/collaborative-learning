@@ -1,11 +1,16 @@
 /**
  * The two Shutterbug modes: the production-parity baseline and the parameterized one.
  *
- * `shutterbug-production-current` reproduces today's production request exactly — the production
- * endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, and no
- * `fullPage`. Bug for bug, clipping included. A snapshot test pins it so it cannot drift while the
- * other modes evolve. It is a **baseline**, not a recommendation: improvements go into
- * `shutterbug-parameterized`, which is the shape the eventual production fix will take.
+ * `shutterbug-production-current` matches production's request envelope — the production endpoint,
+ * the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, and no `fullPage` — and
+ * renders against production's target, clipping included. It is not byte-for-byte production: the
+ * page inside the request body comes from the generator this file shares with the other modes,
+ * which escapes the document rather than interpolating it raw and guards a zero `updateHeight`. The
+ * README lists every difference under "differences from production's HTML". A snapshot test pins
+ * what this mode posts, so it cannot drift while the other modes evolve.
+ *
+ * It is a **baseline**, not a recommendation: improvements go into `shutterbug-parameterized`,
+ * which is the shape the eventual production fix will take.
  *
  * Note that `scripts/shutterbug.ts` is *not* a production baseline, whatever the harness plan says:
  * it posts `height: 500, fullPage: true` and omits the unit.

@@ -10,7 +10,7 @@ import { ResultRow } from "../src/schemas.js";
 import { makeTask, makeTestDataRoot, readLines, testPricing, testRunMeta } from "./helpers.js";
 
 /**
- * The two bugs carried over from the milestone-1 review, both of which turned on how
+ * Two bugs found in review, both of which turned on how
  * `openai@6.45.0` actually behaves rather than on how it reads.
  */
 
@@ -68,7 +68,7 @@ describe("network failures are retried", () => {
       createCompletion,
       sleep: async () => undefined
     });
-    // Three dispatches, one successful row — the two retries the spec asks for.
+    // Three dispatches, one successful row: the first attempt plus two retries.
     expect(attempts).toBe(3);
     expect(summary.apiCalls).toBe(3);
     const rows = readLines(path.join(dataRoot, "results.jsonl")) as ResultRow[];

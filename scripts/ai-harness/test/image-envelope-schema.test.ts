@@ -38,7 +38,7 @@ const envelope = {
 };
 
 describe("the image envelope", () => {
-  it("validates the shape the spec describes", () => {
+  it("validates a complete envelope", () => {
     expect(validateImageEnvelope(envelope, file)).toEqual(envelope);
   });
 

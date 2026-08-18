@@ -270,7 +270,7 @@ describe("freshness", () => {
   });
 
   it("checks every image, not just the first", () => {
-    // Milestone 2 always writes one, but the checks handle N so milestone 3's per-tile capture is
+    // Every render writes one today, but the checks handle N so a per-tile capture is
     // additive — and a second image nobody looked at would be exactly the hole this guards.
     const { envelopeFile, envelope, identity: expected } = writeOne("second-image");
     const stale: ImageEnvelope = {
@@ -317,7 +317,8 @@ describe("building a request from an envelope", () => {
     expect(singleImageOf(envelope, envelopeFile).file).toBe("single-1.png");
   });
 
-  it.each([0, 2])("refuses an envelope with %i images, naming milestone 3", (count) => {
+  // The message names the unbuilt feature, which is deliberate: it is guidance to whoever hit it.
+  it.each([0, 2])("refuses an envelope with %i images, and says why", (count) => {
     const { envelopeFile, envelope } = writeOne("counted");
     const images = count === 0
       ? []

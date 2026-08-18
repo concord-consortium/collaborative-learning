@@ -412,7 +412,7 @@ const kTransientCodes =
  * in `APIConnectionError` or `APIConnectionTimeoutError`, and those report `name: "Error"`,
  * `status: undefined` and `code: undefined`, with the original code buried on `.cause`. Since
  * `openAiCompletion` sets `maxRetries: 0` precisely so the harness owns retries, missing them meant
- * a connection blip produced one attempt and an error row rather than the two retries the spec asks
+ * a connection blip produced one attempt and an error row rather than the two retries it should get
  * for.
  */
 export function isTransientError(error: unknown): boolean {

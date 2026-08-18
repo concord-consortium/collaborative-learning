@@ -266,7 +266,7 @@ export function writeImageRepresentation(options: WriteImageRepresentationOption
   // Filenames come from the image index, so a render that produces fewer images than the one before
   // would leave the surplus files behind — unreferenced by the envelope, and therefore invisible to
   // `removeImageRepresentation` when `--prune` runs. Rendered student work would survive pruning.
-  // Milestone 2 always writes exactly one image; milestone 3's per-tile capture makes this reachable.
+  // Unreachable while every render produces exactly one image; a per-tile capture would reach it.
   const written = new Set(images.map((image) => image.file));
   for (const name of fs.existsSync(directory) ? fs.readdirSync(directory) : []) {
     if (isImageFileFor(options.docId, name) && !written.has(name)) {
@@ -291,11 +291,11 @@ export function writeImageRepresentation(options: WriteImageRepresentationOption
 }
 
 /**
- * The one image a milestone-2 request is built from.
+ * The one image a request is built from.
  *
  * Zero and many both fail, and the first image is never quietly selected: an envelope with two
- * images means per-tile capture, which is milestone 3's job, and picking one of them would produce a
- * result row that looks like a normal full-document run and is not.
+ * images is a per-tile capture, and picking one of them would produce a result row that looks like
+ * a normal full-document run and is not.
  */
 export function singleImageOf(envelope: ImageEnvelope, envelopeFile: string): EnvelopeImage {
   if (envelope.images.length !== 1) {

@@ -583,10 +583,10 @@ function commandReport(flags: Record<string, string | true>, deps: HarnessDeps):
   const resultsFile = resolveDataPath(required(flags, "results"), "--results", dataRootFor(deps));
   // readResultRows treats a missing file as "no rows", which is what `run` needs when it creates a
   // fresh output file. For `report` that is a typo waiting to be misread as a result: an all-zeros
-  // table and an empty summary.json written over whatever was there before.
+  // table and an empty <basename>.summary.json written over whatever was there before.
   if (!fs.existsSync(resultsFile)) {
     throw new Error(`No results file at ${resultsFile}. Run \`harness.ts run\` first, or check ` +
-      "--results — the default output path is data/results/<corpus>-<experiment>.jsonl.");
+      "--results — the default output path is data/results/<corpus>__<experiment>.jsonl.");
   }
   const rows = readResultRows(resultsFile);
   if (rows.length === 0) {

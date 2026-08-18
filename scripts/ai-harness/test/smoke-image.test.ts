@@ -13,9 +13,11 @@ import { harnessRoot, isContainedBy } from "../src/files.js";
 import { listFilesUnder, makeTestDataRoot, makeTestPng, readLines } from "./helpers.js";
 
 /**
- * The mocked end-to-end path extended through an `image-only` run, with no browser and no network. The render backend is a fake that hands back a committed-shape PNG, so
- * what is exercised is the wiring — envelope, freshness, request construction, cost, rows, report —
- * rather than the rendering, which criterion 7's local integration step covers.
+ * The mocked end-to-end path extended through an `image-only` run, with no browser and no network.
+ *
+ * The render backend is a fake that hands back a committed-shape PNG, so what is exercised is the
+ * wiring — envelope, freshness, request construction, cost, rows, report — rather than the
+ * rendering itself. `test/local-render.integration.ts` covers that, against a real browser.
  */
 describe("end-to-end image-only run against the synthetic corpus", () => {
   const dataRoot = makeTestDataRoot("smoke-image");
@@ -292,9 +294,9 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     expect(imageAll.tokens.promptTotal).not.toBe(textAll.tokens.promptTotal);
   });
 
-  it("refuses an envelope with two images, naming milestone 3", async () => {
+  it("refuses an envelope with two images rather than sending the first", async () => {
     // A genuine second image — real file, real hash, real byte count — so the envelope is entirely
-    // valid and the only thing wrong with it is that milestone 2 does not know which one to send.
+    // valid and the only thing wrong with it is that nothing here knows which one to send.
     // The first is never silently selected.
     const file = imageRepresentationPath(paths, "puppeteer-full-height", "drawing");
     const envelope = readImageEnvelope(file);
@@ -320,7 +322,7 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   });
 
   it("refuses an envelope with no images at all", async () => {
-    // Zero images is a damaged envelope rather than a milestone-3 feature, so it is reported as one
+    // Zero images is a damaged envelope rather than an unbuilt feature, so it is reported as one
     // — but it fails just as hard. See DEVIATIONS in the README.
     const file = imageRepresentationPath(paths, "puppeteer-full-height", "drawing");
     const envelope = readImageEnvelope(file);

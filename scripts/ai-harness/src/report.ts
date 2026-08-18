@@ -250,8 +250,10 @@ export function assertSingleCorpusAndExperiment(rows: ResultRow[], resultsFile: 
 export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Date = new Date()): ReportSummary {
   assertSingleCorpusAndExperiment(rows, resultsFile);
   const { current, superseded } = partitionSuperseded(rows);
-  // The cross-run aggregate is kept out of the keyed map rather than stored under its display label,
-  // so an experiment that happens to define a run called "(all runs)" cannot merge into it.
+  // The keyed map holds per-run rows and the per-shape cross-run rows; those are keyed by the
+  // `kAllRunsKey` *symbol*, not by its display label, so an experiment that happens to define a run
+  // called "(all runs)" cannot merge into one of them. The whole-file `overall` row is kept outside
+  // the map entirely, because nothing else should ever be able to accumulate into it.
   const groups = new Map<string, Accumulator>();
   const overall = newAccumulator(kAllRunsKey, "all", "all");
   const get = (
@@ -282,7 +284,14 @@ export function summarizeResults(rows: ResultRow[], resultsFile: string, now: Da
     rows: rows.length,
     currentRows: current.length,
     superseded: { rows: superseded.length, incurredUsd: incurredUsdOf(superseded) },
-    groups: [...groups.values(), overall].map(finish)
+    // Per-run rows first, then the cross-run aggregates, then the whole-file row. Insertion order
+    // interleaved them, so a reader scanning the table met an "(all runs)" row partway down and had
+    // to work out which rows it was summing.
+    groups: [
+      ...[...groups.values()].filter((group) => group.runId !== kAllRunsKey),
+      ...[...groups.values()].filter((group) => group.runId === kAllRunsKey),
+      overall
+    ].map(finish)
   };
 }
 

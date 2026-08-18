@@ -3,7 +3,7 @@ import { ResultRow } from "../src/schemas.js";
 import { testRunMeta } from "./helpers.js";
 
 /**
- * Implementation doc 1 asks reports to use the override when present *and show both*. Carrying only
+ * A report groups by the override when there is one, and shows both values. Carrying only
  * the effective modality meant a hand-set `modalityOverride` silently regrouped a document with
  * nothing to say a human rather than the classifier had put it there — a judgement call presented as
  * a measurement.

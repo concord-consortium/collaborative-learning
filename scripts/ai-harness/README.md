@@ -57,7 +57,7 @@ OPENAI_API_KEY=sk-…
 | `render` (shutterbug) | **yes** | no | Posts documents to the Shutterbug service and downloads the result. |
 | `plan` | no | no | Validates everything and prints the expanded run list and worst-case cost. |
 | `run` | **yes** | **yes** | The only command that calls OpenAI. `--max-cost` is required. |
-| `report` | no | no | Reads a results JSONL file and writes `summary.json` beside it. |
+| `report` | no | no | Reads a results JSONL file and writes `<basename>.summary.json` beside it. |
 
 ```bash
 npx tsx harness.ts import    --from examples/synthetic-corpus --corpus synthetic-corpus \
@@ -76,8 +76,9 @@ npx tsx harness.ts report    --results data/results/synthetic-corpus__text-basel
 Flags are plain `--name value` pairs. An unknown flag is an error, not a warning.
 
 `plan` on the committed synthetic corpus projects a worst case of about **$0.11** for both text
-baselines across all 25 documents, and roughly **$0.40** more for the image-only run — image tokens
-dominate, and the reservation assumes every retry is used.
+baselines across all 25 documents, and roughly **$0.22** more for the image-only run — a full worst
+case of about **$0.33** for all three, which is the figure the recorded `image-vs-text` run below
+reports. Image tokens dominate, and the reservation assumes every retry is used.
 
 ## Data safety
 
@@ -92,7 +93,7 @@ dominate, and the reservation assumes every retry is used.
   corpora arrive: delete them when the experiment concludes, keep document ids and Firestore paths
   out of anything that leaves the team, and remember that injected related-summaries data contains
   *other* students' work.
-- Milestone 1 touches no production data, no credentials, and no `firebase-admin`.
+- Milestones 1 and 2 touch no production data, no credentials, and no `firebase-admin`.
 
 ## Concepts
 
@@ -138,7 +139,7 @@ gymnastics. It is a candidate for a later milestone.
 
 ```json
 { "schemaVersion": 1, "docId": "drawing", "kind": "image", "modeId": "puppeteer-full-height",
-  "backendId": "puppeteer", "backendVersion": 1,
+  "backendId": "puppeteer", "backendVersion": 2,
   "renderTarget": { "clueUrl": "http://localhost:8080", "unit": "harness-render",
     "clueRevision": "9b53df828 (dirty)", "shutterbugUrl": null, "viewportWidthPx": 960,
     "captureMode": "full-document", "captureHeightPx": null },
@@ -167,16 +168,17 @@ modes are named and separate, and an improvement never gets folded into the base
 |---|---|---|---|---|
 | `puppeteer-full-height` (default) | local | `--clue-url`, default `http://localhost:8080` | harness's own | full document, 960px wide |
 | `shutterbug-production-current` | yes | production's `branch/shutterbug-support` | `mods` | `height: 1500`, no `fullPage` |
-| `shutterbug-parameterized` | yes | `--clue-url` | `--unit` | `--capture-height` |
+| `shutterbug-parameterized` | yes | `--clue-url`, default production's `branch/shutterbug-support` | `--unit`, default `mods` | `--capture-height`, default 1500; `--shutterbug-url`, default **staging** |
 
-**`shutterbug-production-current` is the parity baseline.** It reproduces today's production request
+**`shutterbug-production-current` is the parity baseline.** It matches production's request envelope
 — the production endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, no
-`fullPage`, and a bare string body with no `content-type`, exactly as production sends. A snapshot
-test pins it so it cannot drift while the other modes evolve, and it has been verified by hand
-against the real service.
+`fullPage`, and a bare string body with no `content-type`. A snapshot test pins what this mode posts
+so it cannot drift while the other modes evolve, and it has been verified by hand against the real
+service.
 
-**Two deliberate differences from production's HTML**, both from sharing one hardened generator
-across all three modes rather than keeping a third near-copy:
+**Deliberate differences from production's HTML**, all from sharing one hardened generator across
+all three modes rather than keeping a third near-copy. The page is the `content` field of that
+request body, so these are differences in what gets rendered, not in the request around it:
 
 - The document is escaped before it goes into the `<script>` element. Production does not escape it,
   which is the injection bug reported under "Findings for elsewhere". Reproducing a vulnerability in
@@ -189,9 +191,19 @@ across all three modes rather than keeping a third near-copy:
   is unobservable — it posts 650 then 190 — but it would diverge on a target that reports 0, which
   is the scenario "Findings for elsewhere" describes. If reproducing that collapse ever becomes the
   point, the guard is the one line to make mode-specific.
+- The page sets `window.__clueRender = { initialValuePosted: false }` and flips it to `true` once
+  the document has been handed to the iframe. Production has no equivalent; `puppeteer.ts` waits on
+  it, because whether the parent posted the document is the one thing a local capture cannot see
+  from outside. Shutterbug ignores it.
+- Smaller hardening in the same generator, none of which changes what a working page draws: the
+  missing-`contentWindow` branch returns instead of falling through to post to nothing; the message
+  listener guards `event.data` before reading `.type`; `console.warn` is used where production
+  writes `console.warning` (not a function, so production's warning throws instead of printing); and
+  the iframe `src` is HTML-escaped inside double quotes where production writes a raw `&` inside
+  single quotes.
 
-So the mode is parity of the *request* and of the render target, not a byte-for-byte copy of
-production's page. It is not a recommendation; it is what production does today. Nothing about it is configurable, and passing `--clue-url` or
+So the mode is parity of the *request envelope* (endpoint, headers, height, `fullPage`) and of the
+render target, not of the page body. It is not a recommendation; it is what production does today. Nothing about it is configurable, and passing `--clue-url` or
 `--unit` to it is an error rather than a silently ignored flag.
 
 **`puppeteer-full-height` renders through the same iframe pathway** production's screenshots use —
@@ -223,9 +235,9 @@ or other assets from elsewhere. If offline operation ever has to be a guarantee,
 intercept and reject non-localhost requests, and a test must assert it.
 
 `npm ci` in this directory now installs puppeteer, which downloads a Chromium build on first
-install. If your environment blocks install scripts, approve it (`npm approve-scripts puppeteer`) or
-point `PUPPETEER_SKIP_DOWNLOAD` at an existing browser — the browser is only needed for the local
-render mode.
+install. If your environment blocks that download, set `PUPPETEER_SKIP_DOWNLOAD=true` to skip it and
+`PUPPETEER_EXECUTABLE_PATH` to an existing Chromium — the browser is only needed for the local
+render mode, so every other command works without either.
 
 ### The rendering unit, and why it matters
 
@@ -374,8 +386,14 @@ different question from the one the file describes.
 
 ### Cache
 
-Key = `sha256Canonical({ model, messages, responseFormat, generationSettings })`, stored at
-`data/cache/<first-2>/<key>.json`.
+Key = `sha256Canonical({ model, messages, responseFormat, generationSettings, imageSha256s })`,
+stored at `data/cache/<first-2>/<key>.json`.
+
+`imageSha256s` is the hash of every image file the request carries, and it is **omitted entirely**
+when there are none — so text-only keys are byte-identical to the ones written before images
+existed, and existing cache entries keep working. It is folded in because for a Shutterbug render
+the message holds only a hosted URL, and the same URL can serve different pixels tomorrow: API
+payload identity and evaluation identity are related, but they are not the same thing.
 
 - Successes **and refusals** are cached. A refusal is a real API response that cost real money;
   re-running it would just spend the money again.
@@ -478,9 +496,15 @@ The report's `img tok est` column is the harness's pre-flight image-token estima
 `tok in` the API actually billed. It is `-` for a text group rather than `0`, so the two cases cannot
 be confused.
 
-Every on-disk format has `schemaVersion: 1`, is described as a TypeScript type in
+Every on-disk format carries a `schemaVersion`, is described as a TypeScript type in
 [`src/schemas.ts`](src/schemas.ts), and is validated on every read; a bad file fails with a message
-naming the file and the field.
+naming the file and the field. The versions are not all the same number:
+
+| Format | Version |
+|---|---|
+| Result rows (`data/results/*.jsonl`) | **2** — see above |
+| Corpus manifest, text representation envelopes, image envelopes | 1 |
+| Prompt files, experiment files, report summaries, cache entries | 1 |
 
 ### Version lockstep
 
@@ -500,6 +524,8 @@ src/capability.ts          tile capability registry, document classification
 src/represent-text.ts      text representation variants
 src/represent-image.ts     image envelopes: paths, writing, freshness (files included)
 src/png.ts                 PNG header reader (dimensions + "is this really a PNG?")
+src/files.ts               atomic writes, path containment, JSON reads, git
+src/backends/types.ts      what a render backend is, and the limits every one is held to
 src/backends/index.ts      the three named render modes
 src/backends/render-html.ts  the render page, with safe interpolation — shared by all modes
 src/backends/puppeteer.ts  local capture through CLUE's iframe pathway
@@ -599,12 +625,12 @@ and why.
     is implemented as `canonicalJson(messages).length / 3`, which includes structural overhead. That
     is deterministic and conservative in the right direction. Image parts are excluded from that
     count entirely and priced by the image formula instead.
-10a. **`estimateTokensForText` is not a flat `length / 3`.** The spec prescribes that; the
+11. **`estimateTokensForText` is not a flat `length / 3`.** The spec prescribes that; the
     implementation counts ASCII at three characters per token but every non-ASCII character as a
     whole token, because CJK text and emoji routinely cost about one token each and dividing them by
     three would under-reserve. This changes the arithmetic `--max-cost` depends on, so it is called
     out rather than left as an implementation detail.
-10b. **The default output path names the corpus.** The spec says
+12. **The default output path names the corpus.** The spec says
     `data/results/<experiment>.jsonl`; the implementation writes
     `data/results/<corpus>__<experiment>.jsonl`, so the same experiment run against two corpora does
     not append into one file — which `report` would then refuse for mixing corpora.
@@ -612,54 +638,67 @@ and why.
 Milestone 2 (against
 [docs/plans/CLUE-371-harness-implementation-2.md](../../docs/plans/CLUE-371-harness-implementation-2.md)):
 
-11. **Image envelopes are filed under the *mode* id, not the backend id.** The spec says
+13. **Image envelopes are filed under the *mode* id, not the backend id.** The spec says
     `representations/image-<backendId>/`, but `shutterbug-production-current` and
     `shutterbug-parameterized` share the backend id `shutterbug` and would overwrite each other,
     each looking stale to the other — so you could never hold a parity render and a parameterized
     render side by side, which is exactly the comparison this milestone wants. The envelope records
     both `modeId` and `backendId`; the directory uses `modeId`.
-12. **`run` and `plan` do not compare the render target; `render` does.** The spec applies the full
+14. **`run` and `plan` do not compare the render target; `render` does.** The spec applies the full
     freshness check everywhere. Splitting it avoids duplicating `--clue-url` / `--unit` /
     `--shutterbug-url` onto `plan` and `run` purely so they can reconstruct a target — and the
     distinction is real: which CLUE build a picture was taken against decides whether `render`
     should take it again, but it does not make the stored pixels the wrong pixels to send. `run`
     still checks the document hash, mode, backend, backend version and every file-level property,
     and the row records the whole render target either way, so provenance is kept.
-13. **An envelope with zero images reports "it records no images", not a milestone-3 error.** The
+15. **An envelope with zero images reports "it records no images", not a milestone-3 error.** The
     spec asks for the milestone-3 message on both zero and many. Zero images is a damaged envelope
     rather than an unbuilt feature, and pointing the reader at milestone 3 would misdescribe it.
     Two or more images does say milestone 3. Both fail, and the first image is never selected.
-14. **The render target's `unit` is a stable identifier, not the URL CLUE fetches.** The harness's
+16. **The render target's `unit` is a stable identifier, not the URL CLUE fetches.** The harness's
     own rendering unit is served on an ephemeral loopback port; recording that URL would make every
     stored render look stale the moment the server restarted. It is recorded as `harness-render`,
     with the served URL passed to CLUE separately.
-15. **`buildImageRequest` derives `detail` from the message it builds** rather than accepting one
+17. **`buildImageRequest` derives `detail` from the message it builds** rather than accepting one
     from the caller, and refuses a caller-supplied `detail` outright. The caller knows facts about
     the file; the builder knows what it just sent. This also means the cost model follows the shared
     builder if its `detail` ever changes, instead of confidently pricing the old value.
-16. **Render diagnostics are a DOM count, not a console check.** CLUE logs nothing when a tile type
+18. **Render diagnostics are a DOM count, not a console check.** CLUE logs nothing when a tile type
     is not registered — it substitutes an `Unknown` content model drawn by the placeholder
     component. The local backend therefore counts tiles inside the CLUE frame (`.tool-tile`, with
     `.placeholder-tile` alongside it for an unknown one), which is the only way a render can notice
     it drew the wrong thing.
-17. **The readiness protocol does not wait for `updateHeight`.** The spec prescribes waiting for at
+19. **The readiness protocol does not wait for `updateHeight`.** The spec prescribes waiting for at
     least one valid height message and then for the height to hold still. CLUE posts
     `document.body.scrollHeight`, which is 0 in this build for a fully rendered document, so that
     wait can never be satisfied — it is why backend version 1 rendered nothing. Readiness is measured
     inside the frame instead: content present, tile count and height unchanged across polls, fonts
     loaded, held for the same stability interval.
-18. **The fatal-error set is narrower than "any console error".** The spec lists page errors,
+20. **The fatal-error set is narrower than "any console error".** The spec lists page errors,
     unhandled rejections, failed dynamic imports, and console errors naming an unregistered tile
     type. A real CLUE server logs React key warnings at *error* level and probes for an optional
     `teacher-guide/content.json` that legitimately 404s, so failing on every console error or failed
     request failed every document. Page errors and failed script loads are fatal; everything else is
     recorded in the evidence file without failing the render. The unregistered-tile case is caught by
     the DOM count above, since nothing is logged for it.
-19. **"Not clipped" is guaranteed by construction, not by an overflow check.** The frame is sized
+21. **"Not clipped" is guaranteed by construction, not by an overflow check.** The frame is sized
     from the document's measured tile rows and the capture is then checked to cover them. A DOM
     overflow signal would be the obvious check and is not trustworthy here: `.document-content`
     reports zero overflow at every frame height when measured directly, yet the same selector read
     during a settle reports a constant ~75px for documents whose content is a third of the frame.
+22. **The render page is served over loopback HTTP and navigated to, not injected with
+    `page.setContent`.** The spec prescribes `setContent`. That is why version 1 rendered nothing:
+    it leaves the document on an opaque origin, so Chromium denies storage access to the embedded
+    iframe and CLUE throws reading `localStorage` before it finishes booting. The reasoning is under
+    "`puppeteer-full-height` renders through the same iframe pathway" above; it is repeated here
+    because a spec-versus-reality conflict belongs in this list.
+23. **Render errors are filed under `<modeId>`, not `<backendId>`.** The spec says
+    `render-errors/<backendId>/<docId>/`. For the same reason as entry 13 — two Shutterbug modes
+    share one backend id — evidence from a parity render would overwrite evidence from a
+    parameterized one.
+24. **`render` accepts a `--capture-height` flag.** The spec's CLI list does not include it. The
+    parameterized Shutterbug mode has to be able to set the height it clips at, or it is not
+    parameterized; the local mode refuses the flag rather than silently dropping it.
 
 ### Verified against a real API call, a real browser, a real service?
 

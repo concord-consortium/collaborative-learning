@@ -5,8 +5,8 @@
  * There is exactly one generator, shared by all three modes. The two prior-art copies and production
  * itself each interpolate `JSON.stringify(content)` straight into a `<script>` element, so a student
  * whose text contains `</script>` ends the element early and injects markup into the render page.
- * This copy escapes instead. (Production's copy needs the same fix; that is a production change —
- * see "Findings for elsewhere" in the milestone-2 spec.)
+ * This copy escapes instead. Production's copy needs the same fix, which is a production change
+ * rather than a harness one.
  */
 
 /**

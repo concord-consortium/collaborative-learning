@@ -95,7 +95,7 @@ describe("experiment validation", () => {
     expect(experiment.runs).toHaveLength(1);
   });
 
-  it("rejects a message shape milestone 1 cannot run", () => {
+  it("rejects a message shape nothing can run yet", () => {
     expect(() => validateExperimentFile(
       { schemaVersion: 1, name: "x", runs: [{ ...run, message: "mixed" }] }, "experiment.json", context))
       .toThrow(/runs\[0\]\.message must be one of text-only/);

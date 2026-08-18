@@ -9,9 +9,9 @@ import { createHash } from "node:crypto";
 export const kSchemaVersion = 1;
 
 /**
- * Result rows are version 2 from milestone 2 on.
+ * Result rows are version 2; every other on-disk format is version 1.
  *
- * Milestone 1's rows carried a required `textVariant` string, which an image-only row has nothing
+ * Version-1 rows carried a required `textVariant` string, which an image-only row has nothing
  * honest to put in. It is replaced by a `representation` descriptor that both kinds populate — so a
  * version-1 row cannot be read as a version-2 one, and is refused with an instruction to re-run
  * rather than being silently mis-read.
@@ -141,7 +141,7 @@ export type Modality = typeof modalities[number];
 export const corpusSources = ["synthetic", "demo", "qa", "production"] as const;
 export type CorpusSource = typeof corpusSources[number];
 
-/** Recorded when a production document is pulled (milestone 6). Always `null` in milestone 1. */
+/** Recorded when a production document is pulled. Always `null` until the `pull` command exists. */
 export interface HistoricalAnalysis {
   summarizer: string;
   promptTokens: number;
@@ -235,7 +235,7 @@ function validateManifestDocument(value: unknown, file: string, field: string): 
 }
 
 /**
- * Related summaries are injected into request construction from milestone 3 on, and the manifest is
+ * Related summaries are not yet injected into request construction, and the manifest is
  * exactly the file a human hand-edits, so these are checked rather than cast.
  */
 function validateRelatedSummary(value: unknown, file: string, field: string): RelatedSummaryEntry {
@@ -364,7 +364,7 @@ export function validatePromptFile(value: unknown, file: string): PromptFile {
 // Experiment file
 // ---------------------------------------------------------------------------
 
-/** Milestone 2 runs text-only and image-only messages. `mixed` arrives in milestone 3. */
+/** Text-only and image-only are what run today; `mixed` is declared but nothing builds one yet. */
 export const messageShapes = ["text-only", "image-only"] as const;
 export type MessageShape = typeof messageShapes[number];
 
@@ -540,8 +540,8 @@ export interface ImageEnvelope {
   sourceContentSha256: string;
   generatedAt: string;
   /**
-   * Always an array, even though milestone 2 always writes exactly one full-document image: the
-   * model, the validators and the freshness checks all handle N so milestone 3's per-tile capture is
+   * Always an array, even though every render writes exactly one full-document image today: the
+   * model, the validators and the freshness checks all handle N so a per-tile capture is
    * additive rather than a format change. Request construction separately requires exactly one.
    */
   images: EnvelopeImage[];
@@ -737,7 +737,7 @@ export type ResultStatus = typeof resultStatuses[number];
  * screenshot's provenance *is*: the same document rendered against a different CLUE build is a
  * different picture. `runId` alone would lose all of it.
  *
- * This is also the extension point milestone 3's mixed rows need.
+ * This is also the extension point a mixed-message row will need.
  */
 export type RepresentationDescriptor =
   | { kind: "text"; variantId: string; variantVersion: number; sourceContentSha256: string }

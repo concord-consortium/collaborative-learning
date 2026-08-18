@@ -21,9 +21,9 @@ import { kHarnessRenderUnitId } from "./render-unit.js";
  *
  * `backendId`, `backendVersion`, the prerequisites line and which unit the mode needs were
  * previously spread across a ternary, a switch, and three string comparisons against
- * `"puppeteer-full-height"` in the CLI. Adding milestone 3's per-tile mode meant finding all of
- * them, and missing the unit one is silent: CLUE falls back to its default unit and every tile
- * draws as an unknown tile in a perfectly valid PNG.
+ * `"puppeteer-full-height"` in the CLI. Adding a mode meant finding all of them, and missing the
+ * unit one is silent: CLUE falls back to its default unit and every tile draws as an unknown tile
+ * in a perfectly valid PNG.
  */
 export interface RenderModeDescriptor {
   backendId: string;
@@ -113,7 +113,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       `${kProductionShutterbugUrl}, clipped at ${kProductionCaptureHeightPx}px (none configurable)`,
     defaultUnit: null,
     needsUnitServer: false,
-    // Frozen by definition: this mode exists to reproduce today's production request exactly.
+    // Frozen by definition: this mode exists to match production's request envelope.
     unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx"],
     build: (options) => shutterbugProductionCurrent({ clueRevision: options.clueRevision ?? null })
   },

@@ -164,7 +164,8 @@ export function detailOfSingleImage(messages: ChatCompletionMessageParam[]): Ima
 /**
  * The image analogue, built by the shared `buildImageMessages` unmodified — `detail` stays the
  * hardcoded `"auto"` production sends, so an image run cannot win by asking for a different one.
- * Detail variants arrive in milestone 3.
+ * Comparing detail settings would mean changing the shared builder, which is not something an
+ * experiment definition can reach.
  *
  * The caller supplies what it knows about the file (its hash and its size) and the builder supplies
  * what it knows about the request (the detail it just sent), so there is no way to describe an image
@@ -219,8 +220,8 @@ export function chatCompletionParams(request: HarnessRequest): Record<string, un
  * serve different bytes tomorrow. The image hashes are therefore folded in as well — API-payload
  * identity and evaluation identity are related, but they are not the same thing.
  *
- * The image hashes are omitted entirely when there are none, so text-only keys are byte-identical to
- * the ones milestone 1 wrote and existing cache entries keep working.
+ * The image hashes are omitted entirely when there are none, so a text-only key is byte-identical
+ * to what it would have been before images existed, and existing cache entries keep working.
  */
 export function requestKeyFor(request: HarnessRequest): string {
   const { apiRequest, inputAccounting } = request;

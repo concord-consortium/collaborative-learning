@@ -83,7 +83,7 @@ describe("the committed experiment files", () => {
     expect(experiment.runs.length).toBeGreaterThan(0);
   });
 
-  it("runs the milestone's headline comparison from one file", () => {
+  it("runs the image-versus-text comparison from one file", () => {
     const experimentFile = path.join(harnessRoot, "experiments", "image-vs-text.json");
     const experiment = validateExperimentFile(
       JSON.parse(fs.readFileSync(experimentFile, "utf8")), experimentFile, {
@@ -97,7 +97,7 @@ describe("the committed experiment files", () => {
   });
 });
 
-describe("milestone 1 result rows are refused, not mis-read", () => {
+describe("version-1 result rows are refused, not mis-read", () => {
   const v2Common = {
     schemaVersion: 2,
     experiment: "e", experimentSha256: "abc", runId: "r", corpus: "c", docId: "d",
