@@ -612,7 +612,7 @@ export class DB {
     // The owner's stored fields beyond `uid`: a group owner's `groupId`. The runtime value comes from the
     // stores; it is valid here because createDocument validated it via validateDocumentKindCreation before
     // writing (a group kind requires the user to be in a group, so currentGroupId is present).
-    const ownerFields = getDocumentOwnerFields(kind, { groupId: user.currentGroupId });
+    const ownerFields = getDocumentOwnerFields(kind, user.currentGroupId);
 
     // `title` is stamped only when present so Firestore never sees `title: undefined`.
     const titleInfo: { title?: string } = {};

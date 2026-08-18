@@ -107,17 +107,17 @@ describe("document kinds registry", () => {
 
   describe("owner fields", () => {
     it("stamps a groupId for a group-owned kind", () => {
-      expect(getDocumentOwnerFields(GroupDocument, { groupId: "3" })).toEqual({ groupId: "3" });
+      expect(getDocumentOwnerFields(GroupDocument, "3")).toEqual({ groupId: "3" });
     });
 
     it("stamps nothing for a kind owned by a user or a class", () => {
-      expect(getDocumentOwnerFields(ProblemDocument, { groupId: "3" })).toEqual({});
-      expect(getDocumentOwnerFields(PersonalDocument, { groupId: "3" })).toEqual({});
-      expect(getDocumentOwnerFields(undefined, { groupId: "3" })).toEqual({});
+      expect(getDocumentOwnerFields(ProblemDocument, "3")).toEqual({});
+      expect(getDocumentOwnerFields(PersonalDocument, "3")).toEqual({});
+      expect(getDocumentOwnerFields(undefined, "3")).toEqual({});
     });
 
     it("stamps nothing when the group-owned kind has no group to record", () => {
-      expect(getDocumentOwnerFields(GroupDocument, {})).toEqual({});
+      expect(getDocumentOwnerFields(GroupDocument, undefined)).toEqual({});
     });
   });
 

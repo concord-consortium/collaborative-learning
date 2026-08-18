@@ -188,13 +188,14 @@ export interface IDocumentOwnerFields {
 
 /**
  * The owner fields to stamp on a new document of the given kind, beyond the owner uid getDocumentOwner
- * returns. Only a group owner has one.
+ * returns. Only a group owner has one, so `groupId` is the creating user's current group — ignored for
+ * every other kind, and absent when they are in no group.
  */
 export function getDocumentOwnerFields(
-  kind: string|null|undefined, ctx: { groupId?: string }
+  kind: string|null|undefined, groupId?: string
 ): IDocumentOwnerFields {
-  if (getDocumentOwnerType(kind) !== "group" || !ctx.groupId) return {};
-  return { groupId: ctx.groupId };
+  if (getDocumentOwnerType(kind) !== "group" || !groupId) return {};
+  return { groupId };
 }
 
 /**
