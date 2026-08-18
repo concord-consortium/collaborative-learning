@@ -20,6 +20,7 @@ import {
   ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext, RegisterToolbarContext
 } from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
+import { getTileNodes, kTileClass, tileDomAttributes } from "./tile-dom";
 import { TileActivityBadges } from "./tile-activity-badges";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -319,7 +320,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && persistentUI.showChatPanel;
-    const classes = classNames("tool-tile", model.display, tileEltClass, {
+    const classes = classNames(kTileClass, model.display, tileEltClass, {
       placeholder: isPlaceholderTile,
       readonly: readOnly,
       fixed: model.isFixedPosition,
@@ -373,7 +374,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
           <div
             className={classes} data-testid="tool-tile"
             ref={elt => this.domElement = elt}
-            data-tool-id={model.id}
+            {...tileDomAttributes(model.id)}
             role="group"
             aria-label={tileAriaLabel}
             style={style}
@@ -629,15 +630,12 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
 
   // Navigate to an adjacent sibling tile. Returns true if a sibling was found.
   // The destination tile receives focus (focus ring via :focus-visible) but is NOT selected.
-  // NOTE: Uses DOM selectors (.document-content, .tool-tile[data-tool-id]) to find
-  // siblings — if those CSS classes change, keyboard nav will silently break.
-  // A model-based approach using getTilesInDocumentOrder() was tried but produced
-  // incorrect tab ordering in practice, so DOM queries remain the reliable method.
+  // NOTE: Finds siblings through the DOM (see tile-dom.ts for that contract). A model-based
+  // approach using getTilesInDocumentOrder() was tried but produced incorrect tab ordering in
+  // practice, so DOM queries remain the reliable method.
   private navigateToSiblingTile(e: KeyboardEvent, reverse: boolean): boolean {
     const documentContent = this.domElement?.closest('.document-content');
-    const tiles = Array.from(
-      documentContent?.querySelectorAll('.tool-tile[data-tool-id]') ?? []
-    ) as HTMLElement[];
+    const tiles = documentContent ? getTileNodes(documentContent) : [];
     const currentIndex = tiles.indexOf(this.domElement!);
     const nextTile = reverse ? tiles[currentIndex - 1] : tiles[currentIndex + 1];
     if (nextTile) {

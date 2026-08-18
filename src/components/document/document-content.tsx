@@ -11,6 +11,8 @@ import { DocumentContentModelType } from "../../models/document/document-content
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getDocumentIdentifier, getDocumentLogParams } from "../../models/document/document-utils";
 import { isPlaceholderContent } from "../../models/tiles/placeholder/placeholder-content";
+import { getContainingTileNode, getTileIdFromNode, getTileNode,
+  getTileNodes } from "../tiles/tile-dom";
 import { logDocumentOrCurriculumEvent } from "../../models/document/log-document-event";
 import { IDropRowInfo, TileRowModelType } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
@@ -282,10 +284,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // key off the app's own collapse state (the `.collapsed` class) rather than measured geometry.
     if (this.domElement.closest(".resizable-panel.collapsed")) return;
     const containerRect = this.domElement.getBoundingClientRect();
-    const nodes = this.domElement.querySelectorAll<HTMLElement>(".tool-tile[data-tool-id]");
     const tiles: ITileExtent[] = [];
-    nodes.forEach((node) => {
-      const tileId = node.dataset.toolId;
+    getTileNodes(this.domElement).forEach((node) => {
+      const tileId = getTileIdFromNode(node);
       if (!tileId) return;
       const tile = content.getTile(tileId);
       // A placeholder is an empty layout slot, not something the student can be said to have seen.
@@ -294,7 +295,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // Container tiles render their contents as tiles too, so the query above matches both. Record
       // which entries are nested rather than dropping either: the container is what the student sees
       // as one thing, while its contents are what they read.
-      const containerNode = node.parentElement?.closest<HTMLElement>(".tool-tile[data-tool-id]");
+      const containerNode = getContainingTileNode(node);
       tiles.push({
         tileId,
         tileType: tile?.content.type ?? "unknown",
@@ -302,7 +303,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         top: rect.top,
         bottom: rect.bottom,
         height: rect.height,
-        containerId: containerNode?.dataset.toolId
+        containerId: containerNode && getTileIdFromNode(containerNode)
       });
     });
     const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
@@ -891,9 +892,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     requestAnimationFrame(() => {
       if (isSameDocument) {
         // Same-doc move: tile keeps its ID
-        const tileElt = this.domElement?.querySelector(
-          `.tool-tile[data-tool-id="${tileId}"]`
-        ) as HTMLElement | null;
+        const tileElt = this.domElement && getTileNode(this.domElement, tileId);
         tileElt?.focus();
       } else {
         // Cross-doc copy: find the tile at the drop position.
@@ -906,9 +905,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
             : row.tiles.length - 1;
           const tile = row.tiles[tileIndex];
           if (tile) {
-            const tileElt = this.domElement?.querySelector(
-              `.tool-tile[data-tool-id="${tile.tileId}"]`
-            ) as HTMLElement | null;
+            const tileElt = this.domElement && getTileNode(this.domElement, tile.tileId);
             tileElt?.focus();
           }
         }
