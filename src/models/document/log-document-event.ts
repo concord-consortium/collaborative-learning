@@ -1,6 +1,7 @@
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { isCurriculumLogEvent, logCurriculumEvent } from "../curriculum/log-curriculum-event";
 import { TreeManagerType } from "../history/tree-manager";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
@@ -129,6 +130,23 @@ export function logDocumentEvent(
 ) {
   const params = processDocumentEventParams(_params, Logger.stores);
   Logger.log(event, {...params, ...otherParams}, method);
+}
+
+/**
+ * Logs an event whose subject may be either a saved document (`document`) or curriculum section
+ * content (`curriculum`), expanding whichever is present into that family's canonical fields.
+ * Params carrying neither are logged as they are.
+ */
+export function logDocumentOrCurriculumEvent(event: LogEventName, params: Record<string, any>) {
+  if (isCurriculumLogEvent(params)) {
+    logCurriculumEvent(event, params);
+  }
+  else if (isDocumentLogEvent(params)) {
+    logDocumentEvent(event, params);
+  }
+  else {
+    Logger.log(event, params);
+  }
 }
 
 /**

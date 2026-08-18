@@ -48,19 +48,25 @@ Payload:
 {
   cause: "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange"
        | "commentsToggle" | "comparisonToggle",
-  documentId,        // the document whose visibility is reported (key, or curriculum section path)
-  documentType,      // saved docs only — problem/personal/learningLog/publication/…
-  documentTitle,     // saved docs only, when the doc has a title
-  documentOwner,     // saved docs only — owner uid (identifies whose doc, e.g. in Sort Work)
+  // …plus the document's identity, in the same fields every other document event uses (below)
   tileCount,         // total tiles in the document (denominator: "how many of N are visible")
   viewportHeight,    // scroll container clientHeight, for context
   visibleTiles: [    // only tiles with percentVisible > 0, in document order
-    { tileId, tileType, tileTitle, percentVisible }   // percentVisible: integer 0–100
+    { tileId, tileType, tileTitle, percentVisible }   // percentVisible: integer 1–100
   ],
   dividerPosition,   // present ONLY when cause === "dividerResize" (0 | 50 | 100)
   resizedRowId       // present ONLY when cause === "tileResize" (row height is the resize unit)
 }
 ```
+
+**Identity comes from the shared log helpers, not from fields named here.** A saved document is
+logged through `logDocumentEvent` (`documentKey`, `documentUid`, `documentType`, `documentTitle`, …)
+and the resources reading doc through `logCurriculumEvent` (`curriculum`, `curriculumFacet`,
+`curriculumSection`) — the same fields history, comment, and tile events already carry, so this event
+joins with them. `getDocumentLogParams(content)` turns the content model into whichever of
+`{ document }` / `{ curriculum }` applies, and `logDocumentOrCurriculumEvent` dispatches on it. That
+dispatch already existed, copied inline in `log-history-event.ts` and `log-comment-event.ts`; it is
+extracted so all three share it.
 
 The vertical-geometry math and the params assembly are extracted into a pure module
 (`src/components/document/tile-visibility.ts`) so they are unit-testable without mounting the heavy,
@@ -69,10 +75,9 @@ MobX-injected `DocumentContentComponent` (which has no existing test harness).
 - `tileType` = the tile model's `content.type`; `tileTitle` = `getTileTitleForLogging(tileId, document)`
   (i.e. `content.getTile(tileId)?.computedTitle ?? "<no title>"`) — both pulled from the document
   content model, not the DOM.
-- Emit through `Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, params)` with document context
-  attached (documentId/type/etc., following the existing document-event helpers). The transport-layer
-  `isLoggingEnabled` guard already excludes researchers and non-authed modes, so no call-site guard is
-  needed.
+- Emit through `logDocumentOrCurriculumEvent(LogEventName.TILE_VISIBILITY_CHANGE, params)`, which
+  attaches the document identity as described above. The transport-layer `isLoggingEnabled` guard
+  already excludes researchers and non-authed modes, so no call-site guard is needed.
 
 ## Visibility computation (vertical %)
 
@@ -101,9 +106,9 @@ One shared debounced settle per instrumented component:
 ```ts
 private settle = debounce(() => {
   const visibleTiles = this.computeVisibleTiles();
-  Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, {
-    cause: this.pendingCause, documentId, tileCount, viewportHeight, visibleTiles,
-    ...this.pendingExtra
+  logDocumentOrCurriculumEvent(LogEventName.TILE_VISIBILITY_CHANGE, {
+    ...getDocumentLogParams(content),
+    cause: this.pendingCause, tileCount, viewportHeight, visibleTiles, ...this.pendingExtra
   });
 }, 500);
 ```
@@ -189,8 +194,8 @@ Plumbing (pass-through only, no gating logic): add `logTileVisibility?: boolean`
 `document-content.tsx`, and add + forward it through `editable-document-content.tsx`.
 
 Note: the resources doc renders curriculum `section.content` rather than a saved document, so it has
-no document key — the plan pins what identifier to log for it (e.g. the section path) in the
-`documentId` slot.
+no document key. It is identified the way the other curriculum events identify one: the section path
+in `curriculum`, via `logCurriculumEvent`.
 
 ## Testing (jest)
 

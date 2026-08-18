@@ -9,7 +9,8 @@ import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight, TileRowHandle } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
-import { getDocumentIdentifier, getDocumentLogContext } from "../../models/document/document-utils";
+import { getDocumentIdentifier, getDocumentLogParams } from "../../models/document/document-utils";
+import { logDocumentOrCurriculumEvent } from "../../models/document/log-document-event";
 import { IDropRowInfo, TileRowModelType } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -19,7 +20,6 @@ import { RowListComponent } from "./row-list";
 import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
 import { ContainerContext } from "./container-context";
-import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { buildVisibilityLogParams, computeVisibleTiles, nextVisibilityCause,
   type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
@@ -300,14 +300,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
     // Nothing to report if the (on-screen) container has no tile in the viewport, e.g. an empty doc.
     if (visibleTiles.length === 0) return;
-    const documentContext = getDocumentLogContext(content);
-    if (documentContext.documentId == null && this.props.documentId != null) {
-      documentContext.documentId = this.props.documentId;
-    }
     const params = buildVisibilityLogParams(
-      cause, documentContext, this.domElement.clientHeight, tiles.length, visibleTiles, extra
+      cause, this.domElement.clientHeight, tiles.length, visibleTiles, extra
     );
-    Logger.log(LogEventName.TILE_VISIBILITY_CHANGE, params);
+    logDocumentOrCurriculumEvent(
+      LogEventName.TILE_VISIBILITY_CHANGE, { ...getDocumentLogParams(content), ...params }
+    );
   };
 
   // Trailing debounce = "the student stopped scrolling / dragging"; one event ~500ms after motion ends.

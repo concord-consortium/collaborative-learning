@@ -65,23 +65,19 @@ export interface IVisibilityLogExtra {
   resizedRowId?: string;
 }
 
-export interface IVisibilityDocumentContext {
-  documentId?: string;
-  documentType?: string;
-  documentTitle?: string;
-  documentOwner?: string;
-}
-
-/** Assembles TILE_VISIBILITY_CHANGE params, attaching each cause-specific field only for its cause. */
+/**
+ * Assembles the TILE_VISIBILITY_CHANGE params that describe what was visible, attaching each
+ * cause-specific field only for its cause. The document's identity is added by the caller, via the
+ * shared document/curriculum log helpers.
+ */
 export function buildVisibilityLogParams(
   cause: VisibilityCause,
-  documentContext: IVisibilityDocumentContext,
   viewportHeight: number,
   tileCount: number,
   visibleTiles: IVisibleTile[],
   extra: IVisibilityLogExtra = {}
 ): Record<string, any> {
-  const params: Record<string, any> = { cause, ...documentContext, viewportHeight, tileCount, visibleTiles };
+  const params: Record<string, any> = { cause, viewportHeight, tileCount, visibleTiles };
   if (cause === "dividerResize" && extra.dividerPosition != null) {
     params.dividerPosition = extra.dividerPosition;
   }
