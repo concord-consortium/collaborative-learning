@@ -68,10 +68,13 @@ export interface IDocumentOwnerContext {
 
 const kDocumentKindPattern = /^[a-z][a-zA-Z0-9]*$/;
 /**
- * A document `kind` is used as a Firestore path segment (the canonical-pointer slot) as well as the registry
- * key, so a kind is restricted to a camelCase identifier: a lowercase letter followed by letters/digits, with
- * no separators or special characters. This matches the built-in document type strings (e.g.
- * "learningLogPublication") and keeps the value safe as a Firestore document id.
+ * A `kind` is the registry key, and a class-wide document's canonical-pointer slot is labeled with its kind,
+ * so a kind has to be usable as a Firestore path segment. It is restricted to a camelCase identifier: a
+ * lowercase letter followed by letters/digits, with no separators or special characters. This matches the
+ * built-in document type strings (e.g. "learningLogPublication") and keeps the value safe as a document id.
+ *
+ * The reverse does not hold: a slot label need not be a kind. The group document's slot is labeled "default"
+ * while its kind is "group" — see kDefaultCanonicalDocumentLabel for what a label is.
  */
 export function isValidDocumentKind(value: string): boolean {
   return kDocumentKindPattern.test(value);
