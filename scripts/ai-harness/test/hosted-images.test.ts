@@ -91,8 +91,6 @@ function run(tasks: RunTask[], checkHostedImage?: HostedImageCheck, name = "host
   };
 }
 
-const usable: HostedImageCheck = async () => null;
-
 describe("hosted images are verified before anything is dispatched", () => {
   it("runs normally when every image still serves the pixels that were rendered", async () => {
     const tasks = [hostedTask("a", "https://images.test/a.png"), hostedTask("b", "https://images.test/b.png")];

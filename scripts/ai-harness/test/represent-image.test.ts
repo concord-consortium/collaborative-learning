@@ -111,10 +111,6 @@ describe("writing an image representation", () => {
     fs.writeFileSync(orphan, makeTestPng(100, 100));
     writeOne("shrinking");
     expect(fs.existsSync(orphan)).toBe(false);
-    // Another document's files are left strictly alone.
-    const { envelopeFile: other } = writeOne("bystander");
-    writeOne("shrinking");
-    expect(fs.existsSync(resolveImageFile(other, readImageEnvelope(other).images[0]))).toBe(true);
   });
 
   it("does not delete another document's PNG whose id shares a prefix", () => {
@@ -127,10 +123,25 @@ describe("writing an image representation", () => {
     expect(fs.existsSync(victim)).toBe(true);
   });
 
-  it("leaves no temporary files behind", () => {
-    const { envelopeFile } = writeOne("tidy");
-    const directory = path.dirname(envelopeFile);
-    expect(fs.readdirSync(directory).filter((name) => name.endsWith(".tmp"))).toEqual([]);
+  it("leaves nothing behind but the envelope and its picture", () => {
+    // The whole listing rather than a `.tmp` filter: the filter was coupled to `files.ts`'s naming
+    // with nothing anchoring the two, so a differently named temporary file — a dot-prefixed one,
+    // say — would empty it and the assertion would pass having checked nothing.
+    const directory = path.join(dataRoot, "tidy-only");
+    fs.mkdirSync(directory, { recursive: true });
+    const envelopeFile = path.join(directory, "tidy.json");
+    writeImageRepresentation({
+      envelopeFile,
+      docId: "tidy",
+      modeId: "puppeteer-full-height",
+      backendId: "puppeteer",
+      backendVersion: 2,
+      renderTarget,
+      sourceContentSha256: "0".repeat(64),
+      generatedAt: "2026-08-13T00:00:00.000Z",
+      images: [{ bytes: makeTestPng(60, 80), url: null, tileId: null, purpose: "full-document" }]
+    });
+    expect(fs.readdirSync(directory).sort()).toEqual(["tidy-1.png", "tidy.json"]);
   });
 });
 

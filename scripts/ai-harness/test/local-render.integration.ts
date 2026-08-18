@@ -104,4 +104,8 @@ async function main(): Promise<void> {
   console.log(`\nAll ${fixtures.length} fixtures rendered against ${kClueUrl}.`);
 }
 
-main();
+// Caught, or a throw becomes an unhandled rejection rather than the message and exit code above.
+main().catch((error) => {
+  console.error(`\nThe local render check could not run: ${(error as Error).message}`);
+  process.exitCode = 1;
+});

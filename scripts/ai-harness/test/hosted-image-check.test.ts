@@ -133,8 +133,13 @@ describe("verifying a hosted image", () => {
   });
 
   it("reports a connection failure rather than throwing", async () => {
-    // Nothing is listening on this port; the preflight must return a reason, not blow up the run.
-    const reason = await hostedImageCheck(2000)("http://127.0.0.1:1/shot.png", pngSha);
-    expect(typeof reason).toBe("string");
+    // A port this process really did bind and then closed, rather than a guess like port 1 that
+    // depends on nothing else on the machine using it. The preflight must return a reason, not blow
+    // up the run — and the reason has to be the connection failure rather than any other bug.
+    const server = await serving(servePng(png));
+    const url = server.url;
+    await server.close();
+    const reason = await hostedImageCheck(2000)(url, pngSha);
+    expect(reason).toMatch(/ECONNREFUSED|connect|fetch failed/i);
   });
 });

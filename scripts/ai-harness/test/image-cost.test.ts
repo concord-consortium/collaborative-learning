@@ -54,8 +54,12 @@ describe("what one image costs in input tokens", () => {
       .toBeGreaterThan(estimateImageTokens({ ...size, detail: "low" }, imagePricing));
   });
 
-  it("refuses to price an image with no dimensions", () => {
-    expect(() => estimateImageTokens({ widthPx: 0, heightPx: 100, detail: "auto" }, imagePricing))
+  it.each([
+    [0, 100], [100, 0], [-5, 100], [100, -5], [960.5, 1420], [960, 1420.25]
+  ])("refuses to price a %p x %p image", (widthPx, heightPx) => {
+    // Non-integers are refused as well as non-positives: a fractional dimension is not a pixel
+    // count, and the tile arithmetic would quietly produce a fractional number of tiles.
+    expect(() => estimateImageTokens({ widthPx, heightPx, detail: "auto" }, imagePricing))
       .toThrow(/both dimensions must be positive integers/);
   });
 });
@@ -162,10 +166,16 @@ describe("accounting data never leaves the process", () => {
     expect(requestKeyFor(request)).not.toBe(requestKeyFor(other));
   });
 
-  it("leaves text-only keys exactly as milestone 1 computed them", () => {
-    // Empty image lists are omitted from the key rather than hashed as `[]`, so caches survive.
+  it("omits an empty image list from the key", () => {
+    // Empty image lists are omitted rather than hashed as `[]`, so text-only keys are byte-identical
+    // to the ones written before images existed and existing cache entries keep working.
     const text = makeRequest("hello");
     expect(requestKeyFor(text)).toBe(requestKeyFor({ ...text, inputAccounting: { images: [] } }));
+    // Pinned, because the two lines above are equally satisfied by a key recipe that changed for
+    // *both* — and a changed recipe silently invalidates every cache entry on disk. If this fails,
+    // the recipe moved: decide deliberately, then update this value.
+    expect(requestKeyFor(text))
+      .toBe("8c47272ed53083bacf6c40cff7e7f15c473b9fb735e8aa4674abe006a706b386");
   });
 });
 

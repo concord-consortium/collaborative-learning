@@ -14,11 +14,28 @@ export const repoRoot = path.resolve(harnessRoot, "..", "..");
 /**
  * Scratch space for tests. It lives inside `data/` because nothing the harness generates is ever
  * written outside that (gitignored) tree.
+ *
+ * Removed again when the suite finishes, not merely at the start of the next run: a full corpus of
+ * documents and rendered PNGs per suite, left on disk indefinitely, adds up. Set
+ * `KEEP_TEST_DATA=1` to keep it for inspection after a failure.
  */
+const testDataRoots: string[] = [];
+
+// Registered once, when this module is first imported by a test file, rather than per call: some
+// suites build their scratch directory inside a test body, and jest refuses a hook declared there.
+// The guard is for `test:render`, which runs under tsx and has no jest globals at all.
+if (typeof afterAll === "function") {
+  afterAll(() => {
+    if (process.env.KEEP_TEST_DATA) return;
+    for (const directory of testDataRoots) fs.rmSync(directory, { recursive: true, force: true });
+  });
+}
+
 export function makeTestDataRoot(name: string): string {
   const directory = path.join(harnessRoot, "data", "test-runs", name);
   fs.rmSync(directory, { recursive: true, force: true });
   fs.mkdirSync(directory, { recursive: true });
+  testDataRoots.push(directory);
   return directory;
 }
 
@@ -146,6 +163,27 @@ export function makeTask(docId: string, runId: string, text: string, worstCase =
     imageTokensEstimated: 0,
     hostedImages: []
   };
+}
+
+/**
+ * Every file under `root`, as absolute paths, skipping `node_modules` and `.git`.
+ *
+ * `fs.readdirSync(root, { recursive: true })` walks those too, which for the harness root is tens of
+ * thousands of entries and several seconds. This is for taking a before-and-after picture of what a
+ * command wrote.
+ */
+export function listFilesUnder(root: string): string[] {
+  const found: string[] = [];
+  const walk = (directory: string) => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === ".git") continue;
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else found.push(full);
+    }
+  };
+  if (fs.existsSync(root)) walk(root);
+  return found.sort();
 }
 
 export function readLines(file: string): unknown[] {

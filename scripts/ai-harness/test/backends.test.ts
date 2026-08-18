@@ -8,9 +8,11 @@ import {
 import {
   RenderLimitExceeded, checkCaptureSize, checkEncodedSize, isPublicHttpsUrl, redirectDowngradeReason
 } from "../src/backends/types.js";
+import { generateRenderHtml } from "../src/backends/render-html.js";
 import { makeTestPng } from "./helpers.js";
 
-const document = { rowOrder: [], rowMap: {}, tileMap: {} };
+// Named to avoid shadowing the DOM `document` global in files that are about browser rendering.
+const emptyDocument = { rowOrder: [], rowMap: {}, tileMap: {} };
 
 // ---------------------------------------------------------------------------
 // A fake browser, so the backend's protocol can be tested without Chromium
@@ -120,9 +122,22 @@ function fakeBrowser(options: FakeOptions = {}) {
   return { browser, state, png };
 }
 
-/** A page server that hands back URLs without opening a socket. */
+/**
+ * A page server that hands back URLs without opening a socket, keeping the HTML it was handed.
+ *
+ * Kept, because the URL it returns is a literal this file wrote: asserting the backend navigated to
+ * something matching that pattern re-reads the fake rather than checking anything. What the page
+ * actually holds is the interesting part.
+ */
+const servedPages = new Map<string, string>();
+/** Everything ever served, which `forget` does not remove — so a finished render can be inspected. */
+const servedPagesEver = new Map<string, string>();
 const fakePageServer = async () => ({
-  serve: (docId: string) => ({ url: `http://127.0.0.1:9/${docId}`, forget: () => undefined }),
+  serve: (docId: string, html: string) => {
+    servedPages.set(docId, html);
+    servedPagesEver.set(docId, html);
+    return { url: `http://127.0.0.1:9/${docId}`, forget: () => servedPages.delete(docId) };
+  },
   close: async () => undefined
 });
 
@@ -164,10 +179,21 @@ describe("the puppeteer backend", () => {
 
   it("renders the shared HTML through the iframe pathway and screenshots the iframe", async () => {
     const { backend, state, png } = makeBackend();
-    const outcome = await backend.render({ docId: "drawing", content: document });
+    servedPages.clear();
+    const outcome = await backend.render({ docId: "drawing", content: emptyDocument });
     // Navigated to a real http origin, not injected: `setContent` leaves an opaque origin, and
     // Chromium then denies the CLUE iframe access to localStorage so it never finishes booting.
-    expect(state.url).toMatch(/^http:\/\/127\.0\.0\.1:\d+\//);
+    // `setContent` is therefore never called: `PageLike` does not declare it, so the backend could
+    // not call it even if it wanted to, and this fake page does not implement it.
+    expect(state.url).toBe("http://127.0.0.1:9/drawing");
+    expect(Object.keys(fakeBrowser().browser)).not.toContain("setContent");
+    // And the page that was served is the shared generator's output, unmodified. Pattern-matching
+    // the fake's own URL proved nothing about what reached the browser.
+    expect(servedPagesEver.get("drawing")).toBe(generateRenderHtml({
+      content: emptyDocument, clueUrl: "http://localhost:8080", unit: "http://127.0.0.1:5000/content.json"
+    }));
+    // And it is no longer being served, because the render is over.
+    expect(servedPages.has("drawing")).toBe(false);
     expect(state.viewport).toEqual({ width: 960, height: 1024 });
     expect(state.screenshots).toBe(1);
     expect(outcome.images).toEqual([{ bytes: png, url: null, tileId: null, purpose: "full-document" }]);
@@ -177,7 +203,7 @@ describe("the puppeteer backend", () => {
     const { backend } = makeBackend({
       measurement: { totalTiles: 4, unknownTiles: 0 }
     });
-    const outcome = await backend.render({ docId: "drawing", content: document });
+    const outcome = await backend.render({ docId: "drawing", content: emptyDocument });
     expect(outcome.diagnostics).toEqual({
       reportedHeightPx: 1420,
       unknownTiles: 0,
@@ -194,19 +220,19 @@ describe("the puppeteer backend", () => {
     const { backend } = makeBackend({
       measurement: { totalTiles: 3, unknownTiles: 2 }
     });
-    const outcome = await backend.render({ docId: "ai", content: document });
+    const outcome = await backend.render({ docId: "ai", content: emptyDocument });
     expect(outcome.diagnostics.unknownTiles).toBe(2);
   });
 
   it("fails when the document is never posted to the iframe", async () => {
     const { backend } = makeBackend({ neverPostsInitialValue: true });
-    await expect(backend.render({ docId: "stuck", content: document }))
+    await expect(backend.render({ docId: "stuck", content: emptyDocument }))
       .rejects.toThrow(/never posted the document/);
   });
 
   it("fails when the CLUE frame never appears", async () => {
     const { backend } = makeBackend({ frameUrl: null });
-    await expect(backend.render({ docId: "stuck", content: document }))
+    await expect(backend.render({ docId: "stuck", content: emptyDocument }))
       .rejects.toThrow(/ran out before the CLUE iframe appeared/);
   });
 
@@ -218,19 +244,19 @@ describe("the puppeteer backend", () => {
     // document.body.scrollHeight, which is 0 in this build even for a fully rendered document, so
     // waiting on it could never succeed.
     const { backend } = makeBackend({ measurement }, { timeoutMs: 700 });
-    await expect(backend.render({ docId: "stuck", content: document }))
+    await expect(backend.render({ docId: "stuck", content: emptyDocument }))
       .rejects.toThrow(/ran out before the document finished rendering/);
   });
 
   it("names the document, the URL and the last known height when it fails", async () => {
     const { backend } = makeBackend({ neverPostsInitialValue: true });
-    await expect(backend.render({ docId: "stuck", content: document }))
+    await expect(backend.render({ docId: "stuck", content: emptyDocument }))
       .rejects.toThrow(/^stuck: .*rendering http:\/\/localhost:8080\/iframe\.html.*last reported height none/s);
   });
 
   it("fails on a page error", async () => {
     const { backend } = makeBackend({ pageErrors: ["ReferenceError: thing is not defined"] });
-    await expect(backend.render({ docId: "broken", content: document }))
+    await expect(backend.render({ docId: "broken", content: emptyDocument }))
       .rejects.toThrow(/reported 1 error\(s\).*ReferenceError/s);
   });
 
@@ -238,7 +264,7 @@ describe("the puppeteer backend", () => {
     const { backend } = makeBackend({
       consoleMessages: [{ type: "error", text: "Failed to fetch dynamically imported module" }]
     });
-    await expect(backend.render({ docId: "broken", content: document }))
+    await expect(backend.render({ docId: "broken", content: emptyDocument }))
       .rejects.toThrow(/dynamically imported module/);
   });
 
@@ -249,7 +275,7 @@ describe("the puppeteer backend", () => {
       consoleMessages: [{ type: "error", text: 'Warning: Each child in a list should have a unique "key" prop.' }],
       requestFailures: ["http://127.0.0.1:5000/teacher-guide/content.json"]
     });
-    const outcome = await backend.render({ docId: "noisy", content: document });
+    const outcome = await backend.render({ docId: "noisy", content: emptyDocument });
     expect(outcome.images).toHaveLength(1);
   });
 
@@ -257,25 +283,25 @@ describe("the puppeteer backend", () => {
     const { backend } = makeBackend({
       requestFailures: ["http://localhost:8080/chunk.4f2a.js"]
     });
-    await expect(backend.render({ docId: "broken", content: document }))
+    await expect(backend.render({ docId: "broken", content: emptyDocument }))
       .rejects.toThrow(/chunk\.4f2a\.js/);
   });
 
   it("keeps a console warning without failing the document", async () => {
     const { backend } = makeBackend({ consoleMessages: [{ type: "warning", text: "slow thing" }] });
-    const outcome = await backend.render({ docId: "noisy", content: document });
+    const outcome = await backend.render({ docId: "noisy", content: emptyDocument });
     expect(outcome.diagnostics.consoleWarnings).toEqual(["warning: slow thing"]);
   });
 
   it("fails when the iframe has no visible area", async () => {
     const { backend } = makeBackend({ boundingBox: null });
-    await expect(backend.render({ docId: "invisible", content: document }))
+    await expect(backend.render({ docId: "invisible", content: emptyDocument }))
       .rejects.toThrow(/no visible area/);
   });
 
   it("fails when the render page has no iframe at all", async () => {
     const { backend } = makeBackend({ element: null });
-    await expect(backend.render({ docId: "gone", content: document }))
+    await expect(backend.render({ docId: "gone", content: emptyDocument }))
       .rejects.toThrow(/no #clue-frame element/);
   });
 
@@ -296,7 +322,7 @@ describe("the puppeteer backend", () => {
       stableForMs: 0, pollIntervalMs: 1, timeoutMs: 600
     });
     const started = Date.now();
-    await expect(backend.render({ docId: "wedged", content: document }))
+    await expect(backend.render({ docId: "wedged", content: emptyDocument }))
       .rejects.toThrow(/finding the iframe did not finish within the 600ms budget/);
     expect(Date.now() - started).toBeLessThan(3000);
   });
@@ -316,7 +342,7 @@ describe("the puppeteer backend", () => {
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1, timeoutMs: 600
     });
-    await expect(backend.render({ docId: "wedged", content: document }))
+    await expect(backend.render({ docId: "wedged", content: emptyDocument }))
       .rejects.toThrow(/capturing the iframe did not finish within the 600ms budget/);
   });
 
@@ -326,7 +352,22 @@ describe("the puppeteer backend", () => {
     const fake = fakeBrowser();
     (fake.browser as any).newPage = async () => {
       const page = await fakeBrowser().browser.newPage();
-      (page as any).goto = async () => { throw new Error("net::ERR_CONNECTION_REFUSED"); };
+      const failureHandlers: ((payload: any) => void)[] = [];
+      const originalOn = page.on;
+      (page as any).on = (event: string, handler: (payload: any) => void) => {
+        if (event === "requestfailed") failureHandlers.push(handler);
+        return originalOn.call(page, event, handler);
+      };
+      (page as any).goto = async () => {
+        // The page got as far as failing to load its own code, which is the line worth keeping.
+        for (const handler of failureHandlers) {
+          handler({
+            url: () => "http://localhost:8080/main.js",
+            failure: () => ({ errorText: "net::ERR_CONNECTION_REFUSED" })
+          });
+        }
+        throw new Error("net::ERR_CONNECTION_REFUSED");
+      };
       return page;
     };
     const backend = puppeteerBackend({
@@ -334,20 +375,24 @@ describe("the puppeteer backend", () => {
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1
     });
-    const error = await backend.render({ docId: "unreachable", content: document })
+    const error = await backend.render({ docId: "unreachable", content: emptyDocument })
       .then(() => { throw new Error("expected the render to fail"); },
         (thrown) => thrown as Error & { context?: { screenshot?: Buffer; consoleOutput?: string[] } });
     expect(error).not.toBeInstanceOf(RenderFailed);
     expect(error.message).toContain("ERR_CONNECTION_REFUSED");
     expect(error.context?.screenshot).toBeInstanceOf(Buffer);
-    expect(error.context?.consoleOutput).toBeDefined();
+    // The content, not merely the presence of an array: `[]` satisfied `toBeDefined()`, so an
+    // evidence file that captured nothing at all looked exactly like one that worked.
+    expect(error.context?.consoleOutput).toEqual(expect.arrayContaining([
+      expect.stringContaining("request failed: http://localhost:8080/main.js")
+    ]));
   });
 
   it("attaches evidence when the failure is a size-limit rejection", async () => {
     const { backend } = makeBackend({}, {
       limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 10 }
     });
-    const error = await backend.render({ docId: "huge", content: document })
+    const error = await backend.render({ docId: "huge", content: emptyDocument })
       .then(() => { throw new Error("expected the render to fail"); },
         (thrown) => thrown as Error & { context?: { screenshot?: Buffer } });
     expect(error).toBeInstanceOf(RenderLimitExceeded);
@@ -356,7 +401,7 @@ describe("the puppeteer backend", () => {
 
   it("closes the page even when the render fails", async () => {
     const { backend, state } = makeBackend({ neverPostsInitialValue: true });
-    await expect(backend.render({ docId: "stuck", content: document })).rejects.toThrow(RenderFailed);
+    await expect(backend.render({ docId: "stuck", content: emptyDocument })).rejects.toThrow(RenderFailed);
     expect(state.closedPages).toBe(1);
   });
 
@@ -370,11 +415,16 @@ describe("the puppeteer backend", () => {
       launch: async () => {
         launches += 1;
         return fake.browser;
-      }
+      },
+      // The same fakes every other case here passes. Without them this case bound a real port and
+      // sat through the real settle interval — about 1.2 seconds — to count two calls to `launch`.
+      startPageServer: fakePageServer,
+      stableForMs: 0,
+      pollIntervalMs: 1
     });
     await Promise.all([
-      backend.render({ docId: "a", content: document }),
-      backend.render({ docId: "b", content: document })
+      backend.render({ docId: "a", content: emptyDocument }),
+      backend.render({ docId: "b", content: emptyDocument })
     ]);
     expect(launches).toBe(1);
     await backend.close!();
@@ -384,8 +434,8 @@ describe("the puppeteer backend", () => {
   it("uses one browser for the whole run, a fresh page per document, and closes both", async () => {
     const { backend, state } = makeBackend();
     await backend.open!();
-    await backend.render({ docId: "a", content: document });
-    await backend.render({ docId: "b", content: document });
+    await backend.render({ docId: "a", content: emptyDocument });
+    await backend.render({ docId: "b", content: emptyDocument });
     await backend.close!();
     expect(state.newPages).toBe(2);
     expect(state.closedPages).toBe(2);
@@ -452,7 +502,7 @@ describe("the puppeteer backend", () => {
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1
     });
-    await expect(backend.render({ docId: "late-failure", content: document }))
+    await expect(backend.render({ docId: "late-failure", content: emptyDocument }))
       .rejects.toThrow(/reported \d+ error\(s\).*dynamically imported module/s);
     // The failure really is the late one — the frame had already been resized when it happened.
     expect(resized).toBe(true);
@@ -464,7 +514,7 @@ describe("the puppeteer backend", () => {
     // capture, and the failure names it.
     const started = Date.now();
     const { backend } = makeBackend({ measurement: { contentHeightPx: 0 } }, { timeoutMs: 800 });
-    await expect(backend.render({ docId: "slow", content: document }))
+    await expect(backend.render({ docId: "slow", content: emptyDocument }))
       .rejects.toThrow(/800ms budget for this document ran out/);
     // Comfortably inside a multiple of the budget — the point is that phases share it.
     expect(Date.now() - started).toBeLessThan(3000);
@@ -500,7 +550,7 @@ describe("the puppeteer backend", () => {
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1
     });
-    await backend.render({ docId: "tall", content: document });
+    await backend.render({ docId: "tall", content: emptyDocument });
     // Sized to cover the tiles rather than captured at the 500px viewport default. CLUE lays out to
     // fill its frame, so a taller document is simply absent from a default-height capture.
     expect(fake.state.frameHeights.length).toBeGreaterThan(0);
@@ -516,7 +566,7 @@ describe("the puppeteer backend", () => {
       measurement: { contentRowsHeightPx: 4000 },
       boundingBox: { x: 0, y: 0, width: 960, height: 1420 }
     });
-    await expect(backend.render({ docId: "endless", content: document }))
+    await expect(backend.render({ docId: "endless", content: emptyDocument }))
       .rejects.toThrow(/would be a clipped capture recorded as a full-document one/);
   });
 
@@ -525,7 +575,7 @@ describe("the puppeteer backend", () => {
     const { backend } = makeBackend(
       { boundingBox: { x: 0, y: 0, width: 960, height: 30_000 } },
       { limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 20 * 1024 * 1024 } });
-    await expect(backend.render({ docId: "endless", content: document }))
+    await expect(backend.render({ docId: "endless", content: emptyDocument }))
       .rejects.toThrow(/30000px tall, over the 20000px limit/);
   });
 
@@ -533,7 +583,7 @@ describe("the puppeteer backend", () => {
     const { backend } = makeBackend({}, {
       limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 10 }
     });
-    await expect(backend.render({ docId: "huge", content: document }))
+    await expect(backend.render({ docId: "huge", content: emptyDocument }))
       .rejects.toThrow(/encoded image is \d+ bytes, over the 10 limit/);
   });
 });
@@ -642,12 +692,18 @@ describe("capture limits", () => {
       .toThrow(/^doc: .*No envelope was written/s);
   });
 
-  it("catches each limit on its own terms", () => {
-    expect(() => checkCaptureSize("doc", 960, 30_000, limits)).toThrow(/30000px tall, over the 20000px limit/);
+  it.each([
+    [960, 30_000, /30000px tall, over the 20000px limit/],
     // Under the height limit, over the pixel count: a wide capture nothing else would catch.
-    expect(() => checkCaptureSize("doc", 2000, 2000, limits)).toThrow(/4000000 pixels, over the 1000000 limit/);
+    [2000, 2000, /4000000 pixels, over the 1000000 limit/]
+  ])("refuses a %p x %p capture on its own terms", (widthPx, heightPx, pattern) => {
+    expect(() => checkCaptureSize("doc", widthPx, heightPx, limits)).toThrow(pattern);
+    expect(() => checkCaptureSize("doc", widthPx, heightPx, limits)).toThrow(RenderLimitExceeded);
+  });
+
+  it("refuses an encoded image over the byte limit", () => {
     expect(() => checkEncodedSize("doc", Buffer.alloc(200), limits)).toThrow(/200 bytes, over the 100 limit/);
-    expect(() => checkCaptureSize("doc", 960, 30_000, limits)).toThrow(RenderLimitExceeded);
+    expect(() => checkEncodedSize("doc", Buffer.alloc(200), limits)).toThrow(RenderLimitExceeded);
   });
 });
 
@@ -691,7 +747,25 @@ describe("the mode registry", () => {
     // baseline refuses, so `plan` threw before printing anything for an experiment using it.
     for (const mode of renderModeIds) {
       const unit = mode === "puppeteer-full-height" ? "harness-render" : undefined;
-      expect(getRenderBackend(mode, { unit, clueRevision: null }).prerequisites).toBeTruthy();
+      expect(() => getRenderBackend(mode, { unit, clueRevision: null })).not.toThrow();
+    }
+  });
+
+  it("says what each mode needs before it can run, naming the hosts", () => {
+    // "Truthy" passed for any non-empty string, including one naming the wrong endpoint. What a
+    // reader needs from this line is where the run will reach.
+    const prerequisitesOf = (mode: string, unit?: string) =>
+      getRenderBackend(mode, { unit, clueRevision: null }).prerequisites;
+    expect(prerequisitesOf("puppeteer-full-height", "harness-render"))
+      .toContain("a CLUE dev server at http://localhost:8080");
+    expect(prerequisitesOf("shutterbug-production-current"))
+      .toContain("https://api.concord.org/shutterbug-production");
+    // Omitting --shutterbug-url posts student work at staging; the line has to say so.
+    expect(prerequisitesOf("shutterbug-parameterized"))
+      .toContain("https://api.concord.org/shutterbug-staging");
+    for (const mode of renderModeIds) {
+      expect({ mode, key: prerequisitesOf(mode, mode === "puppeteer-full-height" ? "harness-render" : undefined)
+        .includes("no OpenAI key") }).toEqual({ mode, key: true });
     }
   });
 

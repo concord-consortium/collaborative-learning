@@ -2,14 +2,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
 import { buildImageMessages, defaultAiPrompt } from "../../../shared/ai-analysis-messages.js";
-import { corpusPaths } from "../src/corpus.js";
+import { corpusPaths, readRepresentation, representationPath } from "../src/corpus.js";
 import {
   dataUrlFor, imageRepresentationPath, readImageEnvelope, resolveImageFile, sha256Bytes
 } from "../src/represent-image.js";
 import { CompletionRequest, CompletionResult } from "../src/execute.js";
 import { ReportSummary } from "../src/report.js";
 import { ResultRow } from "../src/schemas.js";
-import { makeTestDataRoot, makeTestPng, readLines } from "./helpers.js";
+import { harnessRoot, isContainedBy } from "../src/files.js";
+import { listFilesUnder, makeTestDataRoot, makeTestPng, readLines } from "./helpers.js";
 
 /**
  * The mocked end-to-end path extended through an `image-only` run, with no browser and no network. The render backend is a fake that hands back a committed-shape PNG, so
@@ -22,6 +23,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   const requests: { messages: any; imageTokens: number }[] = [];
   const paths = corpusPaths(dataRoot, "image-corpus");
   const resultsFile = path.join(dataRoot, "results", "image-corpus__image-vs-text.jsonl");
+  /** What was on disk before this suite ran anything, so the last test can diff against it. */
+  const filesBefore = new Set(listFilesUnder(harnessRoot));
 
   // Distinct sizes per document, so an envelope pointing at another document's PNG shows up as the
   // wrong dimensions. The queue is consumed one capture at a time — reading the *last* queued id
@@ -30,6 +33,35 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   const pngFor = (docId: string) => makeTestPng(960, 1000 + (docId.length % 7) * 60);
   const pendingDocs: string[] = [];
   let lastRenderedDoc = "";
+
+  /** The corpus, read from the manifest — so adding a fixture does not break a count in here. */
+  const documentIds = (): string[] =>
+    (JSON.parse(fs.readFileSync(paths.manifest, "utf8")).documents as { id: string }[])
+      .map((entry) => entry.id);
+
+  /**
+   * Refills the queue the fake capture draws document ids from.
+   *
+   * Filled once for the whole suite, it was drained by the first run's 25 captures, and every later
+   * run then fell back to `lastRenderedDoc` — giving every document the *same* picture, which is
+   * exactly what the distinct sizes above exist to catch. It has to be refilled before each render.
+   */
+  const queueDocuments = () => {
+    pendingDocs.length = 0;
+    for (const docId of documentIds()) pendingDocs.push(docId);
+  };
+
+  /** Every document's envelope really records the size its own capture produced. */
+  const expectOwnPictures = () => {
+    for (const docId of documentIds()) {
+      const envelope = readImageEnvelope(imageRepresentationPath(paths, "puppeteer-full-height", docId));
+      expect({ docId, heightPx: envelope.images[0].heightPx })
+        .toEqual({ docId, heightPx: 1000 + (docId.length % 7) * 60 });
+    }
+    // And the fixture sizes really do differ, or the check above would prove nothing.
+    expect(new Set(documentIds().map((docId) => 1000 + (docId.length % 7) * 60)).size)
+      .toBeGreaterThan(1);
+  };
 
   /** How tall this fake says the document's tile rows are — taller than the page's 500px default. */
   const contentRowsHeightPx = 1340;
@@ -86,8 +118,14 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       stableForMs: 0,
       pollIntervalMs: 1
     },
-    // No unit server: the recorded unit is the stable identifier either way.
-    startUnitServer: undefined,
+    // A stub rather than nothing. Left undefined, `render` fell back to the real unit server, which
+    // reads src/public/demo/units/qa/content.json and binds an ephemeral port on every invocation —
+    // so the comment saying "no unit server" was false and this test carried an undeclared
+    // dependency on that file.
+    startUnitServer: async () => ({
+      unitUrl: "http://127.0.0.1:5000/harness-render/content.json",
+      close: async () => undefined
+    }),
     createCompletion: async ({ request }: CompletionRequest): Promise<CompletionResult> => {
       requests.push({
         messages: request.apiRequest.messages,
@@ -107,14 +145,23 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     await main(["import", "--from", "examples/synthetic-corpus", "--corpus", "image-corpus"], deps);
     await main(["represent", "--corpus", "image-corpus", "--variants", "default,minimal"], deps);
     expect(fs.existsSync(paths.manifest)).toBe(true);
+    // The name says both variants were written, so both are checked — this used to assert only that
+    // the manifest existed, which the import alone would satisfy.
+    expect(documentIds().length).toBeGreaterThan(0);
+    for (const variantId of ["default", "minimal"]) {
+      for (const docId of documentIds()) {
+        const envelope = readRepresentation(representationPath(paths, variantId, docId));
+        expect({ variantId, docId, of: envelope.docId, variant: envelope.variantId })
+          .toEqual({ variantId, docId, of: docId, variant: variantId });
+        expect(typeof envelope.markdown).toBe("string");
+      }
+    }
   });
 
   it("renders an envelope and a PNG per document", async () => {
     output.length = 0;
     // The fake page needs to know which document it is drawing; render is sequential here.
-    const documents = JSON.parse(fs.readFileSync(paths.manifest, "utf8")).documents as { id: string }[];
-    pendingDocs.length = 0;
-    for (const document of documents) pendingDocs.push(document.id);
+    queueDocuments();
     await main(["render", "--corpus", "image-corpus", "--mode", "puppeteer-full-height"], deps);
 
     const file = imageRepresentationPath(paths, "puppeteer-full-height", "drawing");
@@ -130,35 +177,35 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     // has to have grown past the 500px the generated page starts at.
     expect(Math.max(...frameHeights)).toBeGreaterThanOrEqual(contentRowsHeightPx);
     expect(fs.existsSync(resolveImageFile(file, envelope.images[0]))).toBe(true);
-    expect(output.join("\n")).toMatch(/Rendered 25 document\(s\)/);
+    expect(output.join("\n")).toMatch(new RegExp(`Rendered ${documentIds().length} document\\(s\\)`));
 
     // Each document's envelope records the size its *own* capture produced — so an envelope holding
     // another document's picture would fail here rather than passing unnoticed.
-    for (const docId of ["drawing", "text", "empty"]) {
-      const each = readImageEnvelope(imageRepresentationPath(paths, "puppeteer-full-height", docId));
-      expect({ docId, heightPx: each.images[0].heightPx })
-        .toEqual({ docId, heightPx: 1000 + (docId.length % 7) * 60 });
-    }
-    // And the fixture sizes really do differ, or the check above would prove nothing.
-    expect(new Set(["drawing", "text", "empty"].map((id) => 1000 + (id.length % 7) * 60)).size)
-      .toBeGreaterThan(1);
+    expectOwnPictures();
   });
 
   it("reuses fresh renders instead of paying to make them again", async () => {
     output.length = 0;
     await main(["render", "--corpus", "image-corpus", "--mode", "puppeteer-full-height"], deps);
-    expect(output.join("\n")).toMatch(/Rendered 0 document\(s\).*reused 25 still-fresh/s);
+    expect(output.join("\n"))
+      .toMatch(new RegExp(`Rendered 0 document\\(s\\).*reused ${documentIds().length} still-fresh`, "s"));
   });
 
   it("re-renders everything when --refresh is passed", async () => {
     output.length = 0;
+    // Refilled, or every document is handed the last one's picture and the per-document size check
+    // below passes for the wrong reason.
+    queueDocuments();
     await main(["render", "--corpus", "image-corpus", "--mode", "puppeteer-full-height", "--refresh"], deps);
-    expect(output.join("\n")).toMatch(/Rendered 25 document\(s\)/);
+    expect(output.join("\n")).toMatch(new RegExp(`Rendered ${documentIds().length} document\\(s\\)`));
     // New pixels mean new request keys, which means a full re-spend. Said out loud.
     expect(output.join("\n")).toContain("will pay for those calls again");
+    // And every document still holds its own picture after the re-render, not the last one's.
+    expectOwnPictures();
   });
 
   it("re-renders when the document content changes", async () => {
+    queueDocuments();
     const manifestFile = paths.manifest;
     const manifest = JSON.parse(fs.readFileSync(manifestFile, "utf8"));
     const entry = manifest.documents.find((document: any) => document.id === "drawing");
@@ -167,9 +214,11 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     fs.writeFileSync(manifestFile, JSON.stringify(manifest, null, 2));
     output.length = 0;
     await main(["render", "--corpus", "image-corpus", "--mode", "puppeteer-full-height"], deps);
-    expect(output.join("\n")).toMatch(/Rendered 1 document\(s\).*reused 24 still-fresh/s);
+    expect(output.join("\n"))
+      .toMatch(new RegExp(`Rendered 1 document\\(s\\).*reused ${documentIds().length - 1} still-fresh`, "s"));
     entry.contentSha256 = original;
     fs.writeFileSync(manifestFile, JSON.stringify(manifest, null, 2));
+    queueDocuments();
     await main(["render", "--corpus", "image-corpus", "--mode", "puppeteer-full-height"], deps);
   });
 
@@ -177,7 +226,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     output.length = 0;
     await main(["plan", "--corpus", "image-corpus", "--experiment", "experiments/image-vs-text.json"], deps);
     const printed = output.join("\n");
-    expect(printed).toContain("3 run(s) × 25 document(s) = 75 call(s)");
+    const documents = documentIds().length;
+    expect(printed).toContain(`3 run(s) × ${documents} document(s) = ${documents * 3} call(s)`);
     expect(printed).toContain("[image-only, --mode puppeteer-full-height");
     // Where the pictures came from, resolved rather than described. Every render target value has a
     // default, and a default nobody states is one nobody checks.
@@ -191,10 +241,10 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     await main(["run", "--corpus", "image-corpus", "--experiment", "experiments/image-vs-text.json",
       "--max-cost", "2.00"], deps);
     const rows = readLines(resultsFile) as ResultRow[];
-    expect(rows).toHaveLength(75);
+    expect(rows).toHaveLength(documentIds().length * 3);
 
     const imageRows = rows.filter((row) => row.message === "image-only");
-    expect(imageRows).toHaveLength(25);
+    expect(imageRows).toHaveLength(documentIds().length);
     for (const row of imageRows) {
       expect(row.representation.kind).toBe("image");
       if (row.representation.kind === "image") {
@@ -234,8 +284,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       group.runId === "(all runs)" && group.message === "image-only" && group.modality === "all")!;
     const textAll = summary.groups.find((group) =>
       group.runId === "(all runs)" && group.message === "text-only" && group.modality === "all")!;
-    expect(imageAll.docs).toBe(25);
-    expect(textAll.docs).toBe(25);
+    expect(imageAll.docs).toBe(documentIds().length);
+    expect(textAll.docs).toBe(documentIds().length);
     // The whole point of splitting by shape: the two totals are separate numbers.
     expect(imageAll.tokens.imageEstimatedTotal).toBeGreaterThan(0);
     expect(textAll.tokens.imageEstimatedTotal).toBe(0);
@@ -293,6 +343,16 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   });
 
   it("keeps everything it generated inside the harness data directory", () => {
-    expect(path.relative(path.join(dataRoot, "..", ".."), dataRoot).startsWith("..")).toBe(false);
+    // Nothing derived from a student document is ever written outside `data/`, the gitignored tree.
+    // The previous version of this compared `dataRoot` with its own grandparent — true for any
+    // two-deep path, and it inspected no generated file at all. This looks at what really appeared
+    // under the harness root while the suite ran.
+    const dataDir = path.join(harnessRoot, "data");
+    const appeared = listFilesUnder(harnessRoot).filter((file) => !filesBefore.has(file));
+    // This suite has run a full import, represent, render, run and report by now, so plenty did.
+    expect(appeared.length).toBeGreaterThan(documentIds().length);
+    for (const file of appeared) {
+      expect({ file, inside: isContainedBy(file, dataDir) }).toEqual({ file, inside: true });
+    }
   });
 });

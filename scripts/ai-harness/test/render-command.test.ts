@@ -74,7 +74,8 @@ function setUp(name: string) {
     now: () => new Date("2026-08-13T00:00:00.000Z")
   });
   const documents = JSON.parse(fs.readFileSync(paths.manifest, "utf8")).documents as { id: string }[];
-  return { dataRoot, paths, order: documents.map((document) => document.id) };
+  // The corpus size comes from the manifest, so adding a fixture does not break counts in here.
+  return { dataRoot, paths, order: documents.map((entry) => entry.id), corpusSize: documents.length };
 }
 
 function deps(dataRoot: string, browser: unknown, output: string[]) {
@@ -92,7 +93,7 @@ function deps(dataRoot: string, browser: unknown, output: string[]) {
 
 describe("a document that fails to render", () => {
   it("writes no envelope, keeps the evidence, finishes the rest, and exits non-zero", async () => {
-    const { dataRoot, paths, order } = setUp("render-failures");
+    const { dataRoot, paths, order, corpusSize } = setUp("render-failures");
     const output: string[] = [];
     const failing = new Set(["drawing", "geometry"]);
 
@@ -117,11 +118,12 @@ describe("a document that fails to render", () => {
     }
     // Everything else came through.
     expect(fs.existsSync(imageRepresentationPath(paths, "puppeteer-full-height", "text"))).toBe(true);
-    expect(output.join("\n")).toMatch(/Rendered 23 document\(s\).*2 failed/s);
+    expect(output.join("\n"))
+      .toMatch(new RegExp(`Rendered ${corpusSize - 2} document\\(s\\).*2 failed`, "s"));
   });
 
-  it("retries nothing on a rerun but does re-attempt the failures", async () => {
-    const { dataRoot, paths, order } = setUp("render-retry");
+  it("reuses the fresh renders and re-renders only what failed", async () => {
+    const { dataRoot, paths, order, corpusSize } = setUp("render-retry");
     const output: string[] = [];
     await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
       deps(dataRoot, browserThatFails(new Set(["drawing"]), order), output))).rejects.toThrow();
@@ -134,7 +136,8 @@ describe("a document that fails to render", () => {
     const browser = browserThatFails(new Set(), stillFailing, 2000);
     await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
       deps(dataRoot, browser, output));
-    expect(output.join("\n")).toMatch(/Rendered 1 document\(s\).*reused 24 still-fresh.*0 failed/s);
+    expect(output.join("\n")).toMatch(
+      new RegExp(`Rendered 1 document\\(s\\).*reused ${corpusSize - 1} still-fresh.*0 failed`, "s"));
     // 2000px of tiles plus the document's own chrome, so the capture covers the whole document.
     expect(Math.max(...browser.frameHeights)).toBeGreaterThanOrEqual(2000);
     expect(fs.existsSync(imageRepresentationPath(paths, "puppeteer-full-height", "drawing"))).toBe(true);
@@ -251,7 +254,7 @@ describe("render refuses what it cannot do", () => {
     // Thrown from a `finally`, a close failure replaces whatever was already in flight — so a
     // browser that failed to launch surfaced as "close failed", which says nothing about why the
     // render did not happen.
-    const { dataRoot, order } = setUp("render-close-failure");
+    const { dataRoot, order, corpusSize } = setUp("render-close-failure");
     const output: string[] = [];
     const browser = browserThatFails(new Set(), order);
     (browser as any).close = async () => { throw new Error("Chromium is gone"); };
@@ -259,7 +262,7 @@ describe("render refuses what it cannot do", () => {
       deps(dataRoot, browser, output));
     expect(output.join("\n")).toMatch(/closing the render backend failed: Chromium is gone/);
     // And the run itself still reported what it did.
-    expect(output.join("\n")).toMatch(/Rendered 25 document\(s\)/);
+    expect(output.join("\n")).toMatch(new RegExp(`Rendered ${corpusSize} document\\(s\\)`));
   });
 
   it("rejects an unknown mode", async () => {
@@ -271,15 +274,14 @@ describe("render refuses what it cannot do", () => {
   it("warns when the CLUE revision behind the target cannot be established", async () => {
     const { dataRoot, order } = setUp("render-no-revision");
     const output: string[] = [];
+    // One base, spread over. Building `deps` three times put two throwaway browsers and two
+    // throwaway loggers into play, all pushing into the same `output`.
+    const base = deps(dataRoot, browserThatFails(new Set(), order), output);
     await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"], {
-      ...deps(dataRoot, browserThatFails(new Set(), order), output),
+      ...base,
       // Spread, not replaced: dropping the fast poll timings made this sit through the real settle
-      // loop for all 25 documents.
-      renderModeOptions: {
-        ...deps(dataRoot, browserThatFails(new Set(), order), output).renderModeOptions,
-        clueRevision: null,
-        launch: async () => browserThatFails(new Set(), order) as never
-      }
+      // loop for every document in the corpus.
+      renderModeOptions: { ...base.renderModeOptions, clueRevision: null }
     });
     expect(output.join("\n")).toMatch(/CLUE revision behind .* could not be established/);
   });
