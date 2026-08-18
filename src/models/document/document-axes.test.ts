@@ -1,5 +1,5 @@
 import {
-  getCurriculumLabel, getGroupOwnerId, hasClassOwner, hasGroupOwner, isInClassUnitContainer
+  getClassOwnerId, getCurriculumLabel, getGroupOwnerId, hasClassOwner, hasGroupOwner, isInClassUnitContainer
 } from "./document-axes";
 
 describe("document axis guards", () => {
@@ -13,9 +13,9 @@ describe("document axis guards", () => {
   };
   // Curriculum-authored, so it belongs to no offering and is owned by an authoring persona.
   const exemplar = { uid: "ivan_idea_1", unit: "qa", investigation: "1", problem: "1" };
-  const classWide = { uid: "class_h1", unit: "sas", investigation: null };
+  const classWide = { uid: getClassOwnerId("h1"), unit: "sas", investigation: null };
   // Created before investigation/problem were stamped.
-  const legacyClassWide = { uid: "class_h1", unit: "sas" };
+  const legacyClassWide = { uid: getClassOwnerId("h1"), unit: "sas" };
 
   describe("hasGroupOwner", () => {
     it("is true only for a document owned by the synthetic group uid", () => {
@@ -54,13 +54,27 @@ describe("document axis guards", () => {
     });
 
     it("reads only the owner, whatever the document is about or where it is kept", () => {
-      expect(hasClassOwner({ uid: "class_h1" })).toBe(true);
-      expect(hasClassOwner({ uid: "class_h1", unit: "sas", investigation: "1", offeringId: "off-1" }))
-        .toBe(true);
+      expect(hasClassOwner({ uid: getClassOwnerId("h1") })).toBe(true);
+      expect(hasClassOwner({ uid: getClassOwnerId("h1"), unit: "sas", investigation: "1",
+        offeringId: "off-1" })).toBe(true);
     });
 
     it("is false when the document has no uid at all", () => {
       expect(hasClassOwner({ unit: "sas" })).toBe(false);
+    });
+  });
+
+  describe("getClassOwnerId", () => {
+    it("mints the uid hasClassOwner recognizes", () => {
+      // The minting and reading sides are pinned together: a change to the uid's grammar that broke one
+      // without the other would file class-wide documents in a slot nothing could find them by.
+      expect(getClassOwnerId("h1")).toBe("class_h1");
+      expect(hasClassOwner({ uid: getClassOwnerId("h1") })).toBe(true);
+    });
+
+    it("is distinct from a group owner built on the same id", () => {
+      expect(getClassOwnerId("3")).not.toBe(getGroupOwnerId("off-1", "3"));
+      expect(hasGroupOwner({ uid: getClassOwnerId("3") })).toBe(false);
     });
   });
 

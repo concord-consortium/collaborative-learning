@@ -36,7 +36,7 @@ import {
   getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
   getDocumentAxisProfileName, getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
 } from "../models/document/document-kinds";
-import { kClassOwnerPrefix } from "../models/document/document-axes";
+import { getClassOwnerId } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -632,7 +632,7 @@ export class DB {
     // The owner's stored fields beyond `uid`: a group owner's `groupId`. The runtime value comes from the
     // stores; it is valid here because createDocument validated it via validateDocumentKindCreation before
     // writing (a group kind requires the user to be in a group, so currentGroupId is present).
-    const ownerFields = getDocumentOwnerFields(kind, { groupId: user.currentGroupId });
+    const ownerFields = getDocumentOwnerFields(kind, user.currentGroupId);
 
     // `title` is stamped only when present so Firestore never sees `title: undefined`.
     const titleInfo: { title?: string } = {};
@@ -815,10 +815,10 @@ export class DB {
     });
   }
 
-  // Synthetic owner uid for this class's class-wide documents. hasClassOwner reads the prefix back off
-  // a stored uid, so both sides share the constant.
+  // Synthetic owner uid for this class's class-wide documents, minted by the same function hasClassOwner
+  // reads back, so the two cannot drift.
   private get userIdForClassWideDocuments() {
-    return `${kClassOwnerPrefix}${this.stores.user.classHash}`;
+    return getClassOwnerId(this.stores.user.classHash);
   }
 
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {

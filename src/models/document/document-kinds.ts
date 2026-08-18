@@ -159,14 +159,14 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
     throw new Error(`Cannot resolve the owner of unregistered document kind "${kind}"`);
   }
   switch (info.profile.ownerType) {
-    case "group": return required(ctx.groupOwnerId, kind, "group");
-    case "class": return required(ctx.classOwnerId, kind, "class");
+    case "group": return requireOwnerId(ctx.groupOwnerId, kind, "group");
+    case "class": return requireOwnerId(ctx.classOwnerId, kind, "class");
     case "user":  return ctx.userId;
     default:      return ctx.userId;
   }
 }
 
-function required(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
+function requireOwnerId(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
   if (!ownerId) {
     throw new Error(`Cannot create a ${ownerType}-owned document of kind "${kind}": ` +
       `no ${ownerType} owner id is available`);
@@ -185,13 +185,14 @@ export interface IDocumentOwnerFields {
 
 /**
  * The owner fields to stamp on a new document of the given kind, beyond the owner uid getDocumentOwner
- * returns. Only a group owner has one.
+ * returns. Only a group owner has one, so `groupId` is the creating user's current group — ignored for
+ * every other kind, and absent when they are in no group.
  */
 export function getDocumentOwnerFields(
-  kind: string|null|undefined, ctx: { groupId?: string }
+  kind: string|null|undefined, groupId?: string
 ): IDocumentOwnerFields {
-  if (getDocumentOwnerType(kind) !== "group" || !ctx.groupId) return {};
-  return { groupId: ctx.groupId };
+  if (getDocumentOwnerType(kind) !== "group" || !groupId) return {};
+  return { groupId };
 }
 
 /**

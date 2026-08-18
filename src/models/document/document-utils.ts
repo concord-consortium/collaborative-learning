@@ -86,8 +86,6 @@ export function getDocumentDisplayTitle(
   } else {
     const storedTitle = getDocumentTitleWithTimestamp(document, appConfig);
     if (storedTitle) return storedTitle;
-    // Nothing stored and no kind title: name it by kind and curriculum position if we can, otherwise return the
-    // stored value unchanged so callers see the same empty result as before.
     return getUnresolvedDocumentTitle(document) ?? storedTitle;
   }
 }
@@ -139,23 +137,9 @@ export function isDocumentAccessibleToUser ({
   return false;
 }
 
-/**
- * The metadata fields the edit predicate reads.
- *
- * Structural, and deliberately not `IDocumentMetadata`: that interface declares
- * `properties?: Record<string, string>` while the MST `DocumentMetadataModel` holds an observable
- * map there, so a metadata model instance is not assignable to it. `isDocumentAccessibleToUser`
- * sidesteps the same problem by taking `IDocumentMetadataBase`, which has no `properties` — this
- * adds the two axis fields the base type lacks.
- */
-type IEditPermissionMetadata = IDocumentMetadataBase & {
-  concurrent?: boolean | null;
-  context_id?: string | null;
-};
-
 interface ICanUserEditDocumentParams {
   document?: DocumentModelType;
-  documentMetadata?: IEditPermissionMetadata;
+  documentMetadata?: IDocumentMetadataBase;
   user: UserModelType;
 }
 

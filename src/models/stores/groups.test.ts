@@ -82,6 +82,16 @@ describe("Groups model", () => {
       expect(groupsFor(undefined).getGroupByOwnerId(getGroupOwnerId("off-1", "3"))).toBeUndefined();
       expect(groupsFor("off-1").getGroupByOwnerId(undefined)).toBeUndefined();
     });
+
+    it("looks the group up in a map keyed by owner id, rather than scanning the groups", () => {
+      const groups = groupsFor("off-1");
+      expect(Object.keys(groups.groupsByOwnerId)).toEqual([getGroupOwnerId("off-1", "3")]);
+      expect(groups.groupsByOwnerId[getGroupOwnerId("off-1", "3")].id).toBe("3");
+    });
+
+    it("keys nothing until the offering is known, since an owner id cannot be built without it", () => {
+      expect(groupsFor(undefined).groupsByOwnerId).toEqual({});
+    });
   });
 
   it("records the offering its groups belong to when updating from db", () => {
