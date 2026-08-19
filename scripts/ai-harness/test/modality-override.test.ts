@@ -119,14 +119,14 @@ describe("averages are blank on a row that spans more than one message shape", (
     "results.jsonl", new Date("2026-08-17T00:00:00.000Z")));
 
   it("blanks the means on the row that mixes them, and only that row", () => {
-    const rows = table().split("\n").filter((line) => /text-only|image-only|all/.test(line));
     const means = column(table(), "in mean");
     const shapes = column(table(), "message");
+    // The loop below is vacuous on an empty column, so the guard is on the array it iterates.
+    expect(shapes.length).toBeGreaterThan(0);
     // Every "all" row is a mixture here, and every named-shape row is not.
     for (const [index, shape] of shapes.entries()) {
       expect({ shape, mean: means[index] === "-" }).toEqual({ shape, mean: shape === "all" });
     }
-    expect(rows.length).toBeGreaterThan(0);
   });
 
   it("keeps the sums and the cost, which stay comparable", () => {

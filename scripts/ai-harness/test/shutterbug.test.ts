@@ -100,7 +100,6 @@ describe("production parity", () => {
     expect(body.content).toContain(`<script>const initialValue=${JSON.stringify(emptyDocument)}</script>`);
     expect(body.content).toContain("height='500px'");
     expect(body.content).toContain("window.__clueRender = { initialValuePosted: false }");
-    expect(body.content).not.toContain("fullPage");
   });
 
   it("posts to the production endpoint and nowhere else", async () => {

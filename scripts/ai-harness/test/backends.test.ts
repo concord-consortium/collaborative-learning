@@ -183,10 +183,9 @@ describe("the puppeteer backend", () => {
     const outcome = await backend.render({ docId: "drawing", content: emptyDocument });
     // Navigated to a real http origin, not injected: `setContent` leaves an opaque origin, and
     // Chromium then denies the CLUE iframe access to localStorage so it never finishes booting.
-    // `setContent` is therefore never called: `PageLike` does not declare it, so the backend could
-    // not call it even if it wanted to, and this fake page does not implement it.
+    // That it is never called is a type-level guarantee rather than something asserted here —
+    // `PageLike` does not declare `setContent`, so a call would not compile.
     expect(state.url).toBe("http://127.0.0.1:9/drawing");
-    expect(Object.keys(fakeBrowser().browser)).not.toContain("setContent");
     // And the page that was served is the shared generator's output, unmodified. Pattern-matching
     // the fake's own URL proved nothing about what reached the browser.
     expect(servedPagesEver.get("drawing")).toBe(generateRenderHtml({
