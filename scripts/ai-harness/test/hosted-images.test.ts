@@ -29,7 +29,7 @@ function hostedTask(docId: string, url: string, sha256 = kSha): RunTask {
     promptName: "categorize-design-default",
     promptSha256: "hash",
     aiPrompt: defaultAiPrompt,
-    request,
+    makeRequest: () => request,
     requestKey: requestKeyFor(request),
     worstCaseUsd: 0.02,
     retries: kRetries,
@@ -90,8 +90,6 @@ function run(tasks: RunTask[], checkHostedImage?: HostedImageCheck, name = "host
     })
   };
 }
-
-const usable: HostedImageCheck = async () => null;
 
 describe("hosted images are verified before anything is dispatched", () => {
   it("runs normally when every image still serves the pixels that were rendered", async () => {
@@ -164,6 +162,25 @@ describe("hosted images are verified before anything is dispatched", () => {
     }, "hosted-two-hashes");
     await harness.promise;
     expect(checks).toBe(2);
+  });
+
+  it("checks no more images at once than the run loop dispatches", async () => {
+    // Each check downloads a whole image, allowed up to 20 MB. Starting them all with `Promise.all`
+    // put half a gigabyte in flight for a 25-document corpus, and opened 25 connections to one host.
+    const tasks = Array.from({ length: 9 }, (_, index) =>
+      hostedTask(`d${index}`, `https://images.test/${index}.png`));
+    let inFlight = 0;
+    let peak = 0;
+    const harness = run(tasks, async () => {
+      inFlight += 1;
+      peak = Math.max(peak, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return null;
+    }, "hosted-concurrency");
+    await harness.promise;
+    // `run` above passes concurrency: 2.
+    expect(peak).toBe(2);
   });
 
   it("makes no check at all for a run with no hosted images", async () => {

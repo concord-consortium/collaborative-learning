@@ -94,7 +94,7 @@ The three existing sources disagree about what a screenshot is, which is the tra
 
 `scripts/shutterbug.ts` is therefore **not** a production baseline — it renders a different height and adds `fullPage`. Ship three named modes and never fold an improvement into the baseline:
 
-**`shutterbug-production-current` (parity baseline; network).** Reproduces today's production request exactly: the production Shutterbug endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, no `fullPage`. Bug-for-bug, clipping included. Pinned by a snapshot test (criterion 12) so it cannot drift while the other modes evolve.
+**`shutterbug-production-current` (parity baseline; network).** Matches production's request envelope: the production Shutterbug endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, no `fullPage` — and renders against production's target, clipping included. It is **not** byte-for-byte production: the page in the request body comes from the harness's own generator, which escapes the document rather than interpolating it raw and guards a zero `updateHeight`. The README's "differences from production's HTML" section lists every one. Pinned by a snapshot test (criterion 12) so what this mode posts cannot drift while the other modes evolve.
 
 **`shutterbug-parameterized` (network).** The same transport with `--clue-url`, `--unit`, `--shutterbug-url` and capture height all configurable. This is the shape the eventual production fix will take, and what proves the parameterization works.
 
@@ -287,8 +287,8 @@ Mixed-mode messages and `buildMixedMessages` (M3); detail low/high variants and 
 ## As built
 
 Everything above is the work order as written *before* implementation, kept as the record of intent.
-Four things were decided differently once the code met a real CLUE server, and the reasons are in
-`scripts/ai-harness/README.md` under DEVIATIONS (entries 11-19). In brief:
+Several things were decided differently once the code met a real CLUE server, and the reasons are in
+`scripts/ai-harness/README.md` under DEVIATIONS (entries 13-24). The four that matter most:
 
 - **Envelopes are filed under the mode id, not the backend id.** Both Shutterbug modes share the
   backend id `shutterbug` and would have overwritten each other, so a parity render and a

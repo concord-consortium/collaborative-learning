@@ -97,9 +97,18 @@ describe("verifying a hosted image", () => {
     })).toMatch(/HTTP 404/);
   });
 
-  it("fails when what comes back is not a PNG at all", async () => {
+  it("fails when the server says it is serving something other than a PNG", async () => {
     expect(await check((_request, response) => {
       response.writeHead(200, { "content-type": "text/html" });
+      response.end("<html>503</html>");
+    })).toMatch(/served content-type "text\/html", not image\/png/);
+  });
+
+  it("fails when what comes back is not a PNG at all, whatever the content type claims", async () => {
+    // The declared type is a claim, not evidence: a service can return an HTML error page under an
+    // `image/png` header, and the bytes are what decide.
+    expect(await check((_request, response) => {
+      response.writeHead(200, { "content-type": "image/png" });
       response.end("<html>503</html>");
     })).toMatch(/is not a usable PNG/);
   });
@@ -124,8 +133,13 @@ describe("verifying a hosted image", () => {
   });
 
   it("reports a connection failure rather than throwing", async () => {
-    // Nothing is listening on this port; the preflight must return a reason, not blow up the run.
-    const reason = await hostedImageCheck(2000)("http://127.0.0.1:1/shot.png", pngSha);
-    expect(typeof reason).toBe("string");
+    // A port this process really did bind and then closed, rather than a guess like port 1 that
+    // depends on nothing else on the machine using it. The preflight must return a reason, not blow
+    // up the run — and the reason has to be the connection failure rather than any other bug.
+    const server = await serving(servePng(png));
+    const url = server.url;
+    await server.close();
+    const reason = await hostedImageCheck(2000)(url, pngSha);
+    expect(reason).toMatch(/ECONNREFUSED|connect|fetch failed/i);
   });
 });

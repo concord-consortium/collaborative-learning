@@ -30,7 +30,7 @@ describe("image requests are built by the shared production builder", () => {
   });
 
   it("leaves detail at the hardcoded auto the shared builder sends", () => {
-    // Detail variants are milestone 3's, and they arrive by changing the shared builder — not by the
+    // Comparing detail settings means changing the shared builder — not the
     // harness quietly sending something else.
     const content = build(hostedUrl).apiRequest.messages[1].content as any[];
     expect(content[1]).toEqual({ type: "image_url", image_url: { url: hostedUrl, detail: "auto" } });
@@ -120,7 +120,7 @@ describe("a detail that disagrees with what is sent cannot be built", () => {
   });
 
   it("still catches a mismatch in a request assembled some other way", () => {
-    // Defence in depth: milestone 3's mixed-mode builder, or a hand-assembled request, does not go
+    // Defence in depth: a future mixed-mode builder, or a hand-assembled request, does not go
     // through buildImageRequest, and the reservation must not be estimated from the wrong rate.
     const mismatched = makeImageRequest("https://x.test/a.png",
       { ...accounting, detail: "low" }, 1024);

@@ -111,10 +111,6 @@ describe("writing an image representation", () => {
     fs.writeFileSync(orphan, makeTestPng(100, 100));
     writeOne("shrinking");
     expect(fs.existsSync(orphan)).toBe(false);
-    // Another document's files are left strictly alone.
-    const { envelopeFile: other } = writeOne("bystander");
-    writeOne("shrinking");
-    expect(fs.existsSync(resolveImageFile(other, readImageEnvelope(other).images[0]))).toBe(true);
   });
 
   it("does not delete another document's PNG whose id shares a prefix", () => {
@@ -127,10 +123,25 @@ describe("writing an image representation", () => {
     expect(fs.existsSync(victim)).toBe(true);
   });
 
-  it("leaves no temporary files behind", () => {
-    const { envelopeFile } = writeOne("tidy");
-    const directory = path.dirname(envelopeFile);
-    expect(fs.readdirSync(directory).filter((name) => name.endsWith(".tmp"))).toEqual([]);
+  it("leaves nothing behind but the envelope and its picture", () => {
+    // The whole listing rather than a `.tmp` filter: the filter was coupled to `files.ts`'s naming
+    // with nothing anchoring the two, so a differently named temporary file — a dot-prefixed one,
+    // say — would empty it and the assertion would pass having checked nothing.
+    const directory = path.join(dataRoot, "tidy-only");
+    fs.mkdirSync(directory, { recursive: true });
+    const envelopeFile = path.join(directory, "tidy.json");
+    writeImageRepresentation({
+      envelopeFile,
+      docId: "tidy",
+      modeId: "puppeteer-full-height",
+      backendId: "puppeteer",
+      backendVersion: 2,
+      renderTarget,
+      sourceContentSha256: "0".repeat(64),
+      generatedAt: "2026-08-13T00:00:00.000Z",
+      images: [{ bytes: makeTestPng(60, 80), url: null, tileId: null, purpose: "full-document" }]
+    });
+    expect(fs.readdirSync(directory).sort()).toEqual(["tidy-1.png", "tidy.json"]);
   });
 });
 
@@ -207,7 +218,8 @@ describe("freshness", () => {
     // Same byte count, different pixels: only the hash catches this one.
     const { envelopeFile, envelope, bytes, identity: expected } = writeOne("replaced");
     const swapped = Buffer.from(bytes);
-    swapped[swapped.length - 5] ^= 0xff;
+    // A different value in the same number of bytes: only the hash catches this.
+    swapped[swapped.length - 5] = (swapped[swapped.length - 5] + 1) % 256;
     fs.writeFileSync(resolveImageFile(envelopeFile, envelope.images[0]), swapped);
     const result = imageRepresentationFreshness(envelope, expected, envelopeFile);
     expect(result.fresh).toBe(false);
@@ -259,7 +271,7 @@ describe("freshness", () => {
   });
 
   it("checks every image, not just the first", () => {
-    // Milestone 2 always writes one, but the checks handle N so milestone 3's per-tile capture is
+    // Every render writes one today, but the checks handle N so a per-tile capture is
     // additive — and a second image nobody looked at would be exactly the hole this guards.
     const { envelopeFile, envelope, identity: expected } = writeOne("second-image");
     const stale: ImageEnvelope = {
@@ -306,7 +318,8 @@ describe("building a request from an envelope", () => {
     expect(singleImageOf(envelope, envelopeFile).file).toBe("single-1.png");
   });
 
-  it.each([0, 2])("refuses an envelope with %i images, naming milestone 3", (count) => {
+  // The message names the unbuilt feature, which is deliberate: it is guidance to whoever hit it.
+  it.each([0, 2])("refuses an envelope with %i images, and says why", (count) => {
     const { envelopeFile, envelope } = writeOne("counted");
     const images = count === 0
       ? []
@@ -328,6 +341,37 @@ describe("pruning", () => {
   it("does nothing when there is nothing there", () => {
     expect(removeImageRepresentation(imageRepresentationPath(paths, "puppeteer-full-height", "absent")))
       .toEqual([]);
+  });
+
+  it("deletes orphaned PNGs left by a crash, which have no envelope at all", () => {
+    // The PNGs are written first and the envelope last, so a crash mid-render leaves pictures with
+    // nothing naming them. Returning early on a missing envelope left them there, and --prune then
+    // kept a rendered picture of a document that is no longer in the corpus.
+    const envelopeFile = imageRepresentationPath(paths, "puppeteer-full-height", "crashed");
+    const directory = path.dirname(envelopeFile);
+    fs.mkdirSync(directory, { recursive: true });
+    const orphans = ["crashed-1.png", "crashed-2.png"].map((name) => path.join(directory, name));
+    for (const orphan of orphans) fs.writeFileSync(orphan, makeTestPng(8, 8));
+    // Another document's picture, which must survive.
+    const bystander = path.join(directory, "crashed-later-1.png");
+    fs.writeFileSync(bystander, makeTestPng(8, 8));
+
+    expect(removeImageRepresentation(envelopeFile).sort()).toEqual(orphans.sort());
+    for (const orphan of orphans) expect(fs.existsSync(orphan)).toBe(false);
+    expect(fs.existsSync(bystander)).toBe(true);
+  });
+
+  it("deletes a temporary file left by an interrupted write of a picture", () => {
+    // A kill during `writeFileAtomically` leaves `<docId>-1.png.<pid>.<uuid>.tmp` holding the same
+    // pixels as the picture it was about to become. Nothing else ever looks at it again.
+    const envelopeFile = imageRepresentationPath(paths, "puppeteer-full-height", "interrupted");
+    const directory = path.dirname(envelopeFile);
+    fs.mkdirSync(directory, { recursive: true });
+    const temporary = path.join(directory,
+      `interrupted-1.png.${process.pid}.f81d4fae-7dec-11d0-a765-00a0c91e6bf6.tmp`);
+    fs.writeFileSync(temporary, makeTestPng(8, 8));
+    expect(removeImageRepresentation(envelopeFile)).toEqual([temporary]);
+    expect(fs.existsSync(temporary)).toBe(false);
   });
 
   it("deletes the PNGs of an envelope it cannot parse, not just the envelope", () => {

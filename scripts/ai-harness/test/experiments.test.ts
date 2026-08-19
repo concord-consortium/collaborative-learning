@@ -67,7 +67,12 @@ describe("a run names the representation its message shape actually uses", () =>
 });
 
 describe("the committed experiment files", () => {
-  it.each(fs.readdirSync(path.join(harnessRoot, "experiments")))("%s validates", (name) => {
+  // Filtered and sorted: readdir order is the filesystem's, so it decided test order, and any
+  // non-JSON file dropped in the directory made `JSON.parse` throw rather than being skipped.
+  const experimentFiles = fs.readdirSync(path.join(harnessRoot, "experiments"))
+    .filter((name) => name.endsWith(".json")).sort();
+
+  it.each(experimentFiles)("%s validates", (name) => {
     const experimentFile = path.join(harnessRoot, "experiments", name);
     const experiment = validateExperimentFile(
       JSON.parse(fs.readFileSync(experimentFile, "utf8")), experimentFile, {
@@ -78,7 +83,7 @@ describe("the committed experiment files", () => {
     expect(experiment.runs.length).toBeGreaterThan(0);
   });
 
-  it("runs the milestone's headline comparison from one file", () => {
+  it("runs the image-versus-text comparison from one file", () => {
     const experimentFile = path.join(harnessRoot, "experiments", "image-vs-text.json");
     const experiment = validateExperimentFile(
       JSON.parse(fs.readFileSync(experimentFile, "utf8")), experimentFile, {
@@ -92,7 +97,7 @@ describe("the committed experiment files", () => {
   });
 });
 
-describe("milestone 1 result rows are refused, not mis-read", () => {
+describe("version-1 result rows are refused, not mis-read", () => {
   const v2Common = {
     schemaVersion: 2,
     experiment: "e", experimentSha256: "abc", runId: "r", corpus: "c", docId: "d",
@@ -111,19 +116,16 @@ describe("milestone 1 result rows are refused, not mis-read", () => {
     expect(validateResultRow(v2Common, "results.jsonl").schemaVersion).toBe(2);
   });
 
-  it("refuses a version-1 row and says what to do about it", () => {
-    // A version-1 row described its representation with a bare `textVariant` string. Reading one as
-    // current would attribute rows to a variant that never ran, so it is refused with instructions.
-    const { representation, ...rest } = v2Common;
-    const v1 = { ...rest, schemaVersion: 1, textVariant: "default" };
-    expect(() => validateResultRow(v1, "results.jsonl"))
-      .toThrow(/schemaVersion must be 2, got 1.*re-run the experiment into a fresh --output/s);
-  });
-
-  it("names the cache, so re-running does not read as re-paying", () => {
+  // A version-1 row described its representation with a bare `textVariant` string. Reading one as
+  // current would attribute rows to a variant that never ran, so it is refused with instructions —
+  // which have to say both what to do and that a rerun is not a second bill.
+  it.each([
+    ["says what to do about it", /schemaVersion must be 2, got 1.*re-run the experiment into a fresh --output/s],
+    ["names the cache, so re-running does not read as re-paying", /will not be paid for twice/]
+  ])("refuses a version-1 row and %s", (_label, pattern) => {
     const { representation, ...rest } = v2Common;
     expect(() => validateResultRow({ ...rest, schemaVersion: 1, textVariant: "default" }, "results.jsonl"))
-      .toThrow(/will not be paid for twice/);
+      .toThrow(pattern);
   });
 });
 

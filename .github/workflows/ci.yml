@@ -65,9 +65,11 @@ jobs:
       - name: Install AI Harness Dependencies
         working-directory: ./scripts/ai-harness
         run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
+      # Lint runs here rather than through the root `npm run lint`, whose glob covers only ./src and
+      # ./cypress. Without this step nothing in scripts/ai-harness was lint-covered at all.
       - name: Run AI Harness Tests
         working-directory: ./scripts/ai-harness
-        run: npm run typecheck && npm test
+        run: npm run typecheck && npm run lint && npm test
       - name: Cache Jest cache
         uses: actions/cache@v3
         with:

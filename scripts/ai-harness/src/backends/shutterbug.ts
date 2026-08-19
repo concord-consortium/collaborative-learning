@@ -1,11 +1,16 @@
 /**
  * The two Shutterbug modes: the production-parity baseline and the parameterized one.
  *
- * `shutterbug-production-current` reproduces today's production request exactly — the production
- * endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, and no
- * `fullPage`. Bug for bug, clipping included. A snapshot test pins it so it cannot drift while the
- * other modes evolve. It is a **baseline**, not a recommendation: improvements go into
- * `shutterbug-parameterized`, which is the shape the eventual production fix will take.
+ * `shutterbug-production-current` matches production's request envelope — the production endpoint,
+ * the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, and no `fullPage` — and
+ * renders against production's target, clipping included. It is not byte-for-byte production: the
+ * page inside the request body comes from the generator this file shares with the other modes,
+ * which escapes the document rather than interpolating it raw and guards a zero `updateHeight`. The
+ * README lists every difference under "differences from production's HTML". A snapshot test pins
+ * what this mode posts, so it cannot drift while the other modes evolve.
+ *
+ * It is a **baseline**, not a recommendation: improvements go into `shutterbug-parameterized`,
+ * which is the shape the eventual production fix will take.
  *
  * Note that `scripts/shutterbug.ts` is *not* a production baseline, whatever the harness plan says:
  * it posts `height: 500, fullPage: true` and omits the unit.
@@ -15,7 +20,8 @@ import { NotAPngError, readPngInfo } from "../png.js";
 import { generateRenderHtml } from "./render-html.js";
 import {
   RenderBackend, RenderLimitExceeded, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
-  kDefaultRenderLimits, kUnobservedDiagnostics, readBodyWithin
+  isPublicHttpsUrl, kDefaultRenderLimits, kUnobservedDiagnostics, readBodyWithin,
+  redirectDowngradeReason
 } from "./types.js";
 
 /** Exactly what production uses today. Changing any of these changes what "parity" means. */
@@ -39,8 +45,9 @@ export function isAcceptableShutterbugUrl(value: string): boolean {
     return false;
   }
   if (url.protocol === "https:") return true;
+  // `URL.hostname` brackets IPv6 addresses, so the bare `::1` form never appears here.
   return url.protocol === "http:" &&
-    ["localhost", "127.0.0.1", "[::1]", "::1"].includes(url.hostname);
+    ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
 }
 
 export interface ShutterbugOptions {
@@ -67,6 +74,15 @@ const kDefaultRequestTimeoutMs = 60_000;
 const kDefaultDownloadTimeoutMs = 60_000;
 const kDefaultRetries = 2;
 
+/**
+ * How much of Shutterbug's reply will be read.
+ *
+ * It answers with a small JSON object holding one URL. Anything approaching this is a service that
+ * has gone wrong — an HTML error page from a proxy, say — and reading it in full would be paying
+ * unbounded memory for a body that is going to be rejected either way.
+ */
+const kMaxResponseBytes = 1024 * 1024;
+
 export class ShutterbugError extends Error {
   constructor(docId: string, detail: string) {
     super(`${docId}: ${detail}`);
@@ -77,6 +93,13 @@ export class ShutterbugError extends Error {
 function isRetriableStatus(status: number): boolean {
   return status >= 500 || status === 429;
 }
+
+/** What one attempt at the Shutterbug POST came back with, once its body has been read. */
+type PostAnswer =
+  | { failed: { status: number; statusText: string } }
+  | { redirected: { status: number; location: string | null } }
+  | { overLimit: true }
+  | { text: string };
 
 async function withTimeout<T>(
   timeoutMs: number, what: string, run: (signal: AbortSignal) => Promise<T>
@@ -161,21 +184,58 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
         // `text/plain;charset=UTF-8` — and reproducing production's request exactly is the whole
         // point of the parity mode. Setting `application/json` here would look tidier and would
         // stop this being what production sends.
-        const response = await withTimeout(requestTimeoutMs, "the Shutterbug request", (signal) =>
-          fetchImpl(shutterbugUrl, { method: "POST", body: JSON.stringify(body), signal }));
-        if (!response.ok) {
+        // Reading the body is inside the timeout too, and bounded. `fetchImpl` resolves as soon as
+        // the headers arrive, so a stalled or endless body read outside it had no bound at all —
+        // not in time, and not in size. `download()` has always done it this way; this is the same
+        // rule applied to the request that precedes it.
+        const answer = await withTimeout<PostAnswer>(requestTimeoutMs, "the Shutterbug request",
+          async (signal) => {
+            const response = await fetchImpl(shutterbugUrl,
+              { method: "POST", body: JSON.stringify(body), redirect: "manual", signal });
+            // A 3xx is not `ok`, so it is read here, before the branch below reduces it to a status
+            // code with no destination in it.
+            if (response.status >= 300 && response.status < 400) {
+              return {
+                redirected: {
+                  status: response.status,
+                  location: response.headers?.get?.("location") ?? null
+                }
+              };
+            }
+            if (!response.ok) {
+              return { failed: { status: response.status, statusText: response.statusText } };
+            }
+            const read = await readBodyWithin(response, kMaxResponseBytes);
+            return "overLimit" in read ? { overLimit: true } : { text: read.bytes.toString("utf8") };
+          });
+        if ("failed" in answer) {
           const error = new ShutterbugError(docId,
-            `Shutterbug answered ${response.status} ${response.statusText}`);
-          if (isRetriableStatus(response.status) && attempt < retries) {
+            `Shutterbug answered ${answer.failed.status} ${answer.failed.statusText}`);
+          if (isRetriableStatus(answer.failed.status) && attempt < retries) {
             lastError = error;
             await sleep(500 * 2 ** attempt);
             continue;
           }
           throw error;
         }
+        if ("redirected" in answer) {
+          // `redirect: "manual"` on the request is what makes this preventable rather than merely
+          // observable: on a 307 or 308 fetch re-sends the POST body, so a followed redirect has
+          // already delivered the document by the time anything could inspect where it went.
+          throw new ShutterbugError(docId,
+            `Shutterbug answered ${answer.redirected.status} redirecting to ` +
+            `${answer.redirected.location ?? "an unnamed location"}. The document is not sent on ` +
+            "to a redirect target; point --shutterbug-url at the new address if the endpoint has " +
+            "moved.");
+        }
+        if ("overLimit" in answer) {
+          throw new ShutterbugError(docId,
+            `Shutterbug's response is over the ${kMaxResponseBytes} byte limit, so it is not the ` +
+            "small JSON object this expects");
+        }
         let json: unknown;
         try {
-          json = await response.json();
+          json = JSON.parse(answer.text);
         } catch (error) {
           throw new ShutterbugError(docId,
             `Shutterbug's response was not JSON (${(error as Error).message})`);
@@ -188,6 +248,12 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
         // Student work went up; the picture of it comes back over TLS or not at all.
         if (!url.startsWith("https:")) {
           throw new ShutterbugError(docId, `Shutterbug returned a non-https image URL (${url})`);
+        }
+        // And from somewhere the harness could plausibly be told to fetch. Establishing this here is
+        // also what gives `download` a public https URL to compare its final response URL against.
+        if (!isPublicHttpsUrl(url)) {
+          throw new ShutterbugError(docId,
+            `Shutterbug returned an image URL on a loopback or private host (${url})`);
         }
         return url;
       } catch (error) {
@@ -208,6 +274,11 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     if (!response.ok) {
       throw new ShutterbugError(docId, `downloading ${url} answered ${response.status} ${response.statusText}`);
     }
+    // Redirects are followed, so the URL that answered is not necessarily the one that was asked
+    // for: this is where a redirect to plain http, or to an address on this machine, is caught.
+    // `post` has already established that `url` itself is a public https URL.
+    const downgraded = redirectDowngradeReason(url, response.url || url);
+    if (downgraded) throw new ShutterbugError(docId, `${url} ${downgraded}`);
     const contentType = response.headers?.get?.("content-type") ?? null;
     if (contentType && !contentType.toLowerCase().startsWith("image/png")) {
       throw new ShutterbugError(docId, `${url} served content-type "${contentType}", not image/png`);

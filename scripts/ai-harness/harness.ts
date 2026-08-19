@@ -302,7 +302,6 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
   // The unit server serves the same CLUE deployment the backend renders against.
   const clueUrl = backendOptions.clueUrl ?? kDefaultClueUrl;
 
-
   let rendered = 0;
   let reused = 0;
   const failures: string[] = [];
@@ -310,6 +309,7 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
 
   let unitServer: RenderUnitServer | undefined;
   let openBackend: RenderBackend | undefined;
+  let closeFailure: Error | undefined;
   try {
     if (mode.needsUnitServer && !explicitUnit) {
       unitServer = await (deps.startUnitServer ?? startRenderUnitServer)({ clueUrl });
@@ -318,6 +318,21 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     // Built once, after the unit server is up, so the backend knows where its unit is served.
     const renderer = getRenderBackend(modeId, { ...backendOptions, unitUrl: unitServer?.unitUrl });
     openBackend = renderer;
+
+    // Nothing will notice if these renders are pictures of the wrong thing.
+    //
+    // CLUE registers tile types from the unit's own configuration, so a unit that does not declare
+    // the corpus's tile types draws them with the placeholder component — a perfectly valid PNG of
+    // an "Unknown" box. The `unknownTiles` warning below is what normally catches that, and it
+    // needs a backend that can see inside the page. A hosted service renders somewhere else and
+    // reports nothing, so for the Shutterbug modes (which render against `mods`) both halves are
+    // missing at once, and the run just says it rendered every document.
+    if (renderer.renderTarget.unit !== kHarnessRenderUnitId && renderer.kind === "network") {
+      log(`warning: --mode ${modeId} renders against unit "${renderer.renderTarget.unit}" and cannot ` +
+        "report what it drew. Any tile type that unit does not register draws as an unknown-tile " +
+        "placeholder, and nothing here will say so — check the pictures before trusting a run that " +
+        "uses them.");
+    }
 
     if (renderer.renderTarget.clueRevision === null) {
       // Recorded as unknown rather than guessed. A target whose code can change underneath a stored
@@ -411,13 +426,22 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     };
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
   } finally {
-    // Nested: if closing the backend throws — a crashed Chromium, say — the unit server still has
-    // to come down, or its open handle keeps the CLI alive after the error has been printed.
-    try {
-      if (openBackend?.close) await openBackend.close();
-    } finally {
-      await unitServer?.close();
-    }
+    // A close failure is logged here and kept, never thrown from the `finally` itself. Rethrowing
+    // from a `finally` replaces whatever was already in flight, so a Chromium launch failure would
+    // surface as a close failure — the wrong error, and the one that says nothing about why the
+    // render did not happen. Both halves come down whatever the other one does: the unit server's
+    // open handle keeps the CLI alive on its own, and the browser is a process.
+    const closeQuietly = async (what: string, close: (() => Promise<void>) | undefined) => {
+      if (!close) return;
+      try {
+        await close();
+      } catch (error) {
+        log(`warning: closing ${what} failed: ${(error as Error).message}`);
+        closeFailure ??= error as Error;
+      }
+    };
+    await closeQuietly("the render backend", openBackend?.close?.bind(openBackend));
+    await closeQuietly("the unit server", unitServer?.close?.bind(unitServer));
   }
 
   log(`Rendered ${rendered} document(s) with --mode ${modeId}, reused ${reused} still-fresh ` +
@@ -429,6 +453,13 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
   if (failures.length > 0) {
     throw new Error(`${failures.length} document(s) failed to render: ${failures.join(", ")}. ` +
       `See ${renderErrorDir(paths, modeId, "<docId>")}.`);
+  }
+  // Reported only once the render failures have had their turn, since they say more about what went
+  // wrong. On its own, though, it is still a failure: a command that exits 0 says it finished, and
+  // a browser that would not close may still be running.
+  if (closeFailure) {
+    throw new Error(`Every document rendered, but shutting down afterwards failed: ` +
+      `${closeFailure.message}. The renders on disk are good, so a re-run will reuse them.`);
   }
 }
 
@@ -464,6 +495,11 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
       ? ` [image-only, --mode ${run.imageMode}; ${renderMode(run.imageMode!).prerequisites}]`
       : ` [text-only, ${run.textVariant}]`;
     log(`  ${run.id}: ${runTasksForRun.length} call(s), worst case $${runTotal.toFixed(4)}${shape}`);
+    if (run.message === "image-only") {
+      // Where the pictures came from, resolved rather than described. Every render target value has
+      // a default, and omitting `--shutterbug-url` posts student work at staging without saying so.
+      log(`    renders against: ${renderMode(run.imageMode!).renderTargetSummary}`);
+    }
     if (imageTokens > 0) {
       // Reserved at the high-detail rate, because the shared builder sends `auto` and the provider
       // publishes an exact formula only for explicit low and high.
@@ -561,10 +597,10 @@ function commandReport(flags: Record<string, string | true>, deps: HarnessDeps):
   const resultsFile = resolveDataPath(required(flags, "results"), "--results", dataRootFor(deps));
   // readResultRows treats a missing file as "no rows", which is what `run` needs when it creates a
   // fresh output file. For `report` that is a typo waiting to be misread as a result: an all-zeros
-  // table and an empty summary.json written over whatever was there before.
+  // table and an empty <basename>.summary.json written over whatever was there before.
   if (!fs.existsSync(resultsFile)) {
     throw new Error(`No results file at ${resultsFile}. Run \`harness.ts run\` first, or check ` +
-      "--results — the default output path is data/results/<corpus>-<experiment>.jsonl.");
+      "--results — the default output path is data/results/<corpus>__<experiment>.jsonl.");
   }
   const rows = readResultRows(resultsFile);
   if (rows.length === 0) {

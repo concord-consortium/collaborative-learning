@@ -169,6 +169,11 @@ export async function readBodyWithin(
   return { bytes: Buffer.concat(chunks), sha256: digest.digest("hex") };
 }
 
+// Re-exported so the modules that reach for these through `backends/types.js` keep working; they
+// are defined in urls.ts so that schemas.ts can use them without importing this module, which
+// imports schemas.ts itself.
+export { isPublicHttpsUrl, redirectDowngradeReason } from "../urls.js";
+
 export function checkEncodedSize(docId: string, bytes: Buffer, limits: RenderLimits): void {
   if (bytes.length > limits.maxEncodedBytes) {
     throw new RenderLimitExceeded(docId,

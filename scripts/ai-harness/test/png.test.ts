@@ -2,13 +2,8 @@ import { NotAPngError, readPngInfo } from "../src/png.js";
 import { makeTestPng } from "./helpers.js";
 
 describe("reading a PNG header", () => {
-  it("reads width and height out of the IHDR chunk", () => {
-    expect(readPngInfo(makeTestPng(960, 1420), "test")).toEqual({ widthPx: 960, heightPx: 1420 });
-  });
-
-  it("reads a one-pixel image", () => {
-    const info = readPngInfo(makeTestPng(1, 1), "test");
-    expect([info.widthPx, info.heightPx]).toEqual([1, 1]);
+  it.each([[960, 1420], [1, 1]])("reads %p x %p out of the IHDR chunk", (widthPx, heightPx) => {
+    expect(readPngInfo(makeTestPng(widthPx, heightPx), "test")).toEqual({ widthPx, heightPx });
   });
 
   it("refuses bytes that are not a PNG", () => {

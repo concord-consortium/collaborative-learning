@@ -9,6 +9,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 /** The scripts/ai-harness directory. */
@@ -29,12 +30,25 @@ export function readJsonFile(file: string): unknown {
 }
 
 /**
+ * What `writeFileAtomically` appends to a path while the write is in progress, as a regex fragment.
+ *
+ * Exported so the sweeps that clean up after a document can recognise a leftover temporary file
+ * without restating the naming. Two places knowing this independently is how a stale `.tmp` becomes
+ * invisible to `--prune`: a picture of a student's document that nothing ever deletes.
+ */
+export const kTemporaryFilePattern = "\\.\\d+\\.[0-9a-f-]+\\.tmp";
+
+/**
  * Write-then-rename, so a crash mid-write leaves either the previous file or none — never a partial
  * one. Everything the harness writes that another command later reads goes through here.
  */
 export function writeFileAtomically(file: string, contents: Buffer | string): void {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  const temporary = `${file}.${process.pid}.tmp`;
+  // The process id alone is not unique *within* a process: two concurrent writes to one path would
+  // share a temp name and each would rename the other's half-written bytes into place. Latent
+  // today, since each render worker owns a distinct document, and one `randomUUID()` per write is
+  // cheap insurance against that stopping being true.
+  const temporary = `${file}.${process.pid}.${randomUUID()}.tmp`;
   try {
     fs.writeFileSync(temporary, contents);
     fs.renameSync(temporary, file);

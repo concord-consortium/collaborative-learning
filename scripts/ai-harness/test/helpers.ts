@@ -3,22 +3,38 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { harnessRoot } from "../src/corpus.js";
 import type { RunTask } from "../src/execute.js";
-import type { HarnessRequest, InputImageAccounting } from "../src/messages.js";
-import { requestKeyFor } from "../src/messages.js";
+import { HarnessRequest, InputImageAccounting, requestKeyFor } from "../src/messages.js";
 import { kRetries } from "../src/cost.js";
 import type { ModelPricing, RunMeta } from "../src/schemas.js";
 
 /** The repository root — two levels up from scripts/ai-harness. */
 export const repoRoot = path.resolve(harnessRoot, "..", "..");
 
+const testDataRoots: string[] = [];
+
+// Registered once, when this module is first imported by a test file, rather than per call: some
+// suites build their scratch directory inside a test body, and jest refuses a hook declared there.
+// The guard is for `test:render`, which runs under tsx and has no jest globals at all.
+if (typeof afterAll === "function") {
+  afterAll(() => {
+    if (process.env.KEEP_TEST_DATA) return;
+    for (const directory of testDataRoots) fs.rmSync(directory, { recursive: true, force: true });
+  });
+}
+
 /**
  * Scratch space for tests. It lives inside `data/` because nothing the harness generates is ever
  * written outside that (gitignored) tree.
+ *
+ * Removed again when the suite finishes, not merely at the start of the next run: a full corpus of
+ * documents and rendered PNGs per suite, left on disk indefinitely, adds up. Set `KEEP_TEST_DATA=1`
+ * to keep it for inspection after a failure.
  */
 export function makeTestDataRoot(name: string): string {
   const directory = path.join(harnessRoot, "data", "test-runs", name);
   fs.rmSync(directory, { recursive: true, force: true });
   fs.mkdirSync(directory, { recursive: true });
+  testDataRoots.push(directory);
   return directory;
 }
 
@@ -113,6 +129,9 @@ export function makeTestPng(widthPx: number, heightPx: number, fill = 0x40): Buf
   ]);
 }
 
+// CRC32 is defined in terms of shifts and exclusive-or; writing it any other way would be an
+// obfuscation rather than a clarification.
+/* eslint-disable no-bitwise */
 const crcTable = Array.from({ length: 256 }, (_, index) => {
   let value = index;
   for (let bit = 0; bit < 8; bit += 1) value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
@@ -124,6 +143,7 @@ function crc32(bytes: Buffer): number {
   for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
   return (crc ^ 0xffffffff) >>> 0;
 }
+/* eslint-enable no-bitwise */
 
 export function makeTask(docId: string, runId: string, text: string, worstCase = 0.01): RunTask {
   const request = makeRequest(text);
@@ -136,7 +156,7 @@ export function makeTask(docId: string, runId: string, text: string, worstCase =
     promptName: "categorize-design-default",
     promptSha256: "prompt-hash",
     aiPrompt: { systemPrompt: "You are a teaching assistant.", mainPrompt: "Evaluate this.", discussionPrompt: "?" },
-    request,
+    makeRequest: () => request,
     requestKey: requestKeyFor(request),
     worstCaseUsd: worstCase,
     retries: kRetries,
@@ -147,6 +167,42 @@ export function makeTask(docId: string, runId: string, text: string, worstCase =
     hostedImages: []
   };
 }
+
+/**
+ * Every file under `root`, as absolute paths, skipping `node_modules` and `.git`.
+ *
+ * `fs.readdirSync(root, { recursive: true })` walks those too, which for the harness root is tens of
+ * thousands of entries and several seconds. This is for taking a before-and-after picture of what a
+ * command wrote.
+ *
+ * A directory that disappears mid-walk is skipped rather than thrown on. Jest runs suites in
+ * parallel workers, and every one of them removes its own scratch directory when it finishes — so
+ * walking the harness root means walking a tree that other processes are actively deleting from. A
+ * directory that has gone is not a file anyone wrote.
+ */
+export function listFilesUnder(root: string): string[] {
+  const found: string[] = [];
+  const walk = (directory: string) => {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(directory, { withFileTypes: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+      throw error;
+    }
+    for (const entry of entries) {
+      if (entry.name === "node_modules" || entry.name === ".git") continue;
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else found.push(full);
+    }
+  };
+  walk(root);
+  return found.sort();
+}
+
+/** Where `makeTestDataRoot` puts every suite's scratch directory. */
+export const testRunsRoot = path.join(harnessRoot, "data", "test-runs");
 
 export function readLines(file: string): unknown[] {
   return fs.readFileSync(file, "utf8").split("\n").filter((line) => line.length > 0).map((line) => JSON.parse(line));

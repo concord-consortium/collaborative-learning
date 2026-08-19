@@ -5,13 +5,14 @@
  * `ValidationError` naming the file and the offending field.
  */
 import { createHash } from "node:crypto";
+import { isPublicHttpsUrl } from "./urls.js";
 
 export const kSchemaVersion = 1;
 
 /**
- * Result rows are version 2 from milestone 2 on.
+ * Result rows are version 2; every other on-disk format is version 1.
  *
- * Milestone 1's rows carried a required `textVariant` string, which an image-only row has nothing
+ * Version-1 rows carried a required `textVariant` string, which an image-only row has nothing
  * honest to put in. It is replaced by a `representation` descriptor that both kinds populate — so a
  * version-1 row cannot be read as a version-2 one, and is refused with an instruction to re-run
  * rather than being silently mis-read.
@@ -141,7 +142,7 @@ export type Modality = typeof modalities[number];
 export const corpusSources = ["synthetic", "demo", "qa", "production"] as const;
 export type CorpusSource = typeof corpusSources[number];
 
-/** Recorded when a production document is pulled (milestone 6). Always `null` in milestone 1. */
+/** Recorded when a production document is pulled. Always `null` until the `pull` command exists. */
 export interface HistoricalAnalysis {
   summarizer: string;
   promptTokens: number;
@@ -235,7 +236,7 @@ function validateManifestDocument(value: unknown, file: string, field: string): 
 }
 
 /**
- * Related summaries are injected into request construction from milestone 3 on, and the manifest is
+ * Related summaries are not yet injected into request construction, and the manifest is
  * exactly the file a human hand-edits, so these are checked rather than cast.
  */
 function validateRelatedSummary(value: unknown, file: string, field: string): RelatedSummaryEntry {
@@ -364,7 +365,7 @@ export function validatePromptFile(value: unknown, file: string): PromptFile {
 // Experiment file
 // ---------------------------------------------------------------------------
 
-/** Milestone 2 runs text-only and image-only messages. `mixed` arrives in milestone 3. */
+/** Text-only and image-only are what run today; `mixed` is declared but nothing builds one yet. */
 export const messageShapes = ["text-only", "image-only"] as const;
 export type MessageShape = typeof messageShapes[number];
 
@@ -411,7 +412,7 @@ export function validateExperimentFile(
   const runs = asArray(record.runs, file, "runs");
   if (runs.length === 0) fail(file, "runs", "must contain at least one run");
   const seen = new Set<string>();
-  const validated = runs.map((entry, index) => {
+  const validatedRuns = runs.map((entry, index) => {
     const field = `runs[${index}]`;
     const run = asObject(entry, file, field);
     const id = asString(run.id, file, `${field}.id`);
@@ -447,7 +448,7 @@ export function validateExperimentFile(
     }
     return validated;
   });
-  return { schemaVersion: kSchemaVersion, name, runs: validated };
+  return { schemaVersion: kSchemaVersion, name, runs: validatedRuns };
 }
 
 // ---------------------------------------------------------------------------
@@ -540,8 +541,8 @@ export interface ImageEnvelope {
   sourceContentSha256: string;
   generatedAt: string;
   /**
-   * Always an array, even though milestone 2 always writes exactly one full-document image: the
-   * model, the validators and the freshness checks all handle N so milestone 3's per-tile capture is
+   * Always an array, even though every render writes exactly one full-document image today: the
+   * model, the validators and the freshness checks all handle N so a per-tile capture is
    * additive rather than a format change. Request construction separately requires exactly one.
    */
   images: EnvelopeImage[];
@@ -565,6 +566,26 @@ function asBareFilename(value: unknown, file: string, field: string): string {
   if (text.length === 0 || text.includes("/") || text.includes("\\") || text === "." || text === "..") {
     fail(file, field, `must be a bare filename beside the envelope, got "${text}"`);
   }
+  return text;
+}
+
+/**
+ * A hosted image's `url`, or null when the picture is a local file beside the envelope.
+ *
+ * The same reasoning as `asBareFilename` above. The only thing that ever writes this field is
+ * `post()` in shutterbug.ts, which already refuses anything but a public https URL — but the
+ * envelope is a hand-editable file read back long after it was written, and `run` fetches this URL
+ * before dispatching anything, to check the picture is still the one that was evaluated. Without a
+ * rule here, `http://10.0.0.5/shot.png` in an envelope is fetched over plaintext to that address.
+ *
+ * `redirectDowngradeReason` does not cover it: that rule is "a request must not end up somewhere
+ * less safe than it started", and there is no downgrade from a URL that was never https. Admitting
+ * the URL is a separate question from following it, and this is where it is settled.
+ */
+function asOptionalPublicHttpsUrl(value: unknown, file: string, field: string): string | null {
+  const text = asOptionalString(value, file, field);
+  if (text === null) return null;
+  if (!isPublicHttpsUrl(text)) fail(file, field, `must be a public https URL, got "${text}"`);
   return text;
 }
 
@@ -621,7 +642,7 @@ export function validateImageEnvelope(value: unknown, file: string): ImageEnvelo
       widthPx: asPositiveInteger(image.widthPx, file, `${field}.widthPx`),
       heightPx: asPositiveInteger(image.heightPx, file, `${field}.heightPx`),
       bytes: asPositiveInteger(image.bytes, file, `${field}.bytes`),
-      url: asOptionalString(image.url, file, `${field}.url`),
+      url: asOptionalPublicHttpsUrl(image.url, file, `${field}.url`),
       tileId: asOptionalString(image.tileId, file, `${field}.tileId`),
       purpose: asEnum(image.purpose, imagePurposes, file, `${field}.purpose`)
     };
@@ -737,7 +758,7 @@ export type ResultStatus = typeof resultStatuses[number];
  * screenshot's provenance *is*: the same document rendered against a different CLUE build is a
  * different picture. `runId` alone would lose all of it.
  *
- * This is also the extension point milestone 3's mixed rows need.
+ * This is also the extension point a mixed-message row will need.
  */
 export type RepresentationDescriptor =
   | { kind: "text"; variantId: string; variantVersion: number; sourceContentSha256: string }
@@ -899,7 +920,10 @@ function validateResultCommon(record: Record<string, unknown>, file: string): Re
     computedModality: asEnum(record.computedModality, modalities, file, "computedModality"),
     message: asEnum(record.message, messageShapes, file, "message"),
     representation: validateRepresentationDescriptor(record.representation, file, "representation"),
-    prompt: { name: asString(prompt.name, file, "prompt.name"), sha256: asString(prompt.sha256, file, "prompt.sha256") },
+    prompt: {
+      name: asString(prompt.name, file, "prompt.name"),
+      sha256: asString(prompt.sha256, file, "prompt.sha256")
+    },
     requestKey: null,
     runMeta: {
       date: asString(runMeta.date, file, "runMeta.date"),

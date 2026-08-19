@@ -1,8 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
-import { defaultAiPrompt } from "../../../shared/ai-analysis-messages.js";
-import { buildSummaryMessages } from "../../../shared/ai-analysis-messages.js";
+import { buildSummaryMessages, defaultAiPrompt } from "../../../shared/ai-analysis-messages.js";
 import { corpusPaths, readRepresentation, representationPath } from "../src/corpus.js";
 import { CompletionRequest, CompletionResult } from "../src/execute.js";
 import { ReportSummary } from "../src/report.js";
@@ -177,7 +176,8 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     expect(table).toContain("(all runs)");
 
     const summary = JSON.parse(
-      fs.readFileSync(path.join(dataRoot, "results", "smoke-corpus__text-baselines.summary.json"), "utf8")) as ReportSummary;
+      fs.readFileSync(path.join(dataRoot, "results", "smoke-corpus__text-baselines.summary.json"), "utf8"),
+    ) as ReportSummary;
     expect(fs.existsSync(resultsFile)).toBe(true);
     expect(summary.rows).toBe(50);
     const overall = summary.groups.find((group) => group.runId === "(all runs)" && group.modality === "all")!;

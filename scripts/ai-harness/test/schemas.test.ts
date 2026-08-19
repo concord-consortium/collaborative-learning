@@ -95,7 +95,7 @@ describe("experiment validation", () => {
     expect(experiment.runs).toHaveLength(1);
   });
 
-  it("rejects a message shape milestone 1 cannot run", () => {
+  it("rejects a message shape nothing can run yet", () => {
     expect(() => validateExperimentFile(
       { schemaVersion: 1, name: "x", runs: [{ ...run, message: "mixed" }] }, "experiment.json", context))
       .toThrow(/runs\[0\]\.message must be one of text-only/);
@@ -150,7 +150,8 @@ describe("result rows are a discriminated union on status", () => {
   };
   const usage = { promptTokens: 10, completionTokens: 5, source: "api" };
   const cost = { modeledUsd: 0.0001, incurredThisRunUsd: 0.0001 };
-  const responseOriginMeta = { date: "2026-08-11T00:00:00.000Z", modelReturned: "gpt-4o-mini", systemFingerprint: null };
+  const responseOriginMeta =
+    { date: "2026-08-11T00:00:00.000Z", modelReturned: "gpt-4o-mini", systemFingerprint: null };
 
   it("validates a success row", () => {
     const row = validateResultRow(
@@ -295,12 +296,14 @@ describe("error rows may carry what a billed failure cost", () => {
     corpus: "synthetic-corpus", docId: "text", modality: "text-only",
     computedModality: "text-only", message: "text-only",
     representation: { kind: "text", variantId: "default", variantVersion: 1,
-      sourceContentSha256: "0".repeat(64) }, prompt: { name: "p", sha256: "d" }, requestKey: "key", runMeta: testRunMeta,
+      sourceContentSha256: "0".repeat(64) },
+    prompt: { name: "p", sha256: "d" }, requestKey: "key", runMeta: testRunMeta,
     status: "error", error: { type: "unparsed", message: "no parsed response", attempts: 1 }
   };
   const usage = { promptTokens: 700, completionTokens: 1024, source: "api" };
   const cost = { modeledUsd: 0.0007, incurredThisRunUsd: 0.0007 };
-  const responseOriginMeta = { date: "2026-08-12T00:00:00.000Z", modelReturned: "gpt-4o-mini", systemFingerprint: null };
+  const responseOriginMeta =
+    { date: "2026-08-12T00:00:00.000Z", modelReturned: "gpt-4o-mini", systemFingerprint: null };
 
   it("validates an error row with all three billing fields", () => {
     const row = validateResultRow({ ...common, usage, cost, responseOriginMeta }, "results.jsonl");

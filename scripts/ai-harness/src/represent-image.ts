@@ -13,7 +13,7 @@ import { createHash } from "node:crypto";
 // Type-only, deliberately: corpus.ts imports this module to delete rendered PNGs on --prune, so a
 // value import here would be a cycle. The helpers come from files.ts instead.
 import type { CorpusPaths } from "./corpus.js";
-import { isContainedBy, readJsonFile, writeFileAtomically } from "./files.js";
+import { isContainedBy, kTemporaryFilePattern, readJsonFile, writeFileAtomically } from "./files.js";
 import { NotAPngError, readPngInfo } from "./png.js";
 import {
   EnvelopeImage, ImageEnvelope, RenderTarget, kSchemaVersion, validateImageEnvelope
@@ -44,13 +44,20 @@ export function imageFileName(docId: string, index: number): string {
 }
 
 /**
- * Matches exactly the files `imageFileName` produces for one document.
+ * Matches the files `imageFileName` produces for one document, and the temporary files an
+ * interrupted write of one of them leaves behind.
  *
  * A `startsWith(`${docId}-`)` test is not enough: document ids may contain hyphens, so writing `a`
  * would treat `a-b-1.png` — document `a-b`'s picture — as its own orphan and delete it.
+ *
+ * The temporary form is included because a kill mid-write leaves `<docId>-1.png.<pid>.<uuid>.tmp`
+ * holding the same pixels as the picture it was going to become, and nothing else would ever look
+ * at it again: it is not the envelope's file, so freshness ignores it, and without this `--prune`
+ * would leave it behind.
  */
 export function isImageFileFor(docId: string, name: string): boolean {
-  return new RegExp(`^${docId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d+\\.png$`).test(name);
+  const escaped = docId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^${escaped}-\\d+\\.png(${kTemporaryFilePattern})?$`).test(name);
 }
 
 export function readImageEnvelope(file: string): ImageEnvelope {
@@ -259,7 +266,7 @@ export function writeImageRepresentation(options: WriteImageRepresentationOption
   // Filenames come from the image index, so a render that produces fewer images than the one before
   // would leave the surplus files behind — unreferenced by the envelope, and therefore invisible to
   // `removeImageRepresentation` when `--prune` runs. Rendered student work would survive pruning.
-  // Milestone 2 always writes exactly one image; milestone 3's per-tile capture makes this reachable.
+  // Unreachable while every render produces exactly one image; a per-tile capture would reach it.
   const written = new Set(images.map((image) => image.file));
   for (const name of fs.existsSync(directory) ? fs.readdirSync(directory) : []) {
     if (isImageFileFor(options.docId, name) && !written.has(name)) {
@@ -284,11 +291,11 @@ export function writeImageRepresentation(options: WriteImageRepresentationOption
 }
 
 /**
- * The one image a milestone-2 request is built from.
+ * The one image a request is built from.
  *
  * Zero and many both fail, and the first image is never quietly selected: an envelope with two
- * images means per-tile capture, which is milestone 3's job, and picking one of them would produce a
- * result row that looks like a normal full-document run and is not.
+ * images is a per-tile capture, and picking one of them would produce a result row that looks like
+ * a normal full-document run and is not.
  */
 export function singleImageOf(envelope: ImageEnvelope, envelopeFile: string): EnvelopeImage {
   if (envelope.images.length !== 1) {
@@ -304,10 +311,34 @@ export function dataUrlFor(bytes: Buffer): string {
   return `data:${kPngMimeType};base64,${bytes.toString("base64")}`;
 }
 
+/**
+ * Deletes every deterministically named image file for a document, whatever the envelope says.
+ *
+ * Filenames come from the document id and the image index, so the document's own pictures can be
+ * found without an envelope to list them.
+ */
+function sweepImageFiles(envelopeFile: string, removed: string[]): void {
+  const docId = path.basename(envelopeFile, path.extname(envelopeFile));
+  const directory = path.dirname(path.resolve(envelopeFile));
+  for (const name of fs.existsSync(directory) ? fs.readdirSync(directory) : []) {
+    if (!isImageFileFor(docId, name)) continue;
+    const orphan = path.join(directory, name);
+    fs.rmSync(orphan, { force: true });
+    removed.push(orphan);
+  }
+}
+
 /** Deletes an image representation's envelope and every PNG it names. Used by `import --prune`. */
 export function removeImageRepresentation(envelopeFile: string): string[] {
-  if (!fs.existsSync(envelopeFile)) return [];
   const removed: string[] = [];
+  if (!fs.existsSync(envelopeFile)) {
+    // No envelope does not mean no pictures. `writeImageRepresentation` writes the PNGs first and
+    // the envelope last, so a crash mid-render leaves `<docId>-N.png` with nothing naming it —
+    // and `--prune` would then leave a rendered picture of a document that is no longer in the
+    // corpus, which is the one outcome pruning exists to prevent.
+    sweepImageFiles(envelopeFile, removed);
+    return removed;
+  }
   try {
     for (const image of readImageEnvelope(envelopeFile).images) {
       const resolved = resolveImageFile(envelopeFile, image);
@@ -318,17 +349,8 @@ export function removeImageRepresentation(envelopeFile: string): string[] {
     }
   } catch {
     // The envelope is unreadable, so its images cannot be listed — but leaving them while deleting
-    // the only file that names them is exactly the outcome `--prune` exists to prevent: an
-    // unreachable picture of a student's document. Filenames are deterministic, so the document's
-    // own images can be removed without the envelope.
-    const docId = path.basename(envelopeFile, path.extname(envelopeFile));
-    const directory = path.dirname(path.resolve(envelopeFile));
-    for (const name of fs.existsSync(directory) ? fs.readdirSync(directory) : []) {
-      if (!isImageFileFor(docId, name)) continue;
-      const orphan = path.join(directory, name);
-      fs.rmSync(orphan, { force: true });
-      removed.push(orphan);
-    }
+    // the only file that names them is the same unreachable-picture outcome as above.
+    sweepImageFiles(envelopeFile, removed);
   }
   fs.rmSync(envelopeFile);
   removed.push(envelopeFile);

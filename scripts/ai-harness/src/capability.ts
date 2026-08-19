@@ -33,9 +33,9 @@ function capability(
 export const unknownTileCapability: TileRepresentationCapability = capability(false, "fallback", true);
 
 /**
- * Several `fallback` types can in fact hold typed text (DataCard field values, for one). Milestone 1
- * records that as a known simplification rather than guessing per type; instance-level checks may
- * upgrade them in milestone 3, and anything noticed while authoring fixtures is recorded in the
+ * Several `fallback` types can in fact hold typed text (DataCard field values, for one). This
+ * records that as a known simplification rather than guessing per type; an instance-level check
+ * could upgrade them later, and anything noticed while authoring fixtures is recorded in the
  * synthetic corpus's expectations.json.
  */
 export const tileCapabilities: Record<string, TileRepresentationCapability> = {
