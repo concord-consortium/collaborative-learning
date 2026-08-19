@@ -79,6 +79,33 @@ describe("the image envelope", () => {
       .toThrow(pattern);
   });
 
+  it("accepts a hosted url on a public https host", () => {
+    const hosted = { ...image, url: "https://ccshutterbug.s3.us-east-1.amazonaws.com/1787003194685.png" };
+    expect(validateImageEnvelope({ ...envelope, images: [hosted] }, file).images[0].url)
+      .toBe(hosted.url);
+  });
+
+  // `run` fetches this URL before dispatching anything, to check the hosted picture is still the one
+  // that was evaluated. Refusing it here means a hand-edited envelope cannot make the harness issue
+  // that request at all, so there is nothing to intercept downstream. `redirectDowngradeReason` does
+  // not cover these: it asks whether a request ended up somewhere worse than it started, and none of
+  // these started anywhere safe.
+  it.each([
+    ["loopback over plain http", "http://127.0.0.1:8080/shot.png"],
+    ["localhost by name", "http://localhost:8080/shot.png"],
+    ["the cloud metadata address", "http://169.254.169.254/latest/meta-data/"],
+    ["a private address, even over https", "https://10.0.0.5/shot.png"],
+    ["a public host over plain http", "http://images.example.test/shot.png"],
+    ["something that is not a URL at all", "shot.png"]
+  ])("rejects a hosted url on %s", (_description, url) => {
+    expect(() => validateImageEnvelope({ ...envelope, images: [{ ...image, url }] }, file))
+      .toThrow(/url must be a public https URL/);
+  });
+
+  it("still accepts a local capture, which has no url", () => {
+    expect(validateImageEnvelope(envelope, file).images[0].url).toBeNull();
+  });
+
   it("rejects the same filename listed twice", () => {
     // Two entries writing the same file would leave one of them describing bytes that are not there.
     expect(() => validateImageEnvelope({ ...envelope, images: [image, image] }, file))

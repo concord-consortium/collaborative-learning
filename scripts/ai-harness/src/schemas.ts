@@ -5,6 +5,7 @@
  * `ValidationError` naming the file and the offending field.
  */
 import { createHash } from "node:crypto";
+import { isPublicHttpsUrl } from "./urls.js";
 
 export const kSchemaVersion = 1;
 
@@ -568,6 +569,26 @@ function asBareFilename(value: unknown, file: string, field: string): string {
   return text;
 }
 
+/**
+ * A hosted image's `url`, or null when the picture is a local file beside the envelope.
+ *
+ * The same reasoning as `asBareFilename` above. The only thing that ever writes this field is
+ * `post()` in shutterbug.ts, which already refuses anything but a public https URL — but the
+ * envelope is a hand-editable file read back long after it was written, and `run` fetches this URL
+ * before dispatching anything, to check the picture is still the one that was evaluated. Without a
+ * rule here, `http://10.0.0.5/shot.png` in an envelope is fetched over plaintext to that address.
+ *
+ * `redirectDowngradeReason` does not cover it: that rule is "a request must not end up somewhere
+ * less safe than it started", and there is no downgrade from a URL that was never https. Admitting
+ * the URL is a separate question from following it, and this is where it is settled.
+ */
+function asOptionalPublicHttpsUrl(value: unknown, file: string, field: string): string | null {
+  const text = asOptionalString(value, file, field);
+  if (text === null) return null;
+  if (!isPublicHttpsUrl(text)) fail(file, field, `must be a public https URL, got "${text}"`);
+  return text;
+}
+
 export function validateRenderTarget(value: unknown, file: string, field: string): RenderTarget {
   const record = asObject(value, file, field);
   const captureMode = asEnum(record.captureMode, captureModes, file, `${field}.captureMode`);
@@ -621,7 +642,7 @@ export function validateImageEnvelope(value: unknown, file: string): ImageEnvelo
       widthPx: asPositiveInteger(image.widthPx, file, `${field}.widthPx`),
       heightPx: asPositiveInteger(image.heightPx, file, `${field}.heightPx`),
       bytes: asPositiveInteger(image.bytes, file, `${field}.bytes`),
-      url: asOptionalString(image.url, file, `${field}.url`),
+      url: asOptionalPublicHttpsUrl(image.url, file, `${field}.url`),
       tileId: asOptionalString(image.tileId, file, `${field}.tileId`),
       purpose: asEnum(image.purpose, imagePurposes, file, `${field}.purpose`)
     };
