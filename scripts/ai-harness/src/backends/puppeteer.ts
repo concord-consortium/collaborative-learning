@@ -363,9 +363,9 @@ export function expectedTileCount(content: unknown): number {
   for (const row of Object.values(rowMap ?? {})) {
     for (const tile of row?.tiles ?? []) if (tile?.tileId) ids.add(tile.tileId);
   }
-  // An empty walk falls through to the tile map rather than answering 0. A present-but-empty
-  // `rowMap` used to take this branch and expect no tiles at all, which any state satisfies —
-  // including a page that has not finished loading, whose screenshot is blank.
+  // An empty walk falls through to the tile map rather than answering 0. Expecting no tiles at all
+  // is satisfied by any state whatsoever, including a page that has not finished loading, whose
+  // screenshot is blank.
   if (ids.size > 0) return ids.size;
   const tileMap = (content as { tileMap?: Record<string, unknown> })?.tileMap;
   return tileMap ? Object.keys(tileMap).length : 0;
@@ -469,11 +469,6 @@ async function waitUntilSettled(
   // the tiles has settled". A page that never reaches its expected tile count must still stop
   // waiting eventually, so the second clock accepts what is there once it has been quiet for a good
   // while longer, and the caller decides whether what is there is worth keeping.
-  //
-  // This comment used to say the ErrorTest fixture "renders an error boundary and no tile at all",
-  // and that a capture of it was wanted. Both halves were wrong: ErrorTest takes the whole document
-  // down, so CLUE shows its error page, and a picture of that page is the one thing a render must
-  // not store. `documentFailedToLoad` fails it now.
   const graceMs = stableForMs * 6;
   let previous: FrameMeasurement | undefined;
   let stableSince: number | undefined;
@@ -662,9 +657,9 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
           measured = await waitUntilSettled(
             frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
         }
-        // Checked again after the resize. A fatal console line or a failed script request during the
-        // second settle used to land in the evidence file without failing the render, so the
-        // document was captured and stored as if nothing had gone wrong.
+        // Checked again after the resize, because the second settle has its own failures: a fatal
+        // console line or a failed script request there would otherwise reach the evidence file
+        // without failing anything, and the document would be captured as if nothing had happened.
         failOnFatal();
         // The guarantee that nothing is cut off is made by construction — the frame is sized to
         // cover the tile rows, and the capture is checked against them below — rather than by a DOM
@@ -773,7 +768,7 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
       } catch (error) {
         // Evidence is attached to *any* failure, not only to a RenderFailed. A navigation error, a
         // size-limit rejection or a raw protocol error is exactly when the console output and a
-        // picture of the page are most wanted, and those used to arrive carrying neither.
+        // picture of the page are most wanted.
         const context = error instanceof RenderFailed ? error.context : contextOf();
         if (!context.screenshot) {
           try {

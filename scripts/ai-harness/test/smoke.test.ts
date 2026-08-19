@@ -28,8 +28,8 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
       maxCompletionTokens: request.apiRequest.generationSettings.max_completion_tokens
     });
     // One refusal so the report exercises more than the success path. Triggered on the first
-    // request rather than on a particular document's text: the document it used to key off is
-    // empty, and skip-empty means no run sends it any more.
+    // request rather than on a particular document's text: the one that would carry it is empty, and
+    // skip-empty means no run sends an empty document at all.
     if (refusalsRemaining > 0) {
       refusalsRemaining -= 1;
       return {

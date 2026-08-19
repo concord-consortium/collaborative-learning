@@ -828,16 +828,6 @@ export function validatePricingConfig(value: unknown, file: string): PricingConf
 export const resultStatuses = ["success", "refusal", "error", "skipped"] as const;
 export type ResultStatus = typeof resultStatuses[number];
 
-/**
- * Which representation a row was produced from, in enough detail to find it again.
- *
- * Both kinds carry `sourceContentSha256`, so a row can always be tied back to the exact document
- * content it describes. The image side carries the whole render target because that is what a
- * screenshot's provenance *is*: the same document rendered against a different CLUE build is a
- * different picture. `runId` alone would lose all of it.
- *
- * This is also the extension point a mixed-message row will need.
- */
 /** What a text-carrying row sends: which variant produced the summary, from which content. */
 export interface TextRepresentation {
   variantId: string;
@@ -858,7 +848,12 @@ export interface ImageRepresentation {
 }
 
 /**
- * Where a row's input came from.
+ * Where a row's input came from, in enough detail to find it again.
+ *
+ * Every kind carries `sourceContentSha256`, so a row can always be tied back to the exact document
+ * content it describes. The image side carries the whole render target because that is what a
+ * screenshot's provenance *is*: the same document rendered against a different CLUE build is a
+ * different picture. `runId` alone would lose all of it.
  *
  * A `mixed` row carries both sides, as the same two shapes the single-representation rows use rather
  * than a third flattened field list — so a reader (and a report) can read either half of a mixed row

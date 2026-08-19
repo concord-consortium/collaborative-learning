@@ -655,9 +655,9 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
     // Read from the mode descriptor rather than by building a backend: construction validates URLs
     // and limits, and shells out to git for the local mode, none of which belongs in a command that
     // promises to touch nothing.
-    // Built from what the shape actually sends rather than from a two-way ternary. The old one
-    // predated `mixed` and labelled it "text-only", so `plan` -- the record of what a run was about
-    // to do -- described a mixed run as something else while printing its images underneath.
+    // `plan` is the record of what a run was about to do, so this label has to name the shape that
+    // will actually run: one naming the wrong shape would describe a mixed run as something else
+    // while printing its images underneath.
     const carries = [run.message as string];
     if (sendsText(run.message)) carries.push(run.textVariant!);
     if (sendsImages(run.message)) carries.push(`--mode ${run.imageMode}`);

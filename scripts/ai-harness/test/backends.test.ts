@@ -373,7 +373,8 @@ describe("the puppeteer backend", () => {
 
   it("attaches evidence to a failure that is not a RenderFailed", async () => {
     // A navigation error, a size-limit rejection or a raw protocol error is exactly when the console
-    // output and a picture of the page are most wanted, and these used to arrive with neither.
+    // output and a picture of the page are most wanted, so evidence is attached to any failure and
+    // not only to a RenderFailed.
     const fake = fakeBrowser();
     (fake.browser as any).newPage = async () => {
       const page = await fakeBrowser().browser.newPage();
@@ -533,8 +534,9 @@ describe("the puppeteer backend", () => {
         url: () => "http://localhost:8080/iframe.html",
         evaluate: async (script: unknown) => {
           if (String(script).includes("innerText")) return "marker";
-          // Only once the frame has been resized: this is the settle whose failures used to be
-          // recorded as evidence without failing anything.
+          // Only once the frame has been resized. That is the settle whose failures the check
+          // before the capture exists to catch: a fatal error here, after the resize, would
+          // otherwise reach the evidence file without failing anything.
           if (resized) {
             for (const handler of handlers) {
               handler({ type: () => "error", text: () => "Failed to fetch dynamically imported module: tile.js" });
@@ -558,9 +560,9 @@ describe("the puppeteer backend", () => {
   });
 
   it("spends one timeout budget across every phase, not one per phase", async () => {
-    // The budget used to be handed out fresh to each phase, so a stuck document could burn several
-    // times the documented per-document timeout. One deadline now covers load, readiness and
-    // capture, and the failure names it.
+    // One deadline covers load, readiness and capture together, and the failure names it. A fresh
+    // budget per phase would let a stuck document burn several times the per-document timeout the
+    // CLI documents.
     const started = Date.now();
     const { backend } = makeBackend({ measurement: { contentHeightPx: 0 } }, { timeoutMs: 800 });
     await expect(backend.render({ docId: "slow", content: emptyDocument }))
@@ -676,8 +678,9 @@ describe("how many tiles a document should draw", () => {
   });
 
   it("falls through to the tile map when the rows name nothing", () => {
-    // A present-but-empty `rowMap` used to answer 0, and "at least 0 tiles" is satisfied by any
-    // stable state at all — including a page that has not finished loading, whose picture is blank.
+    // Answering 0 for a present-but-empty `rowMap` would mean waiting for "at least 0 tiles", which
+    // any stable state satisfies — including a page that has not finished loading, whose picture is
+    // blank.
     expect(expectedTileCount({ rowMap: {}, tileMap: { a: {}, b: {} } })).toBe(2);
     expect(expectedTileCount({ rowMap: { r1: { tiles: [] } }, tileMap: { a: {} } })).toBe(1);
   });
@@ -856,9 +859,9 @@ describe("the mode registry", () => {
   });
 
   it("supplies the harness rendering unit for the local mode rather than leaving it unset", () => {
-    // The unit used to be the caller's job, decided by a string comparison repeated in three places
-    // in the CLI. Getting it wrong is silent: CLUE falls back to its default unit and every tile
-    // draws as an unknown tile in a perfectly valid PNG. The mode descriptor now supplies it.
+    // The mode descriptor supplies it, rather than the caller deciding by string comparison in the
+    // CLI. Getting it wrong is silent: CLUE falls back to its default unit and every tile draws as
+    // an unknown tile in a perfectly valid PNG.
     expect(getRenderBackend("puppeteer-full-height", { clueRevision: null }).renderTarget.unit)
       .toBe("harness-render");
     // An explicit unit still wins.

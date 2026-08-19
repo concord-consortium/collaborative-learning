@@ -32,8 +32,8 @@ describe("the committed synthetic corpus", () => {
   it("covers every registered tile type, plus a mixed and an empty document", () => {
     const covered = new Set(Object.values(expectations.documents).flatMap((entry) => entry.tileTypes));
     // "Unknown" is deliberately not in `covered`: it is the registration for a type this build does
-    // not know, so the fixture standing in for it declares a made-up type instead. Asserting that is
-    // what the old `covered.add("Unknown")` gave away — adding the string made this unfailable.
+    // not know, so the fixture standing in for it declares a made-up type instead. It is skipped below
+    // rather than added to `covered`, which would satisfy the assertion by writing the answer into it.
     for (const tileType of tileTypes) {
       if (tileType === "Unknown") continue;
       expect([...covered]).toContain(tileType);

@@ -259,9 +259,9 @@ describe("a run configured the way it was before these dimensions existed keeps 
   // produce the key it always did, or every cache entry and every resumable row silently
   // invalidates.
   //
-  // These two values were read off the pre-milestone-3 code (`CLUE-371` at b0ef0a19) by building the
-  // same requests there, so they pin the key against what actually shipped rather than against
-  // whatever this branch happens to produce.
+  // These two values were read off commit b0ef0a19, before this milestone, by building the same
+  // requests there — so they pin the key against what actually shipped rather than against whatever
+  // this branch happens to produce.
   it("a text-only request's key does not move", () => {
     const request = buildRequest({
       model: "gpt-4o-mini",

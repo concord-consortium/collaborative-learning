@@ -162,8 +162,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     await main(["import", "--from", "examples/synthetic-corpus", "--corpus", "image-corpus"], deps);
     await main(["represent", "--corpus", "image-corpus", "--variants", "default,minimal"], deps);
     expect(fs.existsSync(paths.manifest)).toBe(true);
-    // The name says both variants were written, so both are checked — this used to assert only that
-    // the manifest existed, which the import alone would satisfy.
+    // The name says both variants were written, so both are checked. Asserting only that the
+    // manifest exists would be satisfied by the import alone.
     expect(documentIds().length).toBeGreaterThan(0);
     for (const variantId of ["default", "minimal"]) {
       for (const docId of documentIds()) {

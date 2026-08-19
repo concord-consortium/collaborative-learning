@@ -64,7 +64,7 @@ describe("containment survives a symlinked data root", () => {
     fs.symlinkSync(outside, escape);
     try {
       const candidate = path.join(escape, "x.jsonl");
-      // Lexically it looks contained — this is what the old check saw.
+      // Lexically it looks contained, which is all a string comparison can see.
       expect(path.relative(dataRoot, path.resolve(candidate)).startsWith("..")).toBe(false);
       // Resolved through the symlink, it is not.
       expect(isContainedBy(candidate, dataRoot)).toBe(false);

@@ -165,8 +165,8 @@ describe("a document that fails to render", () => {
 
 describe("a failure that is not a RenderFailed still leaves evidence", () => {
   it("writes the console output and a screenshot for a navigation error", async () => {
-    // These used to arrive with neither: the CLI only wrote them for RenderFailed, and a raw
-    // puppeteer error carried no context at all.
+    // Written for any failure, not only for a RenderFailed: a raw puppeteer error carries no context
+    // of its own, and that is exactly when a picture of the page is worth having.
     const { dataRoot, paths, order } = setUp("render-nav-failure");
     const output: string[] = [];
     const browser = browserThatFails(new Set(), order);
@@ -297,8 +297,8 @@ describe("render refuses what it cannot do", () => {
   });
 
   it("does not let a failing unit server close replace the error already in flight", async () => {
-    // The unit server comes down after the backend and used to do so unguarded, which is the same
-    // masking the backend's own close is wrapped to avoid.
+    // The unit server comes down after the backend, and unguarded it would mask whatever error was
+    // already in flight — the same thing the backend's own close is wrapped to avoid.
     const { dataRoot, order } = setUp("render-unit-close-failure");
     const output: string[] = [];
     const browser = browserThatFails(new Set(["drawing"]), order);

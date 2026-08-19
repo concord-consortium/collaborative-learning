@@ -41,9 +41,9 @@ export function cacheOptionsFor(noCache: boolean, refreshCache: boolean): CacheO
 
 /**
  * Returns the entry only if it is actually usable. JSON.parse succeeding is not enough: a file
- * truncated at a record boundary can still parse, and the old cast let it through to
- * `rowFromResponse`, which then crashed on a missing `usage`. Anything short of complete is a miss,
- * which is what the module already promised.
+ * truncated at a record boundary can still parse, and a cast rather than a check would hand it to
+ * `rowFromResponse`, which crashes on a missing `usage`. Anything short of complete is a miss,
+ * which is what the module promises.
  */
 export function validateCacheEntry(value: unknown, key: string): CacheEntry | undefined {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return undefined;

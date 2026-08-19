@@ -348,9 +348,7 @@ const kColumns: { header: string; value: (group: GroupSummary) => string }[] = [
 /**
  * True when a row aggregates more than one message shape, making per-row averages meaningless.
  *
- * Not to be confused with the `mixed` message shape, which is one shape and averages fine. The old
- * name for this was `mixedShapes`, which stopped being readable the moment a shape was called
- * `mixed`.
+ * Not to be confused with the `mixed` message shape, which is one shape and averages fine.
  */
 function spansMessageShapes(group: GroupSummary): boolean {
   return group.message === "all";
