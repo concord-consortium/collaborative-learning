@@ -4,8 +4,8 @@
  */
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import {
-  IAiPrompt, RelatedSummary, buildImageMessages, buildSummaryMessages, buildZodResponseSchema,
-  categorizationResponseFormat
+  IAiPrompt, RelatedSummary, buildImageMessages, buildMixedMessages, buildSummaryMessages,
+  buildZodResponseSchema, categorizationResponseFormat
 } from "../../../shared/ai-analysis-messages.js";
 import { ImageDetail, MessageShape, imageDetails, sha256Canonical } from "./schemas.js";
 
@@ -61,18 +61,43 @@ export interface BuildTextRequestOptions {
   generationSettings: GenerationSettings;
 }
 
+/**
+ * Facts about an image *file*. `detail` is deliberately absent: it is a fact about the request, not
+ * about the file, and the builders read it back out of the message they just built. A caller cannot
+ * declare a detail that disagrees with what is actually sent.
+ */
+export type ImageFileFacts = Omit<InputImageAccounting, "detail">;
+
+/** One image in a request: what goes into the message, and what is known about the file behind it. */
+export interface RequestImage {
+  /** A hosted URL for a Shutterbug render, a data URL for a local capture. */
+  imageUrl: string;
+  accounting: ImageFileFacts;
+}
+
 export interface BuildImageRequestOptions {
   model: string;
   aiPrompt: IAiPrompt;
   message: MessageShape;
-  /** What goes into the message: a hosted URL for Shutterbug, a data URL for a local capture. */
-  imageUrl: string;
+  /** Every image the request sends, in the order it sends them. */
+  images: RequestImage[];
+  /** What the run asked the provider to look at. Absent means the builder's `"auto"`. */
+  detail?: ImageDetail;
+  generationSettings: GenerationSettings;
+}
+
+export interface BuildMixedRequestOptions {
+  model: string;
+  aiPrompt: IAiPrompt;
+  message: MessageShape;
   /**
-   * Facts about the image file. `detail` is deliberately absent: it is a fact about the request, not
-   * about the file, so `buildImageRequest` reads it back out of the message it just built. A caller
-   * cannot declare a detail that disagrees with what is actually sent.
+   * The text side, or `null` for a document with no student-authored text — the run still sends the
+   * pictures, and the row records that the text part was dropped.
    */
-  accounting: Omit<InputImageAccounting, "detail">;
+  markdown: string | null;
+  relatedSummaries?: RelatedSummary[];
+  images: RequestImage[];
+  detail?: ImageDetail;
   generationSettings: GenerationSettings;
 }
 
@@ -129,62 +154,81 @@ export function buildRequest(options: BuildTextRequestOptions): HarnessRequest {
 }
 
 /**
- * Reads back the `detail` of the single image part in a built message list.
+ * Reads back the `detail` of every image part in a built message list, in the order they are sent.
  *
- * The value is taken from the message rather than assumed, so the accounting can never disagree with
- * the request: if the shared builder's `detail` ever changes, the cost model follows it instead of
- * pricing the old one. A message list that is not one image part is the builder's contract having
- * changed underneath us, which stops the harness rather than being guessed at — the same reasoning as
- * `projectResponseFormat`.
+ * The values are taken from the message rather than assumed, so the accounting can never disagree
+ * with the request: if the shared builder's default ever changes, or a per-image detail does not
+ * arrive the way the caller believed, the cost model follows the message instead of pricing the
+ * intention. An unrecognized value is the builder's contract having changed underneath us, which
+ * stops the harness rather than being guessed at — the same reasoning as `projectResponseFormat`.
  */
-export function detailOfSingleImage(messages: ChatCompletionMessageParam[]): ImageDetail {
-  const parts: { detail?: unknown }[] = [];
+export function detailsOfImages(messages: ChatCompletionMessageParam[]): ImageDetail[] {
+  const details: ImageDetail[] = [];
   for (const message of messages) {
     const content = (message as { content?: unknown }).content;
     if (!Array.isArray(content)) continue;
     for (const part of content) {
       const typed = part as { type?: string; image_url?: { detail?: unknown } };
-      if (typed?.type === "image_url") parts.push({ detail: typed.image_url?.detail });
+      if (typed?.type !== "image_url") continue;
+      // An absent detail is the provider's own default, which is `auto`.
+      const detail = typed.image_url?.detail ?? "auto";
+      if (!(imageDetails as readonly unknown[]).includes(detail)) {
+        throw new Error(`The shared image builder sent an unrecognised detail ` +
+          `${JSON.stringify(detail)}. Known values: ${imageDetails.join(", ")}.`);
+      }
+      details.push(detail as ImageDetail);
     }
   }
-  if (parts.length !== 1) {
-    throw new Error(`Expected the shared image builder to produce exactly one image part, got ` +
-      `${parts.length}. The cost model prices images from this, so the harness stops rather than ` +
-      "reserve for the wrong number of them.");
-  }
-  // An absent detail is the provider's own default, which is `auto`.
-  const detail = parts[0].detail ?? "auto";
-  if (!(imageDetails as readonly unknown[]).includes(detail)) {
-    throw new Error(`The shared image builder sent an unrecognised detail ${JSON.stringify(detail)}. ` +
-      `Known values: ${imageDetails.join(", ")}.`);
-  }
-  return detail as ImageDetail;
+  return details;
 }
 
 /**
- * The image analogue, built by the shared `buildImageMessages` unmodified — `detail` stays the
- * hardcoded `"auto"` production sends, so an image run cannot win by asking for a different one.
- * Comparing detail settings would mean changing the shared builder, which is not something an
- * experiment definition can reach.
+ * Pairs each image's file facts with the detail read back from the message at the same position.
  *
- * The caller supplies what it knows about the file (its hash and its size) and the builder supplies
- * what it knows about the request (the detail it just sent), so there is no way to describe an image
- * as costing something other than what was asked for.
+ * A count mismatch means the message does not carry the images the caller thinks it does, so the
+ * cost model would reserve for the wrong number of them. That stops the run.
+ */
+function accountingForImages(
+  messages: ChatCompletionMessageParam[], images: RequestImage[]
+): InputImageAccounting[] {
+  const details = detailsOfImages(messages);
+  if (details.length !== images.length) {
+    throw new Error(`The shared builder produced ${details.length} image part(s) for ` +
+      `${images.length} image(s). The cost model prices images from the message, so the harness ` +
+      "stops rather than reserve for the wrong number of them.");
+  }
+  return images.map((image, index) => {
+    // The type says `detail` does not belong in accounting, but TypeScript only checks that on a
+    // fresh object literal — a spread or a named const carries it straight through, and the pairing
+    // below would then silently replace it. Say so instead.
+    if ("detail" in image.accounting) {
+      throw new Error("Image accounting describes the file, not the request: do not pass a `detail` " +
+        `in it (got ${JSON.stringify((image.accounting as InputImageAccounting).detail)}). Ask for a ` +
+        "detail with the builder's `detail` option, which is what actually reaches the message.");
+    }
+    return { ...image.accounting, detail: details[index] };
+  });
+}
+
+/**
+ * The image analogue, built by the shared `buildImageMessages` unmodified.
+ *
+ * The caller supplies what it knows about each file (its hash and its size) and the builder supplies
+ * what it knows about the request (the detail it just attached), so there is no way to describe an
+ * image as costing something other than what was asked for. The builder stays the only place a
+ * detail is put on a message; a run asks for one through `detail`.
  */
 export function buildImageRequest(options: BuildImageRequestOptions): HarnessRequest {
-  const { model, aiPrompt, message, imageUrl, accounting, generationSettings } = options;
+  const { model, aiPrompt, message, images, detail, generationSettings } = options;
   if (message !== "image-only") {
     throw new Error(`buildImageRequest builds image-only messages; got message shape "${message}".`);
   }
-  // The type says `detail` does not belong here, but TypeScript only checks that on a fresh object
-  // literal — a spread or a named const carries it straight through. Silently ignoring a caller's
-  // declared detail would be its own trap, so it is refused out loud.
-  if ("detail" in accounting) {
-    throw new Error("buildImageRequest derives `detail` from the message it builds; do not pass one " +
-      `in accounting (got ${JSON.stringify((accounting as InputImageAccounting).detail)}). ` +
-      "Detail variants arrive in milestone 3, by changing the shared builder.");
+  if (images.length === 0) {
+    throw new Error("buildImageRequest needs at least one image; an image-only request with no " +
+      "picture is a run that would ask about nothing.");
   }
-  const messages = buildImageMessages(aiPrompt, imageUrl);
+  const messages = buildImageMessages(
+    aiPrompt, images.map((image) => ({ url: image.imageUrl })), { detail });
   return {
     apiRequest: {
       model,
@@ -192,7 +236,38 @@ export function buildImageRequest(options: BuildImageRequestOptions): HarnessReq
       responseFormat: projectResponseFormat(responseFormatFor(aiPrompt)),
       generationSettings
     },
-    inputAccounting: { images: [{ ...accounting, detail: detailOfSingleImage(messages) }] }
+    inputAccounting: { images: accountingForImages(messages, images) }
+  };
+}
+
+/**
+ * Text and pictures in one request, built by the shared `buildMixedMessages` unmodified.
+ *
+ * `markdown` is `null` for a document with no student-authored text: the summary and related-summary
+ * parts are then absent and only the pictures go, which is the case the run records on its row
+ * rather than skipping.
+ */
+export function buildMixedRequest(options: BuildMixedRequestOptions): HarnessRequest {
+  const {
+    model, aiPrompt, message, markdown, relatedSummaries = [], images, detail, generationSettings
+  } = options;
+  if (message !== "mixed") {
+    throw new Error(`buildMixedRequest builds mixed messages; got message shape "${message}".`);
+  }
+  if (images.length === 0) {
+    throw new Error("buildMixedRequest needs at least one image; a mixed request with no picture is " +
+      "a text-only request wearing the wrong name, and would be filed under the wrong message shape.");
+  }
+  const messages = buildMixedMessages(
+    aiPrompt, markdown, relatedSummaries, images.map((image) => ({ url: image.imageUrl })), { detail });
+  return {
+    apiRequest: {
+      model,
+      messages,
+      responseFormat: projectResponseFormat(responseFormatFor(aiPrompt)),
+      generationSettings
+    },
+    inputAccounting: { images: accountingForImages(messages, images) }
   };
 }
 

@@ -147,3 +147,100 @@ describe("averages are blank on a row that spans more than one message shape", (
     expect(column(printed, "img tok est")[textIndex]).toBe("-");
   });
 });
+
+describe("a report reads a mixed run the way it reads the two it sits between", () => {
+  const mixedRow = (docId: string, textPartOmitted?: true): ResultRow => ({
+    ...base,
+    docId,
+    runId: "mixed",
+    message: "mixed",
+    modality: "mixed",
+    computedModality: "mixed",
+    representation: {
+      kind: "mixed",
+      text: { variantId: "default", variantVersion: 1, sourceContentSha256: "0".repeat(64) },
+      image: {
+        modeId: "puppeteer-full-height",
+        backendId: "puppeteer",
+        backendVersion: 2,
+        renderTarget: {
+          clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+          shutterbugUrl: null, viewportWidthPx: 960, captureMode: "full-document", captureHeightPx: null
+        },
+        sourceContentSha256: "0".repeat(64),
+        imageSha256s: ["a".repeat(64)],
+        imageSet: "full-document"
+      }
+    },
+    promptImageTokensEstimated: 14_399,
+    usage: { promptTokens: 15_000, completionTokens: 30, source: "api" },
+    requestKey: `key-mixed-${docId}`,
+    ...(textPartOmitted ? { textPartOmitted } : {})
+  });
+
+  const skippedRow = (docId: string): ResultRow => {
+    const { representation, promptImageTokensEstimated, ...rest } = base as never as Record<string, unknown>;
+    return {
+      ...rest,
+      docId,
+      runId: "mixed",
+      message: "mixed",
+      modality: "empty",
+      computedModality: "empty",
+      status: "skipped",
+      requestKey: null,
+      skipReasons: ["mixed run: the document has no student content at all"],
+      decidedFromContentSha256: "0".repeat(64)
+    } as unknown as ResultRow;
+  };
+
+  const printed = () => formatSummaryTable(summarizeResults(
+    [mixedRow("a"), mixedRow("b", true), skippedRow("c")],
+    "results.jsonl", new Date("2026-08-17T00:00:00.000Z")));
+
+  it("gives a mixed run its own group rather than folding it into either baseline", () => {
+    const summary = summarizeResults(
+      [mixedRow("a"), row("d", "text-only", "text-only")],
+      "results.jsonl", new Date("2026-08-17T00:00:00.000Z"));
+    const shapes = new Set(summary.groups.map((group) => group.message));
+    expect(shapes).toEqual(new Set(["mixed", "text-only", "all"]));
+  });
+
+  it("counts the image tokens of a mixed row, the way it does for an image row", () => {
+    const table = printed();
+    const mixedIndex = column(table, "message").indexOf("mixed");
+    expect(column(table, "img tok est")[mixedIndex]).toBe(String(14_399 * 2));
+  });
+
+  it("averages a mixed group, because one shape is one population", () => {
+    // `mixed` is a shape, not a mixture of shapes: the means are comparable and are shown.
+    const table = printed();
+    const mixedIndex = column(table, "message").indexOf("mixed");
+    expect(column(table, "in mean")[mixedIndex]).toBe("15000");
+  });
+
+  it("counts the rows that went without their text half, and blanks the count where none did", () => {
+    const table = printed();
+    const messages = column(table, "message");
+    const noText = column(table, "no text");
+    expect(noText[messages.indexOf("mixed")]).toBe("1");
+    // A group where it never happened reads "-", not 0, so it cannot be mistaken for a measurement.
+    const summary = summarizeResults(
+      [row("d", "text-only", "text-only")], "results.jsonl", new Date("2026-08-17T00:00:00.000Z"));
+    expect(column(formatSummaryTable(summary), "no text").every((cell) => cell === "-")).toBe(true);
+  });
+
+  it("counts a skipped mixed row as skipped, and not as a document that answered", () => {
+    // Read off the run's all-modality row: a skipped document is classified `empty`, so it lands in
+    // a different per-modality group from the ones that answered.
+    const summary = summarizeResults(
+      [mixedRow("a"), mixedRow("b", true), skippedRow("c")],
+      "results.jsonl", new Date("2026-08-17T00:00:00.000Z"));
+    const run = summary.groups.find((group) =>
+      group.runId === "mixed" && group.message === "mixed" && group.modality === "all")!;
+    expect(run.statuses).toMatchObject({ success: 2, skipped: 1, error: 0, refusal: 0 });
+    // Every document is represented, sent or not: that is what makes a skip readable as a decision.
+    expect(run.docs).toBe(3);
+    expect(run.textPartOmitted).toBe(1);
+  });
+});

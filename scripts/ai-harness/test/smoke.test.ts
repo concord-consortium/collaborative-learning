@@ -6,12 +6,15 @@ import { corpusPaths, readRepresentation, representationPath } from "../src/corp
 import { CompletionRequest, CompletionResult } from "../src/execute.js";
 import { ReportSummary } from "../src/report.js";
 import { ResultRow } from "../src/schemas.js";
-import { makeTestDataRoot, readLines } from "./helpers.js";
+import { makeTestDataRoot, readLines, syntheticCorpusShape } from "./helpers.js";
 
 /**
  * import -> represent -> plan -> run -> report, driven through the same argv parsing the CLI uses,
  * with the OpenAI backend replaced by a mock. No network, no API key.
  */
+/** Derived from the committed fixtures, so adding one moves the counts instead of breaking them. */
+const shape = syntheticCorpusShape();
+
 describe("end-to-end smoke run against the synthetic corpus", () => {
   const dataRoot = makeTestDataRoot("smoke");
   const output: string[] = [];
@@ -24,8 +27,10 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
       messages: request.apiRequest.messages,
       maxCompletionTokens: request.apiRequest.generationSettings.max_completion_tokens
     });
-    // One refusal so the report exercises more than the success path.
-    if (refusalsRemaining > 0 && String(JSON.stringify(request.apiRequest.messages)).includes("empty CLUE document")) {
+    // One refusal so the report exercises more than the success path. Triggered on the first
+    // request rather than on a particular document's text: the one that would carry it is empty, and
+    // skip-empty means no run sends an empty document at all.
+    if (refusalsRemaining > 0) {
       refusalsRemaining -= 1;
       return {
         parsed: null,
@@ -60,8 +65,8 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     await main(["import", "--from", "examples/synthetic-corpus", "--corpus", "smoke-corpus"], deps);
     const manifest = JSON.parse(fs.readFileSync(paths.manifest, "utf8"));
     expect(manifest.schemaVersion).toBe(1);
-    expect(manifest.documents.length).toBe(25);
-    expect(output.join("\n")).toContain("Imported 25 document(s)");
+    expect(manifest.documents.length).toBe(shape.documents.length);
+    expect(output.join("\n")).toContain(`Imported ${shape.documents.length} document(s)`);
   });
 
   it("writes representation envelopes for both text variants", async () => {
@@ -76,35 +81,70 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
   it("reuses fresh representations instead of regenerating them", async () => {
     output.length = 0;
     await main(["represent", "--corpus", "smoke-corpus", "--variants", "default,minimal"], deps);
-    expect(output.join("\n")).toContain("Wrote 0 representation(s), reused 50");
+    // Two variants per document, all of them already fresh.
+    expect(output.join("\n"))
+      .toContain(`Wrote 0 representation(s), reused ${shape.documents.length * 2}`);
   });
 
   it("plans the run without touching the network", async () => {
     output.length = 0;
     await main(["plan", "--corpus", "smoke-corpus", "--experiment", "experiments/text-baselines.json"], deps);
     const printed = output.join("\n");
-    expect(printed).toContain("2 run(s) × 25 document(s) = 50 call(s)");
+    // Not runs × documents: a text-only run sends only the documents that carry student-authored
+    // text, and says so about the rest rather than leaving them out of the results.
+    // The product is of runs and documents, and the two figures after it add back up to it — which
+    // `= N call(s)` did not, on any corpus with a skip.
+    expect(printed).toContain(
+      `2 run(s) × ${shape.documents.length} document(s) = ${shape.documents.length * 2} pair(s); ` +
+      `${shape.withStudentText.length * 2} call(s), ` +
+      `${(shape.documents.length - shape.withStudentText.length) * 2} skipped.`);
     expect(printed).toContain("max_completion_tokens 1024");
     expect(printed).toMatch(/Worst-case total \(retries included\): \$\d+\.\d+/);
     expect(requests).toHaveLength(0);
   });
 
-  it("runs every pair and writes one JSONL row each", async () => {
+  it("writes one row per pair, sent or skipped, and never leaves a document out", async () => {
     output.length = 0;
     await main(["run", "--corpus", "smoke-corpus", "--experiment", "experiments/text-baselines.json",
       "--max-cost", "1.00"], deps);
     const rows = readLines(resultsFile) as ResultRow[];
-    expect(rows).toHaveLength(50);
-    expect(new Set(rows.map((row) => `${row.docId} ${row.runId}`)).size).toBe(50);
+    // Every (run, document) pair appears exactly once, whether or not it was sent: a document that
+    // simply did not appear would be indistinguishable from a bug.
+    const pairs = shape.documents.length * 2;
+    expect(rows).toHaveLength(pairs);
+    expect(new Set(rows.map((row) => `${row.docId} ${row.runId}`)).size).toBe(pairs);
 
-    // 49, not 50: the image tile contributes nothing to a `minimal` summary, so the image document's
-    // minimal representation is identical to the empty document's — same messages, same request key,
-    // so the second one is served from the cache. That is the cache doing its job.
-    const distinctRequests = new Set(rows.map((row) => row.requestKey));
-    expect(distinctRequests.size).toBe(49);
+    const sent = rows.filter((row) => row.status !== "skipped");
+    const skipped = rows.filter((row) => row.status === "skipped");
+    expect(sent).toHaveLength(shape.withStudentText.length * 2);
+    expect(skipped).toHaveLength((shape.documents.length - shape.withStudentText.length) * 2);
+    // Every skip says why, in terms a reader can act on.
+    for (const row of skipped) {
+      expect(row.status === "skipped" && row.skipReasons.join(" "))
+        .toMatch(/no student content at all|no tile carries student-authored text/);
+    }
+    expect(new Set(sent.map((row) => row.docId))).toEqual(new Set(shape.withStudentText));
+
+    const distinctRequests = new Set(sent.map((row) => row.requestKey));
     expect(requests.length).toBeGreaterThanOrEqual(distinctRequests.size);
-    expect(requests.length).toBeLessThanOrEqual(50);
+    expect(requests.length).toBeLessThanOrEqual(sent.length);
     expect(output.join("\n")).toMatch(/from cache, \d+ API call\(s\)/);
+  });
+
+  it("skips the empty documents for every shape, and says so once per run", async () => {
+    // Acceptance: an empty document is skipped by every message shape, and a visual-only one by a
+    // text-only run. Both classes are present in the committed corpus.
+    const rows = readLines(resultsFile) as ResultRow[];
+    for (const docId of shape.empty) {
+      const forDoc = rows.filter((row) => row.docId === docId);
+      expect(forDoc).toHaveLength(2);
+      for (const row of forDoc) expect(row.status).toBe("skipped");
+    }
+    const visualOnly = shape.withContent.filter((docId) => !shape.withStudentText.includes(docId));
+    expect(visualOnly.length).toBeGreaterThan(0);
+    for (const docId of visualOnly) {
+      expect(rows.filter((row) => row.docId === docId).every((row) => row.status === "skipped")).toBe(true);
+    }
   });
 
   it("builds its messages with the shared production builders", () => {
@@ -125,7 +165,8 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     await main(["run", "--corpus", "smoke-corpus", "--experiment", "experiments/text-baselines.json",
       "--max-cost", "1.00"], deps);
     expect(requests).toHaveLength(before);
-    expect(output.join("\n")).toContain("50 already complete");
+    // Every pair the first run wrote is resumed, sent and skipped alike.
+    expect(output.join("\n")).toContain(`${shape.documents.length * 2} already complete`);
   });
 
   it("refuses --refresh-cache and --no-cache when resume would silently skip everything", async () => {
@@ -144,7 +185,13 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     const stale = path.join(dataRoot, "results", "stale-keys.jsonl");
     fs.writeFileSync(stale, fs.readFileSync(resultsFile, "utf8")
       .split("\n").filter((line) => line.length > 0)
-      .map((line) => JSON.stringify({ ...JSON.parse(line), requestKey: `stale-${JSON.parse(line).docId}` }))
+      .map((line) => {
+        const row = JSON.parse(line);
+        // A skipped row has no request key to make stale, and must not be given one.
+        return JSON.stringify(row.status === "skipped"
+          ? row
+          : { ...row, requestKey: `stale-${row.docId}` });
+      })
       .join("\n") + "\n");
     const beforeStale = requests.length;
     await main(["run", "--corpus", "smoke-corpus", "--experiment", "experiments/text-baselines.json",
@@ -179,13 +226,18 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
       fs.readFileSync(path.join(dataRoot, "results", "smoke-corpus__text-baselines.summary.json"), "utf8"),
     ) as ReportSummary;
     expect(fs.existsSync(resultsFile)).toBe(true);
-    expect(summary.rows).toBe(50);
-    const overall = summary.groups.find((group) => group.runId === "(all runs)" && group.modality === "all")!;
-    expect(overall.docs).toBe(25);
-    expect(overall.statuses.success + overall.statuses.refusal).toBe(50);
+    const pairs = shape.documents.length * 2;
+    const sentPairs = shape.withStudentText.length * 2;
+    expect(summary.rows).toBe(pairs);
+    const overall = summary.groups.find((group) =>
+      group.runId === "(all runs)" && group.message === "all" && group.modality === "all")!;
+    expect(overall.docs).toBe(shape.documents.length);
+    // Skipped rows are counted, not dropped: the three statuses account for every pair.
+    expect(overall.statuses.success + overall.statuses.refusal).toBe(sentPairs);
+    expect(overall.statuses.skipped).toBe(pairs - sentPairs);
     expect(overall.statuses.refusal).toBe(1);
     expect(overall.statuses.error).toBe(0);
-    expect(overall.categories.form).toBe(49);
+    expect(overall.categories.form).toBe(sentPairs - 1);
     expect(overall.cost.incurredUsd).toBeGreaterThan(0);
     expect(overall.tokens.total).toBeGreaterThan(0);
 

@@ -43,7 +43,7 @@ describe("writing a file atomically", () => {
   });
 
   it("gives every write its own temporary name", () => {
-    // The name used to be `<file>.<pid>.tmp`, which is not unique within a process: two concurrent
+    // A name built from the process id alone is not unique within that process: two concurrent
     // writes to one path would share it, and each would rename the other's half-written bytes into
     // place.
     const file = path.join(dataRoot, "unique", "value.json");

@@ -317,15 +317,32 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     prerequisites: `network access to ${shutterbugUrl} and ${clueUrl}; no OpenAI key`,
     renderTarget,
     async render(request: RenderRequest): Promise<RenderOutcome> {
+      // A mode with a per-document height is handed one per request; every other mode uses the
+      // height it was configured with. Checked here as well as at construction, because a measured
+      // height is only known once the document has been rendered locally.
+      const heightPx = request.captureHeightPx ?? captureHeightPx;
+      if (request.captureHeightPx !== undefined) {
+        if (!Number.isInteger(heightPx) || heightPx <= 0) {
+          throw new ShutterbugError(request.docId,
+            `was given a capture height of ${JSON.stringify(request.captureHeightPx)}, which is not ` +
+            "a positive whole number of pixels");
+        }
+        checkCaptureSize(request.docId, viewportWidthPx, heightPx, limits);
+      }
       const url = await post(request.docId,
-        shutterbugRequestBody(request.content, { clueUrl, unit, captureHeightPx }));
+        shutterbugRequestBody(request.content, { clueUrl, unit, captureHeightPx: heightPx }));
       const bytes = await download(request.docId, url);
       // The hosted URL is kept beside the downloaded copy: it is what production sends to the model,
       // and it is what `run` has to check is still resolving before it spends anything.
       return {
         images: [{ bytes, url, tileId: null, purpose: "full-document" }],
         // The render happened on someone else's browser, so there is nothing to report about it.
-        diagnostics: { ...kUnobservedDiagnostics }
+        diagnostics: { ...kUnobservedDiagnostics },
+        // Recorded per document when the height was, so freshness compares against the height this
+        // picture was actually taken at rather than the mode's nominal one.
+        ...(request.captureHeightPx === undefined
+          ? {}
+          : { renderTarget: { ...renderTarget, captureHeightPx: heightPx } })
       };
     }
   };
@@ -369,6 +386,35 @@ export function shutterbugParameterized(options: ParameterizedOptions = {}): Ren
     clueUrl: options.clueUrl ?? kProductionClueUrl,
     unit: options.unit ?? kProductionUnit,
     shutterbugUrl: options.shutterbugUrl ?? kStagingShutterbugUrl,
+    captureHeightPx: options.captureHeightPx ?? kProductionCaptureHeightPx,
+    clueRevision: options.clueRevision ?? null,
+    fetchImpl: options.fetchImpl,
+    limits: options.limits,
+    sleep: options.sleep
+  });
+}
+
+/**
+ * The same transport again, but each document is captured at *its own* measured height.
+ *
+ * This is the prototype for the production fix the spike proposes: production posts a hardcoded
+ * `height: 1500` for every document, so a shorter one is padded and a longer one is silently
+ * clipped. Sending the real height instead is a small change to
+ * `on-analysis-document-pending.ts` — and the point of this mode is to measure what it buys before
+ * anyone makes it.
+ *
+ * The height itself comes from a previous local `puppeteer-full-height` render, which is the only
+ * thing that knows how tall a document actually is. `render` reads it and hands it over per
+ * document; nothing here knows the corpus exists.
+ */
+export function shutterbugAccurateHeight(options: ParameterizedOptions = {}): RenderBackend {
+  return shutterbugBackend({
+    modeId: "shutterbug-accurate-height",
+    clueUrl: options.clueUrl ?? kProductionClueUrl,
+    unit: options.unit ?? kProductionUnit,
+    shutterbugUrl: options.shutterbugUrl ?? kStagingShutterbugUrl,
+    // Only a fallback: every render is handed the document's measured height. It is the production
+    // height so that a document with no measurement would be no worse than production, not better.
     captureHeightPx: options.captureHeightPx ?? kProductionCaptureHeightPx,
     clueRevision: options.clueRevision ?? null,
     fetchImpl: options.fetchImpl,

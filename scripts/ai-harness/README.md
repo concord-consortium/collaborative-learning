@@ -4,12 +4,15 @@ A checked-in tool that runs (representation × prompt × message-shape) experime
 CLUE documents and reports quality inputs plus token and cost numbers — so text-only vs. image-only
 vs. mixed-mode claims are backed by measurements instead of intuition.
 
-This is **milestone 2** of [CLUE-371](../../docs/plans/CLUE-371-harness-plan.md). Milestone 1 built
+This is **milestone 3** of [CLUE-371](../../docs/plans/CLUE-371-harness-plan.md). Milestone 1 built
 the shared message builders, the harness skeleton, a synthetic corpus, text-only runs, the response
-cache, the spend ceiling, and reports as data. Milestone 2 adds the other production representation
-— the screenshot — so image-only baselines can run against the same corpus. Mixed mode (milestone 3),
-the HTML review report (milestone 4), rubric scoring (milestone 5) and the production corpus pull
-(milestone 6) are not here yet.
+cache, the spend ceiling, and reports as data. Milestone 2 added the other production representation
+— the screenshot — so image-only baselines could run against the same corpus. Milestone 3 adds the
+message the whole question is about, text **and** picture together, plus the dimensions an
+experiment needs to turn around it: image detail, per-tile and visual-tiles-only image sets, the
+three extras settings, two new text variants, and skip-empty execution. The HTML review report
+(milestone 4), rubric scoring (milestone 5) and the production corpus pull (milestone 6) are not
+here yet.
 
 All runs target `gpt-4o-mini`. That is deliberately the rolling alias, not a pinned snapshot:
 production calls the alias, and a harness that pinned a snapshot would stop measuring what production
@@ -79,10 +82,10 @@ OPENAI_API_KEY=sk-…
 npx tsx harness.ts import    --from examples/synthetic-corpus --corpus synthetic-corpus \
                              [--source synthetic|demo|qa] [--prune]
 npx tsx harness.ts represent --corpus synthetic-corpus --variants default,minimal
-npx tsx harness.ts render    --corpus synthetic-corpus \
-                             --mode puppeteer-full-height|shutterbug-production-current|shutterbug-parameterized \
+npx tsx harness.ts render    --corpus synthetic-corpus --mode <mode> \
                              [--clue-url <url>] [--unit <unit>] [--shutterbug-url <url>] \
-                             [--capture-height <px>] [--refresh]
+                             [--capture-height <px>] [--refresh] \
+                             [--concurrency <n>] [--timeout-ms <n>]
 npx tsx harness.ts plan      --corpus synthetic-corpus --experiment experiments/image-vs-text.json
 npx tsx harness.ts run       --corpus synthetic-corpus --experiment experiments/text-baselines.json \
                              --max-cost 0.50 [--output <file>] [--no-cache | --refresh-cache]
@@ -91,10 +94,15 @@ npx tsx harness.ts report    --results data/results/synthetic-corpus__text-basel
 
 Flags are plain `--name value` pairs. An unknown flag is an error, not a warning.
 
-`plan` on the committed synthetic corpus projects a worst case of about **$0.11** for both text
-baselines across all 25 documents, and roughly **$0.22** more for the image-only run — a full worst
-case of about **$0.33** for all three, which is the figure the recorded `image-vs-text` run below
-reports. Image tokens dominate, and the reservation assumes every retry is used.
+`plan` on the committed synthetic corpus projects a worst case of about **$0.03** for both text
+baselines — 14 calls, because skip-empty sends a text run only the documents that carry
+student-authored text (7 of 26), and records the other 19 as skipped rows. Image runs send every
+document that has any content at all, so they are both larger and dominated by image tokens; run
+`plan` after rendering to see the figure for a particular mode and image set, since a per-tile set
+multiplies the count. The reservation assumes every retry is used.
+
+The recorded run further down is a real `mixed-vs-baselines` run against this corpus as it now
+stands.
 
 ## Data safety
 
@@ -143,10 +151,34 @@ Staleness is decided by the envelope, not by the file existing: a representation
 `sourceContentSha256` and `variantVersion` both still match. Each variant in `src/represent-text.ts`
 exports a `variantVersion` that is bumped whenever its output would change for the same input.
 
-Variants: `default` and `minimal`. The `svg-drawings` variant
-(`documentSummarizerWithDrawings`) is **not** included — it imports `src/plugins/drawing`, which
-imports `.svg` assets that only a bundler can load, so it does not run under `tsx` without build
-gymnastics. It is a candidate for a later milestone.
+| Variant | What it sends |
+|---|---|
+| `default` | `documentSummarizer(content, {})` — what production produces. |
+| `minimal` | No boilerplate, headers or row/column structure: the text content and nothing else. |
+| `no-dataset-tables` | `default`, with each data set's *case data* left out. The heading, attributes table, formulas and case count stay, so the shape of the data is still described. A large table can be most of a document's summary, and whether a model needs the rows to categorize a design is worth measuring rather than assuming. |
+| `drawing-text` | `default`, with drawings **described** instead of merely mentioned: each object's type, position and size, and any text object's own text. The default handler says "This tile contains a drawing" and stops, so a text run otherwise learns nothing about what was drawn — including text a student typed *inside* a drawing, which no other text variant carries. |
+
+`drawing-text` is a measurement prototype, not a good description: it reports geometry and does not
+interpret it, because interpreting the picture is what the model is being measured on. Beating it is
+the point, and a new variant is how someone shows they have.
+
+**A text run reaches it only on a document that carries student text elsewhere**, which today means
+the geometry half is barely exercised. Skip-empty asks the classifier whether any tile holds
+student-authored text, and a Drawing tile counts only when it has a text object with something in it
+(`drawingTileHasText` in `src/capability.ts`) — so the `drawing` fixture, two shapes and no text, is
+skipped by a text-only run before the variant is consulted. Of the two fixtures with Drawing tiles,
+only `mixed` is sent, and that one has a Text tile as well. The variant's own summary of a drawing
+*is* student content, so the skip is asking the wrong question for this combination; the decision is
+made from the classifier alone and knows nothing about which variant is about to run.
+
+Two further ways to shrink a data set — sending a fixed sample of cases, and sending aggregate
+statistics — are named in the plan and not built. Both are variants of their own when someone wants
+to measure them.
+
+The `svg-drawings` variant (`documentSummarizerWithDrawings`) is **not** included — it imports
+`src/plugins/drawing`, which imports `.svg` assets that only a bundler can load, so it does not run
+under `tsx` without build gymnastics. `drawing-text` exists because that limitation is not going
+away soon.
 
 ### Image representations
 
@@ -165,9 +197,10 @@ gymnastics. It is a candidate for a later milestone.
     "purpose": "full-document" }] }
 ```
 
-`images` is an array from the start so milestone 3's per-tile capture is additive, but **request
-construction requires exactly one**: zero and many both fail, and the first is never silently
-selected.
+`images` was an array from the start, which is what made per-tile capture additive. **Which** of an
+envelope's images a run sends is chosen by its `imageSet`, never inferred: a `full-document` run
+takes the one full-document picture and refuses an envelope that has none, rather than sending
+whatever happened to be first.
 
 Freshness checks the files, not just the envelope. A stored render is reused only when the content
 hash, mode, backend and backend version all match **and** every PNG it names still exists, still
@@ -185,6 +218,8 @@ modes are named and separate, and an improvement never gets folded into the base
 | `puppeteer-full-height` (default) | local | `--clue-url`, default `http://localhost:8080` | harness's own | full document, 960px wide |
 | `shutterbug-production-current` | yes | production's `branch/shutterbug-support` | `mods` | `height: 1500`, no `fullPage` |
 | `shutterbug-parameterized` | yes | `--clue-url`, default production's `branch/shutterbug-support` | `--unit`, default `mods` | `--capture-height`, default 1500; `--shutterbug-url`, default **staging** |
+| `puppeteer-per-tile` | local | `--clue-url`, default `http://localhost:8080` | harness's own | one image per top-level tile |
+| `shutterbug-accurate-height` | yes | `--clue-url`, default production's branch | `--unit`, default `mods` | each document's **own measured height** — needs a `puppeteer-full-height` render of the same corpus first |
 
 **`shutterbug-production-current` is the parity baseline.** It matches production's request envelope
 — the production endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, no
@@ -259,16 +294,22 @@ or other assets from elsewhere. If offline operation ever has to be a guarantee,
 intercept and reject non-localhost requests, and a test must assert it.
 
 **A cold dev server can time out the first documents in a run.** `render` drives four pages at a
-time, and the 30-second budget is *per document, covering load, readiness and the capture together*.
-Against a `npm start` server that is still compiling chunks on demand, the first batch pays that
-compile cost and the capture is what runs out of budget — the failure reads `capturing the iframe
-did not finish within the 30000ms budget`, with a clean console and a page screenshot showing a
-perfectly rendered document. Re-run the command: it re-attempts only what failed, against a server
-that is now warm.
+time by default, and the 30-second budget is *per document, covering load, readiness and the capture
+together*. Against a `npm start` server that is still compiling chunks on demand, the first batch
+pays that compile cost and the capture is what runs out of budget — the failure reads `capturing the
+iframe did not finish within the 30000ms budget`, with a clean console and a page screenshot showing
+a perfectly rendered document.
 
-Neither the concurrency nor the per-document timeout is reachable from the command line today —
-both are injectable for tests only, so re-running is the only lever. Flags for them are noted
-against milestone 3 in [the plan](../../docs/plans/CLUE-371-harness-plan.md).
+Re-running is usually enough: it re-attempts only what failed, against a server that is now warm.
+When it is not, `--concurrency 1` and `--timeout-ms 60000` turn the two knobs directly. Both are
+validated as positive whole numbers, and both are named in the run's own log line, so a run that
+needed them says so in its output rather than only in the shell history of whoever typed it.
+
+`--timeout-ms` belongs to the local modes only, and the Shutterbug modes refuse it rather than drop
+it. A per-document budget is a thing the local backend has — one deadline covering load, readiness
+and capture — and a hosted mode has no equivalent: it bounds its request and its download separately,
+with retries around them, so there is nothing for a whole-document budget to bound. Their log line
+names the concurrency alone, rather than a limit nothing enforces. `--concurrency` works everywhere.
 
 `npm ci` in this directory now installs puppeteer, which downloads a Chromium build on first
 install. If your environment blocks that download, set `PUPPETEER_SKIP_DOWNLOAD=true` to skip it and
@@ -306,7 +347,8 @@ plus a per-tile rate after the image is scaled down to fit the long side and the
 **`auto` is reserved at the high rate.** The shared builder sends `detail: "auto"` and the provider
 publishes an exact formula only for explicit low and high, so the harness assumes the expensive
 branch. Deliberately conservative, in the same spirit as the other ceiling caveats above. `detail`
-is fixed at `"auto"` by the shared builder; detail variants arrive with milestone 3.
+defaults to the `"auto"` the shared builder has always sent; a run asks for `low` or `high` with its
+`detail` setting, and the builder remains the only place a detail is attached to a message.
 
 The accounting data that makes this possible travels *beside* the request, not inside it:
 
@@ -410,15 +452,64 @@ identify a prompt by hash, not only by name. `test/prompt.test.ts` asserts the c
 
 ### Experiments
 
-An explicit run list only (no matrix expansion). `message` is `text-only` or `image-only`, `prompt`
-must name an existing prompt file, and run ids must be unique. A run names the representation its
-message shape uses, and only that one: a `text-only` run needs a `textVariant` and is refused if it
-also sets `imageMode`; an `image-only` run needs an `imageMode` and is refused if it also sets
-`textVariant`. Ignoring the spare field would produce a result table that looks fine and answers a
-different question from the one the file describes.
+An explicit run list only (no matrix expansion). `prompt` must name an existing prompt file, and run
+ids must be unique. `message` is one of:
 
-`experiments/image-vs-text.json` runs the milestone's headline comparison — `text-default`,
-`text-minimal` and `image-puppeteer` against the same prompt — from one file.
+| Shape | Names | Sends |
+|---|---|---|
+| `text-only` | `textVariant` | The summary, plus its related-summary parts. |
+| `image-only` | `imageMode` | The pictures. |
+| `mixed` | **both** | The summary *and* the pictures, in one request. |
+
+A run may only carry the dimensions its shape can use, and a spare one is refused rather than
+ignored — ignoring it produces a result table that looks fine and answers a different question from
+the one the file describes:
+
+| Field | Valid on | Default | Values |
+|---|---|---|---|
+| `detail` | image-carrying runs | the builder's `auto` | `low`, `high` |
+| `imageSet` | image-carrying runs | `full-document` | `per-tile`, `visual-tiles-only` |
+| `extras` | text-carrying runs | `extras-fixed` | `extras-production-current`, `no-extras` |
+
+`extras` is what a run puts in the related-summary parts. `extras-fixed` is each related document's
+own summary, from the manifest, which is what the harness has always sent — so an experiment file
+written before this dimension existed keeps its meaning *and its request key*.
+`extras-production-current` reproduces production's `findRelatedSummaries` bug on purpose (spike
+finding 6a, CLUE-630): every related entry is given the **analyzed document's own** summary, so the
+model is shown the same text several times over and told other people agreed with it. It is a named
+baseline, kept faithful so a before-and-after comparison stays honest. `no-extras` sends none.
+
+`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: eleven
+runs over the same corpus. Text, image and mixed are the comparison itself; the other eight turn one
+dimension each around it — detail-low, per-tile and visual-tiles-only on the image side, the three
+extras settings and the two new text variants on the text side. Every dimension this milestone adds
+has a run, so none of them ships only exercised by a unit test.
+`experiments/image-vs-text.json` is milestone 2's narrower comparison, kept as it was.
+
+### Which documents a run declines to send
+
+A run does not send every document, and it says so rather than leaving gaps. The decision comes from
+classifying the document's own content — never from a `modalityOverride`, which is a reporting
+judgement about how to group a result, not a claim about what the document contains.
+
+- **Any shape** skips a document classified `empty`: no tile carries text, and none needs a picture.
+- **`text-only`** skips a document with no student-authored text — the summary would carry no
+  student content, which is the thing a text run measures. On the synthetic corpus that is most of
+  it: 7 of 26 documents carry student text.
+- **`mixed`** sends a document with no student text *without* its summary and related summaries, and
+  records `textPartOmitted` on the row. The picture still has something to say, so skipping it would
+  throw away the answer this shape exists to get.
+- **`visual-tiles-only`** skips a document where no captured tile is one the classification marks as
+  needing a picture.
+
+Every skipped pair becomes a `skipped` result row carrying its reasons and the content hash the
+decision was made from, written before anything is dispatched. A document that simply did not appear
+in the results would be indistinguishable from a bug. On a rerun, an unchanged document keeps its
+existing skipped row; an edited one is decided again.
+
+Worth knowing: a mixed message with its text half dropped is byte-for-byte an image-only message, so
+those rows share the image-only run's request key and are served from the cache rather than paid for
+twice.
 
 ### Cache
 
@@ -509,7 +600,7 @@ API-reported usage is authoritative for final numbers.
 
 Result rows are a discriminated union on `status` (`success`, `refusal`, `error`, `skipped`), all
 sharing the same identifying fields. `skipped` ships now but is unused: skip-empty *execution*
-arrives in milestone 3. `report` handles all four statuses exhaustively and writes
+is written by skip-empty execution. `report` handles all four statuses exhaustively and writes
 `<results-basename>.summary.json` next to the results file — named after it, because a single
 `summary.json` per directory meant every experiment in `data/results/` shared one path and reporting
 on one silently overwrote another's. Groups are per run configuration × message shape × modality,
@@ -526,11 +617,16 @@ both kinds populate — the text side carries the variant and its version, the i
 mode, backend, version, whole render target and image hashes, because that is what a screenshot's
 provenance is. Version-1 rows are **refused** with an instruction to re-run into a fresh `--output`
 rather than being silently mis-read; the response cache means unchanged requests are not paid for
-twice. This is also the extension point milestone 3's mixed rows need.
+twice. It is also the extension point the `mixed` descriptor kind uses.
 
 The report's `img tok est` column is the harness's pre-flight image-token estimate, shown beside the
 `tok in` the API actually billed. It is `-` for a text group rather than `0`, so the two cases cannot
-be confused.
+be confused; a mixed group carries it the same way an image group does.
+
+The `no text` column counts the mixed rows that went without their text half. Those rows carry half
+the input a mixed row usually does, so a reader comparing mixed against text-only needs the count
+before drawing a conclusion. Like `overridden`, it reads `-` where it never happened rather than
+`0`.
 
 Every on-disk format carries a `schemaVersion`, is described as a TypeScript type in
 [`src/schemas.ts`](src/schemas.ts), and is validated on every read; a bad file fails with a message
@@ -562,10 +658,10 @@ src/represent-image.ts     image envelopes: paths, writing, freshness (files inc
 src/png.ts                 PNG header reader (dimensions + "is this really a PNG?")
 src/files.ts               atomic writes, path containment, JSON reads, git
 src/backends/types.ts      what a render backend is, and the limits every one is held to
-src/backends/index.ts      the three named render modes
+src/backends/index.ts      the named render modes
 src/backends/render-html.ts  the render page, with safe interpolation — shared by all modes
 src/backends/puppeteer.ts  local capture through CLUE's iframe pathway
-src/backends/shutterbug.ts the two hosted modes and the network contract
+src/backends/shutterbug.ts the three hosted modes and the network contract
 src/backends/render-unit.ts  the harness's rendering unit and the server that hands it over
 src/messages.ts            request construction via shared/ai-analysis-messages
 src/cache.ts               response cache
@@ -609,9 +705,13 @@ Things this milestone surfaced that are not the harness's to fix.
 
 ## DEVIATIONS
 
-Where the implementation departs from
-[docs/plans/CLUE-371-harness-implementation-1.md](../../docs/plans/CLUE-371-harness-implementation-1.md),
-and why.
+Where the implementation departs from its specification, and why. Each milestone's entries are
+listed under the spec they depart from, and entries are never renumbered or removed — a deviation
+that a later milestone changed is rewritten in place, so a number cited elsewhere keeps pointing at
+the same subject.
+
+Milestone 1 (against
+[docs/plans/CLUE-371-harness-implementation-1.md](../../docs/plans/CLUE-371-harness-implementation-1.md)):
 
 1. **`moduleResolution` is `bundler`, not `nodenext`.** The spec prescribes
    `module: "nodenext"` / `moduleResolution: "nodenext"`. That configuration cannot type-check this
@@ -687,18 +787,24 @@ Milestone 2 (against
     should take it again, but it does not make the stored pixels the wrong pixels to send. `run`
     still checks the document hash, mode, backend, backend version and every file-level property,
     and the row records the whole render target either way, so provenance is kept.
-15. **An envelope with zero images reports "it records no images", not a milestone-3 error.** The
-    spec asks for the milestone-3 message on both zero and many. Zero images is a damaged envelope
-    rather than an unbuilt feature, and pointing the reader at milestone 3 would misdescribe it.
-    Two or more images does say milestone 3. Both fail, and the first image is never selected.
+15. **An envelope with zero images reports "it records no images" rather than a selection error.**
+    The milestone-2 spec asked for one message on both zero and many. Zero images is a damaged
+    envelope; many is a per-tile render meeting a run that asked for a page. Milestone 3 replaced
+    the "many" half with `imageSet` selection, and this entry now covers only the damaged case.
 16. **The render target's `unit` is a stable identifier, not the URL CLUE fetches.** The harness's
     own rendering unit is served on an ephemeral loopback port; recording that URL would make every
     stored render look stale the moment the server restarted. It is recorded as `harness-render`,
     with the served URL passed to CLUE separately.
-17. **`buildImageRequest` derives `detail` from the message it builds** rather than accepting one
-    from the caller, and refuses a caller-supplied `detail` outright. The caller knows facts about
-    the file; the builder knows what it just sent. This also means the cost model follows the shared
-    builder if its `detail` ever changes, instead of confidently pricing the old value.
+17. **A run may ask for an image `detail`; the accounting still records the one actually sent.**
+    Milestone 2 had `buildImageRequest` derive `detail` from the message it built and refuse a
+    caller-supplied one. Milestone 3's `image-detail-low` run has to be able to ask, so
+    `buildImageRequest` and `buildMixedRequest` now take a `detail` and hand it to the shared
+    builder. What did not change is where the cost model reads it back from: `accountingForImages`
+    re-reads every `image_url` part out of the finished message, and a `detail` passed in the
+    accounting is refused outright. The caller states facts about the file; the message states what
+    was asked of the provider. So a run can choose a detail, and nothing can describe an image as
+    having cost something other than what was sent — including if the shared builder's own default
+    ever changes.
 18. **Render diagnostics are a DOM count, not a console check.** CLUE logs nothing when a tile type
     is not registered — it substitutes an `Unknown` content model drawn by the placeholder
     component. The local backend therefore counts tiles inside the CLUE frame (`.tool-tile`, with
@@ -716,7 +822,11 @@ Milestone 2 (against
     `teacher-guide/content.json` that legitimately 404s, so failing on every console error or failed
     request failed every document. Page errors and failed script loads are fatal; everything else is
     recorded in the evidence file without failing the render. The unregistered-tile case is caught by
-    the DOM count above, since nothing is logged for it.
+    the DOM count above, since nothing is logged for it. Milestone 3 added a third fatal condition,
+    and it is also not a console check: if CLUE draws its own `.document-error` page instead of the
+    document, the render fails before the capture. CLUE logs nothing useful there either — it draws a
+    screen — and without the check the harness had been storing a picture of that error screen as a
+    valid render of the `graph` fixture since milestone 2.
 21. **"Not clipped" is guaranteed by construction, not by an overflow check.** The frame is sized
     from the document's measured tile rows and the capture is then checked to cover them. A DOM
     overflow signal would be the obvious check and is not trustworthy here: `.document-content`
@@ -736,28 +846,127 @@ Milestone 2 (against
     parameterized Shutterbug mode has to be able to set the height it clips at, or it is not
     parameterized; the local mode refuses the flag rather than silently dropping it.
 
+Milestone 3 (against
+[docs/plans/CLUE-371-harness-implementation-3.md](../../docs/plans/CLUE-371-harness-implementation-3.md)):
+
+25. **`shutterbug-accurate-height` is a two-step render.** The spec says to take each document's
+    height from its `puppeteer-full-height` envelope and refuse when there is not one, which is what
+    it does — but that makes it the only mode that depends on another mode having run first, against
+    the same corpus, recently enough to still be fresh. `render` reads every document's height
+    before posting anything and refuses the whole corpus at once, naming the documents and the fix:
+    a half-rendered corpus plus a bill for the part that worked is the outcome worth avoiding. The
+    mode table carries the dependency.
+26. **Result rows stay `schemaVersion: 2`.** The milestone-3 spec's item 23 asks for the decision
+    to be recorded either way, which is why this is here at all. The three statuses that send a
+    request are unchanged on disk; `skipped` rows are new in practice, since
+    nothing ever wrote one, and the fields this milestone adds (`textPartOmitted`,
+    `representationWarnings`, `imageSet`, the `mixed` descriptor kind) are all additive. A version
+    bump would invalidate every milestone-2 results file to describe rows those files cannot
+    contain.
+27. **A skipped row carries no `representation`.** The spec has skipped rows recording "the
+    representation descriptor or content hash it was decided from"; they record the hash. Nothing
+    was represented, and a placeholder descriptor would put a variant or a render mode in the
+    results for a request that never existed. `decidedFromContentSha256` is what resume compares.
+28. **The per-tile capture photographs top-level tiles only.** Classification walks into Question
+    tiles, so a visual tile nested in one has a classification entry and no picture of its own — it
+    is drawn inside its parent's. `visual-tiles-only` matches on the images that exist and records
+    the difference in the row's `representationWarnings`, per the spec's own instruction, rather
+    than failing.
+29. **A corpus can mark a document as expected not to render.** The spec has no such notion: a
+    document either renders or the render fails. But `error-test` exists precisely to be
+    unrenderable — it is how the local backend's failure path gets exercised — so every render of
+    the example corpus reported a failure that was really the fixture doing its job, and a genuine
+    failure looked no different. `expectedRenderFailure` on a manifest entry carries the reason.
+    `render` counts those documents apart from real failures so its exit code keeps meaning
+    something, and writes their evidence either way, since a document expected to fail one way and
+    failing another is exactly what the screenshot is for. A document that renders despite the
+    marker gets a warning telling you to clear it: a stale expectation is worse than none, because
+    it would go on hiding a real failure the day that document breaks again. Example corpora seed
+    the marker from `expectations.json`; a value already in the manifest wins, because a human put
+    it there on purpose.
+30. **A per-tile render of a document with no tiles is neither a success nor a failure.** The
+    `empty` fixture declares no tiles, so a per-tile capture has nothing to photograph. Calling it a
+    failure would make a correct corpus exit non-zero; writing an envelope with zero images would
+    make it indistinguishable from a damaged one, which entry 15 exists to keep separate. `render`
+    reports it as "nothing to capture" and writes no envelope. Nothing downstream needs the
+    envelope, because skip-empty declines to send a contentless document in any case.
+
 ### Verified against a real API call, a real browser, a real service?
 
-All of it, by hand. A local render of all 25 fixtures against a real dev server and a real headless Chromium,
-followed by a real `image-vs-text` run:
+All of it, by hand. The 26 fixtures were rendered against a real dev server and a real headless
+Chromium in both capture modes — 25 full-height envelopes and 24 per-tile ones, the missing entries
+being `error-test`, which is marked `expectedRenderFailure`, and `empty`, which has no tile for a
+per-tile capture to photograph. Then a real `mixed-vs-baselines` run, assembled over several
+sittings as review turned up fixes:
 
 ```
-run    75 calls: 50 from cache, 25 API calls. Spent $0.0539 against a $0.3282 worst case.
+run     286 row(s): 153 sent, 133 skipped.
+        11 run(s) × 26 document(s) = 286 pair(s).
+report  286 current, 0 superseded.
 ```
 
-- **The image cost model checks out.** `plan` predicted 376,843 image tokens; the API billed 382,643
-  prompt tokens across those rows, so the estimate accounts for 98.5% of them, the rest being prompt
-  text. The median actual, 14,399, is exactly the formula for a 944×500 capture: 2833 + 2 tiles ×
-  5667, plus prompt.
-- **The cache did real work.** Every text request except two was served from milestone 1's cache;
-  the two were both `adversarial-text`, the fixture this milestone added.
-- **Observation, not a conclusion.** Image-only returned `unknown` for 21 of 25 documents against
-  text-default's 12; on visual-only documents specifically, 15/17 against 9/17. That is the opposite
-  of the hypothesis, and it is heavily confounded: these are one- and two-tile synthetic documents,
-  several render blank (see "What the synthetic corpus cannot show you yet"), and two pairs render
-  byte-identically. The model is being shown very little. **This establishes that the pipeline works
-  and what it costs — not that image mode is worse.** That comparison needs milestone 5's rubric and
-  a corpus of real documents.
+Three things were repaired between the first run and this one, and each is worth knowing before
+reading the numbers. A per-tile capture was photographing tiles nested inside a Question, so
+`question` produced three overlapping pictures instead of one. The mixed prompt told the model it
+had been given a summary on documents where the summary was dropped. And `drawing-text` had no
+experiment run at all.
+
+Two of those cost money to correct and one did not. Re-rendering changed 18 rows, of which only
+`question` changed because of the fix — the other 15 are `data-card`, `dataflow` and `graph`, which
+do not render deterministically and produce different pixels every time. Worth knowing before
+reaching for `--refresh`: new pixels are new request keys, and a re-spend on those documents
+whatever prompted the re-render.
+
+Adding the two variant runs edited the experiment file, and `experimentSha256` is part of resume
+identity — deliberately, so an edited experiment cannot silently resume rows built under the old
+definition. Every row therefore rebuilt, `report` refused a file holding two definitions, and
+recovering meant re-running into a clean one. That cost nothing: the cache is keyed on the request
+rather than the experiment, so all 153 rows came straight back out of it. The whole session's real
+spend was about $0.25.
+
+- **The image cost model checks out.** Estimated image tokens account for 98.6% of the prompt tokens
+  the API actually billed in `image-puppeteer` (371,177 of 376,513), 98.9% in `image-per-tile`
+  (467,511 of 472,847) and 98.4% in `image-visual-tiles-only`; the remainder is prompt text. The
+  median actual, 14,399, is exactly the formula for a 944×500 capture: 2833 + 2 tiles × 5667, plus
+  prompt. `image-detail-low` is the loosest at 92.4%, which is arithmetic rather than error: a
+  low-detail image is a flat 2833 tokens, so the fixed prompt text is a much larger share of a much
+  smaller total.
+- **Every text dimension is priced, over the same 7 documents and the same prompt.** `no-extras`
+  sends 3,725 prompt tokens; `no-dataset-tables` 3,823; `default` and `extras-fixed` 3,895;
+  `drawing-text` 3,958; `extras-production-current` 4,537. The 642-token gap between `extras-fixed`
+  and `extras-production-current` is the production bug (CLUE-630) reproduced and priced: it
+  re-sends the analyzed document's own summary in place of each related one.
+- **`drawing-text` is the only run that ever answered `form`.** Across all 153 rows the categories
+  are 91 `unknown`, 45 `function`, 16 `user` and a single `form` — the `drawing` fixture, two shapes
+  and no text, which every other run either skips or calls `unknown`. The model gave "drawing with 2
+  objects", "rectangle and ellipse", "specified positions and sizes" as its indicators. One document
+  is not evidence that describing geometry beats photographing it, but it is the variant doing
+  exactly what it was built to do, on the document it was built for.
+- **Per-tile cost scales with tile count, not document size.** Its median document billed the same
+  14,399 prompt tokens as full-document, but `tall` — ten tiles, ten images — billed 141,902. The
+  per-document average hides this; budget for the widest document, not the typical one. Tile count
+  means *top-level* tiles: `question` draws two more inside itself, and photographing those as well
+  gave one document three overlapping pictures of the same content until the selector was fixed.
+- **The cache is keyed on the whole request, prompt included.** A mixed message whose text half is
+  dropped is structurally identical to an image-only one, but this experiment gives the mixed run
+  its own `categorize-design-mixed` prompt, so none of its 16 text-free rows matched the image-only
+  cache. Two runs share cache entries only when they share the prompt as well as the payload —
+  which is why `text-extras-fixed` matched `text-default` on all 7 rows and cost nothing.
+- **Fixing the mixed prompt changed no answers.** It had told the model it was given "a written
+  summary and a picture", on 16 of 23 rows where the summary was dropped. Rewording it to promise a
+  summary only when there is one moved **0 of 23** categories. The fidelity problem was real and its
+  measured effect here was nil; both halves are worth stating, because a fix reported without its
+  measurement is just a claim.
+- **Observation, not a conclusion.** Skip-empty means text and image runs no longer send the same
+  documents, so the only fair comparison is the 7 documents both send. There, mixed reproduced
+  text-only's category on all 7, while image-only lost 4 of them to `unknown` — the picture alone
+  was worse, and adding the picture to the text cost nothing in agreement. Across everything each
+  run did send, `unknown` came back 17/23 for image-only, 16/23 for mixed, 19/23 for per-tile, 1/7
+  for text and 1/8 for `drawing-text`. This is heavily confounded: these are one- and two-tile
+  synthetic documents, several render nearly blank (see "What the synthetic corpus cannot show you
+  yet"), and n=7 on the paired comparison. **This establishes that the pipeline works and what it
+  costs — not that any representation is better.** That comparison needs milestone 5's rubric and a
+  corpus of real documents.
 
 **The parity mode was verified by hand against the real service**, with the `drawing` fixture:
 

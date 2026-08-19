@@ -32,8 +32,8 @@ describe("the committed synthetic corpus", () => {
   it("covers every registered tile type, plus a mixed and an empty document", () => {
     const covered = new Set(Object.values(expectations.documents).flatMap((entry) => entry.tileTypes));
     // "Unknown" is deliberately not in `covered`: it is the registration for a type this build does
-    // not know, so the fixture standing in for it declares a made-up type instead. Asserting that is
-    // what the old `covered.add("Unknown")` gave away — adding the string made this unfailable.
+    // not know, so the fixture standing in for it declares a made-up type instead. It is skipped below
+    // rather than added to `covered`, which would satisfy the assertion by writing the answer into it.
     for (const tileType of tileTypes) {
       if (tileType === "Unknown") continue;
       expect([...covered]).toContain(tileType);
@@ -96,5 +96,69 @@ describe.each(docIds)("fixture %s", (docId) => {
 
   itMinimal("summarizes with the minimal variant", () => {
     expect(textVariants.minimal.render(content).length).toBeGreaterThan(0);
+  });
+});
+
+describe("the no-dataset-tables variant", () => {
+  // The table fixture is the one with a data set behind it, so it is the one this variant changes.
+  const tableContent = JSON.parse(fs.readFileSync(
+    path.join(harnessRoot, "examples", "synthetic-corpus", "documents", "table.json"), "utf8"));
+
+  it("keeps the data set's shape and drops its rows", () => {
+    const full = textVariants.default.render(tableContent);
+    const schemaOnly = textVariants["no-dataset-tables"].render(tableContent);
+    expect(full).toContain("shown below in a Markdown table");
+    expect(schemaOnly).not.toContain("shown below in a Markdown table");
+    // The reader still learns what the data set is and how big it is.
+    expect(schemaOnly).toContain("Data Sets");
+    expect(schemaOnly).toMatch(/There are \d+ cases? in this data set\./);
+    expect(schemaOnly.length).toBeLessThan(full.length);
+  });
+
+  it("leaves a document with no data set exactly as `default` renders it", () => {
+    // The variant is about data sets; for everything else it must not be a second `default` with a
+    // different name, or a comparison between them would measure noise.
+    for (const docId of ["drawing", "text", "empty"]) {
+      const content = JSON.parse(fs.readFileSync(
+        path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${docId}.json`), "utf8"));
+      const same = textVariants["no-dataset-tables"].render(content) === textVariants.default.render(content);
+      expect({ docId, same }).toEqual({ docId, same: true });
+    }
+  });
+});
+
+describe("the drawing-text variant", () => {
+  const load = (docId: string) => JSON.parse(fs.readFileSync(
+    path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${docId}.json`), "utf8"));
+
+  it("describes what the student drew, where `default` only says a drawing is there", () => {
+    const summary = textVariants["drawing-text"].render(load("drawing"));
+    expect(textVariants.default.render(load("drawing"))).toContain("This tile contains a drawing.");
+    // The fixture is a rectangle and an ellipse; the variant says so, with their geometry.
+    expect(summary).toContain("2 objects (1 rectangle, 1 ellipse)");
+    expect(summary).toContain("- rectangle at (10, 10), 120×60");
+    expect(summary).toContain("- ellipse at (160, 40), radii 30×20");
+  });
+
+  it("carries a drawing's text objects, which the default summary loses entirely", () => {
+    // The `mixed` fixture has a Drawing holding a text object. A text-only run against `default`
+    // never sees those words at all.
+    const summary = textVariants["drawing-text"].render(load("mixed"));
+    const fallback = textVariants.default.render(load("mixed"));
+    const drawnText = JSON.parse(fs.readFileSync(
+      path.join(harnessRoot, "examples", "synthetic-corpus", "documents", "mixed.json"), "utf8"))
+      .tileMap["mixed-drawing-tile"].content.objects.find((object: any) => object.type === "text").text;
+    expect(summary).toContain(drawnText);
+    expect(fallback).not.toContain(drawnText);
+  });
+
+  it("leaves every other tile type exactly as `default` renders it", () => {
+    // The variant swaps one handler. If it changed anything else, a comparison against `default`
+    // would measure the difference between two summarizers rather than between two drawing
+    // serializers.
+    for (const docId of ["text", "table", "geometry", "empty"]) {
+      const same = textVariants["drawing-text"].render(load(docId)) === textVariants.default.render(load(docId));
+      expect({ docId, same }).toEqual({ docId, same: true });
+    }
   });
 });

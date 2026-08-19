@@ -13,6 +13,12 @@ export interface RenderRequest {
   docId: string;
   /** The document content, as an object. */
   content: unknown;
+  /**
+   * The height to capture this particular document at, for a mode whose height is per document
+   * rather than fixed. Supplied by the caller because it comes from a previous local render, which
+   * lives in the corpus — something a backend has no business knowing about.
+   */
+  captureHeightPx?: number;
 }
 
 export interface RenderedImage {
@@ -67,6 +73,12 @@ export const kUnobservedDiagnostics: RenderDiagnostics = {
 export interface RenderOutcome {
   images: RenderedImage[];
   diagnostics: RenderDiagnostics;
+  /**
+   * What this particular render was produced against, when it differs from the backend's own
+   * target. Only a per-document height does that today, and the envelope records the real one so
+   * freshness compares against what actually happened.
+   */
+  renderTarget?: RenderTarget;
 }
 
 export interface RenderBackend {

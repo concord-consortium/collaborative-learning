@@ -133,8 +133,7 @@ describe("accounting data never leaves the process", () => {
     model: "gpt-4o-mini",
     aiPrompt: defaultAiPrompt,
     message: "image-only",
-    imageUrl: dataUrlFor(bytes),
-    accounting: { sha256: "b".repeat(64), widthPx: 20, heightPx: 30 },
+    images: [{ imageUrl: dataUrlFor(bytes), accounting: { sha256: "b".repeat(64), widthPx: 20, heightPx: 30 } }],
     generationSettings: { max_completion_tokens: 1024 }
   });
 

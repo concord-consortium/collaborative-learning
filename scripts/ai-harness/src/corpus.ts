@@ -8,7 +8,8 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   CorpusManifest, CorpusSource, ManifestDocument, Modality, RepresentationEnvelope,
-  kDocumentIdPattern, kSchemaVersion, sha256Canonical, validateCorpusManifest, validateRepresentationEnvelope
+  kDocumentIdPattern, kSchemaVersion, sha256Canonical, validateCorpusManifest, validateExpectationsFile,
+  validateRepresentationEnvelope
 } from "./schemas.js";
 import { classifyDocument } from "./capability.js";
 import { removeImageRepresentation } from "./represent-image.js";
@@ -128,6 +129,22 @@ export interface ImportResult {
 /** `production` is not accepted here; only the (gated) `pull` command may set it. */
 export const importableSources: readonly CorpusSource[] = ["synthetic", "demo", "qa"];
 
+/**
+ * Which documents in a source directory are known not to render, and why.
+ *
+ * `expectations.json` is the committed sidecar describing the example corpus, and "this fixture
+ * cannot render" is exactly the kind of thing it already records. A source directory without one —
+ * every real corpus — simply has no expectations, and the manifest keeps whatever a human set.
+ */
+function readSourceRenderExpectations(from: string): Map<string, string> {
+  const file = path.join(from, "expectations.json");
+  if (!fs.existsSync(file)) return new Map();
+  const expectations = validateExpectationsFile(readJsonFile(file), file);
+  return new Map(Object.entries(expectations.documents)
+    .filter(([, entry]) => entry.expectedRenderFailure !== undefined)
+    .map(([docId, entry]) => [docId, entry.expectedRenderFailure!]));
+}
+
 export function importCorpus(options: ImportOptions): ImportResult {
   const { from, corpus, source, prune, dataRoot } = options;
   // Stamped once, so every document in one import shares a retrievedAt and a new corpus's createdAt
@@ -150,6 +167,7 @@ export function importCorpus(options: ImportOptions): ImportResult {
 
   const existing = fs.existsSync(paths.manifest) ? readManifest(paths) : null;
   const previous = new Map((existing?.documents ?? []).map((entry) => [entry.id, entry]));
+  const sourceExpectations = readSourceRenderExpectations(from);
 
   const warnings: string[] = [];
   const imported: string[] = [];
@@ -199,6 +217,11 @@ export function importCorpus(options: ImportOptions): ImportResult {
       contextId: before?.contextId ?? null,
       computedModality: classification.computedModality,
       modalityOverride: before?.modalityOverride ?? null,
+      // Seeded from the source directory's expectations, so a corpus imported from `examples/`
+      // knows which of its fixtures cannot render without anyone hand-editing a generated file. A
+      // hand-set value on an existing manifest wins, because a human said it on purpose.
+      expectedRenderFailure:
+        before?.expectedRenderFailure ?? sourceExpectations.get(id) ?? null,
       labels: before?.labels ?? {},
       relatedSummaries: before?.relatedSummaries ?? [],
       historical: before?.historical ?? null

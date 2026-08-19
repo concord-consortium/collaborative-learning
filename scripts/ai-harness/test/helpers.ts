@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { harnessRoot } from "../src/corpus.js";
+import { classifyDocument } from "../src/capability.js";
 import type { RunTask } from "../src/execute.js";
 import { HarnessRequest, InputImageAccounting, requestKeyFor } from "../src/messages.js";
 import { kRetries } from "../src/cost.js";
@@ -164,6 +165,9 @@ export function makeTask(docId: string, runId: string, text: string, worstCase =
       kind: "text", variantId: "default", variantVersion: 1, sourceContentSha256: "0".repeat(64)
     },
     imageTokensEstimated: 0,
+    imageCount: 0,
+    textPartOmitted: false,
+    representationWarnings: [],
     hostedImages: []
   };
 }
@@ -206,4 +210,46 @@ export const testRunsRoot = path.join(harnessRoot, "data", "test-runs");
 
 export function readLines(file: string): unknown[] {
   return fs.readFileSync(file, "utf8").split("\n").filter((line) => line.length > 0).map((line) => JSON.parse(line));
+}
+
+/**
+ * How the committed synthetic corpus classifies, so tests can derive counts rather than pin them.
+ *
+ * Skip-empty makes "runs × documents" wrong as a call count: a text-only run sends only the
+ * documents that carry student-authored text, and no shape sends an empty one. Adding a fixture
+ * should move these numbers without editing an assertion.
+ */
+export function syntheticCorpusShape(): {
+  documents: string[];
+  withStudentText: string[];
+  empty: string[];
+  /** Documents the corpus says cannot be rendered, so no image-carrying run can send them. */
+  unrenderable: string[];
+  /** Documents an image-carrying run sends: everything with content that can be rendered. */
+  withContent: string[];
+} {
+  const corpus = path.join(harnessRoot, "examples", "synthetic-corpus");
+  const expectations = JSON.parse(fs.readFileSync(path.join(corpus, "expectations.json"), "utf8"));
+  const unrenderable = Object.entries(expectations.documents as Record<string, any>)
+    .filter(([, entry]) => entry.expectedRenderFailure !== undefined)
+    .map(([docId]) => docId);
+  const directory = path.join(corpus, "documents");
+  const documents: string[] = [];
+  const withStudentText: string[] = [];
+  const empty: string[] = [];
+  for (const name of fs.readdirSync(directory).filter((file) => file.endsWith(".json")).sort()) {
+    const docId = name.replace(/\.json$/, "");
+    documents.push(docId);
+    const classification = classifyDocument(JSON.parse(fs.readFileSync(path.join(directory, name), "utf8")));
+    if (classification.tiles.some((tile) => tile.hasStudentText)) withStudentText.push(docId);
+    if (classification.computedModality === "empty") empty.push(docId);
+  }
+  return {
+    documents,
+    withStudentText,
+    empty,
+    unrenderable,
+    withContent: documents.filter((docId) =>
+      !empty.includes(docId) && !unrenderable.includes(docId))
+  };
 }

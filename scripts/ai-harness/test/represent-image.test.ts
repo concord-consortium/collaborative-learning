@@ -3,7 +3,7 @@ import path from "node:path";
 import { corpusPaths } from "../src/corpus.js";
 import {
   imageRepresentationDir, imageRepresentationFreshness, imageRepresentationPath, readImageEnvelope,
-  removeImageRepresentation, renderErrorDir, resolveImageFile, sha256Bytes, singleImageOf,
+  imagesForSet, removeImageRepresentation, renderErrorDir, resolveImageFile, sha256Bytes,
   writeImageRepresentation
 } from "../src/represent-image.js";
 import { ImageEnvelope, RenderTarget, validateImageEnvelope } from "../src/schemas.js";
@@ -312,20 +312,78 @@ describe("containment", () => {
   });
 });
 
-describe("building a request from an envelope", () => {
-  it("takes the one image when there is exactly one", () => {
-    const { envelopeFile, envelope } = writeOne("single");
-    expect(singleImageOf(envelope, envelopeFile).file).toBe("single-1.png");
+describe("choosing which of an envelope's images a run sends", () => {
+  const tile = (tileId: string | null, file: string) => ({
+    file, sha256: "a".repeat(64), mimeType: "image/png", widthPx: 100, heightPx: 100,
+    bytes: 10, url: null, tileId, purpose: "tile" as const
   });
 
-  // The message names the unbuilt feature, which is deliberate: it is guidance to whoever hit it.
-  it.each([0, 2])("refuses an envelope with %i images, and says why", (count) => {
+  it("takes the one full-document image for a full-document run", () => {
+    const { envelopeFile, envelope } = writeOne("single");
+    const { images, warnings } = imagesForSet(envelope, envelopeFile, "full-document");
+    expect(images.map((image) => image.file)).toEqual(["single-1.png"]);
+    expect(warnings).toEqual([]);
+  });
+
+  it.each([0, 2])("refuses %i full-document images, rather than picking one", (count) => {
+    // Picking whatever is there would produce a row that looks like an ordinary full-document run
+    // and is not.
     const { envelopeFile, envelope } = writeOne("counted");
     const images = count === 0
       ? []
       : [envelope.images[0], { ...envelope.images[0], file: "counted-2.png" }];
-    expect(() => singleImageOf({ ...envelope, images }, envelopeFile))
-      .toThrow(/records \d+ images.*milestone 3/s);
+    expect(() => imagesForSet({ ...envelope, images }, envelopeFile, "full-document"))
+      .toThrow(new RegExp(`records ${count} full-document image\\(s\\)`));
+  });
+
+  it("takes every tile image, in envelope order, for a per-tile run", () => {
+    const { envelopeFile, envelope } = writeOne("tiles");
+    const withTiles = {
+      ...envelope,
+      images: [tile("t1", "tiles-1.png"), tile("t2", "tiles-2.png"), tile("t3", "tiles-3.png")]
+    };
+    expect(imagesForSet(withTiles, envelopeFile, "per-tile").images.map((image) => image.tileId))
+      .toEqual(["t1", "t2", "t3"]);
+  });
+
+  it("tells the caller to render per-tile first when the envelope has no tile images", () => {
+    const { envelopeFile, envelope } = writeOne("no-tiles");
+    for (const imageSet of ["per-tile", "visual-tiles-only"] as const) {
+      expect(() => imagesForSet(envelope, envelopeFile, imageSet, new Set()))
+        .toThrow(/records no per-tile images.*--mode puppeteer-per-tile/s);
+    }
+  });
+
+  it("keeps only the tiles the classification says need a picture", () => {
+    const { envelopeFile, envelope } = writeOne("visual");
+    const withTiles = {
+      ...envelope,
+      images: [tile("text-tile", "visual-1.png"), tile("drawing-tile", "visual-2.png")]
+    };
+    const { images, warnings } = imagesForSet(
+      withTiles, envelopeFile, "visual-tiles-only", new Set(["drawing-tile"]));
+    expect(images.map((image) => image.tileId)).toEqual(["drawing-tile"]);
+    expect(warnings).toEqual([]);
+  });
+
+  it("warns, rather than fails, when a visual tile has no capture of its own", () => {
+    // Classification walks into Question tiles; the per-tile capture photographs top-level tiles
+    // only. The images that exist are still the right ones to send.
+    const { envelopeFile, envelope } = writeOne("nested");
+    const withTiles = { ...envelope, images: [tile("outer", "nested-1.png")] };
+    const { images, warnings } = imagesForSet(
+      withTiles, envelopeFile, "visual-tiles-only", new Set(["outer", "inside-a-question"]));
+    expect(images.map((image) => image.tileId)).toEqual(["outer"]);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain("inside-a-question");
+    expect(warnings[0]).toContain("nested inside a Question");
+  });
+
+  it("selects nothing when no captured tile needs a picture", () => {
+    // The caller turns this into a skipped row: it is a fact about the document, not a failure.
+    const { envelopeFile, envelope } = writeOne("all-text");
+    const withTiles = { ...envelope, images: [tile("text-tile", "all-text-1.png")] };
+    expect(imagesForSet(withTiles, envelopeFile, "visual-tiles-only", new Set()).images).toEqual([]);
   });
 });
 

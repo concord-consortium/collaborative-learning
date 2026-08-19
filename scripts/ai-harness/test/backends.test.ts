@@ -9,6 +9,7 @@ import {
   RenderLimitExceeded, checkCaptureSize, checkEncodedSize, isPublicHttpsUrl, redirectDowngradeReason
 } from "../src/backends/types.js";
 import { generateRenderHtml } from "../src/backends/render-html.js";
+import { readPngInfo } from "../src/png.js";
 import { makeTestPng } from "./helpers.js";
 
 // Named to avoid shadowing the DOM `document` global in files that are about browser rendering.
@@ -30,9 +31,12 @@ interface FakeOptions {
   requestFailures?: string[];
   frameUrl?: string | null;
   element?: ElementLike | null;
+  /** The top-level tiles the CLUE frame draws, for the per-tile capture. */
+  tiles?: { tileId: string; widthPx: number; heightPx: number }[];
 }
 
 const settledMeasurement: FrameMeasurement = {
+  documentFailedToLoad: false,
   contentHeightPx: 1420,
   contentRowsHeightPx: 1200,
   totalTiles: 3,
@@ -64,12 +68,31 @@ function fakeBrowser(options: FakeOptions = {}) {
     }
   };
 
+  const tiles = options.tiles ?? [];
   const frame: FrameLike = {
     url: () => options.frameUrl ?? "http://localhost:8080/iframe.html?unit=x&unwrapped&readOnly",
-    // The settle poll asks for the measurement; the post-settle read asks for the document text.
+    // The settle poll asks for the measurement; the post-settle reads ask for the document text and
+    // for the tile ids.
     evaluate: async (script) => (String(script).includes("innerText")
       ? "drawing-fixture-marker"
-      : { ...settledMeasurement, ...options.measurement }) as never
+      : String(script).includes("data-tool-id")
+      ? tiles.map((tile) => tile.tileId)
+      : { ...settledMeasurement, ...options.measurement }) as never,
+    $$: async (selector) => {
+      // Pinned because this fake has no DOM: it returns `tiles` whatever it is asked for, so the
+      // only thing it can say about the selector is what the selector was. The `:not()` is the part
+      // that keeps a Question tile's nested tiles out of the capture, and dropping it would give one
+      // top-level tile several pictures with nothing here noticing. `local-render.integration.ts`
+      // is where that is checked against a real DOM.
+      expect(selector).toBe(".tool-tile:not(.tool-tile .tool-tile)");
+      return tiles.map((tile) => ({
+        boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx }),
+        screenshot: async () => {
+          state.screenshots += 1;
+          return makeTestPng(tile.widthPx, tile.heightPx);
+        }
+      }));
+    }
   };
 
   const page: PageLike = {
@@ -144,6 +167,7 @@ const fakePageServer = async () => ({
 function makeBackend(options: FakeOptions = {}, overrides: Record<string, unknown> = {}) {
   const fake = fakeBrowser(options);
   const backend = puppeteerBackend({
+    modeId: "puppeteer-full-height",
     clueUrl: "http://localhost:8080",
     unit: "http://127.0.0.1:5000/content.json",
     clueRevision: "9b53df828",
@@ -316,6 +340,7 @@ describe("the puppeteer backend", () => {
       return page;
     };
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1, timeoutMs: 600
@@ -337,6 +362,7 @@ describe("the puppeteer backend", () => {
       return page;
     };
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1, timeoutMs: 600
@@ -347,7 +373,8 @@ describe("the puppeteer backend", () => {
 
   it("attaches evidence to a failure that is not a RenderFailed", async () => {
     // A navigation error, a size-limit rejection or a raw protocol error is exactly when the console
-    // output and a picture of the page are most wanted, and these used to arrive with neither.
+    // output and a picture of the page are most wanted, so evidence is attached to any failure and
+    // not only to a RenderFailed.
     const fake = fakeBrowser();
     (fake.browser as any).newPage = async () => {
       const page = await fakeBrowser().browser.newPage();
@@ -370,6 +397,7 @@ describe("the puppeteer backend", () => {
       return page;
     };
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1
@@ -410,6 +438,7 @@ describe("the puppeteer backend", () => {
     let launches = 0;
     const fake = fakeBrowser();
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => {
         launches += 1;
@@ -450,6 +479,7 @@ describe("the puppeteer backend", () => {
     (fake.browser as any).close = async () => { throw new Error("Chromium is gone"); };
     let pageServerClosed = 0;
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => fake.browser,
       startPageServer: async () => ({
@@ -462,6 +492,26 @@ describe("the puppeteer backend", () => {
     // The failure still surfaces — it is just no longer allowed to skip the other close.
     await expect(backend.close!()).rejects.toThrow(/Chromium is gone/);
     expect(pageServerClosed).toBe(1);
+  });
+
+  it("fails a document CLUE could not load, rather than photographing its error page", async () => {
+    // CLUE renders its own "Error loading the document" page when it cannot deserialize what it was
+    // handed. That page photographs perfectly well — which is the problem. Two committed fixtures
+    // were storing valid PNGs of an error screen as though they were student work, and nothing
+    // said so, because the only diagnostic anyone checked was the *unknown tile* count.
+    const { backend } = makeBackend({ measurement: { documentFailedToLoad: true } });
+    await expect(backend.render({ docId: "unloadable", content: emptyDocument }))
+      .rejects.toThrow(/CLUE could not load this document and showed its error page instead/);
+  });
+
+  it("fails before resizing, so a document that never loaded costs the cheap path", async () => {
+    const { backend, state } = makeBackend({
+      measurement: { documentFailedToLoad: true, contentRowsHeightPx: 4000 }
+    });
+    await expect(backend.render({ docId: "unloadable", content: emptyDocument })).rejects.toThrow();
+    // No resize, and no capture: the frame was never asked to grow.
+    expect(state.frameHeights).toEqual([]);
+    expect(state.screenshots).toBe(0);
   });
 
   it("fails a render whose page breaks during the settle after the resize", async () => {
@@ -484,8 +534,9 @@ describe("the puppeteer backend", () => {
         url: () => "http://localhost:8080/iframe.html",
         evaluate: async (script: unknown) => {
           if (String(script).includes("innerText")) return "marker";
-          // Only once the frame has been resized: this is the settle whose failures used to be
-          // recorded as evidence without failing anything.
+          // Only once the frame has been resized. That is the settle whose failures the check
+          // before the capture exists to catch: a fatal error here, after the resize, would
+          // otherwise reach the evidence file without failing anything.
           if (resized) {
             for (const handler of handlers) {
               handler({ type: () => "error", text: () => "Failed to fetch dynamically imported module: tile.js" });
@@ -497,6 +548,7 @@ describe("the puppeteer backend", () => {
       return page;
     };
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1
@@ -508,9 +560,9 @@ describe("the puppeteer backend", () => {
   });
 
   it("spends one timeout budget across every phase, not one per phase", async () => {
-    // The budget used to be handed out fresh to each phase, so a stuck document could burn several
-    // times the documented per-document timeout. One deadline now covers load, readiness and
-    // capture, and the failure names it.
+    // One deadline covers load, readiness and capture together, and the failure names it. A fresh
+    // budget per phase would let a stuck document burn several times the per-document timeout the
+    // CLI documents.
     const started = Date.now();
     const { backend } = makeBackend({ measurement: { contentHeightPx: 0 } }, { timeoutMs: 800 });
     await expect(backend.render({ docId: "slow", content: emptyDocument }))
@@ -545,6 +597,7 @@ describe("the puppeteer backend", () => {
       return page;
     };
     const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
       launch: async () => fake.browser, startPageServer: fakePageServer,
       stableForMs: 0, pollIntervalMs: 1
@@ -625,8 +678,9 @@ describe("how many tiles a document should draw", () => {
   });
 
   it("falls through to the tile map when the rows name nothing", () => {
-    // A present-but-empty `rowMap` used to answer 0, and "at least 0 tiles" is satisfied by any
-    // stable state at all — including a page that has not finished loading, whose picture is blank.
+    // Answering 0 for a present-but-empty `rowMap` would mean waiting for "at least 0 tiles", which
+    // any stable state satisfies — including a page that has not finished loading, whose picture is
+    // blank.
     expect(expectedTileCount({ rowMap: {}, tileMap: { a: {}, b: {} } })).toBe(2);
     expect(expectedTileCount({ rowMap: { r1: { tiles: [] } }, tileMap: { a: {} } })).toBe(1);
   });
@@ -742,9 +796,10 @@ describe("capture limits", () => {
 });
 
 describe("the mode registry", () => {
-  it("knows exactly three modes, defaulting to the local one", () => {
+  it("knows exactly the modes it can build, defaulting to the local full-document one", () => {
     expect([...renderModeIds]).toEqual([
-      "puppeteer-full-height", "shutterbug-production-current", "shutterbug-parameterized"
+      "puppeteer-full-height", "puppeteer-per-tile",
+      "shutterbug-production-current", "shutterbug-parameterized", "shutterbug-accurate-height"
     ]);
     expect(kDefaultRenderModeId).toBe("puppeteer-full-height");
     expect(isRenderModeId("puppeteer-full-height")).toBe(true);
@@ -804,9 +859,9 @@ describe("the mode registry", () => {
   });
 
   it("supplies the harness rendering unit for the local mode rather than leaving it unset", () => {
-    // The unit used to be the caller's job, decided by a string comparison repeated in three places
-    // in the CLI. Getting it wrong is silent: CLUE falls back to its default unit and every tile
-    // draws as an unknown tile in a perfectly valid PNG. The mode descriptor now supplies it.
+    // The mode descriptor supplies it, rather than the caller deciding by string comparison in the
+    // CLI. Getting it wrong is silent: CLUE falls back to its default unit and every tile draws as
+    // an unknown tile in a perfectly valid PNG.
     expect(getRenderBackend("puppeteer-full-height", { clueRevision: null }).renderTarget.unit)
       .toBe("harness-render");
     // An explicit unit still wins.
@@ -824,5 +879,71 @@ describe("the mode registry", () => {
     expect(backend.renderTarget).toMatchObject({
       clueUrl: "http://localhost:8080", unit: "qa", captureHeightPx: 3000
     });
+  });
+});
+
+describe("the per-tile capture", () => {
+  const perTile = (options: FakeOptions = {}, overrides: Record<string, unknown> = {}) =>
+    makeBackend(options, { capture: "per-tile", ...overrides });
+
+  const threeTiles = [
+    { tileId: "tile-a", widthPx: 300, heightPx: 200 },
+    { tileId: "tile-b", widthPx: 480, heightPx: 320 },
+    { tileId: "tile-c", widthPx: 120, heightPx: 90 }
+  ];
+
+  it("takes one picture per top-level tile, tagged with the tile it is a picture of", async () => {
+    const { backend } = perTile({ tiles: threeTiles });
+    const outcome = await backend.render({ docId: "three", content: emptyDocument });
+    expect(outcome.images).toHaveLength(3);
+    expect(outcome.images.map((image) => image.tileId)).toEqual(["tile-a", "tile-b", "tile-c"]);
+    for (const image of outcome.images) {
+      expect(image.purpose).toBe("tile");
+      // A tile picture is a local capture, so it carries bytes and no hosted URL.
+      expect(image.url).toBeNull();
+      expect(image.bytes.length).toBeGreaterThan(0);
+    }
+    // Each picture really is that tile's own size, not the page's.
+    expect(outcome.images.map((image) => readPngInfo(image.bytes, "tile").widthPx))
+      .toEqual([300, 480, 120]);
+  });
+
+  it("records a per-tile capture as its own capture mode", () => {
+    // Not "full-document": the set covers the document, but no single image is the document, and a
+    // freshness check comparing targets has to be able to tell the two renders apart.
+    expect(perTile().backend.renderTarget.captureMode).toBe("per-tile");
+    expect(perTile().backend.renderTarget.captureHeightPx).toBeNull();
+    expect(makeBackend().backend.renderTarget.captureMode).toBe("full-document");
+  });
+
+  it("fails a document that drew no tiles rather than writing an empty envelope", async () => {
+    // An envelope with no images is treated as damaged everywhere else, so producing one here would
+    // be indistinguishable from a broken render.
+    const { backend } = perTile({ tiles: [] });
+    await expect(backend.render({ docId: "bare", content: emptyDocument }))
+      .rejects.toThrow(/drew no tiles, so a per-tile capture would produce no images at all/);
+  });
+
+  it("applies every size bound per image rather than to the set", async () => {
+    const { backend } = perTile(
+      { tiles: [{ tileId: "huge", widthPx: 960, heightPx: 30_000 }] },
+      { limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 20 * 1024 * 1024 } });
+    await expect(backend.render({ docId: "huge", content: emptyDocument }))
+      .rejects.toThrow(/30000px tall, over the 20000px limit/);
+  });
+
+  it("records a tile with no id as having none, rather than as an empty one", async () => {
+    // An empty string would be matched against the classification and silently find nothing; null
+    // says outright that this picture cannot be traced back to a tile.
+    const { backend } = perTile({ tiles: [{ tileId: "", widthPx: 100, heightPx: 100 }] });
+    const outcome = await backend.render({ docId: "anonymous", content: emptyDocument });
+    expect(outcome.images[0].tileId).toBeNull();
+  });
+
+  it("still reports what it could see, the same as a full-document capture", async () => {
+    const { backend } = perTile({ tiles: threeTiles, measurement: { totalTiles: 3, unknownTiles: 1 } });
+    const outcome = await backend.render({ docId: "three", content: emptyDocument });
+    expect(outcome.diagnostics)
+      .toMatchObject({ totalTiles: 3, unknownTiles: 1, documentText: "drawing-fixture-marker" });
   });
 });

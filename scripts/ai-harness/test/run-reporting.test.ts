@@ -124,6 +124,44 @@ describe("cache hits are not double-counted against the skipped total", () => {
   });
 });
 
+describe("skipped rows are not counted as dispatched work", () => {
+  it("still reports the work a ceiling left behind when the run also skipped a pair", async () => {
+    // `pending` holds request tasks; `written` counts every row, skipped ones included — and those
+    // are written before dispatch for pairs that were never in `pending`. Subtracting one from the
+    // other therefore cancelled a skip against an undispatched task: one of each gave 0, and the
+    // CLI then said nothing about a request it never sent.
+    const dataRoot = makeTestDataRoot("nd-skips");
+    const expensive = async () => ({
+      ...(await ok()), usage: { promptTokens: 4_000_000, completionTokens: 1024 }
+    });
+    const summary = await runTasks({
+      corpus: "c",
+      experiment: experiment as any,
+      experimentSha256: "hash",
+      tasks: [makeTask("sendable", "r", "s", 0.02)],
+      skipped: [{
+        docId: "empty", runId: "r", run: { id: "r", message: "text-only", prompt: "p" } as any,
+        modality: "empty", computedModality: "empty", promptName: "p", promptSha256: "h",
+        skipReasons: ["the document has no student content at all"],
+        decidedFromContentSha256: "e".repeat(64)
+      }],
+      outputFile: path.join(dataRoot, "out.jsonl"),
+      ledger: new CostLedger(0.0001),
+      cache: new ResponseCache(path.join(dataRoot, "cache")),
+      pricing: testPricing,
+      runMeta: testRunMeta,
+      createCompletion: expensive,
+      sleep: async () => undefined
+    });
+
+    expect(summary.skipped).toBe(1);
+    expect(summary.written).toBe(1);
+    expect(summary.stoppedOnCeiling).toBe(true);
+    // One request task, never dispatched. The skipped row is not a substitute for having sent it.
+    expect(summary.notDispatched).toBe(1);
+  });
+});
+
 describe("the two overshoots are reported separately", () => {
   it("keeps committed overshoot distinct from incurred overshoot", async () => {
     // A run that stops on the ceiling has usually committed more than it spent — reservations are

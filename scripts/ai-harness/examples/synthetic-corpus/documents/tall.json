@@ -1,0 +1,198 @@
+{
+  "rowOrder": [
+    "row-1",
+    "row-2",
+    "row-3",
+    "row-4",
+    "row-5",
+    "row-6",
+    "row-7",
+    "row-8",
+    "row-9",
+    "row-10"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-1"
+        }
+      ]
+    },
+    "row-2": {
+      "id": "row-2",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-2"
+        }
+      ]
+    },
+    "row-3": {
+      "id": "row-3",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-3"
+        }
+      ]
+    },
+    "row-4": {
+      "id": "row-4",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-4"
+        }
+      ]
+    },
+    "row-5": {
+      "id": "row-5",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-5"
+        }
+      ]
+    },
+    "row-6": {
+      "id": "row-6",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-6"
+        }
+      ]
+    },
+    "row-7": {
+      "id": "row-7",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-7"
+        }
+      ]
+    },
+    "row-8": {
+      "id": "row-8",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-8"
+        }
+      ]
+    },
+    "row-9": {
+      "id": "row-9",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-9"
+        }
+      ]
+    },
+    "row-10": {
+      "id": "row-10",
+      "isSectionHeader": false,
+      "height": 120,
+      "tiles": [
+        {
+          "tileId": "tall-text-10"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "tall-text-1": {
+      "id": "tall-text-1",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>Our team is designing a lunchbox latch for a first grader who cannot work a stiff clasp. We watched three children try the old latch and none of them opened it without help.</p>"
+      }
+    },
+    "tall-text-2": {
+      "id": "tall-text-2",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>The latch has to survive being dropped on a hard floor and being opened many times a day. We chose a moulded hinge rather than a metal spring, because a spring bends out of shape.</p>"
+      }
+    },
+    "tall-text-3": {
+      "id": "tall-text-3",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>We tried a slider first. It opened easily, but it also opened inside a bag and a drink spilled over a reading book, so we went back to something that needs a deliberate push.</p>"
+      }
+    },
+    "tall-text-4": {
+      "id": "tall-text-4",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>The second prototype uses a wide lever with a raised edge. A small hand can push it with one thumb, and it does not move when the box is squeezed from the sides.</p>"
+      }
+    },
+    "tall-text-5": {
+      "id": "tall-text-5",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>We measured how long each child took to open the box. The lever took about two seconds; the original clasp took more than ten, and two children gave up before it opened.</p>"
+      }
+    },
+    "tall-text-6": {
+      "id": "tall-text-6",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>The lid needs a seal or the food dries out, and a seal makes the lid harder to lift. A tighter seal means a stiffer lid, and a stiffer lid needs a stronger latch.</p>"
+      }
+    },
+    "tall-text-7": {
+      "id": "tall-text-7",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>Most other lunchboxes use two small clips on opposite sides, which means using two hands at once. A first grader holding a tray cannot do that.</p>"
+      }
+    },
+    "tall-text-8": {
+      "id": "tall-text-8",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>Our third prototype puts the lever on the front face rather than the top, which keeps it away from the handle so the box does not open while it is being carried.</p>"
+      }
+    },
+    "tall-text-9": {
+      "id": "tall-text-9",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>We considered a magnet instead. Magnets are easy to open, but a magnet strong enough to stay shut when the box is knocked was too strong for a small hand to pull apart.</p>"
+      }
+    },
+    "tall-text-10": {
+      "id": "tall-text-10",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>Next we want to test the lever after a dishwasher cycle, because the plastic may become brittle. A latch that snaps is worse than one that is stiff. tall-fixture-marker</p>"
+      }
+    }
+  }
+}

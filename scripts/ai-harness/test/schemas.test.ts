@@ -95,10 +95,93 @@ describe("experiment validation", () => {
     expect(experiment.runs).toHaveLength(1);
   });
 
-  it("rejects a message shape nothing can run yet", () => {
+  it("rejects a message shape it does not know", () => {
     expect(() => validateExperimentFile(
-      { schemaVersion: 1, name: "x", runs: [{ ...run, message: "mixed" }] }, "experiment.json", context))
-      .toThrow(/runs\[0\]\.message must be one of text-only/);
+      { schemaVersion: 1, name: "x", runs: [{ ...run, message: "picture-and-a-song" }] },
+      "experiment.json", context))
+      .toThrow(/runs\[0\]\.message must be one of text-only, image-only, mixed/);
+  });
+
+  const validate = (overrides: Record<string, unknown>) => () => validateExperimentFile(
+    { schemaVersion: 1, name: "x", runs: [{ ...run, ...overrides }] }, "experiment.json", context);
+
+  describe("a mixed run names both representations", () => {
+    const mixed = {
+      id: "mixed", message: "mixed", textVariant: "default",
+      imageMode: "puppeteer-full-height", prompt: "categorize-design-default"
+    };
+
+    it("accepts one that names both", () => {
+      const experiment = validateExperimentFile(
+        { schemaVersion: 1, name: "x", runs: [mixed] }, "experiment.json", context);
+      expect(experiment.runs[0])
+        .toEqual({ ...mixed, message: "mixed", textVariant: "default", imageMode: "puppeteer-full-height" });
+    });
+
+    it("refuses one missing either half", () => {
+      const { textVariant, ...noText } = mixed;
+      const { imageMode, ...noImage } = mixed;
+      expect(() => validateExperimentFile(
+        { schemaVersion: 1, name: "x", runs: [noText] }, "experiment.json", context))
+        .toThrow(/runs\[0\]\.textVariant must be a string/);
+      expect(() => validateExperimentFile(
+        { schemaVersion: 1, name: "x", runs: [noImage] }, "experiment.json", context))
+        .toThrow(/runs\[0\]\.imageMode must be a string/);
+    });
+
+    it("validates both against the known lists", () => {
+      expect(() => validateExperimentFile(
+        { schemaVersion: 1, name: "x", runs: [{ ...mixed, imageMode: "screenshot" }] },
+        "experiment.json", context)).toThrow(/runs\[0\]\.imageMode must be one of/);
+    });
+  });
+
+  describe("a dimension a shape cannot use is refused rather than ignored", () => {
+    // Silently dropping one produces a result table that looks fine and answers a different
+    // question, which is the whole reason these are refusals.
+    it("refuses detail and imageSet on a text-only run", () => {
+      expect(validate({ detail: "low" })).toThrow(/detail must not be set on a "text-only" run/);
+      expect(validate({ imageSet: "per-tile" })).toThrow(/imageSet must not be set on a "text-only" run/);
+    });
+
+    it("refuses extras on an image-only run", () => {
+      expect(validate({
+        message: "image-only", textVariant: undefined, imageMode: "puppeteer-full-height",
+        extras: "no-extras"
+      })).toThrow(/extras must not be set on an "image-only" run: extras ride the summary/);
+    });
+
+    it("accepts all three on a mixed run", () => {
+      const experiment = validateExperimentFile({
+        schemaVersion: 1,
+        name: "x",
+        runs: [{
+          id: "mixed", message: "mixed", textVariant: "default", imageMode: "puppeteer-full-height",
+          detail: "high", imageSet: "per-tile", extras: "no-extras", prompt: "categorize-design-default"
+        }]
+      }, "experiment.json", context);
+      expect(experiment.runs[0])
+        .toMatchObject({ detail: "high", imageSet: "per-tile", extras: "no-extras" });
+    });
+
+    it("refuses values outside each list", () => {
+      expect(validate({ message: "image-only", textVariant: undefined,
+        imageMode: "puppeteer-full-height", detail: "ultra" }))
+        .toThrow(/detail must be one of low, high, auto/);
+      expect(validate({ message: "image-only", textVariant: undefined,
+        imageMode: "puppeteer-full-height", imageSet: "every-other-tile" }))
+        .toThrow(/imageSet must be one of full-document, per-tile, visual-tiles-only/);
+      expect(validate({ extras: "extras-improved" }))
+        .toThrow(/extras must be one of extras-fixed, extras-production-current, no-extras/);
+    });
+
+    it("leaves an unset dimension unset, so defaults stay the caller's business", () => {
+      const experiment = validateExperimentFile(
+        { schemaVersion: 1, name: "x", runs: [run] }, "experiment.json", context);
+      expect(experiment.runs[0]).not.toHaveProperty("extras");
+      expect(experiment.runs[0]).not.toHaveProperty("detail");
+      expect(experiment.runs[0]).not.toHaveProperty("imageSet");
+    });
   });
 
   it("rejects an unknown text variant", () => {
@@ -174,12 +257,76 @@ describe("result rows are a discriminated union on status", () => {
   });
 
   it("validates a skipped row and requires a null requestKey", () => {
-    const row = validateResultRow(
-      { ...common, status: "skipped", requestKey: null, skipReasons: ["empty document"] }, "results.jsonl");
+    // A skipped row carries no representation and no request key, and records the content its
+    // decision was made from so a rerun can tell whether that decision still applies.
+    const { representation, ...skippable } = common;
+    const skipped = {
+      ...skippable,
+      status: "skipped",
+      requestKey: null,
+      skipReasons: ["empty document"],
+      decidedFromContentSha256: "b".repeat(64)
+    };
+    const row = validateResultRow(skipped, "results.jsonl");
     expect(row.status).toBe("skipped");
     expect(row.requestKey).toBeNull();
-    expect(() => validateResultRow({ ...common, status: "skipped", skipReasons: [] }, "results.jsonl"))
+    expect(() => validateResultRow({ ...skipped, requestKey: "k" }, "results.jsonl"))
       .toThrow(/requestKey must be null on a skipped row/);
+  });
+
+  it.each([
+    ["representation", { kind: "text", variantId: "default", variantVersion: 1, sourceContentSha256: "c".repeat(64) }],
+    ["promptImageTokensEstimated", 14_399],
+    ["representationWarnings", ["a warning"]],
+    ["textPartOmitted", true],
+    ["response", { parsed: {}, raw: {} }],
+    ["refusal", "no"],
+    ["usage", { promptTokens: 1, completionTokens: 1, source: "api" }],
+    ["cost", { modeledUsd: 0.01, incurredThisRunUsd: 0.01 }],
+    ["responseOriginMeta", { date: "2026-08-19T00:00:00.000Z", modelReturned: null, systemFingerprint: null }],
+    ["error", { type: "APIError", message: "boom", attempts: 1 }]
+  ])("refuses a skipped row carrying %s, which only a sent row can have", (field, value) => {
+    // Dropped silently, these made a row that disagrees with itself validate cleanly: nothing was
+    // sent, and the row describes a request or a reply anyway. `validateSentRow` already refuses the
+    // mirror image — an image-token estimate on a text row — so this is the same rule facing the
+    // other way.
+    const { representation, ...skippable } = common;
+    const skipped = {
+      ...skippable, status: "skipped", requestKey: null,
+      skipReasons: ["empty document"], decidedFromContentSha256: "b".repeat(64)
+    };
+    expect(() => validateResultRow({ ...skipped, [field]: value }, "results.jsonl"))
+      .toThrow(new RegExp(`${field} cannot appear on a skipped row`));
+  });
+
+  it("still accepts the skipped rows the harness actually writes", () => {
+    // The guard above lists fields by name, so it can only be as right as that list. This reads a
+    // real row back rather than a hand-built one.
+    const written = {
+      schemaVersion: 2, experiment: "e", experimentSha256: "h", runId: "r", corpus: "c",
+      docId: "empty", modality: "empty", computedModality: "empty", message: "text-only",
+      prompt: { name: "p", sha256: "d" }, requestKey: null,
+      runMeta: { date: "2026-08-19T00:00:00.000Z", openaiSdkVersion: "6", gitCommit: null, gitDirty: false },
+      status: "skipped", skipReasons: ["the document has no student content at all"],
+      decidedFromContentSha256: "b".repeat(64)
+    };
+    expect(validateResultRow(written, "results.jsonl").status).toBe("skipped");
+  });
+
+  it("refuses a skipped row that does not say why, or cannot say what it decided from", () => {
+    // A document that simply does not appear in the results is indistinguishable from a bug; a row
+    // with no reasons is the same problem wearing a status.
+    const { representation, ...skippable } = common;
+    const skipped = {
+      ...skippable, status: "skipped", requestKey: null,
+      skipReasons: ["empty document"], decidedFromContentSha256: "b".repeat(64)
+    };
+    expect(() => validateResultRow({ ...skipped, skipReasons: [] }, "results.jsonl"))
+      .toThrow(/skipReasons must name at least one reason/);
+    expect(() => validateResultRow({ ...skipped, decidedFromContentSha256: undefined }, "results.jsonl"))
+      .toThrow(/decidedFromContentSha256 must be a string/);
+    expect(() => validateResultRow({ ...skipped, decidedFromContentSha256: "nope" }, "results.jsonl"))
+      .toThrow(/decidedFromContentSha256 must be a 64-character hex sha256/);
   });
 
   it("rejects a success row that is missing the fields its status requires", () => {

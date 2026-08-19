@@ -8,6 +8,11 @@ import {
 import { readPngInfo } from "../src/png.js";
 import { makeTestDataRoot, makeTestPng } from "./helpers.js";
 
+/** A response body that streams, the way `fetch` delivers one. */
+const bodyOf = (bytes: Buffer) => ({
+  async *[Symbol.asyncIterator]() { yield bytes; }
+});
+
 /**
  * A browser whose pages fail for the documents named in `failFor`.
  *
@@ -46,12 +51,24 @@ function browserThatFails(failFor: Set<string>, order: string[], contentRowsHeig
         }),
         frames: () => [{
           url: () => "http://localhost:8080/iframe.html?unwrapped&readOnly",
-          evaluate: async () => ({
-            // High enough to satisfy any fixture's expected tile count; this fake renders every document
-            // in the committed corpus, and a count below the document's own would never settle.
-            contentHeightPx: 1000, contentRowsHeightPx, totalTiles: 99, unknownTiles: 0,
-            fontsReady: true, documentText: "x"
-          }) as never
+          // Two top-level tiles, so the per-tile mode has something to photograph. The
+          // full-document mode never asks.
+          $$: async () => [
+            { boundingBox: async () => ({ x: 0, y: 0, width: 300, height: 200 }),
+              screenshot: async () => makeTestPng(300, 200) },
+            { boundingBox: async () => ({ x: 0, y: 0, width: 400, height: 260 }),
+              screenshot: async () => makeTestPng(400, 260) }
+          ],
+          evaluate: async (script: unknown) => (String(script).includes("data-tool-id")
+            ? ["tile-one", "tile-two"]
+            : {
+              // High enough to satisfy any fixture's expected tile count; this fake renders every
+              // document in the committed corpus, and a count below the document's own would never
+              // settle.
+              documentFailedToLoad: false,
+              contentHeightPx: 1000, contentRowsHeightPx, totalTiles: 99, unknownTiles: 0,
+              fontsReady: true, documentText: "x"
+            }) as never
         }],
         on: () => undefined,
         close: async () => undefined
@@ -148,8 +165,8 @@ describe("a document that fails to render", () => {
 
 describe("a failure that is not a RenderFailed still leaves evidence", () => {
   it("writes the console output and a screenshot for a navigation error", async () => {
-    // These used to arrive with neither: the CLI only wrote them for RenderFailed, and a raw
-    // puppeteer error carried no context at all.
+    // Written for any failure, not only for a RenderFailed: a raw puppeteer error carries no context
+    // of its own, and that is exactly when a picture of the page is worth having.
     const { dataRoot, paths, order } = setUp("render-nav-failure");
     const output: string[] = [];
     const browser = browserThatFails(new Set(), order);
@@ -280,8 +297,8 @@ describe("render refuses what it cannot do", () => {
   });
 
   it("does not let a failing unit server close replace the error already in flight", async () => {
-    // The unit server comes down after the backend and used to do so unguarded, which is the same
-    // masking the backend's own close is wrapped to avoid.
+    // The unit server comes down after the backend, and unguarded it would mask whatever error was
+    // already in flight — the same thing the backend's own close is wrapped to avoid.
     const { dataRoot, order } = setUp("render-unit-close-failure");
     const output: string[] = [];
     const browser = browserThatFails(new Set(["drawing"]), order);
@@ -314,5 +331,310 @@ describe("render refuses what it cannot do", () => {
       renderModeOptions: { ...base.renderModeOptions, clueRevision: null }
     });
     expect(output.join("\n")).toMatch(/CLUE revision behind .* could not be established/);
+  });
+});
+
+describe("a mode whose height is measured needs a local render to measure from", () => {
+  it("refuses the whole corpus up front, naming the documents and the fix", async () => {
+    // Checked before anything is posted: failing document by document would leave a half-rendered
+    // corpus and a bill for the part that worked.
+    const { dataRoot } = setUp("accurate-height-missing");
+    const output: string[] = [];
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-accurate-height"],
+      deps(dataRoot, null, output)))
+      .rejects.toThrow(/captures each document at its own measured height/);
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-accurate-height"],
+      deps(dataRoot, null, output)))
+      .rejects.toThrow(/have no usable puppeteer-full-height render/);
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-accurate-height"],
+      deps(dataRoot, null, output)))
+      .rejects.toThrow(/Render locally first: harness\.ts render --corpus <name> --mode puppeteer-full-height/);
+    // Nothing was posted, so nothing was written.
+    expect(output.join("\n")).not.toMatch(/Rendered \d+ document/);
+  });
+
+  it("does not demand a height for a document that is expected not to render", async () => {
+    // The fixture that cannot render has no local render to measure, and never will, so requiring
+    // one refused every corpus that contains one — which the committed example corpus does. It is
+    // skipped rather than captured, because an absent height reaches the backend as the fixed
+    // production height and would be filed as a capture at the document's own measured one.
+    const { dataRoot, paths, order } = setUp("accurate-height-expected-failure");
+    const output: string[] = [];
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browserThatFails(new Set(), order, 900), output));
+    // Drop the local render for `error-test`, which is what a real run has: it never rendered.
+    const marked = "error-test";
+    fs.rmSync(imageRepresentationPath(paths, "puppeteer-full-height", marked), { force: true });
+    const manifestFile = path.join(paths.root, "manifest.json");
+    const manifest = JSON.parse(fs.readFileSync(manifestFile, "utf8"));
+    expect(manifest.documents.find((entry: { id: string }) => entry.id === marked).expectedRenderFailure)
+      .toEqual(expect.any(String));
+
+    // A fake Shutterbug, so the whole command runs without a network. The posted body carries the
+    // document, so the marker in `error-test` says whether it was sent.
+    const png = makeTestPng(960, 980);
+    const posted: string[] = [];
+    const fetchImpl = async (url: string, init?: RequestInit): Promise<Response> => {
+      if (init?.method === "POST") {
+        posted.push(String(JSON.parse(String(init.body)).content));
+        return {
+          ok: true, status: 200, statusText: "OK",
+          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test/shot.png" })))
+        } as unknown as Response;
+      }
+      return {
+        ok: true, status: 200, statusText: "OK", url: "https://images.test/shot.png",
+        headers: new Headers({ "content-type": "image/png" }), body: bodyOf(png)
+      } as unknown as Response;
+    };
+
+    output.length = 0;
+    await main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-accurate-height"], {
+      ...deps(dataRoot, null, output),
+      renderConcurrency: 1,
+      renderModeOptions: { clueRevision: "test-revision", fetchImpl }
+    });
+
+    // The corpus rendered rather than being refused whole, and the marked document was not posted.
+    expect(output.join("\n")).toMatch(new RegExp(`skipped ${marked}: it is expected not to render`));
+    expect(output.join("\n")).toMatch(/Rendered \d+ document\(s\)/);
+    expect(posted).toHaveLength(order.length - 1);
+    expect(posted.some((body) => body.includes("ErrorTest"))).toBe(false);
+    expect(fs.existsSync(imageRepresentationPath(paths, "shutterbug-accurate-height", marked))).toBe(false);
+  });
+
+  it("posts each document at the height its own local render measured", async () => {
+    const { dataRoot, paths, order } = setUp("accurate-height-present");
+    const output: string[] = [];
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browserThatFails(new Set(), order, 900), output));
+    const heights = new Map(order.map((docId) => [
+      docId,
+      readImageEnvelope(imageRepresentationPath(paths, "puppeteer-full-height", docId)).images[0].heightPx
+    ]));
+
+    // A fake Shutterbug, so the whole command runs without a network.
+    const posted: { height: number }[] = [];
+    const png = makeTestPng(960, 980);
+    const fetchImpl = async (url: string, init?: RequestInit): Promise<Response> => {
+      if (init?.method === "POST") {
+        posted.push({ height: JSON.parse(String(init.body)).height });
+        return {
+          ok: true, status: 200, statusText: "OK",
+          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test/shot.png" })))
+        } as unknown as Response;
+      }
+      return {
+        ok: true, status: 200, statusText: "OK", url: "https://images.test/shot.png",
+        headers: new Headers({ "content-type": "image/png" }), body: bodyOf(png)
+      } as unknown as Response;
+    };
+
+    output.length = 0;
+    await main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-accurate-height"], {
+      ...deps(dataRoot, null, output),
+      renderConcurrency: 1,
+      renderModeOptions: { clueRevision: "test-revision", fetchImpl }
+    });
+
+    // Every document was posted at its own measured height, not one height for all of them.
+    expect(posted.map((call) => call.height)).toEqual(order.map((docId) => heights.get(docId)));
+    // And the envelope records the height the picture was actually taken at, so freshness compares
+    // against that rather than the mode's nominal 1500.
+    for (const docId of order) {
+      const envelope = readImageEnvelope(imageRepresentationPath(paths, "shutterbug-accurate-height", docId));
+      expect({ docId, height: envelope.renderTarget.captureHeightPx })
+        .toEqual({ docId, height: heights.get(docId) });
+      expect(envelope.renderTarget.captureMode).toBe("fixed-height");
+    }
+  });
+});
+
+describe("a document that renders nothing", () => {
+  it("warns when a document declares tiles but drew none", async () => {
+    // Not fatal: `empty` is a real fixture with no tiles. But for a document whose content declares
+    // some, a capture that drew none is a picture of the wrong thing, and until now only *unknown*
+    // tiles were ever mentioned.
+    const { dataRoot, order } = setUp("render-drew-nothing");
+    const output: string[] = [];
+    const browser = browserThatFails(new Set(), order);
+    const original = browser.newPage;
+    browser.newPage = async () => {
+      const page = await original();
+      (page as any).frames = () => [{
+        url: () => "http://localhost:8080/iframe.html",
+        $$: async () => [],
+        evaluate: async (script: unknown) => (String(script).includes("innerText") ? "" : {
+          documentFailedToLoad: false, contentHeightPx: 500, contentRowsHeightPx: 100,
+          totalTiles: 0, unknownTiles: 0, fontsReady: true
+        }) as never
+      }];
+      return page;
+    };
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browser, output));
+    expect(output.join("\n")).toMatch(/declares \d+ tile\(s\) but drew none/);
+  });
+
+  it("skips a document with no tiles for a per-tile mode, without calling it a failure", async () => {
+    // A per-tile mode cannot represent a document whose content declares no tiles. That is a fact
+    // about the document, not a failure of the render, and a run skips it for the same reason.
+    const { dataRoot, order } = setUp("render-per-tile-empty");
+    const output: string[] = [];
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-per-tile"],
+      deps(dataRoot, browserThatFails(new Set(), order), output));
+    const printed = output.join("\n");
+    expect(printed).toMatch(/skipped empty: its content declares no tiles/);
+    expect(printed).toMatch(/with nothing to capture/);
+    // Not counted as a failure, so the command still succeeds.
+    expect(printed).not.toMatch(/failed to render/);
+  });
+
+  it("clears the pictures a document leaves behind when it stops having tiles", async () => {
+    // A document that had tiles and then has none is stale rather than absent, so it lands in
+    // `pending` and the skip above takes over. Nothing else would ever clear what it left: `render`
+    // only overwrites what it re-renders, and `--prune` only reaches documents that have left the
+    // manifest. Those files are pictures of a document that no longer looks like that, and once a
+    // corpus is real they are pictures of student work.
+    const { dataRoot, paths, order } = setUp("render-per-tile-emptied");
+    const output: string[] = [];
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-per-tile"],
+      deps(dataRoot, browserThatFails(new Set(), order), output));
+
+    const docId = "drawing";
+    const envelopeFile = imageRepresentationPath(paths, "puppeteer-per-tile", docId);
+    const pngs = readImageEnvelope(envelopeFile).images
+      .map((image) => resolveImageFile(envelopeFile, image));
+    expect(pngs.length).toBeGreaterThan(0);
+    expect(pngs.every((png) => fs.existsSync(png))).toBe(true);
+
+    // Empty the document, which is what makes its existing render stale.
+    const documentFile = path.join(paths.root, "documents", `${docId}.json`);
+    fs.writeFileSync(documentFile, JSON.stringify({ rowOrder: [], rowMap: {}, tileMap: {} }), "utf8");
+    await main(["import", "--from", path.join(paths.root, "documents"), "--corpus", "render-corpus"],
+      { dataRoot, log: () => undefined });
+
+    output.length = 0;
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-per-tile"],
+      deps(dataRoot, browserThatFails(new Set(), order), output));
+    expect(output.join("\n")).toMatch(new RegExp(`skipped ${docId}: its content declares no tiles`));
+    expect(output.join("\n")).toMatch(/removed \d+ stale file\(s\)/);
+    expect(fs.existsSync(envelopeFile)).toBe(false);
+    expect(pngs.filter((png) => fs.existsSync(png))).toEqual([]);
+  });
+});
+
+describe("a document the corpus says cannot be rendered", () => {
+  it("is reported apart from real failures, and does not fail the command", async () => {
+    // A corpus that always exits non-zero is a corpus nobody checks, which is how a picture of an
+    // error page survived a whole milestone.
+    const { dataRoot, paths, order } = setUp("render-expected-failure");
+    const output: string[] = [];
+    const manifest = JSON.parse(fs.readFileSync(paths.manifest, "utf8"));
+    for (const entry of manifest.documents) {
+      if (entry.id === "drawing") entry.expectedRenderFailure = "this fixture throws on purpose";
+    }
+    fs.writeFileSync(paths.manifest, JSON.stringify(manifest, null, 2));
+
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browserThatFails(new Set(["drawing"]), order), output));
+
+    const printed = output.join("\n");
+    expect(printed).toMatch(/expected failure: drawing \(this fixture throws on purpose\)/);
+    expect(printed).toMatch(/1 expected to fail/);
+    // Not counted among the failures, so the command succeeded rather than throwing.
+    expect(printed).toMatch(/0 failed/);
+    // And no envelope was written for it, exactly as for any other failure.
+    expect(fs.existsSync(imageRepresentationPath(paths, "puppeteer-full-height", "drawing"))).toBe(false);
+    // Evidence is kept too. A document expected to fail one way and failing another is exactly the
+    // case a screenshot is for, and the failure message points the reader at it.
+    const evidence = renderErrorDir(paths, "puppeteer-full-height", "drawing");
+    expect(fs.existsSync(path.join(evidence, "error.txt"))).toBe(true);
+    expect(printed).toContain(`evidence written to ${evidence}`);
+  });
+
+  it("warns when a document it expected to fail renders after all", async () => {
+    // A stale expectation is worse than none: it would go on hiding a real failure the day this
+    // document breaks again.
+    const { dataRoot, paths, order } = setUp("render-expectation-stale");
+    const output: string[] = [];
+    const manifest = JSON.parse(fs.readFileSync(paths.manifest, "utf8"));
+    for (const entry of manifest.documents) {
+      if (entry.id === "drawing") entry.expectedRenderFailure = "this used to throw";
+    }
+    fs.writeFileSync(paths.manifest, JSON.stringify(manifest, null, 2));
+
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browserThatFails(new Set(), order), output));
+    expect(output.join("\n"))
+      .toMatch(/drawing rendered, but the manifest says it should not.*Clear expectedRenderFailure/s);
+  });
+});
+
+describe("--concurrency and --timeout-ms", () => {
+  it("refuses anything that is not a positive whole number", async () => {
+    const { dataRoot } = setUp("render-bad-limits");
+    for (const [flag, value] of [["--concurrency", "0"], ["--concurrency", "2.5"],
+      ["--timeout-ms", "-1"], ["--timeout-ms", "abc"]] as const) {
+      await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height",
+        flag, value], deps(dataRoot, null, [])))
+        .rejects.toThrow(new RegExp(`\\${flag} must be a positive whole number`));
+    }
+  });
+
+  it("renders one page at a time when asked, instead of four", async () => {
+    // Asserted through the fake browser rather than by timing: a timing assertion would be a
+    // stopwatch on somebody else's machine.
+    const { dataRoot, order } = setUp("render-concurrency-1");
+    const output: string[] = [];
+    let open = 0;
+    let peak = 0;
+    const browser = browserThatFails(new Set(), order);
+    const original = browser.newPage;
+    browser.newPage = async () => {
+      const page = await original();
+      open += 1;
+      peak = Math.max(peak, open);
+      const close = page.close;
+      (page as any).close = async () => {
+        open -= 1;
+        return close();
+      };
+      return page;
+    };
+    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height",
+      "--concurrency", "1"], {
+      dataRoot,
+      log: (message: string) => output.push(message),
+      now: () => new Date("2026-08-13T00:00:00.000Z"),
+      // No renderConcurrency here: the flag is the thing under test, and a dep would mask it.
+      renderModeOptions: {
+        clueRevision: "test-revision", launch: async () => browser as never,
+        stableForMs: 0, pollIntervalMs: 1
+      }
+    });
+    expect(peak).toBe(1);
+    // The settings a run used are in its own output, not only in the shell history of whoever ran it.
+    expect(output.join("\n")).toMatch(/\(1 at a time, 30000ms per document\.\)/);
+  });
+
+  it("hands the per-document budget to the backend, and says which one it used", async () => {
+    const { dataRoot, order } = setUp("render-timeout");
+    const output: string[] = [];
+    // A budget this small cannot survive the fake's own settle loop, so the documents fail — which
+    // is the observable proof the flag reached the backend rather than being parsed and dropped.
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height",
+      "--timeout-ms", "1"], {
+      dataRoot,
+      log: (message: string) => output.push(message),
+      now: () => new Date("2026-08-13T00:00:00.000Z"),
+      renderConcurrency: 1,
+      renderModeOptions: {
+        clueRevision: "test-revision", launch: async () => browserThatFails(new Set(), order) as never,
+        stableForMs: 0, pollIntervalMs: 1
+      }
+    })).rejects.toThrow(/failed to render/);
+    expect(output.join("\n")).toMatch(/1ms budget for this document/);
+    expect(output.join("\n")).toMatch(/\(1 at a time, 1ms per document\.\)/);
   });
 });

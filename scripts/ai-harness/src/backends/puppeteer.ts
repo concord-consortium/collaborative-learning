@@ -10,7 +10,7 @@
  * Puppeteer is imported lazily so that every other module here — and every test that does not drive
  * a browser — loads without it.
  */
-import { RenderTarget } from "../schemas.js";
+import { CaptureMode, RenderTarget } from "../schemas.js";
 import { readPngInfo } from "../png.js";
 import { generateRenderHtml, iframeUrlFor, kInitialFrameHeightPx } from "./render-html.js";
 import {
@@ -30,6 +30,8 @@ export interface ElementLike {
 export interface FrameLike {
   url(): string;
   evaluate<T>(fn: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
+  /** Every element matching the selector, in document order. Used by the per-tile capture. */
+  $$(selector: string): Promise<ElementLike[]>;
 }
 
 export interface PageLike {
@@ -98,6 +100,12 @@ export class RenderFailed extends Error {
 }
 
 export interface PuppeteerBackendOptions {
+  /**
+   * The `--mode` id this backend is being built for, which is also the directory its envelopes are
+   * filed under. Passed in rather than fixed: the same backend serves more than one mode, and a
+   * hardcoded id filed a per-tile render on top of the full-document one.
+   */
+  modeId: string;
   clueUrl: string;
   /**
    * The unit's stable identifier — what goes into the render target and is compared for freshness.
@@ -121,6 +129,13 @@ export interface PuppeteerBackendOptions {
   launch?: () => Promise<BrowserLike>;
   /** Injected by tests, so a fake browser needs no real loopback server. */
   startPageServer?: () => Promise<RenderPageServer>;
+  /**
+   * What the mode captures: one picture of the whole document, or one per top-level tile.
+   *
+   * Per-tile is the same page, the same readiness protocol and the same sizing — only the last step
+   * differs, so the two modes cannot disagree about when a document is ready to photograph.
+   */
+  capture?: Extract<CaptureMode, "full-document" | "per-tile">;
 }
 
 async function launchPuppeteer(): Promise<BrowserLike> {
@@ -150,13 +165,21 @@ const kMeasureFrameScript = `(() => {
   const rows = document.querySelectorAll('.tile-row');
   let rowsHeight = 0;
   rows.forEach((row) => { rowsHeight += row.getBoundingClientRect().height; });
+  const documentError = document.querySelector('.document-error');
   return {
+    // CLUE renders its own "Error loading the document" page when it cannot deserialize what it was
+    // handed. That page photographs perfectly well, which is exactly the problem: without this the
+    // capture is a valid PNG of an error screen, stored as though it were the student's work.
+    documentFailedToLoad: !!documentError,
     contentHeightPx: app ? app.scrollHeight : 0,
     // The document's own height — the tile rows themselves. CLUE lays out to fill its viewport (the
     // iframe element) rather than to its content, so nothing else reports how tall the document
     // actually is: the scroller always matches the frame exactly, at any frame height. Sizing the
     // frame from this is what makes the capture the whole document rather than a viewport of it.
     contentRowsHeightPx: Math.ceil(rowsHeight),
+    // Every tile, nested ones included — deliberately not \`kTileSelector\`, which photographs
+    // top-level tiles only. This one is counting what drew, and an unregistered tile type inside a
+    // Question is exactly as worth reporting as one in a row of its own.
     totalTiles: document.querySelectorAll('.tool-tile').length,
     unknownTiles: document.querySelectorAll('.placeholder-tile').length,
     fontsReady: !document.fonts || document.fonts.status === 'loaded'
@@ -170,6 +193,8 @@ const kMeasureFrameScript = `(() => {
 const kReadDocumentTextScript = "document.body ? document.body.innerText : ''";
 
 export interface FrameMeasurement {
+  /** True when CLUE showed its document-error page instead of the document. */
+  documentFailedToLoad: boolean;
   contentHeightPx: number;
   contentRowsHeightPx: number;
   totalTiles: number;
@@ -338,9 +363,9 @@ export function expectedTileCount(content: unknown): number {
   for (const row of Object.values(rowMap ?? {})) {
     for (const tile of row?.tiles ?? []) if (tile?.tileId) ids.add(tile.tileId);
   }
-  // An empty walk falls through to the tile map rather than answering 0. A present-but-empty
-  // `rowMap` used to take this branch and expect no tiles at all, which any state satisfies —
-  // including a page that has not finished loading, whose screenshot is blank.
+  // An empty walk falls through to the tile map rather than answering 0. Expecting no tiles at all
+  // is satisfied by any state whatsoever, including a page that has not finished loading, whose
+  // screenshot is blank.
   if (ids.size > 0) return ids.size;
   const tileMap = (content as { tileMap?: Record<string, unknown> })?.tileMap;
   return tileMap ? Object.keys(tileMap).length : 0;
@@ -351,6 +376,23 @@ export { kInitialFrameHeightPx };
 
 /** Room for the document's own chrome — margins and the annotation layer — above the tile rows. */
 const kDocumentChromePx = 80;
+
+/**
+ * The tile elements a per-tile capture photographs, and the attribute carrying each one's id.
+ *
+ * `.tool-tile` is the element `TileComponent` renders (`data-testid="tool-tile"`), and it carries
+ * `data-tool-id` — the tile model's id, which is what the envelope records so a per-tile image can
+ * be matched back to the tile it is a picture of.
+ *
+ * The `:not()` is what makes this top-level tiles rather than all of them. A Question tile renders a
+ * `RowListComponent` (`src/components/tiles/question/question-tile.tsx`), and the tiles inside it are
+ * `.tool-tile` elements too — so a bare `.tool-tile` photographs the Question *and* each tile drawn
+ * inside it, which duplicates content the outer picture already contains and gives one top-level tile
+ * several images. A nested tile is drawn within its parent's picture; that is the picture of it.
+ */
+const kTileSelector = ".tool-tile:not(.tool-tile .tool-tile)";
+const kReadTileIdsScript = `Array.from(document.querySelectorAll('${kTileSelector}'))
+  .map((tile) => tile.getAttribute('data-tool-id') || '')`;
 
 /**
  * An overflow this small, which growing the frame does not reduce, is a rounding or border artifact
@@ -424,9 +466,9 @@ async function waitUntilSettled(
   pollIntervalMs: number, expectedTiles: number, contextOf: () => RenderFailed["context"]
 ): Promise<FrameMeasurement> {
   // Two clocks: one for "everything has settled, tiles included", and one for "everything except
-  // the tiles has settled". A document whose tile legitimately never draws — the ErrorTest fixture
-  // renders an error boundary and no tile at all — must still be captured, so the second clock
-  // accepts what is there once it has been quiet for a good while longer.
+  // the tiles has settled". A page that never reaches its expected tile count must still stop
+  // waiting eventually, so the second clock accepts what is there once it has been quiet for a good
+  // while longer, and the caller decides whether what is there is worth keeping.
   const graceMs = stableForMs * 6;
   let previous: FrameMeasurement | undefined;
   let stableSince: number | undefined;
@@ -470,14 +512,15 @@ async function waitUntilSettled(
 
 export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBackend {
   const {
-    clueUrl, unit, clueRevision,
+    modeId, clueUrl, unit, clueRevision,
     // Loaded from wherever it is served; recorded under its stable identifier.
     unitUrl = unit,
     viewportWidthPx = kDefaultViewportWidthPx,
     limits = kDefaultRenderLimits,
     timeoutMs = kDefaultRenderTimeoutMs,
     stableForMs = kDefaultStableForMs,
-    pollIntervalMs = 100
+    pollIntervalMs = 100,
+    capture = "full-document"
   } = options;
   const launch = options.launch ?? launchPuppeteer;
   const startPageServer = options.startPageServer;
@@ -488,7 +531,7 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
     clueRevision,
     shutterbugUrl: null,
     viewportWidthPx,
-    captureMode: "full-document",
+    captureMode: capture,
     captureHeightPx: null
   };
 
@@ -503,7 +546,7 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
   const openPageServer = () => (pageServerPromise ??= (startPageServer ?? startRenderPageServer)());
 
   return {
-    modeId: "puppeteer-full-height",
+    modeId,
     backendId: "puppeteer",
     backendVersion: kPuppeteerBackendVersion,
     // "local", not "offline": the CLUE page it loads may still pull fonts, images or other assets
@@ -583,6 +626,15 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         let measured = await waitUntilSettled(
           frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
 
+        // Checked before the resize, so a document that never loaded fails on the cheap path rather
+        // than after being measured, resized, settled again and photographed.
+        if (measured.documentFailedToLoad) {
+          throw new RenderFailed(request.docId,
+            "CLUE could not load this document and showed its error page instead. A capture would " +
+            "be a valid picture of an error screen stored as though it were the student's work — " +
+            "see the screenshot in this document's render-errors directory", contextOf());
+        }
+
         const failOnFatal = () => {
           if (state.fatal.length > 0) {
             throw new RenderFailed(request.docId, `the page reported ${state.fatal.length} error(s): ` +
@@ -605,9 +657,9 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
           measured = await waitUntilSettled(
             frame, request.docId, deadline, stableForMs, pollIntervalMs, expectedTiles, contextOf);
         }
-        // Checked again after the resize. A fatal console line or a failed script request during the
-        // second settle used to land in the evidence file without failing the render, so the
-        // document was captured and stored as if nothing had gone wrong.
+        // Checked again after the resize, because the second settle has its own failures: a fatal
+        // console line or a failed script request there would otherwise reach the evidence file
+        // without failing anything, and the document would be captured as if nothing had happened.
         failOnFatal();
         // The guarantee that nothing is cut off is made by construction — the frame is sized to
         // cover the tile rows, and the capture is checked against them below — rather than by a DOM
@@ -616,6 +668,67 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         // documents whose content is a third of the frame; whatever that describes, it is not "the
         // document is cut off".
         state.heightPx = measured.contentHeightPx;
+
+        const diagnosticsOf = async (): Promise<RenderDiagnostics> => ({
+          reportedHeightPx: measured.contentHeightPx,
+          unknownTiles: measured.unknownTiles,
+          totalTiles: measured.totalTiles,
+          documentText: await withinDeadline(
+            frame.evaluate<string>(kReadDocumentTextScript), request.docId, "reading the document text",
+            deadline, contextOf).catch(() => null),
+          consoleWarnings: state.consoleOutput.filter((line) => line.startsWith("warning:"))
+        });
+
+        if (capture === "per-tile") {
+          // One picture per top-level tile, of the same settled and resized page. Both reads use
+          // `kTileSelector`, so the handles and the ids describe the same elements — the mismatch
+          // check below is the backstop for that, since they are paired by index.
+          const [handles, tileIds] = await Promise.all([
+            withinDeadline(frame.$$(kTileSelector), request.docId, "finding the document's tiles",
+              deadline, contextOf),
+            withinDeadline(frame.evaluate<string[]>(kReadTileIdsScript), request.docId,
+              "reading the tile ids", deadline, contextOf)
+          ]);
+          if (handles.length === 0) {
+            // An envelope with no images is already treated as damaged everywhere else, so a
+            // document that photographs to nothing is a failure with evidence rather than an empty
+            // envelope nobody can tell from a broken one.
+            throw new RenderFailed(request.docId,
+              "the document drew no tiles, so a per-tile capture would produce no images at all",
+              contextOf());
+          }
+          if (handles.length !== tileIds.length) {
+            throw new RenderFailed(request.docId,
+              `found ${handles.length} tile element(s) but ${tileIds.length} tile id(s); the two ` +
+              "are read from the same selector, so they cannot be paired", contextOf());
+          }
+          const images = [];
+          for (const [index, handle] of handles.entries()) {
+            const tileBox = await withinDeadline(handle.boundingBox(), request.docId,
+              `measuring tile ${tileIds[index] || index + 1}`, deadline, contextOf);
+            if (!tileBox || tileBox.width <= 0 || tileBox.height <= 0) {
+              throw new RenderFailed(request.docId,
+                `tile ${tileIds[index] || index + 1} has no visible area ` +
+                `(${JSON.stringify(tileBox)})`, contextOf());
+            }
+            // Every bound applies per image: a per-tile capture multiplies the count, not the
+            // allowance.
+            checkCaptureSize(request.docId, Math.ceil(tileBox.width), Math.ceil(tileBox.height), limits);
+            const tileBytes = Buffer.from(await withinDeadline(handle.screenshot({ type: "png" }),
+              request.docId, `capturing tile ${tileIds[index] || index + 1}`, deadline, contextOf));
+            checkEncodedSize(request.docId, tileBytes, limits);
+            readPngInfo(tileBytes, `${request.docId} tile ${tileIds[index] || index + 1}`);
+            images.push({
+              bytes: tileBytes,
+              url: null,
+              // Empty rather than absent would be a lie: a tile with no id cannot be matched back to
+              // the classification, and the selection step needs to know that.
+              tileId: tileIds[index] || null,
+              purpose: "tile" as const
+            });
+          }
+          return { images, diagnostics: await diagnosticsOf() };
+        }
 
         // Every step of the capture is inside the budget, not merely started inside it.
         const element = await withinDeadline(
@@ -648,23 +761,14 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         // the capture path itself is broken, and that is worth saying at the point it happened.
         readPngInfo(bytes, `${request.docId} screenshot`);
 
-        const diagnostics: RenderDiagnostics = {
-          reportedHeightPx: measured.contentHeightPx,
-          unknownTiles: measured.unknownTiles,
-          totalTiles: measured.totalTiles,
-          documentText: await withinDeadline(
-            frame.evaluate<string>(kReadDocumentTextScript), request.docId, "reading the document text",
-            deadline, contextOf).catch(() => null),
-          consoleWarnings: state.consoleOutput.filter((line) => line.startsWith("warning:"))
-        };
         return {
           images: [{ bytes, url: null, tileId: null, purpose: "full-document" }],
-          diagnostics
+          diagnostics: await diagnosticsOf()
         };
       } catch (error) {
         // Evidence is attached to *any* failure, not only to a RenderFailed. A navigation error, a
         // size-limit rejection or a raw protocol error is exactly when the console output and a
-        // picture of the page are most wanted, and those used to arrive carrying neither.
+        // picture of the page are most wanted.
         const context = error instanceof RenderFailed ? error.context : contextOf();
         if (!context.screenshot) {
           try {

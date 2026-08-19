@@ -12,8 +12,11 @@ import { ReportSummary } from "../src/report.js";
 import { ExperimentFile, ResultRow } from "../src/schemas.js";
 import { harnessRoot, isContainedBy } from "../src/files.js";
 import {
-  listFilesUnder, makeTestDataRoot, makeTestPng, readLines, testRunsRoot
+  listFilesUnder, makeTestDataRoot, makeTestPng, readLines, syntheticCorpusShape, testRunsRoot
 } from "./helpers.js";
+
+/** Derived from the committed fixtures, so adding one moves the counts instead of breaking them. */
+const shape = syntheticCorpusShape();
 
 /**
  * The mocked end-to-end path extended through an `image-only` run, with no browser and no network.
@@ -96,13 +99,22 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       }),
       frames: () => [{
         url: () => "http://localhost:8080/iframe.html?unit=harness-render&unwrapped&readOnly",
-        evaluate: async () => ({
-          // High enough for any fixture in the committed corpus — see render-command.test.ts.
-          // Without `contentRowsHeightPx` the backend compares against `undefined`, skips the
-          // resize, and skips the guard that keeps `captureMode: "full-document"` honest.
-          contentHeightPx: 1420, contentRowsHeightPx, totalTiles: 99, unknownTiles: 0,
-          fontsReady: true, documentText: "marker"
-        }) as never
+        // Two top-level tiles, for the per-tile mode. The full-height mode never asks.
+        $$: async () => [
+          { boundingBox: async () => ({ x: 0, y: 0, width: 300, height: 200 }),
+            screenshot: async () => makeTestPng(300, 200) },
+          { boundingBox: async () => ({ x: 0, y: 0, width: 400, height: 260 }),
+            screenshot: async () => makeTestPng(400, 260) }
+        ],
+        // High enough for any fixture in the committed corpus — see render-command.test.ts.
+        // Without `contentRowsHeightPx` the backend compares against `undefined`, skips the
+        // resize, and skips the guard that keeps `captureMode: "full-document"` honest.
+        evaluate: async (script: unknown) => (String(script).includes("data-tool-id")
+          ? ["tile-one", "tile-two"]
+          : {
+            contentHeightPx: 1420, contentRowsHeightPx, totalTiles: 99, unknownTiles: 0,
+            fontsReady: true, documentText: "marker"
+          }) as never
       }],
       on: () => undefined,
       close: async () => undefined
@@ -150,8 +162,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     await main(["import", "--from", "examples/synthetic-corpus", "--corpus", "image-corpus"], deps);
     await main(["represent", "--corpus", "image-corpus", "--variants", "default,minimal"], deps);
     expect(fs.existsSync(paths.manifest)).toBe(true);
-    // The name says both variants were written, so both are checked — this used to assert only that
-    // the manifest existed, which the import alone would satisfy.
+    // The name says both variants were written, so both are checked. Asserting only that the
+    // manifest exists would be satisfied by the import alone.
     expect(documentIds().length).toBeGreaterThan(0);
     for (const variantId of ["default", "minimal"]) {
       for (const docId of documentIds()) {
@@ -231,9 +243,16 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     output.length = 0;
     await main(["plan", "--corpus", "image-corpus", "--experiment", "experiments/image-vs-text.json"], deps);
     const printed = output.join("\n");
-    const documents = documentIds().length;
-    expect(printed).toContain(`3 run(s) × ${documents} document(s) = ${documents * 3} call(s)`);
+    // Skip-empty means the call count is no longer runs × documents: the text runs send only what
+    // carries student text, and no shape sends an empty document.
+    const sent = shape.withStudentText.length * 2 + shape.withContent.length;
+    expect(printed).toContain(
+      `3 run(s) × ${documentIds().length} document(s) = ${documentIds().length * 3} pair(s); ` +
+      `${sent} call(s), ${documentIds().length * 3 - sent} skipped.`);
     expect(printed).toContain("[image-only, --mode puppeteer-full-height");
+    // Each shape is described by what it actually sends. The old two-way label predated `mixed` and
+    // called it "text-only" while printing its images underneath.
+    expect(printed).toContain("[text-only, default]");
     // Where the pictures came from, resolved rather than described. Every render target value has a
     // default, and a default nobody states is one nobody checks.
     expect(printed).toMatch(/renders against: http:\/\/localhost:8080 \(--clue-url\), unit harness-render/);
@@ -246,11 +265,22 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     await main(["run", "--corpus", "image-corpus", "--experiment", "experiments/image-vs-text.json",
       "--max-cost", "2.00"], deps);
     const rows = readLines(resultsFile) as ResultRow[];
+    // One row per (run, document) pair, sent or skipped.
     expect(rows).toHaveLength(documentIds().length * 3);
 
-    const imageRows = rows.filter((row) => row.message === "image-only");
-    expect(imageRows).toHaveLength(documentIds().length);
+    // An image run sends every document it can: the empty ones show nothing in a picture, and the
+    // unrenderable ones have no picture to send at all.
+    const imageRows = rows.filter((row) => row.message === "image-only" && row.status !== "skipped");
+    expect(imageRows).toHaveLength(shape.withContent.length);
+    const skippedImages = rows.filter((row) => row.message === "image-only" && row.status === "skipped");
+    expect(skippedImages.map((row) => row.docId).sort())
+      .toEqual([...shape.empty, ...shape.unrenderable].sort());
+    // Each says which of the two it was, in terms a reader can act on.
+    expect(skippedImages.filter((row) =>
+      row.status === "skipped" && row.skipReasons.join(" ").includes("cannot be rendered")))
+      .toHaveLength(shape.unrenderable.length);
     for (const row of imageRows) {
+      if (row.status === "skipped") continue;
       expect(row.representation.kind).toBe("image");
       if (row.representation.kind === "image") {
         expect(row.representation.modeId).toBe("puppeteer-full-height");
@@ -260,7 +290,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       expect(row.promptImageTokensEstimated).toBeGreaterThan(10_000);
     }
     // A text row has a text descriptor and no image estimate at all.
-    const textRow = rows.find((row) => row.runId === "text-default")!;
+    const textRow = rows.find((row) => row.runId === "text-default" && row.status !== "skipped")!;
+    if (textRow.status === "skipped") throw new Error("expected text-default to have sent a request");
     expect(textRow.representation.kind).toBe("text");
     expect(textRow.promptImageTokensEstimated).toBeUndefined();
   });
@@ -321,6 +352,77 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     expect(JSON.stringify(task.makeRequest().apiRequest.messages)).toContain(dataUrlFor(original));
   });
 
+  it("runs a mixed message, dropping the text half only where there is no student text", async () => {
+    // The milestone's headline shape: both representations of the same document in one request.
+    const experiment = path.join(dataRoot, "mixed.json");
+    fs.writeFileSync(experiment, JSON.stringify({
+      schemaVersion: 1,
+      name: "mixed-check",
+      runs: [{
+        id: "mixed", message: "mixed", textVariant: "default",
+        imageMode: "puppeteer-full-height", prompt: "categorize-design-default"
+      }]
+    }, null, 2));
+    output.length = 0;
+    // `plan` is the record of what a run was about to do, so its label has to name the shape that
+    // will actually run. The old two-way label predated `mixed` and filed it under "text-only"
+    // while printing its images underneath.
+    await main(["plan", "--corpus", "image-corpus", "--experiment", experiment], deps);
+    expect(output.join("\n"))
+      .toContain("[mixed, default, --mode puppeteer-full-height");
+
+    output.length = 0;
+    requests.length = 0;
+    const mixedResults = path.join(dataRoot, "results", "mixed.jsonl");
+    await main(["run", "--corpus", "image-corpus", "--experiment", experiment,
+      "--max-cost", "2.00", "--output", mixedResults], deps);
+
+    const rows = readLines(mixedResults) as ResultRow[];
+    expect(rows).toHaveLength(documentIds().length);
+    const sent = rows.filter((row) => row.status !== "skipped");
+    // A mixed run sends everything it has a picture for, and skips the rest.
+    expect(sent).toHaveLength(shape.withContent.length);
+    expect(rows.filter((row) => row.status === "skipped"))
+      .toHaveLength(shape.empty.length + shape.unrenderable.length);
+
+    // Both halves are recorded, and the two shapes are the ones the single-representation rows use.
+    for (const row of sent) {
+      expect(row.representation.kind).toBe("mixed");
+      if (row.representation.kind !== "mixed") continue;
+      expect(row.representation.text.variantId).toBe("default");
+      expect(row.representation.image.modeId).toBe("puppeteer-full-height");
+      expect(row.representation.image.imageSet).toBe("full-document");
+      expect(row.promptImageTokensEstimated).toBeGreaterThan(10_000);
+    }
+
+    // The text half is dropped exactly for the documents that carry no student text — and those
+    // rows are sent, not skipped, because the picture still has something to say.
+    const omitted = sent.filter((row) => row.textPartOmitted).map((row) => row.docId).sort();
+    const expectedOmitted = shape.withContent
+      .filter((docId) => !shape.withStudentText.includes(docId)).sort();
+    expect(omitted).toEqual(expectedOmitted);
+    expect(omitted.length).toBeGreaterThan(0);
+
+    // A dropped text half really means prompt-plus-picture and nothing else — which is exactly an
+    // image-only message. So those rows share the image-only run's request key, and this run served
+    // them from its cache rather than paying for them again. Asserted rather than worked around:
+    // that identity is the cache doing precisely what it is for.
+    const imageOnlyKeys = new Map((readLines(resultsFile) as ResultRow[])
+      .filter((row) => row.runId === "image-puppeteer" && row.status !== "skipped")
+      .map((row) => [row.docId, row.requestKey]));
+    for (const row of sent) {
+      const imageOnlyKey = imageOnlyKeys.get(row.docId);
+      expect({ docId: row.docId, sameAsImageOnly: row.requestKey === imageOnlyKey })
+        .toEqual({ docId: row.docId, sameAsImageOnly: Boolean(row.textPartOmitted) });
+    }
+    // And the dispatched calls were only the ones carrying a summary; the rest were cache hits.
+    expect(requests).toHaveLength(shape.withStudentText.length);
+    for (const request of requests) {
+      expect((request.messages[1].content as any[]).map((part: any) => part.type))
+        .toEqual(["text", "text", "image_url"]);
+    }
+  });
+
   it("reports image-only and text-only side by side rather than summed", async () => {
     output.length = 0;
     await main(["report", "--results", resultsFile], deps);
@@ -335,39 +437,53 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       group.runId === "(all runs)" && group.message === "image-only" && group.modality === "all")!;
     const textAll = summary.groups.find((group) =>
       group.runId === "(all runs)" && group.message === "text-only" && group.modality === "all")!;
+    // Both groups still cover every document — a skipped pair is a row in its group, not an absence.
     expect(imageAll.docs).toBe(documentIds().length);
     expect(textAll.docs).toBe(documentIds().length);
+    expect(imageAll.statuses.skipped).toBe(shape.empty.length + shape.unrenderable.length);
     // The whole point of splitting by shape: the two totals are separate numbers.
     expect(imageAll.tokens.imageEstimatedTotal).toBeGreaterThan(0);
     expect(textAll.tokens.imageEstimatedTotal).toBe(0);
     expect(imageAll.tokens.promptTotal).not.toBe(textAll.tokens.promptTotal);
   });
 
-  it("refuses an envelope with two images rather than sending the first", async () => {
-    // A genuine second image — real file, real hash, real byte count — so the envelope is entirely
-    // valid and the only thing wrong with it is that nothing here knows which one to send.
-    // The first is never silently selected.
+  it("chooses by purpose when an envelope holds a tile picture as well", async () => {
+    // A genuine second image — real file, real hash, real byte count — with `purpose: "tile"`. A
+    // full-document run sends the full-document picture and ignores the tile, rather than picking
+    // whichever came first.
     const file = imageRepresentationPath(paths, "puppeteer-full-height", "drawing");
     const envelope = readImageEnvelope(file);
     const second = makeTestPng(480, 500);
     fs.writeFileSync(path.join(path.dirname(file), "drawing-2.png"), second);
-    fs.writeFileSync(file, JSON.stringify({
-      ...envelope,
-      images: [envelope.images[0], {
-        ...envelope.images[0],
-        file: "drawing-2.png",
-        sha256: sha256Bytes(second),
-        bytes: second.length,
-        widthPx: 480,
-        heightPx: 500,
-        purpose: "tile",
-        tileId: "tile-1"
-      }]
-    }, null, 2));
-    await expect(main(["plan", "--corpus", "image-corpus", "--experiment",
-      "experiments/image-vs-text.json"], deps)).rejects.toThrow(/records 2 images[\s\S]*milestone 3/);
-    fs.writeFileSync(file, JSON.stringify(envelope, null, 2));
-    fs.rmSync(path.join(path.dirname(file), "drawing-2.png"));
+    const tile = {
+      ...envelope.images[0],
+      file: "drawing-2.png",
+      sha256: sha256Bytes(second),
+      bytes: second.length,
+      widthPx: 480,
+      heightPx: 500,
+      purpose: "tile",
+      tileId: "tile-1"
+    };
+    fs.writeFileSync(file, JSON.stringify({ ...envelope, images: [envelope.images[0], tile] }, null, 2));
+    try {
+      output.length = 0;
+      await main(["plan", "--corpus", "image-corpus", "--experiment",
+        "experiments/image-vs-text.json"], deps);
+      // Still one image per document, and it is the full-document one.
+      expect(output.join("\n"))
+        .toMatch(new RegExp(`${shape.withContent.length} image\\(s\\) across ` +
+          `${shape.withContent.length} call\\(s\\)`));
+
+      // And an envelope holding *only* tiles refuses a full-document run outright, naming the fix.
+      fs.writeFileSync(file, JSON.stringify({ ...envelope, images: [tile] }, null, 2));
+      await expect(main(["plan", "--corpus", "image-corpus", "--experiment",
+        "experiments/image-vs-text.json"], deps))
+        .rejects.toThrow(/records 0 full-document image\(s\) out of 1[\s\S]*set imageSet on the run/);
+    } finally {
+      fs.writeFileSync(file, JSON.stringify(envelope, null, 2));
+      fs.rmSync(path.join(path.dirname(file), "drawing-2.png"));
+    }
   });
 
   it("refuses an envelope with no images at all", async () => {
@@ -412,5 +528,112 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     for (const file of appeared) {
       expect({ file, inside: isContainedBy(file, dataDir) }).toEqual({ file, inside: true });
     }
+  });
+});
+
+describe("a per-tile render, and the sets a run can send from it", () => {
+  const dataRoot = makeTestDataRoot("per-tile");
+  const paths = corpusPaths(dataRoot, "tile-corpus");
+  const output: string[] = [];
+  /** Two top-level tiles per document: one the classification calls visual, one it does not. */
+  const tiles = [
+    { tileId: "text-tile", widthPx: 300, heightPx: 200 },
+    { tileId: "drawing-tile", widthPx: 400, heightPx: 260 }
+  ];
+
+  const fakeBrowser = () => ({
+    newPage: async () => ({
+      setViewport: async () => undefined,
+      screenshot: async () => makeTestPng(40, 40),
+      goto: async () => undefined,
+      evaluate: async () => undefined as never,
+      waitForFunction: async () => true,
+      $: async () => ({
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1420 }),
+        screenshot: async () => makeTestPng(960, 1420)
+      }),
+      frames: () => [{
+        url: () => "http://localhost:8080/iframe.html?unit=harness-render&unwrapped&readOnly",
+        $$: async () => tiles.map((tile) => ({
+          boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx }),
+          screenshot: async () => makeTestPng(tile.widthPx, tile.heightPx)
+        })),
+        evaluate: async (script: unknown) => (String(script).includes("data-tool-id")
+          ? tiles.map((tile) => tile.tileId)
+          : {
+            contentHeightPx: 1420, contentRowsHeightPx: 1340, totalTiles: 99, unknownTiles: 0,
+            fontsReady: true, documentText: "marker"
+          }) as never
+      }],
+      on: () => undefined,
+      close: async () => undefined
+    }),
+    close: async () => undefined
+  });
+
+  const deps = {
+    dataRoot,
+    log: (message: string) => output.push(message),
+    now: () => new Date("2026-08-13T00:00:00.000Z"),
+    renderConcurrency: 1,
+    renderModeOptions: {
+      clueRevision: "tile-revision",
+      launch: async () => fakeBrowser() as never,
+      stableForMs: 0,
+      pollIntervalMs: 1
+    },
+    startUnitServer: async () => ({
+      unitUrl: "http://127.0.0.1:5000/harness-render/content.json",
+      close: async () => undefined
+    })
+  };
+
+  it("writes one image per tile, each tagged with the tile it is a picture of", async () => {
+    await main(["import", "--from", "examples/synthetic-corpus", "--corpus", "tile-corpus"], deps);
+    await main(["represent", "--corpus", "tile-corpus", "--variants", "default"], deps);
+    output.length = 0;
+    await main(["render", "--corpus", "tile-corpus", "--mode", "puppeteer-per-tile"], deps);
+    expect(output.join("\n")).toMatch(/Rendered \d+ document\(s\) with --mode puppeteer-per-tile/);
+
+    const envelope = readImageEnvelope(imageRepresentationPath(paths, "puppeteer-per-tile", "drawing"));
+    expect(envelope.images).toHaveLength(2);
+    expect(envelope.images.map((image) => image.tileId)).toEqual(["text-tile", "drawing-tile"]);
+    for (const image of envelope.images) expect(image.purpose).toBe("tile");
+    // Its own capture mode, so a freshness check can tell the two renders apart.
+    expect(envelope.renderTarget.captureMode).toBe("per-tile");
+    // The full-document render is filed separately and is unaffected.
+    expect(fs.existsSync(imageRepresentationPath(paths, "puppeteer-full-height", "drawing"))).toBe(false);
+  });
+
+  it("sends every tile for a per-tile run, and prices each one separately", async () => {
+    const experiment = path.join(dataRoot, "per-tile.json");
+    fs.writeFileSync(experiment, JSON.stringify({
+      schemaVersion: 1,
+      name: "per-tile-set",
+      runs: [{
+        id: "tiles", message: "image-only", imageMode: "puppeteer-per-tile",
+        imageSet: "per-tile", prompt: "categorize-design-default"
+      }]
+    }, null, 2));
+    output.length = 0;
+    await main(["plan", "--corpus", "tile-corpus", "--experiment", experiment], deps);
+    const printed = output.join("\n");
+    // Two images per call is the thing to see before paying for it: each carries the base charge.
+    expect(printed).toMatch(/\d+ image\(s\) across \d+ call\(s\) \(2\.0 per document, imageSet per-tile\)/);
+    expect(printed).toMatch(/image tokens \(estimated, auto priced at the high rate\): \d+/);
+  });
+
+  it("refuses a full-document run against a per-tile render, naming the fix", async () => {
+    const experiment = path.join(dataRoot, "full.json");
+    fs.writeFileSync(experiment, JSON.stringify({
+      schemaVersion: 1,
+      name: "wrong-set",
+      runs: [{
+        id: "full", message: "image-only", imageMode: "puppeteer-per-tile",
+        prompt: "categorize-design-default"
+      }]
+    }, null, 2));
+    await expect(main(["plan", "--corpus", "tile-corpus", "--experiment", experiment], deps))
+      .rejects.toThrow(/records 0 full-document image\(s\)[\s\S]*set imageSet on the run/);
   });
 });

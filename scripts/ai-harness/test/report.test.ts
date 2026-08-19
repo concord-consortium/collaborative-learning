@@ -22,6 +22,9 @@ const base = {
 };
 const origin = { date: "2026-08-11T00:00:00.000Z", modelReturned: "gpt-4o-mini", systemFingerprint: null };
 
+/** `base` without the fields only a row that sent a request carries. */
+const { representation: _representation, ...skippedBase } = base;
+
 const rows: ResultRow[] = [
   { ...base, docId: "text", modality: "text-only", requestKey: "k1", status: "success",
     response: { parsed: { category: "form" }, raw: {} },
@@ -37,8 +40,11 @@ const rows: ResultRow[] = [
     cost: { modeledUsd: 0.0005, incurredThisRunUsd: 0.0005 }, responseOriginMeta: origin },
   { ...base, docId: "image", modality: "visual-only", requestKey: "k4", status: "error",
     error: { type: "APIError", message: "boom", attempts: 3 } },
-  { ...base, docId: "empty", modality: "empty", requestKey: null, status: "skipped",
-    skipReasons: ["no student content"] }
+  // A skipped row carries no representation — nothing was represented — and records the content it
+  // was decided from, so a rerun can tell whether the decision still applies.
+  { ...skippedBase, docId: "empty", modality: "empty", requestKey: null,
+    status: "skipped", skipReasons: ["text-only run: no tile carries student-authored text"],
+    decidedFromContentSha256: "0".repeat(64) }
 ];
 
 describe("summarizeResults", () => {

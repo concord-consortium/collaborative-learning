@@ -4,7 +4,37 @@ import { defaultAiPrompt } from "../../../shared/ai-analysis-messages.js";
 import { harnessRoot } from "../src/corpus.js";
 import { sha256Canonical, validatePromptFile } from "../src/schemas.js";
 
-const promptFile = path.join(harnessRoot, "prompts", "categorize-design-default.json");
+const promptsDir = path.join(harnessRoot, "prompts");
+const promptFile = path.join(promptsDir, "categorize-design-default.json");
+
+/**
+ * Every committed prompt, not just the one below.
+ *
+ * `validatePromptFile` checks each file's declared `aiPromptSha256` against its own `aiPrompt`, and
+ * `buildTasks` loads prompts through it — so a file that fails this aborts `plan` and `run` before a
+ * single task is built. Nothing exercised any prompt but `categorize-design-default`, and a reworded
+ * `categorize-design-mixed` shipped with a stale hash and a green suite: the only experiment that
+ * covers mixed, detail, imageSet and extras could not run at all.
+ *
+ * Filtered and sorted for the same reasons as the experiment-file block in experiments.test.ts:
+ * readdir order is the filesystem's, and a stray non-JSON file should be skipped rather than throw.
+ */
+describe("every committed prompt file", () => {
+  const promptFiles = fs.readdirSync(promptsDir).filter((name) => name.endsWith(".json")).sort();
+
+  // A glob that matches nothing passes every case it is given, so the count is asserted first.
+  it("finds the prompts to check", () => {
+    expect(promptFiles.length).toBeGreaterThan(1);
+  });
+
+  it.each(promptFiles)("%s validates, hash included", (name) => {
+    const file = path.join(promptsDir, name);
+    const prompt = validatePromptFile(JSON.parse(fs.readFileSync(file, "utf8")), file);
+    // The name is what an experiment's `prompt` field names, and the filename is how it is found —
+    // so a copy-paste that leaves them disagreeing makes a prompt unreachable under its own name.
+    expect(prompt.name).toBe(path.basename(name, ".json"));
+  });
+});
 
 /**
  * The committed prompt is a copy of production's built-in default, and this
