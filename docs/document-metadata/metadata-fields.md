@@ -188,8 +188,11 @@ questions and are written by different code.
 - **Reactive:** No
 
 Claims a canonical label for a group document so concurrent creators converge on one document. The rules
-forbid setting it on create and permit a single one-time set on update. Not present in
-`IDocumentMetadata` or `DocumentMetadataModel` — it has no type coverage at all.
+forbid setting it on create and permit a single one-time set on update, and only when the pointer for
+this document's own slot already names it. That slot is a container plus an owner plus a label, and the
+rules locate it by building the path from the document's own fields — including its `uid` as the owner —
+so a document cannot claim a slot belonging to a different owner. Not present in `IDocumentMetadata` or
+`DocumentMetadataModel` — it has no type coverage at all.
 
 ### `offeringId`
 
@@ -197,13 +200,14 @@ forbid setting it on create and permit a single one-time set on update. Not pres
 - **Location:** Firestore `documents/{key}.offeringId`; RTDB
   `/{classPath}/users/{uid}/documentMetadata/{key}/offeringId`
 - **Applies to:** the problem family — problem, planning, publication, supportPublication, group
-- **Runtime:** not surfaced on any document model
+- **Runtime:** `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId`
 - **Updated by:** nothing — creation only
-- **Reactive:** No
+- **Reactive:** No — immutable
 
-Listed here rather than under dual-stored because it is not in `IDocumentMetadata` and has no runtime
-representation; it exists to scope documents to an offering. It reaches Firestore only because
-`createFirestoreMetadataDocument` spreads the RTDB metadata object.
+Names the offering a document is kept in, and is the only positive marker of that container: an
+exemplar carries the same unit/investigation/problem as a problem document and is distinguished from
+it by nothing else. `canUserEditDocument` therefore depends on it — without it a group document reads
+as class-wide, and the class check would let any classmate edit another group's work.
 
 ---
 
@@ -316,18 +320,21 @@ declare it. Anything reading properties from the Firestore metadata should treat
   `undefined`)
 - **Applies to:** group documents — the group that **owns** the document
 - **Runtime:** `DocumentModel.groupId`, `DocumentMetadataModel.groupId`
-- **Updated by:** nothing — creation only, stamped from the kind's registered `scopeType` by
-  `getDocumentScopeFields` ([document-kinds.ts](../../src/models/document/document-kinds.ts))
+- **Updated by:** nothing — creation only, stamped from the kind's `ownerType` by
+  `getDocumentOwnerFields`
 - **Reactive:** No — immutable
 
 The group that **owns** the document, and nothing else — not the group its owning user happens to be in,
 which is `groupIdOfUserOwner` below. It is a denormalization of the owner: the owner `uid` already encodes it
 (`group_<offeringId>_<groupId>`), so this field spares consumers from taking that apart when they need the
-group's number.
+group's number. It is not what makes a document group-owned — `hasGroupOwner`
+(`src/models/document/document-axes.ts`) reads the uid's prefix, so the uid stays the single authority on
+the owner and this field cannot contradict it.
 
 **A group id is unique only within an offering.** Group 3 of one assignment and group 3 of the next are
-different sets of students, so a bare group id is not a safe key to look a group up by. The owner `uid`
-carries the offering, which makes it the exact one.
+different sets of students, so a bare group id must not be used to look a group up — `getGroupByOwnerId`
+matches on the whole owner id instead, and answers with nothing for a group outside the offering it
+holds.
 
 ### `groupIdOfUserOwner` (runtime only)
 

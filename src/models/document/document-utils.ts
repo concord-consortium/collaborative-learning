@@ -1,6 +1,6 @@
 import { upperFirst } from "lodash";
 import { getParent } from "mobx-state-tree";
-import { IDocumentMetadata, IDocumentMetadataBase } from "../../../shared/shared";
+import { IDocumentMetadataBase } from "../../../shared/shared";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { translate } from "../../utilities/translation/translate";
 import { SectionModelType } from "../curriculum/section";
@@ -10,7 +10,8 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { getDocumentTitle } from "./document-kinds";
+import { getCurriculumLabel, isInClassUnitContainer } from "./document-axes";
+import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { getDocumentIdentityParams } from "./log-document-event";
 import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
@@ -25,20 +26,33 @@ function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | ID
 }
 
 function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
-  const {type, unit, investigation, problem} = document;
   const problemModel = getProblemFromDoc(currentUnit, document);
   if (problemModel) {
-    if (isPlanningType(type)) {
+    if (isPlanningType(document.type)) {
       return `${problemModel.title}: Planning`;
     }
     return problemModel.title;
   }
 
   const upperType = upperFirst(document.type);
-  if (!unit) {
+  const curriculumLabel = getCurriculumLabel(document);
+  if (!curriculumLabel) {
     return `${upperType} doc without ${translate("contentLevel.unit")}`;
   }
-  return `${upperType} doc from ${unit}-${investigation}.${problem}`;
+  return `${upperType} doc from ${curriculumLabel}`;
+}
+
+/**
+ * A stand-in title for a document that stores none and whose kind resolves no title (see
+ * getDocumentTitle). The kind names what the document is; the curriculum position says where it came
+ * from, read from the stored fields because an unresolvable kind gives no indication of where the
+ * document sits.
+ */
+function getUnresolvedDocumentTitle(document: DocumentModelType | IDocumentMetadataModel) {
+  const kindLabel = getDocumentKindLabel(document.kind);
+  if (!kindLabel) return undefined;
+  const curriculumLabel = getCurriculumLabel(document);
+  return curriculumLabel ? `${kindLabel} (${curriculumLabel})` : kindLabel;
 }
 
 export function getDocumentTitleWithTimestamp(
@@ -71,7 +85,9 @@ export function getDocumentDisplayTitle(
   } else if (isProblemType(type) || isPlanningType(type)) {
     return getDocumentTitleFromProblem(unit, document);
   } else {
-    return getDocumentTitleWithTimestamp(document, appConfig);
+    const storedTitle = getDocumentTitleWithTimestamp(document, appConfig);
+    if (storedTitle) return storedTitle;
+    return getUnresolvedDocumentTitle(document) ?? storedTitle;
   }
 }
 
@@ -141,27 +157,69 @@ export function isDocumentAccessibleToUser ({
 
 interface ICanUserEditDocumentParams {
   document?: DocumentModelType;
-  // `properties` is omitted so an IDocumentMetadataModel can be passed: the model stores properties in an
-  // observable map rather than a Record. See the compile-time checks in document-metadata-model.ts.
-  documentMetadata?: Omit<IDocumentMetadata, "properties">;
+  documentMetadata?: IDocumentMetadataBase;
   user: UserModelType;
 }
+
 /**
- * Whether the user can edit the document: true when it's their own document, or when it's a
- * collaborative document owned by their group (created by any member of the group).
+ * Whether this user may edit this document — the gate on every Edit button.
+ *
+ * A published document is a read-only snapshot, not editable by anyone, including its own
+ * publisher — publishing copies the document under the publisher's uid, so the ownership check
+ * alone can't tell a live document from its published copy. Beyond that exclusion, a user may
+ * always edit their own document; otherwise only a `concurrent` (multi-writer) document is
+ * editable by someone other than its owner, and then only by someone the document reaches: a class-wide
+ * document by any member of its class (teachers included — they belong to the class too), a group
+ * document by any member of its group.
+ *
+ * A researcher gets no edit affordance on anyone else's document, including the concurrent documents
+ * of a class or group they observe. The check sits *after* the ownership test on purpose: a researcher
+ * still has documents created for them under their own uid, and locking them out of those would serve
+ * nothing. Their uid is their own — the portal signs a researcher's JWT for the authenticated user and
+ * carries the student being viewed in a separate `target_user_id` claim — so the ownership test can
+ * never match a student's document for them.
+ *
+ * The Firestore metadata is preferred over the loaded document, because it is reactive and arrives
+ * first: a groupmate's document is listed before its content finishes loading, and the Edit button
+ * appears without a reload. The document is the fallback for the workspace, which opens documents
+ * without looking their metadata up. Every field read here is stamped once at creation, so the two
+ * sources never disagree — which is why one is chosen outright rather than field by field.
+ *
+ * This is an example of the `permissions` axis. See the
+ * `permissions` section of docs/document-axes/axes.md and "Not covered yet" in
+ * docs/document-axes/reading-axes-in-code.md.
  */
 export function canUserEditDocument({
   document, documentMetadata, user
 }: ICanUserEditDocumentParams): boolean {
-  // Prefer the reactive Firestore metadata field-by-field, falling back to the lazily-fetched full document,
-  // so the answer updates as soon as a groupmate's document syncs rather than on the next reload.
-  const uid = documentMetadata?.uid ?? document?.uid;
-  const type = documentMetadata?.type ?? document?.type;
-  const groupId = documentMetadata?.groupId ?? document?.groupId;
+  const metadata = documentMetadata ?? document?.metadata;
+  if (!metadata) return false;
 
+  const { uid, type, concurrent, context_id: contextId } = metadata;
+
+  if (type && isPublishedType(type)) return false;
   if (!!uid && uid === user.id) return true;
+  if (user.isResearcher) return false;
+  if (!concurrent) return false;
+  // Beyond this point the user must be inside the document's container, asked at the narrowest level the
+  // document is kept at. A group document is kept in an offering, so its group is asked first.
+  if (isUserInDocumentsGroup(uid, user)) return true;
+  if (isInClassUnitContainer(metadata)) {
+    return !!contextId && contextId === user.classHash;
+  }
+  return false;
+}
 
-  // A collaborative (multi-writer) document is editable by the members of the group that owns it.
-  const isCollaborativeDoc = type === GroupDocument;
-  return isCollaborativeDoc && !!user.currentGroupId && groupId === user.currentGroupId;
+/**
+ * Whether the user belongs to the group that owns this document.
+ *
+ * Compares owners rather than group ids. A group id is unique only within an offering — groups live
+ * at `offerings/<offeringId>/groups` — so the same group number in another offering is a different
+ * set of students. The owner (`group_<offeringId>_<groupId>`) carries the offering, which makes the
+ * comparison exact; Sort Work's "All" filter lists documents from every offering the class has
+ * worked through, so documents from another offering do reach this check.
+ */
+function isUserInDocumentsGroup(uid: string | null | undefined, user: UserModelType): boolean {
+  if (!uid || !user.currentGroupId || !user.offeringId) return false;
+  return uid === user.userIdForGroupDocuments;
 }

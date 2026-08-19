@@ -5,20 +5,31 @@ import React from "react";
 import { SimpleDocumentItem } from "./simple-document-item";
 import { DocumentMetadataModel, IDocumentMetadataModel } from "../../models/document/document-metadata-model";
 import { ProblemDocument } from "../../models/document/document-types";
+import { ClassModel } from "../../models/stores/class";
 import { specStores } from "../../models/stores/spec-stores";
 import { UserModel } from "../../models/stores/user";
 
 interface IRenderOptions {
   isPrivate?: boolean;
   selected?: boolean;
+  /** Overrides the document's owner, for owners who are not members of the class. */
+  uid?: string;
   onSelectDocument?: (document: IDocumentMetadataModel) => void;
 }
 
 function renderItem(options: IRenderOptions = {}) {
   const { isPrivate = false, selected = false, onSelectDocument = jest.fn() } = options;
-  const ownerId = isPrivate ? "other-user" : "test-student";
+  const ownerId = options.uid ?? (isPrivate ? "other-user" : "test-student");
   const user = UserModel.create({ id: "test-student", type: "student", name: "Test Student" });
-  const stores = specStores({ user });
+  const clazz = ClassModel.create({
+    name: "Test Class",
+    classHash: "test-class-hash",
+    users: {
+      "test-student": { type: "student", id: "test-student", firstName: "Test", lastName: "Student",
+                        fullName: "Test Student", initials: "TS" }
+    }
+  });
+  const stores = specStores({ user, class: clazz });
   const document = DocumentMetadataModel.create({
     type: ProblemDocument,
     title: "Test Document",
@@ -48,6 +59,18 @@ describe("SimpleDocumentItem", () => {
   it("uses the same string for aria-label as for title (so screen readers match the tooltip)", () => {
     const { item } = renderItem();
     expect(item.getAttribute("aria-label")).toBe(item.getAttribute("title"));
+  });
+
+  it("names a document by its owner and title, and one whose owner is not in the class by title alone", () => {
+    // Group and class-wide documents are owned by a synthetic uid (`group_<offeringId>_<groupId>`,
+    // `class_<classHash>`) that belongs to no class member, and their titles already say whose they are.
+    const memberLabel = renderItem().item.getAttribute("aria-label");
+    const syntheticOwnerItem = renderItem({ uid: "class_test-class-hash" }).item;
+    const syntheticLabel = syntheticOwnerItem.getAttribute("aria-label");
+
+    expect(memberLabel).toBe(`Test Student: ${syntheticLabel}`);
+    expect(syntheticLabel).not.toContain("undefined");
+    expect(syntheticOwnerItem.getAttribute("title")).toBe(syntheticLabel);
   });
 
   it("identifies which document it stands for, the same way a thumbnail does", () => {

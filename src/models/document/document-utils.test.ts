@@ -1,10 +1,11 @@
-import { IDocumentMetadata } from "../../../shared/shared";
 import { UnitModel } from "../curriculum/unit";
 import { AppConfigModel } from "../stores/app-config-model";
 import { UserModel } from "../stores/user";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
-import { DocumentModel } from "./document";
-import { GroupDocument, PersonalDocument, ProblemDocument, SupportPublication } from "./document-types";
+import { createDocumentModel } from "./document";
+import { getGroupOwnerId } from "./document-axes";
+import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
+  SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, getDocumentLogParams,
   isDocumentAccessibleToUser } from "./document-utils";
 import { registerDocumentKind } from "./document-kinds";
@@ -195,7 +196,7 @@ describe("document utils", () => {
 
       test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
         registerDocumentKind("testClassWideTitle", {
-          metadataFields: { concurrent: true }, ownerType: "class", scopeType: "classUnit",
+          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
           title: "Driving Question Board"
         });
         const metadata = DocumentMetadataModel.create({
@@ -205,68 +206,256 @@ describe("document utils", () => {
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
     });
+
+    describe("class-wide documents from another unit", () => {
+      // Under the Sort Work "All" filter a class sees every document it owns, including class-wide
+      // documents from units it has already worked through. Those units' configs are not loaded, so
+      // their kinds' titles cannot be looked up and the documents store no title of their own.
+      const unit = UnitModel.create({ code: "test", title: "test" });
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+
+      test("names the document by its kind and the unit it came from", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
+          unit: "other", investigation: null, problem: null
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board (other)");
+      });
+
+      test("does not borrow the current unit's title for another unit's document of the same kind", () => {
+        registerDocumentKind("testSharedKind", {
+          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          title: "Our Big Questions", unit: "test"
+        });
+        const ownUnitDoc = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
+        });
+        const otherUnitDoc = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
+        });
+        expect(getDocumentDisplayTitle(unit, ownUnitDoc, appConfig)).toBe("Our Big Questions");
+        expect(getDocumentDisplayTitle(unit, otherUnitDoc, appConfig)).toBe("Test Shared Kind (other)");
+      });
+
+      test("falls back to the kind alone when the document has no unit", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
+      });
+    });
   });
 
   describe("canUserEditDocument", () => {
-    const me = "student-1";
-    const myGroup = "3";
+    const student = UserModel.create({ id: "me", type: "student", name: "Me", classHash: "class-1" });
+    const kOffering = "off-1";
+    // A group document's owner, the same synthetic id the app stamps at creation.
+    const groupOwner = (groupId: string, offeringId = kOffering) => getGroupOwnerId(offeringId, groupId);
+    const groupedStudent = UserModel.create({
+      id: "me", type: "student", name: "Me", classHash: "class-1",
+      currentGroupId: "3", offeringId: kOffering
+    });
+    const teacher = UserModel.create({ id: "t1", type: "teacher", name: "Teacher", classHash: "class-1" });
+    const researcher = UserModel.create({ id: "r1", type: "researcher", name: "Researcher", classHash: "class-1" });
 
-    const user = (currentGroupId?: string) => UserModel.create({ id: me, currentGroupId });
-    const metadata = (props: Partial<IDocumentMetadata>): IDocumentMetadata =>
-      ({ key: "doc-1", uid: me, type: ProblemDocument, ...props });
+    const metadata = (props: Record<string, any>) =>
+      DocumentMetadataModel.create({ uid: "someone-else", type: GroupDocument, key: "k", ...props });
 
-    it("allows editing the user's own document", () => {
+    /**
+     * A group document as the app actually stamps it: kept in an offering, so it carries an
+     * `offeringId` and the owning class. Both matter — without the `offeringId` the document reads as
+     * class-wide, and the class check would then let any classmate edit another group's work.
+     */
+    const groupDocMetadata = (groupId: string, offeringId = kOffering) => metadata({
+      uid: groupOwner(groupId, offeringId), concurrent: true, groupId,
+      unit: "sas", investigation: "1", problem: "2", offeringId, context_id: "class-1"
+    });
+
+    it("allows a user to edit their own document", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({ uid: me }), user: user(myGroup)
+        documentMetadata: metadata({ uid: "me", type: ProblemDocument }), user: student
       })).toBe(true);
     });
 
-    it("allows editing the user's own group document, even when created by another group member", () => {
+    it("refuses another student's single-writer document", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({ uid: "student-2", type: GroupDocument, groupId: myGroup }), user: user(myGroup)
+        documentMetadata: metadata({ type: ProblemDocument }), user: student
+      })).toBe(false);
+    });
+
+    it("allows a member of the owning group to edit a group document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: groupDocMetadata("3"), user: groupedStudent
       })).toBe(true);
     });
 
-    it("does not allow editing another group's document", () => {
+    it("refuses another group's document, even to a classmate of its owners", () => {
+      // The document is in this student's own class, so only its offering keeps the class-wide branch
+      // from reaching it.
       expect(canUserEditDocument({
-        documentMetadata: metadata({ uid: "student-9", type: GroupDocument, groupId: "7" }), user: user(myGroup)
+        documentMetadata: groupDocMetadata("7"), user: groupedStudent
       })).toBe(false);
     });
 
-    it("does not allow editing another student's (non-group) document", () => {
+    it("refuses the same group number in a different offering — a different set of students", () => {
+      // Sort Work's "All" filter lists documents from every offering the class has worked through,
+      // so this document does reach the check. Group ids are unique only within an offering.
       expect(canUserEditDocument({
-        documentMetadata: metadata({ uid: "student-2" }), user: user(myGroup)
+        documentMetadata: groupDocMetadata("3", "other-offering"), user: groupedStudent
       })).toBe(false);
     });
 
-    it("does not allow editing a group document when the user isn't in a group", () => {
+    it("refuses a group document when the user is not in a group", () => {
       expect(canUserEditDocument({
-        documentMetadata: metadata({ uid: "student-2", type: GroupDocument, groupId: myGroup }), user: user()
+        documentMetadata: groupDocMetadata("3"), user: student
       })).toBe(false);
     });
 
-    it("does not treat a missing document uid as a match", () => {
-      expect(canUserEditDocument({ user: user(myGroup) })).toBe(false);
+    it("allows any member of the class to edit a class-wide document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-1"
+        }),
+        user: student
+      })).toBe(true);
     });
 
-    it("recognizes an own-group doc from the document when no metadata is available", () => {
-      const document = DocumentModel.create({
-        key: "doc-1", uid: "student-2", type: GroupDocument, groupId: myGroup
+    it("refuses a class-wide document belonging to another class", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-2"
+        }),
+        user: student
+      })).toBe(false);
+    });
+
+    // An exemplar belongs to no offering, so it sits in the same container as a class-wide document
+    // and `isInClassUnitContainer` is true for it. What keeps it read-only is that it is single-writer.
+    it("refuses a curriculum exemplar", () => {
+      expect(canUserEditDocument({
+        document: createDocumentModel({
+          uid: "ivan_idea_1", type: ExemplarDocument, key: "ex-1",
+          unit: "sas", investigation: "1", problem: "2"
+        }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("refuses the metadata record written when a teacher comments on an exemplar", () => {
+      // Unlike the curriculum document it mirrors, this record is stamped with the commenting class's
+      // `context_id` (create-firestore-metadata-document.ts), so the class check inside the container
+      // branch would pass. Being single-writer is the only thing standing between it and an Edit button.
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          uid: "ivan_idea_1", type: ExemplarDocument,
+          unit: "sas", investigation: "1", problem: "2", context_id: "class-1"
+        }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("refuses a document that is not concurrent even inside the user's own scope", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ unit: "sas", investigation: null, context_id: "class-1" }),
+        user: student
+      })).toBe(false);
+    });
+
+    it("returns false when neither a document nor metadata is supplied", () => {
+      expect(canUserEditDocument({ user: student })).toBe(false);
+    });
+
+    it("refuses a user's own published document — publishing copies it under the publisher's uid," +
+       " it is not a live editable document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "me", type: ProblemPublication }), user: student
+      })).toBe(false);
+    });
+
+    it("allows a researcher to edit their own document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "r1", type: ProblemDocument }), user: researcher
+      })).toBe(true);
+    });
+
+    it("refuses a researcher editing a class-wide document even though their classHash matches", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-1"
+        }),
+        user: researcher
+      })).toBe(false);
+    });
+
+    it("allows a teacher to edit a class-wide document belonging to their class", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: "class-1"
+        }),
+        user: teacher
+      })).toBe(true);
+    });
+
+    it("refuses a class-wide document when context_id and the user's classHash are both empty", () => {
+      // Guards the `!!contextId &&` check: without it, an empty-string context_id would equal a
+      // user's default empty-string classHash and incorrectly grant access.
+      const noClassUser = UserModel.create({ id: "me", type: "student", name: "Me" });
+      expect(noClassUser.classHash).toBe("");
+      expect(canUserEditDocument({
+        documentMetadata: metadata({
+          concurrent: true, unit: "sas", investigation: null, context_id: ""
+        }),
+        user: noClassUser
+      })).toBe(false);
+    });
+
+    it("prefers the reactive metadata's owner over a still-loading document", () => {
+      // A groupmate's document syncs into the metadata before its content finishes loading; reading
+      // the metadata per field is what makes the Edit button appear without a reload.
+      const stillLoading = createDocumentModel({
+        uid: "", type: GroupDocument, key: "k", concurrent: true
       });
-      expect(canUserEditDocument({ document, user: user(myGroup) })).toBe(true);
+      expect(canUserEditDocument({
+        document: stillLoading,
+        documentMetadata: metadata({
+          uid: groupOwner("3"), concurrent: true, groupId: "3", unit: "sas", investigation: "1"
+        }),
+        user: groupedStudent
+      })).toBe(true);
     });
 
-    // The reactivity fix: the metadata is kept in sync by Firestore listeners while the lazily-fetched
-    // full document may still be missing the group id, so the metadata wins field by field.
-    it("prefers the metadata groupId over the document's", () => {
-      const document = DocumentModel.create({
-        key: "doc-1", uid: "student-2", type: GroupDocument
+    it("does not treat a document model's groupId as evidence of group ownership", () => {
+      // A `groupId` on the model does not make a document group-owned — only the owner uid does, via
+      // hasGroupOwner reading its prefix. So a group number matching the user's own must not grant an
+      // edit by itself.
+      const authoredByAGroupmate = createDocumentModel({
+        uid: "someone-else", type: ProblemDocument, key: "k", concurrent: true,
+        groupId: "3", unit: "sas", investigation: "1"
       });
-      expect(document.groupId).toBeUndefined();
-      expect(canUserEditDocument({
-        document, documentMetadata: metadata({ uid: "student-2", type: GroupDocument, groupId: myGroup }),
-        user: user(myGroup)
-      })).toBe(true);
+      expect(authoredByAGroupmate.groupId).toBe("3");
+      expect(canUserEditDocument({ document: authoredByAGroupmate, user: groupedStudent })).toBe(false);
+    });
+
+    it("allows a user to edit their own document via the document-only path (no metadata)", () => {
+      const ownDocument = createDocumentModel({ uid: "me", type: ProblemDocument, key: "k" });
+      expect(canUserEditDocument({ document: ownDocument, user: student })).toBe(true);
+    });
+
+    it("allows any member of the class to edit a class-wide document via the document-only path" +
+       " (no metadata)", () => {
+      const classWideDocument = createDocumentModel({
+        uid: "someone-else", type: GroupDocument, key: "k", concurrent: true,
+        unit: "sas", contextId: "class-1"
+      });
+      expect(canUserEditDocument({ document: classWideDocument, user: student })).toBe(true);
+    });
+
+    it("allows a group member to edit their group's document via the document-only path (no metadata)", () => {
+      const groupDocument = createDocumentModel({
+        uid: groupOwner("3"), type: GroupDocument, key: "k", concurrent: true,
+        unit: "sas", investigation: "1", offeringId: kOffering
+      });
+      expect(canUserEditDocument({ document: groupDocument, user: groupedStudent })).toBe(true);
     });
   });
 });
@@ -278,7 +467,7 @@ describe("getDocumentLogParams", () => {
 
   // The names below are the ones every other document event uses, so events can be joined on them.
   it("identifies a saved document by key/uid/type/title", () => {
-    const document = DocumentModel.create({
+    const document = createDocumentModel({
       key: "doc-1", uid: "student-2", type: ProblemDocument, title: "My Work", content: {}
     });
     expect(getDocumentLogParams(document.content)).toEqual({
@@ -287,7 +476,7 @@ describe("getDocumentLogParams", () => {
   });
 
   it("carries identity only, leaving out the document's content state", () => {
-    const document = DocumentModel.create({ key: "doc-1", uid: "u1", type: ProblemDocument, content: {} });
+    const document = createDocumentModel({ key: "doc-1", uid: "u1", type: ProblemDocument, content: {} });
     const params = getDocumentLogParams(document.content);
     expect(params.documentProperties).toBeUndefined();
     expect(params.documentVisibility).toBeUndefined();
