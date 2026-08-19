@@ -148,12 +148,18 @@ interface ICanUserEditDocumentParams {
  *
  * A published document is a read-only snapshot, not editable by anyone, including its own
  * publisher — publishing copies the document under the publisher's uid, so the ownership check
- * alone can't tell a live document from its published copy. A researcher never gets an edit
- * affordance, even inside a class or group they observe. Beyond those exclusions, a user may
+ * alone can't tell a live document from its published copy. Beyond that exclusion, a user may
  * always edit their own document; otherwise only a `concurrent` (multi-writer) document is
  * editable by someone other than its owner, and then only by someone the document reaches: a class-wide
  * document by any member of its class (teachers included — they belong to the class too), a group
  * document by any member of its group.
+ *
+ * A researcher gets no edit affordance on anyone else's document, including the concurrent documents
+ * of a class or group they observe. The check sits *after* the ownership test on purpose: a researcher
+ * still has documents created for them under their own uid, and locking them out of those would serve
+ * nothing. Their uid is their own — the portal signs a researcher's JWT for the authenticated user and
+ * carries the student being viewed in a separate `target_user_id` claim — so the ownership test can
+ * never match a student's document for them.
  *
  * The Firestore metadata is preferred over the loaded document, because it is reactive and arrives
  * first: a groupmate's document is listed before its content finishes loading, and the Edit button

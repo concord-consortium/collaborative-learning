@@ -371,6 +371,12 @@ describe("document utils", () => {
       })).toBe(false);
     });
 
+    it("allows a researcher to edit their own document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "r1", type: ProblemDocument }), user: researcher
+      })).toBe(true);
+    });
+
     it("refuses a researcher editing a class-wide document even though their classHash matches", () => {
       expect(canUserEditDocument({
         documentMetadata: metadata({
