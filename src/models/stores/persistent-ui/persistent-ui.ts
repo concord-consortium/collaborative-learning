@@ -26,6 +26,33 @@ import { UITabModel, UITabModel_V1 } from "./ui-tab-model";
 export const kPersistentUiStateVersion2 = "2.0.0";
 export const kPersistentUiStateVersion1 = "1.0.0";
 
+type PanelLayout = "split" | "workspace-only" | "resources-only" | undefined;
+
+// The divider position a given defaultPanelLayout implies. Used to reset the divider when forcing
+// the author's start view, so fixedStartView and defaultPanelLayout stay consistent.
+export function dividerForLayout(layout: PanelLayout) {
+  switch (layout) {
+    case "workspace-only": return kDividerMin;
+    case "resources-only": return kDividerMax;
+    default: return kDividerHalf; // "split" or undefined
+  }
+}
+
+// The whole "force the author start view vs. restore last state" decision, kept pure/testable.
+// Returns the tab + divider to force, or undefined to fall through to normal restore.
+export function resolveStartView(
+  opts: { fixedStartView?: boolean; fixedStartTab?: string; defaultPanelLayout?: PanelLayout },
+  displayedTabs: string[]
+): { tab: string; dividerPosition: number } | undefined {
+  const { fixedStartView, fixedStartTab, defaultPanelLayout } = opts;
+  if (!fixedStartView || !fixedStartTab) return undefined;
+  if (!displayedTabs.includes(fixedStartTab)) {
+    console.warn(`fixedStartView: "${fixedStartTab}" is not a displayed tab; ignoring`);
+    return undefined;
+  }
+  return { tab: fixedStartTab, dividerPosition: dividerForLayout(defaultPanelLayout) };
+}
+
 export const PersistentUIModelV2 = types
   .model("PersistentUI", {
     dividerPosition: kDividerHalf,

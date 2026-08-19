@@ -1,7 +1,7 @@
 import { applySnapshot, getSnapshot } from "@concord-consortium/mobx-state-tree";
 import {
   PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor,
-  PersistentUIModelV2Snapshot, PersistentUIModelType
+  PersistentUIModelV2Snapshot, PersistentUIModelType, dividerForLayout, resolveStartView
 } from "./persistent-ui";
 import { UITabModel } from "./ui-tab-model";
 import { UIDocumentGroup } from "./ui-document-group";
@@ -774,5 +774,42 @@ describe("PersistentUI", () => {
       model.applyDefaultPanelLayout("workspace-only");
       expect(model.dividerPosition).toBe(kDividerHalf);
     });
+  });
+});
+
+describe("dividerForLayout", () => {
+  it("maps each layout to a divider position", () => {
+    expect(dividerForLayout("workspace-only")).toBe(kDividerMin);
+    expect(dividerForLayout("resources-only")).toBe(kDividerMax);
+    expect(dividerForLayout("split")).toBe(kDividerHalf);
+    expect(dividerForLayout(undefined)).toBe(kDividerHalf);
+  });
+});
+
+describe("resolveStartView", () => {
+  const displayed = ["problems", "class-work", "sort-work"];
+
+  it("returns undefined when the switch is off", () => {
+    expect(resolveStartView({ fixedStartView: false, fixedStartTab: "class-work" }, displayed))
+      .toBeUndefined();
+  });
+
+  it("returns undefined when no tab is set", () => {
+    expect(resolveStartView({ fixedStartView: true }, displayed)).toBeUndefined();
+  });
+
+  it("returns undefined and warns when the tab is not displayed", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    expect(resolveStartView({ fixedStartView: true, fixedStartTab: "teacher-guide" }, displayed))
+      .toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("returns the tab and layout-derived divider when displayed", () => {
+    expect(resolveStartView(
+      { fixedStartView: true, fixedStartTab: "class-work", defaultPanelLayout: "resources-only" },
+      displayed
+    )).toEqual({ tab: "class-work", dividerPosition: kDividerMax });
   });
 });
