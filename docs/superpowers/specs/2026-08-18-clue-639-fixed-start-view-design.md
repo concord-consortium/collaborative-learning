@@ -78,26 +78,29 @@ Expose through the two getter layers, following `defaultPanelLayout`:
 
 Add next to `applyDefaultPanelLayout` in `persistent-ui.ts`:
 
+> **Revision (per code review):** an earlier version of this action *mutated* the persisted
+> `activeNavTab`/`dividerPosition`/document group. Because the Firebase snapshot-writer is already
+> active at load time, that overwrote the user's saved state on every load (a lock, not a starting
+> point), and `closeDocumentGroupPrimaryDocument` also mishandled a two-key group (promoting the
+> secondary document) and no-oped for an unvisited tab. The action was reworked into a **session-only,
+> non-destructive override** (below), which is what shipped.
+
 ```ts
-// Force the author-configured start view, overriding any restored state. Called on every
-// load when the unit's fixedStartView switch is on. Unlike applyDefaultPanelLayout this is
-// NOT guarded by hasSavedPersistentUI — the whole point is to override the saved state.
+// Force the author's start view for this session WITHOUT mutating the persisted record: a volatile
+// override the display consults, cleared as soon as the user navigates. The saved state survives.
 applyFixedStartView(tab: string, dividerPosition: number) {
-  self.setActiveNavTab(tab);
-  // Clear the active tab's current document group so no document is open (currentDocumentKeys
-  // becomes []), which renders the thumbnail browser. Comparison mode is already cleared during
-  // initializePersistentUISync, so there is no lingering secondary document to promote.
-  self.closeDocumentGroupPrimaryDocument(tab);
-  self.setDividerPosition(dividerPosition);
+  self.startViewOverride = { tab, dividerPosition };
 }
 ```
 
 Notes:
-- `closeDocumentGroupPrimaryDocument(tab)` (line 222) defaults `docGroupId` to the tab's
-  `currentDocumentGroupId`, creates the group if needed, and calls `closePrimaryDocument()`
-  → `currentDocumentKeys = []` → thumbnails.
-- The action sets `activeNavTab` directly; `displayedActiveNavTab` will surface it as long as
-  the tab is displayed (guarded below).
+- `startViewOverride` is a `.volatile` field, so it is never written back to Firebase.
+- The display consults it: `stores.displayedActiveNavTab` prefers `startViewOverride.tab`;
+  `displayedDividerPosition` prefers `startViewOverride.dividerPosition`; and
+  `section-document-or-browser`'s `renderDocumentView` shows the thumbnail browser (no document) for
+  the override tab.
+- It is cleared by `setActiveNavTab`, `setDividerPosition`, and `openDocumentGroupPrimaryDocument`, so
+  the first genuine navigation restores the user's own (still-persisted) state for the rest of the session.
 
 ### 3. Startup hook (`src/lib/db.ts`)
 

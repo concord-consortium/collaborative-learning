@@ -777,28 +777,61 @@ describe("PersistentUI", () => {
   });
 
   describe("applyFixedStartView", () => {
-    it("forces the tab, closes the open document, and resets the divider — overriding saved state", () => {
+    // A returning user whose state was restored from Firebase, with a two-key group (primary + secondary)
+    // open in another tab — exactly the shape the old close-primary approach mishandled.
+    function makeSavedUI() {
       const ui = PersistentUIModel.create({
         version: "2.0.0",
         tabs: {
           "class-work": {
             id: "class-work",
             currentDocumentGroupId: "Workspaces",
-            visitedDocumentGroups: { Workspaces: { id: "Workspaces", currentDocumentKeys: ["doc-1"] } }
+            visitedDocumentGroups: { Workspaces: { id: "Workspaces", currentDocumentKeys: ["doc-1", "doc-2"] } }
           }
         },
         activeNavTab: "my-work",
         dividerPosition: kDividerMax,
         problemWorkspace: { type: "problem", mode: "1-up" }
       });
-      // Simulate a returning user whose state was restored from Firebase.
       ui.setHasSavedPersistentUI(true);
+      return ui;
+    }
 
+    it("overrides the displayed tab and divider without mutating the saved record", () => {
+      const ui = makeSavedUI();
       ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
 
-      expect(ui.activeNavTab).toBe(ENavTab.kClassWork);
-      expect(ui.tabs.get("class-work")?.currentDocumentGroup?.userExplicitlyClosedDocument).toBe(true);
-      expect(ui.dividerPosition).toBe(kDividerHalf);
+      // The override drives the display...
+      expect(ui.startViewOverride).toEqual({ tab: ENavTab.kClassWork, dividerPosition: kDividerHalf });
+      expect(ui.displayedDividerPosition).toBe(kDividerHalf);
+      // ...but the persisted state is untouched — the user's real place survives.
+      expect(ui.activeNavTab).toBe("my-work");
+      expect(ui.dividerPosition).toBe(kDividerMax);
+      expect(ui.tabs.get("class-work")?.getDocumentGroup("Workspaces")?.currentDocumentKeys)
+        .toEqual(["doc-1", "doc-2"]);
+    });
+
+    it("clears the override when the user chooses a tab", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.setActiveNavTab(ENavTab.kSortWork);
+      expect(ui.startViewOverride).toBeUndefined();
+      expect(ui.activeNavTab).toBe(ENavTab.kSortWork);
+    });
+
+    it("clears the override when the user moves the divider", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.setDividerPosition(kDividerMin);
+      expect(ui.startViewOverride).toBeUndefined();
+      expect(ui.displayedDividerPosition).toBe(kDividerMin);
+    });
+
+    it("clears the override when the user opens a document", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.openDocumentGroupPrimaryDocument(ENavTab.kClassWork, "Workspaces", "doc-9");
+      expect(ui.startViewOverride).toBeUndefined();
     });
   });
 });

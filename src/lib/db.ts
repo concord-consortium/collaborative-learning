@@ -39,6 +39,7 @@ import {
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { resolveStartView } from "../models/stores/persistent-ui/persistent-ui";
+import { urlParams } from "../utilities/url-params";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { typeConverter } from "../utilities/db-utils";
@@ -191,17 +192,18 @@ export class DB {
               exemplarController.initialize(this.stores);
               this.createDeclaredClassWideDocuments();
 
-              // After unit config is available, apply default panel layout for first-time visitors
+              // Once unit config is available, either apply the author's fixed start view (a session-only
+              // override — see applyFixedStartView) or, for first-time visitors, the default panel layout.
               persistentUIReady.then(() => {
                 const { appConfig } = this.stores;
                 const displayedTabs = this.stores.tabsToDisplay.map(t => t.tab);
                 const startView = resolveStartView({
                   fixedStartView: appConfig.fixedStartView,
                   fixedStartTab: appConfig.fixedStartTab,
-                  defaultPanelLayout: appConfig.defaultPanelLayout
+                  defaultPanelLayout: appConfig.defaultPanelLayout,
+                  hasDocumentTarget: !!urlParams.studentDocument
                 }, displayedTabs);
                 if (startView) {
-                  // Force the author's start view on every load, overriding restored state.
                   persistentUI.applyFixedStartView(startView.tab, startView.dividerPosition);
                 } else {
                   persistentUI.applyDefaultPanelLayout(appConfig.defaultPanelLayout);

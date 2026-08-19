@@ -77,7 +77,10 @@ const NavTabs: React.FC = () => {
   const currentFixedStartTab = useMemo(() => {
     return unitConfig?.config?.fixedStartTab ?? "";
   }, [unitConfig]);
-  const { handleSubmit, register, formState: { errors } } = useForm<INavTabsInputs>();
+  const { handleSubmit, register, watch, formState: { errors } } = useForm<INavTabsInputs>();
+  // Only tabs that are actually shown for this unit and not teacher-only can be forced (a hidden or
+  // teacher-only tab would resolve to nothing for students at runtime), matching resolveStartView's guard.
+  const startTabOptions = useMemo(() => formTabs.filter(t => t.show && !t.teacherOnly), [formTabs]);
 
   const onSubmit: SubmitHandler<INavTabsInputs> = (data) => {
     setUnitConfig(draft => {
@@ -94,14 +97,15 @@ const NavTabs: React.FC = () => {
         } else {
           delete draft.config.contentLayout;
         }
-        // Fixed start view (omit fixedStartView when off; preserve the author's tab choice either way)
+        // Fixed start view: omit the switch when off. The select is disabled (so it submits undefined)
+        // when off, so we leave any saved fixedStartTab in place rather than deleting it — toggling the
+        // switch off preserves the author's tab choice for when they turn it back on.
         if (data.fixedStartView && data.fixedStartTab) {
           draft.config.fixedStartView = true;
           draft.config.fixedStartTab = data.fixedStartTab;
         } else {
           delete draft.config.fixedStartView;
           if (data.fixedStartTab) draft.config.fixedStartTab = data.fixedStartTab;
-          else delete draft.config.fixedStartTab;
         }
         formTabs.forEach((tab, index) => {
           const formTab = data.tabs[index];
@@ -158,19 +162,28 @@ const NavTabs: React.FC = () => {
       <fieldset>
         <legend>Fixed Start View</legend>
         <p className="muted">
-          When on, every user starts on the selected tab (no document open, divider reset) on every
-          load, instead of resuming where they left off.
+          When on, every user starts on the selected tab (no document open, divider reset) each load,
+          as a session-only override — it never overwrites where they left off.
         </p>
         <label>
           <input type="checkbox" {...register("fixedStartView")} defaultChecked={currentFixedStartView} />
           {" "}Always start on a fixed tab
         </label>
-        <select {...register("fixedStartTab")} defaultValue={currentFixedStartTab}>
+        <label htmlFor="fixedStartTab">Start tab</label>
+        <select
+          id="fixedStartTab"
+          disabled={!(watch("fixedStartView") ?? currentFixedStartView)}
+          defaultValue={currentFixedStartTab}
+          {...register("fixedStartTab", {
+            validate: (v, values) => !values.fixedStartView || !!v || "Choose a tab, or turn the switch off"
+          })}
+        >
           <option value="">(choose a tab)</option>
-          {formTabs.map(formTab => (
-            <option key={formTab.tab} value={formTab.tab}>{formTab.defaultLabel}</option>
+          {startTabOptions.map(formTab => (
+            <option key={formTab.tab} value={formTab.tab}>{formTab.customLabel || formTab.defaultLabel}</option>
           ))}
         </select>
+        {errors.fixedStartTab && <p className="error">{errors.fixedStartTab.message}</p>}
       </fieldset>
       <table>
         <thead>

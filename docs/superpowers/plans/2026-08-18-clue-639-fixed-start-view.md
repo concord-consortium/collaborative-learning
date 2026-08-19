@@ -4,6 +4,10 @@
 
 **Goal:** Add a unit authoring switch that, when on, forces every user to a fixed starting view on every load — a chosen nav tab, no document open (all thumbnails), divider reset to the unit default — instead of restoring their last-seen state.
 
+> **Revision (per code review):** `applyFixedStartView` was reworked from mutating the persisted state
+> into a session-only, non-destructive volatile override (`startViewOverride`) consulted by
+> `displayedActiveNavTab`, `displayedDividerPosition`, and the doc browser. See the design doc revision note.
+
 **Architecture:** Mirror the existing `defaultPanelLayout` unit setting through the 3-layer config chain (`ProblemConfiguration` → `ConfigurationManager` → `AppConfigModel`). Add a new `PersistentUIModel.applyFixedStartView` action plus two small pure helpers (`dividerForLayout`, `resolveStartView`). Invoke from the DB startup hook at `src/lib/db.ts` where `applyDefaultPanelLayout` already runs — but unconditionally (overriding restored state), and only when the target tab is displayed. Add the two fields to the authoring form.
 
 **Tech Stack:** TypeScript, MobX-State-Tree, React, Jest.

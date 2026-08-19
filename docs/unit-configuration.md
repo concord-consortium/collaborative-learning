@@ -138,6 +138,20 @@ These properties are configurable at the unit, investigation, or problem levels 
   stamps: SnapshotIn<typeof StampModel>[];
   // See next section for what can go in 'settings'
   settings: SnapshotIn<typeof SettingsMstType>;
+  // Which panels are shown when a user FIRST visits a problem (first-time visitors only).
+  // "split" (default) shows both; "workspace-only" collapses resources; "resources-only" collapses workspace.
+  defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  // How the split view divides its width. "evenLayout" (default) splits evenly; "wideContent" narrows
+  // the resources pane (~1/3) so the workspace stays wide until comments are opened.
+  contentLayout?: "evenLayout" | "wideContent";
+  // When true, every user starts on `fixedStartTab` each load (that tab, no document open, divider reset
+  // to the defaultPanelLayout position) instead of resuming where they left off. Applied as a session-only
+  // override, so it never overwrites the user's saved place and clears as soon as they navigate.
+  fixedStartView?: boolean;
+  // The nav tab to start on when fixedStartView is true — an ENavTab id, e.g. "class-work" or "sort-work".
+  // Must be a tab that is shown for this unit and not teacher-only, or it is ignored (with a console warning).
+  // Kept separate from the switch so turning fixedStartView off preserves the chosen tab.
+  fixedStartTab?: string;
 ```
 
 ### Settings properties

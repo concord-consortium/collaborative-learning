@@ -3,11 +3,15 @@ import { IAuthoredDocumentContent } from "../document/document-content-import-ty
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
 import { SettingsMstType } from "./settings";
+import { ENavTab } from "../view/nav-tabs";
 
 // Probably this should be changed to something more complex
 export const ToolbarModel = types.array(ToolbarButtonModel);
 export interface IToolbarModel extends Instance<typeof ToolbarModel> {}
 export type IToolbarModelSnapshot = SnapshotIn<typeof ToolbarModel>;
+
+// The panel-layout options an author can set; shared so persist-ui and the authoring form don't respell it.
+export type PanelLayout = "split" | "workspace-only" | "resources-only";
 
 export interface ProblemConfiguration {
   disabledFeatures: string[];
@@ -34,15 +38,16 @@ export interface ProblemConfiguration {
   settings: SnapshotIn<typeof SettingsMstType>;
   // default panel layout when user first visits a problem
   // "split" (default) shows both panels; "workspace-only" collapses resources; "resources-only" collapses workspace
-  defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  defaultPanelLayout?: PanelLayout;
   // how the resources and workspace panes divide the split view. "evenLayout" (default) splits evenly.
   // "wideContent" narrows the resources pane to its comments-open width (~1/3) when both panes are shown
   // and comments are closed, giving the workspace ~2/3; opening comments expands it back to the even split.
   contentLayout?: "evenLayout" | "wideContent";
   // When true, every load starts on `fixedStartTab` (no open document, divider reset to the unit
   // default) instead of restoring the user's last-seen state. Off/undefined = restore last state.
+  // The forced view is applied as a session-only override, so it never overwrites the saved state.
   fixedStartView?: boolean;
-  // The nav tab (an ENavTab id, e.g. "class-work") to start on when fixedStartView is true.
-  // Kept as a separate value so toggling the switch off preserves the author's choice.
-  fixedStartTab?: string;
+  // The nav tab to start on when fixedStartView is true. Typed as ENavTab so a typo in the unit JSON
+  // is caught. Kept as a separate value so toggling the switch off preserves the author's choice.
+  fixedStartTab?: ENavTab;
 }

@@ -15,6 +15,7 @@ import {
 } from "../../document/document-types";
 import { ENavTab, NavTabModelType } from "../../view/nav-tabs";
 import { AppConfigModelType } from "../app-config-model";
+import { PanelLayout } from "../problem-configuration";
 import { SortedDocuments } from "../sorted-documents";
 import {
   DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax, kDividerMin, PrimarySortType
@@ -26,11 +27,8 @@ import { UITabModel, UITabModel_V1 } from "./ui-tab-model";
 export const kPersistentUiStateVersion2 = "2.0.0";
 export const kPersistentUiStateVersion1 = "1.0.0";
 
-type PanelLayout = "split" | "workspace-only" | "resources-only" | undefined;
-
-// The divider position a given defaultPanelLayout implies. Used to reset the divider when forcing
-// the author's start view, so fixedStartView and defaultPanelLayout stay consistent.
-export function dividerForLayout(layout: PanelLayout) {
+// The divider position a given defaultPanelLayout implies, so fixedStartView and defaultPanelLayout agree.
+export function dividerForLayout(layout: PanelLayout | undefined) {
   switch (layout) {
     case "workspace-only": return kDividerMin;
     case "resources-only": return kDividerMax;
@@ -38,14 +36,17 @@ export function dividerForLayout(layout: PanelLayout) {
   }
 }
 
-// The whole "force the author start view vs. restore last state" decision, kept pure/testable.
-// Returns the tab + divider to force, or undefined to fall through to normal restore.
+// Decides whether to force the author start view. Returns the tab + divider to force, or undefined to
+// fall through to normal restore (switch off, no tab, tab not displayed, or an explicit deep link).
 export function resolveStartView(
-  opts: { fixedStartView?: boolean; fixedStartTab?: string; defaultPanelLayout?: PanelLayout },
+  opts: { fixedStartView?: boolean; fixedStartTab?: string; defaultPanelLayout?: PanelLayout;
+          hasDocumentTarget?: boolean },
   displayedTabs: string[]
 ): { tab: string; dividerPosition: number } | undefined {
-  const { fixedStartView, fixedStartTab, defaultPanelLayout } = opts;
+  const { fixedStartView, fixedStartTab, defaultPanelLayout, hasDocumentTarget } = opts;
   if (!fixedStartView || !fixedStartTab) return undefined;
+  // An explicit document link (e.g. ?studentDocument=...) should win over the forced view.
+  if (hasDocumentTarget) return undefined;
   if (!displayedTabs.includes(fixedStartTab)) {
     console.warn(`fixedStartView: "${fixedStartTab}" is not a displayed tab; ignoring`);
     return undefined;
@@ -76,14 +77,24 @@ export const PersistentUIModelV2 = types
     defaultLeftNavExpanded: false,
     problemPath: "",
     isDocumentsView: false,
-    hasSavedPersistentUI: false
+    hasSavedPersistentUI: false,
+    // Author's fixed start view, applied as a session-only override so it never overwrites the saved
+    // record. When set, the display prefers it (tab, divider, and a no-document browser view for the
+    // tab); it is cleared the moment the user navigates. undefined = restore the user's own state.
+    startViewOverride: undefined as { tab: string, dividerPosition: number } | undefined
+  }))
+  .views((self) => ({
+    // The divider the UI should render: the forced-start override when active, else the saved position.
+    get displayedDividerPosition () {
+      return self.startViewOverride?.dividerPosition ?? self.dividerPosition;
+    }
   }))
   .views((self) => ({
     get navTabContentShown () {
-      return self.dividerPosition > kDividerMin;
+      return self.displayedDividerPosition > kDividerMin;
     },
     get workspaceShown () {
-      return self.dividerPosition < kDividerMax;
+      return self.displayedDividerPosition < kDividerMax;
     },
     get currentDocumentGroupId () {
       return self.activeNavTab && self.tabs.get(self.activeNavTab)?.currentDocumentGroupId;
@@ -114,21 +125,18 @@ export const PersistentUIModelV2 = types
   }))
   .actions(self => ({
     setDividerPosition(position: number) {
+      self.startViewOverride = undefined; // moving the divider is a user action; drop the forced view
       self.dividerPosition = position;
     },
     setHasSavedPersistentUI(value: boolean) {
       self.hasSavedPersistentUI = value;
     },
-    applyDefaultPanelLayout(layout: "split" | "workspace-only" | "resources-only" | undefined) {
+    applyDefaultPanelLayout(layout: PanelLayout | undefined) {
       if (self.hasSavedPersistentUI) return;
-      switch (layout) {
-        case "workspace-only":
-          self.dividerPosition = kDividerMin;
-          break;
-        case "resources-only":
-          self.dividerPosition = kDividerMax;
-          break;
-        // "split" or undefined: keep the default kDividerHalf
+      // Delegate to the shared mapping, but keep the "leave the divider alone for split/undefined"
+      // behavior (an unconditional assignment would be a behavior change for first-time visitors).
+      if (layout === "workspace-only" || layout === "resources-only") {
+        self.dividerPosition = dividerForLayout(layout);
       }
     },
     setShowAnnotations(show: boolean) {
@@ -159,6 +167,7 @@ export const PersistentUIModelV2 = types
       self.showRemoteHistoryView = show;
     },
     setActiveNavTab(tab: string) {
+      self.startViewOverride = undefined; // choosing a tab is a user action; drop the forced view
       self.activeNavTab = tab;
     },
     getOrCreateTabState(tab: string) {
@@ -235,6 +244,7 @@ export const PersistentUIModelV2 = types
      * @param documentKey
      */
     openDocumentGroupPrimaryDocument(tab: string, docGroupId: string, documentKey: string) {
+      self.startViewOverride = undefined; // opening a document is a user action; drop the forced view
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
       tabState.openDocumentGroupPrimaryDocument(docGroupId, documentKey);
@@ -279,17 +289,16 @@ export const PersistentUIModelV2 = types
     }
   }))
   .actions(self => ({
-    // Force the author-configured start view, OVERRIDING any restored state (unlike
-    // applyDefaultPanelLayout, this is intentionally not guarded by hasSavedPersistentUI).
-    // Called on every load when the unit's fixedStartView switch is on and the tab is displayed.
+    // Force the author-configured start view for this session WITHOUT mutating the persisted record:
+    // it is a volatile override that the display consults (displayedActiveNavTab, displayedDividerPosition,
+    // and a no-document browser view for the tab via section-document-or-browser). Because it never
+    // touches activeNavTab/dividerPosition/document groups, the user's saved state survives, and any
+    // navigation action (setActiveNavTab/setDividerPosition/openDocumentGroupPrimaryDocument) clears it.
     applyFixedStartView(tab: string, dividerPosition: number) {
-      self.setActiveNavTab(tab);
-      // Close any open primary document in the tab's current group → currentDocumentKeys becomes [],
-      // which renders the thumbnail browser. Comparison mode is already cleared during
-      // initializePersistentUISync, so there is no secondary document to promote. If the tab has no
-      // current document group yet, closeDocumentGroupPrimaryDocument is a no-op (nothing was open).
-      self.closeDocumentGroupPrimaryDocument(tab);
-      self.setDividerPosition(dividerPosition);
+      self.startViewOverride = { tab, dividerPosition };
+    },
+    clearStartViewOverride() {
+      self.startViewOverride = undefined;
     },
     /**
      * Update the top level tab in the resources panel (left side), and guess a sub tab to open to view

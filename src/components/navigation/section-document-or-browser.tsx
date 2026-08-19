@@ -117,6 +117,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabModel) => {
+    // While the author's fixed start view is overriding this tab, always show the thumbnail browser
+    // (no document open) — non-destructively, without touching the persisted document-group state.
+    if (persistentUI.startViewOverride?.tab === tabSpec.tab) {
+      return false;
+    }
     const documentGroup = maybeTabState?.getDocumentGroup(subTab.label);
     const openDocumentKey = documentGroup?.primaryDocumentKey || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
