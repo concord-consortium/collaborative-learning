@@ -289,13 +289,22 @@ export class FirestoreHistoryManager {
   }
 
   async moveToHistoryEntryAfterLoad(historyId: string) {
-    // Wait for history loading to reach a terminal status. Waiting only for HISTORY_LOADED would never
-    // settle — leaking this promise and its MobX reaction — when the document is NO_HISTORY or hit
-    // HISTORY_ERROR, and NO_HISTORY is exactly the case the "first" sentinel below is emitted for.
-    await when(() =>
-      this.historyStatus === HistoryStatus.HISTORY_LOADED ||
-      this.historyStatus === HistoryStatus.NO_HISTORY ||
-      this.historyStatus === HistoryStatus.HISTORY_ERROR);
+    // NO_HISTORY is the INITIAL status, not a terminal one — a freshly constructed manager reports it
+    // before the Firestore query has run. So we must wait for the history to actually load (or error),
+    // not stop on NO_HISTORY, or we'd give up before the entries arrive and never seek. A bounded
+    // timeout avoids leaking the reaction if the load never completes (e.g. a genuinely empty document,
+    // which stays NO_HISTORY forever).
+    try {
+      await when(
+        () => this.historyStatus === HistoryStatus.HISTORY_LOADED ||
+              this.historyStatus === HistoryStatus.HISTORY_ERROR,
+        { timeout: 30000 }
+      );
+    } catch {
+      console.warn("moveToHistoryEntryAfterLoad: history did not load within timeout; status:",
+        this.historyStatus);
+      return;
+    }
     if (this.historyStatus !== HistoryStatus.HISTORY_LOADED) {
       console.warn("moveToHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
       return;
