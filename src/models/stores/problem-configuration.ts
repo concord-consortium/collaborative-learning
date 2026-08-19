@@ -39,4 +39,10 @@ export interface ProblemConfiguration {
   // "wideContent" narrows the resources pane to its comments-open width (~1/3) when both panes are shown
   // and comments are closed, giving the workspace ~2/3; opening comments expands it back to the even split.
   contentLayout?: "evenLayout" | "wideContent";
+  // When true, every load starts on `fixedStartTab` (no open document, divider reset to the unit
+  // default) instead of restoring the user's last-seen state. Off/undefined = restore last state.
+  fixedStartView?: boolean;
+  // The nav tab (an ENavTab id, e.g. "class-work") to start on when fixedStartView is true.
+  // Kept as a separate value so toggling the switch off preserves the author's choice.
+  fixedStartTab?: string;
 }

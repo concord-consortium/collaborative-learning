@@ -253,4 +253,24 @@ describe("ConfigurationManager", () => {
     expect(configManager.allowCustomCommentTags).toBe(true);
   });
 
+  it("returns fixedStartView/fixedStartTab from the base config", () => {
+    const config = new ConfigurationManager(
+      { ...defaults, fixedStartView: true, fixedStartTab: "class-work" }, []);
+    expect(config.fixedStartView).toBe(true);
+    expect(config.fixedStartTab).toBe("class-work");
+  });
+
+  it("lets a later config override fixedStartTab", () => {
+    const config = new ConfigurationManager(
+      { ...defaults, fixedStartView: true, fixedStartTab: "class-work" },
+      [{ fixedStartTab: "sort-work" }]);
+    expect(config.fixedStartTab).toBe("sort-work");
+  });
+
+  it("defaults fixedStartView/fixedStartTab to undefined when unset", () => {
+    const config = new ConfigurationManager(defaults, []);
+    expect(config.fixedStartView).toBeUndefined();
+    expect(config.fixedStartTab).toBeUndefined();
+  });
+
 });

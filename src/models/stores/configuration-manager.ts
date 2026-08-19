@@ -255,6 +255,14 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["contentLayout"]>("contentLayout");
   }
 
+  get fixedStartView() {
+    return this.getProp<UC["fixedStartView"]>("fixedStartView");
+  }
+
+  get fixedStartTab() {
+    return this.getProp<UC["fixedStartTab"]>("fixedStartTab");
+  }
+
   get defaultSharedDocuments() {
     return this.getProp<UC["defaultSharedDocuments"]>("defaultSharedDocuments");
   }
