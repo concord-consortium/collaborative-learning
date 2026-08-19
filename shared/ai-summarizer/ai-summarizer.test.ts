@@ -1029,6 +1029,27 @@ describe('ai-summarizer', () => {
       });
     });
   });
+
+  describe("tile ids", () => {
+    const content = {
+      rowOrder: ["row1"],
+      rowMap: { row1: { id: "row1", tiles: [{ tileId: "tileAAA" }] } },
+      tileMap: {
+        tileAAA: { id: "tileAAA", title: "My Notes", content: { type: "Text", format: "markdown", text: "hello" } }
+      }
+    };
+
+    it("names each tile's id beneath its heading", () => {
+      const result = documentSummarizer(content, {});
+      expect(result).toContain("### Tile 1");
+      expect(result).toContain("This tile's id is `tileAAA`.");
+    });
+
+    it("keeps the id out of the heading itself", () => {
+      const result = documentSummarizer(content, {});
+      expect(result).toMatch(/### Tile 1 \(My Notes\)\n/);
+    });
+  });
 });
 
 describe('documentSummarizerWithDrawings', () => {
