@@ -479,10 +479,12 @@ finding 6a, CLUE-630): every related entry is given the **analyzed document's ow
 model is shown the same text several times over and told other people agreed with it. It is a named
 baseline, kept faithful so a before-and-after comparison stays honest. `no-extras` sends none.
 
-`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: text,
-image and mixed against the same corpus, plus one run each for detail-low, per-tile,
-visual-tiles-only and the three extras settings. `experiments/image-vs-text.json` is milestone 2's
-narrower comparison, kept as it was.
+`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: eleven
+runs over the same corpus. Text, image and mixed are the comparison itself; the other eight turn one
+dimension each around it — detail-low, per-tile and visual-tiles-only on the image side, the three
+extras settings and the two new text variants on the text side. Every dimension this milestone adds
+has a run, so none of them ships only exercised by a unit test.
+`experiments/image-vs-text.json` is milestone 2's narrower comparison, kept as it was.
 
 ### Which documents a run declines to send
 
@@ -894,27 +896,33 @@ Milestone 3 (against
 All of it, by hand. The 26 fixtures were rendered against a real dev server and a real headless
 Chromium in both capture modes — 25 full-height envelopes and 24 per-tile ones, the missing entries
 being `error-test`, which is marked `expectedRenderFailure`, and `empty`, which has no tile for a
-per-tile capture to photograph. Then a real `mixed-vs-baselines` run:
+per-tile capture to photograph. Then a real `mixed-vs-baselines` run, assembled over several
+sittings as review turned up fixes:
 
 ```
-run     234 row(s): 138 sent (61 from cache, 77 API calls), 96 skipped.
-        Reserved at peak $0.2198 of a $1.1000 ceiling; actually spent $0.1570.
-run     (again) 0 row(s): 234 already complete, 0 API call(s).
+run     286 row(s): 153 sent, 133 skipped.
+        11 run(s) × 26 document(s) = 286 pair(s).
+report  286 current, 0 superseded.
 ```
 
-The corpus was then re-rendered and the affected rows re-run, after a fix to which tiles a per-tile
-capture photographs. Only 18 of the 234 rows changed, and resume dispatched exactly those:
+Three things were repaired between the first run and this one, and each is worth knowing before
+reading the numbers. A per-tile capture was photographing tiles nested inside a Question, so
+`question` produced three overlapping pictures instead of one. The mixed prompt told the model it
+had been given a summary on documents where the summary was dropped. And `drawing-text` had no
+experiment run at all.
 
-```
-run     18 row(s): 216 already complete, 3 from cache, 15 API call(s).
-        Reserved at peak $0.0562 of a $0.3000 ceiling; actually spent $0.0313.
-report  252 row(s) read; 234 current, 18 superseded by a later re-run.
-```
+Two of those cost money to correct and one did not. Re-rendering changed 18 rows, of which only
+`question` changed because of the fix — the other 15 are `data-card`, `dataflow` and `graph`, which
+do not render deterministically and produce different pixels every time. Worth knowing before
+reaching for `--refresh`: new pixels are new request keys, and a re-spend on those documents
+whatever prompted the re-render.
 
-The figures below are the current rows. Only `question` changed because of the fix; the other 15 are
-`data-card`, `dataflow` and `graph`, which do not render deterministically and produce different
-pixels every time — worth knowing before reaching for `--refresh`, since new pixels are new request
-keys and a re-spend on those documents whatever prompted the re-render.
+Adding the two variant runs edited the experiment file, and `experimentSha256` is part of resume
+identity — deliberately, so an edited experiment cannot silently resume rows built under the old
+definition. Every row therefore rebuilt, `report` refused a file holding two definitions, and
+recovering meant re-running into a clean one. That cost nothing: the cache is keyed on the request
+rather than the experiment, so all 153 rows came straight back out of it. The whole session's real
+spend was about $0.25.
 
 - **The image cost model checks out.** Estimated image tokens account for 98.6% of the prompt tokens
   the API actually billed in `image-puppeteer` (371,177 of 376,513), 98.9% in `image-per-tile`
@@ -923,32 +931,42 @@ keys and a re-spend on those documents whatever prompted the re-render.
   prompt. `image-detail-low` is the loosest at 92.4%, which is arithmetic rather than error: a
   low-detail image is a flat 2833 tokens, so the fixed prompt text is a much larger share of a much
   smaller total.
-- **The extras dimension is measurable.** Across the same 7 documents and the same prompt,
-  `no-extras` sent 3,725 prompt tokens, `extras-fixed` and the default sent 3,895, and
-  `extras-production-current` sent 4,537. The three differ on exactly the two documents that have
-  `relatedSummaries`, and the 642-token gap between `fixed` and `production-current` is the
-  production bug (CLUE-630) reproduced and priced: it re-sends the analyzed document's own
-  summary in place of each related one.
-- **The cache is keyed on the whole request, prompt included.** A mixed message whose text half is
-  dropped is structurally identical to an image-only one, but this experiment gives the mixed run
-  its own `categorize-design-mixed` prompt, so none of its 16 text-free rows matched the image-only
-  cache. Two runs share cache entries only when they share the prompt as well as the payload —
-  which is why `text-extras-fixed` matched `text-default` on all 7 rows and cost nothing.
+- **Every text dimension is priced, over the same 7 documents and the same prompt.** `no-extras`
+  sends 3,725 prompt tokens; `no-dataset-tables` 3,823; `default` and `extras-fixed` 3,895;
+  `drawing-text` 3,958; `extras-production-current` 4,537. The 642-token gap between `extras-fixed`
+  and `extras-production-current` is the production bug (CLUE-630) reproduced and priced: it
+  re-sends the analyzed document's own summary in place of each related one.
+- **`drawing-text` is the only run that ever answered `form`.** Across all 153 rows the categories
+  are 91 `unknown`, 45 `function`, 16 `user` and a single `form` — the `drawing` fixture, two shapes
+  and no text, which every other run either skips or calls `unknown`. The model gave "drawing with 2
+  objects", "rectangle and ellipse", "specified positions and sizes" as its indicators. One document
+  is not evidence that describing geometry beats photographing it, but it is the variant doing
+  exactly what it was built to do, on the document it was built for.
 - **Per-tile cost scales with tile count, not document size.** Its median document billed the same
   14,399 prompt tokens as full-document, but `tall` — ten tiles, ten images — billed 141,902. The
   per-document average hides this; budget for the widest document, not the typical one. Tile count
   means *top-level* tiles: `question` draws two more inside itself, and photographing those as well
   gave one document three overlapping pictures of the same content until the selector was fixed.
+- **The cache is keyed on the whole request, prompt included.** A mixed message whose text half is
+  dropped is structurally identical to an image-only one, but this experiment gives the mixed run
+  its own `categorize-design-mixed` prompt, so none of its 16 text-free rows matched the image-only
+  cache. Two runs share cache entries only when they share the prompt as well as the payload —
+  which is why `text-extras-fixed` matched `text-default` on all 7 rows and cost nothing.
+- **Fixing the mixed prompt changed no answers.** It had told the model it was given "a written
+  summary and a picture", on 16 of 23 rows where the summary was dropped. Rewording it to promise a
+  summary only when there is one moved **0 of 23** categories. The fidelity problem was real and its
+  measured effect here was nil; both halves are worth stating, because a fix reported without its
+  measurement is just a claim.
 - **Observation, not a conclusion.** Skip-empty means text and image runs no longer send the same
   documents, so the only fair comparison is the 7 documents both send. There, mixed reproduced
-  text-only's category on all 7, while image-only lost 3 of them to `unknown` — the picture alone
+  text-only's category on all 7, while image-only lost 4 of them to `unknown` — the picture alone
   was worse, and adding the picture to the text cost nothing in agreement. Across everything each
-  run did send, `unknown` came back 17/23 for image-only, 16/23 for mixed, 19/23 for per-tile and
-  1/7 for text. This is heavily confounded: these are one- and two-tile synthetic documents, several
-  render nearly blank (see "What the synthetic corpus cannot show you yet"), and n=7 on the paired
-  comparison. **This establishes that the pipeline works and what it costs — not that any
-  representation is better.** That comparison needs milestone 5's rubric and a corpus of real
-  documents.
+  run did send, `unknown` came back 17/23 for image-only, 16/23 for mixed, 19/23 for per-tile, 1/7
+  for text and 1/8 for `drawing-text`. This is heavily confounded: these are one- and two-tile
+  synthetic documents, several render nearly blank (see "What the synthetic corpus cannot show you
+  yet"), and n=7 on the paired comparison. **This establishes that the pipeline works and what it
+  costs — not that any representation is better.** That comparison needs milestone 5's rubric and a
+  corpus of real documents.
 
 **The parity mode was verified by hand against the real service**, with the `drawing` fixture:
 
