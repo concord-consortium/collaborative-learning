@@ -207,6 +207,14 @@ So the mode is parity of the *request envelope* (endpoint, headers, height, `ful
 render target, not of the page body. It is not a recommendation; it is what production does today. Nothing about it is configurable, and passing `--clue-url` or
 `--unit` to it is an error rather than a silently ignored flag.
 
+**The endpoint has to be the final address.** Both Shutterbug modes post with `redirect: "manual"`,
+and a 3xx answer fails the render naming the `Location` rather than being followed. That request
+carries the document, and on a 307 or 308 `fetch` re-sends the body verbatim — so following a
+redirect would deliver a student's work to the new address before anything could check where it
+went, and the envelope would still record the endpoint that was configured. If the service moves,
+point `--shutterbug-url` at the new address. The download that follows *does* follow redirects,
+because it is a plain GET for a hosted image and the URL it lands on is checked instead.
+
 **`puppeteer-full-height` renders through the same iframe pathway** production's screenshots use —
 the same HTML, the same `iframe.html?unwrapped&readOnly` entry point, the same `initialValue`
 message. Only two things differ: who takes the picture, and that it captures the whole document

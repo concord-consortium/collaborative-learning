@@ -1,3 +1,5 @@
+import http from "node:http";
+import { AddressInfo } from "node:net";
 import {
   kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
   shutterbugParameterized, shutterbugProductionCurrent, shutterbugRequestBody
@@ -277,6 +279,34 @@ describe("the network contract", () => {
     }
   });
 
+  it("refuses a POST that is answered with a redirect, naming where it was being sent", async () => {
+    const redirect = {
+      ok: false,
+      status: 307,
+      statusText: "Temporary Redirect",
+      headers: new Headers({ location: "http://collector.example.test/shutterbug" })
+    } as unknown as Partial<Response>;
+    await expect(backend({ postResponses: [redirect] }).render({ docId: "doc", content: emptyDocument }))
+      .rejects.toThrow(/answered 307 redirecting to http:\/\/collector\.example\.test\/shutterbug/);
+  });
+
+  it("asks fetch not to follow a redirect on the POST", async () => {
+    // The option, not the message, is what stops the document moving, and no fake can show that:
+    // `fakeFetch` returns what it is handed and never follows anything. Asserted directly for that
+    // reason. The loopback test below is the one that proves the consequence.
+    const calls: Call[] = [];
+    await backend({ calls }).render({ docId: "doc", content: emptyDocument });
+    expect(calls[0].init?.method).toBe("POST");
+    expect(calls[0].init?.redirect).toBe("manual");
+  });
+
+  it("does not retry a redirect", async () => {
+    const calls: Call[] = [];
+    const redirect = { ok: false, status: 308, statusText: "Permanent Redirect" } as Partial<Response>;
+    await expect(backend({ calls, postResponses: [redirect] })
+      .render({ docId: "doc", content: emptyDocument })).rejects.toThrow(/redirecting to/);
+    expect(calls).toHaveLength(1);
+  });
   it("refuses an image URL on a loopback or private host", async () => {
     await expect(backend({ postResponses: [postBody(JSON.stringify({ url: "https://10.0.0.5/shot.png" }))] })
       .render({ docId: "doc", content: emptyDocument }))
@@ -311,5 +341,56 @@ describe("the network contract", () => {
   it("refuses a failed download", async () => {
     await expect(backend({ download: { ok: false, status: 404, statusText: "Not Found" } })
       .render({ docId: "doc", content: emptyDocument })).rejects.toThrow(/answered 404 Not Found/);
+  });
+});
+
+
+describe("a redirected POST against a real server", () => {
+  // The one test here that uses the real `fetch`. Every other case injects `fakeFetch`, which
+  // cannot answer this question at all: it returns whatever it is handed and never follows a
+  // redirect, so it would pass whether or not the request asked to follow one. A 307 makes `fetch`
+  // re-send the POST body verbatim, so following one delivers the document to the new address
+  // before any check on the response could run.
+  const servers: http.Server[] = [];
+  const listen = async (handler: http.RequestListener): Promise<string> => {
+    const server = http.createServer(handler);
+    servers.push(server);
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    return `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  };
+  afterAll(async () => {
+    await Promise.all(servers.map((server) => new Promise((resolve) => server.close(resolve))));
+  });
+
+  it("never delivers the document to the redirect target", async () => {
+    const delivered: { method: string; body: string }[] = [];
+    const target = await listen((request, response) => {
+      let body = "";
+      request.on("data", (chunk) => { body += chunk; });
+      request.on("end", () => {
+        delivered.push({ method: request.method!, body });
+        response.end(JSON.stringify({ url: "https://images.example.test/shot.png" }));
+      });
+    });
+    const origin = await listen((_request, response) => {
+      response.writeHead(307, { location: `${target}/collect` });
+      response.end();
+    });
+
+    const backend = shutterbugParameterized({
+      clueUrl: "http://localhost:8080",
+      unit: "http://127.0.0.1:5000/content.json",
+      shutterbugUrl: origin,
+      captureHeightPx: 1500,
+      sleep: noSleep
+    });
+    // What the render does with the refusal is a separate question, asserted on the fake above.
+    // This one is only about whether the document moved, so the outcome is caught rather than
+    // asserted on first: a failure further down the render would otherwise be the reported error
+    // and `delivered` would never be read.
+    const outcome = await backend.render({ docId: "doc", content: emptyDocument })
+      .then(() => null, (error: Error) => error);
+    expect(delivered).toEqual([]);
+    expect(String(outcome)).toMatch(new RegExp(`answered 307 redirecting to ${target}/collect`));
   });
 });

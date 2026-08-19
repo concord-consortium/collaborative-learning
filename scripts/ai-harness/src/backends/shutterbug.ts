@@ -97,6 +97,7 @@ function isRetriableStatus(status: number): boolean {
 /** What one attempt at the Shutterbug POST came back with, once its body has been read. */
 type PostAnswer =
   | { failed: { status: number; statusText: string } }
+  | { redirected: { status: number; location: string | null } }
   | { overLimit: true }
   | { text: string };
 
@@ -190,7 +191,17 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
         const answer = await withTimeout<PostAnswer>(requestTimeoutMs, "the Shutterbug request",
           async (signal) => {
             const response = await fetchImpl(shutterbugUrl,
-              { method: "POST", body: JSON.stringify(body), signal });
+              { method: "POST", body: JSON.stringify(body), redirect: "manual", signal });
+            // A 3xx is not `ok`, so it is read here, before the branch below reduces it to a status
+            // code with no destination in it.
+            if (response.status >= 300 && response.status < 400) {
+              return {
+                redirected: {
+                  status: response.status,
+                  location: response.headers?.get?.("location") ?? null
+                }
+              };
+            }
             if (!response.ok) {
               return { failed: { status: response.status, statusText: response.statusText } };
             }
@@ -206,6 +217,16 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
             continue;
           }
           throw error;
+        }
+        if ("redirected" in answer) {
+          // `redirect: "manual"` on the request is what makes this preventable rather than merely
+          // observable: on a 307 or 308 fetch re-sends the POST body, so a followed redirect has
+          // already delivered the document by the time anything could inspect where it went.
+          throw new ShutterbugError(docId,
+            `Shutterbug answered ${answer.redirected.status} redirecting to ` +
+            `${answer.redirected.location ?? "an unnamed location"}. The document is not sent on ` +
+            "to a redirect target; point --shutterbug-url at the new address if the endpoint has " +
+            "moved.");
         }
         if ("overLimit" in answer) {
           throw new ShutterbugError(docId,
