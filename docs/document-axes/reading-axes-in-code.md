@@ -51,6 +51,12 @@ A profile declares two knobs, plus `concurrent`:
 - `containerType` — `"class"`, `"classUnit"`, or `"offering"`. It picks the fields that say where the
   document is kept and what it is about (`getDocumentLocationFields`).
 
+The profile's name is stamped onto the document it creates, in `axisProfile`, and that record is
+deliberately declared on no runtime type — not `IDocumentMetadata`, not `DocumentMetadataModel`, not
+`DocumentModel` — so reading it back would mean widening a type first. Only a migration or offline
+analysis, reading Firestore directly, can see it. See the
+[`axisProfile` field](../document-metadata/metadata-fields.md#axisprofile) for what is stored and where.
+
 One knob covers both container and curriculum because every container above the class is *identified
 by* a curriculum coordinate — a classUnit by its unit, an offering by its problem — so a kind has no
 curriculum position left to choose separately. `getDocumentLocationFields` is named for the pair rather
