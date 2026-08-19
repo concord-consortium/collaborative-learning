@@ -52,9 +52,7 @@ context("Tile Navigator", () => {
   it("can be hidden and shown", () => {
     beforeTest();
 
-    cy.window().then(win => {
-      cy.stub(win.ccLogger, "log").as("log");
-    });
+    cy.stubLogger();
 
     for(let tileType of ["drawing", "geometry"]) {
       clueCanvas.addTile(tileType);

@@ -30,7 +30,7 @@ describe("Firestore security rules", () => {
   const kDocumentDocPath = "authed/myPortal/documents/myDocument";
 
   interface ISpecDocumentDoc {
-    add?: Record<string, string | string[] | object>;
+    add?: Record<string, string | string[] | object | boolean>;
     remove?: string[];
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
@@ -222,6 +222,23 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", context_id: otherClass });
     });
 
+    it("authenticated teachers can't stamp an axisProfile onto a document that has none", async () => {
+      // The profile a document was created from is what a later migration selects on, so a client that
+      // could write it could aim a migration at documents it was never made from. Only creation (as the
+      // document's author) and the service-account backfill script, which bypasses these rules, set it.
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", axisProfile: "classWide" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only axisProfile field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { axisProfile: "group" } }));
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", axisProfile: "classWide" });
+    });
+
     it("authenticated teachers can't update other teachers' documents", async () => {
       db = initFirestore(teacher2Auth);
       await specClassDoc(thisClass, teacherId);
@@ -360,6 +377,34 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title" });
     });
 
+    it("a class member cannot set concurrent:true on a classmate's non-group document", async () => {
+      // `concurrent` is an authorization input for the history rule (isConcurrentClassDocument), so
+      // granting it here would let a class member hand themselves and every classmate history access
+      // to someone else's document.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id }}));
+      await expectUpdateToFail(db, kDocumentDocPath, { concurrent: true });
+    });
+
+    it("a class member can set concurrent:true on a classmate's group-typed document", async () => {
+      // The backfill paths (src/lib/db.ts on-open backfill, scripts/backfill-group-document-axes.ts)
+      // merge-update `concurrent` onto pre-existing group documents, so this must keep working.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "group" }}));
+      await expectUpdateToSucceed(db, kDocumentDocPath, { concurrent: true });
+    });
+
+    it("a class member cannot clear concurrent on a group document", async () => {
+      // Only the backfills write this field and both write `true`, so clearing it is nobody's
+      // legitimate operation. Allowing it would let any class member strip a group document's shared
+      // history access and its members' Edit button.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
+        add: { uid: student2Id, type: "group", concurrent: true }
+      }));
+      await expectUpdateToFail(db, kDocumentDocPath, { concurrent: false });
+    });
+
     it("authenticated students can't delete documents in their class", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
@@ -377,7 +422,7 @@ describe("Firestore security rules", () => {
   describe("history entries", () => {
     const kDocumentHistoryDocPath = `${kDocumentDocPath}/history/myHistoryEntry`;
     interface ISpecHisoryDoc {
-      add?: Record<string, string | string[] | object>;
+      add?: Record<string, string | string[] | object | boolean>;
       remove?: string[];
     }
     function specHistoryEntryDoc(options?: ISpecHisoryDoc) {
@@ -551,6 +596,59 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: teacherId }}));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
+
+    it("class member can create a history entry on a concurrent document owned by a group", async () => {
+      // A concurrent document's owner is synthetic (`group_<offeringId>_<groupId>` for a group
+      // document, `class_<classHash>` for a class-wide one), so it never equals a real user id.
+      // Every member of the class must still be able to append history to it.
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
+        add: { uid: "group_myOffering_3", type: "group", concurrent: true, groupId: "3" },
+        remove: ["teachers"]
+      }));
+      await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+
+    it("class member can create a history entry on a class-wide concurrent document", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
+        add: { uid: `class_${thisClass}`, type: "group", concurrent: true, unit: "sas" },
+        remove: ["teachers"]
+      }));
+      await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+
+    it("class member can read history on a concurrent document they do not own", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
+        add: { uid: `class_${thisClass}`, type: "group", concurrent: true, unit: "sas" },
+        remove: ["teachers"]
+      }));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToSucceed(db, kDocumentHistoryDocPath);
+    });
+
+    it("a user outside the class cannot create a history entry on a concurrent document", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
+        add: {
+          uid: "class_someOtherClass", type: "group", concurrent: true, unit: "sas",
+          context_id: otherClass
+        },
+        remove: ["teachers"]
+      }));
+      await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+
+    it("a class member still cannot create a history entry on a classmate's single-writer document",
+      async () => {
+        // The concurrent axis is what grants the write, not class membership on its own.
+        db = initFirestore(studentAuth);
+        await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({
+          add: { uid: student2Id, type: "problemDocument" }, remove: ["teachers"]
+        }));
+        await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+      });
 
     it ("all updates fail", async () => {
       db = initFirestore();
