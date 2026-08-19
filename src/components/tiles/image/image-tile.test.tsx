@@ -3,6 +3,9 @@ import { render } from "@testing-library/react";
 import { ImageComponent } from "./image-component";
 import { ImageContentModel } from "../../../models/tiles/image/image-content";
 
+// Logger.stores is uninitialized in this component test; mock the change logger so setUrl doesn't crash.
+jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
 describe("Image Component", () => {
   const handleMouseDown = jest.fn();
   const handleUrlChange = jest.fn();
