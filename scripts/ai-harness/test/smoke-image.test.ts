@@ -247,8 +247,8 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     // carries student text, and no shape sends an empty document.
     const sent = shape.withStudentText.length * 2 + shape.withContent.length;
     expect(printed).toContain(
-      `3 run(s) × ${documentIds().length} document(s) = ${sent} call(s), ` +
-      `${documentIds().length * 3 - sent} skipped.`);
+      `3 run(s) × ${documentIds().length} document(s) = ${documentIds().length * 3} pair(s); ` +
+      `${sent} call(s), ${documentIds().length * 3 - sent} skipped.`);
     expect(printed).toContain("[image-only, --mode puppeteer-full-height");
     // Each shape is described by what it actually sends. The old two-way label predated `mixed` and
     // called it "text-only" while printing its images underneath.

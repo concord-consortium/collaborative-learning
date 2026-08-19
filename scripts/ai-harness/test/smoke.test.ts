@@ -92,8 +92,11 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     const printed = output.join("\n");
     // Not runs × documents: a text-only run sends only the documents that carry student-authored
     // text, and says so about the rest rather than leaving them out of the results.
+    // The product is of runs and documents, and the two figures after it add back up to it — which
+    // `= N call(s)` did not, on any corpus with a skip.
     expect(printed).toContain(
-      `2 run(s) × ${shape.documents.length} document(s) = ${shape.withStudentText.length * 2} call(s), ` +
+      `2 run(s) × ${shape.documents.length} document(s) = ${shape.documents.length * 2} pair(s); ` +
+      `${shape.withStudentText.length * 2} call(s), ` +
       `${(shape.documents.length - shape.withStudentText.length) * 2} skipped.`);
     expect(printed).toContain("max_completion_tokens 1024");
     expect(printed).toMatch(/Worst-case total \(retries included\): \$\d+\.\d+/);

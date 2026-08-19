@@ -639,9 +639,16 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
     pricing
   });
 
+  // The product is of runs and documents, which is the number of *pairs* — not the number of calls,
+  // because skip-empty declines some of them. Stating it as `= N call(s), M skipped` made the
+  // multiplication false on any corpus with a skip, in the one command someone reads to decide
+  // whether to spend money. Both figures below are checkable: the product, and the split of it.
+  const pairs = experiment.runs.length * documents.length;
   log(`Experiment "${experiment.name}": ${experiment.runs.length} run(s) × ` +
-    `${documents.length} document(s) = ${tasks.length} call(s)` +
-    (skipped.length > 0 ? `, ${skipped.length} skipped.` : "."));
+    `${documents.length} document(s) = ${pairs} pair(s)` +
+    (skipped.length > 0
+      ? `; ${tasks.length} call(s), ${skipped.length} skipped.`
+      : `, all sent as ${tasks.length} call(s).`));
   log(`Model ${kDefaultModel}, prices effective ${pricingConfig.effectiveDate}, ` +
     `max_completion_tokens ${pricing.maxOutputTokens}.`);
   let total = 0;
