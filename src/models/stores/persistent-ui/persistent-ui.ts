@@ -279,6 +279,18 @@ export const PersistentUIModelV2 = types
     }
   }))
   .actions(self => ({
+    // Force the author-configured start view, OVERRIDING any restored state (unlike
+    // applyDefaultPanelLayout, this is intentionally not guarded by hasSavedPersistentUI).
+    // Called on every load when the unit's fixedStartView switch is on and the tab is displayed.
+    applyFixedStartView(tab: string, dividerPosition: number) {
+      self.setActiveNavTab(tab);
+      // Close any open primary document in the tab's current group → currentDocumentKeys becomes [],
+      // which renders the thumbnail browser. Comparison mode is already cleared during
+      // initializePersistentUISync, so there is no secondary document to promote. If the tab has no
+      // current document group yet, closeDocumentGroupPrimaryDocument is a no-op (nothing was open).
+      self.closeDocumentGroupPrimaryDocument(tab);
+      self.setDividerPosition(dividerPosition);
+    },
     /**
      * Update the top level tab in the resources panel (left side), and guess a sub tab to open to view
      * this document. Currently this only works with non curriculum docs.

@@ -775,6 +775,32 @@ describe("PersistentUI", () => {
       expect(model.dividerPosition).toBe(kDividerHalf);
     });
   });
+
+  describe("applyFixedStartView", () => {
+    it("forces the tab, closes the open document, and resets the divider — overriding saved state", () => {
+      const ui = PersistentUIModel.create({
+        version: "2.0.0",
+        tabs: {
+          "class-work": {
+            id: "class-work",
+            currentDocumentGroupId: "Workspaces",
+            visitedDocumentGroups: { Workspaces: { id: "Workspaces", currentDocumentKeys: ["doc-1"] } }
+          }
+        },
+        activeNavTab: "my-work",
+        dividerPosition: kDividerMax,
+        problemWorkspace: { type: "problem", mode: "1-up" }
+      });
+      // Simulate a returning user whose state was restored from Firebase.
+      ui.setHasSavedPersistentUI(true);
+
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+
+      expect(ui.activeNavTab).toBe(ENavTab.kClassWork);
+      expect(ui.tabs.get("class-work")?.currentDocumentGroup?.userExplicitlyClosedDocument).toBe(true);
+      expect(ui.dividerPosition).toBe(kDividerHalf);
+    });
+  });
 });
 
 describe("dividerForLayout", () => {
