@@ -8,6 +8,7 @@ import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, Pro
   SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, getDocumentLogParams,
   isDocumentAccessibleToUser } from "./document-utils";
+import { kClassWideProfile } from "./document-axis-profiles";
 import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
@@ -196,7 +197,7 @@ describe("document utils", () => {
 
       test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
         registerDocumentKind("testClassWideTitle", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          profile: kClassWideProfile,
           title: "Driving Question Board"
         });
         const metadata = DocumentMetadataModel.create({
@@ -224,7 +225,7 @@ describe("document utils", () => {
 
       test("does not borrow the current unit's title for another unit's document of the same kind", () => {
         registerDocumentKind("testSharedKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          profile: kClassWideProfile,
           title: "Our Big Questions", unit: "test"
         });
         const ownUnitDoc = DocumentMetadataModel.create({
