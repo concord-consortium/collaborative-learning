@@ -83,80 +83,85 @@ async function main(): Promise<void> {
     clueRevision: "integration-check"
   });
   const failures: string[] = [];
-
-  await backend.open?.();
+  // Everything from here runs inside this, so the listening socket comes down whatever happens:
+  // a fixture that will not parse, or a browser that will not launch, would otherwise leave it
+  // holding the process open and `npm run test:render` would never return.
   try {
-    for (const fixture of fixtures) {
-      const file = path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${fixture.docId}.json`);
-      const content = JSON.parse(fs.readFileSync(file, "utf8"));
-      try {
-        const outcome = await backend.render({ docId: fixture.docId, content });
-        const image = outcome.images[0];
-        const info = readPngInfo(image.bytes, fixture.docId);
-        const { totalTiles, unknownTiles } = outcome.diagnostics;
+    try {
+      await backend.open?.();
+      for (const fixture of fixtures) {
+        const file = path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${fixture.docId}.json`);
+        const content = JSON.parse(fs.readFileSync(file, "utf8"));
+        try {
+          const outcome = await backend.render({ docId: fixture.docId, content });
+          const image = outcome.images[0];
+          const info = readPngInfo(image.bytes, fixture.docId);
+          const { totalTiles, unknownTiles } = outcome.diagnostics;
 
-        const problems: string[] = [];
-        if (info.widthPx > kDefaultViewportWidthPx) {
-          problems.push(`width ${info.widthPx} exceeds the ${kDefaultViewportWidthPx}px viewport`);
-        }
-        if (info.heightPx <= 0) problems.push(`height ${info.heightPx}`);
-        if (fixture.minHeightPx !== undefined && info.heightPx <= fixture.minHeightPx) {
-          problems.push(`height ${info.heightPx} is not past the ${fixture.minHeightPx}px the frame ` +
-            "starts at, so this fixture did not exercise the resize");
-        }
-        if ((totalTiles ?? -1) < fixture.minTiles) {
-          problems.push(`counted ${totalTiles} tiles, expected at least ${fixture.minTiles}`);
-        }
-        if (unknownTiles !== fixture.expectUnknownTiles) {
-          problems.push(`counted ${unknownTiles} unknown tiles, expected ${fixture.expectUnknownTiles}`);
-        }
+          const problems: string[] = [];
+          if (info.widthPx > kDefaultViewportWidthPx) {
+            problems.push(`width ${info.widthPx} exceeds the ${kDefaultViewportWidthPx}px viewport`);
+          }
+          if (info.heightPx <= 0) problems.push(`height ${info.heightPx}`);
+          if (fixture.minHeightPx !== undefined && info.heightPx <= fixture.minHeightPx) {
+            problems.push(`height ${info.heightPx} is not past the ${fixture.minHeightPx}px the frame ` +
+              "starts at, so this fixture did not exercise the resize");
+          }
+          if ((totalTiles ?? -1) < fixture.minTiles) {
+            problems.push(`counted ${totalTiles} tiles, expected at least ${fixture.minTiles}`);
+          }
+          if (unknownTiles !== fixture.expectUnknownTiles) {
+            problems.push(`counted ${unknownTiles} unknown tiles, expected ${fixture.expectUnknownTiles}`);
+          }
 
-        const status = problems.length === 0 ? "ok  " : "FAIL";
-        console.log(`${status} ${fixture.docId.padEnd(10)} ${info.widthPx}×${String(info.heightPx).padEnd(5)} ` +
-          `${String(image.bytes.length).padStart(7)} bytes  tiles=${totalTiles} unknown=${unknownTiles}` +
-          (problems.length ? `\n       ${problems.join("; ")}` : ""));
-        if (problems.length) failures.push(`${fixture.docId}: ${problems.join("; ")}`);
-      } catch (error) {
-        console.log(`FAIL ${fixture.docId.padEnd(10)} ${(error as Error).message}`);
-        failures.push(`${fixture.docId}: ${(error as Error).message}`);
+          const status = problems.length === 0 ? "ok  " : "FAIL";
+          console.log(`${status} ${fixture.docId.padEnd(10)} ${info.widthPx}×${String(info.heightPx).padEnd(5)} ` +
+            `${String(image.bytes.length).padStart(7)} bytes  tiles=${totalTiles} unknown=${unknownTiles}` +
+            (problems.length ? `\n       ${problems.join("; ")}` : ""));
+          if (problems.length) failures.push(`${fixture.docId}: ${problems.join("; ")}`);
+        } catch (error) {
+          console.log(`FAIL ${fixture.docId.padEnd(10)} ${(error as Error).message}`);
+          failures.push(`${fixture.docId}: ${(error as Error).message}`);
+        }
       }
+    } finally {
+      await backend.close?.();
+    }
+
+    const perTile = puppeteerBackend({
+      modeId: "puppeteer-per-tile",
+      clueUrl: kClueUrl,
+      unit: "harness-render",
+      unitUrl: unitServer.unitUrl,
+      clueRevision: "integration-check",
+      capture: "per-tile"
+    });
+    try {
+      await perTile.open?.();
+      for (const fixture of perTileFixtures) {
+        const file = path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${fixture.docId}.json`);
+        const content = JSON.parse(fs.readFileSync(file, "utf8"));
+        try {
+          const outcome = await perTile.render({ docId: fixture.docId, content });
+          const tileIds = outcome.images.map((image) => image.tileId ?? "?");
+          const problems: string[] = [];
+          if (outcome.images.length !== fixture.expectImages) {
+            problems.push(`captured ${outcome.images.length} tile(s), expected ${fixture.expectImages} ` +
+              `(${tileIds.join(", ")})`);
+          }
+          const status = problems.length === 0 ? "ok  " : "FAIL";
+          console.log(`${status} ${fixture.docId.padEnd(10)} per-tile: ${outcome.images.length} image(s) ` +
+            `[${tileIds.join(", ")}]` + (problems.length ? `\n       ${problems.join("; ")}` : ""));
+          if (problems.length) failures.push(`${fixture.docId} (per-tile): ${problems.join("; ")}`);
+        } catch (error) {
+          console.log(`FAIL ${fixture.docId.padEnd(10)} per-tile: ${(error as Error).message}`);
+          failures.push(`${fixture.docId} (per-tile): ${(error as Error).message}`);
+        }
+      }
+    } finally {
+      await perTile.close?.();
     }
   } finally {
-    await backend.close?.();
-  }
-
-  const perTile = puppeteerBackend({
-    modeId: "puppeteer-per-tile",
-    clueUrl: kClueUrl,
-    unit: "harness-render",
-    unitUrl: unitServer.unitUrl,
-    clueRevision: "integration-check",
-    capture: "per-tile"
-  });
-  await perTile.open?.();
-  try {
-    for (const fixture of perTileFixtures) {
-      const file = path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${fixture.docId}.json`);
-      const content = JSON.parse(fs.readFileSync(file, "utf8"));
-      try {
-        const outcome = await perTile.render({ docId: fixture.docId, content });
-        const tileIds = outcome.images.map((image) => image.tileId ?? "?");
-        const problems: string[] = [];
-        if (outcome.images.length !== fixture.expectImages) {
-          problems.push(`captured ${outcome.images.length} tile(s), expected ${fixture.expectImages} ` +
-            `(${tileIds.join(", ")})`);
-        }
-        const status = problems.length === 0 ? "ok  " : "FAIL";
-        console.log(`${status} ${fixture.docId.padEnd(10)} per-tile: ${outcome.images.length} image(s) ` +
-          `[${tileIds.join(", ")}]` + (problems.length ? `\n       ${problems.join("; ")}` : ""));
-        if (problems.length) failures.push(`${fixture.docId} (per-tile): ${problems.join("; ")}`);
-      } catch (error) {
-        console.log(`FAIL ${fixture.docId.padEnd(10)} per-tile: ${(error as Error).message}`);
-        failures.push(`${fixture.docId} (per-tile): ${(error as Error).message}`);
-      }
-    }
-  } finally {
-    await perTile.close?.();
     await unitServer.close();
   }
 
