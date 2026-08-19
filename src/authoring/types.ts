@@ -62,6 +62,8 @@ export interface IUnitConfig extends IItemTemplateConfig {
   // "evenLayout" (default) splits the panes evenly; "wideContent" narrows the resources pane to its
   // comments-open width so the workspace gets ~2/3 until comments are opened.
   contentLayout?: "evenLayout" | "wideContent";
+  fixedStartView?: boolean;
+  fixedStartTab?: string;
   defaultSharedDocuments?: boolean;
   showShare?: boolean;
 }

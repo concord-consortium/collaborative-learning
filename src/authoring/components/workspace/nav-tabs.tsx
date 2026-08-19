@@ -16,6 +16,8 @@ interface FormTab {
 interface INavTabsInputs {
   defaultPanelLayout: IUnitConfig["defaultPanelLayout"];
   contentLayout: IUnitConfig["contentLayout"];
+  fixedStartView: boolean;
+  fixedStartTab: string;
   tabs: FormTab[];
 }
 
@@ -69,6 +71,12 @@ const NavTabs: React.FC = () => {
   const currentContentLayout = useMemo(() => {
     return unitConfig?.config?.contentLayout ?? "evenLayout";
   }, [unitConfig]);
+  const currentFixedStartView = useMemo(() => {
+    return unitConfig?.config?.fixedStartView ?? false;
+  }, [unitConfig]);
+  const currentFixedStartTab = useMemo(() => {
+    return unitConfig?.config?.fixedStartTab ?? "";
+  }, [unitConfig]);
   const { handleSubmit, register, formState: { errors } } = useForm<INavTabsInputs>();
 
   const onSubmit: SubmitHandler<INavTabsInputs> = (data) => {
@@ -85,6 +93,15 @@ const NavTabs: React.FC = () => {
           draft.config.contentLayout = data.contentLayout;
         } else {
           delete draft.config.contentLayout;
+        }
+        // Fixed start view (omit fixedStartView when off; preserve the author's tab choice either way)
+        if (data.fixedStartView && data.fixedStartTab) {
+          draft.config.fixedStartView = true;
+          draft.config.fixedStartTab = data.fixedStartTab;
+        } else {
+          delete draft.config.fixedStartView;
+          if (data.fixedStartTab) draft.config.fixedStartTab = data.fixedStartTab;
+          else delete draft.config.fixedStartTab;
         }
         formTabs.forEach((tab, index) => {
           const formTab = data.tabs[index];
@@ -136,6 +153,23 @@ const NavTabs: React.FC = () => {
         >
           <option value="evenLayout">Even split (50 / 50)</option>
           <option value="wideContent">Wide content (narrow resources)</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <legend>Fixed Start View</legend>
+        <p className="muted">
+          When on, every user starts on the selected tab (no document open, divider reset) on every
+          load, instead of resuming where they left off.
+        </p>
+        <label>
+          <input type="checkbox" {...register("fixedStartView")} defaultChecked={currentFixedStartView} />
+          {" "}Always start on a fixed tab
+        </label>
+        <select {...register("fixedStartTab")} defaultValue={currentFixedStartTab}>
+          <option value="">(choose a tab)</option>
+          {formTabs.map(formTab => (
+            <option key={formTab.tab} value={formTab.tab}>{formTab.defaultLabel}</option>
+          ))}
         </select>
       </fieldset>
       <table>
