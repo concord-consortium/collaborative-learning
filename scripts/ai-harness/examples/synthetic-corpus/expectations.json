@@ -107,7 +107,7 @@
         "requiresVisualRepresentation": true
       },
       "handlerTier": "stub",
-      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The stub handler emits one sentence \u2014 that weak summary is the measurement, not a failure."
+      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The stub handler emits one sentence — that weak summary is the measurement, not a failure."
     },
     "empty": {
       "expectDistinctiveInDefaultSummary": false,
