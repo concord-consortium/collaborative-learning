@@ -38,6 +38,7 @@ import {
 } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
+import { resolveStartView } from "../models/stores/persistent-ui/persistent-ui";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { typeConverter } from "../utilities/db-utils";
@@ -192,7 +193,19 @@ export class DB {
 
               // After unit config is available, apply default panel layout for first-time visitors
               persistentUIReady.then(() => {
-                persistentUI.applyDefaultPanelLayout(this.stores.appConfig.defaultPanelLayout);
+                const { appConfig } = this.stores;
+                const displayedTabs = this.stores.tabsToDisplay.map(t => t.tab);
+                const startView = resolveStartView({
+                  fixedStartView: appConfig.fixedStartView,
+                  fixedStartTab: appConfig.fixedStartTab,
+                  defaultPanelLayout: appConfig.defaultPanelLayout
+                }, displayedTabs);
+                if (startView) {
+                  // Force the author's start view on every load, overriding restored state.
+                  persistentUI.applyFixedStartView(startView.tab, startView.dividerPosition);
+                } else {
+                  persistentUI.applyDefaultPanelLayout(appConfig.defaultPanelLayout);
+                }
               }).catch((err) => {
                 console.error("Error initializing persistent UI:", err);
               });
