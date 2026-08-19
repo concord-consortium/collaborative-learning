@@ -6,6 +6,7 @@ import { SnapshotIn } from "mobx-state-tree";
 import { clearTermOverrides, setTermOverrides } from "../../utilities/translation/translate";
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
+import { getGroupOwnerId } from "../document/document-axes";
 import { GroupDocument, ProblemDocument } from "../document/document-types";
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
@@ -14,6 +15,10 @@ import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DocumentMetadataStore } from "./document-metadata-store";
 import { DB } from "../../lib/db";
 import { Bookmark, Bookmarks } from "./bookmarks";
+
+// The offering these mock groups belong to. A group id is unique only within one offering, so a group
+// document identifies its group through the synthetic owner uid the app stamps, not by a bare id.
+const kOffering = "offering-1";
 
 //****************************************** Documents Mock ***************************************
 
@@ -35,12 +40,16 @@ const mockDocumentsData: DocumentModelSnapshotType[] = [
     type: ProblemDocument, key:"Student 4 Problem Doc Group 3", groupIdOfUserOwner: "3", createdAt: 4,
     content: { tiles: [] } as DocumentContentSnapshotType
   },
-  { uid: "2", //Scott (group doc for group 3)
+  { uid: getGroupOwnerId(kOffering, "3"), // owned by the group, not by whoever created it
     type: GroupDocument, key:"Group 3 Group Doc", groupId: "3", createdAt: 5,
     content: { tiles: [] } as DocumentContentSnapshotType
   },
-  { uid: "1", //Joe (group doc for group 5)
+  { uid: getGroupOwnerId(kOffering, "5"),
     type: GroupDocument, key:"Group 5 Group Doc", groupId: "5", createdAt: 6,
+    content: { tiles: [] } as DocumentContentSnapshotType
+  },
+  { uid: "class_mock", // the class-wide synthetic owner
+    type: GroupDocument, key:"Class Wide Doc", createdAt: 7, unit: "sas",
     content: { tiles: [] } as DocumentContentSnapshotType
   }
 ];
@@ -79,20 +88,32 @@ const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
     problem: "2"
   },
   "Group 3 Group Doc": {
-    uid: "2",
+    uid: getGroupOwnerId(kOffering, "3"),   // the synthetic group owner, as the app stamps it
     type: GroupDocument, key:"Group 3 Group Doc", createdAt: 5,
     tools: [],
     groupId: "3",
+    offeringId: kOffering,
     investigation: "1",
     problem: "2"
   },
   "Group 5 Group Doc": {
-    uid: "1",
+    uid: getGroupOwnerId(kOffering, "5"),
     type: GroupDocument, key:"Group 5 Group Doc", createdAt: 6,
     tools: [],
     groupId: "5",
+    offeringId: kOffering,
     investigation: "1",
     problem: "1"
+  },
+  "Class Wide Doc": {
+    uid: "class_mock",
+    type: GroupDocument, key: "Class Wide Doc", createdAt: 7,
+    tools: [],
+    unit: "sas",
+    investigation: null,
+    problem: null,
+    kind: "drivingQuestionBoard",
+    concurrent: true
   }
 };
 
@@ -164,6 +185,7 @@ const createMockGroups = (mockClass?: ClassModelType) => {
 
   const env = mockClass ? { class: mockClass } : undefined;
   const mockGroups = GroupsModel.create({
+    offeringId: kOffering,
     groupsMap: {
       3: GroupModel.create({ id: "3", users: group3Users }),
       5: GroupModel.create({ id: "5", users: group5Users }),
@@ -239,8 +261,11 @@ describe('DocumentGroup Model', () => {
 
       const documentsByGroup = sortedDocuments.sortBy("Group");
 
+      // documentsByGroup[0] is "Whole Class" (the class-wide document, not bookmarked); group
+      // sections follow it in numeric order.
+
       // Group 3: Scott (bookmarked), Kirk (not), Group 3 group doc (not)
-      const documentCollection = documentsByGroup[0].byBookmarked;
+      const documentCollection = documentsByGroup[1].byBookmarked;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Bookmarked");
       expect(documentCollection[0].documents.length).toBe(1);
@@ -248,7 +273,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[1].documents.length).toBe(2);
 
       // Group 5: Joe (bookmarked), Group 5 group doc (not)
-      const documentCollection2 = documentsByGroup[1].byBookmarked;
+      const documentCollection2 = documentsByGroup[2].byBookmarked;
       expect(documentCollection2.length).toBe(2);
       expect(documentCollection2[0].label).toBe("Bookmarked");
       expect(documentCollection2[0].documents.length).toBe(1);
@@ -256,7 +281,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection2[1].documents.length).toBe(1);
 
       // Group 9: Dennis (not bookmarked)
-      const documentCollection3 = documentsByGroup[2].byBookmarked;
+      const documentCollection3 = documentsByGroup[3].byBookmarked;
       expect(documentCollection3.length).toBe(2);
       expect(documentCollection3[0].label).toBe("Bookmarked");
       expect(documentCollection3[0].documents.length).toBe(0);
@@ -328,13 +353,30 @@ describe('DocumentGroup Model', () => {
       expect(collection3[0].documents.length).toBe(2);
     });
 
+    it('puts a class-wide collaborative document in its own Whole Class section, ordered first', () => {
+      const byGroupDocs = sortedDocuments.sortBy("Group");
+      expect(byGroupDocs.map(d => d.label)).toEqual(["Whole Class", "Group 3", "Group 5", "Group 9"]);
+
+      const wholeClass = byGroupDocs[0];
+      expect(wholeClass.documents.map(d => d.key)).toEqual(["Class Wide Doc"]);
+    });
+
+    it('does not file a class-wide document under a numbered group', () => {
+      const byGroupDocs = sortedDocuments.sortBy("Group");
+      const groupSections = byGroupDocs.filter(d => d.label !== "Whole Class");
+      expect(groupSections.some(s => s.documents.some(d => d.key === "Class Wide Doc"))).toBe(false);
+    });
+
   });
 
   describe("byName Function", () => {
     it ('should return a document collection alphabetized by last name with the correct documents per user', () => {
       const byGroupDocs = sortedDocuments.sortBy("Group");
+      // byGroupDocs[0] is "Whole Class" (the class-wide document produces no name section); group
+      // sections follow it in numeric order.
+
       // Group 3: Scott, Kirk, and Group 3 group doc
-      const documentGroup = byGroupDocs[0];
+      const documentGroup = byGroupDocs[1];
       const documentCollection = documentGroup.byName;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Cytacki, Scott");
@@ -345,7 +387,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[1].documents.length).toBe(2);
 
       // Group 5: Joe and Group 5 group doc
-      const documentGroup2 = byGroupDocs[1];
+      const documentGroup2 = byGroupDocs[2];
       const documentCollection2 = documentGroup2.byName;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("Bacal, Joe");
@@ -353,7 +395,7 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection2[0].documents.length).toBe(2);
 
       // Group 9: Dennis (no group doc for group 9)
-      const documentGroup3 = byGroupDocs[2];
+      const documentGroup3 = byGroupDocs[3];
       const documentCollection3 = documentGroup3.byName;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Cao, Dennis");
@@ -363,8 +405,8 @@ describe('DocumentGroup Model', () => {
     it('should include group documents under each member of the group', () => {
       // Sort directly by Name to test the top-level byName behavior
       const byNameDocs = sortedDocuments.sortBy("Name");
-      // Should have 4 name sections (alphabetical): Bacal, Cao, Cytacki, Swenson
-      expect(byNameDocs.length).toBe(4);
+      // Five sections: the four named students alphabetically, then the authorless section last.
+      expect(byNameDocs.length).toBe(5);
 
       // Bacal, Joe (Group 5) - own doc + Group 5 group doc
       expect(byNameDocs[0].label).toBe("Bacal, Joe");
@@ -395,7 +437,73 @@ describe('DocumentGroup Model', () => {
       // Group documents should not appear as their own name entry
       const labels = byNameDocs.map(d => d.label);
       expect(labels).not.toContain("Unknown");
-      expect(labels).toEqual(["Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "Swenson, Kirk"]);
+      // Named students sort among themselves; the authorless section is ordered after them rather than
+      // alphabetically among the surnames, matching the "by group" sort's trailing catch-all.
+      expect(labels).toEqual(["Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "Swenson, Kirk", "No Name"]);
+    });
+
+    it('files a class-wide collaborative document under No Name, not under any student', () => {
+      const byNameDocs = sortedDocuments.sortBy("Name");
+      const noName = byNameDocs.find(d => d.label === "No Name");
+      expect(noName).toBeDefined();
+      expect(noName?.documents.map(d => d.key)).toEqual(["Class Wide Doc"]);
+
+      // It has no author, so it must not be repeated under the students the way a group document is.
+      const studentSections = byNameDocs.filter(d => d.label !== "No Name");
+      expect(studentSections.some(s => s.documents.some(d => d.key === "Class Wide Doc"))).toBe(false);
+    });
+
+    describe("a group document from another offering", () => {
+      // Sort Work's "All" filter spans every offering the class has worked through. Group 3 of another
+      // assignment is a different set of students, and this store holds only the current offering's
+      // membership, so the document must not be filed under anybody's name.
+      const addForeignGroupDoc = () => {
+        sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create({
+          ...mockMetadataDocuments,
+          "Old Group 3 Doc": {
+            uid: getGroupOwnerId("other-offering", "3"),
+            type: GroupDocument, key: "Old Group 3 Doc", createdAt: 8,
+            tools: [], groupId: "3", offeringId: "other-offering",
+            unit: "sas", investigation: "2", problem: "4"
+          }
+        });
+      };
+
+      it("is sectioned by where the work came from, not under this offering's group 3", () => {
+        addForeignGroupDoc();
+        const byNameDocs = sortedDocuments.sortBy("Name");
+        const section = byNameDocs.find(d => d.documents.some(doc => doc.key === "Old Group 3 Doc"));
+        expect(section?.label).toBe("Groups from sas-2.4");
+
+        // Group 3 of the current offering is Cytacki and Swenson; neither wrote this.
+        const named = byNameDocs.filter(d => d.label === "Cytacki, Scott" || d.label === "Swenson, Kirk");
+        expect(named.some(s => s.documents.some(d => d.key === "Old Group 3 Doc"))).toBe(false);
+      });
+
+      it("stays visible even when this offering has no group of that number", () => {
+        // Group 7 does not exist here, so looking the group up by bare id found nothing and the
+        // document was dropped from this sort altogether rather than mis-filed.
+        sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create({
+          ...mockMetadataDocuments,
+          "Old Group 7 Doc": {
+            uid: getGroupOwnerId("other-offering", "7"),
+            type: GroupDocument, key: "Old Group 7 Doc", createdAt: 9,
+            tools: [], groupId: "7", offeringId: "other-offering",
+            unit: "sas", investigation: "2", problem: "4"
+          }
+        });
+        const byNameDocs = sortedDocuments.sortBy("Name");
+        const allKeys = byNameDocs.flatMap(d => d.documents.map(doc => doc.key));
+        expect(allKeys).toContain("Old Group 7 Doc");
+      });
+
+      it("is ordered after the named students, alongside the authorless section", () => {
+        addForeignGroupDoc();
+        const labels = sortedDocuments.sortBy("Name").map(d => d.label);
+        expect(labels).toEqual([
+          "Bacal, Joe", "Cao, Dennis", "Cytacki, Scott", "Swenson, Kirk", "Groups from sas-2.4", "No Name"
+        ]);
+      });
     });
   });
 
@@ -433,6 +541,16 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection3[2].label).toBe("Not Tagged");
       expect(documentCollection3[2].documents.length).toBe(2);
 
+      // No Name: class-wide document with no strategies. It sorts after the named students.
+      const documentCollectionNoName = byNameGroups[4].byStrategy;
+      expect(documentCollectionNoName.length).toBe(3);
+      expect(documentCollectionNoName[0].label).toBe("foo");
+      expect(documentCollectionNoName[0].documents.length).toBe(0);
+      expect(documentCollectionNoName[1].label).toBe("bar");
+      expect(documentCollectionNoName[1].documents.length).toBe(0);
+      expect(documentCollectionNoName[2].label).toBe("Not Tagged");
+      expect(documentCollectionNoName[2].documents.length).toBe(1); // Class Wide Doc
+
       // Swenson, Kirk: problem doc has ["bar"] + Group 3 group doc with no strategies
       const documentCollection4 = byNameGroups[3].byStrategy;
       expect(documentCollection4.length).toBe(3);
@@ -448,9 +566,10 @@ describe('DocumentGroup Model', () => {
   describe("byTools Function", () => {
     it ('should return a document collection sorted by tool with the correct documents per tool', () => {
       const byGroupDocs = sortedDocuments.sortBy("Group");
+      // byGroupDocs[0] is "Whole Class"; group sections follow it in numeric order.
 
       // Group 3: Scott (Text), Kirk (no tools), Group 3 group doc (no tools)
-      const documentCollection = byGroupDocs[0].byTools;
+      const documentCollection = byGroupDocs[1].byTools;
       expect(documentCollection.length).toBe(2);
       expect(documentCollection[0].label).toBe("Text");
       expect(documentCollection[0].documents.length).toBe(1);
@@ -458,13 +577,13 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[1].documents.length).toBe(2);
 
       // Group 5: Joe (no tools), Group 5 group doc (no tools)
-      const documentCollection2 = byGroupDocs[1].byTools;
+      const documentCollection2 = byGroupDocs[2].byTools;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("No Tools");
       expect(documentCollection2[0].documents.length).toBe(2);
 
       // Group 9: Dennis (Drawing)
-      const documentCollection3 = byGroupDocs[2].byTools;
+      const documentCollection3 = byGroupDocs[3].byTools;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Drawing");
       expect(documentCollection3[0].documents.length).toBe(1);
@@ -475,21 +594,22 @@ describe('DocumentGroup Model', () => {
     it('should return a document collection sorted by problem with correct documents per problem', () => {
       // Primary sort by Group, then secondary sort by Problem
       const byGroupDocs = sortedDocuments.sortBy("Group");
+      // byGroupDocs[0] is "Whole Class"; group sections follow it in numeric order.
 
       // Group 3: Scott (1.2), Kirk (1.2), Group 3 group doc (1.2)
-      const documentCollection = byGroupDocs[0].byProblem;
+      const documentCollection = byGroupDocs[1].byProblem;
       expect(documentCollection.length).toBe(1);
       expect(documentCollection[0].label).toBe("Problem 1.2");
       expect(documentCollection[0].documents.length).toBe(3);
 
       // Group 5: Joe (1.1), Group 5 group doc (1.1)
-      const documentCollection2 = byGroupDocs[1].byProblem;
+      const documentCollection2 = byGroupDocs[2].byProblem;
       expect(documentCollection2.length).toBe(1);
       expect(documentCollection2[0].label).toBe("Problem 1.1");
       expect(documentCollection2[0].documents.length).toBe(2);
 
       // Group 9: Dennis (2.1)
-      const documentCollection3 = byGroupDocs[2].byProblem;
+      const documentCollection3 = byGroupDocs[3].byProblem;
       expect(documentCollection3.length).toBe(1);
       expect(documentCollection3[0].label).toBe("Problem 2.1");
       expect(documentCollection3[0].documents.length).toBe(1);
@@ -497,14 +617,17 @@ describe('DocumentGroup Model', () => {
 
     it('should sort problems in correct order (by investigation then problem)', () => {
       const byProblemDocs = sortedDocuments.sortBy("Problem");
-      expect(byProblemDocs.length).toBe(3);
-      // Should be sorted: 1.1, 1.2, 2.1
+      // The class-wide document has no investigation/problem, so it falls into "No Problem".
+      expect(byProblemDocs.length).toBe(4);
+      // Should be sorted: 1.1, 1.2, 2.1, No Problem
       expect(byProblemDocs[0].label).toBe("Problem 1.1");
       expect(byProblemDocs[0].documents.length).toBe(2); // Joe + Group 5 group doc
       expect(byProblemDocs[1].label).toBe("Problem 1.2");
       expect(byProblemDocs[1].documents.length).toBe(3); // Scott + Kirk + Group 3 group doc
       expect(byProblemDocs[2].label).toBe("Problem 2.1");
       expect(byProblemDocs[2].documents.length).toBe(1);
+      expect(byProblemDocs[3].label).toBe("No Problem");
+      expect(byProblemDocs[3].documents.length).toBe(1); // Class Wide Doc
     });
 
     it('labels groups with the problem title when the unit provides one (keeping ordinal order)', () => {
@@ -516,7 +639,9 @@ describe('DocumentGroup Model', () => {
         })
       };
       const byProblemDocs = sortedDocuments.sortBy("Problem");
-      expect(byProblemDocs.map(g => g.label)).toEqual(["Storm 1-1", "Storm 1-2", "Storm 2-1"]);
+      // The class-wide document has no investigation/problem, so it has no title to resolve and
+      // keeps the generic "No Problem" label.
+      expect(byProblemDocs.map(g => g.label)).toEqual(["Storm 1-1", "Storm 1-2", "Storm 2-1", "No Problem"]);
       // Grouping/ordering is unchanged — only the displayed label differs.
       expect(byProblemDocs[1].documents.length).toBe(3);
     });
@@ -542,7 +667,8 @@ describe('DocumentGroup Model', () => {
       expect(byProblemDocs[2].label).toBe("Problem 2.1");
       expect(byProblemDocs[2].documents.length).toBe(1);
       expect(byProblemDocs[3].label).toBe("No Problem");
-      expect(byProblemDocs[3].documents.length).toBe(1);
+      // Student 1 Problem Doc Group 5 (modified to have no problem info) + the class-wide document
+      expect(byProblemDocs[3].documents.length).toBe(2);
     });
   });
 

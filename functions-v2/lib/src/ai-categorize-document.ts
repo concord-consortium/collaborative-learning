@@ -18,6 +18,18 @@ import {
   defaultAiPrompt
 } from "../../../shared/ai-analysis-messages";
 
+/**
+ * The fields `mapRelatedSummaries` reads off a document returned by the related-summaries search.
+ *
+ * Local to this module rather than shared: it describes a Firestore document's shape, and it names
+ * `AiAgreement`, which is a functions-v2 type. `shared/` carries what production and the harness
+ * both have to agree on — the prompt, the message builders, and the entries those builders take.
+ */
+export interface RelatedSummarySource {
+  summary?: unknown;
+  aiAgreements?: Record<string, AiAgreement>;
+}
+
 // The message and schema builders live in shared/ so this function and the local evaluation
 // harness (scripts/ai-harness) construct identical OpenAI requests. They are re-exported here
 // so existing importers of this module keep working.
@@ -93,22 +105,30 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
       distanceMeasure: "EUCLIDEAN",
     });
   const snapshot = await query.get();
+  return mapRelatedSummaries(snapshot.docs.map((doc) => doc.data() as RelatedSummarySource));
+}
+
+/**
+ * Maps the documents found by the related-summaries search into the entries injected into the AI
+ * prompt. A document with an empty `aiAgreements` map still yields an entry; only a missing map is
+ * skipped. Exported for unit testing.
+ */
+export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
   const relatedSummaries: RelatedSummary[] = [];
-  snapshot.forEach((doc) => {
-    const aiAgreements: Record<AgreementValue, AiAgreement> = doc.data().aiAgreements || undefined;
-    if (aiAgreements) {
-      const agreements = Object.values(aiAgreements).reduce<Agreements>((acc, cur) => {
+  for (const data of docs) {
+    if (data.aiAgreements && typeof data.summary === "string" && data.summary.length > 0) {
+      const agreements = Object.values(data.aiAgreements).reduce<Agreements>((acc, cur) => {
         const value = cur.value as AgreementValue;
         acc[value] = acc[value] || [];
         acc[value].push({content: cur.content, tags: cur.tags});
         return acc;
-      }, {} as Agreements);
+      }, {});
       relatedSummaries.push({
-        summary,
+        summary: data.summary,
         agreements,
       });
     }
-  });
+  }
   return relatedSummaries;
 }
 

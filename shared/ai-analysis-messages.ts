@@ -17,7 +17,13 @@ export interface AgreementInfo {
   content: string;
   tags: string[];
 }
-export type Agreements = Record<AgreementValue, AgreementInfo[]>;
+/**
+ * `Partial`, because a document's agreements need not cover every value. `Object.values` over a
+ * document's `aiAgreements` produces only the values people actually chose, so a summary that
+ * everyone agreed with has a `yes` key and nothing else — and the prompt line built from this reads
+ * the entries that are there rather than assuming all of them.
+ */
+export type Agreements = Partial<Record<AgreementValue, AgreementInfo[]>>;
 
 export interface RelatedSummary {
   summary: string;

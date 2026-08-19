@@ -112,6 +112,51 @@ function setupFirestoreHistoryManager(
 }
 
 describe("history loading", () => {
+  interface IMirrorMockHistoryParam {
+    entries: HistoryEntrySnapshot[];
+    loadingError?: firebase.firestore.FirestoreError | undefined;
+    lastHistoryEntry?: LastHistoryEntry;
+  }
+
+  /**
+   * This does several things. It:
+   * - mocks getLastHistoryEntry and loadHistory
+   * - waits until setNumHistoryEntriesAppliedFromFirestore has resolved.
+   *
+   * This allows us check the logic of historyManager.historyStatus based on
+   * mock history entries, a loading error and a mock lastHistoryEntry
+   *
+   * @param param
+   * @returns
+   */
+  async function mirrorMockHistory(param: IMirrorMockHistoryParam) {
+    const { entries, loadingError, lastHistoryEntry } = param;
+    const { treeManager } = setupDocument();
+    const { historyManager } = setupFirestoreHistoryManager(treeManager);
+
+    // Mock getLastHistoryEntry to return the lastHistoryEntry
+    // This is called in prepareFirestoreHistoryInfo
+    getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
+
+    loadHistory.mockImplementation((firestore, path, historyLoaded) => {
+      // In the real world this callback will be delayed until the history documents
+      // are actually loaded from firebase
+      const historyEntryDocs = entries.map((entry, index) => ({
+        index,
+        entry
+      }));
+      historyLoaded(historyEntryDocs, loadingError);
+      return () => undefined;
+    });
+
+    await historyManager.subscribeToFirestoreHistory();
+
+    // Wait for setNumHistoryEntriesAppliedFromFirestore to finish
+    await when(() => treeManager.numHistoryEventsApplied !== undefined);
+
+    return { treeManager, historyManager };
+  }
+
   it("initially has a status of NO_HISTORY", () => {
     const { treeManager } = setupDocument();
     const { historyManager } = setupFirestoreHistoryManager(treeManager);
@@ -221,50 +266,6 @@ describe("history loading", () => {
 
     describe("updates the historyStatus", () => {
 
-      interface IMirrorMockHistoryParam {
-        entries: HistoryEntrySnapshot[];
-        loadingError?: firebase.firestore.FirestoreError | undefined;
-        lastHistoryEntry?: LastHistoryEntry;
-      }
-
-      /**
-       * This does several things. It:
-       * - mocks getLastHistoryEntry and loadHistory
-       * - waits until setNumHistoryEntriesAppliedFromFirestore has resolved.
-       *
-       * This allows us check the logic of historyManager.historyStatus based on
-       * mock history entries, a loading error and a mock lastHistoryEntry
-       *
-       * @param param
-       * @returns
-       */
-      async function mirrorMockHistory(param: IMirrorMockHistoryParam) {
-        const { entries, loadingError, lastHistoryEntry } = param;
-        const { treeManager } = setupDocument();
-        const { historyManager } = setupFirestoreHistoryManager(treeManager);
-
-        // Mock getLastHistoryEntry to return the lastHistoryEntry
-        // This is called in prepareFirestoreHistoryInfo
-        getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
-
-        loadHistory.mockImplementation((firestore, path, historyLoaded) => {
-          // In the real world this callback will be delayed until the history documents
-          // are actually loaded from firebase
-          const historyEntryDocs = entries.map((entry, index) => ({
-            index,
-            entry
-          }));
-          historyLoaded(historyEntryDocs, loadingError);
-          return () => undefined;
-        });
-
-        await historyManager.subscribeToFirestoreHistory();
-
-        // Wait for setNumHistoryEntriesAppliedFromFirestore to finish
-        await when(() => treeManager.numHistoryEventsApplied !== undefined);
-
-        return { treeManager, historyManager };
-      }
 
       it("is LOADED when there are more events than firestore length", async () => {
         const { historyManager } = await mirrorMockHistory({
@@ -326,7 +327,73 @@ describe("history loading", () => {
         expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADING);
       });
 
+
     });
 
+  });
+
+  describe("moveToHistoryEntryAfterLoad", () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it("treats the 'first' sentinel as position 0", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      await historyManager.moveToHistoryEntryAfterLoad("first");
+      expect(goToSpy).toHaveBeenCalledWith(0);
+    });
+
+    it("warns and does not navigate for an unresolved id", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+      expect(goToSpy).not.toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalled();
+    });
+
+    // The real ordering: PlaybackComponent calls this from a mount effect while the status is still
+    // the initial NO_HISTORY, before the Firestore query resolves. The seek must wait for the load
+    // and then happen — this is the case the earlier "stop on NO_HISTORY" version regressed.
+    it("seeks once the history loads when called before the load resolves", async () => {
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
+      getLastHistoryEntry.mockResolvedValue(undefined);
+      loadHistory.mockImplementation((firestore, path, historyLoaded) => {
+        historyLoaded([{ index: 0, entry: { id: "a1" } }, { index: 1, entry: { id: "a2" } }]);
+        return () => undefined;
+      });
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+
+      // Status is the initial NO_HISTORY here — call BEFORE the history loads.
+      expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
+      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("a2");
+
+      // Now load the history; the pending seek proceeds once the status becomes LOADED.
+      await historyManager.subscribeToFirestoreHistory();
+      await when(() => treeManager.numHistoryEventsApplied !== undefined);
+      await seekPromise;
+
+      expect(goToSpy).toHaveBeenCalled();
+    });
+
+    // A genuinely empty document stays NO_HISTORY forever, so the bounded wait must time out
+    // (not hang) and give up without navigating.
+    it("warns and does not navigate when the history never loads (times out)", async () => {
+      jest.useFakeTimers();
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("first");
+      await jest.advanceTimersByTimeAsync(30000);
+      await seekPromise;
+      expect(goToSpy).not.toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
   });
 });

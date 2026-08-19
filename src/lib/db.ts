@@ -33,9 +33,10 @@ import { LogEventName } from "./logger-types";
 import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
-  getDocumentKindMetadataFields, getDocumentOwner, getDocumentOwnerType, getDocumentScopeFields,
-  registerClassWideDocumentKind
+  getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
+  getDocumentAxisProfileName, getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
 } from "../models/document/document-kinds";
+import { getClassOwnerId } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -110,10 +111,12 @@ export interface OpenDocumentOptions {
 }
 
 interface IGetOrCreateCanonicalDocumentOpts {
-  // Firestore path of the pointer slot for this scope.
-  pointerPath: string;
-  // The pointer slot's label. It must match the final segment of pointerPath and is written to the
-  // winning document's `canonical` field.
+  // The container holding the slot: the class, plus that container's own id when the document is kept
+  // below the class. The slot's owner is not passed — it is derived from `kind`, the same way the
+  // document's own `uid` is, so the pointer path and the document can never name different owners.
+  container: { classHash: string; offeringId?: string; unit?: string };
+  // The pointer slot's label. It is the path's final segment and is written to the winning document's
+  // `canonical` field.
   canonicalLabel: string;
   // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
   // a class-wide document keeps type === GroupDocument while its kind is the declared kind. The kind also drives
@@ -122,6 +125,26 @@ interface IGetOrCreateCanonicalDocumentOpts {
   kind: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
+
+/**
+ * The metadata shape written at creation: everything `IDocumentMetadata` declares, plus the fields only the
+ * write side knows about.
+ *
+ * `axisProfile` is deliberately absent from `IDocumentMetadata`, `DocumentMetadataModel`, and
+ * `DocumentModel`, so it is not reachable from the running app. It exists for migrations and offline
+ * analysis, which read Firestore directly. Leaving it undeclared is what keeps it from becoming a thing the
+ * runtime branches on — the axes stay the only way to ask how a document behaves, and a read of the profile
+ * would have to add the field to a type first, which is a reviewable act rather than an accident.
+ *
+ * Undeclared fields survive the trip: `DocumentMetadataStore` typechecks raw Firestore data against
+ * `DocumentMetadataModel`, and MST's `typecheck` ignores properties a model does not declare (pinned in
+ * src/models/mst.test.ts). `canonical` already relies on this.
+ */
+type IDocumentMetadataAtCreation = IDocumentMetadata & {
+  context_id: string;
+  network: string | null;
+  axisProfile?: string;
+};
 
 interface ICreateFirestoreMetadataDocumentOpts {
   documentKey: string;
@@ -579,7 +602,7 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts) {
+  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts): Promise<IDocumentMetadata> {
     const { documentKey, type, kind, owner, createdAt, title } = opts;
     const { user } = this.stores;
     const userContext = this.stores.userContextProvider.userContext;
@@ -598,16 +621,18 @@ export class DB {
       return docSnapshot.data() as IDocumentMetadata;
     }
 
-    // Resolve every scope field (context_id, unit/investigation/problem, offering/group association) from the
-    // kind's registered scope. The runtime values come from the stores; they are valid here because
-    // createDocument validated them via validateDocumentKindCreation before writing (a group kind requires the
-    // user to be in a group, so currentGroupId is present).
-    const scopeFields = getDocumentScopeFields(kind, {
+    // Resolve where the document is kept and what it is about (context_id, unit/investigation/problem,
+    // offeringId) from the kind's registered container.
+    const locationFields = getDocumentLocationFields(kind, {
       ...this.currentProblemInfo,
       context_id: user.classHash,
       offeringId: user.offeringId,
-      groupId: user.currentGroupId,
     });
+
+    // The owner's stored fields beyond `uid`: a group owner's `groupId`. The runtime value comes from the
+    // stores; it is valid here because createDocument validated it via validateDocumentKindCreation before
+    // writing (a group kind requires the user to be in a group, so currentGroupId is present).
+    const ownerFields = getDocumentOwnerFields(kind, user.currentGroupId);
 
     // `title` is stamped only when present so Firestore never sees `title: undefined`.
     const titleInfo: { title?: string } = {};
@@ -616,13 +641,19 @@ export class DB {
     }
 
     // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
-    // Every kind is registered now for scope/owner resolution, yet we deliberately do NOT persist `kind` on
+    // Every kind is registered now for location/owner resolution, yet we deliberately do NOT persist `kind` on
     // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
     // other document types, so we don't want to stamp a kind we'd then have to migrate. Add a type here as it
     // is converted — see "Which documents get stamped" in docs/document-axes/target-architecture.md.
     const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
-    const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
+    // The axis profile the document is created at, recorded so a later migration can select every document
+    // made from one profile without querying the axis fields it is there to change. Gated with the kind
+    // fields above, for the same reason.
+    const profileName = type === GroupDocument ? getDocumentAxisProfileName(kind) : undefined;
+    const profileField = profileName ? { axisProfile: profileName } : {};
+
+    const firestoreMetadata: IDocumentMetadataAtCreation = {
       type,
       createdAt,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
@@ -632,8 +663,10 @@ export class DB {
       properties: {},
       uid: owner,
       ...titleInfo,
-      ...scopeFields,
-      ...kindFields
+      ...ownerFields,
+      ...locationFields,
+      ...kindFields,
+      ...profileField
     };
     await documentRef.set(firestoreMetadata);
     return firestoreMetadata;
@@ -659,9 +692,9 @@ export class DB {
     return { groupId: currentGroupId, offeringId };
   }
 
-  // Verify the stores hold the runtime context a document of this kind needs to construct its owner and scope
-  // fields. Throws when the context is missing. Currently only group-owned kinds have a requirement. The check
-  // lives here instead of the kind registry because it is easier for now.
+  // Verify the stores hold the runtime context a document of this kind needs to construct its owner and
+  // location fields. Throws when the context is missing. Currently only group-owned kinds have a requirement.
+  // The check lives here instead of the kind registry because it is easier for now.
   private validateDocumentKindCreation(kind: string) {
     if (getDocumentOwnerType(kind) === "group") {
       this.requireGroupContext();
@@ -685,11 +718,7 @@ export class DB {
       // The owner (authoring identity, stored as `uid`) is chosen by the kind's registered owner type:
       // the creating user, the synthetic group owner, or the synthetic class owner. It is also the document's
       // storage-path owner — a document the user owns resolves to their own path (getUserPath: owner || user.id).
-      const owner = getDocumentOwner(kind, {
-        userId: user.id,
-        groupOwnerId: user.userIdForGroupDocuments,
-        classOwnerId: this.userIdForClassWideDocuments
-      });
+      const owner = getDocumentOwner(kind, this.documentOwnerContext);
 
       const documentPath = this.firebase.getUserDocumentPath(user, undefined, owner);
       const documentRef = this.firebase.ref(documentPath).push();
@@ -773,14 +802,12 @@ export class DB {
   public async getOrCreateGroupDocument() {
     const { user } = this.stores;
     const { groupId, offeringId } = this.requireGroupContext();
-    // The pointer slot is labeled "default" (the group's default canonical document), not by the
-    // document's type — see kDefaultCanonicalDocumentLabel. The document itself is a GroupDocument.
-    const pointerPath = getCanonicalPointerPath(
-      { classHash: user.classHash, offeringId, groupId }, kDefaultCanonicalDocumentLabel
-    );
-    // Regular group documents: the transitional `type` and `kind` coincide (both GroupDocument).
+    // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
+    // The slot is labeled "default" (the group's default canonical document) rather than by the
+    // document's type — see kDefaultCanonicalDocumentLabel. For a regular group document the
+    // transitional `type` and the `kind` coincide, both GroupDocument.
     return this.getOrCreateCanonicalDocument({
-      pointerPath,
+      container: { classHash: user.classHash, offeringId },
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       type: GroupDocument,
       kind: GroupDocument,
@@ -788,20 +815,19 @@ export class DB {
     });
   }
 
-  // Class-scoped synthetic owner for this class's class-wide documents
+  // Synthetic owner uid for this class's class-wide documents, minted by the same function hasClassOwner
+  // reads back, so the two cannot drift.
   private get userIdForClassWideDocuments() {
-    return `class_${this.stores.user.classHash}`;
+    return getClassOwnerId(this.stores.user.classHash);
   }
 
   public async getOrCreateClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
-    const label = classWideDoc.kind;
-    const pointerPath = getCanonicalPointerPath({ classHash: user.classHash, unit: unit.code }, label);
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
     return this.getOrCreateCanonicalDocument({
-      pointerPath,
-      canonicalLabel: label,
+      container: { classHash: user.classHash, unit: unit.code },
+      canonicalLabel: classWideDoc.kind,
       type: GroupDocument,
       kind: classWideDoc.kind
     });
@@ -815,10 +841,12 @@ export class DB {
     if (!classWideDocs?.length) return;
     for (const classWideDoc of classWideDocs) {
       // Register each declared document's kind so createFirestoreMetadataDocument stamps its axis fields via the
-      // registry and createDocument derives its owner and scope. Registration validates the kind and rejects a
-      // duplicate (both throw); skip a bad entry rather than crash startup.
+      // registry and createDocument derives its owner and location — registerClassWideDocumentKind supplies the
+      // shape every class-wide document shares. The unit passed is the same code stamped as the document's
+      // `unit` (see currentProblemInfo). Registration validates the kind and rejects a duplicate (both throw);
+      // skip a bad entry rather than crash startup.
       try {
-        registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title);
+        registerClassWideDocumentKind(classWideDoc.kind, classWideDoc.title, this.stores.unit.code);
       } catch (err) {
         console.error("Ignoring class-wide document:", classWideDoc.kind, err);
         continue;
@@ -829,8 +857,27 @@ export class DB {
     }
   }
 
+  // The candidate owner uids for a document created in this session. getDocumentOwner picks among them by
+  // the kind's registered owner type; both the document's stored `uid` and its canonical slot use this.
+  private get documentOwnerContext(): IDocumentOwnerContext {
+    const { user } = this.stores;
+    return {
+      userId: user.id,
+      groupOwnerId: user.userIdForGroupDocuments,
+      classOwnerId: this.userIdForClassWideDocuments
+    };
+  }
+
   private async getOrCreateCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts) {
-    const { pointerPath, type, kind, canonicalLabel, findLegacy } = opts;
+    const { container, type, kind, canonicalLabel, findLegacy } = opts;
+    // The slot's owner is the same uid createDocument stamps on the document, from the same registry
+    // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
+    // path named a different owner would be rejected rather than silently mis-slotted.
+    const pointerPath = getCanonicalPointerPath({
+      ...container,
+      owner: getDocumentOwner(kind, this.documentOwnerContext),
+      label: canonicalLabel
+    });
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists.

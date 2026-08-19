@@ -53,6 +53,7 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
             <CanvasComponent
               content={content}
               context="left-nav"
+              logTileVisibility={true}
               readOnly={true}
             />
           </div>

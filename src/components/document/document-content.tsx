@@ -1,7 +1,7 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
-import { throttle } from "lodash";
+import { debounce, throttle } from "lodash";
 import classNames from "classnames";
 import { DocumentDndContext } from "./document-dnd-context";
 import { BaseComponent, IBaseProps } from "../base";
@@ -9,7 +9,11 @@ import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight, TileRowHandle } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
-import { getDocumentIdentifier } from "../../models/document/document-utils";
+import { getDocumentIdentifier, getDocumentLogParams } from "../../models/document/document-utils";
+import { isPlaceholderContent } from "../../models/tiles/placeholder/placeholder-content";
+import { getContainingTileNode, getTileIdFromNode, getTileNode,
+  getTileNodes } from "../tiles/tile-dom";
+import { logDocumentOrCurriculumEvent } from "../../models/document/log-document-event";
 import { IDropRowInfo, TileRowModelType } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -19,6 +23,9 @@ import { RowListComponent } from "./row-list";
 import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
 import { ContainerContext } from "./container-context";
+import { LogEventName } from "../../lib/logger-types";
+import { buildVisibilityLogParams, computeVisibleTiles, nextVisibilityCause,
+  type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
 
 import "./document-content.scss";
 
@@ -26,6 +33,7 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   context: string;
   documentId?: string;
+  logTileVisibility?: boolean;
   onScroll?: (x: number, y: number) => void;
   readOnly?: boolean;
   scale?: number;
@@ -63,6 +71,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
   private pickUpReactionDisposer: IReactionDisposer;
+  private visibilityDividerDisposer?: IReactionDisposer;
+  private visibilityCommentsDisposer?: IReactionDisposer;
+  private visibilityComparisonDisposer?: IReactionDisposer;
+  private pendingVisibilityCause?: VisibilityCause;
+  private pendingVisibilityExtra: IVisibilityLogExtra = {};
 
   constructor(props: IProps) {
     super(props);
@@ -145,6 +158,24 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           }
         }
       );
+
+      if (this.props.logTileVisibility) {
+        window.addEventListener("resize", this.handleWindowResizeForVisibility);
+        this.visibilityDividerDisposer = reaction(
+          () => this.stores.persistentUI.dividerPosition,
+          (dividerPosition) => this.queueVisibilityLog("dividerResize", { dividerPosition })
+        );
+        this.visibilityCommentsDisposer = reaction(
+          () => this.stores.persistentUI.showChatPanel,
+          () => this.queueVisibilityLog("commentsToggle")
+        );
+        this.visibilityComparisonDisposer = reaction(
+          () => this.stores.persistentUI.problemWorkspace.comparisonVisible,
+          () => this.queueVisibilityLog("comparisonToggle")
+        );
+        // Initial snapshot of what's visible when this view first shows a document.
+        this.queueVisibilityLog("documentChange");
+      }
     }
   }
 
@@ -154,9 +185,25 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     document.removeEventListener("keydown", this.handlePickUpKeyDown);
     this.domElement?.removeEventListener("mousemove", this.handlePickUpMouseMove);
     this.domElement?.removeEventListener("mouseleave", this.handlePickUpMouseLeave);
+    // Stop the visibility triggers. A pending scroll snapshot is flushed while the DOM is still
+    // mounted here, but a pending layout cause is dropped: this view is being torn down, so it can
+    // only report the pre-change layout, and whichever view replaces it reports the settled one.
+    window.removeEventListener("resize", this.handleWindowResizeForVisibility);
+    this.visibilityDividerDisposer?.();
+    this.visibilityCommentsDisposer?.();
+    this.visibilityComparisonDisposer?.();
+    if (this.pendingVisibilityCause === "scroll") {
+      this.settleVisibilityLog.flush();
+    } else {
+      this.settleVisibilityLog.cancel();
+    }
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    if (this.props.logTileVisibility &&
+        this.props.content?.contentId !== prevProps.content?.contentId) {
+      this.queueVisibilityLog("documentChange");
+    }
     // recalculate after render
     requestAnimationFrame(() => {
       this.updateVisibleRows();
@@ -226,6 +273,69 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       </DocumentDndContext>
     );
   }
+
+  // Gathers each rendered tile's vertical extent + type/title, then logs the visible ones.
+  private emitTileVisibility = (cause: VisibilityCause, extra: IVisibilityLogExtra = {}) => {
+    const { content } = this.props;
+    if (!this.domElement || !content) return;
+    // Don't report a document whose pane is collapsed. A collapsed ResizablePanel keeps this
+    // component mounted (so window-resize / reload triggers still fire) and, because the panel uses
+    // `flex: 0` + `overflow-x: clip`, the inner container can still report a non-zero width — so we
+    // key off the app's own collapse state (the `.collapsed` class) rather than measured geometry.
+    if (this.domElement.closest(".resizable-panel.collapsed")) return;
+    const containerRect = this.domElement.getBoundingClientRect();
+    const tiles: ITileExtent[] = [];
+    getTileNodes(this.domElement).forEach((node) => {
+      const tileId = getTileIdFromNode(node);
+      if (!tileId) return;
+      const tile = content.getTile(tileId);
+      // A placeholder is an empty layout slot, not something the student can be said to have seen.
+      if (isPlaceholderContent(tile?.content)) return;
+      const rect = node.getBoundingClientRect();
+      // Container tiles render their contents as tiles too, so the query above matches both. Record
+      // which entries are nested rather than dropping either: the container is what the student sees
+      // as one thing, while its contents are what they read.
+      const containerNode = getContainingTileNode(node);
+      tiles.push({
+        tileId,
+        tileType: tile?.content.type ?? "unknown",
+        tileTitle: tile?.computedTitle ?? "<no title>",
+        top: rect.top,
+        bottom: rect.bottom,
+        height: rect.height,
+        containerId: containerNode && getTileIdFromNode(containerNode)
+      });
+    });
+    const visibleTiles = computeVisibleTiles({ top: containerRect.top, bottom: containerRect.bottom }, tiles);
+    // Nothing to report if the (on-screen) container has no tile in the viewport, e.g. an empty doc.
+    if (visibleTiles.length === 0) return;
+    const params = buildVisibilityLogParams(
+      cause, this.domElement.clientHeight, tiles.length, visibleTiles, extra
+    );
+    logDocumentOrCurriculumEvent(
+      LogEventName.TILE_VISIBILITY_CHANGE, { ...getDocumentLogParams(content), ...params }
+    );
+  };
+
+  // Trailing debounce = "the student stopped scrolling / dragging"; one event ~500ms after motion ends.
+  private settleVisibilityLog = debounce(() => {
+    const cause = this.pendingVisibilityCause;
+    if (!cause) return;
+    const extra = this.pendingVisibilityExtra;
+    this.pendingVisibilityCause = undefined;
+    this.pendingVisibilityExtra = {};
+    this.emitTileVisibility(cause, extra);
+  }, 500);
+
+  // Queues a snapshot for the next settle. Extras accumulate across the coalesced triggers so the
+  // divider position or the resized row still rides along with the cause that reports it.
+  private queueVisibilityLog = (cause: VisibilityCause, extra?: IVisibilityLogExtra) => {
+    this.pendingVisibilityCause = nextVisibilityCause(this.pendingVisibilityCause, cause);
+    if (extra) Object.assign(this.pendingVisibilityExtra, extra);
+    this.settleVisibilityLog();
+  };
+
+  private handleWindowResizeForVisibility = () => this.queueVisibilityLog("windowResize");
 
   // updates the list of all row we can see the bottom of
   private updateVisibleRows = () => {
@@ -302,6 +412,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const yScroll = this.domElement?.scrollTop || 0;
     tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
     this.props.onScroll?.(xScroll, yScroll);
+    if (this.props.logTileVisibility) this.queueVisibilityLog("scroll");
   }, 50);
 
   private getTileTitle(id: string) {
@@ -781,9 +892,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     requestAnimationFrame(() => {
       if (isSameDocument) {
         // Same-doc move: tile keeps its ID
-        const tileElt = this.domElement?.querySelector(
-          `.tool-tile[data-tool-id="${tileId}"]`
-        ) as HTMLElement | null;
+        const tileElt = this.domElement && getTileNode(this.domElement, tileId);
         tileElt?.focus();
       } else {
         // Cross-doc copy: find the tile at the drop position.
@@ -796,9 +905,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
             : row.tiles.length - 1;
           const tile = row.tiles[tileIndex];
           if (tile) {
-            const tileElt = this.domElement?.querySelector(
-              `.tool-tile[data-tool-id="${tile.tileId}"]`
-            ) as HTMLElement | null;
+            const tileElt = this.domElement && getTileNode(this.domElement, tile.tileId);
             tileElt?.focus();
           }
         }
@@ -813,6 +920,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const row = content.getRowRecursive(dragResizeRow.id);
       row?.setRowHeight(dragResizeRow.newHeight);
       this.setState({ dragResizeRow: undefined });
+      if (this.props.logTileVisibility) {
+        this.queueVisibilityLog("tileResize", { resizedRowId: dragResizeRow.id });
+      }
     }
   };
 

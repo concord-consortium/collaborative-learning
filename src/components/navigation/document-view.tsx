@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useStores,
   usePersistentUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
-import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
+import { canUserEditDocument, isDocumentAccessibleToUser } from "../../models/document/document-utils";
 import { ISubTabModel, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
@@ -228,7 +228,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isVisible, isSec
   const {appConfig, persistentUI, ui, user} = useStores();
   const showPlayback = user.type && !openDocument?.isPublished
                           ? appConfig.enableHistoryRoles.includes(user.type) : false;
-  const showEdit = !openDocument.isRemote && ((tab === "my-work") || (tab === "learningLog"));
+  const showEdit = !openDocument.isRemote && canUserEditDocument({ document: openDocument, user });
 
   function handleCloseButtonClick() {
     persistentUI.closeDocumentGroupPrimaryDocument();

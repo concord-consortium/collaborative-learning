@@ -4,7 +4,7 @@ import { getTileContainerForLogging, getTileTitleForLogging } from "../../../lib
 import { DocumentModelType } from "../../document/document";
 import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
 import { isQuestionModel } from "../question/question-content";
-import { getQuestionAnswersAsJSON } from "../question/question-utils";
+import { getQuestionAnswersAsJSON, getQuestionPrompt } from "../question/question-utils";
 import { ITileModel } from "../tile-model";
 
 interface ITileBaseLogEvent extends Record<string, any> {
@@ -72,9 +72,12 @@ function logAnswerChange(questionTile: ITileModel, document: DocumentModelType) 
   if (isQuestionModel(questionTile.content) && document.content) {
     const questionId = questionTile.content.questionId;
     const answers = getQuestionAnswersAsJSON(document.content, questionId);
+    // undefined when the question has no authored prompt; JSON.stringify then drops the key.
+    const prompt = getQuestionPrompt(document.content, questionTile.content);
     const params: ITileBaseLogEvent = {
       document,
       questionId,
+      prompt,
       tileId: questionTile.id,
       answers,
     };
