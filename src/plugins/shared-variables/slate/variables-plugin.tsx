@@ -305,8 +305,6 @@ export function releaseOwnHighlightRefs(
 const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
-  // Slate selection, which is NOT the highlight state below. The two are deliberately separate:
-  // selection is operational (it is what the next edit acts on), a highlight is informational.
   const isSelected = useSelected();
   const isSerializing = useSerializing();
   // useState + callback ref so the effect in useChipMeasurement re-runs when the chip
