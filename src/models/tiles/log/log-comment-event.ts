@@ -3,8 +3,7 @@ import { ProblemModelType } from "../../curriculum/problem";
 import { Logger } from "../../../lib/logger";
 import { getTileTitleForLogging } from "../../../lib/logger-utils";
 import { LogEventName } from "../../../lib/logger-types";
-import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
-import { isCurriculumLogEvent, logCurriculumEvent } from "../../curriculum/log-curriculum-event";
+import { logDocumentOrCurriculumEvent } from "../../document/log-document-event";
 
 type CommentAction = "add" | "delete" | "expand" | "collapse" | "rate";
 export interface ILogComment extends Record<string, any> {
@@ -68,13 +67,5 @@ export function logCommentEvent(_params: ILogComment) {
   };
   const event = eventMap[action];
   const params = processCommentEventParams(_params, Logger.stores);
-  if (isCurriculumLogEvent(params)) {
-    logCurriculumEvent(event, params);
-  }
-  else if (isDocumentLogEvent(params)) {
-    logDocumentEvent(event, params);
-  }
-  else {
-    Logger.log(event, params);
-  }
+  logDocumentOrCurriculumEvent(event, params);
 }

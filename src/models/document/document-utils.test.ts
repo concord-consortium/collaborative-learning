@@ -6,7 +6,8 @@ import { createDocumentModel } from "./document";
 import { getGroupOwnerId } from "./document-axes";
 import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
-import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
+import { canUserEditDocument, getDocumentDisplayTitle, getDocumentLogParams,
+  isDocumentAccessibleToUser } from "./document-utils";
 import { kClassWideProfile } from "./document-axis-profiles";
 import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
@@ -457,6 +458,47 @@ describe("document utils", () => {
       });
       expect(canUserEditDocument({ document: groupDocument, user: groupedStudent })).toBe(true);
     });
+  });
+});
+
+describe("getDocumentLogParams", () => {
+  it("returns nothing without content", () => {
+    expect(getDocumentLogParams(undefined)).toEqual({});
+  });
+
+  // The names below are the ones every other document event uses, so events can be joined on them.
+  it("identifies a saved document by key/uid/type/title", () => {
+    const document = createDocumentModel({
+      key: "doc-1", uid: "student-2", type: ProblemDocument, title: "My Work", content: {}
+    });
+    expect(getDocumentLogParams(document.content)).toEqual({
+      documentKey: "doc-1", documentUid: "student-2", documentType: ProblemDocument, documentTitle: "My Work"
+    });
+  });
+
+  it("carries identity only, leaving out the document's content state", () => {
+    const document = createDocumentModel({ key: "doc-1", uid: "u1", type: ProblemDocument, content: {} });
+    const params = getDocumentLogParams(document.content);
+    expect(params.documentProperties).toBeUndefined();
+    expect(params.documentVisibility).toBeUndefined();
+    expect(params.documentChanges).toBeUndefined();
+    expect(params.documentHistoryId).toBeUndefined();
+  });
+
+  it("identifies curriculum section content by its section path", async () => {
+    const unit = UnitModel.create({
+      code: "u1",
+      title: "Unit 1",
+      investigations: [
+        { ordinal: 1, title: "I1", problems: [
+          { ordinal: 2, title: "P1", sections: [{ type: "introduction", content: {} }] }
+        ] }
+      ]
+    });
+    const problem = unit.getInvestigation(1)?.getProblem(2);
+    // sections is a volatile array, populated from the snapshot by loadSections
+    await problem?.loadSections("");
+    expect(getDocumentLogParams(problem?.sections[0]?.content)).toEqual({ curriculum: "u1/1/2/introduction" });
   });
 });
 

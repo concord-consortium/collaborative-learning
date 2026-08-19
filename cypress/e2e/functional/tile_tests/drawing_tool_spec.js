@@ -34,9 +34,7 @@ context('Draw Tool Tile', function () {
   it("renders draw tool tile and supports freehand tool", () => {
     beforeTest();
 
-    cy.window().then(win => {
-      cy.stub(win.ccLogger, "log").as("log");
-    });
+    cy.stubLogger();
     cy.get("@log").should('not.have.been.called');
     clueCanvas.addTile("drawing");
     cy.get("@log")
