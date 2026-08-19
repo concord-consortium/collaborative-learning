@@ -124,12 +124,12 @@ up with who creates group documents: `getOrCreateGroupDocument` requires the cal
 only students are. A caller without the claim is denied, which is the safe direction — if teachers ever need
 to create group-owned documents, this rule is what has to change.
 
-**What remains is membership, not offering.** Nothing proves the caller is in the group they name: group
-membership lives in the Realtime Database, which the rules cannot read, and the token carries no group
-claim. So a student can still create a document owned by another group *in their own offering*. They cannot
-create one owned by a classmate, by a group in another offering, or by another class. Closing the gap needs
-a group claim in the portal-minted token or group membership mirrored into Firestore, and it is why the
-owner axis is still in progress.
+**What remains is membership, not offering — accepted rather than tracked as work.** Nothing proves the
+caller is in the group they name: group membership lives in the Realtime Database, which the rules cannot
+read, and the token carries no group claim. So a student can still create a document owned by another group
+*in their own offering*. They cannot create one owned by a classmate, by a group in another offering, or by
+another class. Groups are a CLUE concept that the portal does not model, so no token claim is going to
+corroborate one — this is where the create rules stop, by design rather than pending work.
 
 **The class case has a residual of its own, accepted rather than tracked as work.** The token corroborates
 that the caller belongs to the class named in `class_<class_hash>`, not that they are entitled to mint a

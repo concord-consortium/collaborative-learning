@@ -103,8 +103,9 @@ Every client-side create of `authed/{portal}/documents/*` goes through one funct
 | `class` | class-wide documents | `class_<classHash>` | Fully — `class_hash` is a token claim |
 | `group` | group documents | `group_<offeringId>_<groupId>` | Partly — the offering is the `offering_id` claim, so the uid can be required to name the caller's own offering and to agree with the document's `groupId`; but no claim proves the caller is *in* that group |
 
-The gap is the third row's second half, and it is not closeable from Firestore rules today: group membership
-lives in the Realtime Database, which rules cannot read, and the auth token carries no group claim.
+The gap is the third row's second half, and it is not closeable from Firestore rules: group membership
+lives in the Realtime Database, which rules cannot read, and the auth token carries no group claim. Groups
+are a CLUE concept that the portal does not model, so a claim for one is not coming.
 
 **The offering comes from the token, not the document.** `offering_id` is minted only for a learner — the
 portal omits it for a teacher or researcher so they are not confined to one offering
@@ -120,8 +121,8 @@ for any offering of their class.
 offering*. They cannot create one owned by a classmate, by another group in another offering, or by another
 class. Per the story's instruction — ship if the investigation comes back clean, split it out if it turns up
 complications — this ships, with the residual recorded here, in the rules comment, and on the owner-axis row
-of the roadmap. Closing it needs either a group claim in the portal-minted token or group membership mirrored
-into Firestore; both are larger than this story and neither is scheduled.
+of the roadmap. It is recorded as a boundary rather than as deferred work: corroborating group membership
+would require the portal to model CLUE groups, which is not something we want it to do.
 
 ### The rule
 
@@ -171,8 +172,8 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 
 - `docs/document-axes/axes-current-state.md` (renamed from `reading-axes-in-code.md`, since enforcement is now
   part of what it records) — a "What the rules enforce" section states what the rules can and cannot
-  corroborate about a document's owner, and both residuals. The `README.md` owner-axis row names the
-  group-membership residual as the reason the axis is still `in progress` and points there.
+  corroborate about a document's owner, and both residuals, each accepted rather than tracked as work. The
+  `README.md` owner-axis row points there.
 - `firestore.rules` — the TRANSITIONAL comment above `concurrentChangeOk` currently describes the create-side
   work as still to do. Rewrite it to describe what is now enforced and what remains for CLUE-612 (making
   `concurrent` read-only after creation, once CLUE-604's migration has drained).
@@ -224,8 +225,8 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 
 ## Boundaries and non-goals
 
-- **Not closing the same-offering group residual.** It needs a token claim or mirrored membership; recorded,
-  not built.
+- **Not closing the same-offering group residual.** Corroborating it would need the portal to model CLUE
+  groups; accepted as a boundary, not deferred work.
 - **Not making `concurrent` read-only after creation.** That is CLUE-612, and it cannot ship until CLUE-604's
   migration has drained the on-open backfill that writes it.
 - **Presence is still CLUE-611.** Untouched.
