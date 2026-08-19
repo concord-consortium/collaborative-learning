@@ -38,7 +38,13 @@ guard for it exists.
 ## How a kind declares its axes
 
 Those fields are stamped at creation from what the kind registered in
-`src/models/document/document-kinds.ts`. A kind declares two things:
+`src/models/document/document-kinds.ts`. A kind does not spell out axis values: it names an **axis
+profile** (`src/models/document/document-axis-profiles.ts`), and the profile declares them. Many kinds
+share one — what separates a learning log from a personal document is presentation and its creation
+recipe, not any axis — and the profiles file is therefore the complete list of axis combinations the
+application creates documents at. See "Axis profiles" in [axes.md](./axes.md).
+
+A profile declares two knobs, plus `concurrent`:
 
 - `ownerType` — `"user"`, `"group"`, or `"class"`. It picks the owner `uid` (`getDocumentOwner`) and,
   for a group owner, the `groupId` stored beside it (`getDocumentOwnerFields`).

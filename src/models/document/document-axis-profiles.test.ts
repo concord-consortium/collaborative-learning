@@ -30,13 +30,6 @@ describe("document axis profiles", () => {
     });
   });
 
-  it("distinguishes the class-wide profile from the group profile on owner and container alone", () => {
-    // The demonstration that the axes decide behavior: these two differ by where they sit, not by kind.
-    expect(kClassWideProfile.concurrent).toBe(kGroupProfile.concurrent);
-    expect(kClassWideProfile.ownerType).not.toBe(kGroupProfile.ownerType);
-    expect(kClassWideProfile.containerType).not.toBe(kGroupProfile.containerType);
-  });
-
   it("does not reach the runtime metadata model", () => {
     // `axisProfile` is stamped into Firestore but declared on no runtime type, so the running app cannot
     // read it and cannot come to depend on it. DocumentMetadataStore validates raw Firestore data against

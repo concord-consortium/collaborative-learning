@@ -324,7 +324,7 @@ declare it. Anything reading properties from the Firestore metadata should treat
   `undefined`)
 - **Applies to:** group documents — the group that **owns** the document
 - **Runtime:** `DocumentModel.groupId`, `DocumentMetadataModel.groupId`
-- **Updated by:** nothing — creation only, stamped from the kind's `ownerType` by
+- **Updated by:** nothing — creation only, stamped from the `ownerType` of the kind's axis profile by
   `getDocumentOwnerFields`
 - **Reactive:** No — immutable
 
@@ -351,8 +351,8 @@ holds.
 - **Reactive:** Yes, to group membership changes — not to document changes
 
 The group the **user who owns** the document belongs to. Set only where the owner is a user (`ownerType:
-"user"` in the kind registry): a group- or class-owned document's synthetic `uid` is not a member of any
-group, so there is nobody to look up. A fact about that user's membership rather than about the document,
+"user"` on the kind's axis profile): a group- or class-owned document's synthetic `uid` is not a member
+of any group, so there is nobody to look up. A fact about that user's membership rather than about the document,
 which is why it is derived rather than stored: a student's group changes, and a frozen copy would go
 stale. The four-up view (`getProblemDocumentsForGroup`), Student Work routing, and the content listener's
 "whose documents do I monitor" test all want this one.
@@ -408,6 +408,14 @@ Exists for migrations. A migration that changes what a profile means has to find
 from it; selecting those by their axis values would mean querying the fields the migration is about to
 change, and would need rewriting each time they move. Because the field records *provenance* — which
 profile the document was made from — it stays true after such a migration rather than going stale.
+
+The `type: "group"` gate is transitional, and is the same gate `kind` uses for the same reason: a value
+stamped before a type's kind is settled is a value we would have to migrate afterwards. It widens as each
+type is converted, and is deleted once they all are — see
+["Which documents get stamped"](../document-axes/target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
+in the target architecture. So `axisProfile` arrives on a document by the same route `kind` does, and
+outlives `type`: the end state is every document carrying a profile and a kind, and `type` carrying no
+meaning at all.
 
 It is absent from `IDocumentMetadata`, `DocumentMetadataModel`, and `DocumentModel` on purpose, so the
 running app cannot read it and cannot come to branch on it; the axis guards stay the only way to ask how a

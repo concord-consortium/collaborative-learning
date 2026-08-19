@@ -336,11 +336,11 @@ entries to a unit config: it needs a configuration source loaded independently o
 association on the document naming that source. Until such a source exists, personal-like presets stay
 static.
 
-**How a kind sets that today.** A kind declares only `containerType`, and `getDocumentLocationFields`
-derives both the container and curriculum axes' fields from it, so a document's curriculum position
-currently follows from its container: `class` yields no unit, `classUnit` the unit, `offering` the
+**How a kind sets that today.** A kind names a profile, and a profile declares only `containerType`;
+`getDocumentLocationFields` derives both the container and curriculum axes' fields from it, so a
+document's curriculum position currently follows from its container: `class` yields no unit, `classUnit` the unit, `offering` the
 problem. The bound is stated on `curriculum` because that is what rule 2 constrains, and it survives
-the coupling being broken — a kind declaring a class container *and* a unit curriculum would stamp
+the coupling being broken — a profile declaring a class container *and* a unit curriculum would stamp
 `unit` and satisfy rule 2, which a container-based bound would wrongly forbid.
 
 ## Axis profiles — naming a combination of axis values
@@ -360,10 +360,11 @@ the application supports.
 document is presentation and its creation recipe, not any axis. `kind` says which preset a document came
 from; its profile says where that preset put it on the axes.
 
-**Profiles are what keep `kind` open-ended without the axes being.** A unit config declares kinds, but it
-declares no axis values — every kind is registered against a profile written in code. So a configuration
-can add a document to an existing combination and cannot invent one, and the set of combinations stays
-reviewable in one file rather than growing with the units.
+**A unit may add kinds; it may not add axis combinations.** This is what lets `kind` stay open-ended while
+the set of axis combinations stays closed. A unit config declares kinds, but it declares no axis values —
+every kind is registered against a profile written in code. So a configuration can add a document to an
+existing combination and cannot invent one, and the set of combinations stays reviewable in one file rather
+than growing with the units.
 
 **A profile is recorded, not resolved.** Each document stores the name of the profile it was created from,
 in `axisProfile`. That exists for one reason: a migration that changes what a profile means has to find

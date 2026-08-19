@@ -6,11 +6,12 @@
  * already mean by "a class-wide document" or "a problem document": a shorthand for a set of coordinates
  * that no single stored field holds.
  *
- * Profiles are the reason `kind` can be open-ended without the axes being. A unit config may declare a new
- * kind, but every kind is registered against one of the profiles below, so a configuration can add a
- * document to an existing combination and cannot invent a new one. This file is therefore the complete
- * list of axis combinations the application supports — the one place to look to check that they are all
- * intended and all handled.
+ * Profiles are why a unit may add kinds but may not add axis combinations, which is what lets `kind` stay
+ * open-ended while the set of combinations stays closed. A unit config may declare a new kind, but every
+ * kind is registered against one of the profiles below, so a configuration can add a document to an
+ * existing combination and cannot invent a new one. This file is therefore the complete list of axis
+ * combinations the application supports — the one place to look to check that they are all intended and
+ * all handled.
  *
  * | profile        | owner | container | curriculum | concurrent | kinds today                                    |
  * |----------------|-------|-----------|------------|------------|------------------------------------------------|
