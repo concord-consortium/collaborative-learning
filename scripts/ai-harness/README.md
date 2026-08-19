@@ -20,12 +20,27 @@ apart after the fact.
 ## Setup
 
 ```bash
+npm ci                 # in the repository root first — see below
 cd scripts/ai-harness
 npm ci                 # not `npm install` — the lockfile is the contract (see "Version lockstep")
 npm run typecheck
 npm run lint           # the root `npm run lint` glob does not reach this directory
 npm test
 ```
+
+**The root install has to come first.** This package declares no eslint of its own: `lint` runs
+`eslint -c ../../.eslintrc.js`, and that config brings its own plugins — `@typescript-eslint`,
+`json`, `react`, `react-hooks`, `unused-imports`, `mocha`, `eslint-comments` — all of which resolve
+from the root's `node_modules`. Declaring eslint here would not make the directory standalone; it
+would need every one of those pinned to the root's versions, and `typecheck` covers files under
+`shared/`, which has its own install again. On a fresh clone that installs only this package, `lint`
+reports `eslint: not found`.
+
+`lint` runs with `--max-warnings 0` and `--report-unused-disable-directives`, so a warning fails and
+so does an `eslint-disable` comment that is no longer suppressing anything. It uses the default
+config rather than `.eslintrc.build.js`, which the repository root uses before merging:
+that one adds `no-console`, aimed at the React app, and this is a command-line tool whose job is
+writing to the console.
 
 `npm run test:render` is a separate, scripted check that drives the local render backend against a
 running CLUE dev server and a real headless Chromium, for a subset of fixtures. It needs
