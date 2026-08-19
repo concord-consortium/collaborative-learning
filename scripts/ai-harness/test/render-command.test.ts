@@ -242,26 +242,57 @@ describe("render refuses what it cannot do", () => {
     expect(output.join("\n"))
       .toMatch(/renders against unit "mods" and cannot report what it drew/);
     // The local mode renders against the harness's own unit and can see inside the page, so it says
-    // nothing of the sort.
+    // nothing of the sort. It gets a working fake browser even though there is nothing to render,
+    // because `open()` launches one up front and a `null` would then fail to close.
     output.length = 0;
     await main(["render", "--corpus", "empty-corpus", "--mode", "puppeteer-full-height"],
-      deps(dataRoot, null, output));
+      deps(dataRoot, browserThatFails(new Set(), []), output));
     expect(output.join("\n")).not.toMatch(/cannot report what it drew/);
   });
 
-  it("logs a failure to close the backend rather than letting it replace the real error", async () => {
+  it("reports a close failure without letting it replace the real error", async () => {
     // Thrown from a `finally`, a close failure replaces whatever was already in flight — so a
     // browser that failed to launch surfaced as "close failed", which says nothing about why the
-    // render did not happen.
+    // render did not happen. It is still a failure of the command, though: exiting 0 would say the
+    // run finished, with a browser that would not close possibly still running.
     const { dataRoot, order, corpusSize } = setUp("render-close-failure");
     const output: string[] = [];
     const browser = browserThatFails(new Set(), order);
     (browser as any).close = async () => { throw new Error("Chromium is gone"); };
-    await main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
-      deps(dataRoot, browser, output));
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browser, output)))
+      .rejects.toThrow(/shutting down afterwards failed: Chromium is gone/);
     expect(output.join("\n")).toMatch(/closing the render backend failed: Chromium is gone/);
-    // And the run itself still reported what it did.
+    // And the run itself still reported what it did, so the summary is not lost to the throw.
     expect(output.join("\n")).toMatch(new RegExp(`Rendered ${corpusSize} document\\(s\\)`));
+  });
+
+  it("lets the render failures win when the close fails too", async () => {
+    // Both went wrong, and the documents that would not render are the more useful thing to be told.
+    const { dataRoot, order } = setUp("render-close-and-render-failure");
+    const output: string[] = [];
+    const browser = browserThatFails(new Set(["drawing"]), order);
+    (browser as any).close = async () => { throw new Error("Chromium is gone"); };
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"],
+      deps(dataRoot, browser, output)))
+      .rejects.toThrow(/1 document\(s\) failed to render: drawing/);
+    expect(output.join("\n")).toMatch(/closing the render backend failed: Chromium is gone/);
+  });
+
+  it("does not let a failing unit server close replace the error already in flight", async () => {
+    // The unit server comes down after the backend and used to do so unguarded, which is the same
+    // masking the backend's own close is wrapped to avoid.
+    const { dataRoot, order } = setUp("render-unit-close-failure");
+    const output: string[] = [];
+    const browser = browserThatFails(new Set(["drawing"]), order);
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height"], {
+      ...deps(dataRoot, browser, output),
+      startUnitServer: async () => ({
+        unitUrl: "http://127.0.0.1:9/content.json",
+        close: async () => { throw new Error("the unit server would not stop"); }
+      })
+    })).rejects.toThrow(/1 document\(s\) failed to render: drawing/);
+    expect(output.join("\n")).toMatch(/closing the unit server failed: the unit server would not stop/);
   });
 
   it("rejects an unknown mode", async () => {

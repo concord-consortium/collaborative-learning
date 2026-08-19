@@ -309,6 +309,7 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
 
   let unitServer: RenderUnitServer | undefined;
   let openBackend: RenderBackend | undefined;
+  let closeFailure: Error | undefined;
   try {
     if (mode.needsUnitServer && !explicitUnit) {
       unitServer = await (deps.startUnitServer ?? startRenderUnitServer)({ clueUrl });
@@ -425,16 +426,22 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     };
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
   } finally {
-    // A close failure is logged, never thrown. Rethrowing it from a `finally` replaces whatever was
-    // already in flight, so a Chromium launch failure would surface as a close failure — the wrong
-    // error, and the one that says nothing about why the render did not happen. The unit server
-    // still has to come down either way, or its open handle keeps the CLI alive.
-    try {
-      if (openBackend?.close) await openBackend.close();
-    } catch (error) {
-      log(`warning: closing the render backend failed: ${(error as Error).message}`);
-    }
-    await unitServer?.close();
+    // A close failure is logged here and kept, never thrown from the `finally` itself. Rethrowing
+    // from a `finally` replaces whatever was already in flight, so a Chromium launch failure would
+    // surface as a close failure — the wrong error, and the one that says nothing about why the
+    // render did not happen. Both halves come down whatever the other one does: the unit server's
+    // open handle keeps the CLI alive on its own, and the browser is a process.
+    const closeQuietly = async (what: string, close: (() => Promise<void>) | undefined) => {
+      if (!close) return;
+      try {
+        await close();
+      } catch (error) {
+        log(`warning: closing ${what} failed: ${(error as Error).message}`);
+        closeFailure ??= error as Error;
+      }
+    };
+    await closeQuietly("the render backend", openBackend?.close?.bind(openBackend));
+    await closeQuietly("the unit server", unitServer?.close?.bind(unitServer));
   }
 
   log(`Rendered ${rendered} document(s) with --mode ${modeId}, reused ${reused} still-fresh ` +
@@ -446,6 +453,13 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
   if (failures.length > 0) {
     throw new Error(`${failures.length} document(s) failed to render: ${failures.join(", ")}. ` +
       `See ${renderErrorDir(paths, modeId, "<docId>")}.`);
+  }
+  // Reported only once the render failures have had their turn, since they say more about what went
+  // wrong. On its own, though, it is still a failure: a command that exits 0 says it finished, and
+  // a browser that would not close may still be running.
+  if (closeFailure) {
+    throw new Error(`Every document rendered, but shutting down afterwards failed: ` +
+      `${closeFailure.message}. The renders on disk are good, so a re-run will reuse them.`);
   }
 }
 
