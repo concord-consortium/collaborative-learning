@@ -91,8 +91,12 @@ service cloud.firestore {
               request.resource.data.keys().hasAll(["uid", "unit", "problem", "section", "path", "network"]);
     }
 
+    // `axisProfile` records which axis profile a document was created from, and is what a migration
+    // selects a cohort by, so a client able to write it could aim a migration at documents that were
+    // never made from that profile. It is settable only at creation: the one backfill that writes it
+    // afterwards (scripts/backfill-group-document-axes.ts) runs as a service account, past these rules.
     function preservesReadOnlyDocumentFields() {
-      let readOnlyFieldsSet = ["uid", "type", "key", "createdAt", "context_id"].toSet();
+      let readOnlyFieldsSet = ["uid", "type", "key", "createdAt", "context_id", "axisProfile"].toSet();
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
     }

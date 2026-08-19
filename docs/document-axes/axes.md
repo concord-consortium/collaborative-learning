@@ -359,12 +359,51 @@ entries to a unit config: it needs a configuration source loaded independently o
 association on the document naming that source. Until such a source exists, personal-like presets stay
 static.
 
-**How a kind sets that today.** A kind declares only `containerType`, and `getDocumentLocationFields`
-derives both the container and curriculum axes' fields from it, so a document's curriculum position
-currently follows from its container: `class` yields no unit, `classUnit` the unit, `offering` the
-problem. The bound is stated on `curriculum` because that is what rule 2 constrains, and it survives
-the coupling being broken — a kind declaring a class container *and* a unit curriculum would stamp
+**How a kind sets that today.** A kind's profile declares only `containerType`, and
+`getDocumentLocationFields` derives both the container and curriculum axes' fields from it, so a
+document's curriculum position currently follows from its container: `class` yields no unit, `classUnit`
+the unit, `offering` the problem. The bound is stated on `curriculum` because that is what rule 2
+constrains, and it survives the coupling being broken — a profile declaring a class container *and* a unit curriculum would stamp
 `unit` and satisfy rule 2, which a container-based bound would wrongly forbid.
+
+## Axis profiles — naming a combination of axis values
+
+The axes describe a document one question at a time, but people do not talk that way. Nobody says "a
+unit-level, class-owned, canonical, concurrent document" — they say **a class-wide document**. That
+shorthand is not sloppiness; it names a real thing, a *combination* of positions that documents are
+actually created at. This section gives that thing a name: an **axis profile**.
+
+A profile is a named bundle of axis values. `classWide` is one. So are the two CLUE has always had without
+naming them — the bundle shared by personal documents, learning logs, and their publications, and the
+bundle shared by problem, planning, and problem-like publications. They are defined in one place, which
+makes that place the complete list of axis combinations the application supports.
+
+**A profile is not a `kind`.** Many kinds share one: what makes a learning log different from a personal
+document is presentation and its creation recipe, not any axis. `kind` says which preset a document came
+from; its profile says where that preset put it on the axes.
+
+**A unit may add kinds; it may not add axis combinations.** This is what lets `kind` stay open-ended while
+the set of axis combinations stays closed. A unit config declares kinds, but it declares no axis values —
+every kind is declared against a profile, and profiles are not authorable. So a configuration can add a
+document to an existing combination and cannot invent one, and the set of combinations stays reviewable in
+one place rather than growing with the units.
+
+**A profile is recorded, not resolved.** A document records which profile it was created from. That exists
+for one reason: a migration that changes what a profile means has to find every document created from it,
+and selecting those by their axis values would mean querying the very fields the migration is there to
+change — a query that has to be rewritten every time the answer moves.
+Because it is provenance rather than a cache, it stays true after such a migration: it says which profile
+the document was made from, not what its axes hold now.
+
+**Nothing in the running application reads that record.** It is deliberately out of the app's reach: only
+something reading stored documents directly — a migration, or offline analysis — can see it. That keeps the
+axes themselves the only way to ask how a document behaves, which is the point of this whole folder. A
+document behaves the way it does because of where it sits on the axes, never because of the name of the
+bundle it started at.
+
+Where the profiles are defined, and how a kind names one, is in
+[axes-current-state.md](./axes-current-state.md); the stored record is in
+[metadata-fields.md](../document-metadata/metadata-fields.md).
 
 ### `permissions` — who may do what
 

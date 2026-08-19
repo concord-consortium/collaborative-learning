@@ -1,6 +1,12 @@
-import { GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import {
-  getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields, getDocumentOwner,
+  kClassWideProfile, kGroupProfile, kPersonalLikeProfile
+} from "./document-axis-profiles";
+import {
+  GroupDocument, LearningLogDocument, PersonalDocument, ProblemDocument
+} from "./document-types";
+import {
+  getDocumentAxisProfileName, getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields,
+  getDocumentOwner, registerClassWideDocumentKind,
   getDocumentOwnerFields, getDocumentOwnerType, getDocumentLocationFields, getDocumentTitle, getKindDefinitionFor,
   isValidDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "./document-kinds";
@@ -19,7 +25,7 @@ describe("isValidDocumentKind", () => {
 
 describe("document kinds registry", () => {
   it("resolves the built-in group kind as concurrent", () => {
-    expect(getDocumentKindInfo(GroupDocument)?.metadataFields.concurrent).toBe(true);
+    expect(getDocumentKindInfo(GroupDocument)?.profile.concurrent).toBe(true);
   });
 
   it("returns undefined for unregistered or missing kinds", () => {
@@ -30,23 +36,23 @@ describe("document kinds registry", () => {
 
   it("registerDocumentKind adds new kinds", () => {
     registerDocumentKind("testAddedKind",
-      { metadataFields: { concurrent: true }, ownerType: "user", containerType: "class" });
-    expect(getDocumentKindInfo("testAddedKind")?.metadataFields.concurrent).toBe(true);
+      { profile: kGroupProfile });
+    expect(getDocumentKindInfo("testAddedKind")?.profile.concurrent).toBe(true);
   });
 
   it("registerDocumentKind throws when a kind is registered more than once", () => {
     registerDocumentKind("testDuplicateKind",
-      { metadataFields: {}, ownerType: "user", containerType: "class" });
+      { profile: kPersonalLikeProfile });
     expect(() => registerDocumentKind("testDuplicateKind",
-      { metadataFields: {}, ownerType: "user", containerType: "class" })).toThrow(/already registered/);
+      { profile: kPersonalLikeProfile })).toThrow(/already registered/);
     // built-in kinds are registered at module load, so re-registering one throws too
     expect(() => registerDocumentKind(GroupDocument,
-      { metadataFields: { concurrent: true }, ownerType: "group", containerType: "offering" })).toThrow();
+      { profile: kGroupProfile })).toThrow();
   });
 
   it("registerDocumentKind throws for a kind that is not a valid camelCase identifier", () => {
     expect(() => registerDocumentKind("not-camel-case",
-      { metadataFields: {}, ownerType: "user", containerType: "class" })).toThrow(/not a valid identifier/);
+      { profile: kPersonalLikeProfile })).toThrow(/not a valid identifier/);
   });
 
   describe("getDocumentKindMetadataFields", () => {
@@ -60,6 +66,32 @@ describe("document kinds registry", () => {
       expect(getDocumentKindMetadataFields("unregisteredKind")).toEqual({});
       expect(getDocumentKindMetadataFields(undefined)).toEqual({});
       expect(getDocumentKindMetadataFields(null)).toEqual({});
+    });
+  });
+
+  describe("getDocumentAxisProfileName", () => {
+    it("names the profile each built-in kind is created at", () => {
+      expect(getDocumentAxisProfileName(GroupDocument)).toBe("group");
+      expect(getDocumentAxisProfileName(PersonalDocument)).toBe("personalLike");
+      expect(getDocumentAxisProfileName(ProblemDocument)).toBe("problemLike");
+    });
+
+    it("gives kinds that share a profile the same name", () => {
+      // What separates a personal document from a learning log is presentation, not any axis, so both
+      // belong to one migration cohort.
+      expect(getDocumentAxisProfileName(LearningLogDocument))
+        .toBe(getDocumentAxisProfileName(PersonalDocument));
+    });
+
+    it("names the class-wide profile for a kind a unit declares", () => {
+      // The config supplies no axis values, so every declared kind lands on this one profile.
+      registerClassWideDocumentKind("testProfileDqb", "DQB", "sas");
+      expect(getDocumentAxisProfileName("testProfileDqb")).toBe("classWide");
+    });
+
+    it("returns undefined for an unregistered kind", () => {
+      expect(getDocumentAxisProfileName("unregisteredKind")).toBeUndefined();
+      expect(getDocumentAxisProfileName(undefined)).toBeUndefined();
     });
   });
 
@@ -88,7 +120,7 @@ describe("document kinds registry", () => {
 
     it("resolves a class kind to the class owner", () => {
       registerDocumentKind("testDqb",
-        { metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit" });
+        { profile: kClassWideProfile });
       expect(getDocumentOwnerType("testDqb")).toBe("class");
       expect(getDocumentOwner("testDqb", ctx)).toBe("class_c1");
     });
@@ -99,7 +131,7 @@ describe("document kinds registry", () => {
       expect(() => getDocumentOwner(GroupDocument, { userId: "u-1" }))
         .toThrow(/Cannot create a group-owned document/);
       registerDocumentKind("testClassKindNoOwner",
-        { metadataFields: {}, ownerType: "class", containerType: "classUnit" });
+        { profile: kClassWideProfile });
       expect(() => getDocumentOwner("testClassKindNoOwner", { userId: "u-1" }))
         .toThrow(/Cannot create a class-owned document/);
     });
@@ -136,7 +168,7 @@ describe("document kinds registry", () => {
 
     it("returns the unit and context_id for a class-unit kind, stating the absent curriculum explicitly", () => {
       registerDocumentKind("testWordWall",
-        { metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit" });
+        { profile: kClassWideProfile });
       expect(getDocumentLocationFields("testWordWall", ctx)).toEqual({
         unit: "msu", context_id: "class-h", investigation: null, problem: null
       });
@@ -156,8 +188,8 @@ describe("document kinds registry", () => {
 
   describe("getKindDefinitionFor", () => {
     it("resolves a built-in kind for a document from any unit, since no unit declared it", () => {
-      expect(getKindDefinitionFor({ kind: GroupDocument, unit: "sas" })?.ownerType).toBe("group");
-      expect(getKindDefinitionFor({ kind: GroupDocument })?.ownerType).toBe("group");
+      expect(getKindDefinitionFor({ kind: GroupDocument, unit: "sas" })?.profile.ownerType).toBe("group");
+      expect(getKindDefinitionFor({ kind: GroupDocument })?.profile.ownerType).toBe("group");
     });
 
     it("returns undefined when the kind is unregistered or absent", () => {
@@ -169,7 +201,7 @@ describe("document kinds registry", () => {
       beforeEach(() => {
         resetDocumentKindRegistryForTests();
         registerDocumentKind("testScopedKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          profile: kClassWideProfile,
           title: "Driving Question Board", unit: "sas"
         });
       });
@@ -194,7 +226,7 @@ describe("document kinds registry", () => {
   describe("title", () => {
     it("returns a class-wide kind's registered static title", () => {
       registerDocumentKind("testDqbTitle", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+        profile: kClassWideProfile,
         title: "Driving Question Board"
       });
       expect(getDocumentTitle({ kind: "testDqbTitle", type: GroupDocument })).toBe("Driving Question Board");
@@ -224,7 +256,7 @@ describe("document kinds registry", () => {
       beforeEach(() => {
         resetDocumentKindRegistryForTests();
         registerDocumentKind("testUnitDeclaredKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          profile: kClassWideProfile,
           title: "Driving Question Board", unit: "sas"
         });
       });
@@ -265,9 +297,7 @@ describe("document kinds registry", () => {
 
     beforeEach(() => {
       resetDocumentKindRegistryForTests();
-      registerDocumentKind("testClassWideKind", {
-        metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit"
-      });
+      registerDocumentKind("testClassWideKind", { profile: kClassWideProfile });
     });
 
     it("stamps the unit and class, and states the absent curriculum explicitly", () => {

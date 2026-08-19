@@ -1,6 +1,10 @@
 import { upperFirst } from "lodash";
 import { IDocumentMetadata } from "../../../shared/shared";
 import {
+  DocumentOwnerType, IDocumentAxisProfile, kClassWideProfile, kGroupProfile, kPersonalLikeProfile,
+  kProblemLikeProfile
+} from "./document-axis-profiles";
+import {
   GroupDocument, LearningLogDocument, LearningLogPublication,
   PersonalDocument, PersonalPublication, PlanningDocument,
   ProblemDocument, ProblemPublication, SupportPublication
@@ -12,31 +16,15 @@ import {
  */
 export type IDocumentKindMetadataFields = Pick<IDocumentMetadata, "kind" | "concurrent">;
 
-/**
- * How a kind's `owner` axis (authoring identity / provenance, stored as the document's `uid`) is derived
- * at creation: "user" → the creating user; "group" → the synthetic group owner (`group_<off>_<grp>`);
- * "class" → the synthetic class owner (`class_<classHash>`), shared by the whole class. Defaults to "user".
- */
-export type DocumentOwnerType = "user" | "group" | "class";
-
-/**
- * Which container a kind's documents are kept in, and with it their curriculum reach: "class" → the class,
- * about no unit; "classUnit" → the class's copy of one unit, about that unit; "offering" → one assignment of
- * a problem to a class, about that problem.
- *
- * One knob sets the container and curriculum axes values because that is the most convenient.
- */
-export type DocumentContainerType = "class" | "classUnit" | "offering";
-
 export interface IDocumentKindInfo {
   /** The kind key. Matches the value stored in a document's `kind` field. */
   kind: string;
-  /** This kind's stamped fields, without `kind` — getDocumentKindMetadataFields adds it back. */
-  metadataFields: Omit<IDocumentKindMetadataFields, "kind">;
-  /** How this kind's owner uid is derived. */
-  ownerType: DocumentOwnerType;
-  /** Which container this kind's documents live in, and their curriculum reach. */
-  containerType: DocumentContainerType;
+  /**
+   * The axis profile this kind's documents are created at — where they sit on every axis. Several kinds
+   * share one: what distinguishes a personal document from a learning log is presentation and creation
+   * recipe, not any axis (see document-axis-profiles.ts).
+   */
+  profile: IDocumentAxisProfile;
   /**
    * Static document display title. Leave undefined for dynamic titles.
    */
@@ -136,15 +124,24 @@ export function getKindDefinitionFor(doc: IKindScopedDocumentFields): IDocumentK
   return info;
 }
 
-/** A kind's full stamp set (its metadataFields plus the `kind` key), or `{}` if the kind is unregistered. */
+/** A kind's full stamp set (the `kind` key plus the axis fields its profile fixes), or `{}` if unregistered. */
 export function getDocumentKindMetadataFields(kind?: string|null): IDocumentKindMetadataFields {
   const info = getDocumentKindInfo(kind);
   if (!info) return {};
-  return { kind: info.kind, ...info.metadataFields };
+  return { kind: info.kind, ...(info.profile.concurrent ? { concurrent: true } : {}) };
+}
+
+/**
+ * The name of the axis profile a document of this kind is created at, or undefined if the kind is
+ * unregistered. Stamped onto the document as its record of which profile it was made from; see
+ * IDocumentAxisProfile.name for why that is stored rather than recomputed.
+ */
+export function getDocumentAxisProfileName(kind?: string|null): string | undefined {
+  return getDocumentKindInfo(kind)?.profile.name;
 }
 
 export function getDocumentOwnerType(kind?: string|null): DocumentOwnerType {
-  return getDocumentKindInfo(kind)?.ownerType ?? "user";
+  return getDocumentKindInfo(kind)?.profile.ownerType ?? "user";
 }
 
 /**
@@ -164,7 +161,7 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
   if (!info) {
     throw new Error(`Cannot resolve the owner of unregistered document kind "${kind}"`);
   }
-  switch (info.ownerType) {
+  switch (info.profile.ownerType) {
     case "group": return requireOwnerId(ctx.groupOwnerId, kind, "group");
     case "class": return requireOwnerId(ctx.classOwnerId, kind, "class");
     case "user":  return ctx.userId;
@@ -221,7 +218,7 @@ export interface IDocumentLocationContext {
 export function getDocumentLocationFields(
   kind: string|null|undefined, ctx: IDocumentLocationContext
 ): IDocumentLocationContext {
-  switch (getDocumentKindInfo(kind)?.containerType) {
+  switch (getDocumentKindInfo(kind)?.profile.containerType) {
     case "classUnit": return {
       unit: ctx.unit,
       context_id: ctx.context_id,
@@ -298,50 +295,28 @@ export function getDocumentKindLabel(kind?: string | null): string | undefined {
 
 /**
  * Register a kind declared by a unit's `classWideDocuments` configuration. Every class-wide collaborative
- * document has the same shape — concurrent, owned by the synthetic class owner, kept in the class's copy of
- * the unit and about that unit and nothing narrower — so only the kind key, the authored title, and the
- * declaring unit come from the configuration. The title is registered rather than stored per document so it
- * resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind when the kind is malformed
- * or already registered.
+ * document sits at the same place on every axis, so the configuration supplies no axis values at all — it
+ * names the kind and its title, and the class-wide profile supplies the rest. A unit config can therefore
+ * add a document to an existing axis combination but cannot invent one. The title is registered rather than
+ * stored per document so it resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind
+ * when the kind is malformed or already registered.
  */
 export function registerClassWideDocumentKind(kind: string, title: string, unit: string) {
-  registerDocumentKind(kind, {
-    metadataFields: { concurrent: true },
-    ownerType: "class",
-    containerType: "classUnit",
-    title,
-    unit
-  });
+  registerDocumentKind(kind, { profile: kClassWideProfile, title, unit });
 }
 
 function registerBuiltInDocumentKinds() {
-  // A group document is kept in the offering, like the problem documents beside it; what makes it a group's
-  // is its owner, which is also where its stored `groupId` comes from (see getDocumentOwnerFields).
-  registerDocumentKind(GroupDocument, {
-    metadataFields: { concurrent: true },
-    ownerType: "group",
-    containerType: "offering"
-  });
+  registerDocumentKind(GroupDocument, { profile: kGroupProfile });
 
-  const personalLikeKindInfo = {
-    metadataFields: { },
-    ownerType: "user",
-    containerType: "class"
-  } as const;
-  registerDocumentKind(PersonalDocument, personalLikeKindInfo);
-  registerDocumentKind(LearningLogDocument, personalLikeKindInfo);
-  registerDocumentKind(PersonalPublication, personalLikeKindInfo);
-  registerDocumentKind(LearningLogPublication, personalLikeKindInfo);
+  registerDocumentKind(PersonalDocument, { profile: kPersonalLikeProfile });
+  registerDocumentKind(LearningLogDocument, { profile: kPersonalLikeProfile });
+  registerDocumentKind(PersonalPublication, { profile: kPersonalLikeProfile });
+  registerDocumentKind(LearningLogPublication, { profile: kPersonalLikeProfile });
 
-  const problemLikeKindInfo = {
-    metadataFields: { },
-    ownerType: "user",
-    containerType: "offering"
-  } as const;
-  registerDocumentKind(PlanningDocument, problemLikeKindInfo);
-  registerDocumentKind(ProblemDocument, problemLikeKindInfo);
-  registerDocumentKind(ProblemPublication, problemLikeKindInfo);
-  registerDocumentKind(SupportPublication, problemLikeKindInfo);
+  registerDocumentKind(PlanningDocument, { profile: kProblemLikeProfile });
+  registerDocumentKind(ProblemDocument, { profile: kProblemLikeProfile });
+  registerDocumentKind(ProblemPublication, { profile: kProblemLikeProfile });
+  registerDocumentKind(SupportPublication, { profile: kProblemLikeProfile });
 }
 registerBuiltInDocumentKinds();
 

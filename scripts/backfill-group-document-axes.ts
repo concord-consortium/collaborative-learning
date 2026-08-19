@@ -1,16 +1,26 @@
 // Normalize the stored axes of `type == "group"` documents — both regular group documents and
 // class-wide collaborative documents, which share that transitional type.
 //
-// Two independent passes over one collection-group query, selected by scope so they cover disjoint
-// sets. A group-scoped document carries a groupId; a class-wide document does not.
+// Three passes over one collection-group query, committed as ONE merged write per document. Scope
+// selects which pass a document falls into: a group-scoped document carries a groupId; a class-wide
+// document does not.
 //
+//   missing `axisProfile`                   -> { axisProfile: "group" | "classWide" }
 //   group-scoped, missing `concurrent`      -> { concurrent: true, kind: "group" }
 //   class-wide, missing curriculum scope    -> { investigation: null, problem: null }
 //
-// The first pass restores the concurrent history manager for group documents that carry no stored
-// `concurrent` value. The second states a class-wide document's absent curriculum scope
-// explicitly, which is what makes it findable by Sort Work's unit-scoped query. Both are additive,
-// idempotent, and batched.
+// The profile pass records which axis profile a document was created from
+// (src/models/document/document-axis-profiles.ts), which documents created since that landed already
+// carry. It is what a later migration selects on when it changes what a profile means, so it has to
+// cover the documents that predate the field. It is also the last migration that has to identify a
+// document by its axis values rather than by a stored cohort key — which is why it derives the name
+// from scope here rather than from `kind`: a class-wide document's kind is whatever its unit declared,
+// and a script that runs outside the app cannot resolve unit-declared kinds through the registry.
+//
+// The second pass restores the concurrent history manager for group documents that carry no stored
+// `concurrent` value. The third states a class-wide document's absent curriculum scope
+// explicitly, which is what makes it findable by Sort Work's unit-scoped query. All three are
+// additive, idempotent, and batched.
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
 // The `documents` collection-group query needs a single-field COLLECTION_GROUP index on `type`
@@ -41,10 +51,17 @@ export interface BackfillResult {
   total: number;
   concurrentUpdated: number;
   scopeUpdated: number;
+  profileUpdated: number;
 }
 
+// The profile names, kept in sync with src/models/document/document-axis-profiles.ts by the unit test.
+// They are repeated rather than imported because scripts/ compiles on its own, against its own
+// package.json, and does not resolve modules from src.
+const kGroupProfileName = "group";
+const kClassWideProfileName = "classWide";
+
 /**
- * Run both backfill passes. Pure (no admin initialization) so it can be unit-tested with a mock
+ * Run all three backfill passes. Pure (no admin initialization) so it can be unit-tested with a mock
  * Firestore.
  */
 export async function backfillGroupDocumentAxes(
@@ -59,23 +76,44 @@ export async function backfillGroupDocumentAxes(
   const needingConcurrent = snap.docs.filter((d) => !!d.get("groupId") && d.get("concurrent") !== true);
   const needingScope = snap.docs.filter((d) =>
     !d.get("groupId") && (d.get("investigation") === undefined || d.get("problem") === undefined));
+  const needingProfile = snap.docs.filter((d) => !d.get("axisProfile"));
 
   log(`group-typed docs: ${snap.size} total, ` +
-      `${needingConcurrent.length} missing concurrent, ${needingScope.length} missing curriculum scope`);
+      `${needingConcurrent.length} missing concurrent, ${needingScope.length} missing curriculum scope, ` +
+      `${needingProfile.length} missing an axis profile`);
   if (dryRun) {
     log("DRY RUN — set APPLY=1 to write");
-    return { total: snap.size, concurrentUpdated: 0, scopeUpdated: 0 };
+    return { total: snap.size, concurrentUpdated: 0, scopeUpdated: 0, profileUpdated: 0 };
   }
 
-  const writes = [
-    ...needingConcurrent.map((d) => ({ ref: d.ref, data: { concurrent: true, kind: "group" } })),
-    ...needingScope.map((d) => ({ ref: d.ref, data: { investigation: null, problem: null } })),
-  ];
+  // One merged write per document, not one per pass: the profile pass overlaps both of the others, and
+  // two batched writes to the same document would cost twice as much for the same result.
+  const fields = new Map<FirebaseFirestore.DocumentReference, Record<string, unknown>>();
+  const fieldsFor = (ref: FirebaseFirestore.DocumentReference) => {
+    const existing = fields.get(ref);
+    if (existing) return existing;
+    const created: Record<string, unknown> = {};
+    fields.set(ref, created);
+    return created;
+  };
+
+  for (const d of needingProfile) {
+    // Scope is the only thing that separates the two profiles this query can return, and it is the same
+    // split the passes below select on: a groupId means the group profile, its absence the class-wide one.
+    const axisProfile = d.get("groupId") ? kGroupProfileName : kClassWideProfileName;
+    Object.assign(fieldsFor(d.ref), { axisProfile });
+  }
+  for (const d of needingConcurrent) {
+    Object.assign(fieldsFor(d.ref), { concurrent: true, kind: "group" });
+  }
+  for (const d of needingScope) {
+    Object.assign(fieldsFor(d.ref), { investigation: null, problem: null });
+  }
 
   let batch = db.batch();
   let n = 0;
-  for (const write of writes) {
-    batch.set(write.ref, write.data, { merge: true });
+  for (const [ref, data] of fields) {
+    batch.set(ref, data, { merge: true });
     if (++n % 400 === 0) {
       await batch.commit();
       batch = db.batch();
@@ -85,11 +123,13 @@ export async function backfillGroupDocumentAxes(
     await batch.commit();
   }
 
-  log(`updated ${needingConcurrent.length} concurrent, ${needingScope.length} curriculum scope`);
+  log(`updated ${needingConcurrent.length} concurrent, ${needingScope.length} curriculum scope, ` +
+      `${needingProfile.length} axis profile`);
   return {
     total: snap.size,
     concurrentUpdated: needingConcurrent.length,
     scopeUpdated: needingScope.length,
+    profileUpdated: needingProfile.length,
   };
 }
 
