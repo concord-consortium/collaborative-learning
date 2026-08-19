@@ -141,11 +141,12 @@ export interface IDocumentMetadataBase {
   unit?: string|null;
   offeringId?: string|null;
   groupId?: string|null;
+  context_id?: string|null;
+  concurrent?: boolean|null;
 }
 
 export interface IDocumentMetadata extends IDocumentMetadataBase {
   createdAt?: number;
-  context_id?: string|null;
   network?: string|null;
   originDoc?: string|null;
   properties?: Record<string, string>;
@@ -155,7 +156,6 @@ export interface IDocumentMetadata extends IDocumentMetadataBase {
     id: string;
     index: number;
   }|null;
-  concurrent?: boolean|null;
   kind?: string|null;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {

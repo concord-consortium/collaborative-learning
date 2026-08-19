@@ -19,7 +19,11 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
   const { uid } = document;
   const userName = classStore.getUserById(uid)?.displayName;
   const title = getDocumentDisplayTitle(unit, document, appConfig);
-  const titleWithUser = `${userName}: ${title}`;
+  // A document several people edit together is owned by a synthetic uid — `group_<offeringId>_<groupId>` or
+  // `class_<classHash>` — which is no member of the class, so there is no name to put in front of it. Its
+  // title already says whose it is ("Group 1 Document"). A title can also be absent, so join whichever parts
+  // resolve rather than interpolating both.
+  const titleWithUser = [userName, title].filter(Boolean).join(": ");
   const isPrivate = !isDocumentAccessibleToUser({ documentMetadata: document, user, documents });
   const selected = ui.highlightedSortWorkDocument === document.key;
 
