@@ -635,6 +635,17 @@ describe("how many tiles a document should draw", () => {
     expect(expectedTileCount({ rowMap: {}, tileMap: {} })).toBe(0);
     expect(expectedTileCount({})).toBe(0);
   });
+
+  it("ignores tiles in the map that the rows do not name, when the rows name any at all", () => {
+    // The count is what the frame is waited on to draw, so counting high is the expensive mistake:
+    // the wait can never be satisfied and every such document pays the grace period instead, which
+    // is six times the stable interval. `question` is the real case — its nested tiles are in the
+    // tile map and named by no row — and the fallback must not turn its 1 into 3.
+    expect(expectedTileCount({
+      rowMap: { r1: { tiles: [{ tileId: "a" }] } },
+      tileMap: { a: {}, nested1: {}, nested2: {} }
+    })).toBe(1);
+  });
 });
 
 describe("which hosted URLs may be fetched", () => {

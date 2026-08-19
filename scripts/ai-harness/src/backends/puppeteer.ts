@@ -233,7 +233,14 @@ export async function startRenderPageServer(): Promise<RenderPageServer> {
         forget: () => { pages.delete(docId); }
       };
     },
-    close: () => new Promise<void>((resolve) => server.close(() => resolve()))
+    close: () => new Promise<void>((resolve) => {
+      // `close` alone waits for connections that are mid-request, which a browser hung part-way
+      // through reading a page would leave behind — and this resolves the promise `close()` awaits
+      // before exiting, so waiting on one is a CLI that never returns. Idle keep-alive sockets are
+      // dropped by `close` itself; this is for the ones that are not idle.
+      server.closeAllConnections();
+      server.close(() => resolve());
+    })
   };
 }
 
@@ -339,13 +346,7 @@ export function expectedTileCount(content: unknown): number {
   return tileMap ? Object.keys(tileMap).length : 0;
 }
 
-/**
- * The iframe's starting height, re-exported from the module that writes it into the page.
- *
- * One constant rather than two coupled literals: this is what the resize guard compares against, so
- * if the page's starting height and this ever diverged, the guard would stop firing and a
- * viewport-sized capture would be recorded as a full-document one.
- */
+/** Re-exported for the callers that reach for it here; defined in `render-html.ts`, which says why. */
 export { kInitialFrameHeightPx };
 
 /** Room for the document's own chrome — margins and the annotation layer — above the tile rows. */
