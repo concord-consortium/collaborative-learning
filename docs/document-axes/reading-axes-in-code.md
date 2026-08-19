@@ -38,12 +38,24 @@ guard for it exists.
 ## How a kind declares its axes
 
 Those fields are stamped at creation from what the kind registered in
-`src/models/document/document-kinds.ts`. A kind declares two things:
+`src/models/document/document-kinds.ts`. A kind does not spell out axis values: it names an **axis
+profile** (`src/models/document/document-axis-profiles.ts`), and the profile declares them. Many kinds
+share one — what separates a learning log from a personal document is presentation and its creation
+recipe, not any axis — and the profiles file is therefore the complete list of axis combinations the
+application creates documents at. See "Axis profiles" in [axes.md](./axes.md).
+
+A profile declares two knobs, plus `concurrent`:
 
 - `ownerType` — `"user"`, `"group"`, or `"class"`. It picks the owner `uid` (`getDocumentOwner`) and,
   for a group owner, the `groupId` stored beside it (`getDocumentOwnerFields`).
 - `containerType` — `"class"`, `"classUnit"`, or `"offering"`. It picks the fields that say where the
   document is kept and what it is about (`getDocumentLocationFields`).
+
+The profile's name is stamped onto the document it creates, in `axisProfile`, and that record is
+deliberately declared on no runtime type — not `IDocumentMetadata`, not `DocumentMetadataModel`, not
+`DocumentModel` — so reading it back would mean widening a type first. Only a migration or offline
+analysis, reading Firestore directly, can see it. See the
+[`axisProfile` field](../document-metadata/metadata-fields.md#axisprofile) for what is stored and where.
 
 One knob covers both container and curriculum because every container above the class is *identified
 by* a curriculum coordinate — a classUnit by its unit, an offering by its problem — so a kind has no

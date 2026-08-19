@@ -222,6 +222,23 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", context_id: otherClass });
     });
 
+    it("authenticated teachers can't stamp an axisProfile onto a document that has none", async () => {
+      // The profile a document was created from is what a later migration selects on, so a client that
+      // could write it could aim a migration at documents it was never made from. Only creation (as the
+      // document's author) and the service-account backfill script, which bypasses these rules, set it.
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", axisProfile: "classWide" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only axisProfile field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { axisProfile: "group" } }));
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", axisProfile: "classWide" });
+    });
+
     it("authenticated teachers can't update other teachers' documents", async () => {
       db = initFirestore(teacher2Auth);
       await specClassDoc(thisClass, teacherId);

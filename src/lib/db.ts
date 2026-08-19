@@ -34,7 +34,7 @@ import { getSimpleDocumentPath, IDocumentMetadata, IGetImageDataParams,
          IPublishSupportParams } from "../../shared/shared";
 import {
   getDocumentKindMetadataFields, getDocumentLocationFields, getDocumentOwner, getDocumentOwnerFields,
-  getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
+  getDocumentAxisProfileName, getDocumentOwnerType, IDocumentOwnerContext, registerClassWideDocumentKind
 } from "../models/document/document-kinds";
 import { getClassOwnerId } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
@@ -125,6 +125,26 @@ interface IGetOrCreateCanonicalDocumentOpts {
   kind: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
 }
+
+/**
+ * The metadata shape written at creation: everything `IDocumentMetadata` declares, plus the fields only the
+ * write side knows about.
+ *
+ * `axisProfile` is deliberately absent from `IDocumentMetadata`, `DocumentMetadataModel`, and
+ * `DocumentModel`, so it is not reachable from the running app. It exists for migrations and offline
+ * analysis, which read Firestore directly. Leaving it undeclared is what keeps it from becoming a thing the
+ * runtime branches on — the axes stay the only way to ask how a document behaves, and a read of the profile
+ * would have to add the field to a type first, which is a reviewable act rather than an accident.
+ *
+ * Undeclared fields survive the trip: `DocumentMetadataStore` typechecks raw Firestore data against
+ * `DocumentMetadataModel`, and MST's `typecheck` ignores properties a model does not declare (pinned in
+ * src/models/mst.test.ts). `canonical` already relies on this.
+ */
+type IDocumentMetadataAtCreation = IDocumentMetadata & {
+  context_id: string;
+  network: string | null;
+  axisProfile?: string;
+};
 
 interface ICreateFirestoreMetadataDocumentOpts {
   documentKey: string;
@@ -582,7 +602,7 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts) {
+  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts): Promise<IDocumentMetadata> {
     const { documentKey, type, kind, owner, createdAt, title } = opts;
     const { user } = this.stores;
     const userContext = this.stores.userContextProvider.userContext;
@@ -627,7 +647,13 @@ export class DB {
     // is converted — see "Which documents get stamped" in docs/document-axes/target-architecture.md.
     const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
 
-    const firestoreMetadata: IDocumentMetadata & { context_id: string; network: string | null } = {
+    // The axis profile the document is created at, recorded so a later migration can select every document
+    // made from one profile without querying the axis fields it is there to change. Gated with the kind
+    // fields above, for the same reason.
+    const profileName = type === GroupDocument ? getDocumentAxisProfileName(kind) : undefined;
+    const profileField = profileName ? { axisProfile: profileName } : {};
+
+    const firestoreMetadata: IDocumentMetadataAtCreation = {
       type,
       createdAt,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
@@ -639,7 +665,8 @@ export class DB {
       ...titleInfo,
       ...ownerFields,
       ...locationFields,
-      ...kindFields
+      ...kindFields,
+      ...profileField
     };
     await documentRef.set(firestoreMetadata);
     return firestoreMetadata;
