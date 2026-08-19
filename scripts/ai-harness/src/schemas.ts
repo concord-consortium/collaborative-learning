@@ -1152,6 +1152,18 @@ function validateOriginMeta(value: unknown, file: string): ResponseOriginMeta {
   };
 }
 
+/**
+ * Fields that only a row which sent a request can carry: what was sent, and what came back.
+ *
+ * A skipped row has none of them, and `SkippedResultRow` does not declare them — but a results file
+ * is data on disk, hand-editable and readable by a version of this code that did not write it, so
+ * the type says nothing about what a file actually contains.
+ */
+const kSentOnlyRowFields = [
+  "representation", "promptImageTokensEstimated", "representationWarnings", "textPartOmitted",
+  "response", "refusal", "usage", "cost", "responseOriginMeta", "error"
+] as const;
+
 /** Validates one result row against the schema its `status` selects. */
 export function validateResultRow(value: unknown, file: string): ResultRow {
   const record = asObject(value, file, "result");
@@ -1161,6 +1173,15 @@ export function validateResultRow(value: unknown, file: string): ResultRow {
   if (status === "skipped") {
     if (record.requestKey != null) {
       fail(file, "requestKey", `must be null on a skipped row, got ${describe(record.requestKey)}`);
+    }
+    // Nothing describing a request or a reply belongs here, because there was neither. Refused
+    // rather than dropped, the way `validateSentRow` refuses an image-token estimate on a text row:
+    // a field this row cannot have means the file was written by something that disagrees about
+    // what a skipped row is, and reading past it would file that disagreement as a valid row.
+    const impossible = kSentOnlyRowFields.filter((field) => record[field] !== undefined);
+    if (impossible.length > 0) {
+      fail(file, impossible[0], `cannot appear on a skipped row, which sent no request` +
+        `${impossible.length > 1 ? ` (nor can ${impossible.slice(1).join(", ")})` : ""}`);
     }
     const skipReasons = asArray(record.skipReasons, file, "skipReasons")
       .map((reason, index) => asString(reason, file, `skipReasons[${index}]`));

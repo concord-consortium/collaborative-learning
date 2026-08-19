@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "categorize-design-mixed",
   "aiPrompt": {
-    "mainPrompt": "This is a student document, given to you as a written summary and a picture of it.\nThey are working on engineering task. Please tell me which of the following areas of their design they are focusing on:\n- user: who's it for?\n- environment: where's it used?\n- form: what's it look like?\n- function: what does it do?\nand why you chose that area.\nOr if the document doesn't include enough content to clearly identify a focus area let me know by setting \"category\" to \"unknown\".\nYour answer should be a JSON document in the given format.",
+    "mainPrompt": "This is a student document, given to you as a written summary and a picture of it.\nThey are working on an engineering task. Please tell me which of the following areas of their design they are focusing on:\n- user: who's it for?\n- environment: where's it used?\n- form: what's it look like?\n- function: what does it do?\nand why you chose that area.\nOr if the document doesn't include enough content to clearly identify a focus area let me know by setting \"category\" to \"unknown\".\nYour answer should be a JSON document in the given format.",
     "categorizationDescription": "Categorize the document based on its content.",
     "categories": [
       "user",

@@ -274,6 +274,45 @@ describe("result rows are a discriminated union on status", () => {
       .toThrow(/requestKey must be null on a skipped row/);
   });
 
+  it.each([
+    ["representation", { kind: "text", variantId: "default", variantVersion: 1, sourceContentSha256: "c".repeat(64) }],
+    ["promptImageTokensEstimated", 14_399],
+    ["representationWarnings", ["a warning"]],
+    ["textPartOmitted", true],
+    ["response", { parsed: {}, raw: {} }],
+    ["refusal", "no"],
+    ["usage", { promptTokens: 1, completionTokens: 1, source: "api" }],
+    ["cost", { modeledUsd: 0.01, incurredThisRunUsd: 0.01 }],
+    ["responseOriginMeta", { date: "2026-08-19T00:00:00.000Z", modelReturned: null, systemFingerprint: null }],
+    ["error", { type: "APIError", message: "boom", attempts: 1 }]
+  ])("refuses a skipped row carrying %s, which only a sent row can have", (field, value) => {
+    // Dropped silently, these made a row that disagrees with itself validate cleanly: nothing was
+    // sent, and the row describes a request or a reply anyway. `validateSentRow` already refuses the
+    // mirror image — an image-token estimate on a text row — so this is the same rule facing the
+    // other way.
+    const { representation, ...skippable } = common;
+    const skipped = {
+      ...skippable, status: "skipped", requestKey: null,
+      skipReasons: ["empty document"], decidedFromContentSha256: "b".repeat(64)
+    };
+    expect(() => validateResultRow({ ...skipped, [field]: value }, "results.jsonl"))
+      .toThrow(new RegExp(`${field} cannot appear on a skipped row`));
+  });
+
+  it("still accepts the skipped rows the harness actually writes", () => {
+    // The guard above lists fields by name, so it can only be as right as that list. This reads a
+    // real row back rather than a hand-built one.
+    const written = {
+      schemaVersion: 2, experiment: "e", experimentSha256: "h", runId: "r", corpus: "c",
+      docId: "empty", modality: "empty", computedModality: "empty", message: "text-only",
+      prompt: { name: "p", sha256: "d" }, requestKey: null,
+      runMeta: { date: "2026-08-19T00:00:00.000Z", openaiSdkVersion: "6", gitCommit: null, gitDirty: false },
+      status: "skipped", skipReasons: ["the document has no student content at all"],
+      decidedFromContentSha256: "b".repeat(64)
+    };
+    expect(validateResultRow(written, "results.jsonl").status).toBe("skipped");
+  });
+
   it("refuses a skipped row that does not say why, or cannot say what it decided from", () => {
     // A document that simply does not appear in the results is indistinguishable from a bug; a row
     // with no reasons is the same problem wearing a status.
