@@ -15,8 +15,7 @@ function hostedTask(docId: string, url: string, sha256 = kSha): RunTask {
     model: "gpt-4o-mini",
     aiPrompt: defaultAiPrompt,
     message: "image-only",
-    imageUrl: url,
-    accounting: { sha256, widthPx: 960, heightPx: 1420 },
+    images: [{ imageUrl: url, accounting: { sha256, widthPx: 960, heightPx: 1420 } }],
     generationSettings: { max_completion_tokens: 1024 }
   });
   return {
@@ -51,6 +50,9 @@ function hostedTask(docId: string, url: string, sha256 = kSha): RunTask {
       imageSha256s: [sha256]
     },
     imageTokensEstimated: 36_835,
+    imageCount: 1,
+    textPartOmitted: false,
+    representationWarnings: [],
     hostedImages: [{ url, sha256 }]
   };
 }

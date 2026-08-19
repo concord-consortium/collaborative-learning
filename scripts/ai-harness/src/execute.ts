@@ -8,19 +8,21 @@ import OpenAI, { APIConnectionError } from "openai";
 import { VERSION as kOpenAiSdkVersion } from "openai/version";
 import type { IAiPrompt, RelatedSummary } from "../../../shared/ai-analysis-messages.js";
 import {
-  CorpusPaths, readJsonFile, readManifest, readRepresentation, representationIsFresh, representationPath
+  CorpusPaths, readCorpusDocument, readJsonFile, readManifest, readRepresentation,
+  representationIsFresh, representationPath
 } from "./corpus.js";
 import { CacheEntry, ResponseCache } from "./cache.js";
 import {
   CostCeilingExceeded, CostLedger, estimateImageTokens, kRetries, priceTokens, worstCaseUsd
 } from "./cost.js";
 import {
-  HarnessRequest, buildImageRequest, buildRequest, chatCompletionParams, requestKeyFor, responseFormatFor
+  HarnessRequest, RequestImage, buildImageRequest, buildMixedRequest, buildRequest,
+  chatCompletionParams, requestKeyFor, responseFormatFor
 } from "./messages.js";
 import { getTextVariant } from "./represent-text.js";
 import {
-  dataUrlFor, imageRepresentationIsUsable, imageRepresentationPath, readImageEnvelope, resolveImageFile,
-  sha256Bytes, singleImageOf
+  dataUrlFor, imageRepresentationIsUsable, imageRepresentationPath, imagesForSet, readImageEnvelope,
+  resolveImageFile, sha256Bytes
 } from "./represent-image.js";
 import { readPngHeader } from "./png.js";
 import { createHash } from "node:crypto";
@@ -28,10 +30,12 @@ import { git } from "./files.js";
 import { kDefaultRenderLimits, redirectDowngradeReason } from "./backends/types.js";
 import { renderBackendIdentity } from "./backends/index.js";
 import {
-  ExperimentFile, ExperimentRun, ManifestDocument, ModelPricing, RepresentationDescriptor,
-  ResponseOriginMeta, ResultRow, RunMeta, effectiveModality, kResultSchemaVersion, kSchemaVersion,
+  ExperimentFile, ExperimentRun, ImageRepresentation, ManifestDocument, MessageShape, ModelPricing,
+  RepresentationDescriptor, ResponseOriginMeta, ResultRow, RunMeta, SkippedResultRow,
+  TextRepresentation, effectiveModality, kResultSchemaVersion, kSchemaVersion, sendsImages,
   validatePromptFile, validateResultRow
 } from "./schemas.js";
+import { DocumentClassification, classifyDocument } from "./capability.js";
 
 /**
  * Enough of the file to read the IHDR chunk; the rest is hashed and discarded.
@@ -99,6 +103,12 @@ export interface RunTask {
   representation: RepresentationDescriptor;
   /** The image-token share of the input estimate; 0 for a text run. */
   imageTokensEstimated: number;
+  /** How many pictures this task sends. `plan` totals it, because a per-tile set multiplies it. */
+  imageCount: number;
+  /** True on a mixed task whose document had no student text, so only its pictures are sent. */
+  textPartOmitted: boolean;
+  /** Non-failures worth recording about how this task's input was assembled. */
+  representationWarnings: string[];
   /**
    * Hosted images this task's request points at, each with the sha256 the envelope recorded for it.
    * A local capture sends its bytes inline and has none. `run` checks these still serve exactly
@@ -116,8 +126,28 @@ export interface BuildTasksOptions {
   retries?: number;
 }
 
+/**
+ * A (run, document) pair the experiment declines to send, and why.
+ *
+ * Carried out of `buildTasks` rather than dropped: every one becomes a `skipped` result row. A
+ * document that simply does not appear in the results is indistinguishable from a bug.
+ */
+export interface SkippedTask {
+  docId: string;
+  runId: string;
+  run: ExperimentRun;
+  modality: ManifestDocument["computedModality"];
+  computedModality: ManifestDocument["computedModality"];
+  promptName: string;
+  promptSha256: string;
+  skipReasons: string[];
+  /** The content the decision was made from, so a rerun can tell whether it still applies. */
+  decidedFromContentSha256: string;
+}
+
 export interface BuildTasksResult {
   tasks: RunTask[];
+  skipped: SkippedTask[];
   documents: ManifestDocument[];
 }
 
@@ -148,8 +178,76 @@ function checkedImageBytes(file: string, expectedSha256: string): Buffer {
 }
 
 /**
- * Expands (runs × documents) into concrete requests. `plan` and `run` both go through here, so the
- * cost they compute comes from exactly the same requests.
+ * The related summaries a run sends, which is a dimension rather than a fact about the document.
+ *
+ * `extras-production-current` reproduces a real production bug on purpose (spike finding 6a,
+ * CLUE-630): `findRelatedSummaries` hands every related entry the *analyzed document's own* summary
+ * instead of the related document's, so the model is shown the same text several times over and told
+ * other people agreed with it. It is a named baseline so a before/after comparison stays honest —
+ * measuring the fix means measuring against what production does today. Do not improve it.
+ */
+export function relatedSummariesFor(
+  run: ExperimentRun, document: ManifestDocument, markdown: string
+): RelatedSummary[] {
+  const entries = (document.relatedSummaries ?? []) as unknown as RelatedSummary[];
+  switch (run.extras ?? "extras-fixed") {
+    case "no-extras":
+      return [];
+    case "extras-production-current":
+      return entries.map((entry) => ({ ...entry, summary: markdown }));
+    default:
+      return entries;
+  }
+}
+
+/**
+ * Why this run should not send this document, or an empty list when it should.
+ *
+ * Decided from the document's own content, never from `modalityOverride`: an override is a
+ * reporting judgement about how to group a result, not a claim about what the document contains,
+ * and letting it drive a skip would silently change what was measured.
+ */
+export function skipReasonsFor(
+  message: MessageShape, classification: DocumentClassification, document?: ManifestDocument
+): string[] {
+  const hasStudentText = classification.tiles.some((tile) => tile.hasStudentText);
+  const reasons: string[] = [];
+  // A document the corpus says cannot be rendered has no picture to send, and never will. That is a
+  // fact about the document, so an image-carrying run skips it rather than failing on a missing
+  // render the way it would for one somebody simply forgot to render.
+  if (document?.expectedRenderFailure && sendsImages(message)) {
+    reasons.push(`${message} run: this document cannot be rendered ` +
+      `(${document.expectedRenderFailure}), so there is no picture to send`);
+    return reasons;
+  }
+  if (classification.computedModality === "empty") {
+    reasons.push(`${message} run: the document has no student content at all — ` +
+      "no tile carries text, and none needs a picture");
+    return reasons;
+  }
+  if (message === "text-only" && !hasStudentText) {
+    reasons.push("text-only run: no tile carries student-authored text, so the summary would " +
+      "carry no student content");
+  }
+  return reasons;
+}
+
+/** The tiles a classification says need a picture, by id — what `visual-tiles-only` selects on. */
+export function visualTileIdsOf(classification: DocumentClassification): Set<string> {
+  return new Set(classification.tiles
+    .filter((tile) => tile.requiresVisualRepresentation)
+    .map((tile) => tile.tileId));
+}
+
+/** Whether a mixed run can send a summary for this document, or only its pictures. */
+export function mixedSendsText(classification: DocumentClassification): boolean {
+  return classification.tiles.some((tile) => tile.hasStudentText);
+}
+
+/**
+ * Expands (runs × documents) into concrete requests, plus the pairs this experiment declines to
+ * send. `plan` and `run` both go through here, so the cost they compute — and the skips they report
+ * — come from exactly the same decisions.
  */
 export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
   const { corpusPaths: paths, experiment, promptsDir, pricing } = options;
@@ -171,8 +269,24 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
 
   const generationSettings = { max_completion_tokens: pricing.maxOutputTokens };
 
-  /** Everything a text-only run needs for one document. */
-  const textInput = (run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt) => {
+  /**
+   * What the document actually contains, read from its content rather than from the manifest.
+   *
+   * Skip decisions are about what is in front of us, so they are made from a fresh classification
+   * of the document's own file. Cached per document: a corpus is classified once however many runs
+   * an experiment defines.
+   */
+  const classifications = new Map<string, DocumentClassification>();
+  const classify = (document: ManifestDocument): DocumentClassification => {
+    const cached = classifications.get(document.id);
+    if (cached) return cached;
+    const classification = classifyDocument(readCorpusDocument(paths, document));
+    classifications.set(document.id, classification);
+    return classification;
+  };
+
+  /** The text side of a request: the summary to send, and what to record about where it came from. */
+  const textSide = (run: ExperimentRun, document: ManifestDocument) => {
     const variant = getTextVariant(run.textVariant!);
     const file = representationPath(paths, variant.id, document.id);
     if (!fs.existsSync(file)) {
@@ -190,25 +304,19 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
         `"${envelope.docId}" / variant "${envelope.variantId}" at version ${envelope.variantVersion}). ` +
         `Run: harness.ts represent --corpus ${manifest.name} --variants ${variant.id}`);
     }
-    const makeRequest = () => buildRequest({
-      model,
-      aiPrompt,
-      message: run.message,
+    return {
       markdown: envelope.markdown,
-      relatedSummaries: document.relatedSummaries as unknown as RelatedSummary[],
-      generationSettings
-    });
-    const representation: RepresentationDescriptor = {
-      kind: "text",
-      variantId: variant.id,
-      variantVersion: variant.variantVersion,
-      sourceContentSha256: envelope.sourceContentSha256
+      relatedSummaries: relatedSummariesFor(run, document, envelope.markdown),
+      representation: {
+        variantId: variant.id,
+        variantVersion: variant.variantVersion,
+        sourceContentSha256: envelope.sourceContentSha256
+      } satisfies TextRepresentation
     };
-    return { makeRequest, representation, hostedImages: [] as { url: string; sha256: string }[] };
   };
 
-  /** Everything an image-only run needs for one document. */
-  const imageInput = (run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt) => {
+  /** The image side of a request: which pictures to send, and what to record about them. */
+  const imageSide = (run: ExperimentRun, document: ManifestDocument) => {
     const modeId = run.imageMode!;
     const backend = renderBackendIdentity(modeId);
     const file = imageRepresentationPath(paths, modeId, document.id);
@@ -229,44 +337,172 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
         `Run: harness.ts render --corpus ${manifest.name} --mode ${modeId} --refresh`);
     }
 
-    // Exactly one image, never the first of several — see singleImageOf.
-    const image = singleImageOf(envelope, file);
-    // The path is resolved now — it is a check, and a stale envelope should fail here rather than
-    // at dispatch — but the bytes are read only when the request is actually built.
-    const imageFile = image.url ? null : resolveImageFile(file, image);
-    const makeRequest = () => buildImageRequest({
-      model,
-      aiPrompt,
-      message: run.message,
-      // A hosted render sends the URL production sends; a local capture sends its bytes inline, the
-      // way production's categorizeDocument() does with a local file.
-      imageUrl: image.url ?? dataUrlFor(checkedImageBytes(imageFile!, image.sha256)),
-      accounting: { sha256: image.sha256, widthPx: image.widthPx, heightPx: image.heightPx },
-      generationSettings
-    });
-    const representation: RepresentationDescriptor = {
-      kind: "image",
-      modeId,
-      backendId: envelope.backendId,
-      backendVersion: envelope.backendVersion,
-      renderTarget: envelope.renderTarget,
-      sourceContentSha256: envelope.sourceContentSha256,
-      imageSha256s: envelope.images.map((entry) => entry.sha256)
-    };
+    // Which pictures this run sends, chosen by its image set rather than by whatever is there.
+    const imageSet = run.imageSet ?? "full-document";
+    const selected = imagesForSet(envelope, file, imageSet, visualTileIdsOf(classify(document)));
+    // The paths are resolved now — a stale envelope should fail here rather than at dispatch — but
+    // the bytes are read only when the request is actually built.
+    const files = selected.images.map((image) => image.url ? null : resolveImageFile(file, image));
     return {
-      makeRequest,
-      representation,
-      hostedImages: image.url ? [{ url: image.url, sha256: image.sha256 }] : []
+      images: selected.images,
+      warnings: selected.warnings,
+      makeImages: (): RequestImage[] => selected.images.map((image, index) => ({
+        // A hosted render sends the URL production sends; a local capture sends its bytes inline,
+        // the way production's categorizeDocument() does with a local file.
+        imageUrl: image.url ?? dataUrlFor(checkedImageBytes(files[index]!, image.sha256)),
+        accounting: { sha256: image.sha256, widthPx: image.widthPx, heightPx: image.heightPx }
+      })),
+      hostedImages: selected.images
+        .filter((image): image is typeof image & { url: string } => image.url !== null)
+        .map((image) => ({ url: image.url, sha256: image.sha256 })),
+      representation: {
+        modeId,
+        backendId: envelope.backendId,
+        backendVersion: envelope.backendVersion,
+        renderTarget: envelope.renderTarget,
+        sourceContentSha256: envelope.sourceContentSha256,
+        // Every image the envelope holds, not only the ones sent: this is the render's provenance,
+        // and `imageSet` beside it says which of them this row used.
+        imageSha256s: envelope.images.map((entry) => entry.sha256),
+        imageSet
+      } satisfies ImageRepresentation
+    };
+  };
+
+  /** Everything a text-only run needs for one document. */
+  const textInput = (run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt) => {
+    const text = textSide(run, document);
+    return {
+      makeRequest: () => buildRequest({
+        model,
+        aiPrompt,
+        message: run.message,
+        markdown: text.markdown,
+        relatedSummaries: text.relatedSummaries,
+        generationSettings
+      }),
+      representation: { kind: "text", ...text.representation } as RepresentationDescriptor,
+      hostedImages: [] as { url: string; sha256: string }[],
+      textPartOmitted: false,
+      imageCount: null as number | null,
+      warnings: [] as string[]
+    };
+  };
+
+  /** Everything an image-only run needs for one document. */
+  const imageInput = (run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt) => {
+    const image = imageSide(run, document);
+    return {
+      makeRequest: () => buildImageRequest({
+        model,
+        aiPrompt,
+        message: run.message,
+        images: image.makeImages(),
+        detail: run.detail,
+        generationSettings
+      }),
+      representation: { kind: "image", ...image.representation } as RepresentationDescriptor,
+      hostedImages: image.hostedImages,
+      textPartOmitted: false,
+      imageCount: image.images.length as number | null,
+      warnings: image.warnings
+    };
+  };
+
+  /**
+   * Everything a mixed run needs for one document: both sides at once.
+   *
+   * `sendsText` is false for a document with no student-authored text. The pictures still go — that
+   * is the whole point of asking about such a document — and the row records that its text half was
+   * dropped, rather than the run skipping it.
+   */
+  const mixedInput = (
+    run: ExperimentRun, document: ManifestDocument, aiPrompt: IAiPrompt, withText: boolean
+  ) => {
+    const image = imageSide(run, document);
+    const text = withText ? textSide(run, document) : null;
+    return {
+      makeRequest: () => buildMixedRequest({
+        model,
+        aiPrompt,
+        message: run.message,
+        markdown: text?.markdown ?? null,
+        relatedSummaries: text?.relatedSummaries ?? [],
+        images: image.makeImages(),
+        detail: run.detail,
+        generationSettings
+      }),
+      representation: {
+        kind: "mixed",
+        // The text half is still recorded when the summary was dropped: which variant *would* have
+        // produced it, and from which content, is what makes the omission readable rather than a
+        // gap. `textPartOmitted` on the row says it did not go.
+        text: text?.representation ?? textVariantDescriptorFor(run, document),
+        image: image.representation
+      } as RepresentationDescriptor,
+      hostedImages: image.hostedImages,
+      textPartOmitted: !withText,
+      imageCount: image.images.length as number | null,
+      warnings: image.warnings
+    };
+  };
+
+  /** The text descriptor for a mixed row whose summary was dropped: the variant that would have run. */
+  const textVariantDescriptorFor = (
+    run: ExperimentRun, document: ManifestDocument
+  ): TextRepresentation => {
+    const variant = getTextVariant(run.textVariant!);
+    return {
+      variantId: variant.id,
+      variantVersion: variant.variantVersion,
+      sourceContentSha256: document.contentSha256
     };
   };
 
   const tasks: RunTask[] = [];
+  const skipped: SkippedTask[] = [];
   for (const run of experiment.runs) {
     const { aiPrompt, sha256 } = loadPrompt(run.prompt);
     for (const document of manifest.documents) {
-      const { makeRequest, representation, hostedImages } = run.message === "text-only"
-        ? textInput(run, document, aiPrompt)
-        : imageInput(run, document, aiPrompt);
+      const classification = classify(document);
+      const skipReasons = skipReasonsFor(run.message, classification, document);
+      if (skipReasons.length > 0) {
+        // A decision, not an absence: the pair lands in the results as a skipped row saying why.
+        skipped.push({
+          docId: document.id,
+          runId: run.id,
+          run,
+          modality: effectiveModality(document),
+          computedModality: document.computedModality,
+          promptName: run.prompt,
+          promptSha256: sha256,
+          skipReasons,
+          decidedFromContentSha256: document.contentSha256
+        });
+        continue;
+      }
+      const input =
+        run.message === "text-only" ? textInput(run, document, aiPrompt)
+        : run.message === "image-only" ? imageInput(run, document, aiPrompt)
+        : mixedInput(run, document, aiPrompt, mixedSendsText(classification));
+      if (input.imageCount === 0) {
+        // The envelope has per-tile images, but none of them is a tile this set wants. A decision
+        // about what the document contains, so it lands as a skipped row like any other.
+        skipped.push({
+          docId: document.id,
+          runId: run.id,
+          run,
+          modality: effectiveModality(document),
+          computedModality: document.computedModality,
+          promptName: run.prompt,
+          promptSha256: sha256,
+          skipReasons: [`${run.message} run with imageSet "${run.imageSet}": no captured tile is one ` +
+            "the classification marks as needing a picture", ...input.warnings],
+          decidedFromContentSha256: document.contentSha256
+        });
+        continue;
+      }
+      const { makeRequest, representation, hostedImages, textPartOmitted } = input;
       // Built once for the key and the reservation, then released — see `makeRequest`.
       const request = makeRequest();
       const imageTokensEstimated = request.inputAccounting.images
@@ -286,11 +522,14 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
         retries,
         representation,
         imageTokensEstimated,
-        hostedImages
+        imageCount: request.inputAccounting.images.length,
+        hostedImages,
+        textPartOmitted,
+        representationWarnings: input.warnings
       });
     }
   }
-  return { tasks, documents: manifest.documents };
+  return { tasks, skipped, documents: manifest.documents };
 }
 
 // ---------------------------------------------------------------------------
@@ -495,6 +734,8 @@ export interface RunOptions {
   experiment: ExperimentFile;
   experimentSha256: string;
   tasks: RunTask[];
+  /** Pairs this experiment declined to send. Each becomes a `skipped` row before anything runs. */
+  skipped?: SkippedTask[];
   outputFile: string;
   ledger: CostLedger;
   cache: ResponseCache;
@@ -660,6 +901,23 @@ export interface RunSummary {
   committedOvershootUsd: number;
   /** Tasks that were never dispatched because the run stopped. 0 when everything ran. */
   notDispatched: number;
+  /** Skipped rows written this run. Resumed skips are counted in `resumed`, not here. */
+  skipped: number;
+}
+
+/**
+ * Resume identity for a skipped (run, document) pair.
+ *
+ * A skip has no request key — it built no request — so it resumes on the content its decision was
+ * made from. Same content, same decision, so the existing row still stands; changed content means
+ * the document must be looked at again.
+ */
+export function skipResumeKeyFor(row: {
+  corpus: string; experimentSha256: string; docId: string; runId: string;
+  decidedFromContentSha256: string;
+}): string {
+  return `${row.corpus}\u0001${row.experimentSha256}\u0001${row.docId}\u0001${row.runId}` +
+    `\u0001${row.decidedFromContentSha256}`;
 }
 
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -679,7 +937,19 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
   // sharing a document id (or the same experiment edited between runs) would resume each other's
   // rows: the requestKey covers the request, but not which corpus or experiment produced it.
   const completed = new Set<string>();
+  // Skipped rows resume on the content they were decided from rather than on a request key, which
+  // they do not have. A rerun against unchanged content keeps the existing row instead of appending
+  // a second one saying the same thing; an edited document is re-decided.
+  const alreadySkipped = new Set<string>();
   for (const row of readResultRows(outputFile)) {
+    if (row.status === "skipped") {
+      // From the row's own corpus and experiment, the way `resumeKeyFor(row)` does below. Building
+      // the key from the *current* ones instead relabelled every stored skip as belonging to this
+      // run, so a row written for another corpus or an earlier experiment would suppress a skip that
+      // is genuinely new — the one thing including them in the key is meant to prevent.
+      alreadySkipped.add(skipResumeKeyFor(row));
+      continue;
+    }
     if (row.status === "error" || row.requestKey === null) continue;
     completed.add(resumeKeyFor(row));
   }
@@ -687,8 +957,40 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
   const writer = new JsonlWriter(outputFile);
   const summary: RunSummary = {
     written: 0, resumed: 0, cacheHits: 0, apiCalls: 0, stoppedOnCeiling: false, reservedPeakUsd: 0,
-    incurredUsd: 0, overshootUsd: 0, committedOvershootUsd: 0, notDispatched: 0
+    incurredUsd: 0, overshootUsd: 0, committedOvershootUsd: 0, notDispatched: 0, skipped: 0
   };
+
+  // Written before anything is dispatched, so the results file describes the whole experiment even
+  // if a spend ceiling stops the run partway through.
+  for (const skip of options.skipped ?? []) {
+    const key = skipResumeKeyFor({
+      corpus, experimentSha256, docId: skip.docId, runId: skip.runId,
+      decidedFromContentSha256: skip.decidedFromContentSha256
+    });
+    if (alreadySkipped.has(key)) {
+      summary.resumed += 1;
+      continue;
+    }
+    await writer.write({
+      schemaVersion: kResultSchemaVersion,
+      experiment: experiment.name,
+      experimentSha256,
+      runId: skip.runId,
+      corpus,
+      docId: skip.docId,
+      modality: skip.modality,
+      computedModality: skip.computedModality,
+      message: skip.run.message,
+      prompt: { name: skip.promptName, sha256: skip.promptSha256 },
+      requestKey: null,
+      runMeta,
+      status: "skipped",
+      skipReasons: skip.skipReasons,
+      decidedFromContentSha256: skip.decidedFromContentSha256
+    } satisfies SkippedResultRow);
+    summary.written += 1;
+    summary.skipped += 1;
+  }
 
   const taskResumeKey = (task: RunTask) =>
     resumeKeyFor({ corpus, experimentSha256, docId: task.docId, runId: task.runId, requestKey: task.requestKey });
@@ -735,8 +1037,13 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
     representation: task.representation,
     // Only on rows that actually sent a picture, so the report's image column never shows a number
     // belonging to nothing.
-    ...(task.representation.kind === "image"
+    ...(task.representation.kind === "image" || task.representation.kind === "mixed"
       ? { promptImageTokensEstimated: task.imageTokensEstimated }
+      : {}),
+    // Only when it happened, so its absence means "the text part went" rather than "unknown".
+    ...(task.textPartOmitted ? { textPartOmitted: true as const } : {}),
+    ...(task.representationWarnings.length > 0
+      ? { representationWarnings: task.representationWarnings }
       : {}),
     prompt: { name: task.promptName, sha256: task.promptSha256 },
     requestKey: task.requestKey,
@@ -923,9 +1230,13 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
   summary.overshootUsd = Math.max(0, ledger.incurredUsd - ledger.maxCostUsd);
   summary.committedOvershootUsd = ledger.overshootUsd;
   // Counted from what is left rather than tracked as we go, so it is right however the run ended.
-  // `written` already includes cache hits — a hit writes a row — so subtracting `cacheHits` as well
-  // double-counted them, under-reporting the skipped work and, with enough hits, driving this to 0
-  // and suppressing the "stopped early" message for a run that really did stop.
-  summary.notDispatched = Math.max(0, pending.length - summary.written);
+  //
+  // Both sides have to describe the same population. `pending` holds request tasks only, while
+  // `written` counts every row this run produced — including the skipped ones, written before
+  // dispatch for pairs that were never in `pending` at all. Subtracting those back out is what keeps
+  // a run that skipped as many pairs as it abandoned from reporting nothing left. Cache hits do stay
+  // in: a hit is a pending task that got its row, so it is dispatched work as far as this is
+  // concerned, and subtracting them as well would count them twice.
+  summary.notDispatched = Math.max(0, pending.length - (summary.written - summary.skipped));
   return summary;
 }

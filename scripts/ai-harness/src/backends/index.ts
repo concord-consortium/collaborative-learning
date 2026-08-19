@@ -11,8 +11,9 @@ import { git } from "../files.js";
 import { RenderBackend } from "./types.js";
 import { kPuppeteerBackendVersion, puppeteerBackend } from "./puppeteer.js";
 import {
-  kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
-  kShutterbugBackendVersion, kStagingShutterbugUrl, shutterbugParameterized, shutterbugProductionCurrent
+  FetchLike, kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl,
+  kProductionUnit, kShutterbugBackendVersion, kStagingShutterbugUrl, shutterbugAccurateHeight,
+  shutterbugParameterized, shutterbugProductionCurrent
 } from "./shutterbug.js";
 import { kHarnessRenderUnitId } from "./render-unit.js";
 
@@ -45,6 +46,14 @@ export interface RenderModeDescriptor {
   defaultUnit: string | null;
   /** Whether `render` must serve the harness's own rendering unit for this mode. */
   needsUnitServer: boolean;
+  /**
+   * Whether each document is captured at its own measured height, which `render` reads from a
+   * previous local full-document render and hands over per document.
+   *
+   * It makes this mode a two-step operation — render locally, then here — which is a real cost, and
+   * the only way to send a true height to a service that cannot measure anything itself.
+   */
+  needsMeasuredHeight?: boolean;
   /** Options this mode cannot honour, by the CLI flag a caller would have used. */
   unusableFlags: (keyof RenderModeOptions)[];
   build(options: RenderModeOptions): RenderBackend;
@@ -52,8 +61,10 @@ export interface RenderModeDescriptor {
 
 export const renderModeIds = [
   "puppeteer-full-height",
+  "puppeteer-per-tile",
   "shutterbug-production-current",
-  "shutterbug-parameterized"
+  "shutterbug-parameterized",
+  "shutterbug-accurate-height"
 ] as const;
 export type RenderModeId = typeof renderModeIds[number];
 
@@ -65,8 +76,18 @@ const kFlagNames: Partial<Record<keyof RenderModeOptions, string>> = {
   clueUrl: "--clue-url",
   unit: "--unit",
   shutterbugUrl: "--shutterbug-url",
-  captureHeightPx: "--capture-height"
+  captureHeightPx: "--capture-height",
+  timeoutMs: "--timeout-ms"
 };
+
+/**
+ * The flags that say where a render is taken, as opposed to how it is driven.
+ *
+ * Only these are answered with "use the parameterized mode instead", which is advice about the
+ * render target and no help at all to someone who asked for a longer timeout.
+ */
+const kRenderTargetFlags: (keyof RenderModeOptions)[] =
+  ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx"];
 
 export interface RenderModeOptions {
   clueUrl?: string;
@@ -78,9 +99,17 @@ export interface RenderModeOptions {
   /** What CLUE build is being rendered. `null` is recorded, and `render` warns about it. */
   clueRevision?: string | null;
   launch?: Parameters<typeof puppeteerBackend>[0]["launch"];
+  /**
+   * Injected by tests so a Shutterbug mode can be driven through the CLI without a network, the
+   * same seam `launch` gives the local mode. Without it these modes could only be tested one layer
+   * down, and nothing covered what `render` itself hands them.
+   */
+  fetchImpl?: FetchLike;
   /** Readiness timing, lowered by tests so a fake browser does not sit through real intervals. */
   stableForMs?: number;
   pollIntervalMs?: number;
+  /** The whole budget for one document: load, readiness and capture together. */
+  timeoutMs?: number;
 }
 
 export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
@@ -96,13 +125,45 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     // would silently answer a different question from the one that was asked.
     unusableFlags: ["shutterbugUrl", "captureHeightPx"],
     build: (options) => puppeteerBackend({
+      modeId: "puppeteer-full-height",
       clueUrl: options.clueUrl ?? kDefaultClueUrl,
       unit: requireUnit(options.unit, "puppeteer-full-height"),
       unitUrl: options.unitUrl,
       clueRevision: options.clueRevision === undefined ? localClueRevision() : options.clueRevision,
       launch: options.launch,
       stableForMs: options.stableForMs,
-      pollIntervalMs: options.pollIntervalMs
+      pollIntervalMs: options.pollIntervalMs,
+      timeoutMs: options.timeoutMs
+    })
+  },
+  /**
+   * The same page, the same readiness protocol and the same sizing as `puppeteer-full-height` —
+   * only the last step differs, so the two cannot disagree about when a document is ready to
+   * photograph. It exists so a run can send one picture per tile instead of one of the page.
+   *
+   * Filed under its own mode id, like every mode, so a per-tile render and a full-document one can
+   * both exist for the same document.
+   */
+  "puppeteer-per-tile": {
+    backendId: "puppeteer",
+    backendVersion: kPuppeteerBackendVersion,
+    prerequisites: `a CLUE dev server at ${kDefaultClueUrl} (npm start); no OpenAI key`,
+    renderTargetSummary: `${kDefaultClueUrl} (--clue-url), unit ${kHarnessRenderUnitId} (--unit), ` +
+      "captured one image per top-level tile",
+    defaultUnit: kHarnessRenderUnitId,
+    needsUnitServer: true,
+    unusableFlags: ["shutterbugUrl", "captureHeightPx"],
+    build: (options) => puppeteerBackend({
+      modeId: "puppeteer-per-tile",
+      clueUrl: options.clueUrl ?? kDefaultClueUrl,
+      unit: requireUnit(options.unit, "puppeteer-per-tile"),
+      unitUrl: options.unitUrl,
+      clueRevision: options.clueRevision === undefined ? localClueRevision() : options.clueRevision,
+      launch: options.launch,
+      stableForMs: options.stableForMs,
+      pollIntervalMs: options.pollIntervalMs,
+      timeoutMs: options.timeoutMs,
+      capture: "per-tile"
     })
   },
   "shutterbug-production-current": {
@@ -114,8 +175,11 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     defaultUnit: null,
     needsUnitServer: false,
     // Frozen by definition: this mode exists to match production's request envelope.
-    unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx"],
-    build: (options) => shutterbugProductionCurrent({ clueRevision: options.clueRevision ?? null })
+    unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx", "timeoutMs"],
+    build: (options) => shutterbugProductionCurrent({
+      clueRevision: options.clueRevision ?? null,
+      fetchImpl: options.fetchImpl
+    })
   },
   "shutterbug-parameterized": {
     backendId: "shutterbug",
@@ -129,13 +193,35 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       "(--capture-height)",
     defaultUnit: null,
     needsUnitServer: false,
-    unusableFlags: [],
+    unusableFlags: ["timeoutMs"],
     build: (options) => shutterbugParameterized({
       clueUrl: options.clueUrl,
       unit: options.unit,
       shutterbugUrl: options.shutterbugUrl,
       captureHeightPx: options.captureHeightPx,
-      clueRevision: options.clueRevision ?? null
+      clueRevision: options.clueRevision ?? null,
+      fetchImpl: options.fetchImpl
+    })
+  },
+  "shutterbug-accurate-height": {
+    backendId: "shutterbug",
+    backendVersion: kShutterbugBackendVersion,
+    prerequisites: `a local ${kDefaultRenderModeId} render of the same corpus, plus network access ` +
+      `to the Shutterbug endpoint (${kStagingShutterbugUrl} unless --shutterbug-url says otherwise) ` +
+      "and the CLUE URL; no OpenAI key",
+    renderTargetSummary: `${kProductionClueUrl} (--clue-url), unit ${kProductionUnit} (--unit), via ` +
+      `${kStagingShutterbugUrl} (--shutterbug-url), clipped at each document's own measured height`,
+    defaultUnit: null,
+    needsUnitServer: false,
+    needsMeasuredHeight: true,
+    // The height is measured, not chosen, so accepting one would answer a different question.
+    unusableFlags: ["captureHeightPx", "timeoutMs"],
+    build: (options) => shutterbugAccurateHeight({
+      clueUrl: options.clueUrl,
+      unit: options.unit,
+      shutterbugUrl: options.shutterbugUrl,
+      clueRevision: options.clueRevision ?? null,
+      fetchImpl: options.fetchImpl
     })
   }
 };
@@ -183,12 +269,14 @@ export function localClueRevision(): string | null {
  * the backend first meant an invalid flag left the server listening and hung the CLI.
  */
 export function assertRenderModeOptions(modeId: string, options: RenderModeOptions = {}): void {
-  const given = renderMode(modeId).unusableFlags
-    .filter((option) => options[option] !== undefined)
-    .map((option) => kFlagNames[option] ?? String(option));
+  const rejected = renderMode(modeId).unusableFlags.filter((option) => options[option] !== undefined);
+  const given = rejected.map((option) => kFlagNames[option] ?? String(option));
   if (given.length > 0) {
+    const hint = rejected.some((option) => kRenderTargetFlags.includes(option))
+      ? " Use --mode shutterbug-parameterized to change the render target."
+      : "";
     throw new Error(`${given.join(", ")} ${given.length === 1 ? "is" : "are"} not configurable for ` +
-      `--mode ${modeId}. Use --mode shutterbug-parameterized to change the render target.`);
+      `--mode ${modeId}.${hint}`);
   }
 }
 

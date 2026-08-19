@@ -107,7 +107,7 @@
         "requiresVisualRepresentation": true
       },
       "handlerTier": "stub",
-      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The stub handler emits one sentence — that weak summary is the measurement, not a failure."
+      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The stub handler emits one sentence \u2014 that weak summary is the measurement, not a failure."
     },
     "empty": {
       "expectDistinctiveInDefaultSummary": false,
@@ -136,7 +136,9 @@
         "containsStudentText": false,
         "requiresVisualRepresentation": true
       },
-      "handlerTier": "fallback"
+      "handlerTier": "fallback",
+      "expectedRenderFailure": "the ErrorTest tile throws during render on purpose, which takes the whole document down and makes CLUE show its error page",
+      "notes": "Exists to prove the harness notices a render that fails. There is nothing to fix here: a successful render of this document would mean the tile stopped throwing."
     },
     "expression": {
       "expectDistinctiveInDefaultSummary": false,
@@ -317,6 +319,21 @@
       "computedModality": "text-only",
       "tileTypes": [
         "Table"
+      ],
+      "capability": {
+        "containsStudentText": true,
+        "requiresVisualRepresentation": false
+      },
+      "handlerTier": "full"
+    },
+    "tall": {
+      "expectDistinctiveInDefaultSummary": true,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "tall-fixture-marker",
+      "computedModality": "text-only",
+      "tileTypes": [
+        "Text"
       ],
       "capability": {
         "containsStudentText": true,

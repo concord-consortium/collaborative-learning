@@ -19,7 +19,7 @@
       "content": {
         "type": "ErrorTest",
         "fixtureMarker": "error-test-fixture-marker",
-        "failureMode": "render"
+        "throwRenderError": true
       }
     }
   }

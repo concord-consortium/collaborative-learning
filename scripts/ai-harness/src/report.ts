@@ -33,6 +33,12 @@ export interface GroupSummary {
    * should know which part before comparing groups.
    */
   overriddenModality: number;
+  /**
+   * How many of this group's documents sent a mixed message with its text half dropped, because the
+   * document carried no student-authored text. Those rows are half the input a mixed row usually
+   * has, so a reader comparing mixed against text-only needs the count before drawing a conclusion.
+   */
+  textPartOmitted: number;
   cacheHits: number;
   statuses: { success: number; refusal: number; error: number; skipped: number };
   tokens: {
@@ -122,6 +128,7 @@ interface Accumulator {
   promptTokens: number[];
   completionTokens: number[];
   imageEstimatedTotal: number;
+  textPartOmitted: Set<string>;
   modeledUsd: number;
   incurredUsd: number;
   categories: Record<string, number>;
@@ -138,6 +145,7 @@ function newAccumulator(
     overriddenModality: new Set(),
     cacheHits: 0,
     statuses: { success: 0, refusal: 0, error: 0, skipped: 0 },
+    textPartOmitted: new Set(),
     promptTokens: [],
     completionTokens: [],
     imageEstimatedTotal: 0,
@@ -151,9 +159,12 @@ function accumulate(accumulator: Accumulator, row: ResultRow): void {
   accumulator.docs.add(row.docId);
   // Counted by document rather than by row, so it lines up with the `docs` column beside it.
   if (row.modality !== row.computedModality) accumulator.overriddenModality.add(row.docId);
-  // Counted for every status, including errors and skips: what a picture would have cost is a fact
-  // about the request, not about whether the model answered.
-  accumulator.imageEstimatedTotal += row.promptImageTokensEstimated ?? 0;
+  // Counted for every status that built a request, errors included: what a picture would have cost
+  // is a fact about the request, not about whether the model answered. A skipped row built none.
+  if (row.status !== "skipped") {
+    accumulator.imageEstimatedTotal += row.promptImageTokensEstimated ?? 0;
+    if (row.textPartOmitted) accumulator.textPartOmitted.add(row.docId);
+  }
   switch (row.status) {
     case "success": {
       accumulator.statuses.success += 1;
@@ -210,6 +221,7 @@ function finish(accumulator: Accumulator): GroupSummary {
     modality: accumulator.modality,
     docs: accumulator.docs.size,
     overriddenModality: accumulator.overriddenModality.size,
+    textPartOmitted: accumulator.textPartOmitted.size,
     cacheHits: accumulator.cacheHits,
     statuses: accumulator.statuses,
     tokens: {
@@ -307,6 +319,10 @@ const kColumns: { header: string; value: (group: GroupSummary) => string }[] = [
   { header: "refused", value: (group) => String(group.statuses.refusal) },
   { header: "errors", value: (group) => String(group.statuses.error) },
   { header: "skipped", value: (group) => String(group.statuses.skipped) },
+  // Mixed rows that went without their text half, because the document carried no student-authored
+  // text. "-" rather than 0, so a group where it never happened does not read like a measurement.
+  { header: "no text", value: (group) =>
+    group.textPartOmitted === 0 ? "-" : String(group.textPartOmitted) },
   { header: "cached", value: (group) => String(group.cacheHits) },
   { header: "tok in", value: (group) => String(group.tokens.promptTotal) },
   // What the harness estimated the pictures cost, beside what the API actually billed for the whole
@@ -318,19 +334,25 @@ const kColumns: { header: string; value: (group: GroupSummary) => string }[] = [
   // image-only and text-only rows is arithmetic over two incomparable populations — a ~14,000-token
   // screenshot and a ~400-token summary — and reads as a fact about neither. Sums stay: "what did
   // this file cost" is a real question.
-  { header: "in mean", value: (group) => mixedShapes(group) ? "-" : group.tokens.promptMean.toFixed(0) },
-  { header: "in med", value: (group) => mixedShapes(group) ? "-" : group.tokens.promptMedian.toFixed(0) },
+  { header: "in mean", value: (group) => spansMessageShapes(group) ? "-" : group.tokens.promptMean.toFixed(0) },
+  { header: "in med", value: (group) => spansMessageShapes(group) ? "-" : group.tokens.promptMedian.toFixed(0) },
   { header: "out mean", value: (group) =>
-    mixedShapes(group) ? "-" : group.tokens.completionMean.toFixed(0) },
+    spansMessageShapes(group) ? "-" : group.tokens.completionMean.toFixed(0) },
   { header: "out med", value: (group) =>
-    mixedShapes(group) ? "-" : group.tokens.completionMedian.toFixed(0) },
+    spansMessageShapes(group) ? "-" : group.tokens.completionMedian.toFixed(0) },
   { header: "modeled $", value: (group) => group.cost.modeledUsd.toFixed(4) },
   { header: "incurred $", value: (group) => group.cost.incurredUsd.toFixed(4) },
   { header: "categories", value: (group) => formatCategories(group.categories) }
 ];
 
-/** True when a row aggregates more than one message shape, making per-row averages meaningless. */
-function mixedShapes(group: GroupSummary): boolean {
+/**
+ * True when a row aggregates more than one message shape, making per-row averages meaningless.
+ *
+ * Not to be confused with the `mixed` message shape, which is one shape and averages fine. The old
+ * name for this was `mixedShapes`, which stopped being readable the moment a shape was called
+ * `mixed`.
+ */
+function spansMessageShapes(group: GroupSummary): boolean {
   return group.message === "all";
 }
 

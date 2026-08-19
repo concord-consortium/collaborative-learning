@@ -23,10 +23,14 @@
         "yAttributeLabel": "Height (cm)",
         "axes": {
           "bottom": {
+            "type": "numeric",
+            "place": "bottom",
             "min": 0,
             "max": 10
           },
           "left": {
+            "type": "numeric",
+            "place": "left",
             "min": 0,
             "max": 25
           }

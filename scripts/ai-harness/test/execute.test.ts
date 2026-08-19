@@ -156,6 +156,50 @@ describe("resume identity spans the corpus and the experiment", () => {
     });
     expect(second.resumed).toBe(1);
   });
+
+  // The same three cases for skipped rows, which resume on the content they were decided from rather
+  // than on a request key. Their keys were being rebuilt from the *current* corpus and experiment
+  // while the rows above use their own, so a stored skip carried whatever identity the reading run
+  // happened to have — and suppressed a new skip that only looked the same.
+  const skip = (docId: string) => ({
+    docId, runId: "text-default", run: { id: "text-default", message: "text-only", prompt: "p" } as any,
+    modality: "empty" as const, computedModality: "empty" as const, promptName: "p", promptSha256: "h",
+    skipReasons: ["the document has no student content at all"],
+    decidedFromContentSha256: "e".repeat(64)
+  });
+  const skipWith = async (dataRoot: string, overrides: { corpus?: string; experimentSha256?: string }) =>
+    runTasks({
+      corpus: overrides.corpus ?? "synthetic-corpus",
+      experiment: experiment as any,
+      experimentSha256: overrides.experimentSha256 ?? "hash",
+      tasks: [],
+      skipped: [skip("empty")],
+      outputFile: path.join(dataRoot, "results.jsonl"),
+      ledger: new CostLedger(10),
+      cache: new ResponseCache(path.join(dataRoot, "cache"), { read: false, write: false }),
+      pricing: testPricing,
+      runMeta: testRunMeta,
+      createCompletion: async () => { throw new Error("a skip sends nothing"); },
+      sleep: async () => undefined
+    });
+
+  it.each([
+    ["a different corpus", { corpus: "corpus-b" }],
+    ["a different experiment definition", { experimentSha256: "after-edit" }]
+  ])("does not resume a skipped row written for %s", async (_what, overrides) => {
+    const dataRoot = makeTestDataRoot(`resume-skip-${JSON.stringify(overrides).length}`);
+    const first = await skipWith(dataRoot, {});
+    expect(first.skipped).toBe(1);
+    const second = await skipWith(dataRoot, overrides);
+    expect({ resumed: second.resumed, written: second.skipped }).toEqual({ resumed: 0, written: 1 });
+  });
+
+  it("still resumes a skipped row when corpus and experiment both match", async () => {
+    const dataRoot = makeTestDataRoot("resume-skip-same");
+    await skipWith(dataRoot, {});
+    const second = await skipWith(dataRoot, {});
+    expect({ resumed: second.resumed, written: second.skipped }).toEqual({ resumed: 1, written: 0 });
+  });
 });
 
 describe("a dispatched request that fails is not treated as free", () => {

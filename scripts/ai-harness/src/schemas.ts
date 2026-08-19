@@ -172,6 +172,17 @@ export interface ManifestDocument {
   computedModality: Modality;
   /** Only ever set by a human; tooling never writes it. */
   modalityOverride: Modality | null;
+  /**
+   * Why this document is known not to render, or `null` when it should.
+   *
+   * A document can be unrenderable on purpose — the ErrorTest fixture exists to make a tile throw —
+   * and without somewhere to say so, `render` reports a real failure every time and the exit code
+   * stops meaning anything. A run treats such a document as skipped rather than as a missing render.
+   *
+   * Set by a human, or seeded by `import` from the source directory's `expectations.json`. Never
+   * inferred from a render that happened to fail: that is the thing it would hide.
+   */
+  expectedRenderFailure: string | null;
   labels: Record<string, unknown>;
   relatedSummaries: RelatedSummaryEntry[];
   historical: HistoricalAnalysis | null;
@@ -224,6 +235,8 @@ function validateManifestDocument(value: unknown, file: string, field: string): 
     modalityOverride: record.modalityOverride == null
       ? null
       : asEnum(record.modalityOverride, modalities, file, `${field}.modalityOverride`),
+    expectedRenderFailure:
+      asOptionalString(record.expectedRenderFailure, file, `${field}.expectedRenderFailure`),
     labels: record.labels == null ? {} : asObject(record.labels, file, `${field}.labels`),
     relatedSummaries: record.relatedSummaries == null
       ? []
@@ -236,8 +249,9 @@ function validateManifestDocument(value: unknown, file: string, field: string): 
 }
 
 /**
- * Related summaries are not yet injected into request construction, and the manifest is
- * exactly the file a human hand-edits, so these are checked rather than cast.
+ * Related summaries *are* injected into request construction — every text-carrying run puts them in
+ * the message's related-summary parts — and the manifest is exactly the file a human hand-edits, so
+ * these are checked rather than cast.
  */
 function validateRelatedSummary(value: unknown, file: string, field: string): RelatedSummaryEntry {
   const record = asObject(value, file, field);
@@ -365,22 +379,53 @@ export function validatePromptFile(value: unknown, file: string): PromptFile {
 // Experiment file
 // ---------------------------------------------------------------------------
 
-/** Text-only and image-only are what run today; `mixed` is declared but nothing builds one yet. */
-export const messageShapes = ["text-only", "image-only"] as const;
+export const messageShapes = ["text-only", "image-only", "mixed"] as const;
 export type MessageShape = typeof messageShapes[number];
 
+/** Which images out of an envelope a run sends. */
+export const imageSets = ["full-document", "per-tile", "visual-tiles-only"] as const;
+export type ImageSet = typeof imageSets[number];
+
 /**
- * A run names one representation, and which one depends on its message shape: `text-only` runs carry
- * a `textVariant`, `image-only` runs carry an `imageMode`. The other field is refused rather than
- * ignored — a `text-only` run with an `imageMode` set is a mistake about what is being measured, and
- * silently dropping it would produce a result table that looks fine and answers a different question.
+ * What a run puts in the related-summary parts of a text or mixed message.
+ *
+ * `extras-fixed` is the default because it is what the harness has always done — each related
+ * document's actual summary, from the manifest — so existing experiment files keep their meaning and
+ * their request keys. `extras-production-current` reproduces production's `findRelatedSummaries` bug
+ * on purpose, as a named baseline; see the README.
+ */
+export const extrasModes = ["extras-fixed", "extras-production-current", "no-extras"] as const;
+export type ExtrasMode = typeof extrasModes[number];
+
+/**
+ * A run names its representation, and which one depends on its message shape: `text-only` carries a
+ * `textVariant`, `image-only` carries an `imageMode`, `mixed` carries both. A field that the shape
+ * cannot use is refused rather than ignored — a `text-only` run with an `imageMode` set is a mistake
+ * about what is being measured, and silently dropping it would produce a result table that looks
+ * fine and answers a different question. The same rule covers the three dimensions below.
  */
 export interface ExperimentRun {
   id: string;
   message: MessageShape;
   textVariant?: string;
   imageMode?: string;
+  /** Image runs only. Absent means the shared builder's `"auto"`. */
+  detail?: ImageDetail;
+  /** Image runs only. Absent means `full-document`. */
+  imageSet?: ImageSet;
+  /** Text-carrying runs only. Absent means `extras-fixed`. */
+  extras?: ExtrasMode;
   prompt: string;
+}
+
+/** Whether this shape sends a summary, and so can carry a text variant and an extras setting. */
+export function sendsText(message: MessageShape): boolean {
+  return message === "text-only" || message === "mixed";
+}
+
+/** Whether this shape sends pictures, and so can carry an image mode, a set and a detail. */
+export function sendsImages(message: MessageShape): boolean {
+  return message === "image-only" || message === "mixed";
 }
 
 export interface ExperimentFile {
@@ -425,26 +470,53 @@ export function validateExperimentFile(
     }
 
     const validated: ExperimentRun = { id, message, prompt };
-    if (message === "text-only") {
-      if (run.imageMode !== undefined) {
-        fail(file, `${field}.imageMode`, 'must not be set on a "text-only" run, which sends no image');
-      }
+    if (sendsText(message)) {
       const textVariant = asString(run.textVariant, file, `${field}.textVariant`);
       if (!context.knownTextVariants.includes(textVariant)) {
         fail(file, `${field}.textVariant`,
           `must be one of ${context.knownTextVariants.join(", ")}, got "${textVariant}"`);
       }
       validated.textVariant = textVariant;
+      if (run.extras !== undefined) {
+        validated.extras = asEnum(run.extras, extrasModes, file, `${field}.extras`);
+      }
     } else {
       if (run.textVariant !== undefined) {
-        fail(file, `${field}.textVariant`, 'must not be set on an "image-only" run, which sends no summary');
+        fail(file, `${field}.textVariant`,
+          `must not be set on an "${message}" run, which sends no summary`);
       }
+      if (run.extras !== undefined) {
+        fail(file, `${field}.extras`,
+          `must not be set on an "${message}" run: extras ride the summary, and none is sent`);
+      }
+    }
+
+    if (sendsImages(message)) {
       const imageMode = asString(run.imageMode, file, `${field}.imageMode`);
       if (!context.knownImageModes.includes(imageMode)) {
         fail(file, `${field}.imageMode`,
           `must be one of ${context.knownImageModes.join(", ")}, got "${imageMode}"`);
       }
       validated.imageMode = imageMode;
+      if (run.detail !== undefined) {
+        validated.detail = asEnum(run.detail, imageDetails, file, `${field}.detail`);
+      }
+      if (run.imageSet !== undefined) {
+        validated.imageSet = asEnum(run.imageSet, imageSets, file, `${field}.imageSet`);
+      }
+    } else {
+      if (run.imageMode !== undefined) {
+        fail(file, `${field}.imageMode`,
+          `must not be set on a "${message}" run, which sends no image`);
+      }
+      if (run.detail !== undefined) {
+        fail(file, `${field}.detail`,
+          `must not be set on a "${message}" run: detail describes an image, and none is sent`);
+      }
+      if (run.imageSet !== undefined) {
+        fail(file, `${field}.imageSet`,
+          `must not be set on a "${message}" run, which sends no image`);
+      }
     }
     return validated;
   });
@@ -483,15 +555,21 @@ export function validateRepresentationEnvelope(value: unknown, file: string): Re
 // Image representation envelope
 // ---------------------------------------------------------------------------
 
-/** What a capture covers. `fixed-height` is the Shutterbug modes' clipped capture. */
-export const captureModes = ["full-document", "fixed-height"] as const;
+/**
+ * What a capture covers.
+ *
+ * `fixed-height` is the Shutterbug modes' clipped capture. `per-tile` produces one image per
+ * top-level tile instead of one of the page, so the set covers the document while no single image
+ * is the document — which is why it is a capture mode of its own rather than a kind of full page.
+ */
+export const captureModes = ["full-document", "fixed-height", "per-tile"] as const;
 export type CaptureMode = typeof captureModes[number];
 
-/** What one stored image is a picture of. `tile` is written by nothing yet; it arrives in M3. */
+/** What one stored image is a picture of. */
 export const imagePurposes = ["full-document", "tile"] as const;
 export type ImagePurpose = typeof imagePurposes[number];
 
-/** OpenAI's image detail setting. The shared builder hardcodes `auto`; M3 adds the other two. */
+/** OpenAI's image detail setting, as sent on an image part. */
 export const imageDetails = ["low", "high", "auto"] as const;
 export type ImageDetail = typeof imageDetails[number];
 
@@ -600,8 +678,8 @@ export function validateRenderTarget(value: unknown, file: string, field: string
   if (captureMode === "fixed-height" && captureHeightPx === null) {
     fail(file, `${field}.captureHeightPx`, 'is required when captureMode is "fixed-height"');
   }
-  if (captureMode === "full-document" && captureHeightPx !== null) {
-    fail(file, `${field}.captureHeightPx`, 'must be null when captureMode is "full-document"');
+  if (captureMode !== "fixed-height" && captureHeightPx !== null) {
+    fail(file, `${field}.captureHeightPx`, `must be null when captureMode is "${captureMode}"`);
   }
   return {
     clueUrl: asString(record.clueUrl, file, `${field}.clueUrl`),
@@ -760,36 +838,77 @@ export type ResultStatus = typeof resultStatuses[number];
  *
  * This is also the extension point a mixed-message row will need.
  */
+/** What a text-carrying row sends: which variant produced the summary, from which content. */
+export interface TextRepresentation {
+  variantId: string;
+  variantVersion: number;
+  sourceContentSha256: string;
+}
+
+/** What an image-carrying row sends: which render produced the pictures, and which pictures. */
+export interface ImageRepresentation {
+  modeId: string;
+  backendId: string;
+  backendVersion: number;
+  renderTarget: RenderTarget;
+  sourceContentSha256: string;
+  imageSha256s: string[];
+  /** Which images out of the envelope were sent. Absent on rows written before sets existed. */
+  imageSet?: ImageSet;
+}
+
+/**
+ * Where a row's input came from.
+ *
+ * A `mixed` row carries both sides, as the same two shapes the single-representation rows use rather
+ * than a third flattened field list — so a reader (and a report) can read either half of a mixed row
+ * exactly as it reads the row that sent only that half.
+ */
 export type RepresentationDescriptor =
-  | { kind: "text"; variantId: string; variantVersion: number; sourceContentSha256: string }
-  | {
-      kind: "image";
-      modeId: string;
-      backendId: string;
-      backendVersion: number;
-      renderTarget: RenderTarget;
-      sourceContentSha256: string;
-      imageSha256s: string[];
-    };
+  | ({ kind: "text" } & TextRepresentation)
+  | ({ kind: "image" } & ImageRepresentation)
+  | { kind: "mixed"; text: TextRepresentation; image: ImageRepresentation };
+
+function validateTextRepresentation(
+  record: Record<string, unknown>, file: string, field: string
+): TextRepresentation {
+  return {
+    variantId: asString(record.variantId, file, `${field}.variantId`),
+    variantVersion: asNumber(record.variantVersion, file, `${field}.variantVersion`),
+    sourceContentSha256: asString(record.sourceContentSha256, file, `${field}.sourceContentSha256`)
+  };
+}
+
+function validateImageRepresentation(
+  record: Record<string, unknown>, file: string, field: string
+): ImageRepresentation {
+  return {
+    ...validateImageProvenance(record, file, field),
+    imageSha256s: asArray(record.imageSha256s, file, `${field}.imageSha256s`)
+      .map((hash, index) => asSha256(hash, file, `${field}.imageSha256s[${index}]`)),
+    ...(record.imageSet === undefined
+      ? {}
+      : { imageSet: asEnum(record.imageSet, imageSets, file, `${field}.imageSet`) })
+  };
+}
 
 export function validateRepresentationDescriptor(
   value: unknown, file: string, field: string
 ): RepresentationDescriptor {
   const record = asObject(value, file, field);
-  const kind = asEnum(record.kind, ["text", "image"] as const, file, `${field}.kind`);
+  const kind = asEnum(record.kind, ["text", "image", "mixed"] as const, file, `${field}.kind`);
   if (kind === "text") {
-    return {
-      kind,
-      variantId: asString(record.variantId, file, `${field}.variantId`),
-      variantVersion: asNumber(record.variantVersion, file, `${field}.variantVersion`),
-      sourceContentSha256: asString(record.sourceContentSha256, file, `${field}.sourceContentSha256`)
-    };
+    return { kind, ...validateTextRepresentation(record, file, field) };
+  }
+  if (kind === "image") {
+    return { kind, ...validateImageRepresentation(record, file, field) };
   }
   return {
     kind,
-    ...validateImageProvenance(record, file, field),
-    imageSha256s: asArray(record.imageSha256s, file, `${field}.imageSha256s`)
-      .map((hash, index) => asSha256(hash, file, `${field}.imageSha256s[${index}]`))
+    text: validateTextRepresentation(
+      asObject(record.text, file, `${field}.text`), file, `${field}.text`),
+    image: validateImageRepresentation(
+      asObject(record.image, file, `${field}.image`), file, `${field}.image`)
   };
 }
 
@@ -839,6 +958,20 @@ export interface ResultRowCommon {
    */
   computedModality: Modality;
   message: MessageShape;
+  prompt: { name: string; sha256: string };
+  /** The cache key, which doubles as resume identity. `null` on skipped rows: they build no request. */
+  requestKey: string | null;
+  runMeta: RunMeta;
+}
+
+/**
+ * What every row that actually built and sent a request carries.
+ *
+ * `representation` lives here rather than on `ResultRowCommon` because a skipped row has none —
+ * nothing was represented. Giving one a placeholder descriptor would put a variant or a render mode
+ * in the results for a request that never existed.
+ */
+export interface SentResultRowCommon extends ResultRowCommon {
   representation: RepresentationDescriptor;
   /**
    * The harness's pre-flight image-token estimate for this row's images, at the configured pricing.
@@ -846,13 +979,25 @@ export interface ResultRowCommon {
    * what was billed; this is recorded so a report can say how much of the prompt was picture.
    */
   promptImageTokensEstimated?: number;
-  prompt: { name: string; sha256: string };
-  /** The cache key, which doubles as resume identity. `null` on skipped rows: they build no request. */
-  requestKey: string | null;
-  runMeta: RunMeta;
+  /**
+   * Set on a mixed row whose document carried no student-authored text: the summary and the related
+   * summaries were dropped and only the pictures went. The request *was* sent, so this is not a
+   * skipped row — but a reader comparing mixed against text-only needs to know which mixed rows were
+   * missing half their input, and a report counts them.
+   */
+  textPartOmitted?: true;
+  /**
+   * Things worth knowing about how this row's input was assembled, which are not failures.
+   *
+   * The case this exists for: classification walks into Question tiles, but the per-tile capture
+   * photographs top-level tiles only, so a visual tile nested in a Question has a classification
+   * entry and no picture of its own. The images that exist are still the right ones to send, and a
+   * reader comparing image sets needs to know the difference rather than discovering it later.
+   */
+  representationWarnings?: string[];
 }
 
-export interface SuccessResultRow extends ResultRowCommon {
+export interface SuccessResultRow extends SentResultRowCommon {
   status: "success";
   requestKey: string;
   response: { parsed: unknown; raw: unknown };
@@ -861,7 +1006,7 @@ export interface SuccessResultRow extends ResultRowCommon {
   responseOriginMeta: ResponseOriginMeta;
 }
 
-export interface RefusalResultRow extends ResultRowCommon {
+export interface RefusalResultRow extends SentResultRowCommon {
   status: "refusal";
   requestKey: string;
   refusal: string;
@@ -870,7 +1015,7 @@ export interface RefusalResultRow extends ResultRowCommon {
   responseOriginMeta: ResponseOriginMeta;
 }
 
-export interface ErrorResultRow extends ResultRowCommon {
+export interface ErrorResultRow extends SentResultRowCommon {
   status: "error";
   requestKey: string;
   error: { type: string; message: string; attempts: number };
@@ -888,7 +1033,17 @@ export interface ErrorResultRow extends ResultRowCommon {
 export interface SkippedResultRow extends ResultRowCommon {
   status: "skipped";
   requestKey: null;
+  /** Why this (run, document) was not sent, in terms a reader can act on. */
   skipReasons: string[];
+  /**
+   * The document content the decision was made from.
+   *
+   * A skip is a judgement about what a document contains, so a rerun has to be able to tell whether
+   * that judgement still applies. Without this, an existing skipped row is indistinguishable from
+   * one decided against content that has since changed, and resume would either re-skip forever or
+   * never revisit an edited document.
+   */
+  decidedFromContentSha256: string;
 }
 
 export type ResultRow = SuccessResultRow | RefusalResultRow | ErrorResultRow | SkippedResultRow;
@@ -919,7 +1074,6 @@ function validateResultCommon(record: Record<string, unknown>, file: string): Re
     modality: asEnum(record.modality, modalities, file, "modality"),
     computedModality: asEnum(record.computedModality, modalities, file, "computedModality"),
     message: asEnum(record.message, messageShapes, file, "message"),
-    representation: validateRepresentationDescriptor(record.representation, file, "representation"),
     prompt: {
       name: asString(prompt.name, file, "prompt.name"),
       sha256: asString(prompt.sha256, file, "prompt.sha256")
@@ -932,20 +1086,44 @@ function validateResultCommon(record: Record<string, unknown>, file: string): Re
       gitDirty: asBoolean(runMeta.gitDirty, file, "runMeta.gitDirty")
     }
   };
+  return common;
+}
+
+/** The `representation` half of a row that sent a request, plus the fields that ride with it. */
+function validateSentRow(
+  record: Record<string, unknown>, file: string, common: ResultRowCommon
+): SentResultRowCommon {
+  const representation = validateRepresentationDescriptor(record.representation, file, "representation");
+  const sent: SentResultRowCommon = { ...common, representation };
   if (record.promptImageTokensEstimated !== undefined) {
     // Reports sum this, so a negative would quietly subtract from the image-token total.
-    common.promptImageTokensEstimated =
+    sent.promptImageTokensEstimated =
       asNonNegativeNumber(record.promptImageTokensEstimated, file, "promptImageTokensEstimated");
   }
   // An estimate on a row that sent no image, or its absence on one that did, would put a number in
   // the report's image column that belongs to nothing.
-  const sentAnImage = common.representation.kind === "image";
-  if (sentAnImage !== (common.promptImageTokensEstimated !== undefined)) {
+  const sentAnImage = representation.kind === "image" || representation.kind === "mixed";
+  if (sentAnImage !== (sent.promptImageTokensEstimated !== undefined)) {
     fail(file, "promptImageTokensEstimated",
       `must be ${sentAnImage ? "set" : "absent"} on a row whose representation is ` +
-      `"${common.representation.kind}"`);
+      `"${representation.kind}"`);
   }
-  return common;
+  if (record.representationWarnings !== undefined) {
+    sent.representationWarnings = asArray(record.representationWarnings, file, "representationWarnings")
+      .map((warning, index) => asString(warning, file, `representationWarnings[${index}]`));
+  }
+  if (record.textPartOmitted !== undefined) {
+    if (record.textPartOmitted !== true) {
+      fail(file, "textPartOmitted",
+        `is only ever true when present, got ${describe(record.textPartOmitted)}`);
+    }
+    if (representation.kind !== "mixed") {
+      fail(file, "textPartOmitted",
+        `only applies to a mixed row, and this one is "${representation.kind}"`);
+    }
+    sent.textPartOmitted = true;
+  }
+  return sent;
 }
 
 function validateUsage(value: unknown, file: string): ResultUsage {
@@ -984,21 +1162,30 @@ export function validateResultRow(value: unknown, file: string): ResultRow {
     if (record.requestKey != null) {
       fail(file, "requestKey", `must be null on a skipped row, got ${describe(record.requestKey)}`);
     }
+    const skipReasons = asArray(record.skipReasons, file, "skipReasons")
+      .map((reason, index) => asString(reason, file, `skipReasons[${index}]`));
+    // A skipped row with no reason is the failure mode this status exists to prevent: a document
+    // that simply does not appear, with nothing saying why.
+    if (skipReasons.length === 0) {
+      fail(file, "skipReasons", "must name at least one reason the document was not sent");
+    }
     return {
       ...common,
       status,
       requestKey: null,
-      skipReasons: asArray(record.skipReasons, file, "skipReasons")
-        .map((reason, index) => asString(reason, file, `skipReasons[${index}]`))
+      skipReasons,
+      decidedFromContentSha256:
+        asSha256(record.decidedFromContentSha256, file, "decidedFromContentSha256")
     };
   }
 
   const requestKey = asString(record.requestKey, file, "requestKey");
+  const sent = validateSentRow(record, file, common);
 
   if (status === "error") {
     const error = asObject(record.error, file, "error");
     const row: ErrorResultRow = {
-      ...common,
+      ...sent,
       status,
       requestKey,
       error: {
@@ -1023,7 +1210,7 @@ export function validateResultRow(value: unknown, file: string): ResultRow {
 
   if (status === "refusal") {
     return {
-      ...common,
+      ...sent,
       status,
       requestKey,
       refusal: asString(record.refusal, file, "refusal"),
@@ -1037,7 +1224,7 @@ export function validateResultRow(value: unknown, file: string): ResultRow {
   if (!("parsed" in response)) fail(file, "response.parsed", "is missing");
   if (!("raw" in response)) fail(file, "response.raw", "is missing");
   return {
-    ...common,
+    ...sent,
     status,
     requestKey,
     response: { parsed: response.parsed, raw: response.raw },
@@ -1064,6 +1251,11 @@ export interface FixtureExpectation {
   expectDistinctiveInDefaultSummary: boolean;
   defaultSummaryMustSucceed: boolean;
   minimalSummaryMustSucceed: boolean;
+  /**
+   * Why this fixture is expected not to render, when it is not expected to. `import` copies it onto
+   * the manifest entry, so a corpus imported from here knows without anyone hand-editing anything.
+   */
+  expectedRenderFailure?: string;
   notes?: string;
 }
 
@@ -1099,6 +1291,9 @@ export function validateExpectationsFile(value: unknown, file: string): Expectat
         expectation.defaultSummaryMustSucceed, file, `${field}.defaultSummaryMustSucceed`),
       minimalSummaryMustSucceed: asBoolean(
         expectation.minimalSummaryMustSucceed, file, `${field}.minimalSummaryMustSucceed`),
+      expectedRenderFailure: expectation.expectedRenderFailure === undefined
+        ? undefined
+        : asString(expectation.expectedRenderFailure, file, `${field}.expectedRenderFailure`),
       notes: expectation.notes === undefined ? undefined : asString(expectation.notes, file, `${field}.notes`)
     };
   }

@@ -141,25 +141,29 @@ describe("the image-token estimate belongs to rows that sent an image", () => {
       },
       sourceContentSha256: "0".repeat(64), imageSha256s: ["a".repeat(64)]
     },
-    prompt: { name: "p", sha256: "s" }, requestKey: "key", runMeta: testRunMeta,
-    status: "skipped", requestKey2: undefined, skipReasons: []
+    prompt: { name: "p", sha256: "s" }, runMeta: testRunMeta,
+    // A row that really did send a request: the rule under test is about those, and a skipped row
+    // carries no representation for it to apply to.
+    status: "success", requestKey: "key", response: { parsed: {}, raw: {} },
+    usage: { promptTokens: 37_000, completionTokens: 40, source: "api" },
+    cost: { modeledUsd: 0.001, incurredThisRunUsd: 0.001 },
+    responseOriginMeta: { date: "d", modelReturned: null, systemFingerprint: null }
   };
 
   it("accepts an image row that carries one", () => {
-    const row = validateResultRow(
-      { ...base, requestKey: null, promptImageTokensEstimated: 36_835 }, "results.jsonl");
+    const row = validateResultRow({ ...base, promptImageTokensEstimated: 36_835 }, "results.jsonl");
+    if (row.status === "skipped") throw new Error("expected a row that sent a request");
     expect(row.promptImageTokensEstimated).toBe(36_835);
   });
 
   it("refuses an image row with no estimate", () => {
-    expect(() => validateResultRow({ ...base, requestKey: null }, "results.jsonl"))
+    expect(() => validateResultRow({ ...base }, "results.jsonl"))
       .toThrow(/promptImageTokensEstimated must be set on a row whose representation is "image"/);
   });
 
   it.each([-5, Number.NaN])("refuses a nonsensical estimate (%p)", (value) => {
     // Reports sum this field, so a negative would quietly subtract from the image-token total.
-    expect(() => validateResultRow(
-      { ...base, requestKey: null, promptImageTokensEstimated: value }, "results.jsonl"))
+    expect(() => validateResultRow({ ...base, promptImageTokensEstimated: value }, "results.jsonl"))
       .toThrow(/promptImageTokensEstimated must (not be negative|be a finite number)/);
   });
 
@@ -167,7 +171,6 @@ describe("the image-token estimate belongs to rows that sent an image", () => {
     // A number in the report's image column that belongs to nothing.
     expect(() => validateResultRow({
       ...base,
-      requestKey: null,
       representation: {
         kind: "text", variantId: "default", variantVersion: 1, sourceContentSha256: "0".repeat(64)
       },

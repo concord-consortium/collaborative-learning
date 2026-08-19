@@ -2,8 +2,9 @@ import http from "node:http";
 import { AddressInfo } from "node:net";
 import {
   kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
-  shutterbugParameterized, shutterbugProductionCurrent, shutterbugRequestBody
+  shutterbugAccurateHeight, shutterbugParameterized, shutterbugProductionCurrent, shutterbugRequestBody
 } from "../src/backends/shutterbug.js";
+import { getRenderBackend } from "../src/backends/index.js";
 import { RenderLimitExceeded } from "../src/backends/types.js";
 import { makeTestPng } from "./helpers.js";
 
@@ -391,5 +392,100 @@ describe("a redirected POST against a real server", () => {
       .then(() => null, (error: Error) => error);
     expect(delivered).toEqual([]);
     expect(String(outcome)).toMatch(new RegExp(`answered 307 redirecting to ${target}/collect`));
+  });
+});
+
+describe("the accurate-height mode", () => {
+  // The prototype for the production fix: production posts a hardcoded height: 1500 for every
+  // document, so a shorter one is padded and a longer one is silently clipped.
+  const heightIn = (calls: Call[]) => JSON.parse(String(calls[0].init!.body)).height;
+
+  it("captures a document at the height it is given, not the configured one", async () => {
+    const calls: Call[] = [];
+    const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
+    await backend.render({ docId: "doc", content: emptyDocument, captureHeightPx: 1180 });
+    expect(heightIn(calls)).toBe(1180);
+  });
+
+  it("records the height it actually used on that render, not the mode's nominal one", async () => {
+    const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch(), sleep: noSleep });
+    const outcome = await backend.render({ docId: "doc", content: emptyDocument, captureHeightPx: 640 });
+    // Without this the envelope would claim 1500 and freshness would compare against a height the
+    // picture was never taken at.
+    expect(outcome.renderTarget?.captureHeightPx).toBe(640);
+    expect(outcome.renderTarget?.captureMode).toBe("fixed-height");
+    expect(backend.renderTarget.captureHeightPx).toBe(kProductionCaptureHeightPx);
+  });
+
+  it("falls back to production's height for a document it was given none for", async () => {
+    // No better than production, rather than better in a way nobody asked for.
+    const calls: Call[] = [];
+    const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
+    const outcome = await backend.render({ docId: "doc", content: emptyDocument });
+    expect(heightIn(calls)).toBe(kProductionCaptureHeightPx);
+    // And it says nothing special about its target, because nothing was special about it.
+    expect(outcome.renderTarget).toBeUndefined();
+  });
+
+  it("refuses a measured height that is not a positive whole number of pixels", async () => {
+    const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch(), sleep: noSleep });
+    for (const captureHeightPx of [0, -20, 12.5]) {
+      await expect(backend.render({ docId: "doc", content: emptyDocument, captureHeightPx }))
+        .rejects.toThrow(/not a positive whole number of pixels/);
+    }
+  });
+
+  it("refuses a measured height beyond the limits, before posting the document", async () => {
+    const calls: Call[] = [];
+    const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
+    await expect(backend.render({ docId: "tall", content: emptyDocument, captureHeightPx: 30_000 }))
+      .rejects.toThrow(/30000px tall, over the 20000px limit/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("otherwise posts exactly what the parameterized mode posts", async () => {
+    // Same envelope, same target — only the height differs, which is the whole experiment.
+    const accurate: Call[] = [];
+    const parameterized: Call[] = [];
+    await shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls: accurate }), sleep: noSleep })
+      .render({ docId: "doc", content: emptyDocument, captureHeightPx: kProductionCaptureHeightPx });
+    await shutterbugParameterized({ fetchImpl: fakeFetch({ calls: parameterized }), sleep: noSleep })
+      .render({ docId: "doc", content: emptyDocument });
+    expect(accurate[0].url).toBe(parameterized[0].url);
+    expect(JSON.parse(String(accurate[0].init!.body)))
+      .toEqual(JSON.parse(String(parameterized[0].init!.body)));
+  });
+
+  it("cannot be given a capture height on the command line", () => {
+    // The height is measured, not chosen: accepting one would answer a different question.
+    expect(() => getRenderBackend("shutterbug-accurate-height", { captureHeightPx: 900 }))
+      .toThrow(/--capture-height is not configurable for --mode shutterbug-accurate-height/);
+  });
+});
+
+describe("the per-document timeout belongs to the modes that keep one", () => {
+  // A hosted mode bounds its request and its download separately, with retries around them, and has
+  // no whole-document deadline to hand a budget to. Accepting `--timeout-ms` and dropping it meant
+  // the CLI printed a per-document limit that nothing enforced.
+  it.each(["shutterbug-production-current", "shutterbug-parameterized", "shutterbug-accurate-height"])(
+    "refuses --timeout-ms for %s", (modeId) => {
+      expect(() => getRenderBackend(modeId, { timeoutMs: 5000 }))
+        .toThrow(/--timeout-ms is not configurable for --mode/);
+    });
+
+  it("does not offer the parameterized mode as a remedy for a timeout", () => {
+    // That advice is about where a render is taken, and says nothing to someone who asked for
+    // longer. It is still given for the flags it does answer.
+    expect(() => getRenderBackend("shutterbug-parameterized", { timeoutMs: 5000 }))
+      .toThrow(/not configurable for --mode shutterbug-parameterized\.$/);
+    expect(() => getRenderBackend("shutterbug-production-current", { clueUrl: "http://x.test" }))
+      .toThrow(/Use --mode shutterbug-parameterized to change the render target\./);
+  });
+
+  it("still accepts it for the local modes, which do keep one", () => {
+    expect(() => getRenderBackend("puppeteer-full-height", { timeoutMs: 5000, unit: "harness-render" }))
+      .not.toThrow();
+    expect(() => getRenderBackend("puppeteer-per-tile", { timeoutMs: 5000, unit: "harness-render" }))
+      .not.toThrow();
   });
 });

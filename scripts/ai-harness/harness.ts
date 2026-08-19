@@ -5,6 +5,7 @@
  *   npx tsx harness.ts represent --corpus <name> --variants default,minimal
  *   npx tsx harness.ts render    --corpus <name> --mode <mode> [--clue-url <url>] [--unit <unit>]
  *                                [--shutterbug-url <url>] [--capture-height <px>] [--refresh]
+ *                                [--concurrency <n>] [--timeout-ms <n>]
  *   npx tsx harness.ts plan      --corpus <name> --experiment <file>
  *   npx tsx harness.ts run       --corpus <name> --experiment <file> --max-cost <usd>
  *                                [--output <file>] [--no-cache | --refresh-cache]
@@ -27,20 +28,22 @@ import {
 } from "./src/execute.js";
 import { getTextVariant, textVariantIds } from "./src/represent-text.js";
 import {
-  imageRepresentationFreshness, imageRepresentationPath, readImageEnvelope, renderErrorDir,
-  writeImageRepresentation
+  imageRepresentationFreshness, imageRepresentationIsUsable, imageRepresentationPath,
+  readImageEnvelope, removeImageRepresentation, renderErrorDir, writeImageRepresentation
 } from "./src/represent-image.js";
 import {
   RenderModeOptions, assertRenderModeOptions, getRenderBackend, kDefaultClueUrl, kDefaultRenderModeId,
-  renderMode, renderModeIds
+  renderBackendIdentity, renderMode, renderModeIds
 } from "./src/backends/index.js";
 import type { RenderBackend } from "./src/backends/types.js";
+import { expectedTileCount, kDefaultRenderTimeoutMs } from "./src/backends/puppeteer.js";
 import {
   RenderUnitServer, kHarnessRenderUnitId, startRenderUnitServer
 } from "./src/backends/render-unit.js";
 import { formatSummaryTable, summarizeResults, summaryPathFor, writeSummary } from "./src/report.js";
 import {
-  CorpusSource, corpusSources, kSchemaVersion, sha256Canonical, validateExperimentFile
+  CorpusSource, corpusSources, kSchemaVersion, sendsImages, sendsText, sha256Canonical,
+  validateExperimentFile
 } from "./src/schemas.js";
 
 /** Four pages at a time: enough to be quick, few enough not to starve a dev server. */
@@ -117,7 +120,8 @@ export function parseArgs(argv: string[], knownFlags: Record<string, readonly st
 const kKnownFlags = {
   import: ["from", "corpus", "source", "prune"],
   represent: ["corpus", "variants"],
-  render: ["corpus", "mode", "clue-url", "unit", "shutterbug-url", "capture-height", "refresh"],
+  render: ["corpus", "mode", "clue-url", "unit", "shutterbug-url", "capture-height", "refresh",
+    "concurrency", "timeout-ms"],
   plan: ["corpus", "experiment"],
   run: ["corpus", "experiment", "max-cost", "output", "no-cache", "refresh-cache"],
   report: ["results"]
@@ -265,6 +269,75 @@ function commandRepresent(flags: Record<string, string | true>, deps: HarnessDep
  * no envelope, leaves what evidence it has under `render-errors/`, and does not stop the others; the
  * command exits non-zero at the end.
  */
+/**
+ * The height each document should be captured at, from its local full-document render.
+ *
+ * A hosted service cannot measure anything: it is handed a page and a height and clips to it. The
+ * only thing that knows how tall a CLUE document really is, is a browser that has laid it out — so
+ * an accurate-height render is a two-step operation, and this is the step that reads the answer.
+ *
+ * Every document is checked before any is posted. Failing document by document would leave a
+ * half-rendered corpus, and a bill for the part that worked.
+ */
+function measuredHeightsFor(
+  paths: ReturnType<typeof corpusPaths>,
+  documents: { id: string; contentSha256: string; expectedRenderFailure: string | null }[],
+  modeId: string
+): Map<string, number> {
+  const source = kDefaultRenderModeId;
+  const backend = renderBackendIdentity(source);
+  const heights = new Map<string, number>();
+  const missing: string[] = [];
+  // A document known not to render has no local render to measure from, and never will. Demanding
+  // one would make any corpus holding a deliberately unrenderable fixture unusable with this mode.
+  // Only the demand is waived: a marked document that *does* have a usable render still contributes
+  // its height and is captured like any other, and one that does not is simply absent from the map,
+  // which the render loop skips rather than falling back on a height this mode was built to avoid.
+  const wanted = (document: { id: string; expectedRenderFailure: string | null }) => {
+    if (!document.expectedRenderFailure) missing.push(document.id);
+  };
+  for (const document of documents) {
+    const file = imageRepresentationPath(paths, source, document.id);
+    if (!fs.existsSync(file)) {
+      wanted(document);
+      continue;
+    }
+    try {
+      const envelope = readImageEnvelope(file);
+      const usable = imageRepresentationIsUsable(envelope, {
+        docId: document.id,
+        modeId: source,
+        backendId: backend.backendId,
+        backendVersion: backend.backendVersion,
+        contentSha256: document.contentSha256
+      }, file);
+      const image = envelope.images.find((entry) => entry.purpose === "full-document");
+      if (!usable.fresh || !image) {
+        wanted(document);
+        continue;
+      }
+      heights.set(document.id, image.heightPx);
+    } catch {
+      wanted(document);
+    }
+  }
+  if (missing.length > 0) {
+    throw new Error(`--mode ${modeId} captures each document at its own measured height, and ` +
+      `${missing.length} document(s) have no usable ${source} render to measure from: ` +
+      `${missing.slice(0, 5).join(", ")}${missing.length > 5 ? ", …" : ""}. Render locally first: ` +
+      `harness.ts render --corpus <name> --mode ${source}`);
+  }
+  return heights;
+}
+
+/** The render target a document would be captured against now, height included. */
+function targetFor(
+  renderer: RenderBackend, measuredHeights: Map<string, number> | null, docId: string
+) {
+  if (!measuredHeights) return renderer.renderTarget;
+  return { ...renderer.renderTarget, captureHeightPx: measuredHeights.get(docId) ?? null };
+}
+
 async function commandRender(flags: Record<string, string | true>, deps: HarnessDeps): Promise<void> {
   const log = deps.log ?? console.log;
   const now = deps.now ?? (() => new Date());
@@ -274,12 +347,21 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
   const modeId = typeof flags.mode === "string" ? flags.mode : kDefaultRenderModeId;
   const refresh = flags.refresh === true;
 
-  const captureHeight = typeof flags["capture-height"] === "string"
-    ? Number(flags["capture-height"]) : undefined;
-  if (captureHeight !== undefined && (!Number.isInteger(captureHeight) || captureHeight <= 0)) {
-    throw new Error(`--capture-height must be a positive whole number of pixels, got ` +
-      `"${String(flags["capture-height"])}"`);
-  }
+  const positiveInteger = (name: string, unit: string): number | undefined => {
+    const raw = flags[name];
+    if (typeof raw !== "string") return undefined;
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value <= 0) {
+      throw new Error(`--${name} must be a positive whole number of ${unit}, got "${String(raw)}"`);
+    }
+    return value;
+  };
+  const captureHeight = positiveInteger("capture-height", "pixels");
+  // Both default to what they always were. They exist because a cold dev server times out the first
+  // documents of a run — four pages at once against a server still compiling chunks — and until now
+  // re-running was the only lever.
+  const concurrencyFlag = positiveInteger("concurrency", "pages at a time");
+  const timeoutMs = positiveInteger("timeout-ms", "milliseconds");
 
   // The local mode needs a unit that registers every tile type the corpus uses, and CLUE registers
   // tile types from the unit's own configuration. With no unit it loads its default one and draws
@@ -293,6 +375,7 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     unit: explicitUnit,
     shutterbugUrl: typeof flags["shutterbug-url"] === "string" ? flags["shutterbug-url"] : undefined,
     captureHeightPx: captureHeight,
+    ...(timeoutMs === undefined ? {} : { timeoutMs }),
     ...(deps.renderModeOptions ?? {})
   };
   // Validated *before* anything is started. When this ran after the unit server was listening, an
@@ -304,8 +387,12 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
 
   let rendered = 0;
   let reused = 0;
+  /** Documents a per-tile mode cannot represent, because their content declares no tiles. */
+  let nothingToCapture = 0;
+  /** Documents the manifest says cannot render, which failed as expected. */
+  const expectedFailures: string[] = [];
   const failures: string[] = [];
-  const concurrency = Math.max(1, deps.renderConcurrency ?? kDefaultRenderConcurrency);
+  const concurrency = concurrencyFlag ?? Math.max(1, deps.renderConcurrency ?? kDefaultRenderConcurrency);
 
   let unitServer: RenderUnitServer | undefined;
   let openBackend: RenderBackend | undefined;
@@ -318,6 +405,13 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     // Built once, after the unit server is up, so the backend knows where its unit is served.
     const renderer = getRenderBackend(modeId, { ...backendOptions, unitUrl: unitServer?.unitUrl });
     openBackend = renderer;
+
+    // A mode whose height is measured needs a local full-document render to measure from. Read for
+    // the whole corpus before anything is posted: discovering it document by document would leave a
+    // half-rendered corpus and a bill for the part that worked.
+    const measuredHeights = mode.needsMeasuredHeight
+      ? measuredHeightsFor(paths, manifest.documents, modeId)
+      : null;
 
     // Nothing will notice if these renders are pictures of the wrong thing.
     //
@@ -352,7 +446,9 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
           backendId: renderer.backendId,
           backendVersion: renderer.backendVersion,
           contentSha256: document.contentSha256,
-          renderTarget: renderer.renderTarget
+          // Compared against the height this document would be captured at now, not the mode's
+          // nominal one: a document whose local render has since changed height is stale here too.
+          renderTarget: targetFor(renderer, measuredHeights, document.id)
         }, file).fresh) {
           reused += 1;
           return false;
@@ -371,10 +467,44 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
         if (index >= pending.length) return;
         const document = pending[index];
         const file = imageRepresentationPath(paths, renderer.modeId, document.id);
+        // A document this mode cannot represent leaves nothing behind. It is in `pending` because
+        // whatever is on disk is stale, and those files are pictures of a document that no longer
+        // looks like that — unusable, and student work once the corpus is real. Nothing else would
+        // ever clear them: `render` only overwrites what it re-renders, and `--prune` only reaches
+        // documents that have left the manifest.
+        const skipWithoutCapturing = (reason: string) => {
+          log(`skipped ${document.id}: ${reason}`);
+          const removed = removeImageRepresentation(file);
+          if (removed.length > 0) {
+            log(`  removed ${removed.length} stale file(s) from the previous ${renderer.modeId} render`);
+          }
+          nothingToCapture += 1;
+        };
         try {
+          const content = readCorpusDocument(paths, document);
+          const declaredTiles = expectedTileCount(content);
+          // A per-tile mode has nothing to photograph in a document whose content declares no tiles.
+          // That is a fact about the document, not a failure of the render — the mode simply cannot
+          // represent it, and a run skips it for the same reason.
+          if (renderer.renderTarget.captureMode === "per-tile" && declaredTiles === 0) {
+            skipWithoutCapturing("its content declares no tiles, so a per-tile capture has " +
+              "nothing to photograph");
+            continue;
+          }
+          // A measured-height mode has no height for a document that is known not to render, and
+          // must not fall back: an absent `captureHeightPx` reaches the backend as the fixed
+          // production height, which is the very thing this mode exists not to do — and the result
+          // would be filed as a capture at the document's own measured height.
+          if (measuredHeights && !measuredHeights.has(document.id)) {
+            skipWithoutCapturing(`${document.expectedRenderFailure
+              ? `it is expected not to render ("${document.expectedRenderFailure}"), so there is no `
+              : "it has no "}measured height for --mode ${modeId} to capture at`);
+            continue;
+          }
           const outcome = await renderer.render({
             docId: document.id,
-            content: readCorpusDocument(paths, document)
+            content,
+            ...(measuredHeights ? { captureHeightPx: measuredHeights.get(document.id) } : {})
           });
           writeImageRepresentation({
             envelopeFile: file,
@@ -382,7 +512,9 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
             modeId: renderer.modeId,
             backendId: renderer.backendId,
             backendVersion: renderer.backendVersion,
-            renderTarget: renderer.renderTarget,
+            // The backend reports its own target when the render differed from the mode's nominal
+            // one, which is how a per-document height reaches the envelope.
+            renderTarget: outcome.renderTarget ?? renderer.renderTarget,
             sourceContentSha256: document.contentSha256,
             generatedAt: now().toISOString(),
             images: outcome.images.map((image) => ({
@@ -393,6 +525,19 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
           // The document renders now, so the previous run's evidence is evidence of nothing — and
           // leaving it behind would keep a PNG of student work that no envelope refers to.
           fs.rmSync(renderErrorDir(paths, renderer.modeId, document.id), { recursive: true, force: true });
+          // The document loaded and drew nothing. Not fatal — `empty` is a real fixture — but for
+          // any document whose content declares tiles it means the picture is of the wrong thing,
+          // and until now only *unknown* tiles were ever mentioned.
+          if (document.expectedRenderFailure) {
+            // The expectation is now wrong, and a stale one is worse than none: it would go on
+            // hiding a real failure the day this document breaks again.
+            log(`warning: ${document.id} rendered, but the manifest says it should not ` +
+              `("${document.expectedRenderFailure}"). Clear expectedRenderFailure for it.`);
+          }
+          if (declaredTiles > 0 && outcome.diagnostics.totalTiles === 0) {
+            log(`warning: ${document.id} declares ${declaredTiles} tile(s) but drew none; the ` +
+              "capture is of a document that rendered nothing");
+          }
           if (outcome.diagnostics.unknownTiles) {
             // Not fatal — the Unknown and Placeholder fixtures are *supposed* to draw this way — but
             // never silent, because for any other document it means the unit did not register its
@@ -401,7 +546,13 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
               `of ${outcome.diagnostics.totalTiles ?? "?"}`);
           }
         } catch (error) {
-          failures.push(document.id);
+          // Known not to render, and why: reported apart from real failures so the exit code keeps
+          // meaning something, since a corpus that always exits non-zero is one nobody checks. The
+          // evidence is written either way — a document expected to fail one way and failing
+          // another is exactly the case the screenshot is for, and the failure message points at it.
+          const expected = document.expectedRenderFailure;
+          if (expected) expectedFailures.push(document.id);
+          else failures.push(document.id);
           const directory = renderErrorDir(paths, renderer.modeId, document.id);
           // Cleared first: a previous attempt's screenshot and console output would otherwise be
           // presented as evidence for this error, and would keep an older copy of the document.
@@ -419,8 +570,10 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
           // The picture of the failure, where the backend could take one. For a visual failure this
           // is often the only evidence there is — the console is empty and the page is half drawn.
           if (context?.screenshot) fs.writeFileSync(path.join(directory, "screenshot.png"), context.screenshot);
-          log(`error: ${(error as Error).message}`);
-          log(`  evidence written to ${directory}`);
+          log(expected
+            ? `expected failure: ${document.id} (${expected})`
+            : `error: ${(error as Error).message}`);
+          log(`  ${expected ? `${(error as Error).message}\n  ` : ""}evidence written to ${directory}`);
         }
       }
     };
@@ -444,8 +597,18 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     await closeQuietly("the unit server", unitServer?.close?.bind(unitServer));
   }
 
+  // The settings are named in the line, so a run that needed them says so in its own output rather
+  // than only in the shell history of whoever typed it. The per-document budget is named only by the
+  // modes that keep one: a hosted mode bounds its request and its download separately and has no
+  // whole-document deadline, so printing one would describe a limit nothing enforces.
+  const settings = mode.unusableFlags.includes("timeoutMs")
+    ? `${concurrency} at a time`
+    : `${concurrency} at a time, ${timeoutMs ?? kDefaultRenderTimeoutMs}ms per document`;
   log(`Rendered ${rendered} document(s) with --mode ${modeId}, reused ${reused} still-fresh ` +
-    `one(s), ${failures.length} failed.`);
+    `one(s), ${failures.length} failed` +
+    (expectedFailures.length > 0 ? `, ${expectedFailures.length} expected to fail` : "") +
+    (nothingToCapture > 0 ? `, ${nothingToCapture} with nothing to capture` : "") +
+    `. (${settings}.)`);
   if (rendered > 0) {
     // New pixels mean new request keys, which means a full re-spend on any run that uses them.
     log("Regenerated renders produce new request keys, so runs using them will pay for those calls again.");
@@ -469,7 +632,7 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
   const { experiment } = loadExperiment(required(flags, "experiment"));
   const pricingConfig = loadPricingConfig();
   const pricing = pricingFor(pricingConfig, kDefaultModel);
-  const { tasks } = buildTasks({
+  const { tasks, skipped, documents } = buildTasks({
     corpusPaths: corpusPaths(dataRootFor(deps), corpus),
     experiment,
     promptsDir,
@@ -477,7 +640,8 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
   });
 
   log(`Experiment "${experiment.name}": ${experiment.runs.length} run(s) × ` +
-    `${tasks.length / Math.max(1, experiment.runs.length)} document(s) = ${tasks.length} call(s).`);
+    `${documents.length} document(s) = ${tasks.length} call(s)` +
+    (skipped.length > 0 ? `, ${skipped.length} skipped.` : "."));
   log(`Model ${kDefaultModel}, prices effective ${pricingConfig.effectiveDate}, ` +
     `max_completion_tokens ${pricing.maxOutputTokens}.`);
   let total = 0;
@@ -491,16 +655,28 @@ function commandPlan(flags: Record<string, string | true>, deps: HarnessDeps): v
     // Read from the mode descriptor rather than by building a backend: construction validates URLs
     // and limits, and shells out to git for the local mode, none of which belongs in a command that
     // promises to touch nothing.
-    const shape = run.message === "image-only"
-      ? ` [image-only, --mode ${run.imageMode}; ${renderMode(run.imageMode!).prerequisites}]`
-      : ` [text-only, ${run.textVariant}]`;
+    // Built from what the shape actually sends rather than from a two-way ternary. The old one
+    // predated `mixed` and labelled it "text-only", so `plan` -- the record of what a run was about
+    // to do -- described a mixed run as something else while printing its images underneath.
+    const carries = [run.message as string];
+    if (sendsText(run.message)) carries.push(run.textVariant!);
+    if (sendsImages(run.message)) carries.push(`--mode ${run.imageMode}`);
+    const shape = ` [${carries.join(", ")}` +
+      (run.imageMode ? `; ${renderMode(run.imageMode).prerequisites}` : "") + "]";
     log(`  ${run.id}: ${runTasksForRun.length} call(s), worst case $${runTotal.toFixed(4)}${shape}`);
-    if (run.message === "image-only") {
+    if (run.imageMode) {
       // Where the pictures came from, resolved rather than described. Every render target value has
       // a default, and omitting `--shutterbug-url` posts student work at staging without saying so.
-      log(`    renders against: ${renderMode(run.imageMode!).renderTargetSummary}`);
+      log(`    renders against: ${renderMode(run.imageMode).renderTargetSummary}`);
     }
     if (imageTokens > 0) {
+      // How many pictures, not just what they cost: a per-tile set sends one image per tile, and
+      // each one carries the base charge again. That multiplication is the thing to see *before*
+      // paying for it, so it is stated per run beside the total it produces.
+      const images = runTasksForRun.reduce((sum, task) => sum + task.imageCount, 0);
+      const perDocument = images / Math.max(1, runTasksForRun.length);
+      log(`    ${images} image(s) across ${runTasksForRun.length} call(s) ` +
+        `(${perDocument.toFixed(1)} per document, imageSet ${run.imageSet ?? "full-document"})`);
       // Reserved at the high-detail rate, because the shared builder sends `auto` and the provider
       // publishes an exact formula only for explicit low and high.
       log(`    image tokens (estimated, auto priced at the high rate): ${imageTokens}`);
@@ -527,7 +703,7 @@ async function commandRun(flags: Record<string, string | true>, deps: HarnessDep
   const dataRoot = dataRootFor(deps);
   const pricingConfig = loadPricingConfig();
   const pricing = pricingFor(pricingConfig, kDefaultModel);
-  const { tasks } = buildTasks({
+  const { tasks, skipped } = buildTasks({
     corpusPaths: corpusPaths(dataRoot, corpus),
     experiment,
     promptsDir,
@@ -569,6 +745,7 @@ async function commandRun(flags: Record<string, string | true>, deps: HarnessDep
     experiment,
     experimentSha256,
     tasks,
+    skipped,
     outputFile,
     ledger,
     cache: new ResponseCache(path.join(dataRoot, "cache"), cacheOptions),
@@ -581,6 +758,12 @@ async function commandRun(flags: Record<string, string | true>, deps: HarnessDep
 
   log(`Wrote ${summary.written} row(s) to ${outputFile} ` +
     `(${summary.resumed} already complete, ${summary.cacheHits} from cache, ${summary.apiCalls} API call(s)).`);
+  if (summary.skipped > 0) {
+    // Named rather than folded into the row count: a skipped row costs nothing and answers nothing,
+    // and a reader comparing runs needs to know how much of the corpus each one actually looked at.
+    log(`${summary.skipped} (run, document) pair(s) were skipped and recorded as skipped rows, with ` +
+      "reasons. See the `skipped` column in `report`.");
+  }
   log(`Reserved at peak $${summary.reservedPeakUsd.toFixed(4)} of the $${maxCost.toFixed(4)} ceiling; ` +
     `actually spent $${summary.incurredUsd.toFixed(4)}.`);
   // Gated on work actually skipped, not merely on the ceiling having been reached: a run that

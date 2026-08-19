@@ -16,7 +16,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { harnessRoot } from "../src/corpus.js";
-import { puppeteerBackend, kDefaultViewportWidthPx } from "../src/backends/puppeteer.js";
+import {
+  kDefaultViewportWidthPx, kInitialFrameHeightPx, puppeteerBackend
+} from "../src/backends/puppeteer.js";
 import { startRenderUnitServer } from "../src/backends/render-unit.js";
 import { readPngInfo } from "../src/png.js";
 
@@ -27,7 +29,9 @@ const kClueUrl = process.env.CLUE_URL ?? "http://localhost:8080";
  * a plain tile, a visual one, two tiles at once, an empty document, and the two fixtures whose
  * unknown-tile status is the point.
  */
-const fixtures: { docId: string; expectUnknownTiles: number; minTiles: number }[] = [
+const fixtures: {
+  docId: string; expectUnknownTiles: number; minTiles: number; minHeightPx?: number;
+}[] = [
   { docId: "drawing", expectUnknownTiles: 0, minTiles: 1 },
   { docId: "table", expectUnknownTiles: 0, minTiles: 1 },
   { docId: "geometry", expectUnknownTiles: 0, minTiles: 1 },
@@ -38,7 +42,28 @@ const fixtures: { docId: string; expectUnknownTiles: number; minTiles: number }[
   { docId: "unknown", expectUnknownTiles: 1, minTiles: 1 },
   // AI is one of the two types the QA unit does not register, and the harness unit adds. If the
   // rendering unit regresses, this is where it shows up.
-  { docId: "ai", expectUnknownTiles: 0, minTiles: 1 }
+  { docId: "ai", expectUnknownTiles: 0, minTiles: 1 },
+  // Taller than the 500px the generated page starts at, so a real browser exercises the frame
+  // resize. Every other fixture is short enough that the resize never fires, which left the one
+  // mechanism that keeps `captureMode: "full-document"` honest covered only by fake browsers.
+  { docId: "tall", expectUnknownTiles: 0, minTiles: 10, minHeightPx: kInitialFrameHeightPx }
+];
+
+/**
+ * Documents rendered a second time, per tile, with the number of pictures they must produce.
+ *
+ * Only a real browser can answer this. The fake in `smoke-image.test.ts` returns a fixed list of
+ * elements whatever selector it is handed, so it has no DOM and cannot represent one tile inside
+ * another — which is exactly the case this checks.
+ *
+ * `question` is the case: one top-level tile in the document's rows, and two more in its tile map
+ * that it draws inside itself. A per-tile capture must produce one picture, not three.
+ */
+const perTileFixtures: { docId: string; expectImages: number }[] = [
+  { docId: "question", expectImages: 1 },
+  // Two top-level tiles, neither nested, so this is the control: the same code path must still
+  // produce one picture each rather than being made blind by the rule above.
+  { docId: "mixed", expectImages: 2 }
 ];
 
 async function main(): Promise<void> {
@@ -51,6 +76,7 @@ async function main(): Promise<void> {
 
   const unitServer = await startRenderUnitServer({ clueUrl: kClueUrl });
   const backend = puppeteerBackend({
+    modeId: "puppeteer-full-height",
     clueUrl: kClueUrl,
     unit: "harness-render",
     unitUrl: unitServer.unitUrl,
@@ -74,6 +100,10 @@ async function main(): Promise<void> {
           problems.push(`width ${info.widthPx} exceeds the ${kDefaultViewportWidthPx}px viewport`);
         }
         if (info.heightPx <= 0) problems.push(`height ${info.heightPx}`);
+        if (fixture.minHeightPx !== undefined && info.heightPx <= fixture.minHeightPx) {
+          problems.push(`height ${info.heightPx} is not past the ${fixture.minHeightPx}px the frame ` +
+            "starts at, so this fixture did not exercise the resize");
+        }
         if ((totalTiles ?? -1) < fixture.minTiles) {
           problems.push(`counted ${totalTiles} tiles, expected at least ${fixture.minTiles}`);
         }
@@ -93,15 +123,53 @@ async function main(): Promise<void> {
     }
   } finally {
     await backend.close?.();
+  }
+
+  const perTile = puppeteerBackend({
+    modeId: "puppeteer-per-tile",
+    clueUrl: kClueUrl,
+    unit: "harness-render",
+    unitUrl: unitServer.unitUrl,
+    clueRevision: "integration-check",
+    capture: "per-tile"
+  });
+  await perTile.open?.();
+  try {
+    for (const fixture of perTileFixtures) {
+      const file = path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${fixture.docId}.json`);
+      const content = JSON.parse(fs.readFileSync(file, "utf8"));
+      try {
+        const outcome = await perTile.render({ docId: fixture.docId, content });
+        const tileIds = outcome.images.map((image) => image.tileId ?? "?");
+        const problems: string[] = [];
+        if (outcome.images.length !== fixture.expectImages) {
+          problems.push(`captured ${outcome.images.length} tile(s), expected ${fixture.expectImages} ` +
+            `(${tileIds.join(", ")})`);
+        }
+        const status = problems.length === 0 ? "ok  " : "FAIL";
+        console.log(`${status} ${fixture.docId.padEnd(10)} per-tile: ${outcome.images.length} image(s) ` +
+          `[${tileIds.join(", ")}]` + (problems.length ? `\n       ${problems.join("; ")}` : ""));
+        if (problems.length) failures.push(`${fixture.docId} (per-tile): ${problems.join("; ")}`);
+      } catch (error) {
+        console.log(`FAIL ${fixture.docId.padEnd(10)} per-tile: ${(error as Error).message}`);
+        failures.push(`${fixture.docId} (per-tile): ${(error as Error).message}`);
+      }
+    }
+  } finally {
+    await perTile.close?.();
     await unitServer.close();
   }
 
+  // Both passes, or the line understates what ran and a per-tile failure would be reported against
+  // a total that never included it.
+  const checks = fixtures.length + perTileFixtures.length;
   if (failures.length > 0) {
-    console.error(`\n${failures.length} of ${fixtures.length} fixture(s) failed the local render check.`);
+    console.error(`\n${failures.length} of ${checks} check(s) failed the local render check.`);
     process.exitCode = 1;
     return;
   }
-  console.log(`\nAll ${fixtures.length} fixtures rendered against ${kClueUrl}.`);
+  console.log(`\nAll ${checks} checks passed against ${kClueUrl} ` +
+    `(${fixtures.length} full-document, ${perTileFixtures.length} per-tile).`);
 }
 
 // Caught, or a throw becomes an unhandled rejection rather than the message and exit code above.

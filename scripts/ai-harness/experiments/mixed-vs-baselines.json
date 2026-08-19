@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "name": "mixed-vs-baselines",
+  "runs": [
+    {
+      "id": "text-default",
+      "message": "text-only",
+      "textVariant": "default",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "image-puppeteer",
+      "message": "image-only",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "mixed",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-mixed"
+    },
+    {
+      "id": "image-detail-low",
+      "message": "image-only",
+      "imageMode": "puppeteer-full-height",
+      "detail": "low",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "image-per-tile",
+      "message": "image-only",
+      "imageMode": "puppeteer-per-tile",
+      "imageSet": "per-tile",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "image-visual-tiles-only",
+      "message": "image-only",
+      "imageMode": "puppeteer-per-tile",
+      "imageSet": "visual-tiles-only",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "text-extras-fixed",
+      "message": "text-only",
+      "textVariant": "default",
+      "extras": "extras-fixed",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "text-extras-production-current",
+      "message": "text-only",
+      "textVariant": "default",
+      "extras": "extras-production-current",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "text-no-extras",
+      "message": "text-only",
+      "textVariant": "default",
+      "extras": "no-extras",
+      "prompt": "categorize-design-default"
+    }
+  ]
+}

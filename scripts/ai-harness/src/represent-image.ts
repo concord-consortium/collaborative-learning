@@ -16,7 +16,7 @@ import type { CorpusPaths } from "./corpus.js";
 import { isContainedBy, kTemporaryFilePattern, readJsonFile, writeFileAtomically } from "./files.js";
 import { NotAPngError, readPngInfo } from "./png.js";
 import {
-  EnvelopeImage, ImageEnvelope, RenderTarget, kSchemaVersion, validateImageEnvelope
+  EnvelopeImage, ImageEnvelope, ImageSet, RenderTarget, kSchemaVersion, validateImageEnvelope
 } from "./schemas.js";
 
 export const kPngMimeType = "image/png";
@@ -291,19 +291,56 @@ export function writeImageRepresentation(options: WriteImageRepresentationOption
 }
 
 /**
- * The one image a request is built from.
+ * The images a run sends, chosen from the envelope by the run's image set.
  *
- * Zero and many both fail, and the first image is never quietly selected: an envelope with two
- * images is a per-tile capture, and picking one of them would produce a result row that looks like
- * a normal full-document run and is not.
+ * The set is part of what a run measures, so it is selected rather than inferred: a `full-document`
+ * run against a per-tile envelope is a mistake about what is being compared, and picking whatever
+ * happens to be there would produce a result row that looks ordinary and answers a different
+ * question.
+ *
+ * `visualTileIds` names the tiles the classification marked as needing a picture, and is only read
+ * for `visual-tiles-only`.
  */
-export function singleImageOf(envelope: ImageEnvelope, envelopeFile: string): EnvelopeImage {
-  if (envelope.images.length !== 1) {
-    throw new Error(`${envelopeFile} records ${envelope.images.length} images. Milestone 2 builds ` +
-      "requests from exactly one full-document image; multi-image requests (per-tile capture and " +
-      "mixed messages) arrive in milestone 3.");
+export function imagesForSet(
+  envelope: ImageEnvelope, envelopeFile: string, imageSet: ImageSet, visualTileIds?: Set<string>
+): { images: EnvelopeImage[]; warnings: string[] } {
+  const warnings: string[] = [];
+  if (imageSet === "full-document") {
+    const full = envelope.images.filter((image) => image.purpose === "full-document");
+    if (full.length !== 1) {
+      throw new Error(`${envelopeFile} records ${full.length} full-document image(s) out of ` +
+        `${envelope.images.length}. A "full-document" run sends exactly one picture of the whole ` +
+        "document; render with a full-document mode, or set imageSet on the run.");
+    }
+    return { images: full, warnings };
   }
-  return envelope.images[0];
+
+  const tiles = envelope.images.filter((image) => image.purpose === "tile");
+  if (tiles.length === 0) {
+    throw new Error(`${envelopeFile} records no per-tile images, so an "${imageSet}" run has ` +
+      "nothing to send. Render with --mode puppeteer-per-tile first.");
+  }
+  if (imageSet === "per-tile") return { images: tiles, warnings };
+
+  if (!visualTileIds) {
+    throw new Error(`A "visual-tiles-only" run needs the document's classification to know which ` +
+      "tiles need a picture; none was supplied.");
+  }
+  const captured = new Set(tiles.map((image) => image.tileId).filter((id): id is string => !!id));
+  // Classification walks into Question tiles; the per-tile capture photographs top-level tiles
+  // only. So a visual tile nested inside a Question has a classification entry and no picture of
+  // its own — it is drawn inside its parent's. Recorded rather than failed: the images that exist
+  // are still the right ones to send, and a reader comparing sets needs to know the difference.
+  const uncaptured = [...visualTileIds].filter((tileId) => !captured.has(tileId));
+  if (uncaptured.length > 0) {
+    warnings.push(`${uncaptured.length} tile(s) the classification marks as needing a picture have ` +
+      `no per-tile capture (${uncaptured.slice(0, 5).join(", ")}) — a tile nested inside a Question ` +
+      "is drawn within its parent's image rather than beside it");
+  }
+  return {
+    images: tiles.filter((image) => image.tileId !== null && visualTileIds.has(image.tileId)),
+    warnings
+  };
 }
 
 /** The base64 data URL a locally captured PNG is sent as — what production does with a local file. */
