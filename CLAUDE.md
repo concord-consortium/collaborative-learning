@@ -146,8 +146,27 @@ npx cypress run --spec 'cypress/e2e/...' --config baseUrl=http://localhost:8083/
 
 Symptom of getting this wrong: tests pass/fail against an unrelated repo's dev
 server, the cypress config log prints the desired baseUrl but
-`cy.window().then(w => w.location.href)` shows the default port. Verify by
-having a test print `window.location.href`.
+`cy.window().then(w => w.location.href)` shows the default port.
+
+**`window.location.href` only catches the wrong-*port* case.** If a different
+project is serving the *same* port — easy when switching between repos, since
+they all default to 8080 — both print `localhost:8080` and the URL tells you
+nothing. Two checks that do work:
+
+```bash
+# which repo the listener is actually running from
+lsof -a -p "$(lsof -ti tcp:8080 -sTCP:LISTEN)" -d cwd -Fn | grep '^n'
+
+# or ask for a file only this repo serves; another project 404s
+curl -s -o /dev/null -w '%{http_code}\n' localhost:8080/demo/docs/emg-highlight-demo.json
+```
+
+**A server on the right repo can still be wrong.** A long-lived `npm start` that
+has seen many branch switches can serve a bundle that no longer matches the
+working tree, while the route and every static asset look current — so the
+checks above all pass and the app still misbehaves. The tell is a spec failing
+in `beforeEach` with the document never loading. Restart the dev server before
+debugging the test.
 
 ### Running one cypress spec in CI
 
