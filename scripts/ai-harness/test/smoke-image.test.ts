@@ -276,15 +276,17 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     expect(sent).toBeDefined();
   });
 
-  it("reads the picture when the request is built, not when the task is", async () => {
-    // A locally captured PNG becomes a base64 data URL roughly a third larger than the file. Held on
-    // every task from `buildTasks` until the run ended, a corpus of real captures was hundreds of
-    // megabytes resident before the first call went out. Tasks now carry a `makeRequest` function
-    // instead, and the bytes are read when it is called.
+  it("refuses a picture that changed between building the task and building the request", async () => {
+    // A locally captured PNG becomes a base64 data URL roughly a third larger than the file. Holding
+    // one on every task until the run ends puts a corpus of captures in memory before the first call
+    // goes out, so tasks carry a `makeRequest` function and the bytes are read when it is called.
     //
-    // Retention is not observable, so this pins the behaviour that follows from it: swap the file
-    // on disk after the tasks are built, and the request picks up the new bytes. An eagerly built
-    // request would still be carrying the old ones.
+    // Neither the retention nor the timing is observable directly, so this pins both through the one
+    // consequence that is: swap the file after the tasks are built, and building the request fails
+    // because the bytes no longer hash to what the task recorded. A request built eagerly would
+    // still be carrying the old bytes and would never look at the file again, so it could not fail
+    // this way — and the failure is the divergence itself, since `requestKey`,
+    // `representation.imageSha256s` and the cache entry were all fixed when the task was built.
     const { tasks } = buildTasks({
       corpusPaths: paths,
       experiment: {
@@ -309,15 +311,13 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     expect(replaced).not.toEqual(original);
     try {
       fs.writeFileSync(png, replaced);
-      const sent = JSON.stringify(task.makeRequest().apiRequest.messages);
-      expect(sent).toContain(dataUrlFor(replaced));
-      expect(sent).not.toContain(dataUrlFor(original));
+      expect(() => task.makeRequest()).toThrow(
+        new RegExp(`hashes to ${sha256Bytes(replaced)}, expected ${sha256Bytes(original)}`));
     } finally {
       fs.writeFileSync(png, original);
     }
-    // With the file restored, the request is the one the key was built from — which is the case
-    // that matters, since `buildTasks` hashes the file and refuses a stale envelope before any of
-    // this. The swap above only says *where* the read happens.
+    // And with the file back, the same task builds the request it always would have: the check is
+    // on the bytes, not a latch that stays tripped.
     expect(JSON.stringify(task.makeRequest().apiRequest.messages)).toContain(dataUrlFor(original));
   });
 

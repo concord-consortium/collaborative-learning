@@ -20,7 +20,7 @@ import {
 import { getTextVariant } from "./represent-text.js";
 import {
   dataUrlFor, imageRepresentationIsUsable, imageRepresentationPath, readImageEnvelope, resolveImageFile,
-  singleImageOf
+  sha256Bytes, singleImageOf
 } from "./represent-image.js";
 import { readPngHeader } from "./png.js";
 import { createHash } from "node:crypto";
@@ -122,6 +122,32 @@ export interface BuildTasksResult {
 }
 
 /**
+ * A local capture's bytes, checked against the hash its task carries.
+ *
+ * The hash is fixed when the task is built and the file is read when the request is dispatched, so
+ * a `render --refresh` against the same corpus in between would put new pixels in the request while
+ * `requestKey`, `representation.imageSha256s` and the cache entry all still describe the old ones —
+ * the model answering about one picture and every record naming another, with nothing failing to
+ * show it. The run stops instead. The digest is taken over the buffer that is about to be sent
+ * rather than a second read, so there is no gap between checking and using.
+ *
+ * A hosted image has no equivalent: the model fetches the URL itself, so no check here can say what
+ * it saw. `hostedImageCheck` is the preflight for that, and is best-effort by nature.
+ */
+function checkedImageBytes(file: string, expectedSha256: string): Buffer {
+  const bytes = fs.readFileSync(file);
+  const digest = sha256Bytes(bytes);
+  if (digest !== expectedSha256) {
+    throw new Error(`${file} hashes to ${digest}, expected ${expectedSha256}. The picture changed ` +
+      "after this run's tasks were built, so what would be sent is not what this run's request " +
+      "keys and result rows describe; a concurrent `render --refresh` is the usual cause. Nothing " +
+      "was sent for this document. Re-run the same command once the render has finished: rows " +
+      "already written are kept, and only the documents whose pictures changed are dispatched again.");
+  }
+  return bytes;
+}
+
+/**
  * Expands (runs × documents) into concrete requests. `plan` and `run` both go through here, so the
  * cost they compute comes from exactly the same requests.
  */
@@ -214,7 +240,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
       message: run.message,
       // A hosted render sends the URL production sends; a local capture sends its bytes inline, the
       // way production's categorizeDocument() does with a local file.
-      imageUrl: image.url ?? dataUrlFor(fs.readFileSync(imageFile!)),
+      imageUrl: image.url ?? dataUrlFor(checkedImageBytes(imageFile!, image.sha256)),
       accounting: { sha256: image.sha256, widthPx: image.widthPx, heightPx: image.heightPx },
       generationSettings
     });
