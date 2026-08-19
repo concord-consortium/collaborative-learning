@@ -79,10 +79,10 @@ export interface RunTask {
    * Builds the request this task will send, on demand.
    *
    * A function rather than the request itself, because for a locally captured image the request
-   * holds the picture: a 4 MB PNG becomes a ~5.5 MB base64 data URL, and one of those per task meant
-   * an entire corpus's pixels sat in memory from `buildTasks` until the run ended — around 275 MB
-   * for 25 documents across two image runs, before the first call went out. The request is now built
-   * once here for the key and the cost reservation, released, and built again at dispatch.
+   * holds the picture: a 4 MB PNG becomes a ~5.5 MB base64 data URL, so one request per task would
+   * keep a whole corpus's pixels in memory from `buildTasks` until the run ended — around 275 MB for
+   * 25 documents across two image runs, before the first call goes out. It is built once for the key
+   * and the cost reservation, released, and built again at dispatch.
    */
   makeRequest: () => HarnessRequest;
   requestKey: string;
@@ -267,8 +267,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
       const { makeRequest, representation, hostedImages } = run.message === "text-only"
         ? textInput(run, document, aiPrompt)
         : imageInput(run, document, aiPrompt);
-      // Built once for the key and the reservation, then released. Holding on to it is what put a
-      // whole corpus of base64-encoded pixels in memory before the first call went out.
+      // Built once for the key and the reservation, then released — see `makeRequest`.
       const request = makeRequest();
       const imageTokensEstimated = request.inputAccounting.images
         .reduce((total, image) => total + estimateImageTokens(image, pricing.imageTokens), 0);
@@ -821,8 +820,8 @@ export async function runTasks(options: RunOptions): Promise<RunSummary> {
       let attempts = 0;
       let lastError: unknown;
       let result: CompletionResult | undefined;
-      // Built here, at dispatch, and dropped when this task finishes — see `makeRequest`. Every
-      // attempt sends the same request, so it is built once per task rather than once per attempt.
+      // See `makeRequest`. Outside the retry loop because every attempt sends the same request, so
+      // it is built once per task rather than once per attempt.
       const request = task.makeRequest();
       while (attempts <= retries) {
         attempts += 1;
