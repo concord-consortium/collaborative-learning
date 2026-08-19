@@ -652,13 +652,37 @@ describe("which hosted URLs may be fetched", () => {
     for (const host of [
       "localhost", "127.0.0.1", "127.1.2.3", "0.0.0.0", "10.0.0.5", "172.16.0.1", "172.31.255.255",
       "192.168.1.1", "169.254.169.254", "[::1]", "[::]", "[fd00::1]", "[fe80::1]",
-      "[::ffff:127.0.0.1]"
+      "[::ffff:127.0.0.1]",
+      // Shared address space (RFC 6598), and both ends of it.
+      "100.64.0.1", "100.127.255.255"
     ]) {
       expect({ host, allowed: isPublicHttpsUrl(`https://${host}/shot.png`) })
         .toEqual({ host, allowed: false });
     }
-    // Just outside the private block, so the range check is a range and not a prefix match.
-    expect(isPublicHttpsUrl("https://172.32.0.1/shot.png")).toBe(true);
+    // Just outside each private block, so the range checks are ranges and not prefix matches.
+    for (const host of ["172.32.0.1", "100.63.255.255", "100.128.0.1"]) {
+      expect({ host, allowed: isPublicHttpsUrl(`https://${host}/shot.png`) })
+        .toEqual({ host, allowed: true });
+    }
+  });
+
+  it("reads only the IPv4-mapped form, which is the only one that reaches the address", () => {
+    // `::ffff:0:127.0.0.1` and `::ffff:0:0:127.0.0.1` normalize to `[::ffff:0:7f00:1]` and
+    // `[::ffff:0:0:7f00:1]`, which put `ffff` in a different group: the deprecated IPv4-translated
+    // range, which no stack here translates — both answer EHOSTUNREACH rather than reaching
+    // 127.0.0.1. Treating them as private would be reading an unreachable IPv6 address as loopback.
+    expect(isPublicHttpsUrl("https://[::ffff:127.0.0.1]/shot.png")).toBe(false);
+    expect(isPublicHttpsUrl("https://[::ffff:0:127.0.0.1]/shot.png")).toBe(true);
+    expect(isPublicHttpsUrl("https://[::ffff:0:0:127.0.0.1]/shot.png")).toBe(true);
+  });
+
+  it("reads an IPv4 address however it is written", () => {
+    // `URL` normalizes the decimal, hex, octal and short forms, so the octet check sees 127.0.0.1
+    // in every case and none of them is a way around it.
+    for (const host of ["2130706433", "0x7f000001", "017700000001", "127.1"]) {
+      expect({ host, allowed: isPublicHttpsUrl(`https://${host}/shot.png`) })
+        .toEqual({ host, allowed: false });
+    }
   });
 
   it("refuses a redirect that lands somewhere less safe than where it was asked to go", () => {

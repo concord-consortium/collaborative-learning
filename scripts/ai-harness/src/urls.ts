@@ -51,6 +51,12 @@ function isPrivateHost(hostname: string): boolean {
     if (/^f[cd]/.test(address) || /^fe[89ab]/.test(address)) return true;
     // An IPv4-mapped address is still the IPv4 address it names. `URL` normalizes the dotted form
     // (`::ffff:127.0.0.1`) to hex groups (`::ffff:7f00:1`), so that is the form to read.
+    //
+    // Only this form. `::ffff:0:127.0.0.1` and `::ffff:0:0:127.0.0.1` normalize just as readily, to
+    // `::ffff:0:7f00:1` and `::ffff:0:0:7f00:1`, and are deliberately not matched: they put `ffff`
+    // in a different group, which is the deprecated IPv4-translated range rather than the mapped
+    // one. No stack here translates them — both answer EHOSTUNREACH rather than reaching 127.0.0.1
+    // — so they are ordinary unreachable IPv6 addresses and reading them as private would be wrong.
     const mapped = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(address);
     if (!mapped) return false;
     const high = parseInt(mapped[1], 16);
@@ -70,6 +76,9 @@ function isPrivateIpv4(host: string): boolean {
   return first === 0 || first === 10 || first === 127 ||
     (first === 172 && second >= 16 && second <= 31) ||
     (first === 192 && second === 168) ||
+    // Shared address space (RFC 6598). Carrier-grade NAT, and the pod network on several managed
+    // Kubernetes offerings — an address that routes somewhere internal rather than nowhere.
+    (first === 100 && second >= 64 && second <= 127) ||
     // Link-local, which on a cloud host is the instance metadata service.
     (first === 169 && second === 254);
 }
