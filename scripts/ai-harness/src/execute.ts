@@ -32,7 +32,7 @@ import { renderBackendIdentity } from "./backends/index.js";
 import {
   ExperimentFile, ExperimentRun, ImageRepresentation, ManifestDocument, MessageShape, ModelPricing,
   RepresentationDescriptor, ResponseOriginMeta, ResultRow, RunMeta, SkippedResultRow,
-  TextRepresentation, effectiveModality, kResultSchemaVersion, kSchemaVersion, sendsImages,
+  TextRepresentation, effectiveModality, kResultSchemaVersion, kSchemaVersion, sendsImages, sendsText,
   validatePromptFile, validateResultRow
 } from "./schemas.js";
 import { DocumentClassification, classifyDocument } from "./capability.js";
@@ -92,11 +92,13 @@ export interface RunTask {
   requestKey: string;
   worstCaseUsd: number;
   /**
-   * How many retries `worstCaseUsd` was reserved for. Carried on the task rather than read
-   * independently by the run loop: the two used to be separate reads of `options.retries`, with
-   * nothing tying them together, so a caller passing `retries: 5` to `buildTasks` and not to
-   * `runTasks` would reserve for three attempts and dispatch six. The invariant that makes
-   * `--max-cost` a bound is now code rather than convention.
+   * How many retries `worstCaseUsd` was reserved for.
+   *
+   * Carried on the task rather than read independently by the run loop, so the number reserved for
+   * and the number dispatched cannot disagree: two separate reads of `options.retries` would let a
+   * caller passing `retries: 5` to `buildTasks` and not to `runTasks` reserve for three attempts
+   * and send six. Keeping them one value is what makes `--max-cost` a bound rather than a
+   * convention.
    */
   retries: number;
   /** What this row will record about where its input came from. */
@@ -180,11 +182,12 @@ function checkedImageBytes(file: string, expectedSha256: string): Buffer {
 /**
  * The related summaries a run sends, which is a dimension rather than a fact about the document.
  *
- * `extras-production-current` reproduces a real production bug on purpose (spike finding 6a,
- * CLUE-630): `findRelatedSummaries` hands every related entry the *analyzed document's own* summary
- * instead of the related document's, so the model is shown the same text several times over and told
- * other people agreed with it. It is a named baseline so a before/after comparison stays honest —
- * measuring the fix means measuring against what production does today. Do not improve it.
+ * `extras-production-current` reproduces a real production bug on purpose (CLUE-630, written up as
+ * finding 6a in `docs/plans/CLUE-371-spike.md`): `findRelatedSummaries` hands every related entry
+ * the *analyzed document's own* summary instead of the related document's, so the model is shown
+ * the same text several times over and told other people agreed with it. It is a named baseline so
+ * a before/after comparison stays honest — measuring the fix means measuring against what
+ * production does today. Do not improve it.
  */
 export function relatedSummariesFor(
   run: ExperimentRun, document: ManifestDocument, markdown: string
@@ -207,8 +210,20 @@ export function relatedSummariesFor(
  * reporting judgement about how to group a result, not a claim about what the document contains,
  * and letting it drive a skip would silently change what was measured.
  */
+/**
+ * Whether the variant a text-carrying run would use finds student content the classifier does not.
+ *
+ * Returns false for a run that sends no text, and for every variant that only passes text through.
+ */
+export function variantFindsStudentContentIn(run: ExperimentRun, content: unknown): boolean {
+  if (!sendsText(run.message)) return false;
+  const variant = getTextVariant(run.textVariant ?? "default");
+  return variant.findsStudentContentWithoutText?.(content) ?? false;
+}
+
 export function skipReasonsFor(
-  message: MessageShape, classification: DocumentClassification, document?: ManifestDocument
+  message: MessageShape, classification: DocumentClassification, document?: ManifestDocument,
+  variantFindsStudentContent = false
 ): string[] {
   const hasStudentText = classification.tiles.some((tile) => tile.hasStudentText);
   const reasons: string[] = [];
@@ -225,7 +240,11 @@ export function skipReasonsFor(
       "no tile carries text, and none needs a picture");
     return reasons;
   }
-  if (message === "text-only" && !hasStudentText) {
+  // The variant gets the last word, because it is the thing that builds the summary. `hasStudentText`
+  // asks whether a tile holds text a student wrote, which is the right question only for a variant
+  // that passes text through — `drawing-text` turns geometry into words, and a document of two
+  // shapes has student work in it that this question cannot see.
+  if (message === "text-only" && !hasStudentText && !variantFindsStudentContent) {
     reasons.push("text-only run: no tile carries student-authored text, so the summary would " +
       "carry no student content");
   }
@@ -276,13 +295,17 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
    * of the document's own file. Cached per document: a corpus is classified once however many runs
    * an experiment defines.
    */
-  const classifications = new Map<string, DocumentClassification>();
-  const classify = (document: ManifestDocument): DocumentClassification => {
+  const classifications = new Map<string, { content: unknown; classification: DocumentClassification }>();
+  // The content is kept alongside, because a skip decision can need it: a variant is asked whether
+  // it would find student content the classifier does not see, and only the document itself can
+  // answer that. Reading it twice would be the alternative.
+  const classify = (document: ManifestDocument) => {
     const cached = classifications.get(document.id);
     if (cached) return cached;
-    const classification = classifyDocument(readCorpusDocument(paths, document));
-    classifications.set(document.id, classification);
-    return classification;
+    const content = readCorpusDocument(paths, document);
+    const entry = { content, classification: classifyDocument(content) };
+    classifications.set(document.id, entry);
+    return entry;
   };
 
   /** The text side of a request: the summary to send, and what to record about where it came from. */
@@ -339,7 +362,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
 
     // Which pictures this run sends, chosen by its image set rather than by whatever is there.
     const imageSet = run.imageSet ?? "full-document";
-    const selected = imagesForSet(envelope, file, imageSet, visualTileIdsOf(classify(document)));
+    const selected = imagesForSet(envelope, file, imageSet, visualTileIdsOf(classify(document).classification));
     // The paths are resolved now — a stale envelope should fail here rather than at dispatch — but
     // the bytes are read only when the request is actually built.
     const files = selected.images.map((image) => image.url ? null : resolveImageFile(file, image));
@@ -464,8 +487,9 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
   for (const run of experiment.runs) {
     const { aiPrompt, sha256 } = loadPrompt(run.prompt);
     for (const document of manifest.documents) {
-      const classification = classify(document);
-      const skipReasons = skipReasonsFor(run.message, classification, document);
+      const { content, classification } = classify(document);
+      const skipReasons = skipReasonsFor(run.message, classification, document,
+        variantFindsStudentContentIn(run, content));
       if (skipReasons.length > 0) {
         // A decision, not an absence: the pair lands in the results as a skipped row saying why.
         skipped.push({

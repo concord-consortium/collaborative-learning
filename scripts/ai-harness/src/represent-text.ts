@@ -19,6 +19,21 @@ export interface TextVariant {
   /** Bump when this variant's output would change for the same input. */
   variantVersion: number;
   render(content: unknown): string;
+  /**
+   * Whether this variant would put student content in the summary for a document the classifier
+   * says carries no student-authored text.
+   *
+   * Skip-empty asks "would the summary carry any student content", and answers it from the
+   * classifier: does any tile hold text a student wrote. That is the right question for every
+   * variant that only passes text through, and the wrong one for a variant whose whole purpose is
+   * turning something else into words — `drawing-text` describes geometry, and a drawing of two
+   * shapes holds no student *text* while very much holding student work. Without this the decision
+   * is variant-blind, and the fixture a variant exists for is skipped before the variant is
+   * consulted.
+   *
+   * Absent means "nothing the classifier missed", which is true of every pass-through variant.
+   */
+  findsStudentContentWithoutText?(content: unknown): boolean;
 }
 
 export const textVariants: Record<string, TextVariant> = {
@@ -65,9 +80,29 @@ export const textVariants: Record<string, TextVariant> = {
     // handler that answers wins, so this one takes the Drawing tiles and the rest are untouched.
     render: (content) => documentSummarizer(content, {
       tileHandlers: [handleDrawingTileText, ...defaultTileHandlers]
-    })
+    }),
+    // A drawing with objects in it is student work this variant can describe, whether or not any of
+    // those objects is a text object. An empty drawing is not: `handleDrawingTileText` answers
+    // "which is empty", and a summary saying that carries nothing.
+    findsStudentContentWithoutText: (content) =>
+      tilesOf(content).some((tile) => {
+        const tileContent = (tile as { content?: { type?: string; objects?: unknown } })?.content;
+        return tileContent?.type === "Drawing" && Array.isArray(tileContent.objects) &&
+          tileContent.objects.length > 0;
+      })
   }
 };
+
+/**
+ * Every tile in a document's tile map, nested ones included.
+ *
+ * The map is flat — a Question tile's children are entries in it like any other — so this is the
+ * whole document's tiles without walking rows.
+ */
+function tilesOf(content: unknown): unknown[] {
+  const tileMap = (content as { tileMap?: Record<string, unknown> })?.tileMap;
+  return tileMap && typeof tileMap === "object" ? Object.values(tileMap) : [];
+}
 
 export const textVariantIds: readonly string[] = Object.keys(textVariants);
 

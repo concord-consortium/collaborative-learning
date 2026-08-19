@@ -162,6 +162,15 @@ exports a `variantVersion` that is bumped whenever its output would change for t
 interpret it, because interpreting the picture is what the model is being measured on. Beating it is
 the point, and a new variant is how someone shows they have.
 
+**A text run reaches it only on a document that carries student text elsewhere**, which today means
+the geometry half is barely exercised. Skip-empty asks the classifier whether any tile holds
+student-authored text, and a Drawing tile counts only when it has a text object with something in it
+(`drawingTileHasText` in `src/capability.ts`) — so the `drawing` fixture, two shapes and no text, is
+skipped by a text-only run before the variant is consulted. Of the two fixtures with Drawing tiles,
+only `mixed` is sent, and that one has a Text tile as well. The variant's own summary of a drawing
+*is* student content, so the skip is asking the wrong question for this combination; the decision is
+made from the classifier alone and knows nothing about which variant is about to run.
+
 Two further ways to shrink a data set — sending a fixed sample of cases, and sending aggregate
 statistics — are named in the plan and not built. Both are variants of their own when someone wants
 to measure them.
@@ -918,7 +927,7 @@ keys and a re-spend on those documents whatever prompted the re-render.
   `no-extras` sent 3,725 prompt tokens, `extras-fixed` and the default sent 3,895, and
   `extras-production-current` sent 4,537. The three differ on exactly the two documents that have
   `relatedSummaries`, and the 642-token gap between `fixed` and `production-current` is the
-  production bug (spike finding 6a) reproduced and priced: it re-sends the analyzed document's own
+  production bug (CLUE-630) reproduced and priced: it re-sends the analyzed document's own
   summary in place of each related one.
 - **The cache is keyed on the whole request, prompt included.** A mixed message whose text half is
   dropped is structurally identical to an image-only one, but this experiment gives the mixed run

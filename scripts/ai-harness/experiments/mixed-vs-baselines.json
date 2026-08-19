@@ -62,6 +62,18 @@
       "textVariant": "default",
       "extras": "no-extras",
       "prompt": "categorize-design-default"
+    },
+    {
+      "id": "text-no-dataset-tables",
+      "message": "text-only",
+      "textVariant": "no-dataset-tables",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "text-drawing-text",
+      "message": "text-only",
+      "textVariant": "drawing-text",
+      "prompt": "categorize-design-default"
     }
   ]
 }

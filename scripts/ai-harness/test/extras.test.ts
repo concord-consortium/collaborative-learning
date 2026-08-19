@@ -1,7 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
-import { buildTasks, kDefaultModel, mixedSendsText, relatedSummariesFor, skipReasonsFor } from "../src/execute.js";
+import {
+  buildTasks, kDefaultModel, mixedSendsText, relatedSummariesFor, skipReasonsFor,
+  variantFindsStudentContentIn
+} from "../src/execute.js";
 import { classifyDocument } from "../src/capability.js";
 import { corpusPaths } from "../src/corpus.js";
 import { loadPricingConfig, pricingFor } from "../src/cost.js";
@@ -103,12 +106,54 @@ describe("which documents a run declines to send", () => {
     expect(skipReasonsFor("mixed", visualOnly)).toEqual([]);
   });
 
+  it("does not skip when the variant finds student content the classifier cannot see", () => {
+    // The classifier asks whether a tile holds text a student wrote. A variant that turns something
+    // else into words -- geometry, for `drawing-text` -- answers a different question, and the
+    // document it exists for is exactly the one the classifier calls empty of text.
+    expect(skipReasonsFor("text-only", visualOnly, undefined, true)).toEqual([]);
+    // Only that branch is overridden: a document with no tiles at all has nothing for any variant
+    // to describe, and still skips.
+    expect(skipReasonsFor("text-only", empty, undefined, true)[0])
+      .toMatch(/no student content at all/);
+  });
+
   it("tells a mixed run when to drop its text half rather than skip the document", () => {
     // The picture still has something to say, so the request goes and the row records the omission.
     expect(mixedSendsText(withText)).toBe(true);
     expect(mixedSendsText(visualOnly)).toBe(false);
   });
+});
 
+describe("which variants find student content the classifier does not", () => {
+  const drawingWith = (objects: unknown[]) => ({
+    rowOrder: ["r"], rowMap: { r: { tiles: [{ tileId: "d" }] } },
+    tileMap: { d: { content: { type: "Drawing", objects } } }
+  });
+  const textRun = (textVariant: string) =>
+    ({ id: "r", message: "text-only", textVariant, prompt: "p" } as any);
+
+  it("drawing-text counts a drawing with shapes, which carries no text at all", () => {
+    expect(variantFindsStudentContentIn(textRun("drawing-text"),
+      drawingWith([{ type: "rectangle", x: 10, y: 10, width: 120, height: 60 }]))).toBe(true);
+  });
+
+  it("but not an empty drawing, whose summary would say only that it is empty", () => {
+    expect(variantFindsStudentContentIn(textRun("drawing-text"), drawingWith([]))).toBe(false);
+  });
+
+  it("and no pass-through variant claims to find anything", () => {
+    for (const variantId of ["default", "minimal", "no-dataset-tables"]) {
+      expect({ variantId, finds: variantFindsStudentContentIn(textRun(variantId),
+        drawingWith([{ type: "rectangle" }])) }).toEqual({ variantId, finds: false });
+    }
+  });
+
+  it("and a run that sends no text is never asked", () => {
+    // `textVariant` is absent on an image-only run, so consulting a variant here would have to
+    // invent one.
+    expect(variantFindsStudentContentIn({ id: "r", message: "image-only", prompt: "p" } as any,
+      drawingWith([{ type: "rectangle" }]))).toBe(false);
+  });
 });
 
 describe("the extras dimension against a real corpus", () => {
@@ -172,7 +217,7 @@ describe("the extras dimension against a real corpus", () => {
   });
 
   it("sends the document its own summary back, twice, for extras-production-current", () => {
-    // What production does today (spike finding 6a). The summary the request is already carrying
+    // What production does today (CLUE-630). The summary the request is already carrying
     // comes back as though two other students had written it.
     const task = tasksFor("extras-production-current").find((entry) => entry.docId === "text")!;
     const messages = task.makeRequest().apiRequest.messages;
