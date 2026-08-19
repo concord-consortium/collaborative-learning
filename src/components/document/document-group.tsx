@@ -15,11 +15,14 @@ interface IProps {
   onSelectDocument: (document: IDocumentMetadataModel) => void;
 }
 
+// A document box and the gap that follows it, matching the box size and `column-gap` of
+// `.doc-group-list.simple` in document-group.scss. The row scrolls in whole units of this.
+const kDocBoxWidth = 16;
+const kDocBoxGap = 10;
+export const kScrollUnit = kDocBoxWidth + kDocBoxGap;
+
 export const DocumentGroupComponent = observer(function DocumentGroupComponent(props: IProps) {
   const { documentGroup, secondarySort, onSelectDocument } = props;
-  const docBoxWidth = 16;
-  const docBoxGap = 10;
-  const scrollUnit = docBoxWidth + docBoxGap;
   const docCount = documentGroup.documents.length || 0;
   const isUnsorted = secondarySort === "None";
   const docListContainerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +45,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
       // The row's width changes as the scroll buttons take their place beside it, so both directions
       // measure at click time: they have to move by the same amount for the row to reach its start
       // again. Whole boxes only, so a click never leaves one half out of view.
-      const scrollAmount = Math.floor(docListContainer.clientWidth / scrollUnit) * scrollUnit;
+      const scrollAmount = Math.floor(docListContainer.clientWidth / kScrollUnit) * kScrollUnit;
       docListContainer.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth"
@@ -80,10 +83,10 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
   // Calculate the number of visible documents based on the current container width
   useEffect(() => {
     if (docListContainerRef.current) {
-      const count = Math.floor(containerWidth / scrollUnit);
+      const count = Math.floor(containerWidth / kScrollUnit);
       setVisibleCount(count);
     }
-  }, [containerWidth, scrollUnit]);
+  }, [containerWidth]);
 
   // Update arrow button states based on scroll position.
   useEffect(() => {
@@ -104,7 +107,7 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
         docListContainer.removeEventListener("scroll", updateArrowStates);
       };
     }
-  }, [visibleCount, scrollUnit]);
+  }, [visibleCount]);
 
   const renderScrollButton = (direction: "left" | "right", disabled: boolean) => {
     return (

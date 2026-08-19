@@ -62,12 +62,13 @@ function getUrlParam(name: string): string | null {
 export const S3_BUCKET = "models-resources";
 export const S3_STAGING_BUCKET = "models-resources-qa";
 
-function getS3Bucket() {
-  if (getUrlParam("tokenServiceEnv") === "staging") {
-    return S3_STAGING_BUCKET;
-  }
+/** Token-service environment for envelope uploads; ?tokenServiceEnv=staging for testing. */
+export function getTokenServiceEnv(): "staging" | "production" {
+  return getUrlParam("tokenServiceEnv") === "staging" ? "staging" : "production";
+}
 
-  return S3_BUCKET;
+function getS3Bucket() {
+  return getTokenServiceEnv() === "staging" ? S3_STAGING_BUCKET : S3_BUCKET;
 }
 
 /** AWS region of the envelope tile bucket. */
@@ -77,7 +78,9 @@ export const AWS_REGION = "us-east-1";
 export const S3_PREFIX = "collaborative-learning/envelopes/";
 
 /** Base URL of the S3 bucket hosting envelope tiles. */
-export const TILE_BASE_URL = `https://${getS3Bucket()}.s3.amazonaws.com/`;
+export function getTileBaseUrl() {
+  return `https://${getS3Bucket()}.s3.amazonaws.com/`;
+}
 
 /** Duration of each raw data fetch chunk in seconds. */
 export const RAW_CHUNK_DURATION = 7200; // 2 hours

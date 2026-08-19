@@ -69,16 +69,29 @@ migration — a Firestore query needs a stored field, which a uid grammar cannot
 
 ## What each stored shape looks like
 
-| document | `uid` | `unit` | `investigation` | `offeringId` | `groupId` | container | curriculum | owner |
-|---|---|---|---|---|---|---|---|---|
-| personal, learning log | the user | `null` | — | — | — | class | none | user |
-| problem, planning, publications | the user | set | set | set | — | offering | problem | user |
-| group | `group_<offeringId>_<groupId>` | set | set | set | set | offering | problem | **group** |
-| exemplar (from curriculum) | authoring persona | set | set | — | — | classUnit | problem | synthetic user |
-| class-wide slot | `class_<classHash>` | set | `null` | — | — | classUnit | **unit** | class |
+| document | `uid` | `unit` | `investigation` | `offeringId` | `groupId` | `canonical` | container | curriculum | owner |
+|---|---|---|---|---|---|---|---|---|---|
+| personal, learning log | the user | `null` | — | — | — | — | class | none | user |
+| problem, planning, publications | the user | set | set | set | — | — | offering | problem | user |
+| group | `group_<offeringId>_<groupId>` | set | set | set | set | `"default"` | offering | problem | **group** |
+| exemplar (from curriculum) | authoring persona | set | set | — | — | — | classUnit | problem | synthetic user |
+| class-wide slot | `class_<classHash>` | set | `null` | — | — | **the kind** | classUnit | **unit** | class |
 
 The owner column is read off the `uid` alone. `groupId` is set on exactly the row whose `uid` already
 encodes it, which is what makes it a denormalization rather than a second source.
+
+`canonical` holds a **slot label**, not a flag: the final segment of the pointer path the document won
+(`…/owners/<uid>/slots/<label>`). The two rows that carry one show why it cannot be a boolean — a class-wide
+document is labeled with its kind precisely so that several of them can be canonical at once inside the same
+classUnit container, under the same class owner, one per declared kind. A problem document is canonical *by
+convention* only: no pointer is claimed for it, so the field stays unset.
+
+Nothing in the client reads it. The path is always built from what the caller already knows — the container,
+the owner, and the label it is asking for — and the *pointer* is what names the document, so the code only
+ever travels slot → document. The label is stored for the direction nothing travels yet, and for the
+Firestore rules: they rebuild the pointer path from the incoming label to verify a claim (which is why no
+label is hardcoded in the rules), and they read the stored label back to refuse deleting a document that
+holds a slot.
 
 The `null`s are load-bearing. A class-wide document writes `investigation: null` and `problem: null`
 explicitly rather than omitting them, because Firestore cannot match a field that is missing — that is

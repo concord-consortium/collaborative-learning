@@ -45,9 +45,9 @@ export interface IDocumentKindInfo {
    * The unit code whose config declared this kind. Set for kinds declared by a unit config; undefined
    * for the built-in kinds, which are unit-independent.
    *
-   * A `title` is authored in one unit's config, so it names only that unit's documents. Two units may
-   * declare the same kind with different wording, and only the current unit's config is loaded, so
-   * getDocumentTitle uses this to avoid lending one unit's title to another unit's document.
+   * Kind names are not unique across configurations — two units may declare the same kind with different
+   * wording — and only the current unit's config is loaded. getKindDefinitionFor compares this against a
+   * document's own `unit` so one unit's definition is never applied to another unit's document.
    */
   unit?: string;
 }
@@ -68,10 +68,13 @@ export interface IDocumentOwnerContext {
 
 const kDocumentKindPattern = /^[a-z][a-zA-Z0-9]*$/;
 /**
- * A document `kind` is used as a Firestore path segment (the canonical-pointer slot) as well as the registry
- * key, so a kind is restricted to a camelCase identifier: a lowercase letter followed by letters/digits, with
- * no separators or special characters. This matches the built-in document type strings (e.g.
- * "learningLogPublication") and keeps the value safe as a Firestore document id.
+ * A `kind` is the registry key, and a class-wide document's canonical-pointer slot is labeled with its kind,
+ * so a kind has to be usable as a Firestore path segment. It is restricted to a camelCase identifier: a
+ * lowercase letter followed by letters/digits, with no separators or special characters. This matches the
+ * built-in document type strings (e.g. "learningLogPublication") and keeps the value safe as a document id.
+ *
+ * The reverse does not hold: a slot label need not be a kind. The group document's slot is labeled "default"
+ * while its kind is "group" — see kDefaultCanonicalDocumentLabel for what a label is.
  */
 export function isValidDocumentKind(value: string): boolean {
   return kDocumentKindPattern.test(value);
@@ -90,8 +93,47 @@ export function registerDocumentKind(kind: string, info: Omit<IDocumentKindInfo,
   gDocumentKindInfoMap[kind] = { kind, ...info };
 }
 
+/**
+ * Look a kind up by name alone, without asking which configuration defined it. Creation is the only
+ * caller: a document being created takes its kind from the config in hand, so the definition found is
+ * necessarily the one it is made from. Anything reading an existing document must use
+ * getKindDefinitionFor instead.
+ */
 export function getDocumentKindInfo(kind?: string|null) {
   return kind ? gDocumentKindInfoMap[kind] : undefined;
+}
+
+/**
+ * The fields that identify which definition a document was made from: its kind, and the association
+ * naming the configuration that declared that kind. Structural, so this stays a leaf module.
+ */
+export interface IKindScopedDocumentFields {
+  kind?: string | null;
+  unit?: string | null;
+}
+
+/**
+ * This document's kind definition, or undefined when no definition applicable to it is loaded.
+ *
+ * The single entry point for reading a kind definition off an existing document. It takes the document
+ * rather than the kind because a kind name does not identify a definition on its own: a kind declared by a
+ * unit config exists only while that unit is loaded, and two units may declare the same kind meaning
+ * different things (see IDocumentKindInfo.unit). Matching the document's `unit` against the definition's is
+ * what tells a definition that governs this document from one that merely shares its name.
+ *
+ * Undefined therefore means "no definition to read here", not "no such kind" — the document may well have
+ * been created from a perfectly good definition belonging to a unit that is not loaded. Sort Work lists
+ * documents from every unit a class has worked through, so this is ordinary rather than exceptional, and a
+ * caller must answer from the document's stored fields instead. Anything a definition contributes that
+ * cannot be recovered that way has to be stamped onto the document at creation.
+ */
+export function getKindDefinitionFor(doc: IKindScopedDocumentFields): IDocumentKindInfo | undefined {
+  const info = getDocumentKindInfo(doc.kind);
+  if (!info) return undefined;
+  // A built-in kind declares no unit: it is registered by the application, so it governs its documents
+  // wherever they came from.
+  if (info.unit != null && info.unit !== doc.unit) return undefined;
+  return info;
 }
 
 /** A kind's full stamp set (its metadataFields plus the `kind` key), or `{}` if the kind is unregistered. */
@@ -123,14 +165,14 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
     throw new Error(`Cannot resolve the owner of unregistered document kind "${kind}"`);
   }
   switch (info.ownerType) {
-    case "group": return required(ctx.groupOwnerId, kind, "group");
-    case "class": return required(ctx.classOwnerId, kind, "class");
+    case "group": return requireOwnerId(ctx.groupOwnerId, kind, "group");
+    case "class": return requireOwnerId(ctx.classOwnerId, kind, "class");
     case "user":  return ctx.userId;
     default:      return ctx.userId;
   }
 }
 
-function required(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
+function requireOwnerId(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
   if (!ownerId) {
     throw new Error(`Cannot create a ${ownerType}-owned document of kind "${kind}": ` +
       `no ${ownerType} owner id is available`);
@@ -149,13 +191,14 @@ export interface IDocumentOwnerFields {
 
 /**
  * The owner fields to stamp on a new document of the given kind, beyond the owner uid getDocumentOwner
- * returns. Only a group owner has one.
+ * returns. Only a group owner has one, so `groupId` is the creating user's current group — ignored for
+ * every other kind, and absent when they are in no group.
  */
 export function getDocumentOwnerFields(
-  kind: string|null|undefined, ctx: { groupId?: string }
+  kind: string|null|undefined, groupId?: string
 ): IDocumentOwnerFields {
-  if (getDocumentOwnerType(kind) !== "group" || !ctx.groupId) return {};
-  return { groupId: ctx.groupId };
+  if (getDocumentOwnerType(kind) !== "group" || !groupId) return {};
+  return { groupId };
 }
 
 /**
@@ -211,21 +254,19 @@ export function getDocumentLocationFields(
  * The minimal document fields getDocumentTitle reads. Structural so the registry stays a leaf module that
  * doesn't import the document models.
  */
-interface IDocumentTitleFields {
-  kind?: string | null;
+interface IDocumentTitleFields extends IKindScopedDocumentFields {
   type?: string;
   groupId?: string | null;
-  unit?: string | null;
 }
 
 /**
  * The display title for a document based on its kind
  */
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
-  const info = getDocumentKindInfo(document.kind);
-  // A registered title names its own unit's documents only (see IDocumentKindInfo.unit); a document
-  // from another unit falls through to a caller's fallback.
-  if (info?.title != null && (info.unit == null || info.unit === document.unit)) return info.title;
+  // A document whose definition is not loaded resolves no title here and falls through to a caller's
+  // fallback, which names it from its stored fields instead.
+  const info = getKindDefinitionFor(document);
+  if (info?.title != null) return info.title;
   // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
   // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
   // on the lookup above. Requiring `groupId` (not just `type === GroupDocument`) matters because a class-wide

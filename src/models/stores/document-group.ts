@@ -253,8 +253,8 @@ export class DocumentGroup {
     // One section per other assignment, not per group: a class works through many, and a section per
     // group of each would swamp the sort. Every document in one offering shares a curriculum position,
     // so that names the section.
+    const groupsTerm = upperWords(translate("studentGroups"));
     const otherAssignmentSection = (doc: IDocumentMetadataModel) => {
-      const groupsTerm = upperWords(translate("studentGroups"));
       const curriculumLabel = getCurriculumLabel(doc);
       return curriculumLabel ? `${groupsTerm} from ${curriculumLabel}` : `Other ${groupsTerm}`;
     };

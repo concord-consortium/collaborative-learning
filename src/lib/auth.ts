@@ -101,9 +101,9 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
   });
 };
 
-export const getFirebaseJWTParams = (classHash?: string) => {
+export const getFirebaseJWTParams = (classHash?: string, firebaseApp = FIREBASE_APP_NAME) => {
   const params: Record<string,string> = {
-    firebase_app: FIREBASE_APP_NAME
+    firebase_app: firebaseApp
   };
   if (classHash) {
     params.class_hash = classHash;
@@ -118,13 +118,14 @@ export const getFirebaseJWTParams = (classHash?: string) => {
   return `?${(new URLSearchParams(params)).toString()}`;
 };
 
-export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string,
-                                              rawToken: string, classHash?: string) => {
+export const getFirebaseJWTWithBearerToken = (
+  basePortalUrl: string, rawToken: string, classHash?: string, firebaseApp?: string
+) => {
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
-    const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash)}`;
+    const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash, firebaseApp)}`;
     superagent
       .get(maybeAddResearcherParam(url))
-      .set("Authorization", `${type} ${rawToken}`)
+      .set("Authorization", `Bearer ${rawToken}`)
       .end((err, res) => {
         if (err) {
           reject(getErrorMessage(err, res));
@@ -251,9 +252,8 @@ export const authenticate = async (
   const uidAsString = `${portalJWT.uid}`;
   // TODO: figure out why we need to use bearer tokens here in normal mode
   // when we already have the portalJWT in all cases
-  const tokenType = user?.standaloneAuthUser ? "Bearer/JWT" : "Bearer";
   const rawToken = user?.standaloneAuthUser?.rawJWT ?? bearerToken;
-  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, tokenType, rawToken, classHash);
+  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, rawToken, classHash);
   const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
   const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 

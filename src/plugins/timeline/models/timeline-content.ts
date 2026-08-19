@@ -23,6 +23,10 @@ export const TimelineContentModel = TileContentModel
     viewEndTimeISO: types.maybe(types.string),
     selectedEventIndex: types.optional(types.number, 0),
   })
+  .volatile(self => ({
+    hoverTime: undefined as DateTime | undefined,
+    pinnedTime: undefined as DateTime | undefined,
+  }))
   .views(self => ({
     get isUserResizable() {
       return true;
@@ -62,6 +66,16 @@ export const TimelineContentModel = TileContentModel
     get viewRangeSeconds() {
       if (!self.viewStartTime || !self.viewEndTime) return undefined;
       return self.viewEndTime.diff(self.viewStartTime, "seconds").seconds;
+    },
+    get viewStartMs() {
+      return self.viewStartTime?.toMillis();
+    },
+    get viewEndMs() {
+      return self.viewEndTime?.toMillis();
+    },
+    get viewRangeMs() {
+      if (!self.viewStartTime || !self.viewEndTime) return undefined;
+      return self.viewEndTime.diff(self.viewStartTime).milliseconds;
     },
     get events(): TimelineEvent[] {
       const ds = self.sharedDataSet?.dataSet;
@@ -152,6 +166,11 @@ export const TimelineContentModel = TileContentModel
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
       return `Event ${self.selectedEventIndex + 1}`;
+    },
+    timeToViewPct(time: DateTime): number | undefined {
+      const { viewStartMs, viewRangeMs } = self;
+      if (viewStartMs === undefined || viewRangeMs === undefined || viewRangeMs <= 0) return undefined;
+      return (time.toMillis() - viewStartMs) / viewRangeMs * 100;
     }
   }))
   .views(self => ({
@@ -168,6 +187,18 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    setHoverTime(time: DateTime) {
+      self.hoverTime = time;
+    },
+    clearHoverTime() {
+      self.hoverTime = undefined;
+    },
+    setPinnedTime(time: DateTime) {
+      self.pinnedTime = time;
+    },
+    clearPinnedTime() {
+      self.pinnedTime = undefined;
+    },
     setViewRange(start: DateTime, end: DateTime) {
       if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;
       self.viewStartTimeISO = start.toISO() ?? undefined;

@@ -7,7 +7,8 @@ import "./status-and-output.scss";
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
   const {
-    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, eventsDataSet, runError
+    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isLoadingData,
+    eventsDataSet, runError, loadDataError
   } = model;
 
   return (
@@ -24,7 +25,9 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         )}
       </div>
       <div className="download-status-container">
+        {isLoadingData && <div>Loading data: day {model.loadDaysDone + 1} of {model.loadDaysTotal || "?"}...</div>}
         {isRunning && <div>Running model...</div>}
+        {loadDataError && <div className="waveform-error">{loadDataError}</div>}
         {runError && <div className="waveform-error">{runError}</div>}
       </div>
       <div className="estimated-time">

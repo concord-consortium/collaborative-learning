@@ -1,6 +1,6 @@
 import {
   attemptAutoLogin, buildAuthorizeUrl, clearLastLogin, consumeAccessTokenFromLocation, fetchTokenServiceJwt,
-  getPortalUrl, getTokenServiceEnv, shouldAutoLogin, AUTO_LOGIN_MAX_AGE_MS
+  getPortalUrl, shouldAutoLogin, AUTO_LOGIN_MAX_AGE_MS
 } from "./portal-auth";
 
 const LAST_LOGIN_KEY = "seismic-admin-portal-last-login";
@@ -32,22 +32,6 @@ describe("portal-auth", () => {
     it("strips trailing slashes from the portal param", () => {
       history.replaceState(null, "", "/seismic-admin/?portal=https://learn.staging.concord.org/");
       expect(getPortalUrl()).toBe("https://learn.staging.concord.org");
-    });
-  });
-
-  describe("getTokenServiceEnv", () => {
-    it("defaults to production", () => {
-      expect(getTokenServiceEnv()).toBe("production");
-    });
-
-    it("returns staging when the tokenServiceEnv param asks for it", () => {
-      history.replaceState(null, "", "/seismic-admin/?tokenServiceEnv=staging");
-      expect(getTokenServiceEnv()).toBe("staging");
-    });
-
-    it("treats any other param value as production", () => {
-      history.replaceState(null, "", "/seismic-admin/?tokenServiceEnv=dev");
-      expect(getTokenServiceEnv()).toBe("production");
     });
   });
 

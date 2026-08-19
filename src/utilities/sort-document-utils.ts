@@ -48,23 +48,6 @@ export const kWholeClassSectionLabel = "Whole Class";
 export const kNoNameSectionLabel = "No Name";
 
 /**
- * The ordering information for one "by name" section, carried alongside the label for the same reason
- * as GroupSectionSortKey below: only the student sections are names, and the rest must not be sorted as
- * if they were. Named students come first, then group documents from other assignments, then the
- * authorless section — the same shape as the "by group" sort, which ends with its own catch-all.
- */
-export type NameSectionSortKey =
-  | { section: "student" }
-  | { section: "otherAssignment" }
-  | { section: "noName" };
-
-const kNameSectionOrder: Record<NameSectionSortKey["section"], number> = {
-  student: 0,
-  otherAssignment: 1,
-  noName: 2,
-};
-
-/**
  * The ordering information for one "by group" section. Carried alongside the section label so the
  * comparator never has to recover structure from the display text, which is translatable
  * (`studentGroup` is overridable per unit) and has no number at all for some sections.
@@ -97,9 +80,7 @@ export const sortGroupSections = (docMapKeys: string[], sortKeys: Map<string, Gr
     if (keyA.section === "group" && keyB.section === "group") {
       // A group id is usually a number, but not always: under
       // `autoAssignStudentsToIndividualGroups` the group id is the user id, which in demo mode can be
-      // a nanoid. Only an all-digit id sorts numerically; the rest sort after those, by label. The
-      // check has to be the whole string — a leading-digit one would read a nanoid like "3xK9…" as
-      // group 3 and tie it with the real group 3.
+      // a nanoid. Only an all-digit id sorts numerically; the rest sort after those, by label.
       const numA = kNumericGroupId.test(keyA.groupId) ? Number(keyA.groupId) : NaN;
       const numB = kNumericGroupId.test(keyB.groupId) ? Number(keyB.groupId) : NaN;
       if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
@@ -109,6 +90,23 @@ export const sortGroupSections = (docMapKeys: string[], sortKeys: Map<string, Gr
     }
     return a.localeCompare(b);
   });
+};
+
+/**
+ * The ordering information for one "by name" section, carried alongside the label for the same reason
+ * as GroupSectionSortKey above: only the student sections are names, and the rest must not be sorted as
+ * if they were. Named students come first, then group documents from other assignments, then the
+ * authorless section — the same shape as the "by group" sort, which ends with its own catch-all.
+ */
+export type NameSectionSortKey =
+  | { section: "student" }
+  | { section: "otherAssignment" }
+  | { section: "noName" };
+
+const kNameSectionOrder: Record<NameSectionSortKey["section"], number> = {
+  student: 0,
+  otherAssignment: 1,
+  noName: 2,
 };
 
 export const sortNameSectionLabels = (docMapKeys: string[], sortKeys?: Map<string, NameSectionSortKey>) => {

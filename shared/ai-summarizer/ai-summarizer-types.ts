@@ -3,6 +3,14 @@
 export type DocumentContentSnapshotType = any;
 export type ITileModelSnapshotOut = any;
 
+// Per-unit Dataflow Live Output config, mirrored onto tile content so the (snapshot-only) summarizer
+// can describe it. Defined here rather than in src/plugins so both the summarizer and the model share
+// one type — the backend summarizer can't import from src/plugins.
+export interface IDataflowOutputConfig {
+  servoInputMode?: string;       // "proportion" when set; absent = degrees
+  allowedOutputTypes?: string[]; // restricted Live Output type names; absent = full list
+}
+
 export interface NormalizedSection {
   rows: INormalizedRow[];
   sectionId?: string;

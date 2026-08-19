@@ -6,8 +6,8 @@ $toolbar-width: 83px;
 
 $toolbar-background: $gray-light;
 
-$button-sensor: $input-blue;
-$button-number: $input-blue;
+$button-sensor: $input-purple;
+$button-number: $input-purple;
 $button-generator: $generator-blue;
 $button-timer: $timer-blue;
 $button-math: $math-green;
@@ -94,19 +94,20 @@ $button-label-text: $gray-text;
     height: 15px;
     border-radius: 2px;
     background-color: $button-sensor;
-    border: 1px solid $input-blue-outline;
+    border: 1px solid $input-purple-outline;
 
     &.sensor,
     &.number,
     &.generator,
     &.timer {
-      background-color: $input-blue;
+      background-color: $input-purple;
     }
     &.math,
     &.logic,
     &.transform,
     &.control {
-      background-color: $operator-green;
+      background-color: $operator-blue;
+      border: 1px solid $operator-blue-outline;
     }
     &.demo-output {
       background-color: $output-yellow;

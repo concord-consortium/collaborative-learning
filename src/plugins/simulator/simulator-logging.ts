@@ -1,0 +1,51 @@
+import { VariableType } from "@concord-consortium/diagram-view";
+import { LogEventName } from "../../lib/logger-types";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
+
+// Snapshot of every variable's current value, keyed by name. Captured at the
+// moment a student changes a control so the logged event carries the resulting
+// output/derived values as answer context — without the simulation loop
+// (step(), which never calls this) ever emitting an event.
+//
+// Unset values are encoded as null rather than undefined: the event is sent via
+// JSON.stringify (logger.ts), which drops undefined-valued keys, so an unset
+// variable would otherwise vanish from the "all current values" snapshot.
+function variablesSnapshot(variables: VariableType[]): Record<string, number | null> {
+  const snapshot: Record<string, number | null> = {};
+  for (const variable of variables) {
+    if (variable.name != null) snapshot[variable.name] = variable.currentValue ?? null;
+  }
+  return snapshot;
+}
+
+// Emit a SIMULATOR_TOOL_CHANGE for a single student-initiated variable change.
+// Routes through logTileChangeEvent, so a Simulator tile inside a Question also
+// fires QUESTION_ANSWERS_CHANGE (which the Student Answers report reads) with no
+// extra wiring. Call ONLY from student control handlers (buttons, slider
+// release) — never from step()/the simulation loop.
+//
+// `valueLabel` is an optional human-readable name for the new value, passed for
+// discrete controls whose numeric value is an opaque enum (e.g. a mode button:
+// 0 -> "Pressure"). Continuous controls (sliders) omit it — the number is the
+// meaning.
+//
+// The logged value is read from `variable.currentValue`, so callers must apply
+// the change before logging (setValue / commit); the snapshot then reflects the
+// post-change state.
+export function logSimulatorVariableChange(
+  tileId: string,
+  variable: VariableType,
+  variables: VariableType[],
+  valueLabel?: string
+) {
+  logTileChangeEvent(LogEventName.SIMULATOR_TOOL_CHANGE, {
+    tileId,
+    operation: "setValue",
+    change: {
+      name: variable.name,
+      value: variable.currentValue,
+      ...(valueLabel != null ? { valueLabel } : {}),
+      variables: variablesSnapshot(variables),
+    },
+  });
+}

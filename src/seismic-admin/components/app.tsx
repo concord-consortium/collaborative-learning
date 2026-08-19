@@ -1,11 +1,10 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
+import { getTokenServiceEnv } from "../../../shared/seismic/envelopes/envelope-config";
 import { SeismicAdminStoreContext } from "../hooks/use-seismic-admin-stores";
 import { initAdminFirebase } from "../utils/admin-firebase";
 import { loadCatalog } from "../utils/load-catalog";
-import {
-  attemptAutoLogin, consumeAccessTokenFromLocation, fetchTokenServiceJwt, getTokenServiceEnv
-} from "../utils/portal-auth";
+import { attemptAutoLogin, consumeAccessTokenFromLocation, fetchTokenServiceJwt } from "../utils/portal-auth";
 import { SeismicAdminStore } from "../seismic-admin-store";
 import { AdminBody } from "./admin-body";
 import { AdminHeader } from "./admin-header";

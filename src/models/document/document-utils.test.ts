@@ -3,6 +3,7 @@ import { AppConfigModel } from "../stores/app-config-model";
 import { UserModel } from "../stores/user";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { createDocumentModel } from "./document";
+import { getGroupOwnerId } from "./document-axes";
 import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
@@ -248,7 +249,7 @@ describe("document utils", () => {
     const student = UserModel.create({ id: "me", type: "student", name: "Me", classHash: "class-1" });
     const kOffering = "off-1";
     // A group document's owner, the same synthetic id the app stamps at creation.
-    const groupOwner = (groupId: string, offeringId = kOffering) => `group_${offeringId}_${groupId}`;
+    const groupOwner = (groupId: string, offeringId = kOffering) => getGroupOwnerId(offeringId, groupId);
     const groupedStudent = UserModel.create({
       id: "me", type: "student", name: "Me", classHash: "class-1",
       currentGroupId: "3", offeringId: kOffering
@@ -368,6 +369,12 @@ describe("document utils", () => {
       expect(canUserEditDocument({
         documentMetadata: metadata({ uid: "me", type: ProblemPublication }), user: student
       })).toBe(false);
+    });
+
+    it("allows a researcher to edit their own document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "r1", type: ProblemDocument }), user: researcher
+      })).toBe(true);
     });
 
     it("refuses a researcher editing a class-wide document even though their classHash matches", () => {

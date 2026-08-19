@@ -175,6 +175,22 @@ export const GroupsModel = types
       });
       return groupsByUser;
     },
+    /**
+     * This offering's groups, keyed by the synthetic uid that owns their documents.
+     *
+     * Empty until the offering is known, because a group owner id cannot be built without it. That is also
+     * what keeps a document from another assignment from resolving here: its owner carries that
+     * assignment's offering, so it matches no key in this map.
+     */
+    get groupsByOwnerId() {
+      const groupsByOwnerId: Record<string, GroupModelType> = {};
+      const { offeringId } = self;
+      if (!offeringId) return groupsByOwnerId;
+      self.allGroups.forEach((group) => {
+        groupsByOwnerId[getGroupOwnerId(offeringId, group.id)] = group;
+      });
+      return groupsByOwnerId;
+    },
     get nonEmptyGroups() {
       return self.allGroups.filter(g => g.users.length > 0);
     }
@@ -199,9 +215,7 @@ export const GroupsModel = types
      * groups in this offering.
      */
     getGroupByOwnerId(ownerId?: string) {
-      const { offeringId } = self;
-      if (!ownerId || !offeringId) return undefined;
-      return self.allGroups.find(group => getGroupOwnerId(offeringId, group.id) === ownerId);
+      return ownerId ? self.groupsByOwnerId[ownerId] : undefined;
     },
   }))
   .views((self) => ({
