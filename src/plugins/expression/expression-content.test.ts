@@ -18,7 +18,6 @@ describe("ExpressionContent", () => {
     expect(content.latexStr).toBe("abc");
   });
 
-  // setLatexStr is wired to the mathfield's per-keystroke input event, so it must not log.
   it("does not log when setLatexStr mutates the expression", () => {
     (logTileChangeEvent as jest.Mock).mockClear();
     const content = ExpressionContentModel.create();
@@ -26,7 +25,6 @@ describe("ExpressionContent", () => {
     expect(logTileChangeEvent).not.toHaveBeenCalled();
   });
 
-  // The component calls logExpressionEvent on commit (blur); it carries the real tile id.
   it("logExpressionEvent logs an EXPRESSION_TOOL_CHANGE with the tile id", () => {
     const content = ExpressionContentModel.create();
     const tile = TileModel.create({ content });

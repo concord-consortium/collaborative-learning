@@ -14,6 +14,16 @@ export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
 }
 
+// Module-level logging helper (logBarGraphEvent/logAiEvent convention), so the model doesn't expose a
+// public action that changes no state (which the history middleware would record as a nested action).
+export function logNumberlineEvent(
+  model: NumberlineContentModelType, operation: string, change: Record<string, any>
+) {
+  logTileChangeEvent(LogEventName.NUMBERLINE_TOOL_CHANGE, {
+    tileId: getTileIdFromContent(model) ?? "", operation, change
+  });
+}
+
 export const PointObjectModel = types
   .model("PointObject", {
     id: types.identifier,
@@ -91,13 +101,6 @@ export const NumberlineContentModel = TileContentModel
       }));
     },
   }))
-  .actions(self => ({
-    logChange(operation: string, change: Record<string, any>) {
-      logTileChangeEvent(LogEventName.NUMBERLINE_TOOL_CHANGE, {
-        tileId: getTileIdFromContent(self) ?? "", operation, change
-      });
-    }
-  }))
   .actions(self =>({
     clearSelectedPoints() {
       for (const id in self.selectedPoints){
@@ -106,11 +109,11 @@ export const NumberlineContentModel = TileContentModel
     },
     setMin(num: number) {
       self.min = num;
-      self.logChange("setMin", { min: num });
+      logNumberlineEvent(self as NumberlineContentModelType, "setMin", { min: num });
     },
     setMax(num: number) {
       self.max = num;
-      self.logChange("setMax", { max: num });
+      logNumberlineEvent(self as NumberlineContentModelType, "setMax", { max: num });
     }
   }))
   .actions(self => ({
@@ -118,7 +121,7 @@ export const NumberlineContentModel = TileContentModel
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue, isOpen });
       self.points.set(id, pointModel);
-      self.logChange("createNewPoint", { id, xValue, isOpen });
+      logNumberlineEvent(self as NumberlineContentModelType, "createNewPoint", { id, xValue, isOpen });
       return pointModel;
     },
     setSelectedPoint(point: PointObjectModelType) {
@@ -134,20 +137,24 @@ export const NumberlineContentModel = TileContentModel
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
       }
       self.clearSelectedPoints();
-      self.logChange("deleteSelectedPoints", { ids });
+      logNumberlineEvent(self as NumberlineContentModelType, "deleteSelectedPoints", { ids });
     },
     deleteAllPoints() {
       self.points.clear();
-      self.logChange("deleteAllPoints", {});
+      logNumberlineEvent(self as NumberlineContentModelType, "deleteAllPoints", {});
     },
     // Commit a point drag (called from the drag "end" handler) and log the repositioning — the most
-    // common way a numberline answer gets revised, which was previously unlogged. Only log when the
-    // point actually moved, so a plain selection click (which also fires drag "end") doesn't emit.
-    setPointXValue(point: PointObjectModelType) {
-      const moved = point.dragXValue !== undefined;
+    // common way a numberline answer gets revised, which was previously unlogged. Takes the point id
+    // (not the node) so the dispatched/recorded action serializes. Log only when a drag actually
+    // occurred, so a plain selection click (which also fires drag "end" with no dragXValue) doesn't emit.
+    setPointXValue(pointId: string) {
+      const point = self.points.get(pointId);
+      if (!point) return;
+      const dragged = point.dragXValue !== undefined;
       point.setXValueToDragValue();
-      if (moved) {
-        self.logChange("setPointXValue", { id: point.id, xValue: point.xValue });
+      if (dragged) {
+        logNumberlineEvent(self as NumberlineContentModelType, "setPointXValue",
+          { id: point.id, xValue: point.xValue });
       }
     },
   }))

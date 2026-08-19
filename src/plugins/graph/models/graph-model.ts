@@ -56,13 +56,10 @@ export type BackgroundLockInfo = {
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
 
-// The GraphModel has many actions; most are UI-state, selection, or styling. We log only the ones that
-// represent a student building/editing the graph — an allow-list is safer than ignoring the noisy
-// majority. Only actions that reach onTileAction as ROOT calls from a UI handler belong here (see the
-// onTileAction comment below): actions that fire only nested inside another action (e.g. setPrimaryRole/
-// setPlotType/setAxis/removeAxis via GraphController.handleAttributeAssignment, or showAdornment/
-// hideAdornment via handleSharedVariablesUpdate) never reach here on a student edit and would only log
-// on document load when the graph replays its auto-assigned attributes, so they are deliberately absent.
+// We log only the actions that represent a student building/editing the graph. Only actions that reach
+// onTileAction as ROOT calls from a UI handler qualify (see the onTileAction comment below); actions
+// that fire only nested inside another action never reach here on a student edit and would otherwise
+// only log at document load, so they are deliberately absent.
 const kLoggedGraphActions = new Set([
   "createEditableLayer",
   "addPoint",
@@ -859,6 +856,8 @@ export const GraphModel = TileContentModel
     // Researcher report (via the QUESTION_ANSWERS_CHANGE side-effect of logTileChangeEvent).
     // Note: some actions (e.g. addAdornment) pass MST nodes as arguments, which serialize to
     // { $MST_UNSERIALIZABLE: true }, so change.args is not meaningful for them; the operation name is.
+    // Because the listener runs pre-mutation, a GRAPH_TOOL_CHANGE means the action was invoked, not that
+    // it took effect (an allow-listed action that no-ops still logs).
     // Out of scope: dragging an EXISTING point mutates the shared DataSet (setCanonicalCaseValues in
     // scatterdots.tsx), which lives outside the tile subtree and so is not reachable via onTileAction.
     onTileAction(call: ISerializedActionCall) {

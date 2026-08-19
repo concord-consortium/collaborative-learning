@@ -139,7 +139,7 @@ describe('GraphModel', () => {
     expect(graphModel.adornments[0].isVisible).toBe(true);
   });
 
-  describe('onTileAction logging (CLUE-615)', () => {
+  describe('onTileAction logging', () => {
     // Build a real document so the document.ts onAction dispatch (which forwards only OUTERMOST actions
     // to GraphModel.onTileAction) is wired — this drives the actions the way the UI does rather than
     // calling onTileAction by hand, which is what catches the root-vs-nested reachability issues.
@@ -155,10 +155,11 @@ describe('GraphModel', () => {
     it('logs a GRAPH_TOOL_CHANGE with the tile id for a root student edit', () => {
       const { tileId, graphModel } = makeDocGraph();
       (logTileChangeEvent as jest.Mock).mockClear();
-      // setAttributeID is a root action invoked from the attribute-assignment UI handler.
-      graphModel.setAttributeID("x", "dataset-1", "attr-1");
+      // setXAttributeLabel is an allow-listed root action from the axis-label UI that actually mutates.
+      graphModel.setXAttributeLabel("Time");
+      expect(graphModel.xAttributeLabel).toBe("Time");
       expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.GRAPH_TOOL_CHANGE, {
-        tileId, operation: "setAttributeID", change: { args: ["x", "dataset-1", "attr-1"] }
+        tileId, operation: "setXAttributeLabel", change: { args: ["Time"] }
       });
     });
 

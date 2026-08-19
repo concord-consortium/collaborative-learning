@@ -90,10 +90,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     userContext, unit.code, systemPrompt
   ]);
 
-  // Track each field's value at focus time so we can log once on blur, and only when it changed —
-  // mirroring the text tile's handleBlur convention rather than logging on every keystroke.
+  // Track the prompt's value at focus time so we can log once on blur, and only when it changed —
+  // mirroring the text tile's handleBlur convention rather than logging on every keystroke. The
+  // description is authoring text ("shown to students"), not student answer work, so it is not logged.
   const promptOnFocus = useRef("");
-  const descriptionOnFocus = useRef("");
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);
@@ -107,12 +107,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
   const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setDescription(event.target.value);
-  };
-
-  const handleDescriptionBlur = () => {
-    if (content.description !== descriptionOnFocus.current) {
-      logAiEvent(content, "setDescription", { description: content.description });
-    }
   };
 
   const renderPromptForm = () => {
@@ -147,8 +141,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             id="ai-description-input"
             value={content.description}
             onChange={handleDescriptionChange}
-            onFocus={() => { descriptionOnFocus.current = content.description; }}
-            onBlur={handleDescriptionBlur}
           />
         </div>
       );

@@ -67,8 +67,7 @@ describe("AIContent", () => {
     expect(json.refreshCount).toBeUndefined();
   });
 
-  // The content setters are pure mutations wired to controlled inputs; they must not log on every
-  // keystroke, and setText is driven by the AI-response effect on load, not by a student.
+  // setText is driven by the AI-response effect on load, not a student, so none of the setters log.
   it("does not log when the content setters mutate state", () => {
     const content = AIContentModel.create();
     (logTileChangeEvent as jest.Mock).mockClear();
@@ -79,8 +78,7 @@ describe("AIContent", () => {
     expect(logTileChangeEvent).not.toHaveBeenCalled();
   });
 
-  // requestRefresh is the student-triggered action (the "Update" button), so it logs, and it carries
-  // the real tile id when the content is hosted in a tile.
+  // requestRefresh (the student "Update" button) logs, with the real tile id when hosted in a tile.
   it("logs an AI_TOOL_CHANGE with the tile id when the student requests a refresh", () => {
     const content = AIContentModel.create();
     const tile = TileModel.create({ content });

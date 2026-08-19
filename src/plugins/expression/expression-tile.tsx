@@ -60,11 +60,13 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     },
     [ui, model.id, content]);
 
-  // mathlive dispatches "change" when the value is committed (blur/enter), mirroring an <input>. Log
-  // there instead of on every keystroke, following the text tile's blur convention.
+  // mathlive dispatches "change" when the value is committed, mirroring an <input> — but it fires twice
+  // for one edit (once on Enter, again on blur), so log only when the value moved since the last log and
+  // advance the ref afterward, making the second "change" in a focus session a no-op.
   const handleMathfieldChange = useCallback(() => {
     if (content.latexStr !== latexOnFocus.current) {
       logExpressionEvent(content, content.latexStr);
+      latexOnFocus.current = content.latexStr;
     }
   }, [content]);
 
