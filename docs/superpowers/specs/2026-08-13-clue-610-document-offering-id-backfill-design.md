@@ -279,6 +279,40 @@ and separating them is the point: the first says the consolidated metadata tree 
 for that document, the second says it was written without the field. Which of the two dominates
 determines whether the offering-tree source would help at all.
 
+## What the production census found (2026-08-20)
+
+A full dry run against production scanned 112,900 documents in 4m24s.
+
+| root | spaces | docs | resolved | alreadySet | noMetadataNode | keyNotRtdbSafe | classWide |
+|---|---|---|---|---|---|---|---|
+| `authed` | 5 | 95,772 | 69,501 | 26,182 | 43 | 2 | 44 |
+| `demo` | 426 | 3,566 | 1,898 | 1,653 | 8 | — | 7 |
+| `dev` | 3,631 | 4,473 | 588 | 3,793 | 92 | — | — |
+| `qa` | 3,559 | 9,089 | 22 | 6,217 | 1,104 | — | 1,746 |
+| **total** | | **112,900** | **72,009** | **37,845** | **1,247** | **2** | **1,797** |
+
+**This settles the deferred question: tier 1 is enough, and the other two sources should not be
+built.** Across real data — `authed` and `demo` — 71,399 documents need an `offeringId` and 53 cannot
+get one, a recovery rate of 99.93%. The offering-tree source and the portal-API fuzzy match would be
+substantial machinery to rescue fifty-odd documents. "Report and leave alone" is the right policy for
+the residue, and is what the script already does.
+
+`nodeWithoutOfferingId` is **0** across all 112,900 documents. There is no population of RTDB nodes
+written without an offering; the only failure mode is the node being absent entirely, which matches
+the historical bug `find-documents-missing-metadata.ts` was written for.
+
+Two things the per-root split shows that the totals hide:
+
+- **88% of the unrecoverable residue is `qa`** — 1,104 of 1,247 — because `delete-qa-user-data.ts`
+  purges the RTDB side while leaving the Firestore metadata. Those documents are unrepairable by
+  construction, not by defect. Including `qa` in the sweep gains 22 repairable documents and adds
+  1,104 permanently-unrecoverable ones to every future report. `dev` is a better trade at 588.
+- **Every group document already carries its `offeringId`** (76 of 76), so the withheld uid
+  derivation was never needed.
+
+The sweep would therefore write about 72,000 documents in ~180 batches, over a read pass of roughly
+four and a half minutes.
+
 ## Write policy
 
 `APPLY=1` writes only the `resolved` bucket, as `set({ offeringId }, { merge: true })`, batched at
