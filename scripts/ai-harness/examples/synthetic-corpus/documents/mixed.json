@@ -28,8 +28,8 @@
       "id": "mixed-text-tile",
       "content": {
         "type": "Text",
-        "format": "markdown",
-        "text": "We drew the latch and then wrote up why it works. mixed-fixture-marker"
+        "format": "html",
+        "text": "<p>We drew the latch and then wrote up why it works. mixed-fixture-marker</p>"
       }
     },
     "mixed-drawing-tile": {

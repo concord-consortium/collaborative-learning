@@ -10,11 +10,14 @@
  *   npx tsx harness.ts run       --corpus <name> --experiment <file> --max-cost <usd>
  *                                [--output <file>] [--no-cache | --refresh-cache]
  *   npx tsx harness.ts report    --results <file>.jsonl
+ *   npx tsx harness.ts review    --results <file>.jsonl --experiment <file>.json [--out <file>.html]
+ *                                [--shareable] [--blind] [--reuse-key]
  *
  * See README.md for setup and per-command prerequisites.
  */
 import fs from "node:fs";
 import path from "node:path";
+import { randomBytes } from "node:crypto";
 import dotenv from "dotenv";
 import {
   corpusPaths, defaultDataRoot, harnessRoot, importCorpus, isContainedBy, readCorpusDocument, readJsonFile,
@@ -40,10 +43,17 @@ import { expectedTileCount, kDefaultRenderTimeoutMs } from "./src/backends/puppe
 import {
   RenderUnitServer, kHarnessRenderUnitId, startRenderUnitServer
 } from "./src/backends/render-unit.js";
-import { formatSummaryTable, summarizeResults, summaryPathFor, writeSummary } from "./src/report.js";
+import {
+  assertSingleCorpusAndExperiment, formatSummaryTable, summarizeResults, summaryPathFor, writeSummary
+} from "./src/report.js";
+import {
+  ReviewModes, assertExperimentMatchesRows, buildReviewModel, ratingsTemplateCsv, renderReviewHtml,
+  reviewKeyFileFor, reviewOutputPathFor, reviewSidecarPaths
+} from "./src/review.js";
+import { writeFileAtomically } from "./src/files.js";
 import {
   CorpusSource, corpusSources, kSchemaVersion, sendsImages, sendsText, sha256Canonical,
-  validateExperimentFile
+  validateExperimentFile, validateReviewKeyFile
 } from "./src/schemas.js";
 
 /** Four pages at a time: enough to be quick, few enough not to starve a dev server. */
@@ -65,6 +75,11 @@ export interface HarnessDeps {
   renderConcurrency?: number;
   /** Injected by tests so `run` does not really download hosted images to check them. */
   checkHostedImage?: HostedImageCheck;
+  /**
+   * The random seed a blind `review` orders its cards by. Injected by tests, which need two reports
+   * that differ only in their seed; a real run generates 32 fresh bytes and keeps them in the key.
+   */
+  reviewSeed?: () => string;
 }
 
 const promptsDir = path.join(harnessRoot, "prompts");
@@ -78,7 +93,9 @@ export interface ParsedArgs {
   flags: Record<string, string | true>;
 }
 
-const kBooleanFlags = new Set(["prune", "no-cache", "refresh-cache", "refresh"]);
+const kBooleanFlags = new Set([
+  "prune", "no-cache", "refresh-cache", "refresh", "shareable", "blind", "reuse-key"
+]);
 
 /** Plain `--name value` pairs; a handful of flags are boolean. Unknown flags are errors. */
 export function parseArgs(argv: string[], knownFlags: Record<string, readonly string[]>): ParsedArgs {
@@ -124,7 +141,8 @@ const kKnownFlags = {
     "concurrency", "timeout-ms"],
   plan: ["corpus", "experiment"],
   run: ["corpus", "experiment", "max-cost", "output", "no-cache", "refresh-cache"],
-  report: ["results"]
+  report: ["results"],
+  review: ["results", "experiment", "out", "shareable", "blind", "reuse-key"]
 } as const;
 
 function required(flags: Record<string, string | true>, name: string): string {
@@ -784,10 +802,24 @@ function commandReport(flags: Record<string, string | true>, deps: HarnessDeps):
   const log = deps.log ?? console.log;
   // Reports are derived from student work, so both the file read and the summary written beside it
   // stay inside the data root.
-  const resultsFile = resolveDataPath(required(flags, "results"), "--results", dataRootFor(deps));
-  // readResultRows treats a missing file as "no rows", which is what `run` needs when it creates a
-  // fresh output file. For `report` that is a typo waiting to be misread as a result: an all-zeros
-  // table and an empty <basename>.summary.json written over whatever was there before.
+  const { resultsFile, rows } = readResultsFileFor(flags, dataRootFor(deps));
+  const summary = summarizeResults(rows, resultsFile, deps.now?.());
+  const summaryFile = resolveDataPath(summaryPathFor(resultsFile), "--results", dataRootFor(deps));
+  log(formatSummaryTable(summary));
+  log(`\nRead ${summary.rows} row(s) from ${resultsFile}; ` +
+    `${summary.currentRows} current, ${summary.superseded.rows} superseded by a later re-run.`);
+  log(`Wrote ${writeSummary(summary, summaryFile)}`);
+}
+
+/**
+ * The results file every `report`/`review` invocation reads, with the two ways of getting it wrong
+ * separated: a path that is not there at all, and a file that holds no rows.
+ *
+ * `readResultRows` treats a missing file as "no rows", which is what `run` needs on a fresh
+ * `--output`. Here that would turn a typo into an all-zeros report written over whatever was there.
+ */
+function readResultsFileFor(flags: Record<string, string | true>, dataRoot: string) {
+  const resultsFile = resolveDataPath(required(flags, "results"), "--results", dataRoot);
   if (!fs.existsSync(resultsFile)) {
     throw new Error(`No results file at ${resultsFile}. Run \`harness.ts run\` first, or check ` +
       "--results — the default output path is data/results/<corpus>__<experiment>.jsonl.");
@@ -796,12 +828,122 @@ function commandReport(flags: Record<string, string | true>, deps: HarnessDeps):
   if (rows.length === 0) {
     throw new Error(`${resultsFile} contains no result rows, so there is nothing to report.`);
   }
-  const summary = summarizeResults(rows, resultsFile, deps.now?.());
-  const summaryFile = resolveDataPath(summaryPathFor(resultsFile), "--results", dataRootFor(deps));
-  log(formatSummaryTable(summary));
-  log(`\nRead ${summary.rows} row(s) from ${resultsFile}; ` +
-    `${summary.currentRows} current, ${summary.superseded.rows} superseded by a later re-run.`);
-  log(`Wrote ${writeSummary(summary, summaryFile)}`);
+  return { resultsFile, rows };
+}
+
+/**
+ * The side-by-side HTML review report: what a human judge reads to compare runs on one document.
+ *
+ * Reads the results file, the experiment file and the corpus tree, and writes an HTML file plus —
+ * in the modes that need one — a key and a ratings template beside it. No network, no API key.
+ *
+ * Every collision is settled before anything is written, so a refused run leaves nothing behind. An
+ * existing key is never overwritten and never rewritten: rotating it would orphan every rating a
+ * judge has already written against the old labels.
+ */
+function commandReview(flags: Record<string, string | true>, deps: HarnessDeps): void {
+  const log = deps.log ?? console.log;
+  const dataRoot = dataRootFor(deps);
+  const { resultsFile, rows } = readResultsFileFor(flags, dataRoot);
+  assertSingleCorpusAndExperiment(rows, resultsFile);
+
+  // Required, and hash-checked. Result rows do not carry `detail`, `imageSet` or `extras`, a skipped
+  // row carries no representation descriptor at all, and run order lives in the experiment file —
+  // so the report needs that file, and needs to know it is the one these rows were produced with.
+  const { experiment, experimentSha256, file: experimentFile } =
+    loadExperiment(required(flags, "experiment"));
+  assertExperimentMatchesRows(rows, experimentSha256, experimentFile, resultsFile);
+
+  const corpus = rows[0].corpus;
+  const paths = corpusPaths(dataRoot, corpus);
+  if (!fs.existsSync(paths.manifest)) {
+    throw new Error(`These results were produced against corpus "${corpus}", which is not in ` +
+      `${dataRoot}. The review report shows the summaries and pictures each run sent, so it needs ` +
+      `the corpus tree: import it as "${corpus}" first.`);
+  }
+
+  const modes: ReviewModes = { shareable: flags.shareable === true, blind: flags.blind === true };
+  const outputFile = resolveDataPath(
+    typeof flags.out === "string" ? flags.out : reviewOutputPathFor(resultsFile, modes),
+    "--out", dataRoot);
+  if (!outputFile.endsWith(".html")) {
+    // The key and the ratings template are named from this path, so an `--out` with another
+    // extension would produce sidecars whose names nobody can predict — including the next
+    // invocation, which has to find the key it must not overwrite.
+    throw new Error(`--out must name a .html file, got ${outputFile}.`);
+  }
+  const sidecars = reviewSidecarPaths(outputFile);
+  const needsKey = modes.shareable || modes.blind;
+  const reuseKey = flags["reuse-key"] === true;
+
+  if (!needsKey && reuseKey) {
+    throw new Error("--reuse-key applies to --shareable and --blind reports, which are the ones " +
+      "that write a key. A plain review report writes no sidecars.");
+  }
+  // Every path this run would touch is settled here, before a single byte is written — and the
+  // rules do not depend on the mode. A sidecar beside the output path belongs to some report, and
+  // with `--out` the mode is not in the filename, so those sidecars are the only record of what
+  // that path is. Checking them only in the modes that write them let a plain report overwrite a
+  // blinded one: an unredacted page in a file believed to be shareable, a key that decodes nothing,
+  // and a judge's page replaced mid-round.
+  if (fs.existsSync(sidecars.key) && !reuseKey) {
+    throw new Error(`${sidecars.key} already exists, so this path holds a shareable or blinded ` +
+      `report. A key is never overwritten: its labels and pseudonyms are what any ratings already ` +
+      "collected refer to" + (needsKey
+        ? ". Pass --reuse-key to regenerate that same report, or --out to write a different one."
+        : ", and a plain report would replace its HTML with an unredacted one and leave the key " +
+          "decoding a page that no longer exists. Pass --out to write a different report."));
+  }
+  if (!fs.existsSync(sidecars.key) && reuseKey) {
+    throw new Error(`--reuse-key was given, but there is no key at ${sidecars.key} to reuse.`);
+  }
+  // A template is preserved by exactly one kind of run: a blinded regeneration against its own key.
+  // Any other run at this path would leave a judge's ratings naming labels the page no longer has.
+  const preservesRatings = modes.blind && reuseKey;
+  if (fs.existsSync(sidecars.ratings) && !preservesRatings) {
+    throw new Error(`${sidecars.ratings} already exists, and this run would not preserve it: a ` +
+      "ratings template names the labels of the blinded report that wrote it, and may hold a " +
+      "judge's answers against them. Move it aside, or pass --out to write a different report.");
+  }
+
+  const existingKey = reuseKey
+    ? { key: validateReviewKeyFile(readJsonFile(sidecars.key), sidecars.key), file: sidecars.key }
+    : undefined;
+
+  const model = buildReviewModel({
+    rows,
+    resultsFile,
+    experiment,
+    experimentSha256,
+    paths,
+    now: deps.now?.() ?? new Date(),
+    modes,
+    // 32 bytes from the OS, kept only in the key file: an ordering derived from anything in the
+    // results is reconstructible by whoever reads `blindLabelsFor`.
+    seed: (deps.reviewSeed ?? (() => randomBytes(32).toString("hex")))(),
+    existingKey
+  });
+
+  // The key goes down first. A key with no report beside it costs a re-run — `--reuse-key`
+  // regenerates the report exactly — while a report with no key is a document nobody can decode.
+  if (needsKey && !reuseKey) {
+    writeJsonFile(sidecars.key, reviewKeyFileFor(model));
+    log(`Wrote ${sidecars.key} — the only copy of ` +
+      `${[modes.shareable && "the pseudonyms", modes.blind && "the label mapping"]
+        .filter(Boolean).join(" and ")}. Keep it; without it the report cannot be decoded.`);
+  }
+  writeFileAtomically(outputFile, renderReviewHtml(model));
+  log(`Wrote ${outputFile} — ${model.documents.length} document(s), ${model.judgeable.length} ` +
+    `judgeable outcome(s), ${model.counts.skipped} skipped.`);
+  if (modes.blind) {
+    if (fs.existsSync(sidecars.ratings)) {
+      // Never regenerated: it may already hold a judge's half-entered ratings.
+      log(`Left ${sidecars.ratings} as it is.`);
+    } else {
+      writeFileAtomically(sidecars.ratings, ratingsTemplateCsv(model));
+      log(`Wrote ${sidecars.ratings} — one empty row per labelled outcome.`);
+    }
+  }
 }
 
 function requireApiKey(): string {
@@ -826,6 +968,7 @@ export async function main(argv: string[], deps: HarnessDeps = {}): Promise<void
     case "plan": return commandPlan(flags, deps);
     case "run": return commandRun(flags, deps);
     case "report": return commandReport(flags, deps);
+    case "review": return commandReview(flags, deps);
     default: throw new Error(`Unknown command "${command}"`);
   }
 }

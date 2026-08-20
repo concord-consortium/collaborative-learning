@@ -4,15 +4,16 @@ A checked-in tool that runs (representation × prompt × message-shape) experime
 CLUE documents and reports quality inputs plus token and cost numbers — so text-only vs. image-only
 vs. mixed-mode claims are backed by measurements instead of intuition.
 
-This is **milestone 3** of [CLUE-371](../../docs/plans/CLUE-371-harness-plan.md). Milestone 1 built
+This is **milestone 4** of [CLUE-371](../../docs/plans/CLUE-371-harness-plan.md). Milestone 1 built
 the shared message builders, the harness skeleton, a synthetic corpus, text-only runs, the response
 cache, the spend ceiling, and reports as data. Milestone 2 added the other production representation
-— the screenshot — so image-only baselines could run against the same corpus. Milestone 3 adds the
+— the screenshot — so image-only baselines could run against the same corpus. Milestone 3 added the
 message the whole question is about, text **and** picture together, plus the dimensions an
 experiment needs to turn around it: image detail, per-tile and visual-tiles-only image sets, the
-extras settings, two new text variants, and skip-empty execution. The HTML review report
-(milestone 4), rubric scoring (milestone 5) and the production corpus pull (milestone 6) are not
-here yet.
+extras settings, two new text variants, and skip-empty execution. Milestone 4 adds the `review`
+command: the side-by-side HTML report a human judge reads, with a `--shareable` mode for reports
+that leave the team and a `--blind` mode for the judging round milestone 5 will run. Rubric scoring
+(milestone 5) and the production corpus pull (milestone 6) are not here yet.
 
 All runs target `gpt-4o-mini`. That is deliberately the rolling alias, not a pinned snapshot:
 production calls the alias, and a harness that pinned a snapshot would stop measuring what production
@@ -77,6 +78,7 @@ OPENAI_API_KEY=sk-…
 | `plan` | no | no | Validates everything and prints the expanded run list and worst-case cost. |
 | `run` | **yes** | **yes** | The only command that calls OpenAI. `--max-cost` is required. |
 | `report` | no | no | Reads a results JSONL file and writes `<basename>.summary.json` beside it. |
+| `review` | no | no | Renders the side-by-side HTML review report from a results file, its experiment file and the corpus. |
 
 ```bash
 npx tsx harness.ts import    --from examples/synthetic-corpus --corpus synthetic-corpus \
@@ -90,6 +92,9 @@ npx tsx harness.ts plan      --corpus synthetic-corpus --experiment experiments/
 npx tsx harness.ts run       --corpus synthetic-corpus --experiment experiments/text-baselines.json \
                              --max-cost 0.50 [--output <file>] [--no-cache | --refresh-cache]
 npx tsx harness.ts report    --results data/results/synthetic-corpus__text-baselines.jsonl
+npx tsx harness.ts review    --results data/results/synthetic-corpus__text-baselines.jsonl \
+                             --experiment experiments/text-baselines.json \
+                             [--out <file>.html] [--shareable] [--blind] [--reuse-key]
 ```
 
 Flags are plain `--name value` pairs. An unknown flag is an error, not a warning.
@@ -117,6 +122,12 @@ stands.
   corpora arrive: delete them when the experiment concludes, keep document ids and Firestore paths
   out of anything that leaves the team, and remember that injected related-summaries data contains
   *other* students' work.
+- **`review --shareable` removes harness metadata identifiers; it does not anonymize or redact
+  document content.** Document ids become per-report pseudonyms and the unit, investigation,
+  problem, `contextId`, source, file paths and tile ids are omitted — but the summaries, pictures
+  and model outputs are shown as they are, and a student who typed their name into a text tile is
+  still named. Whether a particular report may leave the team is a human judgement made when it is
+  sent. See "Review report".
 - Milestones 1 and 2 touch no production data, no credentials, and no `firebase-admin`.
 
 ## Concepts
@@ -404,20 +415,40 @@ alone would never fire.
 
 ### What the synthetic corpus cannot show you yet
 
-Two fixture-level problems surfaced when the corpus was first rendered for real. Both are deferred —
-they are corpus changes, and editing a fixture changes its content hash, forcing a re-render and a
-re-run — but they bound what an image-mode result on this corpus means.
+Two fixture-level problems surfaced when the corpus was first rendered for real. The first is fixed;
+the second is deferred, and still bounds what an image-mode result on this corpus means.
 
-- **Text tiles authored with `format: "markdown"` render blank.** `src/models/tiles/text/text-content.ts`
-  returns `[]` for that format, behind an explicit `// TODO: figure out what to do about markdown`.
-  Most fixtures use it, so the text summarizer sees full content where image mode sees an empty
-  tile. `text` and `adversarial-text` render byte-identically as a result, which also means the
-  adversarial fixture's whole point — that student text containing `</script>` must not break the
-  render — cannot be observed through the image path. The generated HTML is still covered by unit
-  tests and a snapshot.
+- **Fixed in milestone 4: text tiles authored with `format: "markdown"` rendered blank.**
+  `src/models/tiles/text/text-content.ts` returns `[]` for that format, behind an explicit
+  `// TODO: figure out what to do about markdown`, so CLUE drew an empty tile while the summarizer —
+  which reads the `text` property directly — saw the full content. Four fixtures used it, and the
+  review report made the consequence impossible to miss: an image run was categorizing a blank
+  rectangle on `text`, `adversarial-text`, `mixed` and `question`, and the first two rendered
+  byte-identically.
+
+  `text`, `mixed` and `question` are now `format: "html"`, matching `tall` and the format real CLUE
+  content overwhelmingly uses (3,654 Text tiles across this repository, against 68 markdown).
+  `adversarial-text` carries **no** `format` at all, so it renders as plain text: authoring it as
+  HTML would let CLUE interpret the `<b>bold</b>` and `<img onerror=…>` its whole point is to carry
+  through as characters. It now renders every one of those characters visibly.
+
+  This is *not* a fix to the markdown blank spot itself, which is production's to make (or not); it
+  is the corpus no longer standing on it. A document authored as markdown still renders blank, so a
+  production corpus containing one would hit this again — and the numbers below show what it costs,
+  because they moved when the fixtures changed.
 - **An unregistered tile renders invisibly.** `empty` and `unknown` produce byte-identical PNGs, so
   image mode cannot tell an empty document from one containing an unregistered tile — even though
-  the render diagnostics correctly count `unknownTiles: 1` for the latter.
+  the render diagnostics correctly count `unknownTiles: 1` for the latter. Still deferred: it is a
+  corpus change, and editing a fixture forces a re-render and a re-run.
+
+**A dev server that will not compile silently poisons every render.** webpack-dev-server injects its
+error overlay *inside* the CLUE iframe, on top of the document, so the capture is a picture of a red
+error screen with the document behind it. Nothing catches this: the tiles really are in the DOM, so
+the tile-count diagnostics pass and `render` reports success. It happened during the milestone-4
+re-render — a type error on `master` (CLUE-616, `brainwaves-gripper.tsx`) put the overlay over all
+25 documents. Run the dev server with `--no-client-overlay`, and look at a picture or two before
+trusting a batch. A backend check for the overlay element would close it properly, and belongs with
+the other fatal-condition checks in `src/backends/puppeteer.ts`.
 
 ### Data leaving the machine
 
@@ -616,8 +647,9 @@ API-reported usage is authoritative for final numbers.
 ### Results and reports
 
 Result rows are a discriminated union on `status` (`success`, `refusal`, `error`, `skipped`), all
-sharing the same identifying fields. `skipped` ships now but is unused: skip-empty *execution*
-is written by skip-empty execution. `report` handles all four statuses exhaustively and writes
+sharing the same identifying fields. A `skipped` row is written by skip-empty execution, for every
+(run, document) pair a run declines to send — see "Which documents a run declines to send".
+`report` handles all four statuses exhaustively and writes
 `<results-basename>.summary.json` next to the results file — named after it, because a single
 `summary.json` per directory meant every experiment in `data/results/` shared one path and reporting
 on one silently overwrote another's. Groups are per run configuration × message shape × modality,
@@ -653,7 +685,166 @@ naming the file and the field. The versions are not all the same number:
 |---|---|
 | Result rows (`data/results/*.jsonl`) | **2** — see above |
 | Corpus manifest, text representation envelopes, image envelopes | 1 |
-| Prompt files, experiment files, report summaries, cache entries | 1 |
+| Prompt files, experiment files, report summaries, cache entries, review key files | 1 |
+
+### Review report
+
+`review` writes the document a human judge reads: **one section per document**, showing the input
+each run was given — the picture(s) and the summary — beside what every run said about it. `report`
+answers aggregate questions; this answers "for this document, which output is better?".
+
+```bash
+npx tsx harness.ts review --results data/results/mixed-run__mixed-vs-baselines.jsonl \
+                          --experiment experiments/mixed-vs-baselines.json \
+                          [--out <file>.html] [--shareable] [--blind] [--reuse-key]
+```
+
+`--experiment` is **required and hash-checked**. Result rows do not carry `detail`, `imageSet` or
+`extras`, a skipped row carries no representation descriptor at all, and run order lives in the
+experiment file — so the report needs that file, and refuses unless its hash equals every row's
+`experimentSha256`. A name match is not enough: an experiment file can be edited after a run. The
+corpus named in the rows has to be on this machine too, since the summaries and pictures come from
+it.
+
+The header lists every run in experiment-file order with its configuration and its prompt's name
+and hash. A run whose current rows carry **more than one** prompt hash is flagged rather than
+summarised: a prompt file's content is not part of the experiment hash but is part of the request
+key, so editing a prompt and re-running into the same results file re-runs every pair — and a re-run
+that stops early leaves some pairs on the new prompt and some on the old. The header then says how
+many versions there are and each card names its own, because those cards are not all comparable with
+each other.
+
+Each document's outputs are one card per run in experiment-file order: the recognized response
+fields (category, key indicators, discussion — all optional in the prompt schema, so whichever exist
+are shown and anything else is printed as JSON), or a refusal, or an error with its attempt count,
+plus tokens, modeled cost and whether the answer came from the cache. A mixed row whose text half was
+dropped is flagged prominently, because that output saw half the input. **Skipped outcomes go in
+their own strip below the cards**, with their reasons: a skipped run produced no feedback to judge.
+
+Three properties are deliberate:
+
+- **Everything student-authored is escaped, everywhere.** Document text reaches the page through
+  summaries, through model outputs that quote it, through refusals and through error messages. One
+  escape function handles all of it: markup is built with a tagged template that escapes every
+  interpolated value unless it is already an escaped fragment, so forgetting is not something the
+  renderer can do by omission. Summaries are rendered as preformatted text, never as interpreted
+  markdown — markdown rendering of student text is markup injection with extra steps. The line and
+  paragraph separators (U+2028, U+2029) are escaped as numeric references as well: they are ordinary
+  characters in HTML and a browser decodes them back, so the page is unchanged, but a file holding
+  them raw is one editors report as having unusual line terminators. Student text does contain
+  them — the `adversarial-text` fixture has one of each.
+- **Self-contained and inert.** One HTML file: inline CSS, **no JavaScript**, images embedded as
+  `data:` URLs, no external reference of any kind. A `Content-Security-Policy` meta tag
+  (`default-src 'none'; img-src data:; style-src 'unsafe-inline'`) is there as defence in depth —
+  with no script and no external loads it should be redundant, and it exists so that a bug in the
+  escaping still cannot reach the network. Embedded pictures make the file large (1.4 MB for the
+  synthetic corpus; a real capture is far bigger). Accepted for now: legibility is one of the things
+  under judgement, so nothing is downscaled. Reading a report also hashes every picture twice — once
+  in the freshness check, once to prove the bytes on the page are the bytes that were sent — which
+  is nothing at 26 documents and worth revisiting for a production corpus.
+- **An input is shown only if it is still the input that was sent.** A representation is displayed
+  when its *whole* descriptor matches — variant id, variant version and source content hash for a
+  summary; mode, backend, backend version, source content and every recorded image hash for a
+  render, with the bytes on disk re-hashed. Anything else renders a "no longer available / no longer
+  matches this run" notice, and the current file is **not** shown in its place. Pairing today's
+  screenshot with last week's output, even with a warning, invites a judgement about the wrong
+  thing.
+
+  A row's `imageSha256s` records **every** picture its envelope holds, because that is the render's
+  provenance, and `imageSet` says which of them the run sent — so the report re-applies the set
+  through `imagesForSet`, the same function execution selects with, and the two cannot disagree
+  about what a set means. `visual-tiles-only` is the one set whose membership is not structural: it
+  is the tiles the classifier marked, so reconstructing it means classifying the same content the
+  run classified. A document edited since gets a notice rather than a confident wrong answer.
+
+  The notice text comes from a fixed vocabulary rather than from the underlying error, because those
+  errors carry absolute paths (which hold the corpus and document id), image filenames (which hold
+  the document id) and freshness reasons (which name the mode, backend and version). The unredacted
+  detail is appended **only** in the team-internal report, where it is what makes the notice
+  actionable.
+
+#### `--shareable`
+
+Replaces document ids with per-report pseudonyms (`doc-01`… numbered in **presentation** order, so
+the key and the ratings template read down the page rather than across it) and omits harness
+metadata: unit, investigation, problem, `contextId`, source, file paths, tile ids, skip reasons, the
+results path, the harness commit and **the corpus name** — that last one is free-form and chosen by
+whoever ran `import --corpus <name>`, so a production pull could easily be named after a class or a
+school. The heading falls back to the experiment name, and the key file still records the corpus, so
+nothing about decoding changes. Run configurations and prompt name/hash stay — they are what a
+reader is judging.
+
+**The flag removes harness metadata identifiers; it does not anonymize or redact document content.**
+The summaries, pictures and model outputs are shown as they are, and can themselves identify
+someone — a student typing their name into a text tile, a photograph of a worksheet. Deciding
+whether a particular corpus may leave the team is a human judgement made when the file is sent, and
+the report says so on its own front page.
+
+#### `--blind`
+
+What milestone 5's judging round consumes. Per document, the judgeable cards (success, refusal,
+error) are shuffled and labelled `A`, `B`, `C`…, with everything identifying the producing run
+hidden: run id, representation labels, detail, image set, extras, variant, tokens, cost and cache
+status. Status stays visible — a refusal is an outcome worth rating. The header's run list becomes a
+run *count*, since a list of configurations beside labelled cards is a decoding aid, and skipped
+outcomes stay in their strip, unlabelled and with their reasons withheld (a reason names the shape
+and settings of the run that declined). The inputs block still shows every picture and summary the
+document's runs used, without the labels naming which mode or variant produced them: the judge needs
+the document; what is hidden is which output came from which configuration.
+
+**The blinding removes labels, not language.** An output can still betray its own mode by what it
+says — "the picture shows…" comes from a run that was given a picture. Worth knowing before reading
+a judging round as if it were airtight.
+
+**Ordering is seeded, and the seed is secret.** Each card's position comes from
+`HMAC(seed, docId + runId)`, with 32 fresh random bytes generated at report time and stored **only**
+in the key file. A seedless hash of the row data would be reconstructible by anyone who reads
+`blindLabelsFor`; `Math.random()` would not regenerate. Without the key file the mapping cannot be
+recovered from the HTML plus this repository — and with it, regeneration is exact.
+
+#### The key file, the ratings template, and their rules
+
+`--shareable` and `--blind` each write **one** key file, `<output-html-basename>.key.json`, and
+blind+shareable writes a single combined one rather than two sidecars racing for a path. It records
+the schema version, corpus, experiment hash, which flags produced the report, the documents in
+presentation order, the judgeable outcomes, the pseudonyms, the seed and the label→run mapping. It
+is validated on read like every other on-disk format. A plain report writes no sidecars at all.
+
+Each judgeable outcome is recorded as (document, run) **plus a fingerprint** of the row the label was
+put on — its request, its representation and its answer. The pair alone does not identify an
+outcome: a re-run appends a replacement row for the same pair, so without the fingerprint a
+`--reuse-key` regeneration would accept the new answer, keep the old label on it, and preserve a
+ratings template whose scores were given to the answer it replaced. The fingerprint deliberately
+excludes `runMeta`, `usage` and `cost`, so a re-run served from the cache — which changes all three
+and changes nothing a judge read — is still reusable.
+
+Blind modes also write `<output-html-basename>.ratings-template.csv`: one row per (document, label)
+over the judgeable cards, columns `document,label,rating,notes`, values empty, using the pseudonym
+when the report is shareable. Milestone 5 defines the rubric and the command that reads the filled
+file back; this milestone only guarantees the judge has somewhere to write answers a program can
+later read.
+
+Both sidecars are named from the **resolved** output path, `--out` included, so no two reports can
+collide on a key. The rules around them:
+
+- Every collision is checked **before anything is written** — a refused run leaves nothing behind —
+  and the checks do not depend on the mode. With `--out` the mode is not in the filename, so the
+  sidecars beside a path are the only record of what that path is for: a plain report over a
+  blinded one's `--out` is refused rather than replacing a judge's page with an unredacted one and
+  leaving the key decoding a page that no longer exists.
+- An existing key is never overwritten. Without `--reuse-key`, its existence is an error: silently
+  rotating a key orphans every rating already written against the old labels.
+- `--reuse-key` reads and validates the existing key and never rewrites it. Reuse is refused if the
+  key's corpus, experiment hash, mode flags, document set or judgeable run set differs from this
+  invocation, **if any outcome it labels has been re-run since it was written**, if its pseudonyms
+  are not the ones the report renders, or if its labels are not
+  exactly one per outcome — same inputs, same labels and pseudonyms, or nothing. The report is
+  rendered from the key's own mapping, so a `--reuse-key` run puts every card back under the label
+  the judge saw. The page is not byte-identical: its `Generated` timestamp is the time it was
+  regenerated, and the superseded count moves if the results file has grown since. The tests pin
+  byte-identity under an injected clock, which is the only condition it holds under.
+- Under `--reuse-key` an existing ratings template is preserved byte for byte; it may hold a judge's
+  half-entered answers. The template is written only when there is none.
 
 ### Version lockstep
 
@@ -685,6 +876,7 @@ src/cache.ts               response cache
 src/cost.ts                pricing, estimation, reservation ledger
 src/execute.ts             run expansion, OpenAI calls, concurrency, retries, JSONL writer
 src/report.ts              summary tables from result JSONL
+src/review.ts              the side-by-side HTML review report, its escaping, key and blinding
 prompts/                   prompt files with provenance
 experiments/               experiment definitions
 examples/synthetic-corpus/ committed fixtures + expectations.json (no manifest — import makes it)
@@ -908,6 +1100,47 @@ Milestone 3 (against
     reports it as "nothing to capture" and writes no envelope. Nothing downstream needs the
     envelope, because skip-empty declines to send a contentless document in any case.
 
+Milestone 4 (against
+[docs/plans/CLUE-371-harness-implementation-4.md](../../docs/plans/CLUE-371-harness-implementation-4.md)):
+
+31. **`review` is its own command over a results file plus its experiment file.** The parent plan's
+    CLI sketch shows `report --corpus <name> --runs <run-ids> [--shareable]`. That predates the
+    results-file conventions milestone 1 settled on: a run's outcomes live in one JSONL file, and
+    `report` already reads one. `review` reads the same file, plus the experiment file it was
+    produced with — required and hash-checked, because the run list, `detail`, `imageSet` and
+    `extras` exist nowhere else — and the corpus tree, for the summaries and pictures. `report`
+    stays "reports as data"; this is a document for humans.
+32. **A blinded *or shareable* report withholds skip reasons rather than printing them.** The spec
+    has skipped outcomes rendering with their `skipReasons` in every mode, and separately requires
+    that no run configuration appear in a blind report and no document identifier in a shareable
+    one. Both conflict, because a skip reason is not a fixed vocabulary: it names the shape and
+    settings of the run that declined ("image-only run with imageSet `visual-tiles-only`: …"), and
+    it carries whatever `imagesForSet` and `expectedRenderFailure` put in it — up to five tile ids
+    and a line of author-written prose. A tile id contains the document id outright in this corpus,
+    so a shareable report printed `wave-runner-tile` under the heading `doc-02`. Both modes keep the
+    strip and the count and say the reasons are withheld; the team-internal report prints them.
+33. **`--shareable` also drops tile ids and representation warnings.** The spec lists the fields to
+    omit — document ids, unit, investigation, problem, `contextId`, source, file paths, render-target
+    URLs, git commit — and tile ids are not among them. In this corpus a tile id contains the
+    document id outright (`wave-runner-tile`), so printing one beside `doc-26` would undo the
+    pseudonym; the same goes for a row's `representationWarnings`, which name the tiles a capture
+    missed. Both are shown in the team-internal report.
+34. **`visual-tiles-only` inputs are reconstructed, not verified.** A row records `imageSha256s` —
+    every picture its envelope held, which is the render's provenance — and `imageSet`, but not the
+    hashes it actually sent. For `full-document` and `per-tile` the set is structural, so re-applying
+    it reproduces exactly what went; for `visual-tiles-only` the membership is the classifier's, and
+    the report classifies the document again to recover it. Flipping `requiresVisualRepresentation`
+    for a tile type in `src/capability.ts` would therefore change which pictures a *past* run is
+    shown as having sent, with no notice — the newly selected picture is still among the recorded
+    hashes, so nothing on the row can catch it. Closing it means recording what was sent (a
+    `sentImageSha256s` on the descriptor, optional for existing rows), which changes what a run
+    writes and is out of scope for a milestone that is a renderer. Worth doing before a judging
+    round rides on a `visual-tiles-only` comparison.
+35. **`--out` must name a `.html` file.** The spec does not constrain it. Both sidecars are named
+    from the resolved output path, so an `--out` with another extension would produce a key whose
+    name the next invocation could not predict — and predicting it is how a key is found and not
+    overwritten.
+
 ### Verified against a real API call, a real browser, a real service?
 
 All of it, by hand. The 26 fixtures were rendered against a real dev server and a real headless
@@ -924,11 +1157,14 @@ command:
 | skipped | 114 |
 | current, superseded | 260, 0 |
 
-Three things were repaired between the first run and this one, and each is worth knowing before
+Four things were repaired between the first run and this one, and each is worth knowing before
 reading the numbers. A per-tile capture was photographing tiles nested inside a Question, so
 `question` produced three overlapping pictures instead of one. The mixed prompt told the model it
-had been given a summary on documents where the summary was dropped. And `drawing-text` had no
-experiment run at all.
+had been given a summary on documents where the summary was dropped. `drawing-text` had no
+experiment run at all. And — found by reading the milestone-4 review report rather than by any
+test — four fixtures rendered as blank tiles, so every image run on them was categorizing an empty
+rectangle. **That last one moved the results**, and the comparison at the end of this section is the
+opposite of what it said before the fixtures were converted.
 
 Two of those cost money to correct and one did not. Re-rendering changed 18 rows, of which only
 `question` changed because of the fix — the other 15 are `data-card`, `dataflow` and `graph`, which
@@ -944,6 +1180,13 @@ rather than the experiment, so all 153 rows the experiment then had came straigh
 That figure is from before the run this section records was reduced to ten; the whole session's
 real spend was about $0.25.
 
+Converting the four blank-rendering fixtures then forced the whole thing again — new content hashes,
+so a re-render, a re-represent and a re-run — and it cost **$0.0538 for 33 API calls**, with the
+other 113 rows served from the cache. That ratio is the useful part: a re-render only re-spends
+where the *pixels* actually changed, and a document that renders deterministically produces
+byte-identical bytes, the same image hash, and therefore the same request key. Only the four
+converted fixtures and the three nondeterministic documents cost anything.
+
 **Any edit to an experiment file does this**, including renaming a run. If you hold results from an
 earlier definition and re-run into the same `--output`, every row rebuilds and `report` then refuses
 the file for mixing two definitions — it says so, and names the fix. Re-run into a fresh file, or
@@ -958,14 +1201,15 @@ move the old one aside. The cache means recovery costs time rather than money.
   smaller total.
 - **Every text dimension is priced, over the same 7 documents and the same prompt.** Named by run,
   because two dimensions are in play and the settings alone would not say which: `text-extras-none`
-  sends 3,725 prompt tokens; `text-no-dataset-tables` 3,823; `text-default` and `text-extras-all`
-  3,895; `text-drawing-text` 3,958. The recorded session also carried an eleventh run, since
+  sends 3,741 prompt tokens; `text-no-dataset-tables` 3,839; `text-default` and `text-extras-all`
+  3,911; `text-drawing-text` 3,974 (it sends an eighth document, `drawing`, for a further 377).
+  The recorded session also carried an eleventh run, since
   removed, whose `extras-production-current` setting reproduced CLUE-630's bug and sent 4,537 — a
   642-token premium for repeating the analyzed document's own summary in place of each related one.
   Kept here because it prices what redundant extras cost, which is the shape of the control
   CLUE-607 will want.
 - **`drawing-text` is the only run that ever answered `form`.** Across all 146 rows the categories
-  are 90 `unknown`, 41 `function`, 14 `user` and a single `form` — the `drawing` fixture, two shapes
+  are 81 `unknown`, 47 `function`, 17 `user` and a single `form` — the `drawing` fixture, two shapes
   and no text, which every other run either skips or calls `unknown`. The model gave "drawing with 2
   objects", "rectangle and ellipse", "specified positions and sizes" as its indicators. One document
   is not evidence that describing geometry beats photographing it, but it is the variant doing
@@ -985,16 +1229,36 @@ move the old one aside. The cache means recovery costs time rather than money.
   summary only when there is one moved **0 of 23** categories. The fidelity problem was real and its
   measured effect here was nil; both halves are worth stating, because a fix reported without its
   measurement is just a claim.
-- **Observation, not a conclusion.** Skip-empty means text and image runs no longer send the same
-  documents, so the only fair comparison is the 7 documents both send. There, mixed reproduced
-  text-only's category on all 7, while image-only lost 4 of them to `unknown` — the picture alone
-  was worse, and adding the picture to the text cost nothing in agreement. Across everything each
-  run did send, `unknown` came back 17/23 for image-only, 16/23 for mixed, 19/23 for per-tile, 1/7
-  for text and 1/8 for `drawing-text`. This is heavily confounded: these are one- and two-tile
-  synthetic documents, several render nearly blank (see "What the synthetic corpus cannot show you
-  yet"), and n=7 on the paired comparison. **This establishes that the pipeline works and what it
-  costs — not that any representation is better.** That comparison needs milestone 5's rubric and a
-  corpus of real documents.
+- **A measurement that reversed when a fixture was fixed.** Skip-empty means text and image runs no
+  longer send the same documents, so the only fair comparison is the 7 documents both send. Before
+  the blank-rendering fixtures were converted, mixed reproduced text-only's category on all 7 while
+  image-only lost 4 of them to `unknown`, and this section concluded "the picture alone was worse".
+  With the pictures actually showing the text, **image-only reproduces text-only's category on all
+  7** and mixed on 6 of 7. The earlier result was measuring four blank rectangles, not the image
+  representation.
+
+  Across everything each run did send, `unknown` now comes back 15/23 for image-only, 15/23 for
+  mixed, 16/23 for per-tile, 16/18 for visual-tiles-only, 1/7 for text and 1/8 for `drawing-text`.
+  This is still heavily confounded: these are one- and two-tile synthetic documents, `empty` and
+  `unknown` still render identically (see "What the synthetic corpus cannot show you yet"), and n=7
+  on the paired comparison — one disagreement is 14% of it. **This establishes that the pipeline
+  works and what it costs — not that any representation is better.** That comparison needs milestone
+  5's rubric and a corpus of real documents.
+
+  The lesson is worth more than the numbers: a quality claim from this harness is only as good as
+  the pictures behind it, and nothing in the aggregate table would ever have shown four of them were
+  blank. Looking at the review report did.
+
+**The review report was generated from that run and read in a browser**, in all four combinations.
+The 26 documents render as 146 cards and 114 skips, with 56 distinct pictures embedded; the plain
+report is 1.4 MB. The `adversarial-text` fixture displays as text in every mode — its `</script>`,
+its `<img onerror=…>` and its markdown link are all visible as characters — and the file contains no
+`<script`, no external URL, and no tag beyond the ones the report itself writes.
+
+Reading it turned up three things no test had: two leaks — a tile id carrying the document id into a
+shareable report, and a skip reason carrying an image-set name into a blinded one (DEVIATIONS 32 and
+33) — and the blank-rendering fixtures above, which had been distorting the image-mode results since
+milestone 2 while every aggregate number looked entirely reasonable.
 
 **The parity mode was verified by hand against the real service**, with the `drawing` fixture:
 

@@ -18,8 +18,8 @@
       "id": "text-tile",
       "content": {
         "type": "Text",
-        "format": "markdown",
-        "text": "Our lunchbox latch is for a first grader who cannot work a stiff clasp. text-fixture-marker"
+        "format": "html",
+        "text": "<p>Our lunchbox latch is for a first grader who cannot work a stiff clasp. text-fixture-marker</p>"
       }
     }
   }
