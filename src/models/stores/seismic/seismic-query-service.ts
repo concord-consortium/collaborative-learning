@@ -7,7 +7,9 @@ import { dequantize } from "../../../../shared/seismic/envelopes/envelope-codec"
 import {
   getTileIndicesForViewport, getTileS3Key, getTileTimeRange
 } from "../../../../shared/seismic/envelopes/tile-addressing";
-import { getStationChannelPrefix, getStationPrefix } from "../../../../shared/seismic/station-addressing";
+import {
+  getLevelPrefix, getStationChannelPrefix, getStationPrefix
+} from "../../../../shared/seismic/station-addressing";
 import { fetchEnvelopeTile } from "../../../../shared/seismic/envelopes/envelope-fetcher";
 import { fetchRawSeismicData, fetchStationMetadata } from "../../../../shared/seismic/earthscope-client";
 import { getMetadataForChannel } from "../../../../shared/seismic/channel-metadata-utils";
@@ -43,14 +45,20 @@ export class SeismicQueryService {
   /** Station metadata cache keyed by "{network}_{station}" */
   metadataCache: Map<string, ChannelMetadata[]> = observable.map();
 
+  /** Bumped by invalidateEnvelopes so viewport loaders know to re-fetch. */
+  envelopeInvalidationCount = 0;
+
   /** In-flight AbortControllers keyed by callerId */
   private inflightByCallerId: Map<string, Map<string, AbortController>> = new Map();
 
   constructor() {
-    makeAutoObservable(this, {
+    makeAutoObservable<SeismicQueryService, "inflightByCallerId">(this, {
       envelopeCache: observable,
       rawCache: observable,
       metadataCache: observable,
+      // Internal bookkeeping — deep observability would replace inner Maps with
+      // observable copies, orphaning the ones registerInflight mutates.
+      inflightByCallerId: false,
     });
   }
 
@@ -90,6 +98,28 @@ export class SeismicQueryService {
     const { startTime, endTime, pixelWidth } = params;
     const level = this.selectLevel(startTime, endTime, pixelWidth);
     this.loadData(callerId, params, level);
+  }
+
+  /**
+   * Drop every cached envelope tile for a station — including "missing" markers and
+   * tiles whose S3 copies may have been merged with new data — so subsequent viewport
+   * loads re-fetch them. Called after new envelope tiles are uploaded.
+   */
+  invalidateEnvelopes(stationData: StationData) {
+    const prefix = getLevelPrefix(stationData);
+    for (const key of [...this.envelopeCache.keys()]) {
+      if (key.startsWith(prefix)) this.envelopeCache.delete(key);
+    }
+    // Abort in-flight envelope fetches so a stale pre-invalidation response can't repopulate the cache.
+    for (const [callerId, callerInflight] of [...this.inflightByCallerId]) {
+      for (const [key, controller] of [...callerInflight]) {
+        if (key.startsWith(prefix)) {
+          controller.abort();
+          this.removeInflight(callerId, key);
+        }
+      }
+    }
+    this.envelopeInvalidationCount++;
   }
 
   /**

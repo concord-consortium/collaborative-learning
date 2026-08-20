@@ -192,7 +192,7 @@ where the document is kept. (Group-based audiences work the same way, but the gr
 
 ### `curriculum` — what content the document is about
 
-**What it is.** Where the document sits in the curriculum: **nothing → unit → investigation →
+**What it is.** Where the document sits in the curriculum: **none → unit → investigation →
 problem**. This is what the document is *about*, not where it is kept.
 
 **In today's behavior.** The curriculum position is visible in *when a document is offered to you*:
@@ -206,7 +206,7 @@ It is also what the Sort Work filters match on: choosing an investigation or a p
 list to documents about that part of the curriculum.
 
 **Why this is separate from `container`.** For most documents the two line up — kept by the class and
-about nothing, kept by a classUnit and about that unit, kept by an assignment and about that problem.
+about none of it, kept by a classUnit and about that unit, kept by an assignment and about that problem.
 Exemplars are the case that comes apart: an exemplar is about a specific problem, but it is not part
 of any assignment. It exists whether or not the class has ever been assigned that problem, so there is
 no assignment to keep it in. A document can be about a problem without being kept in that problem's
@@ -218,15 +218,37 @@ see a document without changing what it is about, while its `owner` stays the pu
 
 ### `canonical` — the single doc for a slot
 
-**What it is.** Whether this is *the* one document expected to fill a given **container** slot, as
-opposed to one of a growing collection.
+**What it is.** *Which* **container** slot this document is the one document for — or none, when the
+document is one of a growing collection instead.
+
+**Which slot, not whether.** A container can have several single-document roles at the same time, so the
+axis has to name the one this document fills.
+
+This is already true of the oldest documents CLUE has. A teacher in one offering has both a problem
+document and a planning document — each the single one of its role, and sharing `owner`, `container`, and
+`curriculum` exactly. The slot is what tells them apart. Nothing enforces either singleton today, so
+nothing has had to name the two roles; the moment something does, a document marked "canonical" is
+ambiguous unless it says which of the two it is.
+
+The class-wide documents make the same point with enforcement behind it: within one class and one unit
+there are several canonical documents at once — the driving question board, the word wall — and a yes/no
+value could not say which of them a given document is.
+
+**A slot is not a `kind`.** A kind is the recipe a document was made from; a slot is a position in a
+container. They line up today only because each class-wide kind happens to define one slot. Nothing says
+they must: a class could want two documents of the same kind — an opening board and a closing one — which
+is two slots filled from one recipe. The group document already leaves room for this. Its slot is named
+"the default one" rather than "the group kind's", so a second group slot could be added without inventing
+a kind to name it.
 
 **In today's behavior.** Some documents are singletons, some are collections:
 - A user is meant to have **exactly one** problem document per offering (and a teacher one planning
   document) — the primary workspace. It is canonical *by convention*; the database does not enforce it,
   and bugs have produced duplicates, which is precisely the fragility making `canonical` worth naming
   explicitly.
-- A group has **one** group document per offering — canonical, and here backed by a real pointer.
+- A group has **one** group document per offering — canonical, and here enforced rather than assumed.
+- A class has **one** class-wide document per declared kind per unit — several slots in one container,
+  each enforced the same way.
 - **Personal** documents and **learning logs** are the opposite: a user may create as many as they
   like. There is no single canonical one — the slot is a collection.
 - **Publications** are non-canonical and versioned: publishing the same document repeatedly stacks up
@@ -265,7 +287,8 @@ behaves:
 - **Presentation** — the label a document is shown under, its title bar, its icons and styling are
   chosen per preset, not consequences of its axis values.
 - **Copy and publish** — what a copy or a publication of a document should look like (which axes change,
-  which carry over) is a per-preset recipe.
+  which carry over, and what kind the result takes) is a per-preset recipe. Worked examples are in
+  [Copies and publications, read as deltas](#copies-and-publications-read-as-deltas).
 - **Permission defaults** — the baseline of who may do what (e.g. "the owner may read and write, the teacher
   may read") is shared by every document of a kind. Rather than copy those rules onto each document, a kind
   points the document at a named **permission policy** (see `permissions`), and several kinds can share one
@@ -320,6 +343,12 @@ kind's definition*:
    way to tell whether a definition found under that name is the one the document was made from, and the
    wrong definition would be applied confidently.
 
+   `getKindDefinitionFor(doc)` is where this rule lives in code: it is the one way to read a kind definition
+   off an existing document, and it compares the two associations before returning anything. Creation looks
+   kinds up by name instead (`getDocumentKindInfo`), which is sound because a document being created takes
+   its kind from the configuration in hand. Keeping every read behind one function is what makes rule 1's
+   fallback obligation checkable — a consumer either handles the undefined case or does not compile.
+
 **This bounds which documents a dynamic kind can create.** A unit-declared kind can only produce
 documents about that unit or narrower, because rule 2 requires the `unit` association and the
 curriculum axis is a nesting rooted at the unit — every position at or below it carries one. It cannot
@@ -330,12 +359,51 @@ entries to a unit config: it needs a configuration source loaded independently o
 association on the document naming that source. Until such a source exists, personal-like presets stay
 static.
 
-**How a kind sets that today.** A kind declares only `containerType`, and `getDocumentLocationFields`
-derives both the container and curriculum axes' fields from it, so a document's curriculum position
-currently follows from its container: `class` yields no unit, `classUnit` the unit, `offering` the
-problem. The bound is stated on `curriculum` because that is what rule 2 constrains, and it survives
-the coupling being broken — a kind declaring a class container *and* a unit curriculum would stamp
+**How a kind sets that today.** A kind's profile declares only `containerType`, and
+`getDocumentLocationFields` derives both the container and curriculum axes' fields from it, so a
+document's curriculum position currently follows from its container: `class` yields no unit, `classUnit`
+the unit, `offering` the problem. The bound is stated on `curriculum` because that is what rule 2
+constrains, and it survives the coupling being broken — a profile declaring a class container *and* a unit curriculum would stamp
 `unit` and satisfy rule 2, which a container-based bound would wrongly forbid.
+
+## Axis profiles — naming a combination of axis values
+
+The axes describe a document one question at a time, but people do not talk that way. Nobody says "a
+unit-level, class-owned, canonical, concurrent document" — they say **a class-wide document**. That
+shorthand is not sloppiness; it names a real thing, a *combination* of positions that documents are
+actually created at. This section gives that thing a name: an **axis profile**.
+
+A profile is a named bundle of axis values. `classWide` is one. So are the two CLUE has always had without
+naming them — the bundle shared by personal documents, learning logs, and their publications, and the
+bundle shared by problem, planning, and problem-like publications. They are defined in one place, which
+makes that place the complete list of axis combinations the application supports.
+
+**A profile is not a `kind`.** Many kinds share one: what makes a learning log different from a personal
+document is presentation and its creation recipe, not any axis. `kind` says which preset a document came
+from; its profile says where that preset put it on the axes.
+
+**A unit may add kinds; it may not add axis combinations.** This is what lets `kind` stay open-ended while
+the set of axis combinations stays closed. A unit config declares kinds, but it declares no axis values —
+every kind is declared against a profile, and profiles are not authorable. So a configuration can add a
+document to an existing combination and cannot invent one, and the set of combinations stays reviewable in
+one place rather than growing with the units.
+
+**A profile is recorded, not resolved.** A document records which profile it was created from. That exists
+for one reason: a migration that changes what a profile means has to find every document created from it,
+and selecting those by their axis values would mean querying the very fields the migration is there to
+change — a query that has to be rewritten every time the answer moves.
+Because it is provenance rather than a cache, it stays true after such a migration: it says which profile
+the document was made from, not what its axes hold now.
+
+**Nothing in the running application reads that record.** It is deliberately out of the app's reach: only
+something reading stored documents directly — a migration, or offline analysis — can see it. That keeps the
+axes themselves the only way to ask how a document behaves, which is the point of this whole folder. A
+document behaves the way it does because of where it sits on the axes, never because of the name of the
+bundle it started at.
+
+Where the profiles are defined, and how a kind names one, is in
+[axes-current-state.md](./axes-current-state.md); the stored record is in
+[metadata-fields.md](../document-metadata/metadata-fields.md).
 
 ### `permissions` — who may do what
 
@@ -377,20 +445,23 @@ policy. (This is a structure *within* `permissions`, not a separate axis.)
 This table is a **snapshot of how each current type sits on the axes** — useful for seeing that the
 axes are already present, but *not* the definition. The point of this doc is the axes; the types are
 just where today's behavior happens to have placed things. `permissions` is collapsed to a short label
-because its real value (a composed grant set) does not fit a cell.
+because its real value (a composed grant set) does not fit a cell. The `canonical` column names *which*
+slot a document fills rather than answering yes/no, since a container can have more than one.
 
-| kind (`type`) | owner | container | curriculum | canonical | concurrent | permissions (shorthand) |
+| kind (`type`) | owner | container | curriculum | canonical (which slot) | concurrent | permissions (shorthand) |
 |---|---|---|---|---|---|---|
-| `problem` | student/teacher | offering | problem | yes (by convention) | no | owner + teacher read; group-read when shared |
-| `planning` | teacher | offering | problem | yes (by convention) | no | owner + teacher read |
-| `personal` | student/teacher | class | none | no (collection) | no | owner + teacher read; class-read when public |
-| `learningLog` | student/teacher | class | none | no (collection) | no | owner + teacher read; class-read when public |
-| `group` | the group | offering | problem | yes (pointer) | **yes** | all group members read/write |
-| class-wide collaborative | the class | classUnit | unit | yes (pointer) | **yes** | all class members read/write |
-| `problem` publication | publisher (retained) | offering | problem | no, versioned | no | class read; frozen |
-| `personal`/`learningLog` publication | publisher (retained) | class | none | no, versioned | no | class read; frozen |
-| `support` (multi-class) | teacher (retained) | multi-class / offering | problem | no | no | target audience read; frozen |
-| `exemplar` | synthetic author | none until commented on | problem | no | no | per-student read |
+| `problem` | student/teacher | offering | problem | the user's one problem doc (by convention) | no | owner + teacher read; group-read when shared |
+| `planning` | teacher | offering | problem | the user's one planning doc (by convention) | no | owner + teacher read |
+| `personal` | student/teacher | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| `learningLog` | student/teacher | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| `group` | the group | offering | problem | the group's one doc (enforced) | **yes** | all group members read/write |
+| class-wide collaborative | the class | classUnit | unit | the class's one doc per declared kind (enforced) | **yes** | all class members read/write |
+| `problem` publication | publisher (retained) | offering | problem | none — versioned | no | class read; frozen |
+| `personal`/`learningLog` publication | publisher (retained) | class | none | none — versioned | no | class read; frozen |
+| copy of a `problem` doc → `personal` | **the copier** | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| copy of a `personal`/`learningLog` doc → same kind | **the copier** | class | none | none — a collection | no | owner + teacher read; class-read when public |
+| `support` (multi-class) | teacher (retained) | multi-class / offering | problem | none | no | target audience read; frozen |
+| `exemplar` | synthetic author | none until commented on | problem | none | no | per-student read |
 
 Reading the table the new way: a "group document" is not a special *kind of thing* — it is simply the
 document that happens to be *group-owned, kept by an assignment, about that problem, canonical,
@@ -398,6 +469,37 @@ concurrent, and group-read/write*. Any other document that took those same axis 
 the same way. The class-wide collaborative document is the demonstration: it differs from a group
 document on `owner`, `container`, and `curriculum` alone, and behaves accordingly. That is the shift this
 folder is built around.
+
+### Copies and publications, read as deltas
+
+The two publication rows and the two copy rows are not new shapes; they are what the publish and copy
+templates (see `kind`) produce when applied to a row above them. Reading them against their source is what
+a template *is*:
+
+- **Publishing a `problem` document** moves `canonical` (a publication fills no slot, and versions stack up)
+  and `permissions` (owner + teacher read → class read, frozen) and holds `owner`, `container`, and
+  `curriculum` still. Holding those three is the substance of publishing: it changes who may see the
+  document, not whose it is or what it is about. Publishing a `personal` document or a learning log is the
+  same delta applied to a different row.
+- **Copying a `problem` document** moves exactly the three axes publishing holds still: `owner` becomes the
+  copier, `container` drops from the offering to the class, `curriculum` drops from the problem to none. It
+  is also not the assignment's primary workspace, so it gives up the one slot its source held — held by
+  convention rather than by enforcement, but held. The result
+  lands on the `personal` row exactly, and `kind` follows: the copy *is* a personal document, presented and
+  listed as one, so the template names that kind rather than carrying the source's over.
+- **Copying a `personal` document or a learning log** moves `owner` alone, and only when the source was
+  someone else's — which is why its row and its source row are otherwise identical.
+
+So a template sets `kind` along with the axes; it is neither carried over automatically nor derivable from
+the axes the template produced. What `kind` a *publication* takes is not settled — see "Open questions" in
+[target-architecture.md](./target-architecture.md).
+
+Two more things follow. The copy template is not one recipe per kind so much as one destination — "a
+document of the copier's own, about nothing in particular" — which is why copying a problem document and
+copying a personal document converge. And the copy of a problem document is the case that argues for
+templates being per-kind at all: no rule over the axes alone says a copy should stop being about the problem
+it came from. That is a decision about what copying is *for*, which is exactly the sort of thing a preset
+holds.
 
 ## Relationship to the other docs here
 

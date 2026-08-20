@@ -1,6 +1,10 @@
 import { upperFirst } from "lodash";
 import { IDocumentMetadata } from "../../../shared/shared";
 import {
+  DocumentOwnerType, IDocumentAxisProfile, kClassWideProfile, kGroupProfile, kPersonalLikeProfile,
+  kProblemLikeProfile
+} from "./document-axis-profiles";
+import {
   GroupDocument, isAxesType, LearningLogDocument, LearningLogPublication,
   PersonalDocument, PersonalPublication, PlanningDocument,
   ProblemDocument, ProblemPublication, SupportPublication
@@ -12,31 +16,15 @@ import {
  */
 export type IDocumentKindMetadataFields = Pick<IDocumentMetadata, "kind" | "concurrent">;
 
-/**
- * How a kind's `owner` axis (authoring identity / provenance, stored as the document's `uid`) is derived
- * at creation: "user" → the creating user; "group" → the synthetic group owner (`group_<off>_<grp>`);
- * "class" → the synthetic class owner (`class_<classHash>`), shared by the whole class. Defaults to "user".
- */
-export type DocumentOwnerType = "user" | "group" | "class";
-
-/**
- * Which container a kind's documents are kept in, and with it their curriculum reach: "class" → the class,
- * about no unit; "classUnit" → the class's copy of one unit, about that unit; "offering" → one assignment of
- * a problem to a class, about that problem.
- *
- * One knob sets the container and curriculum axes values because that is the most convenient.
- */
-export type DocumentContainerType = "class" | "classUnit" | "offering";
-
 export interface IDocumentKindInfo {
   /** The kind key. Matches the value stored in a document's `kind` field. */
   kind: string;
-  /** This kind's stamped fields, without `kind` — getDocumentKindMetadataFields adds it back. */
-  metadataFields: Omit<IDocumentKindMetadataFields, "kind">;
-  /** How this kind's owner uid is derived. */
-  ownerType: DocumentOwnerType;
-  /** Which container this kind's documents live in, and their curriculum reach. */
-  containerType: DocumentContainerType;
+  /**
+   * The axis profile this kind's documents are created at — where they sit on every axis. Several kinds
+   * share one: what distinguishes a personal document from a learning log is presentation and creation
+   * recipe, not any axis (see document-axis-profiles.ts).
+   */
+  profile: IDocumentAxisProfile;
   /**
    * Static document display title. Leave undefined for dynamic titles.
    */
@@ -45,9 +33,9 @@ export interface IDocumentKindInfo {
    * The unit code whose config declared this kind. Set for kinds declared by a unit config; undefined
    * for the built-in kinds, which are unit-independent.
    *
-   * A `title` is authored in one unit's config, so it names only that unit's documents. Two units may
-   * declare the same kind with different wording, and only the current unit's config is loaded, so
-   * getDocumentTitle uses this to avoid lending one unit's title to another unit's document.
+   * Kind names are not unique across configurations — two units may declare the same kind with different
+   * wording — and only the current unit's config is loaded. getKindDefinitionFor compares this against a
+   * document's own `unit` so one unit's definition is never applied to another unit's document.
    */
   unit?: string;
 }
@@ -68,10 +56,13 @@ export interface IDocumentOwnerContext {
 
 const kDocumentKindPattern = /^[a-z][a-zA-Z0-9]*$/;
 /**
- * A document `kind` is used as a Firestore path segment (the canonical-pointer slot) as well as the registry
- * key, so a kind is restricted to a camelCase identifier: a lowercase letter followed by letters/digits, with
- * no separators or special characters. This matches the built-in document type strings (e.g.
- * "learningLogPublication") and keeps the value safe as a Firestore document id.
+ * A `kind` is the registry key, and a class-wide document's canonical-pointer slot is labeled with its kind,
+ * so a kind has to be usable as a Firestore path segment. It is restricted to a camelCase identifier: a
+ * lowercase letter followed by letters/digits, with no separators or special characters. This matches the
+ * built-in document type strings (e.g. "learningLogPublication") and keeps the value safe as a document id.
+ *
+ * The reverse does not hold: a slot label need not be a kind. The group document's slot is labeled "default"
+ * while its kind is "group" — see kDefaultCanonicalDocumentLabel for what a label is.
  */
 export function isValidDocumentKind(value: string): boolean {
   return kDocumentKindPattern.test(value);
@@ -90,19 +81,67 @@ export function registerDocumentKind(kind: string, info: Omit<IDocumentKindInfo,
   gDocumentKindInfoMap[kind] = { kind, ...info };
 }
 
+/**
+ * Look a kind up by name alone, without asking which configuration defined it. Creation is the only
+ * caller: a document being created takes its kind from the config in hand, so the definition found is
+ * necessarily the one it is made from. Anything reading an existing document must use
+ * getKindDefinitionFor instead.
+ */
 export function getDocumentKindInfo(kind?: string|null) {
   return kind ? gDocumentKindInfoMap[kind] : undefined;
 }
 
-/** A kind's full stamp set (its metadataFields plus the `kind` key), or `{}` if the kind is unregistered. */
+/**
+ * The fields that identify which definition a document was made from: its kind, and the association
+ * naming the configuration that declared that kind. Structural, so this stays a leaf module.
+ */
+export interface IKindScopedDocumentFields {
+  kind?: string | null;
+  unit?: string | null;
+}
+
+/**
+ * This document's kind definition, or undefined when no definition applicable to it is loaded.
+ *
+ * The single entry point for reading a kind definition off an existing document. It takes the document
+ * rather than the kind because a kind name does not identify a definition on its own: a kind declared by a
+ * unit config exists only while that unit is loaded, and two units may declare the same kind meaning
+ * different things (see IDocumentKindInfo.unit). Matching the document's `unit` against the definition's is
+ * what tells a definition that governs this document from one that merely shares its name.
+ *
+ * Undefined therefore means "no definition to read here", not "no such kind" — the document may well have
+ * been created from a perfectly good definition belonging to a unit that is not loaded. Sort Work lists
+ * documents from every unit a class has worked through, so this is ordinary rather than exceptional, and a
+ * caller must answer from the document's stored fields instead. Anything a definition contributes that
+ * cannot be recovered that way has to be stamped onto the document at creation.
+ */
+export function getKindDefinitionFor(doc: IKindScopedDocumentFields): IDocumentKindInfo | undefined {
+  const info = getDocumentKindInfo(doc.kind);
+  if (!info) return undefined;
+  // A built-in kind declares no unit: it is registered by the application, so it governs its documents
+  // wherever they came from.
+  if (info.unit != null && info.unit !== doc.unit) return undefined;
+  return info;
+}
+
+/** A kind's full stamp set (the `kind` key plus the axis fields its profile fixes), or `{}` if unregistered. */
 export function getDocumentKindMetadataFields(kind?: string|null): IDocumentKindMetadataFields {
   const info = getDocumentKindInfo(kind);
   if (!info) return {};
-  return { kind: info.kind, ...info.metadataFields };
+  return { kind: info.kind, ...(info.profile.concurrent ? { concurrent: true } : {}) };
+}
+
+/**
+ * The name of the axis profile a document of this kind is created at, or undefined if the kind is
+ * unregistered. Stamped onto the document as its record of which profile it was made from; see
+ * IDocumentAxisProfile.name for why that is stored rather than recomputed.
+ */
+export function getDocumentAxisProfileName(kind?: string|null): string | undefined {
+  return getDocumentKindInfo(kind)?.profile.name;
 }
 
 export function getDocumentOwnerType(kind?: string|null): DocumentOwnerType {
-  return getDocumentKindInfo(kind)?.ownerType ?? "user";
+  return getDocumentKindInfo(kind)?.profile.ownerType ?? "user";
 }
 
 /**
@@ -122,15 +161,15 @@ export function getDocumentOwner(kind: string|null|undefined, ctx: IDocumentOwne
   if (!info) {
     throw new Error(`Cannot resolve the owner of unregistered document kind "${kind}"`);
   }
-  switch (info.ownerType) {
-    case "group": return required(ctx.groupOwnerId, kind, "group");
-    case "class": return required(ctx.classOwnerId, kind, "class");
+  switch (info.profile.ownerType) {
+    case "group": return requireOwnerId(ctx.groupOwnerId, kind, "group");
+    case "class": return requireOwnerId(ctx.classOwnerId, kind, "class");
     case "user":  return ctx.userId;
     default:      return ctx.userId;
   }
 }
 
-function required(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
+function requireOwnerId(ownerId: string | undefined, kind: string|null|undefined, ownerType: string): string {
   if (!ownerId) {
     throw new Error(`Cannot create a ${ownerType}-owned document of kind "${kind}": ` +
       `no ${ownerType} owner id is available`);
@@ -149,13 +188,14 @@ export interface IDocumentOwnerFields {
 
 /**
  * The owner fields to stamp on a new document of the given kind, beyond the owner uid getDocumentOwner
- * returns. Only a group owner has one.
+ * returns. Only a group owner has one, so `groupId` is the creating user's current group — ignored for
+ * every other kind, and absent when they are in no group.
  */
 export function getDocumentOwnerFields(
-  kind: string|null|undefined, ctx: { groupId?: string }
+  kind: string|null|undefined, groupId?: string
 ): IDocumentOwnerFields {
-  if (getDocumentOwnerType(kind) !== "group" || !ctx.groupId) return {};
-  return { groupId: ctx.groupId };
+  if (getDocumentOwnerType(kind) !== "group" || !groupId) return {};
+  return { groupId };
 }
 
 /**
@@ -178,7 +218,7 @@ export interface IDocumentLocationContext {
 export function getDocumentLocationFields(
   kind: string|null|undefined, ctx: IDocumentLocationContext
 ): IDocumentLocationContext {
-  switch (getDocumentKindInfo(kind)?.containerType) {
+  switch (getDocumentKindInfo(kind)?.profile.containerType) {
     case "classUnit": return {
       unit: ctx.unit,
       context_id: ctx.context_id,
@@ -211,21 +251,19 @@ export function getDocumentLocationFields(
  * The minimal document fields getDocumentTitle reads. Structural so the registry stays a leaf module that
  * doesn't import the document models.
  */
-interface IDocumentTitleFields {
-  kind?: string | null;
+interface IDocumentTitleFields extends IKindScopedDocumentFields {
   type?: string;
   groupId?: string | null;
-  unit?: string | null;
 }
 
 /**
  * The display title for a document based on its kind
  */
 export function getDocumentTitle(document: IDocumentTitleFields): string | undefined {
-  const info = getDocumentKindInfo(document.kind);
-  // A registered title names its own unit's documents only (see IDocumentKindInfo.unit); a document
-  // from another unit falls through to a caller's fallback.
-  if (info?.title != null && (info.unit == null || info.unit === document.unit)) return info.title;
+  // A document whose definition is not loaded resolves no title here and falls through to a caller's
+  // fallback, which names it from its stored fields instead.
+  const info = getKindDefinitionFor(document);
+  if (info?.title != null) return info.title;
   // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
   // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
   // on the lookup above. Requiring `groupId` (not just an axes type) matters because a class-wide
@@ -257,50 +295,28 @@ export function getDocumentKindLabel(kind?: string | null): string | undefined {
 
 /**
  * Register a kind declared by a unit's `classWideDocuments` configuration. Every class-wide collaborative
- * document has the same shape — concurrent, owned by the synthetic class owner, kept in the class's copy of
- * the unit and about that unit and nothing narrower — so only the kind key, the authored title, and the
- * declaring unit come from the configuration. The title is registered rather than stored per document so it
- * resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind when the kind is malformed
- * or already registered.
+ * document sits at the same place on every axis, so the configuration supplies no axis values at all — it
+ * names the kind and its title, and the class-wide profile supplies the rest. A unit config can therefore
+ * add a document to an existing axis combination but cannot invent one. The title is registered rather than
+ * stored per document so it resolves live by kind (see getDocumentTitle). Throws like registerDocumentKind
+ * when the kind is malformed or already registered.
  */
 export function registerClassWideDocumentKind(kind: string, title: string, unit: string) {
-  registerDocumentKind(kind, {
-    metadataFields: { concurrent: true },
-    ownerType: "class",
-    containerType: "classUnit",
-    title,
-    unit
-  });
+  registerDocumentKind(kind, { profile: kClassWideProfile, title, unit });
 }
 
 function registerBuiltInDocumentKinds() {
-  // A group document is kept in the offering, like the problem documents beside it; what makes it a group's
-  // is its owner, which is also where its stored `groupId` comes from (see getDocumentOwnerFields).
-  registerDocumentKind(GroupDocument, {
-    metadataFields: { concurrent: true },
-    ownerType: "group",
-    containerType: "offering"
-  });
+  registerDocumentKind(GroupDocument, { profile: kGroupProfile });
 
-  const personalLikeKindInfo = {
-    metadataFields: { },
-    ownerType: "user",
-    containerType: "class"
-  } as const;
-  registerDocumentKind(PersonalDocument, personalLikeKindInfo);
-  registerDocumentKind(LearningLogDocument, personalLikeKindInfo);
-  registerDocumentKind(PersonalPublication, personalLikeKindInfo);
-  registerDocumentKind(LearningLogPublication, personalLikeKindInfo);
+  registerDocumentKind(PersonalDocument, { profile: kPersonalLikeProfile });
+  registerDocumentKind(LearningLogDocument, { profile: kPersonalLikeProfile });
+  registerDocumentKind(PersonalPublication, { profile: kPersonalLikeProfile });
+  registerDocumentKind(LearningLogPublication, { profile: kPersonalLikeProfile });
 
-  const problemLikeKindInfo = {
-    metadataFields: { },
-    ownerType: "user",
-    containerType: "offering"
-  } as const;
-  registerDocumentKind(PlanningDocument, problemLikeKindInfo);
-  registerDocumentKind(ProblemDocument, problemLikeKindInfo);
-  registerDocumentKind(ProblemPublication, problemLikeKindInfo);
-  registerDocumentKind(SupportPublication, problemLikeKindInfo);
+  registerDocumentKind(PlanningDocument, { profile: kProblemLikeProfile });
+  registerDocumentKind(ProblemDocument, { profile: kProblemLikeProfile });
+  registerDocumentKind(ProblemPublication, { profile: kProblemLikeProfile });
+  registerDocumentKind(SupportPublication, { profile: kProblemLikeProfile });
 }
 registerBuiltInDocumentKinds();
 

@@ -2,7 +2,8 @@ import firebase from "firebase";
 import {
   adminWriteDoc, cUnit, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, network1, network2, noNetwork, offeringId, otherClass, prepareEachTest,
+  initFirestore, mockTimestamp, network1, network2, noNetwork, offeringId, otherClass, otherOfferingId,
+  prepareEachTest,
   researcherAuth,
   researcherId,
   student2Id,
@@ -222,6 +223,23 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", context_id: otherClass });
     });
 
+    it("authenticated teachers can't stamp an axisProfile onto a document that has none", async () => {
+      // The profile a document was created from is what a later migration selects on, so a client that
+      // could write it could aim a migration at documents it was never made from. Only creation (as the
+      // document's author) and the service-account backfill script, which bypasses these rules, set it.
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", axisProfile: "classWide" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only axisProfile field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { axisProfile: "group" } }));
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", axisProfile: "classWide" });
+    });
+
     it("authenticated teachers can't update other teachers' documents", async () => {
       db = initFirestore(teacher2Auth);
       await specClassDoc(thisClass, teacherId);
@@ -376,10 +394,24 @@ describe("Firestore security rules", () => {
       }));
     });
 
+    it("a class member cannot create a group document in another offering of their class", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${otherOfferingId}_3`, type: "axes", offeringId: otherOfferingId, groupId: "3" }
+      }));
+    });
+
     it("a class member cannot create a group document whose owner names another offering", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
-        add: { uid: "group_9999_3", type: "axes", offeringId, groupId: "3" }
+        add: { uid: `group_${otherOfferingId}_3`, type: "axes", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a caller whose token carries no offering cannot create a group document", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "axes", offeringId, groupId: "3" }
       }));
     });
 

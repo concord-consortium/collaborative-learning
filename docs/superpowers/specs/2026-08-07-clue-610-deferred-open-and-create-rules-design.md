@@ -48,16 +48,18 @@ Measured in #2949 against `demo/units/qa` on a live Firestore project: **670ms a
 
 Separate *converging on one document per slot* from *opening it*. `getOrCreateCanonicalDocument` splits into:
 
-- a resolver that returns `{ documentKey, firestoreMetadata? }` — the pointer fast path returns the key alone;
-  the legacy-group fallback and the create path also return the metadata they already hold;
-- the existing behavior, layered on top: open from the metadata when present, otherwise
-  `openCanonicalDocumentByKey(documentKey)`.
+- `resolveCanonicalDocument`, returning `{ documentKey, firestoreMetadata? }` — the pointer fast path returns
+  the key alone; the legacy-group fallback and the create path also return the metadata they already hold;
+- `getOrCreateCanonicalDocument`, the existing behavior layered on top: open from the metadata when present,
+  otherwise `openCanonicalDocumentByKey(documentKey)`.
 
 `getOrCreateGroupDocument` keeps the opening behavior — it is called from `document-workspace.tsx` at the
 moment a user opens the document, so there is nothing to defer. Returning the metadata from the legacy and
 create paths is what keeps a group document's open at exactly its current read count.
 
-`createDeclaredClassWideDocuments` uses the resolver only. On the fast path that is a single
+`createDeclaredClassWideDocuments` uses the resolver only, through `getOrCreateClassWideDocument` — renamed
+`resolveClassWideDocument`, since it now yields the slot's `documentKey` rather than an opened document, and
+the `getOrCreate*` name belongs to the methods that still open one. On the fast path that is a single
 `pointerRef.get()` per declared slot and nothing else — no second read, no RTDB fetch, no history
 subscription. The slow path (first student in the class) still creates the document, since creating it is the
 point; it just does not open it afterwards.
@@ -99,23 +101,34 @@ Every client-side create of `authed/{portal}/documents/*` goes through one funct
 |---|---|---|---|
 | `user` | problem, planning, personal, learning log, all publications and copies | `user.id` | Fully — `user.id` is `portalJWT.uid`, which is the `platform_user_id` claim |
 | `class` | class-wide documents | `class_<classHash>` | Fully — `class_hash` is a token claim |
-| `group` | group documents | `group_<offeringId>_<groupId>` | Partly — both segments are also stored as the document's own `offeringId`/`groupId`, so the uid can be required to agree with them; but no claim proves the caller is *in* that group |
+| `group` | group documents | `group_<offeringId>_<groupId>` | Partly — the offering is the `offering_id` claim, so the uid can be required to name the caller's own offering and to agree with the document's `groupId`; but no claim proves the caller is *in* that group |
 
-The gap is the third row's second half, and it is not closeable from Firestore rules today: group membership
-lives in the Realtime Database, which rules cannot read, and the auth token carries no group claim.
+The gap is the third row's second half, and it is not closeable from Firestore rules: group membership
+lives in the Realtime Database, which rules cannot read, and the auth token carries no group claim. Groups
+are a CLUE concept that the portal does not model, so a claim for one is not coming.
+
+**The offering comes from the token, not the document.** `offering_id` is minted only for a learner — the
+portal omits it for a teacher or researcher so they are not confined to one offering
+(`Api::V1::JwtController#firebase` in the portal). That matches who creates group documents:
+`getOrCreateGroupDocument` requires the caller to be in a group, and only students are. It survives a reload,
+too: `convertURLToOAuth2` rewrites the launch URL with `resourceLinkId`, which CLUE sends as
+`resource_link_id`, and the portal resolves that back to the student's learner for that offering. Testing the
+uid against the document's own `offeringId` alone would have been no test at all — both sides are
+client-controlled — which would have let a student mint the group owner, and then claim the canonical slot,
+for any offering of their class.
 
 **Residual after this change:** a student can create a document owned by another group *in their own
 offering*. They cannot create one owned by a classmate, by another group in another offering, or by another
 class. Per the story's instruction — ship if the investigation comes back clean, split it out if it turns up
 complications — this ships, with the residual recorded here, in the rules comment, and on the owner-axis row
-of the roadmap. Closing it needs either a group claim in the portal-minted token or group membership mirrored
-into Firestore; both are larger than this story and neither is scheduled.
+of the roadmap. It is recorded as a boundary rather than as deferred work: corroborating group membership
+would require the portal to model CLUE groups, which is not something we want it to do.
 
 ### The rule
 
 Extend `isValidDocumentCreateRequest` with an owner test — the `uid` must be one of the three corroborated
-shapes above — and a `concurrent` test: `concurrent: true` is permitted only alongside a synthetic
-(`class_`/`group_`) owner. A real-user-owned document can no longer be created class-shared, which is what
+shapes above, with both synthetic shapes anchored to a token claim (`class_hash`, `offering_id`) — and a
+`concurrent` test: `concurrent: true` is permitted only alongside a synthetic (`class_`/`group_`) owner. A real-user-owned document can no longer be created class-shared, which is what
 gave the whole class read and write on its history via `isConcurrentClassDocument`.
 
 **Deliberately not done: a `keys().hasOnly(...)` allowlist on the create.** See the deployment section — an
@@ -157,8 +170,10 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 
 ## 4. Recording the direction
 
-- `docs/document-axes/README.md` — the owner-axis row gains what the rules can and cannot corroborate about a
-  document's owner, and names the group-membership residual as the reason the axis is still `in progress`.
+- `docs/document-axes/axes-current-state.md` (renamed from `reading-axes-in-code.md`, since enforcement is now
+  part of what it records) — a "What the rules enforce" section states what the rules can and cannot
+  corroborate about a document's owner, and both residuals, each accepted rather than tracked as work. The
+  `README.md` owner-axis row points there.
 - `firestore.rules` — the TRANSITIONAL comment above `concurrentChangeOk` currently describes the create-side
   work as still to do. Rewrite it to describe what is now enforced and what remains for CLUE-612 (making
   `concurrent` read-only after creation, once CLUE-604's migration has drained).
@@ -169,8 +184,9 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
   - create with own `uid` — allowed; with a classmate's `uid` — denied.
   - create with `class_<class_hash>` matching the caller's claim — allowed; with another class's hash —
     denied.
-  - create with `group_<offeringId>_<groupId>` agreeing with the document's own fields — allowed; with an
-    `offeringId` or `groupId` that disagrees — denied.
+  - create with `group_<offeringId>_<groupId>` naming the caller's own offering and agreeing with the
+    document's `groupId` — allowed; with a `groupId` that disagrees, with a self-consistent document in
+    another offering of the caller's class, or from a caller whose token carries no `offering_id` — denied.
   - create with `concurrent: true` and a real-user `uid` — denied; with a synthetic owner — allowed.
   - **Deployed-app compatibility:** one create per type the deployed client writes — problem, planning,
     personal, learning log, problem publication, personal/learning-log publication, and a copy — each in the
@@ -209,8 +225,8 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 
 ## Boundaries and non-goals
 
-- **Not closing the same-offering group residual.** It needs a token claim or mirrored membership; recorded,
-  not built.
+- **Not closing the same-offering group residual.** Corroborating it would need the portal to model CLUE
+  groups; accepted as a boundary, not deferred work.
 - **Not making `concurrent` read-only after creation.** That is CLUE-612, and it cannot ship until CLUE-604's
   migration has drained the on-open backfill that writes it.
 - **Presence is still CLUE-611.** Untouched.
@@ -224,7 +240,8 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
 - Preceding stage: [2026-07-27-clue-610-sort-work-ui-design.md](2026-07-27-clue-610-sort-work-ui-design.md) —
   "Carried forward from Stage 2" records the 700ms measurement this branch acts on.
 - Roadmap: [../../document-axes/README.md](../../document-axes/README.md).
-- Key code sites: `src/lib/db.ts` (`createDeclaredClassWideDocuments`, `getOrCreateCanonicalDocument`,
-  `createFirestoreMetadataDocument`), `src/models/stores/sorted-documents.ts` (`fetchFullDocument`),
+- Key code sites: `src/lib/db.ts` (`createDeclaredClassWideDocuments`, `resolveClassWideDocument`,
+  `resolveCanonicalDocument`, `getOrCreateCanonicalDocument`, `createFirestoreMetadataDocument`),
+  `src/models/stores/sorted-documents.ts` (`fetchFullDocument`),
   `firestore.rules` (`isValidDocumentCreateRequest`, `concurrentChangeOk`),
   `firebase-test/src/documents-rules.test.ts`.

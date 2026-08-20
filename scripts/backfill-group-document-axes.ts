@@ -1,10 +1,12 @@
 // Normalize the stored axes of documents that still carry the pre-rename type `"group"` — both regular
 // group documents and class-wide collaborative documents, which share the generic axes type.
 //
-// Two scope-selected passes plus the type rename, committed as ONE merged write per document. A
-// group-scoped document carries a groupId; a class-wide document does not.
+// Three scope-selected passes plus the type rename, committed as ONE merged write per document. Scope
+// selects which of the axis passes a document falls into: a group-scoped document carries a groupId; a
+// class-wide document does not.
 //
 //   every matched document                  -> { type: "axes" }
+//   missing `axisProfile`                   -> { axisProfile: "group" | "classWide" }
 //   group-scoped, missing `concurrent`      -> { concurrent: true, kind: "group" }
 //   class-wide, missing curriculum scope    -> { investigation: null, problem: null }
 //
@@ -13,15 +15,25 @@
 // `type` lands as "axes" it stops matching and a re-run can never see it again to retry a failed axis-
 // field write. Committing `type` in a separate batch from the axis fields would make write order
 // load-bearing across the 400-document chunk boundary — a document whose `type` landed while its
-// axis-field write failed would be permanently half-migrated with no recovery path. Merging also halves
-// the writes for any document that needs a backfill. The first pass restores the concurrent history
-// manager for group documents that carry no stored `concurrent` value. The second states a class-wide
-// document's absent curriculum scope explicitly, which is what makes it findable by that query. All
-// three are additive and batched; re-running is a no-op because the query no longer matches.
+// axis-field write failed would be permanently half-migrated with no recovery path. Merging also keeps
+// a document that several passes select to one write rather than one per pass.
+//
+// The profile pass records which axis profile a document was created from
+// (src/models/document/document-axis-profiles.ts), which documents created since that landed already
+// carry. It is what a later migration selects on when it changes what a profile means, so it has to
+// cover the documents that predate the field. It is also the last migration that has to identify a
+// document by its axis values rather than by a stored cohort key — which is why it derives the name
+// from scope here rather than from `kind`: a class-wide document's kind is whatever its unit declared,
+// and a script that runs outside the app cannot resolve unit-declared kinds through the registry.
+//
+// The concurrent pass restores the concurrent history manager for group documents that carry no stored
+// `concurrent` value. The scope pass states a class-wide document's absent curriculum scope explicitly,
+// which is what makes it findable by Sort Work's unit-scoped query. All of them are additive and
+// batched; re-running is a no-op because the query no longer matches.
 //
 // Write volume changed shape with the type rename: every matched document now gets a write (`snap.size`
-// of them), not just the ones needing a `concurrent`/scope backfill as before. Size a dry-run count or
-// duration estimate off `snap.size`, not off `needingConcurrent.length + needingScope.length`.
+// of them), not just the ones needing a `concurrent`/scope/profile backfill as before. Size a dry-run
+// count or duration estimate off `snap.size`, not off the individual passes' counts.
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
 // The `documents` collection-group query needs a single-field COLLECTION_GROUP index on `type`
@@ -42,7 +54,7 @@
 // axes-typed, and/or the create should require userIsRequestUser(), or a class member can create a
 // new document stamped with a classmate's `uid` and `concurrent: true`.
 //
-// The first pass also unblocks a second cleanup: getDocumentTitle (src/models/document/document-kinds.ts)
+// The concurrent pass also unblocks a second cleanup: getDocumentTitle (src/models/document/document-kinds.ts)
 // selects the group-document title on the axes type plus a groupId, because a group document may carry
 // no `kind`. Once every group document has one, that check becomes `kind == "group"`.
 
@@ -52,11 +64,18 @@ export interface BackfillResult {
   total: number;
   concurrentUpdated: number;
   scopeUpdated: number;
+  profileUpdated: number;
   typeUpdated: number;
 }
 
+// The profile names, kept in sync with src/models/document/document-axis-profiles.ts by the unit test.
+// They are repeated rather than imported because scripts/ compiles on its own, against its own
+// package.json, and does not resolve modules from src.
+const kGroupProfileName = "group";
+const kClassWideProfileName = "classWide";
+
 /**
- * Run both scope-selected passes plus the type rename, as one merged write per document. Pure (no
+ * Run all three backfill passes plus the type rename, as one merged write per document. Pure (no
  * admin initialization) so it can be unit-tested with a mock Firestore.
  */
 export async function backfillGroupDocumentAxes(
@@ -71,18 +90,20 @@ export async function backfillGroupDocumentAxes(
   const needingConcurrent = snap.docs.filter((d) => !!d.get("groupId") && d.get("concurrent") !== true);
   const needingScope = snap.docs.filter((d) =>
     !d.get("groupId") && (d.get("investigation") === undefined || d.get("problem") === undefined));
+  const needingProfile = snap.docs.filter((d) => !d.get("axisProfile"));
 
   log(`group-typed docs: ${snap.size} total, ` +
       `${needingConcurrent.length} missing concurrent, ${needingScope.length} missing curriculum scope, ` +
-      `${snap.size} needing the type rename`);
+      `${needingProfile.length} missing an axis profile, ${snap.size} needing the type rename`);
   if (dryRun) {
     log("DRY RUN — set APPLY=1 to write");
-    return { total: snap.size, concurrentUpdated: 0, scopeUpdated: 0, typeUpdated: 0 };
+    return { total: snap.size, concurrentUpdated: 0, scopeUpdated: 0, profileUpdated: 0, typeUpdated: 0 };
   }
 
   // One merged write per document, not one per pass. `type` is the query's own key (see above), so a
   // document whose `type` write committed separately from — and ahead of — its axis-field write would
-  // drop out of the query and could never be found again to finish migrating.
+  // drop out of the query and could never be found again to finish migrating. The passes overlap each
+  // other as well, and two batched writes to the same document cost twice as much for the same result.
   const fields = new Map<FirebaseFirestore.DocumentReference, Record<string, unknown>>();
   const fieldsFor = (ref: FirebaseFirestore.DocumentReference) => {
     const existing = fields.get(ref);
@@ -95,6 +116,12 @@ export async function backfillGroupDocumentAxes(
   // Every returned document still stores the old type, by definition of the query.
   for (const d of snap.docs) {
     Object.assign(fieldsFor(d.ref), { type: "axes" });
+  }
+  for (const d of needingProfile) {
+    // Scope is the only thing that separates the two profiles this query can return, and it is the same
+    // split the passes below select on: a groupId means the group profile, its absence the class-wide one.
+    const axisProfile = d.get("groupId") ? kGroupProfileName : kClassWideProfileName;
+    Object.assign(fieldsFor(d.ref), { axisProfile });
   }
   for (const d of needingConcurrent) {
     Object.assign(fieldsFor(d.ref), { concurrent: true, kind: "group" });
@@ -117,11 +144,12 @@ export async function backfillGroupDocumentAxes(
   }
 
   log(`updated ${needingConcurrent.length} concurrent, ${needingScope.length} curriculum scope, ` +
-      `${snap.size} type`);
+      `${needingProfile.length} axis profile, ${snap.size} type`);
   return {
     total: snap.size,
     concurrentUpdated: needingConcurrent.length,
     scopeUpdated: needingScope.length,
+    profileUpdated: needingProfile.length,
     typeUpdated: snap.size,
   };
 }

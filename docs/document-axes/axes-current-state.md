@@ -1,10 +1,10 @@
-# Reading the axes in code, today
+# Reading and enforcing the axes in code, today
 
-> **Purpose:** what a consumer can actually read off a document right now, and how. [axes.md](./axes.md)
-> defines the axes in terms of behavior and deliberately avoids naming code;
-> [target-architecture.md](./target-architecture.md) describes where the code is heading. This doc is the
-> current state in between — the helpers that exist, the stored fields behind them, and what is not
-> covered yet.
+> **Purpose:** what a consumer can actually read off a document right now, how it gets stamped, and what
+> the security rules hold it to. [axes.md](./axes.md) defines the axes in terms of behavior and
+> deliberately avoids naming code; [target-architecture.md](./target-architecture.md) describes where the
+> code is heading. This doc is the current state in between — the helpers that exist, the stored fields
+> behind them, the enforcement around them, and what is not covered yet.
 
 ## The guards
 
@@ -38,12 +38,24 @@ guard for it exists.
 ## How a kind declares its axes
 
 Those fields are stamped at creation from what the kind registered in
-`src/models/document/document-kinds.ts`. A kind declares two things:
+`src/models/document/document-kinds.ts`. A kind does not spell out axis values: it names an **axis
+profile** (`src/models/document/document-axis-profiles.ts`), and the profile declares them. Many kinds
+share one — what separates a learning log from a personal document is presentation and its creation
+recipe, not any axis — and the profiles file is therefore the complete list of axis combinations the
+application creates documents at. See "Axis profiles" in [axes.md](./axes.md).
+
+A profile declares two knobs, plus `concurrent`:
 
 - `ownerType` — `"user"`, `"group"`, or `"class"`. It picks the owner `uid` (`getDocumentOwner`) and,
   for a group owner, the `groupId` stored beside it (`getDocumentOwnerFields`).
 - `containerType` — `"class"`, `"classUnit"`, or `"offering"`. It picks the fields that say where the
   document is kept and what it is about (`getDocumentLocationFields`).
+
+The profile's name is stamped onto the document it creates, in `axisProfile`, and that record is
+deliberately declared on no runtime type — not `IDocumentMetadata`, not `DocumentMetadataModel`, not
+`DocumentModel` — so reading it back would mean widening a type first. Only a migration or offline
+analysis, reading Firestore directly, can see it. See the
+[`axisProfile` field](../document-metadata/metadata-fields.md#axisprofile) for what is stored and where.
 
 One knob covers both container and curriculum because every container above the class is *identified
 by* a curriculum coordinate — a classUnit by its unit, an offering by its problem — so a kind has no
@@ -69,20 +81,62 @@ migration — a Firestore query needs a stored field, which a uid grammar cannot
 
 ## What each stored shape looks like
 
-| document | `uid` | `unit` | `investigation` | `offeringId` | `groupId` | container | curriculum | owner |
-|---|---|---|---|---|---|---|---|---|
-| personal, learning log | the user | `null` | — | — | — | class | none | user |
-| problem, planning, publications | the user | set | set | set | — | offering | problem | user |
-| group | `group_<offeringId>_<groupId>` | set | set | set | set | offering | problem | **group** |
-| exemplar (from curriculum) | authoring persona | set | set | — | — | classUnit | problem | synthetic user |
-| class-wide slot | `class_<classHash>` | set | `null` | — | — | classUnit | **unit** | class |
+| document | `uid` | `unit` | `investigation` | `offeringId` | `groupId` | `canonical` | container | curriculum | owner |
+|---|---|---|---|---|---|---|---|---|---|
+| personal, learning log | the user | `null` | — | — | — | — | class | none | user |
+| problem, planning, publications | the user | set | set | set | — | — | offering | problem | user |
+| group | `group_<offeringId>_<groupId>` | set | set | set | set | `"default"` | offering | problem | **group** |
+| exemplar (from curriculum) | authoring persona | set | set | — | — | — | classUnit | problem | synthetic user |
+| class-wide slot | `class_<classHash>` | set | `null` | — | — | **the kind** | classUnit | **unit** | class |
 
 The owner column is read off the `uid` alone. `groupId` is set on exactly the row whose `uid` already
 encodes it, which is what makes it a denormalization rather than a second source.
 
+`canonical` holds a **slot label**, not a flag: the final segment of the pointer path the document won
+(`…/owners/<uid>/slots/<label>`). The two rows that carry one show why it cannot be a boolean — a class-wide
+document is labeled with its kind precisely so that several of them can be canonical at once inside the same
+classUnit container, under the same class owner, one per declared kind. A problem document is canonical *by
+convention* only: no pointer is claimed for it, so the field stays unset.
+
+Nothing in the client reads it. The path is always built from what the caller already knows — the container,
+the owner, and the label it is asking for — and the *pointer* is what names the document, so the code only
+ever travels slot → document. The label is stored for the direction nothing travels yet, and for the
+Firestore rules: they rebuild the pointer path from the incoming label to verify a claim (which is why no
+label is hardcoded in the rules), and they read the stored label back to refuse deleting a document that
+holds a slot.
+
 The `null`s are load-bearing. A class-wide document writes `investigation: null` and `problem: null`
 explicitly rather than omitting them, because Firestore cannot match a field that is missing — that is
 what makes "about a unit but not a problem" a queryable condition.
+
+## What the rules enforce
+
+A document's owner is pinned when it is created: `firestore.rules` admits a new document only if its `uid`
+is the caller's own, their own class (`class_<class_hash>`), or a group in their own offering
+(`group_<offering_id>_<groupId>`) that agrees with the document's own `groupId`. Both synthetic owners are
+corroborated by a token claim rather than by the document — `class_hash` for the class, `offering_id` for
+the offering — so neither can be aimed anywhere the caller is not. `concurrent: true` is admitted only
+alongside one of the two synthetic owners, so no real-user-owned document can be created class-shared.
+
+**`offering_id` is a learner-only claim.** The portal mints it for a student launched into one offering, and
+deliberately omits it for a teacher or researcher so they are not confined to a single offering. That lines
+up with who creates group documents: `getOrCreateGroupDocument` requires the caller to be in a group, and
+only students are. A caller without the claim is denied, which is the safe direction — if teachers ever need
+to create group-owned documents, this rule is what has to change.
+
+**What remains is membership, not offering — accepted rather than tracked as work.** Nothing proves the
+caller is in the group they name: group membership lives in the Realtime Database, which the rules cannot
+read, and the token carries no group claim. So a student can still create a document owned by another group
+*in their own offering*. They cannot create one owned by a classmate, by a group in another offering, or by
+another class. Groups are a CLUE concept that the portal does not model, so no token claim is going to
+corroborate one — this is where the create rules stop, by design rather than pending work.
+
+**The class case has a residual of its own, accepted rather than tracked as work.** The token corroborates
+that the caller belongs to the class named in `class_<class_hash>`, not that they are entitled to mint a
+document under that owner: any class member can create any number of `class_<class_hash>`-owned,
+`concurrent: true` documents, each sectioned under "Whole Class" in Sort Work with the whole class granted
+read and write on its history. Convergence on one class document requires that any class member can mint
+it, so this is inherent to the design rather than something to close.
 
 ## Not covered yet
 

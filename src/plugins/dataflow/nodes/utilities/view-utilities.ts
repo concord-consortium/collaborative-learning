@@ -5,12 +5,18 @@ export function getNumDisplayStr(n: number | undefined ){
   return (n === undefined || isNaN(n)) ? kEmptyValueString : Number(n).toFixed(3).replace(/\.?0+$/, "");
 }
 
+// Badge letter shown on a node. Cases where the internal type name's first letter differs from the
+// user-facing displayName (Sensor→S, Generator→Waves→W, Logic→Compare→C, Control→Hold→H).
 export function getNodeLetter(nodeType: string) {
   switch (nodeType) {
     case "Timer":
       return "t";
-    case "Sensor":
-      return "I"; // internally is "Sensor", but user now sees "Input"
+    case "Generator":
+      return "W";
+    case "Logic":
+      return "C";
+    case "Control":
+      return "H";
     default:
       return nodeType.substring(0, 1);
   }

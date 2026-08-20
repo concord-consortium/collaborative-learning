@@ -135,6 +135,18 @@ const PARTIAL_RAW_OFFERING_INFO = {
 
 const curriculumConfig = CurriculumConfig.create({curriculumSiteUrl: ""});
 
+describe("getFirebaseJWTParams", () => {
+  it("defaults to the collaborative-learning firebase app", () => {
+    expect(getFirebaseJWTParams()).toBe("?firebase_app=collaborative-learning");
+  });
+
+  it("supports requesting a JWT for another firebase app", () => {
+    expect(getFirebaseJWTParams(undefined, "token-service")).toBe("?firebase_app=token-service");
+    expect(getFirebaseJWTParams("class-hash", "token-service"))
+      .toBe("?firebase_app=token-service&class_hash=class-hash");
+  });
+});
+
 describe("dev mode", () => {
   const originalUrlParams = UrlParams.urlParams;
 

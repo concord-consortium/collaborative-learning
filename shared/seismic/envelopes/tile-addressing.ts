@@ -1,5 +1,5 @@
 import type { StationData, TimeRange } from "../seismic-types";
-import { getStationChannelPrefix } from "../station-addressing";
+import { getLevelPath } from "../station-addressing";
 import { ENVELOPE_LAYOUT_VERSION, LEVEL_SPACINGS, POINTS_PER_TILE } from "./envelope-config";
 
 /** Duration of one tile in seconds at the given level. */
@@ -55,7 +55,7 @@ export function getPointIndexInTile(timestamp: number, level: number, tileIndex:
  * Format: {network}_{station}/{location}/{channel}/L{level}/{tileIndex}
  */
 export function getTileS3Key(stationData: StationData, level: number, tileIndex: number): string {
-  return `${getStationChannelPrefix(stationData)}/L${level}/${tileIndex}`;
+  return `${getLevelPath(stationData, level)}/${tileIndex}`;
 }
 
 /**

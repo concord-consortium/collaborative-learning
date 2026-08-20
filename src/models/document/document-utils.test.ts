@@ -3,9 +3,11 @@ import { AppConfigModel } from "../stores/app-config-model";
 import { UserModel } from "../stores/user";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { createDocumentModel } from "./document";
+import { getGroupOwnerId } from "./document-axes";
 import { AxesDocument, ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
+import { kClassWideProfile } from "./document-axis-profiles";
 import { registerDocumentKind } from "./document-kinds";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
@@ -194,7 +196,7 @@ describe("document utils", () => {
 
       test("a class-wide document uses its kind's registered title (resolved by kind, not stored)", () => {
         registerDocumentKind("testClassWideTitle", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          profile: kClassWideProfile,
           title: "Driving Question Board"
         });
         const metadata = DocumentMetadataModel.create({
@@ -229,7 +231,7 @@ describe("document utils", () => {
 
       test("does not borrow the current unit's title for another unit's document of the same kind", () => {
         registerDocumentKind("testSharedKind", {
-          metadataFields: { concurrent: true }, ownerType: "class", containerType: "classUnit",
+          profile: kClassWideProfile,
           title: "Our Big Questions", unit: "test"
         });
         const ownUnitDoc = DocumentMetadataModel.create({
@@ -255,7 +257,7 @@ describe("document utils", () => {
     const student = UserModel.create({ id: "me", type: "student", name: "Me", classHash: "class-1" });
     const kOffering = "off-1";
     // A group document's owner, the same synthetic id the app stamps at creation.
-    const groupOwner = (groupId: string, offeringId = kOffering) => `group_${offeringId}_${groupId}`;
+    const groupOwner = (groupId: string, offeringId = kOffering) => getGroupOwnerId(offeringId, groupId);
     const groupedStudent = UserModel.create({
       id: "me", type: "student", name: "Me", classHash: "class-1",
       currentGroupId: "3", offeringId: kOffering
@@ -375,6 +377,12 @@ describe("document utils", () => {
       expect(canUserEditDocument({
         documentMetadata: metadata({ uid: "me", type: ProblemPublication }), user: student
       })).toBe(false);
+    });
+
+    it("allows a researcher to edit their own document", () => {
+      expect(canUserEditDocument({
+        documentMetadata: metadata({ uid: "r1", type: ProblemDocument }), user: researcher
+      })).toBe(true);
     });
 
     it("refuses a researcher editing a class-wide document even though their classHash matches", () => {

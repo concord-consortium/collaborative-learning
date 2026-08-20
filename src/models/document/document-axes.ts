@@ -4,7 +4,7 @@
  * (see document-kinds.ts).
  *
  * Each guard answers about one axis, reading only that axis's fields; a consumer needing a position on
- * more than one asks each. See docs/document-axes/reading-axes-in-code.md for the field-by-shape table
+ * more than one asks each. See docs/document-axes/axes-current-state.md for the field-by-shape table
  * and what is not covered yet, and docs/document-axes/axes.md for what the axes mean.
  *
  * A guard reads stored fields only, never the kind registry: Sort Work lists documents from other
@@ -18,8 +18,8 @@
 export const kGroupOwnerPrefix = "group_";
 
 /**
- * The prefix of the synthetic uid that owns a class's documents, `class_<classHash>`. Shared by the
- * side that mints the uid (DB.userIdForClassWideDocuments) and hasClassOwner, which reads it back.
+ * The prefix of the synthetic uid that owns a class's documents, `class_<classHash>`. Shared by
+ * getClassOwnerId, which mints the uid, and hasClassOwner, which reads it back.
  */
 export const kClassOwnerPrefix = "class_";
 
@@ -34,6 +34,18 @@ export const kClassOwnerPrefix = "class_";
  */
 export function getGroupOwnerId(offeringId: string, groupId: string): string {
   return `${kGroupOwnerPrefix}${offeringId}_${groupId}`;
+}
+
+/**
+ * The synthetic uid that owns a class's documents. Every member of the class resolves to the same
+ * value, which is what makes the document the class's rather than its creator's.
+ *
+ * The class hash needs no further qualification the way a group id does: it already identifies one class
+ * across the whole portal. Callers that need to recognize a particular class's documents should build the
+ * id with this and compare, rather than parsing a stored uid apart.
+ */
+export function getClassOwnerId(classHash: string): string {
+  return `${kClassOwnerPrefix}${classHash}`;
 }
 
 /** The fields the guards read. Structural, so this stays a leaf module. */

@@ -13,8 +13,8 @@ Add envelope tiles to the seismic admin's coverage workflow:
   locally cached raw data and upload them to S3, **before** running event coverage.
 - The envelope timeline fills in live as tiles are uploaded.
 
-Part 2 (separate effort): the Wave Runner tile's currently disabled "Load Data" button
-generates and uploads envelopes using the same service. It is designed for here but not built.
+Part 2 (separate effort): the Wave Runner tile's "Load Data" button generates and uploads
+envelopes using the same service. It is designed for here but built separately.
 
 ## Background / current state
 
@@ -160,9 +160,12 @@ never mark coverage; a final listing reload per station reconciles the timeline 
 
 ## Part 2 (Wave Runner — designed for, not built here)
 
-The Wave Runner tile's currently disabled "Load Data" button will call the same
-`processEnvelopeCoverage` service, passing the authenticated user's existing `rawFirebaseJWT`
-for credentials. In dev/demo/qa modes no portal JWT exists, so upload is skipped silently.
+The Wave Runner tile's "Load Data" button calls the same `processEnvelopeCoverage` service
+(built separately; see `2026-07-30-wave-runner-envelope-load-data.md`). Credentials come from
+exchanging the session's portal JWT for a `firebase_app=token-service` firebase JWT at click
+time — the user's existing `rawFirebaseJWT` is minted for the `collaborative-learning`
+firebase app, whose signature token-service's `ADMIN_PUBLIC_KEY` does not verify. In
+dev/demo/qa modes no portal JWT exists, so the button is disabled.
 
 ## Testing
 

@@ -8,6 +8,9 @@ import {
 } from "../../components/toolbar/toolbar-button-manager";
 import { BadgedIcon } from "../../components/toolbar/badged-icon";
 import { DataSetViewButton } from "../../components/toolbar/data-set-view-button";
+import { getTokenServiceEnv } from "../../../shared/seismic/envelopes/envelope-config";
+import { useStores } from "../../hooks/use-stores";
+import { makeTokenServiceJwtGetter } from "../../lib/token-service-jwt";
 import { SharedSeismogram } from "../shared-seismogram/shared-seismogram";
 import { kTimelineTileType } from "../timeline/timeline-types";
 import { useWaveRunnerContent } from "./hooks/use-wave-runner-content";
@@ -21,8 +24,22 @@ import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
 const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
+  const { portal, seismicQueryService } = useStores();
+  const getJwt = makeTokenServiceJwtGetter(portal);
+  const disabled = !getJwt || !content.station || content.isRunning || content.isLoadingData;
+
+  function handleClick() {
+    const station = content.station;
+    if (!getJwt || !station) return;
+    content.loadEnvelopeData({
+      getJwt,
+      env: getTokenServiceEnv(),
+      onEnvelopesUpdated: () => seismicQueryService.invalidateEnvelopes(station),
+    });
+  }
+
   return (
-    <TileToolbarButton name={name} title="Load Data" onClick={() => content.loadData()} disabled={true}>
+    <TileToolbarButton name={name} title="Load Data" onClick={handleClick} disabled={disabled}>
       <LoadDataIcon/>
     </TileToolbarButton>
   );
@@ -30,7 +47,7 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
 
 const PlayButton = observer(function PlayButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
-  const disabled = content.isRunning || !content.selectedModelUrl || !!content.eventsDataSet;
+  const disabled = content.isRunning || content.isLoadingData || !content.selectedModelUrl || !!content.eventsDataSet;
   return (
     <TileToolbarButton name={name} title="Run Model" onClick={() => content.runModel()} disabled={disabled}>
       <RunIcon/>

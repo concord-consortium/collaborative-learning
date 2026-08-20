@@ -16,20 +16,24 @@ $socket-and-connection-gray: #949494;
 
 $shadow: rgba(0, 0, 0, 0.25);
 
-$input-blue: #a5b2ff;
-$input-blue-outline: #394aff;
-$input-blue-lighter-1: #bcc5ff;
-$input-blue-lighter-2: #d2d8ff;
-$input-blue-lighter-3: #e8ecff;
+// The three block body colors below are synced by hex value with the Sketch fill palette (SwatchColor
+// lightPurple/lightBlue/lightYellow in drawing/components/color-swatch.tsx) and the diagram-view chip
+// theme. There is no shared source; if you change one, change the others. A guard test on the Sketch
+// side (fill-color-palette.test.tsx) pins those literals.
+$input-purple: #a5b2ff;
+$input-purple-outline: #6b23fc;
+$input-purple-lighter-1: #bcc5ff;
+$input-purple-lighter-2: #d2d8ff;
+$input-purple-lighter-3: #e8ecff;
 
-$operator-green: #4ad0ee;
-$operator-green-outline: #0271c1;
-$operator-green-lighter-1: #77dcf2;
-$operator-green-lighter-2: #a4e7f6;
-$operator-green-lighter-3: #d2f3fb;
+$operator-blue: #addef4;
+$operator-blue-outline: #1a72bf;
+$operator-blue-lighter-1: #c1e6f6;  // node name field bg
+$operator-blue-lighter-2: #d6eef9;  // node name field border
+$operator-blue-lighter-3: #ebf7fd;  // expression / value field bg
 
 $output-yellow: #f7e58f;
-$output-yellow-outline: #c66c02;
+$output-yellow-outline: #877100;
 $output-yellow-lighter-1: #f9ecab;
 $output-yellow-lighter-2: #fbf2c7;
 $output-yellow-lighter-3: #fdf8e3;

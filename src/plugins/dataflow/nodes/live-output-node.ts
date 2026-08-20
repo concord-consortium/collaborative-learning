@@ -9,7 +9,7 @@ import { INodeServices } from "./service-types";
 import { numSocket } from "./num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
-  kGripperOutputTypes, kMicroBitHubRelaysIndexed,
+  kGripperOutputTypes, kMicroBitHubRelaysIndexed, resolveAllowedOutputTypes,
   kServoOutputTypes, outputGateState, unsupportedOutputOption } from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
@@ -145,8 +145,12 @@ export class LiveOutputNode extends BaseNode<
     const nodeValueInput = new ClassicPreset.Input(numSocket, "NodeValue");
     this.addInput("nodeValue", nodeValueInput);
 
+    // Editable views offer the unit-allowed types plus the node's own stored type if a unit restriction
+    // would otherwise hide it; read-only views use the full list. Either way a stored value always
+    // resolves (never renders "Select an option") without overwriting persisted state.
+    const liveOutputTypeOptions = this.readOnly ? NodeLiveOutputTypes : this.editableLiveOutputTypeOptions;
     const liveOutputControl =
-      new DropdownListControl(this, "liveOutputType", this.setLiveOutputTypeWrapper, NodeLiveOutputTypes);
+      new DropdownListControl(this, "liveOutputType", this.setLiveOutputTypeWrapper, liveOutputTypeOptions);
     this.addControl("liveOutputType", liveOutputControl);
 
     if (this.readOnly) {
@@ -165,11 +169,13 @@ export class LiveOutputNode extends BaseNode<
       this.hubSelectControl = new DropdownListControl(this, "hubSelect", model.setHubSelect, []);
 
       if (!model.liveOutputType) {
-        // Set the default value. This also updates the hubSelect depending on the connected device and
-        // and simulation.
+        // New node: default to the first unit-allowed type. This also updates the hubSelect depending on
+        // the connected device and simulation. A node with a stored type is left untouched — the dropdown
+        // (editableLiveOutputTypeOptions) resolves it even when a unit restriction would hide it, so we
+        // never overwrite saved state.
         // FIXME: this might cause problems with undo support since it is changing the state on node
         // initialization, we'll have to make sure this happens within the node creation action
-        this.setLiveOutputTypeWrapper("Gripper 2.0");
+        this.setLiveOutputTypeWrapper(this.allowedLiveOutputTypes[0].name);
       }
       // Update the options now that we have a type
       this.setHubSelectOptions();
@@ -374,7 +380,7 @@ export class LiveOutputNode extends BaseNode<
       const roundedDisplayValue = Math.round((value / 10) * 10);
       return `${roundedDisplayValue}% closed`;
     } else if (kServoOutputTypes.includes(liveOutputType)) {
-      return `${Math.round((value / 10) * 10)}°`;
+      return servoDisplayMessage(value, this.servoProportionMode);
     }
 
     // We shouldn't hit this case but if we do then just pass the value through
@@ -401,6 +407,28 @@ export class LiveOutputNode extends BaseNode<
     return this.services.stores.serialDevice.deviceFamily;
   }
 
+  private get servoProportionMode() {
+    return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
+  private get allowedLiveOutputTypes() {
+    const names = resolveAllowedOutputTypes(this.services.stores.appConfig.getSetting("liveOutputTypes", "dataflow"));
+    // Preserve the author's order (first entry is the new-node default).
+    return names ? names.flatMap(name => NodeLiveOutputTypes.filter(t => t.name === name)) : NodeLiveOutputTypes;
+  }
+
+  // Editable dropdown options: the unit-allowed types, plus this node's stored type when a unit
+  // restriction would otherwise hide it — so a saved value resolves without being overwritten.
+  private get editableLiveOutputTypeOptions() {
+    const allowed = this.allowedLiveOutputTypes;
+    const stored = this.model.liveOutputType;
+    if (stored && !allowed.some(t => t.name === stored)) {
+      const storedType = NodeLiveOutputTypes.find(t => t.name === stored);
+      if (storedType) return [...allowed, storedType];
+    }
+    return allowed;
+  }
+
   data({nodeValue}: {nodeValue?: number[]}) {
     // if there is not a valid input, use 0
     const value = getValueOrZero(nodeValue);
@@ -424,8 +452,11 @@ export class LiveOutputNode extends BaseNode<
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else if (kServoOutputTypes.includes(outputType)) {
-      // angles out of range move servo to nearest valid angle
-      const newValue = Math.min(Math.max(value, 0), 180);
+      // In proportion mode (unit setting) the Servo accepts 0–1 and we scale to the full 0–180 sweep;
+      // the stored value stays in degrees so the serial/hardware path is unchanged. Out-of-range angles
+      // clamp to the nearest valid angle.
+      const scaled = this.servoProportionMode ? value * 180 : value;
+      const newValue = Math.min(Math.max(scaled, 0), 180);
 
       // alternative: out of range value will not move sim servo
       // const isValidServoValue = value >= 0 && value <= 180;
@@ -461,4 +492,12 @@ function getPercentageAsInt(num: number){
   if (num > 1)  return 100;
   if (num < 0)  return 0;
   return Math.round(num * 100);
+}
+
+// The Servo output field label. The stored value is always the angle in degrees (0–180). In degrees
+// mode (default) it's shown as degrees; in proportion mode it's shown as % of full rotation, mirroring
+// the gripper's "% closed".
+export function servoDisplayMessage(value: number, proportionMode: boolean) {
+  if (proportionMode) return `${Math.round((value / 180) * 100)}% rotation`;
+  return `${Math.round(value)}°`;
 }

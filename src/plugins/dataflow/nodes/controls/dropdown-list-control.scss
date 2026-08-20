@@ -55,13 +55,13 @@
       }
       &:hover {
         &.sensorType, &.sensor, &.generatorType, &.interval {
-          background-color: $input-blue-lighter-1;
+          background-color: $input-purple-lighter-1;
           &.missing {
             background-color: #ffb8c6;
           }
         }
         &.mathOperator, &.logicOperator, &.transformOperator {
-          background-color: $operator-green-lighter-1;
+          background-color: $operator-blue-lighter-1;
         }
       }
       &:hover .icon {
@@ -135,7 +135,7 @@
 .node-select.generatorType,
 .node-select.interval {
   .icon svg {
-    fill: $input-blue;
+    fill: $input-purple;
   }
 }
 

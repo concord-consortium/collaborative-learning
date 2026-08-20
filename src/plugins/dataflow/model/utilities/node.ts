@@ -63,7 +63,7 @@ export interface NodeType {
 export const NodeTypes: NodeType[] = [
   {
     name: "Sensor",
-    displayName: "Input",
+    displayName: "Sensor",
   },
   {
     name: "Number",
@@ -71,19 +71,21 @@ export const NodeTypes: NodeType[] = [
   },
   {
     name: "Generator",
-    displayName: "Generator",
+    displayName: "Waves",
   },
-  {
-    name: "Timer",
-    displayName: "Timer (on/off)"
-  },
+  // Timer block hidden from the palette. Kept in code (rete-manager registration, node class) so
+  // existing programs that already contain a Timer node still load.
+  // {
+  //   name: "Timer",
+  //   displayName: "Timer (on/off)"
+  // },
   {
     name: "Math",
     displayName: "Math",
   },
   {
     name: "Logic",
-    displayName: "Logic",
+    displayName: "Compare",
   },
   {
     name: "Transform",
@@ -95,11 +97,11 @@ export const NodeTypes: NodeType[] = [
   },
   {
     name: "Demo Output",
-    displayName: "Demo Output",
+    displayName: "Demo Device",
   },
   {
     name: "Live Output",
-    displayName: "Live Output",
+    displayName: "Live Device",
   }
 ];
 
@@ -439,6 +441,38 @@ export const NodeLiveOutputTypes = [
     sweep: 180
   }
 ];
+
+// Resolves settings.dataflow.liveOutputTypes to the restricted list of type names, or undefined when
+// the unit does not restrict outputs (absent/empty/malformed/unknown-only, or the full list). Shared
+// by the node dropdown and the AI-summary mirror so both report the same set. The author's order is
+// preserved (the first entry becomes the new-node default); unknown and duplicate names are dropped.
+export function resolveAllowedOutputTypes(setting: unknown): string[] | undefined {
+  if (!Array.isArray(setting)) return undefined;
+  const validNames = NodeLiveOutputTypes.map(t => t.name);
+  const names = setting.filter((name, i) =>
+    typeof name === "string" && validNames.includes(name) && setting.indexOf(name) === i) as string[];
+  return names.length > 0 && names.length < NodeLiveOutputTypes.length ? names : undefined;
+}
+
+// These settings.dataflow.* keys are hand-authored JSON with no authoring-UI validation, so a typo
+// silently degrades to the default. Warn once (from the editable tile mount) to save debugging time.
+export function warnUnknownLiveOutputSettings(servoInputMode: unknown, liveOutputTypes: unknown) {
+  if (servoInputMode != null && servoInputMode !== "proportion" && servoInputMode !== "degrees") {
+    console.warn(`settings.dataflow.servoInputMode: ignoring unknown value ${JSON.stringify(servoInputMode)}; ` +
+      `expected "degrees" or "proportion".`);
+  }
+  if (liveOutputTypes != null && !Array.isArray(liveOutputTypes)) {
+    console.warn(`settings.dataflow.liveOutputTypes: expected an array of type names, got ` +
+      `${JSON.stringify(liveOutputTypes)}; ignoring.`);
+  } else if (Array.isArray(liveOutputTypes)) {
+    const validNames = NodeLiveOutputTypes.map(t => t.name);
+    const unknown = liveOutputTypes.filter(name => !validNames.includes(name));
+    if (unknown.length) {
+      console.warn(`settings.dataflow.liveOutputTypes: ignoring unknown type(s) ${JSON.stringify(unknown)}; ` +
+        `expected names from: ${validNames.join(", ")}.`);
+    }
+  }
+}
 
 function createNodeMicroBitHubs(arr: string[]) {
   return arr.map((id) => {
