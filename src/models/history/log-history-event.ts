@@ -1,8 +1,8 @@
 import { isSectionPath } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { IContext, processDocumentEventParams } from "../../lib/logger-utils";
 import { logDocumentOrCurriculumEvent } from "../document/log-document-event";
-import { DocumentsModelType } from "../stores/documents";
 import { TreeManagerType } from "./tree-manager";
 
 type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
@@ -14,20 +14,14 @@ export interface ILogHistory extends Record<string, any> {
   action: HistoryAction;
 }
 
-interface IContext extends Record<string, any> {
-  documents: DocumentsModelType;
-  networkDocuments: DocumentsModelType;
-}
-
 function processHistoryEventParams(params: ILogHistory, context: IContext) {
   const { documentId, action, ...others } = params;
-  const { documents, networkDocuments } = context;
 
   if (isSectionPath(documentId)) {
     return { curriculum: documentId, ...others };
   }
 
-  const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
+  const { document } = processDocumentEventParams({ documentId }, context);
   if (document) {
     return { document, ...others };
   }

@@ -1,8 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
-import { getTileTitleForLogging } from "../../../lib/logger-utils";
-import { DocumentsModelType } from "../../stores/documents";
+import { IContext, processDocumentEventParams } from "../../../lib/logger-utils";
 import { ITileModel } from "../tile-model";
 import { isTileBaseEvent, logTileBaseEvent } from "./log-tile-base-event";
 
@@ -11,18 +10,10 @@ interface ITileDocumentLogEvent extends Record<string, any> {
   commentText?: string;
 }
 
-interface IContext extends Record<string, any> {
-  documents: DocumentsModelType;
-  networkDocuments: DocumentsModelType;
-}
-
 function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: IContext) {
   const { tile: { id: tileId, content }, ...others } = params;
-  const tileType = content.type;
-  const document = context.documents.findDocumentOfTile(tileId) ||
-                    context.networkDocuments.findDocumentOfTile(tileId);
+  const { document, tileTitle, tileType } = processDocumentEventParams({ tileId }, context);
   const legacyTileProps = { objectId: tileId, objectType: tileType, serializedObject: getSnapshot(content) };
-  const tileTitle = getTileTitleForLogging(tileId, document);
   return { document, tileId, tileType, ...legacyTileProps, tileTitle, ...others };
 }
 

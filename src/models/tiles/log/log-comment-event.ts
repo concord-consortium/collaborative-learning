@@ -1,7 +1,6 @@
 import { isSectionPath, parseSectionPath } from "../../../../shared/shared";
-import { ProblemModelType } from "../../curriculum/problem";
 import { Logger } from "../../../lib/logger";
-import { getTileTitleForLogging } from "../../../lib/logger-utils";
+import { getTileTitleForLogging, IContext, processDocumentEventParams } from "../../../lib/logger-utils";
 import { LogEventName } from "../../../lib/logger-types";
 import { logDocumentOrCurriculumEvent } from "../../document/log-document-event";
 
@@ -14,27 +13,19 @@ export interface ILogComment extends Record<string, any> {
   action: CommentAction;
 }
 
-interface IContext extends Record<string, any> {
-  problem: ProblemModelType;
-  teacherGuide?: ProblemModelType;
-}
-
 function processCommentEventParams(params: ILogComment, context: IContext) {
   const { focusDocumentId: documentId, focusTileId: tileId, isFirst, action, ...others } = params;
-  const { documents, networkDocuments } = context;
 
   if (isSectionPath(documentId)) {
     const [_unit, facet, _investigation, _problem, section] = parseSectionPath(documentId) || [];
     const curriculumStore = facet === "guide" ?  context.teacherGuide : context.problem;
-    const tileType = tileId && curriculumStore?.getSectionById(section)?.content?.getTileType(tileId);
-    const tileTitle = tileId && getTileTitleForLogging(tileId, curriculumStore?.getSectionById(section));
-    return { curriculum: documentId, tileId, tileTitle, tileType, ...others };
+    const sectionTileType = tileId && curriculumStore?.getSectionById(section)?.content?.getTileType(tileId);
+    const sectionTileTitle = tileId && getTileTitleForLogging(tileId, curriculumStore?.getSectionById(section));
+    return { curriculum: documentId, tileId, tileTitle: sectionTileTitle, tileType: sectionTileType, ...others };
   }
 
-  const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
+  const { document, tileTitle, tileType } = processDocumentEventParams({ documentId, tileId }, context);
   if (document) {
-    const tileType = tileId ? document.content?.getTileType(tileId) : undefined;
-    const tileTitle = tileId && getTileTitleForLogging(tileId, document);
     return { document, tileId, tileTitle, tileType, ...others };
   }
 
