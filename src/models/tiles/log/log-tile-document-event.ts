@@ -12,7 +12,8 @@ interface ITileDocumentLogEvent extends Record<string, any> {
 
 function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: IDocumentContext) {
   const { tile: { id: tileId, content }, ...others } = params;
-  const { document, tileTitle, tileType } = processDocumentEventParams({ tileId }, context);
+  const tileType = content.type;
+  const { document, tileTitle } = processDocumentEventParams({ tileId }, context);
   const legacyTileProps = { objectId: tileId, objectType: tileType, serializedObject: getSnapshot(content) };
   return { document, tileId, tileType, ...legacyTileProps, tileTitle, ...others };
 }
