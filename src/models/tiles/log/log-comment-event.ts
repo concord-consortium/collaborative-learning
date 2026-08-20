@@ -1,6 +1,6 @@
 import { isSectionPath, parseSectionPath } from "../../../../shared/shared";
 import { Logger } from "../../../lib/logger";
-import { getTileTitleForLogging, IContext, processDocumentEventParams } from "../../../lib/logger-utils";
+import { getTileTitleForLogging, IDocumentContext, processDocumentEventParams } from "../../../lib/logger-utils";
 import { LogEventName } from "../../../lib/logger-types";
 import { logDocumentOrCurriculumEvent } from "../../document/log-document-event";
 
@@ -13,7 +13,7 @@ export interface ILogComment extends Record<string, any> {
   action: CommentAction;
 }
 
-function processCommentEventParams(params: ILogComment, context: IContext) {
+function processCommentEventParams(params: ILogComment, context: IDocumentContext) {
   const { focusDocumentId: documentId, focusTileId: tileId, isFirst, action, ...others } = params;
 
   if (isSectionPath(documentId)) {

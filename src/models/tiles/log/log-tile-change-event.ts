@@ -1,5 +1,5 @@
 import { Logger } from "../../../lib/logger";
-import { IContext, processDocumentEventParams } from "../../../lib/logger-utils";
+import { IDocumentContext, processDocumentEventParams } from "../../../lib/logger-utils";
 import { LogEventMethod, LogEventName } from "../../../lib/logger-types";
 import { isTileBaseEvent, logTileBaseEvent } from "./log-tile-base-event";
 
@@ -15,7 +15,7 @@ export interface ITileChangeLogEvent extends Record<string, any> {
 // once per edit.
 const warnedMissingDocumentTileIds = new Set<string>();
 
-function processTileChangeEvent(params: ITileChangeLogEvent, context?: IContext) {
+function processTileChangeEvent(params: ITileChangeLogEvent, context?: IDocumentContext) {
   const { tileId, operation, change, ...others } = params;
   // Logger.stores is undefined until initializeLogger runs; stay null-safe and fall through to Logger.log.
   const { document, tileTitle } = processDocumentEventParams({ tileId }, context);

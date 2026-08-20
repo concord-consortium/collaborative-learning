@@ -1,7 +1,7 @@
 import { isSectionPath } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { IContext, processDocumentEventParams } from "../../lib/logger-utils";
+import { IDocumentContext, processDocumentEventParams } from "../../lib/logger-utils";
 import { logDocumentOrCurriculumEvent } from "../document/log-document-event";
 import { TreeManagerType } from "./tree-manager";
 
@@ -14,7 +14,7 @@ export interface ILogHistory extends Record<string, any> {
   action: HistoryAction;
 }
 
-function processHistoryEventParams(params: ILogHistory, context: IContext) {
+function processHistoryEventParams(params: ILogHistory, context: IDocumentContext) {
   const { documentId, action, ...others } = params;
 
   if (isSectionPath(documentId)) {

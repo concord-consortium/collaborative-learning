@@ -43,8 +43,8 @@ jest.mock("../../models/stores/ui", () => ({
   userSelectTile: jest.fn()
 }));
 
-// Spy on the tile-change emit to assert genuine state changes log (and that the
-// interactive's "log" breadcrumbs no longer do).
+// Spy on the tile-change emit to assert that genuine interactive-state changes log.
+// (The interactive's own "log" breadcrumbs take the separate, un-enriched Logger.log path.)
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../models/tiles/log/log-tile-change-event", () => ({
   logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent(...args)
@@ -155,6 +155,7 @@ describe("IframeInteractiveComponent Integration Tests", () => {
         LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE,
         {
           tileId: props.model.id,
+          tileType: "IframeInteractive",
           operation: "setInteractiveState",
           change: { interactiveState: newState }
         }
@@ -170,10 +171,7 @@ describe("IframeInteractiveComponent Integration Tests", () => {
     props.readOnly = true;
     render(<IframeInteractiveComponent {...props} />);
 
-    // Other listeners register, but "log" no longer does — the interactive's
-    // init/mouseover breadcrumbs have no handler and never reach the logger.
     await waitFor(() => expect(listeners.interactiveState).toBeDefined());
-    expect(listeners.log).toBeUndefined();
     expect(mockLogTileChangeEvent).not.toHaveBeenCalled();
 
     // This suite does not mock the log module, so spy on Logger.log directly to catch a real emit.

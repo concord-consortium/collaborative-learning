@@ -5,7 +5,8 @@ import { ProblemModelType } from "../models/curriculum/problem";
 
 type ModelTypeUnion = DocumentModelType | SectionModelType | null;
 
-export interface IContext extends Record<string, any> {
+// Subset of IStores needed to find information to log
+export interface IDocumentContext extends Record<string, any> {
   documents: DocumentsModelType;
   networkDocuments: DocumentsModelType;
   problem: ProblemModelType;
@@ -30,7 +31,7 @@ export interface IDocumentEventParams {
   tileId?: string;
 }
 
-export function processDocumentEventParams(params: IDocumentEventParams, context?: IContext) {
+export function processDocumentEventParams(params: IDocumentEventParams, context?: IDocumentContext) {
   const { documentId, tileId } = params;
   let document: DocumentModelType | undefined | null = params.document;
   if (!document && documentId) {
