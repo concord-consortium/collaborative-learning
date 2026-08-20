@@ -89,6 +89,7 @@ export const AppConfigModel = types
     get chatTutorPrompts() { return self.configMgr.chatTutorPrompts; },
     get chatTutorEnabled() { return self.configMgr.chatTutorEnabled; },
     get chatTutorIntro() { return self.configMgr.chatTutorIntro; },
+    get chatTutorHighlights() { return self.configMgr.chatTutorHighlights; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },

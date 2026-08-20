@@ -1,9 +1,11 @@
-import React, { useMemo, useRef } from "react";
-import { IAnyStateTreeNode } from "mobx-state-tree";
+import React, { useEffect, useMemo, useRef } from "react";
+import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
+import { DocumentContentModelType } from "../../models/document/document-content";
+import { uniqueId } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
-import { Chat } from "./chat";
+import { Chat, highlightKey } from "./chat";
 import { useChat } from "./use-chat";
 import { ChatTransport } from "./transport";
 import { conversationDocId } from "./conversation-key";
@@ -22,15 +24,20 @@ interface IProps {
   documentTitle: string;
   problemPath: string;
   problem: ProblemModelType;
-  // the workspace document's content node; undefined until the document loads
-  content: IAnyStateTreeNode | undefined;
+  // The workspace document's content model; undefined until the document loads. Typed concretely
+  // rather than as IAnyStateTreeNode because the highlight buttons call actions on it.
+  content: DocumentContentModelType | undefined;
   onClose: () => void;
 }
 
 // Right-edge overlay drawer for the AI chat tutor. Mounted only while open (the
 // app-header launcher owns the open/close state); mounting resets the transport, so
 // switching documents or problems while open swaps the conversation.
-export const ChatTutorSidebar: React.FC<IProps> = (props) => {
+//
+// An observer because the pinned highlight button reflects `content.pinnedHighlightSource`,
+// which can be taken over by another highlight source (a variable chip, say) while this
+// sidebar stays open.
+export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
   const { appConfig, db, user } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +79,55 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
   // default; an authored empty string suppresses the intro entirely (?? keeps "" distinct from unset).
   const introText = appConfig.chatTutorIntro ?? CHAT_TUTOR_DEFAULT_INTRO;
 
+  // Identifies this sidebar instance as a highlight source. Several sources share one document, and
+  // two of them can cite the same object, so ownership is decided by token rather than by reference.
+  const highlightSource = useMemo(() => `chat-highlight-${uniqueId()}`, []);
+
+  // Which of this sidebar's buttons is pinned. Read from the model rather than kept in React state
+  // alone, so a pin taken over by another source (a variable chip, say) stops showing here.
+  const pinnedKeyRef = useRef<string | undefined>(undefined);
+
+  const findHighlight = (turnId: string, index: number) =>
+    chat.turns.find(t => t.id === turnId)?.highlights?.[index];
+
+  const handleHighlightHover = (turnId: string, index: number, hovering: boolean) => {
+    if (!content) return;
+    if (!hovering) {
+      content.clearHoveredHighlightRefIfOwn(highlightSource);
+      return;
+    }
+    const highlight = findHighlight(turnId, index);
+    if (!highlight) return;
+    content.setHoveredHighlightRef(
+      { kind: "object", tileId: highlight.tileId, objectId: highlight.objectId },
+      highlightSource);
+  };
+
+  const handleHighlightToggle = (turnId: string, index: number) => {
+    const highlight = content && findHighlight(turnId, index);
+    if (!highlight) return;
+    content.togglePinnedHighlightRef(
+      { kind: "object", tileId: highlight.tileId, objectId: highlight.objectId },
+      highlightSource);
+    pinnedKeyRef.current = content.pinnedHighlightSource === highlightSource
+      ? highlightKey(turnId, index) : undefined;
+  };
+
+  const activeHighlightKey = content?.pinnedHighlightSource === highlightSource
+    ? pinnedKeyRef.current : undefined;
+
+  // React does not fire onMouseLeave for an element that unmounts under the cursor, and a pinned
+  // highlight can only be dismissed by clicking its button — so a sidebar that closes while pinned
+  // would strand a ring on the tile for the rest of the session. The same release also has to run
+  // when documentKey/problemPath change without an unmount: that swaps the conversation (see the
+  // component comment above), so a highlight owned by the old conversation must not survive into it.
+  useEffect(() => {
+    return () => {
+      content?.clearHoveredHighlightRefIfOwn(highlightSource);
+      content?.clearPinnedHighlightRefIfOwn(highlightSource);
+    };
+  }, [content, highlightSource, documentKey, problemPath]);
+
   return (
     <div
       ref={containerRef}
@@ -84,8 +140,12 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
     >
       <div ref={bodyRef} className="chat-tutor-sidebar-body">
         <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header}
-              introText={introText} />
+              introText={introText}
+              onHighlightHover={handleHighlightHover}
+              onHighlightToggle={handleHighlightToggle}
+              activeHighlightKey={activeHighlightKey}
+              enableHighlights={!!appConfig.chatTutorHighlights} />
       </div>
     </div>
   );
-};
+});
