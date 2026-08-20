@@ -314,6 +314,83 @@ describe("every outcome a row can hold is rendered", () => {
   });
 });
 
+describe("a run whose rows used two different prompts says so", () => {
+  /**
+   * A prompt file's content is not part of the experiment hash, but it *is* part of the request
+   * key. So editing a prompt and re-running into the same results file re-runs every pair — and a
+   * re-run that stops early leaves some pairs on the new prompt and some on the old, all current.
+   */
+  const mixed = (modes: Partial<ReviewModes> = {}) => {
+    const fixture = buildReviewFixture(`review-prompt-${modes.blind ? "blind" : "plain"}`);
+    // `alpha`'s image row is re-run under an edited prompt; `beta`'s is not reached before the run
+    // stops. Both are current, and both produce a card.
+    const original = fixture.rows.find(
+      (row) => row.docId === "alpha" && row.runId === kSentinels.imageRun)!;
+    const reRun = {
+      ...original, requestKey: "alpha-image-new-prompt",
+      prompt: { name: "categorize-design-default", sha256: "b".repeat(64) }
+    } as ResultRow;
+    const model = buildReviewModel({
+      rows: [...fixture.rows, reRun], resultsFile: fixture.resultsFile,
+      experiment: fixture.experiment, experimentSha256: fixture.experimentSha256,
+      paths: fixture.paths, now: kNow, modes: { shareable: false, blind: false, ...modes },
+      seed: kSeed
+    });
+    return { model, html: renderReviewHtml(model) };
+  };
+
+  it("refuses to name one prompt for the run in the header", () => {
+    const { model, html } = mixed();
+    const run = model.runs!.find((entry) => entry.runId === kSentinels.imageRun)!;
+    // The last row's hash used to be reported as the run's, which was false for the other cards.
+    expect(run.promptSha256).toBeNull();
+    expect(run.promptVersions).toBe(2);
+    expect(html).toContain("2 versions — see each card");
+  });
+
+  it("gives each card its own prompt instead", () => {
+    const { model, html } = mixed();
+    const cards = model.documents.flatMap((document) => document.cards)
+      .filter((card) => card.runId === kSentinels.imageRun);
+    expect(new Set(cards.map((card) => card.promptSha256))).toEqual(new Set(["b".repeat(64), "a".repeat(64)]));
+    expect(html).toContain(`prompt ${"b".repeat(12)}`);
+    expect(html).toContain(`prompt ${"a".repeat(12)}`);
+  });
+
+  it("leaves a run whose rows agree exactly as it was", () => {
+    const { model, html } = mixed();
+    const settled = model.runs!.find((entry) => entry.runId === kSentinels.mixedRun)!;
+    expect(settled.promptVersions).toBe(1);
+    expect(settled.promptSha256).toBe("a".repeat(64));
+    // The hash appears once in the header, not once per card.
+    expect(html.split(`prompt ${"a".repeat(12)}`).length - 1).toBe(1);
+  });
+
+  it("does not count a skipped row, which sent no prompt at all", () => {
+    // A skipped row records the prompt its run would have used. Counting it flagged a run whose
+    // every card came from one prompt, because a lagging skipped row disagreed with them.
+    const fixture = buildReviewFixture("review-prompt-skipped");
+    const rows = fixture.rows.map((row) => (row.status === "skipped"
+      ? { ...row, prompt: { name: "categorize-design-default", sha256: "c".repeat(64) } }
+      : row)) as ResultRow[];
+    const model = buildReviewModel({
+      rows, resultsFile: fixture.resultsFile, experiment: fixture.experiment,
+      experimentSha256: fixture.experimentSha256, paths: fixture.paths, now: kNow,
+      modes: { shareable: false, blind: false }, seed: kSeed
+    });
+    expect(model.runs!.every((run) => run.promptVersions <= 1)).toBe(true);
+    expect(renderReviewHtml(model)).not.toContain("versions — see each card");
+  });
+
+  it("says none of it in a blinded report, where a prompt identifies the run", () => {
+    const { model, html } = mixed({ blind: true });
+    expect(model.documents.flatMap((document) => document.cards)
+      .every((card) => card.promptSha256 === null)).toBe(true);
+    expect(html).not.toContain("b".repeat(12));
+    expect(html).not.toContain("versions — see each card");
+  });
+});
+
 describe("the experiment file has to be the one the rows were produced with", () => {
   const fixture = buildReviewFixture("review-experiment-hash");
 

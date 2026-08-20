@@ -706,6 +706,14 @@ experiment file — so the report needs that file, and refuses unless its hash e
 corpus named in the rows has to be on this machine too, since the summaries and pictures come from
 it.
 
+The header lists every run in experiment-file order with its configuration and its prompt's name
+and hash. A run whose current rows carry **more than one** prompt hash is flagged rather than
+summarised: a prompt file's content is not part of the experiment hash but is part of the request
+key, so editing a prompt and re-running into the same results file re-runs every pair — and a re-run
+that stops early leaves some pairs on the new prompt and some on the old. The header then says how
+many versions there are and each card names its own, because those cards are not all comparable with
+each other.
+
 Each document's outputs are one card per run in experiment-file order: the recognized response
 fields (category, key indicators, discussion — all optional in the prompt schema, so whichever exist
 are shown and anything else is printed as JSON), or a refusal, or an error with its attempt count,

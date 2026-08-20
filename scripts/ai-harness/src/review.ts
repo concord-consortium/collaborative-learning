@@ -148,8 +148,21 @@ export interface ReviewRunConfiguration {
   imageSet: ImageSet | null;
   extras: ExtrasMode | null;
   promptName: string;
-  /** From the run's own rows; `null` when the experiment defines a run this file has no rows for. */
+  /**
+   * The prompt this run's rows actually used. `null` when the experiment defines a run this file
+   * has no rows for, and — the case worth knowing about — when its rows disagree.
+   */
   promptSha256: string | null;
+  /**
+   * How many distinct prompt hashes this run's current rows carry.
+   *
+   * Normally 1. It can be more: a prompt file's content is not part of the experiment hash, but it
+   * *is* part of the request key, so editing a prompt and re-running into the same results file
+   * re-runs every pair — and a re-run that stops early (the spend ceiling, an error, an interrupt)
+   * leaves some pairs on the new prompt and some on the old, all of them current. The header then
+   * cannot honestly name one prompt for the run, and each card carries its own instead.
+   */
+  promptVersions: number;
 }
 
 /** One picture a document's runs actually sent, with the bytes that were sent. */
@@ -209,6 +222,11 @@ export interface ReviewCard {
   usage: { promptTokens: number; completionTokens: number; source: "api" | "cache" } | null;
   /** `null` in blind mode. */
   modeledUsd: number | null;
+  /**
+   * The prompt this row actually used. `null` in blind mode, where it would identify the run.
+   * Rendered only when its run's rows disagree — see `ReviewRunConfiguration.promptVersions`.
+   */
+  promptSha256: string | null;
   /** This row sent a mixed message with its text half dropped: it saw half the input. */
   textPartOmitted: boolean;
   /** Empty in blind and shareable modes; see `cardFor`. */
@@ -482,7 +500,9 @@ function currentRowsByDocument(rows: ResultRow[]): Map<string, Map<string, Resul
   return byDocument;
 }
 
-function configurationFor(run: ExperimentRun, promptSha256: string | null): ReviewRunConfiguration {
+function configurationFor(
+  run: ExperimentRun, promptShas: Set<string>
+): ReviewRunConfiguration {
   return {
     runId: run.id,
     message: run.message,
@@ -492,7 +512,10 @@ function configurationFor(run: ExperimentRun, promptSha256: string | null): Revi
     imageSet: run.imageSet ?? null,
     extras: sendsText(run.message) ? run.extras ?? "all" : null,
     promptName: run.prompt,
-    promptSha256
+    // One hash only when the rows agree on one. Reporting the last row's hash for a run whose rows
+    // disagree told a reader that every card came from that prompt, which was false for some.
+    promptSha256: promptShas.size === 1 ? [...promptShas][0] : null,
+    promptVersions: promptShas.size
   };
 }
 
@@ -762,10 +785,18 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
     }, existingKey.file);
   }
 
-  const promptShaByRun = new Map<string, string>();
-  for (const row of current) promptShaByRun.set(row.runId, row.prompt.sha256);
+  // Every prompt hash each run's current rows carry, not just the last one — and only from the rows
+  // that actually sent a request. A skipped row records the prompt its run *would* have used, but it
+  // produced no card, so letting it disagree would flag a run whose every card came from one prompt.
+  const promptShasByRun = new Map<string, Set<string>>();
+  for (const row of current) {
+    if (row.status === "skipped") continue;
+    const shas = promptShasByRun.get(row.runId) ?? new Set<string>();
+    shas.add(row.prompt.sha256);
+    promptShasByRun.set(row.runId, shas);
+  }
   const configurations = experiment.runs.map(
-    (run) => configurationFor(run, promptShaByRun.get(run.id) ?? null));
+    (run) => configurationFor(run, promptShasByRun.get(run.id) ?? new Set()));
   const configurationById = new Map(configurations.map((entry) => [entry.runId, entry]));
 
   const seed = existingKey?.key.seed ?? options.seed;
@@ -867,6 +898,7 @@ function cardFor(
     outcome: outcomeFor(row),
     usage: blind || !row.usage ? null : { ...row.usage },
     modeledUsd: blind || !row.cost ? null : row.cost.modeledUsd,
+    promptSha256: blind ? null : row.prompt.sha256,
     textPartOmitted: row.textPartOmitted === true,
     // Only the team-internal report carries these. They name the run's shape and the tile ids it
     // could not photograph, which are a configuration in a blinded report and a document identifier
@@ -1095,6 +1127,21 @@ function statusBadge(status: "success" | "refusal" | "error" | "skipped"): Html 
   return html`<span class="badge badge-${status}">${status}</span>`;
 }
 
+/**
+ * What the header says about a run's prompt: its hash, or that its rows do not agree on one.
+ *
+ * The mixed case is not a failure — it is a results file that holds a prompt edit part-way through —
+ * but the report must not paper over it, because the run's cards are then not all comparable with
+ * each other. Each card names its own prompt when this fires.
+ */
+function promptVersionNote(run: ReviewRunConfiguration): Html {
+  if (run.promptSha256) return html` <span class="meta">(${shortSha(run.promptSha256)})</span>`;
+  if (run.promptVersions > 1) {
+    return html` <span class="badge badge-flag">${run.promptVersions} versions — see each card</span>`;
+  }
+  return html``;
+}
+
 function runTable(runs: ReviewRunConfiguration[]): Html {
   const cell = (value: string | null) => html`<td>${value ?? "—"}</td>`;
   return html`
@@ -1110,9 +1157,7 @@ function runTable(runs: ReviewRunConfiguration[]): Html {
           ${cell(run.detail)}
           ${cell(run.imageSet)}
           ${cell(run.extras)}
-          <td>${run.promptName}${run.promptSha256
-            ? html` <span class="meta">(${shortSha(run.promptSha256)})</span>`
-            : ""}</td>
+          <td>${run.promptName}${promptVersionNote(run)}</td>
         </tr>`)}
       </tbody>
     </table>`;
@@ -1237,7 +1282,12 @@ function cardBlock(card: ReviewCard): Html {
           : ""}
       </div>
       ${card.configuration
-        ? html`<p class="card-config">${configurationLine(card.configuration)}</p>`
+        ? html`<p class="card-config">${configurationLine(card.configuration)}${
+          // Only where the run's rows disagree: on every other card this would be the same hash the
+          // header already carries, repeated once per card for nothing.
+          card.configuration.promptVersions > 1 && card.promptSha256
+            ? html` · <strong>prompt ${shortSha(card.promptSha256)}</strong>`
+            : ""}</p>`
         : ""}
       ${card.textPartOmitted
         ? html`<p class="notice">This document carried no student-authored text, so the summary and
