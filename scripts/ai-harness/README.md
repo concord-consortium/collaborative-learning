@@ -914,13 +914,15 @@ All of it, by hand. The 26 fixtures were rendered against a real dev server and 
 Chromium in both capture modes — 25 full-height envelopes and 24 per-tile ones, the missing entries
 being `error-test`, which is marked `expectedRenderFailure`, and `empty`, which has no tile for a
 per-tile capture to photograph. Then a real `mixed-vs-baselines` run, assembled over several
-sittings as review turned up fixes:
+sittings as review turned up fixes. Summarised rather than pasted, since it took more than one
+command:
 
-```
-run     260 row(s): 146 sent, 114 skipped.
-        10 run(s) × 26 document(s) = 260 pair(s).
-report  260 current, 0 superseded.
-```
+| | |
+|---|---|
+| rows written | 260 — 10 runs × 26 documents |
+| sent | 146 |
+| skipped | 114 |
+| current, superseded | 260, 0 |
 
 Three things were repaired between the first run and this one, and each is worth knowing before
 reading the numbers. A per-tile capture was photographing tiles nested inside a Question, so
@@ -938,8 +940,14 @@ Adding the two variant runs edited the experiment file, and `experimentSha256` i
 identity — deliberately, so an edited experiment cannot silently resume rows built under the old
 definition. Every row therefore rebuilt, `report` refused a file holding two definitions, and
 recovering meant re-running into a clean one. That cost nothing: the cache is keyed on the request
-rather than the experiment, so all 153 rows came straight back out of it. The whole session's real
-spend was about $0.25.
+rather than the experiment, so all 153 rows the experiment then had came straight back out of it.
+That figure is from before the run this section records was reduced to ten; the whole session's
+real spend was about $0.25.
+
+**Any edit to an experiment file does this**, including renaming a run. If you hold results from an
+earlier definition and re-run into the same `--output`, every row rebuilds and `report` then refuses
+the file for mixing two definitions — it says so, and names the fix. Re-run into a fresh file, or
+move the old one aside. The cache means recovery costs time rather than money.
 
 - **The image cost model checks out.** Estimated image tokens account for 98.6% of the prompt tokens
   the API actually billed in `image-puppeteer` (371,177 of 376,513), 98.9% in `image-per-tile`
@@ -951,10 +959,11 @@ spend was about $0.25.
 - **Every text dimension is priced, over the same 7 documents and the same prompt.** Named by run,
   because two dimensions are in play and the settings alone would not say which: `text-extras-none`
   sends 3,725 prompt tokens; `text-no-dataset-tables` 3,823; `text-default` and `text-extras-all`
-  3,895; `text-drawing-text` 3,958. This run also carried an `extras-production-current` setting,
-  since removed, which reproduced CLUE-630's bug and sent 4,537 — a 642-token premium for repeating the analyzed
-  document's own summary in place of each related one. Kept here because it prices what redundant
-  extras cost, which is the shape of the control CLUE-607 will want.
+  3,895; `text-drawing-text` 3,958. The recorded session also carried an eleventh run, since
+  removed, whose `extras-production-current` setting reproduced CLUE-630's bug and sent 4,537 — a
+  642-token premium for repeating the analyzed document's own summary in place of each related one.
+  Kept here because it prices what redundant extras cost, which is the shape of the control
+  CLUE-607 will want.
 - **`drawing-text` is the only run that ever answered `form`.** Across all 146 rows the categories
   are 90 `unknown`, 41 `function`, 14 `user` and a single `form` — the `drawing` fixture, two shapes
   and no text, which every other run either skips or calls `unknown`. The model gave "drawing with 2
