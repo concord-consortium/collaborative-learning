@@ -2,12 +2,8 @@ import { isAwaitingReply } from "./awaiting-reply";
 
 describe("isAwaitingReply", () => {
   it("clears typing indicator for a silent assistant reply that produces no turn", () => {
-    // A user message followed by an assistant message (even if silent and producing no turn)
-    // means the tutor has finished, so we are NOT awaiting a reply.
-    expect(isAwaitingReply(["user", "assistant"])).toBe(false);
-  });
-
-  it("clears typing indicator for a visible assistant reply", () => {
+    // A user message followed by an assistant message means the tutor has replied, whether or
+    // not that reply produced a visible turn, so we are NOT awaiting a reply.
     expect(isAwaitingReply(["user", "assistant"])).toBe(false);
   });
 

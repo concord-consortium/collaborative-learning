@@ -5,9 +5,11 @@ drive a highlight by hand. For the contract a tile implements to become a highli
 target, see [highlights.md](highlights.md) — nothing here is needed to add a new tile.
 
 Everything below is about the **variable chip**, which is currently the only way a *user* can
-author a reference to an object in another tile. That makes it the only way to demonstrate the
-feature before AI-emitted references exist, and it is scaffolding rather than the destination —
-see the note on reference kinds in [highlights.md](highlights.md).
+author a reference to an object in another tile — AI-emitted `object` references now exist (the
+chat tutor sidebar produces them), but driving those by hand means opening a chat rather than
+authoring a document. The chip remains the way to demonstrate the feature from a static document,
+and it is scaffolding rather than the destination — see the note on reference kinds in
+[highlights.md](highlights.md).
 
 `src/public/demo/docs/emg-highlight-demo.json` is the worked example, and the fixture for
 `cypress/e2e/functional/tile_tests/highlight_references_spec.js`.

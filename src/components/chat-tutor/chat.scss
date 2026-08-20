@@ -216,6 +216,7 @@
     cursor: pointer;
 
     &:hover { background: $charcoal-light-6; }
+    &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
 
     // Pinned: the student asked to keep this one showing. Distinct from hover, which is a preview.
     &.active {

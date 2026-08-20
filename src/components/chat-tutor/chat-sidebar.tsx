@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
@@ -81,11 +81,15 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
 
   // Identifies this sidebar instance as a highlight source. Several sources share one document, and
   // two of them can cite the same object, so ownership is decided by token rather than by reference.
-  const highlightSource = useMemo(() => `chat-highlight-${uniqueId()}`, []);
+  // useRef rather than useMemo: React is allowed to discard a memoized value and recompute it, which
+  // here would mint a new token mid-life and strand this sidebar's own pinned highlight.
+  const highlightSource = useRef(`chat-highlight-${uniqueId()}`).current;
 
-  // Which of this sidebar's buttons is pinned. Read from the model rather than kept in React state
-  // alone, so a pin taken over by another source (a variable chip, say) stops showing here.
-  const pinnedKeyRef = useRef<string | undefined>(undefined);
+  // Which of this sidebar's buttons is pinned. useState so re-pinning within this sidebar
+  // (still the same content.pinnedHighlightSource) re-renders instead of leaving the previously
+  // pressed button showing stale `.active`/`aria-pressed` state. The guard below still defers to
+  // the model, so a pin taken over by another source (a variable chip, say) stops showing here.
+  const [pinnedKey, setPinnedKey] = useState<string | undefined>(undefined);
 
   const findHighlight = (turnId: string, index: number) =>
     chat.turns.find(t => t.id === turnId)?.highlights?.[index];
@@ -109,12 +113,12 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     content.togglePinnedHighlightRef(
       { kind: "object", tileId: highlight.tileId, objectId: highlight.objectId },
       highlightSource);
-    pinnedKeyRef.current = content.pinnedHighlightSource === highlightSource
-      ? highlightKey(turnId, index) : undefined;
+    setPinnedKey(content.pinnedHighlightSource === highlightSource
+      ? highlightKey(turnId, index) : undefined);
   };
 
   const activeHighlightKey = content?.pinnedHighlightSource === highlightSource
-    ? pinnedKeyRef.current : undefined;
+    ? pinnedKey : undefined;
 
   // React does not fire onMouseLeave for an element that unmounts under the cursor, and a pinned
   // highlight can only be dismissed by clicking its button — so a sidebar that closes while pinned
