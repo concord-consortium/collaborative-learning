@@ -1,7 +1,8 @@
 import { applySnapshot, getSnapshot } from "@concord-consortium/mobx-state-tree";
 import {
   PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor,
-  PersistentUIModelV2Snapshot, PersistentUIModelType
+  PersistentUIModelV2Snapshot, PersistentUIModelType, dividerForLayout, resolveStartView,
+  applyStartupUIState
 } from "./persistent-ui";
 import { UITabModel } from "./ui-tab-model";
 import { UIDocumentGroup } from "./ui-document-group";
@@ -774,5 +775,347 @@ describe("PersistentUI", () => {
       model.applyDefaultPanelLayout("workspace-only");
       expect(model.dividerPosition).toBe(kDividerHalf);
     });
+  });
+
+  describe("applyFixedStartView", () => {
+    // A returning user whose state was restored from Firebase, with a two-key group (primary +
+    // secondary) open in another tab: exactly the shape the old close-primary approach mishandled.
+    function makeSavedUI() {
+      const ui = PersistentUIModel.create({
+        version: "2.0.0",
+        tabs: {
+          "class-work": {
+            id: "class-work",
+            currentDocumentGroupId: "Workspaces",
+            visitedDocumentGroups: { Workspaces: { id: "Workspaces", currentDocumentKeys: ["doc-1", "doc-2"] } }
+          }
+        },
+        activeNavTab: "my-work",
+        dividerPosition: kDividerMax,
+        problemWorkspace: { type: "problem", mode: "1-up" }
+      });
+      ui.setHasSavedPersistentUI(true);
+      return ui;
+    }
+
+    it("overrides the displayed tab and divider without mutating the saved record", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+
+      // The override drives the display...
+      expect(ui.displayedNavTab).toBe(ENavTab.kClassWork);
+      expect(ui.displayedDividerPosition).toBe(kDividerHalf);
+      // ...but the persisted state is untouched, so the user's real place survives.
+      expect(ui.activeNavTab).toBe("my-work");
+      expect(ui.dividerPosition).toBe(kDividerMax);
+      expect(ui.tabs.get("class-work")?.getDocumentGroup("Workspaces")?.currentDocumentKeys)
+        .toEqual(["doc-1", "doc-2"]);
+    });
+
+    it("releases the forced tab when the user chooses a tab", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.setActiveNavTab(ENavTab.kSortWork);
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kClassWork)).toBe(false);
+      expect(ui.displayedNavTab).toBe(ENavTab.kSortWork);
+      expect(ui.activeNavTab).toBe(ENavTab.kSortWork);
+    });
+
+    it("keeps the forced divider when the user navigates", () => {
+      // The saved divider has the resources pane closed. Releasing the divider along with the tab
+      // would collapse the panel on the user's first click, hiding what they just opened.
+      const ui = PersistentUIModel.create({
+        version: "2.0.0",
+        activeNavTab: "my-work",
+        dividerPosition: kDividerMin,
+        problemWorkspace: { type: "problem", mode: "1-up" }
+      });
+      ui.setHasSavedPersistentUI(true);
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      expect(ui.navTabContentShown).toBe(true);
+
+      ui.setActiveNavTab(ENavTab.kClassWork);
+      expect(ui.displayedDividerPosition).toBe(kDividerHalf);
+      expect(ui.navTabContentShown).toBe(true);
+      // The saved divider is untouched by the override itself; a resize overwrites it with whatever
+      // the user picks (here the same value they had saved).
+      expect(ui.dividerPosition).toBe(kDividerMin);
+    });
+
+    it("releases the forced divider, but not the forced tab, when the user resizes", () => {
+      // Resizing the pane (or collapsing it, or following the skip link) is not a request to go to a
+      // different tab, so the panel must not swap its content underneath the resize.
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.setDividerPosition(kDividerMin);
+      expect(ui.displayedDividerPosition).toBe(kDividerMin);
+      expect(ui.startViewDividerPosition).toBeUndefined();
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kClassWork)).toBe(true);
+      expect(ui.displayedNavTab).toBe(ENavTab.kClassWork);
+      // The saved divider is written as usual; only the forced value is dropped.
+      expect(ui.dividerPosition).toBe(kDividerMin);
+    });
+
+    it("releases the forced tab when the user opens a document", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.openDocumentGroupPrimaryDocument(ENavTab.kClassWork, "Workspaces", "doc-9");
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kClassWork)).toBe(false);
+    });
+
+    it("releases the forced tab when the user opens a secondary document", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.openDocumentGroupSecondaryDocument(ENavTab.kClassWork, "Workspaces", "doc-9");
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kClassWork)).toBe(false);
+    });
+
+    it("reports the override only for the tab it forces", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kClassWork)).toBe(true);
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kMyWork)).toBe(false);
+      ui.setActiveNavTab(ENavTab.kSortWork);
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kClassWork)).toBe(false);
+    });
+
+    it("reports no open document for the forced tab, even one the user was already on", () => {
+      const ui = makeSavedUI();
+      // The user's saved tab IS the forced tab, with a document open: the browser has to win, and the
+      // thumbnail must not read as selected, or the first click on it closes the document instead of
+      // opening it.
+      ui.setActiveNavTab(ENavTab.kClassWork);
+      expect(ui.focusDocument).toBe("doc-1");
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      expect(ui.focusDocument).toBeUndefined();
+      expect(ui.focusSecondaryDocument).toBeUndefined();
+      // ...and the saved document is still there when the override ends.
+      ui.setActiveNavTab(ENavTab.kClassWork);
+      expect(ui.focusDocument).toBe("doc-1");
+    });
+
+    it("still reports the section path when it forces a curriculum tab", () => {
+      // "No document open" does not apply to the curriculum tabs: they always show their section, so
+      // comments and read-aloud must keep working there.
+      const ui = makeSavedUI();
+      ui.setProblemPath("unit/1/2");
+      ui.setCurrentDocumentGroupId(ENavTab.kProblems, "introduction");
+      ui.applyFixedStartView(ENavTab.kProblems, kDividerHalf);
+      expect(ui.focusDocument).toBe("unit/1/2/introduction");
+    });
+
+    it("keeps reporting no open document after a resize", () => {
+      const ui = makeSavedUI();
+      ui.setActiveNavTab(ENavTab.kClassWork);
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.setDividerPosition(kDividerMin);
+      expect(ui.focusDocument).toBeUndefined();
+    });
+
+    it("reports the displayed tab's document group, not the user's own tab's", () => {
+      // Read-aloud stops when the section on screen changes. Watching currentDocumentGroupId, which is
+      // keyed off activeNavTab, would miss every change made inside the forced tab.
+      const ui = makeSavedUI();
+      ui.setCurrentDocumentGroupId(ENavTab.kMyWork, "Workspaces");
+      ui.applyFixedStartView(ENavTab.kProblems, kDividerHalf);
+      ui.setCurrentDocumentGroupId(ENavTab.kProblems, "introduction");
+      expect(ui.currentDocumentGroupId).toBe("Workspaces");
+      expect(ui.displayedCurrentDocumentGroupId).toBe("introduction");
+
+      ui.setCurrentDocumentGroupId(ENavTab.kProblems, "initialChallenge");
+      expect(ui.displayedCurrentDocumentGroupId).toBe("initialChallenge");
+    });
+
+    it("pins the sub tab of a forced document tab, and releases it when the user picks one", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      expect(ui.isStartViewSubTabPinnedFor(ENavTab.kClassWork)).toBe(true);
+      // Another tab's pin is not this tab's business.
+      expect(ui.isStartViewSubTabPinnedFor(ENavTab.kMyWork)).toBe(false);
+
+      // A click in a tab that is not forced must not release the forced tab's pin.
+      ui.selectDocumentGroup(ENavTab.kMyWork, "Workspaces");
+      expect(ui.isStartViewSubTabPinnedFor(ENavTab.kClassWork)).toBe(true);
+
+      ui.selectDocumentGroup(ENavTab.kClassWork, "Bookmarks");
+      expect(ui.isStartViewSubTabPinnedFor(ENavTab.kClassWork)).toBe(false);
+      expect(ui.tabs.get(ENavTab.kClassWork)?.currentDocumentGroupId).toBe("Bookmarks");
+    });
+
+    it("does not pin a sub tab on the curriculum tabs, which have no browser to start on", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kProblems, kDividerHalf);
+      expect(ui.startViewSubTabPinned).toBe(false);
+      // Contrast: the same call for a document tab does pin, so this is not just the field default.
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      expect(ui.startViewSubTabPinned).toBe(true);
+    });
+
+    it("releases the pinned sub tab along with the tab", () => {
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      expect(ui.startViewSubTabPinned).toBe(true);
+
+      ui.setActiveNavTab(ENavTab.kSortWork);
+      // Otherwise the author's sub tab choice would be applied to a tab the user chose.
+      expect(ui.isStartViewSubTabPinnedFor(ENavTab.kClassWork)).toBe(false);
+      expect(ui.startViewSubTabPinned).toBe(false);
+    });
+
+    it("does not release the pinned sub tab when code initializes a document group", () => {
+      // The default-sub-tab effect uses setCurrentDocumentGroupId; only a user click releases the pin.
+      const ui = makeSavedUI();
+      ui.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+      ui.setCurrentDocumentGroupId(ENavTab.kClassWork, "Workspaces");
+      expect(ui.isStartViewSubTabPinnedFor(ENavTab.kClassWork)).toBe(true);
+    });
+
+    it("applies to a tab the user has never visited", () => {
+      const ui = makeSavedUI();
+      // No tab state exists for sort-work at all, which is the common case for the feature's audience.
+      ui.applyFixedStartView(ENavTab.kSortWork, kDividerHalf);
+      expect(ui.isStartViewOverrideActiveFor(ENavTab.kSortWork)).toBe(true);
+      expect(ui.focusDocument).toBeUndefined();
+      expect(ui.tabs.get(ENavTab.kSortWork)).toBeUndefined();
+    });
+  });
+});
+
+describe("dividerForLayout", () => {
+  it("maps each layout to a divider position", () => {
+    expect(dividerForLayout("workspace-only")).toBe(kDividerMin);
+    expect(dividerForLayout("resources-only")).toBe(kDividerMax);
+    expect(dividerForLayout("split")).toBe(kDividerHalf);
+    expect(dividerForLayout(undefined)).toBe(kDividerHalf);
+  });
+});
+
+describe("resolveStartView", () => {
+  const displayed = ["problems", "class-work", "sort-work"];
+
+  it("returns undefined when the switch is off", () => {
+    expect(resolveStartView({ fixedStartView: false, fixedStartTab: "class-work" }, displayed))
+      .toBeUndefined();
+  });
+
+  it("returns undefined when no tab is set", () => {
+    expect(resolveStartView({ fixedStartView: true }, displayed)).toBeUndefined();
+  });
+
+  it("returns undefined and warns when the tab is not displayed", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    expect(resolveStartView({ fixedStartView: true, fixedStartTab: "teacher-guide" }, displayed))
+      .toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("returns undefined and warns for a tab the fixed start view cannot force", () => {
+    // Student Work has no "no document open" browser view, so it is refused even when displayed.
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    expect(resolveStartView(
+      { fixedStartView: true, fixedStartTab: "student-work" },
+      [...displayed, "student-work"]
+    )).toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("returns undefined and warns when the layout collapses the resources panel", () => {
+    // Forcing kDividerMin would hide the tab being forced, and because only a resize releases the
+    // forced divider it would close the panel on every load for a user who had opened it.
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    expect(resolveStartView(
+      { fixedStartView: true, fixedStartTab: "class-work", defaultPanelLayout: "workspace-only" },
+      displayed
+    )).toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("returns undefined when the user arrived with an explicit document target", () => {
+    expect(resolveStartView(
+      { fixedStartView: true, fixedStartTab: "class-work", hasDocumentTarget: true },
+      displayed
+    )).toBeUndefined();
+  });
+
+  it("returns the tab and layout-derived divider when displayed", () => {
+    expect(resolveStartView(
+      { fixedStartView: true, fixedStartTab: "class-work", defaultPanelLayout: "resources-only" },
+      displayed
+    )).toEqual({ tab: "class-work", dividerPosition: kDividerMax });
+  });
+});
+
+describe("applyStartupUIState", () => {
+  const displayed = ["problems", "class-work"];
+
+  function makeUI(dividerPosition = kDividerHalf) {
+    return PersistentUIModel.create({
+      version: "2.0.0",
+      activeNavTab: "my-work",
+      dividerPosition,
+      problemWorkspace: { type: "problem", mode: "1-up" }
+    });
+  }
+
+  it("applies the unit layout and then layers the forced view on top", () => {
+    // Both must run. If only the override ran, releasing it would drop a first-time visitor to the
+    // bare kDividerHalf default rather than the layout the author asked for.
+    const ui = makeUI();
+    applyStartupUIState(ui, {
+      fixedStartView: true, fixedStartTab: "class-work", defaultPanelLayout: "resources-only"
+    }, displayed);
+
+    expect(ui.dividerPosition).toBe(kDividerMax);
+    expect(ui.displayedNavTab).toBe("class-work");
+    expect(ui.displayedDividerPosition).toBe(kDividerMax);
+  });
+
+  it("applies the unit layout but forces nothing when the switch is off", () => {
+    const ui = makeUI();
+    applyStartupUIState(ui, { defaultPanelLayout: "resources-only" }, displayed);
+
+    expect(ui.dividerPosition).toBe(kDividerMax);
+    expect(ui.displayedNavTab).toBe("my-work");
+    expect(ui.startViewTab).toBeUndefined();
+  });
+
+  it("does not force the view when the user arrived with a document link", () => {
+    // The guard this pins was briefly wired to a store member that is never assigned, which silently
+    // disabled it while still type checking.
+    const ui = makeUI();
+    applyStartupUIState(ui, {
+      fixedStartView: true, fixedStartTab: "class-work", hasDocumentTarget: true
+    }, displayed);
+
+    expect(ui.startViewTab).toBeUndefined();
+    expect(ui.displayedNavTab).toBe("my-work");
+  });
+
+  it("does not force a tab that is not displayed for this user", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const ui = makeUI();
+    applyStartupUIState(ui, { fixedStartView: true, fixedStartTab: "sort-work" }, displayed);
+
+    expect(ui.startViewTab).toBeUndefined();
+    warn.mockRestore();
+  });
+
+  it("leaves a returning user's divider alone while still forcing the tab", () => {
+    // The saved divider must differ from the one the layout implies, or this passes whether or not
+    // applyDefaultPanelLayout still honors hasSavedPersistentUI.
+    const ui = makeUI(kDividerMin);
+    ui.setHasSavedPersistentUI(true);
+    applyStartupUIState(ui, {
+      fixedStartView: true, fixedStartTab: "class-work", defaultPanelLayout: "resources-only"
+    }, displayed);
+
+    // applyDefaultPanelLayout is a no-op for a returning user, so their saved divider survives...
+    expect(ui.dividerPosition).toBe(kDividerMin);
+    // ...and the forced divider is only an override on top of it.
+    expect(ui.displayedDividerPosition).toBe(kDividerMax);
+    expect(ui.displayedNavTab).toBe("class-work");
   });
 });
