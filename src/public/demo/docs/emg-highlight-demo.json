@@ -38,7 +38,9 @@
         "type": "Drawing",
         "objects": [
           {"type": "variable", "id": "emgSketchChip", "x": 40, "y": 40, "variableId": "c9561nuH0CdjytQd"},
-          {"type": "variable", "id": "gripperSketchChip", "x": 40, "y": 100, "variableId": "K6LVoQMPcw56cjHU"}
+          {"type": "variable", "id": "gripperSketchChip", "x": 40, "y": 100, "variableId": "K6LVoQMPcw56cjHU"},
+          {"type": "rectangle", "id": "emgSketchRect", "x": 200, "y": 40, "width": 90, "height": 60,
+           "stroke": "#000000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none"}
         ]
       }
     },

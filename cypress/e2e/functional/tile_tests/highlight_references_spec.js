@@ -22,6 +22,10 @@ const SKETCH_TILE = ".canvas-area .drawing-tool";
 const HIGHLIGHT_BOX = "[data-testid=highlight-reference-box]";
 const EMG_SKETCH_BOX = `${HIGHLIGHT_BOX}[data-object-id=emgSketchChip]`;
 const GRIPPER_SKETCH_BOX = `${HIGHLIGHT_BOX}[data-object-id=gripperSketchChip]`;
+// A plain shape, carrying no variable and reachable by no chip. Only an `object` reference names it.
+const SKETCH_RECT_BOX = `${HIGHLIGHT_BOX}[data-object-id=emgSketchRect]`;
+const SKETCH_TILE_ID = "emgSketch1";
+const SKETCH_RECT_ID = "emgSketchRect";
 
 // The demo document ships an authored variable chip, so this spec never has to drive the
 // Insert Variable dialog — the starting state is deterministic.
@@ -178,6 +182,46 @@ context("Highlight references", () => {
 
     // Clicking again unpins.
     cy.get("@chip").click();
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+  });
+
+  // The `object` reference kind is what an AI source emits: a tileId and an objectId, naming one
+  // thing directly rather than resolving through a variable. Every other test here drives the
+  // `variable` kind from a text chip, which reaches sketch objects only because a variable chip
+  // stores a variableId — so none of them touch a shape, and none of them exercise `object` at all.
+  //
+  // Without this test the sketch tile is only demonstrated as a target for variable references,
+  // which is a different claim from the one that matters: that a reference can point at any
+  // drawing object. The rectangle carries no variable, so nothing in the UI can name it.
+  //
+  // The reference is set on the document model because no UI source constructs an `object`
+  // reference yet. That is the point of the test, not a shortcut around one: the rendering path
+  // is meant to be kind-agnostic, and this is the only way to prove it before an AI source exists.
+  it("highlights a plain shape from an object reference, which no chip can name", () => {
+    cy.get(SKETCH_TILE).should("exist");
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+
+    // The document is exposed by DocEditorApp; see the note there on why it tracks replacements.
+    cy.window().then(win => {
+      const content = win.currentDocument.content;
+      expect(content.tileMap.has(SKETCH_TILE_ID), "fixture still has the sketch tile").to.be.true;
+      content.setPinnedHighlightRef({
+        kind: "object", tileId: SKETCH_TILE_ID, objectId: SKETCH_RECT_ID
+      });
+    });
+
+    cy.get(SKETCH_RECT_BOX).should("have.class", "pinned");
+    // Same reason the variable test asserts the computed stroke: the class alone would pass with
+    // the CSS never reaching the rect, leaving a ring that is in the DOM and invisible.
+    cy.get(SKETCH_RECT_BOX).should("have.css", "stroke", "rgb(107, 35, 252)");  // $highlight-pinned-ring
+
+    // Only the named object. A reference that lit the whole tile would satisfy a bare
+    // "something is highlighted" assertion while being useless as guidance.
+    cy.get(HIGHLIGHT_BOX).should("have.length", 1);
+    cy.get(EMG_SKETCH_BOX).should("not.exist");
+    cy.get(GRIPPER_SKETCH_BOX).should("not.exist");
+
+    cy.window().then(win => win.currentDocument.content.clearPinnedHighlightRef());
     cy.get(HIGHLIGHT_BOX).should("not.exist");
   });
 
