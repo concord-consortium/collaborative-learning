@@ -182,25 +182,12 @@ function checkedImageBytes(file: string, expectedSha256: string): Buffer {
 /**
  * The related summaries a run sends, which is a dimension rather than a fact about the document.
  *
- * `extras-production-current` reproduces a real production bug on purpose (CLUE-630, written up as
- * finding 6a in `docs/plans/CLUE-371-spike.md`): `findRelatedSummaries` hands every related entry
- * the *analyzed document's own* summary instead of the related document's, so the model is shown
- * the same text several times over and told other people agreed with it. It is a named baseline so
- * a before/after comparison stays honest — measuring the fix means measuring against what
- * production does today. Do not improve it.
+ * `all` sends the manifest's entries; `none` sends an empty list. Whether they help at all, and
+ * whether any help comes from their content or their length, is unmeasured — see the README.
  */
-export function relatedSummariesFor(
-  run: ExperimentRun, document: ManifestDocument, markdown: string
-): RelatedSummary[] {
+export function relatedSummariesFor(run: ExperimentRun, document: ManifestDocument): RelatedSummary[] {
   const entries = (document.relatedSummaries ?? []) as unknown as RelatedSummary[];
-  switch (run.extras ?? "extras-fixed") {
-    case "no-extras":
-      return [];
-    case "extras-production-current":
-      return entries.map((entry) => ({ ...entry, summary: markdown }));
-    default:
-      return entries;
-  }
+  return (run.extras ?? "all") === "none" ? [] : entries;
 }
 
 /**
@@ -329,7 +316,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
     }
     return {
       markdown: envelope.markdown,
-      relatedSummaries: relatedSummariesFor(run, document, envelope.markdown),
+      relatedSummaries: relatedSummariesFor(run, document),
       representation: {
         variantId: variant.id,
         variantVersion: variant.variantVersion,

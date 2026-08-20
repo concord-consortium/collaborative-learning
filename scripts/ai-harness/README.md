@@ -10,7 +10,7 @@ cache, the spend ceiling, and reports as data. Milestone 2 added the other produ
 — the screenshot — so image-only baselines could run against the same corpus. Milestone 3 adds the
 message the whole question is about, text **and** picture together, plus the dimensions an
 experiment needs to turn around it: image detail, per-tile and visual-tiles-only image sets, the
-three extras settings, two new text variants, and skip-empty execution. The HTML review report
+extras settings, two new text variants, and skip-empty execution. The HTML review report
 (milestone 4), rubric scoring (milestone 5) and the production corpus pull (milestone 6) are not
 here yet.
 
@@ -469,21 +469,38 @@ the one the file describes:
 |---|---|---|---|
 | `detail` | image-carrying runs | the builder's `auto` | `low`, `high` |
 | `imageSet` | image-carrying runs | `full-document` | `per-tile`, `visual-tiles-only` |
-| `extras` | text-carrying runs | `extras-fixed` | `extras-production-current`, `no-extras` |
+| `extras` | text-carrying runs | `all` | `none` |
 
-`extras` is what a run puts in the related-summary parts. `extras-fixed` is each related document's
-own summary, from the manifest, which is what the harness has always sent — so an experiment file
-written before this dimension existed keeps its meaning *and its request key*.
-`extras-production-current` reproduces production's `findRelatedSummaries` bug on purpose (spike
-finding 6a, CLUE-630): every related entry is given the **analyzed document's own** summary, so the
-model is shown the same text several times over and told other people agreed with it. It is a named
-baseline, kept faithful so a before-and-after comparison stays honest. `no-extras` sends none.
+`extras` is what a run puts in the related-summary parts. `all` — the default — sends every related
+summary the manifest carries, each one that document's own, which is what the harness has always
+sent; an experiment file written before this dimension existed therefore keeps its meaning *and its
+request key*. `none` sends the parts empty. A setting that sends *some* of them would belong here
+too, and the names leave room for it.
 
-`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: eleven
-runs over the same corpus. Text, image and mixed are the comparison itself; the other eight turn one
-dimension each around it — detail-low, per-tile and visual-tiles-only on the image side, the three
+**The open question is whether they help at all**, and neither setting answers it on its own. The
+feature has never run for real: production's `summaries` collection holds one document, so the
+search that feeds it has always returned nothing (spike finding 6a). If `all` beats `none` on a
+corpus that has them, the next question is whether that is the *content* of the
+related summaries or simply more text in the prompt — and answering that needs a third setting whose
+extras carry the same volume and no useful information. That is a control worth designing for
+CLUE-607's experiments rather than inheriting.
+
+A setting reproducing CLUE-630's `findRelatedSummaries` bug — every entry given the analyzed
+document's own summary — was here and has been removed. It was built to keep a before-and-after
+honest, but there is no meaningful "before": the bug never fired in production, for the same reason
+the feature never ran. `master` now guards the fix with a unit test, which is the right tool for
+"do not reintroduce this". As a content control it was also confounded, varying volume as well as
+content. The 642-token figure it produced is kept in the recorded run below.
+
+`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: ten
+runs over the same corpus. Text, image and mixed are the comparison itself; the other seven turn one
+dimension each around it — detail-low, per-tile and visual-tiles-only on the image side, the two
 extras settings and the two new text variants on the text side. Every dimension this milestone adds
 has a run, so none of them ships only exercised by a unit test.
+
+`text-extras-all` is deliberately a duplicate of `text-default`: `extras` defaults to `all`, so the
+two build the same request and the second one costs nothing. It is there so the default is measured
+rather than assumed — if it ever stopped matching, the run would say so.
 `experiments/image-vs-text.json` is milestone 2's narrower comparison, kept as it was.
 
 ### Which documents a run declines to send
@@ -897,13 +914,15 @@ All of it, by hand. The 26 fixtures were rendered against a real dev server and 
 Chromium in both capture modes — 25 full-height envelopes and 24 per-tile ones, the missing entries
 being `error-test`, which is marked `expectedRenderFailure`, and `empty`, which has no tile for a
 per-tile capture to photograph. Then a real `mixed-vs-baselines` run, assembled over several
-sittings as review turned up fixes:
+sittings as review turned up fixes. Summarised rather than pasted, since it took more than one
+command:
 
-```
-run     286 row(s): 153 sent, 133 skipped.
-        11 run(s) × 26 document(s) = 286 pair(s).
-report  286 current, 0 superseded.
-```
+| | |
+|---|---|
+| rows written | 260 — 10 runs × 26 documents |
+| sent | 146 |
+| skipped | 114 |
+| current, superseded | 260, 0 |
 
 Three things were repaired between the first run and this one, and each is worth knowing before
 reading the numbers. A per-tile capture was photographing tiles nested inside a Question, so
@@ -921,8 +940,14 @@ Adding the two variant runs edited the experiment file, and `experimentSha256` i
 identity — deliberately, so an edited experiment cannot silently resume rows built under the old
 definition. Every row therefore rebuilt, `report` refused a file holding two definitions, and
 recovering meant re-running into a clean one. That cost nothing: the cache is keyed on the request
-rather than the experiment, so all 153 rows came straight back out of it. The whole session's real
-spend was about $0.25.
+rather than the experiment, so all 153 rows the experiment then had came straight back out of it.
+That figure is from before the run this section records was reduced to ten; the whole session's
+real spend was about $0.25.
+
+**Any edit to an experiment file does this**, including renaming a run. If you hold results from an
+earlier definition and re-run into the same `--output`, every row rebuilds and `report` then refuses
+the file for mixing two definitions — it says so, and names the fix. Re-run into a fresh file, or
+move the old one aside. The cache means recovery costs time rather than money.
 
 - **The image cost model checks out.** Estimated image tokens account for 98.6% of the prompt tokens
   the API actually billed in `image-puppeteer` (371,177 of 376,513), 98.9% in `image-per-tile`
@@ -931,13 +956,16 @@ spend was about $0.25.
   prompt. `image-detail-low` is the loosest at 92.4%, which is arithmetic rather than error: a
   low-detail image is a flat 2833 tokens, so the fixed prompt text is a much larger share of a much
   smaller total.
-- **Every text dimension is priced, over the same 7 documents and the same prompt.** `no-extras`
-  sends 3,725 prompt tokens; `no-dataset-tables` 3,823; `default` and `extras-fixed` 3,895;
-  `drawing-text` 3,958; `extras-production-current` 4,537. The 642-token gap between `extras-fixed`
-  and `extras-production-current` is the production bug (CLUE-630) reproduced and priced: it
-  re-sends the analyzed document's own summary in place of each related one.
-- **`drawing-text` is the only run that ever answered `form`.** Across all 153 rows the categories
-  are 91 `unknown`, 45 `function`, 16 `user` and a single `form` — the `drawing` fixture, two shapes
+- **Every text dimension is priced, over the same 7 documents and the same prompt.** Named by run,
+  because two dimensions are in play and the settings alone would not say which: `text-extras-none`
+  sends 3,725 prompt tokens; `text-no-dataset-tables` 3,823; `text-default` and `text-extras-all`
+  3,895; `text-drawing-text` 3,958. The recorded session also carried an eleventh run, since
+  removed, whose `extras-production-current` setting reproduced CLUE-630's bug and sent 4,537 — a
+  642-token premium for repeating the analyzed document's own summary in place of each related one.
+  Kept here because it prices what redundant extras cost, which is the shape of the control
+  CLUE-607 will want.
+- **`drawing-text` is the only run that ever answered `form`.** Across all 146 rows the categories
+  are 90 `unknown`, 41 `function`, 14 `user` and a single `form` — the `drawing` fixture, two shapes
   and no text, which every other run either skips or calls `unknown`. The model gave "drawing with 2
   objects", "rectangle and ellipse", "specified positions and sizes" as its indicators. One document
   is not evidence that describing geometry beats photographing it, but it is the variant doing
@@ -951,7 +979,7 @@ spend was about $0.25.
   dropped is structurally identical to an image-only one, but this experiment gives the mixed run
   its own `categorize-design-mixed` prompt, so none of its 16 text-free rows matched the image-only
   cache. Two runs share cache entries only when they share the prompt as well as the payload —
-  which is why `text-extras-fixed` matched `text-default` on all 7 rows and cost nothing.
+  which is why `text-extras-all` matched `text-default` on all 7 rows and cost nothing.
 - **Fixing the mixed prompt changed no answers.** It had told the model it was given "a written
   summary and a picture", on 16 of 23 rows where the summary was dropped. Rewording it to promise a
   summary only when there is one moved **0 of 23** categories. The fidelity problem was real and its

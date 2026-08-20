@@ -147,7 +147,7 @@ describe("experiment validation", () => {
     it("refuses extras on an image-only run", () => {
       expect(validate({
         message: "image-only", textVariant: undefined, imageMode: "puppeteer-full-height",
-        extras: "no-extras"
+        extras: "none"
       })).toThrow(/extras must not be set on an "image-only" run: extras ride the summary/);
     });
 
@@ -157,11 +157,11 @@ describe("experiment validation", () => {
         name: "x",
         runs: [{
           id: "mixed", message: "mixed", textVariant: "default", imageMode: "puppeteer-full-height",
-          detail: "high", imageSet: "per-tile", extras: "no-extras", prompt: "categorize-design-default"
+          detail: "high", imageSet: "per-tile", extras: "none", prompt: "categorize-design-default"
         }]
       }, "experiment.json", context);
       expect(experiment.runs[0])
-        .toMatchObject({ detail: "high", imageSet: "per-tile", extras: "no-extras" });
+        .toMatchObject({ detail: "high", imageSet: "per-tile", extras: "none" });
     });
 
     it("refuses values outside each list", () => {
@@ -172,7 +172,7 @@ describe("experiment validation", () => {
         imageMode: "puppeteer-full-height", imageSet: "every-other-tile" }))
         .toThrow(/imageSet must be one of full-document, per-tile, visual-tiles-only/);
       expect(validate({ extras: "extras-improved" }))
-        .toThrow(/extras must be one of extras-fixed, extras-production-current, no-extras/);
+        .toThrow(/extras must be one of all, none/);
     });
 
     it("leaves an unset dimension unset, so defaults stay the caller's business", () => {
