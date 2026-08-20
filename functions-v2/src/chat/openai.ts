@@ -7,8 +7,15 @@
 // json_schema/strict with a nullable `userText`.
 import OpenAI from "openai";
 
+export interface TutorHighlight {
+  tileId: string;
+  objectId: string;
+  label: string;
+}
+
 export interface TutorReply {
   userText: string | null;
+  highlights: TutorHighlight[];
 }
 
 // A single input message for a turn. role:"user" for a typed student message; role:"developer" for
@@ -18,8 +25,10 @@ export interface TutorInputMessage {
   content: string;
 }
 
-// Structured-output contract: strict json_schema, userText nullable. Strict mode guarantees the SHAPE;
-// whether the model chooses userText:null is driven by the generic prompt.
+// Structured-output contract: strict json_schema, userText nullable. Strict mode requires every
+// property to be listed in `required` and forbids additional ones, so "nothing to point at" is an
+// empty array rather than an absent field — the same way userText:null expresses a silent reply.
+// Array length cannot be constrained in strict mode; restraint comes from the prompt.
 export const TUTOR_REPLY_FORMAT = {
   type: "json_schema" as const,
   name: "tutor_reply",
@@ -27,9 +36,27 @@ export const TUTOR_REPLY_FORMAT = {
   schema: {
     type: "object",
     additionalProperties: false,
-    required: ["userText"],
+    required: ["userText", "highlights"],
     properties: {
       userText: {type: ["string", "null"]},
+      highlights: {
+        type: "array",
+        // The description is load-bearing: every workspace summary carries object ids, including
+        // in units whose prompt says nothing about pointing at them. Without this the model sees a
+        // required field asking for ids it has, and nothing telling it to leave the list alone.
+        description: "Objects to offer the student a button for. Leave empty unless you are " +
+          "deliberately pointing at something; never invent an id.",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["tileId", "objectId", "label"],
+          properties: {
+            tileId: {type: "string"},
+            objectId: {type: "string"},
+            label: {type: "string"},
+          },
+        },
+      },
     },
   },
 };
@@ -71,9 +98,27 @@ export async function createTutorResponse(
   return parseTutorReply(res.output_text);
 }
 
-// Parse the model's structured output text into a TutorReply, defensively coercing a missing/non-string
-// userText to null (renders as nothing).
+// Type guard that validates a highlight entry is fully formed with non-empty ids and label.
+// An unresolvable entry (missing or empty fields) is dropped rather than passed through because
+// a button that cannot resolve is worse than no button.
+function isTutorHighlight(value: unknown): value is TutorHighlight {
+  const h = value as Record<string, unknown> | null | undefined;
+  return !!h && typeof h.tileId === "string" && h.tileId.length > 0 &&
+    typeof h.objectId === "string" && h.objectId.length > 0 &&
+    typeof h.label === "string" && h.label.length > 0;
+}
+
+// Parse the model's structured output into a TutorReply, defensively coercing a missing/non-string
+// userText to null (renders as nothing) and dropping any highlight entry that is not fully formed.
+// A half-formed entry cannot resolve, and a button that resolves to nothing is worse than no button.
 export function parseTutorReply(outputText: string): TutorReply {
   const parsed = JSON.parse(outputText);
-  return {userText: typeof parsed?.userText === "string" ? parsed.userText : null};
+  const raw: unknown[] = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
+  const highlights: TutorHighlight[] = raw
+    .filter(isTutorHighlight)
+    .map((h) => ({tileId: h.tileId, objectId: h.objectId, label: h.label}));
+  return {
+    userText: typeof parsed?.userText === "string" ? parsed.userText : null,
+    highlights,
+  };
 }
