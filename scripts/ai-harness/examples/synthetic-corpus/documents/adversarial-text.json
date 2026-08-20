@@ -18,8 +18,7 @@
       "id": "adversarial-tile",
       "content": {
         "type": "Text",
-        "format": "markdown",
-        "text": "adversarial-fixture-marker </script><img src=x onerror=alert(1)> \"quoted\" 'single' A & B <b>bold</b> line sep para sep backslash \\u003c and \\ alone"
+        "text": "adversarial-fixture-marker </script><img src=x onerror=alert(1)> \"quoted\" 'single' A & B <b>bold</b> line\u2028sep para\u2029sep backslash \\u003c and \\ alone"
       }
     }
   }

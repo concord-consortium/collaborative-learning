@@ -1251,6 +1251,137 @@ export function validateResultRow(value: unknown, file: string): ResultRow {
 }
 
 // ---------------------------------------------------------------------------
+// Review key file
+// ---------------------------------------------------------------------------
+
+/** One judgeable outcome: a document and the run that produced it. */
+export interface ReviewKeyPair {
+  docId: string;
+  runId: string;
+}
+
+/**
+ * The single sidecar a `review --shareable` or `review --blind` report writes.
+ *
+ * It is the only place the mapping from what a reader sees to what actually produced it exists: the
+ * pseudonym for each document id, and — for a blind report — the random seed the card order was
+ * derived from plus the label→run mapping that seed produced. The HTML deliberately contains
+ * neither, so losing this file loses the decoding, and rewriting it orphans every rating already
+ * written against the old labels. Hence: one key per report, never overwritten, and validated on
+ * read like every other on-disk format.
+ */
+export interface ReviewKeyFile {
+  schemaVersion: number;
+  generatedAt: string;
+  corpus: string;
+  experiment: string;
+  experimentSha256: string;
+  /** Which flags produced the report this key belongs to. */
+  modes: { shareable: boolean; blind: boolean };
+  /** Every document the report renders, in presentation order — what the pseudonyms number. */
+  documents: string[];
+  /** The exact set of judgeable outcomes the report was generated over. */
+  judgeable: ReviewKeyPair[];
+  /** Document id → pseudonym. `null` unless the report is shareable. */
+  pseudonyms: Record<string, string> | null;
+  /** The hex seed the card order derives from. `null` unless the report is blind. */
+  seed: string | null;
+  /** Document id → presentation label → run id. `null` unless the report is blind. */
+  labels: Record<string, Record<string, string>> | null;
+}
+
+/** Read back and checked field by field: a key that does not decode its report is worse than none. */
+export function validateReviewKeyFile(value: unknown, file: string): ReviewKeyFile {
+  const record = asObject(value, file, "key");
+  checkSchemaVersion(record, file);
+  const modes = asObject(record.modes, file, "modes");
+  const shareable = asBoolean(modes.shareable, file, "modes.shareable");
+  const blind = asBoolean(modes.blind, file, "modes.blind");
+  // A key that records neither mode belongs to a report that writes no key at all, so reading one
+  // means the file was written by something that disagrees about what a key is for.
+  if (!shareable && !blind) {
+    fail(file, "modes", "records neither shareable nor blind, and a plain report writes no key");
+  }
+  const documents = asArray(record.documents, file, "documents")
+    .map((docId, index) => asString(docId, file, `documents[${index}]`));
+  const judgeable = asArray(record.judgeable, file, "judgeable").map((entry, index) => {
+    const pair = asObject(entry, file, `judgeable[${index}]`);
+    return {
+      docId: asString(pair.docId, file, `judgeable[${index}].docId`),
+      runId: asString(pair.runId, file, `judgeable[${index}].runId`)
+    };
+  });
+
+  // Each mapping is required by exactly the mode that uses it, and refused otherwise: a blind key
+  // with no labels decodes nothing, and a plain key carrying a seed describes a report that was
+  // never blinded.
+  const mapping = (mode: boolean, name: "pseudonyms" | "seed" | "labels", read: () => unknown) => {
+    const present = record[name] !== undefined && record[name] !== null;
+    if (mode !== present) {
+      fail(file, name, `must be ${mode ? "set" : "null"} on a key whose modes are ` +
+        `shareable=${shareable}, blind=${blind}`);
+    }
+    return present ? read() : null;
+  };
+
+  const pseudonyms = mapping(shareable, "pseudonyms", () => {
+    const entries = asObject(record.pseudonyms, file, "pseudonyms");
+    const byDocument = Object.fromEntries(Object.entries(entries)
+      .map(([docId, name]) => [docId, asString(name, file, `pseudonyms.${docId}`)]));
+    // Two documents sharing a pseudonym would make the report ambiguous about which one a rating
+    // refers to, which is the one thing this mapping exists to settle.
+    const names = Object.values(byDocument);
+    if (new Set(names).size !== names.length) {
+      const repeated = names.find((name, index) => names.indexOf(name) !== index);
+      fail(file, "pseudonyms", `gives more than one document the pseudonym "${repeated}"`);
+    }
+    return byDocument;
+  }) as Record<string, string> | null;
+
+  const seed = mapping(blind, "seed", () => {
+    const text = asString(record.seed, file, "seed");
+    // Whole bytes, so `Buffer.from(seed, "hex")` cannot quietly drop a trailing half-byte and key
+    // the ordering with something other than what the file says.
+    if (!/^([0-9a-f]{2}){16,}$/.test(text)) {
+      fail(file, "seed", `must be at least 16 whole bytes of lower-case hex, got "${text}"`);
+    }
+    return text;
+  }) as string | null;
+
+  const labels = mapping(blind, "labels", () => {
+    const perDocument = asObject(record.labels, file, "labels");
+    return Object.fromEntries(Object.entries(perDocument).map(([docId, forDocument]) => {
+      const entries = asObject(forDocument, file, `labels.${docId}`);
+      const byLabel = Object.fromEntries(Object.entries(entries)
+        .map(([label, runId]) => [label, asString(runId, file, `labels.${docId}.${label}`)]));
+      // One label per run, and one run per label. Two labels naming one run would read as a
+      // complete mapping and decode to whichever the reader happened to apply last — so the report
+      // and the key that is supposed to decode it could disagree while both looked well formed.
+      const runIds = Object.values(byLabel);
+      if (new Set(runIds).size !== runIds.length) {
+        const repeated = runIds.find((runId, index) => runIds.indexOf(runId) !== index);
+        fail(file, `labels.${docId}`, `gives run "${repeated}" more than one label`);
+      }
+      return [docId, byLabel];
+    }));
+  }) as Record<string, Record<string, string>> | null;
+
+  return {
+    schemaVersion: kSchemaVersion,
+    generatedAt: asString(record.generatedAt, file, "generatedAt"),
+    corpus: asString(record.corpus, file, "corpus"),
+    experiment: asString(record.experiment, file, "experiment"),
+    experimentSha256: asString(record.experimentSha256, file, "experimentSha256"),
+    modes: { shareable, blind },
+    documents,
+    judgeable,
+    pseudonyms,
+    seed,
+    labels
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Fixture expectations (the committed synthetic corpus)
 // ---------------------------------------------------------------------------
 

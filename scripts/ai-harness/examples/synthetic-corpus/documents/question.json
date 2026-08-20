@@ -47,16 +47,16 @@
       "id": "question-prompt",
       "content": {
         "type": "Text",
-        "format": "markdown",
-        "text": "What problem does your design solve?"
+        "format": "html",
+        "text": "<p>What problem does your design solve?</p>"
       }
     },
     "question-response": {
       "id": "question-response",
       "content": {
         "type": "Text",
-        "format": "markdown",
-        "text": "It keeps the lunchbox shut on the bus."
+        "format": "html",
+        "text": "<p>It keeps the lunchbox shut on the bus.</p>"
       }
     }
   }
