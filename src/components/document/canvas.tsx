@@ -34,6 +34,7 @@ interface IProps {
   content?: DocumentContentModelType;
   context: string;
   document?: DocumentModelType;
+  logTileVisibility?: boolean;
   overlayMessage?: string;
   readOnly: boolean;
   scale?: number;

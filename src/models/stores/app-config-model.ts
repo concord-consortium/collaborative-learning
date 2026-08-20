@@ -113,6 +113,8 @@ export const AppConfigModel = types
     get termOverrides() { return self.configMgr.termOverrides; },
     get defaultPanelLayout() { return self.configMgr.defaultPanelLayout; },
     get contentLayout() { return self.configMgr.contentLayout; },
+    get fixedStartView() { return self.configMgr.fixedStartView; },
+    get fixedStartTab() { return self.configMgr.fixedStartTab; },
     get defaultSharedDocuments() { return self.configMgr.defaultSharedDocuments; },
     // Default true: the share toggle shows unless a unit explicitly hides it.
     get showShare() { return self.configMgr.showShare ?? true; },

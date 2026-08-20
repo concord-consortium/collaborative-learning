@@ -68,8 +68,10 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
       // TODO: create different tabState and/or document group types so these
       // values can be stored as fields in the document group
       const documentGroupId = JSON.stringify(openDocGroupMetadata);
-      const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
-      tabState.openDocumentGroupPrimaryDocument(documentGroupId, document.key);
+      // Go through the store action rather than the tab model: it also marks Sort Work as the active
+      // tab and ends the author's fixed start view, which otherwise keeps suppressing the document
+      // this click just opened.
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, documentGroupId, document.key);
       setHighlightedSortWorkDocument(document.key);
       logDocumentViewEvent(document);
     };

@@ -1,7 +1,7 @@
 import Markdown from "markdown-to-jsx";
 import { observer } from "mobx-react";
 import { getParentOfType } from "mobx-state-tree";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
@@ -12,7 +12,7 @@ import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { AIContentModelType } from "./ai-content";
+import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
 
 import "./ai-tile.scss";
@@ -90,8 +90,19 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     userContext, unit.code, systemPrompt
   ]);
 
+  // Track the prompt's value at focus time so we can log once on blur, and only when it changed —
+  // mirroring the text tile's handleBlur convention rather than logging on every keystroke. The
+  // description is authoring text ("shown to students"), not student answer work, so it is not logged.
+  const promptOnFocus = useRef("");
+
   const handlePromptChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setPrompt(event.target.value);
+  };
+
+  const handlePromptBlur = () => {
+    if (content.prompt !== promptOnFocus.current) {
+      logAiEvent(content, "setPrompt", { prompt: content.prompt });
+    }
   };
 
   const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -103,7 +114,13 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     return (
       <div className="prompt-form">
         <h3>Prompt for AI</h3>
-        <textarea value={content.prompt} onChange={handlePromptChange} disabled={isUpdating} />
+        <textarea
+          value={content.prompt}
+          onChange={handlePromptChange}
+          onFocus={() => { promptOnFocus.current = content.prompt; }}
+          onBlur={handlePromptBlur}
+          disabled={isUpdating}
+        />
         <button
           onClick={() => content.requestRefresh()}
           className="update-button"

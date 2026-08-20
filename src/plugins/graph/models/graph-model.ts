@@ -19,6 +19,9 @@ import { SharedModelType } from "../../../models/shared/shared-model";
 
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
@@ -52,6 +55,18 @@ export type BackgroundLockInfo = {
 
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
+
+// We log only the actions that represent a student building/editing the graph. Only actions that reach
+// onTileAction as ROOT calls from a UI handler qualify (see the onTileAction comment below); actions
+// that fire only nested inside another action never reach here on a student edit and would otherwise
+// only log at document load, so they are deliberately absent.
+const kLoggedGraphActions = new Set([
+  "createEditableLayer",
+  "addPoint",
+  "setAttributeID", "removeAttribute", "removeYAttributeID", "replaceYAttributeID",
+  "setXAttributeLabel", "setYAttributeLabel",
+  "addAdornment"
+]);
 
 export const GraphModel = TileContentModel
   .named("GraphModel")
@@ -831,6 +846,27 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.config.handleDataSetChange();
       }
+    }
+  }))
+  .actions(self => ({
+    // Overrides the base no-op onTileAction. Only OUTERMOST actions reach here (document.ts registers
+    // onAction with default options), and the listener runs BEFORE the action mutates state — so an
+    // action that only ever fires nested inside another action will not be seen here. Log the
+    // allow-listed answer-relevant actions as GRAPH_TOOL_CHANGE so free-standing graph work reaches the
+    // Researcher report (via the QUESTION_ANSWERS_CHANGE side-effect of logTileChangeEvent).
+    // Note: some actions (e.g. addAdornment) pass MST nodes as arguments, which serialize to
+    // { $MST_UNSERIALIZABLE: true }, so change.args is not meaningful for them; the operation name is.
+    // Because the listener runs pre-mutation, a GRAPH_TOOL_CHANGE means the action was invoked, not that
+    // it took effect (an allow-listed action that no-ops still logs).
+    // Out of scope: dragging an EXISTING point mutates the shared DataSet (setCanonicalCaseValues in
+    // scatterdots.tsx), which lives outside the tile subtree and so is not reachable via onTileAction.
+    onTileAction(call: ISerializedActionCall) {
+      if (!kLoggedGraphActions.has(call.name)) return;
+      logTileChangeEvent(LogEventName.GRAPH_TOOL_CHANGE, {
+        tileId: getTileIdFromContent(self) ?? "",
+        operation: call.name,
+        change: { args: call.args }
+      });
     }
   }));
 

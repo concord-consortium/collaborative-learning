@@ -190,20 +190,27 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
     if (tabs) {
       const tabSpec = tabs[tabIndex];
-      if (persistentUI.activeNavTab !== tabSpec.tab) {
-        persistentUI.setActiveNavTab(tabSpec.tab);
+      // Read the before state: while the author's fixed start view is active, the tab on screen is
+      // not activeNavTab, and the user is acting on what they can see. setActiveNavTab ends the
+      // forced view, so afterwards the two agree again.
+      const wasForced = persistentUI.isStartViewOverrideActiveFor(tabSpec.tab);
+      const wasDisplayed = this.stores.displayedActiveNavTab === tabSpec.tab;
+      const wasActive = persistentUI.activeNavTab === tabSpec.tab;
+      persistentUI.setActiveNavTab(tabSpec.tab);
+      // wasForced counts as a change: the panel swaps the thumbnail browser for the user's own
+      // restored document, so the log should not read as though nothing happened.
+      if (!wasDisplayed || !wasActive || wasForced) {
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
-      } else {
-        if (persistentUI.currentDocumentGroupId) {
-          // If there is a document open then a click on the active top level tab
-          // closes the document. Also a click on the active sub tab closes the
-          // document, this is handled in section-document-or-browser
-          persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, persistentUI.currentDocumentGroupId);
-        }
+      } else if (persistentUI.currentDocumentGroupId) {
+        // Only reached when the tab was already displayed and active and not forced.
+        // If there is a document open then a click on the active top level tab
+        // closes the document. Also a click on the active sub tab closes the
+        // document, this is handled in section-document-or-browser.
+        persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, persistentUI.currentDocumentGroupId);
       }
     }
   };

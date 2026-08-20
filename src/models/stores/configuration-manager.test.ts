@@ -1,5 +1,6 @@
 import { ConfigurationManager } from "./configuration-manager";
 import { UnitConfiguration } from "./unit-configuration";
+import { ENavTab } from "../view/nav-tabs";
 
 describe("ConfigurationManager", () => {
 
@@ -251,6 +252,26 @@ describe("ConfigurationManager", () => {
     const override: Partial<UnitConfiguration> = { showCommentTag: true, allowCustomCommentTags: true };
     const configManager = new ConfigurationManager(defaults, [override]);
     expect(configManager.allowCustomCommentTags).toBe(true);
+  });
+
+  it("returns fixedStartView/fixedStartTab from the base config", () => {
+    const config = new ConfigurationManager(
+      { ...defaults, fixedStartView: true, fixedStartTab: ENavTab.kClassWork }, []);
+    expect(config.fixedStartView).toBe(true);
+    expect(config.fixedStartTab).toBe("class-work");
+  });
+
+  it("lets a later config override fixedStartTab", () => {
+    const config = new ConfigurationManager(
+      { ...defaults, fixedStartView: true, fixedStartTab: ENavTab.kClassWork },
+      [{ fixedStartTab: ENavTab.kSortWork }]);
+    expect(config.fixedStartTab).toBe("sort-work");
+  });
+
+  it("defaults fixedStartView/fixedStartTab to undefined when unset", () => {
+    const config = new ConfigurationManager(defaults, []);
+    expect(config.fixedStartView).toBeUndefined();
+    expect(config.fixedStartTab).toBeUndefined();
   });
 
 });

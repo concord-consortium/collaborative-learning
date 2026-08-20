@@ -32,6 +32,7 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
   return (
     <CanvasComponent
       context="1-up"
+      logTileVisibility={true}
       document={document}
       {...others}
     />

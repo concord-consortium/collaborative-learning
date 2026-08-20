@@ -41,18 +41,88 @@ export const sortDateSectionLabels = (
   });
 };
 
-export const sortGroupSectionLabels = (docMapKeys: string[]) => {
+/** Section label for documents that belong to the class as a whole rather than to a group. */
+export const kWholeClassSectionLabel = "Whole Class";
+
+/** Section label, in the "by name" sort, for documents that have no personal author. */
+export const kNoNameSectionLabel = "No Name";
+
+/**
+ * The ordering information for one "by group" section. Carried alongside the section label so the
+ * comparator never has to recover structure from the display text, which is translatable
+ * (`studentGroup` is overridable per unit) and has no number at all for some sections.
+ */
+export type GroupSectionSortKey =
+  | { section: "class" }
+  | { section: "group"; groupId: string }
+  | { section: "none" };
+
+const kGroupSectionOrder: Record<GroupSectionSortKey["section"], number> = {
+  class: 0,
+  group: 1,
+  none: 2,
+};
+
+const kNumericGroupId = /^\d+$/;
+
+/**
+ * Order "by group" sections: the whole class first, then groups by ascending numeric id, then the
+ * no-group section. A section with no sort key is ordered as if it had none.
+ */
+export const sortGroupSections = (docMapKeys: string[], sortKeys: Map<string, GroupSectionSortKey>) => {
+  const keyFor = (label: string): GroupSectionSortKey => sortKeys.get(label) ?? { section: "none" };
   return docMapKeys.sort((a, b) => {
-    const numA = parseInt(a.replace(/^\D+/g, ''), 10);
-    const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-    return numA - numB;
+    const keyA = keyFor(a);
+    const keyB = keyFor(b);
+    if (keyA.section !== keyB.section) {
+      return kGroupSectionOrder[keyA.section] - kGroupSectionOrder[keyB.section];
+    }
+    if (keyA.section === "group" && keyB.section === "group") {
+      // A group id is usually a number, but not always: under
+      // `autoAssignStudentsToIndividualGroups` the group id is the user id, which in demo mode can be
+      // a nanoid. Only an all-digit id sorts numerically; the rest sort after those, by label.
+      const numA = kNumericGroupId.test(keyA.groupId) ? Number(keyA.groupId) : NaN;
+      const numB = kNumericGroupId.test(keyB.groupId) ? Number(keyB.groupId) : NaN;
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      if (!isNaN(numA)) return -1;
+      if (!isNaN(numB)) return 1;
+      return keyA.groupId.localeCompare(keyB.groupId);
+    }
+    return a.localeCompare(b);
   });
 };
 
-export const sortNameSectionLabels = (docMapKeys: string[]) => {
+/**
+ * The ordering information for one "by name" section, carried alongside the label for the same reason
+ * as GroupSectionSortKey above: only the student sections are names, and the rest must not be sorted as
+ * if they were. Named students come first, then group documents from other assignments, then the
+ * authorless section — the same shape as the "by group" sort, which ends with its own catch-all.
+ */
+export type NameSectionSortKey =
+  | { section: "student" }
+  | { section: "otherAssignment" }
+  | { section: "noName" };
+
+const kNameSectionOrder: Record<NameSectionSortKey["section"], number> = {
+  student: 0,
+  otherAssignment: 1,
+  noName: 2,
+};
+
+export const sortNameSectionLabels = (docMapKeys: string[], sortKeys?: Map<string, NameSectionSortKey>) => {
+  const keyFor = (label: string): NameSectionSortKey => sortKeys?.get(label) ?? { section: "student" };
   return docMapKeys.sort((a, b) => {
-    const parseName = (name: any) => {
-      const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
+    const sectionA = keyFor(a).section;
+    const sectionB = keyFor(b).section;
+    if (sectionA !== sectionB) {
+      return kNameSectionOrder[sectionA] - kNameSectionOrder[sectionB];
+    }
+    // Only the student sections hold names; the others are compared as plain labels.
+    if (sectionA !== "student") {
+      return a.localeCompare(b);
+    }
+    const parseName = (name: string) => {
+      const [lastName, firstName] = name.split(", ").map(part => part.trim());
       return { firstName, lastName };
     };
     const aParsed = parseName(a);
@@ -63,7 +133,8 @@ export const sortNameSectionLabels = (docMapKeys: string[]) => {
     if (lastNameCompare !== 0) {
       return lastNameCompare;
     }
-    return aParsed.firstName.localeCompare(bParsed.firstName);
+    // "Unknown" has no comma, so it has no first name to compare.
+    return (aParsed.firstName ?? "").localeCompare(bParsed.firstName ?? "");
   });
 };
 

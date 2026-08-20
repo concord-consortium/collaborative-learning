@@ -3,12 +3,25 @@ import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { TileContentModel } from "../../../models/tiles/tile-content";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { kNumberlineTileType, maxNumSelectedPoints } from "../numberline-tile-constants";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
+}
+
+// Module-level logging helper (logBarGraphEvent/logAiEvent convention), so the model doesn't expose a
+// public action that changes no state (which the history middleware would record as a nested action).
+export function logNumberlineEvent(
+  model: NumberlineContentModelType, operation: string, change: Record<string, any>
+) {
+  logTileChangeEvent(LogEventName.NUMBERLINE_TOOL_CHANGE, {
+    tileId: getTileIdFromContent(model) ?? "", operation, change
+  });
 }
 
 export const PointObjectModel = types
@@ -96,9 +109,11 @@ export const NumberlineContentModel = TileContentModel
     },
     setMin(num: number) {
       self.min = num;
+      logNumberlineEvent(self as NumberlineContentModelType, "setMin", { min: num });
     },
     setMax(num: number) {
       self.max = num;
+      logNumberlineEvent(self as NumberlineContentModelType, "setMax", { max: num });
     }
   }))
   .actions(self => ({
@@ -106,6 +121,7 @@ export const NumberlineContentModel = TileContentModel
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue, isOpen });
       self.points.set(id, pointModel);
+      logNumberlineEvent(self as NumberlineContentModelType, "createNewPoint", { id, xValue, isOpen });
       return pointModel;
     },
     setSelectedPoint(point: PointObjectModelType) {
@@ -116,13 +132,30 @@ export const NumberlineContentModel = TileContentModel
     },
     deleteSelectedPoints() {
       //For now - only one point can be selected
+      const ids = Object.keys(self.selectedPoints);
       for (const selectedPointId in self.selectedPoints){
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
       }
       self.clearSelectedPoints();
+      logNumberlineEvent(self as NumberlineContentModelType, "deleteSelectedPoints", { ids });
     },
     deleteAllPoints() {
       self.points.clear();
+      logNumberlineEvent(self as NumberlineContentModelType, "deleteAllPoints", {});
+    },
+    // Commit a point drag (called from the drag "end" handler) and log the repositioning — the most
+    // common way a numberline answer gets revised, which was previously unlogged. Takes the point id
+    // (not the node) so the dispatched/recorded action serializes. Log only when a drag actually
+    // occurred, so a plain selection click (which also fires drag "end" with no dragXValue) doesn't emit.
+    setPointXValue(pointId: string) {
+      const point = self.points.get(pointId);
+      if (!point) return;
+      const dragged = point.dragXValue !== undefined;
+      point.setXValueToDragValue();
+      if (dragged) {
+        logNumberlineEvent(self as NumberlineContentModelType, "setPointXValue",
+          { id: point.id, xValue: point.xValue });
+      }
     },
   }))
   .actions(self => ({
