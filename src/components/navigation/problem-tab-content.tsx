@@ -40,7 +40,9 @@ export const ProblemTabContent: React.FC<IProps>
     const section = sections?.[index];
     if (!section) return;
 
-    persistentUI.setCurrentDocumentGroupId(tabId, section.type);
+    // The user picking a section, so this goes through selectDocumentGroup rather than
+    // setCurrentDocumentGroupId, matching section-document-or-browser.
+    persistentUI.selectDocumentGroup(tabId, section.type);
 
     // TODO: The log event properties have been reversed for quite a while now.
     // We don't want to introduce a breaking change in the log event stream, so
