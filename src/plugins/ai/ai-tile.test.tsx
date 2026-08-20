@@ -22,10 +22,12 @@ jest.mock("../../hooks/use-stores", () => ({
   useSettingFromStores: (key: string, group?: string) => mockStores.appConfig.getSetting(key, group ?? ""),
 }));
 
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../lib/logger-types";
 import { defaultAIContent } from "./ai-content";
 import { AIComponent } from "./ai-tile";
 
@@ -64,6 +66,10 @@ jest.mock("mobx-state-tree", () => ({
 jest.mock("../../models/document/document-utils", () => ({
   getDocumentIdentifier: jest.fn(() => "test-doc-content-id")
 }));
+
+// Logger.stores is uninitialized in this component test; mock the change logger so setPrompt/setText
+// don't crash when the AI content logs changes.
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
 describe("AIComponent", () => {
   const content = defaultAIContent();
@@ -106,6 +112,30 @@ describe("AIComponent", () => {
     });
     expect(getByText("New Text")).toBeInTheDocument();
     expect(queryByText("Hello World")).not.toBeInTheDocument();
+  });
+
+  // Exercises the actual focus/blur wiring (the regression risk), not just the model helper: a blur
+  // logs setPrompt only when the prompt changed since focus.
+  it("logs AI_TOOL_CHANGE on prompt blur, only when the prompt changed", () => {
+    const aiContent = defaultAIContent();
+    const aiModel = TileModel.create({ content: aiContent });
+    const { container } = render(<AIComponent {...defaultProps} model={aiModel} />);
+    const promptTextarea = container.querySelector(".prompt-form textarea") as HTMLTextAreaElement;
+    expect(promptTextarea).toBeTruthy();
+
+    (logTileChangeEvent as jest.Mock).mockClear();
+    // Focus then blur with no edit → no log.
+    fireEvent.focus(promptTextarea);
+    fireEvent.blur(promptTextarea);
+    expect(logTileChangeEvent).not.toHaveBeenCalled();
+
+    // Focus, edit, blur → one log carrying the real tile id.
+    fireEvent.focus(promptTextarea);
+    fireEvent.change(promptTextarea, { target: { value: "ask the AI" } });
+    fireEvent.blur(promptTextarea);
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.AI_TOOL_CHANGE, {
+      tileId: aiModel.id, operation: "setPrompt", change: { prompt: "ask the AI" }
+    });
   });
 
 });

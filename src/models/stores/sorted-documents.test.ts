@@ -245,3 +245,114 @@ describe('Sorted Documents Model', () => {
     });
   });
 });
+
+type WhereClause = [string, string, any];
+
+interface IMockQueryRecord {
+  clauses: WhereClause[];
+  emit: (docs: any[]) => void;
+  disposed: boolean;
+}
+
+// Records every query built off db.firestore and lets a test drive each listener's snapshot.
+function makeMockFirestore() {
+  const listeners: IMockQueryRecord[] = [];
+  const makeQuery = (clauses: WhereClause[]): any => ({
+    withConverter: () => makeQuery(clauses),
+    where: (field: string, op: string, value: any) => makeQuery([...clauses, [field, op, value]]),
+    onSnapshot: (cb: (snap: any) => void) => {
+      const record: IMockQueryRecord = {
+        clauses,
+        emit: (docs: any[]) => cb({ docs: docs.map(d => ({ data: () => d })) }),
+        disposed: false
+      };
+      listeners.push(record);
+      return () => { record.disposed = true; };
+    }
+  });
+  return { listeners, collection: () => makeQuery([]) };
+}
+
+describe("SortedDocuments.watchFirestoreMetaDataDocs", () => {
+  let firestore: ReturnType<typeof makeMockFirestore>;
+  let sortedDocuments: SortedDocuments;
+
+  const classWideMetadata = {
+    uid: "class_mock", type: "group", key: "Class Wide Doc", createdAt: 7,
+    unit: "sas", investigation: null, problem: null, kind: "drivingQuestionBoard", concurrent: true
+  };
+
+  beforeEach(() => {
+    firestore = makeMockFirestore();
+    const documentMetadata = new DocumentMetadataStore(
+      { db: {}, user: { classHash: "mock" }, documents: { exemplarDocuments: [] } } as any
+    );
+    const mockStores: DeepPartial<ISortedDocumentsStores> = {
+      documents: { all: [], exemplarDocuments: [] },
+      db: { firestore } as any,
+      user: { classHash: "mock" },
+      curriculumConfig: { getUnitCodeVariants: (unit: string) => [unit] },
+      documentMetadata,
+    };
+    sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
+  });
+
+  const unitScopedListener = () =>
+    firestore.listeners.find(l =>
+      l.clauses.some(([field, , value]) => field === "investigation" && value === null));
+
+  it("adds a whole-unit listener under the Problem filter", () => {
+    sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
+    const listener = unitScopedListener();
+    expect(listener).toBeDefined();
+    expect(listener?.clauses).toEqual([
+      ["context_id", "==", "mock"],
+      ["unit", "in", ["sas"]],
+      ["investigation", "==", null],
+    ]);
+  });
+
+  it("adds a whole-unit listener under the Investigation filter", () => {
+    sortedDocuments.watchFirestoreMetaDataDocs("Investigation", "sas", 1, 2);
+    expect(unitScopedListener()).toBeDefined();
+  });
+
+  it("adds no whole-unit listener under the All or Unit filters, which already include those docs", () => {
+    sortedDocuments.watchFirestoreMetaDataDocs("All", "sas", 1, 2);
+    expect(unitScopedListener()).toBeUndefined();
+
+    firestore.listeners.length = 0;
+    sortedDocuments.watchFirestoreMetaDataDocs("Unit", "sas", 1, 2);
+    expect(unitScopedListener()).toBeUndefined();
+  });
+
+  it("surfaces whole-unit documents in firestoreMetadataDocs", () => {
+    sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
+    unitScopedListener()?.emit([classWideMetadata]);
+    expect(sortedDocuments.firestoreMetadataDocs.map(d => d.key)).toEqual(["Class Wide Doc"]);
+  });
+
+  it("does not list a document twice when both listeners return it", () => {
+    sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
+    firestore.listeners[0].emit([classWideMetadata]);   // the filtered listener
+    unitScopedListener()?.emit([classWideMetadata]);
+    expect(sortedDocuments.firestoreMetadataDocs.map(d => d.key)).toEqual(["Class Wide Doc"]);
+  });
+
+  it("disposes the whole-unit listener with the others", () => {
+    const dispose = sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
+    const listener = unitScopedListener();
+    dispose();
+    expect(listener?.disposed).toBe(true);
+  });
+
+  it("clears previously fetched whole-unit documents when the filter no longer needs them", () => {
+    sortedDocuments.watchFirestoreMetaDataDocs("Problem", "sas", 1, 2);
+    unitScopedListener()?.emit([classWideMetadata]);
+    expect(sortedDocuments.firestoreMetadataDocs.length).toBe(1);
+
+    firestore.listeners.length = 0;
+    sortedDocuments.watchFirestoreMetaDataDocs("All", "sas", 1, 2);
+    expect(sortedDocuments.firestoreMetadataDocs.length).toBe(0);
+  });
+});

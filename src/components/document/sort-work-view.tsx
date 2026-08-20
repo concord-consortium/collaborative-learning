@@ -116,7 +116,10 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortedDocumentGroups = sortedDocuments.sortBy(validatedPrimarySortBy);
   const secondarySearchTerm = validatedSecondarySortBy;
   const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
+  // Suppressed, not cleared, while the fixed start view holds this tab; see startViewTab.
+  const openDocumentKey = persistentUI.isStartViewOverrideActiveFor(ENavTab.kSortWork)
+    ? undefined
+    : maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
 
   let openGroupMetadata: IOpenDocumentsGroupMetadata|undefined;
   let openDocumentsGroup: DocumentGroup|undefined;

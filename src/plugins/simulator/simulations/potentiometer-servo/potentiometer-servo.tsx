@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
 import { useResizeDetector } from "react-resize-detector";
-import { VariableSlider } from "@concord-consortium/diagram-view";
-
 import { potentiometerAndServoValues } from "../../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
+import { VariableSlider } from "@concord-consortium/diagram-view";
+import { logSimulatorVariableChange } from "../../simulator-logging";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl } from "../../../shared-assets/icons/icon-utilities";
 import { findVariable } from "../simulation-utilities";
@@ -204,6 +204,9 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
               min={minPotAngle}
               step={5}
               variable={potAngleVar}
+              onChangeComplete={(variable) => {
+                if (tile?.id) logSimulatorVariableChange(tile.id, variable, variables);
+              }}
             />
             <div className="slider-labels">
               <div className="low">low</div>

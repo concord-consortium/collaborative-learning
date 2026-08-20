@@ -430,14 +430,22 @@ export class ReadAloudService {
         )
       );
     } else {
-      // Left pane: stop if the active tab or curriculum section changes
+      // Left pane: stop if the tab or section on screen changes. These watch the displayed values
+      // rather than activeNavTab / currentDocumentGroupId so that a section change inside the
+      // author's fixed start view is not missed, which it would be whenever the forced tab differs
+      // from the tab the user left off on.
+      // Neither fires when the override is released onto the same tab the user was already on. That
+      // is not a gap today: while the override holds a document tab no document is open, so the left
+      // pane has no read-aloud toolbar to start from (it is rendered only by EditableDocumentContent
+      // with pane="left", which needs an open document), and on the curriculum tabs releasing the
+      // override changes nothing on screen. Revisit if the browser view ever gains a read-aloud entry.
       this.disposers.push(
         reaction(
-          () => persistentUI.activeNavTab,
+          () => persistentUI.displayedNavTab,
           () => { this.stop("tab-switch"); }
         ),
         reaction(
-          () => persistentUI.currentDocumentGroupId,
+          () => persistentUI.displayedCurrentDocumentGroupId,
           () => { this.stop("tab-switch"); }
         )
       );

@@ -1,5 +1,6 @@
 import { SectionModel } from "../curriculum/section";
 import { AppConfigModel } from "./app-config-model";
+import { ENavTab } from "../view/nav-tabs";
 import { unitConfigDefaults, unitConfigOverrides } from "../../test-fixtures/sample-unit-configurations";
 
 describe("ConfigurationManager", () => {
@@ -176,6 +177,28 @@ describe("ConfigurationManager", () => {
       const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
       appConfig.setConfigs([{ defaultPanelLayout: "resources-only" }]);
       expect(appConfig.defaultPanelLayout).toBe("resources-only");
+    });
+  });
+
+  describe("fixedStartView / fixedStartTab", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.fixedStartView).toBeUndefined();
+      expect(appConfig.fixedStartTab).toBeUndefined();
+    });
+
+    it("should return the configured values", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, fixedStartView: true, fixedStartTab: ENavTab.kClassWork }
+      });
+      expect(appConfig.fixedStartView).toBe(true);
+      expect(appConfig.fixedStartTab).toBe("class-work");
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ fixedStartView: true, fixedStartTab: ENavTab.kSortWork }]);
+      expect(appConfig.fixedStartTab).toBe("sort-work");
     });
   });
 

@@ -55,7 +55,7 @@ view, and it is legitimate to put here because these are *data the document has*
 | `owner` | existing `uid` (identity/provenance; may differ from scope for publications) |
 | `scope` | the individual association fields `context` / `offeringId` / `groupId` / `problem` / `unit` (the org + curriculum associations). Consumed via field/axis **guards** (see "Typed document shapes"), not by branching on `type`; whether to also expose a single unified `scope` getter is an open question — the fields may be read directly |
 | `kind` | existing `type` (a stored tag — see Layer 2 for its uses) |
-| `canonical` | new stored field (pointer-slot occupancy) |
+| `canonical` | new stored field holding the label of the pointer slot this document fills — not a flag; several documents can be canonical in one container, one per label |
 | `permissions` | **composed getter** — merges *permission-policy grants* (from the document's referenced policy) with *stored per-doc grants* (the `visibility` share toggle, support audience, exemplar visibility). See "Permissions composition" below |
 | `concurrent` | new stored field (multi-writer; marks special stored state, rule-readable) |
 
@@ -327,6 +327,14 @@ deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This s
 - Whether `DocumentModel` should be split further into a generic wrapper + a CLUE metadata mixin, or left as
   one model with the getters (leaning: leave as one; the getters-vs-behaviors boundary already delivers the
   clarity, and a further split risks churn for little gain).
+- What `kind` a publish template targets: its source's kind, or a publication kind of its own. Copying settles
+  the same question by naming a kind outright (axes.md, "Copies and publications, read as deltas"), but
+  publishing holds `owner`, `container`, and `curriculum` still and moves only `canonical` and `permissions`
+  — all stated on the axes — so a second kind buys nothing unless some per-kind fact about a publication is
+  not determined by its axes. Today's four publication types are not evidence either way; that is `type`
+  doing every job at once. (Leaning: keep the source's kind. The cost is that a nav-tab section selects
+  documents by a list of type names, so the authored `navTabs` configs — in this repo and in
+  `clue-curriculum` — would have to select on axes instead.)
 
 ## References
 
