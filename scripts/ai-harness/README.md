@@ -492,11 +492,15 @@ the feature never ran. `master` now guards the fix with a unit test, which is th
 "do not reintroduce this". As a content control it was also confounded, varying volume as well as
 content. The 642-token figure it produced is kept in the recorded run below.
 
-`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: eleven
-runs over the same corpus. Text, image and mixed are the comparison itself; the other eight turn one
-dimension each around it — detail-low, per-tile and visual-tiles-only on the image side, the three
+`experiments/mixed-vs-baselines.json` runs this milestone's headline comparison from one file: ten
+runs over the same corpus. Text, image and mixed are the comparison itself; the other seven turn one
+dimension each around it — detail-low, per-tile and visual-tiles-only on the image side, the two
 extras settings and the two new text variants on the text side. Every dimension this milestone adds
 has a run, so none of them ships only exercised by a unit test.
+
+`text-extras-all` is deliberately a duplicate of `text-default`: `extras` defaults to `all`, so the
+two build the same request and the second one costs nothing. It is there so the default is measured
+rather than assumed — if it ever stopped matching, the run would say so.
 `experiments/image-vs-text.json` is milestone 2's narrower comparison, kept as it was.
 
 ### Which documents a run declines to send

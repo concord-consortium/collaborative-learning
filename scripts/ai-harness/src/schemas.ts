@@ -487,7 +487,8 @@ export function validateExperimentFile(
       }
       if (run.extras !== undefined) {
         fail(file, `${field}.extras`,
-          `must not be set on an "${message}" run: extras ride the summary, and none is sent`);
+          `must not be set on an "${message}" run: extras ride the summary, which this shape ` +
+          "does not send");
       }
     }
 
