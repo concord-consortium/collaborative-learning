@@ -737,9 +737,11 @@ Three properties are deliberate:
   `data:` URLs, no external reference of any kind. A `Content-Security-Policy` meta tag
   (`default-src 'none'; img-src data:; style-src 'unsafe-inline'`) is there as defence in depth —
   with no script and no external loads it should be redundant, and it exists so that a bug in the
-  escaping still cannot reach the network. Embedded pictures make the file large (1.3 MB for the
+  escaping still cannot reach the network. Embedded pictures make the file large (1.4 MB for the
   synthetic corpus; a real capture is far bigger). Accepted for now: legibility is one of the things
-  under judgement, so nothing is downscaled.
+  under judgement, so nothing is downscaled. Reading a report also hashes every picture twice — once
+  in the freshness check, once to prove the bytes on the page are the bytes that were sent — which
+  is nothing at 26 documents and worth revisiting for a production corpus.
 - **An input is shown only if it is still the input that was sent.** A representation is displayed
   when its *whole* descriptor matches — variant id, variant version and source content hash for a
   summary; mode, backend, backend version, source content and every recorded image hash for a
@@ -837,7 +839,10 @@ collide on a key. The rules around them:
   invocation, **if any outcome it labels has been re-run since it was written**, if its pseudonyms
   are not the ones the report renders, or if its labels are not
   exactly one per outcome — same inputs, same labels and pseudonyms, or nothing. The report is
-  rendered from the key's own mapping, so a `--reuse-key` run regenerates byte-identical HTML.
+  rendered from the key's own mapping, so a `--reuse-key` run puts every card back under the label
+  the judge saw. The page is not byte-identical: its `Generated` timestamp is the time it was
+  regenerated, and the superseded count moves if the results file has grown since. The tests pin
+  byte-identity under an injected clock, which is the only condition it holds under.
 - Under `--reuse-key` an existing ratings template is preserved byte for byte; it may hold a judge's
   half-entered answers. The template is written only when there is none.
 
@@ -1120,7 +1125,18 @@ Milestone 4 (against
     document id outright (`wave-runner-tile`), so printing one beside `doc-26` would undo the
     pseudonym; the same goes for a row's `representationWarnings`, which name the tiles a capture
     missed. Both are shown in the team-internal report.
-34. **`--out` must name a `.html` file.** The spec does not constrain it. Both sidecars are named
+34. **`visual-tiles-only` inputs are reconstructed, not verified.** A row records `imageSha256s` —
+    every picture its envelope held, which is the render's provenance — and `imageSet`, but not the
+    hashes it actually sent. For `full-document` and `per-tile` the set is structural, so re-applying
+    it reproduces exactly what went; for `visual-tiles-only` the membership is the classifier's, and
+    the report classifies the document again to recover it. Flipping `requiresVisualRepresentation`
+    for a tile type in `src/capability.ts` would therefore change which pictures a *past* run is
+    shown as having sent, with no notice — the newly selected picture is still among the recorded
+    hashes, so nothing on the row can catch it. Closing it means recording what was sent (a
+    `sentImageSha256s` on the descriptor, optional for existing rows), which changes what a run
+    writes and is out of scope for a milestone that is a renderer. Worth doing before a judging
+    round rides on a `visual-tiles-only` comparison.
+35. **`--out` must name a `.html` file.** The spec does not constrain it. Both sidecars are named
     from the resolved output path, so an `--out` with another extension would produce a key whose
     name the next invocation could not predict — and predicting it is how a key is found and not
     overwritten.

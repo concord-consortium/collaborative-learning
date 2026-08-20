@@ -466,7 +466,7 @@ export type ContentMatching = (sourceContentSha256: string) => { content: unknow
  * differently for the same unchanged content and envelope, and the newly selected picture is still
  * among `imageSha256s`, so the check below cannot notice. Closing that means recording what was
  * sent — a `sentImageSha256s` on the descriptor — which changes what a run writes and so belongs to
- * a later milestone. See DEVIATIONS in the README.
+ * a later milestone. See DEVIATIONS 34 in the README.
  */
 function readSentImages(
   paths: CorpusPaths, docId: string, descriptor: ImageRepresentation,
