@@ -44,7 +44,7 @@ describe('SortWorkView Tests', () => {
 
     cy.log('verify opening and closing a document from the sort work view');
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
-    sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
+    sortWork.getSortWorkGroupItem('No Group').eq(1).click();
     resourcesPanel.getEditableDocumentContent().should('be.visible');
 
     cy.log('verify can switch sort groups using arrows');

@@ -289,8 +289,29 @@ export class FirestoreHistoryManager {
   }
 
   async moveToHistoryEntryAfterLoad(historyId: string) {
-    await when(() => this.historyStatus === HistoryStatus.HISTORY_LOADED);
-    const entry = this.treeManager.findHistoryEntryIndex(historyId);
+    // NO_HISTORY is the INITIAL status, not a terminal one — a freshly constructed manager reports it
+    // before the Firestore query has run. So we must wait for the history to actually load (or error),
+    // not stop on NO_HISTORY, or we'd give up before the entries arrive and never seek. A bounded
+    // timeout avoids leaking the reaction if the load never completes (e.g. a genuinely empty document,
+    // which stays NO_HISTORY forever).
+    try {
+      await when(
+        () => this.historyStatus === HistoryStatus.HISTORY_LOADED ||
+              this.historyStatus === HistoryStatus.HISTORY_ERROR,
+        { timeout: 30000 }
+      );
+    } catch {
+      console.warn("moveToHistoryEntryAfterLoad: history did not load within timeout; status:",
+        this.historyStatus);
+      return;
+    }
+    if (this.historyStatus !== HistoryStatus.HISTORY_LOADED) {
+      console.warn("moveToHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
+      return;
+    }
+    // "first" is the sentinel logDocumentEvent emits for a change made before the document had any
+    // history entry, so it never resolves via findHistoryEntryIndex; it maps to position 0.
+    const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
     if (entry >= 0) {
       this.treeManager.goToHistoryEntry(entry);
     } else {

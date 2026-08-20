@@ -2,6 +2,8 @@ import { render, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 // Mock iframe-phone BEFORE importing the component
 const mockIframePhone = {
@@ -49,7 +51,6 @@ jest.mock("../../models/tiles/log/log-tile-change-event", () => ({
 }));
 
 // NOW import the component after the mock is set up
-import { LogEventName } from "../../lib/logger-types";
 import { IframeInteractiveComponent } from "./iframe-interactive-tile";
 
 // Import registration to ensure tile type is registered
@@ -161,8 +162,12 @@ describe("IframeInteractiveComponent Integration Tests", () => {
     }, { timeout: 1000 });
   });
 
-  it("does not wire a 'log' breadcrumb listener, so interactive log messages are not logged", async () => {
+  it("does not persist or log interactive state in read-only mode", async () => {
+    // In read-only/report mode a teacher's view must not persist or LOG the student's state — logging
+    // would attribute a phantom answer-change to the teacher's uid. handleInteractiveState returns
+    // early, so neither the content write nor the IFRAME_INTERACTIVE_TOOL_CHANGE event happens.
     const props = createDefaultProps();
+    props.readOnly = true;
     render(<IframeInteractiveComponent {...props} />);
 
     // Other listeners register, but "log" no longer does — the interactive's
@@ -170,6 +175,18 @@ describe("IframeInteractiveComponent Integration Tests", () => {
     await waitFor(() => expect(listeners.interactiveState).toBeDefined());
     expect(listeners.log).toBeUndefined();
     expect(mockLogTileChangeEvent).not.toHaveBeenCalled();
+
+    // This suite does not mock the log module, so spy on Logger.log directly to catch a real emit.
+    const logSpy = jest.spyOn(Logger, "log").mockImplementation(() => undefined);
+    jest.useFakeTimers();
+    listeners.interactiveState({ answer: "phantom" });
+    jest.advanceTimersByTime(500); // flush the 500ms debounce window (nothing should have been queued)
+
+    expect(logSpy).not.toHaveBeenCalledWith(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, expect.anything());
+    expect((props.model.content as any).interactiveState).toEqual({});
+
+    jest.useRealTimers();
+    logSpy.mockRestore();
   });
 
   it("polls for interactive state every 2 seconds", async () => {

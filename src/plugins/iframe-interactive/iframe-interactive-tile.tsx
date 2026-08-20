@@ -58,13 +58,10 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
+import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
-import {
-  IShowModal,
-  ICloseModal,
-  ISupportedFeatures
-} from "@concord-consortium/lara-interactive-api";
+import { IShowModal, ICloseModal, ISupportedFeatures } from "@concord-consortium/lara-interactive-api";
 
 import "./iframe-interactive-tile.scss";
 
@@ -95,9 +92,7 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T &
   return debounced;
 }
 
-interface IIframeInteractiveComponentProps extends ITileProps {
-  // Note: onLog and onHintChange removed - will use Logger directly
-}
+type IIframeInteractiveComponentProps = ITileProps;
 
 // Error Boundary for tile isolation
 class IframeInteractiveErrorBoundary extends React.Component<
@@ -195,13 +190,12 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   const debouncedSetState = useMemo(
     () => debounce((state: any) => {
       contentRef.current?.setInteractiveState(state);
-      // Log the genuine student-state change (debounced, and only reached when
-      // handleInteractiveState's JSON-diff guard saw an actual change). Routes
-      // through logTileChangeEvent so an interactive inside a Question also
-      // fires QUESTION_ANSWERS_CHANGE. This is the meaningful change — distinct
-      // from the interactive's chatty "log" breadcrumbs, which we no longer log.
+      // Log the interactiveState change (only reached when
+      // handleInteractiveState's JSON-diff guard saw an actual change).
+      // The persisted interactive state is the student's answer, so it is logged as a tile change.
       logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
         tileId: model.id,
+        tileType: "IframeInteractive",
         operation: "setInteractiveState",
         change: { interactiveState: state }
       });
@@ -212,6 +206,9 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   // Action to handle incoming interactive state with debouncing
   // Supports special messages: "nochange" and "touch" (LARA compatibility)
   const handleInteractiveState = useCallback((newState: any) => {
+    // Read-only/report mode: never persist or log the interactive's state (both the debounced path and
+    // the "touch" write below), or a teacher's view would dirty the model and post a phantom answer.
+    if (readOnly) return;
     // "nochange" and "touch" are special messages supported by LARA. We don't want to save them.
     // newState might be undefined if interactive state is requested before any state update.
     if (newState !== undefined && newState !== "nochange" && newState !== "touch") {
@@ -228,7 +225,7 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
       // Save the current interactive state with a new timestamp
       contentRef.current?.setInteractiveState(currentInteractiveState.current);
     }
-  }, [debouncedSetState]);
+  }, [debouncedSetState, readOnly]);
 
   const debouncedRequestHeight = useMemo(
     () => debounce((tileId: string, height: number) => {
@@ -358,11 +355,14 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         }
       });
 
-      // Interactives emit "log" messages for their own analytics (init,
-      // mouseover, etc.) — a burst of them on load. These are breadcrumbs, not
-      // tile-content changes, so CLUE does not log them (they previously flooded
-      // the log as IFRAME_INTERACTIVE_TOOL_CHANGE). The meaningful change is the
-      // interactiveState update, logged from debouncedSetState above.
+      // These are analytics breadcrumbs (button clicked, hint viewed), not a state change.
+      phone.addListener("log", (logData: any) => {
+        Logger.log(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
+          tileId: model.id,
+          tileType: "IframeInteractive",
+          ...logData
+        });
+      });
 
       // Handle modal requests (optional - can show modal dialogs)
       phone.addListener("showModal", (modalOptions: IShowModal) => {
@@ -452,9 +452,9 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
       debouncedSetState.cancel();
       debouncedRequestHeight.cancel();
     };
-  // Note: debouncedSetState and debouncedRequestHeight are stable (empty/stable deps in useMemo)
-  // and are already captured by handleInteractiveState and handleHeight, so they're not needed here.
-  // applyAspectRatio depends on handleHeight, so it's also not needed separately.
+  // Note: debouncedSetState and debouncedRequestHeight are reached through handleInteractiveState and
+  // handleHeight, which are in the dep array below, so their identity changes propagate; they don't
+  // need to be listed here. applyAspectRatio depends on handleHeight, so it's also not needed separately.
   // content.interactiveState and content.authoredState are intentionally read once at connection time.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content?.url, model.id, readOnly, handleInteractiveState, handleHeight]);
