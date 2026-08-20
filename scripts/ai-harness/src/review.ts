@@ -287,7 +287,18 @@ export interface ReviewDocument {
 
 export interface ReviewModel {
   generatedAt: string;
+  /** The corpus these rows were run against. Recorded in the key; see `displayCorpus` for the page. */
   corpus: string;
+  /**
+   * The corpus name as the page may print it, or `null` in shareable mode.
+   *
+   * A corpus name is free-form and chosen by whoever ran `import --corpus <name>`, so a production
+   * pull could easily be named after a class or a school — and it was rendering in the heading and
+   * the browser tab of every shareable report. The key file still records the true name, so nothing
+   * about decoding changes; the page falls back to the experiment name, which is authored to
+   * describe the experiment.
+   */
+  displayCorpus: string | null;
   experimentName: string;
   experimentSha256: string;
   /** `null` in shareable mode, where file paths are stripped. */
@@ -427,24 +438,36 @@ interface SentImage {
 }
 
 /**
- * The pictures an image-carrying row sent, or why they cannot be shown.
- *
- * Two checks, both required. The envelope has to still be usable for this row —
- * `imageRepresentationIsUsable` covers mode, backend, backend version, source content and every
- * file-level property, which is the same bar `run` applies before sending one. And every hash the
- * row recorded has to be one of the pictures that envelope now holds, with the bytes on disk still
- * hashing to it. The second check is stated directly rather than inferred from the first: "these are
- * the bytes that were sent" is the claim the report makes, so it is the claim that gets tested.
- */
-/**
  * A document's content, but only when it still hashes to what the run was given.
  *
  * `visual-tiles-only` is the one image set whose membership is not structural: it is the tiles the
  * *classifier* marked as needing a picture, so reconstructing what a run sent means classifying the
  * same content it classified. Anything else is a guess dressed as provenance.
+ *
+ * Wrapped in an object rather than returned bare: `unknown | null` collapses to `unknown`, so the
+ * signature would say nothing about the sentinel every caller checks.
  */
-export type ContentMatching = (sourceContentSha256: string) => unknown | null;
+export type ContentMatching = (sourceContentSha256: string) => { content: unknown } | null;
 
+/**
+ * The pictures an image-carrying row sent, or why they cannot be shown.
+ *
+ * The envelope has to still be usable for this row — `imageRepresentationIsUsable` covers mode,
+ * backend, backend version, source content and every file-level property, which is the same bar
+ * `run` applies before sending one. Then the run's image set decides which of the envelope's
+ * pictures it sent, and each of those is re-read and re-hashed here: "these are the bytes that were
+ * sent" is the claim the report makes, so it is the claim that gets tested.
+ *
+ * **How far that claim reaches, exactly.** A row records `imageSha256s` — every picture the envelope
+ * held — and `imageSet`, not the hashes it actually sent. For `full-document` and `per-tile` the set
+ * is structural, so re-applying it reproduces the same pictures and the claim is tight. For
+ * `visual-tiles-only` the membership is the classifier's, and it is *reconstructed* here rather than
+ * verified: flipping `requiresVisualRepresentation` for a tile type in `capability.ts` would select
+ * differently for the same unchanged content and envelope, and the newly selected picture is still
+ * among `imageSha256s`, so the check below cannot notice. Closing that means recording what was
+ * sent — a `sentImageSha256s` on the descriptor — which changes what a run writes and so belongs to
+ * a later milestone. See DEVIATIONS in the README.
+ */
 function readSentImages(
   paths: CorpusPaths, docId: string, descriptor: ImageRepresentation,
   contentMatching: ContentMatching
@@ -475,9 +498,10 @@ function readSentImages(
   let selected;
   try {
     if (imageSet === "visual-tiles-only") {
-      const content = contentMatching(descriptor.sourceContentSha256);
-      if (content === null) return { unavailable: "selection-unknown" };
-      selected = imagesForSet(envelope, file, imageSet, visualTileIdsOf(classifyDocument(content)));
+      const matching = contentMatching(descriptor.sourceContentSha256);
+      if (!matching) return { unavailable: "selection-unknown" };
+      selected = imagesForSet(
+        envelope, file, imageSet, visualTileIdsOf(classifyDocument(matching.content)));
     } else {
       selected = imagesForSet(envelope, file, imageSet);
     }
@@ -488,8 +512,9 @@ function readSentImages(
   const recorded = new Set(descriptor.imageSha256s);
   const images: SentImage[] = [];
   for (const image of selected.images) {
-    // Belt and braces: a selected picture the row's provenance does not list would mean the
-    // envelope has changed under us in a way the freshness check did not catch.
+    // Every selected picture must be one the row recorded. This proves the picture existed when the
+    // run happened — not that this run selected it, which for `visual-tiles-only` nothing on the row
+    // can prove (see above).
     if (!recorded.has(image.sha256)) return { unavailable: "bytes-changed" };
     let bytes: Buffer;
     try {
@@ -821,16 +846,9 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
     ...manifest.documents.map((entry) => entry.id).filter((docId) => byDocument.has(docId)),
     ...[...byDocument.keys()].filter((docId) => !manifestById.has(docId)).sort()
   ];
-  // **Presentation order**: the page groups documents by modality, so manifest order is not the
-  // order anyone reads in. Everything numbered or listed downstream — the pseudonyms, the key's
-  // document list, the ratings template — is built from this one sequence, so a judge working down
-  // the page works down the spreadsheet at the same time. Within a group, manifest order stands.
-  const modalityOf = (docId: string) => byDocument.get(docId)!.values().next().value!.modality;
-  const docIds = modalities.flatMap(
-    (modality) => inManifestOrder.filter((docId) => modalityOf(docId) === modality));
   const known = new Set(experiment.runs.map((run) => run.id));
   /** Every document's rows in experiment-file order — the order the header lists runs in. */
-  const rowsByDocument = new Map(docIds.map((docId) => {
+  const rowsByDocument = new Map(inManifestOrder.map((docId) => {
     const forDocument = byDocument.get(docId)!;
     const ordered = experiment.runs
       .map((run) => forDocument.get(run.id))
@@ -842,6 +860,25 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
       .sort((a, b) => a.runId.localeCompare(b.runId));
     return [docId, [...ordered, ...extra]] as const;
   }));
+
+  /**
+   * The modality a document is filed under: its first row in **experiment-file** order.
+   *
+   * One row decides, and every reader of it uses the same one. Ordering once read the first row in
+   * results-file order while the document itself read the first in experiment-file order — the same
+   * row only until a resume or a re-run appended out of that order, and two rows can disagree about
+   * modality (a hand-set `modalityOverride` between two appends). The page would then be grouped by
+   * one answer and ordered by the other, which is exactly the "work down the page, work down the
+   * spreadsheet" property below.
+   */
+  const modalityOf = (docId: string) => rowsByDocument.get(docId)![0].modality;
+
+  // **Presentation order**: the page groups documents by modality, so manifest order is not the
+  // order anyone reads in. Everything numbered or listed downstream — the pseudonyms, the key's
+  // document list, the ratings template — is built from this one sequence, so a judge working down
+  // the page works down the spreadsheet at the same time. Within a group, manifest order stands.
+  const docIds = modalities.flatMap(
+    (modality) => inManifestOrder.filter((docId) => modalityOf(docId) === modality));
 
   const counts = { success: 0, refusal: 0, error: 0, skipped: 0 };
   const judgeable: ReviewKeyPair[] = [];
@@ -923,7 +960,7 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
     return {
       docId,
       displayName: modes.shareable ? pseudonyms[docId] : docId,
-      modality: first.modality,
+      modality: modalityOf(docId),
       computedModality: first.computedModality,
       overridden: first.modality !== first.computedModality,
       metadata: modes.shareable || !entry ? null : metadataFor(entry),
@@ -942,6 +979,7 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
   return {
     generatedAt: options.now.toISOString(),
     corpus: manifest.name,
+    displayCorpus: modes.shareable ? null : manifest.name,
     experimentName: experiment.name,
     experimentSha256: options.experimentSha256,
     resultsFile: modes.shareable ? null : options.resultsFile,
@@ -979,7 +1017,7 @@ function contentMatchingFor(paths: CorpusPaths, entry: ManifestDocument | null):
       }
     }
     if (!loaded) return null;
-    return sha256Canonical(loaded.content) === sourceContentSha256 ? loaded.content : null;
+    return sha256Canonical(loaded.content) === sourceContentSha256 ? loaded : null;
   };
 }
 
@@ -1296,7 +1334,7 @@ function runTable(runs: ReviewRunConfiguration[]): Html {
 function headerBlock(model: ReviewModel): Html {
   const { counts } = model;
   return html`
-    <h1>Review: ${model.corpus}</h1>
+    <h1>Review: ${model.displayCorpus ?? model.experimentName}</h1>
     <div class="meta">
       <dl>
         <dt>Experiment</dt>
@@ -1491,7 +1529,8 @@ function documentBlock(document: ReviewDocument): Html {
  * so that a bug in the escaping above still cannot reach the network.
  */
 export function renderReviewHtml(model: ReviewModel): string {
-  const title = `Review: ${model.corpus} / ${model.experimentName}` +
+  const title = `Review: ${model.displayCorpus ? `${model.displayCorpus} / ` : ""}` +
+    `${model.experimentName}` +
     `${model.modes.blind ? " (blind)" : ""}${model.modes.shareable ? " (shareable)" : ""}`;
   const page = html`<!DOCTYPE html>
 <html lang="en">

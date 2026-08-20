@@ -765,9 +765,12 @@ Three properties are deliberate:
 
 Replaces document ids with per-report pseudonyms (`doc-01`… numbered in **presentation** order, so
 the key and the ratings template read down the page rather than across it) and omits harness
-metadata: unit,
-investigation, problem, `contextId`, source, file paths, tile ids, the results path and the harness
-commit. Run configurations and prompt name/hash stay — they are what a reader is judging.
+metadata: unit, investigation, problem, `contextId`, source, file paths, tile ids, skip reasons, the
+results path, the harness commit and **the corpus name** — that last one is free-form and chosen by
+whoever ran `import --corpus <name>`, so a production pull could easily be named after a class or a
+school. The heading falls back to the experiment name, and the key file still records the corpus, so
+nothing about decoding changes. Run configurations and prompt name/hash stay — they are what a
+reader is judging.
 
 **The flag removes harness metadata identifiers; it does not anonymize or redact document content.**
 The summaries, pictures and model outputs are shown as they are, and can themselves identify

@@ -11,7 +11,7 @@ import {
 } from "../src/represent-image.js";
 import { ResultRow, validateReviewKeyFile } from "../src/schemas.js";
 import {
-  ReviewFixture, buildReviewFixture, kAdversarial, kNonVisualTileId, kSentinels, tagNamesIn
+  ReviewFixture, buildReviewFixture, kAdversarial, kCorpus, kNonVisualTileId, kSentinels, tagNamesIn
 } from "./review-fixture.js";
 
 const kSeed = "a".repeat(64);
@@ -506,9 +506,17 @@ describe("--shareable", () => {
     for (const sentinel of [kSentinels.unit, kSentinels.investigation, kSentinels.problem,
       kSentinels.contextId,
       // A skip reason quotes tile ids, and a tile id contains the document id in this corpus.
-      kSentinels.skipReasonTile]) {
+      kSentinels.skipReasonTile,
+      // The corpus name is free-form and chosen at import; a production pull could be named after a
+      // class. It rendered in the heading and the browser tab of every shareable report.
+      kCorpus]) {
       expect(html).not.toContain(sentinel);
     }
+    expect(model.displayCorpus).toBeNull();
+    // The key still records it, so the report is decodable.
+    expect(reviewKeyFileFor(model).corpus).toBe(kCorpus);
+    // The heading falls back to the experiment name, which describes the experiment.
+    expect(html).toContain("<h1>Review: review-fixture</h1>");
     expect(html).not.toContain("documents/");
     expect(html).not.toContain(fixture.resultsFile);
     expect(model.gitCommit).toBeNull();
@@ -825,6 +833,36 @@ describe("output and sidecar paths", () => {
     expect(reviewSidecarPaths("/d/one.html"))
       .toEqual({ key: "/d/one.key.json", ratings: "/d/one.ratings-template.csv" });
     expect(reviewSidecarPaths("/d/two.html").key).not.toBe(reviewSidecarPaths("/d/one.html").key);
+  });
+});
+
+describe("one row decides a document's modality", () => {
+  it("groups and orders by the same answer when two rows disagree", () => {
+    // A re-run appends out of experiment order, so the first row in the file and the first row in
+    // experiment order are different rows — and a `modalityOverride` edited between two appends
+    // makes them disagree. Ordering used to read one and the document itself the other, which would
+    // group the page by one answer and order it by the other.
+    const fixture = buildReviewFixture("review-modality-disagreement");
+    const rerun = {
+      ...fixture.rows.find(
+        (row) => row.docId === "alpha" && row.runId === kSentinels.textRun && row.status === "success")!,
+      requestKey: "alpha-text-rerun",
+      modality: "mixed" as const
+    } as ResultRow;
+    const model = buildReviewModel({
+      rows: [...fixture.rows, rerun], resultsFile: fixture.resultsFile,
+      experiment: fixture.experiment, experimentSha256: fixture.experimentSha256,
+      paths: fixture.paths, now: kNow, modes: { shareable: true, blind: false }, seed: kSeed
+    });
+
+    const alpha = model.documents.find((document) => document.docId === "alpha")!;
+    const group = model.groups.find(
+      (entry) => entry.documents.some((document) => document.docId === "alpha"))!;
+    expect(group.modality).toBe(alpha.modality);
+    // Flattening the groups gives back the presentation order exactly — the property the pseudonyms,
+    // the key and the ratings template are all numbered from.
+    expect(model.groups.flatMap((entry) => entry.documents.map((document) => document.displayName)))
+      .toEqual(model.documents.map((document) => document.displayName));
   });
 });
 
