@@ -21,7 +21,14 @@ jest.mock("../../document/log-document-event", () => ({
 }));
 
 jest.mock("../../../lib/logger-utils", () => ({
-  getTileTitleForLogging: () => "My Tile",
+  processDocumentEventParams: (_params: any, context: any) => {
+    // Mirrors the real helper: tile info is derived from the resolved document,
+    // so without one there's no type and the title falls back to "<no title>".
+    const document = context ? mockCtx.document : undefined;
+    return document
+      ? { document, tileTitle: "My Tile", tileType: "Drawing" }
+      : { document: undefined, tileTitle: "<no title>", tileType: undefined };
+  }
 }));
 
 import { logTileFocusEvent } from "./log-tile-focus-event";
@@ -52,16 +59,16 @@ describe("logTileFocusEvent", () => {
     expect(mockLoggerLog).toHaveBeenCalledWith(LogEventName.SELECT_TILE, {
       tileId: "tile-2",
       tileType: undefined,
-      tileTitle: "My Tile",
+      tileTitle: "<no title>",
       readOnly: false,
     });
     expect(mockLogDocumentEvent).not.toHaveBeenCalled();
   });
 
-  it("is a no-op until the Logger is initialized", () => {
+  it("falls back to bare Logger.log when no document is found", () => {
     mockCtx.storesReady = false;
     logTileFocusEvent("tile-3", false);
-    expect(mockLoggerLog).not.toHaveBeenCalled();
+    expect(mockLoggerLog).toHaveBeenCalled();
     expect(mockLogDocumentEvent).not.toHaveBeenCalled();
   });
 });
