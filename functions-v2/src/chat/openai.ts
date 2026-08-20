@@ -6,12 +6,7 @@
 // which is per-request and not carried across turns). Assistant replies are structured: text.format
 // json_schema/strict with a nullable `userText`.
 import OpenAI from "openai";
-
-export interface TutorHighlight {
-  tileId: string;
-  objectId: string;
-  label: string;
-}
+import {TutorHighlight} from "../../../shared/chat-tutor-highlight";
 
 export interface TutorReply {
   userText: string | null;
