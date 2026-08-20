@@ -1,0 +1,26 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "image-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "image-tile": {
+      "id": "image-tile",
+      "content": {
+        "type": "Image",
+        "url": "curriculum/images/latch-sketch.png",
+        "fixtureMarker": "image-fixture-marker"
+      }
+    }
+  }
+}

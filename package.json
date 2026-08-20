@@ -33,6 +33,7 @@
       "/functions-v1/",
       "/functions-v2/",
       "/authoring-api/",
+      "/scripts/ai-harness/",
       "/.yalc/"
     ],
     "transform": {
@@ -101,7 +102,7 @@
     "lint:unused": "tsc --noUnusedLocals --project .",
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
-    "postinstall": "patch-package",
+    "postinstall": "patch-package && npm ci --prefix shared",
     "serve": "npx serve -c ../serve.json -l 8080 dist",
     "start": "webpack-dev-server --hot",
     "start:secure": "webpack-dev-server --server-type https --hot --server-options-cert ~/.localhost-ssl/localhost.pem --server-options-key ~/.localhost-ssl/localhost.key",

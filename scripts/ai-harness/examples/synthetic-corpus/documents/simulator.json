@@ -1,0 +1,44 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "simulator-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "simulator-tile": {
+      "id": "simulator-tile",
+      "content": {
+        "type": "Simulator",
+        "simulation": "terrarium"
+      },
+      "title": "simulator-fixture-marker"
+    }
+  },
+  "sharedModelMap": {
+    "shared-simulator-variables": {
+      "sharedModel": {
+        "type": "SharedVariables",
+        "id": "shared-simulator-variables",
+        "variables": [
+          {
+            "id": "simulator-var-1",
+            "name": "temperature",
+            "displayName": "Temperature",
+            "unit": "C",
+            "value": 22
+          }
+        ]
+      },
+      "tiles": []
+    }
+  }
+}

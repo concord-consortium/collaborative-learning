@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "name": "image-vs-text",
+  "runs": [
+    {
+      "id": "text-default",
+      "message": "text-only",
+      "textVariant": "default",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "text-minimal",
+      "message": "text-only",
+      "textVariant": "minimal",
+      "prompt": "categorize-design-default"
+    },
+    {
+      "id": "image-puppeteer",
+      "message": "image-only",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default"
+    }
+  ]
+}

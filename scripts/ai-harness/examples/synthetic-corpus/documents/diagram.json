@@ -1,0 +1,44 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "diagram-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "diagram-tile": {
+      "id": "diagram-tile",
+      "content": {
+        "type": "Diagram",
+        "fixtureMarker": "diagram-fixture-marker"
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-diagram-variables": {
+      "sharedModel": {
+        "type": "SharedVariables",
+        "id": "shared-diagram-variables",
+        "variables": [
+          {
+            "id": "diagram-var-1",
+            "name": "latchForce",
+            "displayName": "Latch force",
+            "unit": "N",
+            "value": 4,
+            "description": "Force needed to open the latch"
+          }
+        ]
+      },
+      "tiles": []
+    }
+  }
+}

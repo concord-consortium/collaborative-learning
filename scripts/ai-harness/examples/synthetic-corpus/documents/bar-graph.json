@@ -1,0 +1,69 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "bar-graph-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "bar-graph-tile": {
+      "id": "bar-graph-tile",
+      "content": {
+        "type": "BarGraph",
+        "fixtureMarker": "bar-graph-fixture-marker",
+        "yAxisLabel": "Count",
+        "primaryAttribute": "bar-graph-data-x"
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-bar-graph-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-bar-graph-data",
+        "providerId": "bar-graph-tile",
+        "dataSet": {
+          "id": "bar-graph-data",
+          "name": "Latch votes",
+          "attributes": [
+            {
+              "id": "bar-graph-data-x",
+              "name": "Trial",
+              "values": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "bar-graph-data-y",
+              "name": "Height (cm)",
+              "values": [
+                "12",
+                "19"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "bar-graph-data-case-1"
+            },
+            {
+              "__id__": "bar-graph-data-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "bar-graph-tile"
+      ]
+    }
+  }
+}

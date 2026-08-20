@@ -83,4 +83,14 @@ export interface AiSummarizerOptions {
   includeModel?: boolean; // If true, include the full JSON model in the output
   minimal?: boolean;      // If true, skip all boilerplate and headers and just return the text content
   tileHandlers?: TileHandler[];
+  /**
+   * How much of each data set to write out.
+   *
+   * `full` (the default, and what every caller got before this existed) describes the data set and
+   * then prints every case as a markdown table. `schema-only` keeps the heading, the attributes
+   * table, the formulas and the case count, and leaves the case data out — the shape of the data
+   * without the data itself. A large table can be most of a document's summary, and whether the
+   * model needs the rows to categorize a design is exactly the sort of thing worth measuring.
+   */
+  dataSetTables?: "full" | "schema-only";
 }

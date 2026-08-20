@@ -1,0 +1,68 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "data-card-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "data-card-tile": {
+      "id": "data-card-tile",
+      "content": {
+        "type": "DataCard",
+        "fixtureMarker": "data-card-fixture-marker",
+        "caseIndex": 0
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-data-card-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-data-card-data",
+        "providerId": "data-card-tile",
+        "dataSet": {
+          "id": "data-card-data",
+          "name": "Latch cards",
+          "attributes": [
+            {
+              "id": "data-card-data-x",
+              "name": "Trial",
+              "values": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "data-card-data-y",
+              "name": "Height (cm)",
+              "values": [
+                "12",
+                "19"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "data-card-data-case-1"
+            },
+            {
+              "__id__": "data-card-data-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "data-card-tile"
+      ]
+    }
+  }
+}
