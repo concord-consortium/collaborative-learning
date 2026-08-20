@@ -1,9 +1,9 @@
 # Backfilling `offeringId` onto Firestore metadata documents — design
 
-**Jira:** CLUE-610. The sweep that runs this script is CLUE-604's; that story is updated once this
-is implemented, not before.
+**Jira:** CLUE-643, which both writes this script and runs the sweep.
 
-**Branch:** `CLUE-610-document-offering-id-backfill`, chained on `CLUE-610-generic-type-rename`.
+**Branch:** `CLUE-643-document-offering-id-backfill`, based on master. The script imports nothing from
+`src/`, so it stands on its own.
 
 ## The problem
 
@@ -46,8 +46,9 @@ the kind registry (`src/models/document/document-kinds.ts`):
 
 The group/class-wide type is **either `"group"` or `"axes"`** during the sweep window, depending on
 whether `backfill-group-document-axes.ts` has already run. The script accepts both, which makes the
-two sweep scripts order-independent — otherwise CLUE-604's runbook acquires a hidden ordering
-constraint that nothing in either script would state.
+two sweep scripts order-independent — otherwise the two runbooks acquire a hidden ordering
+constraint that nothing in either script would state. That matters more now that the axes backfill is
+run by CLUE-604 and this one by CLUE-643, since no single runbook could enforce an order between them.
 
 ### Documents deliberately excluded
 
@@ -168,7 +169,7 @@ The queries need a `COLLECTION_GROUP` ascending index on `documents.type`. It wa
 index — but **declared is not deployed**, and it turned out to exist in neither environment. Nothing
 had exercised it, because neither sweep script had been run.
 
-**It was deployed to staging and production on 2026-08-13, so CLUE-604 does not need to repeat it.**
+**It was deployed to staging and production on 2026-08-13, so neither sweep story needs to repeat it.**
 Indexes persist, and `.firebaserc` defines only those two projects. Recorded here because the
 symptom is otherwise baffling: without the index the very first query fails outright, and both sweep
 scripts fail identically.
@@ -383,11 +384,13 @@ Unit tests against a mock Firestore and a mock RTDB, in the sibling's style:
 This is data repair. No app code changes, no rules change, no client behavior change — so it needs
 no drain, no deploy window, and no place in the release chain.
 
-CLUE-604's sweep step becomes **two script runs instead of one, in either order**. Both are dry-run
-first, then `APPLY=1`, per environment.
+This sweep is CLUE-643's own, so it waits on no release. Within that story it runs **after** the
+`context_id` repair and the missing-metadata creation: this script finds a document's `offeringId`
+through its `context_id`, so a wrong one makes the document look unrecoverable, and rows that do not
+exist yet cannot be scanned at all.
 
-CLUE-604 is updated to describe this once the script exists, so that its runbook can name the real
-script, its real flags, and its real output.
+Against CLUE-604's axes backfill it is order-independent, for the reason given under "Documents in
+scope": that script's rename is accepted by this one either way.
 
 ## Open question, deliberately deferred
 
