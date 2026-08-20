@@ -259,7 +259,7 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
           };
     const rowTile = document?.addTile(tool.id, newTileOptions);
     if (document && rowTile && rowTile.tileId) {
-      ui.setSelectedTileId(rowTile.tileId);
+      ui.setSelectedTileId(rowTile.tileId, { programmatic: true });
       setActiveTool(defaultTool);
       // Scroll to the new tile once it has been added to the correct location
       // We need to use a timeout because tiles are added in one spot, then moved elsewhere

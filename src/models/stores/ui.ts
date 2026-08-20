@@ -12,8 +12,9 @@ type StringDialogResolver = (value: string | PromiseLike<string>) => void;
 let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;
 
 interface ISelectTileOptions {
-  append: boolean;
+  append?: boolean;
   dragging?: boolean;
+  programmatic?: boolean;
   readOnly?: boolean;
 }
 
@@ -159,8 +160,8 @@ export const UIModel = types
           self.selectedTileIds.replace([tileId]);
         }
 
-        // Log a SELECT_TILE only when the tile newly enters the selection.
-        if (!isCurrentlySelected) {
+        // Log a SELECT_TILE only when the tile newly enters the selection from a non-programmatic action.
+        if (!isCurrentlySelected && !options?.programmatic) {
           logTileFocusEvent(tileId, !!options?.readOnly);
         }
       } else {

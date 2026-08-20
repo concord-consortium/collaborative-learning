@@ -952,7 +952,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const rowTile = content.userAddTile(toolId, {title, insertRowInfo});
 
     if (rowTile?.tileId) {
-      ui.setSelectedTileId(rowTile.tileId);
+      ui.setSelectedTileId(rowTile.tileId, { programmatic: true });
     }
   };
 

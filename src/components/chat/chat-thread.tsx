@@ -103,7 +103,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
     if (threadId === "document") {
       ui.setSelectedTileId('');
     } else {
-      ui.setSelectedTileId(threadId);
+      ui.setSelectedTileId(threadId, { programmatic: true });
     }
   };
 

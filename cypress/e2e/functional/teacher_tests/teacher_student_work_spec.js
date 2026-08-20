@@ -28,7 +28,6 @@ context('Teacher can use studentDocument URL parameter', () => {
     beforeTest(studentQueryParams);
     clueCanvas.addTile('text');
 
-    // Search for the event, since adding a tile also selects it, so CREATE_TILE is followed by SELECT_TILE.
     cy.get("@log")
       .should("have.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
       .invoke("getCalls")
