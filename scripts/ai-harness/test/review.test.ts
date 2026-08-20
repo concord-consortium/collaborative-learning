@@ -91,6 +91,31 @@ describe("escaping student-authored content", () => {
   });
 });
 
+describe("the page can be read with a keyboard", () => {
+  const fixture = buildReviewFixture("review-accessibility");
+  const html = renderReviewHtml(modelFor(fixture));
+
+  it("makes every clipped block focusable, so it can be scrolled without a mouse", () => {
+    // `pre` clips at 32rem and scrolls, and summaries routinely run past that. A scroll container
+    // without `tabindex` cannot be focused or scrolled by keyboard in Firefox or Safari, so a
+    // keyboard-only judge cannot read past the clip.
+    const blocks = [...html.matchAll(/<pre\b([^>]*)>/g)].map((match) => match[1]);
+    expect(blocks.length).toBeGreaterThan(0);
+    expect(blocks.every((attributes) => attributes.includes('tabindex="0"'))).toBe(true);
+    // And each announces what it is, rather than being an unnamed region.
+    expect(blocks.every((attributes) => /aria-label="[^"]+"/.test(attributes))).toBe(true);
+  });
+
+  it("never skips a heading level", () => {
+    const levels = [...html.matchAll(/<h([1-6])\b/g)].map((match) => Number(match[1]));
+    expect(levels[0]).toBe(1);
+    // A jump from h1 straight to h4 makes heading navigation lie about the structure.
+    for (let index = 1; index < levels.length; index += 1) {
+      expect(levels[index] - levels[index - 1]).toBeLessThanOrEqual(1);
+    }
+  });
+});
+
 describe("what the model was given", () => {
   const fixture = buildReviewFixture("review-inputs");
   const model = modelFor(fixture);

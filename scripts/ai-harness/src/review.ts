@@ -1257,6 +1257,9 @@ const kStyles = `
     border: 1px solid #e2e2e2; border-radius: 4px; padding: 0.6rem 0.75rem; margin: 0;
     font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: 32rem;
     overflow-y: auto; }
+  pre:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
+  h2.caption { font-size: 0.85rem; margin: 1.25rem 0 0.5rem; padding: 0; border-bottom: none;
+    text-transform: uppercase; letter-spacing: 0.06em; color: #555; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0.75rem; }
   .card { border: 1px solid #c8c8c8; border-radius: 5px; padding: 0.6rem 0.75rem; background: #fcfcfc; }
   .card-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
@@ -1354,7 +1357,7 @@ function headerBlock(model: ReviewModel): Html {
       </dl>
     </div>
     ${model.runs
-      ? html`<h4>Runs, in experiment-file order</h4>${runTable(model.runs)}`
+      ? html`<h2 class="caption">Runs, in experiment-file order</h2>${runTable(model.runs)}`
       : html`<p class="meta">${model.runCount} run(s). Which configuration produced which output is
           withheld: this is a blinded report, and the mapping is in its key file.</p>`}
     ${model.modes.shareable
@@ -1383,7 +1386,9 @@ function inputsBlock(document: ReviewDocument): Html {
           <p class="input-label">Summary ${index + 1} of ${document.texts.length}${text.labels.length > 0
             ? html` — variant ${text.labels.join("; ")}`
             : ""}</p>
-          <pre>${text.markdown}</pre>
+          <pre tabindex="0" role="region"
+            aria-label="Summary ${index + 1} sent for document ${document.displayName}"
+          >${text.markdown}</pre>
         </div>`)}
       ${document.images.length === 0 && document.texts.length === 0
         ? html`<p class="meta">No input is available to show for this document.</p>`
@@ -1404,13 +1409,14 @@ function configurationLine(configuration: ReviewRunConfiguration): string {
 
 function outcomeBlock(outcome: ReviewOutcome): Html {
   if (outcome.kind === "refusal") {
-    return html`<div class="field"><div class="field-name">refusal</div><pre>${outcome.refusal}</pre></div>`;
+    return html`<div class="field"><div class="field-name">refusal</div>
+      <pre tabindex="0" role="region" aria-label="Refusal text">${outcome.refusal}</pre></div>`;
   }
   if (outcome.kind === "error") {
     return html`
       <div class="field">
         <div class="field-name">error</div>
-        <pre>${outcome.type}: ${outcome.message}
+        <pre tabindex="0" role="region" aria-label="Error detail">${outcome.type}: ${outcome.message}
 attempts: ${outcome.attempts}</pre>
       </div>`;
   }
@@ -1431,7 +1437,8 @@ attempts: ${outcome.attempts}</pre>
       : ""}
     ${outcome.remainingJson
       ? html`<div class="field"><div class="field-name">other response fields</div>
-          <pre>${outcome.remainingJson}</pre></div>`
+          <pre tabindex="0" role="region" aria-label="Other response fields, as JSON"
+          >${outcome.remainingJson}</pre></div>`
       : ""}
     ${outcome.category === null && !outcome.keyIndicators && outcome.discussion === null &&
       !outcome.remainingJson
