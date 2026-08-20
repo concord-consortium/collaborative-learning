@@ -203,7 +203,7 @@ const NavTabs: React.FC = () => {
           When on, every user starts on the selected tab (no document open, divider reset) each load,
           as a session-only override; it never overwrites where they left off.
         </p>
-        <label>
+        <label className="checkbox-label">
           <input type="checkbox" {...register("fixedStartView")} />
           {" "}Always start on a fixed tab
         </label>

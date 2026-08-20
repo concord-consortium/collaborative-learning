@@ -57,6 +57,12 @@
       margin-bottom: 10px;
     }
 
+    // A checkbox and its text share one label, so it needs its own spacing from whatever follows.
+    .checkbox-label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
     .form-error {
       color: red;
       margin-bottom: 10px;
