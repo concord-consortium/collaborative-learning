@@ -11,6 +11,11 @@ type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
 let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;
 
+interface ISelectTileOptions {
+  append: boolean;
+  dragging?: boolean;
+  readOnly?: boolean;
+}
 
 // Information needed to scroll to a tile (for example, when a comment about a tile is selected)
 const ScrollToModel = types
@@ -132,8 +137,7 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
-    const setOrAppendTileIdToSelection =
-        (tileId?: string, options?: {append: boolean, dragging?: boolean, readOnly?: boolean}) => {
+    const selectTile = (tileId?: string, options?: ISelectTileOptions) => {
       if (tileId) {
         const tileIdIndex = self.selectedTileIds.indexOf(tileId);
         const isCurrentlySelected = tileIdIndex >= 0;
@@ -154,14 +158,8 @@ export const UIModel = types
         } else if (!options?.dragging) {
           self.selectedTileIds.replace([tileId]);
         }
-        // clicking on an already-selected tile doesn't change selection
-        //
-        // Log a SELECT_TILE only when the tile newly enters the selection — a
-        // repeat click on an already-selected tile is a no-op above, and this
-        // never fires on deselect/clear. Every selection path funnels here
-        // (mouse via handlePointerDown / the tile's own click handler, keyboard
-        // via the focus trap's onFocusEnter, drag), so both mouse and keyboard
-        // focus are covered by this one hook.
+
+        // Log a SELECT_TILE only when the tile newly enters the selection.
         if (!isCurrentlySelected) {
           logTileFocusEvent(tileId, !!options?.readOnly);
         }
@@ -209,11 +207,11 @@ export const UIModel = types
         self.errorContent = undefined;
       },
 
-      setSelectedTile(tile?: ITileModel, options?: {append: boolean, dragging?: boolean, readOnly?: boolean}) {
-        setOrAppendTileIdToSelection(tile && tile.id, options);
+      setSelectedTile(tile?: ITileModel, options?: ISelectTileOptions) {
+        selectTile(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string, options?: {append: boolean, dragging?: boolean, readOnly?: boolean}) {
-        setOrAppendTileIdToSelection(tileId, options);
+      setSelectedTileId(tileId: string, options?: ISelectTileOptions) {
+        selectTile(tileId, options);
       },
       removeTileIdFromSelection(tileId: string) {
         self.selectedTileIds.remove(tileId);
