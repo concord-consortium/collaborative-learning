@@ -36,17 +36,11 @@ This is spike work: promising, but not yet a mandated feature, and the plan may 
 - `scripts/lib/` + `scripts/README.md` conventions (`npx tsx`, `scripts/.env`, `serviceAccountKey.json`) — the harness follows them.
 - `src/components/doc-editor/doc-editor-app.tsx` — proves `documentSummarizerWithDrawings` (SVG drawing handler) runs anywhere React is importable, including a node script here. The harness can prototype SVG-in-markdown drawings today even though the deployed function can't use that handler yet.
 
-## Known production bug the baselines must account for
+## Known production bug the baselines must account for (since resolved — see below)
 
-`findRelatedSummaries()` in `functions-v2/lib/src/ai-categorize-document.ts` pushes the *current document's* `summary` argument into every result instead of each related Firestore doc's own summary (`doc.data().summary`). Production has therefore been injecting up to five copies of the student's own summary into the prompt, not related students' summaries. (Caught in external review; verified in code.)
+`findRelatedSummaries()` in `functions-v2/lib/src/ai-categorize-document.ts` pushed the *current document's* `summary` argument into every result instead of each related Firestore doc's own summary (`doc.data().summary`). (Caught in external review; verified in code.)
 
-Consequently the extras experiments need three named variants, so the baseline can't silently drift into an improved implementation:
-
-- `extras-production-current` — reproduces today's behavior exactly, bug included
-- `extras-fixed` — each related document's actual summary
-- `no-extras`
-
-The bug itself gets fixed in production as part of this story (or CLUE-607), but the harness must be able to reproduce the buggy baseline for honest before/after comparison.
+This section originally required three named extras variants — `extras-production-current` (bug reproduced), `extras-fixed`, `no-extras` — so the baseline couldn't silently drift into an improved implementation. **That requirement is retired.** The bug was fixed on `master` (CLUE-630) with a unit test guarding against reintroduction, and spike finding 6a established it never fired in production: the `summaries` collection holds a single document, so the search feeding related summaries has always returned nothing — there is no real-world "before" for a buggy baseline to represent. The harness built `extras-production-current` in milestone 3 and then removed it; the surviving settings are `extras: all` (each related document's own summary — the fixed behavior) and `extras: none`. The one measurement the removed setting produced (its token premium) is recorded in the harness README's recorded run. The question it was quietly serving — do extras help because of their *content* or just their added *text volume*? — is real but needs a designed length-matched control, which belongs to CLUE-607's experiments.
 
 ## Architecture
 
@@ -81,7 +75,7 @@ Given document content JSON, produce representations, cached on disk per (doc co
 ### 3. Message layer
 
 - **Milestone-1 requirement (promoted from "open question"):** extract the pure builders — `buildSummaryMessages`, `buildImageMessages`, `buildZodResponseSchema`, and the new `buildMixedMessages` — out of `ai-categorize-document.ts` (which mixes them with `firebase-functions` and Firestore imports) into `shared/`, consumed by both production and the harness. The harness configures variants; it never forks message construction.
-- Related-summaries extras come from the manifest (injected data), not live Firestore, in the three named variants above.
+- Related-summaries extras come from the manifest (injected data), not live Firestore, in the `all`/`none` settings above.
 - Prompts are data: `prompts/<name>.json` in `aiPrompt` shape, each with **provenance**: source (unit config path / built-in constant), retrieval commit or timestamp, and content hash. Reports identify prompts by hash, not just friendly name. Seed set: the built-in `categorize-design` default (as-is *and* the mixed-mode rewording from the config decision) and the authored MODS/cas prompts.
 
 ### 4. Execution layer
@@ -142,7 +136,7 @@ Against the committed synthetic corpus with mocked OpenAI responses: manifest/ex
 
 1. **Shared builders + skeleton.** Extract the pure message/schema builders to `shared/` (production consumes them from there too — this is a small production PR). Corpus/experiment/result schemas with validation. Synthetic corpus covering every tile type. `import`, text representations, text-only runs via the shared builders, JSONL results, cache, required spend ceiling, run metadata.
 2. **Images.** Multi-image representation model; puppeteer backend (base64 data URLs), then parameterized Shutterbug backend. Image-only production-parity baseline.
-3. **Mixed + variants.** `buildMixedMessages` (in `shared/`), skip-empty with the initial capability registry, extras in all three variants (including the reproduced production bug), detail low/high, accurate-height, per-tile and visual-tiles-only image sets, `no-dataset-tables` (new summarizer work). Smoke matrix on synthetic corpus; verify caching, ceiling, resume, reports. Also carry two operational gaps found while verifying milestone 2: `render` has no CLI flag for its concurrency or its per-document timeout, so a cold dev server times out the first documents of a run and re-running is the only remedy (see "A cold dev server can time out the first documents in a run" in the harness README); and a taller fixture, since every synthetic document renders under the 500px starting frame height except two, leaving the frame-resize path thinly covered against a real browser.
+3. **Mixed + variants.** `buildMixedMessages` (in `shared/`), skip-empty with the initial capability registry, extras settings (as built: `all`/`none` — the bug-reproducing third variant was built and then retired; see the resolved section above), detail low/high, accurate-height, per-tile and visual-tiles-only image sets, `no-dataset-tables` (new summarizer work). Smoke matrix on synthetic corpus; verify caching, ceiling, resume, reports. Also carry two operational gaps found while verifying milestone 2: `render` has no CLI flag for its concurrency or its per-document timeout, so a cold dev server times out the first documents of a run and re-running is the only remedy (see "A cold dev server can time out the first documents in a run" in the harness README); and a taller fixture, since every synthetic document renders under the 500px starting frame height except two, leaving the frame-resize path thinly covered against a real browser.
 4. **Review report.** Side-by-side HTML with escaping and `--shareable` mode.
 5. **Evaluation definition.** Decision rule + blinded review workflow written down (needs team question 1's examples; becomes spike step 2).
 6. **Production corpus (gated).** Safeguards from "Data safety," then `pull`, then the approved full matrix.
