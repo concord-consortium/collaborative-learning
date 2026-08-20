@@ -346,7 +346,7 @@ describe("CommentThread", () => {
     // Thread is expanded, click on the comment card
     mockSetSelectedTileId.mockClear();
     fireEvent.click(screen.getByTestId("comment-card"));
-    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-abc");
+    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-abc", { programmatic: true });
   });
 
   it("shows empty thread with override title when focused tile has no comments", () => {
