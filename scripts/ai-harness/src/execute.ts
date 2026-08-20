@@ -182,13 +182,10 @@ function checkedImageBytes(file: string, expectedSha256: string): Buffer {
 /**
  * The related summaries a run sends, which is a dimension rather than a fact about the document.
  *
- * Whether they help at all is the open question (CLUE-607): the feature has never run for real, so
- * its value is unmeasured. Answering it needs a control that varies the *content* of the extras
- * while holding their length still, which neither of these two is — see the README.
+ * `all` sends the manifest's entries; `none` sends an empty list. Whether they help at all, and
+ * whether any help comes from their content or their length, is unmeasured — see the README.
  */
-export function relatedSummariesFor(
-  run: ExperimentRun, document: ManifestDocument, markdown: string
-): RelatedSummary[] {
+export function relatedSummariesFor(run: ExperimentRun, document: ManifestDocument): RelatedSummary[] {
   const entries = (document.relatedSummaries ?? []) as unknown as RelatedSummary[];
   return (run.extras ?? "all") === "none" ? [] : entries;
 }
@@ -319,7 +316,7 @@ export function buildTasks(options: BuildTasksOptions): BuildTasksResult {
     }
     return {
       markdown: envelope.markdown,
-      relatedSummaries: relatedSummariesFor(run, document, envelope.markdown),
+      relatedSummaries: relatedSummariesFor(run, document),
       representation: {
         variantId: variant.id,
         variantVersion: variant.variantVersion,

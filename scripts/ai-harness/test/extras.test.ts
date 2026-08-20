@@ -38,22 +38,21 @@ describe("what a run puts in the related-summary parts", () => {
     { summary: "The first related document.", agreements },
     { summary: "The second related document.", agreements }
   ];
-  const markdown = "# This document\n\nThe student drew a box.";
 
   it("sends the manifest entries unchanged by default", () => {
-    // `all` is the default because it is what the harness has always done, so an
-    // experiment file written before this dimension existed keeps its meaning and its request key.
-    expect(relatedSummariesFor(run(), document(entries), markdown)).toEqual(entries);
-    expect(relatedSummariesFor(run("all"), document(entries), markdown)).toEqual(entries);
+    // Saying nothing and saying `all` are the same thing. That this also keeps the request key is
+    // asserted further down, next to the keys it compares.
+    expect(relatedSummariesFor(run(), document(entries))).toEqual(entries);
+    expect(relatedSummariesFor(run("all"), document(entries))).toEqual(entries);
   });
 
   it("sends nothing when the setting is `none`", () => {
-    expect(relatedSummariesFor(run("none"), document(entries), markdown)).toEqual([]);
+    expect(relatedSummariesFor(run("none"), document(entries))).toEqual([]);
   });
 
   it("has nothing to send when the document has no related summaries", () => {
     for (const extras of ["all", "none"] as const) {
-      expect(relatedSummariesFor(run(extras), document([]), markdown)).toEqual([]);
+      expect(relatedSummariesFor(run(extras), document([]))).toEqual([]);
     }
   });
 });

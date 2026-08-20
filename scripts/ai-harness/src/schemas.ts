@@ -391,8 +391,7 @@ export type ImageSet = typeof imageSets[number];
  *
  * `all` is the default because it is what the harness has always done — every related summary the
  * manifest carries — so an experiment file that says nothing keeps its meaning and its request key.
- * `none` sends the parts empty. A setting that sends *some* of them belongs in this family too, and
- * the names leave room for it.
+ * `none` sends the parts empty.
  */
 export const extrasModes = ["all", "none"] as const;
 export type ExtrasMode = typeof extrasModes[number];
