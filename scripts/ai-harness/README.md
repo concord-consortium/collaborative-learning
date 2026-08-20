@@ -748,6 +748,13 @@ Three properties are deliberate:
   screenshot with last week's output, even with a warning, invites a judgement about the wrong
   thing.
 
+  A row's `imageSha256s` records **every** picture its envelope holds, because that is the render's
+  provenance, and `imageSet` says which of them the run sent — so the report re-applies the set
+  through `imagesForSet`, the same function execution selects with, and the two cannot disagree
+  about what a set means. `visual-tiles-only` is the one set whose membership is not structural: it
+  is the tiles the classifier marked, so reconstructing it means classifying the same content the
+  run classified. A document edited since gets a notice rather than a confident wrong answer.
+
   The notice text comes from a fixed vocabulary rather than from the underlying error, because those
   errors carry absolute paths (which hold the corpus and document id), image filenames (which hold
   the document id) and freshness reasons (which name the mode, backend and version). The unredacted

@@ -24,16 +24,21 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHmac } from "node:crypto";
-import { CorpusPaths, readManifest, readRepresentation, representationPath } from "./corpus.js";
 import {
-  imageRepresentationIsUsable, imageRepresentationPath, readImageEnvelope, resolveImageFile,
-  sha256Bytes
+  CorpusPaths, readCorpusDocument, readManifest, readRepresentation, representationPath
+} from "./corpus.js";
+import {
+  imageRepresentationIsUsable, imageRepresentationPath, imagesForSet, readImageEnvelope,
+  resolveImageFile, sha256Bytes
 } from "./represent-image.js";
+import { classifyDocument } from "./capability.js";
+import { visualTileIdsOf } from "./execute.js";
 import { partitionSuperseded } from "./report.js";
 import {
   EnvelopeImage, ExperimentFile, ExperimentRun, ExtrasMode, ImageDetail, ImageRepresentation,
   ImageSet, ManifestDocument, MessageShape, Modality, ResultRow, ReviewKeyFile, ReviewKeyPair,
-  TextRepresentation, canonicalJson, kSchemaVersion, modalities, sendsImages, sendsText
+  TextRepresentation, canonicalJson, kSchemaVersion, modalities, sendsImages, sendsText,
+  sha256Canonical
 } from "./schemas.js";
 
 // ---------------------------------------------------------------------------
@@ -368,7 +373,8 @@ export type UnavailableReason =
   | "variant-changed"
   | "document-changed"
   | "render-changed"
-  | "bytes-changed";
+  | "bytes-changed"
+  | "selection-unknown";
 
 /** What went wrong, plus detail that only the team-internal report is allowed to print. */
 export interface UnavailableInput {
@@ -425,8 +431,18 @@ interface SentImage {
  * hashing to it. The second check is stated directly rather than inferred from the first: "these are
  * the bytes that were sent" is the claim the report makes, so it is the claim that gets tested.
  */
+/**
+ * A document's content, but only when it still hashes to what the run was given.
+ *
+ * `visual-tiles-only` is the one image set whose membership is not structural: it is the tiles the
+ * *classifier* marked as needing a picture, so reconstructing what a run sent means classifying the
+ * same content it classified. Anything else is a guess dressed as provenance.
+ */
+export type ContentMatching = (sourceContentSha256: string) => unknown | null;
+
 function readSentImages(
-  paths: CorpusPaths, docId: string, descriptor: ImageRepresentation
+  paths: CorpusPaths, docId: string, descriptor: ImageRepresentation,
+  contentMatching: ContentMatching
 ): { images: SentImage[] } | UnavailableInput {
   const file = imageRepresentationPath(paths, descriptor.modeId, docId);
   if (!fs.existsSync(file)) return { unavailable: "missing" };
@@ -446,18 +462,37 @@ function readSentImages(
   if (!usable.fresh) {
     return { unavailable: "render-changed", detail: usable.reasons[0] };
   }
-  const byHash = new Map(envelope.images.map((image) => [image.sha256, image]));
+  // `imageSha256s` is every picture the envelope holds — the render's provenance — and `imageSet`
+  // says which of them the run actually sent. Showing all of them displayed tile captures a
+  // `visual-tiles-only` run never received, labelled as though it had. The selection goes through
+  // the same function execution selects with, so the two cannot disagree about what a set means.
+  const imageSet = descriptor.imageSet ?? "full-document";
+  let selected;
+  try {
+    if (imageSet === "visual-tiles-only") {
+      const content = contentMatching(descriptor.sourceContentSha256);
+      if (content === null) return { unavailable: "selection-unknown" };
+      selected = imagesForSet(envelope, file, imageSet, visualTileIdsOf(classifyDocument(content)));
+    } else {
+      selected = imagesForSet(envelope, file, imageSet);
+    }
+  } catch (error) {
+    return { unavailable: "selection-unknown", detail: (error as Error).message };
+  }
+
+  const recorded = new Set(descriptor.imageSha256s);
   const images: SentImage[] = [];
-  for (const sha256 of descriptor.imageSha256s) {
-    const image = byHash.get(sha256);
-    if (!image) return { unavailable: "bytes-changed" };
+  for (const image of selected.images) {
+    // Belt and braces: a selected picture the row's provenance does not list would mean the
+    // envelope has changed under us in a way the freshness check did not catch.
+    if (!recorded.has(image.sha256)) return { unavailable: "bytes-changed" };
     let bytes: Buffer;
     try {
       bytes = fs.readFileSync(resolveImageFile(file, image));
     } catch {
       return { unavailable: "unreadable", detail: `${image.file} could not be read` };
     }
-    if (sha256Bytes(bytes) !== sha256) {
+    if (sha256Bytes(bytes) !== image.sha256) {
       return { unavailable: "bytes-changed", detail: `${image.file} holds different bytes` };
     }
     images.push({ image, bytes });
@@ -609,7 +644,9 @@ const kUnavailableSentences: Record<UnavailableReason, string> = {
   "document-changed": "the document has changed since this run, so what is on disk now describes " +
     "the newer content",
   "render-changed": "the render on disk no longer matches the one this run sent",
-  "bytes-changed": "the picture on disk no longer holds the bytes this run sent"
+  "bytes-changed": "the picture on disk no longer holds the bytes this run sent",
+  "selection-unknown": "which of the document's pictures this run sent cannot be established " +
+    "from what is on disk now"
 };
 
 /**
@@ -620,7 +657,8 @@ const kUnavailableSentences: Record<UnavailableReason, string> = {
  * appearance walking the rows in experiment-run order, which is stable.
  */
 function inputsFor(
-  paths: CorpusPaths, docId: string, rows: readonly ResultRow[], modes: ReviewModes
+  paths: CorpusPaths, docId: string, rows: readonly ResultRow[], modes: ReviewModes,
+  contentMatching: ContentMatching
 ): Pick<ReviewDocument, "images" | "texts" | "inputNotices"> {
   const { blind } = modes;
   const images: ReviewImageInput[] = [];
@@ -683,11 +721,15 @@ function inputsFor(
   // done to reach the same answer.
   const readImages = new Map<string, ReturnType<typeof readSentImages>>();
   const addImages = (descriptor: ImageRepresentation) => {
+    // `imageSet` belongs in this key: two runs over one render record the *same* whole-envelope
+    // hashes and differ only by the set they sent, so a key without it served a per-tile run's
+    // selection to a visual-tiles-only one.
     const key = `${descriptor.modeId} ${descriptor.backendId} ${descriptor.backendVersion} ` +
-      `${descriptor.sourceContentSha256} ${descriptor.imageSha256s.join(",")}`;
+      `${descriptor.sourceContentSha256} ${descriptor.imageSet ?? "full-document"} ` +
+      `${descriptor.imageSha256s.join(",")}`;
     let read = readImages.get(key);
     if (!read) {
-      read = readSentImages(paths, docId, descriptor);
+      read = readSentImages(paths, docId, descriptor, contentMatching);
       readImages.set(key, read);
     }
     if ("unavailable" in read) {
@@ -857,7 +899,7 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
       overridden: first.modality !== first.computedModality,
       metadata: modes.shareable || !entry ? null : metadataFor(entry),
       missingFromManifest: !entry,
-      ...inputsFor(paths, docId, rowsForDocument, modes),
+      ...inputsFor(paths, docId, rowsForDocument, modes, contentMatchingFor(paths, entry)),
       cards,
       skipped: rowsForDocument
         .filter((row): row is ResultRow & { status: "skipped" } => row.status === "skipped")
@@ -886,6 +928,29 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
     pseudonyms: modes.shareable ? pseudonyms : null,
     seed: modes.blind ? seed : null,
     labels: modes.blind ? labels : null
+  };
+}
+
+/**
+ * Reads a document's content back, but hands it over only when it still hashes to what the run was
+ * given — and reads it at most once per document however many rows ask.
+ *
+ * A document edited since the run classifies differently, so using it to work out which tiles a
+ * `visual-tiles-only` run sent would produce a confident, wrong answer. The report says it cannot
+ * tell instead.
+ */
+function contentMatchingFor(paths: CorpusPaths, entry: ManifestDocument | null): ContentMatching {
+  let loaded: { content: unknown } | null | undefined;
+  return (sourceContentSha256: string) => {
+    if (loaded === undefined) {
+      try {
+        loaded = entry ? { content: readCorpusDocument(paths, entry) } : null;
+      } catch {
+        loaded = null;
+      }
+    }
+    if (!loaded) return null;
+    return sha256Canonical(loaded.content) === sourceContentSha256 ? loaded.content : null;
   };
 }
 

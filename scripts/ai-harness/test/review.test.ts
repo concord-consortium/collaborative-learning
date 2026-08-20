@@ -10,7 +10,9 @@ import {
   imageRepresentationPath, readImageEnvelope, resolveImageFile
 } from "../src/represent-image.js";
 import { ResultRow, validateReviewKeyFile } from "../src/schemas.js";
-import { ReviewFixture, buildReviewFixture, kAdversarial, kSentinels, tagNamesIn } from "./review-fixture.js";
+import {
+  ReviewFixture, buildReviewFixture, kAdversarial, kNonVisualTileId, kSentinels, tagNamesIn
+} from "./review-fixture.js";
 
 const kSeed = "a".repeat(64);
 const kOtherSeed = "b".repeat(64);
@@ -101,9 +103,19 @@ describe("what the model was given", () => {
   });
 
   it("shows one copy of a picture two runs both sent, labelled with both", () => {
-    expect(beta.images).toHaveLength(1);
-    expect(beta.images[0].sha256).toBe(fixture.imageSha256);
-    expect(beta.images[0].labels).toEqual(["puppeteer-full-height, full-document"]);
+    // The whole-document capture, the two tile captures, and nothing repeated.
+    expect(beta.images.map((image) => image.sha256))
+      .toEqual([fixture.imageSha256, ...fixture.tileSha256s]);
+    const visual = beta.images.find((image) => image.sha256 === fixture.visualTileSha256)!;
+    expect(visual.labels)
+      .toEqual(["puppeteer-per-tile, per-tile", "puppeteer-per-tile, visual-tiles-only"]);
+  });
+
+  it("shows a tile picture only under the sets that actually sent it", () => {
+    // `imageSha256s` records every image in the envelope and `imageSet` says which were sent, so
+    // reading the hashes alone showed a `visual-tiles-only` run sending tiles it never received.
+    const nonVisual = beta.images.find((image) => image.tileId === kNonVisualTileId)!;
+    expect(nonVisual.labels).toEqual(["puppeteer-per-tile, per-tile"]);
   });
 
   it("does not claim a mixed row sent a summary when its text half was dropped", () => {
@@ -152,7 +164,8 @@ describe("an input that no longer matches the run is never shown in its place", 
     bytes[bytes.length - 20] = bytes[bytes.length - 20] === 0 ? 1 : 0;
     fs.writeFileSync(resolveImageFile(envelopeFile, image), bytes);
     const beta = notices(fixture, "beta");
-    expect(beta.images).toHaveLength(0);
+    // The damaged full-document render is withheld; the per-tile one is untouched and still shown.
+    expect(beta.images.map((shown) => shown.sha256)).toEqual(fixture.tileSha256s);
     // Damaged bytes trip the envelope's own hash check first, so the reason is the render no longer
     // matching rather than the narrower "these are not the bytes that were sent".
     expect(beta.inputNotices.join(" ")).toContain("no longer matches the one this run sent");
@@ -164,7 +177,8 @@ describe("an input that no longer matches the run is never shown in its place", 
     const envelope = JSON.parse(fs.readFileSync(envelopeFile, "utf8"));
     fs.writeFileSync(envelopeFile,
       JSON.stringify({ ...envelope, sourceContentSha256: "9".repeat(64) }));
-    expect(notices(fixture, "beta").images).toHaveLength(0);
+    expect(notices(fixture, "beta").images.map((image) => image.sha256))
+      .toEqual(fixture.tileSha256s);
   });
 
   it("degrades to a notice when the files are gone, rather than crashing", () => {
@@ -177,7 +191,7 @@ describe("an input that no longer matches the run is never shown in its place", 
     const beta = model.documents.find((document) => document.docId === "beta")!;
     expect(alpha.texts).toHaveLength(0);
     expect(alpha.inputNotices.join(" ")).toContain("no longer on disk");
-    expect(beta.images).toHaveLength(0);
+    expect(beta.images.map((image) => image.sha256)).toEqual(fixture.tileSha256s);
     expect(beta.inputNotices.join(" ")).toContain("no longer on disk");
     expect(() => renderReviewHtml(model)).not.toThrow();
   });
@@ -187,8 +201,68 @@ describe("an input that no longer matches the run is never shown in its place", 
     fs.writeFileSync(imageRepresentationPath(fixture.paths, "puppeteer-full-height", "beta"),
       "{ not json");
     const beta = notices(fixture, "beta");
-    expect(beta.images).toHaveLength(0);
+    expect(beta.images.map((image) => image.sha256)).toEqual(fixture.tileSha256s);
     expect(beta.inputNotices.join(" ")).toContain("could not be read");
+  });
+});
+
+describe("only the pictures a run's image set actually sent", () => {
+  const fixture = buildReviewFixture("review-image-sets");
+  const model = modelFor(fixture);
+  const beta = model.documents.find((document) => document.docId === "beta")!;
+
+  it("sends the whole envelope's hashes but shows only the selected subset", () => {
+    // Both per-tile rows record every image the envelope holds — that is the render's provenance —
+    // and only `imageSet` says which of them went. The two runs must not look alike here.
+    const sentBy = (runId: string) => {
+      const row = fixture.rows.find((entry) => entry.runId === runId)!;
+      if (row.status === "skipped") throw new Error(`${runId} sent nothing`);
+      return row.representation;
+    };
+    expect(sentBy(kSentinels.perTileRun)).toMatchObject({ imageSha256s: fixture.tileSha256s });
+    expect(sentBy(kSentinels.visualTilesRun)).toMatchObject({ imageSha256s: fixture.tileSha256s });
+
+    const visual = beta.images.find((image) => image.sha256 === fixture.visualTileSha256)!;
+    const other = beta.images.find((image) => image.tileId === kNonVisualTileId)!;
+    expect(visual.labels).toContain("puppeteer-per-tile, visual-tiles-only");
+    expect(other.labels).not.toContain("puppeteer-per-tile, visual-tiles-only");
+  });
+
+  it("says it cannot tell when the document no longer classifies the same way", () => {
+    // `visual-tiles-only` is the one set whose membership is not structural: it is whatever the
+    // classifier marked. Reconstructing it from an edited document would be a confident wrong
+    // answer, so the report declines instead.
+    const edited = buildReviewFixture("review-image-sets-edited");
+    fs.writeFileSync(path.join(edited.paths.documents, "beta.json"),
+      JSON.stringify({ rowOrder: [], rowMap: {}, tileMap: {} }));
+    const changed = modelFor(edited).documents.find((document) => document.docId === "beta")!;
+    expect(changed.inputNotices.join(" ")).toContain("cannot be established");
+    // The per-tile run's own pictures are structural, so they are unaffected.
+    expect(changed.images.map((image) => image.sha256))
+      .toEqual([edited.imageSha256, ...edited.tileSha256s]);
+    expect(changed.images.every((image) =>
+      !image.labels.includes("puppeteer-per-tile, visual-tiles-only"))).toBe(true);
+  });
+
+  it("keeps that notice safe in a shareable or blinded report", () => {
+    const edited = buildReviewFixture("review-image-sets-redacted");
+    fs.writeFileSync(path.join(edited.paths.documents, "beta.json"),
+      JSON.stringify({ rowOrder: [], rowMap: {}, tileMap: {} }));
+    const noticesIn = (modes: Partial<ReviewModes>) => modelFor(edited, modes).documents
+      .flatMap((document) => document.inputNotices).join(" ");
+
+    // Shareable keeps run configurations — they are what a reader judges — so the mode and set may
+    // be named. What must not appear is anything identifying the document.
+    const shareable = noticesIn({ shareable: true });
+    expect(shareable).toContain("cannot be established");
+    for (const leak of ["beta", "/", ".json", ".png"]) expect(shareable).not.toContain(leak);
+
+    // Blind hides the configuration as well, so the notice says only that an input is missing.
+    const blind = noticesIn({ blind: true });
+    expect(blind).toContain("cannot be established");
+    for (const leak of ["beta", "puppeteer", "visual-tiles-only", "/"]) {
+      expect(blind).not.toContain(leak);
+    }
   });
 });
 
@@ -246,7 +320,7 @@ describe("every outcome a row can hold is rendered", () => {
   const gamma = model.documents.find((document) => document.docId === "gamma")!;
 
   it("counts each status once, over current rows only", () => {
-    expect(model.counts).toEqual({ success: 3, refusal: 1, error: 1, skipped: 4 });
+    expect(model.counts).toEqual({ success: 5, refusal: 1, error: 1, skipped: 4 });
   });
 
   it("renders success, refusal and error as cards", () => {
@@ -299,8 +373,10 @@ describe("every outcome a row can hold is rendered", () => {
   });
 
   it("lists every run's configuration in experiment-file order", () => {
-    expect(model.runs!.map((run) => run.runId))
-      .toEqual([kSentinels.textRun, kSentinels.imageRun, kSentinels.mixedRun]);
+    expect(model.runs!.map((run) => run.runId)).toEqual([
+      kSentinels.textRun, kSentinels.imageRun, kSentinels.mixedRun, kSentinels.perTileRun,
+      kSentinels.visualTilesRun
+    ]);
     expect(model.runs![1]).toMatchObject({ imageMode: "puppeteer-full-height", detail: "low" });
     // Defaults are shown as what they are rather than left blank: `extras` is only absent from the
     // experiment file, not from the request.
@@ -473,8 +549,8 @@ describe("--blind", () => {
 
   it("reduces the header's run list to a count", () => {
     expect(model.runs).toBeNull();
-    expect(model.runCount).toBe(3);
-    expect(html).toContain("3 run(s)");
+    expect(model.runCount).toBe(5);
+    expect(html).toContain("5 run(s)");
   });
 
   it("leaves no run id, variant, mode, detail, image set, extras or cost anywhere in the page", () => {
@@ -495,7 +571,7 @@ describe("--blind", () => {
     const alpha = model.documents.find((document) => document.docId === "alpha")!;
     const beta = model.documents.find((document) => document.docId === "beta")!;
     expect(alpha.texts.map((text) => text.markdown)).toEqual([fixture.alphaMarkdown]);
-    expect(beta.images).toHaveLength(1);
+    expect(beta.images).toHaveLength(3);
     // Without the labels, which would name a configuration.
     expect(alpha.texts[0].labels).toEqual([]);
     expect(beta.images[0].labels).toEqual([]);
@@ -525,10 +601,15 @@ describe("--blind", () => {
     // Two reports over identical data, differing only in the seed. The pages hold the same cards in
     // a different order, and nothing in either page says which is which.
     expect(model.labels).not.toEqual(other.labels);
-    const cardsOf = (source: string) =>
-      [...source.matchAll(/<div class="card">([\s\S]*?)<\/div>\s*<\/div>/g)]
-        .map((match) => match[1].replace(/<span class="card-title">[A-Z]+<\/span>/, "")).sort();
-    expect(cardsOf(html)).toEqual(cardsOf(renderReviewHtml(other)));
+    // Compared against the model rather than by carving cards out of the markup: a card body holds
+    // nested elements, so a regex boundary shifts with the order and would compare fragments.
+    const outcomes = (source: ReviewModel) => source.documents.map(
+      (document) => document.cards.map((card) => JSON.stringify(card.outcome)).sort());
+    const labelled = (source: ReviewModel) => source.documents.map(
+      (document) => document.cards.map((card) => `${card.label} ${JSON.stringify(card.outcome)}`));
+    // The same cards in both, paired with different labels — and neither page says which is which.
+    expect(outcomes(model)).toEqual(outcomes(other));
+    expect(labelled(model)).not.toEqual(labelled(other));
     expect(html).not.toBe(renderReviewHtml(other));
   });
 

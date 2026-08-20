@@ -35,6 +35,8 @@ export const kSentinels = {
   textRun: "zz-run-one",
   imageRun: "zz-run-two",
   mixedRun: "zz-run-three",
+  perTileRun: "zz-run-four",
+  visualTilesRun: "zz-run-five",
   unit: "zz-unit-sentinel",
   investigation: "zz-investigation-sentinel",
   problem: "zz-problem-sentinel",
@@ -44,11 +46,34 @@ export const kSentinels = {
 export const kCorpus = "review-corpus";
 export const kDocuments = ["alpha", "beta", "gamma"];
 
+/**
+ * `beta`'s content is real, and its hash is computed from it rather than made up.
+ *
+ * `visual-tiles-only` selects the tiles the *classifier* marks as needing a picture, so a report
+ * reconstructing what such a run sent has to classify the same content the run classified. That
+ * needs a document that actually classifies: a Text tile (student text, no picture needed) beside a
+ * Drawing tile (needs one), so the two image sets genuinely differ.
+ */
+const kBetaContent = {
+  rowOrder: ["row-1"],
+  rowMap: { "row-1": { id: "row-1", isSectionHeader: false,
+    tiles: [{ tileId: "beta-text" }, { tileId: "beta-drawing" }] } },
+  tileMap: {
+    "beta-text": { id: "beta-text", content: { type: "Text", text: "beta text" } },
+    "beta-drawing": { id: "beta-drawing", content: { type: "Drawing", objects: [] } }
+  }
+};
+
 const kContentSha = {
   alpha: "1".repeat(64),
-  beta: "2".repeat(64),
+  beta: sha256Canonical(kBetaContent),
   gamma: "3".repeat(64)
 };
+
+/** The tile the classifier marks as needing a picture — the only one `visual-tiles-only` sends. */
+export const kVisualTileId = "beta-drawing";
+/** The tile a per-tile capture also photographs, and `visual-tiles-only` does not send. */
+export const kNonVisualTileId = "beta-text";
 
 const origin = { date: "2026-08-11T00:00:00.000Z", modelReturned: "gpt-4o-mini", systemFingerprint: null };
 
@@ -60,8 +85,12 @@ export interface ReviewFixture {
   experimentSha256: string;
   resultsFile: string;
   rows: ResultRow[];
-  /** The sha256 of the one picture both image-carrying runs sent. */
+  /** The sha256 of the one picture both full-document runs sent. */
   imageSha256: string;
+  /** The per-tile render's two pictures, in envelope order. */
+  tileSha256s: string[];
+  /** The one of them a `visual-tiles-only` run sends. */
+  visualTileSha256: string;
   /** The `default` variant's summary for `alpha`, as it sits on disk. */
   alphaMarkdown: string;
 }
@@ -126,6 +155,32 @@ export function buildReviewFixture(name: string): ReviewFixture {
     });
   }
 
+  writeJsonFile(path.join(paths.documents, "beta.json"), kBetaContent);
+
+  // A per-tile render of both of `beta`'s tiles. `image-per-tile` sends both; `visual-tiles-only`
+  // sends only the drawing.
+  const perTileFile = imageRepresentationPath(paths, "puppeteer-per-tile", "beta");
+  writeImageRepresentation({
+    envelopeFile: perTileFile,
+    docId: "beta",
+    modeId: "puppeteer-per-tile",
+    backendId: "puppeteer",
+    backendVersion: 2,
+    renderTarget: {
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "abc1234",
+      shutterbugUrl: null, viewportWidthPx: 960, captureMode: "per-tile", captureHeightPx: null
+    },
+    sourceContentSha256: sha256Canonical(kBetaContent),
+    generatedAt: "2026-08-11T00:00:00.000Z",
+    images: [
+      { bytes: makeTestPng(30, 10), url: null, tileId: kNonVisualTileId, purpose: "tile" },
+      { bytes: makeTestPng(30, 14), url: null, tileId: kVisualTileId, purpose: "tile" }
+    ]
+  });
+  const perTile = readImageEnvelope(perTileFile).images;
+  const tileSha256s = perTile.map((image) => image.sha256);
+  const visualTileSha256 = perTile.find((image) => image.tileId === kVisualTileId)!.sha256;
+
   const envelopeFile = imageRepresentationPath(paths, "puppeteer-full-height", "beta");
   writeImageRepresentation({
     envelopeFile,
@@ -157,7 +212,11 @@ export function buildReviewFixture(name: string): ReviewFixture {
       { id: kSentinels.imageRun, message: "image-only", imageMode: "puppeteer-full-height",
         detail: "low", prompt: "categorize-design-default" },
       { id: kSentinels.mixedRun, message: "mixed", textVariant: "default",
-        imageMode: "puppeteer-full-height", extras: "none", prompt: "categorize-design-default" }
+        imageMode: "puppeteer-full-height", extras: "none", prompt: "categorize-design-default" },
+      { id: kSentinels.perTileRun, message: "image-only", imageMode: "puppeteer-per-tile",
+        imageSet: "per-tile", prompt: "categorize-design-default" },
+      { id: kSentinels.visualTilesRun, message: "image-only", imageMode: "puppeteer-per-tile",
+        imageSet: "visual-tiles-only", prompt: "categorize-design-default" }
     ]
   };
   const experimentFile = path.join(dataRoot, "experiment.json");
@@ -245,6 +304,24 @@ export function buildReviewFixture(name: string): ReviewFixture {
       promptImageTokensEstimated: 2833, textPartOmitted: true, status: "success",
       response: { parsed: {}, raw: {} }, usage, cost, responseOriginMeta: origin },
 
+    // The two per-tile runs, over the same render: one sends both tiles, the other only the tile
+    // the classifier marks as needing a picture. Both rows record every image the envelope holds,
+    // which is what makes `imageSet` the only thing that says what was sent.
+    { ...common, docId: "beta", runId: kSentinels.perTileRun, modality: "visual-only",
+      computedModality: "mixed", message: "image-only", requestKey: "beta-per-tile",
+      representation: { ...imageRepresentation, modeId: "puppeteer-per-tile",
+        imageSha256s: tileSha256s, imageSet: "per-tile" },
+      promptImageTokensEstimated: 5666, status: "success",
+      response: { parsed: { category: "function" }, raw: {} }, usage, cost,
+      responseOriginMeta: origin },
+    { ...common, docId: "beta", runId: kSentinels.visualTilesRun, modality: "visual-only",
+      computedModality: "mixed", message: "image-only", requestKey: "beta-visual-tiles",
+      representation: { ...imageRepresentation, modeId: "puppeteer-per-tile",
+        imageSha256s: tileSha256s, imageSet: "visual-tiles-only" },
+      promptImageTokensEstimated: 2833, status: "success",
+      response: { parsed: { category: "user" }, raw: {} }, usage, cost,
+      responseOriginMeta: origin },
+
     ...[kSentinels.textRun, kSentinels.imageRun, kSentinels.mixedRun].map((runId) => ({
       ...common, docId: "gamma", runId, modality: "empty" as const,
       computedModality: "empty" as const, message: "text-only" as const, requestKey: null,
@@ -259,12 +336,14 @@ export function buildReviewFixture(name: string): ReviewFixture {
   fs.writeFileSync(resultsFile, `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`);
 
   return {
+    visualTileSha256,
+    tileSha256s,
     dataRoot,
     paths,
     experimentFile,
     experiment: validateExperimentFile(experiment, experimentFile, {
       knownTextVariants: ["default"],
-      knownImageModes: ["puppeteer-full-height"],
+      knownImageModes: ["puppeteer-full-height", "puppeteer-per-tile"],
       promptExists: () => true
     }),
     experimentSha256,
