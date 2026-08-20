@@ -880,21 +880,30 @@ function commandReview(flags: Record<string, string | true>, deps: HarnessDeps):
     throw new Error("--reuse-key applies to --shareable and --blind reports, which are the ones " +
       "that write a key. A plain review report writes no sidecars.");
   }
-  // Checked together, before a single byte is written.
-  if (needsKey) {
-    if (fs.existsSync(sidecars.key) && !reuseKey) {
-      throw new Error(`${sidecars.key} already exists, and a key is never overwritten: its labels ` +
-        "and pseudonyms are what any ratings already collected refer to. Pass --reuse-key to " +
-        "regenerate this same report, or --out to write a different one.");
-    }
-    if (!fs.existsSync(sidecars.key) && reuseKey) {
-      throw new Error(`--reuse-key was given, but there is no key at ${sidecars.key} to reuse.`);
-    }
-    if (modes.blind && !reuseKey && fs.existsSync(sidecars.ratings)) {
-      throw new Error(`${sidecars.ratings} already exists without a key beside it. It may hold a ` +
-        "judge's ratings against labels this report is about to generate afresh; move it aside, or " +
-        "pass --out to write a different report.");
-    }
+  // Every path this run would touch is settled here, before a single byte is written — and the
+  // rules do not depend on the mode. A sidecar beside the output path belongs to some report, and
+  // with `--out` the mode is not in the filename, so those sidecars are the only record of what
+  // that path is. Checking them only in the modes that write them let a plain report overwrite a
+  // blinded one: an unredacted page in a file believed to be shareable, a key that decodes nothing,
+  // and a judge's page replaced mid-round.
+  if (fs.existsSync(sidecars.key) && !reuseKey) {
+    throw new Error(`${sidecars.key} already exists, so this path holds a shareable or blinded ` +
+      `report. A key is never overwritten: its labels and pseudonyms are what any ratings already ` +
+      "collected refer to" + (needsKey
+        ? ". Pass --reuse-key to regenerate that same report, or --out to write a different one."
+        : ", and a plain report would replace its HTML with an unredacted one and leave the key " +
+          "decoding a page that no longer exists. Pass --out to write a different report."));
+  }
+  if (!fs.existsSync(sidecars.key) && reuseKey) {
+    throw new Error(`--reuse-key was given, but there is no key at ${sidecars.key} to reuse.`);
+  }
+  // A template is preserved by exactly one kind of run: a blinded regeneration against its own key.
+  // Any other run at this path would leave a judge's ratings naming labels the page no longer has.
+  const preservesRatings = modes.blind && reuseKey;
+  if (fs.existsSync(sidecars.ratings) && !preservesRatings) {
+    throw new Error(`${sidecars.ratings} already exists, and this run would not preserve it: a ` +
+      "ratings template names the labels of the blinded report that wrote it, and may hold a " +
+      "judge's answers against them. Move it aside, or pass --out to write a different report.");
   }
 
   const existingKey = reuseKey

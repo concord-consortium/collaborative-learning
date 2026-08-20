@@ -822,7 +822,11 @@ later read.
 Both sidecars are named from the **resolved** output path, `--out` included, so no two reports can
 collide on a key. The rules around them:
 
-- Every collision is checked **before anything is written** — a refused run leaves nothing behind.
+- Every collision is checked **before anything is written** — a refused run leaves nothing behind —
+  and the checks do not depend on the mode. With `--out` the mode is not in the filename, so the
+  sidecars beside a path are the only record of what that path is for: a plain report over a
+  blinded one's `--out` is refused rather than replacing a judge's page with an unredacted one and
+  leaving the key decoding a page that no longer exists.
 - An existing key is never overwritten. Without `--reuse-key`, its existence is an error: silently
   rotating a key orphans every rating already written against the old labels.
 - `--reuse-key` reads and validates the existing key and never rewrites it. Reuse is refused if the

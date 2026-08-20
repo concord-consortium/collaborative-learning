@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
+import { reviewSidecarPaths } from "../src/review.js";
 import { validateReviewKeyFile } from "../src/schemas.js";
 import { listFilesUnder } from "./helpers.js";
 import { ReviewFixture, buildReviewFixture, kSentinels } from "./review-fixture.js";
@@ -112,7 +113,7 @@ describe("an existing key is never overwritten, and never rewritten", () => {
     const htmlBefore = fs.readFileSync(paths.html, "utf8");
 
     await expect(review(fixture, ["--blind"], "d".repeat(64)))
-      .rejects.toThrow(/already exists, and a key is never overwritten/);
+      .rejects.toThrow(/A key is never overwritten/);
     // A refused run leaves every file exactly as it found it — including the HTML, which is checked
     // before it is written rather than after.
     expect(fs.readFileSync(paths.key, "utf8")).toBe(before);
@@ -136,8 +137,69 @@ describe("an existing key is never overwritten, and never rewritten", () => {
     const paths = pathsFor(fixture, "-blind");
     fs.mkdirSync(path.dirname(paths.ratings), { recursive: true });
     fs.writeFileSync(paths.ratings, "document,label,rating,notes\n");
-    await expect(review(fixture, ["--blind"])).rejects.toThrow(/already exists without a key beside it/);
+    await expect(review(fixture, ["--blind"]))
+      .rejects.toThrow(/this run would not preserve it/);
     expect(fs.existsSync(paths.html)).toBe(false);
+  });
+});
+
+describe("a plain report cannot overwrite a shareable or blinded one", () => {
+  /** A judging report written to an explicit `--out`, where the mode is not in the filename. */
+  const judging = async (name: string) => {
+    const fixture = buildReviewFixture(name);
+    const out = fixture.resultsFile.replace(/\.jsonl$/, ".judging.html");
+    const { deps } = depsFor(fixture);
+    await main(["review", "--results", fixture.resultsFile, "--experiment", fixture.experimentFile,
+      "--out", out, "--blind", "--shareable"], deps);
+    return { fixture, out, files: reviewSidecarPaths(out), deps };
+  };
+
+  it("refuses, rather than replacing a blinded page with an unredacted one", async () => {
+    // Dropping the flags from a command in shell history is all it takes. The sidecars beside the
+    // path are the only record of what that path is for.
+    const { fixture, out, files, deps } = await judging("review-command-clobber");
+    const blinded = fs.readFileSync(out, "utf8");
+    fs.writeFileSync(files.ratings, 'document,label,rating,notes\n"doc-01","A","5","x"\n');
+
+    await expect(main(["review", "--results", fixture.resultsFile,
+      "--experiment", fixture.experimentFile, "--out", out], deps))
+      .rejects.toThrow(/a plain report would replace its HTML with an unredacted one/);
+
+    // The judge's page, their ratings and the key that decodes them are all as they were.
+    expect(fs.readFileSync(out, "utf8")).toBe(blinded);
+    expect(fs.readFileSync(files.ratings, "utf8")).toContain('"5","x"');
+    expect(fs.existsSync(files.key)).toBe(true);
+  });
+
+  it("refuses over a ratings template even when the key has gone", async () => {
+    const { fixture, out, files, deps } = await judging("review-command-clobber-template");
+    fs.rmSync(files.key);
+    await expect(main(["review", "--results", fixture.resultsFile,
+      "--experiment", fixture.experimentFile, "--out", out], deps))
+      .rejects.toThrow(/this run would not preserve it/);
+  });
+
+  it("refuses a shareable report over a template it would strand, too", async () => {
+    // Not only plain mode: a shareable report has no labels, so a template beside it names labels
+    // its page does not have.
+    const { fixture, out, files, deps } = await judging("review-command-clobber-shareable");
+    fs.rmSync(files.key);
+    await expect(main(["review", "--results", fixture.resultsFile,
+      "--experiment", fixture.experimentFile, "--out", out, "--shareable"], deps))
+      .rejects.toThrow(/this run would not preserve it/);
+  });
+
+  it("still writes a plain report to a path with no sidecars", async () => {
+    const fixture = buildReviewFixture("review-command-plain-out");
+    const out = fixture.resultsFile.replace(/\.jsonl$/, ".plain.html");
+    const { deps } = depsFor(fixture);
+    await main(["review", "--results", fixture.resultsFile, "--experiment", fixture.experimentFile,
+      "--out", out], deps);
+    expect(fs.existsSync(out)).toBe(true);
+    // And re-running a plain report over its own output is fine: there is nothing to strand.
+    await main(["review", "--results", fixture.resultsFile, "--experiment", fixture.experimentFile,
+      "--out", out], deps);
+    expect(fs.existsSync(reviewSidecarPaths(out).key)).toBe(false);
   });
 });
 
