@@ -28,6 +28,7 @@ import PrimaryWorkspace from './elements/common/PrimaryWorkspace';
 import Canvas from './elements/common/Canvas';
 import TeacherDashboard from "./elements/common/TeacherDashboard";
 import 'cypress-file-upload';
+import { LogEventName } from '../../src/lib/logger-types';
 import 'cypress-commands';
 import ResourcesPanel from "./elements/common/ResourcesPanel";
 import {platformCmdKey} from '../../src/utilities/hot-keys';
@@ -306,4 +307,20 @@ Cypress.Commands.add('portalLogin', (options = {}) => {
 
   // Wait for any post-login redirects to complete
   cy.wait(2000);
+});
+
+// Stubs the app's logger and aliases the calls as "log", leaving out events that fire on their own
+// as the layout settles. A test asserting on `lastCall` is asking "what did the action I just
+// performed log", and an ambient event landing in between would displace that answer.
+const kAmbientLogEvents = [LogEventName.TILE_VISIBILITY_CHANGE];
+
+Cypress.Commands.add("stubLogger", () => {
+  cy.window().then(win => {
+    const loggedCalls = cy.stub().as("log");
+    cy.stub(win.ccLogger, "log").callsFake((event, ...args) => {
+      if (!kAmbientLogEvents.includes(event)) {
+        loggedCalls(event, ...args);
+      }
+    });
+  });
 });

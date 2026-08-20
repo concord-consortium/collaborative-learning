@@ -15,9 +15,7 @@ const canvas = new Canvas;
 function beforeTest(params) {
   cy.visit(params);
   cy.waitForLoad();
-  cy.window().then(win => {
-    cy.stub(win.ccLogger, "log").as("log");
-  });
+  cy.stubLogger();
 }
 
 const initialText = "Initial text for studentDocument view test";

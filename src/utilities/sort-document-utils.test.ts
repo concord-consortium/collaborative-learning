@@ -7,6 +7,8 @@ import {
   createDocMapByBookmarks,
   createTileTypeToDocumentsMap,
   getTagsWithDocs,
+  GroupSectionSortKey,
+  sortGroupSections,
   sortProblemSectionLabels
 } from "./sort-document-utils";
 import { clearTermOverrides, setTermOverrides } from "./translation/translate";
@@ -201,6 +203,61 @@ describe("sort-document-utils", () => {
       const sorted = sortProblemSectionLabels([...labels]);
 
       expect(sorted).toEqual(["Problem 1.1"]);
+    });
+  });
+
+  describe("sortGroupSections", () => {
+    const keys = (entries: Array<[string, GroupSectionSortKey]>) => new Map(entries);
+
+    it("puts the whole-class section first, groups in numeric order, and no-group last", () => {
+      const labels = ["No Group", "Group 10", "Whole Class", "Group 2"];
+      const sorted = sortGroupSections(labels, keys([
+        ["No Group", { section: "none" }],
+        ["Group 10", { section: "group", groupId: "10" }],
+        ["Whole Class", { section: "class" }],
+        ["Group 2", { section: "group", groupId: "2" }],
+      ]));
+      expect(sorted).toEqual(["Whole Class", "Group 2", "Group 10", "No Group"]);
+    });
+
+    it("orders non-numeric group ids after numeric ones, alphabetically", () => {
+      const labels = ["Group b", "Group 3", "Group a"];
+      const sorted = sortGroupSections(labels, keys([
+        ["Group b", { section: "group", groupId: "b" }],
+        ["Group 3", { section: "group", groupId: "3" }],
+        ["Group a", { section: "group", groupId: "a" }],
+      ]));
+      expect(sorted).toEqual(["Group 3", "Group a", "Group b"]);
+    });
+
+    it("does not read the label text — a renamed group term still sorts numerically", () => {
+      // The comparator must not infer order from the display string; `studentGroup` is overridable
+      // per unit, so "Team 2" and "Group 2" must sort identically.
+      const labels = ["Team 10", "Team 2"];
+      const sorted = sortGroupSections(labels, keys([
+        ["Team 10", { section: "group", groupId: "10" }],
+        ["Team 2", { section: "group", groupId: "2" }],
+      ]));
+      expect(sorted).toEqual(["Team 2", "Team 10"]);
+    });
+
+    it("orders a digit-prefixed group id after the numeric ones, not alongside its leading digit", () => {
+      // Under `autoAssignStudentsToIndividualGroups` a group id is a user id, which in demo mode can be
+      // a nanoid — and a nanoid starts with a digit about one time in six. Reading only the leading
+      // digits would file "3xK9mQ" as group 3, tying it with the real group 3 and leaving the two in
+      // whatever order they arrived in.
+      const labels = ["Group 3xK9mQ", "Group 4", "Group 3"];
+      const sorted = sortGroupSections(labels, keys([
+        ["Group 3xK9mQ", { section: "group", groupId: "3xK9mQ" }],
+        ["Group 4", { section: "group", groupId: "4" }],
+        ["Group 3", { section: "group", groupId: "3" }],
+      ]));
+      expect(sorted).toEqual(["Group 3", "Group 4", "Group 3xK9mQ"]);
+    });
+
+    it("treats a label with no sort key as no-group", () => {
+      const sorted = sortGroupSections(["Mystery", "Whole Class"], keys([["Whole Class", { section: "class" }]]));
+      expect(sorted).toEqual(["Whole Class", "Mystery"]);
     });
   });
 });

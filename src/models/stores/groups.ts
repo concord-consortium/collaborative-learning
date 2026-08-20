@@ -1,6 +1,7 @@
 import { types, getEnv, SnapshotIn, applySnapshot, hasEnv } from "mobx-state-tree";
 import { DBOfferingGroup, DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
+import { getGroupOwnerId } from "../document/document-axes";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { UserModelType } from "./user";
 import { DocumentsModelType } from "./documents";
@@ -150,6 +151,12 @@ export function getGroupSnapshot(groupId: string, groupFromDB: DBOfferingGroup) 
 export const GroupsModel = types
   .model("Groups", {
     groupsMap: types.map(GroupModel),
+    /**
+     * The offering whose groups these are, recorded because a group id is unique only within one
+     * offering. Without it a group id read off a document from another assignment would resolve to the
+     * same-numbered group here — a different set of students. Set by updateFromDB.
+     */
+    offeringId: types.maybe(types.string),
   })
   .views(self => ({
     get allGroups() {
@@ -167,6 +174,22 @@ export const GroupsModel = types
         });
       });
       return groupsByUser;
+    },
+    /**
+     * This offering's groups, keyed by the synthetic uid that owns their documents.
+     *
+     * Empty until the offering is known, because a group owner id cannot be built without it. That is also
+     * what keeps a document from another assignment from resolving here: its owner carries that
+     * assignment's offering, so it matches no key in this map.
+     */
+    get groupsByOwnerId() {
+      const groupsByOwnerId: Record<string, GroupModelType> = {};
+      const { offeringId } = self;
+      if (!offeringId) return groupsByOwnerId;
+      self.allGroups.forEach((group) => {
+        groupsByOwnerId[getGroupOwnerId(offeringId, group.id)] = group;
+      });
+      return groupsByOwnerId;
     },
     get nonEmptyGroups() {
       return self.allGroups.filter(g => g.users.length > 0);
@@ -186,6 +209,13 @@ export const GroupsModel = types
     },
     getGroupById(id?: string) {
       return self.allGroups.find(group => group.id === id);
+    },
+    /**
+     * The group that a group owned document's uid names, or undefined when that group owner is not one of the
+     * groups in this offering.
+     */
+    getGroupByOwnerId(ownerId?: string) {
+      return ownerId ? self.groupsByOwnerId[ownerId] : undefined;
     },
   }))
   .views((self) => ({
@@ -208,12 +238,17 @@ export const GroupsModel = types
     }
   }))
   .actions((self) => ({
-    updateFromDB(groups: DBOfferingGroupMap) {
+    // `offeringId` identifies the offering these groups belong to. Required rather than optional, and
+    // assigned unconditionally: these groups only mean anything paired with the offering they came
+    // from, so a caller that has none must say so and clear the stale one rather than leave the
+    // previous offering's id standing over a new set of groups.
+    updateFromDB(groups: DBOfferingGroupMap, offeringId: string | undefined) {
       const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
       Object.entries(groups).forEach(([groupId, group]) => {
         groupsMapSnapshot[groupId] = getGroupSnapshot(groupId, group);
       });
       applySnapshot(self.groupsMap, groupsMapSnapshot);
+      self.offeringId = offeringId;
     }
   }));
 

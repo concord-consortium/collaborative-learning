@@ -42,6 +42,7 @@ so this table doubles as a migration-progress view.
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
 | `canonical` | Firestore | group | not surfaced | No |
+| `axisProfile` | Firestore | group | not surfaced — deliberately | No |
 | `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
 | `groupId` | Firestore | group (the **owning** group) | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | No — immutable |
 
@@ -78,6 +79,9 @@ prop, which is why they show as "not surfaced" above. They still reach `Document
 `typecheck(DocumentMetadataModel, data)` unfiltered and validate only because MST's `typecheck` ignores
 properties the model does not declare — pinned by the `typecheck` tests in
 [mst.test.ts](../../src/models/mst.test.ts).
+
+`axisProfile` relies on the same behavior, but by design rather than by omission: leaving it undeclared is
+what keeps the running app from reading it. See its section below.
 
 ### Derived (no stored field)
 
@@ -188,8 +192,11 @@ questions and are written by different code.
 - **Reactive:** No
 
 Claims a canonical label for a group document so concurrent creators converge on one document. The rules
-forbid setting it on create and permit a single one-time set on update. Not present in
-`IDocumentMetadata` or `DocumentMetadataModel` — it has no type coverage at all.
+forbid setting it on create and permit a single one-time set on update, and only when the pointer for
+this document's own slot already names it. That slot is a container plus an owner plus a label, and the
+rules locate it by building the path from the document's own fields — including its `uid` as the owner —
+so a document cannot claim a slot belonging to a different owner. Not present in `IDocumentMetadata` or
+`DocumentMetadataModel` — it has no type coverage at all.
 
 ### `offeringId`
 
@@ -197,13 +204,14 @@ forbid setting it on create and permit a single one-time set on update. Not pres
 - **Location:** Firestore `documents/{key}.offeringId`; RTDB
   `/{classPath}/users/{uid}/documentMetadata/{key}/offeringId`
 - **Applies to:** the problem family — problem, planning, publication, supportPublication, group
-- **Runtime:** not surfaced on any document model
+- **Runtime:** `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId`
 - **Updated by:** nothing — creation only
-- **Reactive:** No
+- **Reactive:** No — immutable
 
-Listed here rather than under dual-stored because it is not in `IDocumentMetadata` and has no runtime
-representation; it exists to scope documents to an offering. It reaches Firestore only because
-`createFirestoreMetadataDocument` spreads the RTDB metadata object.
+Names the offering a document is kept in, and is the only positive marker of that container: an
+exemplar carries the same unit/investigation/problem as a problem document and is distinguished from
+it by nothing else. `canUserEditDocument` therefore depends on it — without it a group document reads
+as class-wide, and the class check would let any classmate edit another group's work.
 
 ---
 
@@ -316,18 +324,21 @@ declare it. Anything reading properties from the Firestore metadata should treat
   `undefined`)
 - **Applies to:** group documents — the group that **owns** the document
 - **Runtime:** `DocumentModel.groupId`, `DocumentMetadataModel.groupId`
-- **Updated by:** nothing — creation only, stamped from the kind's registered `scopeType` by
-  `getDocumentScopeFields` ([document-kinds.ts](../../src/models/document/document-kinds.ts))
+- **Updated by:** nothing — creation only, stamped from the `ownerType` of the kind's axis profile by
+  `getDocumentOwnerFields`
 - **Reactive:** No — immutable
 
 The group that **owns** the document, and nothing else — not the group its owning user happens to be in,
 which is `groupIdOfUserOwner` below. It is a denormalization of the owner: the owner `uid` already encodes it
 (`group_<offeringId>_<groupId>`), so this field spares consumers from taking that apart when they need the
-group's number.
+group's number. It is not what makes a document group-owned — `hasGroupOwner`
+(`src/models/document/document-axes.ts`) reads the uid's prefix, so the uid stays the single authority on
+the owner and this field cannot contradict it.
 
 **A group id is unique only within an offering.** Group 3 of one assignment and group 3 of the next are
-different sets of students, so a bare group id is not a safe key to look a group up by. The owner `uid`
-carries the offering, which makes it the exact one.
+different sets of students, so a bare group id must not be used to look a group up — `getGroupByOwnerId`
+matches on the whole owner id instead, and answers with nothing for a group outside the offering it
+holds.
 
 ### `groupIdOfUserOwner` (runtime only)
 
@@ -340,8 +351,8 @@ carries the offering, which makes it the exact one.
 - **Reactive:** Yes, to group membership changes — not to document changes
 
 The group the **user who owns** the document belongs to. Set only where the owner is a user (`ownerType:
-"user"` in the kind registry): a group- or class-owned document's synthetic `uid` is not a member of any
-group, so there is nobody to look up. A fact about that user's membership rather than about the document,
+"user"` on the kind's axis profile): a group- or class-owned document's synthetic `uid` is not a member
+of any group, so there is nobody to look up. A fact about that user's membership rather than about the document,
 which is why it is derived rather than stored: a student's group changes, and a frozen copy would go
 stale. The four-up view (`getProblemDocumentsForGroup`), Student Work routing, and the content listener's
 "whose documents do I monitor" test all want this one.
@@ -379,6 +390,38 @@ identity of a document.
 
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
+
+### `axisProfile`
+
+The name of the [axis profile](../document-axes/axes.md#axis-profiles--naming-a-combination-of-axis-values)
+the document was created from — the named bundle of axis values it started at (`classWide`, `group`,
+`personalLike`, `problemLike`).
+
+- **Stores:** Firestore only
+- **Location:** `documents/{key}.axisProfile`
+- **Applies to:** `type: "group"` documents (group + class-wide) — the same gate as `kind`
+- **Runtime:** **none, deliberately** — declared on no runtime type
+- **Updated by:** nothing — creation only, from the registered kind's profile
+- **Reactive:** No
+
+Exists for migrations. A migration that changes what a profile means has to find every document created
+from it; selecting those by their axis values would mean querying the fields the migration is about to
+change, and would need rewriting each time they move. Because the field records *provenance* — which
+profile the document was made from — it stays true after such a migration rather than going stale.
+
+The `type: "group"` gate is transitional, and is the same gate `kind` uses for the same reason: a value
+stamped before a type's kind is settled is a value we would have to migrate afterwards. It widens as each
+type is converted, and is deleted once they all are — see
+["Which documents get stamped"](../document-axes/target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
+in the target architecture. So `axisProfile` arrives on a document by the same route `kind` does, and
+outlives `type`: the end state is every document carrying a profile and a kind, and `type` carrying no
+meaning at all.
+
+It is absent from `IDocumentMetadata`, `DocumentMetadataModel`, and `DocumentModel` on purpose, so the
+running app cannot read it and cannot come to branch on it; the axis guards stay the only way to ask how a
+document behaves. Reading it would mean widening a type first, which is a visible change rather than an
+accident. Like `canonical`, it survives `DocumentMetadataStore`'s validation because MST's `typecheck`
+ignores undeclared properties (see the note under the summary tables).
 
 ### `unit`, `investigation`, `problem`
 
