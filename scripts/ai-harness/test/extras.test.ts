@@ -41,30 +41,18 @@ describe("what a run puts in the related-summary parts", () => {
   const markdown = "# This document\n\nThe student drew a box.";
 
   it("sends the manifest entries unchanged by default", () => {
-    // `extras-fixed` is the default because it is what the harness has always done, so an
+    // `extras` is the default because it is what the harness has always done, so an
     // experiment file written before this dimension existed keeps its meaning and its request key.
     expect(relatedSummariesFor(run(), document(entries), markdown)).toEqual(entries);
-    expect(relatedSummariesFor(run("extras-fixed"), document(entries), markdown)).toEqual(entries);
+    expect(relatedSummariesFor(run("all"), document(entries), markdown)).toEqual(entries);
   });
 
-  it("sends nothing for no-extras", () => {
-    expect(relatedSummariesFor(run("no-extras"), document(entries), markdown)).toEqual([]);
-  });
-
-  it("reproduces production's bug for extras-production-current", () => {
-    // Production's findRelatedSummaries hands every related entry the *analyzed* document's own
-    // summary, so the model sees the same text several times over and is told other people agreed
-    // with it. Reproduced on purpose, as a named baseline to measure the fix against.
-    const produced = relatedSummariesFor(run("extras-production-current"), document(entries), markdown);
-    expect(produced).toHaveLength(2);
-    for (const entry of produced) expect(entry.summary).toBe(markdown);
-    // The agreements are untouched — only the summary is wrong in production, and copying the bug
-    // faithfully is the whole point.
-    expect(produced.map((entry) => entry.agreements)).toEqual(entries.map((entry) => entry.agreements));
+  it("sends nothing for none", () => {
+    expect(relatedSummariesFor(run("none"), document(entries), markdown)).toEqual([]);
   });
 
   it("has nothing to send when the document has no related summaries", () => {
-    for (const extras of ["extras-fixed", "extras-production-current", "no-extras"] as const) {
+    for (const extras of ["all", "none"] as const) {
       expect(relatedSummariesFor(run(extras), document([]), markdown)).toEqual([]);
     }
   });
@@ -212,37 +200,22 @@ describe("the extras dimension against a real corpus", () => {
     expect(parts[0]).toContain("yes: 1");
   });
 
-  it("sends none at all for no-extras", () => {
-    expect(relatedParts(tasksFor("no-extras").find((entry) => entry.docId === "text")!)).toEqual([]);
-  });
-
-  it("sends the document its own summary back, twice, for extras-production-current", () => {
-    // What production does today (CLUE-630). The summary the request is already carrying
-    // comes back as though two other students had written it.
-    const task = tasksFor("extras-production-current").find((entry) => entry.docId === "text")!;
-    const messages = task.makeRequest().apiRequest.messages;
-    const own = ((messages[1] as any).content as any[])
-      .find((part) => part.text?.startsWith("This is the AI generated summary:")).text
-      .replace("This is the AI generated summary:\n", "");
-    const parts = relatedParts(task);
-    expect(parts).toHaveLength(2);
-    for (const part of parts) expect(part).toContain(own);
-    expect(parts[0]).toContain("yes: 1");
+  it("sends none at all for none", () => {
+    expect(relatedParts(tasksFor("none").find((entry) => entry.docId === "text")!)).toEqual([]);
   });
 
   it("gives each setting a different request key, so they are separate measurements", () => {
     const keyFor = (extras?: ExperimentRun["extras"]) =>
       tasksFor(extras).find((entry) => entry.docId === "text")!.requestKey;
-    const keys = [keyFor(), keyFor("no-extras"), keyFor("extras-production-current")];
-    expect(new Set(keys).size).toBe(3);
+    expect(new Set([keyFor(), keyFor("none")]).size).toBe(2);
     // And the default really is what an experiment file written before this dimension existed got.
-    expect(keyFor("extras-fixed")).toBe(keyFor());
+    expect(keyFor("all")).toBe(keyFor());
   });
 
   it("changes nothing for a document with no related summaries", () => {
     const keyFor = (extras?: ExperimentRun["extras"]) =>
       tasksFor(extras).find((entry) => entry.docId === "question")!.requestKey;
-    expect(new Set([keyFor(), keyFor("no-extras"), keyFor("extras-production-current")]).size).toBe(1);
+    expect(new Set([keyFor(), keyFor("none")]).size).toBe(1);
   });
 });
 

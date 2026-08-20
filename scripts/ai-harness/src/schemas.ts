@@ -389,12 +389,12 @@ export type ImageSet = typeof imageSets[number];
 /**
  * What a run puts in the related-summary parts of a text or mixed message.
  *
- * `extras-fixed` is the default because it is what the harness has always done — each related
- * document's actual summary, from the manifest — so existing experiment files keep their meaning and
- * their request keys. `extras-production-current` reproduces production's `findRelatedSummaries` bug
- * on purpose, as a named baseline; see the README.
+ * `all` is the default because it is what the harness has always done — every related summary the
+ * manifest carries — so an experiment file that says nothing keeps its meaning and its request key.
+ * `none` sends the parts empty. A setting that sends *some* of them belongs in this family too, and
+ * the names leave room for it.
  */
-export const extrasModes = ["extras-fixed", "extras-production-current", "no-extras"] as const;
+export const extrasModes = ["all", "none"] as const;
 export type ExtrasMode = typeof extrasModes[number];
 
 /**
@@ -413,7 +413,7 @@ export interface ExperimentRun {
   detail?: ImageDetail;
   /** Image runs only. Absent means `full-document`. */
   imageSet?: ImageSet;
-  /** Text-carrying runs only. Absent means `extras-fixed`. */
+  /** Text-carrying runs only. Absent means `all`. */
   extras?: ExtrasMode;
   prompt: string;
 }

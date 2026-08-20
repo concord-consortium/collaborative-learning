@@ -43,24 +43,17 @@
       "prompt": "categorize-design-default"
     },
     {
-      "id": "text-extras-fixed",
+      "id": "text-extras-all",
       "message": "text-only",
       "textVariant": "default",
-      "extras": "extras-fixed",
+      "extras": "all",
       "prompt": "categorize-design-default"
     },
     {
-      "id": "text-extras-production-current",
+      "id": "text-extras-none",
       "message": "text-only",
       "textVariant": "default",
-      "extras": "extras-production-current",
-      "prompt": "categorize-design-default"
-    },
-    {
-      "id": "text-no-extras",
-      "message": "text-only",
-      "textVariant": "default",
-      "extras": "no-extras",
+      "extras": "none",
       "prompt": "categorize-design-default"
     },
     {
