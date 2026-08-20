@@ -285,15 +285,23 @@ A full dry run against production scanned 112,900 documents in 4m24s.
 
 | root | spaces | docs | resolved | alreadySet | noMetadataNode | keyNotRtdbSafe | classWide |
 |---|---|---|---|---|---|---|---|
-| `authed` | 5 | 95,772 | 69,501 | 26,182 | 43 | 2 | 44 |
+| `authed` | 5 | 95,772 | 69,501 | 26,182 | 43 | 2* | 44 |
 | `demo` | 426 | 3,566 | 1,898 | 1,653 | 8 | — | 7 |
 | `dev` | 3,631 | 4,473 | 588 | 3,793 | 92 | — | — |
 | `qa` | 3,559 | 9,089 | 22 | 6,217 | 1,104 | — | 1,746 |
 | **total** | | **112,900** | **72,009** | **37,845** | **1,247** | **2** | **1,797** |
 
+\* The two `keyNotRtdbSafe` documents were **deleted on 2026-08-20**, so a re-run now reports zero.
+They were `supportPublication` rows in the `cc-test` network from 2021, keyed
+`2.2 Initial Challenge Support 1` and `2.2 Support 1` — curriculum-authored supports whose
+curriculum-defined keys contain a `.`, which an RTDB path forbids. Scanning all 146,105 documents in
+the collection group confirmed they were the only two. Notably neither carried a `unit`, so they
+never endangered `isInClassUnitContainer` in the first place; removing them was housekeeping, so that
+the residue is not permanently non-zero.
+
 **This settles the deferred question: tier 1 is enough, and the other two sources should not be
-built.** Across real data — `authed` and `demo` — 71,399 documents need an `offeringId` and 53 cannot
-get one, a recovery rate of 99.93%. The offering-tree source and the portal-API fuzzy match would be
+built.** Across real data — `authed` and `demo` — 71,399 documents need an `offeringId` and 51 cannot
+get one (53 at census time, less the two deleted since), a recovery rate of 99.93%. The offering-tree source and the portal-API fuzzy match would be
 substantial machinery to rescue fifty-odd documents. "Report and leave alone" is the right policy for
 the residue, and is what the script already does.
 
