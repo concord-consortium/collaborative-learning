@@ -1204,8 +1204,18 @@ export function assertKeyIsReusable(
 // The ratings template
 // ---------------------------------------------------------------------------
 
-function csvField(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
+/**
+ * One CSV field, quoted for the parser and defused for the spreadsheet.
+ *
+ * Excel and LibreOffice evaluate a field beginning `=`, `+`, `-` or `@` as a formula even inside
+ * quotes, and this file exists to be opened in a spreadsheet by a judge. Nothing writes such a value
+ * today — document ids and labels cannot start with those characters — but the `document` column
+ * carries whatever a corpus calls its documents, and a pseudonym is only used in shareable mode. A
+ * leading apostrophe is the standard defusing and spreadsheets do not show it.
+ */
+export function csvField(value: string): string {
+  const defused = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${defused.replace(/"/g, '""')}"`;
 }
 
 /**

@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   BuildReviewOptions, ReviewModel, ReviewModes, assertExperimentMatchesRows, blindLabelsFor,
-  assertKeyIsReusable, buildReviewModel, compareLabels, escapeHtml, labelForIndex, ratingsTemplateCsv,
+  assertKeyIsReusable, buildReviewModel, compareLabels, csvField, escapeHtml, labelForIndex,
+  ratingsTemplateCsv,
   renderReviewHtml, reviewKeyFactsOf, reviewKeyFileFor, reviewOutputPathFor, reviewSidecarPaths
 } from "../src/review.js";
 import { representationPath } from "../src/corpus.js";
@@ -605,8 +606,10 @@ describe("--blind", () => {
     expect(model.documents.flatMap((document) => document.cards)
       .every((card) => !card.configuration && !card.usage && card.modeledUsd === null)).toBe(true);
     expect(html).not.toContain("puppeteer-full-height");
+    // Not `not.toContain("$")`: a student can type a dollar sign, and a cost rendered without a
+    // currency symbol would slip past it anyway. The structural check above is the real one.
     expect(html).not.toContain("modeled");
-    expect(html).not.toContain("$");
+    expect(html).not.toMatch(/\d+ in \/ \d+ out tokens/);
   });
 
   it("still shows the document: every image and summary its runs used", () => {
@@ -666,6 +669,18 @@ describe("--blind", () => {
     expect(csv[1]).toBe('"alpha","A","",""');
   });
 
+  it("defuses a ratings template against spreadsheet formula evaluation", () => {
+    // Excel and LibreOffice evaluate a field beginning `=`, `+`, `-` or `@` even inside quotes, and
+    // this file is opened in a spreadsheet by a judge. Nothing writes such a value today; the
+    // `document` column carries whatever a corpus calls its documents.
+    expect(csvField("=1+1")).toBe(`"'=1+1"`);
+    expect(csvField("@SUM(A1)")).toBe(`"'@SUM(A1)"`);
+    expect(csvField("-2")).toBe(`"'-2"`);
+    // Ordinary values are untouched, and quoting still escapes quotes.
+    expect(csvField("doc-01")).toBe('"doc-01"');
+    expect(csvField('a "b"')).toBe('"a ""b"""');
+  });
+
   it("uses the pseudonym in the template when the report is also shareable", () => {
     const both = modelFor(fixture, { blind: true, shareable: true });
     expect(ratingsTemplateCsv(both).split("\n")[1]).toBe('"doc-01","A","",""');
@@ -678,8 +693,13 @@ describe("--blind", () => {
 });
 
 describe("a response field the typed renderer cannot show is kept, not dropped", () => {
+  let parsedFixtures = 0;
   const withParsed = (parsed: unknown) => {
-    const fixture = buildReviewFixture(`review-parsed-${Math.abs(JSON.stringify(parsed).length)}`);
+    // A counter, not a hash of the input: naming the directory after the serialized length gave two
+    // different values of equal length the same scratch directory, which `makeTestDataRoot` clears
+    // on entry — the exact hazard `buildReviewFixture`'s own comment warns about.
+    parsedFixtures += 1;
+    const fixture = buildReviewFixture(`review-parsed-${parsedFixtures}`);
     const rows = fixture.rows.map((row) => (
       row.docId === "beta" && row.runId === kSentinels.imageRun && row.status === "success"
         ? { ...row, response: { parsed, raw: {} } }

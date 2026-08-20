@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
+import { harnessRoot } from "../src/corpus.js";
 import { reviewSidecarPaths } from "../src/review.js";
 import { validateReviewKeyFile } from "../src/schemas.js";
 import { listFilesUnder } from "./helpers.js";
@@ -97,10 +98,15 @@ describe("review writes one report per mode, with the sidecars that mode needs",
     ]);
   });
 
-  it("keeps everything it wrote inside the data root", () => {
-    for (const file of listFilesUnder(fixture.dataRoot)) {
-      expect(file.startsWith(fixture.dataRoot)).toBe(true);
-    }
+  it("writes nothing outside the data root", () => {
+    // Walking the data root and asserting every path is under it proves nothing: that is all
+    // `listFilesUnder` can return. The claim is about everything *else*, so this takes a picture of
+    // the harness tree outside `data/` and checks a report changes none of it.
+    const outsideData = () => listFilesUnder(harnessRoot)
+      .filter((file) => !file.startsWith(path.join(harnessRoot, "data")));
+    const before = outsideData();
+    return review(fixture, ["--blind", "--shareable", "--reuse-key"])
+      .then(() => expect(outsideData()).toEqual(before));
   });
 });
 
