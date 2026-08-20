@@ -13,6 +13,13 @@ export enum ENavTab {
   kSupports = "supports"
 }
 
+// Student Work is the one tab the fixed start view cannot force: it is group keyed and always renders
+// the four-up, so it has no "no document open" browser view to start on, and its focused-student state
+// is read directly by the teacher dashboard as well as the resources panel. Lives here rather than
+// beside resolveStartView so the authoring entry point can read it without pulling in the runtime
+// PersistentUI store and its dependency graph.
+export const kUnsupportedFixedStartTabs: string[] = [ENavTab.kStudentWork];
+
 // these are the tabs used in the current unit configurations
 export enum EAuthorableNavTab {
   kProblems = "problems",

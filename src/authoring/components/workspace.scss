@@ -62,6 +62,20 @@
       margin-bottom: 10px;
     }
 
+    .form-warning {
+      color: #a25c00;
+      margin-bottom: 10px;
+
+      // The warning is a live region, so it stays mounted and empty rather than being conditionally
+      // rendered: screen readers announce content added to a region they are already monitoring far
+      // more reliably than one that appears with its text. Collapse the margin while it is empty so
+      // it costs no space. Not `display: none`, which would drop it from the accessibility tree and
+      // defeat the point of keeping it mounted.
+      &:empty {
+        margin: 0;
+      }
+    }
+
     button.danger {
       background: #ff4d4f;
       color: white;

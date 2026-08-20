@@ -1,4 +1,5 @@
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
+import { PanelLayout } from "../models/stores/problem-configuration";
 import { DocFilterType, SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
 export { SortTypeIds, SortTypeId };
 
@@ -58,7 +59,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   hide4up?: boolean;
   sortWorkConfig?: ISortWorkConfig;
   termOverrides?: Record<string, string>;
-  defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  defaultPanelLayout?: PanelLayout;
   // "evenLayout" (default) splits the panes evenly; "wideContent" narrows the resources pane to its
   // comments-open width so the workspace gets ~2/3 until comments are opened.
   contentLayout?: "evenLayout" | "wideContent";

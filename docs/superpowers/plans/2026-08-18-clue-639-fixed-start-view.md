@@ -6,7 +6,10 @@
 
 > **Revision (per code review):** `applyFixedStartView` was reworked from mutating the persisted state
 > into a session-only, non-destructive volatile override (`startViewOverride`) consulted by
-> `displayedActiveNavTab`, `displayedDividerPosition`, and the doc browser. See the design doc revision note.
+> `displayedActiveNavTab`, `displayedDividerPosition`, `focusDocument`, and each renderer of a document
+> tab. See the design doc revision note. This plan is the record of how the work was sequenced; where a
+> task below still describes the original mutating approach, the design doc and the code are the
+> authority.
 
 **Architecture:** Mirror the existing `defaultPanelLayout` unit setting through the 3-layer config chain (`ProblemConfiguration` → `ConfigurationManager` → `AppConfigModel`). Add a new `PersistentUIModel.applyFixedStartView` action plus two small pure helpers (`dividerForLayout`, `resolveStartView`). Invoke from the DB startup hook at `src/lib/db.ts` where `applyDefaultPanelLayout` already runs — but unconditionally (overriding restored state), and only when the target tab is displayed. Add the two fields to the authoring form.
 
@@ -250,17 +253,10 @@ Expected: FAIL ("applyFixedStartView is not a function").
 In `src/models/stores/persistent-ui/persistent-ui.ts`, in the same `.actions(self => ({ … }))` block that contains `applyDefaultPanelLayout` (they are siblings), add:
 
 ```ts
-    // Force the author-configured start view, OVERRIDING any restored state (unlike
-    // applyDefaultPanelLayout, this is intentionally not guarded by hasSavedPersistentUI).
-    // Called on every load when the unit's fixedStartView switch is on and the tab is displayed.
+    // Force the author-configured start view for this session. See startViewOverride: this mutates
+    // nothing persisted, so the user's saved place survives and returns as soon as they navigate.
     applyFixedStartView(tab: string, dividerPosition: number) {
-      self.setActiveNavTab(tab);
-      // Close any open primary document in the tab's current group → currentDocumentKeys becomes [],
-      // which renders the thumbnail browser. Comparison mode is already cleared during
-      // initializePersistentUISync, so there is no secondary document to promote. If the tab has no
-      // current document group yet, closeDocumentGroupPrimaryDocument is a no-op (nothing was open).
-      self.closeDocumentGroupPrimaryDocument(tab);
-      self.setDividerPosition(dividerPosition);
+      self.startViewOverride = { tab, dividerPosition };
     },
 ```
 

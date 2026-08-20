@@ -47,7 +47,9 @@ export interface ProblemConfiguration {
   // default) instead of restoring the user's last-seen state. Off/undefined = restore last state.
   // The forced view is applied as a session-only override, so it never overwrites the saved state.
   fixedStartView?: boolean;
-  // The nav tab to start on when fixedStartView is true. Typed as ENavTab so a typo in the unit JSON
-  // is caught. Kept as a separate value so toggling the switch off preserves the author's choice.
+  // The nav tab to start on when fixedStartView is true. ENavTab constrains our own call sites and
+  // fixtures; hand-authored unit JSON is loaded as types.frozen, so a typo there is not rejected at
+  // load time and only shows up as resolveStartView's console warning. Kept as a separate value so
+  // toggling the switch off preserves the author's choice.
   fixedStartTab?: ENavTab;
 }

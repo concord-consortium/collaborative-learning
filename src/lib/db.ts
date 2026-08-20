@@ -38,8 +38,8 @@ import {
 } from "../models/document/document-kinds";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
-import { resolveStartView } from "../models/stores/persistent-ui/persistent-ui";
 import { urlParams } from "../utilities/url-params";
+import { applyStartupUIState } from "../models/stores/persistent-ui/persistent-ui";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { typeConverter } from "../utilities/db-utils";
@@ -192,22 +192,22 @@ export class DB {
               exemplarController.initialize(this.stores);
               this.createDeclaredClassWideDocuments();
 
-              // Once unit config is available, either apply the author's fixed start view (a session-only
-              // override — see applyFixedStartView) or, for first-time visitors, the default panel layout.
+              // Once unit config is available, apply the unit's default panel layout (first-time
+              // visitors only, see applyDefaultPanelLayout) and then layer the author's fixed start
+              // view on top as a session-only override (see applyFixedStartView). Both run: the
+              // override is released as the user acts, and the layout is what they fall back to.
               persistentUIReady.then(() => {
                 const { appConfig } = this.stores;
                 const displayedTabs = this.stores.tabsToDisplay.map(t => t.tab);
-                const startView = resolveStartView({
+                applyStartupUIState(persistentUI, {
                   fixedStartView: appConfig.fixedStartView,
                   fixedStartTab: appConfig.fixedStartTab,
                   defaultPanelLayout: appConfig.defaultPanelLayout,
+                  // Read from urlParams, not stores.documentToDisplay: that IStores member is
+                  // declared optional and never actually assigned on the Stores class, so it is
+                  // always undefined and would silently disable this guard.
                   hasDocumentTarget: !!urlParams.studentDocument
                 }, displayedTabs);
-                if (startView) {
-                  persistentUI.applyFixedStartView(startView.tab, startView.dividerPosition);
-                } else {
-                  persistentUI.applyDefaultPanelLayout(appConfig.defaultPanelLayout);
-                }
               }).catch((err) => {
                 console.error("Error initializing persistent UI:", err);
               });

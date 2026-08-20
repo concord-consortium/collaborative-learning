@@ -8,6 +8,9 @@ import { UserModel } from "./user";
 import { DB } from "../../lib/db";
 import { getSnapshot } from "mobx-state-tree";
 import { CurriculumConfig } from "./curriculum-config";
+import { specAppConfig } from "./spec-app-config";
+import { ENavTab } from "../view/nav-tabs";
+import { kDividerHalf } from "./ui-types";
 
 describe("stores object", () => {
 
@@ -43,6 +46,47 @@ describe("stores object", () => {
     expect(stores.db).toBe(db);
   });
 
+});
+
+describe("displayedActiveNavTab", () => {
+
+  function specStoresWithTabs() {
+    return specStores({ appConfig: specAppConfig({ config: {
+      navTabs: { tabSpecs: [
+        { tab: ENavTab.kProblems, label: "Problems" },
+        { tab: ENavTab.kMyWork, label: "My Work" },
+        { tab: ENavTab.kClassWork, label: "Class Work" }
+      ]}
+    } as any }) });
+  }
+
+  it("reports the tab the user last chose", () => {
+    const stores = specStoresWithTabs();
+    stores.persistentUI.setActiveNavTab(ENavTab.kMyWork);
+    expect(stores.displayedActiveNavTab).toBe(ENavTab.kMyWork);
+  });
+
+  it("prefers the author's fixed start view", () => {
+    const stores = specStoresWithTabs();
+    stores.persistentUI.setActiveNavTab(ENavTab.kMyWork);
+    stores.persistentUI.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+    expect(stores.displayedActiveNavTab).toBe(ENavTab.kClassWork);
+  });
+
+  it("falls back to the first displayed tab when the forced tab is not displayed", () => {
+    const stores = specStoresWithTabs();
+    stores.persistentUI.setActiveNavTab(ENavTab.kMyWork);
+    stores.persistentUI.applyFixedStartView(ENavTab.kSortWork, kDividerHalf);
+    expect(stores.displayedActiveNavTab).toBe(ENavTab.kProblems);
+  });
+
+  it("goes back to the user's own tab as soon as they navigate", () => {
+    const stores = specStoresWithTabs();
+    stores.persistentUI.setActiveNavTab(ENavTab.kMyWork);
+    stores.persistentUI.applyFixedStartView(ENavTab.kClassWork, kDividerHalf);
+    stores.persistentUI.setActiveNavTab(ENavTab.kMyWork);
+    expect(stores.displayedActiveNavTab).toBe(ENavTab.kMyWork);
+  });
 });
 
 function specIntroductionSection() {

@@ -13,7 +13,7 @@ import {
   ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "../../document/document-types";
-import { ENavTab, NavTabModelType } from "../../view/nav-tabs";
+import { ENavTab, kUnsupportedFixedStartTabs, NavTabModelType } from "../../view/nav-tabs";
 import { AppConfigModelType } from "../app-config-model";
 import { PanelLayout } from "../problem-configuration";
 import { SortedDocuments } from "../sorted-documents";
@@ -36,8 +36,7 @@ export function dividerForLayout(layout: PanelLayout | undefined) {
   }
 }
 
-// Decides whether to force the author start view. Returns the tab + divider to force, or undefined to
-// fall through to normal restore (switch off, no tab, tab not displayed, or an explicit deep link).
+// Returns the tab + divider to force, or undefined to fall through to the user's own restored state.
 export function resolveStartView(
   opts: { fixedStartView?: boolean; fixedStartTab?: string; defaultPanelLayout?: PanelLayout;
           hasDocumentTarget?: boolean },
@@ -51,7 +50,39 @@ export function resolveStartView(
     console.warn(`fixedStartView: "${fixedStartTab}" is not a displayed tab; ignoring`);
     return undefined;
   }
+  if (kUnsupportedFixedStartTabs.includes(fixedStartTab)) {
+    console.warn(`fixedStartView: "${fixedStartTab}" cannot be a fixed start tab; ignoring`);
+    return undefined;
+  }
+  if (defaultPanelLayout === "workspace-only") {
+    // The layout the author chose collapses the resources panel the start tab lives in, so forcing a
+    // tab there shows nothing. Forcing the divider as well would close the panel on every load for a
+    // returning user who had opened it, which is destructive rather than merely useless.
+    console.warn(`fixedStartView: "workspace-only" collapses the resources panel; ignoring`);
+    return undefined;
+  }
   return { tab: fixedStartTab, dividerPosition: dividerForLayout(defaultPanelLayout) };
+}
+
+// The whole startup UI decision, extracted from the db hook so the seam is testable rather than being
+// glue nobody can reach. Both steps always run: applyDefaultPanelLayout persists the unit's layout for
+// a first-time visitor (it no-ops for everyone else), and the forced view is layered on top of it as a
+// session-only override, so releasing the override leaves the user on the unit's layout rather than
+// dropping them to the bare default.
+export function applyStartupUIState(
+  persistentUI: {
+    applyDefaultPanelLayout: (layout: PanelLayout | undefined) => void;
+    applyFixedStartView: (tab: string, dividerPosition: number) => void;
+  },
+  opts: { fixedStartView?: boolean; fixedStartTab?: string; defaultPanelLayout?: PanelLayout;
+          hasDocumentTarget?: boolean },
+  displayedTabs: string[]
+) {
+  persistentUI.applyDefaultPanelLayout(opts.defaultPanelLayout);
+  const startView = resolveStartView(opts, displayedTabs);
+  if (startView) {
+    persistentUI.applyFixedStartView(startView.tab, startView.dividerPosition);
+  }
 }
 
 export const PersistentUIModelV2 = types
@@ -78,15 +109,35 @@ export const PersistentUIModelV2 = types
     problemPath: "",
     isDocumentsView: false,
     hasSavedPersistentUI: false,
-    // Author's fixed start view, applied as a session-only override so it never overwrites the saved
-    // record. When set, the display prefers it (tab, divider, and a no-document browser view for the
-    // tab); it is cleared the moment the user navigates. undefined = restore the user's own state.
-    startViewOverride: undefined as { tab: string, dividerPosition: number } | undefined
+    // The author's fixed start view, held as session-only overrides so the saved record is never
+    // rewritten. While they are set the display prefers them: displayedActiveNavTab reports the tab,
+    // displayedDividerPosition the divider, focusDocument reports nothing open for a document tab, and
+    // that tab renders its thumbnail browser with no selection instead of the user's saved document.
+    // The three parts are released independently, because no one user action implies the others:
+    // navigating hands back the user's own tab, resizing hands back their own divider, and choosing a
+    // sub tab hands back their own sub tab.
+    startViewTab: undefined as string | undefined,
+    startViewDividerPosition: undefined as number | undefined,
+    // While set, the forced tab opens on its first sub tab rather than the one the user last used, so
+    // "start on Class Work with every published thumbnail visible" actually lands on the thumbnails.
+    // Only meaningful for the document tabs; the curriculum tabs always show a section, so there is no
+    // "no document open" state to start in and their section is restored like the rest of the user's
+    // state. See applyFixedStartView and docs/unit-configuration.md.
+    startViewSubTabPinned: false
+  }))
+  .actions(self => ({
+    // Navigating is the user taking over the tab, which takes the forced sub tab with it: pinning a
+    // sub tab of a tab the user has left would apply the author's choice to a tab they chose. The
+    // forced divider stands until they resize, or the panel would collapse under a user who had left
+    // the resources pane closed.
+    clearStartViewOverride() {
+      self.startViewTab = undefined;
+      self.startViewSubTabPinned = false;
+    }
   }))
   .views((self) => ({
-    // The divider the UI should render: the forced-start override when active, else the saved position.
     get displayedDividerPosition () {
-      return self.startViewOverride?.dividerPosition ?? self.dividerPosition;
+      return self.startViewDividerPosition ?? self.dividerPosition;
     }
   }))
   .views((self) => ({
@@ -105,19 +156,48 @@ export const PersistentUIModelV2 = types
     }
   }))
   .views((self) => ({
-    // document key or section path for resource (left) document
+    // True while the author's forced start view is showing this tab; see startViewTab.
+    isStartViewOverrideActiveFor(tab: string) {
+      return self.startViewTab === tab;
+    },
+    // True while this tab should open on its first sub tab instead of the user's saved one.
+    isStartViewSubTabPinnedFor(tab: string) {
+      return self.startViewSubTabPinned && self.startViewTab === tab;
+    },
+    // The tab whose content is on screen: the forced start view's tab while it is active, else the
+    // tab the user last chose. Note stores.displayedActiveNavTab additionally falls back to the first
+    // displayed tab; this is the raw preference, for views that only need to know which tab is showing.
+    get displayedNavTab () {
+      return self.startViewTab ?? self.activeNavTab;
+    }
+  }))
+  .views((self) => ({
+    // The document group (sub tab, or curriculum section) of the tab that is actually on screen.
+    // Watch this rather than currentDocumentGroupId, which is keyed off the user's own activeNavTab
+    // and so reports a tab nobody can see while the author's fixed start view is active.
+    get displayedCurrentDocumentGroupId () {
+      const tab = self.displayedNavTab;
+      return tab ? self.tabs.get(tab)?.currentDocumentGroupId : undefined;
+    },
+    // document key or section path for the resource (left) document, for the displayed tab
     get focusDocument () {
-      if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
-        const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
-        return buildSectionPath(self.problemPath, self.currentDocumentGroupId, facet);
+      const tab = self.displayedNavTab;
+      if (tab === ENavTab.kProblems || tab === ENavTab.kTeacherGuide) {
+        const facet = tab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
+        return buildSectionPath(self.problemPath, self.tabs.get(tab)?.currentDocumentGroupId, facet);
+      } else if (tab && self.isStartViewOverrideActiveFor(tab)) {
+        return undefined;
       } else {
         return self.activeTabModel?.currentDocumentGroup?.primaryDocumentKey;
       }
     },
     get focusSecondaryDocument () {
-      if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
-        const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
-        return buildSectionPath(self.problemPath, self.currentDocumentGroupId, facet);
+      const tab = self.displayedNavTab;
+      if (tab === ENavTab.kProblems || tab === ENavTab.kTeacherGuide) {
+        const facet = tab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
+        return buildSectionPath(self.problemPath, self.tabs.get(tab)?.currentDocumentGroupId, facet);
+      } else if (tab && self.isStartViewOverrideActiveFor(tab)) {
+        return undefined;
       } else {
         return self.activeTabModel?.currentDocumentGroup?.secondaryDocumentKey;
       }
@@ -125,7 +205,10 @@ export const PersistentUIModelV2 = types
   }))
   .actions(self => ({
     setDividerPosition(position: number) {
-      self.startViewOverride = undefined; // moving the divider is a user action; drop the forced view
+      // Release the forced divider but keep showing the forced tab: resizing the pane, collapsing it,
+      // or following the skip link is not navigation, and swapping the panel's content underneath a
+      // resize would be a jump the user never asked for.
+      self.startViewDividerPosition = undefined;
       self.dividerPosition = position;
     },
     setHasSavedPersistentUI(value: boolean) {
@@ -167,7 +250,7 @@ export const PersistentUIModelV2 = types
       self.showRemoteHistoryView = show;
     },
     setActiveNavTab(tab: string) {
-      self.startViewOverride = undefined; // choosing a tab is a user action; drop the forced view
+      self.clearStartViewOverride();
       self.activeNavTab = tab;
     },
     getOrCreateTabState(tab: string) {
@@ -244,12 +327,13 @@ export const PersistentUIModelV2 = types
      * @param documentKey
      */
     openDocumentGroupPrimaryDocument(tab: string, docGroupId: string, documentKey: string) {
-      self.startViewOverride = undefined; // opening a document is a user action; drop the forced view
+      self.clearStartViewOverride();
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
       tabState.openDocumentGroupPrimaryDocument(docGroupId, documentKey);
     },
     openDocumentGroupSecondaryDocument(tab: string, docGroupId: string, documentKey: string) {
+      self.clearStartViewOverride();
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
       tabState.setDocumentGroupSecondaryDocument(docGroupId, documentKey);
@@ -289,16 +373,28 @@ export const PersistentUIModelV2 = types
     }
   }))
   .actions(self => ({
-    // Force the author-configured start view for this session WITHOUT mutating the persisted record:
-    // it is a volatile override that the display consults (displayedActiveNavTab, displayedDividerPosition,
-    // and a no-document browser view for the tab via section-document-or-browser). Because it never
-    // touches activeNavTab/dividerPosition/document groups, the user's saved state survives, and any
-    // navigation action (setActiveNavTab/setDividerPosition/openDocumentGroupPrimaryDocument) clears it.
+    // Force the author-configured start view for this session. See startViewTab: this mutates nothing
+    // persisted, so the user's saved place survives and returns as soon as they act on it.
     applyFixedStartView(tab: string, dividerPosition: number) {
-      self.startViewOverride = { tab, dividerPosition };
+      self.startViewTab = tab;
+      self.startViewDividerPosition = dividerPosition;
+      // The curriculum tabs always show a section rather than a browser, so there is no first sub tab
+      // to start on; only the document tabs get their sub tab forced.
+      self.startViewSubTabPinned = tab !== ENavTab.kProblems && tab !== ENavTab.kTeacherGuide;
     },
-    clearStartViewOverride() {
-      self.startViewOverride = undefined;
+    /**
+     * The user choosing a document group, as opposed to code initializing one. Releases the forced
+     * sub tab first, so the click is not swallowed by the pin that put them on the first sub tab.
+     * Use setCurrentDocumentGroupId for initialization, which must not release anything.
+     *
+     * @param tab
+     * @param docGroupId
+     */
+    selectDocumentGroup(tab: string, docGroupId: string) {
+      // Only the forced tab's own pin is released: a click in some other tab is not a choice about
+      // where the forced tab starts.
+      if (self.startViewTab === tab) self.startViewSubTabPinned = false;
+      self.setCurrentDocumentGroupId(tab, docGroupId);
     },
     /**
      * Update the top level tab in the resources panel (left side), and guess a sub tab to open to view
