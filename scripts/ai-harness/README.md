@@ -1102,12 +1102,15 @@ Milestone 4 (against
     produced with — required and hash-checked, because the run list, `detail`, `imageSet` and
     `extras` exist nowhere else — and the corpus tree, for the summaries and pictures. `report`
     stays "reports as data"; this is a document for humans.
-32. **A blinded report withholds skip reasons rather than printing them.** The spec has skipped
-    outcomes rendering with their `skipReasons` in every mode, and separately requires that no run
-    configuration appear in a blind report. Those conflict: a skip reason names the shape and
-    settings of the run that declined ("image-only run with imageSet `visual-tiles-only`: …"), which
-    is a configuration standing beside labelled cards. Blind mode keeps the strip and the count and
-    says the reasons are withheld; every other mode prints them.
+32. **A blinded *or shareable* report withholds skip reasons rather than printing them.** The spec
+    has skipped outcomes rendering with their `skipReasons` in every mode, and separately requires
+    that no run configuration appear in a blind report and no document identifier in a shareable
+    one. Both conflict, because a skip reason is not a fixed vocabulary: it names the shape and
+    settings of the run that declined ("image-only run with imageSet `visual-tiles-only`: …"), and
+    it carries whatever `imagesForSet` and `expectedRenderFailure` put in it — up to five tile ids
+    and a line of author-written prose. A tile id contains the document id outright in this corpus,
+    so a shareable report printed `wave-runner-tile` under the heading `doc-02`. Both modes keep the
+    strip and the count and say the reasons are withheld; the team-internal report prints them.
 33. **`--shareable` also drops tile ids and representation warnings.** The spec lists the fields to
     omit — document ids, unit, investigation, problem, `contextId`, source, file paths, render-target
     URLs, git commit — and tile ids are not among them. In this corpus a tile id contains the

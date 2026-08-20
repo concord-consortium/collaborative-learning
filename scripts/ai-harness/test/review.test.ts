@@ -348,6 +348,13 @@ describe("every outcome a row can hold is rendered", () => {
     expect(html).toContain("The response parsed to an empty object.");
   });
 
+  it("withholds skip reasons from a shareable report, and says so", () => {
+    const shareable = modelFor(buildReviewFixture("review-skip-reasons"), { shareable: true });
+    expect(shareable.documents.flatMap((document) => document.skipped)
+      .every((entry) => entry.skipReasons.length === 0)).toBe(true);
+    expect(renderReviewHtml(shareable)).toContain("can quote identifiers from the document");
+  });
+
   it("keeps skipped outcomes out of the cards and in their own strip, with reasons", () => {
     expect(gamma.cards).toHaveLength(0);
     expect(gamma.skipped).toHaveLength(3);
@@ -497,7 +504,9 @@ describe("--shareable", () => {
 
   it("omits every harness metadata identifier", () => {
     for (const sentinel of [kSentinels.unit, kSentinels.investigation, kSentinels.problem,
-      kSentinels.contextId]) {
+      kSentinels.contextId,
+      // A skip reason quotes tile ids, and a tile id contains the document id in this corpus.
+      kSentinels.skipReasonTile]) {
       expect(html).not.toContain(sentinel);
     }
     expect(html).not.toContain("documents/");

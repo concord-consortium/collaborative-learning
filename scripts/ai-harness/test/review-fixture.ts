@@ -40,7 +40,16 @@ export const kSentinels = {
   unit: "zz-unit-sentinel",
   investigation: "zz-investigation-sentinel",
   problem: "zz-problem-sentinel",
-  contextId: "zz-context-sentinel"
+  contextId: "zz-context-sentinel",
+  /**
+   * A tile id inside a skip reason.
+   *
+   * Skip reasons are not a fixed vocabulary: `imagesForSet` interpolates up to five tile ids into
+   * its warnings and `expectedRenderFailure` is author-written prose, and both end up in a skipped
+   * row. In this corpus a tile id contains the document id outright, so a shareable report that
+   * prints a skip reason prints a document identifier.
+   */
+  skipReasonTile: "zz-tile-sentinel"
 };
 
 export const kCorpus = "review-corpus";
@@ -286,7 +295,10 @@ export function buildReviewFixture(name: string): ReviewFixture {
 
     { ...common, docId: "beta", runId: kSentinels.textRun, modality: "visual-only",
       computedModality: "mixed", message: "text-only", requestKey: null, status: "skipped",
-      skipReasons: [`text-only run: skipped ${kAdversarial}`],
+      skipReasons: [`text-only run: skipped ${kAdversarial}`,
+        `1 tile(s) the classification marks as needing a picture have no per-tile capture ` +
+        `(${kSentinels.skipReasonTile}) — a tile nested inside a Question is drawn within its ` +
+        "parent's image rather than beside it"],
       decidedFromContentSha256: kContentSha.beta },
     // Only `category` is set: every field of the response schema is optional, and an unrecognized
     // one has to be shown rather than dropped by a renderer that assumed the shape.

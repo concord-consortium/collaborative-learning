@@ -243,9 +243,14 @@ export interface ReviewSkipped {
   /** `null` in blind mode. */
   runId: string | null;
   /**
-   * Empty in blind mode. A skip reason names the shape and settings of the run that declined —
-   * "image-only run with imageSet …" — which is a configuration standing beside labelled cards, so
-   * a blinded report keeps the count and drops the reasons. See DEVIATIONS in the README.
+   * Empty in blind **and** shareable modes; only the team-internal report carries them.
+   *
+   * A skip reason is not a fixed vocabulary. It names the shape and settings of the run that
+   * declined ("image-only run with imageSet …"), which is a configuration standing beside labelled
+   * cards; and it carries whatever `imagesForSet` and `expectedRenderFailure` put in it, which is up
+   * to five tile ids and a line of author-written prose. A tile id contains the document id outright
+   * in this corpus, so a shareable report printed `wave-runner-tile` under the heading `doc-02`.
+   * Same leak as DEVIATIONS 33, one path further along. See DEVIATIONS in the README.
    */
   skipReasons: string[];
 }
@@ -929,7 +934,7 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
         .filter((row): row is ResultRow & { status: "skipped" } => row.status === "skipped")
         .map((row) => ({
           runId: modes.blind ? null : row.runId,
-          skipReasons: modes.blind ? [] : row.skipReasons
+          skipReasons: modes.blind || modes.shareable ? [] : row.skipReasons
         }))
     };
   });
@@ -1469,9 +1474,10 @@ function documentBlock(document: ReviewDocument): Html {
                   ? html`<strong>${entry.runId}</strong>: `
                   : ""}${entry.skipReasons.join("; ")}</li>`)}
               </ul>`
-              // A skip reason names the shape and settings of the run that declined, which is a
-              // configuration standing next to labelled cards.
-              : html`<div>Why each one declined is withheld: the reasons name run configurations.</div>`}
+              // A skip reason carries a run's configuration and, through `imagesForSet` and
+              // `expectedRenderFailure`, tile ids and author-written prose.
+              : html`<div>Why each one declined is withheld: the reasons name run configurations and
+                  can quote identifiers from the document.</div>`}
           </div>`
         : ""}
     </article>`;
