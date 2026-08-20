@@ -58,7 +58,6 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
-import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import { IShowModal, ICloseModal, ISupportedFeatures } from "@concord-consortium/lara-interactive-api";
@@ -353,15 +352,6 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         if (hintData.text) {
           console.log(`Interactive ${model.id} hint (not displayed):`, hintData.text);
         }
-      });
-
-      // These are analytics breadcrumbs (button clicked, hint viewed), not a state change.
-      phone.addListener("log", (logData: any) => {
-        Logger.log(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
-          tileId: model.id,
-          tileType: "IframeInteractive",
-          ...logData
-        });
       });
 
       // Handle modal requests (optional - can show modal dialogs)
