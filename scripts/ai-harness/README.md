@@ -802,9 +802,16 @@ recovered from the HTML plus this repository — and with it, regeneration is ex
 `--shareable` and `--blind` each write **one** key file, `<output-html-basename>.key.json`, and
 blind+shareable writes a single combined one rather than two sidecars racing for a path. It records
 the schema version, corpus, experiment hash, which flags produced the report, the documents in
-presentation order, the exact judgeable (document, run) set, the pseudonyms, the seed and the
-label→run mapping. It is validated on read like every other on-disk format. A plain report writes no
-sidecars at all.
+presentation order, the judgeable outcomes, the pseudonyms, the seed and the label→run mapping. It
+is validated on read like every other on-disk format. A plain report writes no sidecars at all.
+
+Each judgeable outcome is recorded as (document, run) **plus a fingerprint** of the row the label was
+put on — its request, its representation and its answer. The pair alone does not identify an
+outcome: a re-run appends a replacement row for the same pair, so without the fingerprint a
+`--reuse-key` regeneration would accept the new answer, keep the old label on it, and preserve a
+ratings template whose scores were given to the answer it replaced. The fingerprint deliberately
+excludes `runMeta`, `usage` and `cost`, so a re-run served from the cache — which changes all three
+and changes nothing a judge read — is still reusable.
 
 Blind modes also write `<output-html-basename>.ratings-template.csv`: one row per (document, label)
 over the judgeable cards, columns `document,label,rating,notes`, values empty, using the pseudonym
@@ -820,7 +827,8 @@ collide on a key. The rules around them:
   rotating a key orphans every rating already written against the old labels.
 - `--reuse-key` reads and validates the existing key and never rewrites it. Reuse is refused if the
   key's corpus, experiment hash, mode flags, document set or judgeable run set differs from this
-  invocation, if its pseudonyms are not the ones the report renders, or if its labels are not
+  invocation, **if any outcome it labels has been re-run since it was written**, if its pseudonyms
+  are not the ones the report renders, or if its labels are not
   exactly one per outcome — same inputs, same labels and pseudonyms, or nothing. The report is
   rendered from the key's own mapping, so a `--reuse-key` run regenerates byte-identical HTML.
 - Under `--reuse-key` an existing ratings template is preserved byte for byte; it may hold a judge's

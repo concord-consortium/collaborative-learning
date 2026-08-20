@@ -1254,10 +1254,22 @@ export function validateResultRow(value: unknown, file: string): ResultRow {
 // Review key file
 // ---------------------------------------------------------------------------
 
-/** One judgeable outcome: a document and the run that produced it. */
+/** One judgeable outcome: a document, the run that produced it, and which outcome that was. */
 export interface ReviewKeyPair {
   docId: string;
   runId: string;
+  /**
+   * A hash of the row this label was put on: its request, its representation and its answer.
+   *
+   * The pair alone does not identify an outcome. A re-run appends a replacement row for the same
+   * (document, run), so without this a `--reuse-key` regeneration accepted the new answer, kept the
+   * old label on it, and preserved a ratings template whose scores were given to the old one. The
+   * ratings then described an outcome nobody had read.
+   *
+   * Deliberately excludes `runMeta`, `usage` and `cost`: a re-run that returns the same answer from
+   * the cache changes all three and changes nothing a judge rated.
+   */
+  fingerprint: string;
 }
 
 /**
@@ -1306,9 +1318,18 @@ export function validateReviewKeyFile(value: unknown, file: string): ReviewKeyFi
     .map((docId, index) => asString(docId, file, `documents[${index}]`));
   const judgeable = asArray(record.judgeable, file, "judgeable").map((entry, index) => {
     const pair = asObject(entry, file, `judgeable[${index}]`);
+    // Named rather than reported as a missing string: a key without fingerprints was written before
+    // they existed, and it cannot tell whether the outcomes it labelled have since been re-run —
+    // which is the one thing reuse needs it for.
+    if (pair.fingerprint === undefined) {
+      fail(file, `judgeable[${index}].fingerprint`, "is missing. This key was written before " +
+        "outcome fingerprints, so it cannot say whether the outcomes it labels have been re-run " +
+        "since. Generate a fresh report (a different --out), and a fresh judging round with it.");
+    }
     return {
       docId: asString(pair.docId, file, `judgeable[${index}].docId`),
-      runId: asString(pair.runId, file, `judgeable[${index}].runId`)
+      runId: asString(pair.runId, file, `judgeable[${index}].runId`),
+      fingerprint: asSha256(pair.fingerprint, file, `judgeable[${index}].fingerprint`)
     };
   });
 

@@ -164,6 +164,58 @@ describe("--reuse-key regenerates the same report", () => {
     expect(fs.readFileSync(paths.ratings, "utf8")).toBe(filled);
   });
 
+  it("refuses a key whose outcomes have been re-run since it was written", async () => {
+    // The reachable case, and the one the never-overwrite-a-key rule did not cover: no file is
+    // hand-edited, a re-run simply appends a replacement row for the same (document, run). The
+    // labels used to survive onto the new answers while the preserved ratings template went on
+    // describing the ones they replaced.
+    const rerun = buildReviewFixture("review-command-rerun");
+    await review(rerun, ["--blind"]);
+    const files = pathsFor(rerun, "-blind");
+    const html = fs.readFileSync(files.html, "utf8");
+    fs.writeFileSync(files.ratings, 'document,label,rating,notes\n"alpha","A","5","best"\n');
+
+    const rows = fs.readFileSync(rerun.resultsFile, "utf8").trim().split("\n").map((line) => JSON.parse(line));
+    const replaced = rows.find((row) => row.docId === "alpha" && row.status === "success")!;
+    fs.appendFileSync(rerun.resultsFile, `${JSON.stringify({
+      ...replaced, requestKey: "alpha-text-rerun",
+      response: { parsed: { category: "user", discussion: "a different answer" }, raw: {} }
+    })}\n`);
+
+    await expect(review(rerun, ["--blind", "--reuse-key"]))
+      .rejects.toThrow(/1 outcome\(s\) have been re-run since it was written/);
+    // And nothing was written: the report the judge read, and their ratings, are as they were.
+    expect(fs.readFileSync(files.html, "utf8")).toBe(html);
+    expect(fs.readFileSync(files.ratings, "utf8")).toContain('"5","best"');
+  });
+
+  it("accepts a re-run that returned the same answer, which is what the cache does", async () => {
+    // A cache hit rewrites runMeta, usage and cost while the card stays identical. Refusing that
+    // would make `--reuse-key` useless on any file that had been re-run at all.
+    const cached = buildReviewFixture("review-command-rerun-same");
+    await review(cached, ["--blind"]);
+    const files = pathsFor(cached, "-blind");
+    const html = fs.readFileSync(files.html, "utf8");
+
+    const rows = fs.readFileSync(cached.resultsFile, "utf8").trim().split("\n").map((line) => JSON.parse(line));
+    const replayed = rows.find((row) => row.docId === "alpha" && row.status === "success")!;
+    fs.appendFileSync(cached.resultsFile, `${JSON.stringify({
+      ...replayed,
+      runMeta: { ...replayed.runMeta, date: "2027-01-01T00:00:00.000Z" },
+      usage: { ...replayed.usage, source: "cache" },
+      cost: { modeledUsd: replayed.cost.modeledUsd, incurredThisRunUsd: 0 }
+    })}\n`);
+
+    await review(cached, ["--blind", "--reuse-key"]);
+    const regenerated = fs.readFileSync(files.html, "utf8");
+    // Every card, and every label on it, is where the judge left it.
+    const cards = (source: string) => source.split('<div class="card">').slice(1);
+    expect(cards(regenerated)).toEqual(cards(html));
+    // The header does move, and honestly so: the file now holds one more superseded row.
+    expect(html).toContain("1 superseded row(s)");
+    expect(regenerated).toContain("2 superseded row(s)");
+  });
+
   it("refuses a key from another corpus, experiment, mode or set of outcomes", async () => {
     const stored = JSON.parse(fs.readFileSync(paths.key, "utf8"));
     const edits: [string, unknown, RegExp][] = [

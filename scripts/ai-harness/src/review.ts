@@ -537,6 +537,28 @@ export function assertExperimentMatchesRows(
     "definition the rows were produced with, or re-run the current one into a fresh --output.");
 }
 
+/**
+ * What a label was put on: the request that was sent, what it was built from, and what came back.
+ *
+ * A (document, run) pair does not identify an outcome — a re-run appends a replacement row for the
+ * same pair. `runMeta`, `usage` and `cost` are left out on purpose: a re-run served from the cache
+ * changes all three while the card a judge read stays identical.
+ */
+function judgeableFingerprint(row: ResultRow): string {
+  if (row.status === "skipped") throw new Error("A skipped row is not judgeable");
+  return sha256Canonical({
+    requestKey: row.requestKey,
+    representation: row.representation,
+    status: row.status,
+    textPartOmitted: row.textPartOmitted === true,
+    // The answer itself, by status. `response.raw` is excluded: it carries a per-call id that
+    // differs between two calls that returned the same thing.
+    parsed: row.status === "success" ? row.response.parsed : undefined,
+    refusal: row.status === "refusal" ? row.refusal : undefined,
+    error: row.status === "error" ? row.error : undefined
+  });
+}
+
 /** The last row per (document, run) — the outcome that still stands. */
 function currentRowsByDocument(rows: ResultRow[]): Map<string, Map<string, ResultRow>> {
   const byDocument = new Map<string, Map<string, ResultRow>>();
@@ -821,7 +843,9 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
   for (const docId of docIds) {
     for (const row of rowsByDocument.get(docId)!) {
       counts[row.status] += 1;
-      if (row.status !== "skipped") judgeable.push({ docId, runId: row.runId });
+      if (row.status !== "skipped") {
+        judgeable.push({ docId, runId: row.runId, fingerprint: judgeableFingerprint(row) });
+      }
     }
   }
 
@@ -1027,6 +1051,15 @@ function pairsOf(pairs: ReviewKeyPair[]): string[] {
   return pairs.map((pair) => `${pair.docId} ${pair.runId}`).sort();
 }
 
+/** The outcomes whose row has changed since the key was written, by (document, run). */
+function movedOutcomes(key: ReviewKeyFile, facts: ReviewKeyFacts): string[] {
+  const stored = new Map(key.judgeable.map((pair) => [`${pair.docId} ${pair.runId}`, pair.fingerprint]));
+  return facts.judgeable
+    .filter((pair) => stored.get(`${pair.docId} ${pair.runId}`) !== pair.fingerprint)
+    .map((pair) => `${pair.docId}/${pair.runId}`)
+    .sort();
+}
+
 /** What a key has to agree with before it may be reused. */
 export interface ReviewKeyFacts {
   corpus: string;
@@ -1082,6 +1115,17 @@ export function assertKeyIsReusable(
   const now = pairsOf(facts.judgeable);
   if (stored.join(" ") !== now.join(" ")) {
     refuse("judgeable outcomes", `${stored.length} of them`, `${now.length}`);
+  }
+  // Same pairs, different outcomes: a re-run has replaced a row since the key was written. The
+  // labels would survive onto answers nobody rated, and the ratings template — which `--reuse-key`
+  // preserves byte for byte — would go on describing the outcomes it replaced.
+  const moved = movedOutcomes(key, facts);
+  if (moved.length > 0) {
+    throw new Error(`${keyFile} cannot be reused: ${moved.length} outcome(s) have been re-run ` +
+      `since it was written (${moved.slice(0, 3).join(", ")}${moved.length > 3 ? ", …" : ""}). ` +
+      "Its labels would sit on answers nobody has read, and any ratings collected against them " +
+      "would describe the outcomes those answers replaced. Generate a fresh report with a " +
+      "different --out.");
   }
   // The pseudonyms are numbered from the presentation order, which the document check above has
   // already pinned — but the key's own mapping is what a reader holding it will decode with, and
