@@ -169,8 +169,14 @@ These properties are configurable at the unit, investigation, or problem levels 
   // The nav tab to start on when fixedStartView is true: an ENavTab id, e.g. "class-work" or "sort-work".
   // Must be a tab that is shown for the current user, or it is ignored with a console warning. Note a
   // teacher-only tab is therefore forced for teachers and ignored for students; the authoring form only
-  // offers tabs that are shown and not teacher-only. "student-work" is not supported at all: it is group
-  // keyed and always shows the four-up, so it has no "no document open" state to start in.
+  // offers tabs that are shown and not teacher-only. Two tabs cannot be used at all:
+  //   "student-work" is group keyed and always shows the four-up, so it has no "no document open"
+  //     state to start in; it is refused outright.
+  //   "teacher-guide" resolves too late. The start view is decided once the unit and the saved UI have
+  //     loaded, but the guide is fetched on a separate path that finishes afterwards, so the tab is not
+  //     yet in the displayed list and the start view is ignored with a console warning rather than
+  //     being retried. Only hand-authored unit JSON can reach this; the authoring form filters
+  //     teacher-only tabs out of the dropdown.
   // Kept separate from the switch so turning fixedStartView off preserves the chosen tab.
   fixedStartTab?: ENavTab;
 ```
