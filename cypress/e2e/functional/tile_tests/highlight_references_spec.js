@@ -14,15 +14,64 @@ const TEXT_EDITOR = ".canvas-area .text-tool-editor";
 const TEXT_TILE = ".canvas-area .text-tool";
 const VARIABLE_CHIP = ".slate-variable-chip";
 
+// The sketch tile draws its emphasis as an SVG rect rather than with a class on the object, so
+// these select the ring itself. data-object-id names which object the ring belongs to, which is
+// what lets the spec assert that the right chip lit up rather than merely that something did.
+// (`.slate-variable-chip` is slate-only, so it never matches the sketch's own variable chips.)
+const SKETCH_TILE = ".canvas-area .drawing-tool";
+const HIGHLIGHT_BOX = "[data-testid=highlight-reference-box]";
+const EMG_SKETCH_BOX = `${HIGHLIGHT_BOX}[data-object-id=emgSketchChip]`;
+const GRIPPER_SKETCH_BOX = `${HIGHLIGHT_BOX}[data-object-id=gripperSketchChip]`;
+// A plain shape, carrying no variable and reachable by no chip. Only an `object` reference names it.
+const SKETCH_RECT_BOX = `${HIGHLIGHT_BOX}[data-object-id=emgSketchRect]`;
+const SKETCH_TILE_ID = "emgSketch1";
+const SKETCH_RECT_ID = "emgSketchRect";
+
 // The demo document ships an authored variable chip, so this spec never has to drive the
 // Insert Variable dialog — the starting state is deterministic.
+// noStorage=true is load-bearing, not tidiness. Without it the doc-editor restores a document
+// from sessionStorage and creates a model from it (doc-editor-app.tsx:32-42), then REPLACES that
+// model once the `document=` param finishes loading. Tile types that register lazily — Drawing is
+// one — can end up bound to the superseded instance while the eagerly-present tiles move to the
+// new one, leaving two document-content instances in a single pane. Cross-tile ephemeral state
+// (highlight refs are volatile, per-document) then cannot travel between them: hovering the text
+// chip highlights the Dataflow node and does nothing to the sketch.
+//
+// Cypress starts with clean session storage, so this passes either way — which is exactly the
+// problem. A developer running the same URL in a browser they have been using all day hits the
+// stale document and sees the feature do nothing. Pin it here so the spec depends on a stated
+// condition rather than an accident of the runner.
 const documentUrl = "/editor/?appMode=qa&unit=./demo/units/qa/content.json" +
-  "&document=./demo/docs/emg-highlight-demo.json";
+  "&noStorage=true&document=./demo/docs/emg-highlight-demo.json";
+
+// The doc-editor renders the document in up to three panes: the editable one plus a Read Only
+// Local and a Read Only Remote (emulated) copy, gated by these settings (doc-editor-settings.ts,
+// consumed at doc-editor-app.tsx:290-298). Both default to true.
+//
+// Turn them off. They are not merely redundant renderings — the remote copy is REBUILT from a
+// snapshot on every document change (`setRemoteDocument(createDocumentModelWithEnv(...))`,
+// doc-editor-app.tsx:80), and this fixture runs a Simulator that writes variable values
+// continuously, so that pane mints a fresh document-content instance over and over. Tiles in
+// different copies are therefore in different MST trees with their own volatile state, and a
+// highlight set from a chip in one copy can never reach a tile in another.
+//
+// Left on, this spec passed while the feature did nothing in the pane a human was watching:
+// unscoped selectors are satisfied by a ring in any copy. One pane makes every assertion here
+// unambiguous.
+const kDocEditorSettings = JSON.stringify({
+  showLocalReadOnly: false, showRemoteReadOnly: false, minimalAISummary: false
+});
 
 context("Highlight references", () => {
   beforeEach(() => {
-    cy.visit(documentUrl);
+    cy.visit(documentUrl, {
+      onBeforeLoad(win) {
+        win.localStorage.setItem("clue-doc-editor-settings", kDocEditorSettings);
+      }
+    });
     cy.get(SENSOR_NODE).should("exist");   // the document has finished loading
+    // One copy only, so any later count of 1 is meaningful rather than an artifact of `.first()`.
+    cy.get(TEXT_EDITOR).should("have.length", 1);
   });
 
   it("previews highlighted Dataflow nodes on chip hover and pins them on click", () => {
@@ -100,6 +149,82 @@ context("Highlight references", () => {
     cy.get(SENSOR_NODE).first().should("have.class", "highlight-pinned");
   });
 
+  // The sketch tile is a highlight target reached by the SAME variable reference that drives the
+  // Dataflow nodes — its variable chips store a variableId, so the existing text chip lights them
+  // with no new source and no changes to the highlight machinery.
+  //
+  // The fixture's second sketch chip (Gripper) is load-bearing: the point of the feature is to
+  // direct attention to one specific thing, so a reference that lit every variable chip would be
+  // a failure rather than an enhancement. Asserting it stays dark is what proves that.
+  it("previews the sketch chip bound to the same variable, and only that chip", () => {
+    cy.get(SKETCH_TILE).should("exist");
+    cy.get(TEXT_EDITOR).first().find(VARIABLE_CHIP).first().as("chip");
+
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+
+    // mouseover/mouseout rather than mouseenter/mouseleave, for the React reason documented above.
+    cy.get("@chip").trigger("mouseover");
+    cy.get(EMG_SKETCH_BOX).should("have.class", "preview");
+    // Assert the computed stroke, not just the class. The ring's color comes from CSS while its
+    // geometry is inline, so a class assertion alone would pass with the rule not reaching the
+    // rect at all — leaving a ring that is in the DOM and invisible. $highlight-preview-ring.
+    cy.get(EMG_SKETCH_BOX).should("have.css", "stroke", "rgb(120, 140, 255)");
+    cy.get(GRIPPER_SKETCH_BOX).should("not.exist");
+
+    cy.get("@chip").trigger("mouseout");
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+
+    // Click pins, and it survives moving the mouse away.
+    cy.get("@chip").click();
+    cy.get("@chip").trigger("mouseout");
+    cy.get(EMG_SKETCH_BOX).should("have.class", "pinned");
+    cy.get(GRIPPER_SKETCH_BOX).should("not.exist");
+
+    // Clicking again unpins.
+    cy.get("@chip").click();
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+  });
+
+  // The `object` reference kind is what an AI source emits: a tileId and an objectId, naming one
+  // thing directly rather than resolving through a variable. Every other test here drives the
+  // `variable` kind from a text chip, which reaches sketch objects only because a variable chip
+  // stores a variableId — so none of them touch a shape, and none of them exercise `object` at all.
+  //
+  // Without this test the sketch tile is only demonstrated as a target for variable references,
+  // which is a different claim from the one that matters: that a reference can point at any
+  // drawing object. The rectangle carries no variable, so nothing in the UI can name it.
+  //
+  // The reference is set on the document model because no UI source constructs an `object`
+  // reference yet. That is the point of the test, not a shortcut around one: the rendering path
+  // is meant to be kind-agnostic, and this is the only way to prove it before an AI source exists.
+  it("highlights a plain shape from an object reference, which no chip can name", () => {
+    cy.get(SKETCH_TILE).should("exist");
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+
+    // The document is exposed by DocEditorApp; see the note there on why it tracks replacements.
+    cy.window().then(win => {
+      const content = win.currentDocument.content;
+      expect(content.tileMap.has(SKETCH_TILE_ID), "fixture still has the sketch tile").to.be.true;
+      content.setPinnedHighlightRef({
+        kind: "object", tileId: SKETCH_TILE_ID, objectId: SKETCH_RECT_ID
+      });
+    });
+
+    cy.get(SKETCH_RECT_BOX).should("have.class", "pinned");
+    // Same reason the variable test asserts the computed stroke: the class alone would pass with
+    // the CSS never reaching the rect, leaving a ring that is in the DOM and invisible.
+    cy.get(SKETCH_RECT_BOX).should("have.css", "stroke", "rgb(107, 35, 252)");  // $highlight-pinned-ring
+
+    // Only the named object. A reference that lit the whole tile would satisfy a bare
+    // "something is highlighted" assertion while being useless as guidance.
+    cy.get(HIGHLIGHT_BOX).should("have.length", 1);
+    cy.get(EMG_SKETCH_BOX).should("not.exist");
+    cy.get(GRIPPER_SKETCH_BOX).should("not.exist");
+
+    cy.window().then(win => win.currentDocument.content.clearPinnedHighlightRef());
+    cy.get(HIGHLIGHT_BOX).should("not.exist");
+  });
+
   // Guards against a regression from wiring hover/click handlers onto the chip (a Slate inline
   // void element) inside the text tile's contentEditable: those handlers must not interfere
   // with normal Slate typing/selection behavior around the chip.
@@ -133,9 +258,6 @@ context("Highlight references", () => {
   //
   // This needs a real Slate unmount, which is why it lives here rather than in a unit test.
   it("releases a pinned highlight when its chip is deleted", () => {
-    // The /editor/ route renders the document more than once, so scope the interaction to one
-    // editor. The assertions below still check every rendering: all of them read the same
-    // content model, so deleting the chip must clear it from all of them.
     cy.get(TEXT_EDITOR).first().as("editor");
     cy.get("@editor").find(VARIABLE_CHIP).first().as("chip");
 
@@ -147,14 +269,21 @@ context("Highlight references", () => {
     // Clicking the chip alone will not focus anything — it is contentEditable={false}.
     cy.wait(500);
     cy.get(TEXT_TILE).first().focus();
-    cy.get("@editor").click("left");
 
-    // Select the whole paragraph and delete, rather than walking the caret to the chip. An
-    // earlier version pressed End then Backspace, which passed locally and failed in CI: End
-    // goes to the end of the *visual* line, and CI's viewport wraps this paragraph differently,
-    // so Backspace ate a character of the prose instead of the chip. Selecting everything is
-    // independent of both wrapping and caret position.
-    cy.realPress([Cypress.platform === "darwin" ? "Meta" : "Control", "a"]);
+    // Triple-click the paragraph to select it, then delete. Two rejected alternatives, both of
+    // which produced green-looking runs that proved nothing:
+    //
+    // - End then Backspace walks the caret to the chip, but End goes to the end of the *visual*
+    //   line, so it passed locally and ate a character of prose under CI's narrower viewport.
+    // - Cmd+A is ambiguous about scope. Depending on whether focus settled on the tile or inside
+    //   Slate it either selects nothing (the chip survives and the test fails) or selects every
+    //   tile in the document (the Dataflow tile is deleted too, so the assertions below cannot
+    //   run at all).
+    //
+    // A triple-click selects exactly this paragraph, independent of wrapping and of which
+    // element ended up focused. force:true gets past CLUE's absolutely-positioned
+    // `.tool-tile-drag-handle`, which overlays the tile's corner.
+    cy.get("@editor").find("p").first().click({ clickCount: 3, force: true });
     cy.realPress("Backspace");
 
     cy.get(VARIABLE_CHIP).should("not.exist");
