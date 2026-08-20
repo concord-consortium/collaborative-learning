@@ -204,11 +204,26 @@ Firestore path:
 |---|---|
 | `authed/<portal>/documents/…` | `/authed/portals/<portal>/classes` |
 | `demo/<name>/documents/…` | `/demo/<name>/portals/demo/classes` |
-| `qa`/`dev`/`test` `/<uid>/documents/…` | none — skipped, see `skippedTestPartition` |
+| `qa/<rootId>/documents/…` | `/qa/<rootId>/portals/qa/classes` |
+| `dev/<rootId>/documents/…` | `/dev/<rootId>/portals/localhost/classes` |
+| `test/<rootId>/documents/…` | not derivable — reports as `unknownSpace` |
 
-The portal segment is already underscore-escaped in the Firestore path, so it is used as-is. The
-partition roots are keyed by *user id* rather than by portal, which is why they cannot be treated as
-just another space.
+The portal segment is already underscore-escaped in the Firestore path, so it is used as-is.
+
+Both stores build their root from the same `getRootId` (`src/lib/root-id.ts`), so a Firestore root of
+`<appMode>/<rootId>` maps to an RTDB root of `<appMode>/<rootId>/portals/<portal>` — `authed` being
+the exception, omitting the rootId because the portal already identifies it.
+
+The catch is that `<portal>` is **not in the Firestore path**, and for the unsecured appModes it comes
+from the user's portal rather than from the root. Sampling production settles two of them: every `dev`
+root uses `localhost` and every `qa` root uses `qa`. `test` takes an arbitrary portal string, so its
+path genuinely cannot be derived — it reports as `unknownSpace` rather than being guessed at, and
+production currently has no `test` documents at all.
+
+These roots are keyed by an ephemeral per-session user id, so they are numerous and thin: production
+carries roughly 7,200 distinct `qa`/`dev` roots for about 13,400 documents. Many have had their RTDB
+side purged by `scripts/delete-qa-user-data.ts`, so expect a high `noMetadataNode` share there and
+read the per-space lines rather than the totals when judging how the run went.
 
 ### One RTDB read per document, run concurrently
 
@@ -241,17 +256,16 @@ that bucket:
 | `nodeWithoutOfferingId` | The node exists, but has no `offeringId` field |
 | `unusableDocument` | No `context_id`, `uid`, or `key` to look up with |
 | `unknownSpace` | Firestore path matched no known space shape |
-| `skippedTestPartition` | A `qa`/`dev`/`test` appMode partition — scratch data, out of scope |
+| `keyNotRtdbSafe` | A path segment holds a character the RTDB forbids, so no lookup is possible |
 | `skippedClassWide` | `group`- or `axes`-typed with no `groupId` — correctly has no offering |
 | `lookupError` | The RTDB read threw |
 
-`skippedTestPartition` is asked **first**, ahead of every other question, because it is about scope
-rather than about the document: a scratch partition's documents are not ours to repair whatever else
-is true of them. It exists because a staging census found 68 `qa` and 46 `dev` documents — over half
-the run — and those roots are keyed by user id rather than by portal, so they match no portal space.
-Without a bucket of their own they would report as an unrecognized path shape, which reads as an
-anomaly to investigate rather than as scratch data. Keeping the two apart is what lets a non-zero
-`unknownSpace` mean "look at this".
+`keyNotRtdbSafe` exists because a production census turned up curriculum-authored supports whose
+document key is a human-readable string — `2.2 Initial Challenge Support 1` — and `.` is illegal in an
+RTDB path. Those lookups throw. Left to the lookup they land in `lookupError`, which reads as
+transient and retryable when in fact they can never succeed. Deciding it up front keeps `lookupError`
+meaning "something went wrong that might not next time", and keeps the unrecoverable residue honestly
+described.
 
 Counted per type and per space.
 

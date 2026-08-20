@@ -61,6 +61,15 @@ export interface IFirestoreSpace {
  * Derive a document's space from its Firestore path. A collection-group query reaches every collection
  * named `documents` anywhere in the database, so an unrecognized root is a real possibility and gets
  * counted rather than guessed at.
+ *
+ * Both stores build their root from the same `getRootId` (src/lib/root-id.ts), so a Firestore root of
+ * `<appMode>/<rootId>` corresponds to an RTDB root of `<appMode>/<rootId>/portals/<portal>` — except
+ * for `authed`, which omits the rootId because the portal already identifies it.
+ *
+ * The portal segment is the catch: it is not in the Firestore path, and for the unsecured appModes it
+ * comes from the user's portal rather than from the root. `dev` and `qa` are fixed in practice
+ * (`localhost` and `qa`, confirmed against production), but `test` takes an arbitrary portal string
+ * and so cannot be derived — a `test` document reports as an unknown space, which is the honest answer.
  */
 export function getSpaceFromFirestorePath(docPath: string): IFirestoreSpace | undefined {
   const [root, name, collection] = docPath.split("/");
@@ -72,21 +81,14 @@ export function getSpaceFromFirestorePath(docPath: string): IFirestoreSpace | un
   if (root === "demo") {
     return { label: `demo/${name}`, firebaseBasePath: `/demo/${name}/portals/demo/classes` };
   }
+  // Keyed by an ephemeral per-session user id rather than by portal, so each root holds only a
+  // handful of documents and many have had their RTDB side purged by delete-qa-user-data.ts — expect
+  // a high noMetadataNode share here, and read the per-space lines rather than the totals.
+  const partitionPortal = { qa: "qa", dev: "localhost" }[root];
+  if (partitionPortal) {
+    return { label: `${root}/${name}`, firebaseBasePath: `/${root}/${name}/portals/${partitionPortal}/classes` };
+  }
   return undefined;
-}
-
-/**
- * The Firestore roots holding data for the unsecured `appMode` partitions, keyed by user id rather
- * than by portal. These are scratch spaces — scripts/delete-qa-user-data.ts exists to purge one of
- * them — so their documents are out of scope entirely rather than merely unrecognized.
- */
-const kTestPartitionRoots = ["qa", "dev", "test"];
-
-/** The partition root a path belongs to, or undefined if it is not one of them. */
-export function getTestPartitionLabel(docPath: string): string | undefined {
-  const [root, name, collection] = docPath.split("/");
-  if (!name || collection !== "documents") return undefined;
-  return kTestPartitionRoots.includes(root) ? root : undefined;
 }
 
 /** A document whose root matches nothing known still needs a label to be counted under. */
@@ -94,7 +96,19 @@ export const kUnknownSpaceLabel = "unknown";
 
 /** How a scanned document is reported in the per-space tallies. */
 export function getSpaceLabel(docPath: string): string {
-  return getSpaceFromFirestorePath(docPath)?.label ?? getTestPartitionLabel(docPath) ?? kUnknownSpaceLabel;
+  return getSpaceFromFirestorePath(docPath)?.label ?? kUnknownSpaceLabel;
+}
+
+/**
+ * Firebase rejects these characters in a Realtime Database path, so a document whose key contains one
+ * can never be looked up — the failure is permanent, not transient. Curriculum-authored supports carry
+ * human-readable keys like "2.2 Initial Challenge Support 1", which is how this arises.
+ */
+const kRtdbIllegal = /[.#$\[\]/]/;
+
+/** Whether every path segment the lookup would build from this document is legal in the RTDB. */
+export function isRtdbAddressable(contextId: string, uid: string, key: string): boolean {
+  return ![contextId, uid, key].some((segment) => kRtdbIllegal.test(segment));
 }
 
 /** Every outcome a scanned document can be counted under. */
@@ -105,13 +119,12 @@ export type CountedBucket =
   | "nodeWithoutOfferingId"
   | "unusableDocument"
   | "unknownSpace"
-  | "skippedTestPartition"
+  | "keyNotRtdbSafe"
   | "skippedClassWide"
   | "lookupError";
 
-// `spaceLabel` travels with the classification so the path is parsed once. Deriving it again at the
-// counting site is what let a qa/dev document be counted under a bucket that says nothing is wrong
-// while being labelled as belonging to no known space.
+// `spaceLabel` travels with the classification so the path is parsed once, and so a counted document
+// can never be labelled with a different space than the one its classification was decided from.
 export type Classification =
   | { kind: "counted"; bucket: CountedBucket; spaceLabel: string }
   | { kind: "lookup"; space: IFirestoreSpace; contextId: string; uid: string; key: string };
@@ -128,10 +141,6 @@ const isGenericAxesType = (type: unknown) => type === "group" || type === "axes"
 export function classifyDocument(data: any, docPath: string): Classification {
   const spaceLabel = getSpaceLabel(docPath);
   const counted = (bucket: CountedBucket): Classification => ({ kind: "counted", bucket, spaceLabel });
-  // Asked first because it is a scope question rather than a property of the document: a scratch
-  // partition's documents are not ours to repair whatever else is true of them, and reporting them
-  // under any other bucket overstates how much real data the run covered.
-  if (getTestPartitionLabel(docPath)) return counted("skippedTestPartition");
   // A generic axes document with no groupId is class-wide: class-unit-contained, correctly without an
   // offering. Writing one would corrupt the guard this script exists to make safe.
   if (isGenericAxesType(data?.type) && !data?.groupId) return counted("skippedClassWide");
@@ -142,6 +151,9 @@ export function classifyDocument(data: any, docPath: string): Classification {
   const uid = data?.uid;
   const key = data?.key;
   if (!contextId || !uid || !key) return counted("unusableDocument");
+  // Decided here rather than left to the lookup, so a permanently unaddressable document is reported
+  // as such instead of as a lookupError, which reads as transient and retryable.
+  if (!isRtdbAddressable(contextId, uid, key)) return counted("keyNotRtdbSafe");
   return { kind: "lookup", space, contextId, uid, key };
 }
 
@@ -158,7 +170,7 @@ export interface IBackfillOfferingIdResult {
 
 const kAllBuckets: CountedBucket[] = [
   "resolved", "alreadySet", "noMetadataNode", "nodeWithoutOfferingId",
-  "unusableDocument", "unknownSpace", "skippedTestPartition", "skippedClassWide", "lookupError"
+  "unusableDocument", "unknownSpace", "keyNotRtdbSafe", "skippedClassWide", "lookupError"
 ];
 
 const emptyCounts = (): IBucketCounts =>

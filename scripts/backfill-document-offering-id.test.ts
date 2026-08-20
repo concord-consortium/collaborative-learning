@@ -1,5 +1,5 @@
 import {
-  classifyDocument, getSpaceFromFirestorePath, getSpaceLabel, getTestPartitionLabel,
+  classifyDocument, getSpaceFromFirestorePath, getSpaceLabel, isRtdbAddressable,
   kOfferingContainedTypes, parsePageSize, parseTypes
 } from "./backfill-document-offering-id";
 import { backfillDocumentOfferingId } from "./backfill-document-offering-id";
@@ -46,21 +46,19 @@ describe("getSpaceFromFirestorePath", () => {
   });
 });
 
-describe("getTestPartitionLabel", () => {
-  it("names the unsecured appMode partitions", () => {
-    // A staging census found 68 qa and 46 dev documents. They are keyed by user id rather than
-    // portal, so they match no portal space, and without this they would be reported as an
-    // unrecognized path shape — an anomaly worth investigating rather than scratch data.
-    expect(getTestPartitionLabel("qa/1kACXbrVxTZ0GSAIhSNcnu8C4zi1/documents/abc")).toBe("qa");
-    expect(getTestPartitionLabel("dev/01R1IX5dp0NhTgPCWfgYiyCQ5rt2/documents/abc")).toBe("dev");
-    expect(getTestPartitionLabel("test/someuid/documents/abc")).toBe("test");
+describe("isRtdbAddressable", () => {
+  it("accepts the ordinary push-id shaped segments", () => {
+    expect(isRtdbAddressable("58de0784", "user-1", "-OXiK3RdodVskcYgwaAx")).toBe(true);
   });
 
-  it("does not claim real spaces or unrecognized shapes", () => {
-    expect(getTestPartitionLabel("authed/learn_concord_org/documents/abc")).toBeUndefined();
-    expect(getTestPartitionLabel("demo/CLUE/documents/abc")).toBeUndefined();
-    expect(getTestPartitionLabel("nosuchroot/x/documents/abc")).toBeUndefined();
-    expect(getTestPartitionLabel("qa/x/other/abc")).toBeUndefined();
+  it("rejects any segment carrying a character the RTDB forbids in a path", () => {
+    // Curriculum-authored supports carry human-readable keys like this one, which production has.
+    expect(isRtdbAddressable("c1", "curriculum", "2.2 Initial Challenge Support 1")).toBe(false);
+    for (const bad of [".", "#", "$", "[", "]", "/"]) {
+      expect(isRtdbAddressable("c1", "u1", `key${bad}x`)).toBe(false);
+      expect(isRtdbAddressable(`ctx${bad}`, "u1", "k1")).toBe(false);
+      expect(isRtdbAddressable("c1", `uid${bad}`, "k1")).toBe(false);
+    }
   });
 });
 
@@ -106,7 +104,7 @@ describe("getSpaceLabel", () => {
   it("labels every root shape, falling back to unknown", () => {
     expect(getSpaceLabel("authed/learn_concord_org/documents/abc")).toBe("authed/learn_concord_org");
     expect(getSpaceLabel("demo/CLUE/documents/abc")).toBe("demo/CLUE");
-    expect(getSpaceLabel("qa/someuid/documents/abc")).toBe("qa");
+    expect(getSpaceLabel("qa/someuid/documents/abc")).toBe("qa/someuid");
     expect(getSpaceLabel("nosuchroot/x/documents/abc")).toBe("unknown");
   });
 });
@@ -148,16 +146,36 @@ describe("classifyDocument", () => {
     )).toEqual({ kind: "counted", bucket: "skippedClassWide", spaceLabel: kLabel });
   });
 
-  it("skips a test-partition document whatever else is true of it", () => {
-    // Asked before every other question, because a scratch partition's documents are out of scope
-    // regardless of their contents. Each of these would otherwise land in a different bucket.
-    expect(classifyDocument(problem, "qa/someuid/documents/abc"))
-      .toEqual({ kind: "counted", bucket: "skippedTestPartition", spaceLabel: "qa" });
-    expect(classifyDocument({ ...problem, offeringId: "2001" }, "dev/someuid/documents/abc"))
-      .toEqual({ kind: "counted", bucket: "skippedTestPartition", spaceLabel: "dev" });
-    expect(classifyDocument({ type: "axes", context_id: "c", uid: "class_hash", key: "k" },
-      "test/someuid/documents/abc"))
-      .toEqual({ kind: "counted", bucket: "skippedTestPartition", spaceLabel: "test" });
+  it("sends qa and dev documents to the lookup, with their own RTDB roots", () => {
+    // Both stores derive their root from the same getRootId, so the Firestore root id is also the
+    // RTDB root id. The portal segment is not in the path and differs per appMode: dev uses
+    // "localhost" and qa uses "qa", both confirmed against production.
+    expect(classifyDocument(problem, "qa/someuid/documents/abc")).toEqual({
+      kind: "lookup",
+      space: { label: "qa/someuid", firebaseBasePath: "/qa/someuid/portals/qa/classes" },
+      contextId: "class-1", uid: "user-1", key: "doc-1"
+    });
+    expect(classifyDocument(problem, "dev/someuid/documents/abc")).toEqual({
+      kind: "lookup",
+      space: { label: "dev/someuid", firebaseBasePath: "/dev/someuid/portals/localhost/classes" },
+      contextId: "class-1", uid: "user-1", key: "doc-1"
+    });
+  });
+
+  it("reports a test-mode document as an unknown space rather than guessing its portal", () => {
+    // `test` takes an arbitrary portal string, so its RTDB path genuinely cannot be derived from the
+    // Firestore path. Guessing would send lookups to a path that does not exist and report the
+    // results as missing metadata.
+    expect(classifyDocument(problem, "test/someuid/documents/abc"))
+      .toEqual({ kind: "counted", bucket: "unknownSpace", spaceLabel: "unknown" });
+  });
+
+  it("reports a key the RTDB cannot address instead of letting the lookup throw", () => {
+    // Production carries curriculum supports keyed like this. The failure is permanent, so filing it
+    // under lookupError — which reads as transient and retryable — would misdescribe the residue.
+    expect(classifyDocument(
+      { ...problem, uid: "curriculum", key: "2.2 Initial Challenge Support 1" }, kPath
+    )).toEqual({ kind: "counted", bucket: "keyNotRtdbSafe", spaceLabel: kLabel });
   });
 
   it("sends a group-scoped document to the lookup under either generic type value", () => {
@@ -419,7 +437,7 @@ describe("backfillDocumentOfferingId — writing", () => {
       mkDoc(`${kSpace}/documents/b`, { type: "problem", offeringId: "9", context_id: "c1", uid: "u1", key: "k2" }),
       mkDoc(`${kSpace}/documents/c`, { type: "problem", uid: "u1", key: "k3" }),
       mkDoc("nosuchroot/x/documents/d", { type: "problem", context_id: "c1", uid: "u1", key: "k4" }),
-      mkDoc("qa/x/documents/e", { type: "problem", context_id: "c1", uid: "u1", key: "k5" })
+      mkDoc(`${kSpace}/documents/e`, { type: "problem", context_id: "c1", uid: "curriculum", key: "2.2 Support 1" })
     ];
     const db = makeDb({ problem: docs });
     const res = await run(db, makeRtdb({}), { dryRun: false });
@@ -430,9 +448,7 @@ describe("backfillDocumentOfferingId — writing", () => {
     expect(res.totals.alreadySet).toBe(1);
     expect(res.totals.unusableDocument).toBe(1);
     expect(res.totals.unknownSpace).toBe(1);
-    expect(res.totals.skippedTestPartition).toBe(1);
-    // The test partition is labelled as itself, not lumped in with genuinely unrecognized paths.
-    expect(res.bySpace.qa.skippedTestPartition).toBe(1);
+    expect(res.totals.keyNotRtdbSafe).toBe(1);
     expect(res.bySpace.unknown.unknownSpace).toBe(1);
     // Every scanned document is counted exactly once, so a miscounted bucket cannot hide.
     const summed = Object.values(res.totals).reduce((a, b) => a + b, 0);
