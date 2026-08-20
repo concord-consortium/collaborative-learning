@@ -1,4 +1,5 @@
 import {parseTutorReply} from "../src/chat/openai";
+import {buildAssistantDoc} from "../src/chat/drain";
 
 describe("parseTutorReply", () => {
   it("reads userText and highlights", () => {
@@ -49,5 +50,24 @@ describe("parseTutorReply", () => {
       ],
     }));
     expect(reply.highlights).toEqual([{tileId: "t1", objectId: "n1", label: "ok"}]);
+  });
+});
+
+describe("buildAssistantDoc", () => {
+  const owner = {uid: "u1", context_id: "c1"};
+
+  it("carries highlights when there are any", () => {
+    const doc = buildAssistantDoc(
+      {userText: "look here", highlights: [{tileId: "t1", objectId: "n1", label: "the sensor"}]},
+      owner);
+    expect(doc.kind).toBe("assistant");
+    expect(doc.userText).toBe("look here");
+    expect(doc.highlights).toEqual([{tileId: "t1", objectId: "n1", label: "the sensor"}]);
+    expect(doc.uid).toBe("u1");
+  });
+
+  it("omits the field entirely when there are none", () => {
+    const doc = buildAssistantDoc({userText: "hi", highlights: []}, owner);
+    expect("highlights" in doc).toBe(false);
   });
 });
