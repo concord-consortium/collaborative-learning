@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   BuildReviewOptions, ReviewModel, ReviewModes, assertExperimentMatchesRows, blindLabelsFor,
-  assertKeyIsReusable, buildReviewModel, escapeHtml, labelForIndex, ratingsTemplateCsv,
+  assertKeyIsReusable, buildReviewModel, compareLabels, escapeHtml, labelForIndex, ratingsTemplateCsv,
   renderReviewHtml, reviewKeyFactsOf, reviewKeyFileFor, reviewOutputPathFor, reviewSidecarPaths
 } from "../src/review.js";
 import { representationPath } from "../src/corpus.js";
@@ -597,6 +597,45 @@ describe("blind labels", () => {
   it("counts past Z rather than running out", () => {
     expect([0, 1, 25, 26, 27, 51, 52].map(labelForIndex))
       .toEqual(["A", "B", "Z", "AA", "AB", "AZ", "BA"]);
+  });
+
+  it("sorts the way it issues, which plain lexicographic ordering does not", () => {
+    const issued = Array.from({ length: 30 }, (_, index) => labelForIndex(index));
+    expect([...issued].sort(compareLabels)).toEqual(issued);
+    // What the report used to do: `AA` lands immediately after `A`.
+    expect([...issued].sort((a, b) => a.localeCompare(b))).not.toEqual(issued);
+    expect(["B", "AA", "A", "Z", "AB"].sort(compareLabels)).toEqual(["A", "B", "Z", "AA", "AB"]);
+  });
+
+  it("keeps a document with more than 26 outcomes in issued order, page and template alike", () => {
+    // 27 runs over one document: the case where the ordering rule stops being academic.
+    const fixture = buildReviewFixture("review-many-labels");
+    const template = fixture.rows.find(
+      (row) => row.docId === "alpha" && row.status === "success")!;
+    const runIds = Array.from({ length: 27 }, (_, index) => `zz-run-${String(index).padStart(2, "0")}`);
+    const experiment = {
+      ...fixture.experiment,
+      runs: runIds.map((id) => ({
+        id, message: "text-only" as const, textVariant: "default", extras: "all" as const,
+        prompt: "categorize-design-default"
+      }))
+    };
+    const rows = runIds.map((runId) => ({
+      ...template, runId, requestKey: `alpha-${runId}`
+    })) as ResultRow[];
+    const model = buildReviewModel({
+      rows, resultsFile: fixture.resultsFile, experiment, experimentSha256: fixture.experimentSha256,
+      paths: fixture.paths, now: kNow, modes: { shareable: false, blind: true }, seed: kSeed
+    });
+
+    const expected = Array.from({ length: 27 }, (_, index) => labelForIndex(index));
+    expect(expected[26]).toBe("AA");
+    expect(model.documents[0].cards.map((card) => card.label)).toEqual(expected);
+    const rendered = [...renderReviewHtml(model)
+      .matchAll(/<span class="card-title">([A-Z]+)<\/span>/g)].map((match) => match[1]);
+    expect(rendered).toEqual(expected);
+    expect(ratingsTemplateCsv(model).trim().split("\n").slice(1)
+      .map((line) => line.split(",")[1].replace(/"/g, ""))).toEqual(expected);
   });
 
   it("depends on the seed, the document and the run", () => {

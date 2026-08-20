@@ -303,7 +303,11 @@ export interface ReviewModel {
 // Blind ordering
 // ---------------------------------------------------------------------------
 
-/** `A`…`Z`, then `AA`, `AB`… — enough labels for any run list, in an order a reader can follow. */
+/**
+ * `A`…`Z`, then `AA`, `AB`… — enough labels for any run list, in an order a reader can follow.
+ *
+ * Sort them with `compareLabels`, never with `localeCompare` alone: see below.
+ */
 export function labelForIndex(index: number): string {
   let label = "";
   let remaining = index;
@@ -312,6 +316,18 @@ export function labelForIndex(index: number): string {
     remaining = Math.floor(remaining / 26) - 1;
     if (remaining < 0) return label;
   }
+}
+
+/**
+ * Orders labels the way `labelForIndex` issues them.
+ *
+ * Plain lexicographic ordering is wrong past `Z`: it puts `AA` immediately after `A`, so a document
+ * with more than 26 outcomes would render `A, AA, AB, …, B`. Length first, because the labels are
+ * bijective base-26 and their length rises with the index, so length-then-lexicographic *is* index
+ * order. It lives here rather than at the sort, so the sequence and its ordering cannot drift apart.
+ */
+export function compareLabels(a: string, b: string): number {
+  return a.length - b.length || a.localeCompare(b);
 }
 
 /**
@@ -822,7 +838,7 @@ export function buildReviewModel(options: BuildReviewOptions): ReviewModel {
       });
       // Presented in label order. Leaving them in experiment order with shuffled letters attached
       // would hand the mapping straight back to anyone who knows the run list.
-      cards.sort((a, b) => a.label!.localeCompare(b.label!));
+      cards.sort((a, b) => compareLabels(a.label!, b.label!));
       // A document with nothing to judge gets no entry at all, rather than an empty one: the key
       // maps labels, and there are no labels here.
       if (labelByRun.size > 0) {
