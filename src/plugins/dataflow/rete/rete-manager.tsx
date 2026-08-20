@@ -100,7 +100,7 @@ export class ReteManager implements INodeServices {
 
   constructor(
     private mstProgram: DataflowProgramModelType,
-    private tileId: string,
+    public readonly tileId: string,
     div: HTMLElement,
     public mstContent: DataflowContentModelType,
     public stores: IStores,

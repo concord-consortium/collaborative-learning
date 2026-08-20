@@ -195,6 +195,20 @@ export const TextContentModel = TileContentModel
       });
       return objects;
     },
+    /**
+     * Contributes this tile's variable chips as highlight targets, so a variable reference from
+     * elsewhere in the document resolves to them and the chip can render its own emphasis. See
+     * docs/highlights.md.
+     */
+    getObjectsForVariable(variableId: string): IClueTileObject[] {
+      const objects: IClueTileObject[] = [];
+      getAllTextPluginInfos().forEach(info => {
+        if (info?.getObjectsForVariable) {
+          objects.push(...info.getObjectsForVariable(self, variableId));
+        }
+      });
+      return objects;
+    },
   }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;

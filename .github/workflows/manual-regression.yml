@@ -50,6 +50,7 @@ on:
           - functional/tile_tests/expression_tool_spec.js
           - functional/tile_tests/geometry_tool_spec.js
           - functional/tile_tests/geometry_table_integraton_test_spec.js
+          - functional/tile_tests/highlight_references_spec.js
           - functional/tile_tests/image_tool_spec.js
           - functional/tile_tests/numberline_tool_spec.js
           - functional/tile_tests/shared_dataset_spec.js
@@ -87,6 +88,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      # The container image ships node 20.11.0, which no longer satisfies package.json's
+      # engines ("^20.19.0 || ^22.13.0 || >=24"), so `npm ci` aborts with ERR!notsup before
+      # any test runs. ci-regression.yml already installs a current node 20.x this way.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
       - name: Set the browser
         env:
           DEFAULT_BROWSER: chrome
@@ -141,6 +151,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      # The container image ships node 20.11.0, which no longer satisfies package.json's
+      # engines ("^20.19.0 || ^22.13.0 || >=24"), so `npm ci` aborts with ERR!notsup before
+      # any test runs. ci-regression.yml already installs a current node 20.x this way.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
       - name: Set the browser
         env:
           DEFAULT_BROWSER: chrome

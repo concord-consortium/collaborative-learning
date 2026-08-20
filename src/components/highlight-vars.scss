@@ -1,0 +1,19 @@
+// Emphasis colors for the ephemeral highlight system — see docs/highlights.md.
+//
+// One definition shared by every target tile, so the same reference reads the same way wherever it
+// lands: a Dataflow node and a sketch variable chip highlighted by the same reference should not
+// look like two different features. Import this partial rather than redefining the values locally.
+//
+// Preview (hover) reads lighter than pinned (click) so a hover does not look like a commitment.
+//
+// $highlight-preview-ring deliberately is NOT dataflow's $input-purple (#a5b2ff): that is the input
+// nodes' own fill color and measures 2.02:1 against a white canvas, below WCAG 1.4.11's 3:1 minimum
+// for a non-text state indicator. This is the nearest accessible neighbor in the same hue family,
+// at exactly 3.0:1.
+//
+// Known limitation, tracked separately for design: $highlight-pinned-ring is also the value of
+// dataflow's $input-purple-outline, which is the Sensor node's own border color — so on that one
+// node a pinned ring reads as a thicker border rather than as emphasis. Picking an emphasis color
+// that reads as emphasis across every node family is a design decision, not a code one.
+$highlight-preview-ring:  #788cff;
+$highlight-pinned-ring:   #6b23fc;
