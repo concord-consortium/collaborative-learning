@@ -43,7 +43,9 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
       console.error("No currentDocumentGroupId found in persistentUI");
       return;
     }
-    tabState.openDocumentGroupPrimaryDocument(tabState.currentDocumentGroupId, document.key);
+    // See sorted-section: the store action also ends the author's fixed start view.
+    persistentUI.openDocumentGroupPrimaryDocument(
+      ENavTab.kSortWork, tabState.currentDocumentGroupId, document.key);
     logDocumentViewEvent(document);
   };
 

@@ -26,9 +26,7 @@ function textMatchesList(selector, expected) {
 function beforeTest() {
   const url = "/editor/?appMode=qa&unit=./demo/units/qa/content.json";
   cy.visit(url);
-  cy.window().then(win => {
-    cy.stub(win.ccLogger, "log").as("log");
-  });
+  cy.stubLogger();
 }
 
 context('Bar Graph Tile', function () {

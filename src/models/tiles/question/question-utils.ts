@@ -1,6 +1,6 @@
 import { uniqueId } from "../../../utilities/js-utils";
 import { DocumentContentModelType } from "../../document/document-content";
-import { isQuestionModel } from "./question-content";
+import { isQuestionModel, QuestionContentModelType } from "./question-content";
 import { kQuestionTileType } from "./question-types";
 import { kTextTileType, TextContentModelType } from "../text/text-content";
 
@@ -36,6 +36,28 @@ export function updateQuestionContentForCopy(content: any, acrossDocuments: bool
     return { ...content, locked: acrossDocuments, questionId: maybeNewId };
   }
   return content;
+}
+
+/**
+ * Returns the authored prompt of a Question tile as plain text: the first fixed-position Text tile in
+ * the question (the "Question Prompt"; the same tile getQuestionAnswersAsJSON skips). A blank prompt is
+ * treated as absent (undefined) so the report falls back to the questionId rather than a blank header.
+ *
+ * @param doc - The document model
+ * @param questionContent - The Question tile's content
+ */
+export function getQuestionPrompt(
+  doc: DocumentContentModelType,
+  questionContent: QuestionContentModelType
+): string | undefined {
+  for (const id of questionContent.tileIds) {
+    const tile = doc.getTile(id);
+    if (tile?.isFixedPosition && tile.content?.type === kTextTileType) {
+      const text = (tile.content as TextContentModelType).asPlainText();
+      return text.trim() || undefined;
+    }
+  }
+  return undefined;
 }
 
 /**

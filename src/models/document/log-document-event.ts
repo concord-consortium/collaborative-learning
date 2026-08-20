@@ -1,6 +1,7 @@
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { isCurriculumLogEvent, logCurriculumEvent } from "../curriculum/log-curriculum-event";
 import { TreeManagerType } from "../history/tree-manager";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
@@ -89,15 +90,27 @@ export function setTargetDocumentProperties(
   }
 }
 
+/**
+ * The fields that say *which* document an event is about. Events that describe something other than
+ * the document's content — where it sits on screen, say — can log these on their own and skip the
+ * state fields that `logDocumentEvent` adds.
+ */
+export function getDocumentIdentityParams(
+  document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel
+) {
+  return {
+    documentUid: document.uid,
+    documentKey: document.key,
+    documentType: document.type,
+    documentTitle: document.title || ""
+  };
+}
+
 function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContext) {
   const { document, targetDocument, ...others } = params;
   const documentProps = getAllDocumentProperties(document, user);
 
   const {
-    uid: documentUid,
-    key: documentKey,
-    type: documentType,
-    title: documentTitle,
     properties: documentProperties,
     visibility: documentVisibility,
     changes: documentChanges,
@@ -106,10 +119,7 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContex
   } = documentProps;
 
   const result = {
-    documentUid,
-    documentKey,
-    documentType,
-    documentTitle,
+    ...getDocumentIdentityParams(document),
     documentProperties,
     documentVisibility,
     documentChanges,
@@ -129,6 +139,23 @@ export function logDocumentEvent(
 ) {
   const params = processDocumentEventParams(_params, Logger.stores);
   Logger.log(event, {...params, ...otherParams}, method);
+}
+
+/**
+ * Logs an event whose subject may be either a saved document (`document`) or curriculum section
+ * content (`curriculum`), expanding whichever is present into that family's canonical fields.
+ * Params carrying neither are logged as they are.
+ */
+export function logDocumentOrCurriculumEvent(event: LogEventName, params: Record<string, any>) {
+  if (isCurriculumLogEvent(params)) {
+    logCurriculumEvent(event, params);
+  }
+  else if (isDocumentLogEvent(params)) {
+    logDocumentEvent(event, params);
+  }
+  else {
+    Logger.log(event, params);
+  }
 }
 
 /**

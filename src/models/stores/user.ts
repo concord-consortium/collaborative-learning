@@ -3,6 +3,7 @@ import { Instance, types } from "mobx-state-tree";
 import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
 import { PortalFirebaseStudentJWT, PortalJWT, PortalUserJWT } from "../../lib/portal-types";
 import { UserType, UserTypeEnum } from "./user-types";
+import { getGroupOwnerId } from "../document/document-axes";
 
 export const UserPortalOffering = types
   .model("UserPortalOffering", {
@@ -184,12 +185,14 @@ export const UserModel = types
 
     /**
      * Group documents have a special user id based on the offering and group id.
-     * In this way every member of the group will have the same userId for group documents
+     * In this way every member of the group will have the same userId for group documents.
      *
-     * @returns
+     * Undefined when this user is not in a group in an offering: there is no group whose documents these
+     * would be.
      */
-    get userIdForGroupDocuments() {
-      return `group_${self.offeringId}_${self.currentGroupId}`;
+    get userIdForGroupDocuments(): string | undefined {
+      if (!self.offeringId || !self.currentGroupId) return undefined;
+      return getGroupOwnerId(self.offeringId, self.currentGroupId);
     }
   }))
   .views((self) => ({

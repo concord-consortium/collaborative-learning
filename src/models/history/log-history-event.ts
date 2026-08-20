@@ -1,8 +1,7 @@
 import { isSectionPath } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { isCurriculumLogEvent, logCurriculumEvent } from "../curriculum/log-curriculum-event";
-import { isDocumentLogEvent, logDocumentEvent } from "../document/log-document-event";
+import { logDocumentOrCurriculumEvent } from "../document/log-document-event";
 import { DocumentsModelType } from "../stores/documents";
 import { TreeManagerType } from "./tree-manager";
 
@@ -47,15 +46,7 @@ export function logHistoryEvent(historyLogInfo: ILogHistory) {
   };
   const event = eventMap[historyLogInfo.action];
   const params = processHistoryEventParams(historyLogInfo, Logger.stores);
-  if (isCurriculumLogEvent(params)) {
-    logCurriculumEvent(event, params);
-  }
-  else if (isDocumentLogEvent(params)) {
-    logDocumentEvent(event, params);
-  }
-  else {
-    Logger.log(event, historyLogInfo);
-  }
+  logDocumentOrCurriculumEvent(event, params);
 }
 
 export function logCurrentHistoryEvent(treeManager: TreeManagerType, action: HistoryAction) {

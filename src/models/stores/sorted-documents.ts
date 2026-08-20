@@ -41,6 +41,10 @@ export class SortedDocuments {
   // `metadataDocsWithoutUnit` picks up unit-less docs (e.g. personal documents) when a unit
   // filter is applied.
   metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  // `metadataDocsWholeUnit` picks up documents about a whole unit rather than any one investigation
+  // or problem within it (class-wide collaborative documents) when an investigation or problem filter
+  // is applied, which would otherwise exclude them.
+  metadataDocsWholeUnit = MetadataDocMapModel.create();
   docsReceived = false;
   // Maps from document ID to the history entry ID that the user requested to view.
   documentHistoryViewRequests: Record<string,string> = {};
@@ -54,6 +58,7 @@ export class SortedDocuments {
     // We only want MobX observability + MST serialization, not MST actions, on these maps.
     unprotect(this.metadataDocsFiltered);
     unprotect(this.metadataDocsWithoutUnit);
+    unprotect(this.metadataDocsWholeUnit);
     this.rootDocumentGroup = new DocumentGroup({
       stores,
       sortType: "All",
@@ -151,11 +156,30 @@ export class SortedDocuments {
       this.metadataDocsWithoutUnit.clear();
     }
 
-    // A disposing function that calls the two disposers from the
+    let disposeWholeUnitListener: (() => void) | undefined;
+    if (filter === "Investigation" || filter === "Problem") {
+      // We only want to filter out documents with a **different** investigation or problem.
+      // If the document is at the unit level (no investigation), we want to still show it.
+      // This is the curriculum axis of the document, not the container axis. Documents
+      // in the unit container that are about an investigation or problem are not included.
+      const queryForWholeUnit = baseQuery
+        .where("unit", "in", this.curriculumConfig.getUnitCodeVariants(unit))
+        .where("investigation", "==", null);
+      disposeWholeUnitListener = queryForWholeUnit.onSnapshot(snapshot => {
+        const mstSnapshot = this.stores.documentMetadata.getMSTSnapshotFromFBSnapshot(snapshot);
+        applySnapshot(this.metadataDocsWholeUnit, mstSnapshot);
+      });
+    } else {
+      // The All and Unit filters already include these documents.
+      this.metadataDocsWholeUnit.clear();
+    }
+
+    // A disposing function that calls the disposers from the
     // onSnapshot listeners.
     return () => {
       disposeFilteredListener();
       disposeDocsWithoutUnitListener?.();
+      disposeWholeUnitListener?.();
     };
   }
 
@@ -178,6 +202,12 @@ export class SortedDocuments {
     });
     this.metadataDocsWithoutUnit.forEach(doc => {
       // If there is a duplicate for some reason just ignore the unit-less one
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.metadataDocsWholeUnit.forEach(doc => {
+      // Also present in the filtered map under the All and Unit filters; dedupe by key.
       if (matchedDocKeys.has(doc.key)) return;
       docsArray.push(doc);
       matchedDocKeys.add(doc.key);

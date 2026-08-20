@@ -8,13 +8,13 @@ place, with `type`/`kind` dereferenced only inside a kind registry, a creation f
 
 - **Concepts — what the axes are, read out of current CLUE behavior:** [axes.md](./axes.md)
 - **Target — how the axes live in code (layers and boundaries):** [target-architecture.md](./target-architecture.md)
+- **Current state — what a consumer can read off a document today:** [reading-axes-in-code.md](./reading-axes-in-code.md)
 - **Research background (current-state evidence):** the findings doc, on the `document-type-decomposition`
   branch (~49KB; left there rather than imported).
 
 ### Related existing docs this roadmap evolves toward
 
 - [../document-types.md](../document-types.md) — the current `type` catalog these axes decompose.
-- [../document-scope.md](../document-scope.md) — the current scoping model the `scope` axis formalizes.
 - [../group-docs/README.md](../group-docs/README.md) — the group-document feature; its concurrency behavior is
   the first thing rebased onto the `concurrent` axis.
 
@@ -26,15 +26,17 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 
 | Axis / component | Mechanism (target) | Status | Delivered by |
 |---|---|---|---|
-| `canonical` (single pointed-to doc for a scope slot) | scoped pointer slots, rule-enforced | done | CLUE-524; class+unit pointer scope added CLUE-550 Stage 2 |
+| `canonical` (single pointed-to doc for a slot) | pointer slots addressed as container + owner + label, rule-enforced | done | CLUE-524; class+unit slots added CLUE-550 Stage 2; CLUE-610 gave every slot an explicit owner segment, taken from the document's `uid` |
 | `concurrent` (multi-writer vs single-writer) | stored per-doc; rule-readable; `DocumentModel` prop sourced from Firestore at open | done | CLUE-550 Stage 1 |
-| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | in progress | CLUE-550 Stage 1 (stored + registry seeded; presentation wiring lands Stage 3); class-wide slot kinds registered and their titles resolved by kind (`getDocumentTitle`) CLUE-550 Stage 2 |
-| `owner` (authoring identity / provenance) | creation: kind-declared `ownerType` → owner `uid` (in the kind registry); read: getter over stored `uid` | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds via `getDocumentOwner`; read-side getter still to come) |
-| `scope` (org + curriculum association refs) | creation: `getDocumentScopeFields(kind, ctx)` stamps a kind's association fields, keyed on a registered `scopeType`; read: consumers read the individual scope fields, narrowing with field/axis **guards** (e.g. `hasOfferingScope`) rather than branching on `type` — whether to also add a single unified `scope` getter is an open question | in progress | CLUE-550 Stage 2 (creation-side scope fields registry-derived for every kind — the `createFirestoreMetadataDocument` type switch is gone) |
-| `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | — |
-| kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1 |
-| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis) |
-| creation factory (the one `kind → axis` bridge) | reads registry defaults, stamps axis values on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner `uid` and scope fields stamped from the kind's `ownerType`/`scopeType`) |
+| `kind` (preset/cohort tag: defaults, presentation, templates) | stored per-doc tag; dereferenced only in the kind registry | done | CLUE-550 Stage 1 (stored + registry seeded); titles resolved by kind Stage 2; presentation wired by CLUE-610 (workspace title bar reads the registry; no consumer branches on kind); CLUE-610 also scopes a unit-declared kind's definition to its unit — see "Static and dynamic kinds" in [axes.md](./axes.md) |
+| `owner` (who the document belongs to) | creation: `ownerType`, from the kind's axis profile → owner `uid` (`getDocumentOwner`) plus a group owner's stored `groupId` (`getDocumentOwnerFields`); read: `hasGroupOwner(doc)` and `hasClassOwner(doc)`, each over the uid prefix its minter used | in progress | CLUE-550 Stage 2 (creation-side owner derivation registry-declared for all kinds); CLUE-610 (both guards; `groupId` moved onto this axis, off the container, and then off the owner *question* — the `uid` is the sole authority). Still to come: the user level, and a getter that returns which owner a document has rather than testing for one |
+| `container` (where the document is kept: class → classUnit → offering) | creation: `containerType`, from the kind's axis profile, stamped by `getDocumentLocationFields(kind, ctx)`; read: `isInClassUnitContainer(doc)`, over an `offeringId` now surfaced on both metadata types | in progress | CLUE-550 Stage 2 (creation side, every kind); CLUE-610 (`containerType` replaces `scopeType`, with no group level — a group document is kept in the offering and owned by the group; the edit gate switched from a curriculum test to this one). Still to come: a guard for the class level, and a getter returning the container |
+| `curriculum` (what the document is about: none → unit → investigation → problem) | creation: fixed by the profile's `containerType`, since every container above the class is identified by a curriculum coordinate; read: `getCurriculumLabel(doc)` | in progress | CLUE-550 Stage 2 (creation side, every kind); CLUE-610 (the label, and the unit level states its absent fields explicitly so it is queryable). No consumer asks a yes/no curriculum question, so no guard exists |
+| `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | Consumers are spread widely and each composes the answer by hand; the edit gate `canUserEditDocument` is called out as a worked example, including its `type` branch for published documents. See "Not covered yet" in [reading-axes-in-code.md](./reading-axes-in-code.md) for what a named policy would replace |
+| kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1; CLUE-610 moved the axis values off each kind and onto a named **axis profile** it registers against (`document-axis-profiles.ts`), so the set of axis combinations is enumerable in one file and a unit config can join one but not invent one |
+| axis profiles (named axis-value bundles) | code-defined profiles; each document stores the name of the one it was created from (`axisProfile`), read by migrations only | done | CLUE-610 — see "Axis profiles" in [axes.md](./axes.md). Deliberately absent from every runtime type, so behavior is still decided by the axis guards |
+| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis); CLUE-550 Stage 3a (collaborative thumbnail treatment reads `concurrent`); CLUE-610 (edit gate `canUserEditDocument` and the collaborative title bar read `concurrent`) |
+| creation factory (the one `kind → axis` bridge) | reads the profile the kind registers, stamps its axis values and its name on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner and location fields stamped from the kind's `ownerType`/`containerType`) |
 
 Status values: `not started` / `in progress` / `done`.
 
@@ -44,15 +46,29 @@ CLUE-550 ("class-wide collaborative documents") is the first concrete slice of t
 `concurrent` and `kind` stored axes plus a kind registry, then rebased group-document behavior (concurrent
 history, non-owner write-sync, class-wide read access, the rules delete clause) from `type === "group"` onto
 the stored `concurrent`. Stage 2 auto-creates class-wide documents (e.g. the driving-question board) via the
-canonical-pointer engine: a class+unit pointer scope alongside the existing offering+group scope, with
+canonical-pointer engine: a class+unit slot alongside the existing offering+group one, with
 get-or-create convergence guaranteeing exactly one document per slot per class. Stage 2 also begins the
-`owner` and `scope` axes on the creation side, now for **every** kind: a document's owner `uid` is derived from
-the kind's registered `ownerType` (`user` / `group` / `class`) — class-wide documents owned by a class-scoped
-synthetic uid (`class_<classHash>`) — and its scope association fields from the kind's registered `scopeType`
-via `getDocumentScopeFields(kind, ctx)`, both resolved in the kind registry rather than a `type` switch. Because
-all kinds are registered, `createFirestoreMetadataDocument` derives owner and scope through these registry calls
+`owner`, `container`, and `curriculum` axes on the creation side, now for **every** kind: a document's owner
+`uid` is derived from the kind's registered `ownerType` (`user` / `group` / `class`) — class-wide documents
+owned by a synthetic class uid (`class_<classHash>`) — and the fields saying where it is kept and what it is
+about from the kind's registered container, both resolved in the kind registry rather than a `type` switch.
+Because all kinds are registered, `createFirestoreMetadataDocument` derives all of these through registry calls
 for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
 `type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
 into the kinds they publish. That gate widens as each type is converted; see
 [Which documents get stamped](./target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
 for how it is retired.
+
+CLUE-610 surfaces those documents: Sort Work sections them under "Whole Class" by owner and curriculum
+rather than by type, a whole-unit listener keeps them visible under the investigation and problem
+filters, presentation reads `concurrent` and the kind registry, and one predicate
+(`canUserEditDocument`) gates every Edit button. It also settles how these axes are modeled in code:
+consumers read narrow named guards over the stored fields, with no level enum and no unified struct;
+a kind names an axis profile, which declares `ownerType` and `containerType`; and `groupId` sits on the
+owner axis, so there is no group container level (see
+[reading-axes-in-code.md](./reading-axes-in-code.md)). Canonical slots follow:
+each is addressed as its container plus its owner plus a label, with the owner segment read straight from
+the document's `uid` so the pointer path no longer depends on `groupId` at all. Both owner guards read the
+`uid` the same way, which leaves it the single authority on who a document belongs to; the stored
+`groupId` is left carrying only Sort Work's group label and the queries that retire with the
+canonical-pointer migration.
