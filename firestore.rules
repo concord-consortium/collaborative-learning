@@ -109,13 +109,20 @@ service cloud.firestore {
     // one-shot scripts/backfill-group-document-axes.ts. Both write only `true`, so clearing the field is
     // nobody's legitimate operation, and permitting it would let a class member strip a group document's
     // shared history and edit access. `type` itself is read-only (preservesReadOnlyDocumentFields),
-    // so it cannot be flipped first to unlock this. Once both backfill paths have run against every
-    // environment, this function should be deleted and `concurrent` added to
-    // preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at document creation —
-    // which also requires constraining isValidDocumentCreateRequest below: today it constrains neither
-    // `concurrent` nor `uid`, so a class member can create a new document stamped with a classmate's `uid`
-    // and `concurrent: true`. A truthy `concurrent` at create should imply `type == "group"`, and/or the
-    // create should require userIsRequestUser().
+    // so it cannot be flipped first to unlock this.
+    // Residual: a class member can still create a `type: "group"` document owned by themselves with no
+    // `concurrent` field — both create rules permit that — and then any classmate can update it to
+    // `concurrent: true`, because this function tests only the document's `type`, never its owner. That
+    // grants the whole class read and write access to that one document's history. It is not a way into
+    // anyone else's work: documentOwnerOk blocks creating under another user's `uid`, and `type` is
+    // read-only after creation, so an existing personal document can never be turned into a group one this
+    // way. Closing it needs `concurrent` to become unchangeable after creation (CLUE-612), which can't ship
+    // until the CLUE-604 migration has drained the backfill this function exists for.
+    // Once both backfill paths have run against every environment, this function should be deleted and
+    // `concurrent` added to preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at
+    // document creation — which is already constrained: isValidDocumentCreateRequest requires a synthetic
+    // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk). That
+    // deletion is CLUE-612.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(["concurrent"].toSet())
@@ -180,9 +187,62 @@ service cloud.firestore {
         return canonical == null || canonical == "";
       }
 
+      // A document's `uid` is its owner. Three shapes are legitimate, and each is corroborated either by the
+      // caller's token or by fields the document itself carries:
+      //   - the caller (an ordinary problem, personal, learning-log, planning or publication document);
+      //   - the synthetic class owner of the caller's own class (a class-wide document);
+      //   - the synthetic group owner, required to name the caller's own offering and to agree with the
+      //     group the document records.
+      // Keep the two synthetic formats in lockstep with kClassOwnerPrefix and getGroupOwnerId in
+      // src/models/document/document-axes.ts.
+      // Residual, accepted: nothing here proves the caller is a member of that group, because group
+      // membership lives in the Realtime Database and the token carries no group claim. A student can
+      // therefore create a document owned by another group in their own offering. Groups are a CLUE
+      // concept that the portal does not model, so no token claim is going to corroborate one; this is
+      // where the create rules stop. See the owner axis in docs/document-axes/README.md.
+      // Residual, accepted: the token corroborates that the caller belongs to the class named in
+      // `class_<class_hash>`, but not that the caller is entitled to mint a document under that owner. Any
+      // class member can create any number of `class_<class_hash>`-owned, `concurrent: true` documents, each
+      // sectioned under "Whole Class" in Sort Work with the whole class granted read and write on its
+      // history. This is narrower than admitting any `uid` at all, and it is inherent to the design — a
+      // class can only converge on one document if any of its members can mint it. See the owner axis in
+      // docs/document-axes/README.md.
+      function documentOwnerIsCallersClass() {
+        return request.resource.data.uid == "class_" + request.auth.token.class_hash;
+      }
+
+      // The offering comes from the caller's token, not from the document: `offering_id` is minted only for a
+      // learner — a student launched into one offering — which is exactly who creates a group document
+      // (getOrCreateGroupDocument requires the caller to be in a group, and only students are). A teacher's
+      // or researcher's token omits the claim deliberately, so that they are not confined to one offering;
+      // neither creates a group-owned document. Without the claim the comparison fails and the create is
+      // denied, which is the safe direction.
+      function documentOwnerIsCallersGroup() {
+        let data = request.resource.data;
+        let offering = data.get("offeringId", "");
+        let group = data.get("groupId", "");
+        return offering is string && offering != ""
+          && group is string && group != ""
+          && offering == string(request.auth.token.get("offering_id", ""))
+          && data.uid == "group_" + offering + "_" + group;
+      }
+
+      function documentOwnerOk() {
+        return userIsRequestUser() || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
+      }
+
+      // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
+      // tested here: the transitional `type: "group"` is on its way out, while the owner is the durable fact.
+      // The update side is governed by concurrentChangeOk.
+      function concurrentCreateOk() {
+        return request.resource.data.get("concurrent", false) == false
+          || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          documentOwnerOk() && concurrentCreateOk() &&
           // The canonical label is granted solely by the pointer-claim transaction (an update,
           // gated by canonicalFieldOk), so a create carrying a non-blank `canonical` — including a
           // non-string like `true` — is rejected.

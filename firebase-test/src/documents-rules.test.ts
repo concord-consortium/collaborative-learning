@@ -1,8 +1,9 @@
 import firebase from "firebase";
 import {
-  adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
+  adminWriteDoc, cUnit, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, network1, network2, noNetwork, otherClass, prepareEachTest,
+  initFirestore, mockTimestamp, network1, network2, noNetwork, offeringId, otherClass, otherOfferingId,
+  prepareEachTest,
   researcherAuth,
   researcherId,
   student2Id,
@@ -30,7 +31,7 @@ describe("Firestore security rules", () => {
   const kDocumentDocPath = "authed/myPortal/documents/myDocument";
 
   interface ISpecDocumentDoc {
-    add?: Record<string, string | string[] | object | boolean>;
+    add?: Record<string, string | string[] | object | boolean | null>;
     remove?: string[];
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
@@ -357,12 +358,112 @@ describe("Firestore security rules", () => {
 
     it("authenticated students can create documents in their class", async () => {
       db = initFirestore(studentAuth);
-      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc());
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({ add: { uid: studentId } }));
     });
 
     it("authenticated students can't create documents in a different class", async () => {
       db = initFirestore(studentAuth);
-      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { context_id: otherClass }}));
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: studentId, context_id: otherClass } }));
+    });
+
+    it("a class member cannot create a document owned by a classmate", async () => {
+      // The document would then appear under that classmate's name in Sort Work.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id } }));
+    });
+
+    it("a class member can create their class's class-wide document", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "group", unit: cUnit, investigation: null, problem: null }
+      }));
+    });
+
+    it("a class member cannot create a document owned by another class", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${otherClass}`, type: "group", unit: cUnit }
+      }));
+    });
+
+    it("a class member can create a group document whose owner agrees with its offering and group", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a class member cannot create a group document in another offering of their class", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${otherOfferingId}_3`, type: "group", offeringId: otherOfferingId, groupId: "3" }
+      }));
+    });
+
+    it("a class member cannot create a group document whose owner names another offering", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${otherOfferingId}_3`, type: "group", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a caller whose token carries no offering cannot create a group document", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3" }
+      }));
+    });
+
+    it("a class member cannot create a group document whose owner names another group", async () => {
+      // The uid must agree with the document's own groupId. Nothing here proves the caller is IN group 3 —
+      // group membership lives in the Realtime Database and the token carries no group claim. That residual
+      // is recorded on the owner axis in docs/document-axes/README.md.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "4" }
+      }));
+    });
+
+    it("a class member cannot create a group-shaped owner with no offering or group of its own", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { uid: "group__", type: "group" } }));
+    });
+
+    it("a class member cannot create their own document already marked concurrent", async () => {
+      // `concurrent` is what isConcurrentClassDocument reads to grant every class member read and write on a
+      // document's history. A document owned by a real person must never carry it.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: studentId, concurrent: true } }));
+    });
+
+    it("a class member cannot create a classmate's document already marked concurrent", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: student2Id, concurrent: true } }));
+    });
+
+    it("a class member cannot create their own document with a truthy non-boolean concurrent value", async () => {
+      // concurrentCreateOk tests `concurrent` against `== false`, not `!= true`, so a non-boolean like the
+      // string "true" cannot slip past the owner check the way it would under a `!= true` test.
+      db = initFirestore(studentAuth);
+      await expectWriteToFail(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: studentId, concurrent: "true" } }));
+    });
+
+    it("a class-wide document may be created concurrent", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "group", unit: cUnit, concurrent: true }
+      }));
+    });
+
+    it("a group document may be created concurrent", async () => {
+      db = initFirestore(studentAuth);
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `group_${offeringId}_3`, type: "group", offeringId, groupId: "3", concurrent: true }
+      }));
     });
 
     it("authenticated students can update documents in their class", async () => {
@@ -417,6 +518,45 @@ describe("Firestore security rules", () => {
       await expectDeleteToFail(db, kDocumentDocPath);
     });
 
+  });
+
+  describe("document shapes the deployed client creates", () => {
+    // The create rules deploy a release ahead of the app that satisfies them, so each shape the deployed
+    // client writes has to keep creating. The fields are the ones createFirestoreMetadataDocument stamps,
+    // selected by the kind's containerType: "offering" carries unit/investigation/problem/offeringId,
+    // "class" carries unit: null, "classUnit" carries a unit with investigation and problem explicitly null.
+    // Group and class-wide documents are deliberately excluded from this list: they are the only two shapes
+    // the new create rule can reject, and their creation breaking in the window between the rules deploy and
+    // the app deploy is accepted.
+    const offeringContained = { unit: cUnit, investigation: "1", problem: "2", offeringId };
+    const classContained = { unit: null };
+
+    const kDeployedShapes: Array<{ name: string; fields: Record<string, any> }> = [
+      { name: "problem document", fields: { type: "problem", ...offeringContained } },
+      { name: "planning document", fields: { type: "planning", ...offeringContained } },
+      { name: "problem publication", fields: { type: "publication", ...offeringContained } },
+      { name: "personal document", fields: { type: "personal", title: "My Doc", ...classContained } },
+      { name: "learning log", fields: { type: "learningLog", title: "My Log", ...classContained } },
+      { name: "personal publication",
+        fields: { type: "personalPublication", title: "My Doc", ...classContained } },
+      { name: "learning log publication",
+        fields: { type: "learningLogPublication", title: "My Log", ...classContained } }
+    ];
+
+    kDeployedShapes.forEach(({ name, fields }) => {
+      it(`a student can create a ${name}`, async () => {
+        db = initFirestore(studentAuth);
+        await expectWriteToSucceed(db, kDocumentDocPath,
+          specDocumentDoc({ add: { uid: studentId, properties: {}, ...fields } }));
+      });
+    });
+
+    it("a teacher can create a document in a class they teach", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await expectWriteToSucceed(db, kDocumentDocPath,
+        specDocumentDoc({ add: { uid: teacherId, properties: {}, ...offeringContained } }));
+    });
   });
 
   describe("history entries", () => {
