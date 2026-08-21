@@ -17,7 +17,19 @@ interface IProps {
   // Optional persona intro pinned at the top of the message column. Render-only: it is never a
   // ChatTurn, so it never enters the AI context, the transport, or the copied transcript.
   introText?: string;
+  // Highlight buttons. The component stays free of MST: it reports which button was acted on by
+  // turn id and index, and is told which one is currently pinned as a plain string.
+  onHighlightHover?: (turnId: string, index: number, hovering: boolean) => void;
+  onHighlightToggle?: (turnId: string, index: number) => void;
+  activeHighlightKey?: string;
+  // Whether this unit offers highlight buttons at all. Defaults to true: the policy lives in the
+  // sidebar, which is where unit config lives, and this component only renders what it is given.
+  enableHighlights?: boolean;
 }
+
+// Identifies one button across the conversation. The turn id is the message document id, so this is
+// stable for the life of the conversation and unique even when two replies point at the same object.
+export const highlightKey = (turnId: string, index: number) => `${turnId}:${index}`;
 
 // Build a plain-markdown transcript of the visible conversation for copy-to-clipboard.
 // Debug dry-run turns and empty turns are excluded; message bodies are copied verbatim.
@@ -99,7 +111,8 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
   );
 };
 
-export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText }) => {
+export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
+    onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = true }) => {
   const { turns, error, pending, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -223,6 +236,28 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
                 {/* per-turn sender attribution in the DOM (sender is otherwise conveyed by position+color only) */}
                 <span className="visually-hidden">{turn.sender === "user" ? "You said:" : "Tutor said:"}</span>
                 <div className={classNames("chat-bubble", { pending: turn.pending })}>{turn.text}</div>
+                {enableHighlights && turn.highlights?.length
+                  ? <div className="chat-highlights" data-testid="chat-highlights">
+                      {turn.highlights.map((highlight, index) => (
+                        <button
+                          key={highlightKey(turn.id, index)}
+                          type="button"
+                          className={classNames("chat-highlight", {
+                            active: activeHighlightKey === highlightKey(turn.id, index)
+                          })}
+                          aria-pressed={activeHighlightKey === highlightKey(turn.id, index)}
+                          // Focus mirrors hover so the preview is reachable without a mouse.
+                          onMouseEnter={() => onHighlightHover?.(turn.id, index, true)}
+                          onMouseLeave={() => onHighlightHover?.(turn.id, index, false)}
+                          onFocus={() => onHighlightHover?.(turn.id, index, true)}
+                          onBlur={() => onHighlightHover?.(turn.id, index, false)}
+                          onClick={() => onHighlightToggle?.(turn.id, index)}
+                        >
+                          Show me {highlight.label}
+                        </button>
+                      ))}
+                    </div>
+                  : null}
               </div>
         ))}
         {(pending || sending) &&

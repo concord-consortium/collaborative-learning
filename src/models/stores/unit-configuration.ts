@@ -120,6 +120,12 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // never sent to the AI as context. Unset falls back to the built-in default; an empty string
   // suppresses the intro entirely.
   chatTutorIntro?: string;
+  // Whether the tutor may render buttons that highlight an object in the student's document.
+  // Separate from chatTutorEnabled: a unit can have the tutor without the pointing behavior.
+  // Turning it on is necessary but not sufficient: the tutor produces the references those
+  // buttons need when the unit's prompt asks it to, via chatTutorPrompts.appendToGenericPrompt.
+  // With the flag on and no such instruction, replies will rarely have anything to show.
+  chatTutorHighlights?: boolean;
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
   // if set it will be used to determine if the show ideas button is shown, otherwise

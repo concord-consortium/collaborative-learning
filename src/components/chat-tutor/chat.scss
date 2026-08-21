@@ -5,6 +5,11 @@
 // Color pairs below are WCAG AA checked: white on $workspace-teal-dark-2 = 7.0:1;
 // $charcoal-dark-2 on $charcoal-light-7 = 9.4:1; $charcoal border on white = 4.95:1;
 // $error-red on white = 7.3:1; $charcoal-dark-1 on white = 7.6:1.
+// .chat-highlight: $charcoal-dark-2 text on white = 10.5:1; $charcoal border (non-text,
+// WCAG 1.4.11) on white = 4.95:1 and on the $charcoal-light-6 hover fill = 4.3:1 — the
+// border carries the boundary alone on hover, since the fill itself is only 1.1:1 against
+// the page; hover/active fill $charcoal-light-6 with $charcoal-dark-2 text = 9.1:1, and
+// the active border (also $charcoal-dark-2) against that same fill = 9.1:1.
 .chat-tutor {
   display: flex;
   flex-direction: column;
@@ -190,6 +195,35 @@
 
     &.pending { opacity: 0.6; }
     &.typing { padding: 10px 14px; }
+  }
+
+  .chat-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    max-width: 85%;
+  }
+
+  .chat-highlight {
+    font: inherit;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid $charcoal;
+    background: white;
+    color: $charcoal-dark-2;
+    cursor: pointer;
+
+    &:hover { background: $charcoal-light-6; }
+    &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
+
+    // Pinned: the student asked to keep this one showing. Distinct from hover, which is a preview.
+    &.active {
+      border-color: $charcoal-dark-2;
+      background: $charcoal-light-6;
+      font-weight: bold;
+    }
   }
 
   // Animated typing indicator: three dots that strobe in sequence. Motion is suppressed

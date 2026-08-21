@@ -13,6 +13,7 @@ import {
 
 import {
   createOpenAIClient, createConversation, installDeveloperPrompt, createTutorResponse,
+  TutorReply,
 } from "./openai";
 import {assembleTurnContext} from "./context-assembly";
 
@@ -51,6 +52,22 @@ export function pickOwnerFields(data: DocumentData | undefined): Record<string, 
   if (data?.context_id !== undefined) out.context_id = data.context_id;
   if (data?.problemPath !== undefined) out.problemPath = data.problemPath;
   return out;
+}
+
+// Exported and parameterized so the doc's shape is testable without an emulator. `highlights` is
+// omitted rather than written as an empty array: most replies point at nothing, and an absent field
+// keeps those documents the size they are today.
+export function buildAssistantDoc(
+  reply: TutorReply, ownerFields: Record<string, unknown>
+): Record<string, unknown> {
+  const doc: Record<string, unknown> = {
+    kind: "assistant",
+    userText: reply.userText,
+    createdAt: FieldValue.serverTimestamp(),
+    ...ownerFields,
+  };
+  if (reply.highlights.length > 0) doc.highlights = reply.highlights;
+  return doc;
 }
 
 // The side effects of processing one message, for the caller to commit atomically with the
@@ -92,7 +109,7 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
     await installDeveloperPrompt(openai, conversationId, item);
   }
 
-  const {userText} = await createTutorResponse(openai, {model, conversationId, input: turn.input});
+  const reply = await createTutorResponse(openai, {model, conversationId, input: turn.input});
 
   // only NOW (developer items written + response succeeded) is conversationId/problemInstalled/
   // seq earned; the caller persists them (batched with the cursor) so they commit atomically.
@@ -109,12 +126,7 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
   // userText:null assistant doc so the client's "awaiting" indicator clears.
-  const assistant = {
-    kind: "assistant",
-    userText,
-    createdAt: FieldValue.serverTimestamp(),
-    ...ownerFields,
-  };
+  const assistant = buildAssistantDoc(reply, ownerFields);
 
   return {assistant, parentUpdate};
 }

@@ -337,7 +337,11 @@ export function programToGraphviz(program: Program): string {
     }
     const formatter = getNodeFormatter(nodeType);
     const properties = formatter({ node, inputs, nodeValue });
-    const propertyRows = propertiesToTableRows({...automaticNodeProperties, ...properties});
+    // The real node id rides as a property rather than as the graph identifier: the identifier is
+    // also every edge's endpoint, and nanoids there would make the graph unreadable. Anything that
+    // wants to point at this node needs the id the document actually stores. Spread it last so it
+    // remains authoritative against whatever a node's data carries.
+    const propertyRows = propertiesToTableRows({ ...automaticNodeProperties, ...properties, id: node.id });
 
     // Build HTML table label
     const labelLines: string[] = [];
