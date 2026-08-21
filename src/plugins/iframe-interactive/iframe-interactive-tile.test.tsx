@@ -327,6 +327,34 @@ describe("IframeInteractiveComponent", () => {
     });
   });
 
+  it("does not log LARA's nochange/touch messages or a repeat of the current state", () => {
+    jest.useFakeTimers();
+    const iframePhone = require("iframe-phone");
+    const props = createTestProps();
+    props.content.setUrl("https://example.com/interactive");
+    render(<IframeInteractiveComponent {...props} />);
+
+    const initInteractive = iframePhone.ParentEndpoint.mock.calls.at(-1)[1];
+    initInteractive();
+    const phone = iframePhone.ParentEndpoint.mock.results.at(-1).value;
+    const stateHandler = phone.addListener.mock.calls.find((c: any[]) => c[0] === "interactiveState")[1];
+
+    const flush = (state: any) => act(() => {
+      stateHandler(state);
+      jest.advanceTimersByTime(500);
+    });
+
+    // Establish a real state, then confirm the no-op messages add nothing on top of it.
+    flush({ answer: "42" });
+    expect(logTileChangeEvent).toHaveBeenCalledTimes(1);
+
+    flush("nochange");
+    flush("touch");
+    flush(undefined);
+    flush({ answer: "42" });  // identical to the current state, so the JSON diff sees no change
+    expect(logTileChangeEvent).toHaveBeenCalledTimes(1);
+  });
+
   afterEach(() => {
     jest.useRealTimers();
   });

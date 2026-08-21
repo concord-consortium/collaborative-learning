@@ -2,8 +2,6 @@ import { render, waitFor } from "@testing-library/react";
 import React from "react";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultIframeInteractiveContent } from "./iframe-interactive-tile-content";
-import { Logger } from "../../lib/logger";
-import { LogEventName } from "../../lib/logger-types";
 
 // Mock iframe-phone BEFORE importing the component
 const mockIframePhone = {
@@ -41,6 +39,12 @@ jest.mock("../../components/document/container-context", () => ({
 // Mock userSelectTile to avoid needing full UI store
 jest.mock("../../models/stores/ui", () => ({
   userSelectTile: jest.fn()
+}));
+
+// Spy on the tile-change emit so the read-only test can assert nothing is logged.
+const mockLogTileChangeEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({
+  logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent(...args)
 }));
 
 // NOW import the component after the mock is set up
@@ -143,21 +147,16 @@ describe("IframeInteractiveComponent Integration Tests", () => {
     props.readOnly = true;
     render(<IframeInteractiveComponent {...props} />);
 
-    await waitFor(() => {
-      expect(listeners.interactiveState).toBeDefined();
-    });
+    await waitFor(() => expect(listeners.interactiveState).toBeDefined());
 
-    // This suite does not mock the log module, so spy on Logger.log directly to catch a real emit.
-    const logSpy = jest.spyOn(Logger, "log").mockImplementation(() => undefined);
     jest.useFakeTimers();
     listeners.interactiveState({ answer: "phantom" });
     jest.advanceTimersByTime(500); // flush the 500ms debounce window (nothing should have been queued)
 
-    expect(logSpy).not.toHaveBeenCalledWith(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, expect.anything());
+    expect(mockLogTileChangeEvent).not.toHaveBeenCalled();
     expect((props.model.content as any).interactiveState).toEqual({});
 
     jest.useRealTimers();
-    logSpy.mockRestore();
   });
 
   it("polls for interactive state every 2 seconds", async () => {

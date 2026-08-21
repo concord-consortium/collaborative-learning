@@ -277,7 +277,7 @@ describe("CommentThread", () => {
 
     // Thread 2 is collapsed, click to expand it
     fireEvent.click(screen.getByText("Thread 2"));
-    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-xyz");
+    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-xyz", { programmatic: true });
   });
 
   it("collapsing a thread does not update tile selection", () => {
@@ -346,7 +346,7 @@ describe("CommentThread", () => {
     // Thread is expanded, click on the comment card
     mockSetSelectedTileId.mockClear();
     fireEvent.click(screen.getByTestId("comment-card"));
-    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-abc");
+    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-abc", { programmatic: true });
   });
 
   it("shows empty thread with override title when focused tile has no comments", () => {
