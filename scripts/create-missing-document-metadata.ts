@@ -284,10 +284,35 @@ async function main() {
   // position, so their offering id is it. Decoding splits a string into a name and a number and can
   // split in the wrong place, so every result is checked against a curriculum checkout before use.
   const curriculumRoot = process.env.CURRICULUM_ROOT ?? `${process.env.HOME}/Development/clue-curriculum`;
-  const validate = createCurriculumValidator(curriculumRoot, { exists: nodeFs.existsSync });
+  // Each unit's content.json read at most once; missing units cache as undefined.
+  const unitContent = new Map<string, any>();
+  const readUnitContent = (unit: string) => {
+    if (!unitContent.has(unit)) {
+      const path = `${curriculumRoot}/curriculum/${unit}/content.json`;
+      try {
+        unitContent.set(unit, JSON.parse(nodeFs.readFileSync(path, "utf8")));
+      } catch {
+        unitContent.set(unit, undefined);
+      }
+    }
+    return unitContent.get(unit);
+  };
+  const validate = createCurriculumValidator(curriculumRoot, { readUnitContent });
+
+  // A demo session launched with no `unit` parameter leaves the unit code out of its offering id
+  // while the app still loads this unit, so a bare id means this one. Read from the config rather
+  // than hardcoded, so it stays true if the default changes.
+  const defaultUnit = JSON.parse(
+    nodeFs.readFileSync(getScriptRootFilePath("../src/clue/curriculum-config.json"), "utf8")
+  ).defaultUnit;
+  console.log(`- Curriculum: ${curriculumRoot} (default unit "${defaultUnit}")`);
+
   const resolveFromOfferingId = (offeringId: string) => {
-    const decoded = decodeDemoOfferingId(offeringId);
-    if (!decoded) return undefined;
+    const decoded = decodeDemoOfferingId(offeringId, defaultUnit);
+    if (!decoded) {
+      console.log(`    offering ${offeringId} carries no unit code — skipped`);
+      return undefined;
+    }
     if (!validate(decoded)) {
       console.log(`    offering ${offeringId} decodes to ${decoded.unit} ` +
         `${decoded.investigation}.${decoded.problem}, which the curriculum does not have — skipped`);

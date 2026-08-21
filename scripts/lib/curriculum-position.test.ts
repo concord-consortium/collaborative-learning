@@ -45,28 +45,77 @@ describe("decodeDemoOfferingId", () => {
 });
 
 describe("createCurriculumValidator", () => {
-  const existing = new Set([
-    "/curriculum/curriculum/brain/investigation-2/problem-3",
-    "/curriculum/curriculum/sas/investigation-0/problem-1"
-  ]);
-  const validator = createCurriculumValidator("/curriculum", { exists: (p) => existing.has(p) });
+  // A unit's content.json is the authority on which problems exist. The directory layout is not: a
+  // problem's sections can live under a shared `sections/` tree, so msa declares investigation 1
+  // problem 1 while `msa/investigation-1/` holds only `problem-2`.
+  const units: Record<string, any> = {
+    msa: { investigations: [{ ordinal: 1, problems: [{ ordinal: 1 }, { ordinal: 2 }] }] },
+    brain: {
+      investigations: [
+        { ordinal: 0, problems: [{ ordinal: 1 }] },
+        { ordinal: 2, problems: [{ ordinal: 3 }] }
+      ]
+    }
+  };
+  const validator = createCurriculumValidator("/curriculum", { readUnitContent: (u) => units[u] });
 
-  it("accepts a position whose problem directory exists", () => {
+  it("accepts a problem the unit's content.json declares", () => {
+    expect(validator({ unit: "msa", investigation: "1", problem: "1" })).toBe(true);
     expect(validator({ unit: "brain", investigation: "2", problem: "3" })).toBe(true);
-    expect(validator({ unit: "sas", investigation: "0", problem: "1" })).toBe(true);
   });
 
-  it("rejects a position no curriculum directory backs", () => {
+  it("accepts investigation 0, which is a real investigation rather than a missing one", () => {
+    expect(validator({ unit: "brain", investigation: "0", problem: "1" })).toBe(true);
+  });
+
+  it("rejects a problem the unit does not declare", () => {
     // This is the guard on a decode that split the id in the wrong place. A unit code ending in a
-    // digit -- "unit2" plus problem 1.1 -- decodes as unit "unit", investigation 21, which exists
-    // nowhere and so is caught here rather than written onto a document.
+    // digit -- "unit2" plus problem 1.1 -- decodes as unit "unit", investigation 21, which no
+    // curriculum declares, so it is caught here rather than written onto a document.
     expect(validator({ unit: "unit", investigation: "21", problem: "1" })).toBe(false);
-    expect(validator({ unit: "brain", investigation: "9", problem: "9" })).toBe(false);
+    expect(validator({ unit: "msa", investigation: "1", problem: "9" })).toBe(false);
+    expect(validator({ unit: "msa", investigation: "7", problem: "1" })).toBe(false);
+  });
+
+  it("rejects a unit with no content.json at all", () => {
     expect(validator({ unit: "nosuchunit", investigation: "1", problem: "1" })).toBe(false);
   });
 
-  it("rejects an incomplete position rather than checking a malformed path", () => {
-    expect(validator({ unit: "brain", investigation: "2" })).toBe(false);
-    expect(validator({ unit: undefined, investigation: "2", problem: "3" })).toBe(false);
+  it("rejects problem 0, which no ordinal names", () => {
+    // `problem=2` with no minor decodes as investigation 2, problem 0. The real problem is unknown,
+    // so the document is reported rather than given a guessed position.
+    expect(validator({ unit: "msa", investigation: "1", problem: "0" })).toBe(false);
+  });
+
+  it("rejects an incomplete position", () => {
+    expect(validator({ unit: "msa", investigation: "1" })).toBe(false);
+    expect(validator({ unit: undefined, investigation: "1", problem: "1" })).toBe(false);
+  });
+});
+
+describe("decodeDemoOfferingId with a default unit", () => {
+  // A demo session launched with no `unit` parameter builds its offering id from an empty unit code
+  // (src/lib/auth.ts), while the app still loads curriculumConfig.defaultUnit. So a bare id means
+  // the default unit, and 54 such ids appear across production's demo spaces.
+
+  it("uses the default unit for a bare id", () => {
+    expect(decodeDemoOfferingId("101", "sas")).toEqual({ unit: "sas", investigation: "1", problem: "1" });
+    expect(decodeDemoOfferingId("1", "sas")).toEqual({ unit: "sas", investigation: "0", problem: "1" });
+    expect(decodeDemoOfferingId("303", "sas")).toEqual({ unit: "sas", investigation: "3", problem: "3" });
+  });
+
+  it("still refuses a bare id when no default unit is supplied", () => {
+    expect(decodeDemoOfferingId("101")).toBeUndefined();
+  });
+
+  it("refuses a portal offering id even with a default unit", () => {
+    // Portal ids are 5 or 6 digits; treating one as an encoding would invent an investigation.
+    expect(decodeDemoOfferingId("173197", "sas")).toBeUndefined();
+    expect(decodeDemoOfferingId("85359", "sas")).toBeUndefined();
+  });
+
+  it("prefers a unit code the id carries over the default", () => {
+    expect(decodeDemoOfferingId("brain203", "sas"))
+      .toEqual({ unit: "brain", investigation: "2", problem: "3" });
   });
 });
