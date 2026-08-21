@@ -4,7 +4,6 @@ import React from "react";
 import { Tooltip } from "react-tippy";
 import { useStores } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
-import { isAxesType } from "../../models/document/document-types";
 
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 
@@ -59,9 +58,11 @@ export const TileActivityBadges = observer(function TileActivityBadges({
 }: IProps) {
   const { groupActivity, groups, documents, user } = useStores();
 
-  // Only render for documents that several people edit together
+  // Only render for documents that several people edit together. `concurrent` is the axis that says so,
+  // which is why this does not test the document's type: a type says which preset a document was made
+  // from, and co-editing is what the badges are about.
   const document = documents.getDocument(documentKey);
-  if (!document || !isAxesType(document.type)) return null;
+  if (!document?.concurrent) return null;
 
   const focused = groupActivity.usersFocusedOnTile(documentKey, tileId, user.id);
   if (focused.length === 0) return null;

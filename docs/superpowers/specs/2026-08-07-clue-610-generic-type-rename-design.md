@@ -152,12 +152,19 @@ real axis query is the same edit either way.
 | [document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241) | the transitional group-document title — widening it is what keeps a half-swept document titled |
 | [document-types.ts:48-56](../../../src/models/document/document-types.ts#L48-L56) | `isSortableType` — Sort Work membership |
 | [document-title.tsx:28](../../../src/components/document/document-title.tsx#L28) | suppress the owner-name prefix |
-| [tile-activity-badges.tsx:64](../../../src/components/tiles/tile-activity-badges.tsx#L64) | presence indicators — "concurrent" (CLUE-611's territory) |
 | [document-workspace.tsx:209](../../../src/components/document/document-workspace.tsx#L209) | primary-document handling |
 
-Both `document-title.tsx` and `tile-activity-badges.tsx` already apply to class-wide documents today,
-since those also store `"group"`. Accepting both values preserves that exactly; accepting only `"axes"`
-would too, but would break un-drained clients, which is the whole reason for the transitional window.
+`tile-activity-badges.tsx` was on this list and is not any more: it was rebased onto `concurrent` rather
+than widened. The badges report who is co-editing a tile, which is exactly what `concurrent` says, and
+every neighbouring feature asking the same question already reads it — the concurrent history manager,
+the non-owner write-sync suppression, the concurrent title bar, the thumbnail. Widening a type test there
+would have left the one site that already meant "concurrent" phrased as a type test, so it takes the
+per-site rebase the note above this table says the predicate costs nothing. Doing it here rather than
+under CLUE-611 also means one fewer site that has to be revisited when the type is dropped.
+
+`document-title.tsx` already applies to class-wide documents today, since those also store `"group"`.
+Accepting both values preserves that exactly; accepting only `"axes"` would too, but would break
+un-drained clients, which is the whole reason for the transitional window.
 
 ### 5c. Firestore rules — accept both values
 
@@ -373,9 +380,12 @@ which stopped being true once the script also wrote `type: "axes"` and merged it
 
 - **Unit tests** covering the readers already exist and reference `GroupDocument` (`document.test.ts`,
   `document-utils.test.ts`, `document-kinds.test.ts`, `sorted-documents.test.ts`,
-  `tile-activity-badges.test.tsx`, `thumbnail-document-item.test.tsx`, `document-file-menu.test.tsx`,
-  `db.test.ts`, `firebase.test.ts`). Each accept-both reader needs a case for *both* values, since the
-  transitional window is the only time both occur and it is exactly when a regression would ship.
+  `thumbnail-document-item.test.tsx`, `document-file-menu.test.tsx`, `db.test.ts`, `firebase.test.ts`).
+  Each accept-both reader needs a case for *both* values, since the transitional window is the only time
+  both occur and it is exactly when a regression would ship.
+- **`tile-activity-badges.test.tsx`** needs the opposite: the rebased gate must be pinned to `concurrent`
+  and away from the type, so a non-concurrent document typed like the ones that do get badges renders
+  none, and a concurrent document of another type renders them. Both cases fail against the type test.
 - **`scripts/backfill-group-document-axes.test.ts`** needs cases for the merged-write restructure: a
   document needing `concurrent` **and** `type` receives one write containing both; a document needing
   only `type` receives one write; re-running changes nothing.
