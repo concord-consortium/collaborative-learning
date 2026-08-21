@@ -53,9 +53,9 @@ get-or-create convergence guaranteeing exactly one document per slot per class. 
 owned by a synthetic class uid (`class_<classHash>`) — and the fields saying where it is kept and what it is
 about from the kind's registered container, both resolved in the kind registry rather than a `type` switch.
 Because all kinds are registered, `createFirestoreMetadataDocument` derives all of these through registry calls
-for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on
-`type:"group"` documents — avoiding a stamp we would have to migrate if the publication kinds are later folded
-into the kinds they publish. That gate widens as each type is converted; see
+for all document types. The kind axis fields (`kind`/`concurrent`) are stamped only on axes-typed documents
+— avoiding a stamp we would have to migrate if the publication kinds are later folded into the kinds they
+publish. That gate widens as each type is converted; see
 [Which documents get stamped](./target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
 for how it is retired.
 

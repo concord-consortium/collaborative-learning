@@ -34,7 +34,10 @@ export type DBDocumentType = "section" |  // section documents are deprecated
                               "personal" | "personalPublication" |
                               "learningLog" | "learningLogPublication" |
                               "supportPublication" |
-                              "group";
+                              // Both values of the axes type. RTDB holds a permanent mix of the two and is
+                              // never swept: this tree is slated for removal and nothing reads the field
+                              // back. See docs/document-metadata/firestore-sourcing-roadmap.md.
+                              "group" | "axes";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
@@ -101,12 +104,12 @@ export interface DBSupportPublicationMetadata extends DBBaseProblemDocumentMetad
   type: "supportPublication";
 }
 
-// Group and class-wide documents share the transitional type "group". Both store only base metadata in RTDB
+// Group and class-wide documents share the axes type. Both store only base metadata in RTDB
 // (createdAt is the sole field read back, at open); their scope (groupId/unit/offeringId), owner, title, and
 // kind are stamped into the Firestore metadata by createFirestoreMetadataDocument instead. So the two collapse
 // to this one shape here — until documents are discriminated by axes rather than `type`.
 export interface DBGroupDocMetadata extends DBBaseDocumentMetadata {
-  type: "group";
+  type: "group" | "axes";
 }
 
 export interface DBGroupUserConnections {
@@ -132,12 +135,12 @@ export interface DBDocument {
   type: DBDocumentType;
 }
 
-// Note: group documents do not have any type specific metadata. They have generic metadata,
+// Note: axes-typed documents do not have any type specific metadata. They have generic metadata,
 // and they mainly use the Firestore metadata instead of the Realtime Database metadata.
 // The Realtime Database is maintained for consistency with other document types, and for
 // firebase functions which look for this metadata.
 export interface DBGroupDocument extends DBDocument {
-  type: "group";
+  type: "group" | "axes";
 }
 
 export interface IDocumentProperties {

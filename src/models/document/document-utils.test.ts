@@ -4,7 +4,7 @@ import { UserModel } from "../stores/user";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { createDocumentModel } from "./document";
 import { getGroupOwnerId } from "./document-axes";
-import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
+import { AxesDocument, ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, isDocumentAccessibleToUser } from "./document-utils";
 import { kClassWideProfile } from "./document-axis-profiles";
@@ -204,6 +204,13 @@ describe("document utils", () => {
           type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
+      });
+
+      test("an axes-typed group document uses the group label", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: AxesDocument, kind: GroupDocument, uid: "g", key: "g-axes", groupId: "3"
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Group 3 Document");
       });
     });
 
@@ -477,5 +484,13 @@ describe("isDocumentAccessibleToUser — group documents", () => {
   it("denies a student access to a non-shared personal document owned by someone else", () => {
     const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };
     expect(isDocumentAccessibleToUser({ documentMetadata, documents, user: student })).toBe(false);
+  });
+
+  it("grants a student access to an axes-typed doc owned by someone else", () => {
+    const axesNoFlag: any = { uid: "other", type: AxesDocument, key: "a1" };  // no concurrent
+    expect(isDocumentAccessibleToUser({ documentMetadata: axesNoFlag, documents, user: student })).toBe(true);
+
+    const axesWithFlag: any = { uid: "other", type: AxesDocument, key: "a2", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: axesWithFlag, documents, user: student })).toBe(true);
   });
 });

@@ -12,7 +12,7 @@ import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
 import { getCurriculumLabel, isInClassUnitContainer } from "./document-axes";
 import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
-import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
+import { isAxesType, isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
 
 function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
@@ -128,7 +128,7 @@ export function isDocumentAccessibleToUser ({
 
   const ownDocument = metadata.uid === user.id;
   const isPublished = isPublishedType(metadata.type);
-  const isGroupDoc = metadata.type === GroupDocument; // Group documents are accessible to everyone
+  const isGroupDoc = isAxesType(metadata.type); // Group and class-wide documents are accessible to everyone
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
     return ownDocument || isShared || isPublished || isGroupDoc
