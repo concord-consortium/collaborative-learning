@@ -595,6 +595,9 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       }
       const { ui } = this.stores;
       if (!ui.isSelectedTile(model)) {
+        // A read-only tile gets no focus trap (see componentDidMount), so this strategy only runs on
+        // editable tiles: readOnly is always false here and getEffectiveSelectionModel() is always
+        // model. Both are passed anyway so this call stays correct if that ever changes.
         ui.setSelectedTile(this.getEffectiveSelectionModel(),
           { append: this.lastPointerDownHadModifier, readOnly: !!this.props.readOnly, logTileId: model.id });
       }

@@ -116,6 +116,38 @@ describe("ui model", () => {
     expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
   });
 
+  it("does not log a shift-click that deselects a tile other than the last one logged", () => {
+    // The re-select/deselect case above deselects the tile it just logged, so lastLoggedTileId
+    // already suppresses it. Deselecting a *different* tile is what isolates the isDeselecting
+    // guard: without it, removing A from the selection would log A as though it were focused.
+    mockLogTileFocusEvent.mockReset();
+    const tileA = makeTile("A");
+    const tileB = makeTile("B");
+
+    ui.setSelectedTile(tileA);                   // new → log A
+    ui.setSelectedTile(tileB, { append: true }); // shift-click adds B → log B
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+
+    ui.setSelectedTile(tileA, { append: true }); // shift-click removes A → not a focus event
+    expect(ui.selectedTileIds).toStrictEqual(["B"]);
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it("logs a tile again after select-all, which leaves no single tile focused", () => {
+    mockLogTileFocusEvent.mockReset();
+    const tileA = makeTile("A");
+
+    ui.setSelectedTile(tileA);              // new → log A
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+
+    ui.selectAllTiles(["A", "B"]);          // select-all doesn't focus any one tile
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+
+    ui.setSelectedTile(tileA);              // collapsing back onto A is a new focus → log A
+    expect(ui.selectedTileIds).toStrictEqual(["A"]);
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+  });
+
   it("flags read-only selections (resources panel / class work) in the SELECT_TILE event", () => {
     mockLogTileFocusEvent.mockReset();
     const tile = makeTile("R");
