@@ -23,7 +23,8 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
   const [handlePointerDown, handlePointerUp] = useTileSelectionPointerEvents(
     useCallback(() => modelRef.current.id, [modelRef]),
     useCallback(() => ui.selectedTileIds, [ui]),
-    useCallback((append: boolean) => ui.setSelectedTile(modelRef.current, { append }), [modelRef, ui]),
+    useCallback((append: boolean) => ui.setSelectedTile(modelRef.current, { append, readOnly: props.readOnly }),
+      [modelRef, ui, props.readOnly]),
     domElement
   );
 

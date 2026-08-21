@@ -1,6 +1,6 @@
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
-import { IDocumentContext, processDocumentEventParams } from "../../../lib/logger-utils";
+import { IDocumentLookupContext, resolveTileLogContext } from "../../../lib/logger-utils";
 import { ITileModel } from "../tile-model";
 import { logTileDocumentEvent } from "./log-tile-document-event";
 
@@ -9,10 +9,10 @@ interface ITileCopyLogEvent extends Record<string, any> {
   originalTileId: string;
 }
 
-function processTileCopyEventParams(params: ITileCopyLogEvent, context: IDocumentContext) {
+function processTileCopyEventParams(params: ITileCopyLogEvent, context: IDocumentLookupContext) {
   const { originalTileId, ...others } = params;
   const { document: srcDocument, tileTitle: originalTileTitle } =
-    processDocumentEventParams({ tileId: originalTileId }, context);
+    resolveTileLogContext({ tileId: originalTileId }, context);
   const srcProps = srcDocument
                     ? {
                       sourceUsername: srcDocument.uid,

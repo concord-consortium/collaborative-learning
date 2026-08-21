@@ -28,11 +28,14 @@ context('Teacher can use studentDocument URL parameter', () => {
     beforeTest(studentQueryParams);
     clueCanvas.addTile('text');
 
+    // Matched by event rather than by lastCall so an unrelated event logged after the tile is
+    // created can't break this.
     cy.get("@log")
       .should("have.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
       .invoke("getCalls")
       .then((calls) => {
         const createCall = calls.find(c => c.args[0] === LogEventName.CREATE_TILE);
+        expect(createCall, "CREATE_TILE was logged").to.exist;
         expect(createCall.args[1]).to.include({ objectType: "Text" });
         expect(createCall.args[1]).to.have.property("documentHistoryId", "first");
       });

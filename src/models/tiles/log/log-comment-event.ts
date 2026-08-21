@@ -1,6 +1,6 @@
 import { isSectionPath, parseSectionPath } from "../../../../shared/shared";
 import { Logger } from "../../../lib/logger";
-import { getTileTitleForLogging, IDocumentContext, processDocumentEventParams } from "../../../lib/logger-utils";
+import { getTileTitleForLogging, IDocumentContext, resolveTileLogContext } from "../../../lib/logger-utils";
 import { LogEventName } from "../../../lib/logger-types";
 import { logDocumentOrCurriculumEvent } from "../../document/log-document-event";
 
@@ -24,7 +24,7 @@ function processCommentEventParams(params: ILogComment, context: IDocumentContex
     return { curriculum: documentId, tileId, tileTitle: sectionTileTitle, tileType: sectionTileType, ...others };
   }
 
-  const { document, tileTitle, tileType } = processDocumentEventParams({ documentId, tileId }, context);
+  const { document, tileTitle, tileType } = resolveTileLogContext({ documentId, tileId }, context);
   if (document) {
     return { document, tileId, tileTitle, tileType, ...others };
   }

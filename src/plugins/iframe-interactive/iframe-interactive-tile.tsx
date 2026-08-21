@@ -189,9 +189,8 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   const debouncedSetState = useMemo(
     () => debounce((state: any) => {
       contentRef.current?.setInteractiveState(state);
-      // Log the interactiveState change (only reached when
-      // handleInteractiveState's JSON-diff guard saw an actual change).
-      // The persisted interactive state is the student's answer, so it is logged as a tile change.
+      // Only reached when handleInteractiveState's JSON-diff guard saw a real change. The persisted
+      // interactive state is the student's answer, so it is logged as a tile change.
       logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
         tileId: model.id,
         tileType: "IframeInteractive",
@@ -437,8 +436,8 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = undefined;
       }
-      // Cancel debounced functions to prevent MST "dead node" errors
-      // after component unmount
+      // Cancel debounced functions to prevent MST "dead node" errors after component unmount, and
+      // so a tile that is gone can't emit a change event against a stale Logger context.
       debouncedSetState.cancel();
       debouncedRequestHeight.cancel();
     };

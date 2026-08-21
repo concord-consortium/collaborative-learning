@@ -1,6 +1,6 @@
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
-import { getTileContainerForLogging, processDocumentEventParams } from "../../../lib/logger-utils";
+import { getTileContainerForLogging, resolveTileLogContext } from "../../../lib/logger-utils";
 import { DocumentModelType } from "../../document/document";
 import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
 import { isQuestionModel } from "../question/question-content";
@@ -18,7 +18,7 @@ export function isTileBaseEvent(params: Record<string, any>): params is ITileBas
 
 function processTileBaseEventParams(params: ITileBaseLogEvent) {
   const { document, tileId, ...others } = params;
-  const { sectionId, tileTitle } = processDocumentEventParams({ document, tileId });
+  const { sectionId, tileTitle } = resolveTileLogContext({ document, tileId });
   const parameters: ITileBaseLogEvent = { document, tileId, sectionId, tileTitle, ...others };
   // There may be a containerId specified in the parameters,
   // but we need to see if it has changed (ie, tile moved); if so, include both.

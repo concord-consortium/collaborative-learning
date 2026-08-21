@@ -277,7 +277,7 @@ describe("CommentThread", () => {
 
     // Thread 2 is collapsed, click to expand it
     fireEvent.click(screen.getByText("Thread 2"));
-    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-xyz");
+    expect(mockSetSelectedTileId).toHaveBeenCalledWith("tile-xyz", { programmatic: true });
   });
 
   it("collapsing a thread does not update tile selection", () => {

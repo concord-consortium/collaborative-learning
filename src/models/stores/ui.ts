@@ -14,8 +14,13 @@ let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;
 interface ISelectTileOptions {
   append?: boolean;
   dragging?: boolean;
+  // Suppresses the SELECT_TILE log; set by callers that select on the user's behalf
+  // (read-aloud, new-tile creation, chat thread) rather than in response to a direct selection.
   programmatic?: boolean;
   readOnly?: boolean;
+  // The tile the user actually acted on. Read-only selections inside a container select the
+  // container (see _userSelectTile), so without this the log would name the wrapper instead.
+  logTileId?: string;
 }
 
 // Information needed to scroll to a tile (for example, when a comment about a tile is selected)
@@ -78,6 +83,9 @@ export const UIModel = types
     standalone: false,
     errorContent: undefined as React.FC<any> | undefined,
     showChatTutor: false,
+    // The tile named in the last SELECT_TILE. Read-only tiles inside a container all select the
+    // container, so the selection alone can't tell us whether the user moved to a different tile.
+    lastLoggedTileId: undefined as string | undefined,
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -160,17 +168,30 @@ export const UIModel = types
           self.selectedTileIds.replace([tileId]);
         }
 
-        // Log a SELECT_TILE only when the tile newly enters the selection from a non-programmatic action.
-        if (!isCurrentlySelected && !options?.programmatic) {
-          logTileFocusEvent(tileId, !!options?.readOnly);
+        // A modifier-click on a selected tile removes it, which is not a focus event.
+        const isDeselecting = !!isExtendingSelection && isCurrentlySelected;
+        // Compare against the last logged tile, not just the selection: read-only siblings inside one
+        // container all select that container, so the selection alone would swallow every tile but the first.
+        const logTileId = options?.logTileId ?? tileId;
+        const isNewFocus = !isCurrentlySelected || logTileId !== self.lastLoggedTileId;
+        // Logging is a side channel; a failure here must not break the selection the user just made.
+        if (!options?.programmatic && !isDeselecting && isNewFocus) {
+          self.lastLoggedTileId = logTileId;
+          try {
+            logTileFocusEvent(logTileId, !!options?.readOnly);
+          } catch (e) {
+            console.warn("SELECT_TILE logging failed", e);
+          }
         }
       } else {
         self.selectedTileIds.clear();
+        self.lastLoggedTileId = undefined;
       }
     };
 
     const selectAllTiles = (tileIds: string[]) => {
       self.selectedTileIds.replace(tileIds);
+      self.lastLoggedTileId = undefined;
     };
 
     return {
@@ -301,10 +322,11 @@ export type UIDialogModelType = typeof UIDialogModel.Type;
  */
 function _userSelectTile(ui: UIModelType, model: ITileModel,
       options: { append?: boolean, readOnly?: boolean, container?: ITileModel }) {
+  const logTileId = model.id;
   if (options.readOnly && options.container) {
     model = options.container;
   }
-  ui.setSelectedTile(model, { append: !!options.append, readOnly: !!options.readOnly });
+  ui.setSelectedTile(model, { append: !!options.append, readOnly: !!options.readOnly, logTileId });
 }
 
 // Sometimes we get multiple selection events for a single click.

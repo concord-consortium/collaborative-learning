@@ -12,12 +12,12 @@ import { UnknownContentModel } from "../../models/tiles/unknown-content";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { userSelectTile } from "../../models/stores/ui";
 
 // required before tile creation
 import "../../register-tile-types";
 
-// Spy on the SELECT_TILE emit so we can assert both mouse and keyboard selection
-// reach it (the real helper is a no-op without an initialized Logger).
+// Spy on the SELECT_TILE emit so we can assert both mouse and keyboard selection reach it.
 const mockLogTileFocusEvent = jest.fn();
 jest.mock("../../models/tiles/log/log-tile-focus-event", () => ({
   logTileFocusEvent: (...args: any[]) => mockLogTileFocusEvent(...args)
@@ -84,6 +84,7 @@ interface IRenderOptions {
   hasToolbar?: boolean;
   numToolbarButtons?: number;
   contentEditable?: boolean;
+  readOnly?: boolean;
 }
 
 function renderFocusTrapTile(options?: IRenderOptions) {
@@ -93,6 +94,7 @@ function renderFocusTrapTile(options?: IRenderOptions) {
     hasToolbar = true,
     numToolbarButtons = 2,
     contentEditable = false,
+    readOnly = false,
   } = options ?? {};
 
   mockTitleElement = hasTitle ? document.createElement("input") : null;
@@ -133,6 +135,7 @@ function renderFocusTrapTile(options?: IRenderOptions) {
             documentContent={null}
             isUserResizable={false}
             model={tileModel}
+            readOnly={readOnly}
             onResizeRow={jest.fn()}
             onSetCanAcceptDrop={jest.fn()}
             onRequestRowHeight={jest.fn()}
@@ -285,7 +288,12 @@ describe("TileComponent focus trap", () => {
   // --- SELECT_TILE logging (mouse + keyboard) ---
 
   describe("SELECT_TILE logging", () => {
-    beforeEach(() => mockLogTileFocusEvent.mockReset());
+    beforeEach(() => {
+      mockLogTileFocusEvent.mockReset();
+      // userSelectTile is a module-level 50ms leading-edge debounce, so without this a test that
+      // runs within 50ms of the previous one has its first click swallowed.
+      userSelectTile.cancel();
+    });
 
     it("logs when a tile is selected via the mouse (mousedown)", () => {
       const { tileElement, tileModel } = renderFocusTrapTile();
@@ -301,11 +309,44 @@ describe("TileComponent focus trap", () => {
     });
 
     it("does not log again when an already-selected tile is clicked", () => {
-      const { tileElement } = renderFocusTrapTile();
-      fireEvent.mouseDown(tileElement); // selects + logs once
-      mockLogTileFocusEvent.mockClear();
-      fireEvent.mouseDown(tileElement); // already selected → no new event
-      expect(mockLogTileFocusEvent).not.toHaveBeenCalled();
+      // Separate the clicks so the second isn't swallowed by the debounce window.
+      jest.useFakeTimers();
+      try {
+        const { tileElement } = renderFocusTrapTile();
+        fireEvent.mouseDown(tileElement); // selects + logs once
+        expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+        mockLogTileFocusEvent.mockClear();
+        act(() => { jest.advanceTimersByTime(100); });
+        fireEvent.mouseDown(tileElement); // already selected → no new event
+        expect(mockLogTileFocusEvent).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it("flags a read-only selection so viewing can be told apart from editing", () => {
+      const { tileElement, tileModel } = renderFocusTrapTile({ readOnly: true });
+      fireEvent.mouseDown(tileElement);
+      expect(mockLogTileFocusEvent).toHaveBeenCalledWith(tileModel.id, true);
+    });
+
+    it("flags a read-only selection made by dragging (copy out of a resource panel)", () => {
+      // Read-only tiles are draggable (that is how work is copied out of the resource panels), and
+      // drag start is their only selection path: handlePointerDown bails on the drag element and
+      // read-only tiles get no focus trap, so onFocusEnter never runs for them either.
+      const { tileElement, tileModel } = renderFocusTrapTile({ readOnly: true });
+      const dragHandle = tileElement.querySelector('[data-testid="tool-tile-drag-handle"]') as HTMLElement;
+      expect(dragHandle).toBeTruthy();
+      const dataTransfer = { setData: jest.fn(), setDragImage: jest.fn(), getData: jest.fn() };
+      fireEvent.dragStart(dragHandle, { dataTransfer });
+      expect(mockLogTileFocusEvent).toHaveBeenCalledWith(tileModel.id, true);
+    });
+
+    it("flags a read-only selection made with the keyboard (Enter)", () => {
+      const { tileElement, tileModel } = renderFocusTrapTile({ readOnly: true });
+      act(() => { tileElement.focus(); });
+      fireEvent.keyDown(tileElement, { key: "Enter" });
+      expect(mockLogTileFocusEvent).toHaveBeenCalledWith(tileModel.id, true);
     });
   });
 
