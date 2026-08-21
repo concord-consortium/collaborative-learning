@@ -253,3 +253,125 @@ describe("createMissingDocumentMetadata curriculum fields", () => {
     }
   });
 });
+
+describe("createMissingDocumentMetadata publication fields", () => {
+  // Only `originDoc` is taken from the publication list. `groupId` there names the group that
+  // *published* the document, while Firestore's groupId is an owner-axis field meaning the document
+  // *belongs to* that group -- copying it would make a published document read as group-owned.
+  // `pubVersion` and `userId` appear on no Firestore document at all. See
+  // docs/document-metadata/firestore-migration.md.
+
+  it("takes originDoc from the personal publications list, where the key is nested in self", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["pub1", home()]]);
+    const nodes = { pub1: { type: "personalPublication", createdAt: 1, title: "Published" } };
+    const lists = {
+      [`${kRoot}/classes/c1/personalPublications`]: {
+        "-someListId": { self: { documentKey: "pub1" }, originDoc: "-origin1", pubVersion: 1, uid: "u1" }
+      }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: async (p) => lists[p] ?? nodes[p.split("/").pop()!] ?? null },
+      { dryRun: false, log: silent });
+
+    expect(store.pub1.originDoc).toBe("-origin1");
+  });
+
+  it("takes originDoc from the learning log publications list", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["pub1", home()]]);
+    const nodes = { pub1: { type: "learningLogPublication", createdAt: 1, title: "Log" } };
+    const lists = {
+      [`${kRoot}/classes/c1/publications`]: {
+        "-listId": { self: { documentKey: "pub1" }, originDoc: "-origin2" }
+      }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: async (p) => lists[p] ?? nodes[p.split("/").pop()!] ?? null },
+      { dryRun: false, log: silent });
+
+    expect(store.pub1.originDoc).toBe("-origin2");
+  });
+
+  it("never copies groupId, pubVersion or userId from a publication list entry", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["pub1", home()]]);
+    const nodes = { pub1: { type: "personalPublication", createdAt: 1 } };
+    const lists = {
+      [`${kRoot}/classes/c1/personalPublications`]: {
+        "-listId": {
+          self: { documentKey: "pub1" }, originDoc: "-o", groupId: "935672", pubVersion: 3, userId: "u9"
+        }
+      }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: async (p) => lists[p] ?? nodes[p.split("/").pop()!] ?? null },
+      { dryRun: false, log: silent });
+
+    for (const field of ["groupId", "pubVersion", "userId"]) {
+      expect(field in store.pub1).toBe(false);
+    }
+  });
+
+  it("gives a problem publication no originDoc, which none of the 14,325 in production carry", async () => {
+    const { firestore, store } = fakeFirestore({
+      sibling: { key: "sibling", offeringId: "173197", unit: "sas", investigation: "1", problem: "3" }
+    });
+    const index = new Map([["pub1", home()]]);
+    const nodes = { pub1: { type: "publication", createdAt: 1, offeringId: "173197" } };
+    const lists = {
+      [`${kRoot}/classes/c1/offerings/173197/publications`]: {
+        "-listId": { documentKey: "pub1", groupId: "935672", pubVersion: 1, userId: "935672" }
+      }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: async (p) => lists[p] ?? nodes[p.split("/").pop()!] ?? null },
+      { dryRun: false, log: silent });
+
+    expect("originDoc" in store.pub1).toBe(false);
+    expect(store.pub1).toMatchObject({ type: "publication", unit: "sas" });
+  });
+
+  it("still creates the row when the publication has no list entry", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["pub1", home()]]);
+    const nodes = { pub1: { type: "personalPublication", createdAt: 1, title: "t" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.created).toBe(1);
+    expect("originDoc" in store.pub1).toBe(false);
+  });
+
+  it("reads each publication list once, however many documents come from it", async () => {
+    const { firestore } = fakeFirestore();
+    const index = new Map([["p1", home()], ["p2", home()]]);
+    const nodes: Record<string, any> = {
+      p1: { type: "learningLogPublication", createdAt: 1 },
+      p2: { type: "learningLogPublication", createdAt: 2 }
+    };
+    const listPath = `${kRoot}/classes/c1/publications`;
+    let listReads = 0;
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      {
+        rtdbRoot: kRoot,
+        readNode: async (p) => {
+          if (p === listPath) {
+            listReads++;
+            return { a: { self: { documentKey: "p1" }, originDoc: "-o1" },
+                     b: { self: { documentKey: "p2" }, originDoc: "-o2" } };
+          }
+          return nodes[p.split("/").pop()!] ?? null;
+        }
+      },
+      { dryRun: false, log: silent });
+
+    expect(listReads).toBe(1);
+  });
+});

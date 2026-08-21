@@ -27,6 +27,23 @@ const kBatchSize = 400;
  */
 export const kOfferingContainedTypes = ["problem", "planning", "publication", "supportPublication"];
 
+/**
+ * Publication types whose `originDoc` is worth recovering, and the class-level list holding it.
+ *
+ * `originDoc` is established practice for exactly these two — 296 of 296 learning log publications and
+ * 238 of 295 personal publications carry it in production — and no practice at all for problem
+ * publications, where 0 of 14,325 do. So a problem publication is deliberately absent here.
+ *
+ * Nothing else is taken from these lists. `pubVersion` and `userId` appear on no Firestore document,
+ * and their `groupId` names the group that *published* the document, whereas Firestore's `groupId` is
+ * an owner-axis field meaning the document *belongs to* that group. See
+ * docs/document-metadata/firestore-migration.md.
+ */
+const kOriginDocLists: Record<string, (classHash: string) => string> = {
+  personalPublication: (classHash) => `classes/${classHash}/personalPublications`,
+  learningLogPublication: (classHash) => `classes/${classHash}/publications`
+};
+
 export type CreateBucket =
   | "created"            // a row this run would write, or did
   | "written"            // credited only once the commit resolved
@@ -125,6 +142,20 @@ export async function createMissingDocumentMetadata(
     return resolved?.unit ? resolved : undefined;
   };
 
+  // A publication list is shared by every publication in its class, so read each at most once.
+  const listCache = new Map<string, any>();
+  const originDocFor = async (type: string, classHash: string, key: string) => {
+    const buildPath = kOriginDocLists[type];
+    if (!buildPath) return undefined;
+    const path = `${rtdbRoot}/${buildPath(classHash)}`;
+    if (!listCache.has(path)) listCache.set(path, await readNode(path));
+    const list = listCache.get(path);
+    // Entries are keyed by their own push id; the document key is inside `self`.
+    const entry = list && Object.values(list)
+      .find((candidate: any) => candidate?.self?.documentKey === key);
+    return (entry as any)?.originDoc;
+  };
+
   let batch = firestore.batch();
   let batched = 0;
   const commit = async () => {
@@ -165,6 +196,9 @@ export async function createMissingDocumentMetadata(
     };
     // Stamped only when present, so Firestore never stores `title: undefined`.
     if (node.title != null) row.title = node.title;
+
+    const originDoc = await originDocFor(node.type, indexed.classHash, key);
+    if (originDoc != null) row.originDoc = originDoc;
 
     if (kOfferingContainedTypes.includes(node.type)) {
       const position = node.offeringId ? await curriculumFor(node.offeringId) : undefined;
