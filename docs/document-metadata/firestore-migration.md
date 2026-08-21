@@ -94,9 +94,75 @@ It isn't clear how these conflicts were created. For the context_id my best gues
 
 However would be good to digging into this more because it could mean there is some runtime or function code that is creating documents with wrong context_id's and this would then probably prevent students from reading and writing to these documents.
 
+*Confirmed 2026-08-21 (CLUE-643).* The guess above was right, and the code still does it:
+`createFirestoreMetadataDocumentIfNecessaryWithoutValidation` in
+`functions-v2/src/create-firestore-metadata-document.ts` stamps `context_id: context.classHash` — the
+commenter's class, not the document's — and it writes only when no metadata row exists yet, so a
+missing row is the precondition. A census of production on 2026-08-20 found 35 documents whose
+`context_id` disagrees with the class they live in, plus about 8 more outside `learn_concord_org`.
+Opening one throws, because the realtime-database path built from the commenter's class and the
+owner's uid never existed. CLUE-643 repairs the data and fixes the function.
+
 The title conflicts were all in learning log documents whose title was updated by what looks like a researcher user.
 
 The unit conflict was a conversion of s+s to sas which was renamed.
+
+# Metadata that still lives only in the realtime database
+
+*Recorded 2026-08-21 while working on CLUE-643, from a census of `authed/learn_concord_org`.*
+
+The Sep. 2025 migration consolidated the several *Firestore* metadata documents per CLUE document into
+one. It did not move anything out of the realtime database, which still holds document metadata in
+three kinds of place:
+
+- `classes/<class>/users/<uid>/documentMetadata/<key>` — the per-document node
+- `classes/<class>/offerings/<offeringId>/users/<uid>/documents/<key>` — problem document pointers
+- `classes/<class>/publications`, `classes/<class>/personalPublications`, and
+  `classes/<class>/offerings/<offeringId>/publications` — the publication lists
+
+Some of what those hold has **never** been mirrored into Firestore. Deleting the realtime metadata
+without moving it first would lose it. Counts are out of 114,763 production Firestore documents:
+
+| field | where it lives | Firestore documents carrying it |
+|---|---|---|
+| `pubVersion` | all three publication lists (`DBPublication`, `DBOtherPublication`) | **0** |
+| `userId` | `DBPublication` — who published | 0 (distinct from `uid`) |
+| `groupUserConnections` | `DBPublication` | 0 |
+| `groupId` | `DBPublication` — which group published | 1, and that one is a group *document* |
+| `originDoc` | `DBOtherPublication` | 539 (see below) |
+
+`originDoc` is the one already partly mirrored, and unevenly: `learningLogPublication` 296/296,
+`personalPublication` 238/295, `supportPublication` 5/287, and `publication` **0 of 14,325**. So it is
+established practice for the "other" publication types and no practice at all for problem publications.
+
+## The `groupId` collision
+
+`pubVersion` and `userId` look safe to add to Firestore under their own names. **`groupId` is not.**
+
+The two `groupId`s mean different things:
+
+- In the realtime database, `DBPublication.groupId` (`src/lib/db-types.ts`) is **the group that published** a
+  problem document, stored beside `userId` and `groupUserConnections`.
+- In Firestore, `groupId` on `IDocumentMetadataBase` is an **owner axis** field: it says the document
+  *belongs to* that group, and it is written only alongside a synthetic `group_<offeringId>_<groupId>`
+  owner uid. `getDocumentOwnerFields` (`src/models/document/document-kinds.ts`) returns it only when
+  the kind's owner type is `group`, which is why exactly one production document has it.
+
+Copying the first into the second would make every published problem document read as group-owned.
+Anything reasoning about ownership — `hasGroupOwner`, the group-membership edit check, Sort Work's
+grouping — would then be wrong about 14,325 documents.
+
+So a migration that moves the publication lists into Firestore needs a **different field name** for the
+publishing group, `publishedByGroupId` or similar, rather than reusing `groupId`.
+
+## Before the realtime metadata is deleted
+
+Inventory each of the three structures against the Firestore schema and decide, field by field, whether
+it is worth keeping. The table above is a start, not a complete list — it covers the publication lists
+and was compiled for one question. The offering document pointers have not been examined at all.
+
+There is no story for this work yet. CLUE-647 covers the narrower job of hardening the document
+creation path; collapsing the metadata locations is larger and should be its own story.
 
 # Conflicting context ids
 
