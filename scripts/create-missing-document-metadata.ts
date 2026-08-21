@@ -244,6 +244,7 @@ async function main() {
     createRtdbReader, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
   } = await import("./lib/repair-cli");
   const { buildRtdbDocumentIndex } = await import("./lib/rtdb-document-index");
+  const { createCurriculumValidator, decodeDemoOfferingId } = await import("./lib/curriculum-position");
 
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(nodeFs.readFileSync(serviceAccountFile, "utf8"));
@@ -266,7 +267,7 @@ async function main() {
   const firestore = admin.firestore();
   const reader = createRtdbReader(databaseURL, () => (credential as any).getAccessToken());
 
-  const resolveCurriculum = async (offeringId: string) => {
+  const resolveFromPortal = async (offeringId: string) => {
     try {
       const { fetchPortalOffering } = await import("./lib/fetch-portal-entity.js");
       const offering: any = await fetchPortalOffering(portal, offeringId);
@@ -277,6 +278,23 @@ async function main() {
       console.log(`    portal lookup failed for offering ${offeringId}: ${err.message}`);
       return undefined;
     }
+  };
+
+  // Demo documents have no other source: nothing in the realtime database records a curriculum
+  // position, so their offering id is it. Decoding splits a string into a name and a number and can
+  // split in the wrong place, so every result is checked against a curriculum checkout before use.
+  const curriculumRoot = process.env.CURRICULUM_ROOT ?? `${process.env.HOME}/Development/clue-curriculum`;
+  const validate = createCurriculumValidator(curriculumRoot, { exists: nodeFs.existsSync });
+  const resolveFromOfferingId = (offeringId: string) => {
+    const decoded = decodeDemoOfferingId(offeringId);
+    if (!decoded) return undefined;
+    if (!validate(decoded)) {
+      console.log(`    offering ${offeringId} decodes to ${decoded.unit} ` +
+        `${decoded.investigation}.${decoded.problem}, which the curriculum does not have — skipped`);
+      return undefined;
+    }
+    console.log(`    offering ${offeringId} -> ${decoded.unit} ${decoded.investigation}.${decoded.problem}`);
+    return decoded;
   };
 
   const selection = selectSpaces(await listSpacePaths(firestore), filter);
@@ -293,15 +311,16 @@ async function main() {
     if (duplicates.length) {
       console.log(`  ${space.label}: ${duplicates.length} keys with more than one home — NOT created`);
     }
-    // The portal fallback is only meaningful for spaces the portal actually backs. A demo space's
+    // Which fallback applies depends on where the space's offerings came from. A demo space's
     // realtime root is `demo/<name>/portals/demo` and its offering ids are authored strings like
-    // "m2s101", which learn.concord.org knows nothing about — asking would be noise, not recovery.
+    // "m2s101", which learn.concord.org knows nothing about; an authed space's are portal ids, which
+    // encode nothing. Either way the sibling lookup inside the pass is tried first.
     const portalBacked = space.label.startsWith("authed/");
     const { counts, skipped } = await createMissingDocumentMetadata(
       firestore, space.spacePath, index,
       {
         rtdbRoot: space.rtdbRoot, readNode: reader.readNode,
-        resolveCurriculum: portalBacked ? resolveCurriculum : undefined
+        resolveCurriculum: portalBacked ? resolveFromPortal : async (id: string) => resolveFromOfferingId(id)
       },
       { dryRun }
     );
