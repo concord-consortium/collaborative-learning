@@ -42,8 +42,32 @@ alias of the annotation system's `IClueObjectSnapshot`, so the two addressing sc
 apart. Resolvers register themselves as a module side effect, and a resolver belongs wherever its
 kind's knowledge lives: the `object` resolver is here, but the `variable` one is registered by
 `shared-variables-registration.ts`, so core never has to know what a variable is.
-`resolveHighlightReference` fails quiet: an unknown kind or an unresolvable reference yields
-no targets and no error.
+`resolveHighlightReference` fails quiet in the sense that nothing throws, but "unresolvable"
+does not mean the same thing for both kinds, and the difference matters to anyone reading a
+target list. An unknown kind yields no targets. A `variable` reference nothing binds yields no
+targets. An `object` reference is returned **unchanged, without checking that the object
+exists** — so a reference to a deleted node yields one target that no tile will render. The
+visible result is the same either way (no ring appears), but do not assume every entry in a
+resolved list corresponds to something present in the document.
+
+**Why a reference carries an id and not a readable name.** The workspace summary an AI reads is
+full of readable names — `Tile 3`, `Dataflow:Sensor 1` — and pointing with one of those looks like
+an obvious simplification. It is not, because the failure modes are asymmetric. The summary an AI
+was given is routinely one edit behind the document by the time its reply arrives. A stale **id**
+resolves to nothing renderable and the ring silently does not appear. A stale **name or index**
+resolves to the *wrong* object, and rings it confidently.
+
+Both naming schemes are also unstable under ordinary use. `Tile N` is positional, assigned by
+walking row order, so inserting a tile above renumbers everything below it. `type:name#N` derives
+from a Dataflow node's `orderedDisplayName`, which is **student-editable** — renaming a node breaks
+a name-based reference through the most ordinary action available to them.
+
+The distinction to hold onto: every other use of names in the summary is *descriptive*, where being
+slightly stale costs a little accuracy. A highlight reference is *operative* — it moves a ring on a
+student's screen. So the summary carries both: readable names for the model to reason with, and ids
+for it to cite. `src/models/highlights/highlight-reference-from-summary.test.ts` holds that line:
+it summarizes the demo document, asserts the summary names every tile id and Dataflow node id, and
+resolves a reference built from those ids.
 
 **Which kind matters, and why the multi-tile behavior is not the feature.** `object` is the kind
 the system exists for: an AI saying "click that button in the Dataflow tile" should light that
