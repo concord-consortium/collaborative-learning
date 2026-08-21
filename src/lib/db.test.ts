@@ -390,7 +390,7 @@ describe("db", () => {
     registerClassWideDocumentKind("testProfileStamp", "DQB", "msu");
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     await db.createFirestoreMetadataDocument({
-      documentKey: "dqb", type: GroupDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
+      documentKey: "dqb", type: AxesDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
     });
     // Every kind a unit declares lands on this one profile, which is what makes the profile — not the
     // kind — the cohort a migration can select on.
@@ -401,7 +401,7 @@ describe("db", () => {
   });
 
   it("does NOT stamp an axis profile on a personal document", async () => {
-    // Same gate as `kind`: only type:"group" documents are stamped, so nothing is written that would have
+    // Same gate as `kind`: only axes-typed documents are stamped, so nothing is written that would have
     // to be migrated if the other types' kinds are reorganized.
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
@@ -431,7 +431,7 @@ describe("db", () => {
       documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
     });
     expect(written).toMatchObject({ kind: "group", concurrent: true });
-    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true });
+    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
   });
 
   it("does NOT stamp kind/concurrent on a personal document", async () => {

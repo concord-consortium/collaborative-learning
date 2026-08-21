@@ -664,7 +664,7 @@ export class DB {
     // The axis profile the document is created at, recorded so a later migration can select every document
     // made from one profile without querying the axis fields it is there to change. Gated with the kind
     // fields above, for the same reason.
-    const profileName = type === GroupDocument ? getDocumentAxisProfileName(kind) : undefined;
+    const profileName = isAxesType(type) ? getDocumentAxisProfileName(kind) : undefined;
     const profileField = profileName ? { axisProfile: profileName } : {};
 
     const firestoreMetadata: IDocumentMetadataAtCreation = {
