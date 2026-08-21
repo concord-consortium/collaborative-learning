@@ -195,6 +195,13 @@ written record of why a transitional rule exists — so they are updated with th
 [firestore.rules:222-223](../../../firestore.rules#L222-L223), and the header of
 [backfill-group-document-axes.ts](../../../scripts/backfill-group-document-axes.ts).
 
+The same is true of the current-state docs that describe the stamp gate by quoting the value it tests:
+["Which documents get stamped"](../../document-axes/target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)
+and the "Already visible in the code" note beside it, the stamping sentence in
+[docs/document-axes/README.md](../../document-axes/README.md), and the `axisProfile` and `uid, type, key`
+entries in [docs/document-metadata/metadata-fields.md](../../document-metadata/metadata-fields.md) — the last
+of which also has to stop calling `type` unconditionally immutable, since the sweep rewrites it.
+
 ## 6. The sweep script, and why it needs restructuring
 
 [`scripts/backfill-group-document-axes.ts`](../../../scripts/backfill-group-document-axes.ts) gains
@@ -391,9 +398,9 @@ which stopped being true once the script also wrote `type: "axes"` and merged it
   §5a, prose already listed in §5d, or an unrelated use of the word — a CSS class name
   (`group-virtual-document.tsx:54`), a drawing-object type, a sticky-note audience, a Sort Work section
   key, or the `DocumentOwnerType` `"group"`, which is the *owner* axis and stays. Re-run it at
-  implementation time rather than trusting this list, and leave the `GroupDocument` constant in place
-  in place — it survives the cleanup anyway as the group kind's name (§7), so until then the compiler
-  keeps pointing at anything still using it as a *type*.
+  implementation time rather than trusting this list, and leave the `GroupDocument` constant in place — it
+  survives the cleanup anyway as the group kind's name (§7), so until then the compiler keeps pointing at
+  anything still using it as a *type*.
 - **The `kind` / `type` coincidence for group documents.** A group document's `kind` is `"group"` and,
   today, so is its `type`. They separate here. Anything that happens to rely on their being equal would
   break, and nothing found so far does — but it is the kind of coupling that hides in tests.

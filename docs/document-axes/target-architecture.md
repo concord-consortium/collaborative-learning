@@ -179,8 +179,10 @@ permission policy's rules all live in code, so changing them changes every docum
 Every `type` is registered as a kind, so the registry can answer `kind → axis fields` for any document. Writing
 those fields into stored metadata is deliberately narrower: both stamp sites — creation
 (`createFirestoreMetadataDocument`) and the client-side lazy backfill when a document is opened (`db.ts`) —
-write the kind axis fields only for the types converted so far, which today means `type: "group"` (regular group
-documents and class-wide documents, which share that transitional type).
+write the kind axis fields only for the types converted so far, which today means the generic axes type
+(regular group documents and class-wide documents, which share it). Two values of that type are live at once:
+documents created since CLUE-610's rename store `"axes"`, ones predating it still store `"group"`, and the gate
+(`isAxesType`) accepts either until CLUE-604's sweep has rewritten the stragglers in every environment.
 
 The gate is a stage in the progression, not a permanent rule:
 
@@ -284,13 +286,14 @@ is `doc.scope`-shaped and lives with the axis layer, not scattered per feature. 
 only in the registry, factory, and migration modules (the core rule); a guard that tests `offeringId` is an
 axis-field check, not a kind check, so it is allowed everywhere.
 
-**Already visible in the code.** Group and class-wide documents both store `type: "group"` yet have different
-scope shapes (group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). Those scope fields live
-in the Firestore `IDocumentMetadata`, stamped from the kind's registered scope — not from `type` — so a single
-`type: "group"` covers two shapes and only a guard on the scope fields tells them apart. (The RTDB
-`DBGroupDocMetadata` is now a single bare `type: "group"` shape shared by both, precisely because `type` can no
-longer carry the distinction.) This transitional shared `type: "group"` is the first concrete case motivating
-the guard approach ahead of `type` removal.
+**Already visible in the code.** Group and class-wide documents share one type yet have different scope shapes
+(group: `offeringId` + `groupId`; class-wide: `unit`, no offering/group). Those scope fields live in the
+Firestore `IDocumentMetadata`, stamped from the kind's registered scope — not from `type` — so a single axes
+type covers two shapes and only a guard on the scope fields tells them apart. That the value is now spelled
+`"axes"` rather than `"group"` is the naming catching up with this: it says only "read my axes", which is
+exactly what it carried before the rename. (The RTDB `DBGroupDocMetadata` is a single bare shape shared by
+both, precisely because `type` can no longer carry the distinction.) This shared type is the first concrete
+case motivating the guard approach ahead of `type` removal.
 
 **Deferred:** the concrete requirement-type set and guard inventory land with the field-shape work already
 deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This section fixes the *approach*
