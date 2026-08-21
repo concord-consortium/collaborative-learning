@@ -375,3 +375,29 @@ describe("createMissingDocumentMetadata publication fields", () => {
     expect(listReads).toBe(1);
   });
 });
+
+describe("createMissingDocumentMetadata offering lookup caching", () => {
+  it("asks about an offering once even when the answer is that it cannot be resolved", async () => {
+    // Demo spaces carry authored offering ids the portal knows nothing about. Without caching the
+    // failure, every document sharing one re-queries, turning a handful of offerings into hundreds
+    // of pointless round trips across 462 demo spaces.
+    const { firestore } = fakeFirestore();
+    const index = new Map([["k1", home()], ["k2", home()], ["k3", home()]]);
+    const nodes = {
+      k1: { type: "problem", createdAt: 1, offeringId: "m2s101" },
+      k2: { type: "problem", createdAt: 2, offeringId: "m2s101" },
+      k3: { type: "problem", createdAt: 3, offeringId: "m2s101" }
+    };
+    let calls = 0;
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      {
+        rtdbRoot: kRoot, readNode: nodeReaderFor(nodes),
+        resolveCurriculum: async () => { calls++; return undefined; }
+      },
+      { dryRun: false, log: silent });
+
+    expect(calls).toBe(1);
+    expect(result.counts.unresolvedCurriculum).toBe(3);
+  });
+});

@@ -135,11 +135,14 @@ export async function createMissingDocumentMetadata(
   }
 
   // Memoizes both sources, so an offering is asked about once however many documents share it.
+  // Failures are cached as `undefined` too: demo spaces carry authored offering ids the portal knows
+  // nothing about, and without this every document sharing one would re-query.
   const curriculumFor = async (offeringId: string): Promise<ICurriculumPosition | undefined> => {
     if (curriculumByOffering.has(offeringId)) return curriculumByOffering.get(offeringId);
     const resolved = resolveCurriculum ? await resolveCurriculum(offeringId) : undefined;
-    if (resolved?.unit) curriculumByOffering.set(offeringId, resolved);
-    return resolved?.unit ? resolved : undefined;
+    const usable = resolved?.unit ? resolved : undefined;
+    curriculumByOffering.set(offeringId, usable as ICurriculumPosition);
+    return usable;
   };
 
   // A publication list is shared by every publication in its class, so read each at most once.
@@ -227,7 +230,95 @@ export async function createMissingDocumentMetadata(
       `already present ${counts.alreadyPresent}, no content ${counts.skippedNoContent}, ` +
       `unaddressable ${counts.skippedUnaddressable}, unreadable ${counts.nodeUnreadable}, ` +
       `unresolved curriculum ${counts.unresolvedCurriculum}`);
-  if (dryRun) log("DRY RUN — set APPLY=1 to write");
 
   return { counts, skipped };
+}
+
+async function main() {
+  // Imported lazily so the Jest test can import createMissingDocumentMetadata without loading
+  // firebase-admin or the import.meta-using script-utils module.
+  const admin = (await import("firebase-admin")).default;
+  const nodeFs = (await import("fs")).default;
+  const { getScriptRootFilePath, getProblemDetails } = await import("./lib/script-utils.js");
+  const {
+    createRtdbReader, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
+  } = await import("./lib/repair-cli");
+  const { buildRtdbDocumentIndex } = await import("./lib/rtdb-document-index");
+
+  const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+  const serviceAccount = JSON.parse(nodeFs.readFileSync(serviceAccountFile, "utf8"));
+  const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
+  const dryRun = process.env.APPLY !== "1";
+  const filter = parseSpacesFilter(process.env.SPACES);
+  // The portal is only consulted for offerings no existing document describes. Without a token the
+  // run still works; those documents are reported as unresolved instead of written half-populated.
+  const portal = process.env.PORTAL ?? "https://learn.concord.org";
+
+  console.log(`- Service account: ${serviceAccount.client_email}`);
+  console.log(`- Firebase project: ${serviceAccount.project_id}`);
+  console.log(`- Realtime Database URL: ${databaseURL}`);
+  console.log(`- Portal (curriculum fallback): ${portal}`);
+  console.log(`- Spaces: ${filter ? filter.join(", ") : "all"}`);
+  console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will write"}`);
+
+  const credential = admin.credential.cert(serviceAccountFile);
+  admin.initializeApp({ credential, databaseURL });
+  const firestore = admin.firestore();
+  const reader = createRtdbReader(databaseURL, () => (credential as any).getAccessToken());
+
+  const resolveCurriculum = async (offeringId: string) => {
+    try {
+      const { fetchPortalOffering } = await import("./lib/fetch-portal-entity.js");
+      const offering: any = await fetchPortalOffering(portal, offeringId);
+      if (!offering?.activity_url) return undefined;
+      return getProblemDetails(offering.activity_url);
+    } catch (err: any) {
+      // An offering the portal cannot answer for is reported by the pass, not fatal to the run.
+      console.log(`    portal lookup failed for offering ${offeringId}: ${err.message}`);
+      return undefined;
+    }
+  };
+
+  const selection = selectSpaces(await listSpacePaths(firestore), filter);
+  for (const { label, reason } of selection.refused) console.log(`- skipping ${label}: ${reason}`);
+  for (const path of selection.unrecognized) console.log(`- unrecognized space path: ${path}`);
+  for (const name of selection.filterMisses) console.log(`- SPACES named "${name}", which matches no space`);
+  console.log(`- Running over ${selection.selected.length} spaces\n`);
+
+  const totals = emptyCounts();
+  const allSkipped: Record<string, number> = {};
+  for (const space of selection.selected) {
+    const { index, duplicates, classes } = await buildRtdbDocumentIndex(space.rtdbRoot, reader.readChildKeys);
+    console.log(`  ${space.label}: ${classes} classes, ${index.size} indexed documents`);
+    if (duplicates.length) {
+      console.log(`  ${space.label}: ${duplicates.length} keys with more than one home — NOT created`);
+    }
+    // The portal fallback is only meaningful for spaces the portal actually backs. A demo space's
+    // realtime root is `demo/<name>/portals/demo` and its offering ids are authored strings like
+    // "m2s101", which learn.concord.org knows nothing about — asking would be noise, not recovery.
+    const portalBacked = space.label.startsWith("authed/");
+    const { counts, skipped } = await createMissingDocumentMetadata(
+      firestore, space.spacePath, index,
+      {
+        rtdbRoot: space.rtdbRoot, readNode: reader.readNode,
+        resolveCurriculum: portalBacked ? resolveCurriculum : undefined
+      },
+      { dryRun }
+    );
+    for (const bucket of Object.keys(totals) as CreateBucket[]) totals[bucket] += counts[bucket];
+    for (const s of skipped) allSkipped[s.reason] = (allSkipped[s.reason] ?? 0) + 1;
+  }
+
+  console.log("\ndone", JSON.stringify(totals, null, 2));
+  console.log("skipped by reason", JSON.stringify(allSkipped, null, 2));
+  if (dryRun) console.log("DRY RUN — set APPLY=1 to write");
+  process.exit(0);
+}
+
+// Run only when invoked directly (via tsx), never when imported by the Jest test.
+if (!process.env.JEST_WORKER_ID) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }

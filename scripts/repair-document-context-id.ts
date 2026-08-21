@@ -138,7 +138,70 @@ export async function repairDocumentContextId(
   log(`${spacePath}: needs repair ${counts.needsRepair}, written ${counts.written}, ` +
       `already correct ${counts.alreadyCorrect}, not in index ${counts.notInIndex}, ` +
       `uid mismatches ${counts.uidMismatch}`);
-  if (dryRun) log("DRY RUN — set APPLY=1 to write");
 
   return { counts, repairs, uidMismatches };
+}
+
+async function main() {
+  // Imported lazily so the Jest test can import repairDocumentContextId without loading
+  // firebase-admin or the import.meta-using script-utils module.
+  const admin = (await import("firebase-admin")).default;
+  const nodeFs = (await import("fs")).default;
+  const { getScriptRootFilePath } = await import("./lib/script-utils.js");
+  const {
+    createRtdbReader, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
+  } = await import("./lib/repair-cli");
+  const { buildRtdbDocumentIndex } = await import("./lib/rtdb-document-index");
+
+  const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+  const serviceAccount = JSON.parse(nodeFs.readFileSync(serviceAccountFile, "utf8"));
+  const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
+  const dryRun = process.env.APPLY !== "1";
+  const filter = parseSpacesFilter(process.env.SPACES);
+
+  console.log(`- Service account: ${serviceAccount.client_email}`);
+  console.log(`- Firebase project: ${serviceAccount.project_id}`);
+  console.log(`- Realtime Database URL: ${databaseURL}`);
+  console.log(`- Spaces: ${filter ? filter.join(", ") : "all"}`);
+  console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will write"}`);
+
+  const credential = admin.credential.cert(serviceAccountFile);
+  admin.initializeApp({ credential, databaseURL });
+  const firestore = admin.firestore();
+  const reader = createRtdbReader(databaseURL, () => (credential as any).getAccessToken());
+
+  const selection = selectSpaces(await listSpacePaths(firestore), filter);
+  for (const { label, reason } of selection.refused) console.log(`- skipping ${label}: ${reason}`);
+  for (const path of selection.unrecognized) console.log(`- unrecognized space path: ${path}`);
+  for (const name of selection.filterMisses) console.log(`- SPACES named "${name}", which matches no space`);
+  console.log(`- Running over ${selection.selected.length} spaces\n`);
+
+  const totals = { needsRepair: 0, written: 0, alreadyCorrect: 0, notInIndex: 0, uidMismatch: 0 };
+  for (const space of selection.selected) {
+    const { index, duplicates, classes } = await buildRtdbDocumentIndex(space.rtdbRoot, reader.readChildKeys);
+    console.log(`  ${space.label}: ${classes} classes, ${index.size} indexed documents`);
+    if (duplicates.length) {
+      console.log(`  ${space.label}: ${duplicates.length} keys with more than one home — NOT repaired`);
+      for (const d of duplicates.slice(0, 10)) console.log(`    ${d.key}: ${d.homes.join(" and ")}`);
+    }
+    const { counts, repairs, uidMismatches } = await repairDocumentContextId(
+      firestore, space.spacePath, index, { dryRun }
+    );
+    // Small enough to read in full, and the whole point of the run.
+    for (const r of repairs) console.log(`    ${r.key} [${r.type}] ${r.from} -> ${r.to}`);
+    for (const m of uidMismatches) console.log(`    uid mismatch ${m.key}: ${m.stored} vs ${m.indexed}`);
+    for (const bucket of Object.keys(totals) as Array<keyof typeof totals>) totals[bucket] += counts[bucket];
+  }
+
+  console.log("\ndone", JSON.stringify(totals, null, 2));
+  if (dryRun) console.log("DRY RUN — set APPLY=1 to write");
+  process.exit(0);
+}
+
+// Run only when invoked directly (via tsx), never when imported by the Jest test.
+if (!process.env.JEST_WORKER_ID) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }
