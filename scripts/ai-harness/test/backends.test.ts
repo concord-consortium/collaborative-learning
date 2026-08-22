@@ -20,7 +20,6 @@ const emptyDocument = { rowOrder: [], rowMap: {}, tileMap: {} };
 // ---------------------------------------------------------------------------
 
 interface FakeOptions {
-  png?: Buffer;
   boundingBox?: { x: number; y: number; width: number; height: number } | null;
   /** Makes the parent never report that it posted the document to the iframe. */
   neverPostsInitialValue?: boolean;
@@ -54,18 +53,14 @@ function fakeBrowser(options: FakeOptions = {}) {
     closedBrowser: 0,
     frameHeights: [] as number[]
   };
-  const png = options.png ?? makeTestPng(960, 1420);
   const handlers = new Map<string, ((payload: any) => void)[]>();
 
   const element: ElementLike = {
-    // Follows the frame height the backend set, the way a real element's box does.
+    // Follows the frame height the backend set, the way a real element's box does. Measurement is
+    // all an element is for now — captures are page screenshots clipped to this box.
     boundingBox: async () => options.boundingBox === undefined
       ? { x: 0, y: 0, width: 960, height: state.frameHeights.at(-1) ?? 1420 }
-      : options.boundingBox,
-    screenshot: async () => {
-      state.screenshots += 1;
-      return png;
-    }
+      : options.boundingBox
   };
 
   const tiles = options.tiles ?? [];
@@ -85,19 +80,25 @@ function fakeBrowser(options: FakeOptions = {}) {
       // top-level tile several pictures with nothing here noticing. `local-render.integration.ts`
       // is where that is checked against a real DOM.
       expect(selector).toBe(".tool-tile:not(.tool-tile .tool-tile)");
+      // Boxes only: `ElementLike` no longer declares `screenshot`, so a capture that tried to
+      // photograph the element rather than clip a page screenshot would not compile.
       return tiles.map((tile) => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx }),
-        screenshot: async () => {
-          state.screenshots += 1;
-          return makeTestPng(tile.widthPx, tile.heightPx);
-        }
+        boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx })
       }));
     }
   };
 
   const page: PageLike = {
     setViewport: async (viewport) => { state.viewport = viewport; },
-    screenshot: async () => makeTestPng(40, 40),
+    // A clipped call is the per-tile capture and returns a PNG of the clip's size, the way a real
+    // page screenshot would; an unclipped call is the evidence capture.
+    screenshot: async (capture) => {
+      if (capture?.clip) {
+        state.screenshots += 1;
+        return makeTestPng(Math.round(capture.clip.width), Math.round(capture.clip.height));
+      }
+      return makeTestPng(40, 40);
+    },
     goto: async (url) => {
       state.url = url;
       // Listeners registered before navigation see the page's events, as puppeteer delivers them.
@@ -142,7 +143,7 @@ function fakeBrowser(options: FakeOptions = {}) {
     },
     close: async () => { state.closedBrowser += 1; }
   };
-  return { browser, state, png };
+  return { browser, state };
 }
 
 /**
@@ -202,7 +203,7 @@ describe("the puppeteer backend", () => {
   });
 
   it("renders the shared HTML through the iframe pathway and screenshots the iframe", async () => {
-    const { backend, state, png } = makeBackend();
+    const { backend, state } = makeBackend();
     servedPages.clear();
     const outcome = await backend.render({ docId: "drawing", content: emptyDocument });
     // Navigated to a real http origin, not injected: `setContent` leaves an opaque origin, and
@@ -217,9 +218,16 @@ describe("the puppeteer backend", () => {
     }));
     // And it is no longer being served, because the render is over.
     expect(servedPages.has("drawing")).toBe(false);
-    expect(state.viewport).toEqual({ width: 960, height: 1024 });
+    // The viewport grew to cover the resized frame (1200px of rows + 80px chrome + 64px pad):
+    // Chromium rasterizes a cross-site iframe only near the visible viewport, so a viewport shorter
+    // than the frame captures the lower rows as blank pixels.
+    expect(state.viewport).toEqual({ width: 960, height: 1344 });
     expect(state.screenshots).toBe(1);
-    expect(outcome.images).toEqual([{ bytes: png, url: null, tileId: null, purpose: "full-document" }]);
+    // The capture is a page screenshot clipped to the iframe's box — 960px wide by the 1280px the
+    // backend just resized the frame to (1200px of rows + 80px chrome) — not an element capture.
+    expect(outcome.images).toEqual([{
+      bytes: makeTestPng(960, 1280), url: null, tileId: null, purpose: "full-document"
+    }]);
   });
 
   it("reports what it could see, so a render can be verified rather than just produced", async () => {
@@ -352,13 +360,16 @@ describe("the puppeteer backend", () => {
   });
 
   it("bounds a capture that hangs inside screenshot()", async () => {
+    // The capture is a clipped page screenshot now, but page.screenshot() still takes no timeout of
+    // its own — a compositor wedged by animating content hangs exactly here, so the deadline has to
+    // cover it. The unclipped evidence capture stays live: the failure path photographs the page.
     const fake = fakeBrowser();
     (fake.browser as any).newPage = async () => {
       const page = await fakeBrowser().browser.newPage();
-      (page as any).$ = async () => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1420 }),
-        screenshot: () => new Promise(() => undefined)
-      });
+      const evidence = page.screenshot.bind(page);
+      (page as any).screenshot = (options: { clip?: unknown }) => options?.clip
+        ? new Promise(() => undefined)
+        : evidence(options as never);
       return page;
     };
     const backend = puppeteerBackend({
@@ -586,8 +597,7 @@ describe("the puppeteer backend", () => {
       (page as any).$ = async () => ({
         boundingBox: async () => ({
           x: 0, y: 0, width: 960, height: fake.state.frameHeights.at(-1) ?? 500
-        }),
-        screenshot: async () => makeTestPng(960, 1880)
+        })
       });
       (page as any).frames = () => [{
         url: () => "http://localhost:8080/iframe.html",

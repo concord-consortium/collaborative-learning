@@ -116,8 +116,11 @@ stands.
   document is written anywhere else. That whole tree is gitignored (see the root `.gitignore`).
 - Committed example corpora live in `examples/`, *outside* the ignored tree, so there are no
   allowlist exceptions inside an ignored directory.
-- `import` will not set the `production` source; only the (not yet built, and gated) `pull` command
-  may, and it will require an explicit sign-off flag.
+- `import --source production` is gated: it is refused without `--production-data-approved`, the
+  flag that names the data-agreements sign-off covering real student or teacher work on a
+  development machine. (This gate was planned for the milestone-6 `pull` command; the teacher-PD
+  corpus arriving through export + import brought it forward. `pull`, when built, carries the same
+  flag.)
 - **Production student work is sensitive everywhere it flows**, not just at import. When production
   corpora arrive: delete them when the experiment concludes, keep document ids and Firestore paths
   out of anything that leaves the team, and remember that injected related-summaries data contains
@@ -295,10 +298,19 @@ each one is load-bearing:
   scroll height — the content lives in `#app` — so that message reports 0 for a fully rendered
   document. The harness can measure in-frame because it drives the browser; production cannot, which
   is why an explicit "document rendered" message remains the right production-side fix.
-- **The frame is sized from the document's own tile rows** before the capture. CLUE lays out to fill
-  its viewport rather than its content, so at the default 500px a longer document is simply absent
-  from the picture, with nothing in the DOM reporting that it was cut off. The capture is then
-  checked against the measured content, which is what keeps `captureMode: "full-document"` honest.
+- **The frame is sized from the document's own tile rows** before the capture — top-level rows
+  only, since a Question tile's nested rows are `.tile-row` elements whose height is already inside
+  their parent's. CLUE lays out to fill its viewport rather than its content, so at the default
+  500px a longer document is simply absent from the picture, with nothing in the DOM reporting that
+  it was cut off. The capture is then checked against the measured content, which is what keeps
+  `captureMode: "full-document"` honest.
+- **The render page is served same-site with a localhost CLUE server, and the viewport grows to
+  cover the resized frame.** With the page on `127.0.0.1` and CLUE on `localhost`, the CLUE iframe
+  is cross-site: Chromium isolates it in its own process, rasterizes it only near the visible
+  viewport — lower rows mount and measure but capture as blank pixels — and screenshotting such a
+  frame can hang outright on a page with continuously animating content (a ticking Dataflow
+  program). Found with the first real-document corpus; every synthetic fixture was short enough to
+  hide it.
 
 It is a **local** backend, not an offline one. The CLUE page it loads may still pull fonts, images
 or other assets from elsewhere. If offline operation ever has to be a guarantee, the backend must

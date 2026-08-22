@@ -79,7 +79,16 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   const fakeBrowser = () => ({
     newPage: async () => ({
       setViewport: async () => undefined,
-      screenshot: async () => makeTestPng(40, 40),
+      // A clipped call is the capture — the full-document capture is a page screenshot clipped to
+      // the iframe's box, never an element screenshot. The docId is not visible here, so each
+      // capture takes the next document off the queue. An unclipped call is the evidence capture.
+      screenshot: async (options?: { clip?: { width: number; height: number } }) => {
+        if (options?.clip) {
+          lastRenderedDoc = pendingDocs.shift() ?? lastRenderedDoc;
+          return pngFor(lastRenderedDoc);
+        }
+        return makeTestPng(40, 40);
+      },
       goto: async () => undefined,
       evaluate: async (script: unknown) => {
         const match = /frame\.height = (\d+)/.exec(String(script));
@@ -89,22 +98,16 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       waitForFunction: async () => true,
       $: async () => ({
         // Follows the height the backend set, the way a real element's box does. A fixed box let a
-        // render that never resized still look like a full-document capture.
-        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: frameHeights.at(-1) ?? 500 }),
-        // The docId is not visible here, so each capture takes the next document off the queue.
-        screenshot: async () => {
-          lastRenderedDoc = pendingDocs.shift() ?? lastRenderedDoc;
-          return pngFor(lastRenderedDoc);
-        }
+        // render that never resized still look like a full-document capture. Boxes are all an
+        // element supplies now — `ElementLike` has no `screenshot`.
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: frameHeights.at(-1) ?? 500 })
       }),
       frames: () => [{
         url: () => "http://localhost:8080/iframe.html?unit=harness-render&unwrapped&readOnly",
         // Two top-level tiles, for the per-tile mode. The full-height mode never asks.
         $$: async () => [
-          { boundingBox: async () => ({ x: 0, y: 0, width: 300, height: 200 }),
-            screenshot: async () => makeTestPng(300, 200) },
-          { boundingBox: async () => ({ x: 0, y: 0, width: 400, height: 260 }),
-            screenshot: async () => makeTestPng(400, 260) }
+          { boundingBox: async () => ({ x: 0, y: 0, width: 300, height: 200 }) },
+          { boundingBox: async () => ({ x: 0, y: 0, width: 400, height: 260 }) }
         ],
         // High enough for any fixture in the committed corpus — see render-command.test.ts.
         // Without `contentRowsHeightPx` the backend compares against `undefined`, skips the
@@ -544,19 +547,23 @@ describe("a per-tile render, and the sets a run can send from it", () => {
   const fakeBrowser = () => ({
     newPage: async () => ({
       setViewport: async () => undefined,
-      screenshot: async () => makeTestPng(40, 40),
+      // Clipped calls are captures — per-tile clips a page screenshot to each tile's box, and the
+      // resulting PNG is the clip's size, the way a real page screenshot works. Unclipped calls are
+      // the evidence capture.
+      screenshot: async (options?: { clip?: { width: number; height: number } }) =>
+        options?.clip
+          ? makeTestPng(Math.round(options.clip.width), Math.round(options.clip.height))
+          : makeTestPng(40, 40),
       goto: async () => undefined,
       evaluate: async () => undefined as never,
       waitForFunction: async () => true,
       $: async () => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1420 }),
-        screenshot: async () => makeTestPng(960, 1420)
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1420 })
       }),
       frames: () => [{
         url: () => "http://localhost:8080/iframe.html?unit=harness-render&unwrapped&readOnly",
         $$: async () => tiles.map((tile) => ({
-          boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx }),
-          screenshot: async () => makeTestPng(tile.widthPx, tile.heightPx)
+          boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx })
         })),
         evaluate: async (script: unknown) => (String(script).includes("data-tool-id")
           ? tiles.map((tile) => tile.tileId)

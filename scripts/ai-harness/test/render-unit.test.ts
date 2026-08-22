@@ -70,6 +70,23 @@ describe("serving the rendering unit", () => {
     }
   });
 
+  it("answers the teacher-guide probe with a CORS-readable 404, not a network error", async () => {
+    // CLUE probes for an optional teacher-guide/content.json beside every unit. Its fetch code
+    // handles a real 404 gracefully but wraps a network-level failure in a thrown Error — and a
+    // 404 without the CORS header IS a network-level failure to a cross-origin caller. With the
+    // render page served same-site (backend v3), that throw surfaces as a fatal page error and
+    // failed every document until the header was added to this path.
+    const server = await startRenderUnitServer({ clueUrl: "http://localhost:8080" });
+    const origin = server.unitUrl.replace("/content.json", "");
+    try {
+      const response = await fetch(`${origin}/teacher-guide/content.json`);
+      expect(response.status).toBe(404);
+      expect(response.headers.get("access-control-allow-origin")).toBe("*");
+    } finally {
+      await server.close();
+    }
+  });
+
   it("answers 404 for any path but /content.json", async () => {
     // It exists so a render can name a unit by URL, not to be a file server: there is no path that
     // reaches the file system at all.
