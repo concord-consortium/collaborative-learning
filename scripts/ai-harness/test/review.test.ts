@@ -36,9 +36,9 @@ function modelFor(
 }
 
 /** The report's own tags. Anything else in the output came from a document. */
-const kOwnTags = ["article", "body", "dd", "div", "dl", "dt", "h1", "h2", "h3", "h4", "head", "html",
-  "img", "li", "meta", "p", "pre", "span", "strong", "style", "table", "tbody", "td", "th", "thead",
-  "title", "tr", "ul"];
+const kOwnTags = ["article", "body", "dd", "details", "div", "dl", "dt", "h1", "h2", "h3", "h4",
+  "head", "html", "img", "li", "meta", "p", "pre", "span", "strong", "style", "summary", "table",
+  "tbody", "td", "th", "thead", "title", "tr", "ul"];
 
 describe("escaping student-authored content", () => {
   const fixture = buildReviewFixture("review-escaping");
@@ -96,15 +96,29 @@ describe("the page can be read with a keyboard", () => {
   const fixture = buildReviewFixture("review-accessibility");
   const html = renderReviewHtml(modelFor(fixture));
 
-  it("makes every clipped block focusable, so it can be scrolled without a mouse", () => {
-    // `pre` clips at 32rem and scrolls, and summaries routinely run past that. A scroll container
-    // without `tabindex` cannot be focused or scrolled by keyboard in Firefox or Safari, so a
-    // keyboard-only judge cannot read past the clip.
+  it("creates no nested scroll region, and no tab stop compensating for one", () => {
+    // `pre` used to clip at 32rem and scroll, which trapped the page scroll mid-document and
+    // needed a `tabindex` on every block so keyboard users could scroll past the clip. The inputs
+    // now collapse instead (see below), so an opened summary is simply as tall as its content —
+    // the clip, the inner scrollbar and the compensating tab stops are all gone, and reintroducing
+    // any of them would bring the scroll trap back.
+    expect(html).not.toMatch(/pre\s*{[^}]*(max-height|overflow-y)/);
     const blocks = [...html.matchAll(/<pre\b([^>]*)>/g)].map((match) => match[1]);
     expect(blocks.length).toBeGreaterThan(0);
-    expect(blocks.every((attributes) => attributes.includes('tabindex="0"'))).toBe(true);
-    // And each announces what it is, rather than being an unnamed region.
-    expect(blocks.every((attributes) => /aria-label="[^"]+"/.test(attributes))).toBe(true);
+    expect(blocks.some((attributes) => attributes.includes("tabindex"))).toBe(false);
+  });
+
+  it("collapses each document's inputs by default, behind a keyboard-operable summary", () => {
+    // The pictures and summaries are most of the page. A closed `details` keeps them out of a
+    // judge's way without JavaScript — the report stays a plain shareable file — and `summary` is
+    // focusable and toggleable by keyboard natively. Closed by default is the point: an `open`
+    // attribute here would put every screenshot back into the scroll path.
+    const details = [...html.matchAll(/<details\b([^>]*)>/g)].map((match) => match[1]);
+    expect(details.length).toBeGreaterThan(0);
+    expect(details.some((attributes) => attributes.includes("open"))).toBe(false);
+    expect(html).toContain("What the model was given");
+    // The toggle says what is inside without opening it.
+    expect(html).toMatch(/<summary>[\s\S]*?image\(s\)[\s\S]*?<\/summary>/);
   });
 
   it("never skips a heading level", () => {

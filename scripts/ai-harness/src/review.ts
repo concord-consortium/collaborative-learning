@@ -1260,14 +1260,16 @@ const kStyles = `
     margin: 1.25rem 0; break-inside: avoid; }
   .document-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem; }
   .inputs { margin: 0.75rem 0; }
+  .inputs > summary { cursor: pointer; }
+  .inputs > summary:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
+  .inputs > summary h4 { display: inline; }
+  .inputs > summary .meta { margin-left: 0.35rem; }
   .input-block { margin: 0 0 1rem; }
   .input-label { font-size: 0.8rem; color: #555; margin: 0 0 0.25rem; }
   img { max-width: 100%; height: auto; border: 1px solid #d4d4d4; background: #fbfbfb; }
   pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f7f7;
     border: 1px solid #e2e2e2; border-radius: 4px; padding: 0.6rem 0.75rem; margin: 0;
-    font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: 32rem;
-    overflow-y: auto; }
-  pre:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
+    font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   h2.caption { font-size: 0.85rem; margin: 1.25rem 0 0.5rem; padding: 0; border-bottom: none;
     text-transform: uppercase; letter-spacing: 0.06em; color: #555; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0.75rem; }
@@ -1379,9 +1381,22 @@ function headerBlock(model: ReviewModel): Html {
 }
 
 function inputsBlock(document: ReviewDocument): Html {
+  // A closed `details`, not a `div`: the pictures and summaries are the bulk of the page, and a
+  // judge scanning verdicts wants them out of the way until they ask. Plain HTML keeps the report
+  // scriptless and shareable, `summary` is keyboard-operable for free, and browsers open a closed
+  // `details` when find-in-page matches inside it, so searching still works against the collapsed
+  // report. This is also why `pre` no longer clips and scrolls: a nested scroll region kept
+  // catching the wheel mid-page, and once the block only takes space when opened it can simply be
+  // as tall as its content.
+  const contents = [
+    document.images.length > 0 ? `${document.images.length} image(s)` : null,
+    document.texts.length > 0 ? `${document.texts.length} summary(ies)` : null
+  ].filter(Boolean).join(", ");
   return html`
-    <div class="inputs">
-      <h4>What the model was given</h4>
+    <details class="inputs">
+      <summary><h4>What the model was given</h4><span class="meta">${contents.length > 0
+        ? `(${contents} — click to expand)`
+        : "(nothing available to show)"}</span></summary>
       ${document.inputNotices.map((message) => html`<p class="notice">${message}</p>`)}
       ${document.images.map((image, index) => html`
         <div class="input-block">
@@ -1396,14 +1411,12 @@ function inputsBlock(document: ReviewDocument): Html {
           <p class="input-label">Summary ${index + 1} of ${document.texts.length}${text.labels.length > 0
             ? html` — variant ${text.labels.join("; ")}`
             : ""}</p>
-          <pre tabindex="0" role="region"
-            aria-label="Summary ${index + 1} sent for document ${document.displayName}"
-          >${text.markdown}</pre>
+          <pre>${text.markdown}</pre>
         </div>`)}
       ${document.images.length === 0 && document.texts.length === 0
         ? html`<p class="meta">No input is available to show for this document.</p>`
         : ""}
-    </div>`;
+    </details>`;
 }
 
 function configurationLine(configuration: ReviewRunConfiguration): string {
@@ -1420,13 +1433,13 @@ function configurationLine(configuration: ReviewRunConfiguration): string {
 function outcomeBlock(outcome: ReviewOutcome): Html {
   if (outcome.kind === "refusal") {
     return html`<div class="field"><div class="field-name">refusal</div>
-      <pre tabindex="0" role="region" aria-label="Refusal text">${outcome.refusal}</pre></div>`;
+      <pre>${outcome.refusal}</pre></div>`;
   }
   if (outcome.kind === "error") {
     return html`
       <div class="field">
         <div class="field-name">error</div>
-        <pre tabindex="0" role="region" aria-label="Error detail">${outcome.type}: ${outcome.message}
+        <pre>${outcome.type}: ${outcome.message}
 attempts: ${outcome.attempts}</pre>
       </div>`;
   }
@@ -1447,8 +1460,7 @@ attempts: ${outcome.attempts}</pre>
       : ""}
     ${outcome.remainingJson
       ? html`<div class="field"><div class="field-name">other response fields</div>
-          <pre tabindex="0" role="region" aria-label="Other response fields, as JSON"
-          >${outcome.remainingJson}</pre></div>`
+          <pre>${outcome.remainingJson}</pre></div>`
       : ""}
     ${outcome.category === null && !outcome.keyIndicators && outcome.discussion === null &&
       !outcome.remainingJson
