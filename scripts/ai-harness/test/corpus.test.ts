@@ -79,11 +79,34 @@ describe("import", () => {
     expect(result.manifest.documents[0].retrievedAt).toBe("2026-08-11T00:00:00.000Z");
   });
 
-  it("refuses to set the production source", () => {
+  it("refuses the production source without the sign-off flag, importing nothing", () => {
     const dataRoot = makeTestDataRoot("import-production");
     const from = sourceDir(dataRoot, { "a-text.json": textDoc });
     expect(() => importCorpus({ from, corpus: "demo1", source: "production", prune: false, dataRoot, now }))
-      .toThrow(/only produced by the \(gated\) pull command/);
+      .toThrow(/--production-data-approved/);
+    expect(fs.existsSync(corpusPaths(dataRoot, "demo1").manifest)).toBe(false);
+  });
+
+  it("imports production documents when the sign-off flag is passed, stamped as production", () => {
+    const dataRoot = makeTestDataRoot("import-production-approved");
+    const from = sourceDir(dataRoot, { "a-text.json": textDoc });
+    const result = importCorpus({
+      from, corpus: "demo1", source: "production", prune: false,
+      productionDataApproved: true, dataRoot, now
+    });
+    expect(result.imported).toEqual(["a-text"]);
+    expect(result.manifest.documents[0].source).toBe("production");
+    expect(result.manifest.documents[0].retrievedAt).toBe("2026-08-11T00:00:00.000Z");
+  });
+
+  it("ignores the sign-off flag for non-production sources rather than treating it as meaningful", () => {
+    const dataRoot = makeTestDataRoot("import-approved-synthetic");
+    const from = sourceDir(dataRoot, { "a-text.json": textDoc });
+    const result = importCorpus({
+      from, corpus: "demo1", source: "synthetic", prune: false,
+      productionDataApproved: true, dataRoot, now
+    });
+    expect(result.manifest.documents[0].source).toBe("synthetic");
   });
 
   it("rejects a document id that is not kebab-case", () => {

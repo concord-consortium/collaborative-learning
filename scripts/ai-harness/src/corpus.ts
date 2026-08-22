@@ -114,6 +114,11 @@ export interface ImportOptions {
   source: CorpusSource;
   prune: boolean;
   dataRoot: string;
+  /**
+   * Names the data-agreements sign-off. Importing `--source production` documents is refused
+   * without it; it has no effect on the other sources.
+   */
+  productionDataApproved?: boolean;
   /** Injected in tests so manifest timestamps are deterministic. */
   now?: () => Date;
 }
@@ -126,7 +131,12 @@ export interface ImportResult {
   warnings: string[];
 }
 
-/** `production` is not accepted here; only the (gated) `pull` command may set it. */
+/**
+ * Sources import accepts without ceremony. `production` is additionally accepted, but only together
+ * with `productionDataApproved` — the flag names the data-agreements sign-off that covers holding
+ * real student or teacher work on a development machine. (The future `pull` command carries the
+ * same gate; this is that gate arriving with import first.)
+ */
 export const importableSources: readonly CorpusSource[] = ["synthetic", "demo", "qa"];
 
 /**
@@ -151,9 +161,15 @@ export function importCorpus(options: ImportOptions): ImportResult {
   // matches them rather than landing a few milliseconds earlier.
   const importedAt = (options.now ?? (() => new Date()))().toISOString();
 
-  if (!importableSources.includes(source)) {
-    throw new Error(`--source must be one of ${importableSources.join(", ")}; ` +
-      `"${source}" documents are only produced by the (gated) pull command`);
+  if (source === "production") {
+    if (!options.productionDataApproved) {
+      throw new Error("--source production requires --production-data-approved: importing real " +
+        "student or teacher work is covered by the data-agreements sign-off, and passing the flag " +
+        "is how a run asserts that sign-off exists. Without it, nothing is imported.");
+    }
+  } else if (!importableSources.includes(source)) {
+    throw new Error(`--source must be one of ${importableSources.join(", ")} — or production, ` +
+      "together with --production-data-approved");
   }
   const paths = corpusPaths(dataRoot, corpus);
 
