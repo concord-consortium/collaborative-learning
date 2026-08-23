@@ -22,7 +22,8 @@ interface IProps extends IBaseProps {
 
 export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const stores = useStores();
-  const { persistentUI: { navTabContentShown, workspaceShown, dividerPosition, showChatPanel },
+  const { persistentUI: { navTabContentShown, workspaceShown,
+            displayedDividerPosition: dividerPosition, showChatPanel },
           appConfig,
           exemplarController,
           problem,

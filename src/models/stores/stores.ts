@@ -253,11 +253,12 @@ class Stores implements IStores{
   // shown (e.g. hidden/stale), fall back to the first displayed tab so the UI
   // never keys off a tab that isn't on screen.
   get displayedActiveNavTab() {
-    const { activeNavTab } = this.persistentUI;
+    // displayedNavTab is the author's forced start view while it is active, else the user's own tab.
+    const effective = this.persistentUI.displayedNavTab;
     const tabs = this.tabsToDisplay;
-    return tabs && tabs.length > 0 && !tabs.some(t => t.tab === activeNavTab)
+    return tabs && tabs.length > 0 && !tabs.some(t => t.tab === effective)
       ? tabs[0].tab
-      : activeNavTab;
+      : effective;
   }
 
   get isProblemLoaded() {

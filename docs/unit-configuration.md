@@ -138,6 +138,47 @@ These properties are configurable at the unit, investigation, or problem levels 
   stamps: SnapshotIn<typeof StampModel>[];
   // See next section for what can go in 'settings'
   settings: SnapshotIn<typeof SettingsMstType>;
+  // Which panels are shown when a user FIRST visits a problem (first-time visitors only).
+  // "split" (default) shows both; "workspace-only" collapses resources; "resources-only" collapses workspace.
+  // Note this also determines the divider that `fixedStartView` forces, for every user rather than
+  // just first-time visitors, and "workspace-only" turns `fixedStartView` off entirely (see below).
+  defaultPanelLayout?: "split" | "workspace-only" | "resources-only";
+  // How the split view divides its width. "evenLayout" (default) splits evenly; "wideContent" narrows
+  // the resources pane (~1/3) so the workspace stays wide until comments are opened.
+  contentLayout?: "evenLayout" | "wideContent";
+  // When true, every user starts on `fixedStartTab` each load (that tab, no document open, divider reset
+  // to the defaultPanelLayout position) instead of resuming where they left off. Applied as a session-only
+  // override, so it never overwrites the user's saved place. It is released in three independent
+  // parts: choosing a different top-level tab or opening a document hands back their own tab (and
+  // sub tab), resizing the panel hands back their own divider, and choosing a sub tab hands back
+  // their own sub tab. Moving between sub tabs does not release the tab, so a user who only browses
+  // sub tabs stays on the forced tab for the session.
+  // The forced tab shows its thumbnail browser for every sub tab, the Bookmarks sub tab included,
+  // and opens on the FIRST sub tab rather than the one the user last used, so the published work is
+  // actually what they land on. On the curriculum tabs ("problems", "teacher-guide") only the tab is
+  // forced: they always show a section rather than a browser, so the section the user last read is
+  // restored as usual.
+  // Ignored (with a console warning) when `defaultPanelLayout` is "workspace-only", which collapses the
+  // resources panel the forced tab lives in: there would be nothing to see, and forcing the collapsed
+  // divider would close the panel on every load for a user who had opened it. Note the mirror case is
+  // NOT refused: with "resources-only" the forced tab is visible, but the workspace is collapsed on
+  // every load until the user resizes, not just on their first visit.
+  // Clicking a sub tab adopts it as the user's own, including the first sub tab the forced view puts
+  // them on, so a click there replaces the sub tab they had left off on.
+  fixedStartView?: boolean;
+  // The nav tab to start on when fixedStartView is true: an ENavTab id, e.g. "class-work" or "sort-work".
+  // Must be a tab that is shown for the current user, or it is ignored with a console warning. Note a
+  // teacher-only tab is therefore forced for teachers and ignored for students; the authoring form only
+  // offers tabs that are shown and not teacher-only. Two tabs cannot be used at all:
+  //   "student-work" is group keyed and always shows the four-up, so it has no "no document open"
+  //     state to start in; it is refused outright.
+  //   "teacher-guide" resolves too late. The start view is decided once the unit and the saved UI have
+  //     loaded, but the guide is fetched on a separate path that finishes afterwards, so the tab is not
+  //     yet in the displayed list and the start view is ignored with a console warning rather than
+  //     being retried. Only hand-authored unit JSON can reach this; the authoring form filters
+  //     teacher-only tabs out of the dropdown.
+  // Kept separate from the switch so turning fixedStartView off preserves the chosen tab.
+  fixedStartTab?: ENavTab;
 ```
 
 ### Settings properties

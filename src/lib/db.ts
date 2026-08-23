@@ -39,6 +39,8 @@ import {
 import { getClassOwnerId } from "../models/document/document-axes";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
+import { urlParams } from "../utilities/url-params";
+import { applyStartupUIState } from "../models/stores/persistent-ui/persistent-ui";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { typeConverter } from "../utilities/db-utils";
@@ -213,9 +215,22 @@ export class DB {
               exemplarController.initialize(this.stores);
               this.createDeclaredClassWideDocuments();
 
-              // After unit config is available, apply default panel layout for first-time visitors
+              // Once unit config is available, apply the unit's default panel layout (first-time
+              // visitors only, see applyDefaultPanelLayout) and then layer the author's fixed start
+              // view on top as a session-only override (see applyFixedStartView). Both run: the
+              // override is released as the user acts, and the layout is what they fall back to.
               persistentUIReady.then(() => {
-                persistentUI.applyDefaultPanelLayout(this.stores.appConfig.defaultPanelLayout);
+                const { appConfig } = this.stores;
+                const displayedTabs = this.stores.tabsToDisplay.map(t => t.tab);
+                applyStartupUIState(persistentUI, {
+                  fixedStartView: appConfig.fixedStartView,
+                  fixedStartTab: appConfig.fixedStartTab,
+                  defaultPanelLayout: appConfig.defaultPanelLayout,
+                  // Read from urlParams, not stores.documentToDisplay: that IStores member is
+                  // declared optional and never actually assigned on the Stores class, so it is
+                  // always undefined and would silently disable this guard.
+                  hasDocumentTarget: !!urlParams.studentDocument
+                }, displayedTabs);
               }).catch((err) => {
                 console.error("Error initializing persistent UI:", err);
               });

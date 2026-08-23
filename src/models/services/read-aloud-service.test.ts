@@ -633,6 +633,23 @@ describe("ReadAloudService", () => {
 
       expect(service.state).toBe("idle");
     });
+
+    it("stops left pane reading when the section changes inside the author's fixed start view", () => {
+      // The user's own tab is my-work; the author forces problems. Watching currentDocumentGroupId,
+      // which is keyed off activeNavTab, would watch my-work and miss this entirely, leaving the
+      // reader speaking a section that is no longer on screen.
+      stores.persistentUI.setActiveNavTab("my-work");
+      stores.persistentUI.setCurrentDocumentGroupId("problems", "section-1");
+      stores.persistentUI.applyFixedStartView("problems", 50);
+      startWithTiles([
+        { id: "t1", type: "Text", title: "A", text: "a" }
+      ], [], "left");
+      expect(service.state).toBe("reading");
+
+      stores.persistentUI.setCurrentDocumentGroupId("problems", "section-2");
+
+      expect(service.state).toBe("idle");
+    });
   });
 
   describe("replaceQueue", () => {
