@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { UIModel, UIModelType, UIDialogModelType } from "./ui";
+import { UIModel, UIModelType, UIDialogModelType, userSelectTile } from "./ui";
 import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
@@ -8,6 +8,15 @@ import { TextContentModel } from "../tiles/text/text-content";
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
+
+const mockLogTileFocusEvent = jest.fn();
+jest.mock("../tiles/log/log-tile-focus-event", () => ({
+  logTileFocusEvent: (...args: any[]) => mockLogTileFocusEvent(...args)
+}));
+
+function makeTile(id: string) {
+  return TileModel.create({ id, content: TextContentModel.create({ text: "" }) });
+}
 
 describe("ui model", () => {
   let ui: UIModelType;
@@ -78,6 +87,145 @@ describe("ui model", () => {
     ui.setSelectedTile();
     expect(ui.selectedTileIds).toStrictEqual([]);
     expect(ui.isSelectedTile(tile)).toBe(false);
+  });
+
+  it("logs SELECT_TILE once when a tile newly enters the selection, not on re-select/deselect", () => {
+    // Every mouse/keyboard/drag selection path funnels through setSelectedTile /
+    // setSelectedTileId, so this choke-point covers all of them.
+    mockLogTileFocusEvent.mockReset();
+    const tileA = makeTile("A");
+
+    ui.setSelectedTile(tileA);                 // new → log A (editable)
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("A", false);
+
+    ui.setSelectedTile(tileA);                 // already selected → no log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+
+    ui.setSelectedTileId("B");                 // the mouse-click setter → new → log B
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("B", false);
+
+    ui.setSelectedTile(tileA, { append: true }); // shift-click adds A back → log A
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
+
+    ui.setSelectedTile(tileA, { append: true }); // shift-click again deselects A → no log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
+
+    ui.setSelectedTile();                       // clear → no log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(3);
+  });
+
+  it("does not log a shift-click that deselects a tile other than the last one logged", () => {
+    // The re-select/deselect case above deselects the tile it just logged, so lastLoggedTileId
+    // already suppresses it. Deselecting a *different* tile is what isolates the isDeselecting
+    // guard: without it, removing A from the selection would log A as though it were focused.
+    mockLogTileFocusEvent.mockReset();
+    const tileA = makeTile("A");
+    const tileB = makeTile("B");
+
+    ui.setSelectedTile(tileA);                   // new → log A
+    ui.setSelectedTile(tileB, { append: true }); // shift-click adds B → log B
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+
+    ui.setSelectedTile(tileA, { append: true }); // shift-click removes A → not a focus event
+    expect(ui.selectedTileIds).toStrictEqual(["B"]);
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it("logs a tile again after select-all, which leaves no single tile focused", () => {
+    mockLogTileFocusEvent.mockReset();
+    const tileA = makeTile("A");
+
+    ui.setSelectedTile(tileA);              // new → log A
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+
+    ui.selectAllTiles(["A", "B"]);          // select-all doesn't focus any one tile
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+
+    ui.setSelectedTile(tileA);              // collapsing back onto A is a new focus → log A
+    expect(ui.selectedTileIds).toStrictEqual(["A"]);
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it("flags read-only selections (resources panel / class work) in the SELECT_TILE event", () => {
+    mockLogTileFocusEvent.mockReset();
+    const tile = makeTile("R");
+    ui.setSelectedTile(tile, { append: false, readOnly: true });
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("R", true);
+  });
+
+  it("does not log selections made on the user's behalf (read-aloud, tile creation, chat)", () => {
+    mockLogTileFocusEvent.mockReset();
+
+    ui.setSelectedTileId("P", { programmatic: true });
+    expect(ui.selectedTileIds).toStrictEqual(["P"]);   // still selects
+    expect(mockLogTileFocusEvent).not.toHaveBeenCalled();
+
+    ui.setSelectedTile(makeTile("Q"), { programmatic: true });
+    expect(mockLogTileFocusEvent).not.toHaveBeenCalled();
+  });
+
+  it("logs the tile the user acted on, not the container a read-only selection resolves to", () => {
+    mockLogTileFocusEvent.mockReset();
+    userSelectTile.cancel();  // module-level 50ms leading-edge debounce, shared across tests
+    const container = makeTile("container-1");
+    const nested = makeTile("nested-1");
+
+    userSelectTile(ui, nested, { readOnly: true, container });
+
+    // The container is what gets selected, but the nested tile is what the user viewed.
+    expect(ui.selectedTileIds).toStrictEqual(["container-1"]);
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("nested-1", true);
+  });
+
+  it("logs each read-only sibling viewed inside the same container", () => {
+    mockLogTileFocusEvent.mockReset();
+    userSelectTile.cancel();
+    const container = makeTile("container-2");
+    const first = makeTile("nested-a");
+    const second = makeTile("nested-b");
+
+    userSelectTile(ui, first, { readOnly: true, container });
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("nested-a", true);
+
+    // The container is already selected, so only the last-logged tile can tell these apart.
+    userSelectTile.cancel();
+    userSelectTile(ui, second, { readOnly: true, container });
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("nested-b", true);
+
+    // Re-viewing the tile already reported is not a new focus.
+    userSelectTile.cancel();
+    userSelectTile(ui, second, { readOnly: true, container });
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it("logs a drag-initiated selection once, when the dragged tile newly enters the selection", () => {
+    mockLogTileFocusEvent.mockReset();
+    const tile = makeTile("D");
+
+    ui.setSelectedTile(tile, { dragging: true });
+    expect(ui.selectedTileIds).toContain("D");
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileFocusEvent).toHaveBeenLastCalledWith("D", false);
+
+    ui.setSelectedTile(tile, { dragging: true });  // already selected → no new log
+    expect(mockLogTileFocusEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the selection when logging throws", () => {
+    mockLogTileFocusEvent.mockReset();
+    mockLogTileFocusEvent.mockImplementationOnce(() => { throw new Error("logging blew up"); });
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    expect(() => ui.setSelectedTileId("T")).not.toThrow();
+    expect(ui.selectedTileIds).toStrictEqual(["T"]);
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
   });
 
   it("allows divider position to be set", () => {
