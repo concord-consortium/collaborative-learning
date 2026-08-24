@@ -19,6 +19,7 @@ import "./iframe-document-editor.scss";
 interface IProps {
   initialValue?: DocumentModelType;
   handleUpdateContent: (json: Record<string, any>) => void;
+  onDocumentRendered?: () => void; // called once, after the document's first render
   fullHeight?: boolean;
   noBorder?: boolean; // if true don't show border around the editor
 }
@@ -99,16 +100,24 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
     });
   }
 
+  componentDidUpdate(prevProps: IProps, prevState: IState) {
+    // The document is created asynchronously, once the unit has loaded, so the first render
+    // shows the loading box. This is the render that first shows the document itself.
+    if (!prevState.document && this.state.document) {
+      this.props.onDocumentRendered?.();
+    }
+  }
+
   componentWillUnmount() {
     this.disposer?.();
   }
 
   renderDocumentComponent(document: DocumentModelType) {
     if (unwrapped) {
-      // Let the window do the scrolling. This makes it possible for a resize observer
-      // to monitor the body and send height changes to the parent window. That way the
-      // parent window can resize the iframe to just fit its content.
-      window.document.body.style.overflow = "visible";
+      // Let the content determine the page's height rather than filling the viewport, so a
+      // resize observer can send that height to the parent window and the parent can size the
+      // iframe to just fit the document. See the .unwrapped rules in iframe-document-editor.scss.
+      window.document.body.classList.add("unwrapped");
       return (
         <CanvasComponent
           document={document}

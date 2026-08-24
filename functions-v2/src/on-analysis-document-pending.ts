@@ -34,7 +34,12 @@ export function generateHtml(clueDocument: unknown) {
         }
         window.addEventListener("message", (event) => {
           if (event.data?.type === "updateHeight") {
-            document.getElementById("clue-frame").height = event.data.height + "px";
+            // A height of 0, or anything that is not a positive number, would collapse the
+            // iframe and hide the document the screenshot is meant to show. Ignoring it
+            // leaves the iframe at its starting height.
+            const height = Number(event.data.height);
+            if (!Number.isFinite(height) || height <= 0) return;
+            document.getElementById("clue-frame").height = height + "px";
           }
         })
         clueFrame.contentWindow.postMessage(
