@@ -13,7 +13,9 @@
 //
 // Known limitation, tracked separately for design: $highlight-pinned-ring is also the value of
 // dataflow's $input-purple-outline, which is the Sensor node's own border color — so on that one
-// node a pinned ring reads as a thicker border rather than as emphasis. Picking an emphasis color
-// that reads as emphasis across every node family is a design decision, not a code one.
+// node a pinned ring repeats a color already on the node rather than contrasting with it. It still
+// reads as a ring, since the ring sits clear of the node edge (see node-states.scss), so what is
+// left is whether one emphasis color can read as emphasis across every node family. That is a
+// design decision, not a code one.
 $highlight-preview-ring:  #788cff;
 $highlight-pinned-ring:   #6b23fc;
