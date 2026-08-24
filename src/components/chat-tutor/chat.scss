@@ -161,12 +161,16 @@
 
   .chat-row {
     display: flex;
+    // A column so highlight buttons stack beneath the bubble rather than sitting beside it as a
+    // second flex item. The sender's left/right placement moves to align-items, which does in a
+    // column what justify-content did while a row held only the bubble.
+    flex-direction: column;
 
     // Sender color/alignment. The bubble-color rules live here (nested under the sender
     // class) rather than under `.chat-bubble`, where `.chat-row.user &` would resolve to
     // an unmatchable descendant selector.
     &.user {
-      justify-content: flex-end;
+      align-items: flex-end;
 
       .chat-bubble {
         background: $workspace-teal-dark-2;
@@ -175,7 +179,7 @@
       }
     }
     &.assistant {
-      justify-content: flex-start;
+      align-items: flex-start;
 
       .chat-bubble {
         background: $charcoal-light-7;
