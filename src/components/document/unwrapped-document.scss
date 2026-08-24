@@ -1,0 +1,27 @@
+// Layout for the "unwrapped" URL parameter, which renders a document on its own with no CLUE
+// interface around it. Both callers need the page's height to come from the document's content:
+// the iframe reports that height to the page embedding it, and the standalone document editor is
+// screenshotted by a headless browser, which captures the scrolling page rather than a scrolling
+// element inside it.
+//
+// By default nothing in the page can supply that height. `body` is set to overflow hidden by
+// clue.scss, `#app` is positioned fixed and pinned to the viewport's four edges by app.scss, and
+// .document-content scrolls inside that fixed box. Every one of those is sized by the viewport,
+// so the body ends up with no in-flow content and a scrollHeight of 0.
+body.unwrapped {
+  overflow: visible;
+
+  #app {
+    position: static;
+    height: auto;
+  }
+
+  .canvas,
+  .document-content {
+    height: auto;
+  }
+
+  .document-content {
+    overflow: visible;
+  }
+}

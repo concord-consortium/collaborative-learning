@@ -1,25 +1,4 @@
-// In unwrapped mode the embedding page sizes the iframe from the height this window reports,
-// so the height has to come from the document's content. By default the content cannot supply
-// it: `body` is set to overflow hidden by clue.scss, `#app` is positioned fixed and pinned to
-// the viewport by app.scss, and .document-content scrolls inside that fixed box. Every one of
-// those is sized by the viewport, which leaves the body with a scrollHeight of 0.
-body.unwrapped {
-  overflow: visible;
-
-  #app {
-    position: static;
-    height: auto;
-  }
-
-  .canvas,
-  .document-content {
-    height: auto;
-  }
-
-  .document-content {
-    overflow: visible;
-  }
-}
+@import "../components/document/unwrapped-document";
 
 .loading-box {
   align-items: center;
