@@ -15,6 +15,9 @@ const fakeTurn: ChatTurn = {
   highlights: [
     { tileId: "tileA", objectId: "objA", label: "the first block" },
     { tileId: "tileB", objectId: "objB", label: "the second block" },
+    // Deliberately the same object as the first, under a different label. Two turns naming one node
+    // is the ordinary way this arises, and every turn's buttons stay in the transcript together.
+    { tileId: "tileA", objectId: "objA", label: "that same block once more" },
   ],
 };
 
@@ -119,6 +122,37 @@ describe("ChatTutorSidebar as a highlight source", () => {
     fireEvent.click(second);
     expect(first).toHaveAttribute("aria-pressed", "false");
     expect(second).toHaveAttribute("aria-pressed", "true");
+  });
+
+  // Two buttons citing one object share this sidebar's single source token, so a bare
+  // togglePinnedHighlightRef sees its own source on a matching reference and reads the second click
+  // as a release: no button pressed, no ring, and nothing to say why. Moving the pin is the only
+  // sensible reading of clicking a button that is not currently pressed.
+  it("moves the pin between two buttons that cite the same object", () => {
+    const content = makeContent();
+    renderSidebar(content);
+    const first = screen.getByRole("button", { name: /the first block/ });
+    const sameObject = screen.getByRole("button", { name: /that same block once more/ });
+
+    fireEvent.click(first);
+    fireEvent.click(sameObject);
+
+    expect(content.pinnedHighlightRef).toEqual({ kind: "object", tileId: "tileA", objectId: "objA" });
+    expect(first).toHaveAttribute("aria-pressed", "false");
+    expect(sameObject).toHaveAttribute("aria-pressed", "true");
+  });
+
+  // The other half of that guard: it must not cost the pinned button its own release.
+  it("clicking the pinned button again releases it", () => {
+    const content = makeContent();
+    renderSidebar(content);
+    const first = screen.getByRole("button", { name: /the first block/ });
+
+    fireEvent.click(first);
+    fireEvent.click(first);
+
+    expect(content.pinnedHighlightRef).toBeUndefined();
+    expect(first).toHaveAttribute("aria-pressed", "false");
   });
 
   it("releases the pin on unmount", () => {

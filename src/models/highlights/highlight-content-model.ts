@@ -6,8 +6,8 @@ import { HighlightReference } from "./highlight-reference";
  * `DocumentContentModelWithHighlights` that driving a highlight actually uses.
  *
  * A source depends on this rather than on the composed `DocumentContentModelType` so the contract
- * it relies on is visible in one place, and so a source can be exercised against a plain object
- * instead of a document tree.
+ * it relies on is stated in one place, instead of being implied by which handful of a document's
+ * many members the source happens to call.
  *
  * It extends `IAnyStateTreeNode` because a source is generally also handing the same node to
  * something that observes the document itself — the chat tutor passes it to a summarizer that

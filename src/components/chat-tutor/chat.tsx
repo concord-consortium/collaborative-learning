@@ -246,11 +246,23 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
                             active: activeHighlightKey === highlightKey(turn.id, index)
                           })}
                           aria-pressed={activeHighlightKey === highlightKey(turn.id, index)}
-                          // Focus mirrors hover so the preview is reachable without a mouse.
+                          // Focus mirrors hover so the preview is reachable without a mouse. They are
+                          // two independent ways of being on this button, so each only withdraws the
+                          // preview when the other is not also holding it: a pointer crossing a
+                          // focused button must not cancel the keyboard user's preview, and tabbing
+                          // away must not cancel one the pointer is still holding.
                           onMouseEnter={() => onHighlightHover?.(turn.id, index, true)}
-                          onMouseLeave={() => onHighlightHover?.(turn.id, index, false)}
+                          onMouseLeave={e => {
+                            if (e.currentTarget !== document.activeElement) {
+                              onHighlightHover?.(turn.id, index, false);
+                            }
+                          }}
                           onFocus={() => onHighlightHover?.(turn.id, index, true)}
-                          onBlur={() => onHighlightHover?.(turn.id, index, false)}
+                          onBlur={e => {
+                            if (!e.currentTarget.matches(":hover")) {
+                              onHighlightHover?.(turn.id, index, false);
+                            }
+                          }}
                           onClick={() => onHighlightToggle?.(turn.id, index)}
                         >
                           Show me {highlight.label}

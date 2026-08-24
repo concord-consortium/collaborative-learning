@@ -93,6 +93,9 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   // the model, so a pin taken over by another source (a variable chip, say) stops showing here.
   const [pinnedKey, setPinnedKey] = useState<string | undefined>(undefined);
 
+  const activeHighlightKey = content?.pinnedHighlightSource === highlightSource
+    ? pinnedKey : undefined;
+
   const findHighlight = (turnId: string, index: number) =>
     chat.turns.find(t => t.id === turnId)?.highlights?.[index];
 
@@ -112,15 +115,20 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const handleHighlightToggle = (turnId: string, index: number) => {
     const highlight = content && findHighlight(turnId, index);
     if (!highlight) return;
+    const key = highlightKey(turnId, index);
+    // Two buttons can cite the same object — the same node named again in a later turn, say — and
+    // every button here shares this sidebar's one token. togglePinnedHighlightRef releases when the
+    // reference and the source both match, so clicking the second of them would release the pin
+    // rather than move it, leaving no button pressed and no ring. Dropping our own pin first makes
+    // the toggle below always pin; re-clicking the pressed button is then the only way to release.
+    if (activeHighlightKey && activeHighlightKey !== key) {
+      content.clearPinnedHighlightRefIfOwn(highlightSource);
+    }
     content.togglePinnedHighlightRef(
       { kind: "object", tileId: highlight.tileId, objectId: highlight.objectId },
       highlightSource);
-    setPinnedKey(content.pinnedHighlightSource === highlightSource
-      ? highlightKey(turnId, index) : undefined);
+    setPinnedKey(content.pinnedHighlightSource === highlightSource ? key : undefined);
   };
-
-  const activeHighlightKey = content?.pinnedHighlightSource === highlightSource
-    ? pinnedKey : undefined;
 
   // React does not fire onMouseLeave for an element that unmounts under the cursor, and a pinned
   // highlight can only be dismissed by clicking its button — so a sidebar that closes while pinned
