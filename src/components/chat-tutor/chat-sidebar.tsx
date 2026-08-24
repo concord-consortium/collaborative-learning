@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
-import { DocumentContentModelType } from "../../models/document/document-content";
+import type { IHighlightContentModel } from "../../models/highlights/highlight-content-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
 import { Chat, highlightKey } from "./chat";
@@ -24,9 +24,11 @@ interface IProps {
   documentTitle: string;
   problemPath: string;
   problem: ProblemModelType;
-  // The workspace document's content model; undefined until the document loads. Typed concretely
-  // rather than as IAnyStateTreeNode because the highlight buttons call actions on it.
-  content: DocumentContentModelType | undefined;
+  // The workspace document's content model; undefined until the document loads. Typed as the
+  // narrow highlight slice rather than the whole content model: this component drives highlights
+  // and hands the node to the summarizer, and depending on more than that would hide which parts
+  // of the document it actually needs.
+  content: IHighlightContentModel | undefined;
   onClose: () => void;
 }
 
