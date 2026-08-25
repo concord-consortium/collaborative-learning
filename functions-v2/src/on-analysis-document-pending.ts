@@ -16,6 +16,8 @@ const clueURL = "https://collaborative-learning.concord.org/branch/shutterbug-su
 const clueUnit = "mods";
 const shutterbugURL = "https://api.concord.org/shutterbug-production";
 
+// scripts/shutterbug.ts has a near-copy of this page for rendering a document by hand during
+// development. Keep fixes to one in step with the other until they are unified.
 export function generateHtml(clueDocument: unknown) {
   const source = escapeHtmlAttribute(`${clueURL}/iframe.html?unit=${clueUnit}&unwrapped&readOnly`);
   return `
@@ -34,7 +36,12 @@ export function generateHtml(clueDocument: unknown) {
         }
         window.addEventListener("message", (event) => {
           if (event.data?.type === "updateHeight") {
-            document.getElementById("clue-frame").height = event.data.height + "px";
+            // A height of 0, or anything that is not a positive number, would collapse the
+            // iframe and hide the document the screenshot is meant to show. Ignoring it
+            // leaves the iframe at its starting height.
+            const height = event.data.height;
+            if (!Number.isFinite(height) || height <= 0) return;
+            document.getElementById("clue-frame").height = height + "px";
           }
         })
         clueFrame.contentWindow.postMessage(
