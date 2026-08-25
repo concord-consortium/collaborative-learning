@@ -116,6 +116,7 @@ describe("programToGraphviz", () => {
       <tr><td>value</td><td>2</td></tr>
       <tr><td>nodeValue</td><td>2</td></tr>
       <tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>
+      <tr><td>title</td><td>Number 1</td></tr>
       <tr><td>Output</td><td port="value">value</td></tr>
     </table>
   >];
@@ -125,6 +126,7 @@ describe("programToGraphviz", () => {
       <tr><td>value</td><td>3</td></tr>
       <tr><td>nodeValue</td><td>3</td></tr>
       <tr><td>id</td><td>5TnGPjp2Cfvcwnw_</td></tr>
+      <tr><td>title</td><td>Number 2</td></tr>
       <tr><td>Output</td><td port="value">value</td></tr>
     </table>
   >];
@@ -138,6 +140,7 @@ describe("programToGraphviz", () => {
       <tr><td>formula</td><td>Number:Number 1 + Number:Number 2 = nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>2 + 3 = 5</td></tr>
       <tr><td>id</td><td>oFu_7v2unK3-Uc1s</td></tr>
+      <tr><td>title</td><td>Math 1</td></tr>
     </table>
   >];
   "Logic:Logic 1" [label=<
@@ -148,6 +151,7 @@ describe("programToGraphviz", () => {
       <tr><td>formula</td><td>unset_num1 &gt; unset_num2 ⇒ nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>unset_num1 &gt; unset_num2 ⇒ NaN</td></tr>
       <tr><td>id</td><td>node4</td></tr>
+      <tr><td>title</td><td>Logic 1</td></tr>
     </table>
   >];
   "Transform:Transform 1" [label=<
@@ -158,6 +162,7 @@ describe("programToGraphviz", () => {
       <tr><td>formula</td><td>|unset_num1| = nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>|unset_num1| = NaN</td></tr>
       <tr><td>id</td><td>node5</td></tr>
+      <tr><td>title</td><td>Transform 1</td></tr>
     </table>
   >];
 
@@ -274,6 +279,43 @@ describe("programToGraphviz", () => {
       const dot = programToGraphviz(program);
       expect(dot).toContain('"Number:Number 1" [label=<');
       expect(dot).not.toContain('"7ZRiN_2uNGilJII0" [label=<');
+    });
+  });
+
+  describe("node titles", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        n1: {
+          id: "n1",
+          name: "Sensor",
+          x: 0,
+          y: 0,
+          data: { type: "Sensor", plot: false, orderedDisplayName: "Sensor 1" }
+        }
+      },
+      connections: {}
+    };
+
+    it("emits the title the student sees as its own property row", () => {
+      const dot = programToGraphviz(program);
+      expect(dot).toContain("<tr><td>title</td><td>Sensor 1</td></tr>");
+    });
+
+    it("keeps the type prefix on the identifier but not on the title", () => {
+      const dot = programToGraphviz(program);
+      // The identifier carries the type because it doubles as every edge's endpoint; the title is
+      // the bare string on the node's title bar.
+      expect(dot).toContain('"Sensor:Sensor 1" [label=<');
+      expect(dot).not.toContain("<tr><td>title</td><td>Sensor:Sensor 1</td></tr>");
+    });
+
+    it("falls back to the node name when there is no ordered display name", () => {
+      const unnamed = {
+        ...program,
+        nodes: { n1: { ...program.nodes.n1, data: { type: "Sensor", plot: false } } }
+      };
+      expect(programToGraphviz(unnamed)).toContain("<tr><td>title</td><td>Sensor</td></tr>");
     });
   });
 });
