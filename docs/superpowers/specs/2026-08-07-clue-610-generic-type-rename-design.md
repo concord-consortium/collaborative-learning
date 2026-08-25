@@ -147,12 +147,72 @@ real axis query is the same edit either way.
 | [db.ts:640](../../../src/lib/db.ts#L640) | the stamp gate — "axis-native" |
 | [db.ts:936](../../../src/lib/db.ts#L936) | `CREATE_GROUP_DOCUMENT` log event — already fires for class-wide documents |
 | [db.ts:1125](../../../src/lib/db.ts#L1125) | the on-open `concurrent` backfill — "axis-native" |
-| [document.ts:124](../../../src/models/document/document.ts#L124) | the `isGroup` getter |
-| [document-utils.ts:133](../../../src/models/document/document-utils.ts#L133) | read access — a `permissions` question |
 | [document-kinds.ts:241](../../../src/models/document/document-kinds.ts#L241) | the transitional group-document title — widening it is what keeps a half-swept document titled |
 | [document-types.ts:48-56](../../../src/models/document/document-types.ts#L48-L56) | `isSortableType` — Sort Work membership |
 | [document-title.tsx:28](../../../src/components/document/document-title.tsx#L28) | suppress the owner-name prefix |
 | [document-workspace.tsx:209](../../../src/components/document/document-workspace.tsx#L209) | primary-document handling |
+
+**Two sites were on this list and came off it**, for the same reason `tile-activity-badges.tsx` did below
+— in both, widening would have moved the check from a *closed* test (one literal) to an *open* one (a set
+this rename exists to let grow), leaving a default behind rather than just a misleading name:
+
+- [document-utils.ts:131](../../../src/models/document/document-utils.ts#L131) — read access, the
+  `permissions` question. It becomes `!!metadata.concurrent || metadata.type === GroupDocument`. Left as a
+  type test, the next axis-native kind would be readable by every student in the class the moment it was
+  declared, with neither this file nor this decision appearing in that change's diff. `concurrent` is the
+  field that actually answers the question, and it is what the Firestore rules key their own decision on
+  (`isConcurrentClassDocument`), precisely because they cannot enforce group membership.
+
+  **The owner is not used either**, though it would be equivalent today: a group- or class-owned document
+  that is *not* readable by every member is a shape we may well want later, and keying read access on the
+  owner would rule it out. `concurrent` is the field that stays true to the question through that change.
+
+  **The type disjunct is transitional and load-bearing, not belt-and-braces.** Group documents created
+  before `concurrent` was stamped store neither it nor the new type, and this check runs on *un-opened*
+  Firestore metadata: `SimpleDocumentItem` and `ThumbnailDocumentItem` call it to decide whether to render
+  a private placeholder and **suppress their own click**, so db.ts's on-open backfill has not run and
+  cannot — the thumbnail that would repair the document is the one refusing to open it. Without the
+  disjunct a legacy group document goes private to its own group until someone reaches it from the
+  workspace **Group** button, which bypasses this check. This is why the same rebase was tried on
+  2026-07-22 and reverted the same day; the disjunct is what makes it safe now. CLUE-604's sweep writes
+  `concurrent` onto exactly these documents, which is what retires it.
+
+  It tests the **pre-sweep literal**, not `isAxesType`: every document written since stores `concurrent`
+  alongside the new type, so widening it would hand read access to a future axis-native kind — the very
+  thing this rebase exists to prevent. It is therefore a closed test, and it is listed with the other
+  accept-both readers §7 step 5 removes.
+
+  **The function asks nothing about the class, because it is only ever asked about the user's own class.**
+  Three things enforce that upstream: Sort Work queries `context_id == classHash`
+  (`sorted-documents.ts`), the get-by-key path re-asserts it after the read (`document-metadata-store.ts`),
+  and the rules refuse a student another class's metadata outright (`resourceInUserClass`). The rules'
+  concurrent grant pairs both conditions (`isConcurrentClassDocument`), so the class half is required —
+  just not here. The assumption was previously unwritten and the function now states it; a caller that
+  ever reaches outside the user's class has to bring its own class test.
+
+- [document.ts:124](../../../src/models/document/document.ts#L124) — the `isGroup` getter, which is
+  **deleted** rather than widened. It had one consumer, the group-switch reaction in `document-workspace`,
+  which pairs it with `groupId` to close a stale group document; that call site now asks
+  `hasGroupOwner(primary)` directly. As a type test the getter excluded class-wide documents only by
+  accident: they satisfy it, and the reaction returns early only because `getDocumentOwnerFields` leaves
+  their `groupId` undefined. The owner test is what the reaction meant, and a class-wide case now pins it.
+
+  Deleting beats renaming it to `hasGroupOwner`, which was the other candidate. A model getter of that
+  name calling the imported guard of the same name reads as recursion at a glance, and it would leave a
+  second way to ask a question the guard already answers — forcing the same choice on every axis question
+  after it. It also keeps the `is<Type>` family honest: with `isGroup` gone, every remaining member
+  (`isProblem`, `isPlanning`, `isPersonal`, `isLearningLog`, `isSupport`, `isPublished`) really is a test
+  on `type`, which is what the naming promises. Reactivity is unaffected — the guard reads `uid`, an
+  observable prop, inside the reaction's data function.
+
+Neither site references the transitional type, so neither needs revisiting in §7's cleanup.
+
+`isSortableType` is the third check of this shape and is **not** rebased: it is a membership list keyed
+on the type, and rebasing it means changing its signature to take a document rather than a type string,
+which is CLUE-611's per-site pass. It carries a comment saying so, saying that a later axis-native kind is
+listed in Sort Work by default, and directing a kind that should *not* be listed to rebase this check onto
+the axis fields that say so rather than adding another type test. Listing is a far weaker default than
+read access.
 
 `tile-activity-badges.tsx` was on this list and is not any more: it was rebased onto `concurrent` rather
 than widened. The badges report who is co-editing a tile, which is exactly what `concurrent` says, and
@@ -287,7 +347,12 @@ This slots into the release plan already agreed for the CLUE-550 line of work:
    They share CLUE-604's gate exactly — safe once the sweep has run everywhere, unsafe before — so
    there is no reason to leave them trailing as unscheduled cleanup, and every reason not to.
    This has to follow step 4 rather than accompany it: the removals are only safe once no unmigrated
-   document remains.
+   document remains — and "the sweep has run" is a past event, not that condition. Steps 4 and 5 are a
+   release cycle apart and document creation continues through it, so **re-run the dry run against every
+   environment immediately before cutting 7.6.0 and expect `group-typed docs: 0 total`**; the script is
+   dry-run by default, so this is one command per environment and the repair for a non-zero count is the
+   same command with `APPLY=1`. (The runbook for this belongs to CLUE-604; it is named here because it is
+   this design's readers that the count gates.)
 6. **Drain again.**
 7. **7.7.0 — CLUE-612, plus this design's rules-side cleanup.** CLUE-612 is a rules-only change, so
    here the rules deploy *is* the release; there is no app code to sequence ahead of. It tightens
@@ -382,7 +447,17 @@ which stopped being true once the script also wrote `type: "axes"` and merged it
   `document-utils.test.ts`, `document-kinds.test.ts`, `sorted-documents.test.ts`,
   `thumbnail-document-item.test.tsx`, `document-file-menu.test.tsx`, `db.test.ts`, `firebase.test.ts`).
   Each accept-both reader needs a case for *both* values, since the transitional window is the only time
-  both occur and it is exactly when a regression would ship.
+  both occur and it is exactly when a regression would ship. Two exceptions, stated rather than glossed:
+  `document-title.tsx` and `document-workspace.tsx` have no test file at all, so their one-line predicate
+  swaps go in uncovered; and `db.ts`'s `CREATE_GROUP_DOCUMENT` log gate is covered with the new value
+  only, which is moot because after this change no caller passes the old one.
+- **The two sites §5b takes off the type** are pinned to their real axis instead. The tests that stood for
+  `isGroup` now assert `hasGroupOwner` on models of both shapes, and the class-wide case additionally pins
+  `groupId === undefined` — the fact the group-switch reaction's early return actually depends on, which
+  nothing asserted before. `isDocumentAccessibleToUser` gets an axes-typed-but-not-concurrent case
+  (refused), a concurrent document of an unrelated type (granted), and a pre-sweep group document storing
+  no `concurrent` (granted, via the transitional disjunct) — the three shapes that separate the new check
+  from a type test. Both sites keep pre- and post-sweep cases.
 - **`tile-activity-badges.test.tsx`** needs the opposite: the rebased gate must be pinned to `concurrent`
   and away from the type, so a non-concurrent document typed like the ones that do get badges renders
   none, and a concurrent document of another type renders them. Both cases fail against the type test.
@@ -411,6 +486,23 @@ which stopped being true once the script also wrote `type: "axes"` and merged it
   implementation time rather than trusting this list, and leave the `GroupDocument` constant in place — it
   survives the cleanup anyway as the group kind's name (§7), so until then the compiler keeps pointing at
   anything still using it as a *type*.
+- **Dropping §5b's transitional type disjunct too early.** The read-access check reads `concurrent` with
+  the pre-sweep type as a fallback, because a legacy group document stores no `concurrent` and this check
+  runs before the document is opened. Removing that fallback before CLUE-604's sweep has run in an
+  environment makes every unswept group document private to its own group there. It is grouped with the
+  other accept-both readers in §7 step 5 for that reason, and step 5's dry-run re-check is what confirms
+  it is safe to remove.
+- **Rolling 7.5.0 back.** Rollback is cheap here — Release Production is driven by a tag input and every
+  prior version stays in `version/` — which is why it is worth stating what it costs rather than leaving
+  it unsaid. A rolled-back client does not recognize `"axes"`, so documents created during the window
+  become unreachable **to students**: `isDocumentAccessibleToUser` returns early for a teacher or
+  researcher, so only students are affected, and no data is lost — the content is in RTDB and one
+  Firestore string is unrecognized. To roll back, re-dispatch Release Production with the prior tag. If
+  the rollback is expected to be long-lived, reverse the sweep by flipping the queried value and the
+  written value in `backfill-group-document-axes.ts`; it runs as a service account, so
+  `preservesReadOnlyDocumentFields` does not stand in its way. The reader rebases in §5b do not narrow
+  this: they are in the bundle being rolled back, so the client left running is the one that only knows
+  the old value.
 - **The `kind` / `type` coincidence for group documents.** A group document's `kind` is `"group"` and,
   today, so is its `type`. They separate here. Anything that happens to rely on their being equal would
   break, and nothing found so far does — but it is the kind of coupling that hides in tests.

@@ -57,6 +57,11 @@ export function isPublishedType(type: string) {
   return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
           .indexOf(type) >= 0;
 }
+// TRANSITIONAL in the same way isAxesType is: `GroupDocument` here is the pre-sweep spelling of
+// `AxesDocument`, and CLUE-604's cleanup drops it. Note that this is Sort Work *membership*, and it is
+// asked of the type, so every axis-native kind added later is listed by default. An axis-native kind
+// that should not be listed should change this mechanism to check the axis fields that determine it
+// should not be listed instead of just checking the type or kind.
 export function isSortableType(type: string){
   return [
     ProblemDocument,
