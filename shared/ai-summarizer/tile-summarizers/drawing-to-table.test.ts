@@ -200,8 +200,51 @@ describe("drawingToTable groups", () => {
       }]
     }]});
     expect(result).toContain("| outer | group | 100, -50 | 50 x 100 | 90° |  |");
-    expect(result).toContain("| inner | group | 100, -50 | 50 x 100 |  | outer |");
-    expect(result).toContain("| leaf | rectangle | 100, -50 | 50 x 100 |  | inner |");
+    // The inner group and the leaf inherit the outer group's turn, since that is how they sit on
+    // the page even though neither stores a rotation of its own.
+    expect(result).toContain("| inner | group | 100, -50 | 50 x 100 | 90° | outer |");
+    expect(result).toContain("| leaf | rectangle | 100, -50 | 50 x 100 | 90° | inner |");
+  });
+
+  it("reports rotation against the document, so compensating turns cancel", () => {
+    // Turn an object 90 clockwise, group it, turn the group 90 counter-clockwise: on screen the
+    // object is upright again, and that is what the column has to say. Its stored rotation is
+    // still 90 — reporting that would disagree with the position and size beside it.
+    const result = drawingToTable({ objects: [{
+      id: "grp", type: "group", x: 0, y: 0, width: 100, height: 50, rotation: 270,
+      objects: [{ id: "kid", type: "rectangle", x: 0, y: 0, width: 1, height: 1, rotation: 90 }]
+    }]});
+    expect(result).toContain("| grp | group |");
+    expect(result).toContain("270°");
+    expect(result).toMatch(/\| kid \| rectangle \|[^|]+\|[^|]+\|\s*\| grp \|/);
+  });
+
+  it("accumulates rotation through the group chain", () => {
+    const result = drawingToTable({ objects: [{
+      id: "grp", type: "group", x: 0, y: 0, width: 100, height: 100, rotation: 90,
+      objects: [{ id: "kid", type: "rectangle", x: 0, y: 0, width: 1, height: 1, rotation: 90 }]
+    }]});
+    // 90 from the group and 90 of its own. Position is covered by the un-normalizing tests above.
+    expect(result).toContain("| 180° | grp |");
+  });
+
+  it("reverses a child's rotation under a mirrored group", () => {
+    // A mirror turns a clockwise quarter turn into a counter-clockwise one.
+    const result = drawingToTable({ objects: [{
+      id: "grp", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
+      objects: [{ id: "kid", type: "rectangle", x: 0, y: 0, width: 1, height: 1, rotation: 90 }]
+    }]});
+    expect(result).toContain("| 270° | grp |");
+  });
+
+  it("normalizes a rotation that has grown past a full turn", () => {
+    // rotateBy deliberately does not constrain the stored value, so it can exceed 360.
+    const result = drawingToTable({ objects: [
+      { id: "spun", type: "rectangle", x: 0, y: 0, width: 10, height: 10, rotation: 450 }
+    ]});
+    expect(result).toContain("| spun | rectangle |");
+    expect(result).toContain("| 90° |");
+    expect(result).not.toContain("450°");
   });
 
   it("mirrors children of a flipped group", () => {

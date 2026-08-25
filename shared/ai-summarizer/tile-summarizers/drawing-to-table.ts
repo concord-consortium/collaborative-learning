@@ -27,6 +27,12 @@ Five things in that output are not obvious from the code:
   once the box is turned, position and size can no longer express orientation, and a 100x50
   rectangle turned 90 degrees is indistinguishable from an unturned 50x100 one. Flips stay in
   `details`, since they do not change the box.
+- The angle is measured against the document rather than read off the object, so it agrees with the
+  position and size beside it. An object turned 90 inside a group turned 270 reports nothing,
+  because upright is how it sits on the page. Note that a group scales its members by its own width
+  and height, so a member turned by something other than a multiple of 90 inside a group that is not
+  square is sheared rather than merely turned, and no single angle describes it. Only authored or
+  imported documents can reach that — the Rotate control turns in quarters.
 - Row order is document order, which is back to front. The preamble says so, because otherwise the
   ordering is information the model cannot see.
 - A group's members follow it and name it in `parent`, with coordinates converted out of the group's
@@ -91,16 +97,55 @@ function formatDetails(o: DrawingObjectSnapshot): string {
   return details.join(" ");
 }
 
+/**
+ * How an object is turned relative to the document, as a rotation plus whether an odd number of
+ * mirrors has been applied. Mirroring matters because it reverses the direction a later rotation
+ * turns: a mirror M and rotation R satisfy `M R = R⁻¹ M`.
+ */
+interface Orientation {
+  rotation: number;
+  mirrored: boolean;
+}
+
+const kUpright: Orientation = { rotation: 0, mirrored: false };
+
+/** Apply `inner`, expressed in the frame `outer` establishes, and return the result in `outer`'s. */
+function compose(outer: Orientation, inner: Orientation): Orientation {
+  return {
+    rotation: outer.rotation + (outer.mirrored ? -inner.rotation : inner.rotation),
+    mirrored: outer.mirrored !== inner.mirrored
+  };
+}
+
+// A group turns its members by its own rotation and its flips together. One flip is a mirror; both
+// at once are a half turn rather than a mirror, and a vertical flip is a horizontal one plus a half
+// turn — which is the form used here.
+function groupOrientation(o: DrawingObjectSnapshot): Orientation {
+  return {
+    rotation: (o.rotation ?? 0) + (o.vFlip ? 180 : 0),
+    mirrored: !!o.hFlip !== !!o.vFlip
+  };
+}
+
 // Rotation earns a column rather than sitting in details, because position and size cannot express
 // it: the box reported for a 100x50 rectangle turned 90 degrees is 50x100, which is also what an
 // unturned 50x100 rectangle reports. Flips stay in details — they do not change the box at all.
-function formatRotation(o: DrawingObjectSnapshot): string {
-  return o.rotation ? `${o.rotation}°` : "";
+//
+// The angle reported is the one against the document, not the one the object stores, so it agrees
+// with the position and size beside it. An object turned 90 inside a group turned 270 reports
+// nothing, because that is how it sits on the page. Rotations are not constrained when stored —
+// rotateBy deliberately lets them grow past 360 — so this normalizes rather than trusting them.
+function formatRotation(orientation: Orientation): string {
+  const degrees = ((orientation.rotation % 360) + 360) % 360;
+  return degrees ? `${degrees}°` : "";
 }
 
-function row(o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string): string[] {
+function row(
+  o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string, orientation: Orientation
+): string[] {
   return [
-    o.id, o.type, formatPosition(bb), formatSize(bb), formatRotation(o), parentId, formatDetails(o)
+    o.id, o.type, formatPosition(bb), formatSize(bb), formatRotation(orientation), parentId,
+    formatDetails(o)
   ];
 }
 
@@ -116,14 +161,17 @@ type ToDocument = (point: Point) => Point;
 // box at each level instead would discard the rotation of every level above, putting a child of a
 // group inside a rotated group in the wrong quadrant.
 function walk(
-  objects: DrawingObjectSnapshot[], rows: string[][], parentId: string, toDocument?: ToDocument
+  objects: DrawingObjectSnapshot[], rows: string[][], parentId: string,
+  toDocument?: ToDocument, parentOrientation: Orientation = kUpright
 ): void {
   objects.forEach(o => {
     const localBB = boundingBoxForSnapshot(o);
     // An object's own rotation turns it about its se corner, as DrawingObject.boundingBox does.
     const corners = boundingBoxCorners(localBB)
       .map(p => o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
-    rows.push(row(o, boundingBoxForPoints(toDocument ? corners.map(toDocument) : corners), parentId));
+    const bb = boundingBoxForPoints(toDocument ? corners.map(toDocument) : corners);
+    const orientation = compose(parentOrientation, { rotation: o.rotation ?? 0, mirrored: false });
+    rows.push(row(o, bb, parentId, orientation));
 
     if (o.objects?.length) {
       // Members are fractions of this group's *unrotated* box, so that is the frame handed down —
@@ -135,7 +183,7 @@ function walk(
         const inParentSpace = absoluteChildPoint(p, frame);
         return toDocument ? toDocument(inParentSpace) : inParentSpace;
       };
-      walk(o.objects, rows, o.id, next);
+      walk(o.objects, rows, o.id, next, compose(parentOrientation, groupOrientation(o)));
     }
   });
 }
