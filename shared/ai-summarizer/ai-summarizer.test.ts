@@ -311,6 +311,32 @@ describe('ai-summarizer', () => {
         expect(result).toContain('This tile contains a drawing');
       });
 
+      it('should name each object in a drawing tile', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: {
+            row1: {
+              tiles: [{ tileId: 'tile1' }],
+              isSectionHeader: false
+            }
+          },
+          tileMap: {
+            tile1: {
+              id: 'tile1',
+              content: {
+                type: 'Drawing',
+                objects: [
+                  { id: 'r1', type: 'rectangle', x: 40, y: 20, width: 120, height: 80, fill: '#0069ff' }
+                ]
+              }
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('| r1 | rectangle | 40, 20 | 120 x 80 |');
+      });
+
       it('should handle data flow tiles', () => {
         const content = {
           rowOrder: ['row1'],
