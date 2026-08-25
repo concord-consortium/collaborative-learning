@@ -12,9 +12,15 @@
       "height": 400,
       "isSectionHeader": false,
       "tiles": [{"tileId": "d2TohdY3v2Vr9lA_"}]
+    },
+    "emgSketchRow": {
+      "id": "emgSketchRow",
+      "height": 200,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "emgSketch1"}]
     }
   },
-  "rowOrder": ["row1", "f2S20Z61qieQbGx_", "r6ljHBsQ5GQNeTIA"],
+  "rowOrder": ["row1", "emgSketchRow", "f2S20Z61qieQbGx_", "r6ljHBsQ5GQNeTIA"],
   "tileMap": {
     "emgText1": {
       "id": "emgText1",
@@ -23,6 +29,18 @@
         "format": "html",
         "text": [
           "<p>Watch this signal drive your program: <span data-slate-type=\"m2s-variable\" data-slate-reference=\"c9561nuH0CdjytQd\"></span></p>"
+        ]
+      }
+    },
+    "emgSketch1": {
+      "id": "emgSketch1",
+      "content": {
+        "type": "Drawing",
+        "objects": [
+          {"type": "variable", "id": "emgSketchChip", "x": 40, "y": 40, "variableId": "c9561nuH0CdjytQd"},
+          {"type": "variable", "id": "gripperSketchChip", "x": 40, "y": 100, "variableId": "K6LVoQMPcw56cjHU"},
+          {"type": "rectangle", "id": "emgSketchRect", "x": 200, "y": 40, "width": 90, "height": 60,
+           "stroke": "#000000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none"}
         ]
       }
     },
@@ -335,7 +353,7 @@
           }
         ]
       },
-      "tiles": ["d2TohdY3v2Vr9lA_", "emgText1", "69JwO1iprT1DiutQ"]
+      "tiles": ["d2TohdY3v2Vr9lA_", "emgText1", "69JwO1iprT1DiutQ", "emgSketch1"]
     }
   },
   "annotations": {}

@@ -146,5 +146,121 @@ npx cypress run --spec 'cypress/e2e/...' --config baseUrl=http://localhost:8083/
 
 Symptom of getting this wrong: tests pass/fail against an unrelated repo's dev
 server, the cypress config log prints the desired baseUrl but
-`cy.window().then(w => w.location.href)` shows the default port. Verify by
-having a test print `window.location.href`.
+`cy.window().then(w => w.location.href)` shows the default port.
+
+**`window.location.href` only catches the wrong-*port* case.** If a different
+project is serving the *same* port — easy when switching between repos, since
+they all default to 8080 — both print `localhost:8080` and the URL tells you
+nothing. Two checks that do work:
+
+```bash
+# which repo the listener is actually running from
+lsof -a -p "$(lsof -ti tcp:8080 -sTCP:LISTEN)" -d cwd -Fn | grep '^n'
+
+# or ask for a file only this repo serves; another project 404s
+curl -s -o /dev/null -w '%{http_code}\n' localhost:8080/demo/docs/emg-highlight-demo.json
+```
+
+**A server on the right repo can still be wrong.** A long-lived `npm start` that
+has seen many branch switches can serve a bundle that no longer matches the
+working tree, while the route and every static asset look current — so the
+checks above all pass and the app still misbehaves. The tell is a spec failing
+in `beforeEach` with the document never loading. Restart the dev server before
+debugging the test.
+
+### Running one cypress spec in CI
+
+A full `CI Regression` cycle is ~10 minutes and only runs when a PR carries the
+`run regression` label. To iterate on a single spec, dispatch the **Manual
+Regression** workflow, whose `single-test` job runs exactly one spec (~2 min):
+
+```bash
+gh workflow run manual-regression.yml --ref <branch> \
+  -f branch=<branch> -f browser=chrome \
+  -f test=functional/tile_tests/<your>_spec.js
+```
+
+The `test` input is a `choice`, so **a new spec must be added to the list in
+[.github/workflows/manual-regression.yml](.github/workflows/manual-regression.yml)
+before it can be dispatched.** Add it when you add the spec.
+
+### `/editor/` renders the document more than once
+
+The standalone doc-editor route mounts the same document in **three** panes — the
+main editable one, a Read Only Local copy, and a Read Only Remote (emulated) copy.
+Any unscoped count in a spec — `cy.get('.tile-row')`, `cy.get('.some-tile')` — is
+therefore 3× what the document contains, and `.first()` matters when interacting.
+
+**Always pass `noStorage=true` when testing cross-tile behavior on this route.**
+The doc-editor restores a document from `sessionStorage` and builds a model from
+it (`savedDocString` in
+[doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx)),
+then *replaces* that model once the `document=` param finishes loading. An
+`onSnapshot` effect writes the document back to session storage on every change,
+so a fixture with a running Simulator repopulates it constantly.
+
+The consequence is nasty: tile types that register **lazily** (Drawing among
+them) can stay bound to the superseded document instance while eagerly-present
+tiles move to the newly loaded one, leaving **two document-content instances in a
+single pane**. Anything depending on shared ephemeral state — highlight refs,
+hover, selection, all volatile and per-document — then silently does nothing
+between the two groups of tiles.
+
+This does not reproduce under Cypress, which starts with clean session storage.
+It reproduces immediately in a browser tab you have been using for a while, and
+presents as "the feature works in CI and does nothing on my screen." Symptom to
+recognize: `window.currentDocument.content.activeRef` is `undefined` while the
+effect of that ref is plainly visible in another tile.
+
+**The three panes are two models, by design.** The editable pane and the Read
+Only Local copy share the same `document`; the Read Only Remote copy renders a
+separate `remoteDocument` (the `showLocalReadOnly` / `showRemoteReadOnly` panes in
+[doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx)),
+rebuilt from a snapshot on every document change. So a ring, selection, or other
+volatile state set in the editable pane will never appear in the remote copy —
+that is expected, not a bug.
+
+Instrumenting `getDocumentContentFromNode` from inside tile components turned up
+*more* instances than that — four on one page, with the text tile and the drawing
+tiles on different ones. Those extras came from the sessionStorage restore
+described above, not from the panes. With `noStorage=true` the pane count alone
+does not split tiles across trees.
+
+Consequences for testing:
+
+- **`noStorage=true` is the part that matters for correctness.** Without it, two
+  tiles that depend on shared ephemeral state (highlight refs, hover, selection —
+  all volatile and per-document) may sit in different trees and silently fail to
+  talk to each other. With it, the editable pane is a valid place to verify such
+  behavior by hand, panes and all.
+- Disabling the read-only copies is about *assertions*, not correctness. The
+  remote copy is a separate document, so an unscoped selector can be satisfied by
+  a match there while the editable pane shows nothing. Scope per pane, or turn
+  the copies off via the `clue-doc-editor-settings` localStorage key — the
+  highlight spec does the latter.
+- Assertions that a tile does *not* exist after a deletion do hold unscoped: the
+  local read-only copy shares the editable pane's model, and the remote copy is
+  rebuilt from the snapshot, so all three follow the deletion. The exception is
+  the sessionStorage split above — one more reason to pass `noStorage=true`.
+
+Also: `.primary-workspace` does not exist on this route (it is a CLUE workspace
+class), so page objects built on it — including most of `cypress/support/elements`
+— do not work there. Select directly, or pass a different `workspaceClass`.
+
+### Branch preview URLs
+
+Branch builds deploy to `https://collaborative-learning.concord.org/branch/[name]/`,
+but the deploy action **strips a leading ticket prefix** from the folder name:
+branch `CLUE-603-linked-representation-references` deploys to
+`/branch/linked-representation-references/`. Guessing the full branch name gives a
+404. The real URL is on the GitHub deployment status:
+
+```bash
+D=$(gh api repos/{owner}/{repo}/deployments \
+  --jq '[.[] | select(.ref=="refs/heads/<branch>")][0].id')
+gh api repos/{owner}/{repo}/deployments/$D/statuses --jq '.[0].environment_url'
+```
+
+Relative `unit=` / `document=` URL params work on these deploys: they are resolved
+against the webpack public path (the branch root) rather than the page, via
+`getAssetUrl` — see the comment in `doc-editor-app.tsx`.

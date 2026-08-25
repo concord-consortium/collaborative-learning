@@ -65,12 +65,20 @@ A target tile renders emphasis on its own objects. There is no overlay layer —
    `undefined` for detached trees, so null-check it.
 2. **Render emphasis** in whatever idiom is native to the tile. Dataflow adds a CSS class to its
    node (`dataflow-node.tsx`, styles in `nodes/node-states.scss`); the text tile's variable chip
-   does the same (`variables-plugin.tsx`, styles in `text-tile.scss`).
+   does the same (`variables-plugin.tsx`, styles in `text-tile.scss`). The sketch tile draws an
+   SVG ring at layer level instead (`renderHighlightBorders` in `drawing-layer.tsx`).
 
 Use `highlightClassesFor` (`src/models/highlights/highlight-classes.ts`) for the class names, and
 the ring colors in `src/components/highlight-vars.scss`, rather than defining either locally. One
-reference should read the same way wherever it lands; a tile whose emphasis is not CSS-driven can
-still use the shared colors.
+reference should read the same way wherever it lands, and the element carrying the class need not
+be HTML — the sketch ring is an SVG rect and uses both. Geometry stays local: that ring divides its
+stroke width and dash length by the current zoom, which CSS cannot do.
+
+Note what the sketch tile does *not* reuse: `renderSelectionBorders` reads `object.boundingBox`,
+the object's box in its own coordinate space. An object inside a `GroupObject` renders within the
+group's `scale()` transform, so a layer-level ring drawn from the raw box lands in the wrong
+place. Highlights go through `getObjectBoundingBox` (`drawing-content.ts`), which walks the
+enclosing groups.
 
 Note the text chip renders its highlight **separately from its Slate selection style**. That is
 the concrete form of the rule above: the two states must be able to disagree, so a tile that
@@ -143,6 +151,17 @@ A consequence worth knowing: **renaming a variable silently breaks its associati
 nodes that use it.** That is pre-existing behavior of the binding, not of highlights, and it is
 pinned down by a test so it cannot regress unnoticed.
 
+The sketch tile is the contrasting case, and the better model to copy. `VariableChipObject`
+stores `variableId` outright, so `getObjectsForVariable` (`drawing-content.ts`) is a filter over
+`objectMap` and renaming cannot break it. Two details of that implementation are deliberate:
+
+- It matches `object.type === "variable"` as a **string** rather than importing
+  `VariableChipObject`. That model is registered *into* the drawing tile by the shared-variables
+  plugin, so importing it would invert the dependency.
+- It reads `objectMap`, not `objects`. `objects` holds only top-level objects, while `objectMap`
+  recurses into groups — so a chip nested in a group is still found. Whatever a tile reports here
+  must be the same set its renderer walks, or a target resolves but never draws.
+
 A tile that never implements this still answers it. `TileContentModel` itself calls
 `tileContentAPIViews({})` (`tile-content.ts`, "add empty apis so they are available on the generic
 type"), and every registered content model extends it, so the default returning `[]` is always
@@ -210,6 +229,27 @@ highlight from. That is entirely about the variable chip and is not needed to ad
   keyboard and assistive-technology users cannot pin a highlight.
 - **Dataflow exposes only nodes.** Connections and groups have stable ids but are not yet
   addressable, so nothing can point at a wire or a collapsed group.
+- **Everything highlightable today is reached through a *variable* reference — and that is a UI
+  limitation, not a design one.** The `object` kind is fully specified and resolved, but nothing
+  produces one, because a variable chip is currently the only way a *user* can author a cross-tile
+  reference at all. So objects that are addressable but not variable-bound — a sketch rectangle, a
+  Dataflow Math node — cannot be pointed at, and every target tile appears to support only
+  variables. Expect this to dissolve rather than be fixed: once AI-emitted references land,
+  `object` references reach those objects with no change to any target tile. Do not design around
+  the variable kind as though it were the only one.
+- **Sketch variable chips cannot be grouped.** `VariableChipObject` extends `DrawingObject` rather
+  than `SizedObject`, so it never implements `setUnrotatedDragBounds`, which `createGroup` calls,
+  and grouping one throws. Pre-existing and unrelated to highlights, tracked separately as a
+  drawing-tile bug. It bounds the *variable* kind only: a `variable` reference can reach nothing
+  groupable, but an `object` reference names any object by id, and a shape groups fine. So the
+  highlight ring's use of the group-adjusted bounding box is load-bearing rather than defensive —
+  it is simply not exercised, since nothing in the fixtures or specs groups an object.
+- **The group-adjusted box is exact only for rotations that are multiples of 90°.**
+  `GroupObject.adjustInternalBoundingBox` rotates two opposite corners and takes their min/max,
+  which does not bound a rotated rectangle in general — at 45° it collapses to zero width. Nothing
+  in the product creates such a rotation (the only control is Rotate 90°), so this is reachable
+  only from an authored or imported document. Pre-existing, and shared with arrow annotations,
+  which anchor through the same `getObjectBoundingBox` call.
 - **Only whole objects can be highlighted.** There is no way to highlight a range of text; text
   highlight chips are inline void elements holding a copy of their text, so the model has no
   representation for a span of prose.
