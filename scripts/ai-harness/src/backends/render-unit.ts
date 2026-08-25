@@ -113,12 +113,9 @@ export async function startRenderUnitServer(options: BuildRenderUnitOptions): Pr
   const body = `${JSON.stringify(buildRenderUnit(options))}\n`;
   const server = http.createServer((request, response) => {
     if ((request.url ?? "").split("?")[0] !== "/content.json") {
-      // The CORS header matters as much on this path as on the 200: CLUE probes for an optional
-      // teacher-guide/content.json beside the unit, and its fetch code handles a real 404
-      // gracefully (src/models/curriculum/unit-utils.ts returns it to the caller) but wraps a
-      // network-level failure in a thrown Error. A 404 without this header is a CORS rejection to
-      // a cross-origin caller — fetch throws, CLUE throws, and with the render page served
-      // same-site (backend v3) that throw surfaces as a fatal page error on every document.
+      // CLUE probes for an optional teacher-guide/content.json beside the unit and handles a real
+      // 404 gracefully — but without the CORS header a 404 reaches a cross-origin caller as a
+      // network-level failure, which CLUE throws on. The header matters here as much as on the 200.
       response.writeHead(404, { "content-type": "text/plain", "access-control-allow-origin": "*" });
       response.end("not found");
       return;
