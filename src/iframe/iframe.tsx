@@ -41,13 +41,8 @@ const handleDocumentRendered = () => {
   // has rendered there is nothing to measure but the loading box, and in unwrapped mode the
   // stylesheet rules that make the content determine the height are not in effect yet, so an
   // earlier measurement would report the viewport's height instead of the document's.
-  const content = document.getElementById("app");
-  if (!content) {
-    // Nothing to measure, but a consumer waiting on the message should not wait forever.
-    postDocumentRendered(window.parent);
-    return;
-  }
-  resizeObserver.observe(content);
+  // #app is guaranteed here: renderEditor would have thrown at createRoot without it.
+  resizeObserver.observe(document.getElementById("app")!);
 };
 
 let root: Root | undefined;
