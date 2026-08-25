@@ -69,8 +69,33 @@ if (!fs.existsSync(paths.manifest)) {
 }
 const manifest = readManifest(paths);
 
+// The key map must describe THIS corpus. After a first application the manifest's documents carry
+// the class's contextId, so once any is set: a key map with no contextId at all is refused (its
+// class cannot be checked), and one naming a different class — or a manifest holding more than one
+// class — is refused rather than silently patching whichever ids happen to collide. A fresh
+// manifest (every contextId still null) has nothing to compare, and the matched count printed
+// below is the visibility for that case.
+const manifestContextIds = new Set(manifest.documents
+  .map((entry) => entry.contextId)
+  .filter((value): value is string => value !== null));
+if (manifestContextIds.size > 0) {
+  if (keyMap.contextId == null) {
+    fail(`${resolvedKeyMap} carries no contextId, but corpus "${corpus}" already belongs to class ` +
+      `${[...manifestContextIds].join(", ")} — refusing a key map whose class cannot be checked.`);
+  }
+  const mismatched = [...manifestContextIds].filter((value) => value !== keyMap.contextId);
+  if (mismatched.length > 0) {
+    fail(`${resolvedKeyMap} describes class ${keyMap.contextId}, but corpus "${corpus}" carries ` +
+      `${mismatched.join(", ")} — refusing to patch a corpus with another class's key map.`);
+  }
+}
+
+// `filled` counts every write, labels included; `alreadySet` counts only real overwrite candidates
+// — a field the key map offered a value for that an existing value declined. A field the key map
+// had nothing for is neither.
 let filled = 0;
 let alreadySet = 0;
+let matched = 0;
 const unmatched: string[] = [];
 const inManifest = new Set(manifest.documents.map((entry) => entry.id));
 for (const id of Object.keys(keyMap.documents)) {
@@ -80,26 +105,40 @@ for (const id of Object.keys(keyMap.documents)) {
 for (const entry of manifest.documents) {
   const mapped = keyMap.documents[entry.id];
   if (!mapped) continue;
-  const fill = (current: string | null, value: string | null | undefined): [string | null, boolean] => {
-    if (current !== null) { alreadySet++; return [current, false]; }
-    if (value == null) return [current, false];
+  matched++;
+  const fill = (current: string | null, value: string | null | undefined): string | null => {
+    if (value == null) return current;
+    if (current !== null) {
+      alreadySet++;
+      return current;
+    }
     filled++;
-    return [value, true];
+    return value;
   };
-  [entry.unit] = fill(entry.unit, mapped.unit);
-  [entry.investigation] = fill(entry.investigation, mapped.investigation);
-  [entry.problem] = fill(entry.problem, mapped.problem);
-  [entry.contextId] = fill(entry.contextId, keyMap.contextId);
-  if (entry.labels.sourceKey === undefined) entry.labels.sourceKey = mapped.key;
-  if (entry.labels.sourceUid === undefined) entry.labels.sourceUid = mapped.uid;
-  if (entry.labels.surveyModality === undefined && mapped.modality !== undefined) {
-    entry.labels.surveyModality = mapped.modality;
-  }
+  entry.unit = fill(entry.unit, mapped.unit);
+  entry.investigation = fill(entry.investigation, mapped.investigation);
+  entry.problem = fill(entry.problem, mapped.problem);
+  entry.contextId = fill(entry.contextId, keyMap.contextId);
+  const fillLabel = (name: "sourceKey" | "sourceUid" | "surveyModality", value: string | undefined) => {
+    if (value === undefined) return;
+    if (entry.labels[name] !== undefined) {
+      alreadySet++;
+      return;
+    }
+    entry.labels[name] = value;
+    filled++;
+  };
+  fillLabel("sourceKey", mapped.key);
+  fillLabel("sourceUid", mapped.uid);
+  fillLabel("surveyModality", mapped.modality);
 }
 
 writeManifest(paths, manifest);
-console.log(`Filled ${filled} field(s) across ${manifest.documents.length} manifest entries; ` +
-  `${alreadySet} already-set field(s) left untouched.`);
+console.log(`Matched ${matched} of ${manifest.documents.length} manifest entries; ` +
+  `filled ${filled} field(s); ${alreadySet} already-set field(s) left untouched.`);
+if (matched === 0) {
+  console.log("Nothing matched at all — is this the right key map for this corpus?");
+}
 if (unmatched.length) {
   console.log(`Note: ${unmatched.length} key-map id(s) have no manifest entry (skipped or renamed?): ` +
     unmatched.join(", "));
