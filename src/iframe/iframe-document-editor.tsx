@@ -116,7 +116,8 @@ export class IframeDocumentEditor extends React.Component<IProps, IState>  {
     if (unwrapped) {
       // Let the content determine the page's height rather than filling the viewport, so a
       // resize observer can send that height to the parent window and the parent can size the
-      // iframe to just fit the document. See the .unwrapped rules in iframe-document-editor.scss.
+      // iframe to just fit the document. See the .unwrapped rules in
+      // components/document/unwrapped-document.scss.
       window.document.body.classList.add("unwrapped");
       return (
         <CanvasComponent

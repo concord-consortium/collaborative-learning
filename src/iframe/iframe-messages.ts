@@ -8,8 +8,9 @@
 // and its scrollHeight is 0. `#app` itself is no better on its own: pinned to the viewport, its
 // height is the viewport's height, not the content's.
 //
-// The rule in iframe-document-editor.scss puts `#app` back in the normal flow in unwrapped mode
-// and lets the document content size it. Measuring `#app` then gives the content's height.
+// The rules in components/document/unwrapped-document.scss put `#app` back in the normal flow in
+// unwrapped mode and let the document content size it. Measuring `#app` then gives the content's
+// height.
 
 const contentElementId = "app";
 
