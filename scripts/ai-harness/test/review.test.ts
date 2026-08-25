@@ -97,11 +97,8 @@ describe("the page can be read with a keyboard", () => {
   const html = renderReviewHtml(modelFor(fixture));
 
   it("creates no nested scroll region, and no tab stop compensating for one", () => {
-    // `pre` used to clip at 32rem and scroll, which trapped the page scroll mid-document and
-    // needed a `tabindex` on every block so keyboard users could scroll past the clip. The inputs
-    // now collapse instead (see below), so an opened summary is simply as tall as its content —
-    // the clip, the inner scrollbar and the compensating tab stops are all gone, and reintroducing
-    // any of them would bring the scroll trap back.
+    // A `pre` that clips and scrolls traps the page scroll mid-document, and its `tabindex` tab
+    // stops exist only to compensate; the collapsed inputs (below) make both unnecessary.
     expect(html).not.toMatch(/pre\s*{[^}]*(max-height|overflow-y)/);
     const blocks = [...html.matchAll(/<pre\b([^>]*)>/g)].map((match) => match[1]);
     expect(blocks.length).toBeGreaterThan(0);

@@ -84,9 +84,9 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   const fakeBrowser = () => ({
     newPage: async () => ({
       setViewport: async () => undefined,
-      // A clipped call is the capture — the full-document capture is a page screenshot clipped to
-      // the iframe's box, never an element screenshot. The docId is not visible here, so each
-      // capture takes the next document off the queue. An unclipped call is the evidence capture.
+      // A clipped call is the capture (a page screenshot clipped to the iframe's box). The docId
+      // is not visible here, so each capture takes the next document off the queue. An unclipped
+      // call is the evidence capture.
       screenshot: async (options?: { clip?: { width: number; height: number } }) => {
         if (options?.clip) {
           lastRenderedDoc = pendingDocs.shift() ?? lastRenderedDoc;
@@ -102,9 +102,9 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
       },
       waitForFunction: async () => true,
       $: async () => ({
-        // Follows the height the backend set, the way a real element's box does. A fixed box let a
-        // render that never resized still look like a full-document capture. Boxes are all an
-        // element supplies now — `ElementLike` has no `screenshot`.
+        // Follows the height the backend set, the way a real element's box does — a fixed box
+        // would let a render that never resized still look like a full-document capture. Boxes are
+        // all an element supplies; `ElementLike` has no `screenshot`.
         boundingBox: async () => ({ x: 0, y: 0, width: 960, height: frameHeights.at(-1) ?? 500 })
       }),
       frames: () => [{
@@ -552,9 +552,9 @@ describe("a per-tile render, and the sets a run can send from it", () => {
   const fakeBrowser = () => ({
     newPage: async () => ({
       setViewport: async () => undefined,
-      // Clipped calls are captures — per-tile clips a page screenshot to each tile's box, and the
-      // resulting PNG is the clip's size, the way a real page screenshot works. Unclipped calls are
-      // the evidence capture.
+      // Clipped calls are captures (per-tile clips a page screenshot to each tile's box) and
+      // return the clip's size, the way a real page screenshot works. Unclipped calls are the
+      // evidence capture.
       screenshot: async (options?: { clip?: { width: number; height: number } }) =>
         options?.clip
           ? makeTestPng(Math.round(options.clip.width), Math.round(options.clip.height))

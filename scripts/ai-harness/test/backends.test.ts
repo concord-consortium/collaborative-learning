@@ -46,7 +46,7 @@ const settledMeasurement: FrameMeasurement = {
 function fakeBrowser(options: FakeOptions = {}) {
   const state = {
     url: "",
-    viewport: null as { width: number; height: number } | null,
+    viewports: [] as { width: number; height: number }[],
     screenshots: 0,
     newPages: 0,
     closedPages: 0,
@@ -56,8 +56,8 @@ function fakeBrowser(options: FakeOptions = {}) {
   const handlers = new Map<string, ((payload: any) => void)[]>();
 
   const element: ElementLike = {
-    // Follows the frame height the backend set, the way a real element's box does. Measurement is
-    // all an element is for now — captures are page screenshots clipped to this box.
+    // Follows the frame height the backend set, the way a real element's box does. Elements only
+    // measure — captures are page screenshots clipped to this box.
     boundingBox: async () => options.boundingBox === undefined
       ? { x: 0, y: 0, width: 960, height: state.frameHeights.at(-1) ?? 1420 }
       : options.boundingBox
@@ -80,8 +80,8 @@ function fakeBrowser(options: FakeOptions = {}) {
       // top-level tile several pictures with nothing here noticing. `local-render.integration.ts`
       // is where that is checked against a real DOM.
       expect(selector).toBe(".tool-tile:not(.tool-tile .tool-tile)");
-      // Boxes only: `ElementLike` no longer declares `screenshot`, so a capture that tried to
-      // photograph the element rather than clip a page screenshot would not compile.
+      // Boxes only: `ElementLike` has no `screenshot`, so a capture that tried to photograph the
+      // element rather than clip a page screenshot would not compile.
       return tiles.map((tile) => ({
         boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx })
       }));
@@ -89,7 +89,7 @@ function fakeBrowser(options: FakeOptions = {}) {
   };
 
   const page: PageLike = {
-    setViewport: async (viewport) => { state.viewport = viewport; },
+    setViewport: async (viewport) => { state.viewports.push(viewport); },
     // A clipped call is the per-tile capture and returns a PNG of the clip's size, the way a real
     // page screenshot would; an unclipped call is the evidence capture.
     screenshot: async (capture) => {
@@ -218,13 +218,17 @@ describe("the puppeteer backend", () => {
     }));
     // And it is no longer being served, because the render is over.
     expect(servedPages.has("drawing")).toBe(false);
-    // The viewport grew to cover the resized frame (1200px of rows + 80px chrome + 64px pad):
-    // Chromium rasterizes a cross-site iframe only near the visible viewport, so a viewport shorter
-    // than the frame captures the lower rows as blank pixels.
-    expect(state.viewport).toEqual({ width: 960, height: 1344 });
+    // The viewport starts at the fixed working size, then grows to cover the resized frame
+    // (1200px of rows + 80px chrome + 64px pad): Chromium rasterizes a cross-site iframe only near
+    // the visible viewport, so a viewport shorter than the frame captures the lower rows as blank
+    // pixels. Both sizes are asserted — the initial one is what every pre-resize wait runs under.
+    expect(state.viewports).toEqual([
+      { width: 960, height: 1024 },
+      { width: 960, height: 1344 }
+    ]);
     expect(state.screenshots).toBe(1);
-    // The capture is a page screenshot clipped to the iframe's box — 960px wide by the 1280px the
-    // backend just resized the frame to (1200px of rows + 80px chrome) — not an element capture.
+    // The capture is a page screenshot clipped to the iframe's box: 960px wide by the 1280px the
+    // backend resized the frame to (1200px of rows + 80px chrome).
     expect(outcome.images).toEqual([{
       bytes: makeTestPng(960, 1280), url: null, tileId: null, purpose: "full-document"
     }]);
@@ -360,9 +364,9 @@ describe("the puppeteer backend", () => {
   });
 
   it("bounds a capture that hangs inside screenshot()", async () => {
-    // The capture is a clipped page screenshot now, but page.screenshot() still takes no timeout of
-    // its own — a compositor wedged by animating content hangs exactly here, so the deadline has to
-    // cover it. The unclipped evidence capture stays live: the failure path photographs the page.
+    // page.screenshot() takes no timeout of its own — a compositor wedged by animating content
+    // hangs exactly in the clipped capture call, so the deadline has to cover it. The unclipped
+    // evidence capture stays live: the failure path photographs the page.
     const fake = fakeBrowser();
     (fake.browser as any).newPage = async () => {
       const page = await fakeBrowser().browser.newPage();
