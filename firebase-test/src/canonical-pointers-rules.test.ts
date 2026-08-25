@@ -100,6 +100,15 @@ describe("deleting axes-typed documents", () => {
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).delete());
   });
+
+  // Duplicated from the "group" block above rather than left to it: that block covers the pre-sweep
+  // value only, and CLUE-604's cleanup deletes it. Without this case the class check would lose its
+  // coverage at that point rather than at some deliberate decision.
+  it("a user outside the class may not delete the axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, axesDoc());
+    db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
+    await assertFails(db.doc(kDocPath).delete());
+  });
 });
 
 describe("canonical flag integrity", () => {
