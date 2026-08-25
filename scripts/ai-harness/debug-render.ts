@@ -2,16 +2,22 @@
  * Renders ONE corpus document through the same pathway `render --mode puppeteer-full-height` uses,
  * with everything observable: every console message from the page and the CLUE frame (timestamped),
  * a DOM probe every second showing exactly which rows and tiles have mounted, and screenshots at
- * the end regardless of outcome. Built to diagnose the teacher-workshop truncation: rows that are
- * measured but never paint, and documents that never mount at all
- * ("getTileSharedModels has no document").
+ * the end regardless of outcome. Built to diagnose truncated captures: rows that are measured but
+ * never paint, and documents that never mount at all.
  *
  *   npx tsx debug-render.ts --corpus <name> --doc <corpus-document-id>
  *   npx tsx debug-render.ts --corpus <name> --doc <corpus-document-id> --timeout-ms 90000
  *
  * Prerequisites: a CLUE dev server (npm start) at --clue-url (default http://localhost:8080), and
  * the corpus imported under data/corpus/<name>/. Output lands in data/debug/<doc>/: console.txt,
- * timeline.txt, snapshots.json, page.png (full render page), frame.png (the CLUE frame alone).
+ * timeline.txt, snapshots.json, page.png (the render page), frame.png (the CLUE frame alone).
+ *
+ * The observation setup mirrors the backend's capture rules rather than predating them: the render
+ * page is served same-site with a localhost CLUE server, the viewport grows to cover the frame
+ * before the final screenshots, and the frame picture is a page screenshot clipped to the frame's
+ * box in page coordinates — never `ElementHandle.screenshot()`, whose machinery hangs on
+ * continuously animating content (the very documents this tool exists to investigate). The final
+ * captures are also time-bounded, so a hang cannot cost the console and timeline files.
  *
  * Read the timeline bottom-up: the last snapshot shows which model rows never appeared in the DOM
  * (`missing rows`), and the per-row table shows each mounted row's height and tile count, so "it
@@ -20,8 +26,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { corpusPaths, defaultDataRoot, readCorpusDocument, readManifest } from "./src/corpus.js";
+import { kDocumentIdPattern } from "./src/schemas.js";
 import { generateRenderHtml, kInitialFrameHeightPx } from "./src/backends/render-html.js";
-import { startRenderPageServer } from "./src/backends/puppeteer.js";
+import {
+  FrameLike, PageLike, launchPuppeteer, startRenderPageServer, viewportPageOffset
+} from "./src/backends/puppeteer.js";
 import { startRenderUnitServer } from "./src/backends/render-unit.js";
 
 function fail(message: string): never {
@@ -47,12 +56,14 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 if (!corpus || !docId) fail("Usage: debug-render.ts --corpus <name> --doc <id>");
+// Both become path segments under data/, so both are held to the id grammar before any path is
+// built from them — otherwise `--doc ../../x` would write the debug output outside the data root.
+if (!kDocumentIdPattern.test(corpus)) fail(`--corpus must match ${kDocumentIdPattern}, got "${corpus}"`);
+if (!kDocumentIdPattern.test(docId)) fail(`--doc must match ${kDocumentIdPattern}, got "${docId}"`);
 if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) fail("--timeout-ms must be a positive number");
 
 // --- Output -----------------------------------------------------------------
 
-const outDir = path.join(defaultDataRoot(), "debug", docId);
-fs.mkdirSync(outDir, { recursive: true });
 const startedAt = Date.now();
 const stamp = () => `+${((Date.now() - startedAt) / 1000).toFixed(1)}s`;
 
@@ -65,6 +76,21 @@ function logConsole(line: string) {
 function logTimeline(line: string) {
   timelineLines.push(line);
   console.log(line);
+}
+
+/**
+ * Resolves to null instead of hanging: the final captures run after the diagnosis is complete, and
+ * a capture that never settles must not cost the console and timeline files it was decorating.
+ */
+async function bounded<T>(promise: Promise<T>, ms: number, what: string): Promise<T | null> {
+  let timer: NodeJS.Timeout | undefined;
+  const result = await Promise.race([
+    promise,
+    new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), ms); })
+  ]);
+  clearTimeout(timer);
+  if (result === null) logTimeline(`${stamp()} ${what} did not finish within ${ms}ms; continuing`);
+  return result;
 }
 
 // --- The probe run inside the CLUE frame ------------------------------------
@@ -117,6 +143,9 @@ async function main() {
   const manifest = readManifest(paths);
   const entry = manifest.documents.find((doc) => doc.id === docId);
   if (!entry) fail(`Corpus "${corpus}" has no document "${docId}".`);
+  // Created only once the id is known to name a real corpus document.
+  const outDir = path.join(defaultDataRoot(), "debug", docId!);
+  fs.mkdirSync(outDir, { recursive: true });
   const content = readCorpusDocument(paths, entry) as {
     rowOrder?: string[]; rowMap?: Record<string, { isSectionHeader?: boolean; tiles?: unknown[] }>;
     tileMap?: Record<string, unknown>;
@@ -126,39 +155,56 @@ async function main() {
     `${Object.keys(content.tileMap ?? {}).length} tiles in tileMap`);
 
   const unitServer = await startRenderUnitServer({ clueUrl });
-  const pageServer = await startRenderPageServer();
+  // Same-site with a localhost CLUE server, exactly as the backend serves it: a cross-site frame is
+  // rasterized only near the viewport, so a cross-site debugger would report truncation of its own
+  // making.
+  const sameSiteHost = (() => {
+    try {
+      return new URL(clueUrl).hostname === "localhost" ? "localhost" : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  const pageServer = await startRenderPageServer({ urlHost: sameSiteHost });
   const html = generateRenderHtml({
     content, clueUrl, unit: unitServer.unitUrl, initialHeightPx: kInitialFrameHeightPx
   });
   const served = pageServer.serve(docId!, html);
   logTimeline(`${stamp()} render page at ${served.url}; unit at ${unitServer.unitUrl}`);
 
-  const puppeteer = (await import("puppeteer")) as any;
-  const browser = await puppeteer.default.launch({ headless: true });
-  const page = await browser.newPage();
+  const browser = await launchPuppeteer();
+  const page: PageLike = await browser.newPage();
   await page.setViewport({ width: 960, height: 800 });
 
   // Every console message, from the page and every frame, timestamped. This is the stream the
   // backend truncates into evidence-on-failure; here it is the point.
-  page.on("console", (message: any) => {
+  page.on("console", (message: { type(): string; text(): string }) => {
     logConsole(`${stamp()} console.${message.type()}: ${message.text()}`);
   });
-  page.on("pageerror", (error: any) => logConsole(`${stamp()} PAGEERROR: ${error?.message ?? error}`));
-  page.on("requestfailed", (request: any) => {
+  page.on("pageerror", (error: { message?: string }) => {
+    logConsole(`${stamp()} PAGEERROR: ${error?.message ?? error}`);
+  });
+  page.on("requestfailed", (request: { url(): string; failure(): { errorText: string } | null }) => {
     logConsole(`${stamp()} requestfailed: ${request.url()} (${request.failure()?.errorText})`);
   });
-  page.on("framenavigated", (frame: any) => logConsole(`${stamp()} frame navigated: ${frame.url()}`));
+  page.on("framenavigated", (frame: { url(): string }) => {
+    logConsole(`${stamp()} frame navigated: ${frame.url()}`);
+  });
 
   await page.goto(served.url, { waitUntil: "domcontentloaded" });
 
-  const clueFrame = () => page.frames().find((frame: any) => frame.url().includes("iframe.html"));
+  const clueFrame = (): FrameLike | undefined =>
+    page.frames().find((frame) => frame.url().includes("iframe.html"));
 
   // Poll until nothing changes for a while or the timeout lapses — deliberately no early success
-  // exit, because "what happens after it looks done" is part of what this tool is for.
+  // exit, because "what happens after it looks done" is part of what this tool is for. The budget
+  // covers the polling alone: server startup, browser launch and navigation are not what
+  // --timeout-ms names.
+  const pollingStartedAt = Date.now();
   let lastSummary = "";
   let lastChangeAt = Date.now();
   const snapshots: { at: string; posted: boolean; probe: Probe | null }[] = [];
-  while (Date.now() - startedAt < timeoutMs) {
+  while (Date.now() - pollingStartedAt < timeoutMs) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     let posted = false;
     try {
@@ -169,7 +215,7 @@ async function main() {
     let probe: Probe | null = null;
     if (frame) {
       try {
-        probe = await frame.evaluate(kProbeScript) as Probe;
+        probe = await frame.evaluate<Probe>(kProbeScript);
       } catch (error) {
         logTimeline(`${stamp()} probe failed: ${(error as Error).message}`);
       }
@@ -222,18 +268,38 @@ async function main() {
     logTimeline("=== No probe ever succeeded: the CLUE frame never became reachable ===");
   }
 
+  // Final pictures, the backend's way: grow the viewport to cover the frame (a clipped,
+  // captureBeyondViewport:false screenshot is intersected with the viewport), then take page
+  // screenshots — the frame's picture is a clip of the page in page coordinates, never
+  // ElementHandle.screenshot(). Each step is bounded so a wedged page cannot cost the files below.
   try {
-    await page.screenshot({ path: path.join(outDir, "page.png"), fullPage: true });
-    const frameElement = await page.$("iframe");
-    if (frameElement) await frameElement.screenshot({ path: path.join(outDir, "frame.png") });
+    const frameElement = await bounded(page.$("#clue-frame"), 10_000, "finding the iframe");
+    const box = frameElement
+      ? await bounded(frameElement.boundingBox(), 10_000, "measuring the iframe")
+      : null;
+    if (box && box.height > 0) {
+      await page.setViewport({ width: 960, height: Math.min(Math.ceil(box.height) + 64, 20_000) });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    const pageShot = await bounded(page.screenshot({ type: "png" }), 15_000, "capturing the page");
+    if (pageShot) fs.writeFileSync(path.join(outDir, "page.png"), Buffer.from(pageShot));
+    if (box && box.width > 0 && box.height > 0) {
+      const offset = await viewportPageOffset(page);
+      const frameShot = await bounded(page.screenshot({
+        type: "png",
+        clip: { x: box.x + offset.leftPx, y: box.y + offset.topPx, width: box.width, height: box.height },
+        captureBeyondViewport: false
+      }), 15_000, "capturing the iframe");
+      if (frameShot) fs.writeFileSync(path.join(outDir, "frame.png"), Buffer.from(frameShot));
+    }
   } catch (error) {
-    logTimeline(`screenshot failed: ${(error as Error).message}`);
+    logTimeline(`${stamp()} screenshot failed: ${(error as Error).message}`);
   }
 
   fs.writeFileSync(path.join(outDir, "console.txt"), consoleLines.join("\n") + "\n");
   fs.writeFileSync(path.join(outDir, "timeline.txt"), timelineLines.join("\n") + "\n");
   fs.writeFileSync(path.join(outDir, "snapshots.json"), JSON.stringify(snapshots, null, 2) + "\n");
-  console.log(`\nWrote console.txt, timeline.txt, snapshots.json, page.png, frame.png to ${outDir}`);
+  console.log(`\nWrote console.txt, timeline.txt, snapshots.json and any captured PNGs to ${outDir}`);
 
   served.forget();
   await browser.close();

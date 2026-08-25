@@ -155,7 +155,7 @@ export interface PuppeteerBackendOptions {
   capture?: Extract<CaptureMode, "full-document" | "per-tile">;
 }
 
-async function launchPuppeteer(): Promise<BrowserLike> {
+export async function launchPuppeteer(): Promise<BrowserLike> {
   const puppeteer = await import("puppeteer");
   const browser = await (puppeteer as any).default.launch({ headless: true });
   return browser as BrowserLike;
@@ -459,7 +459,7 @@ const kViewportOffsetScript = `(() => {
  * environments with no `visualViewport` (and test fakes that answer only the scripts they know),
  * where the page cannot have scrolled and the offset is zero.
  */
-async function viewportPageOffset(page: PageLike): Promise<{ leftPx: number; topPx: number }> {
+export async function viewportPageOffset(page: PageLike): Promise<{ leftPx: number; topPx: number }> {
   const value = await page.evaluate(kViewportOffsetScript) as unknown;
   const [leftPx, topPx] = Array.isArray(value) && value.length === 2 ? value : [0, 0];
   return { leftPx: Number(leftPx) || 0, topPx: Number(topPx) || 0 };
