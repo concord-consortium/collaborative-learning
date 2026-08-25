@@ -197,9 +197,13 @@ service cloud.firestore {
       // src/models/document/document-axes.ts.
       // Residual, accepted: nothing here proves the caller is a member of that group, because group
       // membership lives in the Realtime Database and the token carries no group claim. A student can
-      // therefore create a document owned by another group in their own offering. Groups are a CLUE
-      // concept that the portal does not model, so no token claim is going to corroborate one; this is
-      // where the create rules stop. See the owner axis in docs/document-axes/README.md.
+      // therefore create a document owned by another group in their own offering. That document is not
+      // inert: canonicalPointerCreatable below checks only the caller's class, so the same caller can also
+      // claim that group's canonical slot, and pointers are immutable — every real member of that group
+      // then converges onto it through the resolver's fast path, and isConcurrentClassDocument grants read
+      // and write on its history to the whole class rather than to the group. Groups are a CLUE concept
+      // that the portal does not model, so no token claim is going to corroborate one; this is where the
+      // create rules stop. See the owner axis in docs/document-axes/README.md.
       // Residual, accepted: the token corroborates that the caller belongs to the class named in
       // `class_<class_hash>`, but not that the caller is entitled to mint a document under that owner. Any
       // class member can create any number of `class_<class_hash>`-owned, `concurrent: true` documents, each

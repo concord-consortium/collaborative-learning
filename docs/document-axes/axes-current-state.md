@@ -128,7 +128,14 @@ to create group-owned documents, this rule is what has to change.
 caller is in the group they name: group membership lives in the Realtime Database, which the rules cannot
 read, and the token carries no group claim. So a student can still create a document owned by another group
 *in their own offering*. They cannot create one owned by a classmate, by a group in another offering, or by
-another class. Groups are a CLUE concept that the portal does not model, so no token claim is going to
+another class.
+
+What is being accepted is larger than a stray document, because two rules that this change does not touch
+compose with it. `canonicalPointerCreatable` checks only that the caller is in the class — never group
+membership — and pointers are immutable, so the same caller can claim that group's canonical slot and hold
+it permanently; every real member of the group then converges onto that document through the resolver's fast
+path. `isConcurrentClassDocument` then grants read and write on its history to the whole class rather than
+to the group. Groups are a CLUE concept that the portal does not model, so no token claim is going to
 corroborate one — this is where the create rules stop, by design rather than pending work.
 
 **The class case has a residual of its own, accepted rather than tracked as work.** The token corroborates
