@@ -67,4 +67,29 @@ describe("absoluteChildBoundingBox", () => {
     expect(absoluteChildBoundingBox({ nw: { x: 0, y: 0 }, se: { x: 1, y: 0.25 } }, flipped))
       .toEqual({ nw: { x: 100, y: 275 }, se: { x: 300, y: 300 } });
   });
+
+  const square = { boundingBox: { nw: { x: 0, y: 0 }, se: { x: 100, y: 100 } } };
+  const wholeGroup = { nw: { x: 0, y: 0 }, se: { x: 1, y: 1 } };
+
+  it("bounds a child rotated 45 degrees using every corner", () => {
+    // Rotation pivots on the group's se corner, so rotating only nw and se leaves se fixed and the
+    // two points share an x — a box of zero width. A 100x100 square turned 45 degrees bounds to
+    // 100*sqrt(2) on each side.
+    const bb = absoluteChildBoundingBox(wholeGroup, { ...square, rotation: 45 });
+    expect(bb.se.x - bb.nw.x).toBeCloseTo(100 * Math.SQRT2);
+    expect(bb.se.y - bb.nw.y).toBeCloseTo(100 * Math.SQRT2);
+  });
+
+  it("still bounds a child rotated a multiple of 90", () => {
+    // The product's Rotate control only produces multiples of 90, where two corners happened to be
+    // enough. This pins that the fix does not disturb them. Compared approximately because
+    // Math.cos(Math.PI / 2) is 6.1e-17 rather than 0, so the corners land a rounding error off.
+    const bb = absoluteChildBoundingBox(wholeGroup, { ...square, rotation: 90 });
+    expect(bb.nw.x).toBeCloseTo(100);
+    expect(bb.nw.y).toBeCloseTo(0);
+    expect(bb.se.x).toBeCloseTo(200);
+    expect(bb.se.y).toBeCloseTo(100);
+    // Unrotated stays exact: cos(0) and sin(0) are 1 and 0 with no rounding.
+    expect(absoluteChildBoundingBox(wholeGroup, square)).toEqual(square.boundingBox);
+  });
 });

@@ -192,10 +192,18 @@ export function absoluteChildBoundingBox(
     internalNW.x = groupBB.nw.x + (groupBB.se.x - internalNW.x);
     internalSE.x = groupBB.nw.x + (groupBB.se.x - internalSE.x);
   }
+  // All four corners are rotated, not just two. Two opposite corners bound the rotated rectangle
+  // only when the rotation is a multiple of 90; at any other angle their images do not span it. At
+  // 45 degrees it collapses outright, because the pivot is the se corner and so maps to itself.
   const rotation = group.rotation ?? 0;
-  const rotatedNW = rotatePoint(internalNW, groupBB.se, rotation);
-  const rotatedSE = rotatePoint(internalSE, groupBB.se, rotation);
-  const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
+  const internalNE = { x: internalSE.x, y: internalNW.y };
+  const internalSW = { x: internalNW.x, y: internalSE.y };
+  const sides = boundingBoxSidesForPoints([
+    rotatePoint(internalNW, groupBB.se, rotation),
+    rotatePoint(internalNE, groupBB.se, rotation),
+    rotatePoint(internalSE, groupBB.se, rotation),
+    rotatePoint(internalSW, groupBB.se, rotation)
+  ]);
   return {
     nw: { x: sides.left, y: sides.top },
     se: { x: sides.right, y: sides.bottom }
