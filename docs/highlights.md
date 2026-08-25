@@ -70,9 +70,9 @@ A target tile renders emphasis on its own objects. There is no overlay layer —
 
 Use `highlightClassesFor` (`src/models/highlights/highlight-classes.ts`) for the class names, and
 the ring colors in `src/components/highlight-vars.scss`, rather than defining either locally. One
-reference should read the same way wherever it lands; a tile whose emphasis is not CSS-driven —
-the sketch ring is an SVG rect — can still use the shared colors. Geometry stays local: that ring
-divides its stroke width and dash length by the current zoom, which CSS cannot do.
+reference should read the same way wherever it lands, and the element carrying the class need not
+be HTML — the sketch ring is an SVG rect and uses both. Geometry stays local: that ring divides its
+stroke width and dash length by the current zoom, which CSS cannot do.
 
 Note what the sketch tile does *not* reuse: `renderSelectionBorders` reads `object.boundingBox`,
 the object's box in its own coordinate space. An object inside a `GroupObject` renders within the
@@ -240,8 +240,16 @@ highlight from. That is entirely about the variable chip and is not needed to ad
 - **Sketch variable chips cannot be grouped.** `VariableChipObject` extends `DrawingObject` rather
   than `SizedObject`, so it never implements `setUnrotatedDragBounds`, which `createGroup` calls,
   and grouping one throws. Pre-existing and unrelated to highlights, tracked separately as a
-  drawing-tile bug — but it does mean the highlight ring's use of the group-adjusted bounding box
-  is correct by construction rather than exercised.
+  drawing-tile bug. It bounds the *variable* kind only: a `variable` reference can reach nothing
+  groupable, but an `object` reference names any object by id, and a shape groups fine. So the
+  highlight ring's use of the group-adjusted bounding box is load-bearing rather than defensive —
+  it is simply not exercised, since nothing in the fixtures or specs groups an object.
+- **The group-adjusted box is exact only for rotations that are multiples of 90°.**
+  `GroupObject.adjustInternalBoundingBox` rotates two opposite corners and takes their min/max,
+  which does not bound a rotated rectangle in general — at 45° it collapses to zero width. Nothing
+  in the product creates such a rotation (the only control is Rotate 90°), so this is reachable
+  only from an authored or imported document. Pre-existing, and shared with arrow annotations,
+  which anchor through the same `getObjectBoundingBox` call.
 - **Only whole objects can be highlighted.** There is no way to highlight a range of text; text
   highlight chips are inline void elements holding a copy of their text, so the model has no
   representation for a span of prose.

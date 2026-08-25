@@ -171,7 +171,6 @@ export const DrawingContentModel = NavigatableTileModel
   }))
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
-      if (!self.objectMap) return [];
       const objects: IClueTileObject[] = [];
       Object.values(self.objectMap).forEach((object) => {
         if (object && !isGroupObject(object)) {
@@ -193,7 +192,6 @@ export const DrawingContentModel = NavigatableTileModel
      * stored variableId — so renaming a variable cannot break it.
      */
     getObjectsForVariable(variableId: string): IClueTileObject[] {
-      if (!self.objectMap) return [];
       const objects: IClueTileObject[] = [];
       Object.values(self.objectMap).forEach(object => {
         if (object?.type === "variable" && (object as any).variableId === variableId) {

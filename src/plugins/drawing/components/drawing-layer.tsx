@@ -25,6 +25,7 @@ import { useDrawingAreaContext } from "./drawing-area-context";
 import { calculateFitContent } from "../model/drawing-utils";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import type { HighlightState } from "../../../models/document/document-content-with-highlights";
+import { highlightClassesFor } from "../../../models/highlights/highlight-classes";
 
 /**
  * Picks out the objects the document is currently highlighting, and the one state they share.
@@ -51,6 +52,21 @@ export function collectHighlightedObjects(
     }
   });
   return { objects: highlighted, state };
+}
+
+/**
+ * Whether a highlighted object should actually get a ring drawn around it.
+ *
+ * Extracted for the same reason as collectHighlightedObjects: the decision is worth testing on its
+ * own, and the render path it lives in needs a tile environment and SVG layout to reach.
+ *
+ * The rule follows conditionallyRenderObject rather than restating it loosely — an object the
+ * drawing renderer omits must not get a ring around empty space. Note it is not simply `visible`:
+ * a hidden object that is selected still renders, and should still be ringed.
+ */
+export function shouldRingObject(object: DrawingObjectType, isSelected: boolean) {
+  if (object.animating) return false;
+  return object.visible || isSelected;
 }
 
 const SELECTION_COLOR = "#777";
@@ -671,10 +687,13 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
    * in the wrong place. getObjectBoundingBox walks the enclosing groups and applies their
    * adjustments, which is what a layer-level ring needs. See docs/highlights.md.
    *
-   * That grouping case is defensive today rather than exercised: the only objects this highlights
-   * are variable chips, and VariableChipObject extends DrawingObject rather than SizedObject, so
-   * it never implements setUnrotatedDragBounds and grouping one throws. If that is ever fixed,
-   * this ring is already correct.
+   * That grouping case is unexercised rather than unreachable, and which of the two it is depends
+   * on the reference kind. A `variable` reference reaches only variable chips, and those cannot be
+   * grouped at all: VariableChipObject extends DrawingObject rather than SizedObject, so it never
+   * implements setUnrotatedDragBounds and grouping one throws. An `object` reference names any
+   * object by id, including a shape that groups fine — so a grouped target is reachable, and the
+   * group-adjusted box is load-bearing rather than defensive. Nothing groups an object in the
+   * fixtures or tests yet, so this path is correct by reading and not by test.
    */
   public renderHighlightBorders(objects: DrawingObjectType[], state: HighlightState) {
     const zoom = this.zoom;
@@ -682,11 +701,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     const content = this.getContent();
 
     return objects.map(object => {
-      if (object.animating) return null;
-      // Follow the same visibility rule as conditionallyRenderObject: an object the drawing
-      // renderer omits must not get a ring drawn around empty space. Note the rule is not simply
-      // `visible` — a hidden object that is selected still renders, and should still be ringed.
-      if (!object.visible && !content.isIdSelected(object.id)) return null;
+      if (!shouldRingObject(object, content.isIdSelected(object.id))) return null;
       const box = content.getObjectBoundingBox(object.id);
       if (!box) return null;
 
@@ -698,7 +713,7 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       return (
         <rect
           key={object.id}
-          className={classNames("highlight-reference-box", state)}
+          className={classNames("highlight-reference-box", highlightClassesFor(state))}
           data-testid="highlight-reference-box"
           // Which object is highlighted is the point of the feature, not an implementation
           // detail: a reference that lights the wrong object, or every object, is the failure

@@ -4,9 +4,9 @@ import type { HighlightState } from "../document/document-content-with-highlight
  * The class names a target tile applies to a highlighted object.
  *
  * Shared rather than repeated per tile so one reference reads the same way wherever it lands —
- * these names pair with the ring styles in components/highlight-vars.scss. Tiles whose emphasis
- * is not CSS-driven (the sketch tile draws an SVG rect) will not use this, but any tile that
- * highlights by class should.
+ * these names pair with the ring styles in components/highlight-vars.scss. The element carrying
+ * the class is whatever the tile draws its emphasis on, and need not be HTML: the sketch tile
+ * puts these on an SVG rect it renders at layer level.
  *
  * Exported as a plain function so the mapping can be unit tested without mounting a tile.
  */

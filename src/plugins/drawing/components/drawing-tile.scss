@@ -203,11 +203,11 @@ $closed-object-list-total-width: $closed-object-list-inner-width + 2 * $object-l
           fill: none;
           pointer-events: none;
 
-          &.preview {
+          &.highlight-preview {
             stroke: $highlight-preview-ring;
           }
 
-          &.pinned {
+          &.highlight-pinned {
             stroke: $highlight-pinned-ring;
           }
         }

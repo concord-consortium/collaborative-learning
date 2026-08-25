@@ -193,7 +193,8 @@ therefore 3× what the document contains, and `.first()` matters when interactin
 
 **Always pass `noStorage=true` when testing cross-tile behavior on this route.**
 The doc-editor restores a document from `sessionStorage` and builds a model from
-it ([doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx):32-42),
+it (`savedDocString` in
+[doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx)),
 then *replaces* that model once the `document=` param finishes loading. An
 `onSnapshot` effect writes the document back to session storage on every change,
 so a fixture with a running Simulator repopulates it constantly.
@@ -213,8 +214,8 @@ effect of that ref is plainly visible in another tile.
 
 **The three panes are two models, by design.** The editable pane and the Read
 Only Local copy share the same `document`; the Read Only Remote copy renders a
-separate `remoteDocument`
-([doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx):293,299),
+separate `remoteDocument` (the `showLocalReadOnly` / `showRemoteReadOnly` panes in
+[doc-editor-app.tsx](src/components/doc-editor/doc-editor-app.tsx)),
 rebuilt from a snapshot on every document change. So a ring, selection, or other
 volatile state set in the editable pane will never appear in the remote copy —
 that is expected, not a bug.

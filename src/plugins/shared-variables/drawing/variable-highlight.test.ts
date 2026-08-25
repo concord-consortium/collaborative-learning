@@ -65,8 +65,9 @@ describe("drawing content getObjectsForVariable", () => {
 });
 
 // A composition guard rather than a unit test: it asserts the tile is reachable from a
-// document-level variable reference at all, which depends on drawing-content routing through
-// tileContentAPIViews. Unhooking that would leave the unit tests above green.
+// document-level variable reference at all — that the shared-variables resolver finds the drawing
+// tile in the document and turns a variableId into that tile's objects. Breaking any link in that
+// chain would leave the unit tests above green.
 describe("a variable reference in the document", () => {
   function documentWithDrawingTile() {
     const sharedModelManager = new SharedModelDocumentManager();

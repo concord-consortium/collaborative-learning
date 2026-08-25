@@ -3,11 +3,13 @@
 // requires a full tile environment and SVG layout, which is not worth standing up here; the
 // rendered result is covered by Cypress in highlight_references_spec.js.
 import { DrawingObjectType } from "../objects/drawing-object";
-import { collectHighlightedObjects } from "./drawing-layer";
+import { collectHighlightedObjects, shouldRingObject } from "./drawing-layer";
 import { HighlightState } from "../../../models/document/document-content-with-highlights";
 
-// The helper only reads `id`, so these stand in for real drawing objects.
+// collectHighlightedObjects only reads `id`, so these stand in for real drawing objects.
 const objectWithId = (id: string) => ({ id } as DrawingObjectType);
+const ringCandidate = (props: Partial<DrawingObjectType>) =>
+  ({ id: "obj1", visible: true, animating: false, ...props } as DrawingObjectType);
 const chip1 = objectWithId("chip1");
 const chip2 = objectWithId("chip2");
 const rect1 = objectWithId("rect1");
@@ -41,5 +43,27 @@ describe("collectHighlightedObjects", () => {
     );
     expect(result.objects).toEqual([chip1, chip2]);
     expect(result.state).toBe("preview");
+  });
+});
+
+// The rule these cover is the whole reason the function exists: an object the drawing renderer
+// omits must not be ringed, or the highlight is a rectangle around empty space. Nothing else
+// asserts it — the Cypress fixture has no hidden or animating objects.
+describe("shouldRingObject", () => {
+  it("rings an object the drawing renderer draws", () => {
+    expect(shouldRingObject(ringCandidate({}), false)).toBe(true);
+  });
+
+  it("does not ring a hidden object", () => {
+    expect(shouldRingObject(ringCandidate({ visible: false }), false)).toBe(false);
+  });
+
+  it("rings a hidden object that is selected, which the renderer still draws", () => {
+    expect(shouldRingObject(ringCandidate({ visible: false }), true)).toBe(true);
+  });
+
+  it("does not ring an animating object, selected or not", () => {
+    expect(shouldRingObject(ringCandidate({ animating: true }), false)).toBe(false);
+    expect(shouldRingObject(ringCandidate({ animating: true }), true)).toBe(false);
   });
 });

@@ -30,8 +30,8 @@ const SKETCH_RECT_ID = "emgSketchRect";
 // The demo document ships an authored variable chip, so this spec never has to drive the
 // Insert Variable dialog — the starting state is deterministic.
 // noStorage=true is load-bearing, not tidiness. Without it the doc-editor restores a document
-// from sessionStorage and creates a model from it (doc-editor-app.tsx:32-42), then REPLACES that
-// model once the `document=` param finishes loading. Tile types that register lazily — Drawing is
+// from sessionStorage and creates a model from it (`savedDocString` in doc-editor-app.tsx), then
+// REPLACES that model once the `document=` param finishes loading. Tile types that register lazily — Drawing is
 // one — can end up bound to the superseded instance while the eagerly-present tiles move to the
 // new one, leaving two document-content instances in a single pane. Cross-tile ephemeral state
 // (highlight refs are volatile, per-document) then cannot travel between them: hovering the text
@@ -46,11 +46,12 @@ const documentUrl = "/editor/?appMode=qa&unit=./demo/units/qa/content.json" +
 
 // The doc-editor renders the document in up to three panes: the editable one plus a Read Only
 // Local and a Read Only Remote (emulated) copy, gated by these settings (doc-editor-settings.ts,
-// consumed at doc-editor-app.tsx:290-298). Both default to true.
+// consumed as `showLocalReadOnly` / `showRemoteReadOnly` in doc-editor-app.tsx). Both default to
+// true.
 //
 // Turn them off. They are not merely redundant renderings — the remote copy is REBUILT from a
-// snapshot on every document change (`setRemoteDocument(createDocumentModelWithEnv(...))`,
-// doc-editor-app.tsx:80), and this fixture runs a Simulator that writes variable values
+// snapshot on every document change (`setRemoteDocument(createDocumentModelWithEnv(...))` in
+// doc-editor-app.tsx), and this fixture runs a Simulator that writes variable values
 // continuously, so that pane mints a fresh document-content instance over and over. Tiles in
 // different copies are therefore in different MST trees with their own volatile state, and a
 // highlight set from a chip in one copy can never reach a tile in another.
@@ -164,7 +165,7 @@ context("Highlight references", () => {
 
     // mouseover/mouseout rather than mouseenter/mouseleave, for the React reason documented above.
     cy.get("@chip").trigger("mouseover");
-    cy.get(EMG_SKETCH_BOX).should("have.class", "preview");
+    cy.get(EMG_SKETCH_BOX).should("have.class", "highlight-preview");
     // Assert the computed stroke, not just the class. The ring's color comes from CSS while its
     // geometry is inline, so a class assertion alone would pass with the rule not reaching the
     // rect at all — leaving a ring that is in the DOM and invisible. $highlight-preview-ring.
@@ -177,12 +178,15 @@ context("Highlight references", () => {
     // Click pins, and it survives moving the mouse away.
     cy.get("@chip").click();
     cy.get("@chip").trigger("mouseout");
-    cy.get(EMG_SKETCH_BOX).should("have.class", "pinned");
+    cy.get(EMG_SKETCH_BOX).should("have.class", "highlight-pinned");
     cy.get(GRIPPER_SKETCH_BOX).should("not.exist");
 
-    // Clicking again unpins.
+    // Clicking again unpins. Assert the pin is gone rather than that no ring exists: the chip's
+    // onClick toggles the pin only and never clears the hover, so a user clicking twice without
+    // moving the mouse is left with a preview ring. That no ring survives here is an artifact of
+    // Cypress not re-firing mouseover on an element it already considers hovered.
     cy.get("@chip").click();
-    cy.get(HIGHLIGHT_BOX).should("not.exist");
+    cy.get(`${EMG_SKETCH_BOX}.highlight-pinned`).should("not.exist");
   });
 
   // The `object` reference kind is what an AI source emits: a tileId and an objectId, naming one
@@ -210,7 +214,7 @@ context("Highlight references", () => {
       });
     });
 
-    cy.get(SKETCH_RECT_BOX).should("have.class", "pinned");
+    cy.get(SKETCH_RECT_BOX).should("have.class", "highlight-pinned");
     // Same reason the variable test asserts the computed stroke: the class alone would pass with
     // the CSS never reaching the rect, leaving a ring that is in the DOM and invisible.
     cy.get(SKETCH_RECT_BOX).should("have.css", "stroke", "rgb(107, 35, 252)");  // $highlight-pinned-ring
