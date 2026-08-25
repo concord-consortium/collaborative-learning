@@ -187,7 +187,7 @@ interface ICanUserEditDocumentParams {
  *
  * This is an example of the `permissions` axis. See the
  * `permissions` section of docs/document-axes/axes.md and "Not covered yet" in
- * docs/document-axes/reading-axes-in-code.md.
+ * docs/document-axes/axes-current-state.md.
  */
 export function canUserEditDocument({
   document, documentMetadata, user
