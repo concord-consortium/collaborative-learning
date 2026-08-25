@@ -275,5 +275,22 @@ describe("programToGraphviz", () => {
       expect(dot).toContain('"Number:Number 1" [label=<');
       expect(dot).not.toContain('"7ZRiN_2uNGilJII0" [label=<');
     });
+
+    // The id is spread last so it wins against anything a node's own data carries under the same
+    // key. Without a conflicting case the ordering is unpinned and moving the spread to the front
+    // would break nothing — while quietly making the summary name an id no document stores.
+    it("takes the node's own id over an id in its data", () => {
+      const dot = programToGraphviz({
+        ...program,
+        nodes: {
+          "7ZRiN_2uNGilJII0": {
+            ...program.nodes["7ZRiN_2uNGilJII0"],
+            data: { ...program.nodes["7ZRiN_2uNGilJII0"].data, id: "not-the-real-id" }
+          }
+        }
+      });
+      expect(dot).toContain("<tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>");
+      expect(dot).not.toContain("not-the-real-id");
+    });
   });
 });
