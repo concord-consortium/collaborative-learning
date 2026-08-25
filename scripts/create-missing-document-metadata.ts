@@ -228,6 +228,11 @@ export async function createMissingDocumentMetadata(
     };
     // Stamped only when present, so Firestore never stores `title: undefined`.
     if (node.title != null) row.title = node.title;
+    // The client keeps this in step from the moment a row exists — useDocumentSyncToFirebase finds
+    // rows by query, so every toggle made while the row was missing updated nothing. Taking the node's
+    // value makes the row right now rather than at the owner's next toggle, which for a document this
+    // old may never come.
+    if (node.visibility != null) row.visibility = node.visibility;
 
     const originDoc = await originDocFor(node.type, indexed.classHash, key);
     if (originDoc != null) row.originDoc = originDoc;

@@ -64,6 +64,32 @@ describe("createMissingDocumentMetadata", () => {
     });
   });
 
+  it("copies visibility from the realtime-database node", async () => {
+    // The client keeps this field in step through useDocumentSyncToFirebase, but only from the moment
+    // a row exists: its updater finds rows by query, so a toggle made while the row was missing
+    // updated nothing. The node holds the truth, and isDocumentAccessibleToUser prefers the Firestore
+    // copy because that one is reactive.
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "personal", createdAt: 1, title: "P", visibility: "public" } };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(store.k1.visibility).toBe("public");
+  });
+
+  it("leaves visibility out when the node has none, rather than inventing one", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "personal", createdAt: 1, title: "P" } };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect("visibility" in store.k1).toBe(false);
+  });
+
   it("never creates a row for a document whose content is gone", async () => {
     // 86 such documents exist outside production. A row here would promote an invisible orphan into
     // a Sort Work entry that throws when opened.
