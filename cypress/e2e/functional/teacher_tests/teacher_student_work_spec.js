@@ -15,9 +15,7 @@ const canvas = new Canvas;
 function beforeTest(params) {
   cy.visit(params);
   cy.waitForLoad();
-  cy.window().then(win => {
-    cy.stub(win.ccLogger, "log").as("log");
-  });
+  cy.stubLogger();
 }
 
 const initialText = "Initial text for studentDocument view test";
@@ -30,14 +28,17 @@ context('Teacher can use studentDocument URL parameter', () => {
     beforeTest(studentQueryParams);
     clueCanvas.addTile('text');
 
+    // Matched by event rather than by lastCall so an unrelated event logged after the tile is
+    // created can't break this.
     cy.get("@log")
-      .its("lastCall.args.0")
-        .should("eq", LogEventName.CREATE_TILE);
-
-    cy.get("@log")
-      .its("lastCall.args.1")
-        .should("include", { objectType: "Text" })
-        .should("have.a.property", "documentHistoryId", "first");
+      .should("have.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
+      .invoke("getCalls")
+      .then((calls) => {
+        const createCall = calls.find(c => c.args[0] === LogEventName.CREATE_TILE);
+        expect(createCall, "CREATE_TILE was logged").to.exist;
+        expect(createCall.args[1]).to.include({ objectType: "Text" });
+        expect(createCall.args[1]).to.have.property("documentHistoryId", "first");
+      });
 
     textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText(initialText);

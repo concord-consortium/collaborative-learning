@@ -20,6 +20,7 @@ import {
   ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext, RegisterToolbarContext
 } from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
+import { getTileNodes, kTileClass, tileDomAttributes } from "./tile-dom";
 import { TileActivityBadges } from "./tile-activity-badges";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -319,7 +320,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && persistentUI.showChatPanel;
-    const classes = classNames("tool-tile", model.display, tileEltClass, {
+    const classes = classNames(kTileClass, model.display, tileEltClass, {
       placeholder: isPlaceholderTile,
       readonly: readOnly,
       fixed: model.isFixedPosition,
@@ -373,7 +374,7 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
           <div
             className={classes} data-testid="tool-tile"
             ref={elt => this.domElement = elt}
-            data-tool-id={model.id}
+            {...tileDomAttributes(model.id)}
             role="group"
             aria-label={tileAriaLabel}
             style={style}
@@ -594,8 +595,11 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       }
       const { ui } = this.stores;
       if (!ui.isSelectedTile(model)) {
+        // A read-only tile gets no focus trap (see componentDidMount), so this strategy only runs on
+        // editable tiles: readOnly is always false here and getEffectiveSelectionModel() is always
+        // model. Both are passed anyway so this call stays correct if that ever changes.
         ui.setSelectedTile(this.getEffectiveSelectionModel(),
-          { append: this.lastPointerDownHadModifier });
+          { append: this.lastPointerDownHadModifier, readOnly: !!this.props.readOnly, logTileId: model.id });
       }
     };
     return strategy;
@@ -629,15 +633,12 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
 
   // Navigate to an adjacent sibling tile. Returns true if a sibling was found.
   // The destination tile receives focus (focus ring via :focus-visible) but is NOT selected.
-  // NOTE: Uses DOM selectors (.document-content, .tool-tile[data-tool-id]) to find
-  // siblings — if those CSS classes change, keyboard nav will silently break.
-  // A model-based approach using getTilesInDocumentOrder() was tried but produced
-  // incorrect tab ordering in practice, so DOM queries remain the reliable method.
+  // NOTE: Finds siblings through the DOM (see tile-dom.ts for that contract). A model-based
+  // approach using getTilesInDocumentOrder() was tried but produced incorrect tab ordering in
+  // practice, so DOM queries remain the reliable method.
   private navigateToSiblingTile(e: KeyboardEvent, reverse: boolean): boolean {
     const documentContent = this.domElement?.closest('.document-content');
-    const tiles = Array.from(
-      documentContent?.querySelectorAll('.tool-tile[data-tool-id]') ?? []
-    ) as HTMLElement[];
+    const tiles = documentContent ? getTileNodes(documentContent) : [];
     const currentIndex = tiles.indexOf(this.domElement!);
     const nextTile = reverse ? tiles[currentIndex - 1] : tiles[currentIndex + 1];
     if (nextTile) {
@@ -697,7 +698,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       const wasAlreadySelected = ui.isSelectedTile(model);
       // Match userSelectTile / onFocusEnter: select the container model for read-only
       // tiles inside a container so all entry paths agree on which tile is selected.
-      ui.setSelectedTileId(this.getEffectiveSelectionModel().id, { append: false });
+      ui.setSelectedTileId(this.getEffectiveSelectionModel().id,
+        { append: false, readOnly: !!this.props.readOnly, logTileId: model.id });
       if (this.props.readOnly) {
         // Read-only tiles have no focus trap — Enter just selects and announces.
         if (!wasAlreadySelected) {
@@ -851,7 +853,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     document.body.classList.add("tile-dragging");
 
     // dragging a tile selects it first
-    ui.setSelectedTile(model, { append: hasSelectionModifier(e), dragging: true });
+    ui.setSelectedTile(model,
+      { append: hasSelectionModifier(e), dragging: true, readOnly: !!this.props.readOnly });
 
     const documentContent = getDocumentContentFromNode(model);
     if (!documentContent) {

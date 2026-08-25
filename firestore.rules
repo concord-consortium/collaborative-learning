@@ -116,17 +116,17 @@ service cloud.firestore {
     // grants the whole class read and write access to that one document's history. It is not a way into
     // anyone else's work: documentOwnerOk blocks creating under another user's `uid`, and `type` is
     // read-only after creation, so an existing personal document can never be turned into a group one this
-    // way. Closing it needs `concurrent` to become unchangeable after creation (CLUE-612), which can't ship
-    // until the CLUE-604 migration has drained the backfill this function exists for.
+    // way. Closing it needs `concurrent` to become unchangeable after creation, which can't ship until the
+    // backfill this function exists for has drained in every environment.
     // Once both backfill paths have run against every environment, this function should be deleted and
     // `concurrent` added to preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at
     // document creation — which is already constrained: isValidDocumentCreateRequest requires a synthetic
-    // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk). That
-    // deletion is CLUE-612.
-    // Both `"group"` and `"axes"` are live document values until CLUE-604's sweep has run in every
-    // environment: pre-sweep documents still store `"group"`, newly-created ones already store `"axes"`.
-    // Neither branch below is dead code — dropping `"group"` here before the sweep has completed would
-    // deny every not-yet-swept document the `concurrent` write this function exists to allow.
+    // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk).
+    // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
+    // stored type has run in every environment: pre-sweep documents still store `"group"`, newly-created
+    // ones already store `"axes"`. Neither branch below is dead code — dropping `"group"` here before that
+    // sweep has completed would deny every not-yet-swept document the `concurrent` write this function
+    // exists to allow.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       let docType = resource.data.get("type", "");
@@ -202,9 +202,13 @@ service cloud.firestore {
       // src/models/document/document-axes.ts.
       // Residual, accepted: nothing here proves the caller is a member of that group, because group
       // membership lives in the Realtime Database and the token carries no group claim. A student can
-      // therefore create a document owned by another group in their own offering. Groups are a CLUE
-      // concept that the portal does not model, so no token claim is going to corroborate one; this is
-      // where the create rules stop. See the owner axis in docs/document-axes/README.md.
+      // therefore create a document owned by another group in their own offering. That document is not
+      // inert: canonicalPointerCreatable below checks only the caller's class, so the same caller can also
+      // claim that group's canonical slot, and pointers are immutable — every real member of that group
+      // then converges onto it through the resolver's fast path, and isConcurrentClassDocument grants read
+      // and write on its history to the whole class rather than to the group. Groups are a CLUE concept
+      // that the portal does not model, so no token claim is going to corroborate one; this is where the
+      // create rules stop. See the owner axis in docs/document-axes/README.md.
       // Residual, accepted: the token corroborates that the caller belongs to the class named in
       // `class_<class_hash>`, but not that the caller is entitled to mint a document under that owner. Any
       // class member can create any number of `class_<class_hash>`-owned, `concurrent: true` documents, each
@@ -515,9 +519,10 @@ service cloud.firestore {
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
-        // Both `"group"` and `"axes"` are live document values until CLUE-604's sweep has run in every
-        // environment. Neither branch below is dead code — dropping `"group"` here before the sweep has
-        // completed would leave the losing side of a race undeletable for every not-yet-swept document.
+        // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
+        // stored type has run in every environment. Neither branch below is dead code — dropping `"group"`
+        // here before that sweep has completed would leave the losing side of a race undeletable for every
+        // not-yet-swept document.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
           && (resource.data.type == "group" || resource.data.type == "axes")

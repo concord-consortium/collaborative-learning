@@ -4,6 +4,9 @@ import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info
 import { ITileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions } from "../tile-model-hooks";
 import { TileContentModel } from "../tile-content";
+import { getTileIdFromContent } from "../tile-model";
+import { logTileChangeEvent } from "../log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -12,6 +15,16 @@ export const kImageTileType = "Image";
 // This is only used directly by tests
 export function defaultImageContent(options?: IDefaultContentOptions) {
   return ImageContentModel.create({url: options?.url || placeholderImage});
+}
+
+// Module-level logging helper (logBarGraphEvent/logAiEvent convention), using getTileIdFromContent like
+// the other tiles rather than a bespoke metadata lookup.
+export function logImageEvent(model: ImageContentModelType, url: string, filename?: string) {
+  logTileChangeEvent(LogEventName.IMAGE_TOOL_CHANGE, {
+    tileId: getTileIdFromContent(model) ?? "",
+    operation: "update",
+    change: { url, filename }
+  });
 }
 
 export const ImageContentModel = TileContentModel
@@ -52,6 +65,7 @@ export const ImageContentModel = TileContentModel
     setUrl(url: string, filename?: string) {
       self.url = url;
       self.filename = filename;
+      logImageEvent(self as ImageContentModelType, url, filename);
     },
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;

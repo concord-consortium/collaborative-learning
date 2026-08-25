@@ -1,10 +1,8 @@
 import { isSectionPath, parseSectionPath } from "../../../../shared/shared";
-import { ProblemModelType } from "../../curriculum/problem";
 import { Logger } from "../../../lib/logger";
-import { getTileTitleForLogging } from "../../../lib/logger-utils";
+import { getTileTitleForLogging, IDocumentContext, resolveTileLogContext } from "../../../lib/logger-utils";
 import { LogEventName } from "../../../lib/logger-types";
-import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
-import { isCurriculumLogEvent, logCurriculumEvent } from "../../curriculum/log-curriculum-event";
+import { logDocumentOrCurriculumEvent } from "../../document/log-document-event";
 
 type CommentAction = "add" | "delete" | "expand" | "collapse" | "rate";
 export interface ILogComment extends Record<string, any> {
@@ -15,27 +13,19 @@ export interface ILogComment extends Record<string, any> {
   action: CommentAction;
 }
 
-interface IContext extends Record<string, any> {
-  problem: ProblemModelType;
-  teacherGuide?: ProblemModelType;
-}
-
-function processCommentEventParams(params: ILogComment, context: IContext) {
+function processCommentEventParams(params: ILogComment, context: IDocumentContext) {
   const { focusDocumentId: documentId, focusTileId: tileId, isFirst, action, ...others } = params;
-  const { documents, networkDocuments } = context;
 
   if (isSectionPath(documentId)) {
     const [_unit, facet, _investigation, _problem, section] = parseSectionPath(documentId) || [];
     const curriculumStore = facet === "guide" ?  context.teacherGuide : context.problem;
-    const tileType = tileId && curriculumStore?.getSectionById(section)?.content?.getTileType(tileId);
-    const tileTitle = tileId && getTileTitleForLogging(tileId, curriculumStore?.getSectionById(section));
-    return { curriculum: documentId, tileId, tileTitle, tileType, ...others };
+    const sectionTileType = tileId && curriculumStore?.getSectionById(section)?.content?.getTileType(tileId);
+    const sectionTileTitle = tileId && getTileTitleForLogging(tileId, curriculumStore?.getSectionById(section));
+    return { curriculum: documentId, tileId, tileTitle: sectionTileTitle, tileType: sectionTileType, ...others };
   }
 
-  const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
+  const { document, tileTitle, tileType } = resolveTileLogContext({ documentId, tileId }, context);
   if (document) {
-    const tileType = tileId ? document.content?.getTileType(tileId) : undefined;
-    const tileTitle = tileId && getTileTitleForLogging(tileId, document);
     return { document, tileId, tileTitle, tileType, ...others };
   }
 
@@ -68,13 +58,5 @@ export function logCommentEvent(_params: ILogComment) {
   };
   const event = eventMap[action];
   const params = processCommentEventParams(_params, Logger.stores);
-  if (isCurriculumLogEvent(params)) {
-    logCurriculumEvent(event, params);
-  }
-  else if (isDocumentLogEvent(params)) {
-    logDocumentEvent(event, params);
-  }
-  else {
-    Logger.log(event, params);
-  }
+  logDocumentOrCurriculumEvent(event, params);
 }

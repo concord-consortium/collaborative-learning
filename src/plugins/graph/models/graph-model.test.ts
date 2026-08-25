@@ -48,6 +48,8 @@ jest.mock("../../../utilities/color-utils.ts", () => {
   };
 });
 
+jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
 // Set up mock axes
 const hOrientation = "horizontal" as AxisOrientation;
 const vOrientation = "vertical" as AxisOrientation;
@@ -85,6 +87,8 @@ const mockAxes = {
 
 import { getSnapshot } from '@concord-consortium/mobx-state-tree';
 import { GraphModel, IGraphModel } from './graph-model';
+import { logTileChangeEvent } from '../../../models/tiles/log/log-tile-change-event';
+import { LogEventName } from '../../../lib/logger-types';
 import { kGraphTileType } from '../graph-defs';
 import {
   clueDataColorInfo, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
@@ -133,6 +137,52 @@ describe('GraphModel', () => {
     expect(graphModel.adornments[0].isVisible).toBe(false);
     graphModel.showAdornment('Movable Point');
     expect(graphModel.adornments[0].isVisible).toBe(true);
+  });
+
+  describe('onTileAction logging', () => {
+    // Build a real document so the document.ts onAction dispatch (which forwards only OUTERMOST actions
+    // to GraphModel.onTileAction) is wired — this drives the actions the way the UI does rather than
+    // calling onTileAction by hand, which is what catches the root-vs-nested reachability issues.
+    function makeDocGraph() {
+      const document = createDocumentModel({
+        type: "problem", uid: "user-1", key: "document-log", content: {}
+      });
+      const { tileId } = document.content?.addTileContentInNewRow(getSnapshot(GraphModel.create())) || {};
+      const graphModel = document.content?.getTile(tileId!)?.content as IGraphModel;
+      return { document, tileId, graphModel };
+    }
+
+    it('logs a GRAPH_TOOL_CHANGE with the tile id for a root student edit', () => {
+      const { tileId, graphModel } = makeDocGraph();
+      (logTileChangeEvent as jest.Mock).mockClear();
+      // setXAttributeLabel is an allow-listed root action from the axis-label UI that actually mutates.
+      graphModel.setXAttributeLabel("Time");
+      expect(graphModel.xAttributeLabel).toBe("Time");
+      expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.GRAPH_TOOL_CHANGE, {
+        tileId, operation: "setXAttributeLabel", change: { args: ["Time"] }
+      });
+    });
+
+    it('logs addPoint when a student plots a point on a layer', () => {
+      const { tileId, graphModel } = makeDocGraph();
+      // A default graph has one layer; addPoint is invoked as a root action from the click handler
+      // (background.tsx) and lives under the tile subtree, so onTileAction receives it.
+      expect(graphModel.layers.length).toBeGreaterThan(0);
+      (logTileChangeEvent as jest.Mock).mockClear();
+      graphModel.layers[0].addPoint(1, 2);
+      expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.GRAPH_TOOL_CHANGE, {
+        tileId, operation: "addPoint", change: { args: [1, 2] }
+      });
+    });
+
+    it('ignores UI-state / styling actions', () => {
+      const { graphModel } = makeDocGraph();
+      (logTileChangeEvent as jest.Mock).mockClear();
+      // Direct calls are fine for the ignore branch: these names are never allow-listed.
+      graphModel.onTileAction({ name: "setInteractionInProgress", args: [true] });
+      graphModel.onTileAction({ name: "setPointColor", args: ["#fff"] });
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+    });
   });
 
   it('should clear selected adornment instances', () => {

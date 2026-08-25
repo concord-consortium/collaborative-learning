@@ -41,6 +41,12 @@ jest.mock("../../models/stores/ui", () => ({
   userSelectTile: jest.fn()
 }));
 
+// Spy on the tile-change emit so the read-only test can assert nothing is logged.
+const mockLogTileChangeEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-change-event", () => ({
+  logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent(...args)
+}));
+
 // NOW import the component after the mock is set up
 import { IframeInteractiveComponent } from "./iframe-interactive-tile";
 
@@ -131,6 +137,26 @@ describe("IframeInteractiveComponent Integration Tests", () => {
       const content = props.model.content as any;
       expect(content.interactiveState).toEqual(newState);
     }, { timeout: 1000 });
+  });
+
+  it("does not persist or log interactive state in read-only mode", async () => {
+    // In read-only/report mode a teacher's view must not persist or LOG the student's state — logging
+    // would attribute a phantom answer-change to the teacher's uid. handleInteractiveState returns
+    // early, so neither the content write nor the IFRAME_INTERACTIVE_TOOL_CHANGE event happens.
+    const props = createDefaultProps();
+    props.readOnly = true;
+    render(<IframeInteractiveComponent {...props} />);
+
+    await waitFor(() => expect(listeners.interactiveState).toBeDefined());
+
+    jest.useFakeTimers();
+    listeners.interactiveState({ answer: "phantom" });
+    jest.advanceTimersByTime(500); // flush the 500ms debounce window (nothing should have been queued)
+
+    expect(mockLogTileChangeEvent).not.toHaveBeenCalled();
+    expect((props.model.content as any).interactiveState).toEqual({});
+
+    jest.useRealTimers();
   });
 
   it("polls for interactive state every 2 seconds", async () => {

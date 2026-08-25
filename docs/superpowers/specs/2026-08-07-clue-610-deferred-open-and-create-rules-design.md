@@ -196,6 +196,12 @@ Neither is in use in a released unit, and this is accepted deliberately rather t
   `stores.documents` entry, no metadata fetch); `createDeclaredClassWideDocuments` opens nothing;
   `getOrCreateGroupDocument` still returns an opened model on all three paths (pointer, legacy, create) at its
   current read count.
+- **Cypress (`cypress/e2e/functional/document_tests/class_wide_document_spec.js`):** the reload case the
+  widened gate exists for, on a new `demo/units/qa-class-wide` unit that declares a class-wide document with
+  `groupDocumentsEnabled` off. A student edits the class-wide document from Sort Work, closes it there, and
+  reloads; the workspace still shows it. Closing it in Sort Work is what gives the test teeth — left open,
+  Sort Work re-opens the document on reload and the assertion passes with the gate narrowed back to
+  `groupDocumentsEnabled`, which was confirmed by reverting the gate and watching the test go red.
 - **Manual — run 2026-08-07, in Chrome against the live Firestore project, demo mode on `demo/units/qa`.**
   Note that `unit=qa` resolves to the *remote* curriculum repo, which has no class-wide slot; the local unit
   has to be named outright: `unit=http://localhost:<port>/demo/units/qa/content.json`.

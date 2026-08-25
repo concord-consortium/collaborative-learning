@@ -1,6 +1,11 @@
-import { updateQuestionContentForCopy, getQuestionAnswersAsJSON } from "./question-utils";
+import { updateQuestionContentForCopy, getQuestionAnswersAsJSON, getQuestionPrompt } from "./question-utils";
 import { kQuestionTileType } from "./question-types";
-import { DocumentContentModelType } from "../../document/document-content";
+import { DocumentContentModel, DocumentContentModelType } from "../../document/document-content";
+import { QuestionContentModel } from "./question-content";
+import { defaultTextContent, TextContentModelType } from "../text/text-content";
+import { registerTileTypes } from "../../../register-tile-types";
+
+registerTileTypes(["Question", "Text"]);
 
 describe("question-utils", () => {
   describe("updateQuestionContentForCopy", () => {
@@ -165,6 +170,32 @@ describe("question-utils", () => {
           { tileId: "a2", type: "Drawing" }
         ] }
       ]);
+    });
+  });
+
+  describe("getQuestionPrompt", () => {
+    // Builds a real document with a Question that has a fixed-position prompt Text tile (text =
+    // promptText) plus one non-fixed answer Text tile; returns the document and question content.
+    function makeQuestionWithPrompt(promptText: string) {
+      const documentContent = DocumentContentModel.create({});
+      const questionContent = QuestionContentModel.create({ type: kQuestionTileType });
+      documentContent.addTileContentInNewRow(questionContent);
+      documentContent.addTileContentInNewRow(defaultTextContent(), { rowList: questionContent });
+      const promptTile = documentContent.getTile(questionContent.tileIds[0])!;
+      promptTile.setFixedPosition(true);
+      (promptTile.content as TextContentModelType).setText(promptText);
+      documentContent.addTileContentInNewRow(defaultTextContent(), { rowList: questionContent }); // answer
+      return { documentContent, questionContent };
+    }
+
+    it("returns the fixed-position prompt tile's authored text", () => {
+      const { documentContent, questionContent } = makeQuestionWithPrompt("What is 2+2?");
+      expect(getQuestionPrompt(documentContent, questionContent)).toBe("What is 2+2?");
+    });
+
+    it("treats a blank prompt as absent (undefined) so the report falls back to the id", () => {
+      const { documentContent, questionContent } = makeQuestionWithPrompt("   ");
+      expect(getQuestionPrompt(documentContent, questionContent)).toBeUndefined();
     });
   });
 });

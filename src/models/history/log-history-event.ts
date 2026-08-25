@@ -1,9 +1,8 @@
 import { isSectionPath } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { isCurriculumLogEvent, logCurriculumEvent } from "../curriculum/log-curriculum-event";
-import { isDocumentLogEvent, logDocumentEvent } from "../document/log-document-event";
-import { DocumentsModelType } from "../stores/documents";
+import { IDocumentLookupContext, resolveTileLogContext } from "../../lib/logger-utils";
+import { logDocumentOrCurriculumEvent } from "../document/log-document-event";
 import { TreeManagerType } from "./tree-manager";
 
 type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
@@ -15,20 +14,14 @@ export interface ILogHistory extends Record<string, any> {
   action: HistoryAction;
 }
 
-interface IContext extends Record<string, any> {
-  documents: DocumentsModelType;
-  networkDocuments: DocumentsModelType;
-}
-
-function processHistoryEventParams(params: ILogHistory, context: IContext) {
+function processHistoryEventParams(params: ILogHistory, context: IDocumentLookupContext) {
   const { documentId, action, ...others } = params;
-  const { documents, networkDocuments } = context;
 
   if (isSectionPath(documentId)) {
     return { curriculum: documentId, ...others };
   }
 
-  const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
+  const { document } = resolveTileLogContext({ documentId }, context);
   if (document) {
     return { document, ...others };
   }
@@ -47,15 +40,7 @@ export function logHistoryEvent(historyLogInfo: ILogHistory) {
   };
   const event = eventMap[historyLogInfo.action];
   const params = processHistoryEventParams(historyLogInfo, Logger.stores);
-  if (isCurriculumLogEvent(params)) {
-    logCurriculumEvent(event, params);
-  }
-  else if (isDocumentLogEvent(params)) {
-    logDocumentEvent(event, params);
-  }
-  else {
-    Logger.log(event, historyLogInfo);
-  }
+  logDocumentOrCurriculumEvent(event, params);
 }
 
 export function logCurrentHistoryEvent(treeManager: TreeManagerType, action: HistoryAction) {

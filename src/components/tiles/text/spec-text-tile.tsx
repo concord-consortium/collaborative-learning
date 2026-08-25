@@ -10,11 +10,16 @@ import { specAppConfig } from "../../../models/stores/spec-app-config";
 import TextToolComponent from "./text-tile";
 import { ITileProps } from "../tile-component";
 import { ITileApi, TileModelContext } from "../tile-api";
+import { ContainerContext } from "../../document/container-context";
 
 export interface ISpecTextTileOptions {
   tileModel?: ITileModel,
   readOnly?: boolean,
   showTitle?: boolean,
+  // Renders the tile inside a container tile (e.g. a question tile), which is what makes a
+  // fixedPosition text tile a locked prompt.
+  container?: ITileModel,
+  containerIsLocked?: boolean,
   onRegisterTileApi?: (tileApi: ITileApi, facet?: string) => void
 }
 
@@ -81,13 +86,19 @@ export function specTextTile(options: ISpecTextTileOptions) {
     <ModalProvider>
       <TileModelContext.Provider value={model}>
         <Provider stores={stores}>
-          <TextToolComponent ref={textTile} {...defaultProps} />
+          <ContainerContext.Provider
+            value={{ model: options.container, isLocked: options.containerIsLocked ?? false }}
+          >
+            <TextToolComponent ref={textTile} {...defaultProps} />
+          </ContainerContext.Provider>
         </Provider>
       </TileModelContext.Provider>
     </ModalProvider>
   );
 
   return {
+    stores,
+    model,
     plugins: textTile?.current?.plugins,
     textTile: textTile.current
   };

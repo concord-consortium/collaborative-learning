@@ -9,7 +9,7 @@ import { MathfieldElement } from "mathlive"; // separate static import of librar
 import type { MathfieldElementAttributes  } from "mathlive";
 import { ComputeEngine, version } from "@concord-consortium/compute-engine";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { ExpressionContentModelType } from "./expression-content";
+import { ExpressionContentModelType, logExpressionEvent } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
@@ -50,10 +50,25 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
   const mathLiveContainerRef = useRef<HTMLDivElement>(null);
+  // The latex value when the field was focused, so we log once on commit and only when it changed.
+  const latexOnFocus = useRef<string>("");
 
   const handleFocus = useCallback(
-    () => ui.setSelectedTileId(model.id),
-    [ui, model.id]);
+    () => {
+      latexOnFocus.current = content.latexStr;
+      ui.setSelectedTileId(model.id, { readOnly });
+    },
+    [ui, model.id, content, readOnly]);
+
+  // mathlive dispatches "change" when the value is committed, mirroring an <input> — but it fires twice
+  // for one edit (once on Enter, again on blur), so log only when the value moved since the last log and
+  // advance the ref afterward, making the second "change" in a focus session a no-op.
+  const handleMathfieldChange = useCallback(() => {
+    if (content.latexStr !== latexOnFocus.current) {
+      logExpressionEvent(content, content.latexStr);
+      latexOnFocus.current = content.latexStr;
+    }
+  }, [content]);
 
   useEffect(() => {
     // model has changed beneath UI - update mathfield, yet restore cursor position
@@ -113,6 +128,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     } else {
       // hack the types for now
       mfEl.addEventListener("input", handleMathfieldInput as any);
+      mfEl.addEventListener("change", handleMathfieldChange);
     }
 
     // Save the math field so we can remove the listener from the same instance
@@ -140,8 +156,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => {
       mathLiveContainer?.removeChild(mfEl);
       mfEl.removeEventListener("focus", handleFocus);
+      mfEl.removeEventListener("change", handleMathfieldChange);
     };
-  }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly, handleFocus]);
+  }, [mf, mathLiveContainerRef, handleMathfieldInput, handleMathfieldChange, content, readOnly, handleFocus]);
 
   const classes = classNames("tile-content", "expression-tool", {
     hovered: props.hovered,
