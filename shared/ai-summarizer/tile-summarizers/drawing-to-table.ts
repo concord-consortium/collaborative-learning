@@ -7,21 +7,26 @@ to this — see the "matches the documented example" test, which pins it:
 
     This tile contains a drawing with 7 objects, listed back to front.
 
-    | id | type | position | size | parent | details |
-    | --- | --- | --- | --- | --- | --- |
-    | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
-    | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  | rx=30 ry=30 fill=none stroke=#d10000 |
-    | Dp47z | variable | 320, 40 | 75 x 24 |  | variableId=v_speed |
-    | Bq91x | group | 100, 200 | 200 x 100 |  | 2 objects |
-    | kid1 | rectangle | 100, 200 | 100 x 50 | Bq91x | fill=#00b400 |
-    | kid2 | vector | 200, 250 | 100 x 50 | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
-    | t9Qr4 | text | 40, 320 | 90 x 20 |  | text="too fast" visible=false |
+    | id | type | position | size | rotation | parent | details |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
+    | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
+    | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed |
+    | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
+    | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
+    | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
+    | t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |
 
-Four things in that output are not obvious from the code:
+Five things in that output are not obvious from the code:
 
 - `position` and `size` describe the object's bounding box, not its stored fields. The ellipse above
   stores its centre at 200,100 with radii of 30 but reports 170,70. Every row therefore means the
   same thing, which is what lets a reader compare two of them.
+- The box is the *turned* one where an object is rotated, as it is on screen: `t9Qr4` stores 90 x 20
+  and reports 20 x 90. That is why rotation is a column rather than another entry in `details` —
+  once the box is turned, position and size can no longer express orientation, and a 100x50
+  rectangle turned 90 degrees is indistinguishable from an unturned 50x100 one. Flips stay in
+  `details`, since they do not change the box.
 - Row order is document order, which is back to front. The preamble says so, because otherwise the
   ordering is information the model cannot see.
 - A group's members follow it and name it in `parent`, with coordinates converted out of the group's
@@ -42,7 +47,7 @@ import { boundingBoxForSnapshot, DrawingObjectSnapshot } from "../../drawing/dra
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
 const kEmptyDrawing = "This tile contains a drawing.";
-const kHeaders = ["id", "type", "position", "size", "parent", "details"];
+const kHeaders = ["id", "type", "position", "size", "rotation", "parent", "details"];
 
 /** Round to a tenth: un-normalizing a grouped child's box produces long floats. */
 function round(n: number): string {
@@ -78,7 +83,6 @@ function formatDetails(o: DrawingObjectSnapshot): string {
   if (o.stroke !== undefined) details.push(`stroke=${o.stroke}`);
   if (o.strokeWidth !== undefined) details.push(`strokeWidth=${o.strokeWidth}`);
   if (o.strokeDashArray) details.push(`strokeDashArray=${o.strokeDashArray}`);
-  if (o.rotation) details.push(`rotation=${o.rotation}`);
   if (o.hFlip) details.push("hFlip=true");
   if (o.vFlip) details.push("vFlip=true");
   // Hidden objects are listed, not omitted: the object is still in the document and its id is still
@@ -87,8 +91,17 @@ function formatDetails(o: DrawingObjectSnapshot): string {
   return details.join(" ");
 }
 
+// Rotation earns a column rather than sitting in details, because position and size cannot express
+// it: the box reported for a 100x50 rectangle turned 90 degrees is 50x100, which is also what an
+// unturned 50x100 rectangle reports. Flips stay in details — they do not change the box at all.
+function formatRotation(o: DrawingObjectSnapshot): string {
+  return o.rotation ? `${o.rotation}°` : "";
+}
+
 function row(o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string): string[] {
-  return [o.id, o.type, formatPosition(bb), formatSize(bb), parentId, formatDetails(o)];
+  return [
+    o.id, o.type, formatPosition(bb), formatSize(bb), formatRotation(o), parentId, formatDetails(o)
+  ];
 }
 
 /** Maps a point out of the space an object is stored in and into the document's. */

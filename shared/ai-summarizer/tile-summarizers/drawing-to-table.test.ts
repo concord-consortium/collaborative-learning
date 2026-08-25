@@ -13,21 +13,21 @@ it("matches the documented example", () => {
       { id: "kid2", type: "vector", x: 0.5, y: 0.5, dx: 0.5, dy: 0.5, stroke: "#000000" }
     ]},
     { id: "t9Qr4", type: "text", x: 40, y: 320, width: 90, height: 20,
-      text: "too fast", visible: false }
+      text: "too fast", rotation: 90, visible: false }
   ]});
 
   expect(result).toBe(
 `This tile contains a drawing with 7 objects, listed back to front.
 
-| id | type | position | size | parent | details |
-| --- | --- | --- | --- | --- | --- |
-| a7Kd2 | rectangle | 40, 20 | 120 x 80 |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
-| c3Mn8 | ellipse | 170, 70 | 60 x 60 |  | rx=30 ry=30 fill=none stroke=#d10000 |
-| Dp47z | variable | 320, 40 | 75 x 24 |  | variableId=v_speed |
-| Bq91x | group | 100, 200 | 200 x 100 |  | 2 objects |
-| kid1 | rectangle | 100, 200 | 100 x 50 | Bq91x | fill=#00b400 |
-| kid2 | vector | 200, 250 | 100 x 50 | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
-| t9Qr4 | text | 40, 320 | 90 x 20 |  | text="too fast" visible=false |`);
+| id | type | position | size | rotation | parent | details |
+| --- | --- | --- | --- | --- | --- | --- |
+| a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
+| c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
+| Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed |
+| Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
+| kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
+| kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
+| t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |`);
 });
 
 describe("drawingToTable", () => {
@@ -136,8 +136,8 @@ describe("drawingToTable groups", () => {
   it("converts a child's fractions to absolute coordinates", () => {
     const result = drawingToTable({ objects: [group] });
     expect(result).toContain("| Bq91x | group | 100, 200 | 200 x 100 |");
-    expect(result).toContain("| kid1 | rectangle | 100, 200 | 100 x 50 | Bq91x |");
-    expect(result).toContain("| kid2 | rectangle | 200, 250 | 100 x 50 | Bq91x |");
+    expect(result).toContain("| kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x |");
+    expect(result).toContain("| kid2 | rectangle | 200, 250 | 100 x 50 |  | Bq91x |");
   });
 
   it("lists a child immediately after its group", () => {
@@ -158,8 +158,8 @@ describe("drawingToTable groups", () => {
         objects: [{ id: "leaf", type: "rectangle", x: 0, y: 0, width: 1, height: 1 }]
       }]
     }]});
-    expect(result).toContain("| inner | group | 50, 0 | 50 x 100 | outer |");
-    expect(result).toContain("| leaf | rectangle | 50, 0 | 50 x 100 | inner |");
+    expect(result).toContain("| inner | group | 50, 0 | 50 x 100 |  | outer |");
+    expect(result).toContain("| leaf | rectangle | 50, 0 | 50 x 100 |  | inner |");
   });
 
   it("reports a rotated object's turned box, not its unturned one", () => {
@@ -168,7 +168,24 @@ describe("drawingToTable groups", () => {
     const result = drawingToTable({ objects: [
       { id: "r90", type: "rectangle", x: 0, y: 0, width: 100, height: 50, rotation: 90 }
     ]});
-    expect(result).toContain("| r90 | rectangle | 100, -50 | 50 x 100 |");
+    // Rotation is its own column: once the box is turned, 50 x 100 here is indistinguishable from
+    // an unturned 50 x 100 rectangle, so the columns alone could not say which this is.
+    expect(result).toContain("| r90 | rectangle | 100, -50 | 50 x 100 | 90° |");
+    expect(result).not.toContain("rotation=90");
+  });
+
+  it("leaves the rotation column empty for an unrotated object", () => {
+    const result = drawingToTable({ objects: [
+      { id: "flat", type: "rectangle", x: 0, y: 0, width: 10, height: 10, rotation: 0 }
+    ]});
+    expect(result).toContain("| flat | rectangle | 0, 0 | 10 x 10 |  |  |");
+  });
+
+  it("keeps flips in details, since they do not change the box", () => {
+    const result = drawingToTable({ objects: [
+      { id: "f1", type: "rectangle", x: 0, y: 0, width: 10, height: 10, hFlip: true }
+    ]});
+    expect(result).toContain("| f1 | rectangle | 0, 0 | 10 x 10 |  |  | hFlip=true |");
   });
 
   it("carries an outer group's rotation down to a nested group's children", () => {
@@ -182,9 +199,9 @@ describe("drawingToTable groups", () => {
         objects: [{ id: "leaf", type: "rectangle", x: 0, y: 0, width: 1, height: 1 }]
       }]
     }]});
-    expect(result).toContain("| outer | group | 100, -50 | 50 x 100 |");
-    expect(result).toContain("| inner | group | 100, -50 | 50 x 100 | outer |");
-    expect(result).toContain("| leaf | rectangle | 100, -50 | 50 x 100 | inner |");
+    expect(result).toContain("| outer | group | 100, -50 | 50 x 100 | 90° |  |");
+    expect(result).toContain("| inner | group | 100, -50 | 50 x 100 |  | outer |");
+    expect(result).toContain("| leaf | rectangle | 100, -50 | 50 x 100 |  | inner |");
   });
 
   it("mirrors children of a flipped group", () => {
@@ -192,6 +209,6 @@ describe("drawingToTable groups", () => {
       id: "flip", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
       objects: [{ id: "fkid", type: "rectangle", x: 0, y: 0, width: 0.25, height: 1 }]
     }]});
-    expect(result).toContain("| fkid | rectangle | 75, 0 | 25 x 100 | flip |");
+    expect(result).toContain("| fkid | rectangle | 75, 0 | 25 x 100 |  | flip |");
   });
 });
