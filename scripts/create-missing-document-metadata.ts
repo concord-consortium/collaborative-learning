@@ -13,7 +13,7 @@
 
 import type { Firestore } from "firebase-admin/firestore";
 import { isRtdbAddressable, type IDocumentHome } from "./lib/rtdb-document-index";
-import { toolsFromContent } from "./lib/document-tools";
+import { toolsFromDocumentNode } from "./lib/document-tools";
 
 /** Batched writes are capped well below Firestore's 500-operation limit. */
 const kBatchSize = 400;
@@ -263,7 +263,7 @@ export async function createMissingDocumentMetadata(
     // thing in the database and this is the run's only read of it.
     const contentPath =
       `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documents/${key}`;
-    const tools = toolsFromContent((await readNode(contentPath))?.content);
+    const tools = toolsFromDocumentNode(await readNode(contentPath));
     // Absent rather than `[]` when the content would not parse: an empty array asserts the document
     // has no tiles, which is a different claim from "this run could not tell".
     if (tools) row.tools = tools;
@@ -282,7 +282,7 @@ export async function createMissingDocumentMetadata(
       `already present ${counts.alreadyPresent}, no content ${counts.skippedNoContent}, ` +
       `unaddressable ${counts.skippedUnaddressable}, unreadable ${counts.nodeUnreadable}, ` +
       `unresolved curriculum ${counts.unresolvedCurriculum}, ` +
-      `no tools ${counts.unreadableContent}`);
+      `unreadable content ${counts.unreadableContent}`);
 
   return { counts, skipped };
 }

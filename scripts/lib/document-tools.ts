@@ -7,16 +7,20 @@
 /**
  * The tile types a document uses, plus "Sparrow" when it carries arrow annotations.
  *
- * Returns `undefined` when the content cannot be read, which the caller must not conflate with `[]`:
- * an empty array claims the document has no tiles, and saying that about a document nobody could
- * parse would be a guess written into the database.
+ * Takes the realtime-database `documents/<key>` node rather than its content string, because the two
+ * ways of having no tiles have to be told apart. A node with no `content` key is a document that was
+ * created and never saved — it has no tiles, and `[]` says so. Content that will not parse is a
+ * document this cannot read, and returns `undefined`: `[]` there would assert emptiness the run never
+ * established.
  */
-export function toolsFromContent(contentJson: string | undefined): string[] | undefined {
-  if (!contentJson) return undefined;
+export function toolsFromDocumentNode(node: any): string[] | undefined {
+  if (!node || typeof node !== "object") return undefined;
+  // Never saved, so there is nothing to have tiles in.
+  if (node.content == null) return [];
 
   let content: any;
   try {
-    content = JSON.parse(contentJson);
+    content = JSON.parse(node.content);
   } catch {
     return undefined;
   }

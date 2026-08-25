@@ -101,6 +101,22 @@ describe("createMissingDocumentMetadata", () => {
     expect(store.k1.tools).toEqual([]);
   });
 
+  it("writes an empty tools list for a document that was created but never saved", async () => {
+    // The commonest shape among the documents this repair covers: a node with self, type and version
+    // and no content key at all. It has no tiles, and Sort Work should hear that rather than nothing.
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = {
+      "documentMetadata/k1": { type: "learningLog", createdAt: 1, title: "L" },
+      "documents/k1": { self: { uid: "u1", documentKey: "k1", classHash: "c1" }, version: "1.0" }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: pathReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(store.k1.tools).toEqual([]);
+  });
+
   it("omits tools when the content cannot be read, rather than claiming the document is empty", async () => {
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
