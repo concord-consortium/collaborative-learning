@@ -121,7 +121,11 @@ Some dependencies are locked to specific versions:
 
 ## Testing Notes
 
-- Firebase test rules require Node.js 16.x and Java for emulators
+- Firestore rules tests live in `firebase-test/` and run with
+  `npm --prefix firebase-test ci && npm --prefix firebase-test run test:exec`. That directory has its own
+  `package-lock.json`, so the root `npm install` does not reach it. It pins its own `firebase-tools`, so no
+  global CLI install is needed, but the Firestore emulator is a JVM process: firebase-tools 15 refuses to
+  start it on anything below **Java 21**. CI runs the same two commands (the `firebase-rules` job).
 - Some tests target production database (qa/test partitions) - prefer emulator
 - Cypress tests may require portal credentials in `cypress.env.json`
 - See `.cursor/rules/testing.mdc` for test runner commands
