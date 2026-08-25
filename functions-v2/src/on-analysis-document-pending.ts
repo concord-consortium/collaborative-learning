@@ -5,6 +5,7 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
+import {escapeHtmlAttribute, escapeJsonForScript} from "../../shared/escape-for-html";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
@@ -15,22 +16,24 @@ const clueURL = "https://collaborative-learning.concord.org/branch/shutterbug-su
 const clueUnit = "mods";
 const shutterbugURL = "https://api.concord.org/shutterbug-production";
 
-function generateHtml(clueDocument: unknown) {
+export function generateHtml(clueDocument: unknown) {
+  const source = escapeHtmlAttribute(`${clueURL}/iframe.html?unit=${clueUnit}&unwrapped&readOnly`);
   return `
-    <script>const initialValue=${JSON.stringify(clueDocument)}</script>
+    <script>const initialValue=${escapeJsonForScript(JSON.stringify(clueDocument))}</script>
     <!-- height will be updated when iframe sends updateHeight message -->
     <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
       allow='serial'
-      src='${clueURL}/iframe.html?unit=${clueUnit}&unwrapped&readOnly'
+      src="${source}"
     ></iframe>
     <script>
       const clueFrame = document.getElementById('clue-frame')
       function sendInitialValueToEditor() {
         if (!clueFrame.contentWindow) {
-          console.warning("iframe doesn't have contentWindow");
+          console.warn("iframe doesn't have contentWindow");
+          return;
         }
         window.addEventListener("message", (event) => {
-          if (event.data.type === "updateHeight") {
+          if (event.data?.type === "updateHeight") {
             document.getElementById("clue-frame").height = event.data.height + "px";
           }
         })

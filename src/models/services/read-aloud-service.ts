@@ -248,7 +248,7 @@ export class ReadAloudService {
     if (!skipTileSelect) {
       this.isSelectingProgrammatically = true;
       this.lastProgrammaticSelectionTime = Date.now();
-      this.stores.ui.setSelectedTileId(item.associatedTileId ?? '');
+      this.stores.ui.setSelectedTileId(item.associatedTileId ?? '', { programmatic: true });
       this.isSelectingProgrammatically = false;
     }
 

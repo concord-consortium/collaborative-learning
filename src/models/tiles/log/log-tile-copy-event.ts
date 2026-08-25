@@ -1,7 +1,6 @@
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
-import { getTileTitleForLogging } from "../../../lib/logger-utils";
-import { DocumentsModelType } from "../../stores/documents";
+import { IDocumentLookupContext, resolveTileLogContext } from "../../../lib/logger-utils";
 import { ITileModel } from "../tile-model";
 import { logTileDocumentEvent } from "./log-tile-document-event";
 
@@ -10,16 +9,10 @@ interface ITileCopyLogEvent extends Record<string, any> {
   originalTileId: string;
 }
 
-interface IContext extends Record<string, any> {
-  documents: DocumentsModelType;
-  networkDocuments: DocumentsModelType;
-}
-
-function processTileCopyEventParams(params: ITileCopyLogEvent, context: IContext) {
+function processTileCopyEventParams(params: ITileCopyLogEvent, context: IDocumentLookupContext) {
   const { originalTileId, ...others } = params;
-  const srcDocument = context.documents.findDocumentOfTile(originalTileId) ||
-                      context.networkDocuments.findDocumentOfTile(originalTileId);
-  const originalTileTitle = getTileTitleForLogging(originalTileId, srcDocument);
+  const { document: srcDocument, tileTitle: originalTileTitle } =
+    resolveTileLogContext({ tileId: originalTileId }, context);
   const srcProps = srcDocument
                     ? {
                       sourceUsername: srcDocument.uid,

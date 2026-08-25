@@ -103,7 +103,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
     if (threadId === "document") {
       ui.setSelectedTileId('');
     } else {
-      ui.setSelectedTileId(threadId);
+      ui.setSelectedTileId(threadId, { programmatic: true });
     }
   };
 
@@ -238,12 +238,12 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       };
       logCommentEvent(eventPayload);
 
-      // If expanding a thread (not collapsing), update the selected tile
+      // Selecting on the user's behalf, so it is not a tile focus worth logging.
       if (!isCurrentlyExpanded) {
         if (clickedId === "document") {
           ui.setSelectedTileId('');
         } else {
-          ui.setSelectedTileId(clickedId || '');
+          ui.setSelectedTileId(clickedId || '', { programmatic: true });
         }
       }
 

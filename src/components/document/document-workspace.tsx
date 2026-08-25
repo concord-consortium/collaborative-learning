@@ -196,14 +196,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private async guaranteeInitialDocuments() {
     const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle,
-              groupDocumentsEnabled },
+              groupDocumentsEnabled, classWideDocuments },
             db, persistentUI: { problemWorkspace },
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       await this.loadDefaultPrimaryDocument();
-    } else if (groupDocumentsEnabled) {
-      // If the primary document is a group document, make sure it is opened properly.
-      // This is because group documents are not loaded automatically like other documents.
+    } else if (groupDocumentsEnabled || classWideDocuments?.length) {
+      // Group documents and class-wide documents are both not loaded automatically like other
+      // documents, so if the primary document is one of those, make sure it is opened properly.
       try {
         const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
         if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {

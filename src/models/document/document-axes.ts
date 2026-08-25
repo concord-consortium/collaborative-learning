@@ -4,7 +4,7 @@
  * (see document-kinds.ts).
  *
  * Each guard answers about one axis, reading only that axis's fields; a consumer needing a position on
- * more than one asks each. See docs/document-axes/reading-axes-in-code.md for the field-by-shape table
+ * more than one asks each. See docs/document-axes/axes-current-state.md for the field-by-shape table
  * and what is not covered yet, and docs/document-axes/axes.md for what the axes mean.
  *
  * A guard reads stored fields only, never the kind registry: Sort Work lists documents from other
