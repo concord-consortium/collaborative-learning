@@ -1,5 +1,6 @@
-import { getOfferingIdFromFirebaseMetadata, getUserDocumentMetadataPath } from "./document-metadata-lookup";
-import type { IMetadataDatabase } from "./document-metadata-lookup";
+import {
+  getOfferingIdFromFirebaseMetadata, getUserDocumentMetadataPath, type IMetadataDatabase
+} from "./document-metadata-lookup";
 
 // Minimal RTDB stand-in. `nodes` maps a full path to the value stored there; a path absent from the
 // map reads back as a non-existent node. `throwOn` makes a path reject, so a transport failure can be

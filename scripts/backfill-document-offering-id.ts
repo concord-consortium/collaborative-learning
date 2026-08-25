@@ -32,8 +32,7 @@ import type { Firestore } from "firebase-admin/firestore";
 // Specified without the `.js` extension that the other scripts here use. This module is loaded by a
 // Jest test, and Jest resolves only the extensionless form to the sibling `.ts` file; tsx resolves
 // either form, so running the script is unaffected.
-import { getOfferingIdFromFirebaseMetadata } from "./lib/document-metadata-lookup";
-import type { IMetadataDatabase } from "./lib/document-metadata-lookup";
+import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "./lib/document-metadata-lookup";
 
 /**
  * The `type` values of documents kept in an offering, per the `containerType: "offering"` entries in
@@ -104,7 +103,7 @@ export function getSpaceLabel(docPath: string): string {
  * can never be looked up — the failure is permanent, not transient. Curriculum-authored supports carry
  * human-readable keys like "2.2 Initial Challenge Support 1", which is how this arises.
  */
-const kRtdbIllegal = /[.#$\[\]/]/;
+const kRtdbIllegal = /[.#$[\]/]/;
 
 /** Whether every path segment the lookup would build from this document is legal in the RTDB. */
 export function isRtdbAddressable(contextId: string, uid: string, key: string): boolean {

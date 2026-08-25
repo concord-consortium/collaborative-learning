@@ -1,9 +1,7 @@
 import {
-  classifyDocument, getSpaceFromFirestorePath, getSpaceLabel, isRtdbAddressable,
-  kOfferingContainedTypes, parsePageSize, parseTypes
+  backfillDocumentOfferingId, classifyDocument, getSpaceFromFirestorePath, getSpaceLabel,
+  isRtdbAddressable, kOfferingContainedTypes, parsePageSize, parseTypes, type IBucketCounts
 } from "./backfill-document-offering-id";
-import { backfillDocumentOfferingId } from "./backfill-document-offering-id";
-import type { IBucketCounts } from "./backfill-document-offering-id";
 import type { IMetadataDatabase } from "./lib/document-metadata-lookup";
 import type { Firestore } from "firebase-admin/firestore";
 
