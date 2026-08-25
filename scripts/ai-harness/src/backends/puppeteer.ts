@@ -22,9 +22,15 @@ import {
  * The slice of puppeteer this backend uses, written out structurally so a test can supply a fake
  * browser and so the module type-checks whether or not puppeteer is installed.
  *
- * Elements are measured, never screenshotted: every capture is a page screenshot clipped to a
- * measured box, because the element capture path's machinery hangs on continuously animating
- * content (see the full-document capture below).
+ * This is also where the capture contract lives. Elements are measured, never screenshotted: every
+ * capture — full-document and per-tile alike — is a page screenshot clipped to a measured box,
+ * because `ElementHandle.screenshot()` runs scroll-into-view, visibility and viewport machinery
+ * before capturing, and that machinery hangs against continuously animating content (a live
+ * Dataflow program repaints forever). A plain clipped surface capture does not. The box comes from
+ * `boundingBox()`, which reports viewport coordinates, while `page.screenshot` clips in page
+ * coordinates — so every capture adds the visual viewport's page offset to the box first (see
+ * `viewportPageOffset`), the same conversion puppeteer's own element screenshot performs, rather
+ * than relying on the render page never scrolling.
  */
 export interface ElementLike {
   boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>;
@@ -64,16 +70,14 @@ export interface BrowserLike {
 }
 
 /**
- * 2: the render page is served over loopback HTTP and navigated to, rather than injected with
- * `setContent`, and readiness is measured inside the CLUE frame rather than taken from the
- * `updateHeight` message. Version 1 produced no pixels at all against a real CLUE server — see the
- * comments on `startRenderPageServer` and `kMeasureFrameScript`.
+ * Bumped when the capture pipeline changes in a way that makes stored renders untrustworthy; the
+ * freshness check invalidates every envelope recorded under an older version.
  *
- * 3: the frame height counts top-level tile rows only (nested Question rows were double-counted,
- * oversizing the frame), the viewport grows to cover the resized frame, and the render page is
- * served same-site with a localhost CLUE server — without those, a cross-site frame's lower content
- * mounted and measured but captured as blank pixels, and its screenshot could hang. Found with the
- * first real-document corpus; every synthetic fixture was short enough to hide all three.
+ * 2: the render page is served over loopback HTTP and navigated to (never `setContent`), and
+ * readiness is measured inside the CLUE frame rather than taken from the `updateHeight` message.
+ *
+ * 3: the frame height counts top-level tile rows only, the viewport grows to cover the resized
+ * frame, and the render page is served same-site with a localhost CLUE server.
  */
 export const kPuppeteerBackendVersion = 3;
 
@@ -175,15 +179,11 @@ async function launchPuppeteer(): Promise<BrowserLike> {
  */
 const kMeasureFrameScript = `(() => {
   const app = document.getElementById('app');
-  const rows = document.querySelectorAll('.tile-row');
+  // Top-level rows only, the same not-nested selector idea as kTileSelector: a Question tile's
+  // nested rows are .tile-row elements too, and their height is already inside their parent's.
+  const rows = document.querySelectorAll('.tile-row:not(.tile-row .tile-row)');
   let rowsHeight = 0;
-  rows.forEach((row) => {
-    // Top-level rows only: a Question tile's nested rows are .tile-row elements too, and their
-    // height is already inside their parent's. Counting both sized the frame for real documents
-    // roughly half again too tall (teacher-workshop p2-3: 3729px measured, ~2145px of content).
-    const parent = row.parentElement && row.parentElement.closest('.tile-row');
-    if (!parent) rowsHeight += row.getBoundingClientRect().height;
-  });
+  rows.forEach((row) => { rowsHeight += row.getBoundingClientRect().height; });
   const documentError = document.querySelector('.document-error');
   return {
     // CLUE renders its own "Error loading the document" page when it cannot deserialize what it was
@@ -447,6 +447,24 @@ const kOverflowTolerancePx = 16;
  */
 const kCaptureShortfallTolerancePx = 2;
 
+/** Reads the visual viewport's page offset — [0, 0] unless something scrolled the render page. */
+const kViewportOffsetScript = `(() => {
+  const viewport = window.visualViewport;
+  return viewport ? [viewport.pageLeft, viewport.pageTop] : [0, 0];
+})()`;
+
+/**
+ * The offset that converts a `boundingBox()` (viewport coordinates) into the page coordinates
+ * `page.screenshot` clips in — see the capture contract on `ElementLike`. The fallback covers
+ * environments with no `visualViewport` (and test fakes that answer only the scripts they know),
+ * where the page cannot have scrolled and the offset is zero.
+ */
+async function viewportPageOffset(page: PageLike): Promise<{ leftPx: number; topPx: number }> {
+  const value = await page.evaluate(kViewportOffsetScript) as unknown;
+  const [leftPx, topPx] = Array.isArray(value) && value.length === 2 ? value : [0, 0];
+  return { leftPx: Number(leftPx) || 0, topPx: Number(topPx) || 0 };
+}
+
 async function setFrameHeight(page: PageLike, heightPx: number): Promise<void> {
   await page.evaluate(`(() => {
     const frame = document.getElementById('clue-frame');
@@ -588,11 +606,9 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
   const openBrowser = () => (browserPromise ??= launch());
   // The render page has to come from a real http origin; see startRenderPageServer. When the CLUE
   // server is on localhost, the page is served from localhost too: with the page on 127.0.0.1 the
-  // CLUE iframe is cross-SITE, Chromium puts it in its own process, rasterizes it only near the
-  // visible viewport (everything below captures as blank), and `element.screenshot()` of such a
-  // frame can hang outright on a page with continuously animating content. Same site, same process,
-  // none of that — found with the teacher-workshop corpus, whose documents are taller and livelier
-  // than any synthetic fixture.
+  // CLUE iframe is cross-SITE, Chromium puts it in its own process and rasterizes it only near the
+  // visible viewport, so everything below captures as blank pixels. Same site, same process,
+  // none of that.
   const sameSiteHost = (() => {
     try {
       return new URL(clueUrl).hostname === "localhost" ? "localhost" : undefined;
@@ -744,6 +760,10 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
           consoleWarnings: state.consoleOutput.filter((line) => line.startsWith("warning:"))
         });
 
+        // Both capture paths clip page screenshots, so both need the same viewport-to-page
+        // conversion; computed once, after the page has settled.
+        const pageOffset = await viewportPageOffset(page);
+
         if (capture === "per-tile") {
           // One picture per top-level tile, of the same settled and resized page. Both reads use
           // `kTileSelector`, so the handles and the ids describe the same elements — the mismatch
@@ -779,17 +799,15 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
             // Every bound applies per image: a per-tile capture multiplies the count, not the
             // allowance.
             checkCaptureSize(request.docId, Math.ceil(tileBox.width), Math.ceil(tileBox.height), limits);
-            // A page screenshot clipped to the tile's box, NOT `handle.screenshot()`: the element
-            // capture path runs element-level machinery (scroll-into-view, visibility checks)
-            // before capturing, and that machinery hangs against a tile whose content repaints
-            // continuously — a ticking Dataflow generator held it for a full 60s budget while the
-            // plain surface capture of the same page succeeded. The clip coordinates come from
-            // `boundingBox()`, which is main-frame-relative, the same space `page.screenshot`
-            // clips in; the viewport covers the resized frame, so the tile is always in view.
+            // A page screenshot clipped to the tile's box, in page coordinates — never
+            // `handle.screenshot()`. The whole contract is on `ElementLike`.
             const tileBytes = Buffer.from(await withinDeadline(
               page.screenshot({
                 type: "png",
-                clip: { x: tileBox.x, y: tileBox.y, width: tileBox.width, height: tileBox.height },
+                clip: {
+                  x: tileBox.x + pageOffset.leftPx, y: tileBox.y + pageOffset.topPx,
+                  width: tileBox.width, height: tileBox.height
+                },
                 captureBeyondViewport: false
               }),
               request.docId, `capturing tile ${tileIds[index] || index + 1}`, deadline, contextOf));
@@ -841,18 +859,16 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
             "full-document one", contextOf());
         }
 
-        // A page screenshot clipped to the iframe's box, the same way the per-tile capture works —
-        // never `element.screenshot()`. The element capture path runs element-level machinery
-        // (scroll-into-view, visibility checks, its own viewport handling) before capturing, and
-        // one piece or another of it hangs against continuously animating content: a ticking Waves
-        // generator hung `captureBeyondViewport`'s viewport dance, and with that disabled the same
-        // documents hung again when the vibe unit changed how their Dataflow tiles animate. The
-        // plain surface capture has never hung. The viewport is sized to cover the resized frame,
-        // and the pixel check below proves the clip really was in view when the capture happened.
+        // A page screenshot clipped to the iframe's box, in page coordinates — never
+        // `element.screenshot()`. The whole contract is on `ElementLike`; the pixel check below
+        // proves the clip really was in view when the capture happened.
         const bytes = Buffer.from(await withinDeadline(
           page.screenshot({
             type: "png",
-            clip: { x: box.x, y: box.y, width: box.width, height: box.height },
+            clip: {
+              x: box.x + pageOffset.leftPx, y: box.y + pageOffset.topPx,
+              width: box.width, height: box.height
+            },
             captureBeyondViewport: false
           }), request.docId,
           "capturing the iframe", deadline, contextOf));

@@ -382,6 +382,37 @@ describe("the puppeteer backend", () => {
       .rejects.toThrow(/capturing the iframe did not finish within the 600ms budget/);
   });
 
+  it("clips in page coordinates: the visual viewport's offset is added to the measured box", async () => {
+    // boundingBox() reports viewport coordinates; page.screenshot clips page coordinates. They
+    // agree only while the page is unscrolled, so the capture adds visualViewport.pageLeft/pageTop
+    // — the same conversion puppeteer's own element screenshot performs — instead of relying on an
+    // unstated no-scroll invariant. This fake reports a scrolled page and expects the shift.
+    const fake = fakeBrowser();
+    let clip: { x: number; y: number } | undefined;
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser().browser.newPage();
+      const innerEvaluate = page.evaluate.bind(page);
+      (page as any).evaluate = async (script: string) => String(script).includes("visualViewport")
+        ? [7, 40]
+        : innerEvaluate(script);
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (options: any) => {
+        if (options?.clip) clip = options.clip;
+        return original(options);
+      };
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await backend.render({ docId: "scrolled", content: emptyDocument });
+    // The fake element's box sits at (0, 0) in the viewport; the clip lands at the page offset.
+    expect(clip).toMatchObject({ x: 7, y: 40 });
+  });
+
   it("fails a capture that came back shorter than its clip, rather than storing it", async () => {
     // A clipped, captureBeyondViewport:false screenshot is intersected with the visual viewport
     // (puppeteer cdp/Page.js): a frame grown past the viewport by a late updateHeight captures

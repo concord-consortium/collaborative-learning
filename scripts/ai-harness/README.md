@@ -328,6 +328,15 @@ When it is not, `--concurrency 1` and `--timeout-ms 60000` turn the two knobs di
 validated as positive whole numbers, and both are named in the run's own log line, so a run that
 needed them says so in its output rather than only in the shell history of whoever typed it.
 
+**Tall documents cost memory in proportion to their height.** The local backend grows each page's
+viewport to cover the whole resized frame (a cross-site-era workaround that survives because the
+clipped capture requires the clip to be in view), so a document near the 20,000px height limit
+holds a roughly 960×20,000 compositing surface — on the order of 75MB — and `--concurrency n`
+holds n of them at once. The default concurrency of 4 is fine on a development machine; if a run
+of unusually tall documents makes Chromium struggle, `--concurrency 1` bounds the peak. A capture
+that a too-small surface would crop fails loudly rather than silently: the backend compares every
+PNG's dimensions against its clip box.
+
 `--timeout-ms` belongs to the local modes only, and the Shutterbug modes refuse it rather than drop
 it. A per-document budget is a thing the local backend has — one deadline covering load, readiness
 and capture — and a hosted mode has no equivalent: it bounds its request and its download separately,

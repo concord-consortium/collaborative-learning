@@ -31,6 +31,7 @@ const kClueUrl = process.env.CLUE_URL ?? "http://localhost:8080";
  */
 const fixtures: {
   docId: string; expectUnknownTiles: number; minTiles: number; minHeightPx?: number;
+  maxHeightPx?: number;
 }[] = [
   { docId: "drawing", expectUnknownTiles: 0, minTiles: 1 },
   { docId: "table", expectUnknownTiles: 0, minTiles: 1 },
@@ -46,7 +47,14 @@ const fixtures: {
   // Taller than the 500px the generated page starts at, so a real browser exercises the frame
   // resize. Every other fixture is short enough that the resize never fires, which left the one
   // mechanism that keeps `captureMode: "full-document"` honest covered only by fake browsers.
-  { docId: "tall", expectUnknownTiles: 0, minTiles: 10, minHeightPx: kInitialFrameHeightPx }
+  { docId: "tall", expectUnknownTiles: 0, minTiles: 10, minHeightPx: kInitialFrameHeightPx },
+  // Nested rows: a Question tile draws its children as .tile-row elements inside its own row, and
+  // the height measurement must count the parent row only. The regression mode is a silently
+  // oversized frame — no error fires — so the upper bound is the check. Only a real DOM can catch
+  // it: every jest fake answers the measurement script with a number of this file's choosing.
+  // The bound is generous (double-counting inflated real documents by roughly half again or more);
+  // the run prints the actual height, so tighten it if the fixture settles well below.
+  { docId: "question", expectUnknownTiles: 0, minTiles: 3, maxHeightPx: 900 }
 ];
 
 /**
@@ -106,6 +114,10 @@ async function main(): Promise<void> {
           if (fixture.minHeightPx !== undefined && info.heightPx <= fixture.minHeightPx) {
             problems.push(`height ${info.heightPx} is not past the ${fixture.minHeightPx}px the frame ` +
               "starts at, so this fixture did not exercise the resize");
+          }
+          if (fixture.maxHeightPx !== undefined && info.heightPx > fixture.maxHeightPx) {
+            problems.push(`height ${info.heightPx} is over the ${fixture.maxHeightPx}px bound — ` +
+              "an oversized frame usually means nested rows were counted into the measurement");
           }
           if ((totalTiles ?? -1) < fixture.minTiles) {
             problems.push(`counted ${totalTiles} tiles, expected at least ${fixture.minTiles}`);
