@@ -1,17 +1,12 @@
+import { isTutorHighlight } from "../../../shared/chat-tutor-highlight";
 import { ChatTurn, TutorHighlight } from "./transport";
 
-// The server validates highlights before writing them, so this is defence in depth rather than the
-// primary gate — but a button that cannot resolve is worse than no button, so a half-formed entry
-// is dropped here too. The test is the same one the server applies (isTutorHighlight in
-// functions-v2/src/chat/openai.ts), non-empty included: an empty id resolves to nothing and an
-// empty label renders a button with no words on it.
-const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && !!value;
-
+// The server validates before writing, so this is defence in depth rather than the primary gate. It
+// reads a document, though, which may have been written by an older server than the one running now.
 function readHighlights(value: unknown): TutorHighlight[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  const highlights = value.filter((h: any) =>
-    isNonEmptyString(h?.tileId) && isNonEmptyString(h?.objectId) && isNonEmptyString(h?.label)
-  ).map((h: any) => ({ tileId: h.tileId, objectId: h.objectId, label: h.label }));
+  const highlights = value.filter(isTutorHighlight)
+    .map(h => ({ tileId: h.tileId, objectId: h.objectId, label: h.label }));
   return highlights.length > 0 ? highlights : undefined;
 }
 

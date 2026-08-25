@@ -51,6 +51,9 @@ describe("parseTutorReply", () => {
       highlights: [{tileId: "t1", objectId: "n1", label: "the sensor"}],
     }));
     expect(withHighlights.userText).toBeNull();
+    // Emptied, not merely unrendered: the client drops the whole turn on a null userText, so
+    // anything left here would be written to Firestore and read by nothing.
+    expect(withHighlights.highlights).toEqual([]);
   });
 
   it("drops entries with empty strings in required fields", () => {

@@ -6,7 +6,7 @@
 // which is per-request and not carried across turns). Assistant replies are structured: text.format
 // json_schema/strict with a nullable `userText`.
 import OpenAI from "openai";
-import {TutorHighlight} from "../../../shared/chat-tutor-highlight";
+import {TutorHighlight, isTutorHighlight} from "../../../shared/chat-tutor-highlight";
 
 export interface TutorReply {
   userText: string | null;
@@ -93,32 +93,22 @@ export async function createTutorResponse(
   return parseTutorReply(res.output_text);
 }
 
-// Type guard that validates a highlight entry is fully formed with non-empty ids and label.
-// An unresolvable entry (missing or empty fields) is dropped rather than passed through because
-// a button that cannot resolve is worse than no button.
-function isTutorHighlight(value: unknown): value is TutorHighlight {
-  const h = value as Record<string, unknown> | null | undefined;
-  return !!h && typeof h.tileId === "string" && h.tileId.length > 0 &&
-    typeof h.objectId === "string" && h.objectId.length > 0 &&
-    typeof h.label === "string" && h.label.length > 0;
-}
-
-// Parse the model's structured output into a TutorReply, defensively coercing a missing/non-string
-// userText to null (renders as nothing) and dropping any highlight entry that is not fully formed.
-// A half-formed entry cannot resolve, and a button that resolves to nothing is worse than no button.
+// Parse the model's structured output into a TutorReply, defensively coercing a missing, non-string
+// or blank userText to null and dropping any highlight entry that is not fully formed.
 //
-// Blank userText coerces to null for the same reason isTutorHighlight requires non-empty ids and
-// labels: "nothing to say" gets one representation on the wire. The client tests `userText == null`
-// to decide a reply is silent, so an empty string would slip past it and render an empty bubble.
+// "Nothing to say" gets one representation on the wire. The client tests `userText == null` to decide
+// a reply is silent, so an empty string would slip past it and render an empty bubble.
+//
+// A silent reply carries no highlights either. Buttons label words the reply never said, and the
+// client drops the whole turn when userText is null, so anything left in the array is data nothing
+// can render.
 export function parseTutorReply(outputText: string): TutorReply {
   const parsed = JSON.parse(outputText);
   const raw: unknown[] = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
-  const highlights: TutorHighlight[] = raw
+  const rawText = parsed?.userText;
+  const userText = typeof rawText === "string" && rawText.trim() ? rawText : null;
+  const highlights: TutorHighlight[] = userText === null ? [] : raw
     .filter(isTutorHighlight)
     .map((h) => ({tileId: h.tileId, objectId: h.objectId, label: h.label}));
-  const userText = parsed?.userText;
-  return {
-    userText: typeof userText === "string" && userText.trim() ? userText : null,
-    highlights,
-  };
+  return {userText, highlights};
 }
