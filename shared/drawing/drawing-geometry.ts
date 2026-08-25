@@ -169,45 +169,50 @@ export const kVariableChipDefaultHeight = 24;
  * @param childBB The bounding box of the object inside the group; sides are normally in [0,1].
  * @returns The bounding box relative to the coordinate system the group itself lives in.
  */
-export function absoluteChildBoundingBox(
-  childBB: BoundingBox,
-  group: { boundingBox: BoundingBox, rotation?: number, hFlip?: boolean, vFlip?: boolean }
-): BoundingBox {
+export interface GroupTransform {
+  boundingBox: BoundingBox;
+  rotation?: number;
+  hFlip?: boolean;
+  vFlip?: boolean;
+}
+
+/** The four corners of a box, clockwise from nw. */
+export function boundingBoxCorners(bb: BoundingBox): Point[] {
+  return [
+    { x: bb.nw.x, y: bb.nw.y },
+    { x: bb.se.x, y: bb.nw.y },
+    { x: bb.se.x, y: bb.se.y },
+    { x: bb.nw.x, y: bb.se.y }
+  ];
+}
+
+/** The smallest axis-aligned box containing every given point. */
+export function boundingBoxForPoints(points: Point[]): BoundingBox {
+  const sides = boundingBoxSidesForPoints(points);
+  return { nw: { x: sides.left, y: sides.top }, se: { x: sides.right, y: sides.bottom } };
+}
+
+/**
+ * Map one point out of a group's normalized space into the space the group itself lives in.
+ *
+ * Points rather than boxes, because a caller walking nested groups has to compose these. Reducing
+ * to an axis-aligned box between levels discards the rotation of every level above, which puts a
+ * child of a group inside a rotated group in the wrong quadrant.
+ */
+export function absoluteChildPoint(point: Point, group: GroupTransform): Point {
   const groupBB = group.boundingBox;
-  const groupWidth = groupBB.se.x - groupBB.nw.x;
-  const groupHeight = groupBB.se.y - groupBB.nw.y;
-  const internalNW = {
-    x: groupBB.nw.x + childBB.nw.x * groupWidth,
-    y: groupBB.nw.y + childBB.nw.y * groupHeight
-  };
-  const internalSE = {
-    x: groupBB.nw.x + childBB.se.x * groupWidth,
-    y: groupBB.nw.y + childBB.se.y * groupHeight
-  };
-  if (group.vFlip) {
-    internalNW.y = groupBB.nw.y + (groupBB.se.y - internalNW.y);
-    internalSE.y = groupBB.nw.y + (groupBB.se.y - internalSE.y);
-  }
-  if (group.hFlip) {
-    internalNW.x = groupBB.nw.x + (groupBB.se.x - internalNW.x);
-    internalSE.x = groupBB.nw.x + (groupBB.se.x - internalSE.x);
-  }
-  // All four corners are rotated, not just two. Two opposite corners bound the rotated rectangle
-  // only when the rotation is a multiple of 90; at any other angle their images do not span it. At
-  // 45 degrees it collapses outright, because the pivot is the se corner and so maps to itself.
-  const rotation = group.rotation ?? 0;
-  const internalNE = { x: internalSE.x, y: internalNW.y };
-  const internalSW = { x: internalNW.x, y: internalSE.y };
-  const sides = boundingBoxSidesForPoints([
-    rotatePoint(internalNW, groupBB.se, rotation),
-    rotatePoint(internalNE, groupBB.se, rotation),
-    rotatePoint(internalSE, groupBB.se, rotation),
-    rotatePoint(internalSW, groupBB.se, rotation)
-  ]);
-  return {
-    nw: { x: sides.left, y: sides.top },
-    se: { x: sides.right, y: sides.bottom }
-  };
+  let x = groupBB.nw.x + point.x * (groupBB.se.x - groupBB.nw.x);
+  let y = groupBB.nw.y + point.y * (groupBB.se.y - groupBB.nw.y);
+  if (group.vFlip) y = groupBB.nw.y + (groupBB.se.y - y);
+  if (group.hFlip) x = groupBB.nw.x + (groupBB.se.x - x);
+  return rotatePoint({ x, y }, groupBB.se, group.rotation ?? 0);
+}
+
+export function absoluteChildBoundingBox(childBB: BoundingBox, group: GroupTransform): BoundingBox {
+  // Every corner is mapped, not just two. Two opposite corners bound the rotated rectangle only
+  // when the rotation is a multiple of 90; at any other angle their images do not span it. At 45
+  // degrees it collapses outright, because the pivot is the se corner and so maps to itself.
+  return boundingBoxForPoints(boundingBoxCorners(childBB).map(p => absoluteChildPoint(p, group)));
 }
 
 export function rotateBoundingBox(boundingBox: BoundingBox, rotation: number): BoundingBox {

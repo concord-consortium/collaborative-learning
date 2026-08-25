@@ -34,7 +34,10 @@ An empty drawing returns the bare sentence this file replaced, so documents whos
 no objects summarize exactly as they did before.
 */
 
-import { absoluteChildBoundingBox, BoundingBox } from "../../drawing/drawing-geometry";
+import {
+  absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, GroupTransform, Point,
+  rotatePoint
+} from "../../drawing/drawing-geometry";
 import { boundingBoxForSnapshot, DrawingObjectSnapshot } from "../../drawing/drawing-object-snapshot";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
@@ -66,7 +69,9 @@ function formatDetails(o: DrawingObjectSnapshot): string {
     const count = o.objects?.length ?? 0;
     details.push(`${count} ${pluralize(count, "object", "objects")}`);
   }
-  if (o.text !== undefined) details.push(`text="${o.text}"`);
+  // JSON-encoded rather than just quoted: drawing text is edited in a textarea and can contain
+  // newlines, which would end the table row and corrupt every column after it.
+  if (o.text !== undefined) details.push(`text=${JSON.stringify(o.text)}`);
   if (o.url !== undefined) details.push(`url=${o.url}`);
   if (o.variableId !== undefined) details.push(`variableId=${o.variableId}`);
   if (o.fill !== undefined) details.push(`fill=${o.fill}`);
@@ -86,21 +91,38 @@ function row(o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string): strin
   return [o.id, o.type, formatPosition(bb), formatSize(bb), parentId, formatDetails(o)];
 }
 
+/** Maps a point out of the space an object is stored in and into the document's. */
+type ToDocument = (point: Point) => Point;
+
 // A group's members are stored as fractions of the group's box rather than as coordinates, so each
-// child's box is converted through the group it sits in — and through every enclosing group above
-// that — leaving every row in one coordinate system. absoluteChildBoundingBox is the same function
-// GroupObject.adjustInternalBoundingBox uses, so flips and rotation are handled identically here.
+// child is converted through the group it sits in — and through every enclosing group above that —
+// leaving every row in one coordinate system. absoluteChildPoint is the same mapping
+// GroupObject.adjustInternalBoundingBox applies, so flips and rotation behave identically here.
+//
+// Corners travel through that chain individually and become a box once, at the end. Collapsing to a
+// box at each level instead would discard the rotation of every level above, putting a child of a
+// group inside a rotated group in the wrong quadrant.
 function walk(
-  objects: DrawingObjectSnapshot[], rows: string[][], parentId: string,
-  parent?: { boundingBox: BoundingBox, rotation?: number, hFlip?: boolean, vFlip?: boolean }
+  objects: DrawingObjectSnapshot[], rows: string[][], parentId: string, toDocument?: ToDocument
 ): void {
   objects.forEach(o => {
-    const storedBB = boundingBoxForSnapshot(o);
-    const bb = parent ? absoluteChildBoundingBox(storedBB, parent) : storedBB;
-    rows.push(row(o, bb, parentId));
+    const localBB = boundingBoxForSnapshot(o);
+    // An object's own rotation turns it about its se corner, as DrawingObject.boundingBox does.
+    const corners = boundingBoxCorners(localBB)
+      .map(p => o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
+    rows.push(row(o, boundingBoxForPoints(toDocument ? corners.map(toDocument) : corners), parentId));
+
     if (o.objects?.length) {
-      walk(o.objects, rows, o.id,
-        { boundingBox: bb, rotation: o.rotation, hFlip: o.hFlip, vFlip: o.vFlip });
+      // Members are fractions of this group's *unrotated* box, so that is the frame handed down —
+      // not the rotated box just reported for it.
+      const frame: GroupTransform = {
+        boundingBox: localBB, rotation: o.rotation, hFlip: o.hFlip, vFlip: o.vFlip
+      };
+      const next: ToDocument = p => {
+        const inParentSpace = absoluteChildPoint(p, frame);
+        return toDocument ? toDocument(inParentSpace) : inParentSpace;
+      };
+      walk(o.objects, rows, o.id, next);
     }
   });
 }

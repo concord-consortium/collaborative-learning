@@ -78,6 +78,27 @@ describe("drawingToTable", () => {
     expect(result).toContain("variableId=v_speed");
   });
 
+  it("keeps multi-line text inside its own cell", () => {
+    // Drawing text is edited in a textarea, so a newline is ordinary. Left raw it would end the
+    // row and corrupt every column after it.
+    const result = drawingToTable({ objects: [
+      { id: "m1", type: "text", x: 0, y: 0, width: 50, height: 40, text: "too\nfast" },
+      { id: "m2", type: "rectangle", x: 0, y: 0, width: 1, height: 1 }
+    ]});
+    expect(result).toContain(String.raw`text="too\nfast"`);
+    expect(result).not.toContain("too\nfast");
+    // The row after it is still a row.
+    expect(result).toContain("| m2 | rectangle |");
+    expect(result.split("\n")).toHaveLength(6); // preamble, blank, header, separator, 2 rows
+  });
+
+  it("escapes quotes and backslashes in text", () => {
+    const result = drawingToTable({ objects: [
+      { id: "q1", type: "text", x: 0, y: 0, width: 50, height: 20, text: 'say "hi" c:\\x' }
+    ]});
+    expect(result).toContain(String.raw`text="say \"hi\" c:\\x"`);
+  });
+
   it("emits a text object's content and an image's url", () => {
     const result = drawingToTable({ objects: [
       { id: "t1", type: "text", x: 0, y: 0, width: 50, height: 20, text: "slower here" },
@@ -139,6 +160,31 @@ describe("drawingToTable groups", () => {
     }]});
     expect(result).toContain("| inner | group | 50, 0 | 50 x 100 | outer |");
     expect(result).toContain("| leaf | rectangle | 50, 0 | 50 x 100 | inner |");
+  });
+
+  it("reports a rotated object's turned box, not its unturned one", () => {
+    // A 100x50 rectangle turned 90 degrees occupies 50x100. Reporting the stored box would describe
+    // a shape the student cannot see.
+    const result = drawingToTable({ objects: [
+      { id: "r90", type: "rectangle", x: 0, y: 0, width: 100, height: 50, rotation: 90 }
+    ]});
+    expect(result).toContain("| r90 | rectangle | 100, -50 | 50 x 100 |");
+  });
+
+  it("carries an outer group's rotation down to a nested group's children", () => {
+    // Each level fills its parent exactly, so the leaf must land on the outer group's own box. If
+    // the walk collapsed to an axis-aligned box between levels, the outer rotation would be lost
+    // here and the leaf would come back in the wrong quadrant.
+    const result = drawingToTable({ objects: [{
+      id: "outer", type: "group", x: 0, y: 0, width: 100, height: 50, rotation: 90,
+      objects: [{
+        id: "inner", type: "group", x: 0, y: 0, width: 1, height: 1,
+        objects: [{ id: "leaf", type: "rectangle", x: 0, y: 0, width: 1, height: 1 }]
+      }]
+    }]});
+    expect(result).toContain("| outer | group | 100, -50 | 50 x 100 |");
+    expect(result).toContain("| inner | group | 100, -50 | 50 x 100 | outer |");
+    expect(result).toContain("| leaf | rectangle | 100, -50 | 50 x 100 | inner |");
   });
 
   it("mirrors children of a flipped group", () => {
