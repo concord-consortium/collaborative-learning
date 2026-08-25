@@ -595,8 +595,11 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       }
       const { ui } = this.stores;
       if (!ui.isSelectedTile(model)) {
+        // A read-only tile gets no focus trap (see componentDidMount), so this strategy only runs on
+        // editable tiles: readOnly is always false here and getEffectiveSelectionModel() is always
+        // model. Both are passed anyway so this call stays correct if that ever changes.
         ui.setSelectedTile(this.getEffectiveSelectionModel(),
-          { append: this.lastPointerDownHadModifier });
+          { append: this.lastPointerDownHadModifier, readOnly: !!this.props.readOnly, logTileId: model.id });
       }
     };
     return strategy;
@@ -695,7 +698,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
       const wasAlreadySelected = ui.isSelectedTile(model);
       // Match userSelectTile / onFocusEnter: select the container model for read-only
       // tiles inside a container so all entry paths agree on which tile is selected.
-      ui.setSelectedTileId(this.getEffectiveSelectionModel().id, { append: false });
+      ui.setSelectedTileId(this.getEffectiveSelectionModel().id,
+        { append: false, readOnly: !!this.props.readOnly, logTileId: model.id });
       if (this.props.readOnly) {
         // Read-only tiles have no focus trap — Enter just selects and announces.
         if (!wasAlreadySelected) {
@@ -849,7 +853,8 @@ class InternalTileComponent extends BaseComponent<IProps, IState> {
     document.body.classList.add("tile-dragging");
 
     // dragging a tile selects it first
-    ui.setSelectedTile(model, { append: hasSelectionModifier(e), dragging: true });
+    ui.setSelectedTile(model,
+      { append: hasSelectionModifier(e), dragging: true, readOnly: !!this.props.readOnly });
 
     const documentContent = getDocumentContentFromNode(model);
     if (!documentContent) {

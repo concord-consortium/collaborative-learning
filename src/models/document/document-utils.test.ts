@@ -3,8 +3,8 @@ import { AppConfigModel } from "../stores/app-config-model";
 import { UserModel } from "../stores/user";
 import { DocumentMetadataModel } from "../document/document-metadata-model";
 import { createDocumentModel } from "./document";
-import { getGroupOwnerId } from "./document-axes";
-import { ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
+import { getClassOwnerId, getGroupOwnerId } from "./document-axes";
+import { AxesDocument, ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument, ProblemPublication,
   SupportPublication } from "./document-types";
 import { canUserEditDocument, getDocumentDisplayTitle, getDocumentLogParams,
   isDocumentAccessibleToUser } from "./document-utils";
@@ -205,6 +205,13 @@ describe("document utils", () => {
           type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
+      });
+
+      test("an axes-typed group document uses the group label", () => {
+        const metadata = DocumentMetadataModel.create({
+          type: AxesDocument, kind: GroupDocument, uid: "g", key: "g-axes", groupId: "3"
+        });
+        expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Group 3 Document");
       });
     });
 
@@ -502,22 +509,54 @@ describe("getDocumentLogParams", () => {
   });
 });
 
-describe("isDocumentAccessibleToUser — group documents", () => {
+describe("isDocumentAccessibleToUser — concurrent documents", () => {
   const student: any = { id: "s1", isTeacherOrResearcher: false, isStudent: true };
   const documents: any = { isExemplarVisible: () => false };
+  const groupUid = getGroupOwnerId("off-1", "3");
+  const classUid = getClassOwnerId("class-1");
 
-  it("grants a student access to a group-typed doc owned by someone else, with or without concurrent", () => {
-    // Access is keyed on the document TYPE (a permission tied to kind), not the stored `concurrent`
-    // field, so a pre-existing group doc lacking `concurrent` is still class-wide readable.
-    const groupNoFlag: any = { uid: "other", type: GroupDocument, key: "g1" };  // no concurrent
-    expect(isDocumentAccessibleToUser({ documentMetadata: groupNoFlag, documents, user: student })).toBe(true);
+  it("grants a student access to a concurrent document owned by someone else", () => {
+    // Access reads the stored `concurrent` field, which is the permissions question: it is what says the
+    // document is shared with the class, and it is what the Firestore rules key on for the same reason.
+    const groupDoc: any = { uid: groupUid, type: GroupDocument, key: "g1", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: groupDoc, documents, user: student })).toBe(true);
 
-    const groupWithFlag: any = { uid: "other", type: GroupDocument, key: "g2", concurrent: true };
-    expect(isDocumentAccessibleToUser({ documentMetadata: groupWithFlag, documents, user: student })).toBe(true);
+    const classWideDoc: any = { uid: classUid, type: GroupDocument, key: "c1", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: classWideDoc, documents, user: student })).toBe(true);
+  });
+
+  it("reads the same for a document the sweep has already renamed", () => {
+    // The type is not read, so the same documents behave identically on either side of CLUE-604's sweep.
+    const swept: any = { uid: groupUid, type: AxesDocument, key: "g2", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: swept, documents, user: student })).toBe(true);
   });
 
   it("denies a student access to a non-shared personal document owned by someone else", () => {
-    const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };
+    const documentMetadata: any = { uid: "other", type: "personal", key: "p1" };  // no concurrent
     expect(isDocumentAccessibleToUser({ documentMetadata, documents, user: student })).toBe(false);
+  });
+
+  it("does not grant access on the axis-native type alone", () => {
+    // The reason this reads `concurrent` rather than the type: the axis-native type is a set the rename
+    // exists to let grow, so a kind added later must state that it is class-shared rather than inherit it.
+    // The transitional branch below must not cover this — it accepts the pre-sweep literal only.
+    const notConcurrent: any = { uid: "other", type: AxesDocument, key: "a1" };  // no concurrent
+    expect(isDocumentAccessibleToUser({ documentMetadata: notConcurrent, documents, user: student })).toBe(false);
+  });
+
+  it("TRANSITIONAL: grants access to a pre-sweep group document that stores no concurrent", () => {
+    // The shape every group document created before `concurrent` was stamped still has, and the reason
+    // the type cannot be dropped from this check yet. It is read from un-opened Firestore metadata, so
+    // db.ts's on-open backfill has not supplied the field and cannot: this check is what decides whether
+    // the thumbnail will accept the click that would open it. CLUE-604's sweep is what retires this case.
+    const legacy: any = { uid: groupUid, type: GroupDocument, key: "g3" };  // no concurrent
+    expect(isDocumentAccessibleToUser({ documentMetadata: legacy, documents, user: student })).toBe(true);
+  });
+
+  it("grants access to a concurrent document of any type", () => {
+    // Nothing ties the permission to a type. A concurrent document of a kind that is not axis-native is
+    // shared with the class on the same terms.
+    const otherType: any = { uid: "other", type: "personal", key: "o1", concurrent: true };
+    expect(isDocumentAccessibleToUser({ documentMetadata: otherType, documents, user: student })).toBe(true);
   });
 });

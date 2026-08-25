@@ -2,7 +2,7 @@ import {
   kClassWideProfile, kGroupProfile, kPersonalLikeProfile
 } from "./document-axis-profiles";
 import {
-  GroupDocument, LearningLogDocument, PersonalDocument, ProblemDocument
+  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, ProblemDocument
 } from "./document-types";
 import {
   getDocumentAxisProfileName, getDocumentKindInfo, getDocumentKindLabel, getDocumentKindMetadataFields,
@@ -237,6 +237,15 @@ describe("document kinds registry", () => {
       expect(getDocumentTitle({ kind: GroupDocument, type: GroupDocument, groupId: "3" }))
         .toBe("Group 3 Document");
       expect(getDocumentTitle({ type: GroupDocument, groupId: "4" })).toBe("Group 4 Document");
+    });
+
+    it("titles an axes-typed group document from its groupId", () => {
+      expect(getDocumentTitle({ type: AxesDocument, groupId: "4" })).toBe("Group 4 Document");
+    });
+
+    it("does not title an axes-typed class-wide document as a group document", () => {
+      // No groupId: a class-wide document must fall through to undefined, not "Group undefined Document".
+      expect(getDocumentTitle({ type: AxesDocument, kind: "unregisteredClassWideKind" })).toBeUndefined();
     });
 
     it("returns undefined for kinds resolved elsewhere (problem/personal/unregistered)", () => {

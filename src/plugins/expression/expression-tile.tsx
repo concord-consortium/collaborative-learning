@@ -56,9 +56,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const handleFocus = useCallback(
     () => {
       latexOnFocus.current = content.latexStr;
-      ui.setSelectedTileId(model.id);
+      ui.setSelectedTileId(model.id, { readOnly });
     },
-    [ui, model.id, content]);
+    [ui, model.id, content, readOnly]);
 
   // mathlive dispatches "change" when the value is committed, mirroring an <input> — but it fires twice
   // for one edit (once on Enter, again on blur), so log only when the value moved since the last log and

@@ -18,9 +18,10 @@ context('Standalone CLUE Teacher', () => {
   it('should load standalone teacher page and show teacher-specific UI', () => {
     standaloneHelper.visitStandalone('/standalone/?unit=msa');
     cy.get('[data-testid=standalone-get-started-button]').click();
-    // Verify that teacher elements are visible
+    // Teacher Guide is a teacher-only tab. Class Work only appears once the standalone auth
+    // handoff finishes, since standalone mode shows just the curriculum tabs until then.
     cy.get('[data-testid=nav-tab-teacher-guide]').should('be.visible');
-    cy.get('[data-testid=nav-tab-student-work]').should('be.visible');
+    cy.get('[data-testid=nav-tab-sort-work]').should('be.visible');
 
     // Verify we're logged in by checking for the user menu
     cy.get("[data-testid=custom-select-header]")

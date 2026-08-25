@@ -8,13 +8,21 @@ export const genericAuth = { uid: "user-generic" };
 export const thisClass = "this-class";
 export const otherClass = "other-class";
 export const lastClass = "last-class";
+// The portal mints `offering_id` only for a learner — a student launched into one offering. A teacher's
+// or researcher's token deliberately omits it so they are not restricted to a single offering, which is
+// why only the student auths below carry it. It is a number in the token, as it is in the portal.
+export const offeringIdNumeric = 2000;
+export const offeringId = `${offeringIdNumeric}`;
+export const otherOfferingIdNumeric = 9999;
+export const otherOfferingId = `${otherOfferingIdNumeric}`;
+
 export const studentIdNumeric = 1;
 export const studentId = `${studentIdNumeric}`;
 export const studentName = "Sam Student";
-export const studentAuth = { uid: studentId, platform_user_id: studentIdNumeric, user_type: "student", class_hash: thisClass };
+export const studentAuth = { uid: studentId, platform_user_id: studentIdNumeric, user_type: "student", class_hash: thisClass, offering_id: offeringIdNumeric };
 export const student2IdNumeric = 2;
 export const student2Id = `${student2IdNumeric}`;
-export const student2Auth = { uid: student2Id, platform_user_id: student2IdNumeric, user_type: "student", class_hash: otherClass };
+export const student2Auth = { uid: student2Id, platform_user_id: student2IdNumeric, user_type: "student", class_hash: otherClass, offering_id: offeringIdNumeric };
 
 export const teacherIdNumeric = 11;
 export const teacherId = `${teacherIdNumeric}`;
@@ -42,8 +50,6 @@ export const researcherId = `${researcherIdNumeric}`;
 export const researcherName = "Rita Researcher";
 export const researcherAuth = { uid: researcherId, platform_user_id: researcherIdNumeric, user_type: "researcher", class_hash: thisClass };
 
-export const offeringIdNumeric = 2000;
-export const offeringId = `${offeringIdNumeric}`;
 export const noNetwork = null;
 export const network1 = "network-1";
 export const network2 = "network-2";

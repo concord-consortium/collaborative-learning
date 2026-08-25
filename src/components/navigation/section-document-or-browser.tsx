@@ -34,7 +34,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
   const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const subTabIndex = Math.max(
+  // Suppressed, not cleared, while the fixed start view holds this tab; see startViewTab.
+  const startViewActive = persistentUI.isStartViewOverrideActiveFor(tabSpec.tab);
+  // The forced view starts on the first sub tab, not the one the user last used, or a user whose last
+  // Class Work sub tab was Bookmarks would be forced to Class Work and still not see published work.
+  // Released by the first sub tab click, so the click is never swallowed.
+  const subTabPinned = persistentUI.isStartViewSubTabPinnedFor(tabSpec.tab);
+  const subTabIndex = subTabPinned ? 0 : Math.max(
     subTabs.findIndex((subTab) => maybeTabState?.currentDocumentGroupId === subTab.label),
     0
   );
@@ -52,12 +58,15 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const _selectedSubTab = subTabs[tabidx];
     const subTabType = _selectedSubTab.sections[0].type;
     const title = _selectedSubTab.label;
-    if (maybeTabState?.currentDocumentGroupId === title && maybeTabState?.currentDocumentGroup?.primaryDocumentKey) {
+    if (!startViewActive && maybeTabState?.currentDocumentGroupId === title &&
+        maybeTabState?.currentDocumentGroup?.primaryDocumentKey) {
       // If there is a document open then a click on the tab should close
-      // the document
+      // the document. Nothing is on screen to close while the fixed start view holds the tab.
       maybeTabState.getDocumentGroup(title)?.closePrimaryDocument();
     }
-    persistentUI.setCurrentDocumentGroupId(tabSpec.tab, title);
+    // The user picking a sub tab, so this goes through selectDocumentGroup rather than
+    // setCurrentDocumentGroupId: it also ends the forced sub tab.
+    persistentUI.selectDocumentGroup(tabSpec.tab, title);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       // FIXME: this can be inaccurate, there can be multiple
@@ -90,7 +99,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentBrowserView = (subTab: ISubTabModel) => {
-    const openDocumentKey = maybeTabState?.getDocumentGroup(subTab.label)?.primaryDocumentKey;
+    const openDocumentKey = startViewActive
+      ? undefined
+      : maybeTabState?.getDocumentGroup(subTab.label)?.primaryDocumentKey;
     const classHash = classStore.classHash;
     return (
       <div className="document-browser vertical">
@@ -117,6 +128,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabModel) => {
+    // Deliberately ahead of the Bookmarks check below: the fixed start view shows the browser for
+    // every sub tab, and for Bookmarks that browser lists the bookmarked documents.
+    if (startViewActive) {
+      return false;
+    }
     const documentGroup = maybeTabState?.getDocumentGroup(subTab.label);
     const openDocumentKey = documentGroup?.primaryDocumentKey || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
