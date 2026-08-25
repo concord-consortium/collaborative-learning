@@ -49,7 +49,9 @@ To run `on-analysis-document-imaged.test.ts` you also need to create a `function
 
 The chat tutor (`chatTutorOnWrite`) uses its own `OPENAI_TUTOR_API_KEY` secret — a separate key under its own OpenAI project so tutor usage is tracked apart from the comments/analysis functions. It does **not** read `OPENAI_API_KEY`, so having that one set is not enough. To exercise the tutor against the local emulator, add `OPENAI_TUTOR_API_KEY=[secret_key]` to `.secret.local` as well.
 
-The tutor also reads its model from an `OPENAI_MODEL` param, which every other function hard-codes instead. It is a `defineString` with **no default**, so if you don't supply one the function sends `model: ""`, OpenAI rejects the request, and the conversation document ends up with `status: "error"`. Copy `.env.example` to `functions-v2/.env` and set a model there. `.env` is a config file rather than a secret, so it is separate from `.secret.local`; both are gitignored.
+The tutor also reads its model from an `OPENAI_MODEL` param, which every other function hard-codes instead. It is a `defineString` with **no default**, so if you don't supply one the function sends `model: ""`, OpenAI rejects the request, and the conversation document ends up with `status: "error"`. Copy `.env.example` to `functions-v2/.env.local` and set a model there. It is config rather than a secret, so it is separate from `.secret.local`; both are gitignored by the `*.local` rule.
+
+**Use `.env.local`, not `.env`.** The Firebase CLI reads `.env` at deploy time and applies its values to the deployed functions of whichever project is selected — so a local `OPENAI_MODEL` in `.env` would decide which model production calls. `.env.local` is the one Firebase reserves for emulation and never deploys.
 
 In this approach the functions are running inside of Jest and they connect to the emulated Firestore and Realtime database services.
 
