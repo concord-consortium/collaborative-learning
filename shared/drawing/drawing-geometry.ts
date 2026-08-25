@@ -105,6 +105,58 @@ export function rotationPoint(boundingBox: BoundingBox, rotation: number): Point
   }
 }
 
+// One bounding-box function per shape, taking plain values rather than model instances so a caller
+// can pass either stored or drag-adjusted inputs. The drawing object classes call these from both
+// their unrotatedBoundingBox and undraggedUnrotatedBoundingBox views, and the AI summarizer calls
+// them against raw snapshots — one implementation, so the two cannot drift.
+
+/** Rectangles, text, images and groups: x,y is the north-west corner. */
+export function sizedBoundingBox(o: { x: number, y: number, width: number, height: number }): BoundingBox {
+  return { nw: { x: o.x, y: o.y }, se: { x: o.x + o.width, y: o.y + o.height } };
+}
+
+/** Ellipses: x,y is the centre, so the radii extend both ways. */
+export function ellipseBoundingBox(o: { x: number, y: number, rx: number, ry: number }): BoundingBox {
+  return {
+    nw: { x: o.x - o.rx, y: o.y - o.ry },
+    se: { x: o.x + o.rx, y: o.y + o.ry }
+  };
+}
+
+/** Vectors: x,y is the start point and dx,dy may be negative. */
+export function vectorBoundingBox(o: { x: number, y: number, dx: number, dy: number }): BoundingBox {
+  return {
+    nw: { x: Math.min(o.x, o.x + o.dx), y: Math.min(o.y, o.y + o.dy) },
+    se: { x: Math.max(o.x, o.x + o.dx), y: Math.max(o.y, o.y + o.dy) }
+  };
+}
+
+/** Polylines: x,y is the first point; the rest are cumulative deltas from it. */
+export function lineBoundingBox(
+  o: { x: number, y: number, deltaPoints: { dx: number, dy: number }[] },
+  scale: Point = { x: 1, y: 1 }
+): BoundingBox {
+  const nw: Point = { x: o.x, y: o.y };
+  const se: Point = { x: o.x, y: o.y };
+  let currentX = o.x;
+  let currentY = o.y;
+  for (const { dx, dy } of o.deltaPoints) {
+    currentX += dx * scale.x;
+    currentY += dy * scale.y;
+    nw.x = Math.min(nw.x, currentX);
+    nw.y = Math.min(nw.y, currentY);
+    se.x = Math.max(se.x, currentX);
+    se.y = Math.max(se.y, currentY);
+  }
+  return { nw, se };
+}
+
+// The variable chip measures itself at render and never persists the result, so a snapshot-only
+// reader has nothing but these defaults to go on. Shared so the model's volatile defaults and the
+// summarizer's assumption are the same number.
+export const kVariableChipDefaultWidth = 75;
+export const kVariableChipDefaultHeight = 24;
+
 export function rotateBoundingBox(boundingBox: BoundingBox, rotation: number): BoundingBox {
   // Get the four corners of the bounding box
   const nw = boundingBox.nw;
