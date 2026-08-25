@@ -47,6 +47,13 @@ const kSpace = "demo/S/documents";
 const nodeReaderFor = (nodes: Record<string, any>) =>
   async (path: string) => nodes[path.split("/").pop()!] ?? null;
 
+/**
+ * Reads nodes keyed by the last two path segments, e.g. "documentMetadata/k1" and "documents/k1", for
+ * the tests that care which of a document's two halves is being read.
+ */
+const pathReaderFor = (nodes: Record<string, any>) =>
+  async (path: string) => nodes[path.split("/").slice(-2).join("/")] ?? null;
+
 describe("createMissingDocumentMetadata", () => {
   it("creates a row for an indexed document that has no Firestore metadata", async () => {
     const { firestore, store } = fakeFirestore();
@@ -62,6 +69,50 @@ describe("createMissingDocumentMetadata", () => {
       key: "k1", type: "learningLog", uid: "u1", context_id: "c1",
       createdAt: 1700000000000, title: "My Log", properties: {}
     });
+  });
+
+  it("derives tools from the document's content, so Sort Work can group it", async () => {
+    // The client recomputes tools on every content save. These documents had no row to save into, so
+    // the value was never recorded; without it Sort Work files them all under "No Tools".
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = {
+      "documentMetadata/k1": { type: "personal", createdAt: 1, title: "P" },
+      "documents/k1": { content: JSON.stringify({ tileMap: { a: { content: { type: "Text" } } } }) }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: pathReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(store.k1.tools).toEqual(["Text"]);
+  });
+
+  it("writes an empty tools list for a document that genuinely has no tiles", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = {
+      "documentMetadata/k1": { type: "personal", createdAt: 1, title: "P" },
+      "documents/k1": { content: JSON.stringify({ tileMap: {} }) }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: pathReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(store.k1.tools).toEqual([]);
+  });
+
+  it("omits tools when the content cannot be read, rather than claiming the document is empty", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = {
+      "documentMetadata/k1": { type: "personal", createdAt: 1, title: "P" },
+      "documents/k1": { content: "{not json" }
+    };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: pathReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect("tools" in store.k1).toBe(false);
   });
 
   it("copies visibility from the realtime-database node", async () => {

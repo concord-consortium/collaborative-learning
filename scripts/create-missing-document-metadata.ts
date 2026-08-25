@@ -13,6 +13,7 @@
 
 import type { Firestore } from "firebase-admin/firestore";
 import { isRtdbAddressable, type IDocumentHome } from "./lib/rtdb-document-index";
+import { toolsFromContent } from "./lib/document-tools";
 
 /** Batched writes are capped well below Firestore's 500-operation limit. */
 const kBatchSize = 400;
@@ -51,13 +52,14 @@ export type CreateBucket =
   | "skippedNoContent"   // metadata without content: creating a row would surface a broken document
   | "skippedUnaddressable" // a key the realtime database cannot express in a path
   | "nodeUnreadable"     // the metadata node could not be read; nothing to build a row from
-  | "unresolvedCurriculum"; // offering-contained, but its unit/investigation/problem are unknown
+  | "unresolvedCurriculum" // offering-contained, but its unit/investigation/problem are unknown
+  | "unreadableContent";  // the row was written, but without `tools`: its content would not parse
 
 export type ICreateCounts = Record<CreateBucket, number>;
 
 const emptyCounts = (): ICreateCounts => ({
   created: 0, written: 0, alreadyPresent: 0, skippedNoContent: 0,
-  skippedUnaddressable: 0, nodeUnreadable: 0, unresolvedCurriculum: 0
+  skippedUnaddressable: 0, nodeUnreadable: 0, unresolvedCurriculum: 0, unreadableContent: 0
 });
 
 export interface ICurriculumPosition {
@@ -257,6 +259,16 @@ export async function createMissingDocumentMetadata(
       row.unit = null;
     }
 
+    // Read last, so the 573 documents skipped above never pull a content node. Content is the largest
+    // thing in the database and this is the run's only read of it.
+    const contentPath =
+      `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documents/${key}`;
+    const tools = toolsFromContent((await readNode(contentPath))?.content);
+    // Absent rather than `[]` when the content would not parse: an empty array asserts the document
+    // has no tiles, which is a different claim from "this run could not tell".
+    if (tools) row.tools = tools;
+    else counts.unreadableContent++;
+
     counts.created++;
     if (!dryRun) {
       batch.set(firestore.doc(`${spacePath}/${key}`), row);
@@ -269,7 +281,8 @@ export async function createMissingDocumentMetadata(
   log(`${spacePath}: created ${counts.created}, written ${counts.written}, ` +
       `already present ${counts.alreadyPresent}, no content ${counts.skippedNoContent}, ` +
       `unaddressable ${counts.skippedUnaddressable}, unreadable ${counts.nodeUnreadable}, ` +
-      `unresolved curriculum ${counts.unresolvedCurriculum}`);
+      `unresolved curriculum ${counts.unresolvedCurriculum}, ` +
+      `no tools ${counts.unreadableContent}`);
 
   return { counts, skipped };
 }
