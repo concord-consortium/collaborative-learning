@@ -401,3 +401,28 @@ describe("createMissingDocumentMetadata offering lookup caching", () => {
     expect(result.counts.unresolvedCurriculum).toBe(3);
   });
 });
+
+describe("createMissingDocumentMetadata skip reporting", () => {
+  it("records when a skipped document was created, so its age can decide what happens to it", async () => {
+    // The unresolvable residue is all outside production. Whether it is worth keeping depends on how
+    // old it is, and createdAt is the only timestamp these nodes reliably carry -- lastEditedAt
+    // appears on a handful.
+    const { firestore } = fakeFirestore();
+    const index = new Map([["k1", home()], ["k2", home({ hasContent: false })]]);
+    const nodes = {
+      k1: { type: "problem", createdAt: 1600000000000, offeringId: "nosuch1" },
+      k2: { type: "personal", createdAt: 1700000000000 }
+    };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes), resolveCurriculum: async () => undefined },
+      { dryRun: true, log: silent });
+
+    // Reported in index order, which is the order the documents were indexed.
+    expect(result.skipped).toEqual([
+      { key: "k1", reason: "unresolvedCurriculum", createdAt: 1600000000000, type: "problem",
+        offeringId: "nosuch1" },
+      { key: "k2", reason: "skippedNoContent", createdAt: 1700000000000 }
+    ]);
+  });
+});

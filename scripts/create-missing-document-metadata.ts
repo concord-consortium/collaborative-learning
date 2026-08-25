@@ -66,10 +66,23 @@ export interface ICurriculumPosition {
   problem?: string | null;
 }
 
+/**
+ * A document the run declined, with enough about it to decide what should happen instead. `createdAt`
+ * is the only timestamp these nodes reliably carry — `lastEditedAt` appears on a handful — so it is
+ * the practical measure of a skipped document's age.
+ */
+export interface ISkippedDocument {
+  key: string;
+  reason: CreateBucket;
+  createdAt?: number;
+  type?: string;
+  offeringId?: string;
+}
+
 export interface ICreateMissingResult {
   counts: ICreateCounts;
-  /** Keys skipped, with the reason, so a run says what it declined rather than only what it did. */
-  skipped: Array<{ key: string; reason: CreateBucket }>;
+  /** Documents skipped, with the reason, so a run says what it declined rather than only what it did. */
+  skipped: ISkippedDocument[];
 }
 
 /** Reads one realtime-database node's value, or null when it is absent. */
@@ -109,7 +122,7 @@ export async function createMissingDocumentMetadata(
   { dryRun = true, log = console.log, pageSize = 500, batchSize = kBatchSize }: ICreateMissingOptions = {}
 ): Promise<ICreateMissingResult> {
   const counts = emptyCounts();
-  const skipped: Array<{ key: string; reason: CreateBucket }> = [];
+  const skipped: ISkippedDocument[] = [];
 
   // One pass over Firestore serves two purposes: the ids already present, so the run writes only what
   // is genuinely absent, and a curriculum position per offering, so most rows need no portal call.
@@ -170,14 +183,19 @@ export async function createMissingDocumentMetadata(
     batched = 0;
   };
 
-  const skip = (key: string, reason: CreateBucket) => {
+  const skip = (key: string, reason: CreateBucket, node?: any) => {
     counts[reason]++;
-    skipped.push({ key, reason });
+    const entry: ISkippedDocument = { key, reason };
+    if (node?.createdAt != null) entry.createdAt = node.createdAt;
+    if (reason === "unresolvedCurriculum") {
+      entry.type = node?.type;
+      entry.offeringId = node?.offeringId;
+    }
+    skipped.push(entry);
   };
 
   for (const [key, indexed] of index) {
     if (present.has(key)) { counts.alreadyPresent++; continue; }
-    if (!indexed.hasContent) { skip(key, "skippedNoContent"); continue; }
     if (!isRtdbAddressable(indexed.classHash, indexed.uid, key)) {
       skip(key, "skippedUnaddressable");
       continue;
@@ -186,6 +204,8 @@ export async function createMissingDocumentMetadata(
     const nodePath =
       `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documentMetadata/${key}`;
     const node = await readNode(nodePath);
+    // Read before the content check so a skipped document can still report its age.
+    if (!indexed.hasContent) { skip(key, "skippedNoContent", node); continue; }
     if (!node) { skip(key, "nodeUnreadable"); continue; }
 
     const row: Record<string, any> = {
@@ -208,7 +228,7 @@ export async function createMissingDocumentMetadata(
       if (!position) {
         // Writing the row without these would place the document on the wrong container axis and
         // hand it to the offeringId backfill as new work. Report it and leave it alone.
-        skip(key, "unresolvedCurriculum");
+        skip(key, "unresolvedCurriculum", node);
         continue;
       }
       row.offeringId = node.offeringId;
@@ -330,6 +350,7 @@ async function main() {
 
   const totals = emptyCounts();
   const allSkipped: Record<string, number> = {};
+  const everySkipped: Array<ISkippedDocument & { space: string }> = [];
   for (const space of selection.selected) {
     const { index, duplicates, classes } = await buildRtdbDocumentIndex(space.rtdbRoot, reader.readChildKeys);
     console.log(`  ${space.label}: ${classes} classes, ${index.size} indexed documents`);
@@ -350,11 +371,31 @@ async function main() {
       { dryRun }
     );
     for (const bucket of Object.keys(totals) as CreateBucket[]) totals[bucket] += counts[bucket];
-    for (const s of skipped) allSkipped[s.reason] = (allSkipped[s.reason] ?? 0) + 1;
+    for (const s of skipped) {
+      allSkipped[s.reason] = (allSkipped[s.reason] ?? 0) + 1;
+      everySkipped.push({ ...s, space: space.label });
+    }
   }
 
   console.log("\ndone", JSON.stringify(totals, null, 2));
   console.log("skipped by reason", JSON.stringify(allSkipped, null, 2));
+
+  // Age of what was declined, so a decision about the residue rests on numbers rather than a guess.
+  const byYear: Record<string, number> = {};
+  let newest = 0;
+  for (const s of everySkipped) {
+    if (!s.createdAt) { byYear["(no createdAt)"] = (byYear["(no createdAt)"] ?? 0) + 1; continue; }
+    const year = new Date(s.createdAt).toISOString().slice(0, 4);
+    byYear[year] = (byYear[year] ?? 0) + 1;
+    newest = Math.max(newest, s.createdAt);
+  }
+  console.log("skipped by year created", JSON.stringify(Object.fromEntries(
+    Object.entries(byYear).sort()
+  ), null, 2));
+  if (newest) console.log(`newest skipped document: ${new Date(newest).toISOString().slice(0, 10)}`);
+  nodeFs.writeFileSync(getScriptRootFilePath("create-missing-skipped.json"),
+    JSON.stringify(everySkipped, null, 2));
+  console.log(`skipped documents written to ${getScriptRootFilePath("create-missing-skipped.json")}`);
   if (dryRun) console.log("DRY RUN — set APPLY=1 to write");
   process.exit(0);
 }

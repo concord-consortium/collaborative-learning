@@ -1,4 +1,6 @@
-import { createRtdbReader, parseSpacesFilter, selectSpaces } from "./repair-cli";
+import {
+  createRtdbReader, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
+} from "./repair-cli";
 
 describe("parseSpacesFilter", () => {
   it("is undefined when unset, meaning every space", () => {
@@ -125,5 +127,73 @@ describe("createRtdbReader", () => {
     });
 
     await expect(reader.readChildKeys("/p")).rejects.toThrow(/500/);
+  });
+});
+
+describe("resolveDatabaseUrl", () => {
+  it("looks the URL up from the credential's project", () => {
+    expect(resolveDatabaseUrl("collaborative-learning-ec215"))
+      .toBe("https://collaborative-learning-ec215.firebaseio.com");
+    expect(resolveDatabaseUrl("collaborative-learning-staging"))
+      .toBe("https://collaborative-learning-staging-default-rtdb.firebaseio.com");
+  });
+
+  it("throws for an unknown project rather than guessing a host", () => {
+    // The two projects share no host pattern, so a derived URL would be a plausible guess pointing at
+    // nothing -- or worse, at another environment, whose offerings would be read onto these documents.
+    expect(() => resolveDatabaseUrl("some-other-project")).toThrow(/some-other-project/);
+    expect(() => resolveDatabaseUrl("some-other-project")).toThrow(/DATABASE_URL/);
+  });
+
+  it("prefers an explicit override, for an environment not listed", () => {
+    expect(resolveDatabaseUrl("anything", "https://example.firebaseio.com"))
+      .toBe("https://example.firebaseio.com");
+  });
+});
+
+describe("createRtdbReader network resilience", () => {
+  const token = async () => ({ access_token: "tok" });
+  const noDelay = async () => undefined;
+
+  it("retries when fetch itself throws, rather than losing the whole sweep to a DNS blip", async () => {
+    // A full sweep makes tens of thousands of requests; a single transient ENOTFOUND killed one run
+    // outright. Only a non-ok response was being retried, not a rejected fetch.
+    let calls = 0;
+    const reader = createRtdbReader("https://db.example.com", token as any, {
+      delay: noDelay,
+      fetch: async () => {
+        if (++calls === 1) throw new Error("getaddrinfo ENOTFOUND db.example.com");
+        return { ok: true, status: 200, json: async () => ({ a: true }) } as any;
+      }
+    });
+
+    expect(await reader.readChildKeys("/p")).toEqual(["a"]);
+    expect(calls).toBe(2);
+  });
+
+  it("gives up after repeated network failures, surfacing the last error", async () => {
+    const reader = createRtdbReader("https://db.example.com", token as any, {
+      delay: noDelay,
+      fetch: async () => { throw new Error("ENOTFOUND"); }
+    });
+
+    await expect(reader.readChildKeys("/p")).rejects.toThrow(/ENOTFOUND/);
+  });
+
+  it("waits between attempts so a retry does not arrive during the same outage", async () => {
+    const waits: number[] = [];
+    let calls = 0;
+    const reader = createRtdbReader("https://db.example.com", token as any, {
+      delay: async (ms: number) => { waits.push(ms); },
+      fetch: async () => {
+        if (++calls < 3) throw new Error("ENOTFOUND");
+        return { ok: true, status: 200, json: async () => ({}) } as any;
+      }
+    });
+
+    await reader.readChildKeys("/p");
+
+    expect(waits.length).toBe(2);
+    expect(waits[1]).toBeGreaterThan(waits[0]);
   });
 });

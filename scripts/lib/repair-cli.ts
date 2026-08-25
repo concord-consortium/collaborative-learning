@@ -66,6 +66,40 @@ export function selectSpaces(spacePaths: string[], filter?: string[]): ISpaceSel
   };
 }
 
+/**
+ * The realtime-database URL for each Firebase project we run against.
+ *
+ * Looked up rather than derived: the projects share no host pattern, so a derived URL would be a
+ * plausible guess pointing at nothing — or worse, at another environment, whose classes would then be
+ * read as these documents' true homes. Keep in step with `src/lib/firebase-config.ts`.
+ */
+const kDatabaseUrls: Record<string, string> = {
+  "collaborative-learning-ec215": "https://collaborative-learning-ec215.firebaseio.com",
+  "collaborative-learning-staging": "https://collaborative-learning-staging-default-rtdb.firebaseio.com"
+};
+
+/** The database URL for a credential's project, or the override when one is supplied. */
+export function resolveDatabaseUrl(projectId: string, override?: string): string {
+  if (override) return override;
+  const url = kDatabaseUrls[projectId];
+  if (!url) {
+    throw new Error(`No realtime database URL known for project "${projectId}". ` +
+      `Add it to kDatabaseUrls in scripts/lib/repair-cli.ts, or set DATABASE_URL.`);
+  }
+  return url;
+}
+
+/** Every `<appMode>/<space>/documents` path Firestore holds, for the app modes we might run against. */
+export async function listSpacePaths(firestore: any, appModes = ["authed", "demo"]): Promise<string[]> {
+  const paths: string[] = [];
+  for (const appMode of appModes) {
+    for (const space of await firestore.collection(appMode).listDocuments()) {
+      paths.push(`${appMode}/${space.id}/documents`);
+    }
+  }
+  return paths;
+}
+
 /** Just enough of `fetch` for the reader, so tests need no network. */
 type FetchLike = (url: string) => Promise<{ ok: boolean; status: number; json: () => Promise<any> }>;
 
@@ -91,7 +125,10 @@ const kMaxAttempts = 3;
 export function createRtdbReader(
   host: string,
   getAccessToken: GetAccessToken,
-  { fetch: fetchImpl = fetch as unknown as FetchLike }: { fetch?: FetchLike } = {}
+  {
+    fetch: fetchImpl = fetch as unknown as FetchLike,
+    delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
+  }: { fetch?: FetchLike; delay?: (ms: number) => Promise<void> } = {}
 ): IRtdbReader {
   let token: string | undefined;
 
@@ -101,20 +138,28 @@ export function createRtdbReader(
     path.split("/").map(segment => encodeURIComponent(segment)).join("/");
 
   const read = async (path: string, shallow: boolean): Promise<any> => {
+    let lastError: unknown;
     for (let attempt = 1; attempt <= kMaxAttempts; attempt++) {
       if (!token) await refresh();
       const url = `${host}${encode(path)}.json?${shallow ? "shallow=true&" : ""}access_token=${token}`;
-      const response = await fetchImpl(url);
-      if (response.ok) return response.json();
-      // The token has expired or been rotated; a fresh one usually fixes it.
-      if (response.status === 401) { await refresh(); continue; }
-      if (attempt === kMaxAttempts) {
+      try {
+        const response = await fetchImpl(url);
+        if (response.ok) return response.json();
+        // The token has expired or been rotated; a fresh one usually fixes it.
+        if (response.status === 401) { await refresh(); continue; }
         // Never return empty on failure: that reads as "this space has no documents", and the run
         // would report a clean sweep having looked at nothing.
-        throw new Error(`realtime database returned ${response.status} for ${path}`);
+        lastError = new Error(`realtime database returned ${response.status} for ${path}`);
+      } catch (err) {
+        // A rejected fetch is a transport failure — DNS, a dropped connection, a socket timeout.
+        // A sweep makes tens of thousands of requests, so one of these is expected rather than
+        // exceptional, and must not end the run.
+        lastError = err;
       }
+      // Backs off, so a retry does not land inside the same outage that caused the failure.
+      if (attempt < kMaxAttempts) await delay(attempt * 1000);
     }
-    throw new Error(`realtime database could not be read at ${path}`);
+    throw lastError ?? new Error(`realtime database could not be read at ${path}`);
   };
 
   return {
