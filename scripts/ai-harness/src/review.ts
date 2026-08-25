@@ -1256,14 +1256,15 @@ const kStyles = `
   table { border-collapse: collapse; font-size: 0.85rem; margin: 0.5rem 0; }
   th, td { border: 1px solid #d4d4d4; padding: 0.2rem 0.5rem; text-align: left; vertical-align: top; }
   th { background: #f2f2f2; }
+  /* No break-inside: avoid — the report is a screen document. A closed details prints without
+     its contents (no scriptless way around that), so print fidelity is not something the layout
+     pretends to offer. */
   .document { border: 1px solid #c8c8c8; border-radius: 6px; padding: 1rem 1.25rem;
-    margin: 1.25rem 0; break-inside: avoid; }
+    margin: 1.25rem 0; }
   .document-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem; }
   .inputs { margin: 0.75rem 0; }
-  .inputs > summary { cursor: pointer; }
-  .inputs > summary:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
-  .inputs > summary h4 { display: inline; }
-  .inputs > summary .meta { margin-left: 0.35rem; }
+  .inputs details > summary { cursor: pointer; }
+  .inputs details > summary:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
   .input-block { margin: 0 0 1rem; }
   .input-label { font-size: 0.8rem; color: #555; margin: 0 0 0.25rem; }
   img { max-width: 100%; height: auto; border: 1px solid #d4d4d4; background: #fbfbfb; }
@@ -1385,19 +1386,26 @@ function inputsBlock(document: ReviewDocument): Html {
   // judge scanning verdicts wants them out of the way until they ask. Plain HTML keeps the report
   // scriptless and shareable, `summary` is keyboard-operable for free, and browsers open a closed
   // `details` when find-in-page matches inside it, so searching still works against the collapsed
-  // report. This is also why `pre` no longer clips and scrolls: a nested scroll region kept
-  // catching the wheel mid-page, and once the block only takes space when opened it can simply be
-  // as tall as its content.
+  // report.
+  //
+  // Three things deliberately live OUTSIDE the collapse: the heading (a heading nested in
+  // `summary` is announced inconsistently by assistive technology), the stale-input notices (a
+  // warning that an input is missing, stale or unverifiable has to be visible without opening
+  // anything), and the nothing-to-show case (a toggle that reveals nothing would be noise). The
+  // summary label is the counts alone — the disclosure role already announces expandability, so
+  // interaction hints like "click to expand" would only pollute the accessible name.
   const contents = [
     document.images.length > 0 ? `${document.images.length} image(s)` : null,
     document.texts.length > 0 ? `${document.texts.length} summary(ies)` : null
   ].filter(Boolean).join(", ");
   return html`
-    <details class="inputs">
-      <summary><h4>What the model was given</h4><span class="meta">${contents.length > 0
-        ? `(${contents} — click to expand)`
-        : "(nothing available to show)"}</span></summary>
+    <div class="inputs">
+      <h4>What the model was given</h4>
       ${document.inputNotices.map((message) => html`<p class="notice">${message}</p>`)}
+      ${contents.length === 0
+        ? html`<p class="meta">No input is available to show for this document.</p>`
+        : html`<details>
+      <summary><span class="meta">${contents}</span></summary>
       ${document.images.map((image, index) => html`
         <div class="input-block">
           <p class="input-label">Image ${index + 1} of ${document.images.length}${image.tileId
@@ -1413,10 +1421,8 @@ function inputsBlock(document: ReviewDocument): Html {
             : ""}</p>
           <pre>${text.markdown}</pre>
         </div>`)}
-      ${document.images.length === 0 && document.texts.length === 0
-        ? html`<p class="meta">No input is available to show for this document.</p>`
-        : ""}
-    </details>`;
+    </details>`}
+    </div>`;
 }
 
 function configurationLine(configuration: ReviewRunConfiguration): string {

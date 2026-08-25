@@ -113,9 +113,15 @@ describe("the page can be read with a keyboard", () => {
     const details = [...html.matchAll(/<details\b([^>]*)>/g)].map((match) => match[1]);
     expect(details.length).toBeGreaterThan(0);
     expect(details.some((attributes) => attributes.includes("open"))).toBe(false);
-    expect(html).toContain("What the model was given");
-    // The toggle says what is inside without opening it.
-    expect(html).toMatch(/<summary>[\s\S]*?image\(s\)[\s\S]*?<\/summary>/);
+    // The heading lives OUTSIDE the collapse (a heading nested in summary is announced
+    // inconsistently by assistive technology), and each summary label is the counts alone.
+    // Summaries are extracted per element: a whole-page regex would cross </summary> boundaries
+    // and pass on an "image(s)" that lives outside every summary.
+    expect(html).toContain("<h4>What the model was given</h4>");
+    const summaries = [...html.matchAll(/<summary>([\s\S]*?)<\/summary>/g)].map((match) => match[1]);
+    expect(summaries.length).toBeGreaterThan(0);
+    expect(summaries.some((label) => /\d+ image\(s\)/.test(label))).toBe(true);
+    expect(summaries.every((label) => !label.includes("<h4>") && !label.includes("click"))).toBe(true);
   });
 
   it("never skips a heading level", () => {
@@ -230,7 +236,14 @@ describe("an input that no longer matches the run is never shown in its place", 
     expect(alpha.inputNotices.join(" ")).toContain("no longer on disk");
     expect(beta.images.map((image) => image.sha256)).toEqual(fixture.tileSha256s);
     expect(beta.inputNotices.join(" ")).toContain("no longer on disk");
-    expect(() => renderReviewHtml(model)).not.toThrow();
+    const staleHtml = renderReviewHtml(model);
+    // The notice is the report's stale-input signal, so it renders OUTSIDE the collapsed details:
+    // a judge must see it without opening anything. Details elements never nest here, so matching
+    // each one to its first close tag extracts its real contents.
+    expect(staleHtml).toContain('class="notice"');
+    const detailsBodies = [...staleHtml.matchAll(/<details>([\s\S]*?)<\/details>/g)]
+      .map((match) => match[1]);
+    expect(detailsBodies.every((body) => !body.includes('class="notice"'))).toBe(true);
   });
 
   it("degrades to a notice when an envelope is damaged", () => {
