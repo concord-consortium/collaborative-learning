@@ -157,6 +157,51 @@ export function lineBoundingBox(
 export const kVariableChipDefaultWidth = 75;
 export const kVariableChipDefaultHeight = 24;
 
+/**
+ * Externalize the bounding box of an object that is inside a group.
+ *
+ * A group's members are stored as fractions of the group's box rather than as coordinates: creating
+ * a group runs GroupObject.assimilateObjects, which divides each member's box by the group's size
+ * and persists the result. So a grouped child holds `x: 0.25, width: 0.5` where a top-level object
+ * holds pixels, and reading the two the same way describes the child as a sub-pixel speck at the
+ * origin.
+ *
+ * @param childBB The bounding box of the object inside the group; sides are normally in [0,1].
+ * @returns The bounding box relative to the coordinate system the group itself lives in.
+ */
+export function absoluteChildBoundingBox(
+  childBB: BoundingBox,
+  group: { boundingBox: BoundingBox, rotation?: number, hFlip?: boolean, vFlip?: boolean }
+): BoundingBox {
+  const groupBB = group.boundingBox;
+  const groupWidth = groupBB.se.x - groupBB.nw.x;
+  const groupHeight = groupBB.se.y - groupBB.nw.y;
+  const internalNW = {
+    x: groupBB.nw.x + childBB.nw.x * groupWidth,
+    y: groupBB.nw.y + childBB.nw.y * groupHeight
+  };
+  const internalSE = {
+    x: groupBB.nw.x + childBB.se.x * groupWidth,
+    y: groupBB.nw.y + childBB.se.y * groupHeight
+  };
+  if (group.vFlip) {
+    internalNW.y = groupBB.nw.y + (groupBB.se.y - internalNW.y);
+    internalSE.y = groupBB.nw.y + (groupBB.se.y - internalSE.y);
+  }
+  if (group.hFlip) {
+    internalNW.x = groupBB.nw.x + (groupBB.se.x - internalNW.x);
+    internalSE.x = groupBB.nw.x + (groupBB.se.x - internalSE.x);
+  }
+  const rotation = group.rotation ?? 0;
+  const rotatedNW = rotatePoint(internalNW, groupBB.se, rotation);
+  const rotatedSE = rotatePoint(internalSE, groupBB.se, rotation);
+  const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
+  return {
+    nw: { x: sides.left, y: sides.top },
+    se: { x: sides.right, y: sides.bottom }
+  };
+}
+
 export function rotateBoundingBox(boundingBox: BoundingBox, rotation: number): BoundingBox {
   // Get the four corners of the bounding box
   const nw = boundingBox.nw;

@@ -1,5 +1,5 @@
 import {
-  ellipseBoundingBox, kVariableChipDefaultHeight, kVariableChipDefaultWidth,
+  absoluteChildBoundingBox, ellipseBoundingBox, kVariableChipDefaultHeight, kVariableChipDefaultWidth,
   lineBoundingBox, sizedBoundingBox, vectorBoundingBox
 } from "./drawing-geometry";
 
@@ -39,5 +39,32 @@ describe("per-type bounding boxes", () => {
     expect(sizedBoundingBox({
       x: 5, y: 5, width: kVariableChipDefaultWidth, height: kVariableChipDefaultHeight
     })).toEqual({ nw: { x: 5, y: 5 }, se: { x: 80, y: 29 } });
+  });
+});
+
+describe("absoluteChildBoundingBox", () => {
+  const group = { boundingBox: { nw: { x: 100, y: 200 }, se: { x: 300, y: 300 } } };
+
+  it("scales a child's fractions up into the group's coordinate system", () => {
+    expect(absoluteChildBoundingBox({ nw: { x: 0, y: 0 }, se: { x: 0.5, y: 0.5 } }, group))
+      .toEqual({ nw: { x: 100, y: 200 }, se: { x: 200, y: 250 } });
+  });
+
+  it("maps a child filling the group onto the group's own box", () => {
+    expect(absoluteChildBoundingBox({ nw: { x: 0, y: 0 }, se: { x: 1, y: 1 } }, group))
+      .toEqual(group.boundingBox);
+  });
+
+  it("mirrors a child when the group is flipped horizontally", () => {
+    const flipped = { ...group, hFlip: true };
+    // The child occupying the left quarter lands on the right quarter.
+    expect(absoluteChildBoundingBox({ nw: { x: 0, y: 0 }, se: { x: 0.25, y: 1 } }, flipped))
+      .toEqual({ nw: { x: 250, y: 200 }, se: { x: 300, y: 300 } });
+  });
+
+  it("mirrors a child when the group is flipped vertically", () => {
+    const flipped = { ...group, vFlip: true };
+    expect(absoluteChildBoundingBox({ nw: { x: 0, y: 0 }, se: { x: 1, y: 0.25 } }, flipped))
+      .toEqual({ nw: { x: 100, y: 275 }, se: { x: 300, y: 300 } });
   });
 });
