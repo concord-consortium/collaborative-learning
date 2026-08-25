@@ -134,19 +134,18 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
 
   // Hover and focus are two independent reasons to preview a highlight, and they can rest on two
   // different buttons at once. Each button records only its own claim; the winner is derived from
-  // both. Letting a button withdraw the preview on its own leave/blur does not work, because the
-  // preview it would withdraw is shared by every button in the sidebar: a button asking the DOM
-  // whether *it* is still hovered or focused cannot see another button's claim, so leaving one
-  // button cancelled a preview another button was holding.
+  // both. A button must not withdraw the preview itself: the preview is shared by every button in
+  // the sidebar, and a button can only ask the DOM about itself, so it cannot see another button's
+  // claim on it.
   const [hoverId, setHoverId] = useState<IHighlightId | undefined>(undefined);
   const [focusId, setFocusId] = useState<IHighlightId | undefined>(undefined);
 
   // Focus arriving from a pointer press is not a preview reason. Browsers focus a button on
   // mousedown, but only keyboard focus paints a visible ring (`:focus-visible`, chat.scss), so
-  // counting it would leave a highlight on screen with nothing to indicate why — which is what
-  // happened after a click released a pin. This draws the same line `:focus-visible` draws, from
-  // events we control rather than the DOM: jsdom reports `:focus-visible` for any focused element,
-  // so a guard written against the pseudo-class cannot be tested.
+  // counting it leaves a highlight on screen with nothing to indicate why. This draws the same line
+  // `:focus-visible` draws, from events we control rather than the DOM: jsdom reports
+  // `:focus-visible` for any focused element, so a guard written against the pseudo-class cannot be
+  // tested.
   const pointerFocus = useRef(false);
 
   // Hover outranks focus, matching the model's rule that a hovered reference replaces a pinned one.

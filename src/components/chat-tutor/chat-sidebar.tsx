@@ -87,16 +87,9 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   // here would mint a new token mid-life and strand this sidebar's own pinned highlight.
   const highlightSource = useRef(`chat-highlight-${uniqueId()}`).current;
 
-  // Which of this sidebar's buttons is pinned. React state rather than a ref: every button here
-  // shares one source token, so re-pinning within this sidebar can leave
-  // content.pinnedHighlightSource holding the value it already had, giving MobX nothing to react to
-  // and leaving the previously pressed button with stale `.active`/`aria-pressed`. A state update
-  // re-renders either way.
-  //
-  // handleHighlightToggle also drops this sidebar's pin before moving it, which changes the source
-  // to undefined and back and forces the same re-render — so switching this to a ref fails no test.
-  // Keep the state regardless: that clear is there to stop two buttons citing one object from
-  // cancelling each other, and nothing binds it to keeping the pressed state fresh.
+  // Which of this sidebar's buttons is pinned. State rather than a ref: every button here shares
+  // one source token, so re-pinning can leave content.pinnedHighlightSource holding the value it
+  // already had, and MobX has nothing to react to. A state update re-renders regardless.
   const [pinnedKey, setPinnedKey] = useState<string | undefined>(undefined);
 
   // Deferring to the model rather than trusting pinnedKey alone is what makes another source taking
@@ -124,11 +117,9 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     const highlight = content && findHighlight(turnId, index);
     if (!highlight) return;
     const key = highlightKey(turnId, index);
-    // Two buttons can cite the same object — the same node named again in a later turn, say — and
-    // every button here shares this sidebar's one token. togglePinnedHighlightRef releases when the
-    // reference and the source both match, so clicking the second of them would release the pin
-    // rather than move it, leaving no button pressed and no ring. Dropping our own pin first makes
-    // the toggle below always pin; re-clicking the pressed button is then the only way to release.
+    // Two buttons can cite the same object, and share this sidebar's one token. Since
+    // togglePinnedHighlightRef releases when reference and source both match, dropping our own pin
+    // first is what makes a different button move the pin instead of clearing it.
     if (activeHighlightKey && activeHighlightKey !== key) {
       content.clearPinnedHighlightRefIfOwn(highlightSource);
     }

@@ -127,10 +127,9 @@ describe("ChatTutorSidebar as a highlight source", () => {
     expect(second).toHaveAttribute("aria-pressed", "true");
   });
 
-  // Two buttons citing one object share this sidebar's single source token, so a bare
-  // togglePinnedHighlightRef sees its own source on a matching reference and reads the second click
-  // as a release: no button pressed, no ring, and nothing to say why. Moving the pin is the only
-  // sensible reading of clicking a button that is not currently pressed.
+  // Clicking a button that is not pressed always pins it, even when it cites the object already
+  // pinned by another button — the two share this sidebar's single source token, which a bare
+  // togglePinnedHighlightRef would read as the same source releasing the same reference.
   it("moves the pin between two buttons that cite the same object", () => {
     const content = makeContent();
     renderSidebar(content);
@@ -145,7 +144,7 @@ describe("ChatTutorSidebar as a highlight source", () => {
     expect(sameObject).toHaveAttribute("aria-pressed", "true");
   });
 
-  // The other half of that guard: it must not cost the pinned button its own release.
+  // The other half: re-clicking the pressed button is still the way to release it.
   it("clicking the pinned button again releases it", () => {
     const content = makeContent();
     renderSidebar(content);

@@ -54,9 +54,8 @@ export function pickOwnerFields(data: DocumentData | undefined): Record<string, 
   return out;
 }
 
-// Exported and parameterized so the doc's shape is testable without an emulator. `highlights` is
-// omitted rather than written as an empty array: most replies point at nothing, and an absent field
-// keeps those documents the size they are today.
+// `highlights` is omitted rather than written as an empty array: most replies point at nothing, and
+// the client treats absent and empty the same way.
 export function buildAssistantDoc(
   reply: TutorReply, ownerFields: Record<string, unknown>
 ): Record<string, unknown> {

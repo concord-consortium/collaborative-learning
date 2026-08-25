@@ -165,9 +165,8 @@ $chat-bubble-max-width: 85%;
 
   .chat-row {
     display: flex;
-    // A column so highlight buttons stack beneath the bubble rather than sitting beside it as a
-    // second flex item. The sender's left/right placement moves to align-items, which does in a
-    // column what justify-content did while a row held only the bubble.
+    // A column so highlight buttons stack beneath the bubble rather than becoming a second flex
+    // item beside it. Sender placement is therefore align-items, not justify-content.
     flex-direction: column;
 
     // Sender color/alignment. The bubble-color rules live here (nested under the sender
