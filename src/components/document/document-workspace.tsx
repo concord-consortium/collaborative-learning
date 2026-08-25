@@ -340,11 +340,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleOpenGroupDocument = async () => {
-    const { db, persistentUI: { problemWorkspace } } = this.stores;
-    const groupDocument = await db.getOrCreateGroupDocument();
+    const { db, persistentUI: { problemWorkspace }, ui } = this.stores;
+    try {
+      const groupDocument = await db.getOrCreateGroupDocument();
 
-    if (groupDocument) {
-      problemWorkspace.setPrimaryDocument(groupDocument);
+      if (groupDocument) {
+        problemWorkspace.setPrimaryDocument(groupDocument);
+      }
+    } catch (error) {
+      // Reached from an onClick with nothing awaiting it, so without this the user sees the click do
+      // nothing at all. The sibling document-open handlers report the same way.
+      ui.setError(error);
     }
   };
 
