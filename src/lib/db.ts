@@ -844,7 +844,7 @@ export class DB {
   // history subscription for every student on every load.
   // The caller's only job is convergence, so it discards the key; the key is returned because it is what
   // says which document the class converged on.
-  private async resolveClassWideDocument(classWideDoc: { kind: string; title: string }) {
+  public async resolveClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.

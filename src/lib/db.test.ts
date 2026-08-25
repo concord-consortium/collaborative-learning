@@ -536,7 +536,7 @@ describe("db", () => {
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result = await (db as any).resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      const result = await db.resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       expect(result).toBe("existing");
       // The point of the deferral: one pointer read, and none of the work that opening entails.
       expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
@@ -555,7 +555,7 @@ describe("db", () => {
              set: (_r: any, d: any) => setCalls.push(d),
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result = await (db as any).resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      const result = await db.resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
         type: GroupDocument,
