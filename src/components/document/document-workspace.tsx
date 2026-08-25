@@ -5,9 +5,10 @@ import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { DocumentModelType } from "../../models/document/document";
+import { hasGroupOwner } from "../../models/document/document-axes";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
 import {
-  DocumentDragKey, GroupDocument, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
+  DocumentDragKey, isAxesType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import { kImageTileType } from "../../models/tiles/image/image-content";
@@ -55,7 +56,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         const { persistentUI: { problemWorkspace }, user } = this.stores;
         const primary = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
         return {
-          primaryDocGroupId: primary?.isGroup ? primary.groupId : undefined,
+          primaryDocGroupId: primary && hasGroupOwner(primary) ? primary.groupId : undefined,
           currentGroupId: user.currentGroupId,
         };
       },
@@ -206,7 +207,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       // documents, so if the primary document is one of those, make sure it is opened properly.
       try {
         const primaryDocMetadata = await db.findFirestoreMetadata(problemWorkspace.primaryDocumentKey);
-        if (primaryDocMetadata && primaryDocMetadata.type === GroupDocument) {
+        if (primaryDocMetadata && isAxesType(primaryDocMetadata.type)) {
           db.openDocumentFromFirestoreMetadata(primaryDocMetadata);
         }
       } catch (e) {
@@ -339,11 +340,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleOpenGroupDocument = async () => {
-    const { db, persistentUI: { problemWorkspace } } = this.stores;
-    const groupDocument = await db.getOrCreateGroupDocument();
+    const { db, persistentUI: { problemWorkspace }, ui } = this.stores;
+    try {
+      const groupDocument = await db.getOrCreateGroupDocument();
 
-    if (groupDocument) {
-      problemWorkspace.setPrimaryDocument(groupDocument);
+      if (groupDocument) {
+        problemWorkspace.setPrimaryDocument(groupDocument);
+      }
+    } catch (error) {
+      // Reached from an onClick with nothing awaiting it, so without this the user sees the click do
+      // nothing at all. The sibling document-open handlers report the same way.
+      ui.setError(error);
     }
   };
 

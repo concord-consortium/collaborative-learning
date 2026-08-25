@@ -8,7 +8,7 @@ import {
   registerClassWideDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "../models/document/document-kinds";
 import {
-  GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
 import { specAppConfig } from "../models/stores/spec-app-config";
@@ -285,7 +285,8 @@ describe("db", () => {
         }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateGroupDocument();
-      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
+      expect((db as any).createDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ type: AxesDocument, kind: GroupDocument }));
       expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
       expect(updateCalls[0]).toEqual({ canonical: "default" });
       expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
@@ -389,7 +390,7 @@ describe("db", () => {
     registerClassWideDocumentKind("testProfileStamp", "DQB", "msu");
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     await db.createFirestoreMetadataDocument({
-      documentKey: "dqb", type: GroupDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
+      documentKey: "dqb", type: AxesDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
     });
     // Every kind a unit declares lands on this one profile, which is what makes the profile — not the
     // kind — the cohort a migration can select on.
@@ -400,7 +401,7 @@ describe("db", () => {
   });
 
   it("does NOT stamp an axis profile on a personal document", async () => {
-    // Same gate as `kind`: only type:"group" documents are stamped, so nothing is written that would have
+    // Same gate as `kind`: only axes-typed documents are stamped, so nothing is written that would have
     // to be migrated if the other types' kinds are reorganized.
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
@@ -414,6 +415,23 @@ describe("db", () => {
       documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123
     });
     expect(setPayloads[0]).not.toHaveProperty("axisProfile");
+  });
+
+  it("stamps kind and concurrent on an axes-typed document's Firestore metadata", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    });
+    expect(written).toMatchObject({ kind: "group", concurrent: true });
+    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
   });
 
   it("does NOT stamp kind/concurrent on a personal document", async () => {
@@ -558,7 +576,7 @@ describe("db", () => {
       const result = await db.resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
-        type: GroupDocument,
+        type: AxesDocument,
         kind: "drivingQuestionBoard"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
@@ -850,6 +868,24 @@ describe("db", () => {
       expect(doc.concurrent).toBe(true);
       expect(doc.kind).toBe("group");
       // and a merge write-back was issued
+      expect(setCalls.some(c => c.data.concurrent === true && c.data.kind === "group" && c.opts?.merge === true))
+        .toBe(true);
+    });
+
+    it("backfills concurrent on an axes-typed doc whose Firestore metadata lacks it", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ set: (data: any, opts: any) => { setCalls.push({ data, opts }); return Promise.resolve(); } })
+      }));
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = {
+        uid: "g", type: AxesDocument, key: "g3", context_id: "class-1"   // no concurrent/kind
+      } as any;
+      const doc = await db.openDocument({
+        documentKey: "g3", type: AxesDocument, userId: "g", firestoreMetadata
+      } as any);
+      expect(doc.concurrent).toBe(true);
+      expect(doc.kind).toBe("group");
       expect(setCalls.some(c => c.data.concurrent === true && c.data.kind === "group" && c.opts?.merge === true))
         .toBe(true);
     });

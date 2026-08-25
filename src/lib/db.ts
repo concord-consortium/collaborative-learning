@@ -15,7 +15,7 @@ import { DocumentModelType, createDocumentModel, isVisibilityType } from "../mod
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, SupportPublication, GroupDocument, isDocumentType
+  ProblemPublication, SupportPublication, GroupDocument, AxesDocument, isAxesType, isDocumentType
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -120,9 +120,9 @@ interface IGetOrCreateCanonicalDocumentOpts {
   // The pointer slot's label. It is the path's final segment and is written to the winning document's
   // `canonical` field.
   canonicalLabel: string;
-  // The document's stored `type` (transitional) and its `kind` axis. They coincide today for group documents;
-  // a class-wide document keeps type === GroupDocument while its kind is the declared kind. The kind also drives
-  // the owner uid (createDocument derives it via the kind registry).
+  // The document's stored `type` (transitional) and its `kind` axis. A group document's kind is GroupDocument
+  // while a class-wide document's is the declared kind; both are axes-typed. The kind also drives the owner
+  // uid (createDocument derives it via the kind registry).
   type: DBDocumentType;
   kind: string;
   findLegacy?: () => Promise<IDocumentMetadata | undefined>;
@@ -669,17 +669,17 @@ export class DB {
       titleInfo.title = title;
     }
 
-    // Stamp the kind's axis fields (kind + concurrent), but only on type:"group" documents (group + class-wide).
+    // Stamp the kind's axis fields (kind + concurrent), but only on axes-typed documents (group + class-wide).
     // Every kind is registered now for location/owner resolution, yet we deliberately do NOT persist `kind` on
     // other docs' Firestore metadata yet. We might change the list of kinds when we add full support for the
     // other document types, so we don't want to stamp a kind we'd then have to migrate. Add a type here as it
     // is converted — see "Which documents get stamped" in docs/document-axes/target-architecture.md.
-    const kindFields = type === GroupDocument ? getDocumentKindMetadataFields(kind) : {};
+    const kindFields = isAxesType(type) ? getDocumentKindMetadataFields(kind) : {};
 
     // The axis profile the document is created at, recorded so a later migration can select every document
     // made from one profile without querying the axis fields it is there to change. Gated with the kind
     // fields above, for the same reason.
-    const profileName = type === GroupDocument ? getDocumentAxisProfileName(kind) : undefined;
+    const profileName = isAxesType(type) ? getDocumentAxisProfileName(kind) : undefined;
     const profileField = profileName ? { axisProfile: profileName } : {};
 
     const firestoreMetadata: IDocumentMetadataAtCreation = {
@@ -768,8 +768,8 @@ export class DB {
       // `type` can't be included because it is part of a discriminated union and must be a fresh literal
       const common = { version, self, createdAt } as const;
 
-      if (type === GroupDocument) {
-        // group + class-wide documents share the transitional type "group" and store only base RTDB metadata
+      if (isAxesType(type)) {
+        // axes-typed documents (group + class-wide) store only base RTDB metadata
         rtdbMetadata = { ...common, type };
       } else {
         switch (type) {
@@ -835,12 +835,12 @@ export class DB {
     const { groupId, offeringId } = this.requireGroupContext();
     // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
     // The slot is labeled "default" (the group's default canonical document) rather than by the
-    // document's type — see kDefaultCanonicalDocumentLabel. For a regular group document the
-    // transitional `type` and the `kind` coincide, both GroupDocument.
+    // document's type — see kDefaultCanonicalDocumentLabel. Its `type` is the generic axes value while
+    // its `kind` is GroupDocument; the two axes are independent.
     return this.getOrCreateCanonicalDocument({
       container: { classHash: user.classHash, offeringId },
       canonicalLabel: kDefaultCanonicalDocumentLabel,
-      type: GroupDocument,
+      type: AxesDocument,
       kind: GroupDocument,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
     });
@@ -862,11 +862,11 @@ export class DB {
   public async resolveClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
-    // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
+    // Its `type` is the generic axes value while its `kind` is the declared kind.
     const { documentKey } = await this.resolveCanonicalDocument({
       container: { classHash: user.classHash, unit: unit.code },
       canonicalLabel: classWideDoc.kind,
-      type: GroupDocument,
+      type: AxesDocument,
       kind: classWideDoc.kind
     });
     return documentKey;
@@ -982,7 +982,7 @@ export class DB {
       await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
       return { documentKey: wonKey };
     }
-    if (type === GroupDocument) {
+    if (isAxesType(type)) {
       Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
     }
     return { documentKey, firestoreMetadata };
@@ -1159,19 +1159,26 @@ export class DB {
           // metadata lacks it. The kind registry is the source of truth for which kinds are concurrent: derive
           // the value so the opened model's history manager runs in concurrent mode this session, and best-
           // effort write it back so the stored field converges (the batch script covers never-opened docs).
-          const kindMetadataFields = getDocumentKindMetadataFields(firestoreMetadata.type);
+          // The kind registry has no "axes" entry, so every axes-typed document is looked up under the
+          // group kind here, whose `concurrent: true` is what every axes-typed document needs. A
+          // class-wide document's own stored `kind` still wins below (`kind ?? kindMetadataFields.kind`);
+          // a group document with no stored `kind` takes the group kind's from this lookup, and the
+          // write-back below sends these fields whole.
+          const kindMetadataFields = getDocumentKindMetadataFields(
+            isAxesType(firestoreMetadata.type) ? GroupDocument : firestoreMetadata.type
+          );
           // Storage wins when it says true; otherwise fall back to the registry, treating any non-`true`
           // stored value as missing so it matches the write-back gate below.
           const concurrent =
             firestoreMetadata.concurrent === true ? true : (kindMetadataFields.concurrent ?? undefined);
           const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
-          // Explicitly restrict the write-back to group documents. Every kind is now registered, so in theory
-          // it'd be possible for someone to add a concurrent field to another document type and then we'd
-          // accidentally update the firestore metadata. Add a type here as it is converted to the axes, and
-          // drop the check once they all are — but note this write-back is made by the signed-in user, so an
-          // axis the security rules enforce can't be stamped from here at all. See "Which documents get
+          // Explicitly restrict the write-back to axes-typed documents. Every kind is now registered, so in
+          // theory it'd be possible for someone to add a concurrent field to another document type and then
+          // we'd accidentally update the firestore metadata. Add a type here as it is converted to the axes,
+          // and drop the check once they all are — but note this write-back is made by the signed-in user, so
+          // an axis the security rules enforce can't be stamped from here at all. See "Which documents get
           // stamped" in docs/document-axes/target-architecture.md.
-          if (firestoreMetadata.type === GroupDocument
+          if (isAxesType(firestoreMetadata.type)
               && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
             this.firestore.doc(getSimpleDocumentPath(documentKey))
               .set(kindMetadataFields, { merge: true })

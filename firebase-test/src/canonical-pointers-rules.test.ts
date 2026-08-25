@@ -86,6 +86,31 @@ describe("deleting group documents", () => {
   });
 });
 
+describe("deleting axes-typed documents", () => {
+  const axesDoc = (extra: any = {}) => groupDoc({ type: "axes", ...extra });
+
+  it("a class member may delete a non-canonical axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, axesDoc());               // no canonical flag
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kDocPath).delete());
+  });
+
+  it("a class member may NOT delete a canonical axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, { ...axesDoc(), canonical: "default", createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).delete());
+  });
+
+  // Duplicated from the "group" block above rather than left to it: that block covers the pre-sweep
+  // value only, and CLUE-604's cleanup deletes it. Without this case the class check would lose its
+  // coverage at that point rather than at some deliberate decision.
+  it("a user outside the class may not delete the axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, axesDoc());
+    db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
+    await assertFails(db.doc(kDocPath).delete());
+  });
+});
+
 describe("canonical flag integrity", () => {
   it("create is denied if the doc arrives pre-flagged canonical", async () => {
     db = initFirestore(studentAuth);
