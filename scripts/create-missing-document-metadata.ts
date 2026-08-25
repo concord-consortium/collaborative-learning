@@ -244,6 +244,12 @@ export async function createMissingDocumentMetadata(
       row.unit = position.unit;
       row.investigation = position.investigation;
       row.problem = position.problem;
+    } else {
+      // Written as an explicit null, not left out. Sort Work finds class-contained documents with
+      // `where("unit", "==", null)` (sorted-documents.ts), and Firestore cannot match a field that is
+      // absent — a row without it is invisible under every filter but "All". This is what the client's
+      // "class" container stamps, and all 19,649 class-contained rows in production carry it.
+      row.unit = null;
     }
 
     counts.created++;

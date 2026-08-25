@@ -238,9 +238,11 @@ describe("createMissingDocumentMetadata curriculum fields", () => {
     expect(result.counts.unresolvedCurriculum).toBe(1);
   });
 
-  it("gives a class-contained document no curriculum fields and no offeringId", async () => {
-    // personal and learningLog documents are kept in the class, not an offering. Stamping a unit on
-    // them would misplace them on the container axis.
+  it("gives a class-contained document an explicit null unit, and no offeringId", async () => {
+    // personal and learningLog documents are kept in the class, not an offering, so they carry no
+    // offering id and no curriculum position. But `unit` is written as an explicit null rather than
+    // left out: Sort Work finds them with `where("unit", "==", null)`, and Firestore cannot match a
+    // field that is absent. See getDocumentLocationFields's "class" container.
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
     const nodes = { k1: { type: "learningLog", createdAt: 1, title: "Log" } };
@@ -248,7 +250,8 @@ describe("createMissingDocumentMetadata curriculum fields", () => {
     await createMissingDocumentMetadata(firestore, kSpace, index,
       { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
 
-    for (const field of ["offeringId", "unit", "investigation", "problem"]) {
+    expect(store.k1.unit).toBeNull();
+    for (const field of ["offeringId", "investigation", "problem"]) {
       expect(field in store.k1).toBe(false);
     }
   });
