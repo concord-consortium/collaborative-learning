@@ -79,6 +79,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
                     if (tabSpec.tab === 'teacher-guide') dataTestId = 'nav-tab-teacher-guide';
                     if (tabSpec.tab === 'student-work') dataTestId = 'nav-tab-student-work';
                     if (tabSpec.tab === 'class-work') dataTestId = 'nav-tab-class-work';
+                    if (tabSpec.tab === 'sort-work') dataTestId = 'nav-tab-sort-work';
                     return (
                       <Tab key={tabSpec.tab} className={tabClass} data-testid={dataTestId}>
                         {tabSpec.label}
