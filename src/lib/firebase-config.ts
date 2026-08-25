@@ -19,36 +19,59 @@ const keys = {
   staging: atob("QUl6YVN5Q0dKRjQybE15XzhjSFpkU0lQa0FvWE9WWFBHMmotSHAw")
 };
 
-const configs = {
+/**
+ * Everything that has to agree about which Firebase project this session talks to.
+ *
+ * `config` is the client's connection to the project. `portalFirebaseApp` is the name of the row in
+ * the portal's `firebase_apps` table whose service account signs our JWT — the portal signs with that
+ * row's credentials and the project in `config` verifies the signature, so the two must name the same
+ * project. They are declared together for that reason: held apart, they can drift, and a drifted pair
+ * fails at login with nothing to say which half is wrong.
+ *
+ * A portal that has no row of the given name refuses the request outright ("Unknown firebase app
+ * name"), which is the failure worth having — a portal that has a row under the *wrong* name signs a
+ * token the project then rejects for reasons that look nothing like the cause.
+ */
+const environments = {
   production: {
-    apiKey: keys.production,
-    authDomain: "collaborative-learning-ec215.firebaseapp.com",
-    databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
-    projectId: "collaborative-learning-ec215",
-    storageBucket: "collaborative-learning-ec215.appspot.com",
-    messagingSenderId: "112537088884",
-    appId: "1:112537088884:web:c51b1b8432fff36faff221",
-    measurementId: "G-XP472LRY18"
+    portalFirebaseApp: "collaborative-learning",
+    config: {
+      apiKey: keys.production,
+      authDomain: "collaborative-learning-ec215.firebaseapp.com",
+      databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
+      projectId: "collaborative-learning-ec215",
+      storageBucket: "collaborative-learning-ec215.appspot.com",
+      messagingSenderId: "112537088884",
+      appId: "1:112537088884:web:c51b1b8432fff36faff221",
+      measurementId: "G-XP472LRY18"
+    }
   },
   staging: {
-    apiKey: keys.staging,
-    authDomain: "collaborative-learning-staging.firebaseapp.com",
-    databaseURL: "https://collaborative-learning-staging-default-rtdb.firebaseio.com",
-    projectId: "collaborative-learning-staging",
-    storageBucket: "collaborative-learning-staging.firebasestorage.app",
-    messagingSenderId: "822807055414",
-    appId: "1:822807055414:web:9e08fe0f4ffaf6130f9c97"
+    portalFirebaseApp: "collaborative-learning-staging",
+    config: {
+      apiKey: keys.staging,
+      authDomain: "collaborative-learning-staging.firebaseapp.com",
+      databaseURL: "https://collaborative-learning-staging-default-rtdb.firebaseio.com",
+      projectId: "collaborative-learning-staging",
+      storageBucket: "collaborative-learning-staging.firebasestorage.app",
+      messagingSenderId: "822807055414",
+      appId: "1:822807055414:web:9e08fe0f4ffaf6130f9c97"
+    }
   }
 };
 
+function currentEnvironment() {
+  const { firebaseEnv } = urlParams;
+  return environments[isFirebaseEnv(firebaseEnv) ? firebaseEnv : "production"];
+}
+
 export function firebaseConfig() {
-  let { firebaseEnv } = urlParams;
+  return currentEnvironment().config;
+}
 
-  if (!isFirebaseEnv(firebaseEnv)) {
-    firebaseEnv = "production";
-  }
-
-  return configs[firebaseEnv];
+/** The portal `firebase_apps` row to request a JWT from. See `environments` above. */
+export function portalFirebaseApp() {
+  return currentEnvironment().portalFirebaseApp;
 }
 
 export const localFunctionsHost = "http://localhost:5001";

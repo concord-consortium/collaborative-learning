@@ -7,6 +7,7 @@ import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-cr
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
+import { portalFirebaseApp } from "./firebase-config";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser,
    } from "./portal-api";
 import { PortalJWT, PortalFirebaseJWT, PortalUserJWT } from "./portal-types";
@@ -21,7 +22,6 @@ import { UserModelType } from "../models/stores/user";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
-export const FIREBASE_APP_NAME = "collaborative-learning";
 
 export const DEV_STUDENT: StudentUser = {
   type: "student",
@@ -101,7 +101,7 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
   });
 };
 
-export const getFirebaseJWTParams = (classHash?: string, firebaseApp = FIREBASE_APP_NAME) => {
+export const getFirebaseJWTParams = (classHash?: string, firebaseApp = portalFirebaseApp()) => {
   const params: Record<string,string> = {
     firebase_app: firebaseApp
   };
