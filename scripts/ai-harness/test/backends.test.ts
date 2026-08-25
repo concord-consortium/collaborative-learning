@@ -382,6 +382,31 @@ describe("the puppeteer backend", () => {
       .rejects.toThrow(/capturing the iframe did not finish within the 600ms budget/);
   });
 
+  it("fails a capture that came back shorter than its clip, rather than storing it", async () => {
+    // A clipped, captureBeyondViewport:false screenshot is intersected with the visual viewport
+    // (puppeteer cdp/Page.js): a frame grown past the viewport by a late updateHeight captures
+    // short with no error, and every box-based check passes because the box grew with the frame.
+    // The decoded PNG is the only witness, so the backend compares it against the clip.
+    const fake = fakeBrowser();
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser().browser.newPage();
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (capture: { clip?: { width: number } }) => capture?.clip
+        ? Promise.resolve(makeTestPng(Math.round(capture.clip.width), 500))
+        : original(capture as never);
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    // The default measurement resizes the frame to 1280px; a 500px-tall PNG is a viewport cut.
+    await expect(backend.render({ docId: "short", content: emptyDocument }))
+      .rejects.toThrow(/came back 960×500px for a 960×1280px clip[\s\S]*cut to the viewport/);
+  });
+
   it("attaches evidence to a failure that is not a RenderFailed", async () => {
     // A navigation error, a size-limit rejection or a raw protocol error is exactly when the console
     // output and a picture of the page are most wanted, so evidence is attached to any failure and
@@ -940,6 +965,29 @@ describe("the per-tile capture", () => {
       { limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 20 * 1024 * 1024 } });
     await expect(backend.render({ docId: "huge", content: emptyDocument }))
       .rejects.toThrow(/30000px tall, over the 20000px limit/);
+  });
+
+  it("fails a tile capture that came back shorter than the tile's box", async () => {
+    // Same honesty check as the full-document capture: the per-tile clip is subject to the same
+    // visual-viewport intersection, so a short PNG must fail rather than be stored as the tile.
+    const tiles = [{ tileId: "tile-a", widthPx: 300, heightPx: 200 }];
+    const fake = fakeBrowser({ tiles });
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser({ tiles }).browser.newPage();
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (capture: { clip?: { width: number } }) => capture?.clip
+        ? Promise.resolve(makeTestPng(Math.round(capture.clip.width), 90))
+        : original(capture as never);
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-per-tile", capture: "per-tile",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await expect(backend.render({ docId: "short-tile", content: emptyDocument }))
+      .rejects.toThrow(/tile tile-a captured 300×90px of its 300×200px box[\s\S]*cut to the viewport/);
   });
 
   it("records a tile with no id as having none, rather than as an empty one", async () => {

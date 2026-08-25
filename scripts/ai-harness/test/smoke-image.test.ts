@@ -38,7 +38,13 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
   // wrong dimensions. The queue is consumed one capture at a time — reading the *last* queued id
   // gave every document the same size and made this safeguard inert. Renders here are sequential
   // (renderConcurrency: 1), so the order is the manifest's.
-  const pngFor = (docId: string) => makeTestPng(960, 1000 + (docId.length % 7) * 60);
+  //
+  // The base is the clip's height (1340px of rows + 80px chrome): the backend fails any capture
+  // SHORTER than its clip box as a viewport cut, so the per-document surplus rides on top — the
+  // identity encoding survives, on the tall side of the honesty check.
+  const kClipHeightPx = 1420;
+  const heightFor = (docId: string) => kClipHeightPx + (docId.length % 7) * 60;
+  const pngFor = (docId: string) => makeTestPng(960, heightFor(docId));
   const pendingDocs: string[] = [];
   let lastRenderedDoc = "";
 
@@ -64,11 +70,10 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     for (const docId of documentIds()) {
       const envelope = readImageEnvelope(imageRepresentationPath(paths, "puppeteer-full-height", docId));
       expect({ docId, heightPx: envelope.images[0].heightPx })
-        .toEqual({ docId, heightPx: 1000 + (docId.length % 7) * 60 });
+        .toEqual({ docId, heightPx: heightFor(docId) });
     }
     // And the fixture sizes really do differ, or the check above would prove nothing.
-    expect(new Set(documentIds().map((docId) => 1000 + (docId.length % 7) * 60)).size)
-      .toBeGreaterThan(1);
+    expect(new Set(documentIds().map(heightFor)).size).toBeGreaterThan(1);
   };
 
   /** How tall this fake says the document's tile rows are — taller than the page's 500px default. */

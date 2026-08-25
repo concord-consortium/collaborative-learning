@@ -433,6 +433,21 @@ const kReadTileIdsScript = `Array.from(document.querySelectorAll('${kTileSelecto
  */
 const kOverflowTolerancePx = 16;
 
+/**
+ * How much smaller than its clip box a captured PNG may come back before it fails the render.
+ *
+ * A clipped, `captureBeyondViewport: false` screenshot is not a promise: puppeteer intersects the
+ * clip with the visual viewport before capturing (`Page._screenshot` in cdp/Page.js, 22.13), so a
+ * frame that outgrows the viewport after `setViewport` — the render page's `updateHeight` listener
+ * is permanent, so a late message can grow it during the post-resize settle — captures short with
+ * no error, and every box-based check passes because the box grew right along with the frame. The
+ * decoded PNG is the only witness to what was actually captured, so the backend compares its
+ * dimensions against the clip. `setViewport` never sets `deviceScaleFactor`, so it is 1 and PNG
+ * pixels compare directly with CSS pixels; two pixels covers fractional-box rounding on either
+ * side of the encode, while a viewport cut is tens to thousands of pixels.
+ */
+const kCaptureShortfallTolerancePx = 2;
+
 async function setFrameHeight(page: PageLike, heightPx: number): Promise<void> {
   await page.evaluate(`(() => {
     const frame = document.getElementById('clue-frame');
@@ -780,7 +795,17 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
               }),
               request.docId, `capturing tile ${tileIds[index] || index + 1}`, deadline, contextOf));
             checkEncodedSize(request.docId, tileBytes, limits);
-            readPngInfo(tileBytes, `${request.docId} tile ${tileIds[index] || index + 1}`);
+            const tileInfo = readPngInfo(tileBytes, `${request.docId} tile ${tileIds[index] || index + 1}`);
+            // The pixels really cover the tile's box — see kCaptureShortfallTolerancePx for why a
+            // clipped capture can silently come back smaller than what it was asked for.
+            if (tileInfo.widthPx + kCaptureShortfallTolerancePx < Math.floor(tileBox.width) ||
+                tileInfo.heightPx + kCaptureShortfallTolerancePx < Math.floor(tileBox.height)) {
+              throw new RenderFailed(request.docId,
+                `tile ${tileIds[index] || index + 1} captured ${tileInfo.widthPx}×${tileInfo.heightPx}px ` +
+                `of its ${Math.round(tileBox.width)}×${Math.round(tileBox.height)}px box: the clip was ` +
+                "cut to the viewport, and storing it would record a truncated image as the tile",
+                contextOf());
+            }
             images.push({
               bytes: tileBytes,
               url: null,
@@ -823,8 +848,8 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         // one piece or another of it hangs against continuously animating content: a ticking Waves
         // generator hung `captureBeyondViewport`'s viewport dance, and with that disabled the same
         // documents hung again when the vibe unit changed how their Dataflow tiles animate. The
-        // plain surface capture has never hung; the viewport covers the resized frame, so the clip
-        // is always fully in view.
+        // plain surface capture has never hung. The viewport is sized to cover the resized frame,
+        // and the pixel check below proves the clip really was in view when the capture happened.
         const bytes = Buffer.from(await withinDeadline(
           page.screenshot({
             type: "png",
@@ -835,7 +860,19 @@ export function puppeteerBackend(options: PuppeteerBackendOptions): RenderBacken
         checkEncodedSize(request.docId, bytes, limits);
         // Decoded here as well as when the envelope is written: a screenshot that is not a PNG means
         // the capture path itself is broken, and that is worth saying at the point it happened.
-        readPngInfo(bytes, `${request.docId} screenshot`);
+        const pngInfo = readPngInfo(bytes, `${request.docId} screenshot`);
+        // And the pixels really cover the box the capture was clipped to. The measured-height check
+        // above cannot catch a viewport cut: a frame grown by a late `updateHeight` grows `box`
+        // right along with it, and both pass while the PNG comes back short — see
+        // kCaptureShortfallTolerancePx.
+        if (pngInfo.widthPx + kCaptureShortfallTolerancePx < Math.floor(box.width) ||
+            pngInfo.heightPx + kCaptureShortfallTolerancePx < Math.floor(box.height)) {
+          throw new RenderFailed(request.docId,
+            `the capture came back ${pngInfo.widthPx}×${pngInfo.heightPx}px for a ` +
+            `${Math.round(box.width)}×${Math.round(box.height)}px clip: the clip was cut to the ` +
+            "viewport, and storing it would record a truncated image as a full-document capture",
+            contextOf());
+        }
 
         return {
           images: [{ bytes, url: null, tileId: null, purpose: "full-document" }],

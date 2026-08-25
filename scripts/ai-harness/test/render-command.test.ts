@@ -32,7 +32,11 @@ function browserThatFails(failFor: Set<string>, order: string[], contentRowsHeig
       const docId = order[index++];
       return {
         setViewport: async () => undefined,
-        screenshot: async () => makeTestPng(40, 40),
+        // Clipped calls are captures and must return the clip's size — the backend fails a PNG
+        // shorter than its clip box as a viewport cut. Unclipped calls are the evidence capture.
+        screenshot: async (options?: { clip?: { width: number; height: number } }) => options?.clip
+          ? makeTestPng(Math.round(options.clip.width), Math.round(options.clip.height))
+          : makeTestPng(40, 40),
         goto: async () => undefined,
         evaluate: async (script: unknown) => {
           const match = /frame\.height = (\d+)/.exec(String(script));
@@ -46,18 +50,15 @@ function browserThatFails(failFor: Set<string>, order: string[], contentRowsHeig
         $: async () => ({
           boundingBox: async () => ({
             x: 0, y: 0, width: 960, height: frameHeights.at(-1) ?? 500
-          }),
-          screenshot: async () => makeTestPng(960, frameHeights.at(-1) ?? 500)
+          })
         }),
         frames: () => [{
           url: () => "http://localhost:8080/iframe.html?unwrapped&readOnly",
           // Two top-level tiles, so the per-tile mode has something to photograph. The
-          // full-document mode never asks.
+          // full-document mode never asks. Boxes only — captures are clipped page screenshots.
           $$: async () => [
-            { boundingBox: async () => ({ x: 0, y: 0, width: 300, height: 200 }),
-              screenshot: async () => makeTestPng(300, 200) },
-            { boundingBox: async () => ({ x: 0, y: 0, width: 400, height: 260 }),
-              screenshot: async () => makeTestPng(400, 260) }
+            { boundingBox: async () => ({ x: 0, y: 0, width: 300, height: 200 }) },
+            { boundingBox: async () => ({ x: 0, y: 0, width: 400, height: 260 }) }
           ],
           evaluate: async (script: unknown) => (String(script).includes("data-tool-id")
             ? ["tile-one", "tile-two"]
