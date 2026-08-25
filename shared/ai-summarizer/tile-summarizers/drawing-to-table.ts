@@ -1,4 +1,4 @@
-import { BoundingBox } from "../../drawing/drawing-geometry";
+import { absoluteChildBoundingBox, BoundingBox } from "../../drawing/drawing-geometry";
 import { boundingBoxForSnapshot, DrawingObjectSnapshot } from "../../drawing/drawing-object-snapshot";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
@@ -50,6 +50,25 @@ function row(o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string): strin
   return [o.id, o.type, formatPosition(bb), formatSize(bb), parentId, formatDetails(o)];
 }
 
+// A group's members are stored as fractions of the group's box rather than as coordinates, so each
+// child's box is converted through the group it sits in — and through every enclosing group above
+// that — leaving every row in one coordinate system. absoluteChildBoundingBox is the same function
+// GroupObject.adjustInternalBoundingBox uses, so flips and rotation are handled identically here.
+function walk(
+  objects: DrawingObjectSnapshot[], rows: string[][], parentId: string,
+  parent?: { boundingBox: BoundingBox, rotation?: number, hFlip?: boolean, vFlip?: boolean }
+): void {
+  objects.forEach(o => {
+    const storedBB = boundingBoxForSnapshot(o);
+    const bb = parent ? absoluteChildBoundingBox(storedBB, parent) : storedBB;
+    rows.push(row(o, bb, parentId));
+    if (o.objects?.length) {
+      walk(o.objects, rows, o.id,
+        { boundingBox: bb, rotation: o.rotation, hFlip: o.hFlip, vFlip: o.vFlip });
+    }
+  });
+}
+
 /**
  * Describe a drawing tile's contents as a table, one row per object, so that anything reading the
  * summary can name a specific shape by the id the document stores.
@@ -59,7 +78,7 @@ export function drawingToTable(content: { objects?: DrawingObjectSnapshot[] }): 
   if (objects.length === 0) return kEmptyDrawing;
 
   const rows: string[][] = [];
-  objects.forEach(o => rows.push(row(o, boundingBoxForSnapshot(o), "")));
+  walk(objects, rows, "");
 
   const count = rows.length;
   const preamble =

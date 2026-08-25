@@ -71,3 +71,51 @@ describe("drawingToTable", () => {
     expect(result).toContain("| u1 | sparkline | 4, 6 | 0 x 0 |");
   });
 });
+
+describe("drawingToTable groups", () => {
+  // Members are stored as fractions of the group's box by assimilateObjects.
+  const group = {
+    id: "Bq91x", type: "group", x: 100, y: 200, width: 200, height: 100,
+    objects: [
+      { id: "kid1", type: "rectangle", x: 0, y: 0, width: 0.5, height: 0.5 },
+      { id: "kid2", type: "rectangle", x: 0.5, y: 0.5, width: 0.5, height: 0.5 }
+    ]
+  };
+
+  it("converts a child's fractions to absolute coordinates", () => {
+    const result = drawingToTable({ objects: [group] });
+    expect(result).toContain("| Bq91x | group | 100, 200 | 200 x 100 |");
+    expect(result).toContain("| kid1 | rectangle | 100, 200 | 100 x 50 | Bq91x |");
+    expect(result).toContain("| kid2 | rectangle | 200, 250 | 100 x 50 | Bq91x |");
+  });
+
+  it("lists a child immediately after its group", () => {
+    const result = drawingToTable({ objects: [group] });
+    expect(result.indexOf("| Bq91x |")).toBeLessThan(result.indexOf("| kid1 |"));
+  });
+
+  it("counts nested children in the total", () => {
+    expect(drawingToTable({ objects: [group] }))
+      .toContain("This tile contains a drawing with 3 objects, listed back to front.");
+  });
+
+  it("composes nested groups", () => {
+    const result = drawingToTable({ objects: [{
+      id: "outer", type: "group", x: 0, y: 0, width: 100, height: 100,
+      objects: [{
+        id: "inner", type: "group", x: 0.5, y: 0, width: 0.5, height: 1,
+        objects: [{ id: "leaf", type: "rectangle", x: 0, y: 0, width: 1, height: 1 }]
+      }]
+    }]});
+    expect(result).toContain("| inner | group | 50, 0 | 50 x 100 | outer |");
+    expect(result).toContain("| leaf | rectangle | 50, 0 | 50 x 100 | inner |");
+  });
+
+  it("mirrors children of a flipped group", () => {
+    const result = drawingToTable({ objects: [{
+      id: "flip", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
+      objects: [{ id: "fkid", type: "rectangle", x: 0, y: 0, width: 0.25, height: 1 }]
+    }]});
+    expect(result).toContain("| fkid | rectangle | 75, 0 | 25 x 100 | flip |");
+  });
+});
