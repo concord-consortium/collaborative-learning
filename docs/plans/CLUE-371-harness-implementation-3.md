@@ -1,11 +1,12 @@
 # CLUE-371 Harness — Milestone 3 Implementation
 
+*Historical work order, written before implementation and kept as ordered; the git history and the milestone PRs record what was actually built.*
+
 A work order for implementing milestone 3 of the
 [harness plan](./CLUE-371-harness-plan.md): **mixed-mode messages and the variant dimensions**
 (extras, image detail, image sets, accurate height, two new text variants), plus skip-empty
 execution and the two operational gaps carried from milestone 2. Written against the as-built state
-of `CLUE-371-harness-m3` after the review follow-up commits (groups B–E of
-[CLUE-371-m2-review-fixes.md](./CLUE-371-m2-review-fixes.md)) — read
+of `CLUE-371-harness-m3` after the milestone-2 review follow-up commits — read
 `scripts/ai-harness/README.md` **first**, including its DEVIATIONS section; it is the accurate map
 of what exists, and several things this milestone extends (multi-image envelopes, the
 `RepresentationDescriptor`, the `skipped` result status, `ImagePurpose: "tile"`) were built in

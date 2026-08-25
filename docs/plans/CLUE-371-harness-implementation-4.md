@@ -1,5 +1,7 @@
 # CLUE-371 Harness — Milestone 4 Implementation
 
+*Historical work order, written before implementation and kept as ordered; the git history and the milestone PRs record what was actually built.*
+
 A work order for milestone 4 of the [harness plan](./CLUE-371-harness-plan.md): the **side-by-side
 HTML review report** — the document a human judge reads to compare what each experiment said about
 each document — with escaping throughout, a `--shareable` mode, and a `--blind` mode that the
