@@ -1,6 +1,7 @@
 import { getSnapshot, Instance } from "mobx-state-tree";
 import { createDocumentModel, DocumentModel, DocumentModelType, SaveState } from "./document";
 import { AxesDocument, ExemplarDocument, GroupDocument, PersonalDocument, ProblemDocument } from "./document-types";
+import { getClassOwnerId, getGroupOwnerId, hasGroupOwner } from "./document-axes";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
 import { expectEntryToBeComplete } from "../history/undo-store-test-utils";
@@ -367,10 +368,30 @@ describe("DocumentModel concurrent/kind stored props", () => {
     expect(doc.concurrent).toBeFalsy();
   });
 
-  it("treats an axes-typed document as a group document", () => {
-    const doc = DocumentModel.create({
-      uid: "u", type: AxesDocument, key: "k-axes", createdAt: 1, concurrent: true, kind: "group"
+  it("carries the group owner uid that hasGroupOwner reads, on either side of the sweep", () => {
+    // The group-switch reaction in document-workspace asks hasGroupOwner(primary) directly; what the
+    // model owes it is the stored uid, unchanged by CLUE-604's rename of the type beside it.
+    const preSweep = DocumentModel.create({
+      uid: getGroupOwnerId("off-1", "3"), type: GroupDocument, key: "k-group", createdAt: 1,
+      concurrent: true, kind: "group", groupId: "3"
     });
-    expect(doc.isGroup).toBe(true);
+    expect(hasGroupOwner(preSweep)).toBe(true);
+
+    const postSweep = DocumentModel.create({
+      uid: getGroupOwnerId("off-1", "3"), type: AxesDocument, key: "k-axes", createdAt: 1,
+      concurrent: true, kind: "group", groupId: "3"
+    });
+    expect(hasGroupOwner(postSweep)).toBe(true);
+  });
+
+  it("does not present a class-wide document as group-owned", () => {
+    // Both store the axis-native type; only the owner says whose the document is. The group-switch
+    // reaction must not fire for a document that belongs to no group.
+    const classWide = DocumentModel.create({
+      uid: getClassOwnerId("class-1"), type: AxesDocument, key: "k-class", createdAt: 1,
+      concurrent: true, kind: "planner", unit: "sas"
+    });
+    expect(hasGroupOwner(classWide)).toBe(false);
+    expect(classWide.groupId).toBeUndefined();
   });
 });

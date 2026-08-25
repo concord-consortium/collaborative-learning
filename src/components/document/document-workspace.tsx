@@ -5,6 +5,7 @@ import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { DocumentModelType } from "../../models/document/document";
+import { hasGroupOwner } from "../../models/document/document-axes";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
 import {
   DocumentDragKey, isAxesType, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
@@ -55,7 +56,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         const { persistentUI: { problemWorkspace }, user } = this.stores;
         const primary = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
         return {
-          primaryDocGroupId: primary?.isGroup ? primary.groupId : undefined,
+          primaryDocGroupId: primary && hasGroupOwner(primary) ? primary.groupId : undefined,
           currentGroupId: user.currentGroupId,
         };
       },
