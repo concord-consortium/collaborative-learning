@@ -19,26 +19,26 @@ const chatResult = (turns: ChatTurn[]): UseChatResult => ({
 
 describe("Chat highlight buttons", () => {
   it("renders one button per highlight, labelled by the model's words", () => {
-    render(<Chat chat={chatResult([turn])} />);
+    render(<Chat enableHighlights chat={chatResult([turn])} />);
     expect(screen.getByRole("button", { name: /the block that reads the sensor/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /the live output/ })).toBeInTheDocument();
   });
 
   it("renders no buttons for a turn without highlights", () => {
-    render(<Chat chat={chatResult([{ id: "t2", sender: "assistant", text: "Just words." }])} />);
+    render(<Chat enableHighlights chat={chatResult([{ id: "t2", sender: "assistant", text: "Just words." }])} />);
     expect(screen.queryByTestId("chat-highlights")).not.toBeInTheDocument();
   });
 
   it("reports toggle with the turn id and index", () => {
     const onHighlightToggle = jest.fn();
-    render(<Chat chat={chatResult([turn])} onHighlightToggle={onHighlightToggle} />);
+    render(<Chat enableHighlights chat={chatResult([turn])} onHighlightToggle={onHighlightToggle} />);
     fireEvent.click(screen.getByRole("button", { name: /the live output/ }));
     expect(onHighlightToggle).toHaveBeenCalledWith("t1", 1);
   });
 
   it("reports hover enter and leave", () => {
     const onHighlightHover = jest.fn();
-    render(<Chat chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
+    render(<Chat enableHighlights chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
     const button = screen.getByRole("button", { name: /the live output/ });
     fireEvent.mouseEnter(button);
     expect(onHighlightHover).toHaveBeenCalledWith("t1", 1, true);
@@ -48,7 +48,7 @@ describe("Chat highlight buttons", () => {
 
   it("reports focus as hover, so the preview reaches keyboard users", () => {
     const onHighlightHover = jest.fn();
-    render(<Chat chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
+    render(<Chat enableHighlights chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
     const button = screen.getByRole("button", { name: /the live output/ });
     fireEvent.focus(button);
     expect(onHighlightHover).toHaveBeenCalledWith("t1", 1, true);
@@ -56,7 +56,7 @@ describe("Chat highlight buttons", () => {
 
   it("reports blur as hover-off, once the focus it withdraws was actually claimed", () => {
     const onHighlightHover = jest.fn();
-    render(<Chat chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
+    render(<Chat enableHighlights chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
     const button = screen.getByRole("button", { name: /the live output/ });
     fireEvent.focus(button);
     fireEvent.blur(button);
@@ -67,15 +67,48 @@ describe("Chat highlight buttons", () => {
   // since the preview belongs to the sidebar rather than to any one button.
   it("ignores a blur on a button that never held focus", () => {
     const onHighlightHover = jest.fn();
-    render(<Chat chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
+    render(<Chat enableHighlights chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
     fireEvent.blur(screen.getByRole("button", { name: /the live output/ }));
     expect(onHighlightHover).not.toHaveBeenCalled();
   });
 
   it("marks the active button pressed", () => {
-    render(<Chat chat={chatResult([turn])} activeHighlightKey="t1:1" />);
+    render(<Chat enableHighlights chat={chatResult([turn])} activeHighlightKey="t1:1" />);
     expect(screen.getByRole("button", { name: /the live output/ })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: /the block that reads/ })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  // Pinning moves a ring onto an object elsewhere in the document. aria-pressed reports the button;
+  // nothing reports the target, so without this a screen reader hears a control with no effect.
+  it("announces the pinned highlight, and its release", () => {
+    const { rerender } = render(<Chat enableHighlights chat={chatResult([turn])} activeHighlightKey="t1:1" />);
+    expect(screen.getByTestId("chat-highlight-live")).toHaveTextContent("Highlighting the live output");
+
+    rerender(<Chat enableHighlights chat={chatResult([turn])} />);
+    expect(screen.getByTestId("chat-highlight-live")).toHaveTextContent("");
+  });
+
+  it("has no highlight live region when the unit has not enabled highlights", () => {
+    render(<Chat chat={chatResult([turn])} enableHighlights={false} activeHighlightKey="t1:1" />);
+    expect(screen.queryByTestId("chat-highlight-live")).not.toBeInTheDocument();
+  });
+
+  // A press that drags off the button and releases elsewhere fires neither onMouseUp on the button
+  // nor onFocus, so a pointer-focus flag left standing would swallow the next keyboard focus of any
+  // button — silently costing a keyboard user their preview.
+  it("does not let a dragged-off press swallow the next keyboard focus", () => {
+    const onHighlightHover = jest.fn();
+    render(<Chat enableHighlights chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
+    const first = screen.getByRole("button", { name: /the block that reads the sensor/ });
+    const second = screen.getByRole("button", { name: /the live output/ });
+
+    fireEvent.mouseEnter(first);
+    fireEvent.mouseDown(first);
+    fireEvent.mouseLeave(first);   // dragged off; no mouseup, no focus event
+    onHighlightHover.mockClear();
+
+    fireEvent.focus(second);
+    expect(onHighlightHover).toHaveBeenCalledWith("t1", 1, true);
   });
 
   it("renders nothing when the unit has not enabled highlights", () => {

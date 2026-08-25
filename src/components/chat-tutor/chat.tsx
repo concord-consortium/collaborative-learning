@@ -22,8 +22,8 @@ interface IProps {
   onHighlightHover?: (turnId: string, index: number, hovering: boolean) => void;
   onHighlightToggle?: (turnId: string, index: number) => void;
   activeHighlightKey?: string;
-  // Whether this unit offers highlight buttons at all. Defaults to true: the policy lives in the
-  // sidebar, which is where unit config lives, and this component only renders what it is given.
+  // Whether this unit offers highlight buttons at all. Defaults to false, matching the unit-config
+  // default: a caller that forgets to pass it gets the feature off rather than on for every unit.
   enableHighlights?: boolean;
 }
 
@@ -118,7 +118,7 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
 };
 
 export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
-    onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = true }) => {
+    onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
   const { turns, error, pending, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -207,6 +207,17 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
     return "";
   }, [turns]);
 
+  // The label of whichever button is currently pinned, for the highlight live region. Empty when
+  // nothing is pinned, which is also what announces a release.
+  const activeHighlightLabel = useMemo(() => {
+    if (!activeHighlightKey) return "";
+    for (const turn of turns) {
+      const index = turn.highlights?.findIndex((_, i) => highlightKey(turn.id, i) === activeHighlightKey);
+      if (index !== undefined && index >= 0) return turn.highlights?.[index].label ?? "";
+    }
+    return "";
+  }, [activeHighlightKey, turns]);
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const text = input.trim();
@@ -288,8 +299,13 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
                           // Each handler records or withdraws only this button's own claim. The winner
                           // across all buttons is decided by activePreview above.
                           onMouseEnter={() => setHoverId({ turnId: turn.id, index })}
-                          onMouseLeave={() => setHoverId(cur => isSameHighlightId(cur, turn.id, index)
-                            ? undefined : cur)}
+                          onMouseLeave={() => {
+                            // Also clears the pointer-focus flag: a press that drags off the button
+                            // and releases elsewhere fires neither onMouseUp here nor onFocus, so a
+                            // flag left standing would swallow the next keyboard focus of any button.
+                            pointerFocus.current = false;
+                            setHoverId(cur => isSameHighlightId(cur, turn.id, index) ? undefined : cur);
+                          }}
                           onMouseDown={() => { pointerFocus.current = true; }}
                           onMouseUp={() => { pointerFocus.current = false; }}
                           onFocus={() => {
@@ -324,6 +340,15 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       <div className="visually-hidden" aria-live="polite" data-testid="chat-live">
         {!pending && lastAssistantText ? `Tutor said: ${lastAssistantText}` : ""}
       </div>
+
+      {/* Pinning a highlight moves a ring onto an object elsewhere in the document, where nothing
+          announces it: aria-pressed reports the button's own state, and the target changes by CSS
+          class alone. Without this the button is, to a screen reader, a control with no effect. Its
+          own region rather than the one above, so a highlight does not re-announce the reply. */}
+      {enableHighlights &&
+        <div className="visually-hidden" aria-live="polite" data-testid="chat-highlight-live">
+          {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
+        </div>}
 
       {error && <div className="chat-error" role="alert" data-testid="chat-error">{error}</div>}
 

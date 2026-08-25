@@ -166,8 +166,8 @@ describe("releaseOwnHighlightRefs", () => {
     expect(content.highlightRef).toEqual({ kind: "variable", variableId: "var-gripper" });
   });
 
-  // An AI-emitted reference has no owning component, so it sets no source and nothing can
-  // own-release it. Guard against a source-less chip clearing it by accident.
+  // The invariant: a highlight set with no source token is owned by nobody, so no source's
+  // own-release may take it — including a release that also passes no token.
   it("leaves a highlight with no source alone", () => {
     const content = emptyContent();
     content.setPinnedHighlightRef({ kind: "variable", variableId: "var-emg" });

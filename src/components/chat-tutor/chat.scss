@@ -1,5 +1,9 @@
 @import "../vars";
 
+// The bubble and the highlight-button row beneath it are aligned by sharing this width; two
+// literals would let one be edited without the other and silently misalign the row.
+$chat-bubble-max-width: 85%;
+
 // The .visually-hidden utility used here is the global one from src/index.scss.
 
 // Color pairs below are WCAG AA checked: white on $workspace-teal-dark-2 = 7.0:1;
@@ -190,7 +194,7 @@
   }
 
   .chat-bubble {
-    max-width: 85%;
+    max-width: $chat-bubble-max-width;
     padding: 8px 12px;
     border-radius: 14px;
     white-space: pre-wrap;
@@ -206,7 +210,7 @@
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 6px;
-    max-width: 85%;
+    max-width: $chat-bubble-max-width;
   }
 
   .chat-highlight {
@@ -218,6 +222,11 @@
     background: white;
     color: $charcoal-dark-2;
     cursor: pointer;
+    // `label` is model-supplied and TUTOR_REPLY_FORMAT cannot bound its length (strict json_schema
+    // has no maxLength), so one long unbroken token would otherwise overflow and give the drawer
+    // horizontal scroll. .chat-bubble guards its own text the same way.
+    max-width: 100%;
+    overflow-wrap: anywhere;
 
     &:hover { background: $charcoal-light-6; }
     &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
