@@ -136,8 +136,21 @@ const PARTIAL_RAW_OFFERING_INFO = {
 const curriculumConfig = CurriculumConfig.create({curriculumSiteUrl: ""});
 
 describe("getFirebaseJWTParams", () => {
+  const originalUrlParams = UrlParams.urlParams;
+
+  afterEach(() => {
+    (UrlParams as any).urlParams = originalUrlParams;
+  });
+
   it("defaults to the collaborative-learning firebase app", () => {
     expect(getFirebaseJWTParams()).toBe("?firebase_app=collaborative-learning");
+  });
+
+  it("defaults to the firebase app of the environment firebaseEnv selects", () => {
+    // Without this the client would talk to the staging project while asking the portal for a token
+    // signed by production's service account, and the staging project would reject every login.
+    (UrlParams as any).urlParams = { firebaseEnv: "staging" };
+    expect(getFirebaseJWTParams()).toBe("?firebase_app=collaborative-learning-staging");
   });
 
   it("supports requesting a JWT for another firebase app", () => {
