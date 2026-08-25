@@ -105,11 +105,10 @@ describe("ChatTutorSidebar as a highlight source", () => {
     expect(typeof content.pinnedHighlightSource).toBe("string");
   });
 
-  // The regression this guards: the pinned button key used to live in a useRef. Re-pinning within
-  // one sidebar reassigns the same content.pinnedHighlightSource (it's this sidebar's own token both
-  // times), so MobX saw no change to react to and the previously pressed button never re-rendered —
-  // the ring moved to the new tile while the old button stayed lit. Holding the key in useState fixed
-  // it; nothing else in the component stops it from regressing.
+  // Asserts the pressed state follows the pin. Two independent things in the sidebar keep that
+  // true — the pinned key lives in React state, and handleHighlightToggle clears this sidebar's pin
+  // before moving it — and either alone satisfies this test, so it does not discriminate between
+  // them. Breaking both is what fails here.
   it("clicking a second button un-presses the first", () => {
     const content = makeContent();
     renderSidebar(content);

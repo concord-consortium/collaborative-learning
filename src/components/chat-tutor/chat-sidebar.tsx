@@ -87,12 +87,20 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   // here would mint a new token mid-life and strand this sidebar's own pinned highlight.
   const highlightSource = useRef(`chat-highlight-${uniqueId()}`).current;
 
-  // Which of this sidebar's buttons is pinned. useState so re-pinning within this sidebar
-  // (still the same content.pinnedHighlightSource) re-renders instead of leaving the previously
-  // pressed button showing stale `.active`/`aria-pressed` state. The guard below still defers to
-  // the model, so a pin taken over by another source (a variable chip, say) stops showing here.
+  // Which of this sidebar's buttons is pinned. React state rather than a ref: every button here
+  // shares one source token, so re-pinning within this sidebar can leave
+  // content.pinnedHighlightSource holding the value it already had, giving MobX nothing to react to
+  // and leaving the previously pressed button with stale `.active`/`aria-pressed`. A state update
+  // re-renders either way.
+  //
+  // handleHighlightToggle also drops this sidebar's pin before moving it, which changes the source
+  // to undefined and back and forces the same re-render — so switching this to a ref fails no test.
+  // Keep the state regardless: that clear is there to stop two buttons citing one object from
+  // cancelling each other, and nothing binds it to keeping the pressed state fresh.
   const [pinnedKey, setPinnedKey] = useState<string | undefined>(undefined);
 
+  // Deferring to the model rather than trusting pinnedKey alone is what makes another source taking
+  // the pin — a variable chip, say — un-press this sidebar's button.
   const activeHighlightKey = content?.pinnedHighlightSource === highlightSource
     ? pinnedKey : undefined;
 
