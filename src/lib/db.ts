@@ -768,6 +768,8 @@ export class DB {
           case ProblemDocument:
           case ProblemPublication:
           case SupportPublication:
+            // Nothing here creates a SupportPublication: supports are written to `mcsupports` by a Cloud
+            // Function using admin credentials. The case is listed so the switch stays exhaustive.
             // The top-level `classHash` here is actually never read, it is left for legacy consistency in the RTDB.
             // See docs/document-metadata/metadata-fields.md for details.
             rtdbMetadata = { ...common, type, classHash, offeringId };
@@ -840,7 +842,9 @@ export class DB {
   // (SortedDocuments.fetchFullDocument) or, after a reload with it as the primary document, from
   // DocumentWorkspace — so unit load pays one pointer read rather than a metadata read, an RTDB fetch, and a
   // history subscription for every student on every load.
-  public async resolveClassWideDocument(classWideDoc: { kind: string; title: string }) {
+  // The caller's only job is convergence, so it discards the key; the key is returned because it is what
+  // says which document the class converged on.
+  private async resolveClassWideDocument(classWideDoc: { kind: string; title: string }) {
     const { user, unit } = this.stores;
     // For a class-wide document the canonical-pointer label equals the document's kind.
     // The document's transitional `type` stays GroupDocument while its `kind` is the declared kind.
