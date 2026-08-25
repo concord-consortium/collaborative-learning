@@ -22,14 +22,14 @@
 import fs from "fs";
 import admin from "firebase-admin";
 import { getScriptRootFilePath } from "./lib/script-utils.js";
-import { createRtdbReader, resolveDatabaseUrl } from "./lib/repair-cli";
+import { createRtdbReader, kSkipReportFile, resolveDatabaseUrl } from "./lib/repair-cli";
 import {
   kDefaultRetentionMs, kProtectedSpaces, planDeletions,
   type IPlannedDeletion, type ISkippedRecord
 } from "./lib/deletion-plan";
 
 async function main() {
-  const reportPath = process.env.REPORT ?? getScriptRootFilePath("create-missing-skipped.json");
+  const reportPath = process.env.REPORT ?? getScriptRootFilePath(kSkipReportFile);
   const records: ISkippedRecord[] = JSON.parse(fs.readFileSync(reportPath, "utf8"));
   const retentionMs = process.env.RETENTION_DAYS
     ? Number(process.env.RETENTION_DAYS) * 24 * 60 * 60 * 1000

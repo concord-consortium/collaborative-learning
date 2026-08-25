@@ -270,7 +270,7 @@ async function main() {
   const nodeFs = (await import("fs")).default;
   const { getScriptRootFilePath, getProblemDetails } = await import("./lib/script-utils.js");
   const {
-    createRtdbReader, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
+    createRtdbReader, kOutputDir, kSkipReportFile, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
   } = await import("./lib/repair-cli");
   const { buildRtdbDocumentIndex } = await import("./lib/rtdb-document-index");
   const { createCurriculumValidator, decodeDemoOfferingId } = await import("./lib/curriculum-position");
@@ -402,9 +402,10 @@ async function main() {
     Object.entries(byYear).sort()
   ), null, 2));
   if (newest) console.log(`newest skipped document: ${new Date(newest).toISOString().slice(0, 10)}`);
-  nodeFs.writeFileSync(getScriptRootFilePath("create-missing-skipped.json"),
-    JSON.stringify(everySkipped, null, 2));
-  console.log(`skipped documents written to ${getScriptRootFilePath("create-missing-skipped.json")}`);
+  const reportPath = getScriptRootFilePath(kSkipReportFile);
+  nodeFs.mkdirSync(getScriptRootFilePath(kOutputDir), { recursive: true });
+  nodeFs.writeFileSync(reportPath, JSON.stringify(everySkipped, null, 2));
+  console.log(`skipped documents written to ${reportPath}`);
   if (dryRun) console.log("DRY RUN — set APPLY=1 to write");
   process.exit(0);
 }

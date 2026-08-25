@@ -3,6 +3,17 @@
 
 import { resolveSpace } from "./rtdb-document-index";
 
+/**
+ * Where a run's reports go, relative to `scripts/`.
+ *
+ * A gitignored directory rather than gitignored filenames: these reports name real classes and users,
+ * so the default has to be "not committed" for anything a run writes, including reports added later.
+ */
+export const kOutputDir = "output";
+
+/** The skip report `create-missing-document-metadata.ts` writes and the deletion script reads. */
+export const kSkipReportFile = `${kOutputDir}/create-missing-skipped.json`;
+
 /** `SPACES=demo/CLUE,authed/learn_concord_org` limits a run; unset means every space. */
 export function parseSpacesFilter(raw: string | undefined): string[] | undefined {
   const names = (raw ?? "").split(",").map(name => name.trim()).filter(Boolean);
