@@ -37,7 +37,7 @@ export function generateHtml(clueDocument: unknown) {
             // A height of 0, or anything that is not a positive number, would collapse the
             // iframe and hide the document the screenshot is meant to show. Ignoring it
             // leaves the iframe at its starting height.
-            const height = Number(event.data.height);
+            const height = event.data.height;
             if (!Number.isFinite(height) || height <= 0) return;
             document.getElementById("clue-frame").height = height + "px";
           }
