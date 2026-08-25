@@ -1,3 +1,39 @@
+/*
+Describes a drawing tile as a table so that anything reading the summary can name a specific shape
+by the id the document stores.
+
+A drawing with two loose shapes, a variable chip, a group of two, and one hidden object serializes
+to this — see the "matches the documented example" test, which pins it:
+
+    This tile contains a drawing with 7 objects, listed back to front.
+
+    | id | type | position | size | parent | details |
+    | --- | --- | --- | --- | --- | --- |
+    | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
+    | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  | rx=30 ry=30 fill=none stroke=#d10000 |
+    | Dp47z | variable | 320, 40 | 75 x 24 |  | variableId=v_speed |
+    | Bq91x | group | 100, 200 | 200 x 100 |  | 2 objects |
+    | kid1 | rectangle | 100, 200 | 100 x 50 | Bq91x | fill=#00b400 |
+    | kid2 | vector | 200, 250 | 100 x 50 | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
+    | t9Qr4 | text | 40, 320 | 90 x 20 |  | text="too fast" visible=false |
+
+Four things in that output are not obvious from the code:
+
+- `position` and `size` describe the object's bounding box, not its stored fields. The ellipse above
+  stores its centre at 200,100 with radii of 30 but reports 170,70. Every row therefore means the
+  same thing, which is what lets a reader compare two of them.
+- Row order is document order, which is back to front. The preamble says so, because otherwise the
+  ordering is information the model cannot see.
+- A group's members follow it and name it in `parent`, with coordinates converted out of the group's
+  normalized space into the document's. `kid1` is stored as `x: 0, width: 0.5`.
+- Hidden objects appear, marked `visible=false`, rather than being dropped. They are still in the
+  document and their ids still resolve; whether a consumer may point a student at one is a prompt
+  decision rather than a serializer decision.
+
+An empty drawing returns the bare sentence this file replaced, so documents whose drawing tiles have
+no objects summarize exactly as they did before.
+*/
+
 import { absoluteChildBoundingBox, BoundingBox } from "../../drawing/drawing-geometry";
 import { boundingBoxForSnapshot, DrawingObjectSnapshot } from "../../drawing/drawing-object-snapshot";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";

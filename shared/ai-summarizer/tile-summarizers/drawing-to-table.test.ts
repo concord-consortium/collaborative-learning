@@ -1,5 +1,35 @@
 import { drawingToTable } from "./drawing-to-table";
 
+// Pins the example in drawing-to-table.ts's header comment. If this fails, the format changed and
+// that comment is now wrong — update both, and prefer the output shown here over re-deriving it.
+it("matches the documented example", () => {
+  const result = drawingToTable({ objects: [
+    { id: "a7Kd2", type: "rectangle", x: 40, y: 20, width: 120, height: 80,
+      fill: "#0069ff", stroke: "#000000", strokeWidth: 2 },
+    { id: "c3Mn8", type: "ellipse", x: 200, y: 100, rx: 30, ry: 30, fill: "none", stroke: "#d10000" },
+    { id: "Dp47z", type: "variable", x: 320, y: 40, variableId: "v_speed" },
+    { id: "Bq91x", type: "group", x: 100, y: 200, width: 200, height: 100, objects: [
+      { id: "kid1", type: "rectangle", x: 0, y: 0, width: 0.5, height: 0.5, fill: "#00b400" },
+      { id: "kid2", type: "vector", x: 0.5, y: 0.5, dx: 0.5, dy: 0.5, stroke: "#000000" }
+    ]},
+    { id: "t9Qr4", type: "text", x: 40, y: 320, width: 90, height: 20,
+      text: "too fast", visible: false }
+  ]});
+
+  expect(result).toBe(
+`This tile contains a drawing with 7 objects, listed back to front.
+
+| id | type | position | size | parent | details |
+| --- | --- | --- | --- | --- | --- |
+| a7Kd2 | rectangle | 40, 20 | 120 x 80 |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
+| c3Mn8 | ellipse | 170, 70 | 60 x 60 |  | rx=30 ry=30 fill=none stroke=#d10000 |
+| Dp47z | variable | 320, 40 | 75 x 24 |  | variableId=v_speed |
+| Bq91x | group | 100, 200 | 200 x 100 |  | 2 objects |
+| kid1 | rectangle | 100, 200 | 100 x 50 | Bq91x | fill=#00b400 |
+| kid2 | vector | 200, 250 | 100 x 50 | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
+| t9Qr4 | text | 40, 320 | 90 x 20 |  | text="too fast" visible=false |`);
+});
+
 describe("drawingToTable", () => {
   it("returns the legacy sentence for an empty drawing", () => {
     expect(drawingToTable({ objects: [] })).toBe("This tile contains a drawing.");
