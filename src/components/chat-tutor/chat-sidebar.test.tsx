@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemModel } from "../../models/curriculum/problem";
 import { ChatTutorSidebar } from "./chat-sidebar";
@@ -47,18 +47,16 @@ jest.mock("./use-tutor-drawer-trap", () => ({
 // [.., appConfig, db, user], so returning new identities each render would invalidate that memo
 // every render, re-subscribe, deliver turns, set state, and render again — an infinite loop rather
 // than a test failure. The real useStores hands back the same object from context every time.
-jest.mock("../../hooks/use-stores", () => {
-  const stores = {
-    appConfig: {
-      chatTutorHighlights: true,
-      chatTutorPrompts: undefined,
-      chatTutorIntro: undefined,
-    },
-    db: { firestore: {} },
-    user: { id: "1", network: undefined, classHash: "class-hash" },
-  };
-  return { useStores: () => stores };
-});
+const mockStores = {
+  appConfig: {
+    chatTutorHighlights: true,
+    chatTutorPrompts: undefined,
+    chatTutorIntro: undefined,
+  },
+  db: { firestore: {} },
+  user: { id: "1", network: undefined, classHash: "class-hash" },
+};
+jest.mock("../../hooks/use-stores", () => ({ useStores: () => mockStores }));
 
 describe("ChatTutorSidebar as a highlight source", () => {
   // Real MST node rather than a plain object: useRightDirty calls onPatch(content, …), which MST
@@ -72,17 +70,23 @@ describe("ChatTutorSidebar as a highlight source", () => {
   // but it's cheap to build for real rather than cast a stub through the prop type.
   const problem = ProblemModel.create({ ordinal: 1, title: "Test Problem" });
 
-  const renderSidebar = (content: ReturnType<typeof makeContent>) =>
-    render(
-      <ChatTutorSidebar
-        documentKey="doc-1"
-        documentTitle="Test Document"
-        problemPath="unit/1/1"
-        problem={problem}
-        content={content}
-        onClose={jest.fn()}
-      />
-    );
+  const sidebar = (content: ReturnType<typeof makeContent>, documentKey = "doc-1") => (
+    <ChatTutorSidebar
+      documentKey={documentKey}
+      documentTitle="Test Document"
+      problemPath="unit/1/1"
+      problem={problem}
+      content={content}
+      onClose={jest.fn()}
+    />
+  );
+
+  const renderSidebar = (content: ReturnType<typeof makeContent>) => render(sidebar(content));
+
+  // The flag is read per render, so a test that changes it must put it back.
+  beforeEach(() => {
+    mockStores.appConfig.chatTutorHighlights = true;
+  });
 
   it("renders one button per highlight, labelled from the model's own text", () => {
     renderSidebar(makeContent());
@@ -225,5 +229,53 @@ describe("ChatTutorSidebar as a highlight source", () => {
 
     unmount();
     expect(content.pinnedHighlightRef).toBeUndefined();
+  });
+
+  // Changing documentKey or problemPath swaps the conversation without unmounting the sidebar, so a
+  // highlight owned by the old conversation must not survive into the new one. Those two deps on the
+  // release effect are the only thing doing that, and they look removable to anyone tidying a
+  // dependency array — nothing else in the component fails if they go.
+  it("releases both refs when the conversation swaps without an unmount", () => {
+    const content = makeContent();
+    const { rerender } = render(sidebar(content, "doc-1"));
+    fireEvent.mouseEnter(screen.getByRole("button", { name: /the first block/ }));
+    fireEvent.click(screen.getByRole("button", { name: /the first block/ }));
+    expect(content.pinnedHighlightRef).toBeDefined();
+
+    rerender(sidebar(content, "doc-2"));
+
+    expect(content.pinnedHighlightRef).toBeUndefined();
+    expect(content.hoveredHighlightRef).toBeUndefined();
+  });
+
+  // The sidebar shows a button as pressed only while the model still says this sidebar owns the pin.
+  // Both halves of that matter: the observer wrapper, and deferring to pinnedHighlightSource rather
+  // than trusting the local key. docs/highlights.md points at this component as the one to copy, so
+  // the deference is part of what it is demonstrating.
+  it("un-presses its button when another source takes the pin", () => {
+    const content = makeContent();
+    renderSidebar(content);
+    const first = screen.getByRole("button", { name: /the first block/ });
+
+    fireEvent.click(first);
+    expect(first).toHaveAttribute("aria-pressed", "true");
+
+    // act() because this re-render comes from MobX rather than from a React event, so without it the
+    // DOM has not flushed by the time the assertion runs.
+    act(() => {
+      content.setPinnedHighlightRef(
+        { kind: "object", tileId: "tileB", objectId: "objB" }, "some-other-source");
+    });
+
+    expect(first).toHaveAttribute("aria-pressed", "false");
+  });
+
+  // enableHighlights={!!appConfig.chatTutorHighlights} is the entire unit-config gate. Deleting the
+  // prop would let Chat's default apply and turn the feature on for every unit.
+  it("renders no highlight buttons when the unit does not enable them", () => {
+    mockStores.appConfig.chatTutorHighlights = false;
+    renderSidebar(makeContent());
+    expect(screen.queryByTestId("chat-highlights")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /the first block/ })).not.toBeInTheDocument();
   });
 });
