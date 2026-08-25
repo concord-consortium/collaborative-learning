@@ -82,7 +82,8 @@ OPENAI_API_KEY=sk-…
 
 ```bash
 npx tsx harness.ts import    --from examples/synthetic-corpus --corpus synthetic-corpus \
-                             [--source synthetic|demo|qa] [--prune]
+                             [--source synthetic|demo|qa|production] [--prune] \
+                             [--production-data-approved]  # required with --source production
 npx tsx harness.ts represent --corpus synthetic-corpus --variants default,minimal
 npx tsx harness.ts render    --corpus synthetic-corpus --mode <mode> \
                              [--clue-url <url>] [--unit <unit>] [--shutterbug-url <url>] \
@@ -151,6 +152,26 @@ directory. `import` generates the manifest; it is never committed. Manifest rule
 - `historical` holds a production `done`-queue record (milestone 6). It describes an analysis of
   whatever the document looked like *then*, so it is never lined up against a fresh run unless the
   content hash proves the input is identical — see `historicalIsComparable` in `src/report.ts`.
+
+### Importing a production corpus
+
+A production corpus arrives in three steps, and the third one is not optional:
+
+1. **Survey and export.** `scripts/survey-class-documents.ts` (one directory up, beside the other
+   Firebase admin scripts) surveys one class read-only and, with `--export`, writes each non-empty
+   document as `documents/<id>.json` plus a `key-map.json` recording every id's original document
+   key, owner uid, unit, investigation, problem and survey modality. The export ids are
+   deliberately opaque — that provenance lives *only* in the key map — and the script refuses any
+   `--export` destination outside `data/`.
+2. **Import, gated.** `import --from <export-dir> --corpus <name> --source production
+   --production-data-approved` copies the documents in. Because the ids carry no provenance, the
+   imported manifest has `unit`, `investigation`, `problem` and `contextId` as `null` at this
+   point — that is expected, not a failed import.
+3. **Fill provenance from the key map.** `npx tsx apply-key-map.ts --corpus <name> --key-map
+   <export-dir>/key-map.json` fills those null fields and stamps the provenance labels
+   (`sourceKey`, `sourceUid`, `surveyModality`), which survive re-imports. Skip this and the
+   manifest's provenance stays null forever: renders and runs still work, but nothing can group
+   results by problem, stratify them by modality, or trace a document back to its source.
 
 ### Representations
 
@@ -879,6 +900,8 @@ lockfile changes.
 
 ```
 harness.ts                 CLI: argv parsing and command dispatch
+apply-key-map.ts           fills a production corpus's provenance fields from a survey key map
+debug-render.ts            renders ONE corpus document with full observability (console, DOM probes)
 src/schemas.ts             types, validators, canonicalJson / sha256Canonical
 src/corpus.ts              corpus layout, import, manifest read/write
 src/capability.ts          tile capability registry, document classification
