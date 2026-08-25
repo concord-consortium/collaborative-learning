@@ -420,9 +420,28 @@ describe("createMissingDocumentMetadata skip reporting", () => {
 
     // Reported in index order, which is the order the documents were indexed.
     expect(result.skipped).toEqual([
-      { key: "k1", reason: "unresolvedCurriculum", createdAt: 1600000000000, type: "problem",
+      { key: "k1", classHash: "c1", uid: "u1", hasContent: true, hasMetadata: true,
+        reason: "unresolvedCurriculum", createdAt: 1600000000000, type: "problem",
         offeringId: "nosuch1" },
-      { key: "k2", reason: "skippedNoContent", createdAt: 1700000000000 }
+      { key: "k2", classHash: "c1", uid: "u1", hasContent: false, hasMetadata: true,
+        reason: "skippedNoContent", createdAt: 1700000000000 }
     ]);
+  });
+});
+
+describe("createMissingDocumentMetadata skip addressing", () => {
+  it("records where a skipped document lives, so a follow-up can act on it", async () => {
+    // A key alone cannot address anything in the realtime database; the class and uid are the rest
+    // of the path. Without them the skip report can be read but not acted on.
+    const { firestore } = fakeFirestore();
+    const index = new Map([["k1", home({ classHash: "class-9", uid: "user-7", hasContent: false })]]);
+    const nodes = { k1: { type: "personal", createdAt: 1 } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: true, log: silent });
+
+    expect(result.skipped[0]).toMatchObject({
+      key: "k1", classHash: "class-9", uid: "user-7", hasContent: false, hasMetadata: true
+    });
   });
 });

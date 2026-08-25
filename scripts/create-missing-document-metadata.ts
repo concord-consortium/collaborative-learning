@@ -73,6 +73,12 @@ export interface ICurriculumPosition {
  */
 export interface ISkippedDocument {
   key: string;
+  /** The rest of the realtime-database path. A key alone addresses nothing. */
+  classHash: string;
+  uid: string;
+  /** Which halves exist, so a follow-up knows which nodes are actually there. */
+  hasContent: boolean;
+  hasMetadata: boolean;
   reason: CreateBucket;
   createdAt?: number;
   type?: string;
@@ -183,9 +189,12 @@ export async function createMissingDocumentMetadata(
     batched = 0;
   };
 
-  const skip = (key: string, reason: CreateBucket, node?: any) => {
+  const skip = (key: string, indexed: IDocumentHome, reason: CreateBucket, node?: any) => {
     counts[reason]++;
-    const entry: ISkippedDocument = { key, reason };
+    const entry: ISkippedDocument = {
+      key, classHash: indexed.classHash, uid: indexed.uid,
+      hasContent: indexed.hasContent, hasMetadata: indexed.hasMetadata, reason
+    };
     if (node?.createdAt != null) entry.createdAt = node.createdAt;
     if (reason === "unresolvedCurriculum") {
       entry.type = node?.type;
@@ -197,7 +206,7 @@ export async function createMissingDocumentMetadata(
   for (const [key, indexed] of index) {
     if (present.has(key)) { counts.alreadyPresent++; continue; }
     if (!isRtdbAddressable(indexed.classHash, indexed.uid, key)) {
-      skip(key, "skippedUnaddressable");
+      skip(key, indexed, "skippedUnaddressable");
       continue;
     }
 
@@ -205,8 +214,8 @@ export async function createMissingDocumentMetadata(
       `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documentMetadata/${key}`;
     const node = await readNode(nodePath);
     // Read before the content check so a skipped document can still report its age.
-    if (!indexed.hasContent) { skip(key, "skippedNoContent", node); continue; }
-    if (!node) { skip(key, "nodeUnreadable"); continue; }
+    if (!indexed.hasContent) { skip(key, indexed, "skippedNoContent", node); continue; }
+    if (!node) { skip(key, indexed, "nodeUnreadable"); continue; }
 
     const row: Record<string, any> = {
       key,
@@ -228,7 +237,7 @@ export async function createMissingDocumentMetadata(
       if (!position) {
         // Writing the row without these would place the document on the wrong container axis and
         // hand it to the offeringId backfill as new work. Report it and leave it alone.
-        skip(key, "unresolvedCurriculum", node);
+        skip(key, indexed, "unresolvedCurriculum", node);
         continue;
       }
       row.offeringId = node.offeringId;
