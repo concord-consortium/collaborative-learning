@@ -16,6 +16,8 @@ const clueURL = "https://collaborative-learning.concord.org/branch/shutterbug-su
 const clueUnit = "mods";
 const shutterbugURL = "https://api.concord.org/shutterbug-production";
 
+// scripts/shutterbug.ts has a near-copy of this page for rendering a document by hand during
+// development. Keep fixes to one in step with the other until they are unified.
 export function generateHtml(clueDocument: unknown) {
   const source = escapeHtmlAttribute(`${clueURL}/iframe.html?unit=${clueUnit}&unwrapped&readOnly`);
   return `

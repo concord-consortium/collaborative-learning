@@ -8,6 +8,8 @@
 
 import fs from "fs";
 
+import { escapeHtmlAttribute, escapeJsonForScript } from "../shared/escape-for-html";
+
 const clueCodebase = "https://collaborative-learning.concord.org/branch/shutterbug-support";
 // const clueCodebase = "http://localhost:8080";
 // const clueCodebase = "https://reimagined-journey-v6q9774jwh6pr4-4000.app.github.dev/";
@@ -16,24 +18,34 @@ const clueCodebase = "https://collaborative-learning.concord.org/branch/shutterb
 // const shutterbugServer = "http://localhost:4000";
 const shutterbugServer = "https://api.concord.org/shutterbug-staging";
 
+// This page is a near-copy of generateHtml in functions-v2/src/on-analysis-document-pending.ts,
+// which is the one the AI analysis pipeline actually uses. They are separate because this script
+// targets a different CLUE build and Shutterbug server and asks for a full-page capture. Keep
+// fixes to one in step with the other until they are unified.
 function generateHtml(clueDocument: any) {
+  const source = escapeHtmlAttribute(`${clueCodebase}/iframe.html?unwrapped&readOnly`);
   return `
-    <script>const initialValue=${JSON.stringify(clueDocument)}</script>
+    <script>const initialValue=${escapeJsonForScript(JSON.stringify(clueDocument))}</script>
     <!-- height will be updated when iframe sends updateHeight message -->
     <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
       allow='serial'
-      src='${clueCodebase}/iframe.html?unwrapped&readOnly'
+      src="${source}"
     ></iframe>
     <script>
       const clueFrame = document.getElementById('clue-frame')
       function sendInitialValueToEditor() {
         if (!clueFrame.contentWindow) {
-          console.warning("iframe doesn't have contentWindow");
+          console.warn("iframe doesn't have contentWindow");
+          return;
         }
 
         window.addEventListener("message", (event) => {
-          if (event.data.type === "updateHeight") {
-            document.getElementById("clue-frame").height = event.data.height + "px";
+          if (event.data?.type === "updateHeight") {
+            // A height of 0, or anything that is not a positive number, would collapse the
+            // iframe and hide the document the screenshot is meant to show.
+            const height = event.data.height;
+            if (!Number.isFinite(height) || height <= 0) return;
+            document.getElementById("clue-frame").height = height + "px";
           }
         })
 
