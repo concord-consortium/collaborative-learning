@@ -21,8 +21,7 @@ import {
 /**
  * The slice of puppeteer this backend uses, written out structurally so a test can supply a fake
  * browser and so the module type-checks whether or not puppeteer is installed.
- */
-/**
+ *
  * Elements are measured, never screenshotted: every capture is a page screenshot clipped to a
  * measured box, because the element capture path's machinery hangs on continuously animating
  * content (see the full-document capture below).

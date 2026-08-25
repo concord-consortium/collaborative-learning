@@ -10,80 +10,95 @@ it say?".
 
 Output: stdout gets a compact report — per-document facts, a per-document category distribution
 across its done records, and failure reasons. The full detail (every done record, every AI comment
-text) goes to the file named by --out. Everything in that file derives from real teacher/student
-work, so keep it inside the repo's canonical ignored artifact root:
-
-  npx tsx survey-class-documents.ts --out ../scripts/ai-harness/data/surveys/teacher-workshop.txt
+text) goes to the file named by --out. Everything either output derives from is real teacher/student
+work, so both --out and --export are refused outside the repo's canonical ignored artifact root,
+scripts/ai-harness/data/.
 
 Setup: a service account key at scripts/serviceAccountKey.json (see scripts/README.md), or
 GOOGLE_APPLICATION_CREDENTIALS pointing at one.
 
-Run from the functions-v2 directory:
+Run from the scripts directory:
   npx tsx survey-class-documents.ts <context_id>
-  npx tsx survey-class-documents.ts [--verbose]     # full detail on stdout too (long!)
-  npx tsx survey-class-documents.ts [--out <file>]  # full detail to a file; stdout stays compact
-  npx tsx survey-class-documents.ts [--export <dir>]  # ALSO writes corpus source files (see below)
+  npx tsx survey-class-documents.ts <context_id> [--verbose]     # full detail on stdout too (long!)
+  npx tsx survey-class-documents.ts <context_id> [--out <file>]  # full detail to a file
+  npx tsx survey-class-documents.ts <context_id> [--export <dir>]  # ALSO writes corpus source files
 
---export writes every non-empty document's content as <dir>/documents/<id>.json (ids shaped
-p<investigation>-<problem>-u<uid>-<key fragment>, valid for `harness import`) plus
-<dir>/key-map.json mapping each id back to its realtime-database key, owner uid, and problem —
-the input to `harness.ts import --source production --production-data-approved` and then
-`apply-key-map.ts`. This is real teacher/student work landing on disk: point --export inside
-scripts/ai-harness/data/ (gitignored), e.g. --export ../scripts/ai-harness/data/exports/teacher-workshop
+The context id can also come from SURVEY_CONTEXT_ID in the environment (e.g. via scripts/.env) —
+it is an identifier for real people's work, so it is never committed as a default in here.
+
+--export writes every non-empty document's content as <dir>/documents/<id>.json plus
+<dir>/key-map.json. The ids are deliberately opaque (`p<investigation>-<problem>-<NN>`): they become
+corpus filenames, envelope paths, results-file columns and review-report headings, so they carry no
+portal uid and no document-key fragment — that provenance lives only in key-map.json, which stays
+under the gitignored data root with everything else. key-map.json is the input to
+`harness.ts import --source production --production-data-approved` and then `apply-key-map.ts`.
 */
 
 import fs from "fs";
 import path from "path";
-import {fileURLToPath} from "url";
 import admin from "firebase-admin";
+import { kAnalyzerUserParams } from "../shared/shared.js";
+import { getFirebaseBasePath, getFirestoreBasePath, getScriptRootFilePath } from "./lib/script-utils.js";
+import { isContainedBy } from "./ai-harness/src/files.js";
+import { getTileCapability } from "./ai-harness/src/capability.js";
 
-const kPortal = "learn_concord_org";
-const kFirestoreRoot = `authed/${kPortal}`;
-const kDatabaseRoot = `/authed/portals/${kPortal}/classes`;
+const kPortal = "learn.concord.org";
+const kFirestoreDocuments = getFirestoreBasePath(kPortal);
+const kDatabaseClasses = getFirebaseBasePath(kPortal);
 const kDatabaseUrl = "https://collaborative-learning-ec215.firebaseio.com";
-const kAdaUid = "ada_insight_1";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-  path.resolve(__dirname, "../scripts/serviceAccountKey.json");
-
-if (!fs.existsSync(keyPath)) {
-  console.error(`No service account key found at ${keyPath}.`);
-  console.error("Download one per scripts/README.md, or set GOOGLE_APPLICATION_CREDENTIALS.");
-  process.exit(1);
-}
-
-admin.initializeApp({credential: admin.credential.cert(keyPath), databaseURL: kDatabaseUrl});
-const firestore = admin.firestore();
+/** Everything derived from real documents stays inside the harness's gitignored data tree. */
+const kDataRoot = getScriptRootFilePath("ai-harness/data");
 
 // --- Arguments --------------------------------------------------------------
+
+/**
+ * Both output options land real work on disk, so both are held to the harness's rule (see
+ * `resolveDataPath` in scripts/ai-harness/harness.ts): nothing derived from student or teacher
+ * documents is ever written outside scripts/ai-harness/data/. Without this, `--export .` from the
+ * scripts directory would write real documents into a tracked directory.
+ */
+function resolveInsideDataRoot(flag: string, value: string): string {
+  const resolved = path.resolve(value);
+  if (!isContainedBy(resolved, kDataRoot)) {
+    console.error(`${flag} must point inside ${kDataRoot} — this output derives from real ` +
+      "teacher/student work and never leaves the gitignored data tree. " +
+      `Got: ${resolved}`);
+    process.exit(1);
+  }
+  return resolved;
+}
 
 let verbose = false;
 let outFile: string | undefined;
 let exportDir: string | undefined;
+// Always explicit: a class's context id is an identifier for real people's work, so it belongs in
+// the operator's command line or environment (e.g. exported from the gitignored scripts/.env),
+// never committed as a default.
 let contextId: string | undefined = process.env.SURVEY_CONTEXT_ID;
+let positionalContextId: string | undefined;
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === "--verbose") {
     verbose = true; continue;
   }
   if (argv[i] === "--out") {
-    outFile = argv[i + 1];
+    const value = argv[i + 1];
     i++;
-    if (!outFile || outFile.startsWith("--")) {
-      console.error("--out requires a file path, e.g. --out ../scripts/ai-harness/data/surveys/x.txt");
+    if (!value || value.startsWith("--")) {
+      console.error("--out requires a file path, e.g. --out ai-harness/data/surveys/class.txt");
       process.exit(1);
     }
+    outFile = resolveInsideDataRoot("--out", value);
     continue;
   }
   if (argv[i] === "--export") {
-    exportDir = argv[i + 1];
+    const value = argv[i + 1];
     i++;
-    if (!exportDir || exportDir.startsWith("--")) {
-      console.error("--export requires a directory, e.g. " +
-        "--export ../scripts/ai-harness/data/exports/teacher-workshop");
+    if (!value || value.startsWith("--")) {
+      console.error("--export requires a directory, e.g. --export ai-harness/data/exports/class");
       process.exit(1);
     }
+    exportDir = resolveInsideDataRoot("--export", value);
     continue;
   }
   // Only a bare token can be the context id. Anything flag-shaped is a mistake (a typo'd flag,
@@ -92,18 +107,30 @@ for (let i = 0; i < argv.length; i++) {
     console.error(`Unknown flag "${argv[i]}".`);
     process.exit(1);
   }
-  if (contextId && contextId !== process.env.SURVEY_CONTEXT_ID) {
-    console.error(`Unexpected second argument "${argv[i]}" — the context id is already "${contextId}".`);
+  if (positionalContextId !== undefined) {
+    console.error(`Unexpected second argument "${argv[i]}" — the context id is already "${positionalContextId}".`);
     process.exit(1);
   }
-  contextId = argv[i];
+  positionalContextId = argv[i];
 }
+if (positionalContextId !== undefined) contextId = positionalContextId;
 if (!contextId) {
   console.error("Usage: npx tsx survey-class-documents.ts <context_id> [--verbose] [--out <file>] " +
     "[--export <dir>]");
   console.error("(or set SURVEY_CONTEXT_ID in the environment)");
   process.exit(1);
 }
+
+// Credentials are checked after the arguments: a run that would die on usage anyway should say so,
+// not complain about a missing key first.
+const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || getScriptRootFilePath("serviceAccountKey.json");
+if (!fs.existsSync(keyPath)) {
+  console.error(`No service account key found at ${keyPath}.`);
+  console.error("Download one per scripts/README.md, or set GOOGLE_APPLICATION_CREDENTIALS.");
+  process.exit(1);
+}
+admin.initializeApp({ credential: admin.credential.cert(keyPath), databaseURL: kDatabaseUrl });
+const firestore = admin.firestore();
 
 /*
 Two-level reporting. `out` lines appear on stdout and in the file; `detail` lines always land in
@@ -179,14 +206,14 @@ function textOfTextTile(content: TileContentLike | undefined): string {
   return text.trim();
 }
 
-/** Tile types where a picture carries information text does not (mirrors the harness registry). */
-const kVisualTileTypes = new Set([
-  "Drawing", "Image", "Graph", "Geometry", "Diagram", "BarGraph", "DataCard", "Numberline",
-  "Expression", "Timeline", "WaveRunner", "Simulator", "Dataflow",
-]);
-
 /**
  * Classify one document's parsed content: which tiles it holds and what modality they carry.
+ *
+ * Text, Drawing and Dataflow get instance-level checks (an empty drawing carries nothing). Every
+ * other tile type takes its modality from the harness's own capability registry
+ * (scripts/ai-harness/src/capability.ts) — the single source of truth, imported rather than
+ * mirrored, so an unlisted type inherits the registry's conservative default (visual) instead of
+ * quietly classifying as "empty" and dropping out of the survey and the export.
  * @param {unknown} content The document's parsed content JSON (shape unknown; read defensively).
  * @return {DocumentFacts} The counts and modality facts the survey reports.
  */
@@ -239,14 +266,15 @@ function classifyContent(content: unknown): DocumentFacts {
       }
       continue;
     }
-    if (kVisualTileTypes.has(type)) {
-      facts.hasVisual = true;
-      facts.substantiveTiles++;
-      continue;
-    }
-    // Question, Table, and anything else: substantive if it exists, but modality-neutral here —
-    // Question children are separate tileMap entries and classify themselves.
-    if (type !== "Question") facts.substantiveTiles++;
+    // A Question tile is a container: its children are separate tileMap entries and classify
+    // themselves, the same way the harness registry treats it.
+    if (type === "Question") continue;
+    // Everything else: the harness capability registry decides, unknown types conservatively
+    // counting as visual so nothing silently drops out of the survey or the corpus export.
+    const capability = getTileCapability(type);
+    if (capability.requiresVisualRepresentation) facts.hasVisual = true;
+    if (capability.containsStudentText) facts.hasText = true;
+    facts.substantiveTiles++;
   }
   return facts;
 }
@@ -270,57 +298,96 @@ interface AnalysisRecord {
   promptTokens?: number;
   completionTokens?: number;
   category?: string;
-  commentText?: string;
   docSummaryChars?: number;
   /** The failure queues record the error message that landed the document there. */
   error?: string;
 }
 
 /**
- * Pull the parsed categorization back out of a stored `fullResponse` completion, best effort.
+ * Pull the parsed category back out of a stored `fullResponse` completion, best effort.
+ *
+ * Category only: what production *said* to the teacher is Ada's actual comment, which the survey
+ * reads from the comments collection rather than reconstructing from the response.
  * @param {unknown} fullResponse The raw completion JSON string a done-queue record stores.
- * @return {object} The category and reconstructed comment text, where the response carried them.
+ * @return {string|undefined} The category, where the response carried one.
  */
-function parseFullResponse(fullResponse: unknown): { category?: string; commentText?: string } {
-  if (typeof fullResponse !== "string" || fullResponse.length === 0) return {};
+function parseCategory(fullResponse: unknown): string | undefined {
+  if (typeof fullResponse !== "string" || fullResponse.length === 0) return undefined;
   try {
     const completion = JSON.parse(fullResponse);
-    const message = completion?.choices?.[0]?.message;
-    const parsed = message?.parsed;
-    if (!parsed) return {};
-    const indicators = Array.isArray(parsed.keyIndicators) && parsed.keyIndicators.length ?
-      ` Your work shows: ${parsed.keyIndicators.join(", ")}` : "";
-    return {
-      category: typeof parsed.category === "string" ? parsed.category : undefined,
-      commentText: `${parsed.discussion ?? ""}${indicators}`.trim() || undefined,
-    };
+    const category = completion?.choices?.[0]?.message?.parsed?.category;
+    return typeof category === "string" ? category : undefined;
   } catch {
-    return {};
+    return undefined;
   }
 }
 
-async function fetchQueueRecords(status: string, keys: Set<string>): Promise<Map<string, AnalysisRecord[]>> {
+/**
+ * Turn one queue snapshot into an AnalysisRecord.
+ * @param {string} status The queue name the record came from.
+ * @param {FirebaseFirestore.DocumentData} data The record's fields.
+ * @return {AnalysisRecord} The slice of it the survey reports.
+ */
+function toRecord(status: string, data: FirebaseFirestore.DocumentData): AnalysisRecord {
+  return {
+    status,
+    summarizer: data.summarizer,
+    evaluator: data.evaluator,
+    completedAt: data.completedAt?.toDate?.()?.toISOString?.()?.slice(0, 16),
+    promptTokens: data.promptTokens,
+    completionTokens: data.completionTokens,
+    docSummaryChars: typeof data.docSummary === "string" ? data.docSummary.length : undefined,
+    error: typeof data.error === "string" ? data.error : undefined,
+    category: parseCategory(data.fullResponse),
+  };
+}
+
+/** Split an array into chunks; Firestore caps `in` queries at 30 values and batches reads. */
+function chunked<T>(values: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < values.length; i += size) chunks.push(values.slice(i, i + size));
+  return chunks;
+}
+
+/**
+ * The class's records from one analysis queue, WITHOUT scanning the whole collection: the queues
+ * are shared across every class and portal and grow without bound, so an unfiltered `.get()` reads
+ * (and bills) the world to keep one class.
+ *
+ * Auto-id queues (`done`, and the failure queues in current production) carry the document key in
+ * a `documentId` field and are queried with `in` filters. Queues keyed by the document key itself
+ * (`pending`, `imaged` — and the failure queues in older data) are fetched directly by reference.
+ * The failure queues are read both ways and de-duplicated by path, so either vintage is found.
+ * @param {string} status The queue name under analysis/queue/.
+ * @param {string[]} keys The class's document keys.
+ * @param {"documentId"|"key"|"both"} addressing How this queue names its documents.
+ * @return {Promise<Map<string, AnalysisRecord[]>>} Records per document key.
+ */
+async function fetchQueueRecords(status: string, keys: string[],
+  addressing: "documentId" | "key" | "both"): Promise<Map<string, AnalysisRecord[]>> {
   const byKey = new Map<string, AnalysisRecord[]>();
-  const snapshot = await firestore.collection(`analysis/queue/${status}`).get();
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    // done records carry documentId; the waiting/failed queues are keyed by the doc key itself.
-    const key = typeof data.documentId === "string" ? data.documentId : doc.id;
-    if (!keys.has(key)) return;
-    const record: AnalysisRecord = {
-      status,
-      summarizer: data.summarizer,
-      evaluator: data.evaluator,
-      completedAt: data.completedAt?.toDate?.()?.toISOString?.()?.slice(0, 16),
-      promptTokens: data.promptTokens,
-      completionTokens: data.completionTokens,
-      docSummaryChars: typeof data.docSummary === "string" ? data.docSummary.length : undefined,
-      error: typeof data.error === "string" ? data.error : undefined,
-      ...parseFullResponse(data.fullResponse),
-    };
+  const seenPaths = new Set<string>();
+  const add = (refPath: string, key: string, data: FirebaseFirestore.DocumentData) => {
+    if (seenPaths.has(refPath)) return;
+    seenPaths.add(refPath);
     if (!byKey.has(key)) byKey.set(key, []);
-    byKey.get(key)!.push(record);
-  });
+    byKey.get(key)!.push(toRecord(status, data));
+  };
+  const collection = firestore.collection(`analysis/queue/${status}`);
+  if (addressing !== "key") {
+    for (const chunk of chunked(keys, 30)) {
+      const snapshot = await collection.where("documentId", "in", chunk).get();
+      snapshot.forEach((doc) => add(doc.ref.path, doc.data().documentId, doc.data()));
+    }
+  }
+  if (addressing !== "documentId") {
+    for (const chunk of chunked(keys, 100)) {
+      const snapshots = await firestore.getAll(...chunk.map((key) => collection.doc(key)));
+      for (const snapshot of snapshots) {
+        if (snapshot.exists) add(snapshot.ref.path, snapshot.id, snapshot.data()!);
+      }
+    }
+  }
   return byKey;
 }
 
@@ -353,11 +420,14 @@ function slugify(value: string): string {
 // ---------------------------------------------------------------------------
 
 async function main() {
-  out(`Surveying class ${contextId} in ${kFirestoreRoot} — ${new Date().toISOString()}`);
+  out(`Surveying class ${contextId} in ${kFirestoreDocuments} — ${new Date().toISOString()}`);
+  out("This report names document keys, user ids and author-entered titles from real class work.");
+  out("Treat it like the data it describes: keep copies under scripts/ai-harness/data/ (gitignored)");
+  out("and do not paste it into tickets, chat, or anything else that persists.");
   out();
 
   // 1. The class's document metadata, from Firestore.
-  const metadataSnapshot = await firestore.collection(`${kFirestoreRoot}/documents`)
+  const metadataSnapshot = await firestore.collection(kFirestoreDocuments)
     .where("context_id", "==", contextId).get();
   if (metadataSnapshot.empty) {
     out("No document metadata found for that context_id.");
@@ -383,7 +453,7 @@ async function main() {
     `${new Set(metaDocs.map((doc) => doc.uid)).size} distinct user(s).`);
 
   // 2. The class's actual document content, from the Realtime Database — one subtree fetch.
-  const usersSnapshot = await admin.database().ref(`${kDatabaseRoot}/${contextId}/users`).once("value");
+  const usersSnapshot = await admin.database().ref(`${kDatabaseClasses}/${contextId}/users`).once("value");
   const users = usersSnapshot.val() ?? {};
   const contentByKey = new Map<string, unknown>();
   let unparseable = 0;
@@ -402,24 +472,41 @@ async function main() {
     `${unparseable ? `; ${unparseable} unparseable` : ""}.`);
   out();
 
-  // 3. AI-analysis history for exactly these documents.
-  const keys = new Set(metaDocs.map((doc) => doc.key));
-  const queues = ["done", "failedAnalyzing", "failedImaging", "pending", "imaged"] as const;
+  // 3. AI-analysis history for exactly these documents — filtered queries, never a full scan.
+  const keys = [...new Set(metaDocs.map((doc) => doc.key))];
+  const keySet = new Set(keys);
+  const queues = [
+    { status: "done", addressing: "documentId" },
+    { status: "failedAnalyzing", addressing: "both" },
+    { status: "failedImaging", addressing: "both" },
+    { status: "pending", addressing: "key" },
+    { status: "imaged", addressing: "key" },
+  ] as const;
   const history = new Map<string, AnalysisRecord[]>();
-  for (const status of queues) {
-    const records = await fetchQueueRecords(status, keys);
+  for (const { status, addressing } of queues) {
+    const records = await fetchQueueRecords(status, keys, addressing);
     for (const [key, list] of records) {
       if (!history.has(key)) history.set(key, []);
       history.get(key)!.push(...list);
     }
   }
 
-  // Ada's comments, per metadata document (covers evaluations whose queue records were cleaned up).
-  const adaCommentCounts = new Map<string, number>();
-  for (const meta of metaDocs) {
-    const comments = await firestore.collection(`${kFirestoreRoot}/documents/${meta.id}/comments`)
-      .where("uid", "==", kAdaUid).get();
-    if (!comments.empty) adaCommentCounts.set(meta.key, comments.size);
+  // Ada's actual comments, per metadata document — the text production really showed the teacher
+  // (covers evaluations whose queue records were cleaned up). Chunked so the reads overlap without
+  // hammering Firestore.
+  const adaComments = new Map<string, string[]>();
+  for (const chunk of chunked(metaDocs, 10)) {
+    await Promise.all(chunk.map(async (meta) => {
+      const comments = await firestore.collection(`${kFirestoreDocuments}/${meta.id}/comments`)
+        .where("uid", "==", kAnalyzerUserParams.id).get();
+      if (comments.empty) return;
+      const texts: string[] = [];
+      comments.forEach((comment) => {
+        const content = comment.data().content;
+        texts.push(typeof content === "string" ? content : "(non-text comment)");
+      });
+      adaComments.set(meta.key, texts);
+    }));
   }
 
   // 4. Per-document report, grouped by investigation.problem.
@@ -432,7 +519,7 @@ async function main() {
 
   const modalityTotals: Record<string, number> = {};
   let missingContent = 0; let evaluatedDocs = 0;
-  const exportDocs: { meta: MetaDoc; content: unknown }[] = [];
+  const exportDocs: { meta: MetaDoc; content: unknown; modality: string }[] = [];
 
   for (const [problem, docs] of [...byProblem.entries()].sort()) {
     out(`=== ${problem} — ${docs.length} document(s) ===`);
@@ -447,24 +534,24 @@ async function main() {
       const modality = modalityOf(facts);
       modalityTotals[modality] = (modalityTotals[modality] ?? 0) + 1;
       if (exportDir && modality !== "empty") {
-        exportDocs.push({meta, content});
+        exportDocs.push({ meta, content, modality });
       }
 
       const tiles = Object.entries(facts.tileCounts).map(([type, n]) => `${type}:${n}`).join(" ");
       const records = history.get(meta.key) ?? [];
-      const adaComments = adaCommentCounts.get(meta.key) ?? 0;
-      if (records.length || adaComments) evaluatedDocs++;
+      const comments = adaComments.get(meta.key) ?? [];
+      if (records.length || comments.length) evaluatedDocs++;
 
       out(`  * ${meta.key} uid=${meta.uid}${meta.title ? ` "${meta.title}"` : ""}`);
       out(`      ${modality}; text ${facts.textChars} chars; drawing ${facts.drawingObjects} ` +
         `objects (${facts.drawingTextObjects} text); dataflow ${facts.dataflowNodes} blocks; ` +
         `tiles: ${tiles || "(none)"}`);
-      if (records.length || adaComments) {
+      if (records.length || comments.length) {
         const doneRecords = records.filter((record) => record.status === "done");
         const failures = records.filter((record) => record.status.startsWith("failed"));
         const waiting = records.length - doneRecords.length - failures.length;
         out(`      AI: ${doneRecords.length} done, ${failures.length} failed, ` +
-          `${waiting} waiting; ${adaComments} Ada comment(s)`);
+          `${waiting} waiting; ${comments.length} Ada comment(s)`);
         if (doneRecords.length > 0) {
           // The rollup is the compact view; the record-by-record detail goes to the file.
           out(`      categories over ${doneRecords.length} done: ` +
@@ -483,7 +570,11 @@ async function main() {
             `${record.evaluator ?? "?"} tokens ${record.promptTokens ?? "?"}+` +
             `${record.completionTokens ?? "?"} summary ${record.docSummaryChars ?? "-"} chars ` +
             `category=${record.category ?? "?"}`);
-          if (record.commentText) detail(`          "${record.commentText}"`);
+        }
+        // What the teacher actually saw, verbatim from the comments collection — not rebuilt from
+        // the stored model response.
+        for (const text of comments) {
+          detail(`        Ada: "${text}"`);
         }
       }
     }
@@ -500,33 +591,38 @@ async function main() {
   const allDone = [...history.values()].flat().filter((record) => record.status === "done");
   out(`Done records in total: ${allDone.length}; categories overall: ` +
     distribution(allDone.map((record) => record.category)));
-  const rtdbOnly = [...contentByKey.keys()].filter((key) => !keys.has(key));
+  const rtdbOnly = [...contentByKey.keys()].filter((key) => !keySet.has(key));
   if (rtdbOnly.length) {
     out(`Note: ${rtdbOnly.length} realtime-database document(s) in this class have no ` +
       "Firestore metadata (personal docs, learning logs, or pre-metadata documents) — not surveyed.");
   }
 
   if (exportDir) {
-    const root = path.resolve(exportDir);
-    const documentsDir = path.join(root, "documents");
-    fs.mkdirSync(documentsDir, {recursive: true});
-    const used = new Set<string>();
+    const documentsDir = path.join(exportDir, "documents");
+    fs.mkdirSync(documentsDir, { recursive: true });
     const mapEntries: Record<string, { key: string; uid: string; unit: string | null;
       investigation: string | null; problem: string | null; modality: string }> = {};
-    for (const {meta, content} of exportDocs) {
-      const base = `p${slugify(meta.investigation ?? "x")}-${slugify(meta.problem ?? "x")}` +
-        `-u${slugify(meta.uid)}-${slugify(meta.key).slice(0, 8)}`;
-      let id = base;
-      for (let suffix = 2; used.has(id); suffix++) id = `${base}-${suffix}`;
-      used.add(id);
+    // Opaque ids: a per-problem sequence number, nothing else. The id becomes a corpus filename
+    // and a results-file column, so the uid and document key stay out of it — key-map.json is the
+    // only place holding that mapping, and it stays inside the gitignored data root. Numbering
+    // follows document-key order within each problem so re-exports are stable.
+    const perProblem = new Map<string, number>();
+    const ordered = [...exportDocs].sort((a, b) =>
+      `${a.meta.investigation}.${a.meta.problem}.${a.meta.key}`
+        .localeCompare(`${b.meta.investigation}.${b.meta.problem}.${b.meta.key}`));
+    for (const { meta, content, modality } of ordered) {
+      const base = `p${slugify(meta.investigation ?? "x")}-${slugify(meta.problem ?? "x")}`;
+      const sequence = (perProblem.get(base) ?? 0) + 1;
+      perProblem.set(base, sequence);
+      const id = `${base}-${String(sequence).padStart(2, "0")}`;
       fs.writeFileSync(path.join(documentsDir, `${id}.json`), JSON.stringify(content, null, 2) + "\n");
       mapEntries[id] = {
         key: meta.key, uid: meta.uid, unit: meta.unit ?? null,
         investigation: meta.investigation ?? null, problem: meta.problem ?? null,
-        modality: modalityOf(classifyContent(content)),
+        modality,
       };
     }
-    fs.writeFileSync(path.join(root, "key-map.json"), JSON.stringify({
+    fs.writeFileSync(path.join(exportDir, "key-map.json"), JSON.stringify({
       schemaVersion: 1,
       contextId,
       portal: kPortal,
@@ -534,31 +630,31 @@ async function main() {
       documents: mapEntries,
     }, null, 2) + "\n");
     console.log(`\nExported ${exportDocs.length} non-empty document(s) to ${documentsDir}`);
-    console.log(`Key map written to ${path.join(root, "key-map.json")}`);
-    console.log("This is real work on disk — keep it under scripts/ai-harness/data/ (gitignored).");
-    console.log("Next: cd ../scripts/ai-harness && npx tsx harness.ts import --from " +
-      `${path.relative(path.resolve(__dirname, "../scripts/ai-harness"), root) || "."} ` +
-      "--corpus <name> --source production --production-data-approved");
-    console.log("Then: npx tsx apply-key-map.ts --corpus <name> --key-map <exportdir>/key-map.json");
+    console.log(`Key map written to ${path.join(exportDir, "key-map.json")}`);
+    const harnessRelative = path.relative(getScriptRootFilePath("ai-harness"), exportDir);
+    console.log("Next: cd ai-harness && npx tsx harness.ts import --from " +
+      `${harnessRelative} --corpus <name> --source production --production-data-approved`);
+    console.log(`Then: npx tsx apply-key-map.ts --corpus <name> --key-map ${harnessRelative}/key-map.json`);
   }
 
   if (outFile) {
-    const resolved = path.resolve(outFile);
-    fs.mkdirSync(path.dirname(resolved), {recursive: true});
-    fs.writeFileSync(resolved, fileLines.join("\n") + "\n");
-    console.log(`\nFull report (every done record and AI comment) written to ${resolved}`);
-    console.log("It contains data derived from real work — keep it under scripts/ai-harness/data/ " +
-      "(gitignored) and out of version control.");
+    fs.mkdirSync(path.dirname(outFile), { recursive: true });
+    fs.writeFileSync(outFile, fileLines.join("\n") + "\n");
+    console.log(`\nFull report (every done record and AI comment) written to ${outFile}`);
   } else if (!verbose) {
     console.log("\nPer-record detail and comment texts were omitted from the terminal. " +
       "Use --out <file> for the full report (recommended over --verbose: terminal scrollback " +
-      "is not an archive), e.g. --out ../scripts/ai-harness/data/surveys/teacher-workshop.txt");
+      "is not an archive), e.g. --out ai-harness/data/surveys/class.txt");
   }
 }
 
 main()
   .catch((error) => {
     console.error(error?.message ?? error);
-    process.exit(1);
+    process.exitCode = 1;
   })
-  .finally(() => process.exit());
+  .finally(async () => {
+    // Closing the app releases the Firestore/RTDB connections so the process exits on its own once
+    // stdout has drained — a hard process.exit() here could truncate a report piped to a file.
+    await admin.app().delete();
+  });
