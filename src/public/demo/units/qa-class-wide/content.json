@@ -1,0 +1,94 @@
+{
+  "code": "qa-class-wide",
+  "abbrevTitle": "QACW",
+  "title": "QA Class-Wide Documents Curriculum",
+  "subtitle": "A unit that declares a class-wide document without enabling group documents",
+  "config": {
+    "placeholderText": "Enter notes here",
+    "classWideDocuments": [
+      { "kind": "drivingQuestionBoard", "title": "Driving Question Board" }
+    ],
+    "sortWorkConfig": {
+      "sortOptions": ["Group", "Name", "Date"]
+    },
+    "navTabs": {
+      "lazyLoadTabContents": true,
+      "showNavPanel": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Problem",
+          "sections": []
+        },
+        {
+          "tab": "sort-work",
+          "label": "Sort Work",
+          "teacherOnly": false
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": ["student", "teacher"]
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
+      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+    ],
+    "stamps": []
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Class-Wide Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "1.1 Class-Wide Documents",
+          "subtitle": "Driving Question Board",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "qaClassWideIntro01",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p>This unit declares a class-wide document and leaves group documents off.</p>"]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
