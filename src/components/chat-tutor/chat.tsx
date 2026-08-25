@@ -31,6 +31,12 @@ interface IProps {
 // stable for the life of the conversation and unique even when two replies point at the same object.
 export const highlightKey = (turnId: string, index: number) => `${turnId}:${index}`;
 
+/** Which highlight button a pointer or focus claim is resting on. */
+interface IHighlightId { turnId: string; index: number }
+
+const isSameHighlightId = (id: IHighlightId | undefined, turnId: string, index: number) =>
+  id?.turnId === turnId && id.index === index;
+
 // Build a plain-markdown transcript of the visible conversation for copy-to-clipboard.
 // Debug dry-run turns and empty turns are excluded; message bodies are copied verbatim.
 export const buildChatTranscript = (turns: ChatTurn[], title?: string): string => {
@@ -125,6 +131,39 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   // Copy-to-clipboard: only offer it when there's real conversation to copy.
   const hasCopyableTurns = useMemo(
     () => turns.some(t => t.variant !== "debug" && t.text.trim()), [turns]);
+
+  // Hover and focus are two independent reasons to preview a highlight, and they can rest on two
+  // different buttons at once. Each button records only its own claim; the winner is derived from
+  // both. Letting a button withdraw the preview on its own leave/blur does not work, because the
+  // preview it would withdraw is shared by every button in the sidebar: a button asking the DOM
+  // whether *it* is still hovered or focused cannot see another button's claim, so leaving one
+  // button cancelled a preview another button was holding.
+  const [hoverId, setHoverId] = useState<IHighlightId | undefined>(undefined);
+  const [focusId, setFocusId] = useState<IHighlightId | undefined>(undefined);
+
+  // Focus arriving from a pointer press is not a preview reason. Browsers focus a button on
+  // mousedown, but only keyboard focus paints a visible ring (`:focus-visible`, chat.scss), so
+  // counting it would leave a highlight on screen with nothing to indicate why — which is what
+  // happened after a click released a pin. This draws the same line `:focus-visible` draws, from
+  // events we control rather than the DOM: jsdom reports `:focus-visible` for any focused element,
+  // so a guard written against the pseudo-class cannot be tested.
+  const pointerFocus = useRef(false);
+
+  // Hover outranks focus, matching the model's rule that a hovered reference replaces a pinned one.
+  const activePreview = hoverId ?? focusId;
+  const reportedPreview = useRef<IHighlightId | undefined>(undefined);
+  useEffect(() => {
+    const previous = reportedPreview.current;
+    if (previous === activePreview) return;
+    reportedPreview.current = activePreview;
+    if (activePreview) {
+      onHighlightHover?.(activePreview.turnId, activePreview.index, true);
+    } else if (previous) {
+      // The sidebar ignores the identity when withdrawing — it releases by source token — but pass
+      // the button that was holding it rather than inventing one.
+      onHighlightHover?.(previous.turnId, previous.index, false);
+    }
+  }, [activePreview, onHighlightHover]);
 
   useEffect(() => {
     if (!copied) return;
@@ -246,23 +285,19 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
                             active: activeHighlightKey === highlightKey(turn.id, index)
                           })}
                           aria-pressed={activeHighlightKey === highlightKey(turn.id, index)}
-                          // Focus mirrors hover so the preview is reachable without a mouse. They are
-                          // two independent ways of being on this button, so each only withdraws the
-                          // preview when the other is not also holding it: a pointer crossing a
-                          // focused button must not cancel the keyboard user's preview, and tabbing
-                          // away must not cancel one the pointer is still holding.
-                          onMouseEnter={() => onHighlightHover?.(turn.id, index, true)}
-                          onMouseLeave={e => {
-                            if (e.currentTarget !== document.activeElement) {
-                              onHighlightHover?.(turn.id, index, false);
-                            }
+                          // Each handler records or withdraws only this button's own claim. The winner
+                          // across all buttons is decided by activePreview above.
+                          onMouseEnter={() => setHoverId({ turnId: turn.id, index })}
+                          onMouseLeave={() => setHoverId(cur => isSameHighlightId(cur, turn.id, index)
+                            ? undefined : cur)}
+                          onMouseDown={() => { pointerFocus.current = true; }}
+                          onMouseUp={() => { pointerFocus.current = false; }}
+                          onFocus={() => {
+                            if (!pointerFocus.current) setFocusId({ turnId: turn.id, index });
+                            pointerFocus.current = false;
                           }}
-                          onFocus={() => onHighlightHover?.(turn.id, index, true)}
-                          onBlur={e => {
-                            if (!e.currentTarget.matches(":hover")) {
-                              onHighlightHover?.(turn.id, index, false);
-                            }
-                          }}
+                          onBlur={() => setFocusId(cur => isSameHighlightId(cur, turn.id, index)
+                            ? undefined : cur)}
                           onClick={() => onHighlightToggle?.(turn.id, index)}
                         >
                           Show me {highlight.label}

@@ -155,6 +155,69 @@ describe("ChatTutorSidebar as a highlight source", () => {
     expect(first).toHaveAttribute("aria-pressed", "false");
   });
 
+  // Hover and focus are separate claims that can rest on two different buttons, and the preview
+  // they compete for is shared by the whole sidebar. Each of the three below fails if a button is
+  // allowed to withdraw that shared preview based on a check about itself.
+  describe("hover and focus arbitration", () => {
+    // Browsers focus a button on mousedown. Counting that as a preview claim left a ring on screen
+    // after a click released the pin, with no `:focus-visible` outline to explain it.
+    //
+    // This one calls first.focus() rather than fireEvent.focus(): only a real focus moves
+    // document.activeElement, and the guard this replaced consulted activeElement. Swap it back to
+    // fireEvent and the test still passes against the broken code, proving nothing. Do not also
+    // fireEvent.focus() afterwards — that is a second focus event, arriving after the pointer flag
+    // has been consumed, and it registers as keyboard focus.
+    it("does not treat pointer-originated focus as a preview", () => {
+      const content = makeContent();
+      renderSidebar(content);
+      const first = screen.getByRole("button", { name: /the first block/ });
+
+      fireEvent.mouseEnter(first);
+      fireEvent.mouseDown(first);
+      first.focus();               // a real focus, as a browser does on mousedown
+      fireEvent.mouseUp(first);
+      fireEvent.click(first);
+      expect(content.highlightState).toBe("pinned");
+
+      fireEvent.mouseLeave(first);
+      fireEvent.click(first);
+
+      expect(content.pinnedHighlightRef).toBeUndefined();
+      expect(content.hoveredHighlightRef).toBeUndefined();
+      expect(content.highlightState).toBeUndefined();
+    });
+
+    it("keeps a focused button's preview when the pointer crosses another button", () => {
+      const content = makeContent();
+      renderSidebar(content);
+      const first = screen.getByRole("button", { name: /the first block/ });
+      const second = screen.getByRole("button", { name: /the second block/ });
+
+      fireEvent.focus(first);
+      expect(content.hoveredHighlightRef).toEqual({ kind: "object", tileId: "tileA", objectId: "objA" });
+
+      fireEvent.mouseEnter(second);
+      expect(content.hoveredHighlightRef).toEqual({ kind: "object", tileId: "tileB", objectId: "objB" });
+
+      fireEvent.mouseLeave(second);
+      expect(content.hoveredHighlightRef).toEqual({ kind: "object", tileId: "tileA", objectId: "objA" });
+    });
+
+    it("keeps a hovered button's preview when focus leaves another button", () => {
+      const content = makeContent();
+      renderSidebar(content);
+      const first = screen.getByRole("button", { name: /the first block/ });
+      const second = screen.getByRole("button", { name: /the second block/ });
+
+      fireEvent.focus(first);
+      fireEvent.mouseEnter(second);
+
+      fireEvent.blur(first);
+
+      expect(content.hoveredHighlightRef).toEqual({ kind: "object", tileId: "tileB", objectId: "objB" });
+    });
+  });
+
   it("releases the pin on unmount", () => {
     const content = makeContent();
     const { unmount } = renderSidebar(content);

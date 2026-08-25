@@ -106,14 +106,19 @@ function isTutorHighlight(value: unknown): value is TutorHighlight {
 // Parse the model's structured output into a TutorReply, defensively coercing a missing/non-string
 // userText to null (renders as nothing) and dropping any highlight entry that is not fully formed.
 // A half-formed entry cannot resolve, and a button that resolves to nothing is worse than no button.
+//
+// Blank userText coerces to null for the same reason isTutorHighlight requires non-empty ids and
+// labels: "nothing to say" gets one representation on the wire. The client tests `userText == null`
+// to decide a reply is silent, so an empty string would slip past it and render an empty bubble.
 export function parseTutorReply(outputText: string): TutorReply {
   const parsed = JSON.parse(outputText);
   const raw: unknown[] = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
   const highlights: TutorHighlight[] = raw
     .filter(isTutorHighlight)
     .map((h) => ({tileId: h.tileId, objectId: h.objectId, label: h.label}));
+  const userText = parsed?.userText;
   return {
-    userText: typeof parsed?.userText === "string" ? parsed.userText : null,
+    userText: typeof userText === "string" && userText.trim() ? userText : null,
     highlights,
   };
 }

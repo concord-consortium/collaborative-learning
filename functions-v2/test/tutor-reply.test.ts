@@ -39,6 +39,20 @@ describe("parseTutorReply", () => {
     expect(parseTutorReply(JSON.stringify({userText: 7, highlights: []})).userText).toBeNull();
   });
 
+  // The client decides a reply is silent by testing `userText == null`, which an empty string
+  // passes through -- rendering an empty bubble. Whitespace-only is the same case.
+  it("coerces a blank userText to null, highlights and all", () => {
+    expect(parseTutorReply(JSON.stringify({userText: "", highlights: []})).userText).toBeNull();
+    expect(parseTutorReply(JSON.stringify({userText: "  \n", highlights: []})).userText).toBeNull();
+    // A blank reply carrying valid highlights is silent too: the buttons label words that the
+    // reply never said, so there is nothing for them to point back at.
+    const withHighlights = parseTutorReply(JSON.stringify({
+      userText: "",
+      highlights: [{tileId: "t1", objectId: "n1", label: "the sensor"}],
+    }));
+    expect(withHighlights.userText).toBeNull();
+  });
+
   it("drops entries with empty strings in required fields", () => {
     const reply = parseTutorReply(JSON.stringify({
       userText: "hi",

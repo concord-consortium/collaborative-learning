@@ -54,12 +54,22 @@ describe("Chat highlight buttons", () => {
     expect(onHighlightHover).toHaveBeenCalledWith("t1", 1, true);
   });
 
-  it("reports blur as hover-off", () => {
+  it("reports blur as hover-off, once the focus it withdraws was actually claimed", () => {
     const onHighlightHover = jest.fn();
     render(<Chat chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
     const button = screen.getByRole("button", { name: /the live output/ });
+    fireEvent.focus(button);
     fireEvent.blur(button);
     expect(onHighlightHover).toHaveBeenCalledWith("t1", 1, false);
+  });
+
+  // A button withdrawing a claim it never made would cancel whatever another button is holding,
+  // since the preview belongs to the sidebar rather than to any one button.
+  it("ignores a blur on a button that never held focus", () => {
+    const onHighlightHover = jest.fn();
+    render(<Chat chat={chatResult([turn])} onHighlightHover={onHighlightHover} />);
+    fireEvent.blur(screen.getByRole("button", { name: /the live output/ }));
+    expect(onHighlightHover).not.toHaveBeenCalled();
   });
 
   it("marks the active button pressed", () => {
