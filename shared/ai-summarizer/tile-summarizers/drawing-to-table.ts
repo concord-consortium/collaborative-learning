@@ -57,8 +57,8 @@ no objects summarize exactly as they did before.
 
 import {
   absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, ellipseBoundingBox,
-  GroupTransform, kVariableChipDefaultHeight, kVariableChipDefaultWidth, Point, rotatePoint,
-  sizedBoundingBox
+  GroupTransform, kVariableChipDefaultHeight, kVariableChipDefaultWidth, objectTransformPoint, Point,
+  roundToTenth, sizedBoundingBox
 } from "../../drawing/drawing-geometry";
 import {
   boundingBoxForSnapshot, displayLabel, DrawingObjectSnapshot, isLegacyGroup
@@ -76,9 +76,9 @@ function chipBoundingBox(origin: Point): BoundingBox {
   });
 }
 
-/** Round to a tenth: un-normalizing a grouped child's box produces long floats. */
+/** Every reported measurement goes through the shared precision — see roundToTenth. */
 function round(n: number): string {
-  return `${Math.round(n * 10) / 10}`;
+  return `${roundToTenth(n)}`;
 }
 
 function formatPosition(bb: BoundingBox): string {
@@ -237,16 +237,18 @@ function walk(
     const chain = toTileSpace ?? ((p: Point) => p);
     // Two mappings, because two questions need different frames.
     //
-    // `toTile` is the full one: the object's own turn about its se corner — as
-    // DrawingObject.boundingBox does it — and then every enclosing group. Position, size and the
+    // `toTile` is the full one: the object's complete own transform — its flips and its turn, in
+    // the order the browser paints them — and then every enclosing group. Position, size and the
     // type-specific geometry in `details` all use it, so a row never mixes frames within itself.
+    // Rotation alone is not enough: an object's own mirror leaves its box untouched but reverses
+    // the direction of anything inside it, so a self-mirrored arrow would report the delta it was
+    // stored with while pointing the other way.
     //
     // `toTileUnturned` stops short of the object's own turn. Only the Square/Circle labels use it,
     // and they have to: those ask about the shape's proportions, and a turned shape's enclosing box
     // has different ones. A 20 x 10 rectangle turned 45 degrees has a square enclosing box and is
     // emphatically not a square.
-    const toTile = (p: Point) =>
-      chain(o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
+    const toTile = (p: Point) => chain(objectTransformPoint(p, { ...o, boundingBox: localBB }));
     const toTileUnturned = chain;
 
     // A chip is sized in pixels rather than in whatever space it is stored in, so only its origin
@@ -273,6 +275,12 @@ function walk(
         // A pre-1.1.0 group's members are stored in ordinary coordinates rather than as fractions
         // of it, so there is nothing to un-normalize — converting them would be the bug, not the
         // fix. They inherit this group's frame unchanged.
+        //
+        // Unchanged, note, rather than `toTile`: this deliberately does not carry the group's own
+        // turn down to its members. That looks like an oversight and is not. Rotation arrived on
+        // drawing objects after the v1.1.0 group normalization shipped, so no validly stored
+        // pre-1.1.0 group can carry one — the state is unrepresentable. Passing `toTile` here would
+        // also be only half a fix, since it applies the group's rotation but not its flips.
         walk(o.objects, rows, o.id, toTileSpace, compose(parentOrientation, objectOrientation(o)));
       } else {
         // Members are fractions of this group's *unrotated* box, so that is the frame handed down —
@@ -294,7 +302,27 @@ function walk(
  * Describe a drawing tile's contents as a table, one row per object, so that anything reading the
  * summary can name a specific shape by the id the document stores.
  */
-export function drawingToTable(content: { objects?: DrawingObjectSnapshot[] }): string {
+export function drawingToTable(
+  content: { objects?: DrawingObjectSnapshot[], changes?: unknown[] }
+): string {
+  // The oldest drawing format stores a change log instead of objects, and DrawingMigrator replays it
+  // with `playbackChanges`. That cannot happen here: it is built on DrawingObjectMSTUnion, which
+  // reaches React through drawing-object-manager, so none of it can live under shared/ — this
+  // module's own lint rule would reject it. Reading such a drawing is a separate piece of work.
+  //
+  // What this does is refuse to describe it as something it is not. Falling through to the empty
+  // sentence would tell a reader the student drew nothing, which is a different claim from "this
+  // could not be read" and indistinguishable from the honest case — exactly the silent failure the
+  // pre-1.1.0 group check goes to trouble to prevent.
+  //
+  // Tested before `objects`, because the migrator tests it there too: a snapshot carrying both is
+  // replayed from the log, so keying off the absence of objects would describe a representation the
+  // browser never renders. The length check is a deliberate divergence — `playbackChanges([])`
+  // yields an empty drawing, so an empty log genuinely is one.
+  if (Array.isArray(content.changes) && content.changes.length > 0) {
+    return "This tile contains a drawing stored in a legacy format that this summary cannot read.";
+  }
+
   const objects = content.objects ?? [];
   if (objects.length === 0) return kEmptyDrawing;
 

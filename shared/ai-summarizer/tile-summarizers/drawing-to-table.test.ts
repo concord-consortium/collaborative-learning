@@ -37,6 +37,36 @@ describe("drawingToTable", () => {
     expect(drawingToTable({})).toBe("This tile contains a drawing.");
   });
 
+  it("distinguishes a change-log drawing from an empty one", () => {
+    // The oldest drawing format stores a change log rather than objects, and DrawingMigrator replays
+    // it — which needs MST and therefore cannot happen here. Reporting the empty-drawing sentence
+    // would tell a reader the student drew nothing, which is a different claim from "this could not
+    // be read", and indistinguishable from the truthful case.
+    const result = drawingToTable({
+      changes: ['{"action":"create","data":{"type":"rectangle"}}']
+    } as any);
+    expect(result).toBe(
+      "This tile contains a drawing stored in a legacy format that this summary cannot read.");
+    expect(result).not.toBe("This tile contains a drawing.");
+  });
+
+  it("still calls an empty change log an empty drawing", () => {
+    // playbackChanges([]) yields an empty drawing, so an empty log genuinely is one. A deliberate
+    // divergence from the migrator's predicate, which does not test length.
+    expect(drawingToTable({ changes: [] } as any)).toBe("This tile contains a drawing.");
+  });
+
+  it("prefers the change log when a snapshot carries both", () => {
+    // The migrator tests `changes` before it looks at `objects`, so a snapshot holding both is
+    // replayed from the log. Keying off the absence of `objects` would describe a representation
+    // the browser never renders.
+    const result = drawingToTable({
+      changes: ['{"action":"create"}'],
+      objects: [{ id: "r1", type: "rectangle", x: 0, y: 0, width: 1, height: 1 }]
+    } as any);
+    expect(result).not.toContain("| r1 |");
+  });
+
   it("emits a row per object carrying its id and type", () => {
     const result = drawingToTable({ objects: [
       { id: "a7Kd2", type: "rectangle", x: 40, y: 20, width: 120, height: 80, fill: "#0069ff" }
@@ -183,6 +213,35 @@ describe("drawingToTable", () => {
     }]});
     expect(result).toContain("| wide | rectangle | 0, 0 | 100 x 50 |");
     expect(result).toContain("| sq | rectangle | 0, 0 | 50 x 50 |  | g | label=Square |");
+  });
+
+  it("still calls a grouped square a Square when the group is turned a quarter", () => {
+    // rotatePoint goes through Math.cos(Math.PI / 2), which is 6.1e-17 rather than 0, so a box that
+    // is square comes back with its two sides a rounding error apart. Comparing exactly made the
+    // label vanish while the size column beside it still read 50 x 50 — a row contradicting itself,
+    // reachable with the ordinary Rotate control.
+    for (const rotation of [0, 90, 180, 270]) {
+      const result = drawingToTable({ objects: [{
+        id: "g", type: "group", x: 0, y: 0, width: 100, height: 100, rotation,
+        objects: [{ id: "s", type: "rectangle", x: 0, y: 0, width: 0.5, height: 0.5 }]
+      }]});
+      expect(result).toContain("50 x 50");
+      expect(result).toContain("label=Square");
+    }
+  });
+
+  it("applies an object's own mirror to its geometry, not only its orientation", () => {
+    // An object's own hFlip emits scale({x: -1}) with a compensating translate, so the box is
+    // unchanged and the arrow points the other way. Reporting the stored delta describes an arrow
+    // pointing the wrong direction, and `orientation` reads `mirrored` either way so it cannot
+    // disambiguate. Two arrows that look identical must not report opposite signs depending on
+    // which of them stores the mirror.
+    const own = drawingToTable({ objects: [
+      { id: "v1", type: "vector", x: 0, y: 0, dx: 10, dy: 0, hFlip: true }
+    ]});
+    expect(own).toContain("dx=-10 dy=0");
+    // The box is untouched by a self-mirror; only the direction moves.
+    expect(own).toContain("| v1 | vector | 0, 0 | 10 x 0 | mirrored |");
   });
 
   it("puts a turned object's own geometry in the same frame as its box", () => {

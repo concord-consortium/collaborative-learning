@@ -157,6 +157,50 @@ export function lineBoundingBox(
 export const kVariableChipDefaultWidth = 75;
 export const kVariableChipDefaultHeight = 24;
 
+/**
+ * The precision every reported coordinate is reduced to.
+ *
+ * Un-normalizing a grouped child produces long floats, and rotating one goes through
+ * `Math.cos(Math.PI / 2)`, which is 6.1e-17 rather than 0 — so two sides of a square box come back a
+ * rounding error apart. Anything that reports a measurement and anything that compares two of them
+ * must use this same function, or a row can contradict itself: a size column reading `50 x 50`
+ * beside a label declining to call the shape square.
+ */
+export function roundToTenth(n: number): number {
+  return Math.round(n * 10) / 10;
+}
+
+/** An object's own placement: the box it occupies, plus whatever turn and flips it carries. */
+export interface ObjectTransform {
+  boundingBox: BoundingBox;
+  rotation?: number;
+  hFlip?: boolean;
+  vFlip?: boolean;
+}
+
+/**
+ * Apply an object's *own* transform to one of its points — flips first, then rotation, matching the
+ * order `Transformable` emits and therefore the order the browser paints.
+ *
+ * The flip reflects about the box's centre rather than the corner the rotation pivots on. That is
+ * not an approximation: `DrawingObject.transform` adds a compensating translate for exactly this
+ * reason, its comment saying "for the bounding box to stay the same, we need to move the object to
+ * account for the position-to-center distance". So a self-mirror leaves the box alone and turns the
+ * contents around inside it, which is what a reader sees.
+ *
+ * Distinct from `absoluteChildPoint`, which is about a group's normalized space rather than an
+ * object's own placement. An object needs both, in this order.
+ */
+export function objectTransformPoint(point: Point, object: ObjectTransform): Point {
+  const bb = object.boundingBox;
+  const centre = { x: (bb.nw.x + bb.se.x) / 2, y: (bb.nw.y + bb.se.y) / 2 };
+  const flipped = {
+    x: object.hFlip ? 2 * centre.x - point.x : point.x,
+    y: object.vFlip ? 2 * centre.y - point.y : point.y
+  };
+  return object.rotation ? rotatePoint(flipped, bb.se, object.rotation) : flipped;
+}
+
 /** How a group places its members: its own box, plus whatever turn and flips it carries. */
 export interface GroupTransform {
   boundingBox: BoundingBox;
