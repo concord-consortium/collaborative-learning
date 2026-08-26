@@ -17,7 +17,8 @@ it("matches the documented example", () => {
   ]});
 
   expect(result).toBe(
-`This tile contains a drawing with 7 objects, listed back to front.
+`This tile contains a drawing with 7 objects, listed back to front. Position, size and rotation \
+are in the tile's coordinate space, including for objects inside a group.
 
 | id | type | position | size | rotation | parent | details |
 | --- | --- | --- | --- | --- | --- | --- |

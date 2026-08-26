@@ -5,7 +5,8 @@ by the id the document stores.
 A drawing with two loose shapes, a variable chip, a group of two, and one hidden object serializes
 to this — see the "matches the documented example" test, which pins it:
 
-    This tile contains a drawing with 7 objects, listed back to front.
+    This tile contains a drawing with 7 objects, listed back to front. Position, size and rotation
+    are in the tile's coordinate space, including for objects inside a group.
 
     | id | type | position | size | rotation | parent | details |
     | --- | --- | --- | --- | --- | --- | --- |
@@ -27,16 +28,17 @@ Five things in that output are not obvious from the code:
   once the box is turned, position and size can no longer express orientation, and a 100x50
   rectangle turned 90 degrees is indistinguishable from an unturned 50x100 one. Flips stay in
   `details`, since they do not change the box.
-- The angle is measured against the document rather than read off the object, so it agrees with the
+- The angle is measured against the tile rather than read off the object, so it agrees with the
   position and size beside it. An object turned 90 inside a group turned 270 reports nothing,
   because upright is how it sits on the page. Note that a group scales its members by its own width
   and height, so a member turned by something other than a multiple of 90 inside a group that is not
   square is sheared rather than merely turned, and no single angle describes it. Only authored or
   imported documents can reach that — the Rotate control turns in quarters.
-- Row order is document order, which is back to front. The preamble says so, because otherwise the
-  ordering is information the model cannot see.
+- Row order is the order the objects are stored in, which is back to front. The preamble says so,
+  because otherwise the ordering is information the model cannot see.
 - A group's members follow it and name it in `parent`, with coordinates converted out of the group's
-  normalized space into the document's. `kid1` is stored as `x: 0, width: 0.5`.
+  normalized space into the tile's. `kid1` is stored as `x: 0, width: 0.5`. The preamble says this
+  too: `parent` otherwise invites the usual reading, where nested coordinates are group-relative.
 - Hidden objects appear, marked `visible=false`, rather than being dropped. They are still in the
   document and their ids still resolve; whether a consumer may point a student at one is a prompt
   decision rather than a serializer decision.
@@ -149,8 +151,12 @@ function row(
   ];
 }
 
-/** Maps a point out of the space an object is stored in and into the document's. */
-type ToDocument = (point: Point) => Point;
+/**
+ * Maps a point out of the space an object is stored in and into the drawing tile's own canvas
+ * space. Tile rather than document: CLUE has no coordinate space spanning tiles, so a drawing's
+ * coordinates mean nothing outside it.
+ */
+type ToTileSpace = (point: Point) => Point;
 
 // A group's members are stored as fractions of the group's box rather than as coordinates, so each
 // child is converted through the group it sits in — and through every enclosing group above that —
@@ -162,14 +168,14 @@ type ToDocument = (point: Point) => Point;
 // group inside a rotated group in the wrong quadrant.
 function walk(
   objects: DrawingObjectSnapshot[], rows: string[][], parentId: string,
-  toDocument?: ToDocument, parentOrientation: Orientation = kUpright
+  toTileSpace?: ToTileSpace, parentOrientation: Orientation = kUpright
 ): void {
   objects.forEach(o => {
     const localBB = boundingBoxForSnapshot(o);
     // An object's own rotation turns it about its se corner, as DrawingObject.boundingBox does.
     const corners = boundingBoxCorners(localBB)
       .map(p => o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
-    const bb = boundingBoxForPoints(toDocument ? corners.map(toDocument) : corners);
+    const bb = boundingBoxForPoints(toTileSpace ? corners.map(toTileSpace) : corners);
     const orientation = compose(parentOrientation, { rotation: o.rotation ?? 0, mirrored: false });
     rows.push(row(o, bb, parentId, orientation));
 
@@ -179,9 +185,9 @@ function walk(
       const frame: GroupTransform = {
         boundingBox: localBB, rotation: o.rotation, hFlip: o.hFlip, vFlip: o.vFlip
       };
-      const next: ToDocument = p => {
+      const next: ToTileSpace = p => {
         const inParentSpace = absoluteChildPoint(p, frame);
-        return toDocument ? toDocument(inParentSpace) : inParentSpace;
+        return toTileSpace ? toTileSpace(inParentSpace) : inParentSpace;
       };
       walk(o.objects, rows, o.id, next, compose(parentOrientation, groupOrientation(o)));
     }
@@ -199,9 +205,13 @@ export function drawingToTable(content: { objects?: DrawingObjectSnapshot[] }): 
   const rows: string[][] = [];
   walk(objects, rows, "");
 
+  // Both sentences state something the table cannot show. Order is invisible without the first, and
+  // the `parent` column actively invites the wrong reading of the second: nested coordinates are
+  // group-relative in most conventions a reader will have met, and nothing here contradicts that.
   const count = rows.length;
   const preamble =
     `This tile contains a drawing with ${count} ${pluralize(count, "object", "objects")}, ` +
-    `listed back to front.\n\n`;
+    `listed back to front. Position, size and rotation are in the tile's coordinate space, ` +
+    `including for objects inside a group.\n\n`;
   return preamble + generateMarkdownTable(kHeaders, rows);
 }
