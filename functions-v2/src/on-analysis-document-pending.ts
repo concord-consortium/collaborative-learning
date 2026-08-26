@@ -115,10 +115,18 @@ export const onAnalysisDocumentPending =
     // The document's unit, from its Firestore metadata. It picks the unit the screenshot is
     // rendered with, and until the unit configuration includes the summarizer it also picks the
     // text summarizer for the cas unit.
+    // A failure here has to go through error() like the other failures: it removes the pending
+    // queue entry, and without that the entry stays put and later edits of the document, which
+    // only update it, never trigger this function again.
     let documentUnit: unknown;
     if (queueDoc?.firestoreDocumentPath) {
+      try {
       const firestoreDoc = await firestore.doc(queueDoc.firestoreDocumentPath).get();
       documentUnit = firestoreDoc.data()?.unit;
+      } catch (err) {
+        await error(`Could not retrieve Firestore document ${queueDoc.firestoreDocumentPath}: ${err}`, event);
+        return;
+      }
     }
 
     // determine the summarizer to use, defaulting to "image"
