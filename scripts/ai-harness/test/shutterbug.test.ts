@@ -93,7 +93,7 @@ describe("production parity", () => {
     expect(body.height).toBe(1500);
     expect(body).not.toHaveProperty("fullPage");
     expect(body.content).toContain(
-      "https://collaborative-learning.concord.org/branch/shutterbug-support/iframe.html?unit=mods");
+      "https://collaborative-learning.concord.org/authoring-iframe/index.html?unit=mods");
     expect(body.content).toContain("&amp;unwrapped&amp;readOnly");
     // Targeted rather than a second copy of the whole page: render-html.test.ts already snapshots
     // the template, and two byte-identical snapshots meant every template change needed both

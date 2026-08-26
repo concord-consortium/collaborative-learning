@@ -38,7 +38,7 @@ function hostedTask(docId: string, url: string, sha256 = kSha): RunTask {
       backendId: "shutterbug",
       backendVersion: 1,
       renderTarget: {
-        clueUrl: "https://collaborative-learning.concord.org/branch/shutterbug-support",
+        clueUrl: "https://collaborative-learning.concord.org/authoring-iframe/index.html",
         unit: "mods",
         clueRevision: null,
         shutterbugUrl: "https://api.concord.org/shutterbug-production",

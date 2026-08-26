@@ -256,13 +256,14 @@ modes are named and separate, and an improvement never gets folded into the base
 | Mode | Network | CLUE URL | unit | Capture |
 |---|---|---|---|---|
 | `puppeteer-full-height` (default) | local | `--clue-url`, default `http://localhost:8080` | harness's own | full document, 960px wide |
-| `shutterbug-production-current` | yes | production's `branch/shutterbug-support` | `mods` | `height: 1500`, no `fullPage` |
-| `shutterbug-parameterized` | yes | `--clue-url`, default production's `branch/shutterbug-support` | `--unit`, default `mods` | `--capture-height`, default 1500; `--shutterbug-url`, default **staging** |
+| `shutterbug-production-current` | yes | production's released `authoring-iframe/index.html` | `mods` (production's fallback) | `height: 1500`, no `fullPage` |
+| `shutterbug-parameterized` | yes | `--clue-url`, default production's released `authoring-iframe/index.html` | `--unit`, default `mods` | `--capture-height`, default 1500; `--shutterbug-url`, default **staging** |
 | `puppeteer-per-tile` | local | `--clue-url`, default `http://localhost:8080` | harness's own | one image per top-level tile |
-| `shutterbug-accurate-height` | yes | `--clue-url`, default production's branch | `--unit`, default `mods` | each document's **own measured height** — needs a `puppeteer-full-height` render of the same corpus first |
+| `shutterbug-accurate-height` | yes | `--clue-url`, default production's released page | `--unit`, default `mods` | each document's **own measured height** — needs a `puppeteer-full-height` render of the same corpus first |
 
 **`shutterbug-production-current` is the parity baseline.** It matches production's request envelope
-— the production endpoint, the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, no
+— the production endpoint, the released build's `authoring-iframe/index.html` page, `unit=mods`
+(production's fallback; production itself renders with each document's own unit), `height: 1500`, no
 `fullPage`, and a bare string body with no `content-type`. A snapshot test pins what this mode posts
 so it cannot drift while the other modes evolve, and it has been verified by hand against the real
 service.
@@ -306,9 +307,10 @@ point `--shutterbug-url` at the new address. The download that follows *does* fo
 because it is a plain GET for a hosted image and the URL it lands on is checked instead.
 
 **`puppeteer-full-height` renders through the same iframe pathway** production's screenshots use —
-the same HTML, the same `iframe.html?unwrapped&readOnly` entry point, the same `initialValue`
-message. Only two things differ: who takes the picture, and that it captures the whole document
-rather than production's first 1500 pixels. The harness captures reality; production's clipping is a
+the same HTML, the same CLUE iframe entry point with `unwrapped&readOnly` (a local build's
+`iframe.html`; the released build's `authoring-iframe/index.html`, built from the same source), the
+same `initialValue` message. Only two things differ: who takes the picture, and that it captures the
+whole document rather than production's first 1500 pixels. The harness captures reality; production's clipping is a
 production concern.
 
 Three details of *how* it does that were established by running it against a real CLUE server, and
@@ -954,6 +956,12 @@ Things this milestone surfaced that are not the harness's to fix.
   rebuilt from current CLUE code, every screenshot collapses to a 0px iframe.** That makes it worth
   fixing before the branch is refreshed, not after — and an explicit "document rendered" message
   would remove the dependency on `scrollHeight` altogether.
+
+  *Since resolved.* The CLUE iframe now measures `#app` in unwrapped mode and posts a
+  `documentRendered` message (`src/iframe/iframe-messages.ts`), the production page ignores a
+  non-positive height, and production's render target is the released build's
+  `authoring-iframe/index.html` (from v7.5.0), rendered with each document's own unit and `mods`
+  as the fallback. The paragraphs above describe the state the harness was built against.
 - **The `generateHtml()` script injection exists in production.** That same file interpolates
   `JSON.stringify(content)` into a `<script>` element with real student work. Text containing
   `</script>` can inject markup into the render page. The harness fixed its own copy

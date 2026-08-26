@@ -2,18 +2,21 @@
  * The two Shutterbug modes: the production-parity baseline and the parameterized one.
  *
  * `shutterbug-production-current` matches production's request envelope — the production endpoint,
- * the `branch/shutterbug-support` CLUE URL, `unit=mods`, `height: 1500`, and no `fullPage` — and
- * renders against production's target, clipping included. It is not byte-for-byte production: the
- * page inside the request body comes from the generator this file shares with the other modes,
- * which escapes the document rather than interpolating it raw and guards a zero `updateHeight`. The
- * README lists every difference under "differences from production's HTML". A snapshot test pins
- * what this mode posts, so it cannot drift while the other modes evolve.
+ * the released build's `authoring-iframe/index.html` page, `unit=mods`, `height: 1500`, and no
+ * `fullPage` — and renders against production's target, clipping included. Production renders
+ * each document with the unit from its Firestore metadata and uses `mods` only as the fallback;
+ * the harness corpus has no such metadata, so this mode renders everything with the fallback. It
+ * is not byte-for-byte production: the page inside the request body comes from the generator this
+ * file shares with the other modes, which escapes the document rather than interpolating it raw
+ * and guards a zero `updateHeight`. The README lists every difference under "differences from
+ * production's HTML". A snapshot test pins what this mode posts, so it cannot drift while the
+ * other modes evolve.
  *
  * It is a **baseline**, not a recommendation: improvements go into `shutterbug-parameterized`,
  * which is the shape the eventual production fix will take.
  *
  * Note that `scripts/shutterbug.ts` is *not* a production baseline, whatever the harness plan says:
- * it posts `height: 500, fullPage: true` and omits the unit.
+ * it posts `height: 500, fullPage: true`.
  */
 import { RenderTarget } from "../schemas.js";
 import { NotAPngError, readPngInfo } from "../png.js";
@@ -25,7 +28,8 @@ import {
 } from "./types.js";
 
 /** Exactly what production uses today. Changing any of these changes what "parity" means. */
-export const kProductionClueUrl = "https://collaborative-learning.concord.org/branch/shutterbug-support";
+export const kProductionClueUrl = "https://collaborative-learning.concord.org/authoring-iframe/index.html";
+/** Production's fallback unit, used when a document's metadata has no usable unit code. */
 export const kProductionUnit = "mods";
 export const kProductionShutterbugUrl = "https://api.concord.org/shutterbug-production";
 export const kProductionCaptureHeightPx = 1500;

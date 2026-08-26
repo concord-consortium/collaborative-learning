@@ -12,7 +12,7 @@
  */
 import { CaptureMode, RenderTarget } from "../schemas.js";
 import { readPngInfo } from "../png.js";
-import { generateRenderHtml, iframeUrlFor, kInitialFrameHeightPx } from "./render-html.js";
+import { generateRenderHtml, iframeUrlFor, isClueFrameUrl, kInitialFrameHeightPx } from "./render-html.js";
 import {
   RenderBackend, RenderDiagnostics, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
   checkEncodedSize, kDefaultRenderLimits
@@ -510,7 +510,7 @@ async function waitForClueFrame(
 ): Promise<FrameLike> {
   for (;;) {
     deadline.requireRemaining(docId, "the CLUE iframe appeared", contextOf());
-    const frame = page.frames().find((candidate) => candidate.url().includes("iframe.html"));
+    const frame = page.frames().find((candidate) => isClueFrameUrl(candidate.url()));
     if (frame) return frame;
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }

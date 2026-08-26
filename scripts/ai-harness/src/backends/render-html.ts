@@ -50,7 +50,7 @@ export const kInitialFrameHeightPx = 500;
 export interface RenderHtmlOptions {
   /** The document content, as an object — not a string of JSON. */
   content: unknown;
-  /** The CLUE deployment to render through, without a trailing slash. */
+  /** The CLUE build root (or an `.html` iframe page) to render through, without a trailing slash. */
   clueUrl: string;
   /**
    * The unit to load. Tile types are registered from the *unit's* configuration, so omitting this
@@ -65,10 +65,24 @@ export interface RenderHtmlOptions {
 /**
  * Builds the iframe URL. `unit` is percent-encoded because it may be a full URL to a `content.json`,
  * which contains characters that would otherwise end the query parameter.
+ *
+ * `clueUrl` is normally a CLUE build root, and `iframe.html` is appended. The released build has no
+ * top-level `iframe.html` — the release workflow copies only a few entry points to the top level —
+ * so production reaches the same page through `authoring-iframe/index.html`. A `clueUrl` that
+ * already names an `.html` page is therefore used as it is.
  */
 export function iframeUrlFor(clueUrl: string, unit: string): string {
   const base = clueUrl.replace(/\/+$/, "");
-  return `${base}/iframe.html?unit=${encodeURIComponent(unit)}&unwrapped&readOnly`;
+  const page = /\.html$/.test(base) ? base : `${base}/iframe.html`;
+  return `${page}?unit=${encodeURIComponent(unit)}&unwrapped&readOnly`;
+}
+
+/**
+ * Whether a frame URL is the CLUE document iframe built by `iframeUrlFor`: `iframe.html` on a build
+ * root, or the released build's `authoring-iframe/index.html`.
+ */
+export function isClueFrameUrl(url: string): boolean {
+  return /\/(iframe\.html|authoring-iframe\/index\.html)(\?|$)/.test(url);
 }
 
 /**

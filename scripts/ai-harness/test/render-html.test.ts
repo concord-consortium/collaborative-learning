@@ -1,5 +1,5 @@
 import {
-  escapeHtmlAttribute, escapeJsonForScript, generateRenderHtml, iframeUrlFor
+  escapeHtmlAttribute, escapeJsonForScript, generateRenderHtml, iframeUrlFor, isClueFrameUrl
 } from "../src/backends/render-html.js";
 
 /**
@@ -60,10 +60,31 @@ describe("the iframe URL", () => {
       .toBe("http://localhost:8080/iframe.html?unit=qa&unwrapped&readOnly");
   });
 
+  it("uses a clueUrl that already names an .html page as the page itself", () => {
+    expect(iframeUrlFor("https://collaborative-learning.concord.org/authoring-iframe/index.html", "mods"))
+      .toBe("https://collaborative-learning.concord.org/authoring-iframe/index.html?unit=mods&unwrapped&readOnly");
+  });
+
   it("percent-encodes a unit given as a URL", () => {
     expect(iframeUrlFor("http://localhost:8080/", "http://127.0.0.1:5000/content.json"))
       .toBe("http://localhost:8080/iframe.html?unit=http%3A%2F%2F127.0.0.1%3A5000%2Fcontent.json" +
         "&unwrapped&readOnly");
+  });
+});
+
+describe("recognising the CLUE frame", () => {
+  it("matches both the build-root and the released iframe pages", () => {
+    expect(isClueFrameUrl("http://localhost:8080/iframe.html?unit=qa&unwrapped&readOnly")).toBe(true);
+    expect(isClueFrameUrl(
+      "https://collaborative-learning.concord.org/authoring-iframe/index.html?unit=mods&unwrapped&readOnly"
+    )).toBe(true);
+    expect(isClueFrameUrl("https://collaborative-learning.concord.org/branch/master/iframe.html")).toBe(true);
+  });
+
+  it("does not match the render page or other CLUE entry points", () => {
+    expect(isClueFrameUrl("about:blank")).toBe(false);
+    expect(isClueFrameUrl("http://127.0.0.1:5000/render.html")).toBe(false);
+    expect(isClueFrameUrl("https://collaborative-learning.concord.org/index.html")).toBe(false);
   });
 });
 
