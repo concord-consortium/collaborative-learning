@@ -6,7 +6,7 @@ describe("boundingBoxForSnapshot", () => {
       .toEqual({ nw: { x: 0, y: 0 }, se: { x: 10, y: 5 } });
   });
 
-  it("treats an ellipse's stored x,y as its centre", () => {
+  it("treats an ellipse's stored x,y as its center", () => {
     expect(boundingBoxForSnapshot({ id: "b", type: "ellipse", x: 10, y: 10, rx: 5, ry: 5 }))
       .toEqual({ nw: { x: 5, y: 5 }, se: { x: 15, y: 15 } });
   });

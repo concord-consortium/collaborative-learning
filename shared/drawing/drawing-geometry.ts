@@ -115,7 +115,7 @@ export function sizedBoundingBox(o: { x: number, y: number, width: number, heigh
   return { nw: { x: o.x, y: o.y }, se: { x: o.x + o.width, y: o.y + o.height } };
 }
 
-/** Ellipses: x,y is the centre, so the radii extend both ways. */
+/** Ellipses: x,y is the center, so the radii extend both ways. */
 export function ellipseBoundingBox(o: { x: number, y: number, rx: number, ry: number }): BoundingBox {
   return {
     nw: { x: o.x - o.rx, y: o.y - o.ry },
@@ -182,7 +182,7 @@ export interface ObjectTransform {
  * Apply an object's *own* transform to one of its points — flips first, then rotation, matching the
  * order `Transformable` emits and therefore the order the browser paints.
  *
- * The flip reflects about the box's centre rather than the corner the rotation pivots on. That is
+ * The flip reflects about the box's center rather than the corner the rotation pivots on. That is
  * not an approximation: `DrawingObject.transform` adds a compensating translate for exactly this
  * reason, its comment saying "for the bounding box to stay the same, we need to move the object to
  * account for the position-to-center distance". So a self-mirror leaves the box alone and turns the
@@ -193,10 +193,10 @@ export interface ObjectTransform {
  */
 export function objectTransformPoint(point: Point, object: ObjectTransform): Point {
   const bb = object.boundingBox;
-  const centre = { x: (bb.nw.x + bb.se.x) / 2, y: (bb.nw.y + bb.se.y) / 2 };
+  const center = { x: (bb.nw.x + bb.se.x) / 2, y: (bb.nw.y + bb.se.y) / 2 };
   const flipped = {
-    x: object.hFlip ? 2 * centre.x - point.x : point.x,
-    y: object.vFlip ? 2 * centre.y - point.y : point.y
+    x: object.hFlip ? 2 * center.x - point.x : point.x,
+    y: object.vFlip ? 2 * center.y - point.y : point.y
   };
   return object.rotation ? rotatePoint(flipped, bb.se, object.rotation) : flipped;
 }

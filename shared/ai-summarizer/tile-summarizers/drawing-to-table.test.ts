@@ -77,7 +77,7 @@ describe("drawingToTable", () => {
   });
 
   it("reports position as the box's north-west corner, not the stored x,y", () => {
-    // An ellipse stores its centre. Every row means the same thing, so rows are comparable.
+    // An ellipse stores its center. Every row means the same thing, so rows are comparable.
     const result = drawingToTable({ objects: [
       { id: "c3Mn8", type: "ellipse", x: 100, y: 100, rx: 30, ry: 30 }
     ]});

@@ -11,7 +11,7 @@ describe("per-type bounding boxes", () => {
       .toEqual({ nw: { x: 10, y: 20 }, se: { x: 40, y: 60 } });
   });
 
-  it("treats an ellipse's x,y as its centre", () => {
+  it("treats an ellipse's x,y as its center", () => {
     expect(ellipseBoundingBox({ x: 100, y: 100, rx: 30, ry: 10 }))
       .toEqual({ nw: { x: 70, y: 90 }, se: { x: 130, y: 110 } });
   });
@@ -49,13 +49,13 @@ describe("the primitives everything else is built from", () => {
   // exercised indirectly through the object models, which means a break shows up as a puzzling
   // failure somewhere else rather than here.
 
-  it("rotates a point clockwise about a centre", () => {
+  it("rotates a point clockwise about a center", () => {
     const p = rotatePoint({ x: 10, y: 0 }, { x: 0, y: 0 }, 90);
     expect(p.x).toBeCloseTo(0);
     expect(p.y).toBeCloseTo(10);
   });
 
-  it("leaves the centre of rotation where it is", () => {
+  it("leaves the center of rotation where it is", () => {
     expect(rotatePoint({ x: 5, y: 7 }, { x: 5, y: 7 }, 45)).toEqual({ x: 5, y: 7 });
   });
 

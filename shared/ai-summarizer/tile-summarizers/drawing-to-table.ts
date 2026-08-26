@@ -21,7 +21,7 @@ to this — see the "matches the documented example" test, which pins it:
 Some things in that output are not obvious from the code:
 
 - `position` and `size` describe the object's bounding box, not its stored fields. The ellipse above
-  stores its centre at 200,100 with radii of 30 but reports 170,70. Every row therefore means the
+  stores its center at 200,100 with radii of 30 but reports 170,70. Every row therefore means the
   same thing, which is what lets a reader compare two of them.
 - The box is the *turned* one where an object is rotated, as it is on screen: `t9Qr4` stores 90 x 20
   and reports 20 x 90. That is why orientation is a column rather than an entry in `details` — once
