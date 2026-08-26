@@ -161,6 +161,51 @@ describe("functions", () => {
       expect(await failedImagingQueue.count().get().then((result) => result.data().count)).toEqual(0);
     }, 10000);
 
+    test("renders with the unit from the document's Firestore metadata", async () => {
+      await getDatabase().ref("demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc2").set({
+        content: sampleDoc,
+      });
+      // The metadata document's unit is a plain code with a character that has to be URL-encoded.
+      const firestoreDocumentPath = "demo/AI/documents/testdoc2";
+      await admin.firestore().doc(firestoreDocumentPath).set({unit: "s+s"});
+
+      // Capture what is posted to Shutterbug instead of calling the real service.
+      const fetchSpy = jest.spyOn(global, "fetch").mockResolvedValue(
+        {json: async () => ({url: "https://shutterbug.example/testdoc2.png"})} as Response);
+
+      try {
+        const wrapped = fft.wrap(onAnalysisDocumentPending);
+        await wrapped({
+          data: makeDocumentSnapshot({
+            metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc2",
+            documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc2",
+            commentsPath: "demo/AI/documents/testdoc2/comments",
+            firestoreDocumentPath,
+            docUpdated: "1001",
+            evaluator: "categorize-design",
+          }, "analysis/queue/pending/testdoc2"),
+          params: {
+            docId: "testdoc2",
+          },
+          document: "analysis/queue/pending/testdoc2",
+        });
+
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        const body = JSON.parse(fetchSpy.mock.calls[0][1]?.body as string);
+        expect(body.content).toContain(`src="${clueIframeURL}?unit=s%2Bs&amp;unwrapped&amp;readOnly"`);
+        expect(body.content).not.toContain(`unit=${fallbackClueUnit}`);
+
+        const imaged = await admin.firestore().doc("analysis/queue/imaged/testdoc2").get();
+        expect(imaged.data()).toMatchObject({
+          summarizer: "image",
+          docImageUrl: "https://shutterbug.example/testdoc2.png",
+        });
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    });
+
     test("does not process doc with unknown evaluator", async () => {
       const wrapped = fft.wrap(onAnalysisDocumentPending);
 

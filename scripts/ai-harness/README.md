@@ -307,9 +307,10 @@ point `--shutterbug-url` at the new address. The download that follows *does* fo
 because it is a plain GET for a hosted image and the URL it lands on is checked instead.
 
 **`puppeteer-full-height` renders through the same iframe pathway** production's screenshots use —
-the same HTML, the same `iframe.html?unwrapped&readOnly` entry point, the same `initialValue`
-message. Only two things differ: who takes the picture, and that it captures the whole document
-rather than production's first 1500 pixels. The harness captures reality; production's clipping is a
+the same HTML, the same CLUE iframe entry point with `unwrapped&readOnly` (a local build's
+`iframe.html`; the released build's `authoring-iframe/index.html`, built from the same source), the
+same `initialValue` message. Only two things differ: who takes the picture, and that it captures the
+whole document rather than production's first 1500 pixels. The harness captures reality; production's clipping is a
 production concern.
 
 Three details of *how* it does that were established by running it against a real CLUE server, and

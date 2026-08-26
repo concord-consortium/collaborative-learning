@@ -27,7 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { corpusPaths, defaultDataRoot, readCorpusDocument, readManifest } from "./src/corpus.js";
 import { kDocumentIdPattern } from "./src/schemas.js";
-import { generateRenderHtml, kInitialFrameHeightPx } from "./src/backends/render-html.js";
+import { generateRenderHtml, isClueFrameUrl, kInitialFrameHeightPx } from "./src/backends/render-html.js";
 import {
   FrameLike, PageLike, launchPuppeteer, startRenderPageServer, viewportPageOffset
 } from "./src/backends/puppeteer.js";
@@ -194,7 +194,7 @@ async function main() {
   await page.goto(served.url, { waitUntil: "domcontentloaded" });
 
   const clueFrame = (): FrameLike | undefined =>
-    page.frames().find((frame) => frame.url().includes("iframe.html"));
+    page.frames().find((frame) => isClueFrameUrl(frame.url()));
 
   // Poll until nothing changes for a while or the timeout lapses — deliberately no early success
   // exit, because "what happens after it looks done" is part of what this tool is for. The budget

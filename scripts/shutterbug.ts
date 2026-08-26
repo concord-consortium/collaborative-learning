@@ -5,6 +5,9 @@
 //
 // Generate shutterbug.html for checking page locally:
 //   npx tsx shutterbug.ts /Users/scytacki/Development/ai/dataset1720819925834-mods/documents/document-NePawLNjq3wEjk58TiW.txt html
+//
+// Render with a specific unit (defaults to "mods"); pass "" as the second argument to skip the html output:
+//   npx tsx shutterbug.ts /path/to/document.txt "" msa
 
 import fs from "fs";
 
@@ -24,8 +27,9 @@ const shutterbugServer = "https://api.concord.org/shutterbug-staging";
 // which is the one the AI analysis pipeline actually uses. They are separate because this script
 // targets a different CLUE build and Shutterbug server and asks for a full-page capture. Keep
 // fixes to one in step with the other until they are unified.
-function generateHtml(clueDocument: any) {
-  const source = escapeHtmlAttribute(`${clueIframePage}?unwrapped&readOnly`);
+function generateHtml(clueDocument: any, unit: string) {
+  const source = escapeHtmlAttribute(
+    `${clueIframePage}?unit=${encodeURIComponent(unit)}&unwrapped&readOnly`);
   return `
     <script>const initialValue=${escapeJsonForScript(JSON.stringify(clueDocument))}</script>
     <!-- height will be updated when iframe sends updateHeight message -->
@@ -74,10 +78,13 @@ export async function postToShutterbug(body: any) {
 
 const fileName = process.argv[2];
 const outputHtml = process.argv[3];
+// Tile types are registered from the loaded unit, so the document renders correctly only with a
+// unit whose toolbar lists every tile type it uses. Defaults to production's fallback unit.
+const clueUnit = process.argv[4] || "mods";
 
 const documentString = fs.readFileSync(fileName, "utf8");
 const docObject = JSON.parse(documentString);
-const html = generateHtml(docObject);
+const html = generateHtml(docObject, clueUnit);
 
 if (outputHtml) {
   fs.writeFileSync("shutterbug.html", html);

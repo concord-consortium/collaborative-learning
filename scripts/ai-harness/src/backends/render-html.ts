@@ -78,6 +78,14 @@ export function iframeUrlFor(clueUrl: string, unit: string): string {
 }
 
 /**
+ * Whether a frame URL is the CLUE document iframe built by `iframeUrlFor`: `iframe.html` on a build
+ * root, or the released build's `authoring-iframe/index.html`.
+ */
+export function isClueFrameUrl(url: string): boolean {
+  return /\/(iframe\.html|authoring-iframe\/index\.html)(\?|$)/.test(url);
+}
+
+/**
  * The same page production posts to Shutterbug, with the injection hole closed and one addition: the
  * page records on `window` that it handed the document to the iframe, which is the one thing a local
  * capture cannot observe from outside. Readiness itself is measured inside the CLUE frame — the

@@ -16,7 +16,7 @@
  * which is the shape the eventual production fix will take.
  *
  * Note that `scripts/shutterbug.ts` is *not* a production baseline, whatever the harness plan says:
- * it posts `height: 500, fullPage: true` and omits the unit.
+ * it posts `height: 500, fullPage: true`.
  */
 import { RenderTarget } from "../schemas.js";
 import { NotAPngError, readPngInfo } from "../png.js";
