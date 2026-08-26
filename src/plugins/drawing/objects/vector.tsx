@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
+import { vectorBoundingBox } from "../../../../shared/drawing/drawing-geometry";
 import {
   computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps,
   IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField
@@ -26,17 +27,11 @@ export const VectorObject = StrokedObject.named("VectorObject")
   .views(self => ({
     get undraggedUnrotatedBoundingBox() {
       const { x, y, dx, dy } = self;
-      return {
-        nw: { x: Math.min(x, x+dx), y: Math.min(y, y+dy) },
-        se: { x: Math.max(x, x+dx), y: Math.max(y, y+dy) } };
+      return vectorBoundingBox({ x, y, dx, dy });
     },
     get unrotatedBoundingBox() {
       const { x, y } = self.position;
-      const dx = self.dragDx ?? self.dx;
-      const dy = self.dragDy ?? self.dy;
-      return {
-        nw: { x: Math.min(x, x+dx), y: Math.min(y, y+dy) },
-        se: { x: Math.max(x, x+dx), y: Math.max(y, y+dy) } };
+      return vectorBoundingBox({ x, y, dx: self.dragDx ?? self.dx, dy: self.dragDy ?? self.dy });
     },
     get label() {
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";

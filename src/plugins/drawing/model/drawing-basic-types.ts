@@ -10,21 +10,10 @@ import AlignTopIcon from "../assets/align-top-icon.svg";
 import AlignMiddleIcon from "../assets/align-middle-icon.svg";
 import AlignBottomIcon from "../assets/align-bottom-icon.svg";
 
-export interface Point { x: number; y: number; }
-
-export interface BoundingBox {
-  nw: Point;
-  se: Point;
-  start?: Point;
-  end?: Point;
-}
-
-export interface BoundingBoxSides {
-  top: number,
-  right: number,
-  bottom: number,
-  left: number
-}
+// The geometry primitives live in shared/ so the AI summarizer can use them; this file imports React
+// and icon assets, which the summarizer cannot load. Re-exported here so the many existing importers
+// of drawing-basic-types keep working.
+export type { BoundingBox, BoundingBoxSides, Point } from "../../../../shared/drawing/drawing-geometry";
 
 export enum VectorType {
   line = "line",

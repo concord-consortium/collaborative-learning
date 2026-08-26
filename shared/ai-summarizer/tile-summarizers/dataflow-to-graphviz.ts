@@ -337,7 +337,18 @@ export function programToGraphviz(program: Program): string {
     }
     const formatter = getNodeFormatter(nodeType);
     const properties = formatter({ node, inputs, nodeValue });
-    const propertyRows = propertiesToTableRows({...automaticNodeProperties, ...properties});
+    // The real node id rides as a property rather than as the graph identifier: the identifier is
+    // also every edge's endpoint, and nanoids there would make the graph unreadable. Anything that
+    // wants to point at this node needs the id the document actually stores. Spread it last so it
+    // remains authoritative against whatever a node's data carries.
+    //
+    // The title bar string rides alongside it for the same reason in reverse. The identifier is
+    // `type:name` so it stays legible as an edge endpoint, but that prefix is not on screen — a
+    // consumer that quotes the identifier to a student names a block `Sensor:Sensor 1` that the
+    // student sees titled `Sensor 1`.
+    const propertyRows = propertiesToTableRows({
+      ...automaticNodeProperties, ...properties, id: node.id, title: orderedDisplayName || node.name
+    });
 
     // Build HTML table label
     const labelLines: string[] = [];

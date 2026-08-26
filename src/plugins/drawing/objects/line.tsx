@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
+import { lineBoundingBox } from "../../../../shared/drawing/drawing-geometry";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, FilledObject, IDrawingComponentProps,
    IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
@@ -20,22 +21,6 @@ function* pointIterator(line: LineObjectType): Generator<Point, string, unknown>
   for (const {dx, dy} of points) {
     currentX += dx * scaleX;
     currentY += dy * scaleY;
-    yield {x: currentX, y: currentY};
-  }
-  // Due to some conflict between TS and ESLint it is necessary to return
-  // a value here. As far as I can tell this value is not used.
-  return "done";
-}
-
-function* undraggedPointIterator(line: LineObjectType): Generator<Point, string, unknown> {
-  const { x, y } = line;
-  const points = line.deltaPoints;
-  let currentX = x;
-  let currentY = y;
-  yield { x: currentX, y: currentY };
-  for (const {dx, dy} of points) {
-    currentX += dx;
-    currentY += dy;
     yield {x: currentX, y: currentY};
   }
   // Due to some conflict between TS and ESLint it is necessary to return
@@ -72,31 +57,16 @@ export const LineObject = types.compose("LineObject", StrokedObject, FilledObjec
     },
 
     get undraggedUnrotatedBoundingBox() {
-      const {x, y} = self;
-      const nw: Point = {x, y};
-      const se: Point = {x, y};
-      for (const point of undraggedPointIterator(self as LineObjectType)) {
-        nw.x = Math.min(nw.x, point.x);
-        nw.y = Math.min(nw.y, point.y);
-        se.x = Math.max(se.x, point.x);
-        se.y = Math.max(se.y, point.y);
-      }
-      return {nw, se};
+      const { x, y, deltaPoints } = self;
+      return lineBoundingBox({ x, y, deltaPoints });
     },
 
     get unrotatedBoundingBox() {
-      // The position of the line is its start point.
-      // Other points are stored as deltas from the start point.
-      const {x, y} = self.position;
-      const nw: Point = {x, y};
-      const se: Point = {x, y};
-      for (const point of pointIterator(self as LineObjectType)){
-        nw.x = Math.min(nw.x, point.x);
-        nw.y = Math.min(nw.y, point.y);
-        se.x = Math.max(se.x, point.x);
-        se.y = Math.max(se.y, point.y);
-      }
-      return {nw, se};
+      const { x, y } = self.position;
+      return lineBoundingBox(
+        { x, y, deltaPoints: self.deltaPoints },
+        { x: self.dragScaleX ?? 1, y: self.dragScaleY ?? 1 }
+      );
     },
 
     get label() {

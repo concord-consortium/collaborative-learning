@@ -311,6 +311,32 @@ describe('ai-summarizer', () => {
         expect(result).toContain('This tile contains a drawing');
       });
 
+      it('should name each object in a drawing tile', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: {
+            row1: {
+              tiles: [{ tileId: 'tile1' }],
+              isSectionHeader: false
+            }
+          },
+          tileMap: {
+            tile1: {
+              id: 'tile1',
+              content: {
+                type: 'Drawing',
+                objects: [
+                  { id: 'r1', type: 'rectangle', x: 40, y: 20, width: 120, height: 80, fill: '#0069ff' }
+                ]
+              }
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('| r1 | rectangle | 40, 20 | 120 x 80 |');
+      });
+
       it('should handle data flow tiles', () => {
         const content = {
           rowOrder: ['row1'],
@@ -423,6 +449,32 @@ describe('ai-summarizer', () => {
           expect(result).toContain('This is a question for students to answer');
           expect(result).toContain('# Question Prompt');
           expect(result).toContain('# Question Response');
+        });
+
+        it('should name the prompt tile id, so what is inside it can be cited', () => {
+          // The prompt is summarized by calling tileSummary directly rather than going through
+          // tilesSummary, which is the only place the id line is emitted. A drawing used as a
+          // prompt therefore gave every object an id while the tile holding them had none.
+          const withDrawingPrompt = JSON.parse(JSON.stringify(content));
+          withDrawingPrompt.tileMap.tile1.content = {
+            type: 'Question',
+            rowOrder: ['qRow1'],
+            rowMap: { qRow1: { tiles: [{ tileId: 'prompt' }] } }
+          };
+          withDrawingPrompt.tileMap = {
+            ...withDrawingPrompt.tileMap,
+            prompt: {
+              id: 'promptTileId',
+              content: {
+                type: 'Drawing',
+                objects: [{ id: 'r1', type: 'rectangle', x: 0, y: 0, width: 10, height: 5 }]
+              }
+            }
+          };
+
+          const result = documentSummarizer(withDrawingPrompt, {});
+          expect(result).toContain('| r1 | rectangle |');
+          expect(result).toContain("This tile's id is `promptTileId`.");
         });
       });
 
@@ -1027,6 +1079,27 @@ describe('ai-summarizer', () => {
         const result = documentSummarizer(content, {});
         expect(result).toContain('This is an empty CLUE document with no content');
       });
+    });
+  });
+
+  describe("tile ids", () => {
+    const content = {
+      rowOrder: ["row1"],
+      rowMap: { row1: { id: "row1", tiles: [{ tileId: "tileAAA" }] } },
+      tileMap: {
+        tileAAA: { id: "tileAAA", title: "My Notes", content: { type: "Text", format: "markdown", text: "hello" } }
+      }
+    };
+
+    it("names each tile's id beneath its heading", () => {
+      const result = documentSummarizer(content, {});
+      expect(result).toContain("### Tile 1");
+      expect(result).toContain("This tile's id is `tileAAA`.");
+    });
+
+    it("keeps the id out of the heading itself", () => {
+      const result = documentSummarizer(content, {});
+      expect(result).toMatch(/### Tile 1 \(My Notes\)\n/);
     });
   });
 });
