@@ -157,18 +157,7 @@ export function lineBoundingBox(
 export const kVariableChipDefaultWidth = 75;
 export const kVariableChipDefaultHeight = 24;
 
-/**
- * Externalize the bounding box of an object that is inside a group.
- *
- * A group's members are stored as fractions of the group's box rather than as coordinates: creating
- * a group runs GroupObject.assimilateObjects, which divides each member's box by the group's size
- * and persists the result. So a grouped child holds `x: 0.25, width: 0.5` where a top-level object
- * holds pixels, and reading the two the same way describes the child as a sub-pixel speck at the
- * origin.
- *
- * @param childBB The bounding box of the object inside the group; sides are normally in [0,1].
- * @returns The bounding box relative to the coordinate system the group itself lives in.
- */
+/** How a group places its members: its own box, plus whatever turn and flips it carries. */
 export interface GroupTransform {
   boundingBox: BoundingBox;
   rotation?: number;
@@ -208,6 +197,18 @@ export function absoluteChildPoint(point: Point, group: GroupTransform): Point {
   return rotatePoint({ x, y }, groupBB.se, group.rotation ?? 0);
 }
 
+/**
+ * Externalize the bounding box of an object that is inside a group.
+ *
+ * A group's members are stored as fractions of the group's box rather than as coordinates: creating
+ * a group runs GroupObject.assimilateObjects, which divides each member's box by the group's size
+ * and persists the result. So a grouped child holds `x: 0.25, width: 0.5` where a top-level object
+ * holds pixels, and reading the two the same way describes the child as a sub-pixel speck at the
+ * origin.
+ *
+ * @param childBB The bounding box of the object inside the group; sides are normally in [0,1].
+ * @returns The bounding box relative to the coordinate system the group itself lives in.
+ */
 export function absoluteChildBoundingBox(childBB: BoundingBox, group: GroupTransform): BoundingBox {
   // Every corner is mapped, not just two. Two opposite corners bound the rotated rectangle only
   // when the rotation is a multiple of 90; at any other angle their images do not span it. At 45

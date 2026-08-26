@@ -450,6 +450,32 @@ describe('ai-summarizer', () => {
           expect(result).toContain('# Question Prompt');
           expect(result).toContain('# Question Response');
         });
+
+        it('should name the prompt tile id, so what is inside it can be cited', () => {
+          // The prompt is summarized by calling tileSummary directly rather than going through
+          // tilesSummary, which is the only place the id line is emitted. A drawing used as a
+          // prompt therefore gave every object an id while the tile holding them had none.
+          const withDrawingPrompt = JSON.parse(JSON.stringify(content));
+          withDrawingPrompt.tileMap.tile1.content = {
+            type: 'Question',
+            rowOrder: ['qRow1'],
+            rowMap: { qRow1: { tiles: [{ tileId: 'prompt' }] } }
+          };
+          withDrawingPrompt.tileMap = {
+            ...withDrawingPrompt.tileMap,
+            prompt: {
+              id: 'promptTileId',
+              content: {
+                type: 'Drawing',
+                objects: [{ id: 'r1', type: 'rectangle', x: 0, y: 0, width: 10, height: 5 }]
+              }
+            }
+          };
+
+          const result = documentSummarizer(withDrawingPrompt, {});
+          expect(result).toContain('| r1 | rectangle |');
+          expect(result).toContain("This tile's id is `promptTileId`.");
+        });
       });
 
       it('should handle placeholder tiles', () => {
