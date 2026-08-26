@@ -3,6 +3,8 @@ import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
+import { turnFromDoc } from "./turn-from-doc";
+import { isAwaitingReply } from "./awaiting-reply";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -95,24 +97,16 @@ export class FirestoreTransport implements ChatTransport {
     this.unsubMessages = this.messagesQuery().onSnapshot(
       snapshot => {
         const turns: ChatTurn[] = [];
-        let idx = 0;
-        let lastUserIdx = -1;
-        let lastAssistantIdx = -1;
+        const kinds: Array<string | undefined> = [];
         snapshot.forEach(doc => {
           const data = doc.data({ serverTimestamps: "estimate" }) as any;
-          if (data.kind === "user") {
-            lastUserIdx = idx;
-            turns.push({
-              id: doc.id, sender: "user", text: data.text ?? "", pending: doc.metadata.hasPendingWrites
-            });
-          } else if (data.kind === "assistant") {
-            lastAssistantIdx = idx;
-            // userText === null is a silent reply — it clears the wait but renders nothing
-            if (data.userText != null) turns.push({ id: doc.id, sender: "assistant", text: data.userText });
-          }
-          idx++;
+          // Push for every document, including a silent reply that produces no turn: isAwaitingReply
+          // counts messages, not visible turns, and a silent reply is what clears the typing indicator.
+          kinds.push(data.kind);
+          const turn = turnFromDoc(doc.id, data, doc.metadata.hasPendingWrites);
+          if (turn) turns.push(turn);
         });
-        this.awaitingReply = lastUserIdx > lastAssistantIdx;
+        this.awaitingReply = isAwaitingReply(kinds);
         onTurns(turns);
         this.emitStatus();
       },

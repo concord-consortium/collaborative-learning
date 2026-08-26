@@ -31,8 +31,11 @@ export const DocumentContentModelWithHighlights = DocumentContentModelWithTileDr
     pinnedHighlightRef: undefined as HighlightReference | undefined,
     // Which source set each ref. A reference cannot identify its own source — two sources can
     // cite the same object, and a variable reference names no source at all — so a source that
-    // wants to release only what it set has to be told apart by something else. Sources that
-    // outlive nothing (an AI-emitted reference has no owning component) can leave this unset.
+    // wants to release only what it set has to be told apart by something else.
+    //
+    // A source with a lifetime must set a token and release on unmount; see docs/highlights.md,
+    // which is the authority on the rules. Leaving it unset means nobody can own-release the
+    // highlight, so it is for a caller that sets a reference and never needs to take it back.
     hoveredHighlightSource: undefined as string | undefined,
     pinnedHighlightSource: undefined as string | undefined,
   }))

@@ -85,9 +85,13 @@
   &::after {
     content: "";
     position: absolute;
-    // 3px ring sitting 2px outside the node edge, matching the previous outline-offset.
-    inset: -5px;
-    border-radius: 10px; // .node's 5px radius + the 5px inset
+    // 3px ring sitting 5px outside the node edge. The gap is what clears the selection
+    // box-shadow, which hugs the node at 0-3px (`&.selected` in dataflow-node.scss). At a
+    // smaller offset the two rings abut and read as a single thick border, so a highlight on an
+    // already-selected node becomes indistinguishable from the selection itself — the one
+    // confusion this system exists to avoid, since a highlight is not selection.
+    inset: -8px;
+    border-radius: 13px; // .node's 5px radius + the 8px inset
     pointer-events: none;
   }
 }

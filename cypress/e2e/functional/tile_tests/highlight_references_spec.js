@@ -198,9 +198,10 @@ context("Highlight references", () => {
   // which is a different claim from the one that matters: that a reference can point at any
   // drawing object. The rectangle carries no variable, so nothing in the UI can name it.
   //
-  // The reference is set on the document model because no UI source constructs an `object`
-  // reference yet. That is the point of the test, not a shortcut around one: the rendering path
-  // is meant to be kind-agnostic, and this is the only way to prove it before an AI source exists.
+  // The reference is set on the document model directly rather than driven through the chat
+  // tutor sidebar, the one UI source that constructs an `object` reference. That is the point of
+  // the test, not a shortcut around one: this spec is about the sketch tile's target rendering,
+  // and setting the reference by hand keeps that concern independent of the chat tutor UI.
   it("highlights a plain shape from an object reference, which no chip can name", () => {
     cy.get(SKETCH_TILE).should("exist");
     cy.get(HIGHLIGHT_BOX).should("not.exist");

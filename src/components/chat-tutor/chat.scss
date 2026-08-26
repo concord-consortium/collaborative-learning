@@ -1,10 +1,19 @@
 @import "../vars";
 
+// The bubble and the highlight-button row beneath it are aligned by sharing this width; two
+// literals would let one be edited without the other and silently misalign the row.
+$chat-bubble-max-width: 85%;
+
 // The .visually-hidden utility used here is the global one from src/index.scss.
 
 // Color pairs below are WCAG AA checked: white on $workspace-teal-dark-2 = 7.0:1;
 // $charcoal-dark-2 on $charcoal-light-7 = 9.4:1; $charcoal border on white = 4.95:1;
 // $error-red on white = 7.3:1; $charcoal-dark-1 on white = 7.6:1.
+// .chat-highlight: $charcoal-dark-2 text on white = 10.5:1; $charcoal border (non-text,
+// WCAG 1.4.11) on white = 4.95:1 and on the $charcoal-light-6 hover fill = 4.3:1 — the
+// border carries the boundary alone on hover, since the fill itself is only 1.1:1 against
+// the page; hover/active fill $charcoal-light-6 with $charcoal-dark-2 text = 9.1:1, and
+// the active border (also $charcoal-dark-2) against that same fill = 9.1:1.
 .chat-tutor {
   display: flex;
   flex-direction: column;
@@ -156,12 +165,15 @@
 
   .chat-row {
     display: flex;
+    // A column so highlight buttons stack beneath the bubble rather than becoming a second flex
+    // item beside it. Sender placement is therefore align-items, not justify-content.
+    flex-direction: column;
 
     // Sender color/alignment. The bubble-color rules live here (nested under the sender
     // class) rather than under `.chat-bubble`, where `.chat-row.user &` would resolve to
     // an unmatchable descendant selector.
     &.user {
-      justify-content: flex-end;
+      align-items: flex-end;
 
       .chat-bubble {
         background: $workspace-teal-dark-2;
@@ -170,7 +182,7 @@
       }
     }
     &.assistant {
-      justify-content: flex-start;
+      align-items: flex-start;
 
       .chat-bubble {
         background: $charcoal-light-7;
@@ -181,7 +193,7 @@
   }
 
   .chat-bubble {
-    max-width: 85%;
+    max-width: $chat-bubble-max-width;
     padding: 8px 12px;
     border-radius: 14px;
     white-space: pre-wrap;
@@ -190,6 +202,44 @@
 
     &.pending { opacity: 0.6; }
     &.typing { padding: 10px 14px; }
+  }
+
+  .chat-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    max-width: $chat-bubble-max-width;
+  }
+
+  .chat-highlight {
+    font: inherit;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid $charcoal;
+    background: white;
+    color: $charcoal-dark-2;
+    cursor: pointer;
+    // `label` is model-supplied and TUTOR_REPLY_FORMAT cannot bound its length (strict json_schema
+    // has no maxLength), so one long unbroken token would otherwise overflow and give the drawer
+    // horizontal scroll.
+    //
+    // `overflow-wrap: anywhere` rather than the `word-break: break-word` .chat-bubble uses: only
+    // `anywhere` shrinks a flex item's min-content contribution, and this button is a flex item.
+    // Unifying the two would look like tidying and would bring the overflow back.
+    max-width: 100%;
+    overflow-wrap: anywhere;
+
+    &:hover { background: $charcoal-light-6; }
+    &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
+
+    // Pinned: the student asked to keep this one showing. Distinct from hover, which is a preview.
+    &.active {
+      border-color: $charcoal-dark-2;
+      background: $charcoal-light-6;
+      font-weight: bold;
+    }
   }
 
   // Animated typing indicator: three dots that strobe in sequence. Motion is suppressed

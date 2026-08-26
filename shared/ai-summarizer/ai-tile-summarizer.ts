@@ -121,6 +121,13 @@ function tileTitle(tile: INormalizedTile): string {
   return tile.model?.title ? ` (${tile.model.title})` : "";
 }
 
+// The id is a separate line rather than part of the heading: headings are matched by prefix in
+// tests and read by people, and anything that wants to refer to an object inside this tile needs
+// the tile id alongside the object id.
+function tileIdLine(tile: INormalizedTile): string {
+  return tile.model?.id ? `This tile's id is \`${tile.model.id}\`.\n\n` : "";
+}
+
 export function tilesSummary({dataSets, tiles, tileMap, headingLevel, options}: TilesHandlerParams): string {
   return tiles.map((tile) => {
     const summary = tileSummary({
@@ -131,7 +138,7 @@ export function tilesSummary({dataSets, tiles, tileMap, headingLevel, options}: 
       options
     });
     if (summary) {
-      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`) + summary;
+      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`) + tileIdLine(tile) + summary;
     }
     return "";
   })

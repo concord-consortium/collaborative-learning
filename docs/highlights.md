@@ -42,17 +42,41 @@ alias of the annotation system's `IClueObjectSnapshot`, so the two addressing sc
 apart. Resolvers register themselves as a module side effect, and a resolver belongs wherever its
 kind's knowledge lives: the `object` resolver is here, but the `variable` one is registered by
 `shared-variables-registration.ts`, so core never has to know what a variable is.
-`resolveHighlightReference` fails quiet: an unknown kind or an unresolvable reference yields
-no targets and no error.
+`resolveHighlightReference` fails quiet in the sense that nothing throws, but "unresolvable"
+does not mean the same thing for both kinds, and the difference matters to anyone reading a
+target list. An unknown kind yields no targets. A `variable` reference nothing binds yields no
+targets. An `object` reference is returned **unchanged, without checking that the object
+exists** — so a reference to a deleted node yields one target that no tile will render. The
+visible result is the same either way (no ring appears), but do not assume every entry in a
+resolved list corresponds to something present in the document.
+
+**Why a reference carries an id and not a readable name.** The workspace summary an AI reads is
+full of readable names — `Tile 3`, `Dataflow:Sensor 1` — and pointing with one of those looks like
+an obvious simplification. It is not, because the failure modes are asymmetric. The summary an AI
+was given is routinely one edit behind the document by the time its reply arrives. A stale **id**
+resolves to nothing renderable and the ring silently does not appear. A stale **name or index**
+resolves to the *wrong* object, and rings it confidently.
+
+Both naming schemes are also unstable under ordinary use. `Tile N` is positional, assigned by
+walking row order, so inserting a tile above renumbers everything below it. `type:name#N` derives
+from a Dataflow node's `orderedDisplayName`, which is **student-editable** — renaming a node breaks
+a name-based reference through the most ordinary action available to them.
+
+The distinction to hold onto: every other use of names in the summary is *descriptive*, where being
+slightly stale costs a little accuracy. A highlight reference is *operative* — it moves a ring on a
+student's screen. So the summary carries both: readable names for the model to reason with, and ids
+for it to cite. `src/models/highlights/highlight-reference-from-summary.test.ts` holds that line:
+it summarizes the demo document, asserts the summary names every tile id and Dataflow node id, and
+resolves a reference built from those ids.
 
 **Which kind matters, and why the multi-tile behavior is not the feature.** `object` is the kind
 the system exists for: an AI saying "click that button in the Dataflow tile" should light that
 button and nothing else. `variable` fans out across tiles, and that fan-out is a property of the
 *kind*, not of highlighting — it exists because a variable chip is currently the only way a user
 can name something in another tile. Treat the variable kind as scaffolding: useful, worth keeping,
-but do not derive the system's semantics from how it behaves. Nothing today produces an `object`
-reference, which is a UI limitation rather than a design one, and it resolves when AI-emitted
-references land.
+but do not derive the system's semantics from how it behaves. The chat tutor sidebar
+(`src/components/chat-tutor/chat-sidebar.tsx`) is the first producer of an `object` reference:
+each highlighted chat turn names one tile object directly, with no fan-out.
 
 ## Setting up a tile to be a highlight *target*
 
@@ -94,8 +118,8 @@ it turns a linear render into a quadratic one.
 
 A source drives the state. The text-tile variable chip is the reference implementation
 (`src/plugins/shared-variables/slate/variables-plugin.tsx`), but a source need not be a tile —
-anything that can reach the document content qualifies, and an AdaChat button will be the first
-that isn't one.
+anything that can reach the document content qualifies. The chat tutor sidebar is the first
+source that isn't one (see below).
 
 Actions on the document content model:
 
@@ -112,8 +136,18 @@ tracked separately or a source will release a highlight it never set. That was a
 chips for one variable, deleting the tile containing either one cleared the highlight everywhere,
 including on the chip the user had actually clicked.
 
-Pass a per-instance id (the chip uses a `useRef` id, not the variable id). A source with no owning
-component — an AI-emitted reference — can leave it unset, in which case nothing own-releases it.
+Pass a per-instance id (the chip uses a `useRef` id, not the variable id; the chat tutor sidebar
+does the same). Leaving the token unset means nothing own-releases the highlight, so reserve that
+for a source that genuinely has no owning component to attach a release effect to — every source
+described here has one, and should carry a token.
+
+The chat tutor sidebar (`src/components/chat-tutor/chat-sidebar.tsx`) is the source to copy for
+anything that isn't a tile. It holds the workspace document's content model as a prop, wraps in
+`observer` so it re-renders when another source takes over its pin, and mints a per-instance token
+with `useRef` rather than `useMemo` — a discarded-and-recomputed memo would mint a new token
+mid-life and strand the sidebar's own pinned highlight. It releases its own highlights on unmount
+and again whenever the conversation swaps out from under it, so a closed drawer or a
+document/problem change never strands a ring.
 
 Two rules a source must respect:
 
@@ -221,22 +255,24 @@ highlight from. That is entirely about the variable chip and is not needed to ad
   is a design decision. (The preview ring was moved off `$input-purple` because that color
   measured 2.02:1 against the white canvas, below WCAG 1.4.11's 3:1 minimum for a non-text
   indicator.) Both values live in `src/components/highlight-vars.scss`.
-- **Only variable references exist today, so nothing can point at one specific object.** The
-  `object` kind is fully resolved but has no producer — see [References](#references). Until
-  AI-emitted references land, every highlight fans out to everything associated with a variable,
-  which is the opposite of what "look at this one thing" needs.
-- **Sources are mouse-only.** The variable chip has no `role`, `tabIndex`, or key handler, so
-  keyboard and assistive-technology users cannot pin a highlight.
+- **The variable chip still fans out, even though `object` now has a producer.** The chat tutor
+  sidebar emits `object` references that point at one thing directly — see
+  [References](#references) — but the variable chip, still the only way a user hand-authors a
+  reference, resolves to everything associated with a variable, which is the opposite of what
+  "look at this one thing" needs.
+- **The variable chip is mouse-only.** It has no `role`, `tabIndex`, or key handler, so keyboard
+  and assistive-technology users cannot pin a highlight from it. The chat tutor sidebar's
+  highlight buttons are real `<button>` elements whose `onFocus` mirrors `onMouseEnter`, so pinning
+  from that source works from the keyboard.
 - **Dataflow exposes only nodes.** Connections and groups have stable ids but are not yet
   addressable, so nothing can point at a wire or a collapsed group.
-- **Everything highlightable today is reached through a *variable* reference — and that is a UI
-  limitation, not a design one.** The `object` kind is fully specified and resolved, but nothing
-  produces one, because a variable chip is currently the only way a *user* can author a cross-tile
-  reference at all. So objects that are addressable but not variable-bound — a sketch rectangle, a
-  Dataflow Math node — cannot be pointed at, and every target tile appears to support only
-  variables. Expect this to dissolve rather than be fixed: once AI-emitted references land,
-  `object` references reach those objects with no change to any target tile. Do not design around
-  the variable kind as though it were the only one.
+- **Non-variable-bound objects are no longer categorically unreachable — the chat tutor sidebar's
+  `object` references prove it for Dataflow nodes.** A Dataflow Math node has no variable to bind
+  to, so the variable chip could never reach it; the chat tutor sidebar points at it directly by
+  tileId/objectId, with no change to the Dataflow target tile. The general shape of the limitation
+  still holds for hand-authored references, since a variable chip remains the only way a *user*
+  constructs a cross-tile reference — so do not design around the variable kind as though it were
+  the only one just because one producer of `object` references now exists.
 - **Sketch variable chips cannot be grouped.** `VariableChipObject` extends `DrawingObject` rather
   than `SizedObject`, so it never implements `setUnrotatedDragBounds`, which `createGroup` calls,
   and grouping one throws. Pre-existing and unrelated to highlights, tracked separately as a

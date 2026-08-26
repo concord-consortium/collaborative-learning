@@ -1,9 +1,11 @@
-import React, { useMemo, useRef } from "react";
-import { IAnyStateTreeNode } from "mobx-state-tree";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
+import type { IHighlightContentModel } from "../../models/highlights/highlight-content-model";
+import { uniqueId } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
-import { Chat } from "./chat";
+import { Chat, highlightKey } from "./chat";
 import { useChat } from "./use-chat";
 import { ChatTransport } from "./transport";
 import { conversationDocId } from "./conversation-key";
@@ -22,15 +24,22 @@ interface IProps {
   documentTitle: string;
   problemPath: string;
   problem: ProblemModelType;
-  // the workspace document's content node; undefined until the document loads
-  content: IAnyStateTreeNode | undefined;
+  // The workspace document's content model; undefined until the document loads. Typed as the
+  // narrow highlight slice rather than the whole content model: this component drives highlights
+  // and hands the node to the summarizer, and depending on more than that would hide which parts
+  // of the document it actually needs.
+  content: IHighlightContentModel | undefined;
   onClose: () => void;
 }
 
 // Right-edge overlay drawer for the AI chat tutor. Mounted only while open (the
 // app-header launcher owns the open/close state); mounting resets the transport, so
 // switching documents or problems while open swaps the conversation.
-export const ChatTutorSidebar: React.FC<IProps> = (props) => {
+//
+// An observer because the pinned highlight button reflects `content.pinnedHighlightSource`,
+// which can be taken over by another highlight source (a variable chip, say) while this
+// sidebar stays open.
+export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
   const { appConfig, db, user } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +81,66 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
   // default; an authored empty string suppresses the intro entirely (?? keeps "" distinct from unset).
   const introText = appConfig.chatTutorIntro ?? CHAT_TUTOR_DEFAULT_INTRO;
 
+  // Identifies this sidebar instance as a highlight source. Several sources share one document, and
+  // two of them can cite the same object, so ownership is decided by token rather than by reference.
+  // useRef rather than useMemo: React is allowed to discard a memoized value and recompute it, which
+  // here would mint a new token mid-life and strand this sidebar's own pinned highlight.
+  const highlightSource = useRef(`chat-highlight-${uniqueId()}`).current;
+
+  // Which of this sidebar's buttons is pinned. State rather than a ref: every button here shares
+  // one source token, so re-pinning can leave content.pinnedHighlightSource holding the value it
+  // already had, and MobX has nothing to react to. A state update re-renders regardless.
+  const [pinnedKey, setPinnedKey] = useState<string | undefined>(undefined);
+
+  // Deferring to the model rather than trusting pinnedKey alone is what makes another source taking
+  // the pin — a variable chip, say — un-press this sidebar's button.
+  const activeHighlightKey = content?.pinnedHighlightSource === highlightSource
+    ? pinnedKey : undefined;
+
+  const findHighlight = (turnId: string, index: number) =>
+    chat.turns.find(t => t.id === turnId)?.highlights?.[index];
+
+  const handleHighlightHover = (turnId: string, index: number, hovering: boolean) => {
+    if (!content) return;
+    if (!hovering) {
+      content.clearHoveredHighlightRefIfOwn(highlightSource);
+      return;
+    }
+    const highlight = findHighlight(turnId, index);
+    if (!highlight) return;
+    content.setHoveredHighlightRef(
+      { kind: "object", tileId: highlight.tileId, objectId: highlight.objectId },
+      highlightSource);
+  };
+
+  const handleHighlightToggle = (turnId: string, index: number) => {
+    const highlight = content && findHighlight(turnId, index);
+    if (!highlight) return;
+    const key = highlightKey(turnId, index);
+    // Two buttons can cite the same object, and share this sidebar's one token. Since
+    // togglePinnedHighlightRef releases when reference and source both match, dropping our own pin
+    // first is what makes a different button move the pin instead of clearing it.
+    if (activeHighlightKey && activeHighlightKey !== key) {
+      content.clearPinnedHighlightRefIfOwn(highlightSource);
+    }
+    content.togglePinnedHighlightRef(
+      { kind: "object", tileId: highlight.tileId, objectId: highlight.objectId },
+      highlightSource);
+    setPinnedKey(content.pinnedHighlightSource === highlightSource ? key : undefined);
+  };
+
+  // React does not fire onMouseLeave for an element that unmounts under the cursor, and a pinned
+  // highlight can only be dismissed by clicking its button — so a sidebar that closes while pinned
+  // would strand a ring on the tile for the rest of the session. The same release also has to run
+  // when documentKey/problemPath change without an unmount: that swaps the conversation (see the
+  // component comment above), so a highlight owned by the old conversation must not survive into it.
+  useEffect(() => {
+    return () => {
+      content?.clearHoveredHighlightRefIfOwn(highlightSource);
+      content?.clearPinnedHighlightRefIfOwn(highlightSource);
+    };
+  }, [content, highlightSource, documentKey, problemPath]);
+
   return (
     <div
       ref={containerRef}
@@ -84,8 +153,12 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
     >
       <div ref={bodyRef} className="chat-tutor-sidebar-body">
         <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header}
-              introText={introText} />
+              introText={introText}
+              onHighlightHover={handleHighlightHover}
+              onHighlightToggle={handleHighlightToggle}
+              activeHighlightKey={activeHighlightKey}
+              enableHighlights={!!appConfig.chatTutorHighlights} />
       </div>
     </div>
   );
-};
+});

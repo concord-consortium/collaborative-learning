@@ -115,6 +115,7 @@ describe("programToGraphviz", () => {
       <tr><td>plot</td><td>false</td></tr>
       <tr><td>value</td><td>2</td></tr>
       <tr><td>nodeValue</td><td>2</td></tr>
+      <tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>
       <tr><td>Output</td><td port="value">value</td></tr>
     </table>
   >];
@@ -123,6 +124,7 @@ describe("programToGraphviz", () => {
       <tr><td>plot</td><td>false</td></tr>
       <tr><td>value</td><td>3</td></tr>
       <tr><td>nodeValue</td><td>3</td></tr>
+      <tr><td>id</td><td>5TnGPjp2Cfvcwnw_</td></tr>
       <tr><td>Output</td><td port="value">value</td></tr>
     </table>
   >];
@@ -135,6 +137,7 @@ describe("programToGraphviz", () => {
       <tr><td>nodeValue</td><td>5</td></tr>
       <tr><td>formula</td><td>Number:Number 1 + Number:Number 2 = nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>2 + 3 = 5</td></tr>
+      <tr><td>id</td><td>oFu_7v2unK3-Uc1s</td></tr>
     </table>
   >];
   "Logic:Logic 1" [label=<
@@ -144,6 +147,7 @@ describe("programToGraphviz", () => {
       <tr><td>nodeValue</td><td>NaN</td></tr>
       <tr><td>formula</td><td>unset_num1 &gt; unset_num2 ⇒ nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>unset_num1 &gt; unset_num2 ⇒ NaN</td></tr>
+      <tr><td>id</td><td>node4</td></tr>
     </table>
   >];
   "Transform:Transform 1" [label=<
@@ -153,6 +157,7 @@ describe("programToGraphviz", () => {
       <tr><td>nodeValue</td><td>NaN</td></tr>
       <tr><td>formula</td><td>|unset_num1| = nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>|unset_num1| = NaN</td></tr>
+      <tr><td>id</td><td>node5</td></tr>
     </table>
   >];
 
@@ -243,5 +248,49 @@ describe("programToGraphviz", () => {
     expect(clusterBlock).toContain("<td>value</td><td>2</td>");
     expect(clusterBlock).not.toContain("<td>value</td><td>3</td>");
     expect(dot).toContain("<td>value</td><td>3</td>");
+  });
+
+  describe("node ids", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        "7ZRiN_2uNGilJII0": {
+          id: "7ZRiN_2uNGilJII0",
+          name: "Number",
+          x: 0,
+          y: 0,
+          data: { type: "Number", plot: false, orderedDisplayName: "Number 1", value: 2 }
+        }
+      },
+      connections: {}
+    };
+
+    it("emits the real node id as a property row", () => {
+      const dot = programToGraphviz(program);
+      expect(dot).toContain("<tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>");
+    });
+
+    it("still uses the readable label as the graph identifier", () => {
+      const dot = programToGraphviz(program);
+      expect(dot).toContain('"Number:Number 1" [label=<');
+      expect(dot).not.toContain('"7ZRiN_2uNGilJII0" [label=<');
+    });
+
+    // The id is spread last so it wins against anything a node's own data carries under the same
+    // key. Without a conflicting case the ordering is unpinned and moving the spread to the front
+    // would break nothing — while quietly making the summary name an id no document stores.
+    it("takes the node's own id over an id in its data", () => {
+      const dot = programToGraphviz({
+        ...program,
+        nodes: {
+          "7ZRiN_2uNGilJII0": {
+            ...program.nodes["7ZRiN_2uNGilJII0"],
+            data: { ...program.nodes["7ZRiN_2uNGilJII0"].data, id: "not-the-real-id" }
+          }
+        }
+      });
+      expect(dot).toContain("<tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>");
+      expect(dot).not.toContain("not-the-real-id");
+    });
   });
 });
