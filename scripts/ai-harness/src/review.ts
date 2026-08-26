@@ -1256,18 +1256,21 @@ const kStyles = `
   table { border-collapse: collapse; font-size: 0.85rem; margin: 0.5rem 0; }
   th, td { border: 1px solid #d4d4d4; padding: 0.2rem 0.5rem; text-align: left; vertical-align: top; }
   th { background: #f2f2f2; }
+  /* No break-inside: avoid — the report is a screen document. A closed details prints without
+     its contents (no scriptless way around that), so print fidelity is not something the layout
+     pretends to offer. */
   .document { border: 1px solid #c8c8c8; border-radius: 6px; padding: 1rem 1.25rem;
-    margin: 1.25rem 0; break-inside: avoid; }
+    margin: 1.25rem 0; }
   .document-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem; }
   .inputs { margin: 0.75rem 0; }
+  .inputs details > summary { cursor: pointer; }
+  .inputs details > summary:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
   .input-block { margin: 0 0 1rem; }
   .input-label { font-size: 0.8rem; color: #555; margin: 0 0 0.25rem; }
   img { max-width: 100%; height: auto; border: 1px solid #d4d4d4; background: #fbfbfb; }
   pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f7f7;
     border: 1px solid #e2e2e2; border-radius: 4px; padding: 0.6rem 0.75rem; margin: 0;
-    font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: 32rem;
-    overflow-y: auto; }
-  pre:focus-visible { outline: 2px solid #1b1b1b; outline-offset: 2px; }
+    font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   h2.caption { font-size: 0.85rem; margin: 1.25rem 0 0.5rem; padding: 0; border-bottom: none;
     text-transform: uppercase; letter-spacing: 0.06em; color: #555; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0.75rem; }
@@ -1379,10 +1382,30 @@ function headerBlock(model: ReviewModel): Html {
 }
 
 function inputsBlock(document: ReviewDocument): Html {
+  // A closed `details`, not a `div`: the pictures and summaries are the bulk of the page, and a
+  // judge scanning verdicts wants them out of the way until they ask. Plain HTML keeps the report
+  // scriptless and shareable, `summary` is keyboard-operable for free, and browsers open a closed
+  // `details` when find-in-page matches inside it, so searching still works against the collapsed
+  // report.
+  //
+  // Three things deliberately live OUTSIDE the collapse: the heading (a heading nested in
+  // `summary` is announced inconsistently by assistive technology), the stale-input notices (a
+  // warning that an input is missing, stale or unverifiable has to be visible without opening
+  // anything), and the nothing-to-show case (a toggle that reveals nothing would be noise). The
+  // summary label is the counts alone — the disclosure role already announces expandability, so
+  // interaction hints like "click to expand" would only pollute the accessible name.
+  const contents = [
+    document.images.length > 0 ? `${document.images.length} image(s)` : null,
+    document.texts.length > 0 ? `${document.texts.length} summary(ies)` : null
+  ].filter(Boolean).join(", ");
   return html`
     <div class="inputs">
       <h4>What the model was given</h4>
       ${document.inputNotices.map((message) => html`<p class="notice">${message}</p>`)}
+      ${contents.length === 0
+        ? html`<p class="meta">No input is available to show for this document.</p>`
+        : html`<details>
+      <summary><span class="meta">${contents}</span></summary>
       ${document.images.map((image, index) => html`
         <div class="input-block">
           <p class="input-label">Image ${index + 1} of ${document.images.length}${image.tileId
@@ -1396,13 +1419,9 @@ function inputsBlock(document: ReviewDocument): Html {
           <p class="input-label">Summary ${index + 1} of ${document.texts.length}${text.labels.length > 0
             ? html` — variant ${text.labels.join("; ")}`
             : ""}</p>
-          <pre tabindex="0" role="region"
-            aria-label="Summary ${index + 1} sent for document ${document.displayName}"
-          >${text.markdown}</pre>
+          <pre>${text.markdown}</pre>
         </div>`)}
-      ${document.images.length === 0 && document.texts.length === 0
-        ? html`<p class="meta">No input is available to show for this document.</p>`
-        : ""}
+    </details>`}
     </div>`;
 }
 
@@ -1420,13 +1439,13 @@ function configurationLine(configuration: ReviewRunConfiguration): string {
 function outcomeBlock(outcome: ReviewOutcome): Html {
   if (outcome.kind === "refusal") {
     return html`<div class="field"><div class="field-name">refusal</div>
-      <pre tabindex="0" role="region" aria-label="Refusal text">${outcome.refusal}</pre></div>`;
+      <pre>${outcome.refusal}</pre></div>`;
   }
   if (outcome.kind === "error") {
     return html`
       <div class="field">
         <div class="field-name">error</div>
-        <pre tabindex="0" role="region" aria-label="Error detail">${outcome.type}: ${outcome.message}
+        <pre>${outcome.type}: ${outcome.message}
 attempts: ${outcome.attempts}</pre>
       </div>`;
   }
@@ -1447,8 +1466,7 @@ attempts: ${outcome.attempts}</pre>
       : ""}
     ${outcome.remainingJson
       ? html`<div class="field"><div class="field-name">other response fields</div>
-          <pre tabindex="0" role="region" aria-label="Other response fields, as JSON"
-          >${outcome.remainingJson}</pre></div>`
+          <pre>${outcome.remainingJson}</pre></div>`
       : ""}
     ${outcome.category === null && !outcome.keyIndicators && outcome.discussion === null &&
       !outcome.remainingJson

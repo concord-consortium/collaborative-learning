@@ -36,9 +36,9 @@ function modelFor(
 }
 
 /** The report's own tags. Anything else in the output came from a document. */
-const kOwnTags = ["article", "body", "dd", "div", "dl", "dt", "h1", "h2", "h3", "h4", "head", "html",
-  "img", "li", "meta", "p", "pre", "span", "strong", "style", "table", "tbody", "td", "th", "thead",
-  "title", "tr", "ul"];
+const kOwnTags = ["article", "body", "dd", "details", "div", "dl", "dt", "h1", "h2", "h3", "h4",
+  "head", "html", "img", "li", "meta", "p", "pre", "span", "strong", "style", "summary", "table",
+  "tbody", "td", "th", "thead", "title", "tr", "ul"];
 
 describe("escaping student-authored content", () => {
   const fixture = buildReviewFixture("review-escaping");
@@ -96,15 +96,32 @@ describe("the page can be read with a keyboard", () => {
   const fixture = buildReviewFixture("review-accessibility");
   const html = renderReviewHtml(modelFor(fixture));
 
-  it("makes every clipped block focusable, so it can be scrolled without a mouse", () => {
-    // `pre` clips at 32rem and scrolls, and summaries routinely run past that. A scroll container
-    // without `tabindex` cannot be focused or scrolled by keyboard in Firefox or Safari, so a
-    // keyboard-only judge cannot read past the clip.
+  it("creates no nested scroll region, and no tab stop compensating for one", () => {
+    // A `pre` that clips and scrolls traps the page scroll mid-document, and its `tabindex` tab
+    // stops exist only to compensate; the collapsed inputs (below) make both unnecessary.
+    expect(html).not.toMatch(/pre\s*{[^}]*(max-height|overflow-y)/);
     const blocks = [...html.matchAll(/<pre\b([^>]*)>/g)].map((match) => match[1]);
     expect(blocks.length).toBeGreaterThan(0);
-    expect(blocks.every((attributes) => attributes.includes('tabindex="0"'))).toBe(true);
-    // And each announces what it is, rather than being an unnamed region.
-    expect(blocks.every((attributes) => /aria-label="[^"]+"/.test(attributes))).toBe(true);
+    expect(blocks.some((attributes) => attributes.includes("tabindex"))).toBe(false);
+  });
+
+  it("collapses each document's inputs by default, behind a keyboard-operable summary", () => {
+    // The pictures and summaries are most of the page. A closed `details` keeps them out of a
+    // judge's way without JavaScript — the report stays a plain shareable file — and `summary` is
+    // focusable and toggleable by keyboard natively. Closed by default is the point: an `open`
+    // attribute here would put every screenshot back into the scroll path.
+    const details = [...html.matchAll(/<details\b([^>]*)>/g)].map((match) => match[1]);
+    expect(details.length).toBeGreaterThan(0);
+    expect(details.some((attributes) => attributes.includes("open"))).toBe(false);
+    // The heading lives OUTSIDE the collapse (a heading nested in summary is announced
+    // inconsistently by assistive technology), and each summary label is the counts alone.
+    // Summaries are extracted per element: a whole-page regex would cross </summary> boundaries
+    // and pass on an "image(s)" that lives outside every summary.
+    expect(html).toContain("<h4>What the model was given</h4>");
+    const summaries = [...html.matchAll(/<summary>([\s\S]*?)<\/summary>/g)].map((match) => match[1]);
+    expect(summaries.length).toBeGreaterThan(0);
+    expect(summaries.some((label) => /\d+ image\(s\)/.test(label))).toBe(true);
+    expect(summaries.every((label) => !label.includes("<h4>") && !label.includes("click"))).toBe(true);
   });
 
   it("never skips a heading level", () => {
@@ -219,7 +236,22 @@ describe("an input that no longer matches the run is never shown in its place", 
     expect(alpha.inputNotices.join(" ")).toContain("no longer on disk");
     expect(beta.images.map((image) => image.sha256)).toEqual(fixture.tileSha256s);
     expect(beta.inputNotices.join(" ")).toContain("no longer on disk");
-    expect(() => renderReviewHtml(model)).not.toThrow();
+    const staleHtml = renderReviewHtml(model);
+    // The notice is the report's stale-input signal, so it renders OUTSIDE the collapsed details:
+    // a judge must see it without opening anything. Details elements never nest here, so matching
+    // each one to its first close tag extracts its real contents.
+    //
+    // Matched by the notice's own sentence, not by `class="notice"`: an omitted text part draws a
+    // notice of its own from the card block, and this fixture has one, so the class alone is in the
+    // page whether or not the stale-input notices render at all. A judge cannot tell a notice that
+    // moved inside the collapse from one that stopped being drawn, so neither can this test.
+    const kStaleSentence = "no longer on disk";
+    expect(staleHtml).toContain(kStaleSentence);
+    const detailsBodies = [...staleHtml.matchAll(/<details>([\s\S]*?)<\/details>/g)]
+      .map((match) => match[1]);
+    // Or the check below would hold over an empty list and pin nothing.
+    expect(detailsBodies.length).toBeGreaterThan(0);
+    expect(detailsBodies.every((body) => !body.includes(kStaleSentence))).toBe(true);
   });
 
   it("degrades to a notice when an envelope is damaged", () => {

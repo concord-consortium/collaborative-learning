@@ -20,7 +20,6 @@ const emptyDocument = { rowOrder: [], rowMap: {}, tileMap: {} };
 // ---------------------------------------------------------------------------
 
 interface FakeOptions {
-  png?: Buffer;
   boundingBox?: { x: number; y: number; width: number; height: number } | null;
   /** Makes the parent never report that it posted the document to the iframe. */
   neverPostsInitialValue?: boolean;
@@ -31,8 +30,12 @@ interface FakeOptions {
   requestFailures?: string[];
   frameUrl?: string | null;
   element?: ElementLike | null;
-  /** The top-level tiles the CLUE frame draws, for the per-tile capture. */
-  tiles?: { tileId: string; widthPx: number; heightPx: number }[];
+  /**
+   * The top-level tiles the CLUE frame draws, for the per-tile capture. `xPx`/`yPx` place a tile's
+   * box in the viewport (both default to the origin); a test that cares where a clip landed needs
+   * boxes that are not all at 0, 0.
+   */
+  tiles?: { tileId: string; widthPx: number; heightPx: number; xPx?: number; yPx?: number }[];
 }
 
 const settledMeasurement: FrameMeasurement = {
@@ -47,25 +50,21 @@ const settledMeasurement: FrameMeasurement = {
 function fakeBrowser(options: FakeOptions = {}) {
   const state = {
     url: "",
-    viewport: null as { width: number; height: number } | null,
+    viewports: [] as { width: number; height: number }[],
     screenshots: 0,
     newPages: 0,
     closedPages: 0,
     closedBrowser: 0,
     frameHeights: [] as number[]
   };
-  const png = options.png ?? makeTestPng(960, 1420);
   const handlers = new Map<string, ((payload: any) => void)[]>();
 
   const element: ElementLike = {
-    // Follows the frame height the backend set, the way a real element's box does.
+    // Follows the frame height the backend set, the way a real element's box does. Elements only
+    // measure — captures are page screenshots clipped to this box.
     boundingBox: async () => options.boundingBox === undefined
       ? { x: 0, y: 0, width: 960, height: state.frameHeights.at(-1) ?? 1420 }
-      : options.boundingBox,
-    screenshot: async () => {
-      state.screenshots += 1;
-      return png;
-    }
+      : options.boundingBox
   };
 
   const tiles = options.tiles ?? [];
@@ -85,19 +84,27 @@ function fakeBrowser(options: FakeOptions = {}) {
       // top-level tile several pictures with nothing here noticing. `local-render.integration.ts`
       // is where that is checked against a real DOM.
       expect(selector).toBe(".tool-tile:not(.tool-tile .tool-tile)");
+      // Boxes only: `ElementLike` has no `screenshot`, so a capture that tried to photograph the
+      // element rather than clip a page screenshot would not compile.
       return tiles.map((tile) => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx }),
-        screenshot: async () => {
-          state.screenshots += 1;
-          return makeTestPng(tile.widthPx, tile.heightPx);
-        }
+        boundingBox: async () => ({
+          x: tile.xPx ?? 0, y: tile.yPx ?? 0, width: tile.widthPx, height: tile.heightPx
+        })
       }));
     }
   };
 
   const page: PageLike = {
-    setViewport: async (viewport) => { state.viewport = viewport; },
-    screenshot: async () => makeTestPng(40, 40),
+    setViewport: async (viewport) => { state.viewports.push(viewport); },
+    // A clipped call is the per-tile capture and returns a PNG of the clip's size, the way a real
+    // page screenshot would; an unclipped call is the evidence capture.
+    screenshot: async (capture) => {
+      if (capture?.clip) {
+        state.screenshots += 1;
+        return makeTestPng(Math.round(capture.clip.width), Math.round(capture.clip.height));
+      }
+      return makeTestPng(40, 40);
+    },
     goto: async (url) => {
       state.url = url;
       // Listeners registered before navigation see the page's events, as puppeteer delivers them.
@@ -142,7 +149,7 @@ function fakeBrowser(options: FakeOptions = {}) {
     },
     close: async () => { state.closedBrowser += 1; }
   };
-  return { browser, state, png };
+  return { browser, state };
 }
 
 /**
@@ -202,7 +209,7 @@ describe("the puppeteer backend", () => {
   });
 
   it("renders the shared HTML through the iframe pathway and screenshots the iframe", async () => {
-    const { backend, state, png } = makeBackend();
+    const { backend, state } = makeBackend();
     servedPages.clear();
     const outcome = await backend.render({ docId: "drawing", content: emptyDocument });
     // Navigated to a real http origin, not injected: `setContent` leaves an opaque origin, and
@@ -217,9 +224,20 @@ describe("the puppeteer backend", () => {
     }));
     // And it is no longer being served, because the render is over.
     expect(servedPages.has("drawing")).toBe(false);
-    expect(state.viewport).toEqual({ width: 960, height: 1024 });
+    // The viewport starts at the fixed working size, then grows to cover the resized frame
+    // (1200px of rows + 80px chrome + 64px pad): Chromium rasterizes a cross-site iframe only near
+    // the visible viewport, so a viewport shorter than the frame captures the lower rows as blank
+    // pixels. Both sizes are asserted — the initial one is what every pre-resize wait runs under.
+    expect(state.viewports).toEqual([
+      { width: 960, height: 1024 },
+      { width: 960, height: 1344 }
+    ]);
     expect(state.screenshots).toBe(1);
-    expect(outcome.images).toEqual([{ bytes: png, url: null, tileId: null, purpose: "full-document" }]);
+    // The capture is a page screenshot clipped to the iframe's box: 960px wide by the 1280px the
+    // backend resized the frame to (1200px of rows + 80px chrome).
+    expect(outcome.images).toEqual([{
+      bytes: makeTestPng(960, 1280), url: null, tileId: null, purpose: "full-document"
+    }]);
   });
 
   it("reports what it could see, so a render can be verified rather than just produced", async () => {
@@ -352,13 +370,16 @@ describe("the puppeteer backend", () => {
   });
 
   it("bounds a capture that hangs inside screenshot()", async () => {
+    // page.screenshot() takes no timeout of its own — a compositor wedged by animating content
+    // hangs exactly in the clipped capture call, so the deadline has to cover it. The unclipped
+    // evidence capture stays live: the failure path photographs the page.
     const fake = fakeBrowser();
     (fake.browser as any).newPage = async () => {
       const page = await fakeBrowser().browser.newPage();
-      (page as any).$ = async () => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 1420 }),
-        screenshot: () => new Promise(() => undefined)
-      });
+      const evidence = page.screenshot.bind(page);
+      (page as any).screenshot = (options: { clip?: unknown }) => options?.clip
+        ? new Promise(() => undefined)
+        : evidence(options as never);
       return page;
     };
     const backend = puppeteerBackend({
@@ -369,6 +390,100 @@ describe("the puppeteer backend", () => {
     });
     await expect(backend.render({ docId: "wedged", content: emptyDocument }))
       .rejects.toThrow(/capturing the iframe did not finish within the 600ms budget/);
+  });
+
+  it("clips in page coordinates: the visual viewport's offset is added to the measured box", async () => {
+    // boundingBox() reports viewport coordinates; page.screenshot clips page coordinates. They
+    // agree only while the page is unscrolled, so the capture adds visualViewport.pageLeft/pageTop
+    // — the same conversion puppeteer's own element screenshot performs — instead of relying on an
+    // unstated no-scroll invariant. This fake reports a scrolled page and expects the shift.
+    const fake = fakeBrowser();
+    let clip: { x: number; y: number } | undefined;
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser().browser.newPage();
+      const innerEvaluate = page.evaluate.bind(page);
+      (page as any).evaluate = async (script: string) => String(script).includes("visualViewport")
+        ? [7, 40]
+        : innerEvaluate(script);
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (options: any) => {
+        if (options?.clip) clip = options.clip;
+        return original(options);
+      };
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await backend.render({ docId: "scrolled", content: emptyDocument });
+    // The fake element's box sits at (0, 0) in the viewport; the clip lands at the page offset.
+    expect(clip).toMatchObject({ x: 7, y: 40 });
+  });
+
+  it("clips each tile in page coordinates too, not only the whole-document capture", async () => {
+    // The per-tile path builds its own clip from its own boundingBox, so the check above says
+    // nothing about it: dropping the conversion there would leave every tile's picture the right
+    // SIZE and the wrong part of the page, which no size-based check can see. Two tiles at
+    // different offsets, so the assertion is on each box's own position rather than on one number
+    // that happens to be the offset.
+    const tiles = [
+      { tileId: "tile-a", xPx: 12, yPx: 30, widthPx: 300, heightPx: 200 },
+      { tileId: "tile-b", xPx: 12, yPx: 260, widthPx: 300, heightPx: 150 }
+    ];
+    const clips: { x: number; y: number; width: number; height: number }[] = [];
+    const fake = fakeBrowser({ tiles });
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser({ tiles }).browser.newPage();
+      const innerEvaluate = page.evaluate.bind(page);
+      (page as any).evaluate = async (script: string) => String(script).includes("visualViewport")
+        ? [7, 40]
+        : innerEvaluate(script);
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (options: any) => {
+        if (options?.clip) clips.push(options.clip);
+        return original(options);
+      };
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-per-tile", capture: "per-tile",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await backend.render({ docId: "scrolled-tiles", content: emptyDocument });
+    // Every clip, in order, and only the clipped calls: an evidence screenshot carries no clip.
+    expect(clips).toEqual(tiles.map((tile) => ({
+      x: tile.xPx + 7, y: tile.yPx + 40, width: tile.widthPx, height: tile.heightPx
+    })));
+  });
+
+  it("fails a capture that came back shorter than its clip, rather than storing it", async () => {
+    // A clipped, captureBeyondViewport:false screenshot is intersected with the visual viewport
+    // (puppeteer cdp/Page.js): a frame grown past the viewport by a late updateHeight captures
+    // short with no error, and every box-based check passes because the box grew with the frame.
+    // The decoded PNG is the only witness, so the backend compares it against the clip.
+    const fake = fakeBrowser();
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser().browser.newPage();
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (capture: { clip?: { width: number } }) => capture?.clip
+        ? Promise.resolve(makeTestPng(Math.round(capture.clip.width), 500))
+        : original(capture as never);
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-full-height",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    // The default measurement resizes the frame to 1280px; a 500px-tall PNG is a viewport cut.
+    await expect(backend.render({ docId: "short", content: emptyDocument }))
+      .rejects.toThrow(/came back 960×500px for a 960×1280px clip[\s\S]*cut to the viewport/);
   });
 
   it("attaches evidence to a failure that is not a RenderFailed", async () => {
@@ -586,8 +701,7 @@ describe("the puppeteer backend", () => {
       (page as any).$ = async () => ({
         boundingBox: async () => ({
           x: 0, y: 0, width: 960, height: fake.state.frameHeights.at(-1) ?? 500
-        }),
-        screenshot: async () => makeTestPng(960, 1880)
+        })
       });
       (page as any).frames = () => [{
         url: () => "http://localhost:8080/iframe.html",
@@ -930,6 +1044,29 @@ describe("the per-tile capture", () => {
       { limits: { maxHeightPx: 20_000, maxPixels: 40_000_000, maxEncodedBytes: 20 * 1024 * 1024 } });
     await expect(backend.render({ docId: "huge", content: emptyDocument }))
       .rejects.toThrow(/30000px tall, over the 20000px limit/);
+  });
+
+  it("fails a tile capture that came back shorter than the tile's box", async () => {
+    // Same honesty check as the full-document capture: the per-tile clip is subject to the same
+    // visual-viewport intersection, so a short PNG must fail rather than be stored as the tile.
+    const tiles = [{ tileId: "tile-a", widthPx: 300, heightPx: 200 }];
+    const fake = fakeBrowser({ tiles });
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser({ tiles }).browser.newPage();
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (capture: { clip?: { width: number } }) => capture?.clip
+        ? Promise.resolve(makeTestPng(Math.round(capture.clip.width), 90))
+        : original(capture as never);
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-per-tile", capture: "per-tile",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await expect(backend.render({ docId: "short-tile", content: emptyDocument }))
+      .rejects.toThrow(/tile tile-a captured 300×90px of its 300×200px box[\s\S]*cut to the viewport/);
   });
 
   it("records a tile with no id as having none, rather than as an empty one", async () => {

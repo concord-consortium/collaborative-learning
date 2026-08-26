@@ -2,6 +2,7 @@
  * CLUE AI evaluation harness.
  *
  *   npx tsx harness.ts import    --from <dir> --corpus <name> [--source synthetic|demo|qa] [--prune]
+ *                                [--source production --production-data-approved]
  *   npx tsx harness.ts represent --corpus <name> --variants default,minimal
  *   npx tsx harness.ts render    --corpus <name> --mode <mode> [--clue-url <url>] [--unit <unit>]
  *                                [--shutterbug-url <url>] [--capture-height <px>] [--refresh]
@@ -94,7 +95,8 @@ export interface ParsedArgs {
 }
 
 const kBooleanFlags = new Set([
-  "prune", "no-cache", "refresh-cache", "refresh", "shareable", "blind", "reuse-key"
+  "prune", "no-cache", "refresh-cache", "refresh", "shareable", "blind", "reuse-key",
+  "production-data-approved"
 ]);
 
 /** Plain `--name value` pairs; a handful of flags are boolean. Unknown flags are errors. */
@@ -135,7 +137,7 @@ export function parseArgs(argv: string[], knownFlags: Record<string, readonly st
 }
 
 const kKnownFlags = {
-  import: ["from", "corpus", "source", "prune"],
+  import: ["from", "corpus", "source", "prune", "production-data-approved"],
   represent: ["corpus", "variants"],
   render: ["corpus", "mode", "clue-url", "unit", "shutterbug-url", "capture-height", "refresh",
     "concurrency", "timeout-ms"],
@@ -225,6 +227,7 @@ function commandImport(flags: Record<string, string | true>, deps: HarnessDeps):
     corpus,
     source,
     prune: flags.prune === true,
+    productionDataApproved: flags["production-data-approved"] === true,
     dataRoot: dataRootFor(deps),
     now: deps.now
   });

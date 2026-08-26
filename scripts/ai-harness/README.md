@@ -82,7 +82,8 @@ OPENAI_API_KEY=sk-…
 
 ```bash
 npx tsx harness.ts import    --from examples/synthetic-corpus --corpus synthetic-corpus \
-                             [--source synthetic|demo|qa] [--prune]
+                             [--source synthetic|demo|qa|production] [--prune] \
+                             [--production-data-approved]  # required with --source production
 npx tsx harness.ts represent --corpus synthetic-corpus --variants default,minimal
 npx tsx harness.ts render    --corpus synthetic-corpus --mode <mode> \
                              [--clue-url <url>] [--unit <unit>] [--shutterbug-url <url>] \
@@ -116,8 +117,11 @@ stands.
   document is written anywhere else. That whole tree is gitignored (see the root `.gitignore`).
 - Committed example corpora live in `examples/`, *outside* the ignored tree, so there are no
   allowlist exceptions inside an ignored directory.
-- `import` will not set the `production` source; only the (not yet built, and gated) `pull` command
-  may, and it will require an explicit sign-off flag.
+- `import --source production` is gated: it is refused without `--production-data-approved`, the
+  flag that names the data-agreements sign-off covering real student or teacher work on a
+  development machine. (This gate was planned for the milestone-6 `pull` command; the teacher-PD
+  corpus arriving through export + import brought it forward. `pull`, when built, carries the same
+  flag.)
 - **Production student work is sensitive everywhere it flows**, not just at import. When production
   corpora arrive: delete them when the experiment concludes, keep document ids and Firestore paths
   out of anything that leaves the team, and remember that injected related-summaries data contains
@@ -148,6 +152,31 @@ directory. `import` generates the manifest; it is never committed. Manifest rule
 - `historical` holds a production `done`-queue record (milestone 6). It describes an analysis of
   whatever the document looked like *then*, so it is never lined up against a fresh run unless the
   content hash proves the input is identical — see `historicalIsComparable` in `src/report.ts`.
+
+### Importing a production corpus
+
+A production corpus arrives in three steps, and the third one is not optional:
+
+1. **Survey and export.** `scripts/survey-class-documents.ts` (one directory up, beside the other
+   Firebase admin scripts) surveys one class read-only and, with `--export`, writes each non-empty
+   document as `documents/<id>.json` plus a `key-map.json` recording every id's original document
+   key, owner uid, unit, investigation, problem and survey modality. The export ids are
+   deliberately opaque — that provenance lives *only* in the key map — and the script refuses any
+   `--export` destination outside `data/`.
+2. **Import, gated.** `import --from <export-dir> --corpus <name> --source production
+   --production-data-approved` copies the documents in. Because the ids carry no provenance, the
+   imported manifest has `unit`, `investigation`, `problem` and `contextId` as `null` at this
+   point — that is expected, not a failed import.
+3. **Fill provenance from the key map.** `npx tsx apply-key-map.ts --corpus <name> --key-map
+   <export-dir>/key-map.json` fills those null fields and stamps the provenance labels
+   (`sourceKey`, `sourceUid`, `surveyModality`), which survive re-imports. Skip this and the
+   manifest's provenance stays null forever: renders and runs still work, but nothing can group
+   results by problem, stratify them by modality, or trace a document back to its source.
+
+   It only ever fills a null, so re-running is safe and a value set by hand always wins. It refuses
+   a key map from another class, and a run where no id matched at all fails with a non-zero exit
+   and writes nothing — export ids are hashes of document keys, so the wrong class's key map has no
+   ids in common with the corpus and lands there rather than patching anything.
 
 ### Representations
 
@@ -295,10 +324,19 @@ each one is load-bearing:
   scroll height — the content lives in `#app` — so that message reports 0 for a fully rendered
   document. The harness can measure in-frame because it drives the browser; production cannot, which
   is why an explicit "document rendered" message remains the right production-side fix.
-- **The frame is sized from the document's own tile rows** before the capture. CLUE lays out to fill
-  its viewport rather than its content, so at the default 500px a longer document is simply absent
-  from the picture, with nothing in the DOM reporting that it was cut off. The capture is then
-  checked against the measured content, which is what keeps `captureMode: "full-document"` honest.
+- **The frame is sized from the document's own tile rows** before the capture — top-level rows
+  only, since a Question tile's nested rows are `.tile-row` elements whose height is already inside
+  their parent's. CLUE lays out to fill its viewport rather than its content, so at the default
+  500px a longer document is simply absent from the picture, with nothing in the DOM reporting that
+  it was cut off. The capture is then checked against the measured content, which is what keeps
+  `captureMode: "full-document"` honest.
+- **The render page is served same-site with a localhost CLUE server, and the viewport grows to
+  cover the resized frame.** With the page on `127.0.0.1` and CLUE on `localhost`, the CLUE iframe
+  is cross-site: Chromium isolates it in its own process, rasterizes it only near the visible
+  viewport — lower rows mount and measure but capture as blank pixels — and screenshotting such a
+  frame can hang outright on a page with continuously animating content (a ticking Dataflow
+  program). Found with the first real-document corpus; every synthetic fixture was short enough to
+  hide it.
 
 It is a **local** backend, not an offline one. The CLUE page it loads may still pull fonts, images
 or other assets from elsewhere. If offline operation ever has to be a guarantee, the backend must
@@ -315,6 +353,15 @@ Re-running is usually enough: it re-attempts only what failed, against a server 
 When it is not, `--concurrency 1` and `--timeout-ms 60000` turn the two knobs directly. Both are
 validated as positive whole numbers, and both are named in the run's own log line, so a run that
 needed them says so in its output rather than only in the shell history of whoever typed it.
+
+**Tall documents cost memory in proportion to their height.** The local backend grows each page's
+viewport to cover the whole resized frame (a cross-site-era workaround that survives because the
+clipped capture requires the clip to be in view), so a document near the 20,000px height limit
+holds a roughly 960×20,000 compositing surface — on the order of 75MB — and `--concurrency n`
+holds n of them at once. The default concurrency of 4 is fine on a development machine; if a run
+of unusually tall documents makes Chromium struggle, `--concurrency 1` bounds the peak. A capture
+that a too-small surface would crop fails loudly rather than silently: the backend compares every
+PNG's dimensions against its clip box.
 
 `--timeout-ms` belongs to the local modes only, and the Shutterbug modes refuse it rather than drop
 it. A per-document budget is a thing the local backend has — one deadline covering load, readiness
@@ -858,9 +905,12 @@ lockfile changes.
 
 ```
 harness.ts                 CLI: argv parsing and command dispatch
+apply-key-map.ts           fills a production corpus's provenance fields from a survey key map
+debug-render.ts            renders ONE corpus document with full observability (console, DOM probes)
 src/schemas.ts             types, validators, canonicalJson / sha256Canonical
 src/corpus.ts              corpus layout, import, manifest read/write
 src/capability.ts          tile capability registry, document classification
+src/key-map.ts             reading a survey key map, and filling a manifest's provenance from it
 src/represent-text.ts      text representation variants
 src/represent-image.ts     image envelopes: paths, writing, freshness (files included)
 src/png.ts                 PNG header reader (dimensions + "is this really a PNG?")

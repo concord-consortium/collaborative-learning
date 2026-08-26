@@ -113,7 +113,10 @@ export async function startRenderUnitServer(options: BuildRenderUnitOptions): Pr
   const body = `${JSON.stringify(buildRenderUnit(options))}\n`;
   const server = http.createServer((request, response) => {
     if ((request.url ?? "").split("?")[0] !== "/content.json") {
-      response.writeHead(404, { "content-type": "text/plain" });
+      // CLUE probes for an optional teacher-guide/content.json beside the unit and handles a real
+      // 404 gracefully — but without the CORS header a 404 reaches a cross-origin caller as a
+      // network-level failure, which CLUE throws on. The header matters here as much as on the 200.
+      response.writeHead(404, { "content-type": "text/plain", "access-control-allow-origin": "*" });
       response.end("not found");
       return;
     }

@@ -14,5 +14,5 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "jest"]
   },
-  "include": ["harness.ts", "src/**/*", "test/**/*"]
+  "include": ["harness.ts", "apply-key-map.ts", "debug-render.ts", "src/**/*", "test/**/*"]
 }
