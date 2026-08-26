@@ -66,7 +66,9 @@ jobs:
         working-directory: ./scripts/ai-harness
         run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
       # Lint runs here rather than through the root `npm run lint`, whose glob covers only ./src and
-      # ./cypress. Without this step nothing in scripts/ai-harness was lint-covered at all.
+      # ./cypress, so without this step nothing under scripts/ is lint-covered at all. The harness's
+      # lint script reaches up to ../survey-class-documents.ts for the same reason: it lives in
+      # scripts/, which no other lint job visits.
       - name: Run AI Harness Tests
         working-directory: ./scripts/ai-harness
         run: npm run typecheck && npm run lint && npm test

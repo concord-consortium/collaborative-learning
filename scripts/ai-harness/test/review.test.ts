@@ -240,10 +240,18 @@ describe("an input that no longer matches the run is never shown in its place", 
     // The notice is the report's stale-input signal, so it renders OUTSIDE the collapsed details:
     // a judge must see it without opening anything. Details elements never nest here, so matching
     // each one to its first close tag extracts its real contents.
-    expect(staleHtml).toContain('class="notice"');
+    //
+    // Matched by the notice's own sentence, not by `class="notice"`: an omitted text part draws a
+    // notice of its own from the card block, and this fixture has one, so the class alone is in the
+    // page whether or not the stale-input notices render at all. A judge cannot tell a notice that
+    // moved inside the collapse from one that stopped being drawn, so neither can this test.
+    const kStaleSentence = "no longer on disk";
+    expect(staleHtml).toContain(kStaleSentence);
     const detailsBodies = [...staleHtml.matchAll(/<details>([\s\S]*?)<\/details>/g)]
       .map((match) => match[1]);
-    expect(detailsBodies.every((body) => !body.includes('class="notice"'))).toBe(true);
+    // Or the check below would hold over an empty list and pin nothing.
+    expect(detailsBodies.length).toBeGreaterThan(0);
+    expect(detailsBodies.every((body) => !body.includes(kStaleSentence))).toBe(true);
   });
 
   it("degrades to a notice when an envelope is damaged", () => {

@@ -30,8 +30,12 @@ interface FakeOptions {
   requestFailures?: string[];
   frameUrl?: string | null;
   element?: ElementLike | null;
-  /** The top-level tiles the CLUE frame draws, for the per-tile capture. */
-  tiles?: { tileId: string; widthPx: number; heightPx: number }[];
+  /**
+   * The top-level tiles the CLUE frame draws, for the per-tile capture. `xPx`/`yPx` place a tile's
+   * box in the viewport (both default to the origin); a test that cares where a clip landed needs
+   * boxes that are not all at 0, 0.
+   */
+  tiles?: { tileId: string; widthPx: number; heightPx: number; xPx?: number; yPx?: number }[];
 }
 
 const settledMeasurement: FrameMeasurement = {
@@ -83,7 +87,9 @@ function fakeBrowser(options: FakeOptions = {}) {
       // Boxes only: `ElementLike` has no `screenshot`, so a capture that tried to photograph the
       // element rather than clip a page screenshot would not compile.
       return tiles.map((tile) => ({
-        boundingBox: async () => ({ x: 0, y: 0, width: tile.widthPx, height: tile.heightPx })
+        boundingBox: async () => ({
+          x: tile.xPx ?? 0, y: tile.yPx ?? 0, width: tile.widthPx, height: tile.heightPx
+        })
       }));
     }
   };
@@ -415,6 +421,44 @@ describe("the puppeteer backend", () => {
     await backend.render({ docId: "scrolled", content: emptyDocument });
     // The fake element's box sits at (0, 0) in the viewport; the clip lands at the page offset.
     expect(clip).toMatchObject({ x: 7, y: 40 });
+  });
+
+  it("clips each tile in page coordinates too, not only the whole-document capture", async () => {
+    // The per-tile path builds its own clip from its own boundingBox, so the check above says
+    // nothing about it: dropping the conversion there would leave every tile's picture the right
+    // SIZE and the wrong part of the page, which no size-based check can see. Two tiles at
+    // different offsets, so the assertion is on each box's own position rather than on one number
+    // that happens to be the offset.
+    const tiles = [
+      { tileId: "tile-a", xPx: 12, yPx: 30, widthPx: 300, heightPx: 200 },
+      { tileId: "tile-b", xPx: 12, yPx: 260, widthPx: 300, heightPx: 150 }
+    ];
+    const clips: { x: number; y: number; width: number; height: number }[] = [];
+    const fake = fakeBrowser({ tiles });
+    (fake.browser as any).newPage = async () => {
+      const page = await fakeBrowser({ tiles }).browser.newPage();
+      const innerEvaluate = page.evaluate.bind(page);
+      (page as any).evaluate = async (script: string) => String(script).includes("visualViewport")
+        ? [7, 40]
+        : innerEvaluate(script);
+      const original = page.screenshot.bind(page);
+      (page as any).screenshot = (options: any) => {
+        if (options?.clip) clips.push(options.clip);
+        return original(options);
+      };
+      return page;
+    };
+    const backend = puppeteerBackend({
+      modeId: "puppeteer-per-tile", capture: "per-tile",
+      clueUrl: "http://localhost:8080", unit: "harness-render", clueRevision: "r",
+      launch: async () => fake.browser, startPageServer: fakePageServer,
+      stableForMs: 0, pollIntervalMs: 1
+    });
+    await backend.render({ docId: "scrolled-tiles", content: emptyDocument });
+    // Every clip, in order, and only the clipped calls: an evidence screenshot carries no clip.
+    expect(clips).toEqual(tiles.map((tile) => ({
+      x: tile.xPx + 7, y: tile.yPx + 40, width: tile.widthPx, height: tile.heightPx
+    })));
   });
 
   it("fails a capture that came back shorter than its clip, rather than storing it", async () => {

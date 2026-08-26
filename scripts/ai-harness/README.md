@@ -173,6 +173,11 @@ A production corpus arrives in three steps, and the third one is not optional:
    manifest's provenance stays null forever: renders and runs still work, but nothing can group
    results by problem, stratify them by modality, or trace a document back to its source.
 
+   It only ever fills a null, so re-running is safe and a value set by hand always wins. It refuses
+   a key map from another class, and a run where no id matched at all fails with a non-zero exit
+   and writes nothing — export ids are hashes of document keys, so the wrong class's key map has no
+   ids in common with the corpus and lands there rather than patching anything.
+
 ### Representations
 
 `represent` writes an envelope per (document, variant):
@@ -905,6 +910,7 @@ debug-render.ts            renders ONE corpus document with full observability (
 src/schemas.ts             types, validators, canonicalJson / sha256Canonical
 src/corpus.ts              corpus layout, import, manifest read/write
 src/capability.ts          tile capability registry, document classification
+src/key-map.ts             reading a survey key map, and filling a manifest's provenance from it
 src/represent-text.ts      text representation variants
 src/represent-image.ts     image envelopes: paths, writing, freshness (files included)
 src/png.ts                 PNG header reader (dimensions + "is this really a PNG?")

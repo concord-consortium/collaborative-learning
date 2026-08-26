@@ -27,20 +27,24 @@ The context id can also come from SURVEY_CONTEXT_ID in the environment (e.g. via
 it is an identifier for real people's work, so it is never committed as a default in here.
 
 --export writes every non-empty document's content as <dir>/documents/<id>.json plus
-<dir>/key-map.json. The ids are deliberately opaque (`p<investigation>-<problem>-<NN>`): they become
-corpus filenames, envelope paths, results-file columns and review-report headings, so they carry no
-portal uid and no document-key fragment — that provenance lives only in key-map.json, which stays
-under the gitignored data root with everything else. key-map.json is the input to
-`harness.ts import --source production --production-data-approved` and then `apply-key-map.ts`.
+<dir>/key-map.json. The ids are deliberately opaque (`p<investigation>-<problem>-<hash>`, the hash
+being the first 8 hex characters of sha256 of the document key): they become corpus filenames,
+envelope paths, results-file columns and review-report headings, so they carry no portal uid and no
+document-key fragment — that provenance lives only in key-map.json, which stays under the gitignored
+data root with everything else. Hashing the key rather than counting positions is what makes an id
+mean the same document across re-exports, including one taken after the class gains documents.
+key-map.json is the input to `harness.ts import --source production --production-data-approved` and
+then `apply-key-map.ts`.
 */
 
+import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import admin from "firebase-admin";
 import { kAnalyzerUserParams } from "../shared/shared.js";
 import { getFirebaseBasePath, getFirestoreBasePath, getScriptRootFilePath } from "./lib/script-utils.js";
 import { isContainedBy } from "./ai-harness/src/files.js";
-import { getTileCapability } from "./ai-harness/src/capability.js";
+import { classifyDocument } from "./ai-harness/src/capability.js";
 
 const kPortal = "learn.concord.org";
 const kFirestoreDocuments = getFirestoreBasePath(kPortal);
@@ -148,9 +152,10 @@ function detail(line = "") {
 }
 
 // ---------------------------------------------------------------------------
-// Content classification (deliberately defensive: real documents are messy)
+// Content volume (deliberately defensive: real documents are messy)
 // ---------------------------------------------------------------------------
 
+/** Volume counters for the report. Modality is not among them; `classifyDocument` answers that. */
 interface DocumentFacts {
   tileCounts: Record<string, number>;
   /** Trimmed length of student-visible text across Text tiles (best effort for slate format). */
@@ -159,9 +164,6 @@ interface DocumentFacts {
   drawingTextObjects: number;
   /** Best-effort count of Dataflow program nodes/blocks across Dataflow tiles. */
   dataflowNodes: number;
-  hasText: boolean;
-  hasVisual: boolean;
-  substantiveTiles: number;
 }
 
 /** The slices of tile content the classifier reads. Real content carries far more; it is ignored. */
@@ -207,35 +209,33 @@ function textOfTextTile(content: TileContentLike | undefined): string {
 }
 
 /**
- * Classify one document's parsed content: which tiles it holds and what modality they carry.
+ * Count what one document's tiles hold, for the report's volume figures.
  *
- * Text, Drawing and Dataflow get instance-level checks (an empty drawing carries nothing). Every
- * other tile type takes its modality from the harness's own capability registry
- * (scripts/ai-harness/src/capability.ts) — the single source of truth, imported rather than
- * mirrored, so an unlisted type inherits the registry's conservative default (visual) instead of
- * quietly classifying as "empty" and dropping out of the survey and the export.
+ * Modality is NOT decided here — `classifyDocument` in the harness's capability module answers
+ * that, and it is the only answer this file uses (see `main`). It walks rowOrder/rowMap rather than
+ * the flat tileMap, so it skips section headers and tiles no row references, and it treats a
+ * Question tile's first row as the authored prompt rather than as student work. A tally over
+ * tileMap cannot see any of that, so a modality computed here would disagree with the corpus the
+ * export feeds — which is the whole point of importing the harness's classifier instead.
+ *
+ * The counters below stay local because the classifier does not produce them: it answers
+ * yes/no per tile, while the report wants "how much" (characters of prose, drawing objects,
+ * Dataflow blocks) to tell a one-line answer from a worked-out one.
  * @param {unknown} content The document's parsed content JSON (shape unknown; read defensively).
- * @return {DocumentFacts} The counts and modality facts the survey reports.
+ * @return {DocumentFacts} The volume counters the survey reports.
  */
-function classifyContent(content: unknown): DocumentFacts {
+function countTileContent(content: unknown): DocumentFacts {
   const facts: DocumentFacts = {
-    tileCounts: {}, textChars: 0, drawingObjects: 0, drawingTextObjects: 0,
-    dataflowNodes: 0, hasText: false, hasVisual: false, substantiveTiles: 0,
+    tileCounts: {}, textChars: 0, drawingObjects: 0, drawingTextObjects: 0, dataflowNodes: 0,
   };
   const tileMap = (content as {tileMap?: Record<string, TileLike>} | null | undefined)?.tileMap ?? {};
   for (const tile of Object.values(tileMap)) {
     const rawType = tile?.content?.type;
     const type = typeof rawType === "string" ? rawType : "Unknown";
     facts.tileCounts[type] = (facts.tileCounts[type] ?? 0) + 1;
-    if (type === "Placeholder") continue;
 
     if (type === "Text") {
-      const text = textOfTextTile(tile.content);
-      facts.textChars += text.length;
-      if (text.length > 0) {
-        facts.hasText = true;
-        facts.substantiveTiles++;
-      }
+      facts.textChars += textOfTextTile(tile.content).length;
       continue;
     }
     if (type === "Drawing") {
@@ -245,12 +245,7 @@ function classifyContent(content: unknown): DocumentFacts {
       for (const object of objects) {
         if (object?.type === "text" && typeof object.text === "string" && object.text.trim()) {
           facts.drawingTextObjects++;
-          facts.hasText = true;
         }
-      }
-      if (objects.length > 0) {
-        facts.hasVisual = true;
-        facts.substantiveTiles++;
       }
       continue;
     }
@@ -258,32 +253,10 @@ function classifyContent(content: unknown): DocumentFacts {
       // The program's block list lives at content.program.nodes (an object keyed by id) in current
       // content; fall back to any nodes-like object so an older shape still counts as present.
       const nodes = tile.content?.program?.nodes ?? tile.content?.nodes;
-      const nodeCount = nodes && typeof nodes === "object" ? Object.keys(nodes).length : 0;
-      facts.dataflowNodes += nodeCount;
-      if (nodeCount > 0) {
-        facts.hasVisual = true;
-        facts.substantiveTiles++;
-      }
-      continue;
+      facts.dataflowNodes += nodes && typeof nodes === "object" ? Object.keys(nodes).length : 0;
     }
-    // A Question tile is a container: its children are separate tileMap entries and classify
-    // themselves, the same way the harness registry treats it.
-    if (type === "Question") continue;
-    // Everything else: the harness capability registry decides, unknown types conservatively
-    // counting as visual so nothing silently drops out of the survey or the corpus export.
-    const capability = getTileCapability(type);
-    if (capability.requiresVisualRepresentation) facts.hasVisual = true;
-    if (capability.containsStudentText) facts.hasText = true;
-    facts.substantiveTiles++;
   }
   return facts;
-}
-
-function modalityOf(facts: DocumentFacts): string {
-  if (facts.hasText && facts.hasVisual) return "mixed";
-  if (facts.hasText) return "text-only";
-  if (facts.hasVisual) return "visual-only";
-  return "empty";
 }
 
 // ---------------------------------------------------------------------------
@@ -415,6 +388,29 @@ function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "x";
 }
 
+/**
+ * The document ids a previous export left in `dir`, according to its key map.
+ *
+ * Empty when there is no key map or none this script recognises — which is the signal that whatever
+ * is in the directory was not put there by an export, and so is not this script's to delete.
+ * @param {string} dir The --export directory.
+ * @return {Set<string>} The previous export's ids.
+ */
+function previousExportIds(dir: string): Set<string> {
+  const keyMapFile = path.join(dir, "key-map.json");
+  if (!fs.existsSync(keyMapFile)) return new Set();
+  try {
+    const parsed = JSON.parse(fs.readFileSync(keyMapFile, "utf8"));
+    if (parsed?.schemaVersion !== 1 || typeof parsed?.documents !== "object" ||
+        parsed.documents === null) {
+      return new Set();
+    }
+    return new Set(Object.keys(parsed.documents));
+  } catch {
+    return new Set();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -491,21 +487,33 @@ async function main() {
     }
   }
 
-  // Ada's actual comments, per metadata document — the text production really showed the teacher
-  // (covers evaluations whose queue records were cleaned up). Chunked so the reads overlap without
-  // hammering Firestore.
+  // Ada's actual comments — the text production really showed the teacher (covers evaluations
+  // whose queue records were cleaned up).
+  //
+  // Addressed by the REALTIME-DATABASE KEY, not by the Firestore metadata document's id: production
+  // writes to `documents/<key>/comments` (the commentsPath built in on-analyzable-doc-written.ts),
+  // and CLUE's own client reads the same simple path. The two ids are equal for a consolidated
+  // metadata document and differ for the legacy `[network]_[key]` and `uid:[user]_[key]` ones that
+  // scripts/check-metadata-doc-ids.ts exists to find — where reading by metadata id finds nothing
+  // and reports "0 Ada comments" for a document production really did comment on. The metadata id
+  // is read as well when it differs, so a comment sitting under the older address is still found.
+  // Chunked so the reads overlap without hammering Firestore.
   const adaComments = new Map<string, string[]>();
+  const adaCommentsUnder = async (documentId: string): Promise<string[]> => {
+    const comments = await firestore.collection(`${kFirestoreDocuments}/${documentId}/comments`)
+      .where("uid", "==", kAnalyzerUserParams.id).get();
+    const texts: string[] = [];
+    comments.forEach((comment) => {
+      const content = comment.data().content;
+      texts.push(typeof content === "string" ? content : "(non-text comment)");
+    });
+    return texts;
+  };
   for (const chunk of chunked(metaDocs, 10)) {
     await Promise.all(chunk.map(async (meta) => {
-      const comments = await firestore.collection(`${kFirestoreDocuments}/${meta.id}/comments`)
-        .where("uid", "==", kAnalyzerUserParams.id).get();
-      if (comments.empty) return;
-      const texts: string[] = [];
-      comments.forEach((comment) => {
-        const content = comment.data().content;
-        texts.push(typeof content === "string" ? content : "(non-text comment)");
-      });
-      adaComments.set(meta.key, texts);
+      const addresses = meta.id === meta.key ? [meta.key] : [meta.key, meta.id];
+      const texts = (await Promise.all(addresses.map(adaCommentsUnder))).flat();
+      if (texts.length > 0) adaComments.set(meta.key, texts);
     }));
   }
 
@@ -530,8 +538,10 @@ async function main() {
         out(`  * ${meta.key} uid=${meta.uid} — NO CONTENT FOUND in realtime database`);
         continue;
       }
-      const facts = classifyContent(content);
-      const modality = modalityOf(facts);
+      const facts = countTileContent(content);
+      // The harness's own classifier, so the survey's answer and the corpus's `computedModality`
+      // for the same document are the same answer rather than two that usually agree.
+      const modality = classifyDocument(content).computedModality;
       modalityTotals[modality] = (modalityTotals[modality] ?? 0) + 1;
       if (exportDir && modality !== "empty") {
         exportDocs.push({ meta, content, modality });
@@ -599,22 +609,95 @@ async function main() {
 
   if (exportDir) {
     const documentsDir = path.join(exportDir, "documents");
-    fs.mkdirSync(documentsDir, { recursive: true });
     const mapEntries: Record<string, { key: string; uid: string; unit: string | null;
       investigation: string | null; problem: string | null; modality: string }> = {};
-    // Opaque ids: a per-problem sequence number, nothing else. The id becomes a corpus filename
-    // and a results-file column, so the uid and document key stay out of it — key-map.json is the
-    // only place holding that mapping, and it stays inside the gitignored data root. Numbering
-    // follows document-key order within each problem so re-exports are stable.
-    const perProblem = new Map<string, number>();
+    // Opaque ids: the problem, plus a hash of the document key. The id becomes a corpus filename,
+    // an envelope path and a results-file column, so the uid and the key itself stay out of it —
+    // key-map.json is the only place holding that mapping, and it stays inside the gitignored data
+    // root. A firebase push key holds far more entropy than the 32 bits kept here, so an id on its
+    // own does not lead back to the key it was made from.
+    //
+    // Derived from the key rather than from a position in a sorted list, because the id has to mean
+    // the same document forever. A counter is stable only while the class's document set is: add
+    // one document that sorts earlier and every later id in that problem shifts by one, silently
+    // re-pointing each id at a different student's work. That would survive a re-import — import
+    // carries a previous manifest's `labels` forward and apply-key-map.ts fills only nulls — so the
+    // corpus would keep the old sourceKey and sourceUid against the new content. Re-exporting after
+    // a class gains documents is the expected workflow, not a hypothetical.
     const ordered = [...exportDocs].sort((a, b) =>
       `${a.meta.investigation}.${a.meta.problem}.${a.meta.key}`
         .localeCompare(`${b.meta.investigation}.${b.meta.problem}.${b.meta.key}`));
-    for (const { meta, content, modality } of ordered) {
+    // One exported document per KEY, not per metadata record. A class can hold two metadata
+    // documents describing one document — a legacy `[network]_[key]` or `uid:[user]_[key]` record
+    // alongside the consolidated one, which is what scripts/check-metadata-doc-ids.ts looks for —
+    // and both name the same realtime-database content. Exporting both would put one student's work
+    // into the corpus twice. Where the duplicates disagree about the document's problem the two
+    // would even get different ids, so which problem it landed under would be decided by sort
+    // order. The first in sorted order wins and the disagreement is reported: it is a metadata
+    // problem for the operator to look at, not something to settle silently here.
+    const describeRecord = (record: MetaDoc) =>
+      `${record.investigation ?? "?"}.${record.problem ?? "?"} uid=${record.uid} ` +
+      `(metadata ${record.id})`;
+    const byKey = new Map<string, typeof ordered[number]>();
+    for (const entry of ordered) {
+      const first = byKey.get(entry.meta.key);
+      if (!first) {
+        byKey.set(entry.meta.key, entry);
+        continue;
+      }
+      if (first.meta.investigation !== entry.meta.investigation ||
+          first.meta.problem !== entry.meta.problem || first.meta.uid !== entry.meta.uid) {
+        out(`Note: document ${entry.meta.key} has two metadata records that disagree — ` +
+          `${describeRecord(first.meta)} vs ${describeRecord(entry.meta)}. Exported once, ` +
+          "under the first.");
+      }
+    }
+    const unique = [...byKey.values()];
+
+    // Every id is assigned before anything is written. Two keys hashing alike inside one problem is
+    // vanishingly unlikely, but the second document would overwrite the first in silence, so it
+    // refuses — and refusing before the first write is what lets it say the export did not happen.
+    const idOf = new Map<string, string>();
+    const claimedBy = new Map<string, string>();
+    for (const { meta } of unique) {
       const base = `p${slugify(meta.investigation ?? "x")}-${slugify(meta.problem ?? "x")}`;
-      const sequence = (perProblem.get(base) ?? 0) + 1;
-      perProblem.set(base, sequence);
-      const id = `${base}-${String(sequence).padStart(2, "0")}`;
+      const id = `${base}-${crypto.createHash("sha256").update(meta.key).digest("hex").slice(0, 8)}`;
+      const claimant = claimedBy.get(id);
+      if (claimant !== undefined && claimant !== meta.key) {
+        console.error(`Export id ${id} is claimed by two different document keys. Nothing was ` +
+          "written. Widen the hash in survey-class-documents.ts and re-run.");
+        process.exit(1);
+      }
+      claimedBy.set(id, meta.key);
+      idOf.set(meta.key, id);
+    }
+
+    // A re-export into a directory that already holds one must not leave the old files there.
+    // `harness.ts import` reads EVERY .json under documents/, so a leftover becomes a corpus
+    // document that no key map mentions: its provenance stays null forever, and after an id-format
+    // change the same student document is imported twice, once under each id.
+    //
+    // Only files the previous key map claims are removed. Anything else means this is not an export
+    // directory — a corpus, say — and deleting from it is not this script's business.
+    if (fs.existsSync(documentsDir)) {
+      const previous = previousExportIds(exportDir);
+      const present = fs.readdirSync(documentsDir).filter((name) => name.endsWith(".json"));
+      const unknown = present.filter((name) => !previous.has(path.basename(name, ".json")));
+      if (unknown.length > 0) {
+        console.error(`${documentsDir} holds ${unknown.length} .json file(s) that no key map ` +
+          `here accounts for (${unknown.slice(0, 3).join(", ")}${unknown.length > 3 ? ", …" : ""}). ` +
+          "Nothing was written. Export to a new directory, or empty this one yourself.");
+        process.exit(1);
+      }
+      for (const name of present) fs.rmSync(path.join(documentsDir, name));
+      if (present.length > 0) {
+        out(`Replacing a previous export: removed ${present.length} document(s) from ${documentsDir}.`);
+      }
+    }
+
+    fs.mkdirSync(documentsDir, { recursive: true });
+    for (const { meta, content, modality } of unique) {
+      const id = idOf.get(meta.key)!;
       fs.writeFileSync(path.join(documentsDir, `${id}.json`), JSON.stringify(content, null, 2) + "\n");
       mapEntries[id] = {
         key: meta.key, uid: meta.uid, unit: meta.unit ?? null,
@@ -629,7 +712,10 @@ async function main() {
       exportedAt: new Date().toISOString(),
       documents: mapEntries,
     }, null, 2) + "\n");
-    console.log(`\nExported ${exportDocs.length} non-empty document(s) to ${documentsDir}`);
+    console.log(`\nExported ${unique.length} non-empty document(s) to ${documentsDir}` +
+      (unique.length === exportDocs.length
+        ? ""
+        : ` (${exportDocs.length - unique.length} duplicate metadata record(s) collapsed)`));
     console.log(`Key map written to ${path.join(exportDir, "key-map.json")}`);
     const harnessRelative = path.relative(getScriptRootFilePath("ai-harness"), exportDir);
     console.log("Next: cd ai-harness && npx tsx harness.ts import --from " +
