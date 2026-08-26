@@ -89,11 +89,12 @@ export function boundingBoxForSnapshot(o: DrawingObjectSnapshot): BoundingBox {
       // that measurement is volatile, so it never reaches a snapshot. Callers presenting this to a
       // reader should say it is estimated; drawing-to-table marks the row.
       //
-      // A chip nested in a group is not handled: its stored box would be a fraction of the group,
-      // and these pixel defaults scaled by the group instead, which reports absurd sizes. That is
-      // unreachable today, because grouping a chip throws — VariableChipObject implements neither
-      // resizeObject nor setUnrotatedDragBounds, and GroupObject.assimilateObjects calls both.
-      // Whoever fixes that grouping bug should expect to fix this alongside it.
+      // A chip inside a group is reachable, so callers must not scale this extent by the group.
+      // Grouping a chip does throw — VariableChipObject implements neither resizeObject nor
+      // setUnrotatedDragBounds, and GroupObject.assimilateObjects calls both — but the throw comes
+      // *after* createGroup has detached the selection into the group, so the group survives with
+      // the chip inside it and gets stored that way. drawing-to-table maps only a chip's origin
+      // through the group chain for this reason.
       return sizedBoundingBox({
         x: o.x, y: o.y, width: kVariableChipDefaultWidth, height: kVariableChipDefaultHeight
       });

@@ -51,8 +51,8 @@ no objects summarize exactly as they did before.
 */
 
 import {
-  absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, GroupTransform, Point,
-  rotatePoint
+  absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, GroupTransform,
+  kVariableChipDefaultHeight, kVariableChipDefaultWidth, Point, rotatePoint, sizedBoundingBox
 } from "../../drawing/drawing-geometry";
 import {
   boundingBoxForSnapshot, DrawingObjectSnapshot, isLegacyGroup
@@ -61,6 +61,14 @@ import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
 const kEmptyDrawing = "This tile contains a drawing.";
 const kHeaders = ["id", "type", "position", "size", "rotation", "parent", "details"];
+
+/** A chip's box: its origin wherever the group chain put it, plus the fixed default extent. */
+function chipBoundingBox(origin: Point): BoundingBox {
+  return sizedBoundingBox({
+    x: origin.x, y: origin.y,
+    width: kVariableChipDefaultWidth, height: kVariableChipDefaultHeight
+  });
+}
 
 /** Round to a tenth: un-normalizing a grouped child's box produces long floats. */
 function round(n: number): string {
@@ -100,8 +108,10 @@ function formatDetails(o: DrawingObjectSnapshot): string {
   if (o.stroke !== undefined) details.push(`stroke=${o.stroke}`);
   if (o.strokeWidth !== undefined) details.push(`strokeWidth=${o.strokeWidth}`);
   if (o.strokeDashArray) details.push(`strokeDashArray=${o.strokeDashArray}`);
-  if (o.hFlip) details.push("hFlip=true");
-  if (o.vFlip) details.push("vFlip=true");
+  // Flips are omitted for a chip for the same reason its rotation is: nothing applies them when it
+  // renders, so reporting them describes an appearance the student never sees.
+  if (o.hFlip && o.type !== "variable") details.push("hFlip=true");
+  if (o.vFlip && o.type !== "variable") details.push("vFlip=true");
   // Hidden objects are listed, not omitted: the object is still in the document and its id is still
   // resolvable. Whether a consumer may point a student at one is a prompt decision, not ours.
   if (o.visible === false) details.push("visible=false");
@@ -184,8 +194,16 @@ function walk(
     // An object's own rotation turns it about its se corner, as DrawingObject.boundingBox does.
     const corners = boundingBoxCorners(localBB)
       .map(p => o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
-    const bb = boundingBoxForPoints(toTileSpace ? corners.map(toTileSpace) : corners);
-    const orientation = compose(parentOrientation, { rotation: o.rotation ?? 0, mirrored: false });
+    // A chip is sized in pixels rather than in whatever space it is stored in, so only its origin
+    // travels the group chain; scaling its extent would report a 75 x 24 chip as 15000 x 2400. It
+    // also renders without any rotation or flip transform, so it is always reported upright.
+    const chip = o.type === "variable";
+    const bb = chip
+      ? chipBoundingBox(toTileSpace ? toTileSpace({ x: o.x, y: o.y }) : { x: o.x, y: o.y })
+      : boundingBoxForPoints(toTileSpace ? corners.map(toTileSpace) : corners);
+    const orientation = chip
+      ? kUpright
+      : compose(parentOrientation, { rotation: o.rotation ?? 0, mirrored: false });
     rows.push(row(o, bb, parentId, orientation));
 
     if (o.objects?.length) {

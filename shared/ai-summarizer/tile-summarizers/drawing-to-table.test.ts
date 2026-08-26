@@ -71,6 +71,18 @@ describe("drawingToTable", () => {
     expect(result).toContain("visible=false");
   });
 
+  it("reports no orientation for a variable chip, which never renders turned", () => {
+    // VariableChipObject renders a bare foreignObject and overrides boundingBox without applying
+    // rotation, so a stored rotation or flip on a chip is invisible on screen. Reporting it would
+    // describe something the student cannot see.
+    const result = drawingToTable({ objects: [
+      { id: "c1", type: "variable", x: 10, y: 10, variableId: "v", rotation: 90, hFlip: true }
+    ]});
+    expect(result).toContain("| c1 | variable | 10, 10 | 75 x 24 |  |  | variableId=v estimatedSize |");
+    expect(result).not.toContain("90°");
+    expect(result).not.toContain("hFlip");
+  });
+
   it("emits a variable chip's variableId", () => {
     const result = drawingToTable({ objects: [
       { id: "Dp47z", type: "variable", x: 110, y: 150, variableId: "v_speed" }
@@ -270,6 +282,18 @@ describe("drawingToTable groups", () => {
     expect(result).toContain("| eA | ellipse | 180, 20 | 50 x 50 |");
     expect(result).toContain("| g1 | group | 140, 20 | 90 x 80 |");
     expect(result).not.toContain("0 x 0");
+  });
+
+  it("keeps a grouped variable chip's size in pixels", () => {
+    // A chip's 75 x 24 is a pixel measurement that is never stored, so unlike a real grouped child
+    // it is not a fraction of the group. Scaling it reports the chip as 15000 x 2400. This is
+    // reachable: createGroup moves the selection into the group before the chip throws, so the
+    // group survives with the chip inside it, and a stored document can already hold one.
+    const result = drawingToTable({ objects: [{
+      id: "g", type: "group", x: 100, y: 200, width: 200, height: 100,
+      objects: [{ id: "chip", type: "variable", x: 0.5, y: 0.5, variableId: "v_speed" }]
+    }]});
+    expect(result).toContain("| chip | variable | 200, 250 | 75 x 24 |");
   });
 
   it("mirrors children of a flipped group", () => {
