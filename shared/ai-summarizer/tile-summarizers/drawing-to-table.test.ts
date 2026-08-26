@@ -17,10 +17,10 @@ it("matches the documented example", () => {
   ]});
 
   expect(result).toBe(
-`This tile contains a drawing with 7 objects, listed back to front. Position, size and rotation \
+`This tile contains a drawing with 7 objects, listed back to front. Position, size and orientation \
 are in the tile's coordinate space, including for objects inside a group.
 
-| id | type | position | size | rotation | parent | details |
+| id | type | position | size | orientation | parent | details |
 | --- | --- | --- | --- | --- | --- | --- |
 | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
 | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
@@ -195,11 +195,52 @@ describe("drawingToTable groups", () => {
     expect(result).toContain("| flat | rectangle | 0, 0 | 10 x 10 |  |  |");
   });
 
-  it("keeps flips in details, since they do not change the box", () => {
+  it("reports a flip as mirroring in the orientation column, not in details", () => {
+    // A flip does not change the box, so position and size cannot express it either. It belongs
+    // beside the angle, in the same frame, rather than as a separate stored flag in details —
+    // otherwise one half of the row is measured against the tile and the other against the parent.
     const result = drawingToTable({ objects: [
       { id: "f1", type: "rectangle", x: 0, y: 0, width: 10, height: 10, hFlip: true }
     ]});
-    expect(result).toContain("| f1 | rectangle | 0, 0 | 10 x 10 |  |  | hFlip=true |");
+    expect(result).toContain("| f1 | rectangle | 0, 0 | 10 x 10 | mirrored |  |  |");
+    expect(result).not.toContain("hFlip");
+  });
+
+  it("reports a turned and mirrored object as both", () => {
+    const result = drawingToTable({ objects: [
+      { id: "f2", type: "rectangle", x: 0, y: 0, width: 10, height: 10, rotation: 90, hFlip: true }
+    ]});
+    expect(result).toContain("| 90° mirrored |");
+  });
+
+  it("treats a doubled flip as a half turn rather than mirroring", () => {
+    const result = drawingToTable({ objects: [
+      { id: "f3", type: "rectangle", x: 0, y: 0, width: 10, height: 10, hFlip: true, vFlip: true }
+    ]});
+    expect(result).toContain("| 180° |");
+    expect(result).not.toContain("mirrored");
+  });
+
+  it("carries a group's mirroring down to its children", () => {
+    // The child stores no flip of its own, but the group's flip mirrors everything it renders. A
+    // vertically flipped group used to report its children as rotated 180 degrees, which is a
+    // different transform — for text, one is readable upside down and the other is not.
+    const result = drawingToTable({ objects: [{
+      id: "g", type: "group", x: 0, y: 0, width: 100, height: 100, vFlip: true,
+      objects: [{ id: "kid", type: "text", x: 0, y: 0, width: 1, height: 0.25, text: "hi" }]
+    }]});
+    expect(result).toContain("| kid | text | 0, 75 | 100 x 25 | 180° mirrored | g |");
+  });
+
+  it("cancels a child's own flip against its group's", () => {
+    // Mirrored twice is not mirrored. The old row said hFlip=true here, describing a mirror that
+    // is not on screen.
+    const result = drawingToTable({ objects: [{
+      id: "g", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
+      objects: [{ id: "kid", type: "rectangle", x: 0, y: 0, width: 1, height: 1, hFlip: true }]
+    }]});
+    // Scoped to the child's row: the group's own row does say mirrored, correctly.
+    expect(result).toContain("| kid | rectangle | 0, 0 | 100 x 100 |  | g |");
   });
 
   it("carries an outer group's rotation down to a nested group's children", () => {
@@ -248,7 +289,8 @@ describe("drawingToTable groups", () => {
       id: "grp", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
       objects: [{ id: "kid", type: "rectangle", x: 0, y: 0, width: 1, height: 1, rotation: 90 }]
     }]});
-    expect(result).toContain("| 270° | grp |");
+    // The child inherits the group's mirroring as well as the reversed turn.
+    expect(result).toContain("| 270° mirrored | grp |");
   });
 
   it("normalizes a rotation that has grown past a full turn", () => {
@@ -318,6 +360,6 @@ describe("drawingToTable groups", () => {
       id: "flip", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
       objects: [{ id: "fkid", type: "rectangle", x: 0, y: 0, width: 0.25, height: 1 }]
     }]});
-    expect(result).toContain("| fkid | rectangle | 75, 0 | 25 x 100 |  | flip |");
+    expect(result).toContain("| fkid | rectangle | 75, 0 | 25 x 100 | mirrored | flip |");
   });
 });

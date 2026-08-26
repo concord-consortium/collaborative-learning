@@ -5,10 +5,10 @@ by the id the document stores.
 A drawing with two loose shapes, a variable chip, a group of two, and one hidden object serializes
 to this — see the "matches the documented example" test, which pins it:
 
-    This tile contains a drawing with 7 objects, listed back to front. Position, size and rotation
+    This tile contains a drawing with 7 objects, listed back to front. Position, size and orientation
     are in the tile's coordinate space, including for objects inside a group.
 
-    | id | type | position | size | rotation | parent | details |
+    | id | type | position | size | orientation | parent | details |
     | --- | --- | --- | --- | --- | --- | --- |
     | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
     | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
@@ -24,14 +24,19 @@ Some things in that output are not obvious from the code:
   stores its centre at 200,100 with radii of 30 but reports 170,70. Every row therefore means the
   same thing, which is what lets a reader compare two of them.
 - The box is the *turned* one where an object is rotated, as it is on screen: `t9Qr4` stores 90 x 20
-  and reports 20 x 90. That is why rotation is a column rather than another entry in `details` —
-  once the box is turned, position and size can no longer express orientation, and a 100x50
-  rectangle turned 90 degrees is indistinguishable from an unturned 50x100 one. Flips stay in
-  `details`, since they do not change the box.
-- The angle is measured against the tile rather than read off the object, so it agrees with the
-  position and size beside it. An object turned 90 inside a group turned 270 reports nothing,
-  because upright is how it sits on the page. Note that a group scales its members by its own width
-  and height, so a member turned by something other than a multiple of 90 inside a group that is not
+  and reports 20 x 90. That is why orientation is a column rather than an entry in `details` — once
+  the box is turned, position and size can no longer express it, a 100x50 rectangle turned 90
+  degrees being indistinguishable from an unturned 50x100 one. Mirroring shares the column for the
+  stronger version of the same reason: a mirrored object has exactly the box of an unmirrored one,
+  so nothing else in the row could carry it. A cell reads `90°`, `mirrored`, `90° mirrored`, or is
+  empty.
+- Orientation is measured against the tile and composed through every enclosing group, so the whole
+  column agrees with the position and size beside it. An object turned 90 inside a group turned 270
+  reports nothing, because upright is how it sits on the page; an object flipped inside a group
+  flipped the same way reports nothing either. This is why an object's own `hFlip`/`vFlip` are not
+  in `details`: they are stored relative to its parent, and mixing them with a tile-space angle
+  would put two frames in one row. Note also that a group scales its members by its own width and
+  height, so a member turned by something other than a multiple of 90 inside a group that is not
   square is sheared rather than merely turned, and no single angle describes it. Only authored or
   imported documents can reach that — the Rotate control turns in quarters.
 - Row order is the order the objects are stored in, which is back to front. The preamble says so,
@@ -61,7 +66,7 @@ import {
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
 const kEmptyDrawing = "This tile contains a drawing.";
-const kHeaders = ["id", "type", "position", "size", "rotation", "parent", "details"];
+const kHeaders = ["id", "type", "position", "size", "orientation", "parent", "details"];
 
 /** A chip's box: its origin wherever the group chain put it, plus the fixed default extent. */
 function chipBoundingBox(origin: Point): BoundingBox {
@@ -137,10 +142,8 @@ function formatDetails(o: DrawingObjectSnapshot, geometry: string[]): string {
   if (o.stroke !== undefined) details.push(`stroke=${o.stroke}`);
   if (o.strokeWidth !== undefined) details.push(`strokeWidth=${o.strokeWidth}`);
   if (o.strokeDashArray) details.push(`strokeDashArray=${o.strokeDashArray}`);
-  // Flips are omitted for a chip for the same reason its rotation is: nothing applies them when it
-  // renders, so reporting them describes an appearance the student never sees.
-  if (o.hFlip && o.type !== "variable") details.push("hFlip=true");
-  if (o.vFlip && o.type !== "variable") details.push("vFlip=true");
+  // Flips are not reported here — they are part of the orientation column, in the tile's frame.
+  // Emitting the object's own stored flags alongside would put two coordinate systems in one row.
   // Hidden objects are listed, not omitted: the object is still in the document and its id is still
   // resolvable. Whether a consumer may point a student at one is a prompt decision, not ours.
   if (o.visible === false) details.push("visible=false");
@@ -170,24 +173,28 @@ function compose(outer: Orientation, inner: Orientation): Orientation {
 // A group turns its members by its own rotation and its flips together. One flip is a mirror; both
 // at once are a half turn rather than a mirror, and a vertical flip is a horizontal one plus a half
 // turn — which is the form used here.
-function groupOrientation(o: DrawingObjectSnapshot): Orientation {
+function objectOrientation(o: DrawingObjectSnapshot): Orientation {
   return {
     rotation: (o.rotation ?? 0) + (o.vFlip ? 180 : 0),
     mirrored: !!o.hFlip !== !!o.vFlip
   };
 }
 
-// Rotation earns a column rather than sitting in details, because position and size cannot express
-// it: the box reported for a 100x50 rectangle turned 90 degrees is 50x100, which is also what an
-// unturned 50x100 rectangle reports. Flips stay in details — they do not change the box at all.
+// Orientation earns a column because position and size cannot express it: the box reported for a
+// 100x50 rectangle turned 90 degrees is 50x100, which is also what an unturned 50x100 rectangle
+// reports, and a mirrored object has exactly the box of an unmirrored one.
 //
-// The angle reported is the one against the document, not the one the object stores, so it agrees
-// with the position and size beside it. An object turned 90 inside a group turned 270 reports
-// nothing, because that is how it sits on the page. Rotations are not constrained when stored —
-// rotateBy deliberately lets them grow past 360 — so this normalizes rather than trusting them.
-function formatRotation(orientation: Orientation): string {
+// Both halves are measured against the tile, composed through every enclosing group, so the whole
+// column agrees with the position and size beside it. An object turned 90 inside a group turned 270
+// reports nothing, because upright is how it sits on the page; an object flipped inside a group
+// flipped the same way reports nothing either, for the same reason. Rotations are not constrained
+// when stored — rotateBy deliberately lets them grow past 360 — so this normalizes them.
+function formatOrientation(orientation: Orientation): string {
   const degrees = ((orientation.rotation % 360) + 360) % 360;
-  return degrees ? `${degrees}°` : "";
+  const parts: string[] = [];
+  if (degrees) parts.push(`${degrees}°`);
+  if (orientation.mirrored) parts.push("mirrored");
+  return parts.join(" ");
 }
 
 function row(
@@ -195,7 +202,7 @@ function row(
   geometry: string[]
 ): string[] {
   return [
-    o.id, o.type, formatPosition(bb), formatSize(bb), formatRotation(orientation), parentId,
+    o.id, o.type, formatPosition(bb), formatSize(bb), formatOrientation(orientation), parentId,
     formatDetails(o, geometry)
   ];
 }
@@ -231,9 +238,10 @@ function walk(
     const bb = chip
       ? chipBoundingBox(toTileSpace ? toTileSpace({ x: o.x, y: o.y }) : { x: o.x, y: o.y })
       : boundingBoxForPoints(toTileSpace ? corners.map(toTileSpace) : corners);
-    const orientation = chip
-      ? kUpright
-      : compose(parentOrientation, { rotation: o.rotation ?? 0, mirrored: false });
+    // objectOrientation folds in the object's own flips as well as its rotation, and it is the same
+    // value handed to its children as their frame — so a row and the rows beneath it are measured
+    // the same way, rather than one against the tile and the other against its parent.
+    const orientation = chip ? kUpright : compose(parentOrientation, objectOrientation(o));
     rows.push(row(o, bb, parentId, orientation, typeGeometry(o, toTileSpace)));
 
     if (o.objects?.length) {
@@ -241,7 +249,7 @@ function walk(
         // A pre-1.1.0 group's members are stored in ordinary coordinates rather than as fractions
         // of it, so there is nothing to un-normalize — converting them would be the bug, not the
         // fix. They inherit this group's frame unchanged.
-        walk(o.objects, rows, o.id, toTileSpace, compose(parentOrientation, groupOrientation(o)));
+        walk(o.objects, rows, o.id, toTileSpace, compose(parentOrientation, objectOrientation(o)));
       } else {
         // Members are fractions of this group's *unrotated* box, so that is the frame handed down —
         // not the rotated box just reported for it.
@@ -252,7 +260,7 @@ function walk(
           const inParentSpace = absoluteChildPoint(p, frame);
           return toTileSpace ? toTileSpace(inParentSpace) : inParentSpace;
         };
-        walk(o.objects, rows, o.id, next, compose(parentOrientation, groupOrientation(o)));
+        walk(o.objects, rows, o.id, next, compose(parentOrientation, objectOrientation(o)));
       }
     }
   });
@@ -275,7 +283,7 @@ export function drawingToTable(content: { objects?: DrawingObjectSnapshot[] }): 
   const count = rows.length;
   const preamble =
     `This tile contains a drawing with ${count} ${pluralize(count, "object", "objects")}, ` +
-    `listed back to front. Position, size and rotation are in the tile's coordinate space, ` +
+    `listed back to front. Position, size and orientation are in the tile's coordinate space, ` +
     `including for objects inside a group.\n\n`;
   return preamble + generateMarkdownTable(kHeaders, rows);
 }
