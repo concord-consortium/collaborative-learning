@@ -71,10 +71,12 @@ describe("drawingToTable", () => {
     expect(result).toContain("visible=false");
   });
 
-  it("reports no orientation for a variable chip, which never renders turned", () => {
+  it("reports a top-level variable chip as upright whatever it stores", () => {
     // VariableChipObject renders a bare foreignObject and overrides boundingBox without applying
-    // rotation, so a stored rotation or flip on a chip is invisible on screen. Reporting it would
-    // describe something the student cannot see.
+    // rotation, so at the top level a stored rotation or flip on a chip is invisible on screen and
+    // reporting it would describe something the student cannot see. A chip inside a group is a
+    // different matter — it inherits the group's transform — but it can only get there through a
+    // corrupt state; see the note in drawing-object-snapshot.
     const result = drawingToTable({ objects: [
       { id: "c1", type: "variable", x: 10, y: 10, variableId: "v", rotation: 90, hFlip: true }
     ]});
@@ -156,6 +158,41 @@ describe("drawingToTable", () => {
     expect(result).toContain("label=Arrow");
     expect(result).toContain("label=Circle");
     expect(result).toContain("label=Square");
+  });
+
+  it("does not call a turned rectangle a square", () => {
+    // A 20 x 10 rectangle turned 45 degrees has a square enclosing box, and the label asks about
+    // the shape, not about the box around it. The object panel calls this a Rectangle.
+    const result = drawingToTable({ objects: [
+      { id: "r1", type: "rectangle", x: 0, y: 0, width: 20, height: 10, rotation: 45 },
+      { id: "e1", type: "ellipse", x: 0, y: 0, rx: 20, ry: 10, rotation: 45 }
+    ]});
+    expect(result).not.toContain("label=Square");
+    expect(result).not.toContain("label=Circle");
+  });
+
+  it("keeps calling a grouped child by its rendered proportions", () => {
+    // The other half of the same question: stored 0.5 x 0.5 is not square either, because the
+    // group it sits in is not. Both cases have to come out right from one rule.
+    const result = drawingToTable({ objects: [{
+      id: "g", type: "group", x: 0, y: 0, width: 200, height: 100,
+      objects: [
+        { id: "wide", type: "rectangle", x: 0, y: 0, width: 0.5, height: 0.5 },
+        { id: "sq", type: "rectangle", x: 0, y: 0, width: 0.25, height: 0.5 }
+      ]
+    }]});
+    expect(result).toContain("| wide | rectangle | 0, 0 | 100 x 50 |");
+    expect(result).toContain("| sq | rectangle | 0, 0 | 50 x 50 |  | g | label=Square |");
+  });
+
+  it("puts a turned object's own geometry in the same frame as its box", () => {
+    // dx/dy travelled the group chain but not the object's own turn, so an arrow turned 90 at the
+    // top level reported the delta it was stored with while the same arrow under a 90 degree group
+    // reported the turned one.
+    const result = drawingToTable({ objects: [
+      { id: "v1", type: "vector", x: 0, y: 0, dx: 10, dy: 0, rotation: 90 }
+    ]});
+    expect(result).not.toContain("dx=10 dy=0");
   });
 
   it("omits the label where it only repeats the type", () => {

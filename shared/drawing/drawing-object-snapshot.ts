@@ -1,6 +1,6 @@
 import {
   BoundingBox, computeObjectsBoundingBox, ellipseBoundingBox, kVariableChipDefaultHeight,
-  kVariableChipDefaultWidth, lineBoundingBox, sizedBoundingBox, vectorBoundingBox
+  kVariableChipDefaultWidth, lineBoundingBox, rotateBoundingBox, sizedBoundingBox, vectorBoundingBox
 } from "./drawing-geometry";
 
 // The stored shape of a drawing object, as a snapshot-only reader sees it. Declared structurally
@@ -93,9 +93,13 @@ export function boundingBoxForSnapshot(o: DrawingObjectSnapshot): BoundingBox {
       // A legacy group states no size of its own; it is the extent of its members, which is what
       // assimilateObjects derives when the browser loads one.
       if (isLegacyGroup(o)) {
-        return computeObjectsBoundingBox(
-          (o.objects ?? []).map(child => ({ boundingBox: boundingBoxForSnapshot(child) }))
-        );
+        // Each child's box includes its own rotation, because that is what the browser's
+        // assimilateObjects unions when it migrates one of these: computeObjectsBoundingBox there
+        // reads the model's rotation-inclusive `boundingBox`. Using unrotated boxes would give this
+        // group a different position and size in the summary than it has on the page.
+        return computeObjectsBoundingBox((o.objects ?? []).map(child => ({
+          boundingBox: rotateBoundingBox(boundingBoxForSnapshot(child), child.rotation ?? 0)
+        })));
       }
       return sizedBoundingBox({ x: o.x, y: o.y, width: o.width ?? 0, height: o.height ?? 0 });
     case "rectangle":
@@ -120,6 +124,12 @@ export function boundingBoxForSnapshot(o: DrawingObjectSnapshot): BoundingBox {
       // *after* createGroup has detached the selection into the group, so the group survives with
       // the chip inside it and gets stored that way. drawing-to-table maps only a chip's origin
       // through the group chain for this reason.
+      //
+      // Note that such a chip is also broken on the page, not merely mis-summarized: GroupComponent
+      // renders its children inside a scale(width, height) transform and the chip carries no
+      // counter-transform, so it paints at the group's scale. Neither that size nor this default
+      // describes anything a student can meaningfully see. Whoever fixes the grouping bug owns
+      // both ends of this.
       return sizedBoundingBox({
         x: o.x, y: o.y, width: kVariableChipDefaultWidth, height: kVariableChipDefaultHeight
       });

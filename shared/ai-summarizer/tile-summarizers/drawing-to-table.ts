@@ -127,13 +127,13 @@ function typeGeometry(o: DrawingObjectSnapshot, toTileSpace?: ToTileSpace): stri
   }
 }
 
-function formatDetails(o: DrawingObjectSnapshot, geometry: string[], bb: BoundingBox): string {
+function formatDetails(o: DrawingObjectSnapshot, geometry: string[], labelBB: BoundingBox): string {
   const details: string[] = [...geometry];
   // The type column stays the internal name — it is stable and it is what an id resolves against —
   // but that name is not always what the student is looking at, so the visible one rides alongside
   // where the two differ. Same reason the Dataflow summary carries a node's title next to its
   // identifier.
-  const label = displayLabel(o, bb);
+  const label = displayLabel(o, labelBB);
   if (label) details.push(`label=${label}`);
   // JSON-encoded rather than just quoted: drawing text is edited in a textarea and can contain
   // newlines, which would end the table row and corrupt every column after it.
@@ -205,11 +205,11 @@ function formatOrientation(orientation: Orientation): string {
 
 function row(
   o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string, orientation: Orientation,
-  geometry: string[]
+  geometry: string[], labelBB: BoundingBox
 ): string[] {
   return [
     o.id, o.type, formatPosition(bb), formatSize(bb), formatOrientation(orientation), parentId,
-    formatDetails(o, geometry, bb)
+    formatDetails(o, geometry, labelBB)
   ];
 }
 
@@ -234,21 +234,39 @@ function walk(
 ): void {
   objects.forEach(o => {
     const localBB = boundingBoxForSnapshot(o);
-    // An object's own rotation turns it about its se corner, as DrawingObject.boundingBox does.
-    const corners = boundingBoxCorners(localBB)
-      .map(p => o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
+    const chain = toTileSpace ?? ((p: Point) => p);
+    // Two mappings, because two questions need different frames.
+    //
+    // `toTile` is the full one: the object's own turn about its se corner — as
+    // DrawingObject.boundingBox does it — and then every enclosing group. Position, size and the
+    // type-specific geometry in `details` all use it, so a row never mixes frames within itself.
+    //
+    // `toTileUnturned` stops short of the object's own turn. Only the Square/Circle labels use it,
+    // and they have to: those ask about the shape's proportions, and a turned shape's enclosing box
+    // has different ones. A 20 x 10 rectangle turned 45 degrees has a square enclosing box and is
+    // emphatically not a square.
+    const toTile = (p: Point) =>
+      chain(o.rotation ? rotatePoint(p, localBB.se, o.rotation) : p);
+    const toTileUnturned = chain;
+
     // A chip is sized in pixels rather than in whatever space it is stored in, so only its origin
-    // travels the group chain; scaling its extent would report a 75 x 24 chip as 15000 x 2400. It
-    // also renders without any rotation or flip transform, so it is always reported upright.
+    // travels the group chain; scaling its extent would report a 75 x 24 chip as 15000 x 2400.
+    // Reported upright and unscaled for the same reason. Note this is a deliberate simplification
+    // rather than a description of the page: a group renders its children inside a
+    // scale(width, height) transform and the chip carries no counter-transform, so a chip that has
+    // ended up inside a group really does paint at that absurd size. It can only get there through
+    // a corrupt state — see the note in drawing-object-snapshot — and neither figure describes
+    // anything a student can see, so this reports the one a reader can use.
     const chip = o.type === "variable";
     const bb = chip
-      ? chipBoundingBox(toTileSpace ? toTileSpace({ x: o.x, y: o.y }) : { x: o.x, y: o.y })
-      : boundingBoxForPoints(toTileSpace ? corners.map(toTileSpace) : corners);
+      ? chipBoundingBox(chain({ x: o.x, y: o.y }))
+      : boundingBoxForPoints(boundingBoxCorners(localBB).map(toTile));
+    const labelBB = boundingBoxForPoints(boundingBoxCorners(localBB).map(toTileUnturned));
     // objectOrientation folds in the object's own flips as well as its rotation, and it is the same
     // value handed to its children as their frame — so a row and the rows beneath it are measured
     // the same way, rather than one against the tile and the other against its parent.
     const orientation = chip ? kUpright : compose(parentOrientation, objectOrientation(o));
-    rows.push(row(o, bb, parentId, orientation, typeGeometry(o, toTileSpace)));
+    rows.push(row(o, bb, parentId, orientation, typeGeometry(o, toTile), labelBB));
 
     if (o.objects?.length) {
       if (isLegacyGroup(o)) {

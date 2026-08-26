@@ -103,8 +103,13 @@ module.exports = {
         //
         // Exempt: test files, which only ever run under jest, and ai-summarizer-with-drawings.ts,
         // which is the deliberately browser-only SVG variant used by the standalone doc editor.
-        files: ["shared/**/*.ts"],
-        excludedFiles: ["shared/**/*.test.ts", "shared/ai-summarizer/ai-summarizer-with-drawings.ts"],
+        // Matches the extensions the lint scripts glob for shared/, so a file cannot be linted
+        // without also being held to this. shared/ holds only .ts today; .tsx and .jsx are absent
+        // deliberately, since a React component there would already be the thing this forbids.
+        files: ["shared/**/*.{ts,js}"],
+        excludedFiles: [
+          "shared/**/*.test.{ts,js}", "shared/ai-summarizer/ai-summarizer-with-drawings.ts"
+        ],
         rules: {
           // Cloud Functions and the CLI scripts under shared/ log through console — it is the
           // logging mechanism there, not a leftover debug statement.
