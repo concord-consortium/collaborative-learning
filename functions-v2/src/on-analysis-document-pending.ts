@@ -16,7 +16,10 @@ import {escapeHtmlAttribute, escapeJsonForScript} from "../../shared/escape-for-
 // (see .github/workflows/release.yml), and `iframe.html` is not one of them, so the document
 // iframe is reached through the `authoring-iframe` entry point, which is built from the same
 // source (src/iframe/iframe.tsx). Rendering against the release means screenshots keep up with
-// tiles added or changed in later releases.
+// tiles added or changed in later releases. The cost is that every CLUE release can change the
+// screenshots: the page below starts the iframe at 500px and only grows it on a positive
+// updateHeight, so a release that breaks height reporting in unwrapped mode (src/iframe) yields
+// truncated screenshots, and nothing here can tell.
 export const clueIframeURL = "https://collaborative-learning.concord.org/authoring-iframe/index.html";
 // The unit to render with when the document's own unit is unknown or unusable.
 export const fallbackClueUnit = "mods";
@@ -121,8 +124,8 @@ export const onAnalysisDocumentPending =
     let documentUnit: unknown;
     if (queueDoc?.firestoreDocumentPath) {
       try {
-      const firestoreDoc = await firestore.doc(queueDoc.firestoreDocumentPath).get();
-      documentUnit = firestoreDoc.data()?.unit;
+        const firestoreDoc = await firestore.doc(queueDoc.firestoreDocumentPath).get();
+        documentUnit = firestoreDoc.data()?.unit;
       } catch (err) {
         await error(`Could not retrieve Firestore document ${queueDoc.firestoreDocumentPath}: ${err}`, event);
         return;
