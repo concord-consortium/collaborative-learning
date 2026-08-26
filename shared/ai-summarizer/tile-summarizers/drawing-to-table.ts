@@ -12,13 +12,13 @@ to this — see the "matches the documented example" test, which pins it:
     | --- | --- | --- | --- | --- | --- | --- |
     | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
     | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
-    | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed |
+    | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed estimatedSize |
     | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
     | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
     | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
     | t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |
 
-Five things in that output are not obvious from the code:
+Some things in that output are not obvious from the code:
 
 - `position` and `size` describe the object's bounding box, not its stored fields. The ellipse above
   stores its centre at 200,100 with radii of 30 but reports 170,70. Every row therefore means the
@@ -42,6 +42,9 @@ Five things in that output are not obvious from the code:
 - Hidden objects appear, marked `visible=false`, rather than being dropped. They are still in the
   document and their ids still resolve; whether a consumer may point a student at one is a prompt
   decision rather than a serializer decision.
+- A variable chip carries `estimatedSize`, because its size is the only one here that was not
+  computed. The chip measures itself on render and that measurement is volatile, so a snapshot only
+  ever has the defaults, and the real width follows the length of the variable's name.
 
 An empty drawing returns the bare sentence this file replaced, so documents whose drawing tiles have
 no objects summarize exactly as they did before.
@@ -87,6 +90,10 @@ function formatDetails(o: DrawingObjectSnapshot): string {
   if (o.text !== undefined) details.push(`text=${JSON.stringify(o.text)}`);
   if (o.url !== undefined) details.push(`url=${o.url}`);
   if (o.variableId !== undefined) details.push(`variableId=${o.variableId}`);
+  // A chip is the one row whose size is not measured: the rendered width follows the variable's
+  // name and is never persisted, so the columns carry a default. Marked so a reader can tell it
+  // apart from a box that was actually computed.
+  if (o.type === "variable") details.push("estimatedSize");
   if (o.fill !== undefined) details.push(`fill=${o.fill}`);
   if (o.stroke !== undefined) details.push(`stroke=${o.stroke}`);
   if (o.strokeWidth !== undefined) details.push(`strokeWidth=${o.strokeWidth}`);

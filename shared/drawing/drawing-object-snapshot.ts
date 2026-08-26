@@ -51,6 +51,16 @@ export function boundingBoxForSnapshot(o: DrawingObjectSnapshot): BoundingBox {
     case "line":
       return lineBoundingBox({ x: o.x, y: o.y, deltaPoints: o.deltaPoints ?? [] });
     case "variable":
+      // These defaults are a floor, not a measurement. The live chip re-measures itself on render
+      // and calls setRenderedSize, so its real width tracks the length of the variable's name — and
+      // that measurement is volatile, so it never reaches a snapshot. Callers presenting this to a
+      // reader should say it is estimated; drawing-to-table marks the row.
+      //
+      // A chip nested in a group is not handled: its stored box would be a fraction of the group,
+      // and these pixel defaults scaled by the group instead, which reports absurd sizes. That is
+      // unreachable today, because grouping a chip throws — VariableChipObject implements neither
+      // resizeObject nor setUnrotatedDragBounds, and GroupObject.assimilateObjects calls both.
+      // Whoever fixes that grouping bug should expect to fix this alongside it.
       return sizedBoundingBox({
         x: o.x, y: o.y, width: kVariableChipDefaultWidth, height: kVariableChipDefaultHeight
       });

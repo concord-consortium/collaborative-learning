@@ -24,7 +24,7 @@ are in the tile's coordinate space, including for objects inside a group.
 | --- | --- | --- | --- | --- | --- | --- |
 | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
 | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
-| Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed |
+| Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed estimatedSize |
 | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
 | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
 | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
@@ -76,7 +76,8 @@ describe("drawingToTable", () => {
       { id: "Dp47z", type: "variable", x: 110, y: 150, variableId: "v_speed" }
     ]});
     expect(result).toContain("| Dp47z | variable | 110, 150 | 75 x 24 |");
-    expect(result).toContain("variableId=v_speed");
+    // Marked estimated: the chip re-measures itself on render and that size is never persisted.
+    expect(result).toContain("variableId=v_speed estimatedSize");
   });
 
   it("keeps multi-line text inside its own cell", () => {
