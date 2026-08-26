@@ -133,6 +133,18 @@ interface IIsDocumentAccessibleToUserParams {
   documents: IExemplarVisibilityProvider;
   user: UserModelType;
 }
+
+/**
+ * Whether this user may see this document's content — the gate on every private placeholder.
+ *
+ * **This function assumes the document is from the same class as the current user.**
+ *
+ * Unlike `canUserEditDocument`, this is a *read* gate, so it is deliberately looser: a concurrent
+ * document is readable by any member of its class rather than only by the group it belongs to.
+ *
+ * This is an example of the `permissions` axis. See the `permissions` section of
+ * docs/document-axes/axes.md and "Not covered yet" in docs/document-axes/axes-current-state.md.
+ */
 export function isDocumentAccessibleToUser ({
   document, documentMetadata, documents, user
 }: IIsDocumentAccessibleToUserParams): boolean {
@@ -146,10 +158,18 @@ export function isDocumentAccessibleToUser ({
 
   const ownDocument = metadata.uid === user.id;
   const isPublished = isPublishedType(metadata.type);
-  const isGroupDoc = metadata.type === GroupDocument; // Group documents are accessible to everyone
+  // A concurrent document is readable by anyone in the class. The class or group owner is not used because
+  // in the future we might have class or group owned documents which are not readable by all members.
+  //
+  // TRANSITIONAL: `GroupDocument` stands in for a missing `concurrent`. Group documents created before
+  // that field was stamped store neither it nor the new type, and this function is run on Firestore metadata
+  // for documents that have not been opened. So in this case the concurrent field is not set on these legacy
+  // metadata. Once all Group documents have been migrated to have the type "axes" and have the concurrent
+  // field the `metadata.type === GroupDocument` should be removed.
+  const isConcurrentDoc = !!metadata.concurrent || metadata.type === GroupDocument;
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
-    return ownDocument || isShared || isPublished || isGroupDoc
+    return ownDocument || isShared || isPublished || isConcurrentDoc
            || (isExemplarType(metadata.type) && documents.isExemplarVisible(metadata.key));
   }
   return false;
@@ -187,7 +207,7 @@ interface ICanUserEditDocumentParams {
  *
  * This is an example of the `permissions` axis. See the
  * `permissions` section of docs/document-axes/axes.md and "Not covered yet" in
- * docs/document-axes/reading-axes-in-code.md.
+ * docs/document-axes/axes-current-state.md.
  */
 export function canUserEditDocument({
   document, documentMetadata, user

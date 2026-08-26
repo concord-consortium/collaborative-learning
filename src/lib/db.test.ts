@@ -8,7 +8,7 @@ import {
   registerClassWideDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "../models/document/document-kinds";
 import {
-  GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
 import { specAppConfig } from "../models/stores/spec-app-config";
@@ -285,11 +285,14 @@ describe("db", () => {
         }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const result: any = await db.getOrCreateGroupDocument();
-      expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({ type: GroupDocument }));
+      expect((db as any).createDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ type: AxesDocument, kind: GroupDocument }));
       expect(setCalls[0]).toMatchObject({ documentKey: "minted-key", createdBy: expect.any(String) });
       expect(updateCalls[0]).toEqual({ canonical: "default" });
       expect(logSpy).toHaveBeenCalledWith(LogEventName.CREATE_GROUP_DOCUMENT);
       expect(result.opened).toBeDefined();
+      // The create path already has the metadata it just wrote, so opening it costs no extra read.
+      expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
       logSpy.mockRestore();
     });
 
@@ -387,7 +390,7 @@ describe("db", () => {
     registerClassWideDocumentKind("testProfileStamp", "DQB", "msu");
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     await db.createFirestoreMetadataDocument({
-      documentKey: "dqb", type: GroupDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
+      documentKey: "dqb", type: AxesDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
     });
     // Every kind a unit declares lands on this one profile, which is what makes the profile — not the
     // kind — the cohort a migration can select on.
@@ -398,7 +401,7 @@ describe("db", () => {
   });
 
   it("does NOT stamp an axis profile on a personal document", async () => {
-    // Same gate as `kind`: only type:"group" documents are stamped, so nothing is written that would have
+    // Same gate as `kind`: only axes-typed documents are stamped, so nothing is written that would have
     // to be migrated if the other types' kinds are reorganized.
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
@@ -412,6 +415,23 @@ describe("db", () => {
       documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123
     });
     expect(setPayloads[0]).not.toHaveProperty("axisProfile");
+  });
+
+  it("stamps kind and concurrent on an axes-typed document's Firestore metadata", async () => {
+    const setPayloads: any[] = [];
+    mockFirestore.mockImplementation(() => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false }),
+        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
+      })
+    }));
+    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
+    const written = await db.createFirestoreMetadataDocument({
+      documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    });
+    expect(written).toMatchObject({ kind: "group", concurrent: true });
+    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
   });
 
   it("does NOT stamp kind/concurrent on a personal document", async () => {
@@ -506,7 +526,7 @@ describe("db", () => {
     });
   });
 
-  describe("getOrCreateClassWideDocument", () => {
+  describe("resolveClassWideDocument", () => {
     const openStub = jest.fn(async (m: any) => ({ opened: m.key }));
     beforeEach(() => {
       // The class+unit pointer scope needs stores.unit.code === "msu"; there is no unit-code setter
@@ -527,19 +547,21 @@ describe("db", () => {
       });
     });
 
-    it("fast path: opens the pointer's documentKey when the class+unit pointer exists", async () => {
+    it("fast path: returns the pointer's documentKey without opening the document", async () => {
       mockFirestore.mockImplementation(() => ({
         doc: (p: string) => ({
           get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) })
         })
       }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
-      expect((db as any).findFirestoreMetadata).toHaveBeenCalledWith("existing");
-      expect(result.opened).toBe("existing");
+      const result = await db.resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      expect(result).toBe("existing");
+      // The point of the deferral: one pointer read, and none of the work that opening entails.
+      expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
+      expect(openStub).not.toHaveBeenCalled();
     });
 
-    it("create path: mints a class-wide doc and claims the class+unit pointer", async () => {
+    it("create path: mints a class-wide doc, claims the pointer, and does not open it", async () => {
       const setCalls: any[] = [];
       const updateCalls: any[] = [];
       (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "dqb-key" } }));
@@ -551,14 +573,15 @@ describe("db", () => {
              set: (_r: any, d: any) => setCalls.push(d),
              update: (_r: any, d: any) => updateCalls.push(d) }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
-      const result: any = await db.getOrCreateClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
+      const result = await db.resolveClassWideDocument({ kind: "drivingQuestionBoard", title: "DQB" });
       // The title is not threaded into createDocument — it is registered on the kind and resolved by kind.
       expect((db as any).createDocument).toHaveBeenCalledWith(expect.objectContaining({
-        type: GroupDocument,
+        type: AxesDocument,
         kind: "drivingQuestionBoard"
       }));
       expect(updateCalls[0]).toEqual({ canonical: "drivingQuestionBoard" });
-      expect(result.opened).toBeDefined();
+      expect(result).toBe("dqb-key");
+      expect(openStub).not.toHaveBeenCalled();
     });
   });
 
@@ -849,6 +872,24 @@ describe("db", () => {
         .toBe(true);
     });
 
+    it("backfills concurrent on an axes-typed doc whose Firestore metadata lacks it", async () => {
+      const setCalls: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ set: (data: any, opts: any) => { setCalls.push({ data, opts }); return Promise.resolve(); } })
+      }));
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = {
+        uid: "g", type: AxesDocument, key: "g3", context_id: "class-1"   // no concurrent/kind
+      } as any;
+      const doc = await db.openDocument({
+        documentKey: "g3", type: AxesDocument, userId: "g", firestoreMetadata
+      } as any);
+      expect(doc.concurrent).toBe(true);
+      expect(doc.kind).toBe("group");
+      expect(setCalls.some(c => c.data.concurrent === true && c.data.kind === "group" && c.opts?.merge === true))
+        .toBe(true);
+    });
+
     it("does NOT write back when concurrent is already true", async () => {
       const setCalls: any[] = [];
       mockFirestore.mockImplementation(() => ({
@@ -878,7 +919,7 @@ describe("db", () => {
   describe("createDeclaredClassWideDocuments", () => {
     it("creates one document per declared class-wide document", async () => {
       const created: any[] = [];
-      (db as any).getOrCreateClassWideDocument =
+      (db as any).resolveClassWideDocument =
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
@@ -890,23 +931,23 @@ describe("db", () => {
       (db as any).createDeclaredClassWideDocuments();
       // allow the fire-and-forget promises to settle
       await new Promise(r => setTimeout(r, 0));
-      expect((db as any).getOrCreateClassWideDocument).toHaveBeenCalledTimes(2);
+      expect((db as any).resolveClassWideDocument).toHaveBeenCalledTimes(2);
       expect(created.map((s: any) => s.kind)).toEqual(["drivingQuestionBoard", "wordWall"]);
     });
 
     it("does nothing when no class-wide documents are declared", async () => {
-      (db as any).getOrCreateClassWideDocument = jest.fn(async () => undefined);
+      (db as any).resolveClassWideDocument = jest.fn(async () => undefined);
       stores.appConfig = specAppConfig();   // no classWideDocuments
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       (db as any).createDeclaredClassWideDocuments();
       await new Promise(r => setTimeout(r, 0));
-      expect((db as any).getOrCreateClassWideDocument).not.toHaveBeenCalled();
+      expect((db as any).resolveClassWideDocument).not.toHaveBeenCalled();
     });
 
     it("skips entries whose kind is not a valid camelCase identifier", async () => {
       const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
       const created: any[] = [];
-      (db as any).getOrCreateClassWideDocument =
+      (db as any).resolveClassWideDocument =
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [
@@ -925,7 +966,7 @@ describe("db", () => {
     it("skips a second entry whose kind duplicates an already-registered kind", async () => {
       const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
       const created: any[] = [];
-      (db as any).getOrCreateClassWideDocument =
+      (db as any).resolveClassWideDocument =
         jest.fn(async (classWideDoc: any) => { created.push(classWideDoc); });
       stores.appConfig = specAppConfig({
         config: { classWideDocuments: [

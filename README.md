@@ -178,7 +178,7 @@ There are a number of URL parameters that can aid in testing:
 |`studentDocument`|string                  |If set to the ID of a document, this will be displayed as the left-side content.|
 |`studentDocumentHistoryId`|string         |Open the history slider and move to the specified revision in the `studentDocument`.|
 |`portalDomain`  |string                   |Used for dev/qa of standalone auth, this overrides which portal is used for auth|
-|`firebaseEnv`   |`production`,`staging`   |Target Firebase project for data and functions|
+|`firebaseEnv`   |`production`,`staging`   |Target Firebase project for data and functions. Also selects which `firebase_apps` row CLUE asks the portal to sign its JWT with — see below.|
 |`showAiSummary` |`true`                   |When set to true the "ai summary" button in the document editor is shown|
 |`includeModelInAiSummary`|`true`          |When set to true the JSON.stringified raw model is included in the AI summary|
 |`fakeAuthoringAuth`|`true`                |When set to true the authoring system fakes the GitHub login|
@@ -186,6 +186,27 @@ There are a number of URL parameters that can aid in testing:
 |`iframeUrl`        |string (escaped url)  |Used as the url for iframe interactive tiles, overriding the url specified in the unit's config.
 |`mockSeismicData`  |none                  |Seismic tiles fetch pre-staged sample miniSEED files from S3 instead of live EarthScope data via the CloudFront proxy, ignoring the requested station.|
 |`tokenServiceEnv`  |`staging`             |Seismic envelope uploads request credentials from the staging token-service and read/write envelope tiles in the staging bucket (`models-resources-qa`) instead of production.|
+
+### `firebaseEnv` and portal authentication
+
+When CLUE is launched from a portal it asks that portal for a Firebase JWT, naming the row of the
+portal's `firebase_apps` table whose service account should sign it. The portal signs with that row's
+credentials and the Firebase project verifies the signature, so the row has to belong to the project
+`firebaseEnv` selects. Both are declared together in `src/lib/firebase-config.ts`:
+
+| `firebaseEnv` | Firebase project | portal `firebase_apps` row |
+|---|---|---|
+| `production` (default) | `collaborative-learning-ec215` | `collaborative-learning` |
+| `staging` | `collaborative-learning-staging` | `collaborative-learning-staging` |
+
+**Running a portal locally against the staging Firebase project** therefore needs a `firebase_apps`
+row named `collaborative-learning-staging`, holding a service account for that project. A portal with
+no row of that name rejects the request with "Unknown firebase app name", which is the error to look
+for. A portal with the credentials under the *wrong* name is worse: the token is signed by one
+project and verified by another, and the resulting failure says nothing about the cause.
+
+This only applies to portal-authenticated sessions. The `dev`, `demo`, `qa` and `test` app modes
+never request a JWT from a portal, so they are unaffected.
 
 The `unit` parameter can be in 3 forms:
 

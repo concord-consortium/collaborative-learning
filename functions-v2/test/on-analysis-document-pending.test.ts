@@ -6,7 +6,7 @@ import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import {initialize, projectConfig} from "./initialize";
-import {onAnalysisDocumentPending} from "../src/on-analysis-document-pending";
+import {generateHtml, onAnalysisDocumentPending} from "../src/on-analysis-document-pending";
 
 jest.mock("firebase-functions/logger");
 
@@ -35,6 +35,40 @@ const sampleDoc = `{
   "sharedModelMap": {},
   "annotations": {}
 }`;
+
+// The text a student could type that would end the script element early if it were not escaped.
+const scriptBreakout = "</script><img src=x onerror=alert(1)>";
+
+// The sample document with the breakout text typed into its Text tile.
+function docWithScriptBreakout() {
+  const doc = JSON.parse(sampleDoc);
+  doc.tileMap["3EkhEN1cWCZ6SQ9X"].content.text = JSON.stringify({
+    object: "value",
+    document: {children: [{type: "paragraph", children: [{text: scriptBreakout}]}]},
+  });
+  return doc;
+}
+
+describe("generateHtml", () => {
+  test("escapes document content so it cannot break out of the script element", () => {
+    const doc = docWithScriptBreakout();
+    const html = generateHtml(doc);
+
+    // The page's own two script elements, and no others.
+    expect(html.match(/<script/g)).toHaveLength(2);
+    expect(html.match(/<\/script>/g)).toHaveLength(2);
+    expect(html).not.toContain("<img");
+
+    // The escaped JSON still parses back to the document that was passed in.
+    const initialValue = html.match(/const initialValue=(.*)<\/script>/)?.[1];
+    expect(JSON.parse(initialValue as string)).toEqual(doc);
+  });
+
+  test("escapes the ampersands in the iframe source", () => {
+    const html = generateHtml(JSON.parse(sampleDoc));
+    expect(html).toMatch(/src="[^"]+\/iframe\.html\?unit=[^"&]+&amp;unwrapped&amp;readOnly"/);
+  });
+});
 
 describe("functions", () => {
   beforeEach(async () => {
