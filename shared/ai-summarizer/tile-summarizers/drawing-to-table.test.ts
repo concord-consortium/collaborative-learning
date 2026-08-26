@@ -249,6 +249,29 @@ describe("drawingToTable groups", () => {
     expect(result).not.toContain("450°");
   });
 
+  it("leaves a pre-1.1.0 group's members alone, since they are already absolute", () => {
+    // Groups gained width/height in v1.1.0; before that a group carried objectExtents and its
+    // members were stored in absolute pixels. The browser never sees this because DrawingMigrator
+    // normalizes on load, but Cloud Functions summarize the raw stored snapshot, so the summarizer
+    // meets unmigrated content directly. Treating those members as fractions of a zero-size group
+    // reports every one of them as a zero-size point at the group's origin.
+    const result = drawingToTable({ objects: [{
+      id: "g1", type: "group", x: 0, y: 0,
+      // The v1.0.0 marker: per-child fractional sides, and no width/height on the group itself.
+      objectExtents: { rA: { top: 0, right: 0.6, bottom: 1, left: 0 } },
+      objects: [
+        { id: "rA", type: "rectangle", x: 140, y: 50, width: 50, height: 50 },
+        { id: "eA", type: "ellipse", x: 205, y: 45, rx: 25, ry: 25 }
+      ]
+    } as any]});
+    // Members keep the absolute coordinates they are stored in, and the group's box is the union of
+    // them — the same derivation assimilateObjects performs when the browser loads this content.
+    expect(result).toContain("| rA | rectangle | 140, 50 | 50 x 50 |");
+    expect(result).toContain("| eA | ellipse | 180, 20 | 50 x 50 |");
+    expect(result).toContain("| g1 | group | 140, 20 | 90 x 80 |");
+    expect(result).not.toContain("0 x 0");
+  });
+
   it("mirrors children of a flipped group", () => {
     const result = drawingToTable({ objects: [{
       id: "flip", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,

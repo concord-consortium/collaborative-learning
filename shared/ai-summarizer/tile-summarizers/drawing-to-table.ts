@@ -54,7 +54,9 @@ import {
   absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, GroupTransform, Point,
   rotatePoint
 } from "../../drawing/drawing-geometry";
-import { boundingBoxForSnapshot, DrawingObjectSnapshot } from "../../drawing/drawing-object-snapshot";
+import {
+  boundingBoxForSnapshot, DrawingObjectSnapshot, isLegacyGroup
+} from "../../drawing/drawing-object-snapshot";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
 const kEmptyDrawing = "This tile contains a drawing.";
@@ -187,16 +189,23 @@ function walk(
     rows.push(row(o, bb, parentId, orientation));
 
     if (o.objects?.length) {
-      // Members are fractions of this group's *unrotated* box, so that is the frame handed down —
-      // not the rotated box just reported for it.
-      const frame: GroupTransform = {
-        boundingBox: localBB, rotation: o.rotation, hFlip: o.hFlip, vFlip: o.vFlip
-      };
-      const next: ToTileSpace = p => {
-        const inParentSpace = absoluteChildPoint(p, frame);
-        return toTileSpace ? toTileSpace(inParentSpace) : inParentSpace;
-      };
-      walk(o.objects, rows, o.id, next, compose(parentOrientation, groupOrientation(o)));
+      if (isLegacyGroup(o)) {
+        // A pre-1.1.0 group's members are stored in ordinary coordinates rather than as fractions
+        // of it, so there is nothing to un-normalize — converting them would be the bug, not the
+        // fix. They inherit this group's frame unchanged.
+        walk(o.objects, rows, o.id, toTileSpace, compose(parentOrientation, groupOrientation(o)));
+      } else {
+        // Members are fractions of this group's *unrotated* box, so that is the frame handed down —
+        // not the rotated box just reported for it.
+        const frame: GroupTransform = {
+          boundingBox: localBB, rotation: o.rotation, hFlip: o.hFlip, vFlip: o.vFlip
+        };
+        const next: ToTileSpace = p => {
+          const inParentSpace = absoluteChildPoint(p, frame);
+          return toTileSpace ? toTileSpace(inParentSpace) : inParentSpace;
+        };
+        walk(o.objects, rows, o.id, next, compose(parentOrientation, groupOrientation(o)));
+      }
     }
   });
 }
