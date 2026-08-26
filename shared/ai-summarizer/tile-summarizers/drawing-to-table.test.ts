@@ -392,6 +392,17 @@ describe("drawingToTable groups", () => {
     expect(result).toContain("dx=50 dy=50");
   });
 
+  it("rounds the long floats un-normalizing produces", () => {
+    // A third of a group does not divide evenly, and without rounding the row reads
+    // "33.333333333333336, 0". Nothing covered this: every other fixture here uses halves and
+    // quarters, so the whole suite stays green with the rounding deleted.
+    const result = drawingToTable({ objects: [{
+      id: "g", type: "group", x: 0, y: 0, width: 100, height: 100,
+      objects: [{ id: "k", type: "rectangle", x: 1 / 3, y: 0, width: 1 / 3, height: 1 }]
+    }]});
+    expect(result).toContain("| k | rectangle | 33.3, 0 | 33.3 x 100 |");
+  });
+
   it("mirrors children of a flipped group", () => {
     const result = drawingToTable({ objects: [{
       id: "flip", type: "group", x: 0, y: 0, width: 100, height: 100, hFlip: true,
