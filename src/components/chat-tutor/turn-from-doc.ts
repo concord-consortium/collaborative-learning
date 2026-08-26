@@ -1,7 +1,7 @@
 import { isTutorHighlight } from "../../../shared/chat-tutor-highlight";
 import { ChatTurn, TutorHighlight } from "./transport";
 
-// The server validates before writing, so this is defence in depth rather than the primary gate. It
+// The server validates before writing, so this is defense in depth rather than the primary gate. It
 // reads a document, though, which may have been written by an older server than the one running now.
 function readHighlights(value: unknown): TutorHighlight[] | undefined {
   if (!Array.isArray(value)) return undefined;

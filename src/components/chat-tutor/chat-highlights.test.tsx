@@ -80,7 +80,12 @@ describe("Chat highlight buttons", () => {
 
   // Pinning moves a ring onto an object elsewhere in the document. aria-pressed reports the button;
   // nothing reports the target, so without this a screen reader hears a control with no effect.
-  it("announces the pinned highlight, and its release", () => {
+  //
+  // Releasing clears the region rather than announcing anything: a polite region's default
+  // aria-relevant is "additions text", so a removal is silent. See the region in chat.tsx for why
+  // that is deliberate. The empty-string assertion is real — jest-dom special-cases "" and fails if
+  // the label persists.
+  it("announces the pinned highlight, and clears on release", () => {
     const { rerender } = render(<Chat enableHighlights chat={chatResult([turn])} activeHighlightKey="t1:1" />);
     expect(screen.getByTestId("chat-highlight-live")).toHaveTextContent("Highlighting the live output");
 

@@ -207,7 +207,8 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   }, [turns]);
 
   // The label of whichever button is currently pinned, for the highlight live region. Empty when
-  // nothing is pinned, which is also what announces a release.
+  // nothing is pinned, which clears the region rather than announcing anything — see the region
+  // itself for why a release is not announced.
   const activeHighlightLabel = useMemo(() => {
     if (!activeHighlightKey) return "";
     for (const turn of turns) {
@@ -343,7 +344,17 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       {/* Pinning a highlight moves a ring onto an object elsewhere in the document, where nothing
           announces it: aria-pressed reports the button's own state, and the target changes by CSS
           class alone. Without this the button is, to a screen reader, a control with no effect. Its
-          own region rather than the one above, so a highlight does not re-announce the reply. */}
+          own region rather than the one above, so a highlight does not re-announce the reply.
+
+          Announced on pin only, deliberately. A polite region's default aria-relevant is
+          "additions text", so emptying it says nothing — a release is silent here, and aria-pressed
+          carries that state for anyone on the button. The hover/focus preview is likewise not
+          announced: the button's own accessible name already says what it points at, so narrating
+          every arrow-key preview would be chatter. Both are affordances beyond what WCAG asks
+          (4.1.2 wants state programmatically determinable, which aria-pressed satisfies), not gaps
+          in it. The real gap is one layer down: a highlighted target carries CSS classes and no
+          ARIA, so its state is invisible to assistive tech whatever set it. That belongs to the
+          highlight system, not here. */}
       {enableHighlights &&
         <div className="visually-hidden" aria-live="polite" data-testid="chat-highlight-live">
           {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}

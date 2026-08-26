@@ -104,9 +104,9 @@ export async function createTutorResponse(
 // can render.
 export function parseTutorReply(outputText: string): TutorReply {
   const parsed = JSON.parse(outputText);
-  const raw: unknown[] = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
   const rawText = parsed?.userText;
   const userText = typeof rawText === "string" && rawText.trim() ? rawText : null;
+  const raw: unknown[] = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
   const highlights: TutorHighlight[] = userText === null ? [] : raw
     .filter(isTutorHighlight)
     .map((h) => ({tileId: h.tileId, objectId: h.objectId, label: h.label}));

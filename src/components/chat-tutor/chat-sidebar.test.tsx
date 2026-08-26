@@ -269,8 +269,10 @@ describe("ChatTutorSidebar as a highlight source", () => {
     expect(first).toHaveAttribute("aria-pressed", "false");
   });
 
-  // enableHighlights={!!appConfig.chatTutorHighlights} is the entire unit-config gate. Deleting the
-  // prop would let Chat's default apply and turn the feature on for every unit.
+  // enableHighlights={!!appConfig.chatTutorHighlights} is the entire unit-config gate, and this is
+  // the only test that fails if the prop stops reading the flag — hardcode it true and nothing else
+  // in the file notices. Deleting the prop outright is caught by the other tests instead, since
+  // Chat's default is false and they all expect buttons.
   it("renders no highlight buttons when the unit does not enable them", () => {
     mockStores.appConfig.chatTutorHighlights = false;
     renderSidebar(makeContent());

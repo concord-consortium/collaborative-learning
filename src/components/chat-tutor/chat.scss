@@ -223,7 +223,11 @@ $chat-bubble-max-width: 85%;
     cursor: pointer;
     // `label` is model-supplied and TUTOR_REPLY_FORMAT cannot bound its length (strict json_schema
     // has no maxLength), so one long unbroken token would otherwise overflow and give the drawer
-    // horizontal scroll. .chat-bubble guards its own text the same way.
+    // horizontal scroll.
+    //
+    // `overflow-wrap: anywhere` rather than the `word-break: break-word` .chat-bubble uses: only
+    // `anywhere` shrinks a flex item's min-content contribution, and this button is a flex item.
+    // Unifying the two would look like tidying and would bring the overflow back.
     max-width: 100%;
     overflow-wrap: anywhere;
 
