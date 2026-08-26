@@ -27,7 +27,7 @@ are in the tile's coordinate space, including for objects inside a group.
 | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed estimatedSize |
 | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
 | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
-| kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
+| kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=100 dy=50 stroke=#000000 |
 | t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |`);
 });
 
@@ -294,6 +294,23 @@ describe("drawingToTable groups", () => {
       objects: [{ id: "chip", type: "variable", x: 0.5, y: 0.5, variableId: "v_speed" }]
     }]});
     expect(result).toContain("| chip | variable | 200, 250 | 75 x 24 |");
+  });
+
+  it("reports a grouped child's own geometry in tile space too", () => {
+    // rx/ry and dx/dy are stored as fractions of the group, the same normalization position and
+    // size go to trouble to undo. Emitted raw they contradict the columns beside them: rx=0.25
+    // next to a size of 50 x 50.
+    const result = drawingToTable({ objects: [{
+      id: "g", type: "group", x: 0, y: 0, width: 100, height: 100,
+      objects: [
+        { id: "e", type: "ellipse", x: 0.5, y: 0.5, rx: 0.25, ry: 0.25 },
+        { id: "v", type: "vector", x: 0.25, y: 0.25, dx: 0.5, dy: 0.5 }
+      ]
+    }]});
+    expect(result).toContain("| e | ellipse | 25, 25 | 50 x 50 |");
+    expect(result).toContain("rx=25 ry=25");
+    expect(result).toContain("| v | vector | 25, 25 | 50 x 50 |");
+    expect(result).toContain("dx=50 dy=50");
   });
 
   it("mirrors children of a flipped group", () => {

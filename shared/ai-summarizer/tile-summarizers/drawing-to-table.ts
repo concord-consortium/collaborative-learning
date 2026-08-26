@@ -15,7 +15,7 @@ to this — see the "matches the documented example" test, which pins it:
     | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed estimatedSize |
     | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
     | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
-    | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=0.5 dy=0.5 stroke=#000000 |
+    | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=100 dy=50 stroke=#000000 |
     | t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |
 
 Some things in that output are not obvious from the code:
@@ -51,8 +51,9 @@ no objects summarize exactly as they did before.
 */
 
 import {
-  absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, GroupTransform,
-  kVariableChipDefaultHeight, kVariableChipDefaultWidth, Point, rotatePoint, sizedBoundingBox
+  absoluteChildPoint, BoundingBox, boundingBoxCorners, boundingBoxForPoints, ellipseBoundingBox,
+  GroupTransform, kVariableChipDefaultHeight, kVariableChipDefaultWidth, Point, rotatePoint,
+  sizedBoundingBox
 } from "../../drawing/drawing-geometry";
 import {
   boundingBoxForSnapshot, DrawingObjectSnapshot, isLegacyGroup
@@ -86,15 +87,43 @@ function formatSize(bb: BoundingBox): string {
 // Everything type-specific rides here as key=value pairs rather than earning a column, the way
 // Dataflow node properties do. The uniform columns are what make two rows comparable; this is where
 // the differences go.
-function formatDetails(o: DrawingObjectSnapshot): string {
-  const details: string[] = [];
-  if (o.type === "ellipse") details.push(`rx=${o.rx} ry=${o.ry}`);
-  if (o.type === "vector") details.push(`dx=${o.dx} dy=${o.dy}`);
-  if (o.type === "line") details.push(`points=${(o.deltaPoints?.length ?? 0) + 1}`);
-  if (o.type === "group") {
-    const count = o.objects?.length ?? 0;
-    details.push(`${count} ${pluralize(count, "object", "objects")}`);
+/**
+ * An object's defining geometry, in the tile's coordinate space rather than the space it is stored
+ * in. A group's members hold these as fractions of the group, exactly as they hold their positions,
+ * so emitting them raw would put two coordinate systems in one row — `rx=0.25` beside a size of
+ * 50 x 50. They travel the same mapping the position and size columns do.
+ */
+function typeGeometry(o: DrawingObjectSnapshot, toTileSpace?: ToTileSpace): string[] {
+  const map = toTileSpace ?? ((p: Point) => p);
+  switch (o.type) {
+    case "ellipse": {
+      // Radii are half the mapped extent. Under a group turned by a multiple of 90 that is exact
+      // and correctly swaps the two; at other angles the mapped box encloses the ellipse, so these
+      // are the closest an axis-aligned pair can get to a turned one.
+      const box = boundingBoxForPoints(boundingBoxCorners(
+        ellipseBoundingBox({ x: o.x, y: o.y, rx: o.rx ?? 0, ry: o.ry ?? 0 })).map(map));
+      return [`rx=${round((box.se.x - box.nw.x) / 2)} ry=${round((box.se.y - box.nw.y) / 2)}`];
+    }
+    case "vector": {
+      // Mapping both endpoints keeps direction as well as magnitude, which matters for an arrow.
+      const start = map({ x: o.x, y: o.y });
+      const end = map({ x: o.x + (o.dx ?? 0), y: o.y + (o.dy ?? 0) });
+      return [`dx=${round(end.x - start.x)} dy=${round(end.y - start.y)}`];
+    }
+    case "line":
+      // A count is the same number in any coordinate system.
+      return [`points=${(o.deltaPoints?.length ?? 0) + 1}`];
+    case "group": {
+      const count = o.objects?.length ?? 0;
+      return [`${count} ${pluralize(count, "object", "objects")}`];
+    }
+    default:
+      return [];
   }
+}
+
+function formatDetails(o: DrawingObjectSnapshot, geometry: string[]): string {
+  const details: string[] = [...geometry];
   // JSON-encoded rather than just quoted: drawing text is edited in a textarea and can contain
   // newlines, which would end the table row and corrupt every column after it.
   if (o.text !== undefined) details.push(`text=${JSON.stringify(o.text)}`);
@@ -162,11 +191,12 @@ function formatRotation(orientation: Orientation): string {
 }
 
 function row(
-  o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string, orientation: Orientation
+  o: DrawingObjectSnapshot, bb: BoundingBox, parentId: string, orientation: Orientation,
+  geometry: string[]
 ): string[] {
   return [
     o.id, o.type, formatPosition(bb), formatSize(bb), formatRotation(orientation), parentId,
-    formatDetails(o)
+    formatDetails(o, geometry)
   ];
 }
 
@@ -204,7 +234,7 @@ function walk(
     const orientation = chip
       ? kUpright
       : compose(parentOrientation, { rotation: o.rotation ?? 0, mirrored: false });
-    rows.push(row(o, bb, parentId, orientation));
+    rows.push(row(o, bb, parentId, orientation, typeGeometry(o, toTileSpace)));
 
     if (o.objects?.length) {
       if (isLegacyGroup(o)) {
