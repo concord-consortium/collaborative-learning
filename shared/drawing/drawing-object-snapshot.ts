@@ -22,6 +22,8 @@ export interface DrawingObjectSnapshot {
   dx?: number;                                 // vector
   dy?: number;
   deltaPoints?: { dx: number, dy: number }[];  // line
+  headShape?: string;                          // vector
+  tailShape?: string;
   objects?: DrawingObjectSnapshot[];           // group
   objectExtents?: Record<string, unknown>;     // group, pre-1.1.0 only
   text?: string;
@@ -54,6 +56,29 @@ export interface DrawingObjectSnapshot {
  * its members summarizes as a zero-size point at the group's origin, silently — nothing throws, the
  * analysis simply describes a drawing that is not there.
  */
+/**
+ * What the drawing tile's own object panel calls this shape, or undefined when that is just the
+ * type again.
+ *
+ * Two of these are actively misleading if a reader assumes the type name is what the student sees:
+ * `line` is labelled Freehand, and `vector` is labelled Line. Citing "the line" by type would point
+ * at the wrong object. Mirrors the `label` getters on the object models, which this module cannot
+ * import.
+ */
+export function displayLabel(o: DrawingObjectSnapshot, box: BoundingBox): string | undefined {
+  // Square and Circle are decided from the box as rendered, not from the stored fields. A group's
+  // member stored 0.5 x 0.5 looks square in the snapshot and is not: inside a 200 x 100 group it
+  // renders 100 x 50. The panel labels what the student sees, so this has to as well.
+  const square = box.se.x - box.nw.x === box.se.y - box.nw.y;
+  switch (o.type) {
+    case "line": return "Freehand";
+    case "vector": return o.headShape || o.tailShape ? "Arrow" : "Line";
+    case "ellipse": return square ? "Circle" : undefined;
+    case "rectangle": return square ? "Square" : undefined;
+    default: return undefined;
+  }
+}
+
 export function isLegacyGroup(o: DrawingObjectSnapshot): boolean {
   return o.type === "group" && (o.width == null || o.objectExtents !== undefined);
 }

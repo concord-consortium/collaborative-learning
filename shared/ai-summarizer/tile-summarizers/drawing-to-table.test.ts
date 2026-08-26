@@ -23,11 +23,11 @@ are in the tile's coordinate space, including for objects inside a group.
 | id | type | position | size | orientation | parent | details |
 | --- | --- | --- | --- | --- | --- | --- |
 | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
-| c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
+| c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 label=Circle fill=none stroke=#d10000 |
 | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed estimatedSize |
 | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
 | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
-| kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=100 dy=50 stroke=#000000 |
+| kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=100 dy=50 label=Line stroke=#000000 |
 | t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |`);
 });
 
@@ -129,6 +129,32 @@ describe("drawingToTable", () => {
     expect(result).toContain("points=3");
   });
 
+  it("names the shape the way the student's panel does, where that differs", () => {
+    // The internal type names are actively misleading: `line` is labelled Freehand on screen and
+    // `vector` is labelled Line, so a tutor citing "the line" by type would point at the wrong
+    // object. Same defect the Dataflow `title` row fixed for node names.
+    const result = drawingToTable({ objects: [
+      { id: "l1", type: "line", x: 0, y: 0, deltaPoints: [{ dx: 5, dy: 5 }] },
+      { id: "v1", type: "vector", x: 0, y: 0, dx: 10, dy: 0 },
+      { id: "a1", type: "vector", x: 0, y: 0, dx: 10, dy: 0, headShape: "triangle" },
+      { id: "c1", type: "ellipse", x: 0, y: 0, rx: 10, ry: 10 },
+      { id: "s1", type: "rectangle", x: 0, y: 0, width: 10, height: 10 }
+    ] as any});
+    expect(result).toContain("label=Freehand");
+    expect(result).toContain("label=Line");
+    expect(result).toContain("label=Arrow");
+    expect(result).toContain("label=Circle");
+    expect(result).toContain("label=Square");
+  });
+
+  it("omits the label where it only repeats the type", () => {
+    const result = drawingToTable({ objects: [
+      { id: "t1", type: "text", x: 0, y: 0, width: 10, height: 10, text: "hi" },
+      { id: "r1", type: "rectangle", x: 0, y: 0, width: 20, height: 10 }
+    ]});
+    expect(result).not.toContain("label=");
+  });
+
   it("names an unknown object type instead of dropping it", () => {
     const result = drawingToTable({ objects: [
       { id: "u1", type: "sparkline", x: 4, y: 6 }
@@ -202,7 +228,7 @@ describe("drawingToTable groups", () => {
     const result = drawingToTable({ objects: [
       { id: "f1", type: "rectangle", x: 0, y: 0, width: 10, height: 10, hFlip: true }
     ]});
-    expect(result).toContain("| f1 | rectangle | 0, 0 | 10 x 10 | mirrored |  |  |");
+    expect(result).toContain("| f1 | rectangle | 0, 0 | 10 x 10 | mirrored |  | label=Square |");
     expect(result).not.toContain("hFlip");
   });
 

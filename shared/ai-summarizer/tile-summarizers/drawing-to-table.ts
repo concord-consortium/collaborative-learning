@@ -11,11 +11,11 @@ to this — see the "matches the documented example" test, which pins it:
     | id | type | position | size | orientation | parent | details |
     | --- | --- | --- | --- | --- | --- | --- |
     | a7Kd2 | rectangle | 40, 20 | 120 x 80 |  |  | fill=#0069ff stroke=#000000 strokeWidth=2 |
-    | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 fill=none stroke=#d10000 |
+    | c3Mn8 | ellipse | 170, 70 | 60 x 60 |  |  | rx=30 ry=30 label=Circle fill=none stroke=#d10000 |
     | Dp47z | variable | 320, 40 | 75 x 24 |  |  | variableId=v_speed estimatedSize |
     | Bq91x | group | 100, 200 | 200 x 100 |  |  | 2 objects |
     | kid1 | rectangle | 100, 200 | 100 x 50 |  | Bq91x | fill=#00b400 |
-    | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=100 dy=50 stroke=#000000 |
+    | kid2 | vector | 200, 250 | 100 x 50 |  | Bq91x | dx=100 dy=50 label=Line stroke=#000000 |
     | t9Qr4 | text | 130, 250 | 20 x 90 | 90° |  | text="too fast" visible=false |
 
 Some things in that output are not obvious from the code:
@@ -61,7 +61,7 @@ import {
   sizedBoundingBox
 } from "../../drawing/drawing-geometry";
 import {
-  boundingBoxForSnapshot, DrawingObjectSnapshot, isLegacyGroup
+  boundingBoxForSnapshot, displayLabel, DrawingObjectSnapshot, isLegacyGroup
 } from "../../drawing/drawing-object-snapshot";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
@@ -127,8 +127,14 @@ function typeGeometry(o: DrawingObjectSnapshot, toTileSpace?: ToTileSpace): stri
   }
 }
 
-function formatDetails(o: DrawingObjectSnapshot, geometry: string[]): string {
+function formatDetails(o: DrawingObjectSnapshot, geometry: string[], bb: BoundingBox): string {
   const details: string[] = [...geometry];
+  // The type column stays the internal name — it is stable and it is what an id resolves against —
+  // but that name is not always what the student is looking at, so the visible one rides alongside
+  // where the two differ. Same reason the Dataflow summary carries a node's title next to its
+  // identifier.
+  const label = displayLabel(o, bb);
+  if (label) details.push(`label=${label}`);
   // JSON-encoded rather than just quoted: drawing text is edited in a textarea and can contain
   // newlines, which would end the table row and corrupt every column after it.
   if (o.text !== undefined) details.push(`text=${JSON.stringify(o.text)}`);
@@ -203,7 +209,7 @@ function row(
 ): string[] {
   return [
     o.id, o.type, formatPosition(bb), formatSize(bb), formatOrientation(orientation), parentId,
-    formatDetails(o, geometry)
+    formatDetails(o, geometry, bb)
   ];
 }
 
