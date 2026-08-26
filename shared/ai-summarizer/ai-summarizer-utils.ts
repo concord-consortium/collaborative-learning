@@ -16,8 +16,13 @@ export function generateMarkdownTable(headers: string[], rows: string[][]): stri
     return "";
   }
 
-  const escapePipe = (stringOrNumber: string | number) => String(stringOrNumber).replace(/\|/g, "\\|");
-  const headerRow = `| ${headers.map(escapePipe).join(" | ")} |`;
+  // A newline ends the row, so an unescaped one splits a cell in two and every column after it is
+  // misaligned — the same damage an unescaped pipe does, and just as easy to arrive from a value a
+  // student typed. Escaped rather than stripped so the reader can still tell the text was
+  // multi-line.
+  const escapeCell = (stringOrNumber: string | number) =>
+    String(stringOrNumber).replace(/\|/g, "\\|").replace(/\r\n?|\n/g, "\\n");
+  const headerRow = `| ${headers.map(escapeCell).join(" | ")} |`;
   const separatorRow = `| ${headers.map(() => "---").join(" | ")} |`;
 
   const dataRows = rows.map(row => {
@@ -25,7 +30,7 @@ export function generateMarkdownTable(headers: string[], rows: string[][]): stri
     while (paddedRow.length < headers.length) {
       paddedRow.push("");
     }
-    return `| ${paddedRow.map(escapePipe).join(" | ")} |`;
+    return `| ${paddedRow.map(escapeCell).join(" | ")} |`;
   });
 
   return [headerRow, separatorRow, ...dataRows].join("\n");

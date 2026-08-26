@@ -106,6 +106,17 @@ describe("drawingToTable", () => {
     expect(result.split("\n")).toHaveLength(6); // preamble, blank, header, separator, 2 rows
   });
 
+  it("keeps a newline in any field inside its cell, not just text", () => {
+    // text was escaped when this was found in review; every other value was still raw, so a newline
+    // in a url split the row exactly the same way.
+    const result = drawingToTable({ objects: [
+      { id: "i1", type: "image", x: 0, y: 0, width: 1, height: 1, url: "x\ny.png" },
+      { id: "r1", type: "rectangle", x: 0, y: 0, width: 2, height: 1 }
+    ]});
+    expect(result).toContain("| r1 | rectangle |");
+    expect(result.split("\n")).toHaveLength(6); // preamble, blank, header, separator, 2 rows
+  });
+
   it("escapes quotes and backslashes in text", () => {
     const result = drawingToTable({ objects: [
       { id: "q1", type: "text", x: 0, y: 0, width: 50, height: 20, text: 'say "hi" c:\\x' }

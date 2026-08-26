@@ -7,5 +7,14 @@ import { drawingToTable } from "./drawing-to-table";
 // markup, so the path it serves cannot be cited object by object the way this one can.
 export function handleDrawingTile({ tile }: TileHandlerParams): string|undefined {
   if (tile.model.content.type !== "Drawing") { return undefined; }
-  return drawingToTable(tile.model.content);
+  try {
+    return drawingToTable(tile.model.content);
+  } catch (error) {
+    // Whatever is wrong with this drawing, it must cost the reader this tile and no more. Nothing
+    // guards the handler loop in tileSummary, so anything thrown here propagates all the way out of
+    // documentSummarizer and the whole document's summary is lost — every other tile with it. The
+    // shapes a stored drawing can take are not worth enumerating; failing to one sentence is.
+    console.error("Error summarizing drawing tile:", error, tile);
+    return "This tile contains a malformed drawing.";
+  }
 }
