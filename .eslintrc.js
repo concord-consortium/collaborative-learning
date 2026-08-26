@@ -136,6 +136,22 @@ module.exports = {
           }]
         }
       },
+      { // A React component under shared/ is the violation this whole boundary exists to prevent,
+        // and it is the one case no-restricted-imports cannot catch: a .tsx there might import
+        // nothing at all and still be a component. So these extensions are globbed by the lint
+        // scripts *in order to be rejected*, not because they are supported.
+        //
+        // The `Program` selector is the root node of a parsed file's syntax tree, present exactly
+        // once in every file including an empty one, so matching it rejects the file's existence
+        // rather than anything in it. No exclusions: a .test.tsx would be just as wrong.
+        files: ["shared/**/*.{tsx,jsx}"],
+        rules: {
+          "no-restricted-syntax": ["error", {
+            selector: "Program",
+            message: "shared/ is loaded by Cloud Functions, which cannot load React. Put the component in src/ and keep the logic it needs in a .ts file here."
+          }]
+        }
+      },
       { // eslint configs
         files: [".eslintrc*.js"],
         env: {
