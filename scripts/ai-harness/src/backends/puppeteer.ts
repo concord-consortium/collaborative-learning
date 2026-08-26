@@ -510,7 +510,7 @@ async function waitForClueFrame(
 ): Promise<FrameLike> {
   for (;;) {
     deadline.requireRemaining(docId, "the CLUE iframe appeared", contextOf());
-    const frame = page.frames().find((candidate) => candidate.url().includes("iframe.html"));
+    const frame = page.frames().find((candidate) => /iframe(\.html|\/index\.html)/.test(candidate.url()));
     if (frame) return frame;
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }

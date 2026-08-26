@@ -6,7 +6,9 @@ import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import {initialize, projectConfig} from "./initialize";
-import {generateHtml, onAnalysisDocumentPending} from "../src/on-analysis-document-pending";
+import {
+  clueIframeURL, fallbackClueUnit, generateHtml, onAnalysisDocumentPending, renderUnitFor,
+} from "../src/on-analysis-document-pending";
 
 jest.mock("firebase-functions/logger");
 
@@ -66,7 +68,34 @@ describe("generateHtml", () => {
 
   test("escapes the ampersands in the iframe source", () => {
     const html = generateHtml(JSON.parse(sampleDoc));
-    expect(html).toMatch(/src="[^"]+\/iframe\.html\?unit=[^"&]+&amp;unwrapped&amp;readOnly"/);
+    expect(html).toMatch(/src="[^"]+\/authoring-iframe\/index\.html\?unit=[^"&]+&amp;unwrapped&amp;readOnly"/);
+  });
+
+  test("renders through the released CLUE build, not a branch", () => {
+    expect(clueIframeURL).toBe("https://collaborative-learning.concord.org/authoring-iframe/index.html");
+    expect(generateHtml(JSON.parse(sampleDoc))).not.toContain("/branch/");
+  });
+
+  test("renders with the unit it is given, falling back to the default unit", () => {
+    expect(generateHtml(JSON.parse(sampleDoc), "msa")).toContain(`src="${clueIframeURL}?unit=msa&amp;`);
+    expect(generateHtml(JSON.parse(sampleDoc))).toContain(`?unit=${fallbackClueUnit}&amp;`);
+  });
+});
+
+describe("renderUnitFor", () => {
+  test("accepts a plain unit code", () => {
+    expect(renderUnitFor("msa")).toBe("msa");
+    expect(renderUnitFor("s+s")).toBe("s+s");
+    expect(renderUnitFor("bio4community")).toBe("bio4community");
+  });
+
+  test("falls back to the default unit for anything else", () => {
+    expect(renderUnitFor(undefined)).toBe(fallbackClueUnit);
+    expect(renderUnitFor(null)).toBe(fallbackClueUnit);
+    expect(renderUnitFor("")).toBe(fallbackClueUnit);
+    expect(renderUnitFor("https://example.com/content.json")).toBe(fallbackClueUnit);
+    expect(renderUnitFor("some/path")).toBe(fallbackClueUnit);
+    expect(renderUnitFor(42)).toBe(fallbackClueUnit);
   });
 });
 

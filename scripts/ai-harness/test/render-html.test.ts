@@ -60,6 +60,11 @@ describe("the iframe URL", () => {
       .toBe("http://localhost:8080/iframe.html?unit=qa&unwrapped&readOnly");
   });
 
+  it("uses a clueUrl that already names an .html page as the page itself", () => {
+    expect(iframeUrlFor("https://collaborative-learning.concord.org/authoring-iframe/index.html", "mods"))
+      .toBe("https://collaborative-learning.concord.org/authoring-iframe/index.html?unit=mods&unwrapped&readOnly");
+  });
+
   it("percent-encodes a unit given as a URL", () => {
     expect(iframeUrlFor("http://localhost:8080/", "http://127.0.0.1:5000/content.json"))
       .toBe("http://localhost:8080/iframe.html?unit=http%3A%2F%2F127.0.0.1%3A5000%2Fcontent.json" +

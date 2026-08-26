@@ -10,9 +10,11 @@ import fs from "fs";
 
 import { escapeHtmlAttribute, escapeJsonForScript } from "../shared/escape-for-html";
 
-const clueCodebase = "https://collaborative-learning.concord.org/branch/shutterbug-support";
-// const clueCodebase = "http://localhost:8080";
-// const clueCodebase = "https://reimagined-journey-v6q9774jwh6pr4-4000.app.github.dev/";
+// The released CLUE build does not include a top-level iframe.html; the authoring-iframe entry
+// point is built from the same source. Branch and local builds have iframe.html directly.
+const clueIframePage = "https://collaborative-learning.concord.org/authoring-iframe/index.html";
+// const clueIframePage = "http://localhost:8080/iframe.html";
+// const clueIframePage = "https://collaborative-learning.concord.org/branch/master/iframe.html";
 
 // const shutterbugServer = "https://api.concord.org/shutterbug-production";
 // const shutterbugServer = "http://localhost:4000";
@@ -23,7 +25,7 @@ const shutterbugServer = "https://api.concord.org/shutterbug-staging";
 // targets a different CLUE build and Shutterbug server and asks for a full-page capture. Keep
 // fixes to one in step with the other until they are unified.
 function generateHtml(clueDocument: any) {
-  const source = escapeHtmlAttribute(`${clueCodebase}/iframe.html?unwrapped&readOnly`);
+  const source = escapeHtmlAttribute(`${clueIframePage}?unwrapped&readOnly`);
   return `
     <script>const initialValue=${escapeJsonForScript(JSON.stringify(clueDocument))}</script>
     <!-- height will be updated when iframe sends updateHeight message -->
