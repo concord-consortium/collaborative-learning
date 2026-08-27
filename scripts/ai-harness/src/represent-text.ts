@@ -39,12 +39,12 @@ export interface TextVariant {
 export const textVariants: Record<string, TextVariant> = {
   default: {
     id: "default",
-    variantVersion: 1,
+    variantVersion: 2,
     render: (content) => documentSummarizer(content, {})
   },
   minimal: {
     id: "minimal",
-    variantVersion: 1,
+    variantVersion: 2,
     render: (content) => documentSummarizer(content, { minimal: true })
   },
   /**
@@ -59,23 +59,24 @@ export const textVariants: Record<string, TextVariant> = {
    */
   "no-dataset-tables": {
     id: "no-dataset-tables",
-    variantVersion: 1,
+    variantVersion: 2,
     render: (content) => documentSummarizer(content, { dataSetTables: "schema-only" })
   },
   /**
-   * `default` with drawings described rather than merely mentioned.
+   * `default` with drawings described by the harness's own prototype serializer.
    *
-   * The default handler says "This tile contains a drawing" and stops, so a text-only run is told
-   * nothing about what the student drew — which is most of what a visual document *is*, and a large
-   * part of why an image run might beat a text one. This variant swaps in a pure serializer that
+   * Written when the production handler said "This tile contains a drawing" and stopped, so a
+   * text-only run was told nothing about what the student drew. It swaps in a pure serializer that
    * lists each object's type, position and size, and any text objects' text.
    *
-   * A measurement prototype, deliberately unambitious: it describes geometry and does not interpret
-   * it. Beating it is the point, and a variant is how someone would show that they had.
+   * CLUE has since given the production handler an object table of its own, so `default` now
+   * describes a drawing too and this is no longer the only text variant that carries what was
+   * drawn. It is kept as the earlier prototype: runs recorded with it are still comparable, and
+   * `experiments/mixed-vs-baselines.json` names its `text-drawing-text` run.
    */
   "drawing-text": {
     id: "drawing-text",
-    variantVersion: 1,
+    variantVersion: 2,
     // Ahead of the defaults, which is how `documentSummarizerWithDrawings` composes: the first
     // handler that answers wins, so this one takes the Drawing tiles and the rest are untouched.
     render: (content) => documentSummarizer(content, {
