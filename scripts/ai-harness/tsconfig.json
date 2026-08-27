@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    // Not "nodenext": shared/ is ESM with extensionless relative imports, which NodeNext rejects
+    // (TS2835). See DEVIATIONS item 1 in README.md.
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "lib": ["es2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["harness.ts", "apply-key-map.ts", "debug-render.ts", "src/**/*", "test/**/*"]
+}

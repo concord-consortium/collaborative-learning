@@ -1,0 +1,26 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "text-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "text-tile": {
+      "id": "text-tile",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": "<p>Our lunchbox latch is for a first grader who cannot work a stiff clasp. text-fixture-marker</p>"
+      }
+    }
+  }
+}

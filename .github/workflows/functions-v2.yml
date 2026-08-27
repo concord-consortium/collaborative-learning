@@ -17,13 +17,21 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: functions-v2/package-lock.json
+          cache-dependency-path: |
+            functions-v2/package-lock.json
+            shared/package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Install Dependencies
         working-directory: ./functions-v2
+        run: npm ci
+      # ../shared has its own openai and zod so the evaluation harness can import
+      # shared/ai-analysis-messages.ts directly. tsc resolves those from shared/node_modules when it
+      # compiles ../shared into this package, so the build fails without them.
+      - name: Install Shared Dependencies
+        working-directory: ./shared
         run: npm ci
       - name: Lint
         working-directory: ./functions-v2

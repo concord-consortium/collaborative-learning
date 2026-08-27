@@ -1,0 +1,27 @@
+{
+  "name": "clue-ai-harness",
+  "version": "1.0.0",
+  "description": "Local evaluation harness for CLUE AI document analysis (CLUE-371)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint -c ../../.eslintrc.js . ../survey-class-documents.ts --ext .ts --report-unused-disable-directives --max-warnings 0",
+    "test:render": "tsx test/local-render.integration.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "openai": "6.45.0",
+    "puppeteer": "22.13.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.4",
+    "tsx": "^4.16.2",
+    "typescript": "~5.9.2"
+  }
+}

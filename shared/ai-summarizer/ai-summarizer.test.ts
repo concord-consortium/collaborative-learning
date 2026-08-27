@@ -577,6 +577,68 @@ describe('ai-summarizer', () => {
         expect(result).toContain('1 data set');
       });
 
+      describe('the dataSetTables option', () => {
+        const withData = {
+          rowOrder: ['row1'],
+          rowMap: { row1: { tiles: [{ tileId: 'tile1' }], isSectionHeader: false } },
+          tileMap: { tile1: { id: 'tile1', content: { type: 'Table' } } },
+          sharedModelMap: {
+            dataSet1: {
+              sharedModel: {
+                type: 'SharedDataSet',
+                providerId: 'provider1',
+                dataSet: {
+                  name: 'Sample Data',
+                  attributes: [
+                    { name: 'Name', values: ['Alice', 'Bob'] },
+                    { name: 'Age', values: ['25', '30'] }
+                  ],
+                  cases: [
+                    { Name: 'Alice', Age: '25' },
+                    { Name: 'Bob', Age: '30' }
+                  ]
+                }
+              },
+              tiles: ['tile1']
+            }
+          }
+        };
+
+        it('defaults to the full table, byte for byte what it produced before the option existed', () => {
+          // The option is new; every existing caller passes nothing. If these two ever differ, every
+          // stored summary and every cached analysis built from one is invalidated for no reason.
+          expect(documentSummarizer(withData, { dataSetTables: 'full' }))
+            .toBe(documentSummarizer(withData, {}));
+        });
+
+        it('keeps the schema and the case count but drops the case data', () => {
+          const schemaOnly = documentSummarizer(withData, { dataSetTables: 'schema-only' });
+          // The shape of the data survives: heading, attributes table, and how many cases there are.
+          expect(schemaOnly).toContain('Sample Data');
+          expect(schemaOnly).toContain('| Name |');
+          expect(schemaOnly).toContain('There are 2 cases in this data set.');
+          // The data itself does not.
+          expect(schemaOnly).not.toContain('Alice');
+          expect(schemaOnly).not.toContain('Bob');
+          expect(schemaOnly).not.toContain('shown below in a Markdown table');
+        });
+
+        it('is shorter than the full summary, which is the point of having it', () => {
+          expect(documentSummarizer(withData, { dataSetTables: 'schema-only' }).length)
+            .toBeLessThan(documentSummarizer(withData, {}).length);
+        });
+
+        it('changes nothing for a document with no data sets', () => {
+          const noData = {
+            rowOrder: ['row1'],
+            rowMap: { row1: { tiles: [{ tileId: 'tile1' }], isSectionHeader: false } },
+            tileMap: { tile1: { id: 'tile1', content: { type: 'Table' } } }
+          };
+          expect(documentSummarizer(noData, { dataSetTables: 'schema-only' }))
+            .toBe(documentSummarizer(noData, {}));
+        });
+      });
+
       it('should handle table tiles without shared data sets', () => {
         const content = {
           rowOrder: ['row1'],
