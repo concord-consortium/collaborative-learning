@@ -27,6 +27,7 @@ import {getFirestore} from "firebase-admin/firestore";
 
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {createOpenAIClient} from "./chat/openai";
+import {createOpenAIProvider} from "./chat/openai-provider";
 import {DrainContext, acquireLock, processAndDrain, pickOwnerFields} from "./chat/drain";
 
 // Only the API key is a true secret (defineSecret). OPENAI_MODEL stays a defineString param
@@ -63,9 +64,11 @@ export const chatTutorOnWrite = functionsV1
     const ctx: DrainContext = {
       parentRef,
       messagesCol,
-      openai: createOpenAIClient(openaiKey.value()),
-      model: openaiModel.value(),
-      genericText: CHAT_GENERIC_PROMPT,
+      provider: createOpenAIProvider({
+        openai: createOpenAIClient(openaiKey.value()),
+        model: openaiModel.value(),
+        genericText: CHAT_GENERIC_PROMPT,
+      }),
     };
 
     try {
