@@ -1,31 +1,32 @@
-// Drain-engine tests against the Firestore emulator with a fake TutorProvider.
-//
-// These cover the machinery the CLUE-566 spec calls out as hard to get right — the drain cursor
-// and the atomic assistant-doc + parent-state + cursor commit — which had no automated coverage
-// because the only way to reach it was through the real trigger and the real OpenAI client. The
-// provider seam is what makes it reachable: the drain no longer knows which backend answered.
+// Drain-engine tests: the lock, the cursor, and the batch commit, run against the Firestore
+// emulator with a fake TutorProvider so no backend is involved.
 //
 // Requires a FIRESTORE-ONLY emulator (npm run test:emulator). A full stack with functions loaded
 // fires the real chatTutorOnWrite trigger on these writes and corrupts state mid-run.
 import {clearFirestoreData} from "firebase-functions-test/lib/providers/firestore";
-import {DocumentData, FieldValue, getFirestore} from "firebase-admin/firestore";
+import {DocumentData, FieldValue, Timestamp, getFirestore} from "firebase-admin/firestore";
 
 import {initialize, projectConfig} from "./initialize";
-import {DrainContext, TurnResult, TutorProvider, processAndDrain} from "../src/chat/drain";
+import {DrainContext, acquireLock, processAndDrain} from "../src/chat/drain";
+import {TurnResult, TutorProvider} from "../src/chat/provider";
 
 const {cleanup} = initialize();
 
 const kConversation = "demo/test-demo/chatTutor/conv1";
 
 // A provider that records what the drain handed it and replies with a canned script, so a test
-// can assert on both directions of the seam.
+// can assert on both directions of the seam. Running off the end of the script throws rather
+// than replaying the last reply, so an unexpected extra turn shows up as a failure here instead
+// of as a plausible-looking duplicate answer.
 function fakeProvider(script: TurnResult[]): TutorProvider & {calls: {parent: DocumentData, message: DocumentData}[]} {
   const calls: {parent: DocumentData, message: DocumentData}[] = [];
   return {
     calls,
     processTurn: async (parent, message) => {
       calls.push({parent, message});
-      return script[calls.length - 1] ?? script[script.length - 1];
+      const reply = script[calls.length - 1];
+      if (!reply) throw new Error(`fakeProvider called ${calls.length} times, script has ${script.length}`);
+      return reply;
     },
   };
 }
@@ -52,15 +53,16 @@ async function readMessages() {
   return snap.docs;
 }
 
+// file-scoped: cleanup() deletes the Firebase app, so it must not run between describe blocks
+beforeEach(async () => {
+  await clearFirestoreData(projectConfig);
+});
+
+afterAll(async () => {
+  await cleanup();
+});
+
 describe("processAndDrain", () => {
-  beforeEach(async () => {
-    await clearFirestoreData(projectConfig);
-  });
-
-  afterAll(async () => {
-    await cleanup();
-  });
-
   it("commits the provider's reply, the parent state it earned, and the cursor together", async () => {
     await queueUserMessage("how do I start?");
     const provider = fakeProvider([
@@ -122,12 +124,31 @@ describe("processAndDrain", () => {
 
     await processAndDrain(makeCtx(provider));
 
+    // the provider call order is the authoritative statement about ordering; the assistant docs
+    // share a serverTimestamp() and are read back by createdAt alone, so their relative order is
+    // not something this test can pin
     expect(provider.calls.map((c) => c.message.text)).toEqual(["first", "second", "third"]);
-    // each turn sees the cursor state the previous one committed
     const parent = (await getFirestore().doc(kConversation).get()).data();
     expect(parent?.status).toBe("idle");
     const assistants = (await readMessages()).filter((d) => d.get("kind") === "assistant");
-    expect(assistants.map((d) => d.get("userText"))).toEqual(["r1", "r2", "r3"]);
+    expect(assistants.map((d) => d.get("userText")).sort()).toEqual(["r1", "r2", "r3"]);
+  });
+
+  it("resumes at the persisted cursor instead of re-answering the backlog", async () => {
+    await queueUserMessage("first");
+    await processAndDrain(makeCtx(fakeProvider([{assistantText: "r1", parentUpdate: {}}])));
+
+    await queueUserMessage("second");
+    // a fresh provider whose script holds exactly one reply: if the drain re-read from the top it
+    // would ask for a second turn and the script would throw. This is the behavior that stops a
+    // re-trigger from re-answering — and re-billing — the whole backlog.
+    const resumed = fakeProvider([{assistantText: "r2", parentUpdate: {}}]);
+    await processAndDrain(makeCtx(resumed));
+
+    expect(resumed.calls).toHaveLength(1);
+    expect(resumed.calls[0].message.text).toBe("second");
+    const assistants = (await readMessages()).filter((d) => d.get("kind") === "assistant");
+    expect(assistants).toHaveLength(2);
   });
 
   it("refuses a provider that tries to release the drain's lock", async () => {
@@ -137,30 +158,33 @@ describe("processAndDrain", () => {
     // concurrent drain of the same backlog.
     const provider = fakeProvider([{assistantText: "reply", parentUpdate: {status: "idle"}}]);
 
-    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow(/drain-owned/);
+    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow(/drain-owned parent fields: status/);
 
     const assistants = (await readMessages()).filter((d) => d.get("kind") === "assistant");
     expect(assistants).toHaveLength(0);
   });
 
   it("refuses a provider that tries to restamp the owner fields", async () => {
+    // seed the owner stamp so the assertion below has something to defend: the owner stamp is
+    // what the client's owner-only read rule keys on, and letting a provider set it would
+    // re-point a conversation at another user.
+    await getFirestore().doc(kConversation).set({uid: "student-1"});
     await queueUserMessage("a provider reaching further");
-    // the owner stamp is what the client's owner-only read rule keys on; letting a provider set
-    // it would re-point a conversation at another user.
     const provider = fakeProvider([{assistantText: "reply", parentUpdate: {uid: "someone-else"}}]);
 
-    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow(/drain-owned/);
+    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow(/drain-owned parent fields: uid/);
 
     const parent = (await getFirestore().doc(kConversation).get()).data();
-    expect(parent?.uid).not.toBe("someone-else");
+    expect(parent?.uid).toBe("student-1");
   });
 
   it("commits nothing when the parent write fails after the provider already succeeded", async () => {
     await queueUserMessage("the turn works, the write does not");
-    // an undefined field the Firestore SDK rejects, so the parent write fails while the assistant
-    // doc and cursor in the SAME batch are already staged. Written sequentially the assistant doc
-    // would survive; batched, nothing does — which is what makes this test about atomicity rather
-    // than about failure handling.
+    // an undefined field the SDK rejects. WriteBatch.set() validates synchronously, so this
+    // throws while the batch is being assembled and commit() is never reached — nothing the
+    // drain staged reaches Firestore. What that pins is that the assistant doc is staged rather
+    // than written eagerly: the same provider against a drain that wrote sequentially would
+    // leave the reply behind.
     const provider = fakeProvider([
       {assistantText: "a reply that must not survive", parentUpdate: {bad: undefined as unknown as string}},
     ]);
@@ -189,5 +213,49 @@ describe("processAndDrain", () => {
     expect(assistants).toHaveLength(0);
     const parent = (await getFirestore().doc(kConversation).get()).data();
     expect(parent?.lastProcessedMessageId).toBeUndefined();
+  });
+});
+
+describe("acquireLock", () => {
+  const ownerFields = {uid: "student-1", context_id: "class-hash-1", problemPath: "sas/1/1"};
+  const parentRef = () => getFirestore().doc(kConversation);
+
+  it("admits the first caller and turns the next one away", async () => {
+    expect(await acquireLock(parentRef(), ownerFields)).toBe(true);
+
+    // single-in-flight: while the first invocation is still draining, a second trigger for the
+    // same conversation must back off rather than drain the same backlog alongside it
+    expect(await acquireLock(parentRef(), ownerFields)).toBe(false);
+  });
+
+  it("stamps the owner fields when it creates the parent, so the client can read status", async () => {
+    await acquireLock(parentRef(), ownerFields);
+
+    const parent = (await parentRef().get()).data();
+    expect(parent?.status).toBe("generating");
+    expect(parent?.uid).toBe("student-1");
+    expect(parent?.context_id).toBe("class-hash-1");
+  });
+
+  it("reclaims a lock whose owner crashed mid-drain", async () => {
+    // STALE_LOCK_MS is 5 minutes; a lock older than that belongs to an invocation that died
+    // without releasing it, and refusing to reclaim would wedge the conversation permanently
+    await parentRef().set({
+      status: "generating",
+      lockedAt: Timestamp.fromMillis(Date.now() - 6 * 60 * 1000),
+      ...ownerFields,
+    });
+
+    expect(await acquireLock(parentRef(), ownerFields)).toBe(true);
+  });
+
+  it("does not reclaim a lock that is merely recent", async () => {
+    await parentRef().set({
+      status: "generating",
+      lockedAt: Timestamp.fromMillis(Date.now() - 30 * 1000),
+      ...ownerFields,
+    });
+
+    expect(await acquireLock(parentRef(), ownerFields)).toBe(false);
   });
 });

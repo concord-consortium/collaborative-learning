@@ -1,8 +1,7 @@
 // The OpenAI tutor backend, behind the TutorProvider seam.
 //
-// This is the code that used to be the body of drain.ts's processUnit; it is unchanged in
-// behavior, only relocated so the drain engine no longer names a vendor. Conversation state
-// lives on OpenAI and its id is carried on the parent doc.
+// Conversation state lives on OpenAI; its id is carried on the parent doc, and the drain persists
+// that id only once this returns, so a turn that fails part-way leaves nothing recorded.
 import {DocumentData} from "firebase-admin/firestore";
 
 import {assembleTurnContext} from "./context-assembly";

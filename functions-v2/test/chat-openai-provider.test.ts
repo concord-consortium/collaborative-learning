@@ -1,12 +1,10 @@
-// Tests for the OpenAI tutor backend behind the TutorProvider seam.
+// Tests for the OpenAI tutor backend behind the TutorProvider seam: conversation creation,
+// install-once, the rule that parent state is earned only after a successful response, and the
+// conversation id and model actually reaching the OpenAI call.
 //
-// The drain suite injects a fake provider, which is what makes the drain testable — but it also
-// means nothing there exercises this adapter. These cover the boundary the refactor moved:
-// conversation creation, install-once, and the rule that parent state is earned only after a
-// successful response.
-//
-// The OpenAI module is mocked because the alternative is billing a real API call; every assertion
-// that can be made against the returned TurnResult is made there rather than against the mocks.
+// The OpenAI module is mocked because the alternative is billing a real API call. Assertions
+// prefer the returned TurnResult; the mocks are inspected only where the behavior is a call the
+// provider is supposed to make.
 import {createOpenAIProvider} from "../src/chat/openai-provider";
 import * as openai from "../src/chat/openai";
 
@@ -57,6 +55,12 @@ describe("createOpenAIProvider", () => {
     // an already-persisted conversationId is not re-reported
     expect(result.parentUpdate.conversationId).toBeUndefined();
     expect(result.parentUpdate.problemInstalled).toBeUndefined();
+    // the parent's conversation and the configured model are what reach OpenAI — the two pieces
+    // of plumbing the seam carries that the TurnResult cannot show
+    expect(createTutorResponse).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({conversationId: "conv_existing", model: "test-model"})
+    );
   });
 
   it("leaves problemInstalled unset when LEFT is empty, keeping the recovery path open", async () => {

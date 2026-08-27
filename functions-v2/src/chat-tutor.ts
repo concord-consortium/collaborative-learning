@@ -19,8 +19,9 @@
 //     ./chat/drain.ts (firebase-admin only, so that logic is emulator-testable without
 //     firebase-functions).
 //
-// This file is deliberately thin: it owns only the trigger registration + params/secret + path
-// parsing, and delegates every Firestore/OpenAI step to ./chat/drain.
+// This file is deliberately thin: it owns the trigger registration, the params/secret, the path
+// parsing, and the choice of which backend answers. The Firestore machinery lives in ./chat/drain
+// and the OpenAI calls in ./chat/openai-provider.
 import * as functionsV1 from "firebase-functions/v1";
 import {defineSecret, defineString} from "firebase-functions/params";
 import {getFirestore} from "firebase-admin/firestore";

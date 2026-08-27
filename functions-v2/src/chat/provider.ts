@@ -1,10 +1,10 @@
 // The contract between the drain engine and a tutor backend.
 //
-// Everything Firestore-shaped — the lock, the drain cursor, the atomic batch commit, the owner
-// fields — stays in drain.ts. A provider sees only the parent doc's current state plus the
-// triggering message, and returns what to persist. That split is what lets a second backend sit
-// alongside the OpenAI path without touching the machinery the CLUE-566 spec calls out as hard
-// to get right.
+// Everything Firestore-shaped — the lock, the drain cursor, the batch commit, the owner fields —
+// stays in drain.ts, which refuses a parentUpdate that reaches for any of them. A provider sees
+// only the parent doc's current state plus the triggering message, and returns what to persist.
+// That split is what lets a second backend sit alongside the OpenAI path without touching the
+// lock and cursor machinery.
 import {DocumentData} from "firebase-admin/firestore";
 
 export interface TurnResult {

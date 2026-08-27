@@ -1,7 +1,7 @@
 // Chat-tutor drain engine — the lock + drain + per-turn processing logic, separated from the
-// trigger wiring in ../chat-tutor.ts. This module imports firebase-admin (+ the chat helpers),
-// NOT firebase-functions, so the drain/lock logic is testable against the Firestore emulator
-// with a fake TutorProvider.
+// trigger wiring in ../chat-tutor.ts. This module imports firebase-admin and the TutorProvider
+// type, never firebase-functions, so the drain/lock logic runs against the Firestore emulator
+// with a fake provider and no trigger.
 //
 // Uses the modular firebase-admin/firestore imports (not admin.firestore.FieldValue etc.): the
 // functions emulator proxies the firebase-admin module and the namespace statics come through
@@ -38,45 +38,47 @@ export interface DrainContext {
   provider: TutorProvider;
 }
 
-export {TurnResult, TutorProvider} from "./provider";
+// The owner fields the client's rules require on any doc it reads. One list, because it feeds two
+// places that must not disagree: pickOwnerFields copies them onto function-written docs, and the
+// guard below refuses to let a provider set them. A field added here is protected in both.
+const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
 
 // Parent-doc fields the drain owns; a provider may write anything EXCEPT these.
 //
-// The seam's promise is that Firestore machinery stays here, but a provider returns a plain field
-// map that gets merged into the parent doc, so the promise needs enforcing rather than stating.
-// The lock is the sharp edge: acquireLock proceeds on any status that is not "generating", so a
-// provider writing status:"idle" would release the lock while its own invocation is still
-// draining and let a racing trigger process the same backlog concurrently. The owner stamp is
-// what the client's owner-only read rule keys on, and the cursor decides which messages are
-// already answered.
+// A provider returns a plain field map that gets merged into the parent doc, so the boundary needs
+// enforcing rather than stating. The lock is the sharp edge: acquireLock proceeds on any status
+// that is not "generating", so a provider writing status:"idle" would release the lock while its
+// own invocation is still draining and let a racing trigger process the same backlog concurrently.
+// The owner stamp is what the client's owner-only read rule keys on, and the cursor decides which
+// messages are already answered.
 //
 // Providers stay free to add their own fields (a session id, an install flag) without touching
 // this file — the rule is only that they cannot touch the drain's.
-const kDrainOwnedParentFields = new Set([
+const kDrainOwnedParentFields = new Set<string>([
   "status", "lockedAt", "error",
   "lastProcessedCreatedAt", "lastProcessedMessageId",
-  "uid", "context_id", "problemPath",
+  ...kOwnerFields,
 ]);
 
 // Throwing (rather than dropping the offending keys) is deliberate: a provider reaching for these
 // is a bug in that provider, and the catch in ../chat-tutor.ts turns this into status:"error"
 // with the cursor unadvanced, which is loud and recoverable. Silently filtering would leave the
-// provider believing it had persisted something.
-export function assertProviderOwnsFields(parentUpdate: Record<string, unknown>): void {
+// provider believing it had persisted something. The message names the offending fields so a
+// production log says which provider reached where.
+function assertProviderOwnsFields(parentUpdate: Record<string, unknown>): void {
   const trespassing = Object.keys(parentUpdate).filter((key) => kDrainOwnedParentFields.has(key));
   if (trespassing.length > 0) {
     throw new Error(`provider returned drain-owned parent fields: ${trespassing.join(", ")}`);
   }
 }
 
-// The owner fields the client's rules require on any doc it reads — copied off the triggering
-// message onto function-written docs (assistant messages, the function-created parent). This is
-// the only channel through which the parent gets its {uid, context_id, problemPath} stamp.
+// Copied off the triggering message onto function-written docs (assistant messages, the
+// function-created parent). This is the only channel through which the parent gets its stamp.
 export function pickOwnerFields(data: DocumentData | undefined): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  if (data?.uid !== undefined) out.uid = data.uid;
-  if (data?.context_id !== undefined) out.context_id = data.context_id;
-  if (data?.problemPath !== undefined) out.problemPath = data.problemPath;
+  for (const field of kOwnerFields) {
+    if (data?.[field] !== undefined) out[field] = data[field];
+  }
   return out;
 }
 
