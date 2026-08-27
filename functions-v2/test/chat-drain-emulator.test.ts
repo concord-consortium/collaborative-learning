@@ -130,6 +130,24 @@ describe("processAndDrain", () => {
     expect(assistants.map((d) => d.get("userText"))).toEqual(["r1", "r2", "r3"]);
   });
 
+  it("commits nothing when the parent write fails after the provider already succeeded", async () => {
+    await queueUserMessage("the turn works, the write does not");
+    // an undefined field the Firestore SDK rejects, so the parent write fails while the assistant
+    // doc and cursor in the SAME batch are already staged. Written sequentially the assistant doc
+    // would survive; batched, nothing does — which is what makes this test about atomicity rather
+    // than about failure handling.
+    const provider = fakeProvider([
+      {assistantText: "a reply that must not survive", parentUpdate: {bad: undefined as unknown as string}},
+    ]);
+
+    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow();
+
+    const assistants = (await readMessages()).filter((d) => d.get("kind") === "assistant");
+    expect(assistants).toHaveLength(0);
+    const parent = (await getFirestore().doc(kConversation).get()).data();
+    expect(parent?.lastProcessedMessageId).toBeUndefined();
+  });
+
   it("leaves the cursor unadvanced and writes nothing when the provider throws", async () => {
     await queueUserMessage("this turn fails");
     const provider: TutorProvider = {
