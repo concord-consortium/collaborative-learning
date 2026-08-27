@@ -416,10 +416,14 @@ ran against the requirements, and three against the implementation plan. The sig
 **Process / testing**
 - Parent conversation doc is created server-side by `acquireLock`; the client writes only message
   docs; the client parent-create rule is defensive (D-1).
-- Trigger/drain behavior is manual/observational for the spike — the rules harness can't run
-  triggers and the functions harness bypasses rules; automated coverage is the rules suite, the
-  pure `decideContext`/context-assembly unit tests, and the promoted focus-trap contract test
+- Trigger behavior is manual/observational for the spike — the rules harness can't run triggers
+  and the functions harness bypasses rules; automated coverage is the rules suite, the pure
+  `decideContext`/context-assembly unit tests, and the promoted focus-trap contract test
   (D-3/QA-1..5). A formal DoD checklist was declined by the project owner (PM finding, IC-6).
+  *(Superseded for the drain: extracting the provider seam made the lock, the cursor and the
+  batch commit reachable without the trigger or a real backend, and they are now covered by
+  `functions-v2/test/chat-drain-emulator.test.ts` against a firestore-only emulator with a fake
+  provider. The trigger wiring itself remains observational.)*
 - PII-to-OpenAI elevated to the headline risk: test accounts only; real-student piloting gated on
   the FERPA/PII + retention review.
 
@@ -427,7 +431,8 @@ ran against the requirements, and three against the implementation plan. The sig
 
 - Jest: client suites (chat-tutor modules, app-config, authoring page), `functions-v2`
   context-assembly suite, and the `firebase-test` chat rules suite (28 cases; firestore-only
-  emulator, serial jest).
+  emulator, serial jest). Later joined by the `functions-v2` drain and OpenAI-provider suites,
+  which cover the lock, the drain cursor and the batch commit directly.
 - Live emulator validation of the chat round-trip, lock behavior, and error path; browser
   (Playwright) validation of the authoring flow, draft preview, prompt append/replace, and
   fresh-conversation-on-edit (2026-07-09).
