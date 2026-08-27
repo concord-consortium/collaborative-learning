@@ -40,6 +40,35 @@ export interface DrainContext {
 
 export {TurnResult, TutorProvider} from "./provider";
 
+// Parent-doc fields the drain owns; a provider may write anything EXCEPT these.
+//
+// The seam's promise is that Firestore machinery stays here, but a provider returns a plain field
+// map that gets merged into the parent doc, so the promise needs enforcing rather than stating.
+// The lock is the sharp edge: acquireLock proceeds on any status that is not "generating", so a
+// provider writing status:"idle" would release the lock while its own invocation is still
+// draining and let a racing trigger process the same backlog concurrently. The owner stamp is
+// what the client's owner-only read rule keys on, and the cursor decides which messages are
+// already answered.
+//
+// Providers stay free to add their own fields (a session id, an install flag) without touching
+// this file — the rule is only that they cannot touch the drain's.
+const kDrainOwnedParentFields = new Set([
+  "status", "lockedAt", "error",
+  "lastProcessedCreatedAt", "lastProcessedMessageId",
+  "uid", "context_id", "problemPath",
+]);
+
+// Throwing (rather than dropping the offending keys) is deliberate: a provider reaching for these
+// is a bug in that provider, and the catch in ../chat-tutor.ts turns this into status:"error"
+// with the cursor unadvanced, which is loud and recoverable. Silently filtering would leave the
+// provider believing it had persisted something.
+export function assertProviderOwnsFields(parentUpdate: Record<string, unknown>): void {
+  const trespassing = Object.keys(parentUpdate).filter((key) => kDrainOwnedParentFields.has(key));
+  if (trespassing.length > 0) {
+    throw new Error(`provider returned drain-owned parent fields: ${trespassing.join(", ")}`);
+  }
+}
+
 // The owner fields the client's rules require on any doc it reads — copied off the triggering
 // message onto function-written docs (assistant messages, the function-created parent). This is
 // the only channel through which the parent gets its {uid, context_id, problemPath} stamp.
@@ -73,6 +102,7 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   // turns, so a provider's seq increment can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
   const {assistantText, parentUpdate} = await provider.processTurn(parent, data);
+  assertProviderOwnsFields(parentUpdate);
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
   // null-text assistant doc so the client's "awaiting" indicator clears.

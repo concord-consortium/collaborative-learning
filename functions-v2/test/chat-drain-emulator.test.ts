@@ -130,6 +130,31 @@ describe("processAndDrain", () => {
     expect(assistants.map((d) => d.get("userText"))).toEqual(["r1", "r2", "r3"]);
   });
 
+  it("refuses a provider that tries to release the drain's lock", async () => {
+    await queueUserMessage("a provider overreaching");
+    // status is drain-owned: acquireLock proceeds on anything that is not "generating", so a
+    // provider writing status:"idle" mid-drain would let a racing trigger start a second
+    // concurrent drain of the same backlog.
+    const provider = fakeProvider([{assistantText: "reply", parentUpdate: {status: "idle"}}]);
+
+    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow(/drain-owned/);
+
+    const assistants = (await readMessages()).filter((d) => d.get("kind") === "assistant");
+    expect(assistants).toHaveLength(0);
+  });
+
+  it("refuses a provider that tries to restamp the owner fields", async () => {
+    await queueUserMessage("a provider reaching further");
+    // the owner stamp is what the client's owner-only read rule keys on; letting a provider set
+    // it would re-point a conversation at another user.
+    const provider = fakeProvider([{assistantText: "reply", parentUpdate: {uid: "someone-else"}}]);
+
+    await expect(processAndDrain(makeCtx(provider))).rejects.toThrow(/drain-owned/);
+
+    const parent = (await getFirestore().doc(kConversation).get()).data();
+    expect(parent?.uid).not.toBe("someone-else");
+  });
+
   it("commits nothing when the parent write fails after the provider already succeeded", async () => {
     await queueUserMessage("the turn works, the write does not");
     // an undefined field the Firestore SDK rejects, so the parent write fails while the assistant

@@ -4,6 +4,10 @@ The functions are split into two folders `functions-v1` and `functions-v2`. This
 
 ## Available Functions
 
+Named below by their implementation name. Five of them are deployed under a `_v2` suffix — see the
+re-exports at the bottom of `src/index.ts` — and the suffixed name is what clients invoke and what
+the `deploy:` scripts target, so `getAiContent` is called as `getAiContent_v2`.
+
 |Function|Purpose|
 |--------|-------|
 |_onUserDocWritten_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
