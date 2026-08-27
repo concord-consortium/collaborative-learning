@@ -107,7 +107,7 @@
         "requiresVisualRepresentation": true
       },
       "handlerTier": "full",
-      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The production handler now emits a table of the drawing's objects, so the marker the default summary must carry is one of those object ids — the first column of that table — rather than a string in the tile's own content."
+      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The production handler now emits a table of the drawing's objects, so the marker the default summary must carry is one of those object ids — the first column of that table. This is the one fixture whose distinctiveString is therefore not its tile's fixtureMarker, which no summarizer emits."
     },
     "empty": {
       "expectDistinctiveInDefaultSummary": false,

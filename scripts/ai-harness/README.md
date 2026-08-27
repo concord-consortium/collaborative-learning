@@ -200,7 +200,7 @@ recorded runs further down this file used.
 | Variant | What it sends |
 |---|---|
 | `default` | `documentSummarizer(content, {})` — what production produces. |
-| `minimal` | No boilerplate, headers or row/column structure: the text content and nothing else. |
+| `minimal` | No boilerplate explanations, and no row or column structure: the section and tile summaries and nothing else. Each tile is summarized by the handler `default` uses, so a Drawing tile still arrives as the whole object table — `drawingToTable` does not read the `minimal` option, which is a gap in the summarizer rather than a choice this variant makes. |
 | `no-dataset-tables` | `default`, with each data set's *case data* left out. The heading, attributes table, formulas and case count stay, so the shape of the data is still described. A large table can be most of a document's summary, and whether a model needs the rows to categorize a design is worth measuring rather than assuming. |
 | `drawing-text` | `default`, with drawings described by the harness's own prototype serializer: each object's type, position and size, and any text object's own text. Written when the production handler said "This tile contains a drawing" and stopped. Production's `default` now emits a table of the drawing's objects instead (CLUE-646), so this is the earlier prototype, kept so the runs recorded with it stay comparable. |
 

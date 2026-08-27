@@ -72,7 +72,7 @@ export const textVariants: Record<string, TextVariant> = {
    * CLUE has since given the production handler an object table of its own, so `default` now
    * describes a drawing too and this is no longer the only text variant that carries what was
    * drawn. It is kept as the earlier prototype: runs recorded with it are still comparable, and
-   * `experiments/vibe-mixed-vs-baselines.json` names its run.
+   * `experiments/mixed-vs-baselines.json` names its `text-drawing-text` run.
    */
   "drawing-text": {
     id: "drawing-text",

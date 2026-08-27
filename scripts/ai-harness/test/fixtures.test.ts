@@ -18,6 +18,26 @@ function readDocument(docId: string): unknown {
   return JSON.parse(fs.readFileSync(path.join(documentsDir, `${docId}.json`), "utf8"));
 }
 
+/**
+ * The `id` of every object in every Drawing tile of a document, a group's members included.
+ *
+ * One entry per object rather than per id: an object that has no id has to show up here as a gap,
+ * since that is the thing the test below exists to catch.
+ */
+function drawingObjectIds(content: unknown): (string | undefined)[] {
+  const ids: (string | undefined)[] = [];
+  const walk = (objects: any[]) => objects.forEach((object) => {
+    ids.push(object?.id);
+    if (Array.isArray(object?.objects)) walk(object.objects);
+  });
+  for (const tile of Object.values<any>((content as any)?.tileMap ?? {})) {
+    if (tile?.content?.type === "Drawing" && Array.isArray(tile.content.objects)) {
+      walk(tile.content.objects);
+    }
+  }
+  return ids;
+}
+
 describe("the committed synthetic corpus", () => {
   it("has one document per file and one expectation per document", () => {
     const files = fs.readdirSync(documentsDir).filter((name) => name.endsWith(".json"))
@@ -46,9 +66,24 @@ describe("the committed synthetic corpus", () => {
     // The production summary of a Drawing tile is a table whose first column is each object's id.
     // A fixture object without one makes that column read "undefined", which is a gap in the
     // fixture rather than in the summarizer — real CLUE documents always store ids.
-    for (const docId of ["drawing", "mixed"]) {
-      const summary = textVariants.default.render(readDocument(docId));
-      expect({ docId, summary }).toEqual({ docId, summary: expect.not.stringContaining("undefined") });
+    //
+    // The documents are found rather than listed, so a third Drawing fixture added without ids
+    // fails here instead of sitting outside the check.
+    const withDrawings = docIds.filter((docId) =>
+      expectations.documents[docId].tileTypes.includes("Drawing"));
+    expect(withDrawings).not.toEqual([]);
+    for (const docId of withDrawings) {
+      const content = readDocument(docId);
+      const summary = textVariants.default.render(content);
+      const ids = drawingObjectIds(content);
+      expect({ docId, objects: ids.length }).not.toEqual({ docId, objects: 0 });
+      // Two separate ways to fail: an object with no id, and an id the summary never prints.
+      // Asking only that "undefined" is absent would pass just as well if the column disappeared.
+      expect({
+        docId,
+        withoutId: ids.filter((id) => !id).length,
+        missing: ids.filter((id) => id && !summary.includes(id))
+      }).toEqual({ docId, withoutId: 0, missing: [] });
     }
   });
 
