@@ -73,7 +73,7 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     await main(["represent", "--corpus", "smoke-corpus", "--variants", "default,minimal"], deps);
     const envelope = readRepresentation(representationPath(paths, "default", "text"));
     expect(envelope.variantId).toBe("default");
-    expect(envelope.variantVersion).toBe(1);
+    expect(envelope.variantVersion).toBe(2);
     expect(envelope.markdown).toContain("text-fixture-marker");
     expect(readRepresentation(representationPath(paths, "minimal", "text")).markdown).toContain("text-fixture-marker");
   });

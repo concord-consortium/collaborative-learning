@@ -38,6 +38,7 @@
         "type": "Drawing",
         "objects": [
           {
+            "id": "mixed-rect-1",
             "type": "rectangle",
             "x": 5,
             "y": 5,
@@ -49,6 +50,7 @@
             "strokeDashArray": "solid"
           },
           {
+            "id": "mixed-text-1",
             "type": "text",
             "x": 12,
             "y": 60,

@@ -191,16 +191,22 @@ Staleness is decided by the envelope, not by the file existing: a representation
 `sourceContentSha256` and `variantVersion` both still match. Each variant in `src/represent-text.ts`
 exports a `variantVersion` that is bumped whenever its output would change for the same input.
 
+Every text variant is at version 2, which is the summarizer as CLUE-646 left it: each tile carries a
+"This tile's id is …" line, and a Drawing tile is summarized as a table of its objects. Version 1 is
+the summarizer before that change, which is what the recorded runs further down this file used.
+
 | Variant | What it sends |
 |---|---|
 | `default` | `documentSummarizer(content, {})` — what production produces. |
 | `minimal` | No boilerplate, headers or row/column structure: the text content and nothing else. |
 | `no-dataset-tables` | `default`, with each data set's *case data* left out. The heading, attributes table, formulas and case count stay, so the shape of the data is still described. A large table can be most of a document's summary, and whether a model needs the rows to categorize a design is worth measuring rather than assuming. |
-| `drawing-text` | `default`, with drawings **described** instead of merely mentioned: each object's type, position and size, and any text object's own text. The default handler says "This tile contains a drawing" and stops, so a text run otherwise learns nothing about what was drawn — including text a student typed *inside* a drawing, which no other text variant carries. |
+| `drawing-text` | `default`, with drawings described by the harness's own prototype serializer: each object's type, position and size, and any text object's own text. Written when the production handler said "This tile contains a drawing" and stopped. Production's `default` now emits a table of the drawing's objects instead (CLUE-646), so this is the earlier prototype, kept so the runs recorded with it stay comparable. |
 
 `drawing-text` is a measurement prototype, not a good description: it reports geometry and does not
 interpret it, because interpreting the picture is what the model is being measured on. Beating it is
-the point, and a new variant is how someone shows they have.
+the point, and a new variant is how someone shows they have. It is no longer the only text variant
+that carries what a student drew — `default` describes a drawing too, in a different shape — but it
+is what the recorded runs below were produced with.
 
 **A text run reaches it only on a document that carries student text elsewhere**, which today means
 the geometry half is barely exercised. Skip-empty asks the classifier whether any tile holds

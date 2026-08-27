@@ -42,6 +42,16 @@ describe("the committed synthetic corpus", () => {
       .toEqual(expect.arrayContaining(["text-only", "visual-only", "mixed", "empty"]));
   });
 
+  it("gives every drawing object an id, so the object table has one to print", () => {
+    // The production summary of a Drawing tile is a table whose first column is each object's id.
+    // A fixture object without one makes that column read "undefined", which is a gap in the
+    // fixture rather than in the summarizer — real CLUE documents always store ids.
+    for (const docId of ["drawing", "mixed"]) {
+      const summary = textVariants.default.render(readDocument(docId));
+      expect({ docId, summary }).toEqual({ docId, summary: expect.not.stringContaining("undefined") });
+    }
+  });
+
   it("stands in for the Unknown registration with a type this build does not register", () => {
     const unknownFixture = expectations.documents.unknown;
     expect(unknownFixture).toBeDefined();
@@ -128,28 +138,30 @@ describe("the no-dataset-tables variant", () => {
 });
 
 describe("the drawing-text variant", () => {
+  // `drawing-text` is the prototype description of a drawing, written when production's summary of a
+  // Drawing tile was the one sentence "This tile contains a drawing." That default sentence has been
+  // replaced with a table of the drawing's objects, so `default` now describes a drawing too. The
+  // variant is kept as the earlier prototype, so recorded runs that used it can still be compared
+  // against — not as an improvement over `default`. These tests therefore say what the variant
+  // emits and nothing about what `default` does or does not say.
   const load = (docId: string) => JSON.parse(fs.readFileSync(
     path.join(harnessRoot, "examples", "synthetic-corpus", "documents", `${docId}.json`), "utf8"));
 
-  it("describes what the student drew, where `default` only says a drawing is there", () => {
+  it("describes a drawing's objects in words", () => {
     const summary = textVariants["drawing-text"].render(load("drawing"));
-    expect(textVariants.default.render(load("drawing"))).toContain("This tile contains a drawing.");
     // The fixture is a rectangle and an ellipse; the variant says so, with their geometry.
     expect(summary).toContain("2 objects (1 rectangle, 1 ellipse)");
     expect(summary).toContain("- rectangle at (10, 10), 120×60");
     expect(summary).toContain("- ellipse at (160, 40), radii 30×20");
   });
 
-  it("carries a drawing's text objects, which the default summary loses entirely", () => {
-    // The `mixed` fixture has a Drawing holding a text object. A text-only run against `default`
-    // never sees those words at all.
-    const summary = textVariants["drawing-text"].render(load("mixed"));
-    const fallback = textVariants.default.render(load("mixed"));
-    const drawnText = JSON.parse(fs.readFileSync(
-      path.join(harnessRoot, "examples", "synthetic-corpus", "documents", "mixed.json"), "utf8"))
-      .tileMap["mixed-drawing-tile"].content.objects.find((object: any) => object.type === "text").text;
+  it("carries a drawing's text objects", () => {
+    // The `mixed` fixture has a Drawing holding a text object.
+    const content = load("mixed");
+    const summary = textVariants["drawing-text"].render(content);
+    const drawnText = content.tileMap["mixed-drawing-tile"].content.objects
+      .find((object: any) => object.type === "text").text;
     expect(summary).toContain(drawnText);
-    expect(fallback).not.toContain(drawnText);
   });
 
   it("leaves every other tile type exactly as `default` renders it", () => {

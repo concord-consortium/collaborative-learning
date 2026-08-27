@@ -106,8 +106,8 @@
         "containsStudentText": false,
         "requiresVisualRepresentation": true
       },
-      "handlerTier": "stub",
-      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The stub handler emits one sentence — that weak summary is the measurement, not a failure."
+      "handlerTier": "full",
+      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The production handler describes the drawing as a table of its objects, one row each; the objects carry ids so that table's first column has something to print."
     },
     "empty": {
       "expectDistinctiveInDefaultSummary": false,
@@ -230,7 +230,7 @@
         "requiresVisualRepresentation": true
       },
       "handlerTier": "full",
-      "notes": "handlerTier describes the Text tile that carries the marker. The Drawing tile is stub tier, and its text object is what the drawing instance-level check looks for."
+      "notes": "handlerTier describes the Text tile that carries the marker. The Drawing tile is full tier as well: the production handler describes it as a table of its objects, and those objects carry ids so that table's first column has something to print. Its text object is what the drawing instance-level check looks for."
     },
     "numberline": {
       "expectDistinctiveInDefaultSummary": false,
