@@ -94,10 +94,10 @@
       "handlerTier": "fallback"
     },
     "drawing": {
-      "expectDistinctiveInDefaultSummary": false,
+      "expectDistinctiveInDefaultSummary": true,
       "defaultSummaryMustSucceed": true,
       "minimalSummaryMustSucceed": true,
-      "distinctiveString": "drawing-fixture-marker",
+      "distinctiveString": "drawing-rect-1",
       "computedModality": "visual-only",
       "tileTypes": [
         "Drawing"
@@ -107,7 +107,7 @@
         "requiresVisualRepresentation": true
       },
       "handlerTier": "full",
-      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The production handler describes the drawing as a table of its objects, one row each; the objects carry ids so that table's first column has something to print."
+      "notes": "No text objects, so the instance-level check keeps containsStudentText false. The production handler now emits a table of the drawing's objects, so the marker the default summary must carry is one of those object ids — the first column of that table — rather than a string in the tile's own content."
     },
     "empty": {
       "expectDistinctiveInDefaultSummary": false,

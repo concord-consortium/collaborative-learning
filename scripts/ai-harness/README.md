@@ -183,7 +183,7 @@ A production corpus arrives in three steps, and the third one is not optional:
 `represent` writes an envelope per (document, variant):
 
 ```json
-{ "schemaVersion": 1, "docId": "…", "variantId": "default", "variantVersion": 1,
+{ "schemaVersion": 1, "docId": "…", "variantId": "default", "variantVersion": 2,
   "sourceContentSha256": "…", "generatedAt": "…", "markdown": "…" }
 ```
 
@@ -191,9 +191,11 @@ Staleness is decided by the envelope, not by the file existing: a representation
 `sourceContentSha256` and `variantVersion` both still match. Each variant in `src/represent-text.ts`
 exports a `variantVersion` that is bumped whenever its output would change for the same input.
 
-Every text variant is at version 2, which is the summarizer as CLUE-646 left it: each tile carries a
-"This tile's id is …" line, and a Drawing tile is summarized as a table of its objects. Version 1 is
-the summarizer before that change, which is what the recorded runs further down this file used.
+Every text variant is at version 2 and carries CLUE-646's "This tile's id is …" line. The three that
+use production's Drawing handler — `default`, `minimal` and `no-dataset-tables` — also summarize a
+Drawing tile as a table of its objects; `drawing-text` replaces that handler with its own prototype
+serializer and so does not. Version 1 is the summarizer before those changes, which is what the
+recorded runs further down this file used.
 
 | Variant | What it sends |
 |---|---|
@@ -1020,7 +1022,9 @@ Milestone 1 (against
    derives that requirement from the handler tier (`full` or `partial`), but two fixtures have no
    place to put a marker the handler would emit: the placeholder handler returns an empty string, and
    the empty document is intentionally contentless. The flag defaults to the tier rule and is set
-   explicitly (with a `notes` line) where it cannot hold.
+   explicitly (with a `notes` line) where it cannot hold. The `drawing` fixture was a third such case
+   while its handler was a stub; that exemption is gone, because the handler now emits a table of the
+   drawing's objects and the fixture's marker is one of those object ids.
 7. **`historical` gained an optional `contentSha256`.** The spec fixes the historical record's shape
    without a hash of the input it ran against, which makes the "never compare unless the content hash
    matches" rule unenforceable. `historicalIsComparable` requires that field, so a record without it
