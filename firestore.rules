@@ -432,8 +432,11 @@ service cloud.firestore {
           let userId = string(request.auth.token.platform_user_id);
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
+          // The user's own key missing from the new map is the toggle-off case, which is allowed.
+          // When the key is present, its value must be one of the values the UI offers.
           return affectedFields.hasOnly(['ratings'])
-            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
+            && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
         }
 
         function isValidCommentUpdateRequest() {
@@ -606,8 +609,11 @@ service cloud.firestore {
           let userId = string(request.auth.token.platform_user_id);
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
+          // The user's own key missing from the new map is the toggle-off case, which is allowed.
+          // When the key is present, its value must be one of the values the UI offers.
           return affectedFields.hasOnly(['ratings'])
-            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
+            && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
         }
 
         function isValidCommentUpdateRequest() {
