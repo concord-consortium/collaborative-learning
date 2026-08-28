@@ -3,7 +3,7 @@ import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
-import { TutorProviderId } from "./tutor-provider";
+import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -27,10 +27,10 @@ export interface FirestoreTransportOptions {
   // unit-authored generic-prompt overrides; static for the page's lifetime (unit
   // config can't change without a reload, which rebuilds the transport)
   tutorPrompts?: TutorPrompts;
-  // which backend answers a turn, stamped on every message so the trigger (which can't
-  // read unit config) can route. Undefined means the default provider: the field is then
-  // omitted entirely rather than stamped with the default's name, so the docs a default
-  // conversation writes are byte-identical to what it wrote before this existed.
+  // which backend the conversation is stamped and partitioned by, carried on every message
+  // because the trigger can't read unit config. Undefined means the default provider: the
+  // field is then omitted entirely rather than stamped with the default's name, so the docs
+  // a default conversation writes are byte-identical to what it wrote before this existed.
   provider?: TutorProviderId;
 }
 
@@ -174,11 +174,8 @@ export class FirestoreTransport implements ChatTransport {
       message.leftContext = leftContext;
     }
     // Stamped on every message rather than only install-eligible ones, so the trigger can read it
-    // off whichever message it happens to be draining. Nothing reads it yet: the trigger builds an
-    // OpenAI backend unconditionally (chat-tutor.ts) and pickOwnerFields does not copy `provider`
-    // onto the parent, so a non-default provider changes the conversation id and this field and
-    // nothing else — the turn is still answered by OpenAI. Routing must persist the provider from
-    // the first message and ignore the field thereafter, or a mid-conversation flip splits one
+    // off whichever message it happens to be draining. Routing must persist it from the first
+    // message and ignore the field thereafter, or a mid-conversation flip splits one
     // conversation's state across two backends.
     if (provider) {
       message.provider = provider;
