@@ -119,6 +119,12 @@ which checks if the the aiEvaluation is set or if there are invisible exemplar d
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
 
+`chatTutorEnabled`: (boolean) If true, the AI chat tutor is enabled for students in this unit. The `chatTutor` URL param also enables it (so authors can preview it). Like other config this merges bottom-up (problem, then investigation, then unit), so a value set at a lower level overrides the unit's. Disabling preserves any `chatTutorPrompts` overrides.
+
+`chatTutorIntro`: (string) Optional per-unit intro message shown at the top of the chat tutor column. Display-only — it is never sent to the AI as context. Unset falls back to the built-in default; an empty string suppresses the intro entirely.
+
+`chatTutorPrompts`: (object) Optional per-unit AI chat tutor prompt overrides: `replaceGenericPrompt` swaps out the server's built-in generic tutor prompt; `appendToGenericPrompt` is added after the (possibly replaced) generic prompt.
+
 ```typescript
   disabledFeatures: string[];
   toolbar: SnapshotIn<typeof ToolbarModel>;
