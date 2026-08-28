@@ -1,4 +1,5 @@
 import { SnapshotIn, types } from "mobx-state-tree";
+import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ProblemConfiguration } from "./problem-configuration";
 import { ISortWorkConfig } from "./sort-work-config";
@@ -111,6 +112,12 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // server's built-in generic tutor prompt; appendToGenericPrompt is added after the
   // (possibly replaced) generic prompt
   chatTutorPrompts?: { replaceGenericPrompt?: string; appendToGenericPrompt?: string };
+  // which AI backend is selected for this unit's tutor turns. Only openai is implemented:
+  // the selection starts a separate conversation and is stamped on each message, but the
+  // server builds an OpenAI backend unconditionally, so setting anything else does not yet
+  // change which AI answers. Unset uses the default (openai); the chatProvider URL param
+  // overrides this so QA can flip a session without re-authoring.
+  chatTutorProvider?: TutorProviderId;
   // if true, the AI chat tutor is enabled for students in this unit. The chatTutor URL param also
   // enables it (so authors can preview it). Like other config this merges bottom-up (problem, then
   // investigation, then unit), so a value set at a lower level overrides the unit's. Disabling

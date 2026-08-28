@@ -1,3 +1,4 @@
+import { TutorProviderId } from "../../shared/chat-tutor-providers";
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
 import { PanelLayout } from "../models/stores/problem-configuration";
 import { DocFilterType, SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
@@ -54,6 +55,11 @@ export interface IUnitConfig extends IItemTemplateConfig {
   chatTutorPrompts?: IChatTutorPrompts;
   chatTutorEnabled?: boolean;
   chatTutorIntro?: string;
+  // Deliberately not offered by the Chat Tutor authoring page — the backend is a developer/QA
+  // choice, not a curriculum one. Declared anyway so this interface keeps describing the same
+  // shape as UnitConfiguration; the authoring workspace edits a draft of the parsed unit JSON,
+  // so the property round-trips a save whether or not it is listed here.
+  chatTutorProvider?: TutorProviderId;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;

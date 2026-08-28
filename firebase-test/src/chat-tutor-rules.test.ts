@@ -73,6 +73,26 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    // Both vocabulary entries, not just the interesting one: 'openai' is in the enum so the pin
+    // mirrors the shared list, and a pin that accidentally omitted it would reject the default
+    // provider's writes the moment anything started stamping it explicitly.
+    it("allows an optional provider naming a known backend", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToSucceed(db, `${kParentPath}/messages/msg-openai`,
+        specMessage({ add: { provider: "openai" } }));
+    });
+
+    // The enum pin, not just the whitelist: once the trigger routes on this field, an arbitrary
+    // provider string would send a paid turn to whatever its fallback happens to be. The trigger
+    // builds an OpenAI backend unconditionally today, so the pin is guarding the routing that
+    // arrives with the second backend rather than anything the server reads now.
+    it("rejects a provider outside the known set", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: "some-other-vendor" } }));
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: 42 } }));
+    });
+
     it("rejects non-string promptReplace/promptAppend", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { promptReplace: 42 } }));
@@ -262,6 +282,26 @@ describe("Firestore security rules: chat tutor", () => {
         demoMessage({ add: { promptReplace: 42 } }));
       await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-append`,
         demoMessage({ add: { promptAppend: ["x"] } }));
+    });
+
+    // The demo block is where a new provider gets exercised first, so whitelisting `provider`
+    // only under the authed block would break exactly the path it was added for — with a
+    // permission-denied that looks nothing like a config error. It carries the identical enum
+    // pin, so it gets the identical cases: a non-string would slip through an `is string`
+    // guard, which is the shape this pin would decay into if someone relaxed it, and asserting
+    // both vocabulary entries here is what catches a provider missing from BOTH rules blocks —
+    // tutor-provider-rules.test.ts compares the blocks to each other, so it sees nothing when
+    // they agree and the shared list is the thing that moved.
+    it("allows a known provider and rejects an unknown one", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-provider`,
+        demoMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-openai`,
+        demoMessage({ add: { provider: "openai" } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider`,
+        demoMessage({ add: { provider: "some-other-vendor" } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider-type`,
+        demoMessage({ add: { provider: 42 } }));
     });
 
     it("allows an authed demo user to read messages/parent, and rejects update/delete", async () => {

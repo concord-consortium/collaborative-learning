@@ -246,6 +246,26 @@ describe("ConfigurationManager", () => {
     });
   });
 
+  describe("chatTutorProvider", () => {
+    it("should return undefined when not configured", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      expect(appConfig.chatTutorProvider).toBeUndefined();
+    });
+
+    it("should return the configured value", () => {
+      const appConfig = AppConfigModel.create({
+        config: { ...unitConfigDefaults, chatTutorProvider: "foreverlearning" }
+      });
+      expect(appConfig.chatTutorProvider).toBe("foreverlearning");
+    });
+
+    it("should cascade from override configs", () => {
+      const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+      appConfig.setConfigs([{ chatTutorProvider: "foreverlearning" }]);
+      expect(appConfig.chatTutorProvider).toBe("foreverlearning");
+    });
+  });
+
   it("should return undefined for groupDocumentsEnabled when not configured", () => {
     const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
     expect(appConfig.groupDocumentsEnabled).toBeUndefined();
