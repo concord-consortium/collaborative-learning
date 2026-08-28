@@ -638,6 +638,58 @@ describe("functions", () => {
       });
     });
 
+    describe("a summary too large to store", () => {
+      test("is recorded as an error, and the picture still goes", async () => {
+        await givenDocument("big1", mixedDoc);
+        stubShutterbug(shutterbugOk());
+        jest.spyOn(summarizer, "documentSummarizer").mockReturnValue("x".repeat(300_000));
+
+        await runPending("big1");
+
+        const record = await imagedRecord("big1");
+        expect(record).toMatchObject({sendSummary: false, sendImage: true, summarizer: "image"});
+        expect(record?.summaryError).toContain("over the");
+        // Not stored, which is the point: the write that hands the document on has to succeed.
+        expect(record?.docSummary).toBeUndefined();
+        expectReasonsAreExclusive(record);
+      });
+
+      test("does not stop a failure record being written when the write itself fails", async () => {
+        // The recorder of last resort must not fail for the reason the work did. Here the first
+        // write is refused the way Firestore refuses an oversized document; the retry has to land
+        // and the pending entry has to go.
+        await givenDocument("bigfail1", emptyDoc);
+        const attempts: Record<string, unknown>[] = [];
+        const realCollection = admin.firestore().collection.bind(admin.firestore());
+        const collectionSpy = jest.spyOn(admin.firestore(), "collection")
+          .mockImplementation((path: string) => {
+            if (!path.endsWith("failedImaging")) return realCollection(path);
+            const real = realCollection(path);
+            return {
+              add: async (doc: Record<string, unknown>) => {
+                attempts.push(doc);
+                if (attempts.length === 1) throw new Error("document exceeds the maximum size");
+                return real.add(doc);
+              },
+            } as any;
+          });
+
+        await runPending("bigfail1");
+        collectionSpy.mockRestore();
+
+        expect(attempts).toHaveLength(2);
+        // The first attempt carried the accumulated fields; the retry carries none of them.
+        expect(attempts[0]).toHaveProperty("classification");
+        expect(attempts[1]).not.toHaveProperty("classification");
+
+        expect(await countIn("pending")).toEqual(0);
+        expect(await countIn("failedImaging")).toEqual(1);
+        const failed = await failedRecord();
+        expect(failed?.error).toContain("document has no student content");
+        expect(failed?.error).toContain("accumulated fields omitted");
+      });
+    });
+
     describe("the error boundary", () => {
       test("content that is not JSON is named as such", async () => {
         await givenDocument("bad1", "this is not JSON");

@@ -52,6 +52,13 @@ const functionTimeoutSeconds = 120;
 // megabyte of HTML, and all of it would otherwise land in the queue record.
 const maxErrorTextLength = 500;
 
+// The largest summary worth keeping. The queue record carries it to the next function and on into
+// `done`, beside the model's full response, and Firestore refuses a document over 1 MiB — so an
+// unbounded summary can fail the write that hands the document on. It would be unusable anyway:
+// anything near that size is past what gpt-4o-mini accepts. The largest summary any real document
+// in the evaluation corpora produces is about 36,000 bytes, so this leaves room to spare.
+const maxSummaryBytes = 200_000;
+
 function bounded(text: string) {
   return text.length > maxErrorTextLength ? `${text.slice(0, maxErrorTextLength)}…` : text;
 }
@@ -139,6 +146,11 @@ const pendingQueuePath = getAnalysisQueueFirestorePath("pending", "{docId}");
  * then as informative as a successful one, which is the difference between diagnosing a failure
  * from the record and having to reproduce it.
  *
+ * Never throws. It is the last thing standing between a failed document and a stranded queue
+ * entry, so a failure inside it is logged rather than raised: raising would escape the handler,
+ * leave `pending` untouched, and — with no retry configured — mean the document is never analyzed
+ * again, because later edits only update that entry and do not re-trigger this function.
+ *
  * @param {string} error what went wrong
  * @param {FirestoreEvent} event the pending-queue event being handled
  * @param {Partial<AnalysisImagedQueueDocument>} accumulated what had been worked out so far
@@ -150,13 +162,29 @@ async function error(
 ) {
   logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
-  await firestore.collection(getAnalysisQueueFirestorePath("failedImaging")).add({
-    ...event.data?.data(),
-    ...accumulated,
-    documentId: event.params.docId,
-    error,
-  });
-  await firestore.doc(event.document).delete();
+  const failedImaging = firestore.collection(getAnalysisQueueFirestorePath("failedImaging"));
+  const documentId = event.params.docId;
+  try {
+    await failedImaging.add({...event.data?.data(), ...accumulated, documentId, error});
+  } catch (err) {
+    // The record explaining a failure must not fail for the same reason the work did. An oversized
+    // summary is the case in mind: it would be spread into this write too, so the retry carries
+    // nothing over.
+    logger.warn("Could not record the accumulated fields, retrying without them", err);
+    try {
+      await failedImaging.add({
+        documentId,
+        error: `${error} (accumulated fields omitted: ${bounded(String(err))})`,
+      });
+    } catch (retryErr) {
+      logger.error("Could not write a failure record at all", retryErr);
+    }
+  }
+  try {
+    await firestore.doc(event.document).delete();
+  } catch (err) {
+    logger.error("Could not remove the pending queue entry, which will not be retried", err);
+  }
 }
 
 /**
@@ -290,6 +318,13 @@ export const onAnalysisDocumentPending =
         docSummary = documentSummarizer(content, {});
       } catch (err) {
         accumulated.summaryError = `summarizer error: ${err}`;
+      }
+      if (docSummary !== undefined && Buffer.byteLength(docSummary) > maxSummaryBytes) {
+        // Treated as a summarizer failure rather than a document failure: the picture may still
+        // carry the work, and one representation is better than none.
+        accumulated.summaryError =
+          `summary is ${Buffer.byteLength(docSummary)} bytes, over the ${maxSummaryBytes} byte limit`;
+        docSummary = undefined;
       }
       if (docSummary !== undefined) {
         accumulated.docSummary = docSummary;
