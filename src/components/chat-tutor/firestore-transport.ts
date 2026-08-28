@@ -173,22 +173,20 @@ export class FirestoreTransport implements ChatTransport {
     if (leftContext !== undefined) {
       message.leftContext = leftContext;
     }
-    // Stamped on every message rather than only install-eligible ones, so the trigger can read
-    // it off whichever message it happens to be draining.
-    //
-    // NOTE: nothing reads this yet. The trigger builds an OpenAI provider unconditionally
-    // (chat-tutor.ts) and pickOwnerFields does not copy `provider` onto the parent, so selecting
-    // a non-default provider today changes the conversation id and this field and nothing else —
-    // the turn is still answered by OpenAI. The routing arrives with the second provider that
-    // makes it meaningful. Whoever adds it should persist the provider from the first message and
-    // ignore the field thereafter, so a mid-conversation flip can't split one conversation's
-    // state across two backends — and should delete this note, which goes stale the moment the
-    // routing lands.
+    // Stamped on every message rather than only install-eligible ones, so the trigger can read it
+    // off whichever message it happens to be draining. Nothing reads it yet: the trigger builds an
+    // OpenAI backend unconditionally (chat-tutor.ts) and pickOwnerFields does not copy `provider`
+    // onto the parent, so a non-default provider changes the conversation id and this field and
+    // nothing else — the turn is still answered by OpenAI. Routing must persist the provider from
+    // the first message and ignore the field thereafter, or a mid-conversation flip splits one
+    // conversation's state across two backends.
     if (provider) {
       message.provider = provider;
     }
     // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
     // them only while installing the generic prompt, and ignores them afterwards).
+    // Provider-independent, which is why conversationDocId forks on the prompts key even
+    // under a non-default provider: whatever installs the prompt, it installs it once.
     if (decision.attachLeft) {
       if (tutorPrompts?.replace) message.promptReplace = tutorPrompts.replace;
       if (tutorPrompts?.append) message.promptAppend = tutorPrompts.append;

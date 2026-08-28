@@ -26,10 +26,12 @@ describe("conversationDocId", () => {
       .toBe("uid:123_docKey1_sas_1_2_vforeverlearning");
   });
 
-  // Prompt overrides are an OpenAI-path feature — the generic prompt has no equivalent on
-  // other providers — so a prompt edit must not pointlessly fork a non-OpenAI conversation.
-  it("ignores the prompts key when a non-default provider is given", () => {
+  // Both suffixes, in a fixed order. A non-default provider must not swallow the prompts
+  // key: the client attaches the authored prompts to install-eligible sends whatever the
+  // provider is, and the installed prompt is immutable, so dropping the key here would
+  // pin such a conversation to its first prompt forever with no way to reset it.
+  it("stacks the provider and prompts keys when both are given", () => {
     expect(conversationDocId("123", "docKey1", undefined, "sas/1/2", "abc123", "foreverlearning"))
-      .toBe("uid:123_docKey1_sas_1_2_vforeverlearning");
+      .toBe("uid:123_docKey1_sas_1_2_vforeverlearning_pabc123");
   });
 });

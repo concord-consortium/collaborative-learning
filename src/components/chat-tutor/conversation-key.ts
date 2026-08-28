@@ -1,3 +1,4 @@
+import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 import { escapeKey, networkDocumentKey } from "../../../shared/shared";
 
 // problemPath is slash-delimited (unitCode/inv/prob) and "/" is a Firestore path
@@ -15,13 +16,16 @@ import { escapeKey, networkDocumentKey } from "../../../shared/shared";
 // immutable for its lifetime and switching must land on a different doc. The default
 // (OpenAI) provider contributes nothing to the id — that carve-out is what keeps every
 // conversation created before provider selection existed resolving to the same doc.
-// A non-default provider drops promptsKey instead of stacking with it: prompt overrides
-// are OpenAI-only, so a prompt edit shouldn't fork a conversation that can't use them.
+//
+// The two suffixes stack rather than one masking the other. Both name something the
+// conversation was built with and cannot be re-made with, so each has to fork on its
+// own: whichever backend ends up answering, a prompt edit must not land on a
+// conversation whose prompt is already installed and immutable.
 export function conversationDocId(
   uid: string, documentKey: string, network: string | undefined, problemPath: string,
-  promptsKey?: string, provider?: string
+  promptsKey?: string, provider?: TutorProviderId
 ): string {
   const base = `${networkDocumentKey(uid, documentKey, network)}_${escapeKey(problemPath)}`;
-  if (provider) return `${base}_v${provider}`;
-  return promptsKey ? `${base}_p${promptsKey}` : base;
+  const withProvider = provider ? `${base}_v${provider}` : base;
+  return promptsKey ? `${withProvider}_p${promptsKey}` : withProvider;
 }
