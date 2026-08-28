@@ -418,21 +418,15 @@ service cloud.firestore {
           return userIsRequestUser() &&
                   // comments network must match network of parent document
                   (request.resource.data.network == getCurriculumNetwork()) &&
-                  request.resource.data.keys().hasAll(["name", "createdAt", "content", "network"]) &&
-                  // a comment can't be created carrying either frozen field
-                  !('ratings' in request.resource.data) &&
-                  !('agreeWithAi' in request.resource.data);
+                  request.resource.data.keys().hasAll(["name", "createdAt", "content", "network"]);
         }
 
-        // Two of these fields can change, and are listed here so that an edit to the comment can't
-        // carry a change to them. `ratings` changes only through isValidRatingUpdate, which limits a
+        // `ratings` can change, and is listed here so that an edit to the comment can't carry a
+        // rating change with it. Ratings change only through isValidRatingUpdate, which limits a
         // write to the requester's own key and to the values the UI offers — including when the
-        // requester wrote the comment. `agreeWithAi` is a legacy field with no legitimate
-        // rules-governed writer (the app posts comments through the postDocumentComment_v2 admin
-        // callable, which bypasses these rules); it stays frozen until the CLUE-645 cutover removes
-        // the function that consumes it.
+        // requester wrote the comment.
         function preservesReadOnlyCommentFields() {
-          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings", "agreeWithAi"].toSet();
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
@@ -605,21 +599,15 @@ service cloud.firestore {
           return userIsRequestUser() &&
                   // comment's network must match network of parent document
                   (request.resource.data.network == getDocumentNetwork()) &&
-                  request.resource.data.keys().hasAll(["name", "createdAt", "content"]) &&
-                  // a comment can't be created carrying either frozen field
-                  !('ratings' in request.resource.data) &&
-                  !('agreeWithAi' in request.resource.data);
+                  request.resource.data.keys().hasAll(["name", "createdAt", "content"]);
         }
 
-        // Two of these fields can change, and are listed here so that an edit to the comment can't
-        // carry a change to them. `ratings` changes only through isValidRatingUpdate, which limits a
+        // `ratings` can change, and is listed here so that an edit to the comment can't carry a
+        // rating change with it. Ratings change only through isValidRatingUpdate, which limits a
         // write to the requester's own key and to the values the UI offers — including when the
-        // requester wrote the comment. `agreeWithAi` is a legacy field with no legitimate
-        // rules-governed writer (the app posts comments through the postDocumentComment_v2 admin
-        // callable, which bypasses these rules); it stays frozen until the CLUE-645 cutover removes
-        // the function that consumes it.
+        // requester wrote the comment.
         function preservesReadOnlyCommentFields() {
-          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings", "agreeWithAi"].toSet();
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
