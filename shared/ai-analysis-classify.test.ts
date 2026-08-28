@@ -120,6 +120,71 @@ describe("whether the summary carries student work", () => {
   });
 });
 
+describe("whether the question itself needs a picture", () => {
+  const imageTile = { content: { type: "Image", url: "hinge-photo.png" } };
+
+  it("is true when a question's authored prompt is an image, and leaves everything else alone", () => {
+    // The failing case: the answer is text, so nothing student-authored needs a picture, and the
+    // prompt's own summary is empty — the model would be judging "Because it is stiff" without
+    // the question it answers.
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt-image"], ["answer"]]),
+      "prompt-image": imageTile,
+      answer: textTile("Because it is stiff")
+    });
+    const classification = classifyDocument(content);
+
+    expect(classification.promptNeedsImage).toBe(true);
+    // Everything the rest of the system reads is untouched: the prompt is still not student work,
+    // and the document is still grouped as text-only.
+    expect(classification.computedModality).toBe("text-only");
+    expect(classification.summaryCarriesStudentWork).toBe(true);
+    expect(classification.tiles.find((tile) => tile.tileId === "prompt-image"))
+      .toMatchObject({role: "prompt", hasStudentText: false, requiresVisualRepresentation: false});
+  });
+
+  it("does not rescue a document that is only an authored prompt", () => {
+    // No response rows, so there is no student work for a picture to be context for. The document
+    // is empty and gets turned away before either flag is consulted.
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt-image"]]),
+      "prompt-image": imageTile
+    });
+    const classification = classifyDocument(content);
+
+    expect(classification.promptNeedsImage).toBe(true);
+    expect(classification.computedModality).toBe("empty");
+    expect(classification.summaryCarriesStudentWork).toBe(false);
+  });
+
+  it("reads the tile type, not the instance flag the prompt has zeroed", () => {
+    // A Drawing prompt is a visual type too, even though its summary does carry its objects.
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt-drawing"], ["answer"]]),
+      "prompt-drawing": drawingTile([{ type: "rectangle" }]),
+      answer: textTile("Because it is stiff")
+    });
+    expect(classifyDocument(content).promptNeedsImage).toBe(true);
+  });
+
+  it("is false when the prompt needs no picture", () => {
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt-text"], ["answer"]]),
+      "prompt-text": textTile("Why did you choose that hinge?"),
+      answer: textTile("Because it is stiff")
+    });
+    expect(classifyDocument(content).promptNeedsImage).toBe(false);
+  });
+
+  it("is false for a document with no question at all", () => {
+    expect(classifyDocument(doc([[{ tileId: "t1" }]], { t1: textTile("hi") })).promptNeedsImage)
+      .toBe(false);
+    expect(classifyDocument(doc([[{ tileId: "d1" }]], { d1: drawingTile([{ type: "rectangle" }]) }))
+      .promptNeedsImage).toBe(false);
+    expect(classifyDocument({ rowOrder: [], rowMap: {}, tileMap: {} }).promptNeedsImage).toBe(false);
+  });
+});
+
 describe("instance-level checks", () => {
   it("counts a Text tile only when it has content after trimming", () => {
     expect(textTileHasContent({ type: "Text", format: "markdown", text: "hello" })).toBe(true);

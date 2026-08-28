@@ -18,6 +18,12 @@ export interface AnalysisClassification {
    */
   summaryCarriesStudentWork: boolean;
   needsImage: boolean;
+  /**
+   * Whether a picture is needed to make sense of the question rather than of the answer. A
+   * question's authored prompt can be an image, which no summary carries, so an answer sent
+   * without a screenshot would be judged without the question it answers.
+   */
+  promptNeedsImage: boolean;
 }
 
 /**

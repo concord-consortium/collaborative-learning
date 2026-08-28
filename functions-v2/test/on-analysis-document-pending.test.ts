@@ -140,6 +140,37 @@ const mixedDoc = docOf(sampleTile, drawingTile);
 // A Drawing tile with nothing in it: a full-fidelity handler with nothing to describe.
 const emptyDrawingDoc = docOf({...drawingTile, content: {...drawingTile.content, objects: []}});
 
+// A Question whose authored prompt is an Image, answered with text. The prompt contributes nothing
+// a summary can carry, so the screenshot is the only way the model sees the question.
+function imagePromptQuestionDoc(withResponse: boolean) {
+  const questionRows: Record<string, unknown> = {
+    "q-row-1": {id: "q-row-1", tiles: [{tileId: "prompt-image"}]},
+  };
+  const rowOrder = ["q-row-1"];
+  const tileMap: Record<string, unknown> = {
+    "q1": {
+      id: "q1",
+      content: {type: "Question", questionId: "Q-1", rowOrder, rowMap: questionRows},
+    },
+    "prompt-image": {id: "prompt-image", content: {type: "Image", url: "hinge-photo.png"}},
+  };
+  if (withResponse) {
+    rowOrder.push("q-row-2");
+    questionRows["q-row-2"] = {id: "q-row-2", tiles: [{tileId: "answer"}]};
+    tileMap.answer = {
+      id: "answer",
+      content: {type: "Text", format: "markdown", text: "Because it is stiff"},
+    };
+  }
+  return JSON.stringify({
+    rowMap: {"row-1": {id: "row-1", isSectionHeader: false, tiles: [{tileId: "q1"}]}},
+    rowOrder: ["row-1"],
+    tileMap,
+    sharedModelMap: {},
+    annotations: {},
+  });
+}
+
 // A Text tile whose text is empty: nothing to evaluate.
 const emptyDoc = docOf({
   ...sampleTile,
@@ -276,7 +307,8 @@ describe("functions", () => {
           sendImage: true,
           docImageUrl: kImageUrl,
           classification: {
-            modality: "mixed", hasStudentText: true, summaryCarriesStudentWork: true, needsImage: true,
+            modality: "mixed", hasStudentText: true, summaryCarriesStudentWork: true,
+            needsImage: true, promptNeedsImage: false,
           },
           renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
           summarizer: "image",
@@ -301,7 +333,8 @@ describe("functions", () => {
           sendImage: false,
           imageOmittedReason: "no-visual-content",
           classification: {
-            modality: "text-only", hasStudentText: true, summaryCarriesStudentWork: true, needsImage: false,
+            modality: "text-only", hasStudentText: true, summaryCarriesStudentWork: true,
+            needsImage: false, promptNeedsImage: false,
           },
           summarizer: "text",
         });
@@ -327,7 +360,7 @@ describe("functions", () => {
           // The record says which of those the send decision was made from.
           classification: {
             modality: "visual-only", hasStudentText: false, summaryCarriesStudentWork: true,
-            needsImage: true,
+            needsImage: true, promptNeedsImage: false,
           },
           summarizer: "image",
         });
@@ -370,7 +403,8 @@ describe("functions", () => {
         expect(failed).toMatchObject({
           analysisVersion: 2,
           classification: {
-            modality: "empty", hasStudentText: false, summaryCarriesStudentWork: false, needsImage: false,
+            modality: "empty", hasStudentText: false, summaryCarriesStudentWork: false,
+            needsImage: false, promptNeedsImage: false,
           },
           renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
@@ -405,6 +439,42 @@ describe("functions", () => {
           `Document unit null is not usable for rendering, using "${fallbackClueUnit}"`);
         // The render was posted with the fallback unit, not the null one.
         expect(shutterbug.postedPage()).toContain(`?unit=${fallbackClueUnit}&amp;unwrapped&amp;readOnly"`);
+      });
+
+      test("a question whose prompt is a picture is screenshotted for the answer's sake", async () => {
+        // Nothing student-authored needs a picture here — the answer is text. Without the
+        // screenshot the model would judge "Because it is stiff" against an empty prompt, because
+        // an Image tile's summary carries nothing.
+        await givenDocument("imgq1", imagePromptQuestionDoc(true));
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("imgq1");
+
+        const record = await imagedRecord("imgq1");
+        expect(record).toMatchObject({
+          sendSummary: true,
+          sendImage: true,
+          docImageUrl: kImageUrl,
+          summarizer: "image",
+          classification: {
+            modality: "text-only", hasStudentText: true, summaryCarriesStudentWork: true,
+            needsImage: false, promptNeedsImage: true,
+          },
+        });
+        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
+        expectReasonsAreExclusive(record);
+      });
+
+      test("a picture prompt with no answer is still an empty document", async () => {
+        // A picture of the question is context for student work, never a substitute for it.
+        await givenDocument("imgq2", imagePromptQuestionDoc(false));
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("imgq2");
+
+        expect(await countIn("imaged")).toEqual(0);
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+        expect((await failedRecord())?.error).toEqual("document has no student content");
       });
 
       test("the mock evaluator produces nothing at all", async () => {

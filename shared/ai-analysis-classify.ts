@@ -173,6 +173,16 @@ export interface ClassifiedTile {
 export interface DocumentClassification {
   computedModality: Modality;
   /**
+   * Whether a picture is needed to make sense of the *question*, rather than of the answer.
+   *
+   * A question's authored prompt is not student work, so every per-tile flag is zeroed for it and
+   * stays zeroed. That is the right answer to "is this student work?" and the wrong one to "does
+   * this request need a picture?": an Image tile used as a prompt contributes nothing a summary can
+   * carry, so an answer sent without it is judged without the question it answers. Read from the
+   * tile *type*, since the instance flag is deliberately zeroed for prompts.
+   */
+  promptNeedsImage: boolean;
+  /**
    * Whether sending the summary would put any student work in front of the model. This is what
    * decides whether the summary is sent; `computedModality` groups documents for reporting and is
    * deliberately left alone.
@@ -291,6 +301,8 @@ export function classifyDocument(content: any): DocumentClassification {
     : "empty";
 
   const summaryCarriesStudentWork = tiles.some((tile) => tile.carriesStudentWork);
+  const promptNeedsImage = tiles.some((tile) =>
+    tile.role === "prompt" && tile.capability.requiresVisualRepresentation);
 
-  return { computedModality, summaryCarriesStudentWork, tiles, warnings };
+  return { computedModality, summaryCarriesStudentWork, promptNeedsImage, tiles, warnings };
 }

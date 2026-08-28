@@ -266,8 +266,10 @@ export const onAnalysisDocumentPending =
       const hasStudentText = classified.tiles.some((tile) => tile.hasStudentText);
       const summaryCarriesStudentWork = classified.summaryCarriesStudentWork;
       const needsImage = classified.tiles.some((tile) => tile.requiresVisualRepresentation);
+      const promptNeedsImage = classified.promptNeedsImage;
       accumulated.classification = {
         modality: classified.computedModality, hasStudentText, summaryCarriesStudentWork, needsImage,
+        promptNeedsImage,
       };
 
       // 2. An empty document is not evaluated. The summarizer always emits a preamble, headings
@@ -303,7 +305,14 @@ export const onAnalysisDocumentPending =
 
       // 4. Screenshot. A failure here is recorded and the document carries on with whatever else
       //    it has; only step 5 decides whether that is enough.
-      if (!needsImage) {
+      // A picture is worth taking when the student's own work needs one, and also when the
+      // question does: an image used as a question prompt contributes nothing a summary can carry,
+      // so an answer sent without it would be judged without the question it answers. The second
+      // case needs student work to be context *for* — a picture of a prompt is never a substitute
+      // for an answer, and a document holding only an authored prompt was turned away as empty
+      // above.
+      const wantsImage = needsImage || (summaryCarriesStudentWork && promptNeedsImage);
+      if (!wantsImage) {
         // Asked first, so a document that has no use for a screenshot never reads the switch.
         accumulated.sendImage = false;
         accumulated.imageOmittedReason = "no-visual-content";
