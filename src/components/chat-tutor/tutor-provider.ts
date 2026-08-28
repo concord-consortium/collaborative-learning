@@ -27,3 +27,14 @@ export function resolveTutorProvider(
 export function nonDefaultTutorProvider(provider: TutorProviderId): TutorProviderId | undefined {
   return provider === kDefaultTutorProvider ? undefined : provider;
 }
+
+// The two steps composed: precedence first, then the default carve-out. Callers want the
+// value to stamp and mix into the conversation id, never the resolved-but-not-yet-carved-out
+// one, so this is the entry point the sidebar uses. Composing here rather than at the call
+// site is what makes the argument order testable — swapping the two at the call site would
+// silently invert the documented param-over-config precedence.
+export function sessionTutorProvider(
+  paramValue: string | undefined, configValue: string | undefined
+): TutorProviderId | undefined {
+  return nonDefaultTutorProvider(resolveTutorProvider(paramValue, configValue));
+}

@@ -1,4 +1,4 @@
-import { nonDefaultTutorProvider, resolveTutorProvider } from "./tutor-provider";
+import { nonDefaultTutorProvider, resolveTutorProvider, sessionTutorProvider } from "./tutor-provider";
 
 describe("resolveTutorProvider", () => {
   it("defaults to openai when neither the param nor the config selects one", () => {
@@ -34,5 +34,26 @@ describe("nonDefaultTutorProvider", () => {
 
   it("is the provider id for a non-default provider", () => {
     expect(nonDefaultTutorProvider("foreverlearning")).toBe("foreverlearning");
+  });
+});
+
+describe("sessionTutorProvider", () => {
+  // Argument order is the whole point of testing the composition: the two parameters have
+  // the same type, so swapping them at the call site inverts precedence with nothing to
+  // catch it. These two cases disagree on the answer if the order is wrong.
+  it("takes the query param over the unit config", () => {
+    expect(sessionTutorProvider("foreverlearning", "openai")).toBe("foreverlearning");
+  });
+
+  it("is undefined when the query param selects the default over the unit config", () => {
+    expect(sessionTutorProvider("openai", "foreverlearning")).toBeUndefined();
+  });
+
+  it("is undefined when neither selects a provider", () => {
+    expect(sessionTutorProvider(undefined, undefined)).toBeUndefined();
+  });
+
+  it("uses the unit config when no query param is given", () => {
+    expect(sessionTutorProvider(undefined, "foreverlearning")).toBe("foreverlearning");
   });
 });
