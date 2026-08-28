@@ -1,10 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
+import { getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
+import { Logger } from "../lib/logger";
+import { SectionModel } from "../models/curriculum/section";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
+import { ProblemDocument } from "../models/document/document-types";
 import { ToolbarModel, IToolbarModelSnapshot } from "../models/stores/problem-configuration";
 import { specStores } from "../models/stores/spec-stores";
 import { ToolbarComponent } from "./toolbar";
@@ -158,6 +162,84 @@ describe("ToolbarComponent", () => {
       fireEvent.keyDown(toolbar, { key: "End" });
       fireEvent.keyDown(toolbar, { key: "ArrowDown" });
       expect(window.document.activeElement).toBe(lastButton);
+    });
+  });
+
+  // A section toolbar has no document of its own, and the primary workspace document it copies
+  // into is not available for a window after load. Buttons must report that accurately: a click
+  // on a button whose action cannot run is discarded without feedback.
+  describe("section toolbar button state without a primary document", () => {
+
+    const selectedTileId = "selected-tile";
+
+    const copyConfig: IToolbarModelSnapshot = [
+      { id: "copyToWorkspace", title: "Copy to Workspace", iconId: "icon-copy-to-workspace-tool",
+        isDefault: false, isTileTool: false },
+      { id: "copyToDocument", title: "Copy to Document", iconId: "icon-copy-to-document-tool",
+        isDefault: false, isTileTool: false },
+      { id: "edit", title: "Edit", iconId: "icon-edit-tool", isDefault: false, isTileTool: false }
+    ];
+
+    // "none": no primary document key at all, as on first load.
+    // "keyOnly": a key has been chosen but the document has not finished loading into the store.
+    // "loaded": the document is available and can actually be copied into.
+    type PrimaryState = "none" | "keyOnly" | "loaded";
+
+    const renderSectionToolbar = (primary: PrimaryState) => {
+      const testStores = specStores();
+      const sectionContent = DocumentContentModel.create({
+        tileMap: { [selectedTileId]: { id: selectedTileId, content: { type: "Unknown" } } }
+      });
+      const section = SectionModel.create({
+        type: "introduction",
+        content: getSnapshot(sectionContent)
+      });
+      testStores.ui.selectAllTiles([selectedTileId]);
+
+      if (primary !== "none") {
+        const primaryDocument = createDocumentModel({
+          type: ProblemDocument, uid: "1", key: "primary-doc", createdAt: 1, content: {}
+        });
+        if (primary === "loaded") {
+          testStores.documents.add(primaryDocument);
+        }
+        // setPrimaryDocument logs a document event, which needs logger context to resolve the user
+        Logger.initializeLogger(testStores);
+        testStores.persistentUI.problemWorkspace.setPrimaryDocument(primaryDocument);
+      }
+
+      render(
+        <ModalProvider>
+          <Provider stores={testStores}>
+            <ToolbarComponent toolbarModel={ToolbarModel.create(copyConfig)} section={section} />
+          </Provider>
+        </ModalProvider>
+      );
+    };
+
+    it("disables Copy to Workspace while there is no primary document key", () => {
+      renderSectionToolbar("none");
+      expect(screen.getByTestId("tool-copytoworkspace")).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("disables Copy to Workspace while the primary document has not finished loading", () => {
+      renderSectionToolbar("keyOnly");
+      expect(screen.getByTestId("tool-copytoworkspace")).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("enables Copy to Workspace once the primary document is loaded", () => {
+      renderSectionToolbar("loaded");
+      expect(screen.getByTestId("tool-copytoworkspace")).not.toHaveAttribute("aria-disabled");
+    });
+
+    it("leaves Copy to Document enabled, since it does not copy to the primary document", () => {
+      renderSectionToolbar("none");
+      expect(screen.getByTestId("tool-copytodocument")).not.toHaveAttribute("aria-disabled");
+    });
+
+    it("does not treat a section as the primary document when neither has a key", () => {
+      renderSectionToolbar("none");
+      expect(screen.getByTestId("tool-edit")).not.toHaveAttribute("aria-disabled");
     });
   });
 
