@@ -100,9 +100,9 @@ npx tsx harness.ts review    --results data/results/synthetic-corpus__text-basel
 
 Flags are plain `--name value` pairs. An unknown flag is an error, not a warning.
 
-`plan` on the committed synthetic corpus projects a worst case of about **$0.03** for both text
-baselines — 14 calls, because skip-empty sends a text run only the documents that carry
-student-authored text (7 of 26), and records the other 19 as skipped rows. Image runs send every
+`plan` on the committed synthetic corpus projects a worst case of about **$0.04** for both text
+baselines — 18 calls, because skip-empty sends a text run only the documents whose summary carries
+student work (9 of 26), and records the other 17 as skipped rows. Image runs send every
 document that has any content at all, so they are both larger and dominated by image tokens; run
 `plan` after rendering to see the figure for a particular mode and image set, since a per-tile set
 multiplies the count. The reservation assumes every retry is used.
@@ -210,14 +210,24 @@ the point, and a new variant is how someone shows they have. It is no longer the
 that carries what a student drew — `default` describes a drawing too, in a different shape — but it
 is what the recorded runs below were produced with.
 
-**A text run reaches it only on a document that carries student text elsewhere**, which today means
-the geometry half is barely exercised. Skip-empty asks the classifier whether any tile holds
-student-authored text, and a Drawing tile counts only when it has a text object with something in it
-(`drawingTileHasText` in `shared/ai-analysis-classify.ts`) — so the `drawing` fixture, two shapes
-and no text, is skipped by a text-only run before the variant is consulted. Of the two fixtures with Drawing tiles,
-only `mixed` is sent, and that one has a Text tile as well. The variant's own summary of a drawing
-*is* student content, so the skip is asking the wrong question for this combination; the decision is
-made from the classifier alone and knows nothing about which variant is about to run.
+**A text run now reaches it on a drawing-only document, which it did not used to.** Skip-empty
+asked whether any tile held student-authored *text*, and a Drawing tile counts as holding text only
+when it has a text object with something in it (`drawingTileHasText` in
+`shared/ai-analysis-classify.ts`) — so the `drawing` fixture, two shapes and no text, was skipped by
+a text-only run before the variant was ever consulted, and only `mixed` reached it, which has a Text
+tile as well. That was the skip asking the wrong question: the variant's summary of a drawing *is*
+student content.
+
+CLUE-646 made the same true of `default`, and the rule changed with it. Skip-empty now asks
+`summaryCarriesStudentWork`, which counts a drawing that holds objects whether or not any of them
+are text, so both fixtures with Drawing tiles reach a text-only run. The decision is still made from
+the classifier alone and still knows nothing about which variant is about to run — it no longer
+needs to, because the two variants now agree about this document.
+
+The variant hook that papered over the old gap is still there: a variant may declare
+`findsStudentContentWithoutText`, and the skip check ORs it with the classifier's answer.
+`drawing-text` still declares it, which is now redundant for drawings and kept because a future
+variant could find content the classifier does not look for.
 
 Two further ways to shrink a data set — sending a fixed sample of cases, and sending aggregate
 statistics — are named in the plan and not built. Both are variants of their own when someone wants
@@ -508,11 +518,15 @@ The authoritative tile-type list is `shared/tile-types.ts`. `test/tile-types.tes
 `src/register-tile-types.ts` as text and fails if the two drift apart, so registering a new tile type
 also forces a capability record for it.
 
-Classification of a real document adds instance-level checks: a Text tile counts as text only when
-its content is non-empty after trimming, and a Drawing tile counts as containing student text only
-when it has text objects with content. Question tiles are traversed into: the authored prompt is not
-student work, response tiles classify by their own types, missing references are skipped with a
-warning, a tile referenced twice counts once, and nesting is capped at 8 levels.
+Classification of a real document adds instance-level checks, but only for two types: a Text tile
+counts as text only when its content is non-empty after trimming, and a Drawing tile counts as
+containing student text only when it has text objects with content. The other types that claim
+student text — Table and Dataflow — are taken at their type's word, so an empty one still counts.
+See "Which documents a run declines to send" for what that means in practice.
+
+Question tiles are traversed into: the authored prompt is not student work, response tiles classify
+by their own types, missing references are skipped with a warning, a tile referenced twice counts
+once, and nesting is capped at 8 levels.
 
 ### Prompts
 
@@ -593,11 +607,18 @@ judgement about how to group a result, not a claim about what the document conta
 - **`text-only`** skips a document whose summary would carry no student work — the thing a text run
   measures. That question is broader than "does a tile hold typed text". A tile also counts when its
   summarizer describes it in detail (a `full` or `partial` handler) *and* it actually holds
-  something to describe: a drawing with at least one object, a graph with at least one layer, a
-  dataflow with a wired program. An empty tile of such a type does not count, and neither does a
-  `stub` or `fallback` type, whose summary is a sentence or a property dump. This is production's
-  rule, in `summaryCarriesStudentWork` on the shared classifier, and the harness reads the same
-  field so a run measures the request production would actually send.
+  something to describe: a drawing with at least one object, a graph with at least one layer. A
+  `stub` or `fallback` type never counts, whatever it holds; its summary is a sentence or a property
+  dump. This is production's rule, in `summaryCarriesStudentWork` on the shared classifier, and the
+  harness reads the same field so a run measures the request production would actually send.
+
+  **Table and Dataflow are exceptions: they count even when empty.** Both are marked as holding
+  student-authored text at the type level, and unlike Text and Drawing that mark is never narrowed
+  per instance — so the first half of the rule answers `true` before the "does it hold anything"
+  check is reached. An empty Dataflow canvas and a Table with no data set therefore send a summary
+  that describes little more than the tile's presence. That is pre-existing rather than something
+  the rule introduced, and narrowing it would move such documents between modalities, which would
+  reclassify recorded results; it is logged with the thin-summary work instead.
 - **`mixed`** sends a document whose summary carries no student work *without* its summary and
   related summaries, and records `textPartOmitted` on the row. The picture still has something to
   say, so skipping it would throw away the answer this shape exists to get.
