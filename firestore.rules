@@ -729,9 +729,12 @@ service cloud.firestore {
           // leftContext, they are client-supplied text sent to the model at developer authority
           // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
           // provider selects the AI backend. Unlike the fields above it is pinned to an ENUM, not
-          // just a type: the trigger routes on it, so an arbitrary string would decide where a
-          // paid turn goes. Keep the list in lockstep with kTutorProviders in
-          // shared/chat-tutor-providers.ts, and with the identical pin in the demo block below.
+          // just a type: once the trigger routes on this field an arbitrary string would decide
+          // where a paid turn goes. The trigger builds an OpenAI backend unconditionally today,
+          // so the field is inert on the server and the pin is guarding the routing that comes
+          // with the second backend. Keep the list in lockstep with kTutorProviders in
+          // shared/chat-tutor-providers.ts, and with the identical pin in the demo block below —
+          // src/components/chat-tutor/tutor-provider-rules.test.ts fails if either drifts.
           // The client omits the field entirely for the default provider, so most messages carry
           // no provider at all; 'openai' is accepted so the enum mirrors the shared list.
           function chatMessageCreate() {
@@ -827,9 +830,10 @@ service cloud.firestore {
     // transcript and the drain cursor. The parent doc is server-created (admin SDK bypasses rules).
     match /demo/{demoName}/chatTutor/{conversationId} {
       // The provider whitelist and enum pin must match the authed block's chatMessageCreate
-      // exactly. This root is where a new provider is exercised first — the chatProvider URL
-      // param is a dev/qa tool — so whitelisting it only under authed would break precisely the
-      // path it was added for, with a permission-denied that reads nothing like a config error.
+      // exactly (tutor-provider-rules.test.ts fails if they drift). This root is where a new
+      // provider gets exercised first, so whitelisting it only under authed would break
+      // precisely the path it was added for, with a permission-denied that reads nothing like
+      // a config error.
       function demoChatMessageCreate() {
         let data = request.resource.data;
         return isAuthed() &&

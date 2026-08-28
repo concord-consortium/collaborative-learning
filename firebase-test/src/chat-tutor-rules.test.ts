@@ -73,13 +73,20 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    // Both vocabulary entries, not just the interesting one: 'openai' is in the enum so the pin
+    // mirrors the shared list, and a pin that accidentally omitted it would reject the default
+    // provider's writes the moment anything started stamping it explicitly.
     it("allows an optional provider naming a known backend", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToSucceed(db, kMessagePath, specMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToSucceed(db, `${kParentPath}/messages/msg-openai`,
+        specMessage({ add: { provider: "openai" } }));
     });
 
-    // The enum pin, not just the whitelist: an arbitrary provider string would route a paid turn
-    // to whatever the trigger's fallback happens to be, so the value is constrained here too.
+    // The enum pin, not just the whitelist: once the trigger routes on this field, an arbitrary
+    // provider string would send a paid turn to whatever its fallback happens to be. The trigger
+    // builds an OpenAI backend unconditionally today, so the pin is guarding the routing that
+    // arrives with the second backend rather than anything the server reads now.
     it("rejects a provider outside the known set", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: "some-other-vendor" } }));
@@ -277,15 +284,19 @@ describe("Firestore security rules: chat tutor", () => {
         demoMessage({ add: { promptAppend: ["x"] } }));
     });
 
-    // The demo block is where a new provider gets exercised first (the chatProvider param is a
-    // qa/dev tool), so whitelisting `provider` only under the authed block would break exactly
-    // the path it was added for — with a permission-denied that looks nothing like a config error.
+    // The demo block is where a new provider gets exercised first, so whitelisting `provider`
+    // only under the authed block would break exactly the path it was added for — with a
+    // permission-denied that looks nothing like a config error. The demo block carries the
+    // identical enum pin, so it gets the identical cases: a non-string would slip through an
+    // `is string` guard, which is the shape this pin would decay into if someone relaxed it.
     it("allows a known provider and rejects an unknown one", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-provider`,
         demoMessage({ add: { provider: "foreverlearning" } }));
       await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider`,
         demoMessage({ add: { provider: "some-other-vendor" } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider-type`,
+        demoMessage({ add: { provider: 42 } }));
     });
 
     it("allows an authed demo user to read messages/parent, and rejects update/delete", async () => {
