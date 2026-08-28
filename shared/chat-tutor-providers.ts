@@ -7,6 +7,9 @@
 // A fourth place can't import it: the enum pin in the chatTutor rules blocks. Adding a provider
 // here means editing BOTH rules blocks — authed and demo — or every message write under the new
 // provider fails with permission-denied, and demo/qa is where a new provider gets exercised first.
+// src/components/chat-tutor/tutor-provider-rules.test.ts fails if either block drifts from this
+// list; the accept cases in firebase-test/src/chat-tutor-rules.test.ts are what catch an entry
+// added here and missed in both.
 export const kTutorProviders = ["openai", "foreverlearning"] as const;
 
 export type TutorProviderId = typeof kTutorProviders[number];

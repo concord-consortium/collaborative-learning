@@ -8,7 +8,8 @@ jest.mock("firebase/app", () => ({
 }));
 
 import { FirestoreTransport } from "./firestore-transport";
-import { TutorProviderId } from "./tutor-provider";
+import { TutorPrompts } from "./tutor-prompts";
+import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 
 // Minimal stand-in for the Firestore handle the transport reaches through. Only the
 // add() path is exercised here; subscribe() is not called, so no listeners are needed.
@@ -19,7 +20,7 @@ function fakeFirestore() {
   return { added, firestore: firestore as any };
 }
 
-function makeTransport(provider?: TutorProviderId) {
+function makeTransport(provider?: TutorProviderId, tutorPrompts?: TutorPrompts) {
   const { added, firestore } = fakeFirestore();
   const transport = new FirestoreTransport({
     firestore,
@@ -29,6 +30,7 @@ function makeTransport(provider?: TutorProviderId) {
     problemPath: "sas/1/2",
     getLeftContext: () => "{}",
     getRightSummary: () => undefined,
+    tutorPrompts,
     provider,
   });
   return { added, transport };
@@ -49,5 +51,23 @@ describe("FirestoreTransport message provider stamp", () => {
     const { added, transport } = makeTransport("foreverlearning");
     await transport.sendUserMessage("hello");
     expect(added[0].provider).toBe("foreverlearning");
+  });
+});
+
+// The other half of the stacking contract in conversationDocId: the prompts key forks the
+// conversation under a non-default provider *because* the overrides are still sent there.
+// Re-gating this send on the default provider would reinstate the failure the stacking fixed
+// — an authored prompt installed once on a conversation whose id can no longer change.
+describe("FirestoreTransport prompt overrides", () => {
+  it("sends the prompt overrides under a non-default provider", async () => {
+    const { added, transport } = makeTransport("foreverlearning", { replace: "REPLACED" });
+    await transport.sendUserMessage("hello");
+    expect(added[0].promptReplace).toBe("REPLACED");
+  });
+
+  it("sends the prompt overrides under the default provider", async () => {
+    const { added, transport } = makeTransport(undefined, { append: "APPENDED" });
+    await transport.sendUserMessage("hello");
+    expect(added[0].promptAppend).toBe("APPENDED");
   });
 });

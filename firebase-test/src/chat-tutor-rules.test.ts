@@ -286,13 +286,18 @@ describe("Firestore security rules: chat tutor", () => {
 
     // The demo block is where a new provider gets exercised first, so whitelisting `provider`
     // only under the authed block would break exactly the path it was added for — with a
-    // permission-denied that looks nothing like a config error. The demo block carries the
-    // identical enum pin, so it gets the identical cases: a non-string would slip through an
-    // `is string` guard, which is the shape this pin would decay into if someone relaxed it.
+    // permission-denied that looks nothing like a config error. It carries the identical enum
+    // pin, so it gets the identical cases: a non-string would slip through an `is string`
+    // guard, which is the shape this pin would decay into if someone relaxed it, and asserting
+    // both vocabulary entries here is what catches a provider missing from BOTH rules blocks —
+    // tutor-provider-rules.test.ts compares the blocks to each other, so it sees nothing when
+    // they agree and the shared list is the thing that moved.
     it("allows a known provider and rejects an unknown one", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-provider`,
         demoMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-openai`,
+        demoMessage({ add: { provider: "openai" } }));
       await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider`,
         demoMessage({ add: { provider: "some-other-vendor" } }));
       await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider-type`,
