@@ -173,9 +173,17 @@ export class FirestoreTransport implements ChatTransport {
     if (leftContext !== undefined) {
       message.leftContext = leftContext;
     }
-    // Stamped on every message, not just install-eligible ones: the server persists it onto
-    // the parent from the first message and ignores it thereafter, so a mid-conversation flip
-    // can't split a conversation's state across two backends.
+    // Stamped on every message rather than only install-eligible ones, so the trigger can read
+    // it off whichever message it happens to be draining.
+    //
+    // NOTE: nothing reads this yet. The trigger builds an OpenAI provider unconditionally
+    // (chat-tutor.ts) and pickOwnerFields does not copy `provider` onto the parent, so selecting
+    // a non-default provider today changes the conversation id and this field and nothing else —
+    // the turn is still answered by OpenAI. The routing arrives with the second provider that
+    // makes it meaningful. Whoever adds it should persist the provider from the first message and
+    // ignore the field thereafter, so a mid-conversation flip can't split one conversation's
+    // state across two backends — and should delete this note, which goes stale the moment the
+    // routing lands.
     if (provider) {
       message.provider = provider;
     }
