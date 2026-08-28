@@ -1,6 +1,9 @@
-// Client-side provider selection: turning a query param and a unit-config value into the one
-// backend that answers this conversation's turns. The vocabulary itself lives in shared/ because
-// the trigger and the unit config schema reference the same list.
+// Client-side provider selection: turning a query param and a unit-config value into the provider
+// a conversation is stamped and partitioned by. That is the whole of it on this side — the server
+// builds an OpenAI backend unconditionally today, so resolving a non-default provider here picks
+// which conversation the turns belong to, not which backend answers them. The vocabulary itself
+// lives in shared/ because the unit config schema and, once it routes, the trigger reference the
+// same list.
 import {
   kDefaultTutorProvider, kTutorProviders, TutorProviderId
 } from "../../../shared/chat-tutor-providers";
