@@ -391,6 +391,12 @@ identity of a document.
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
 
+`type` is the one exception to "written once", and only transitionally: group and class-wide documents share
+a generic type whose value is being renamed from `"group"` to `"axes"`, and
+`scripts/backfill-group-document-axes.ts` rewrites it on the documents that predate the rename. That script
+authenticates as a service account, so it writes past the rule that keeps the field read-only for clients —
+no client ever changes a `type`.
+
 ### `axisProfile`
 
 The name of the [axis profile](../document-axes/axes.md#axis-profiles--naming-a-combination-of-axis-values)
@@ -399,7 +405,7 @@ the document was created from — the named bundle of axis values it started at 
 
 - **Stores:** Firestore only
 - **Location:** `documents/{key}.axisProfile`
-- **Applies to:** `type: "group"` documents (group + class-wide) — the same gate as `kind`
+- **Applies to:** axes-typed documents (group + class-wide) — the same gate as `kind`
 - **Runtime:** **none, deliberately** — declared on no runtime type
 - **Updated by:** nothing — creation only, from the registered kind's profile
 - **Reactive:** No
@@ -409,7 +415,7 @@ from it; selecting those by their axis values would mean querying the fields the
 change, and would need rewriting each time they move. Because the field records *provenance* — which
 profile the document was made from — it stays true after such a migration rather than going stale.
 
-The `type: "group"` gate is transitional, and is the same gate `kind` uses for the same reason: a value
+The axes-type gate is transitional, and is the same gate `kind` uses for the same reason: a value
 stamped before a type's kind is settled is a value we would have to migrate afterwards. It widens as each
 type is converted, and is deleted once they all are — see
 ["Which documents get stamped"](../document-axes/target-architecture.md#which-documents-get-stamped--a-gate-that-narrows-as-types-are-converted)

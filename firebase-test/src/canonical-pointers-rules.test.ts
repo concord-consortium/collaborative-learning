@@ -1,10 +1,13 @@
 import firebase from "firebase";
 import {
-  adminWriteDoc, initFirestore, prepareEachTest, studentAuth, studentId, teacherAuth, tearDownTests, thisClass
+  adminWriteDoc, initFirestore, mockTimestamp, offeringId, prepareEachTest, studentAuth, studentId, teacherAuth,
+  tearDownTests, thisClass
 } from "./setup-rules-tests";
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 
-const kOffering = "offering-1";
+// The student's own offering: a group document may only be created in the offering the caller's token
+// names, so a slot in any other offering could not be reached by the document that claims it.
+const kOffering = offeringId;
 const kGroup = "3";
 const kLabel = "default";
 // The owner segment of a slot path is the document's own `uid` — for a group document, the synthetic
@@ -54,16 +57,18 @@ describe("canonical pointers", () => {
 });
 
 const kDocPath = `authed/test-portal/documents/group-doc-1`;
+// A group document is created by a student of the class, so the seeds below go in through the admin app,
+// which rejects a client-SDK Timestamp — hence mockTimestamp(). The rules only require `createdAt` to be
+// present.
 const groupDoc = (extra: any = {}) => ({
   uid: kGroupOwner, type: "group", key: "group-doc-1",
-  createdAt: firebase.firestore.Timestamp.now(), context_id: thisClass, network: null,
+  createdAt: mockTimestamp(), context_id: thisClass, network: null,
   offeringId: kOffering, groupId: kGroup, ...extra
 });
 
 describe("deleting group documents", () => {
   it("a class member may delete a non-canonical group document", async () => {
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc());               // no canonical flag
+    await adminWriteDoc(kDocPath, groupDoc());               // no canonical flag
     db = initFirestore(studentAuth);
     await assertSucceeds(db.doc(kDocPath).delete());
   });
@@ -75,8 +80,32 @@ describe("deleting group documents", () => {
   });
 
   it("a user outside the class may not delete the group document", async () => {
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc());
+    await adminWriteDoc(kDocPath, groupDoc());
+    db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
+    await assertFails(db.doc(kDocPath).delete());
+  });
+});
+
+describe("deleting axes-typed documents", () => {
+  const axesDoc = (extra: any = {}) => groupDoc({ type: "axes", ...extra });
+
+  it("a class member may delete a non-canonical axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, axesDoc());               // no canonical flag
+    db = initFirestore(studentAuth);
+    await assertSucceeds(db.doc(kDocPath).delete());
+  });
+
+  it("a class member may NOT delete a canonical axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, { ...axesDoc(), canonical: "default", createdAt: Date.now() });
+    db = initFirestore(studentAuth);
+    await assertFails(db.doc(kDocPath).delete());
+  });
+
+  // Duplicated from the "group" block above rather than left to it: that block covers the pre-sweep
+  // value only, and CLUE-604's cleanup deletes it. Without this case the class check would lose its
+  // coverage at that point rather than at some deliberate decision.
+  it("a user outside the class may not delete the axes-typed document", async () => {
+    await adminWriteDoc(kDocPath, axesDoc());
     db = initFirestore({ uid: "99", platform_user_id: 99, user_type: "student", class_hash: "other-class" });
     await assertFails(db.doc(kDocPath).delete());
   });
@@ -95,8 +124,7 @@ describe("canonical flag integrity", () => {
   });
 
   it("a normal metadata update (title) that does not touch canonical is allowed", async () => {
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc());
+    await adminWriteDoc(kDocPath, groupDoc());
     db = initFirestore(studentAuth);
     await assertSucceeds(db.doc(kDocPath).update({ title: "hello" }));
   });
@@ -114,8 +142,7 @@ describe("canonical flag integrity", () => {
   });
 
   it("setting a canonical label WITHOUT a matching pointer (standalone) is denied", async () => {
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc());   // no pointer exists
+    await adminWriteDoc(kDocPath, groupDoc());   // no pointer exists
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
   });
@@ -125,7 +152,7 @@ describe("canonical flag integrity", () => {
     // document has no canonical-pointer path (canonicalPointerPath() is null), so the claim is denied
     // before any pointer is consulted — the update touches only `canonical`, so nothing else can
     // reject it.
-    const { offeringId, ...noContainer } = groupDoc();
+    const { offeringId: _offeringId, ...noContainer } = groupDoc();
     await adminWriteDoc(kDocPath, { ...noContainer, createdAt: Date.now() });
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));
@@ -133,10 +160,9 @@ describe("canonical flag integrity", () => {
 
   it("a group document may set canonical when the slot for its own owner confirms it", async () => {
     // The positive half of the pair below: the pointer sits at the slot for this document's own uid.
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc());
-    await admin.doc(kPointerPath).set({
-      documentKey: "group-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId
+    await adminWriteDoc(kDocPath, groupDoc());
+    await adminWriteDoc(kPointerPath, {
+      documentKey: "group-doc-1", createdAt: mockTimestamp(), createdBy: studentId
     });
     db = initFirestore(studentAuth);
     await assertSucceeds(db.doc(kDocPath).update({ canonical: "default" }));
@@ -150,10 +176,9 @@ describe("canonical flag integrity", () => {
     const otherOwnersSlot =
       `authed/test-portal/canonical/v1/classes/${thisClass}/offerings/${kOffering}` +
       `/owners/group_${kOffering}_7/slots/${kLabel}`;
-    const admin = initFirestore(teacherAuth);
-    await admin.doc(kDocPath).set(groupDoc());
-    await admin.doc(otherOwnersSlot).set({
-      documentKey: "group-doc-1", createdAt: firebase.firestore.Timestamp.now(), createdBy: studentId
+    await adminWriteDoc(kDocPath, groupDoc());
+    await adminWriteDoc(otherOwnersSlot, {
+      documentKey: "group-doc-1", createdAt: mockTimestamp(), createdBy: studentId
     });
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).update({ canonical: "default" }));

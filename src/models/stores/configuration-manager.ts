@@ -67,6 +67,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["chatTutorPrompts"]>("chatTutorPrompts");
   }
 
+  get chatTutorProvider(){
+    return this.getProp<UC["chatTutorProvider"]>("chatTutorProvider");
+  }
+
   get chatTutorEnabled(){
     return this.getProp<UC["chatTutorEnabled"]>("chatTutorEnabled");
   }

@@ -109,10 +109,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   // tileHandlesOwnSelection (which disables the framework's modifier-append tile selection).
   private handleTileContentPointerDown = () => {
     const { ui } = this.stores;
-    const { model } = this.props;
+    const { model, readOnly } = this.props;
     const selected = ui.selectedTileIds;
     if (!(selected.length === 1 && selected[0] === model.id)) {
-      ui.setSelectedTileId(model.id, { append: false });
+      ui.setSelectedTileId(model.id, { append: false, readOnly });
     }
   };
 

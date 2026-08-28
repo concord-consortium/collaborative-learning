@@ -295,13 +295,18 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
         const tileWord = pluralize(dataSet.tileIds.length, "tile", "tiles");
         const attributeWord = pluralize(dataSet.attributes.length, "attribute", "attributes");
         const caseWord = pluralize(dataSet.numCases, "case", "cases");
+        // `schema-only` stops after the case count: the shape of the data without the data. Every
+        // other caller gets the table, exactly as before.
+        const caseData = options.dataSetTables === "schema-only"
+          ? `There are ${dataSet.numCases} ${caseWord} in this data set.\n`
+          : `There are ${dataSet.numCases} ${caseWord} in this data set, shown below in a Markdown table.\n\n` +
+            `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
         return heading(headingLevel + 2, dataSet.name) +
           `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord}.\n` +
           `It contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n\n` +
           `${generateAttributesMarkdownTable(dataSet.attributes)}\n\n` +
           formulaSummary +
-          `There are ${dataSet.numCases} ${caseWord} in this data set, shown below in a Markdown table.\n\n` +
-          `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
+          caseData;
       }).join("\n\n")
     : "";
   const variablsSummary = summary.length > 0 && variables.length > 0

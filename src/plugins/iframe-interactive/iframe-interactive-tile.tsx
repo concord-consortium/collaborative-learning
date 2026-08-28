@@ -58,14 +58,9 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { useSettingFromStores, useStores } from "../../hooks/use-stores";
 import { useContainerContext } from "../../components/document/container-context";
 import { userSelectTile } from "../../models/stores/ui";
-import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
-import {
-  IShowModal,
-  ICloseModal,
-  ISupportedFeatures
-} from "@concord-consortium/lara-interactive-api";
+import { IShowModal, ICloseModal, ISupportedFeatures } from "@concord-consortium/lara-interactive-api";
 
 import "./iframe-interactive-tile.scss";
 
@@ -194,7 +189,8 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
   const debouncedSetState = useMemo(
     () => debounce((state: any) => {
       contentRef.current?.setInteractiveState(state);
-      // The persisted interactive state is the student's answer, so it is logged as a tile change.
+      // Only reached when handleInteractiveState's JSON-diff guard saw a real change. The persisted
+      // interactive state is the student's answer, so it is logged as a tile change.
       logTileChangeEvent(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
         tileId: model.id,
         tileType: "IframeInteractive",
@@ -357,15 +353,6 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         }
       });
 
-      // These are analytics breadcrumbs (button clicked, hint viewed), not a state change.
-      phone.addListener("log", (logData: any) => {
-        Logger.log(LogEventName.IFRAME_INTERACTIVE_TOOL_CHANGE, {
-          tileId: model.id,
-          tileType: "IframeInteractive",
-          ...logData
-        });
-      });
-
       // Handle modal requests (optional - can show modal dialogs)
       phone.addListener("showModal", (modalOptions: IShowModal) => {
         // For now, just alert - could be enhanced with proper modal support
@@ -449,8 +436,8 @@ const IframeInteractiveComponentInternal: React.FC<IIframeInteractiveComponentPr
         clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = undefined;
       }
-      // Cancel debounced functions to prevent MST "dead node" errors
-      // after component unmount
+      // Cancel debounced functions to prevent MST "dead node" errors after component unmount, and
+      // so a tile that is gone can't emit a change event against a stale Logger context.
       debouncedSetState.cancel();
       debouncedRequestHeight.cancel();
     };

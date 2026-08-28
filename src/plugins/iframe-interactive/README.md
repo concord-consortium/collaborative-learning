@@ -16,7 +16,7 @@ The Iframe Interactive tile enables embedding external interactive content into 
 - **Security**: Configurable iframe sandbox and permissions (geolocation, camera, microphone, etc.)
 - **Polling Fallback**: 2-second state polling ensures capture even without proactive state messages
 - **iframe-phone Integration**: Robust postMessage communication with automatic cleanup
-- **Logging Support**: Interactive log events forwarded to CLUE's logger
+- **Logging Support**: Interactive state changes logged to CLUE's logger as tile changes
 
 ## Architecture
 
@@ -300,6 +300,7 @@ The tile uses these sandbox flags for security:
 4. **No Global State**: `globalInteractiveState` always null (cross-page state not supported)
 5. **Firebase Write Limits**: Rapid state changes may hit Firebase rate limits (500ms debounce mitigates)
 6. **Undo/Redo Limitations**: While CLUE's undo/redo system works with this tile, the interactive will receive the restored state but may not be able to intelligently update its view. The interactive may need to re-initialize, which could lose unsaved state or focus.
+7. **No Breadcrumb Logging**: `phone.post("log", ...)` messages are not forwarded to CLUE's logger. Only persisted `interactiveState` changes are logged, so analytics reflect the student's answer rather than every button click or hint view.
 
 ## Performance Considerations
 

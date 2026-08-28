@@ -30,6 +30,13 @@ describe("urlParams", () => {
     expect(processQueryParams("appMode=authed").appMode).toBe("authed");
   });
 
+  // chatProvider carries a value, so it must NOT be a boolean param — listing it there would
+  // coerce every provider name to `true` and silently select the default instead.
+  test("chatProvider keeps its value", () => {
+    expect(processQueryParams().chatProvider).toBeUndefined();
+    expect(processQueryParams("chatProvider=foreverlearning").chatProvider).toBe("foreverlearning");
+  });
+
   test("boolean params are true without a value", () => {
     expect(processQueryParams().demo).toBe(false);
     expect(processQueryParams("demo").demo).toBe(true);

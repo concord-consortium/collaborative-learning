@@ -1,7 +1,7 @@
 // Chat-tutor drain engine — the lock + drain + per-turn processing logic, separated from the
-// trigger wiring in ../chat-tutor.ts. This module imports firebase-admin (+ the chat helpers),
-// NOT firebase-functions, so the drain/lock logic is testable against the Firestore emulator
-// with a fake OpenAI.
+// trigger wiring in ../chat-tutor.ts. This module imports firebase-admin and the TutorProvider
+// type, never firebase-functions, so the drain/lock logic runs against the Firestore emulator
+// with a fake provider and no trigger.
 //
 // Uses the modular firebase-admin/firestore imports (not admin.firestore.FieldValue etc.): the
 // functions emulator proxies the firebase-admin module and the namespace statics come through
@@ -11,11 +11,7 @@ import {
   Query, QueryDocumentSnapshot, getFirestore,
 } from "firebase-admin/firestore";
 
-import {
-  createOpenAIClient, createConversation, installDeveloperPrompt, createTutorResponse,
-  TutorReply,
-} from "./openai";
-import {assembleTurnContext} from "./context-assembly";
+import {TurnResult, TutorProvider} from "./provider";
 
 // reclaim a lock whose owner crashed mid-drain, so a conversation can't wedge forever.
 // INVARIANT: STALE_LOCK_MS must exceed the function's configured timeout (default 60s, no
@@ -38,34 +34,70 @@ type MsgCol = CollectionReference;
 export interface DrainContext {
   parentRef: ParentRef;
   messagesCol: MsgCol;
-  openai: ReturnType<typeof createOpenAIClient>;
-  model: string;
-  genericText: string;
+  // which tutor backend answers a turn; the drain itself is vendor-agnostic
+  provider: TutorProvider;
 }
 
-// The owner fields the client's rules require on any doc it reads — copied off the triggering
-// message onto function-written docs (assistant messages, the function-created parent). This is
-// the only channel through which the parent gets its {uid, context_id, problemPath} stamp.
+// The owner fields the client's rules require on any doc it reads. One list, because it feeds two
+// places that must not disagree: pickOwnerFields copies them onto function-written docs, and the
+// guard below refuses to let a provider set them. A field added here is protected in both.
+const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
+
+// Parent-doc fields the drain owns; a provider may write anything EXCEPT these.
+//
+// A provider returns a plain field map that gets merged into the parent doc, so the boundary needs
+// enforcing rather than stating. The lock is the sharp edge: acquireLock proceeds on any status
+// that is not "generating", so a provider writing status:"idle" would release the lock while its
+// own invocation is still draining and let a racing trigger process the same backlog concurrently.
+// The owner stamp is what the client's owner-only read rule keys on, and the cursor decides which
+// messages are already answered.
+//
+// Providers stay free to add their own fields (a session id, an install flag) without touching
+// this file — the rule is only that they cannot touch the drain's.
+const kDrainOwnedParentFields = new Set<string>([
+  "status", "lockedAt", "error",
+  "lastProcessedCreatedAt", "lastProcessedMessageId",
+  ...kOwnerFields,
+]);
+
+// Throwing (rather than dropping the offending keys) is deliberate: a provider reaching for these
+// is a bug in that provider, and the catch in ../chat-tutor.ts turns this into status:"error"
+// with the cursor unadvanced, which is loud and recoverable. Silently filtering would leave the
+// provider believing it had persisted something. The message names the offending fields so a
+// production log says which provider reached where.
+function assertProviderOwnsFields(parentUpdate: Record<string, unknown>): void {
+  const trespassing = Object.keys(parentUpdate).filter((key) => kDrainOwnedParentFields.has(key));
+  if (trespassing.length > 0) {
+    throw new Error(`provider returned drain-owned parent fields: ${trespassing.join(", ")}`);
+  }
+}
+
+// Copied off the triggering message onto function-written docs (assistant messages, the
+// function-created parent). This is the only channel through which the parent gets its stamp.
 export function pickOwnerFields(data: DocumentData | undefined): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  if (data?.uid !== undefined) out.uid = data.uid;
-  if (data?.context_id !== undefined) out.context_id = data.context_id;
-  if (data?.problemPath !== undefined) out.problemPath = data.problemPath;
+  for (const field of kOwnerFields) {
+    if (data?.[field] !== undefined) out[field] = data[field];
+  }
   return out;
 }
 
-// `highlights` is omitted rather than written as an empty array: most replies point at nothing, and
-// the client treats absent and empty the same way.
+// Takes the whole TurnResult rather than a backend's own reply type: the assistant doc is the
+// drain's to shape, and every field on it has to come through the provider seam to get here.
+//
+// `highlights` is omitted rather than written as an empty array: most replies point at nothing, a
+// backend that cannot produce them omits them entirely, and the client treats absent and empty the
+// same way.
 export function buildAssistantDoc(
-  reply: TutorReply, ownerFields: Record<string, unknown>
+  result: TurnResult, ownerFields: Record<string, unknown>
 ): Record<string, unknown> {
   const doc: Record<string, unknown> = {
     kind: "assistant",
-    userText: reply.userText,
+    userText: result.assistantText,
     createdAt: FieldValue.serverTimestamp(),
     ...ownerFields,
   };
-  if (reply.highlights.length > 0) doc.highlights = reply.highlights;
+  if (result.highlights?.length) doc.highlights = result.highlights;
   return doc;
 }
 
@@ -74,58 +106,29 @@ export function buildAssistantDoc(
 interface UnitResult {
   // written even for a userText:null reply so the client's "awaiting" indicator clears
   assistant: Record<string, unknown>;
-  // parent-doc fields to persist this turn (conversationId/problemInstalled/seq, once earned)
+  // parent-doc fields the provider earned this turn (conversation/session ids, flags, seq)
   parentUpdate: Record<string, unknown>;
 }
 
-// Process one user message: ensure the conversation + developer items exist, call OpenAI, and
-// RETURN the resulting writes (assistant doc + parent updates). The caller commits them in ONE
-// batch together with the cursor advance, so a crash between the reply and the cursor can't
-// leave a duplicate assistant doc.
+// Process one user message: hand the provider the current parent state + the message, and RETURN
+// the resulting writes (assistant doc + parent updates). The caller commits them in ONE batch
+// together with the cursor advance, so a crash between the reply and the cursor can't leave a
+// duplicate assistant doc.
 async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult> {
-  const {parentRef, openai, model} = ctx;
+  const {parentRef, provider} = ctx;
   const data = doc.data();
   const ownerFields = pickOwnerFields(data);
 
   // Per-conversation state is read fresh each turn (no in-memory state). The lock serializes
-  // turns, so the seq increment below can't race across invocations.
+  // turns, so a provider's seq increment can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
-  let conversationId: string | undefined = parent.conversationId;
-  if (!conversationId) {
-    // do NOT persist conversationId yet — only after the install + first response succeed.
-    conversationId = await createConversation(openai);
-  }
-  // "install once" is gated on problemInstalled (not on conversationId existing), so a crash
-  // mid-setup re-writes the developer items next turn instead of running context-blind. An
-  // empty LEFT leaves the flag unset (see context-assembly), keeping the recovery path open.
-  const turn = assembleTurnContext({
-    genericText: ctx.genericText,
-    problemInstalled: !!parent.problemInstalled,
-    parentSeq: parent.seq,
-    message: data,
-  });
-  for (const item of turn.installItems) {
-    await installDeveloperPrompt(openai, conversationId, item);
-  }
-
-  const reply = await createTutorResponse(openai, {model, conversationId, input: turn.input});
-
-  // only NOW (developer items written + response succeeded) is conversationId/problemInstalled/
-  // seq earned; the caller persists them (batched with the cursor) so they commit atomically.
-  const parentUpdate: Record<string, unknown> = {};
-  if (!parent.conversationId) {
-    parentUpdate.conversationId = conversationId;
-  }
-  if (turn.markProblemInstalled) {
-    parentUpdate.problemInstalled = true;
-  }
-  if (turn.seq !== undefined) {
-    parentUpdate.seq = turn.seq;
-  }
+  const turnResult = await provider.processTurn(parent, data);
+  const {parentUpdate} = turnResult;
+  assertProviderOwnsFields(parentUpdate);
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
-  // userText:null assistant doc so the client's "awaiting" indicator clears.
-  const assistant = buildAssistantDoc(reply, ownerFields);
+  // null-text assistant doc so the client's "awaiting" indicator clears.
+  const assistant = buildAssistantDoc(turnResult, ownerFields);
 
   return {assistant, parentUpdate};
 }
@@ -197,8 +200,8 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
     lastSnap = next;
     // commit the assistant doc + earned parent state + cursor advance in ONE batch: either all
     // land or none, so a crash between the reply and the cursor can't duplicate the assistant
-    // doc (a pre-commit crash re-processes the unit but wrote nothing — only a possible OpenAI
-    // re-bill remains, the documented replay risk).
+    // doc (a pre-commit crash re-processes the unit but wrote nothing — only a possible re-bill
+    // from the provider remains, the documented replay risk).
     const writeBatch = db.batch();
     writeBatch.set(messagesCol.doc(), assistant);
     writeBatch.set(parentRef, {

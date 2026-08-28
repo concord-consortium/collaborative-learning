@@ -121,7 +121,8 @@ interface, testable with both uncommitted draft config (authoring preview) and c
 - A hash of the effective prompts is mixed into the conversation doc id (`_p<hash>` suffix) so a
   prompt edit starts a fresh conversation (the generic prompt installs once per OpenAI conversation
   and its items are immutable). No suffix when no prompts are authored — pre-existing conversation
-  ids are unchanged.
+  ids are unchanged. (Provider selection later added a `_v<provider>` suffix ahead of this one;
+  see the provider-selection section below.)
 - Draft/committed testing comes free from the authoring pipeline: preview tabs load draft
   `content.json` via the authoring API `/rawContent` (RTDB updates → blob cache → GitHub), so
   uncommitted prompt edits flow through on save + reload; committed values flow via the normal unit
@@ -130,6 +131,34 @@ interface, testable with both uncommitted draft config (authoring preview) and c
 - Verified end-to-end in the browser (2026-07-09): draft round-trip, empty-key hygiene, append
   path, replace path (ALL-CAPS test), and fresh-conversation-on-edit all confirmed against the
   emulators.
+
+### Provider selection (follow-on, 2026-08-28)
+
+- Unit config field `chatTutorProvider?: "openai" | "foreverlearning"`, overridable per session by
+  the `chatProvider` URL param. Precedence is param > unit config > default (`openai`); an
+  unrecognized value at either level is dropped rather than honored, since the rules pin the
+  stamped field to an enum and would reject the write anyway. Not exposed in the authoring UI.
+- Client-side only. The selection starts a separate conversation and is stamped on each message
+  as `provider`, but the trigger builds an OpenAI backend unconditionally and `pickOwnerFields`
+  does not copy `provider` onto the parent — so a non-default value changes the conversation id
+  and the message field and nothing else. Routing arrives with the second backend, and must
+  persist the provider from the first message so a mid-conversation flip can't split one
+  conversation's state across two backends.
+- The default provider is a strict no-op: it contributes no doc-id suffix and stamps no field, so
+  every conversation predating provider selection resolves to the same doc and writes the same
+  document shape. That carve-out is the whole backward-compatibility story.
+- A non-default provider adds a `_v<provider>` suffix to the conversation doc id, ahead of any
+  `_p<hash>`. The two stack rather than one masking the other: both name something a conversation
+  was built with and cannot be re-made with, and prompt overrides ride install-eligible sends
+  regardless of provider, so dropping the prompts key under a non-default provider would pin such
+  a conversation to its first prompt permanently.
+- The provider vocabulary lives in `shared/chat-tutor-providers.ts`. Both rules blocks (authed and
+  demo) pin it to an ENUM rather than `is string`, and cannot import the list — so
+  `src/components/chat-tutor/tutor-provider-rules.test.ts` reads `firestore.rules` from disk and
+  asserts both pins still equal `kTutorProviders`.
+- `chatProvider` is ungated in every appMode, like `chatTutor` and `chatDebug`. Harmless while the
+  server ignores the field; whoever adds the routing decides whether picking a paid backend stays
+  this open.
 
 ### Gating
 
@@ -144,7 +173,7 @@ interface, testable with both uncommitted draft config (authoring preview) and c
 - Firestore doc shapes — parent: server-owned `{conversationId, status, lock, drain cursor,
   problemInstalled, seq}` + `{uid, context_id, problemPath}` stamped off the first triggering
   message (`pickOwnerFields`); message: `{uid, kind, createdAt, text, context_id, problemPath,
-  leftContext?, rightContext?, promptReplace?, promptAppend?}`.
+  leftContext?, rightContext?, promptReplace?, promptAppend?, provider?}`.
 - The `/authed/**` rules only take effect in `appMode=authed`; they are validated by the
   `firebase-test/` emulator suite with a fresh `user_type: "learner"` auth fixture (the shared
   `studentAuth` fixture carries the wrong `"student"` value and is deliberately not reused) plus a
@@ -416,18 +445,23 @@ ran against the requirements, and three against the implementation plan. The sig
 **Process / testing**
 - Parent conversation doc is created server-side by `acquireLock`; the client writes only message
   docs; the client parent-create rule is defensive (D-1).
-- Trigger/drain behavior is manual/observational for the spike — the rules harness can't run
-  triggers and the functions harness bypasses rules; automated coverage is the rules suite, the
-  pure `decideContext`/context-assembly unit tests, and the promoted focus-trap contract test
+- Trigger behavior is manual/observational for the spike — the rules harness can't run triggers
+  and the functions harness bypasses rules; automated coverage is the rules suite, the pure
+  `decideContext`/context-assembly unit tests, and the promoted focus-trap contract test
   (D-3/QA-1..5). A formal DoD checklist was declined by the project owner (PM finding, IC-6).
+  *(Superseded for the drain: extracting the provider seam made the lock, the cursor and the
+  batch commit reachable without the trigger or a real backend, and they are now covered by
+  `functions-v2/test/chat-drain-emulator.test.ts` against a firestore-only emulator with a fake
+  provider. The trigger wiring itself remains observational.)*
 - PII-to-OpenAI elevated to the headline risk: test accounts only; real-student piloting gated on
   the FERPA/PII + retention review.
 
 ## Verification (as implemented)
 
 - Jest: client suites (chat-tutor modules, app-config, authoring page), `functions-v2`
-  context-assembly suite, and the `firebase-test` chat rules suite (28 cases; firestore-only
-  emulator, serial jest).
+  context-assembly suite, and the `firebase-test` chat rules suite (firestore-only emulator,
+  serial jest). Later joined by the `functions-v2` drain and OpenAI-provider suites,
+  which cover the lock, the drain cursor and the batch commit directly.
 - Live emulator validation of the chat round-trip, lock behavior, and error path; browser
   (Playwright) validation of the authoring flow, draft preview, prompt append/replace, and
   fresh-conversation-on-edit (2026-07-09).

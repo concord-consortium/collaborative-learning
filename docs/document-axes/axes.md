@@ -402,7 +402,7 @@ document behaves the way it does because of where it sits on the axes, never bec
 bundle it started at.
 
 Where the profiles are defined, and how a kind names one, is in
-[reading-axes-in-code.md](./reading-axes-in-code.md); the stored record is in
+[axes-current-state.md](./axes-current-state.md); the stored record is in
 [metadata-fields.md](../document-metadata/metadata-fields.md).
 
 ### `permissions` — who may do what

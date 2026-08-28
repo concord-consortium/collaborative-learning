@@ -28,7 +28,7 @@ import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./shared-model-document-manager";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
-import { DocumentTypeEnum, GroupDocument, IDocumentContext, ISetProperties, isPublishedType,
+import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
@@ -119,9 +119,6 @@ export const DocumentModel = Tree.named("Document")
     },
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
-    },
-    get isGroup() {
-      return (self.type === GroupDocument);
     },
     get isPlanning() {
       return (self.type === PlanningDocument);

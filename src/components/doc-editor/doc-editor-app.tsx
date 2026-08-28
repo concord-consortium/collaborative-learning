@@ -247,9 +247,10 @@ export const DocEditorApp = observer(function DocEditorApp() {
   }, [loadDocument]);
 
   if (unwrapped) {
-    // Let the window do the scrolling. If the body scrolls and shows the full content
-    // then puppeteer's screenshot function can capture the full content easily.
-    window.document.body.style.overflow = "visible";
+    // Let the content determine the page's height rather than filling the viewport, so the
+    // whole document is on the scrolling page and puppeteer's full-page screenshot captures
+    // all of it. See the .unwrapped rules in components/document/unwrapped-document.scss.
+    window.document.body.classList.add("unwrapped");
     return (
       <CanvasComponent
         document={document}

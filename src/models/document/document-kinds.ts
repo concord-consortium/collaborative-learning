@@ -5,7 +5,7 @@ import {
   kProblemLikeProfile
 } from "./document-axis-profiles";
 import {
-  GroupDocument, LearningLogDocument, LearningLogPublication,
+  GroupDocument, isAxesType, LearningLogDocument, LearningLogPublication,
   PersonalDocument, PersonalPublication, PlanningDocument,
   ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
@@ -266,8 +266,8 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   if (info?.title != null) return info.title;
   // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
   // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
-  // on the lookup above. Requiring `groupId` (not just `type === GroupDocument`) matters because a class-wide
-  // document also stores `type: "group"` but carries no `groupId` — if its `kind` is unregistered in this
+  // on the lookup above. Requiring `groupId` (not just an axes type) matters because a class-wide
+  // document is also axes-typed but carries no `groupId` — if its `kind` is unregistered in this
   // session (e.g. it belongs to a unit that has not loaded), the lookup above misses and execution reaches
   // here; without the `groupId` check it would render as "Group undefined Document" instead of falling
   // through to `undefined`, which callers already handle.
@@ -276,7 +276,7 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   // scripts/backfill-group-document-axes.ts has stamped `kind` on every group document in every
   // environment, this becomes `document.kind === GroupDocument` and the `groupId` check goes away with it —
   // a class-wide document has its own kind, so it can no longer reach this branch at all.
-  if (document.type === GroupDocument && document.groupId) return `Group ${document.groupId} Document`;
+  if (isAxesType(document.type ?? "") && document.groupId) return `Group ${document.groupId} Document`;
   return undefined;
 }
 

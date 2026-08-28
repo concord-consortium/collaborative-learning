@@ -103,23 +103,35 @@ service cloud.firestore {
 
     // TRANSITIONAL: `concurrent` is an authorization input for the history rule below
     // (isConcurrentClassDocument), so letting any class member set it on any document would let them
-    // grant themselves history access to a classmate's document. It stays writable on `type ==
-    // "group"` documents only, and then only to `true`, because two backfill paths merge-update it onto
+    // grant themselves history access to a classmate's document. It stays writable on axes-typed
+    // documents only, and then only to `true`, because two backfill paths merge-update it onto
     // pre-existing group documents that predate the field: the on-open backfill in src/lib/db.ts and the
     // one-shot scripts/backfill-group-document-axes.ts. Both write only `true`, so clearing the field is
     // nobody's legitimate operation, and permitting it would let a class member strip a group document's
     // shared history and edit access. `type` itself is read-only (preservesReadOnlyDocumentFields),
-    // so it cannot be flipped first to unlock this. Once both backfill paths have run against every
-    // environment, this function should be deleted and `concurrent` added to
-    // preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at document creation —
-    // which also requires constraining isValidDocumentCreateRequest below: today it constrains neither
-    // `concurrent` nor `uid`, so a class member can create a new document stamped with a classmate's `uid`
-    // and `concurrent: true`. A truthy `concurrent` at create should imply `type == "group"`, and/or the
-    // create should require userIsRequestUser().
+    // so it cannot be flipped first to unlock this.
+    // Residual: a class member can still create an axes-typed document owned by themselves with no
+    // `concurrent` field — both create rules permit that — and then any classmate can update it to
+    // `concurrent: true`, because this function tests only the document's `type`, never its owner. That
+    // grants the whole class read and write access to that one document's history. It is not a way into
+    // anyone else's work: documentOwnerOk blocks creating under another user's `uid`, and `type` is
+    // read-only after creation, so an existing personal document can never be turned into a group one this
+    // way. Closing it needs `concurrent` to become unchangeable after creation, which can't ship until the
+    // backfill this function exists for has drained in every environment.
+    // Once both backfill paths have run against every environment, this function should be deleted and
+    // `concurrent` added to preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at
+    // document creation — which is already constrained: isValidDocumentCreateRequest requires a synthetic
+    // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk).
+    // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
+    // stored type has run in every environment: pre-sweep documents still store `"group"`, newly-created
+    // ones already store `"axes"`. Neither branch below is dead code — dropping `"group"` here before that
+    // sweep has completed would deny every not-yet-swept document the `concurrent` write this function
+    // exists to allow.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      let docType = resource.data.get("type", "");
       return !affectedFieldsSet.hasAny(["concurrent"].toSet())
-        || (resource.data.get("type", "") == "group"
+        || ((docType == "group" || docType == "axes")
             && request.resource.data.get("concurrent", false) == true);
     }
 
@@ -180,9 +192,66 @@ service cloud.firestore {
         return canonical == null || canonical == "";
       }
 
+      // A document's `uid` is its owner. Three shapes are legitimate, and each is corroborated either by the
+      // caller's token or by fields the document itself carries:
+      //   - the caller (an ordinary problem, personal, learning-log, planning or publication document);
+      //   - the synthetic class owner of the caller's own class (a class-wide document);
+      //   - the synthetic group owner, required to name the caller's own offering and to agree with the
+      //     group the document records.
+      // Keep the two synthetic formats in lockstep with kClassOwnerPrefix and getGroupOwnerId in
+      // src/models/document/document-axes.ts.
+      // Residual, accepted: nothing here proves the caller is a member of that group, because group
+      // membership lives in the Realtime Database and the token carries no group claim. A student can
+      // therefore create a document owned by another group in their own offering. That document is not
+      // inert: canonicalPointerCreatable below checks only the caller's class, so the same caller can also
+      // claim that group's canonical slot, and pointers are immutable — every real member of that group
+      // then converges onto it through the resolver's fast path, and isConcurrentClassDocument grants read
+      // and write on its history to the whole class rather than to the group. Groups are a CLUE concept
+      // that the portal does not model, so no token claim is going to corroborate one; this is where the
+      // create rules stop. See the owner axis in docs/document-axes/README.md.
+      // Residual, accepted: the token corroborates that the caller belongs to the class named in
+      // `class_<class_hash>`, but not that the caller is entitled to mint a document under that owner. Any
+      // class member can create any number of `class_<class_hash>`-owned, `concurrent: true` documents, each
+      // sectioned under "Whole Class" in Sort Work with the whole class granted read and write on its
+      // history. This is narrower than admitting any `uid` at all, and it is inherent to the design — a
+      // class can only converge on one document if any of its members can mint it. See the owner axis in
+      // docs/document-axes/README.md.
+      function documentOwnerIsCallersClass() {
+        return request.resource.data.uid == "class_" + request.auth.token.class_hash;
+      }
+
+      // The offering comes from the caller's token, not from the document: `offering_id` is minted only for a
+      // learner — a student launched into one offering — which is exactly who creates a group document
+      // (getOrCreateGroupDocument requires the caller to be in a group, and only students are). A teacher's
+      // or researcher's token omits the claim deliberately, so that they are not confined to one offering;
+      // neither creates a group-owned document. Without the claim the comparison fails and the create is
+      // denied, which is the safe direction.
+      function documentOwnerIsCallersGroup() {
+        let data = request.resource.data;
+        let offering = data.get("offeringId", "");
+        let group = data.get("groupId", "");
+        return offering is string && offering != ""
+          && group is string && group != ""
+          && offering == string(request.auth.token.get("offering_id", ""))
+          && data.uid == "group_" + offering + "_" + group;
+      }
+
+      function documentOwnerOk() {
+        return userIsRequestUser() || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
+      }
+
+      // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
+      // tested here: the transitional type value is on its way out, while the owner is the durable fact.
+      // The update side is governed by concurrentChangeOk.
+      function concurrentCreateOk() {
+        return request.resource.data.get("concurrent", false) == false
+          || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
+      }
+
       function isValidDocumentCreateRequest() {
         return
           request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          documentOwnerOk() && concurrentCreateOk() &&
           // The canonical label is granted solely by the pointer-claim transaction (an update,
           // gated by canonicalFieldOk), so a create carrying a non-blank `canonical` — including a
           // non-string like `true` — is rejected.
@@ -448,11 +517,15 @@ service cloud.firestore {
         allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
         // teachers can only delete their own documents
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
-        // Allows class members to delete the non-winning (non-canonical) group documents from the
+        // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
+        // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
+        // stored type has run in every environment. Neither branch below is dead code — dropping `"group"`
+        // here before that sweep has completed would leave the losing side of a race undeletable for every
+        // not-yet-swept document.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
-          && resource.data.type == "group"
+          && (resource.data.type == "group" || resource.data.type == "axes")
           && !isCanonicalValue(resource.data.get('canonical', ""));
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
@@ -655,6 +728,15 @@ service cloud.firestore {
           // promptReplace/promptAppend carry the unit-authored generic-prompt overrides. Like
           // leftContext, they are client-supplied text sent to the model at developer authority
           // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
+          // provider selects the AI backend. Unlike the fields above it is pinned to an ENUM, not
+          // just a type: once the trigger routes on this field an arbitrary string would decide
+          // where a paid turn goes. The trigger builds an OpenAI backend unconditionally today,
+          // so the field is inert on the server and the pin is guarding the routing that comes
+          // with the second backend. Keep the list in lockstep with kTutorProviders in
+          // shared/chat-tutor-providers.ts, and with the identical pin in the demo block below —
+          // src/components/chat-tutor/tutor-provider-rules.test.ts fails if either drifts.
+          // The client omits the field entirely for the default provider, so most messages carry
+          // no provider at all; 'openai' is accepted so the enum mirrors the shared list.
           function chatMessageCreate() {
             let data = request.resource.data;
             return isStudentClaim() &&
@@ -662,12 +744,13 @@ service cloud.firestore {
               classIsRequestContextId() &&
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                    'problemPath', 'leftContext', 'rightContext',
-                                   'promptReplace', 'promptAppend']) &&
+                                   'promptReplace', 'promptAppend', 'provider']) &&
               data.kind == 'user' &&
               'createdAt' in data &&
               (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
               (!('promptReplace' in data) || data.promptReplace is string) &&
-              (!('promptAppend' in data) || data.promptAppend is string);
+              (!('promptAppend' in data) || data.promptAppend is string) &&
+              (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
           }
 
           allow read: if userIsResourceUser() && isStudentClaim();
@@ -746,17 +829,23 @@ service cloud.firestore {
     // (status/lock/cursor/conversationId/...), which would otherwise corrupt the rendered
     // transcript and the drain cursor. The parent doc is server-created (admin SDK bypasses rules).
     match /demo/{demoName}/chatTutor/{conversationId} {
+      // The provider whitelist and enum pin must match the authed block's chatMessageCreate
+      // exactly (tutor-provider-rules.test.ts fails if they drift). This root is where a new
+      // provider gets exercised first, so whitelisting it only under authed would break
+      // precisely the path it was added for, with a permission-denied that reads nothing like
+      // a config error.
       function demoChatMessageCreate() {
         let data = request.resource.data;
         return isAuthed() &&
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                'problemPath', 'leftContext', 'rightContext',
-                               'promptReplace', 'promptAppend']) &&
+                               'promptReplace', 'promptAppend', 'provider']) &&
           data.kind == 'user' &&
           'createdAt' in data &&
           (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
           (!('promptReplace' in data) || data.promptReplace is string) &&
-          (!('promptAppend' in data) || data.promptAppend is string);
+          (!('promptAppend' in data) || data.promptAppend is string) &&
+          (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
       }
 
       allow read: if isAuthed();

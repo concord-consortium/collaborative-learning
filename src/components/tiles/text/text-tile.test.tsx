@@ -1,4 +1,4 @@
-import {screen} from "@testing-library/react";
+import {fireEvent, screen} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { reaction } from "mobx";
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
@@ -11,7 +11,26 @@ import { specTextTile } from "./spec-text-tile";
 // knows it is a supported tile type
 import "../../../models/tiles/text/text-registration";
 
+const mockLogTileFocusEvent = jest.fn();
+jest.mock("../../../models/tiles/log/log-tile-focus-event", () => ({
+  logTileFocusEvent: (...args: any[]) => mockLogTileFocusEvent(...args)
+}));
+
 describe("TextToolComponent", () => {
+
+  it("logs a locked prompt's own tile id, flagged read-only, when it proxies to its container", () => {
+    // A fixedPosition text tile inside a locked container is the question tile's prompt: clicking it
+    // selects the container so comments attach to the question, but the user viewed the prompt.
+    mockLogTileFocusEvent.mockReset();
+    const container = TileModel.create({ content: defaultTextContent() });
+    const tileModel = TileModel.create({ content: defaultTextContent(), fixedPosition: true });
+    const { stores } = specTextTile({ tileModel, container, containerIsLocked: true });
+
+    fireEvent.mouseDown(screen.getByTestId("text-tool-wrapper"));
+
+    expect(stores.ui.selectedTileIds).toStrictEqual([container.id]);
+    expect(mockLogTileFocusEvent).toHaveBeenCalledWith(tileModel.id, true);
+  });
 
   it("renders successfully", () => {
     specTextTile({});

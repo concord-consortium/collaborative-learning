@@ -40,6 +40,10 @@ export function handleQuestionTile({
   const promptTile = promptTileId ? tileMap?.[promptTileId] : null;
   if (promptTile && promptTile.content) {
     result += heading(headingLevel, "Question Prompt");
+    // The prompt is summarized directly rather than through tilesSummary, so it needs its id line
+    // adding here. Emitted even though the prompt is summarized minimally: a drawing used as a
+    // prompt gives every object an id, and those are unusable without the tile's id to go with them.
+    result += tileIdLine({ model: promptTile, number: 0 } as INormalizedTile);
     result += tileSummary({
       dataSets,
       tile: { model: promptTile, number: 0 },

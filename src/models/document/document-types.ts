@@ -13,6 +13,10 @@ export const PersonalPublication = "personalPublication";
 export const LearningLogPublication = "learningLogPublication";
 export const SupportPublication = "supportPublication";
 export const GroupDocument = "group";
+// The type of a document whose behavior is read from its axes rather than from its type. Group
+// documents and class-wide collaborative documents both store it; so will every kind migrated onto
+// the axes. See docs/document-axes/target-architecture.md.
+export const AxesDocument = "axes";
 
 export function isProblemType(type: string) {
   return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
@@ -32,6 +36,14 @@ export function isSupportType(type: string) {
 export function isExemplarType(type: string) {
   return type === ExemplarDocument;
 }
+// TRANSITIONAL: accepts the pre-sweep value too. Documents created before this change store
+// "group", and CLUE-604's one-time sweep rewrites them to "axes". Once that sweep has run against
+// every environment, drop GroupDocument from this predicate — that is the single edit that closes
+// the transitional window for every call site.
+// Declared as a type guard so callers that build a discriminated union off `type` still narrow.
+export function isAxesType(type: string): type is typeof AxesDocument | typeof GroupDocument {
+  return type === AxesDocument || type === GroupDocument;
+}
 // is this type of document associated with the offering (i.e. with a particular problem)
 export function isOfferingType(type: string) {
   return [SectionDocumentDEPRECATED, PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication]
@@ -45,13 +57,19 @@ export function isPublishedType(type: string) {
   return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
           .indexOf(type) >= 0;
 }
+// TRANSITIONAL in the same way isAxesType is: `GroupDocument` here is the pre-sweep spelling of
+// `AxesDocument`, and CLUE-604's cleanup drops it. Note that this is Sort Work *membership*, and it is
+// asked of the type, so every axis-native kind added later is listed by default. An axis-native kind
+// that should not be listed should change this mechanism to check the axis fields that determine it
+// should not be listed instead of just checking the type or kind.
 export function isSortableType(type: string){
   return [
     ProblemDocument,
     PersonalDocument,
     LearningLogDocument,
     ExemplarDocument,
-    GroupDocument
+    GroupDocument,
+    AxesDocument
   ].indexOf(type) >= 0;
 }
 // This function uses a bit of a hack to determine if a document is curriculum or not:
@@ -65,7 +83,7 @@ export function isCurriculumDocument(documentId?: string) {
 const DocumentTypeEnumValues = [SectionDocumentDEPRECATED,
                 ProblemDocument, PersonalDocument, PlanningDocument, LearningLogDocument, ExemplarDocument,
                 ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication,
-                GroupDocument];
+                GroupDocument, AxesDocument];
 export const DocumentTypeEnum = types.enumeration("type", DocumentTypeEnumValues);
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
 export function isDocumentType(value: string): value is DocumentType {

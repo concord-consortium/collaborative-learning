@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
+import { ellipseBoundingBox } from "../../../../shared/drawing/drawing-geometry";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
@@ -20,20 +21,13 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     dragRy: undefined as number | undefined
   }))
   .views(self => ({
-    // The position of the ellipse is its center, so add and subtract the radii.
     get undraggedUnrotatedBoundingBox() {
       const { x, y, rx, ry } = self;
-      return {
-        nw: { x: x - rx, y: y - ry },
-        se: { x: x + rx, y: y + ry } };
+      return ellipseBoundingBox({ x, y, rx, ry });
     },
     get unrotatedBoundingBox() {
-      const {x, y} = self.position;
-      const rx = self.dragRx ?? self.rx;
-      const ry = self.dragRy ?? self.ry;
-      return {
-        nw: { x: x - rx, y: y - ry },
-        se: { x: x + rx, y: y + ry } };
+      const { x, y } = self.position;
+      return ellipseBoundingBox({ x, y, rx: self.dragRx ?? self.rx, ry: self.dragRy ?? self.ry });
     },
     get label() {
       return (self.rx === self.ry) ? "Circle" : "Ellipse";

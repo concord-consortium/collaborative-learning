@@ -3,7 +3,7 @@ import { Provider } from "mobx-react";
 import React from "react";
 import { ClassModel } from "../../models/stores/class";
 import { createDocumentModel } from "../../models/document/document";
-import { DocumentType, GroupDocument, ProblemDocument } from "../../models/document/document-types";
+import { AxesDocument, DocumentType, ProblemDocument } from "../../models/document/document-types";
 import { DocumentsModel } from "../../models/stores/documents";
 import { GroupActivityModel } from "../../models/stores/group-activity";
 import { GroupModel, GroupsModel, GroupUserModel } from "../../models/stores/groups";
@@ -28,6 +28,7 @@ jest.mock("react-tippy", () => ({
 }));
 
 interface IBuildStoresOptions {
+  concurrent?: boolean;
   documentType?: DocumentType;
   numFocused?: number;
   includeLocalUserFocus?: boolean;
@@ -36,7 +37,8 @@ interface IBuildStoresOptions {
 const kLocalUserId = "local";
 
 function buildStores({
-  documentType = GroupDocument,
+  concurrent = true,
+  documentType = AxesDocument,
   numFocused = 0,
   includeLocalUserFocus = false
 }: IBuildStoresOptions = {}) {
@@ -69,6 +71,7 @@ function buildStores({
   const documents = DocumentsModel.create({});
   const document = createDocumentModel({
     type: documentType,
+    concurrent,
     uid: "1",
     key: kDocKey,
     createdAt: 1,
@@ -113,14 +116,29 @@ describe("TileActivityBadges", () => {
     expect(container.querySelector(".tile-activity-badges")).toBeNull();
   });
 
-  it("renders nothing when document type is not 'group'", () => {
-    const stores = buildStores({ documentType: ProblemDocument, numFocused: 2 });
+  it("renders nothing for a document nobody co-edits", () => {
+    // Typed like the documents that do get badges, so this fails if the gate drifts back to testing the
+    // type: co-editing is what the badges report, and `concurrent` is the axis that says so.
+    const stores = buildStores({ concurrent: false, numFocused: 2 });
     const { container } = render(
       <Provider stores={stores}>
         <TileActivityBadges documentKey={kDocKey} tileId={kTileId} hovered={false} selected={false} />
       </Provider>
     );
     expect(container.querySelector(".tile-activity-badges")).toBeNull();
+  });
+
+  it("renders badges for a concurrent document of any type", () => {
+    // No such document exists yet — every concurrent document is axes-typed today — but making a
+    // non-group document multi-writer is what naming the axis separately is for, and the badges should
+    // follow it there without learning about a new type.
+    const stores = buildStores({ documentType: ProblemDocument, numFocused: 2 });
+    render(
+      <Provider stores={stores}>
+        <TileActivityBadges documentKey={kDocKey} tileId={kTileId} hovered={false} selected={false} />
+      </Provider>
+    );
+    expect(screen.getAllByTestId("activity-badge")).toHaveLength(2);
   });
 
   it.each([1, 2, 3, 4])("renders %i badges", (n) => {

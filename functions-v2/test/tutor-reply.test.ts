@@ -75,7 +75,11 @@ describe("buildAssistantDoc", () => {
 
   it("carries highlights when there are any", () => {
     const doc = buildAssistantDoc(
-      {userText: "look here", highlights: [{tileId: "t1", objectId: "n1", label: "the sensor"}]},
+      {
+        assistantText: "look here",
+        highlights: [{tileId: "t1", objectId: "n1", label: "the sensor"}],
+        parentUpdate: {},
+      },
       owner);
     expect(doc.kind).toBe("assistant");
     expect(doc.userText).toBe("look here");
@@ -84,7 +88,14 @@ describe("buildAssistantDoc", () => {
   });
 
   it("omits the field entirely when there are none", () => {
-    const doc = buildAssistantDoc({userText: "hi", highlights: []}, owner);
+    const doc = buildAssistantDoc({assistantText: "hi", highlights: [], parentUpdate: {}}, owner);
+    expect("highlights" in doc).toBe(false);
+  });
+
+  // A backend with no highlight capability omits the field rather than sending an empty array, so
+  // the absent case has to land on the same doc shape as the empty one.
+  it("omits the field entirely when the provider reports none at all", () => {
+    const doc = buildAssistantDoc({assistantText: "hi", parentUpdate: {}}, owner);
     expect("highlights" in doc).toBe(false);
   });
 });

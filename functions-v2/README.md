@@ -4,10 +4,14 @@ The functions are split into two folders `functions-v1` and `functions-v2`. This
 
 ## Available Functions
 
+Named below by their implementation name. Five of them are deployed under a `_v2` suffix — see the
+re-exports at the bottom of `src/index.ts` — and the suffixed name is what clients invoke and what
+the `deploy:` scripts target, so `getAiContent` is called as `getAiContent_v2`.
+
 |Function|Purpose|
 |--------|-------|
 |_onUserDocWritten_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
-|_onAnalyzableDocWritten_|Monitors Firestore user metadata for updates to documents that request AI analysis, and puts them into the analysis queue.|
+|_onAnalyzableTestDocWritten_, _onAnalyzableProdDocWritten_|Monitor Firestore user metadata for updates to documents that request AI analysis, and put them into the analysis queue. One each for the test and prod roots.|
 |_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, and sends them to Shutterbug to create a screenshot of the document|
 |_onAnalysisDocumentImaged_|Sends new screenshots to ChatGPT for analysis and creates a comment on the original document|
 |_atMidnight_|Clears old Firebase roots for dev and qa instances|
@@ -29,6 +33,7 @@ Here are the basic development operations you can do after you cd into the `func
 $ cd functions-v2
 $ nvm use 20      # Recent version of node is required for these functions
 $ npm install     # install local dependencies
+$ npm --prefix ../shared ci   # ../shared has its own openai/zod; the build needs them
 $ npm run lint    # lint the functions code
 $ npm run test    # runs jest (unit) tests for the functions code (requires emulator, see below)
 $ npm run build   # build the functions code (transpile TypeScript)

@@ -311,6 +311,32 @@ describe('ai-summarizer', () => {
         expect(result).toContain('This tile contains a drawing');
       });
 
+      it('should name each object in a drawing tile', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: {
+            row1: {
+              tiles: [{ tileId: 'tile1' }],
+              isSectionHeader: false
+            }
+          },
+          tileMap: {
+            tile1: {
+              id: 'tile1',
+              content: {
+                type: 'Drawing',
+                objects: [
+                  { id: 'r1', type: 'rectangle', x: 40, y: 20, width: 120, height: 80, fill: '#0069ff' }
+                ]
+              }
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('| r1 | rectangle | 40, 20 | 120 x 80 |');
+      });
+
       it('should handle data flow tiles', () => {
         const content = {
           rowOrder: ['row1'],
@@ -424,6 +450,32 @@ describe('ai-summarizer', () => {
           expect(result).toContain('# Question Prompt');
           expect(result).toContain('# Question Response');
         });
+
+        it('should name the prompt tile id, so what is inside it can be cited', () => {
+          // The prompt is summarized by calling tileSummary directly rather than going through
+          // tilesSummary, which is the only place the id line is emitted. A drawing used as a
+          // prompt therefore gave every object an id while the tile holding them had none.
+          const withDrawingPrompt = JSON.parse(JSON.stringify(content));
+          withDrawingPrompt.tileMap.tile1.content = {
+            type: 'Question',
+            rowOrder: ['qRow1'],
+            rowMap: { qRow1: { tiles: [{ tileId: 'prompt' }] } }
+          };
+          withDrawingPrompt.tileMap = {
+            ...withDrawingPrompt.tileMap,
+            prompt: {
+              id: 'promptTileId',
+              content: {
+                type: 'Drawing',
+                objects: [{ id: 'r1', type: 'rectangle', x: 0, y: 0, width: 10, height: 5 }]
+              }
+            }
+          };
+
+          const result = documentSummarizer(withDrawingPrompt, {});
+          expect(result).toContain('| r1 | rectangle |');
+          expect(result).toContain("This tile's id is `promptTileId`.");
+        });
       });
 
       it('should handle placeholder tiles', () => {
@@ -523,6 +575,68 @@ describe('ai-summarizer', () => {
         expect(result).toContain('Data Sets');
         expect(result).toContain('Sample Data');
         expect(result).toContain('1 data set');
+      });
+
+      describe('the dataSetTables option', () => {
+        const withData = {
+          rowOrder: ['row1'],
+          rowMap: { row1: { tiles: [{ tileId: 'tile1' }], isSectionHeader: false } },
+          tileMap: { tile1: { id: 'tile1', content: { type: 'Table' } } },
+          sharedModelMap: {
+            dataSet1: {
+              sharedModel: {
+                type: 'SharedDataSet',
+                providerId: 'provider1',
+                dataSet: {
+                  name: 'Sample Data',
+                  attributes: [
+                    { name: 'Name', values: ['Alice', 'Bob'] },
+                    { name: 'Age', values: ['25', '30'] }
+                  ],
+                  cases: [
+                    { Name: 'Alice', Age: '25' },
+                    { Name: 'Bob', Age: '30' }
+                  ]
+                }
+              },
+              tiles: ['tile1']
+            }
+          }
+        };
+
+        it('defaults to the full table, byte for byte what it produced before the option existed', () => {
+          // The option is new; every existing caller passes nothing. If these two ever differ, every
+          // stored summary and every cached analysis built from one is invalidated for no reason.
+          expect(documentSummarizer(withData, { dataSetTables: 'full' }))
+            .toBe(documentSummarizer(withData, {}));
+        });
+
+        it('keeps the schema and the case count but drops the case data', () => {
+          const schemaOnly = documentSummarizer(withData, { dataSetTables: 'schema-only' });
+          // The shape of the data survives: heading, attributes table, and how many cases there are.
+          expect(schemaOnly).toContain('Sample Data');
+          expect(schemaOnly).toContain('| Name |');
+          expect(schemaOnly).toContain('There are 2 cases in this data set.');
+          // The data itself does not.
+          expect(schemaOnly).not.toContain('Alice');
+          expect(schemaOnly).not.toContain('Bob');
+          expect(schemaOnly).not.toContain('shown below in a Markdown table');
+        });
+
+        it('is shorter than the full summary, which is the point of having it', () => {
+          expect(documentSummarizer(withData, { dataSetTables: 'schema-only' }).length)
+            .toBeLessThan(documentSummarizer(withData, {}).length);
+        });
+
+        it('changes nothing for a document with no data sets', () => {
+          const noData = {
+            rowOrder: ['row1'],
+            rowMap: { row1: { tiles: [{ tileId: 'tile1' }], isSectionHeader: false } },
+            tileMap: { tile1: { id: 'tile1', content: { type: 'Table' } } }
+          };
+          expect(documentSummarizer(noData, { dataSetTables: 'schema-only' }))
+            .toBe(documentSummarizer(noData, {}));
+        });
       });
 
       it('should handle table tiles without shared data sets', () => {
