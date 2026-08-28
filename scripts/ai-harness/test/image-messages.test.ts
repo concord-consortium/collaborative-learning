@@ -6,7 +6,7 @@ import { dataUrlFor } from "../src/represent-image.js";
 import {
   buildImageMessages, buildMixedMessages, defaultAiPrompt
 } from "../../../shared/ai-analysis-messages.js";
-import { makeImageRequest, makeTestPng, testPricing } from "./helpers.js";
+import { makeImageRequest, makeTestPng, promptFromFile, testPricing } from "./helpers.js";
 
 const bytes = makeTestPng(960, 1420);
 /** Facts about the file. `detail` is not one of them — the builder derives it from the message. */
@@ -262,10 +262,14 @@ describe("a run configured the way it was before these dimensions existed keeps 
   // These two values were read off commit b0ef0a19, before this milestone, by building the same
   // requests there — so they pin the key against what actually shipped rather than against whatever
   // this branch happens to produce.
+  //
+  // The prompt comes from the committed file rather than from `defaultAiPrompt`, which is the
+  // built-in one and has since been reworded. A prompt is part of every request key, so a reworded
+  // built-in moves these keys legitimately and would leave the pins measuring nothing.
   it("a text-only request's key does not move", () => {
     const request = buildRequest({
       model: "gpt-4o-mini",
-      aiPrompt: defaultAiPrompt,
+      aiPrompt: promptFromFile("categorize-design-default"),
       message: "text-only",
       markdown: "The student drew a box.",
       generationSettings: { max_completion_tokens: 1024 }
@@ -275,7 +279,9 @@ describe("a run configured the way it was before these dimensions existed keeps 
   });
 
   it("an image-only request's key does not move", () => {
-    expect(requestKeyFor(build("https://images.example.test/shot.png")))
+    const request = build("https://images.example.test/shot.png",
+      { aiPrompt: promptFromFile("categorize-design-default") });
+    expect(requestKeyFor(request))
       .toBe("cf5465f23060eb90c645bd14edb5695404905ffb7c29681562f87a65cafbeb88");
   });
 });

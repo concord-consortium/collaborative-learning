@@ -6,8 +6,8 @@ import {getAnalysisQueueFirestorePath} from "./utils";
 
 // This is one of three functions for AI analysis of documents:
 // 1. (This function) watch for changes to the evaluation metadata field and write into the queue of docs to process
-// 2. Create screenshots of those documents
-// 3. Send those screenshots to the AI service for processing, and create document comments with the results
+// 2. Summarize and screenshot those documents
+// 3. Send what was produced to the AI service for processing, and create document comments with the results
 
 // We watch for changes in the Firebase metadata, but will eventually need to write results out to comments
 // on the document.
@@ -47,8 +47,7 @@ export interface AIPrompt {
   categories?: string[],
   keyIndicatorsPrompt?: string,
   discussionPrompt?: string,
-  systemPrompt: string,
-  summarizer?: string
+  systemPrompt: string
 }
 
 export interface AnalysisQueueDocument {

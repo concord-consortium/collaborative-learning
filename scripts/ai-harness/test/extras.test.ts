@@ -5,7 +5,7 @@ import {
   buildTasks, kDefaultModel, mixedSendsText, relatedSummariesFor, skipReasonsFor,
   variantFindsStudentContentIn
 } from "../src/execute.js";
-import { classifyDocument } from "../src/capability.js";
+import { classifyDocument } from "../../../shared/ai-analysis-classify.js";
 import { corpusPaths } from "../src/corpus.js";
 import { loadPricingConfig, pricingFor } from "../src/cost.js";
 import { harnessRoot } from "../src/files.js";
@@ -68,6 +68,13 @@ describe("which documents a run declines to send", () => {
     rowMap: { r1: { tiles: [{ tileId: "t1" }] } },
     tileMap: { t1: { content: { type: "Geometry" } } }
   });
+  // A drawing with no labels. It has no student text but its summary is a table of its
+  // objects, so the summary does carry the student's work.
+  const drawingOnly = classifyDocument({
+    rowOrder: ["r1"],
+    rowMap: { r1: { tiles: [{ tileId: "t1" }] } },
+    tileMap: { t1: { content: { type: "Drawing", objects: [{ type: "rectangle" }] } } }
+  });
   const empty = classifyDocument({ rowOrder: [], rowMap: {}, tileMap: {} });
 
   it("sends a document that carries student text to every shape", () => {
@@ -87,10 +94,21 @@ describe("which documents a run declines to send", () => {
 
   it("skips a visual-only document for a text-only run, and sends it to the others", () => {
     // The summary would carry no student content, which is the thing a text-only run measures.
+    // Geometry is a fallback-tier type: its summary is a property dump, not a description.
     expect(skipReasonsFor("text-only", visualOnly)[0])
-      .toMatch(/no tile carries student-authored text/);
+      .toMatch(/no tile puts student work into the summary/);
     expect(skipReasonsFor("image-only", visualOnly)).toEqual([]);
     expect(skipReasonsFor("mixed", visualOnly)).toEqual([]);
+  });
+
+  it("sends a drawing-only document to every shape, text included", () => {
+    // What changed after CLUE-646. The drawing carries no text, so the old rule skipped it for a
+    // text-only run and dropped the text half of a mixed one. Its summary is now a table of the
+    // objects the student drew, which is student work by any reading.
+    for (const message of ["text-only", "image-only", "mixed"] as const) {
+      expect(skipReasonsFor(message, drawingOnly)).toEqual([]);
+    }
+    expect(mixedSendsText(drawingOnly)).toBe(true);
   });
 
   it("does not skip when the variant finds student content the classifier cannot see", () => {

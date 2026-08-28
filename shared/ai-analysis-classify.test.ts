@@ -1,4 +1,4 @@
-import { classifyDocument, drawingTileHasText, kMaxQuestionDepth, textTileHasContent } from "../src/capability.js";
+import { classifyDocument, drawingTileHasText, kMaxQuestionDepth, textTileHasContent } from "./ai-analysis-classify";
 
 function doc(rows: { tileId: string }[][], tileMap: Record<string, any>) {
   const rowOrder: string[] = [];
@@ -25,6 +25,100 @@ function questionTile(rows: string[][], questionId = "q1") {
   });
   return { content: { type: "Question", questionId, rowOrder, rowMap } };
 }
+
+function drawingTile(objects: any[]) {
+  return { content: { type: "Drawing", objects } };
+}
+
+describe("whether the summary carries student work", () => {
+  // The rule the producer sends on. It is deliberately broader than `hasStudentText`: a
+  // Drawing's summary is a table of its objects, so a drawing with no labels still puts the
+  // student's work in front of the model.
+
+  it("counts a drawing with objects but no text", () => {
+    const content = doc([[{ tileId: "d1" }]], { d1: drawingTile([{ type: "rectangle" }]) });
+    const classification = classifyDocument(content);
+    expect(classification.summaryCarriesStudentWork).toBe(true);
+    // Unchanged, and still what the modality grouping is built from.
+    expect(classification.tiles[0].hasStudentText).toBe(false);
+    expect(classification.computedModality).toBe("visual-only");
+  });
+
+  it("does not count a drawing with no objects", () => {
+    // A full-fidelity handler with nothing to describe: the summary would say only that a
+    // drawing tile is there.
+    const content = doc([[{ tileId: "d1" }]], { d1: drawingTile([]) });
+    expect(classifyDocument(content).summaryCarriesStudentWork).toBe(false);
+  });
+
+  it("does not count a drawing that is only inside a question's authored prompt", () => {
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt-drawing"]]),
+      "prompt-drawing": drawingTile([{ type: "rectangle" }])
+    });
+    const classification = classifyDocument(content);
+    expect(classification.summaryCarriesStudentWork).toBe(false);
+    expect(classification.tiles.every((tile) => !tile.carriesStudentWork)).toBe(true);
+  });
+
+  it("counts a drawing in a question's response rows", () => {
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt-text"], ["answer-drawing"]]),
+      "prompt-text": textTile("Draw your design."),
+      "answer-drawing": drawingTile([{ type: "ellipse" }])
+    });
+    expect(classifyDocument(content).summaryCarriesStudentWork).toBe(true);
+  });
+
+  it("counts typed text, exactly as before", () => {
+    expect(classifyDocument(doc([[{ tileId: "t1" }]], { t1: textTile("hi") }))
+      .summaryCarriesStudentWork).toBe(true);
+    expect(classifyDocument(doc([[{ tileId: "t1" }]], { t1: textTile("   ") }))
+      .summaryCarriesStudentWork).toBe(false);
+  });
+
+  it("counts a dataflow tile whether or not its program has nodes", () => {
+    // Not what the per-type check says, and deliberately recorded rather than hidden. Dataflow is
+    // `containsStudentText`, and that is never narrowed per instance the way Text and Drawing are,
+    // so the left side of the rule answers first and the node count never gets a say. Narrowing it
+    // would move an empty-Dataflow document from `mixed` to `visual-only`, which is a change to
+    // `computedModality` — the thing the harness groups recorded results by. That is a decision to
+    // take with the thin-summary work, not a quiet fix here.
+    const withNodes = { content: { type: "Dataflow", program: { nodes: { n1: {} } } } };
+    const empty = { content: { type: "Dataflow", program: { nodes: {} } } };
+    expect(classifyDocument(doc([[{ tileId: "f1" }]], { f1: withNodes }))
+      .summaryCarriesStudentWork).toBe(true);
+    expect(classifyDocument(doc([[{ tileId: "f1" }]], { f1: empty }))
+      .tiles[0].carriesStudentWork).toBe(true);
+  });
+
+  it("counts a graph with layers, and not one with none", () => {
+    const withLayers = { content: { type: "Graph", layers: [{ id: "l1" }] } };
+    const bare = { content: { type: "Graph", layers: [] } };
+    expect(classifyDocument(doc([[{ tileId: "g1" }]], { g1: withLayers }))
+      .summaryCarriesStudentWork).toBe(true);
+    expect(classifyDocument(doc([[{ tileId: "g1" }]], { g1: bare }))
+      .summaryCarriesStudentWork).toBe(false);
+  });
+
+  it("never counts a simulator, whose summary is the unit's content and not the student's", () => {
+    const content = doc([[{ tileId: "s1" }]], { s1: { content: { type: "Simulator", simulation: "terrarium" } } });
+    expect(classifyDocument(content).summaryCarriesStudentWork).toBe(false);
+  });
+
+  it("never counts a placeholder or a stub-tier tile", () => {
+    const content = doc([[{ tileId: "p1" }, { tileId: "i1" }]], {
+      p1: { content: { type: "Placeholder" } },
+      i1: { content: { type: "Image", url: "x.png" } }
+    });
+    expect(classifyDocument(content).summaryCarriesStudentWork).toBe(false);
+  });
+
+  it("is false for an empty document", () => {
+    expect(classifyDocument({ rowOrder: [], rowMap: {}, tileMap: {} }).summaryCarriesStudentWork)
+      .toBe(false);
+  });
+});
 
 describe("instance-level checks", () => {
   it("counts a Text tile only when it has content after trimming", () => {

@@ -6,12 +6,14 @@ import {ZodArray, ZodEnum, ZodString} from "zod";
 import {
   IAiPrompt,
   buildImageMessages,
+  buildMixedMessages,
   buildSummaryMessages,
   buildZodResponseSchema,
   categorizationResponseFormat,
   defaultAiPrompt,
 } from "../../shared/ai-analysis-messages";
 import * as categorizeDocumentModule from "../lib/src/ai-categorize-document";
+import {CategorizeDeps, categorizeRepresentations} from "../lib/src/ai-categorize-document";
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -62,8 +64,104 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       expect(categorizeDocumentModule.buildZodResponseSchema).toBe(buildZodResponseSchema);
       expect(categorizeDocumentModule.buildImageMessages).toBe(buildImageMessages);
       expect(categorizeDocumentModule.buildSummaryMessages).toBe(buildSummaryMessages);
+      expect(categorizeDocumentModule.buildMixedMessages).toBe(buildMixedMessages);
       expect(categorizeDocumentModule.categorizationResponseFormat).toBe(categorizationResponseFormat);
       expect(categorizeDocumentModule.defaultAiPrompt).toBe(defaultAiPrompt);
+    });
+  });
+
+  // The rule this guards: production builds its OpenAI messages only through
+  // shared/ai-analysis-messages. Nothing here mocks a module or touches Firestore or the network —
+  // it runs the real function with a fake OpenAI client and reads back the messages it was given,
+  // so a message built inline in functions-v2 would show up as a mismatch here.
+  describe("every request shape comes from the shared builders", () => {
+    const summary = "A summary of the student's work.";
+    const imageUrl = "https://example.com/image.png";
+
+    // A CategorizeDeps whose OpenAI client records the request instead of sending it.
+    function recordingDeps(overrides: Partial<CategorizeDeps> = {}) {
+      const sent: Record<string, any>[] = [];
+      const deps: CategorizeDeps = {
+        findRelatedSummaries: jest.fn().mockResolvedValue([]),
+        createOpenAI: () => ({
+          chat: {
+            completions: {
+              parse: async (request: Record<string, any>) => {
+                sent.push(request);
+                return {choices: [{message: {parsed: {discussion: "ok"}}}], usage: {}};
+              },
+            },
+          },
+        }) as any,
+        ...overrides,
+      };
+      return {deps, sent};
+    }
+
+    test("a mixed request is exactly buildMixedMessages", async () => {
+      const {deps, sent} = recordingDeps();
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(result.messageShape).toBe("mixed");
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+      expect(sent[0].model).toBe("gpt-4o-mini");
+    });
+
+    test("a summary-only request is exactly buildSummaryMessages", async () => {
+      const {deps, sent} = recordingDeps();
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(result.messageShape).toBe("summary-only");
+      expect(sent[0].messages).toEqual(buildSummaryMessages(fullPrompt, summary, []));
+    });
+
+    test("an image-only request is both builders at once", async () => {
+      const {deps, sent} = recordingDeps();
+
+      const result = await categorizeRepresentations(
+        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(result.messageShape).toBe("image-only");
+      // The mixed builder with a null summary produces the image-only message. Pinning both here
+      // is what lets the one code path stand in for two.
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, null, [], imageUrl));
+      expect(sent[0].messages).toEqual(buildImageMessages(fullPrompt, imageUrl));
+    });
+
+    test("related summaries are looked up only when a summary is being sent", async () => {
+      const {deps} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+    });
+
+    test("a failed related-summaries lookup does not cost the evaluation", async () => {
+      // getEmbeddings resolves undefined on error and FieldValue.vector(undefined) then throws
+      // from inside the lookup, so the whole call can fail, not just the embeddings part.
+      const {deps, sent} = recordingDeps({
+        findRelatedSummaries: jest.fn().mockRejectedValue(new Error("vector search unavailable")),
+      });
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(result.completion).toBeDefined();
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+    });
+
+    test("it refuses to ask the model about nothing", async () => {
+      const {deps, sent} = recordingDeps();
+
+      await expect(categorizeRepresentations(
+        {summary: null, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps))
+        .rejects.toThrow("no representation to send");
+      expect(sent).toHaveLength(0);
     });
   });
 

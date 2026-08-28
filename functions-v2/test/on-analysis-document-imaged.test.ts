@@ -8,17 +8,17 @@ import * as admin from "firebase-admin";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import {initialize, projectConfig} from "./initialize";
-import {onAnalysisDocumentImaged} from "../src/on-analysis-document-imaged";
+import {onAnalysisDocumentImaged, representationsOf} from "../src/on-analysis-document-imaged";
 import {buildZodResponseSchema, buildImageMessages} from "../lib/src/ai-categorize-document";
 import {ZodArray, ZodEnum, ZodString} from "zod";
 
 jest.mock("firebase-functions/logger");
 
-const categorizeUrl = jest.fn();
+const categorizeRepresentations = jest.fn();
 jest.mock("../lib/src/ai-categorize-document", () => {
   const actual = jest.requireActual("../lib/src/ai-categorize-document");
   return {
-    categorizeUrl: (file: string) => categorizeUrl(file),
+    categorizeRepresentations: (...args: unknown[]) => categorizeRepresentations(...args),
     buildZodResponseSchema: actual.buildZodResponseSchema,
     buildImageMessages: actual.buildImageMessages,
   };
@@ -44,24 +44,52 @@ const sampleDoc = {
   evaluator: "categorize-design",
 };
 
-function mockCategorizeUrlResponse({
+function mockCategorizeResponse({
   parsed,
   usage = {prompt_tokens: 1, completion_tokens: 2},
   refusal,
+  messageShape = "image-only",
 }: {
   parsed?: { category: string, discussion: string, keyIndicators: string[] },
   usage?: { prompt_tokens: number, completion_tokens: number },
   refusal?: string,
+  messageShape?: string,
 }) {
-  categorizeUrl.mockResolvedValueOnce({
-    choices: [{
-      message: {
-        parsed,
-        refusal,
-      },
-    }],
-    usage,
+  categorizeRepresentations.mockResolvedValueOnce({
+    completion: {
+      choices: [{
+        message: {
+          parsed,
+          refusal,
+        },
+      }],
+      usage,
+    },
+    messageShape,
   });
+}
+
+// The representations the mock was asked to send, from its most recent call.
+function sentRepresentations() {
+  return categorizeRepresentations.mock.calls[0][0];
+}
+
+// A record in the shape the current producer writes. Pass a field as undefined to leave it out;
+// Firestore cannot encode undefined, so it has to be absent rather than present and empty.
+function versionTwoDoc(fields: Record<string, unknown>) {
+  const doc: Record<string, unknown> = {
+    ...sampleDoc,
+    analysisVersion: 2,
+    classification: {
+      modality: "mixed", hasStudentText: true, summaryCarriesStudentWork: true, needsImage: true,
+    },
+    renderTarget: {clueUrl: "https://collaborative-learning.concord.org/authoring-iframe/index.html", unit: "vibe"},
+    ...fields,
+  };
+  for (const [key, value] of Object.entries(doc)) {
+    if (value === undefined) delete doc[key];
+  }
+  return doc;
 }
 
 describe("functions", () => {
@@ -232,7 +260,7 @@ describe("functions", () => {
     });
 
     test("uses custom evaluator when specified", async () => {
-      mockCategorizeUrlResponse({
+      mockCategorizeResponse({
         parsed: {
           category: "category",
           discussion: "Discussion.",
@@ -285,6 +313,7 @@ describe("functions", () => {
             promptTokens: 1,
             completionTokens: 2,
             fullResponse: "{\"choices\":[{\"message\":{\"parsed\":{\"category\":\"category\",\"discussion\":\"Discussion.\",\"keyIndicators\":[\"key1\",\"key2\"]}}}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":2}}",
+            messageShape: "image-only",
             aiPrompt: {
               mainPrompt: "Main prompt",
               categorizationDescription: "Categorization description",
@@ -319,7 +348,7 @@ describe("functions", () => {
     });
 
     test("creates comment when queued document is imaged", async () => {
-      mockCategorizeUrlResponse({
+      mockCategorizeResponse({
         parsed: {
           category: "category",
           discussion: "Discussion.",
@@ -365,6 +394,7 @@ describe("functions", () => {
             promptTokens: 1,
             completionTokens: 2,
             fullResponse: "{\"choices\":[{\"message\":{\"parsed\":{\"category\":\"category\",\"discussion\":\"Discussion.\",\"keyIndicators\":[\"key1\",\"key2\"]}}}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":2}}",
+            messageShape: "image-only",
           });
         });
       });
@@ -392,7 +422,7 @@ describe("functions", () => {
     });
 
     test("creates comment with no tags when AI doesn't assign a category", async () => {
-      mockCategorizeUrlResponse({
+      mockCategorizeResponse({
         parsed: {
           category: "unknown",
           discussion: "Discussion.",
@@ -438,6 +468,7 @@ describe("functions", () => {
             promptTokens: 1,
             completionTokens: 2,
             fullResponse: "{\"choices\":[{\"message\":{\"parsed\":{\"category\":\"unknown\",\"discussion\":\"Discussion.\",\"keyIndicators\":[]}}}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":2}}",
+            messageShape: "image-only",
           });
         });
       });
@@ -465,7 +496,7 @@ describe("functions", () => {
     });
 
     test("fails when AI refuses request", async () => {
-      mockCategorizeUrlResponse({
+      mockCategorizeResponse({
         refusal: "AI reason",
       });
       const wrapped = fft.wrap(onAnalysisDocumentImaged);
@@ -519,6 +550,160 @@ describe("functions", () => {
 
       const comments = firestore.collection("demo/AI/documents/testdoc1/comments");
       await comments.count().get().then((result) => expect(result.data().count).toBe(0));
+    });
+  });
+
+  describe("representationsOf", () => {
+    const target = {clueUrl: "https://example.com/iframe.html", unit: "vibe"};
+
+    test("reads a legacy text record from its summarizer field", () => {
+      // Written by the previous producer during a deploy: one representation, named by `summarizer`.
+      expect(representationsOf({summarizer: "text", docSummary: "A summary", docImageUrl: "https://x/y.png"}))
+        .toEqual({summary: "A summary", imageUrl: null});
+    });
+
+    test("reads a legacy image record the same way", () => {
+      expect(representationsOf({summarizer: "image", docSummary: "A summary", docImageUrl: "https://x/y.png"}))
+        .toEqual({summary: null, imageUrl: "https://x/y.png"});
+    });
+
+    test("sends both when a version-2 record says so", () => {
+      expect(representationsOf({
+        analysisVersion: 2, renderTarget: target,
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+      })).toEqual({summary: "A summary", imageUrl: "https://x/y.png"});
+    });
+
+    test("withholds a stored summary that is not being sent", () => {
+      // The producer stores an unsent summary for auditing. Sending it anyway would evaluate a
+      // document on text the classification said not to use.
+      expect(representationsOf({
+        analysisVersion: 2, renderTarget: target,
+        sendSummary: false, docSummary: "A summary", summaryOmittedReason: "no-student-work-in-summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+      })).toEqual({summary: null, imageUrl: "https://x/y.png"});
+    });
+
+    test("trusts the value over the flag when the two disagree", () => {
+      // sendImage says there is a picture and there is no URL. The flag loses: a request built
+      // around an empty string would be a paid-for evaluation of nothing.
+      expect(representationsOf({
+        analysisVersion: 2, renderTarget: target,
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true,
+      })).toEqual({summary: "A summary", imageUrl: null});
+    });
+
+    test("gives nothing when a version-2 record sends neither", () => {
+      expect(representationsOf({
+        analysisVersion: 2, renderTarget: target, sendSummary: false, sendImage: false,
+      })).toEqual({summary: null, imageUrl: null});
+    });
+  });
+
+  describe("what the imaged function sends", () => {
+    const parsed = {category: "category", discussion: "Discussion.", keyIndicators: ["key1", "key2"]};
+
+    async function runImaged(doc: Record<string, unknown>) {
+      const wrapped = fft.wrap(onAnalysisDocumentImaged);
+      await wrapped({
+        data: makeDocumentSnapshot(doc, "analysis/queue/imaged/testdoc1"),
+        params: {docId: "testdoc1"},
+      });
+    }
+
+    const doneRecord = () => admin.firestore().collection("analysis/queue/done").get()
+      .then((snapshot) => snapshot.docs[0]?.data());
+
+    test("a mixed record sends both representations", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+      }));
+
+      expect(sentRepresentations()).toEqual({summary: "A summary", imageUrl: "https://x/y.png"});
+      // The producer's fields ride through to `done` on the spread, which is what the harness and
+      // the survey script read.
+      expect(await doneRecord()).toMatchObject({
+        messageShape: "mixed",
+        analysisVersion: 2,
+        classification: {modality: "mixed", hasStudentText: true, needsImage: true},
+        sendSummary: true,
+        sendImage: true,
+        renderTarget: {unit: "vibe"},
+      });
+    });
+
+    test("a summary-only record sends no image", async () => {
+      mockCategorizeResponse({parsed, messageShape: "summary-only"});
+
+      await runImaged(versionTwoDoc({
+        classification: {
+          modality: "text-only", hasStudentText: true, summaryCarriesStudentWork: true,
+          needsImage: false,
+        },
+        sendSummary: true, docSummary: "A summary",
+        sendImage: false, imageOmittedReason: "no-visual-content",
+        docImageUrl: undefined,
+      }));
+
+      expect(sentRepresentations()).toEqual({summary: "A summary", imageUrl: null});
+      expect(await doneRecord()).toMatchObject({
+        messageShape: "summary-only",
+        sendSummary: true,
+        sendImage: false,
+        imageOmittedReason: "no-visual-content",
+      });
+    });
+
+    test("an image-only record sends no summary", async () => {
+      mockCategorizeResponse({parsed, messageShape: "image-only"});
+
+      await runImaged(versionTwoDoc({
+        classification: {
+          modality: "visual-only", hasStudentText: false, summaryCarriesStudentWork: true,
+          needsImage: true,
+        },
+        sendSummary: false, docSummary: "A summary", summaryOmittedReason: "no-student-work-in-summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+      }));
+
+      expect(sentRepresentations()).toEqual({summary: null, imageUrl: "https://x/y.png"});
+      expect(await doneRecord()).toMatchObject({
+        messageShape: "image-only",
+        sendSummary: false,
+        summaryOmittedReason: "no-student-work-in-summary",
+        sendImage: true,
+      });
+    });
+
+    test("a record with nothing to send fails the analysis instead of asking the model", async () => {
+      categorizeRepresentations.mockRejectedValueOnce(new Error("no representation to send"));
+
+      await runImaged(versionTwoDoc({sendSummary: false, sendImage: false, docImageUrl: undefined}));
+
+      expect(await admin.firestore().collection("analysis/queue/done").count().get()
+        .then((result) => result.data().count)).toEqual(0);
+      const failed = await admin.firestore().collection("analysis/queue/failedAnalyzing").get()
+        .then((snapshot) => snapshot.docs[0]?.data());
+      expect(failed?.error).toContain("no representation to send");
+      // No comment was posted on the student's document.
+      expect(await admin.firestore().collection("demo/AI/documents/testdoc1/comments").count().get()
+        .then((result) => result.data().count)).toEqual(0);
+    });
+
+    test("no response from the model fails the analysis", async () => {
+      mockCategorizeResponse({parsed: undefined});
+
+      await runImaged(versionTwoDoc({sendSummary: true, docSummary: "A summary", sendImage: false}));
+
+      expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
+        "analysis/queue/imaged/testdoc1", "No response from AI");
+      expect(await admin.firestore().collection("analysis/queue/failedAnalyzing").count().get()
+        .then((result) => result.data().count)).toEqual(1);
     });
   });
 

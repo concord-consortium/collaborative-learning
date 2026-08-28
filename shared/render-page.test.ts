@@ -1,6 +1,4 @@
-import {
-  escapeHtmlAttribute, escapeJsonForScript, generateRenderHtml, iframeUrlFor, isClueFrameUrl
-} from "../src/backends/render-html.js";
+import { generateRenderHtml, iframeUrlFor, isClueFrameUrl } from "./render-page";
 
 /**
  * A document whose student text does every dangerous thing at once: closes the script element,
@@ -25,34 +23,6 @@ const adversarialDocument = {
     }
   }
 };
-
-describe("escaping a document into a script element", () => {
-  it("escapes the characters that could end the element", () => {
-    expect(escapeJsonForScript('"</script>"')).toBe('"\\u003c/script\\u003e"');
-  });
-
-  it("escapes ampersands", () => {
-    expect(escapeJsonForScript('"A & B"')).toBe('"A \\u0026 B"');
-  });
-
-  it("escapes the two Unicode line terminators", () => {
-    expect(escapeJsonForScript('"a\u2028b\u2029c"')).toBe('"a\\u2028b\\u2029c"');
-  });
-
-  it("still parses back to the original document", () => {
-    // The escaping has to be reversible. Every sequence it writes is a valid JSON string escape, so
-    // the page reads back exactly the student text — mangling that would change what the model is
-    // shown, which is the one thing the harness must not do.
-    const escaped = escapeJsonForScript(JSON.stringify(adversarialDocument));
-    expect(JSON.parse(escaped)).toEqual(adversarialDocument);
-  });
-});
-
-describe("escaping an attribute", () => {
-  it("escapes quotes, angle brackets and ampersands", () => {
-    expect(escapeHtmlAttribute(`a"b<c>d&e'f`)).toBe("a&quot;b&lt;c&gt;d&amp;e&#39;f");
-  });
-});
 
 describe("the iframe URL", () => {
   it("carries the unit, unwrapped and readOnly", () => {
@@ -94,8 +64,8 @@ describe("the generated render page", () => {
   });
 
   it("contains no unescaped closing script tag from the document", () => {
-    // The whole point: production and both prior-art copies interpolate JSON.stringify(content)
-    // straight in, so this string would close the element and inject markup into the render page.
+    // The whole point: interpolated straight in, this string closes the element and injects markup
+    // into the page. Every caller of this generator gets the escaping, so none of them can.
     expect(html).not.toContain("</script><img");
     expect(html).toContain("\\u003c/script\\u003e");
     // Exactly the two script elements the page defines, and no more.

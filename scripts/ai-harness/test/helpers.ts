@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { harnessRoot } from "../src/corpus.js";
-import { classifyDocument } from "../src/capability.js";
+import { classifyDocument } from "../../../shared/ai-analysis-classify.js";
+import type { IAiPrompt } from "../../../shared/ai-analysis-messages.js";
 import type { RunTask } from "../src/execute.js";
 import { HarnessRequest, InputImageAccounting, requestKeyFor } from "../src/messages.js";
 import { kRetries } from "../src/cost.js";
@@ -10,6 +11,18 @@ import type { ModelPricing, RunMeta } from "../src/schemas.js";
 
 /** The repository root — two levels up from scripts/ai-harness. */
 export const repoRoot = path.resolve(harnessRoot, "..", "..");
+
+/**
+ * The `aiPrompt` out of a committed prompt file.
+ *
+ * A test that checks what a run sent has to build its expectation from the prompt that run named,
+ * not from `defaultAiPrompt`: the two are the same prompt only until production's built-in wording
+ * is changed, and a prompt file is frozen by its own hash where the built-in one is not.
+ */
+export function promptFromFile(name: string): IAiPrompt {
+  const file = path.join(harnessRoot, "prompts", `${name}.json`);
+  return JSON.parse(fs.readFileSync(file, "utf8")).aiPrompt as IAiPrompt;
+}
 
 const testDataRoots: string[] = [];
 
@@ -221,7 +234,12 @@ export function readLines(file: string): unknown[] {
  */
 export function syntheticCorpusShape(): {
   documents: string[];
-  withStudentText: string[];
+  /**
+   * Documents whose summary carries student work, which is what a text-carrying run sends. This
+   * is broader than "holds typed text": a drawing's summary is a table of its objects, and a
+   * graph's names its axes and layers.
+   */
+  withSummaryContent: string[];
   empty: string[];
   /** Documents the corpus says cannot be rendered, so no image-carrying run can send them. */
   unrenderable: string[];
@@ -235,18 +253,18 @@ export function syntheticCorpusShape(): {
     .map(([docId]) => docId);
   const directory = path.join(corpus, "documents");
   const documents: string[] = [];
-  const withStudentText: string[] = [];
+  const withSummaryContent: string[] = [];
   const empty: string[] = [];
   for (const name of fs.readdirSync(directory).filter((file) => file.endsWith(".json")).sort()) {
     const docId = name.replace(/\.json$/, "");
     documents.push(docId);
     const classification = classifyDocument(JSON.parse(fs.readFileSync(path.join(directory, name), "utf8")));
-    if (classification.tiles.some((tile) => tile.hasStudentText)) withStudentText.push(docId);
+    if (classification.summaryCarriesStudentWork) withSummaryContent.push(docId);
     if (classification.computedModality === "empty") empty.push(docId);
   }
   return {
     documents,
-    withStudentText,
+    withSummaryContent,
     empty,
     unrenderable,
     withContent: documents.filter((docId) =>

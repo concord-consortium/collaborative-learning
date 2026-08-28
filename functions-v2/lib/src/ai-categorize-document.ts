@@ -12,6 +12,7 @@ import {
   Agreements,
   RelatedSummary,
   buildImageMessages,
+  buildMixedMessages,
   buildSummaryMessages,
   buildZodResponseSchema,
   categorizationResponseFormat,
@@ -35,6 +36,7 @@ export interface RelatedSummarySource {
 // so existing importers of this module keep working.
 export {
   buildImageMessages,
+  buildMixedMessages,
   buildSummaryMessages,
   buildZodResponseSchema,
   categorizationResponseFormat,
@@ -132,26 +134,102 @@ export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummar
   return relatedSummaries;
 }
 
-export async function categorizeSummary(summary: string, apiKey: string, firestoreDocumentPath: string, aiPrompt = defaultAiPrompt) {
-  logger.info(`Categorizing summary for: ${firestoreDocumentPath}`);
-  const openai = new OpenAI({apiKey});
+/**
+ * What a categorization request resolves to.
+ *
+ * Taken from `categorizeUrl` rather than written as `ChatCompletion`, which is the unparsed shape:
+ * it has no `parsed` field, and naming the parsed one directly would mean restating the generic
+ * that `categorizationResponseFormat` already fixes, in a form that a future SDK could quietly
+ * change out from under the caller.
+ */
+type ParsedCompletion = NonNullable<Awaited<ReturnType<typeof categorizeUrl>>>;
+
+/** Which of the two representations a request carried. Recorded on the `done` queue record. */
+export type AnalysisMessageShape = "mixed" | "summary-only" | "image-only";
+
+/** What is being sent to the model. `null` means "not being sent", not "does not exist". */
+export interface DocumentRepresentations {
+  summary: string | null;
+  imageUrl: string | null;
+}
+
+/**
+ * Test seam. Production callers pass nothing.
+ *
+ * `findRelatedSummaries` is called through a same-module binding, so exporting it and spying on
+ * the export does not intercept the internal call once ts-jest has compiled the module. Injecting
+ * it is the honest way to let a test stand in for it.
+ */
+export interface CategorizeDeps {
+  findRelatedSummaries: typeof findRelatedSummaries;
+  createOpenAI: (apiKey: string) => OpenAI;
+}
+
+const defaultCategorizeDeps: CategorizeDeps = {
+  findRelatedSummaries,
+  createOpenAI: (apiKey: string) => new OpenAI({apiKey}),
+};
+
+/**
+ * Sends one request carrying whatever representations the document produced.
+ *
+ * There is one builder per shape and they all live in shared/ai-analysis-messages, so this
+ * function and the evaluation harness construct byte-identical requests. An image-only request is
+ * built with the mixed builder and a null summary, which produces the same message
+ * `buildImageMessages` would: "image only because the text was omitted" then stays on one code
+ * path rather than becoming a second one that can drift.
+ */
+export async function categorizeRepresentations(
+  representations: DocumentRepresentations,
+  apiKey: string,
+  firestoreDocumentPath: string,
+  aiPrompt = defaultAiPrompt,
+  deps: CategorizeDeps = defaultCategorizeDeps
+): Promise<{ completion: ParsedCompletion | undefined; messageShape: AnalysisMessageShape }> {
+  const { summary, imageUrl } = representations;
+  if (summary === null && imageUrl === null) {
+    // The producer will not write such a record and the consumer turns empty values into this
+    // case rather than passing them on, so reaching here means calling the model with a bare
+    // prompt and paying for an answer about nothing.
+    throw new Error("no representation to send");
+  }
+  const messageShape: AnalysisMessageShape =
+    summary !== null && imageUrl !== null ? "mixed" : summary !== null ? "summary-only" : "image-only";
+  logger.info(`Categorizing ${messageShape} for: ${firestoreDocumentPath}`);
+
   try {
     const responseSchema = buildZodResponseSchema(aiPrompt);
     if (Object.keys(responseSchema).length === 0) {
       throw new Error("aiPrompt must specify at least one response field for the schema.");
     }
 
-    const relatedSummaries = await findRelatedSummaries(summary, apiKey, firestoreDocumentPath);
-    logger.info("relatedSummaries", relatedSummaries);
+    // Related summaries are enrichment, and their absence costs the evaluation nothing. The whole
+    // lookup is inside the try, not just the embeddings call: getEmbeddings returns undefined on
+    // error and FieldValue.vector(undefined) then throws from inside findRelatedSummaries.
+    let relatedSummaries: RelatedSummary[] = [];
+    if (summary !== null) {
+      try {
+        relatedSummaries = await deps.findRelatedSummaries(summary, apiKey, firestoreDocumentPath);
+      } catch (error) {
+        logger.warn("related summaries unavailable, continuing without them", error);
+      }
+    }
 
-    return openai.chat.completions.parse({
+    const messages = summary !== null && imageUrl !== null ?
+      buildMixedMessages(aiPrompt, summary, relatedSummaries, imageUrl) :
+      summary !== null ?
+        buildSummaryMessages(aiPrompt, summary, relatedSummaries) :
+        buildMixedMessages(aiPrompt, null, [], imageUrl!);
+
+    const completion = await deps.createOpenAI(apiKey).chat.completions.parse({
       model: "gpt-4o-mini",
-      messages: buildSummaryMessages(aiPrompt, summary, relatedSummaries),
+      messages,
       response_format: categorizationResponseFormat(responseSchema),
     });
+    return { completion, messageShape };
   } catch (error) {
     console.log("OpenAI error", error);
-    return undefined;
+    return { completion: undefined, messageShape };
   }
 }
 
