@@ -157,6 +157,11 @@ export interface QueryParams {
   chatTutor?: boolean;
   // With chatTutor on, use the backend-free debug transport instead of Firestore
   chatDebug?: boolean;
+  // Which AI backend answers tutor turns, overriding the unit's chatTutorProvider config so a
+  // single session can be flipped without re-authoring. Values are the ids in
+  // shared/chat-tutor-providers; an unrecognized one falls back to the config, then the default.
+  // Valued, not boolean — see the booleanParams note in url-params.test.ts.
+  chatProvider?: string;
 }
 
 // Make a union of all of the boolean params from the QueryParams

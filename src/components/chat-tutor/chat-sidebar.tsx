@@ -11,6 +11,7 @@ import { DebugTransport } from "./debug-transport";
 import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
+import { nonDefaultTutorProvider, resolveTutorProvider } from "./tutor-provider";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
@@ -51,15 +52,21 @@ export const ChatTutorSidebar: React.FC<IProps> = (props) => {
       return new DebugTransport({ getLeftContext, getRightSummary, tutorPrompts });
     }
     const promptsKey = tutorPrompts && tutorPromptsKey(tutorPrompts);
+    // Resolved once per transport, then routed through nonDefaultTutorProvider so the default
+    // provider contributes nothing to either the conversation id or the message docs.
+    const provider = nonDefaultTutorProvider(
+      resolveTutorProvider(urlParams.chatProvider, appConfig.chatTutorProvider)
+    );
     return new FirestoreTransport({
       firestore: db.firestore,
-      conversationId: conversationDocId(user.id, documentKey, user.network, problemPath, promptsKey),
+      conversationId: conversationDocId(user.id, documentKey, user.network, problemPath, promptsKey, provider),
       uid: user.id,
       contextId: user.classHash,
       problemPath,
       getLeftContext,
       getRightSummary,
       tutorPrompts,
+      provider,
     });
   }, [documentKey, problemPath, problem, getRightSummary, appConfig, db, user]);
 

@@ -125,6 +125,8 @@ These properties are configurable at the unit, investigation, or problem levels 
 
 `chatTutorPrompts`: (object) Optional per-unit AI chat tutor prompt overrides: `replaceGenericPrompt` swaps out the server's built-in generic tutor prompt; `appendToGenericPrompt` is added after the (possibly replaced) generic prompt.
 
+`chatTutorProvider`: ("openai" | "foreverlearning") Which AI backend answers this unit's tutor turns. Unset uses `openai`, the default. The `chatProvider` URL param overrides it so a single session can be flipped for testing without re-authoring; an unrecognized value in either place falls back to the unit config, then to the default. Switching providers starts a fresh conversation rather than continuing the existing one, because a conversation's backend-specific state cannot transfer. `chatTutorPrompts` has no effect under a non-`openai` provider — those backends configure tutor behavior on their own side and accept no prompt from CLUE. Not yet exposed in the authoring UI, so it is set in the curriculum JSON.
+
 ```typescript
   disabledFeatures: string[];
   toolbar: SnapshotIn<typeof ToolbarModel>;

@@ -3,6 +3,7 @@ import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
+import { TutorProviderId } from "./tutor-provider";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -26,6 +27,11 @@ export interface FirestoreTransportOptions {
   // unit-authored generic-prompt overrides; static for the page's lifetime (unit
   // config can't change without a reload, which rebuilds the transport)
   tutorPrompts?: TutorPrompts;
+  // which backend answers a turn, stamped on every message so the trigger (which can't
+  // read unit config) can route. Undefined means the default provider: the field is then
+  // omitted entirely rather than stamped with the default's name, so the docs a default
+  // conversation writes are byte-identical to what it wrote before this existed.
+  provider?: TutorProviderId;
 }
 
 // Live transport: writes `user` message docs to the conversation's messages
@@ -134,7 +140,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, getRightSummary, tutorPrompts } = this.opts;
+    const { uid, contextId, problemPath, getLeftContext, getRightSummary, tutorPrompts, provider } = this.opts;
     const right = getRightSummary();
     const decision = decideContext({
       leftAlreadyInstalled: this.problemInstalled,
@@ -166,6 +172,12 @@ export class FirestoreTransport implements ChatTransport {
     };
     if (leftContext !== undefined) {
       message.leftContext = leftContext;
+    }
+    // Stamped on every message, not just install-eligible ones: the server persists it onto
+    // the parent from the first message and ignores it thereafter, so a mid-conversation flip
+    // can't split a conversation's state across two backends.
+    if (provider) {
+      message.provider = provider;
     }
     // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
     // them only while installing the generic prompt, and ignores them afterwards).

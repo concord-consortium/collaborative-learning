@@ -73,6 +73,19 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    it("allows an optional provider naming a known backend", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({ add: { provider: "foreverlearning" } }));
+    });
+
+    // The enum pin, not just the whitelist: an arbitrary provider string would route a paid turn
+    // to whatever the trigger's fallback happens to be, so the value is constrained here too.
+    it("rejects a provider outside the known set", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: "some-other-vendor" } }));
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: 42 } }));
+    });
+
     it("rejects non-string promptReplace/promptAppend", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { promptReplace: 42 } }));
@@ -262,6 +275,17 @@ describe("Firestore security rules: chat tutor", () => {
         demoMessage({ add: { promptReplace: 42 } }));
       await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-append`,
         demoMessage({ add: { promptAppend: ["x"] } }));
+    });
+
+    // The demo block is where a new provider gets exercised first (the chatProvider param is a
+    // qa/dev tool), so whitelisting `provider` only under the authed block would break exactly
+    // the path it was added for — with a permission-denied that looks nothing like a config error.
+    it("allows a known provider and rejects an unknown one", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-provider`,
+        demoMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider`,
+        demoMessage({ add: { provider: "some-other-vendor" } }));
     });
 
     it("allows an authed demo user to read messages/parent, and rejects update/delete", async () => {

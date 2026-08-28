@@ -728,6 +728,12 @@ service cloud.firestore {
           // promptReplace/promptAppend carry the unit-authored generic-prompt overrides. Like
           // leftContext, they are client-supplied text sent to the model at developer authority
           // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
+          // provider selects the AI backend. Unlike the fields above it is pinned to an ENUM, not
+          // just a type: the trigger routes on it, so an arbitrary string would decide where a
+          // paid turn goes. Keep the list in lockstep with kTutorProviders in
+          // shared/chat-tutor-providers.ts, and with the identical pin in the demo block below.
+          // The client omits the field entirely for the default provider, so most messages carry
+          // no provider at all; 'openai' is accepted so the enum mirrors the shared list.
           function chatMessageCreate() {
             let data = request.resource.data;
             return isStudentClaim() &&
@@ -735,12 +741,13 @@ service cloud.firestore {
               classIsRequestContextId() &&
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                    'problemPath', 'leftContext', 'rightContext',
-                                   'promptReplace', 'promptAppend']) &&
+                                   'promptReplace', 'promptAppend', 'provider']) &&
               data.kind == 'user' &&
               'createdAt' in data &&
               (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
               (!('promptReplace' in data) || data.promptReplace is string) &&
-              (!('promptAppend' in data) || data.promptAppend is string);
+              (!('promptAppend' in data) || data.promptAppend is string) &&
+              (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
           }
 
           allow read: if userIsResourceUser() && isStudentClaim();
@@ -819,17 +826,22 @@ service cloud.firestore {
     // (status/lock/cursor/conversationId/...), which would otherwise corrupt the rendered
     // transcript and the drain cursor. The parent doc is server-created (admin SDK bypasses rules).
     match /demo/{demoName}/chatTutor/{conversationId} {
+      // The provider whitelist and enum pin must match the authed block's chatMessageCreate
+      // exactly. This root is where a new provider is exercised first — the chatProvider URL
+      // param is a dev/qa tool — so whitelisting it only under authed would break precisely the
+      // path it was added for, with a permission-denied that reads nothing like a config error.
       function demoChatMessageCreate() {
         let data = request.resource.data;
         return isAuthed() &&
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                'problemPath', 'leftContext', 'rightContext',
-                               'promptReplace', 'promptAppend']) &&
+                               'promptReplace', 'promptAppend', 'provider']) &&
           data.kind == 'user' &&
           'createdAt' in data &&
           (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
           (!('promptReplace' in data) || data.promptReplace is string) &&
-          (!('promptAppend' in data) || data.promptAppend is string);
+          (!('promptAppend' in data) || data.promptAppend is string) &&
+          (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
       }
 
       allow read: if isAuthed();
