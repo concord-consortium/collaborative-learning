@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 import { WritableDraft } from "immer";
 
-import { AIEvaluation, IAuthorTool, Summarizer } from "../../types";
+import { AIEvaluation, IAuthorTool } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { kAITileType } from "../../../plugins/ai/ai-types";
 
@@ -15,7 +15,6 @@ interface AISettingsFormInputs {
     categorizationDescription: string;
     keyIndicatorsPrompt: string;
     discussionPrompt: string;
-    summarizer: Summarizer;
   },
   aiTileAvailable: boolean;
   showIdeasButton: boolean;
@@ -51,7 +50,6 @@ const AISettings: React.FC = () => {
         categorizationDescription: aiPrompt?.categorizationDescription ?? "",
         keyIndicatorsPrompt: aiPrompt?.keyIndicatorsPrompt ?? "",
         discussionPrompt: aiPrompt?.discussionPrompt ?? "",
-        summarizer: (aiPrompt?.summarizer ?? "image") as Summarizer,
       },
       aiTileAvailable,
       showIdeasButton
@@ -81,7 +79,6 @@ const AISettings: React.FC = () => {
       trigger("aiPrompt.categorizationDescription");
       trigger("aiPrompt.mainPrompt");
       trigger("aiPrompt.systemPrompt");
-      trigger("aiPrompt.summarizer");
     }, 0);
   }, [currentAiEvaluation, trigger]);
 
@@ -107,7 +104,7 @@ const AISettings: React.FC = () => {
           const aiPrompt = config.aiPrompt;
           const {
             systemPrompt, mainPrompt, categorizationDescription,
-            keyIndicatorsPrompt, discussionPrompt, summarizer
+            keyIndicatorsPrompt, discussionPrompt
           } = data.aiPrompt;
           aiPrompt.systemPrompt = systemPrompt;
           aiPrompt.mainPrompt = mainPrompt;
@@ -115,7 +112,8 @@ const AISettings: React.FC = () => {
           aiPrompt.categories = categories;
           aiPrompt.keyIndicatorsPrompt = keyIndicatorsPrompt;
           aiPrompt.discussionPrompt = discussionPrompt;
-          aiPrompt.summarizer = config.aiEvaluation === "categorize-design" ? "image" : summarizer;
+          // The analysis pipeline ignores summarizer, so drop it from configs that still carry it.
+          delete aiPrompt.summarizer;
         }
 
         if (data.aiTileAvailable) {
@@ -172,21 +170,6 @@ const AISettings: React.FC = () => {
           <option value="categorize-design">Categorize Design</option>
         </select>
         {errors.aiEvaluation && <span className="form-error">{errors.aiEvaluation.message}</span>}
-      </div>
-      <div>
-        <label>Format Of Content Sent To AI</label>
-        <select
-          id="summarizer"
-          defaultValue={settings.aiPrompt.summarizer}
-          {...register("aiPrompt.summarizer", {
-            validate: validateAiFields
-          })}
-          disabled={disableAiFields}
-        >
-          <option value="image">Image of Content</option>
-          <option value="text">Text Summary of Content</option>
-        </select>
-        {errors.aiPrompt?.summarizer && <span className="form-error">{errors.aiPrompt?.summarizer?.message}</span>}
       </div>
       <div>
         <label htmlFor="systemPrompt">System Prompt</label>
