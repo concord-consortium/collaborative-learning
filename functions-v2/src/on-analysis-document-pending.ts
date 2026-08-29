@@ -300,15 +300,20 @@ export const onAnalysisDocumentPending =
         promptNeedsImage,
       };
 
-      // 2. An empty document is not evaluated. The summarizer always emits a preamble, headings
-      //    and any authored question prompts, so it would produce text for a blank document — text
-      //    with no student work in it, which is not worth an evaluation or its cost.
-      if (classified.computedModality === "empty") {
-        await error("document has no student content", event, accumulated);
-        return;
-      }
+      // 2. An empty document is still evaluated, as it was before this work.
+      //
+      //    Turning it away is the better answer on its own terms — the summarizer emits only a
+      //    preamble and headings for a blank document, so the model is paid to comment on nothing.
+      //    But the client has no way to say so. It queues an "Ada is thinking about it…"
+      //    placeholder when the student clicks Ideas, and nothing clears that placeholder except
+      //    an arriving comment, so a student who asks for ideas before doing any work waits for a
+      //    comment that is never coming. Leaving them there is worse than one wasted evaluation.
+      //
+      //    The fix belongs in the client — a plain message saying the document is empty — and that
+      //    is a design decision for the team. Until it is made, empty documents are evaluated.
+      const isEmpty = classified.computedModality === "empty";
 
-      // 3. Summary. Produced whenever the document is not empty, and stored whenever it was
+      // 3. Summary. Always produced, and stored whenever it was
       //    produced, sent or not: an investigator reading a `done` record can then see the summary
       //    the model was not given. It is sent when it carries student work in any form — typed
       //    text, or a detailed description of something the student made, such as a drawing tile's
@@ -329,7 +334,9 @@ export const onAnalysisDocumentPending =
       if (docSummary !== undefined) {
         accumulated.docSummary = docSummary;
       }
-      if (docSummary !== undefined && summaryCarriesStudentWork) {
+      if (docSummary !== undefined && (summaryCarriesStudentWork || isEmpty)) {
+        // An empty document's summary carries no student work, and is sent anyway so that a
+        // comment comes back and the student's placeholder clears. See step 2.
         accumulated.sendSummary = true;
       } else if (docSummary !== undefined) {
         accumulated.sendSummary = false;
@@ -344,8 +351,7 @@ export const onAnalysisDocumentPending =
       // question does: an image used as a question prompt contributes nothing a summary can carry,
       // so an answer sent without it would be judged without the question it answers. The second
       // case needs student work to be context *for* — a picture of a prompt is never a substitute
-      // for an answer, and a document holding only an authored prompt was turned away as empty
-      // above.
+      // for an answer, so a document holding only an authored prompt gets no screenshot.
       const wantsImage = needsImage || (summaryCarriesStudentWork && promptNeedsImage);
       if (!wantsImage) {
         // Asked first, so a document that has no use for a screenshot never reads the switch.

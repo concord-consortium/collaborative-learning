@@ -388,27 +388,32 @@ describe("functions", () => {
         expectReasonsAreExclusive(record);
       });
 
-      test("an empty document is not evaluated and is not summarized", async () => {
+      test("an empty document is still evaluated, so the student gets an answer", async () => {
+        // Deliberately not turned away. The client's "Ada is thinking about it…" placeholder is
+        // cleared only by an arriving comment, so failing here would leave a student who clicked
+        // Ideas before doing any work waiting for good. See step 2 in the producer.
         await givenDocument("empty1", emptyDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
         await runPending("empty1");
 
-        expect(await countIn("imaged")).toEqual(0);
-        expect(await countIn("pending")).toEqual(0);
-        expect(shutterbug.spy).not.toHaveBeenCalled();
-        const failed = await failedRecord();
-        expect(failed?.error).toEqual("document has no student content");
-        // The record still says what was worked out before the document was turned away.
-        expect(failed).toMatchObject({
-          analysisVersion: 2,
+        expect(await countIn("failedImaging")).toEqual(0);
+        const record = await imagedRecord("empty1");
+        expect(record).toMatchObject({
+          sendSummary: true,
+          sendImage: false,
+          imageOmittedReason: "no-visual-content",
+          summarizer: "text",
           classification: {
             modality: "empty", hasStudentText: false, summaryCarriesStudentWork: false,
             needsImage: false, promptNeedsImage: false,
           },
-          renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
-        expect(failed?.docSummary).toBeUndefined();
+        // The summary is boilerplate — that is the cost of not leaving the placeholder up.
+        expect(record?.docSummary).toEqual(expect.any(String));
+        // No picture: there is nothing to photograph.
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+        expectReasonsAreExclusive(record);
       });
 
       test("a document with no metadata document renders with the fallback unit", async () => {
@@ -465,16 +470,24 @@ describe("functions", () => {
         expectReasonsAreExclusive(record);
       });
 
-      test("a picture prompt with no answer is still an empty document", async () => {
-        // A picture of the question is context for student work, never a substitute for it.
+      test("a picture prompt with no answer gets no screenshot", async () => {
+        // A picture of the question is context for student work, never a substitute for it, so
+        // the prompt alone earns no screenshot however visual it is. The document is still
+        // evaluated, because every empty document is — see the empty-document case above.
         await givenDocument("imgq2", imagePromptQuestionDoc(false));
         const shutterbug = stubShutterbug(shutterbugOk());
 
         await runPending("imgq2");
 
-        expect(await countIn("imaged")).toEqual(0);
+        const record = await imagedRecord("imgq2");
+        expect(record).toMatchObject({
+          sendImage: false,
+          imageOmittedReason: "no-visual-content",
+          classification: {modality: "empty", promptNeedsImage: true},
+        });
         expect(shutterbug.spy).not.toHaveBeenCalled();
-        expect((await failedRecord())?.error).toEqual("document has no student content");
+        expect(await countIn("failedImaging")).toEqual(0);
+        expectReasonsAreExclusive(record);
       });
 
       test("the mock evaluator produces nothing at all", async () => {
@@ -658,7 +671,8 @@ describe("functions", () => {
         // The recorder of last resort must not fail for the reason the work did. Here the first
         // write is refused the way Firestore refuses an oversized document; the retry has to land
         // and the pending entry has to go.
-        await givenDocument("bigfail1", emptyDoc);
+        await givenDocument("bigfail1", emptyDrawingDoc);
+        stubShutterbug(new Error("connection refused"));
         const attempts: Record<string, unknown>[] = [];
         const realCollection = admin.firestore().collection.bind(admin.firestore());
         const collectionSpy = jest.spyOn(admin.firestore(), "collection")
@@ -685,7 +699,7 @@ describe("functions", () => {
         expect(await countIn("pending")).toEqual(0);
         expect(await countIn("failedImaging")).toEqual(1);
         const failed = await failedRecord();
-        expect(failed?.error).toContain("document has no student content");
+        expect(failed?.error).toContain("nothing to send");
         expect(failed?.error).toContain("accumulated fields omitted");
       });
     });
