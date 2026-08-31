@@ -42,18 +42,37 @@ Items 5 and 6 are guidance, not flags — look for them in the agent's report.
 
 ### What the baseline looks like
 
-Measured over 5 no-skill reps, 2026-08-31. Compare a new baseline against this before
-concluding the skill has stopped earning its keep:
+**Record the model with every result.** A skill is an addition to a model, so the same rubric
+scores differently on different ones, and a rep inherits the model of the session that
+dispatched it unless you override it. A run whose model went unrecorded cannot be compared
+against anything below.
 
-| Item | Unaided result |
-|---|---|
-| 1 answer | 5/5 reached 111. The script's own `--help` warns that names collide, and 111 is in its usage example, so the number alone no longer discriminates. |
-| 1 route | 2/5. The other three swept class ids, one of them scanning 1–800 one id at a time. This is what the skill is buying. |
-| 2, 3, 4, 5 | 5/5. `docs/deploy.md` now carries the strip regexes, so unaided agents get the deployed path from it. |
-| 6 | 0/5. Every rep put the student launch first and never mentioned the teacher-login Firestore write. |
+Measured 2026-08-31. With the skill, every rep on both models scored 6/6, so the skill is not
+Opus-dependent. All the variation is in the unaided column.
 
-A sweeping rep may also trip the harness's security classifier, since scanning every class
-reads hundreds of student records. Another reason the teacher route is the behaviour to score.
+| Item | Unaided, Opus 5 (n=5) | Unaided, Sonnet 5 (n=3) |
+|---|---|---|
+| 1 answer | 5/5 | 3/3 |
+| 1 route | 2/5 | 3/3 |
+| 2 | 5/5 | 3/3 |
+| 3 | 5/5 | 3/3 |
+| 4 | 5/5 | 0/3 |
+| 5 | 5/5 | 3/3 |
+| 6 | 0/5 | 0/3 |
+
+Where the two models differ, and why it matters for scoring:
+
+- **Item 1's answer discriminates on neither.** The script's own `--help` warns that class
+  names collide and uses 111 in its example, so the number alone proves nothing.
+- **Item 1's route splits the models backwards from what you would guess.** Three of the five
+  Opus reps swept class ids, one scanning 1-800 a single id at a time; all three Sonnet reps
+  went straight to the teacher route. A sweeping rep may also trip the harness's security
+  classifier, since scanning every class reads hundreds of student records.
+- **Item 4 is where the skill earns most on Sonnet.** Every Opus rep checked the problem
+  ordinal against `content.json` unprompted. No Sonnet rep did; all three took 1.3 as given,
+  which is exactly the failure the rubric calls out as a fail even when the ordinal is valid.
+- **Item 6 fails on both.** No unaided rep on either model mentioned the teacher-login
+  Firestore write that `teacherIsInClass()` depends on.
 
 ## Check 2 — dry-run assertion
 
