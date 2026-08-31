@@ -129,6 +129,20 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   const [sliderValue, setSliderValue] = useState(() => sliderEntries.length);
 
+  // The document's history position can move without the slider being touched: a link
+  // into a document's history seeks with goToHistoryEntry. Follow it, so the thumb
+  // reports where the document actually is. Several slider values can share one history
+  // position — a comment and the entry before it — so a value that already represents
+  // the position is left alone rather than snapped onto the history entry.
+  useEffect(() => {
+    if (numHistoryEventsApplied === undefined) return;
+    setSliderValue(current => {
+      if (historyPositionForSliderValue(current) === numHistoryEventsApplied) return current;
+      const index = sliderIndexForHistoryPosition(numHistoryEventsApplied);
+      return index >= 0 ? index : current;
+    });
+  }, [numHistoryEventsApplied, historyPositionForSliderValue, sliderIndexForHistoryPosition]);
+
   const eventCreatedTime = useMemo(() => {
     const entry = sliderEntries[sliderValue] ?? sliderEntries[sliderEntries.length - 1];
     return entry?.created;
