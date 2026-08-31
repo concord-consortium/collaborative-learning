@@ -7,20 +7,21 @@ import {
   teacherAuth, teacherId, teacherName, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
-// The client rates a comment by updating a single dotted key, and toggles a rating off by deleting
-// that key (src/hooks/use-update-comment-rating.ts), so these tests write the same way rather than
-// through the set-with-merge helpers in setup-rules-tests.
-const expectRatingUpdateToSucceed =
+// A comment update, whatever it carries. Most of these tests write a rating, and the client rates by
+// updating a single dotted key and toggles off by deleting that key
+// (src/hooks/use-update-comment-rating.ts), so these tests write the same way rather than through the
+// set-with-merge helpers in setup-rules-tests. A few tests update other fields through these helpers
+// as well — an edit to the comment's own text, alone or alongside a rating.
+const expectCommentUpdateToSucceed =
   async (db: firebase.firestore.Firestore, docPath: string, update: Record<string, any>) => {
     expect(await assertSucceeds(db.doc(docPath).update(update))).toBeUndefined();
   };
-const expectRatingUpdateToFail =
+const expectCommentUpdateToFail =
   async (db: firebase.firestore.Firestore, docPath: string, update: Record<string, any>) => {
     expect(await assertFails(db.doc(docPath).update(update))).toBeDefined();
   };
 
 interface IRatingRealm {
-  // path of the comment being rated
   commentPath: string;
   // writes the parent document and the comment, starting from the given ratings
   seedComment: (ratings?: Record<string, any>) => Promise<void>;
@@ -33,7 +34,6 @@ interface IRatingRealm {
   // auth of the user who wrote the comment. They reach these rules through a second path, since
   // isValidCommentUpdateRequest also lets an author edit their own comment.
   authorAuth: any;
-  // the author's platform user id
   authorId: string;
 }
 
@@ -50,68 +50,68 @@ function testRatingRules(realmName: string, realm: IRatingRealm) {
 
     it.each([...kRatingValues])("a user can rate a comment '%s'", async (value) => {
       await seedComment();
-      await expectRatingUpdateToSucceed(db, commentPath, { [`ratings.${raterId}`]: value });
+      await expectCommentUpdateToSucceed(db, commentPath, { [`ratings.${raterId}`]: value });
     });
 
     it("a user can change their own rating to another allowed value", async () => {
       await seedComment({ [raterId]: "yes" });
-      await expectRatingUpdateToSucceed(db, commentPath, { [`ratings.${raterId}`]: "no" });
+      await expectCommentUpdateToSucceed(db, commentPath, { [`ratings.${raterId}`]: "no" });
     });
 
     it("a user can toggle their own rating off by deleting their key", async () => {
       await seedComment({ [raterId]: "yes" });
-      await expectRatingUpdateToSucceed(db, commentPath,
+      await expectCommentUpdateToSucceed(db, commentPath,
         { [`ratings.${raterId}`]: firebase.firestore.FieldValue.delete() });
     });
 
     it("a user can toggle their own rating off while another user's rating remains", async () => {
       await seedComment({ [raterId]: "yes", [otherUserId]: "no" });
-      await expectRatingUpdateToSucceed(db, commentPath,
+      await expectCommentUpdateToSucceed(db, commentPath,
         { [`ratings.${raterId}`]: firebase.firestore.FieldValue.delete() });
     });
 
     it("rejects a rating value outside the allowed set", async () => {
       await seedComment();
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "maybe" });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "maybe" });
     });
 
     it("rejects an empty rating value", async () => {
       await seedComment();
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "" });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "" });
     });
 
     it("rejects a rating value that isn't a string", async () => {
       await seedComment();
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: 1 });
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: true });
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: { value: "yes" } });
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: ["yes"] });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: 1 });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: true });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: { value: "yes" } });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: ["yes"] });
     });
 
     it("rejects changing an existing rating of one's own to a disallowed value", async () => {
       await seedComment({ [raterId]: "yes" });
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "definitely" });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "definitely" });
     });
 
     it("rejects replacing the whole ratings map", async () => {
       await seedComment({ [otherUserId]: "no" });
-      await expectRatingUpdateToFail(db, commentPath, { ratings: { [raterId]: "yes" } });
+      await expectCommentUpdateToFail(db, commentPath, { ratings: { [raterId]: "yes" } });
     });
 
     it("rejects writing another user's rating", async () => {
       await seedComment();
-      await expectRatingUpdateToFail(db, commentPath, { [`ratings.${otherUserId}`]: "yes" });
+      await expectCommentUpdateToFail(db, commentPath, { [`ratings.${otherUserId}`]: "yes" });
     });
 
     it("rejects deleting another user's rating", async () => {
       await seedComment({ [otherUserId]: "yes" });
-      await expectRatingUpdateToFail(db, commentPath,
+      await expectCommentUpdateToFail(db, commentPath,
         { [`ratings.${otherUserId}`]: firebase.firestore.FieldValue.delete() });
     });
 
     it("rejects a valid rating that also changes another field", async () => {
       await seedComment();
-      await expectRatingUpdateToFail(db, commentPath,
+      await expectCommentUpdateToFail(db, commentPath,
         { [`ratings.${raterId}`]: "yes", content: "A different comment!" });
     });
 
@@ -125,32 +125,32 @@ function testRatingRules(realmName: string, realm: IRatingRealm) {
 
       it("the author can rate their own comment", async () => {
         await seedComment();
-        await expectRatingUpdateToSucceed(db, commentPath, { [`ratings.${authorId}`]: "yes" });
+        await expectCommentUpdateToSucceed(db, commentPath, { [`ratings.${authorId}`]: "yes" });
       });
 
       it("rejects a rating value outside the allowed set", async () => {
         await seedComment();
-        await expectRatingUpdateToFail(db, commentPath, { [`ratings.${authorId}`]: "bogus" });
+        await expectCommentUpdateToFail(db, commentPath, { [`ratings.${authorId}`]: "bogus" });
       });
 
       it("rejects writing another user's rating", async () => {
         await seedComment();
-        await expectRatingUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "yes" });
+        await expectCommentUpdateToFail(db, commentPath, { [`ratings.${raterId}`]: "yes" });
       });
 
       it("rejects replacing the whole ratings map, dropping another user's rating", async () => {
         await seedComment({ [raterId]: "yes" });
-        await expectRatingUpdateToFail(db, commentPath, { ratings: { [authorId]: "yes" } });
+        await expectCommentUpdateToFail(db, commentPath, { ratings: { [authorId]: "yes" } });
       });
 
       it("the author can still edit their own comment", async () => {
         await seedComment({ [raterId]: "yes" });
-        await expectRatingUpdateToSucceed(db, commentPath, { content: "A different comment!" });
+        await expectCommentUpdateToSucceed(db, commentPath, { content: "A different comment!" });
       });
 
       it("rejects an edit that carries a rating change with it", async () => {
         await seedComment();
-        await expectRatingUpdateToFail(db, commentPath,
+        await expectCommentUpdateToFail(db, commentPath,
           { [`ratings.${authorId}`]: "yes", content: "A different comment!" });
       });
     });

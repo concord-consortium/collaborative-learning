@@ -421,10 +421,8 @@ service cloud.firestore {
                   request.resource.data.keys().hasAll(["name", "createdAt", "content", "network"]);
         }
 
-        // `ratings` can change, and is listed here so that an edit to the comment can't carry a
-        // rating change with it. Ratings change only through isValidRatingUpdate, which limits a
-        // write to the requester's own key and to the values the UI offers — including when the
-        // requester wrote the comment.
+        // `ratings` is listed here so a comment edit can't carry a rating change: isValidRatingUpdate
+        // is the only path that changes it, authors included.
         function preservesReadOnlyCommentFields() {
           let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
@@ -437,7 +435,6 @@ service cloud.firestore {
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
           // The user's own key missing from the new map is the toggle-off case, which is allowed.
-          // When the key is present, its value must be one of the values the UI offers.
           return affectedFields.hasOnly(['ratings'])
             && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
             && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
@@ -602,10 +599,8 @@ service cloud.firestore {
                   request.resource.data.keys().hasAll(["name", "createdAt", "content"]);
         }
 
-        // `ratings` can change, and is listed here so that an edit to the comment can't carry a
-        // rating change with it. Ratings change only through isValidRatingUpdate, which limits a
-        // write to the requester's own key and to the values the UI offers — including when the
-        // requester wrote the comment.
+        // `ratings` is listed here so a comment edit can't carry a rating change: isValidRatingUpdate
+        // is the only path that changes it, authors included.
         function preservesReadOnlyCommentFields() {
           let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
@@ -618,7 +613,6 @@ service cloud.firestore {
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
           // The user's own key missing from the new map is the toggle-off case, which is allowed.
-          // When the key is present, its value must be one of the values the UI offers.
           return affectedFields.hasOnly(['ratings'])
             && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
             && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
