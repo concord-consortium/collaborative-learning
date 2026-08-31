@@ -233,13 +233,16 @@ export interface IPublishSupportParams extends IFirebaseFunctionBaseParams {
 }
 export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFunctionWarmUpParams;
 
+export const kRatingValues = ["yes", "no", "notSure"] as const;
+
+export type RatingValue = typeof kRatingValues[number];
+
 export interface IAgreeWithAi {
   version: 1;
-  value: "yes" | "no" | "notSure";
+  value: RatingValue;
 }
 
 export type AgreementValue = IAgreeWithAi["value"]
-export type RatingValue = "yes" | "no" | "notSure";
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text
