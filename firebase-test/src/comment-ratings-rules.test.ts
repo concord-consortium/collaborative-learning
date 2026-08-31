@@ -1,5 +1,6 @@
 import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import firebase from "firebase";
+import { kRatingValues } from "../../shared/shared";
 import {
   adminWriteDoc, cPath, cProblem, cSection, cUnit, initFirestore, mockTimestamp, network1, noNetwork,
   prepareEachTest, student2Id, studentAuth, studentId, teacher2Auth, teacher2Id, teacher2Name,
@@ -47,7 +48,7 @@ function testRatingRules(realmName: string, realm: IRatingRealm) {
       db = initFirestore(raterAuth);
     });
 
-    it.each(["yes", "no", "notSure"])("a user can rate a comment '%s'", async (value) => {
+    it.each([...kRatingValues])("a user can rate a comment '%s'", async (value) => {
       await seedComment();
       await expectRatingUpdateToSucceed(db, commentPath, { [`ratings.${raterId}`]: value });
     });
