@@ -1,3 +1,4 @@
+import type {FieldValue} from "firebase-admin/firestore";
 import {RatingValue} from "../../shared/shared";
 
 // The agreement entries stored in a summary's `aiAgreements` map.
@@ -34,3 +35,38 @@ export interface AiAgreementV2 {
 }
 
 export type AiAgreement = AiAgreementV1 | AiAgreementV2;
+
+/*
+ * Whether an entry records an agreement with one of Ada's comments.
+ *
+ * Both the count stored on the summary and the filter on the read side ask this question, so the
+ * rule that a version-1 entry is an AI agreement by construction is written down once.
+ */
+export function isAiAgreement(entry: AiAgreement): boolean {
+  return entry.version === 1 ? true : entry.isAiComment === true;
+}
+
+/**
+ * A `summaries/{summaryId}` record: the summary the AI evaluated for one document, the vector it
+ * was found by, and what people said about the comments it produced.
+ *
+ * The analysis pipeline creates and refreshes the record; `onCommentRated` only ever adjusts
+ * `aiAgreements` and the two counts. `numAgreements` is optional on read because records written
+ * before it existed do not carry it; the recompute in `onCommentRated` fills it in the first time
+ * a rating touches such a record.
+ */
+export interface Summary {
+  key: string;
+  context_id: string;
+  unit: string;
+  investigation: string;
+  problem: string;
+  offeringId: string;
+  summary: string;
+  summaryEmbedding: FieldValue;
+  analyzedAt: number;
+  adaCommentId?: string;
+  numAiAgreements: number;
+  numAgreements?: number;
+  aiAgreements: Record<string, AiAgreement>;
+}

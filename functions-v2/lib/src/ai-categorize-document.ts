@@ -6,7 +6,7 @@ import {
   FieldValue,
   VectorQuery
 } from "@google-cloud/firestore";
-import { AiAgreement } from "../../src/summary-types";
+import { AiAgreement, isAiAgreement } from "../../src/summary-types";
 import { kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
@@ -118,13 +118,11 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
  * would otherwise be copied into the prompt verbatim as a label.
  *
  * And the agreement has to be with an AI comment. A rating on another student's comment is stored
- * with `isAiComment: false` and is deliberately held back from the prompt for now. Version-1
- * entries come from the retired `agreeWithAi` flow, which only Ada's comments could carry, so they
- * are AI agreements by construction.
+ * with `isAiComment: false` and is deliberately held back from the prompt for now.
  */
 function isPromptableAgreement(entry: AiAgreement): boolean {
   if (!kRatingValues.includes(entry.value)) return false;
-  return entry.version === 1 ? true : entry.isAiComment === true;
+  return isAiAgreement(entry);
 }
 
 /**
