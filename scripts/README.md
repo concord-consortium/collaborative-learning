@@ -43,31 +43,6 @@ endpoints that answer "the current user's own things" — `GET /api/v1/classes/m
 instance — return 403. That is the token working correctly, not a broken token. Fetch classes
 by id instead.
 
-## Setting up a portal assignment to test CLUE
-
-`setup-portal-assignment.ts` creates everything needed to run a build of CLUE from a real
-portal assignment: the resource, its assignment to a class, a teacher report, and the OAuth
-redirect URI. This is how you test CLUE against the real Firebase security rules — `demo` and
-`qa` appMode both write to Firebase paths whose rules are effectively `if isAuthed()`, so
-they exercise none of them.
-
-```shell
-cd scripts
-npx tsx setup-portal-assignment.ts \
-  --clue-path version/v7.5.0 \
-  --class-id 111 \
-  --unit seismic \
-  --problem 1.1 \
-  --dry-run
-```
-
-Run with `--dry-run` first to see what would be created versus reused; every step is
-idempotent, so re-running with different flags is safe. `--help` lists the options.
-
-Launch the result from the class assignment, **not** from the resource page — running a
-resource directly never sends a portal token, so CLUE starts in preview mode and writes to
-`/demo/` rather than `/authed/`.
-
 ## Running on Google Cloud Virtual Machine
 
 It can be useful to offload the running of scripts to a virtual machine in Google Cloud. They will usually run faster there.
