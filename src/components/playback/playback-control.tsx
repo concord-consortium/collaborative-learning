@@ -103,6 +103,30 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     return entries;
   }, [history, allComments]);
 
+  // The history position a slider value represents. A history entry maps to its own
+  // index. A comment maps to the history entry just before it, so the canvas shows
+  // the document as it stood when the comment was made. The slider max is
+  // sliderEntries.length, one past the last index, which means the end of the history.
+  const historyPositionForSliderValue = useCallback((value: number) => {
+    const sliderEntry = sliderEntries[value];
+    if (!sliderEntry) return history.length;
+    if (sliderEntry.kind === "history") return sliderEntry.index;
+    for (let i = value - 1; i >= 0; i--) {
+      const entry = sliderEntries[i];
+      if (entry.kind === "history") return entry.index;
+    }
+    return 0;
+  }, [history.length, sliderEntries]);
+
+  // The inverse: the slider value for a history position. Returns -1 if the position
+  // has no entry in the slider.
+  const sliderIndexForHistoryPosition = useCallback((historyPosition: number) => {
+    // The end-of-history position is sliderEntries.length rather than any entry
+    // inside sliderEntries, so findIndex can't locate it.
+    if (historyPosition >= history.length) return sliderEntries.length;
+    return sliderEntries.findIndex(e => e.kind === "history" && e.index === historyPosition);
+  }, [history.length, sliderEntries]);
+
   const [sliderValue, setSliderValue] = useState(() => sliderEntries.length);
 
   const eventCreatedTime = useMemo(() => {
@@ -124,55 +148,28 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [playbackFailureWarning, setPlaybackFailureWarning] = useState<string | null>(null);
 
   const goToSliderValue = useCallback(async (value: number) => {
-    // the slider max is sliderEntries.length, which is one more than the last index
-    // in sliderEntries. This value indicates going to the end of the history.
+    // set the playback time to the time of the entry so that the comment thread is in sync
     const sliderEntry = sliderEntries[value];
-
-    // figure out which history entry to go to
-    let newHistoryEntryIndex = 0;
     if (sliderEntry) {
-      // set the playback time to the time of the entry so that the comment thread is in sync
       setPlaybackTime(sliderEntry.created);
-
-      if (sliderEntry.kind === "history") {
-        newHistoryEntryIndex = sliderEntry.index;
-      } else {
-        // go to the history entry just before the comment (or any other future slider entry kinds) was made
-        // to keep the canvas in sync
-        for (let i = value - 1; i >= 0; i--) {
-          const entry = sliderEntries[i];
-          if (entry.kind === "history") {
-            newHistoryEntryIndex = entry.index;
-            break;
-          }
-        }
-      }
-    } else {
-      // go to the final history entry when at the end of the slider
-      newHistoryEntryIndex = history.length;
     }
+
+    const newHistoryEntryIndex = historyPositionForSliderValue(value);
     await treeManager.goToHistoryEntry(newHistoryEntryIndex);
 
     // Check if the move was blocked by a failed entry. If so, snap the
     // slider to the last fully applied position and show a warning.
     const actual = treeManager.numHistoryEventsApplied;
     if (actual !== undefined && actual !== newHistoryEntryIndex) {
-      // Find the slider entry that corresponds to the actual history
-      // position. The end-of-history position is represented by
-      // sliderEntries.length (one past the last index), not by any
-      // entry inside sliderEntries, so findIndex can't locate it.
-      const actualSliderIndex = actual === history.length
-        ? sliderEntries.length
-        : sliderEntries.findIndex(
-          e => e.kind === "history" && e.index === actual
-        );
+      const actualSliderIndex = sliderIndexForHistoryPosition(actual);
       setSliderValue(actualSliderIndex >= 0 ? actualSliderIndex : value);
       setPlaybackFailureWarning("History playback could not apply some changes and was stopped.");
     } else {
       setSliderValue(value);
       setPlaybackFailureWarning(null);
     }
-  }, [treeManager, history, sliderEntries, setPlaybackTime]);
+  }, [treeManager, sliderEntries, setPlaybackTime,
+      historyPositionForSliderValue, sliderIndexForHistoryPosition]);
 
   const goToComment = useCallback((comment: WithId<CommentDocument>) => {
     const index = sliderEntries.findIndex(e => e.kind === "comment" && e.entry.id === comment.id);
