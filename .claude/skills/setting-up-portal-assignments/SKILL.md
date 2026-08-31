@@ -92,10 +92,6 @@ So `CLUE-654-portal-assignment-setup` deploys to `branch/portal-assignment-setup
 regexes rather than assuming, then **confirm the path returns 200 before using it** — a 404
 here is far more likely to be the wrong path than an unbuilt branch.
 
-Three sources in the repo describe this wrongly or incompletely, so do not trust them over the
-action's own `deploy-props.ts`: `README.md` and `docs/deploy.md` (both now corrected, but
-check what you are reading), and `s3_deploy.sh`, which is dead code no workflow calls.
-
 Stripping means names collide: `CLUE-1-add-widget` and `CLUE-2-add-widget` both deploy to
 `branch/add-widget/` and overwrite each other.
 
