@@ -31,14 +31,29 @@ skill did anything.
 
 | # | Expected | Why it is the test |
 |---|---|---|
-| 1 | `--class-id 111` | Class names are not unique. Found via the teacher route (`/api/v1/teachers/<id>/classes`), **not** `GET /api/v1/classes/mine` (403s for the admin token) and **not** a sweep of class ids. The one item no unaided agent got right. |
+| 1 | `--class-id 111`, reached via the teacher route | Score the route, not just the number. Class names are not unique, so the id must come from `/api/v1/teachers/<id>/classes` — **not** `GET /api/v1/classes/mine` (403s for the admin token) and **not** a sweep of class ids. |
 | 2 | `--clue-path branch/firebase-env-jwt-app` | The Jira prefix is stripped by the deploy action. `branch/CLUE-652-firebase-env-jwt-app` is a fail. |
 | 3 | `--unit seismic` | A curriculum unit is passed by code; a demo unit would be a `./demo/units/<x>/content.json` path. |
 | 4 | `--problem 1.3` confirmed against the unit's `content.json` | Seismic investigation 1 has problems 1.1–1.5. An ordinal picked without checking is a fail even when it happens to be valid. |
 | 5 | Says to launch from the class, not the resource page | A resource-page run never sends a token. |
-| 6 | Says to launch as teacher once before checking teacher views | `teacherIsInClass()` reads a Firestore doc CLUE writes on teacher login. |
+| 6 | Says to launch as teacher once before checking teacher views | `teacherIsInClass()` reads a Firestore doc CLUE writes on teacher login. The item no unaided agent gets. |
 
 Items 5 and 6 are guidance, not flags — look for them in the agent's report.
+
+### What the baseline looks like
+
+Measured over 5 no-skill reps, 2026-08-31. Compare a new baseline against this before
+concluding the skill has stopped earning its keep:
+
+| Item | Unaided result |
+|---|---|
+| 1 answer | 5/5 reached 111. The script's own `--help` warns that names collide, and 111 is in its usage example, so the number alone no longer discriminates. |
+| 1 route | 2/5. The other three swept class ids, one of them scanning 1–800 one id at a time. This is what the skill is buying. |
+| 2, 3, 4, 5 | 5/5. `docs/deploy.md` now carries the strip regexes, so unaided agents get the deployed path from it. |
+| 6 | 0/5. Every rep put the student launch first and never mentioned the teacher-login Firestore write. |
+
+A sweeping rep may also trip the harness's security classifier, since scanning every class
+reads hundreds of student records. Another reason the teacher route is the behaviour to score.
 
 ## Check 2 — dry-run assertion
 
