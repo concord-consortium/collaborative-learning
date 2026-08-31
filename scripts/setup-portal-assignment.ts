@@ -37,6 +37,18 @@ const kClueOAuthAppId = "clue";
 const kClueStandaloneRule = "clue-standalone";
 /** Admin index pages are paginated; this bounds the scan when looking for an existing record. */
 const kMaxAdminPages = 20;
+/**
+ * The Firebase projects CLUE knows about (`validProjects` in src/lib/firebase-config.ts).
+ * Anything else in the URL falls back to production without complaint, which would point a
+ * staging smoke test at the production database while the resource name said otherwise.
+ */
+const kFirebaseEnvs = ["staging", "production"];
+/** Options taking a value, and valueless flags. Anything else is a typo, not a feature. */
+const kValueOptions = [
+  "clue-path", "class-id", "unit", "problem", "portal", "firebase-env",
+  "name", "clue-base", "activity-id", "oauth-client-id"
+];
+const kFlagOptions = ["help", "no-report", "no-redirect", "dry-run"];
 
 interface IOptions {
   portal: PortalName;
@@ -44,7 +56,7 @@ interface IOptions {
   classId: string;
   unit: string;
   problem: string;
-  firebaseEnv?: string;
+  firebaseEnv: string;
   name?: string;
   clueBase: string;
   activityId?: number;
@@ -71,8 +83,9 @@ Required:
 
 Optional:
   --portal <name>       ${portalNames.join(" | ")} (default: staging)
-  --firebase-env <env>  Firebase project CLUE connects to (default: matches --portal).
-                        Omitted from URLs when "production", which is CLUE's own default.
+  --firebase-env <env>  ${kFirebaseEnvs.join(" | ")}: the Firebase project CLUE connects to
+                        (default: matches --portal). Omitted from URLs when "production",
+                        which is CLUE's own default.
   --name <name>         Resource name (default: derived from unit, problem and CLUE path).
   --clue-base <url>     CLUE deployment root (default: ${kClueBase}).
   --activity-id <id>    Use this existing external activity instead of finding or creating one.
@@ -85,6 +98,21 @@ Optional:
   process.exit(message ? 1 : 0);
 }
 
+/**
+ * A portal record id. Rejecting a non-numeric value matters more than it looks: `Number("x")`
+ * is NaN, NaN is falsy, and every use of these ids treats a falsy id as "not given" — so a
+ * typo would not fail, it would quietly create a second activity or skip the report.
+ */
+function parseId(raw: Record<string, string>, key: string) {
+  const value = raw[key];
+  if (value === undefined) return undefined;
+  const id = Number(value);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    usage(`--${key} must be a positive integer, got "${value}"`);
+  }
+  return id;
+}
+
 function parseOptions(argv: string[]): IOptions {
   const raw: Record<string, string> = {};
   const flags = new Set<string>();
@@ -92,12 +120,17 @@ function parseOptions(argv: string[]): IOptions {
     const arg = argv[i];
     if (!arg.startsWith("--")) usage(`Unexpected argument "${arg}"`);
     const key = arg.slice(2);
-    if (key === "help" || key.startsWith("no-") || key === "dry-run") {
+    // Match against the known names rather than a shape ("starts with no-"), so a misspelled
+    // --no-repot is an error instead of an inert flag that leaves the default in force. This
+    // command writes to a shared portal; a typo must not silently mean something else.
+    if (kFlagOptions.includes(key)) {
       flags.add(key);
-    } else {
+    } else if (kValueOptions.includes(key)) {
       const value = argv[++i];
       if (value === undefined) usage(`Missing value for --${key}`);
       raw[key] = value;
+    } else {
+      usage(`Unknown option "--${key}"`);
     }
   }
   if (flags.has("help")) usage();
@@ -116,6 +149,10 @@ function parseOptions(argv: string[]): IOptions {
   if (!/^\d+\.\d+$/.test(raw.problem)) {
     usage(`--problem must look like "1.1", got "${raw.problem}"`);
   }
+  const firebaseEnv = raw["firebase-env"] ?? portal;
+  if (!kFirebaseEnvs.includes(firebaseEnv)) {
+    usage(`--firebase-env must be one of: ${kFirebaseEnvs.join(", ")}, got "${firebaseEnv}"`);
+  }
 
   return {
     portal,
@@ -126,11 +163,11 @@ function parseOptions(argv: string[]): IOptions {
     // The portal and the Firebase project are independent choices, but pairing them is
     // almost always what is wanted: a staging portal launch that wrote to production
     // Firebase would be testing the rules of a project the assignment does not belong to.
-    firebaseEnv: raw["firebase-env"] ?? portal,
+    firebaseEnv,
     name: raw.name,
     clueBase: (raw["clue-base"] ?? kClueBase).replace(/\/$/, ""),
-    activityId: raw["activity-id"] ? Number(raw["activity-id"]) : undefined,
-    oauthClientId: raw["oauth-client-id"] ? Number(raw["oauth-client-id"]) : undefined,
+    activityId: parseId(raw, "activity-id"),
+    oauthClientId: parseId(raw, "oauth-client-id"),
     withReport: !flags.has("no-report"),
     withRedirect: !flags.has("no-redirect"),
     dryRun: flags.has("dry-run")
@@ -142,8 +179,13 @@ function parseOptions(argv: string[]): IOptions {
 //
 
 /** `production` is CLUE's own default, so naming it in the URL only adds noise. */
-function firebaseEnvParam(firebaseEnv: string | undefined) {
-  return firebaseEnv && firebaseEnv !== "production" ? { firebaseEnv } : {};
+function firebaseEnvParam(firebaseEnv: string) {
+  return firebaseEnv !== "production" ? { firebaseEnv } : {};
+}
+
+/** How a non-default Firebase project is named in a portal record, so the two agree. */
+function firebaseLabel(firebaseEnv: string) {
+  return firebaseEnv !== "production" ? `, ${firebaseEnv} FB` : "";
 }
 
 function buildUrl(base: string, params: Record<string, string>) {
@@ -188,9 +230,8 @@ function describeCluePath(cluePath: string) {
 function defaultName(options: IOptions) {
   // A demo unit's "code" is a path; its directory name is the readable part.
   const unitLabel = options.unit.replace(/^.*\/units\//, "").replace(/\/content\.json$/, "");
-  const firebaseLabel = options.firebaseEnv && options.firebaseEnv !== "production"
-    ? `, ${options.firebaseEnv} FB` : "";
-  return `CLUE ${unitLabel} ${options.problem} (${describeCluePath(options.cluePath)}${firebaseLabel})`;
+  return `CLUE ${unitLabel} ${options.problem} ` +
+    `(${describeCluePath(options.cluePath)}${firebaseLabel(options.firebaseEnv)})`;
 }
 
 //
@@ -213,7 +254,7 @@ async function fetchClass(portal: PortalSession, classId: string): Promise<IClas
  *
  * There is no lookup-by-url endpoint. The search endpoint is the closest thing, but it
  * returns only the first page of each material group, so a miss here does NOT prove the
- * activity is absent — `activityExists` is the authoritative check.
+ * activity is absent — `claimActivityByUrl` is the closer thing to a real existence check.
  */
 async function findActivityIdByUrl(portal: PortalSession, url: string) {
   const search = await portal.json<any>("/api/v1/search/search?query=");
@@ -230,22 +271,29 @@ async function findActivityIdByUrl(portal: PortalSession, url: string) {
  *
  * This is the only probe the portal offers for "is there an activity at this url" — and it
  * is a WRITE. There is no read-only equivalent, which is why the dry-run path below must
- * never call it. On a miss the portal authorizes a nil record and answers 500 rather than
- * 404, so that status — and only that status — is read as "no such activity".
+ * never call it. On a miss the portal authorizes a nil record, which raises inside Pundit
+ * and renders its generic 500 page — the very same page any other server-side failure
+ * renders, so the response cannot say which of the two happened.
+ *
+ * Hence the retry: a missing activity 500s every time, while a transient failure usually
+ * does not repeat. Reading a one-off failure as "absent" would send the caller on to create
+ * a second activity at a url that already has one.
  *
  * The flag is always set to true. It has no legitimate false value here: false is what
  * makes the portal omit the token, which drops CLUE into preview mode.
  */
 async function claimActivityByUrl(portal: PortalSession, url: string) {
-  try {
-    await portal.json("/api/v1/external_activities/update_by_url", {
-      method: "POST",
-      form: { url, append_auth_token: "true" }
-    });
-    return true;
-  } catch (error) {
-    if (error instanceof PortalError && error.status === 500) return false;
-    throw error;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await portal.json("/api/v1/external_activities/update_by_url", {
+        method: "POST",
+        form: { url, append_auth_token: "true" }
+      });
+      return true;
+    } catch (error) {
+      if (!(error instanceof PortalError) || error.status !== 500) throw error;
+      if (attempt > 0) return false;
+    }
   }
 }
 
@@ -274,6 +322,18 @@ async function ensureActivity(portal: PortalSession, options: IOptions, url: str
       );
     }
     return { id: existingId, created: false };
+  }
+
+  // Two 500s say the activity is probably absent, but "probably" is doing real work there:
+  // the portal cannot distinguish that from a failure of its own. Spend one more read before
+  // creating — a duplicate resource at the same url is worse than stopping and asking.
+  const searchId = await findActivityIdByUrl(portal, url);
+  if (searchId) {
+    throw new Error(
+      `The portal failed to update the activity at this URL, but its search still finds one ` +
+      `(id ${searchId}). The portal may be having trouble; re-run, or re-run with ` +
+      `--activity-id ${searchId} if it keeps failing.`
+    );
   }
 
   // `append_auth_token` is the setting this whole script exists to get right. Without it
@@ -344,8 +404,8 @@ async function ensureReport(portal: PortalSession, options: IOptions, url: strin
   if (existing) return { id: existing, created: false };
   if (options.dryRun) return { id: 0, created: true };
 
-  const name = `CLUE Teacher Tools (${describeCluePath(options.cluePath)}` +
-    `${options.firebaseEnv && options.firebaseEnv !== "production" ? `, ${options.firebaseEnv} FB` : ""})`;
+  const name =
+    `CLUE Teacher Tools (${describeCluePath(options.cluePath)}${firebaseLabel(options.firebaseEnv)})`;
   await portal.submitForm("/admin/external_reports/new", "/admin/external_reports", {
     "external_report[name]": name,
     "external_report[url]": url,
