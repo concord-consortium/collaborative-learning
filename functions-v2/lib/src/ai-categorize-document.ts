@@ -6,8 +6,8 @@ import {
   FieldValue,
   VectorQuery
 } from "@google-cloud/firestore";
-import { AiAgreement } from "../../src/on-document-summarized";
-import { AgreementValue } from "../../../shared/shared";
+import { AiAgreement } from "../../src/summary-types";
+import { kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
   RelatedSummary,
@@ -109,20 +109,42 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
 }
 
 /**
+ * Which stored agreements are allowed to reach the prompt.
+ *
+ * Two conditions. The value has to be one the app can actually produce. Firestore rules check that
+ * in the `authed` and `qa` realms, but `demo` and `dev` let any signed-in user write anything, and
+ * values stored before those rules were tightened are still there. `summaryContentParts` builds its
+ * agreement sentence out of the keys of the record this function feeds, so an unrecognized value
+ * would otherwise be copied into the prompt verbatim as a label.
+ *
+ * And the agreement has to be with an AI comment. A rating on another student's comment is stored
+ * with `isAiComment: false` and is deliberately held back from the prompt for now. Version-1
+ * entries come from the retired `agreeWithAi` flow, which only Ada's comments could carry, so they
+ * are AI agreements by construction.
+ */
+function isPromptableAgreement(entry: AiAgreement): boolean {
+  if (!kRatingValues.includes(entry.value)) return false;
+  return entry.version === 1 ? true : entry.isAiComment === true;
+}
+
+/**
  * Maps the documents found by the related-summaries search into the entries injected into the AI
  * prompt. A document with an empty `aiAgreements` map still yields an entry; only a missing map is
- * skipped. Exported for unit testing.
+ * skipped. A document whose entries are all filtered out by `isPromptableAgreement` is the same
+ * case as an empty map. Exported for unit testing.
  */
 export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
   const relatedSummaries: RelatedSummary[] = [];
   for (const data of docs) {
     if (data.aiAgreements && typeof data.summary === "string" && data.summary.length > 0) {
-      const agreements = Object.values(data.aiAgreements).reduce<Agreements>((acc, cur) => {
-        const value = cur.value as AgreementValue;
-        acc[value] = acc[value] || [];
-        acc[value].push({content: cur.content, tags: cur.tags});
-        return acc;
-      }, {});
+      const agreements = Object.values(data.aiAgreements)
+        .filter(isPromptableAgreement)
+        .reduce<Agreements>((acc, cur) => {
+          const value = cur.value;
+          acc[value] = acc[value] || [];
+          acc[value].push({content: cur.content, tags: cur.tags});
+          return acc;
+        }, {});
       relatedSummaries.push({
         summary: data.summary,
         agreements,
