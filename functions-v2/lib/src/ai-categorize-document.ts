@@ -6,8 +6,8 @@ import {
   FieldValue,
   VectorQuery
 } from "@google-cloud/firestore";
-import { AiAgreement } from "../../src/on-document-summarized";
-import { AgreementValue } from "../../../shared/shared";
+import { AiAgreement, isAiAgreement } from "../../src/summary-types";
+import { kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
   RelatedSummary,
@@ -109,20 +109,36 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
 }
 
 /**
+ * Which stored agreements are allowed to reach the prompt.
+ *
+ * Rules validate rating values in `authed` only, and version-1 entries were stored with no value
+ * check, so an out-of-enum value can already be in the collection — and `summaryContentParts` would
+ * copy it into the prompt as a label. Ratings on peer comments are recorded with
+ * `isAiComment: false` and deliberately not prompted yet.
+ */
+function isPromptableAgreement(entry: AiAgreement): boolean {
+  if (!kRatingValues.includes(entry.value)) return false;
+  return isAiAgreement(entry);
+}
+
+/**
  * Maps the documents found by the related-summaries search into the entries injected into the AI
  * prompt. A document with an empty `aiAgreements` map still yields an entry; only a missing map is
- * skipped. Exported for unit testing.
+ * skipped. A document whose entries are all filtered out by `isPromptableAgreement` is the same
+ * case as an empty map. Exported for unit testing.
  */
 export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
   const relatedSummaries: RelatedSummary[] = [];
   for (const data of docs) {
     if (data.aiAgreements && typeof data.summary === "string" && data.summary.length > 0) {
-      const agreements = Object.values(data.aiAgreements).reduce<Agreements>((acc, cur) => {
-        const value = cur.value as AgreementValue;
-        acc[value] = acc[value] || [];
-        acc[value].push({content: cur.content, tags: cur.tags});
-        return acc;
-      }, {});
+      const agreements = Object.values(data.aiAgreements)
+        .filter(isPromptableAgreement)
+        .reduce<Agreements>((acc, cur) => {
+          const value = cur.value;
+          acc[value] = acc[value] || [];
+          acc[value].push({content: cur.content, tags: cur.tags});
+          return acc;
+        }, {});
       relatedSummaries.push({
         summary: data.summary,
         agreements,
