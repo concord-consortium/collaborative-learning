@@ -172,6 +172,11 @@ describe("ToolbarComponent", () => {
 
     const selectedTileId = "selected-tile";
 
+    // This config is synthetic: production section toolbars filter Edit out, since
+    // problem-panel passes myResourcesToolbar({}) and leaves showEdit undefined. Edit is
+    // included anyway because it is the only button that reaches the primary-document guard on
+    // its own, so it is what pins the requirement for a primary document key. Copy to Workspace
+    // cannot pin it: the guard for a loaded primary document disables that button first.
     const copyConfig: IToolbarModelSnapshot = [
       { id: "copyToWorkspace", title: "Copy to Workspace", iconId: "icon-copy-to-workspace-tool",
         isDefault: false, isTileTool: false },
