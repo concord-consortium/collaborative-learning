@@ -156,7 +156,7 @@ interface Summary {
   adaCommentId?: string;          // the MOST RECENT Ada comment; agreements may span older ones
   numAiAgreements: number;        // entries with isAiComment === true (includes version-1 entries)
   numAgreements: number;          // all entries (informational; NOT a query filter in this step)
-  aiAgreements: Record<string, AiAgreement>;   // keyed "{commentId}_{raterUid}"; v1 keys are bare uids
+  aiAgreements: Record<string, AiAgreement>;   // keyed "{commentId}_{raterUid}"; v1 keys are the rater's bare uid
 }
 ```
 
@@ -195,7 +195,8 @@ interface AiAgreement {
 Entry keys contain ids; write them with `FieldPath` rather than dot-notation strings so an id
 containing `.` or other special characters cannot break the update.
 
-**Legacy version-1 entries** (bare-uid keys, no `commentId`, from the old `agreeWithAi` flow) are
+**Legacy version-1 entries** (keyed by the rater's bare uid, no `commentId`, from the old
+`agreeWithAi` flow — which attached the flag to a new comment by the rater, not to Ada's) are
 left in place, count toward `numAiAgreements`, and are not migrated. A user who agreed under the old
 flow and re-rates the same Ada comment produces a second (v2) entry — accepted: the v1 corpus is a
 handful of records, effectively one demo document (#9).

@@ -29,8 +29,7 @@ function readRatings(data: FirebaseFirestore.DocumentData | undefined): Record<s
   return valid;
 }
 
-// A summary written before `aiAgreements` existed has no map at all, which is what the retired
-// function crashed on.
+// A summary written before `aiAgreements` existed has no map at all.
 function readAgreements(summary: Summary | undefined): Record<string, AiAgreement> {
   const agreements = summary?.aiAgreements;
   if (!agreements || typeof agreements !== "object" || Array.isArray(agreements)) return {};
@@ -53,17 +52,24 @@ function agreementKey(commentId: string, raterUid: string) {
  * onCommentRated
  *
  * Records what people said about a document's comments on that document's summary, where later
- * evaluations of similar documents can read the counts. It replaces `onDocumentSummarized`, which
- * read the retired `agreeWithAi` field and did the analysis pipeline's job of writing summaries.
+ * evaluations of similar documents can read the counts.
  *
  * This function never creates or deletes a summary. The pipeline owns those, and a rating on a
- * document that has not been analyzed simply has nowhere to go: that is logged and skipped. It
- * reads no realtime database, summarizes nothing, and computes no embeddings.
+ * document that has not been analyzed simply has nowhere to go: that is logged and skipped.
  *
  * Firestore delivers trigger events at least once and in no particular order, so the event payload
  * decides only whether there is anything to do. What gets written is reconciled against a fresh
  * read of the comment inside the transaction, which is what makes a duplicate event a no-op, an
  * out-of-order pair converge, and a late event unable to resurrect a removed rating.
+ *
+ * Retries are left at the platform default of off, as every other trigger here does. A failed
+ * invocation is not redelivered: the reconcile would make redelivery safe, but a permanently
+ * failing event would then retry for the whole retry window with nowhere to dead-letter it. What
+ * that costs is mostly self-repairing — any later event on the same comment rebuilds that comment's
+ * entries from the snapshot, so a dropped event is undone by the next rating anyone makes on it.
+ * The exception is a dropped *deletion*: no further event can fire on a comment that no longer
+ * exists, so its entries stay on the summary until the comment is somehow rewritten. Turning retry
+ * on would close that, and is worth revisiting if it is ever seen to happen.
  */
 export const onCommentRated = onDocumentWritten(
   "{root}/{space}/documents/{documentId}/comments/{commentId}",
@@ -85,8 +91,11 @@ export const onCommentRated = onDocumentWritten(
     const firestore = admin.firestore();
     const documentPath = `${root}/${space}/documents/${documentId}`;
     const documentKey = await firestore.doc(documentPath).get().then((snapshot) => snapshot.data()?.key);
-    if (!documentKey) {
-      logInfo("No document key; nothing to record a rating against:", documentPath);
+    // Checked for type, not just presence: `getSummaryPath` escapes the key, and a metadata document
+    // carrying a non-string `key` — writable directly in the open realms — would throw there rather
+    // than skip.
+    if (typeof documentKey !== "string" || !documentKey) {
+      logInfo("No usable document key; nothing to record a rating against:", documentPath);
       return;
     }
 
@@ -150,15 +159,9 @@ export const onCommentRated = onDocumentWritten(
           const key = agreementKey(commentId, raterUid);
           const existing = stored[key];
           if (existing?.version === 2 && existing.value === value) {
-            /*
-             * The stored entry already says what the comment says. `content` and `tags` stay as
-             * they are, because they record how the comment read when the rating was made.
-             *
-             * The timestamp is moved forward only when this event's own view agrees with the
-             * comment: an event that disagrees is a stale one that happens to reconcile to the
-             * current value, and stamping it would date the entry to before whatever set that
-             * value.
-             */
+            // `content` and `tags` record how the comment read at rating time, so they stay. The
+            // timestamp moves forwards only, and only for an event whose own view matches the
+            // comment: one that disagrees is stale, and would predate whatever set the value.
             if (eventRatings[raterUid] === value && eventTime > (existing.updatedAt ?? 0)) {
               agreements[key] = {...existing, updatedAt: eventTime};
               changed = true;

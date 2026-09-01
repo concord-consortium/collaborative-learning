@@ -1,4 +1,4 @@
-import {escapeKey, networkDocumentKey} from "../../shared/shared";
+import {escapeKey} from "../../shared/shared";
 import {getSummaryPath} from "../src/utils";
 
 describe("getSummaryPath", () => {
@@ -29,7 +29,7 @@ describe("getSummaryPath", () => {
   /*
    * The retired `onDocumentSummarized` derived the id from the metadata document's id instead of
    * its `key` field. On a document created by the current code the two agree, so this helper
-   * addresses the same record the old function wrote — which is why no data migration is needed.
+   * addresses the same record the old function wrote.
    */
   it("matches the retired id scheme for a metadata document created by the current code", () => {
     const root = "authed";
@@ -46,18 +46,15 @@ describe("getSummaryPath", () => {
   });
 
   /*
-   * On a legacy metadata document the two disagree, and that is the point: both writers derive the
-   * id from `key`, so neither can be led astray by a prefixed metadata document id. A legacy record
-   * written under the old scheme is simply not found — the rating trigger logs and skips, and the
-   * next analysis run creates a record at the key-derived id.
+   * On a legacy metadata document the id and the key disagree, which is why both writers derive the
+   * path from `key`. That property belongs to the callers, not to this helper — it only ever
+   * receives a key, so no implementation of it could get this wrong. It is covered where it can
+   * fail: `on-comment-rated.test.ts` runs every case with a metadata document whose id differs from
+   * its key, so a trigger reaching for the id would find no summary and record nothing.
+   *
+   * What that means for data already stored: a record the old function wrote under a legacy
+   * prefixed id is not the record this helper addresses, so it is simply never found. The rating
+   * trigger logs and skips, and the next analysis run creates a record at the key-derived id.
+   * Nothing is migrated, and nothing needs to be — the collection holds one demo record.
    */
-  it("ignores the uid or network prefix a legacy metadata document id carries", () => {
-    const key = "-M4iVnDvBGGuAA-kCFqK";
-    const legacyDocumentId = networkDocumentKey("uid123", key, "test-network");
-    expect(legacyDocumentId).not.toBe(key);
-    expect(getSummaryPath("authed", "learn_concord_org", key))
-      .not.toBe(`summaries/authed-learn_concord_org-${legacyDocumentId}`);
-    expect(getSummaryPath("authed", "learn_concord_org", key))
-      .toBe(`summaries/authed-learn_concord_org-${key}`);
-  });
 });

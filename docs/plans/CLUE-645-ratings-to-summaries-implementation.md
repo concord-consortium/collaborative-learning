@@ -7,6 +7,18 @@ record the departure (see DEVIATIONS at the end).
 **Verified against:** `master` at `c08e75c28` (2026-08-27), post-harness-merge. File and symbol
 references below were re-checked on that commit.
 
+**Status (2026-09-01).** Track A shipped in PR #2990. Track B — tasks 3 to 6 — is the branch this
+plan sits on. Track C has not started; it is gated on `CLUE-371-ai-feedback-text-and-images`, and
+tasks 7 to 11 are the only ones here that describe work still to do.
+
+Tasks 1 to 6 describe work that is finished, and are kept at full detail as the record of what was
+asked. What is durable about them now lives where it is enforced: the reconcile and timestamp rules
+in `functions-v2/src/on-comment-rated.ts` and its test suite, the id derivation in `getSummaryPath`
+and its tests, and every departure from this plan under DEVIATIONS. **The one thing here with no
+equivalent in code is the deployment cutover, Task 5 step 3** — removing the export does not delete
+the deployed `onDocumentSummarized`, and the old trigger still deletes summaries when their last
+agreement goes, so that step has to be read before deploying.
+
 **Structure:** three tracks. Track A (rules fix) and Track B (`onCommentRated`, types, helper,
 read side) have no dependency on CLUE-371's in-progress pipeline branch and can start immediately;
 Track B's function is testable against fixture summary records because it never creates summaries.
@@ -320,6 +332,11 @@ that a summary in another realm is not returned.
    ref first; either way the summary exists before the comment is readable).
 3. `sendSummary` false, `mock` evaluator, or missing embedding (Task 7) → no write, with a logged
    reason.
+4. **`root` and `space` are optional on the `Summary` type, so the compiler will not tell you if the
+   update path forgets them.** They are optional because this type describes what a *reader* may
+   find and no stored record carries them until this task ships (see the doc block on `Summary` in
+   `functions-v2/src/summary-types.ts`). The only thing that enforces writing them on both paths is
+   the Task 9 test case for it — do not drop that case as redundant.
 
 **Verify:** Task 9.
 **Commit:** `feat: analysis pipeline persists document summaries for agreements (CLUE-645)`
@@ -333,8 +350,9 @@ Cases: first analysis initializes the counts; re-analysis updates only summary f
 agreements and counts; summary exists before the Ada comment; `sendSummary: false` / `mock` /
 missing embedding → no write, run completes; id-derivation fixtures — the same `(root, space, key)`
 triples run through Task 4's helper from both writers and land on the same path; `root` and `space`
-written on both the create and the update path; a record in another realm with otherwise matching
-context fields is not returned by the lookup.
+written on both the create and the update path (**the only enforcement there is** — the fields are
+optional on the type, so a missing write compiles cleanly; see Task 8 step 4); a record in another
+realm with otherwise matching context fields is not returned by the lookup.
 
 **Commit:** `test: pipeline summary-write coverage (CLUE-645)`
 
@@ -348,6 +366,34 @@ context fields is not returned by the lookup.
   reconciliation changed anything.
 
 **Commit:** `docs: record summary write in pipeline plan and function headers (CLUE-645)`
+
+### Task 11: Remove the dead `agreeWithAi` client write path
+
+Deferred out of Track B (2026-09-01, on a review finding) to keep that PR backend-only. Nothing has
+supplied this parameter since CLUE-397 removed the agree buttons (`adb9762`), and with
+`onDocumentSummarized` deleted no backend consumer reads it either — the only remaining reader is
+`on-comment-rated.ts`'s deletion filter, which reads the field off *stored* comments.
+
+**Files:**
+- Modify: `src/components/chat/chat-panel.tsx`, `src/hooks/document-comment-hooks.ts`,
+  `shared/shared.ts`
+
+**Steps:**
+
+1. Delete `IPostCommentOptions.agreeWithAi` and its pass-through: the `postComment` destructure, the
+   `logCommentEvent` payload field, and the `postCommentMutation.mutate` call.
+2. Delete the optimistic-comment field in `document-comment-hooks.ts` and `agreeWithAi` from
+   `IClientCommentParams` in `shared/shared.ts`.
+3. **Keep `IAgreeWithAi` and the `agreeWithAi` field in `src/lib/firestore-schema.ts`.** They
+   describe comments already stored, which `on-comment-rated.ts` reads on the deletion path.
+4. This is type-only. `postDocumentComment` stores `{...comment}`, so a hand-crafted call could
+   still write the field; what makes that harmless is that nothing reads it, which the Track B
+   cutover already achieved. Do not describe this as closing a hole.
+
+**Verify:** `npm test` and `npm run lint` at the root, plus the chat Cypress specs — this is the
+only task in this plan that touches client files, so it is the only one the functions-v2 suite does
+not cover.
+**Commit:** `refactor: remove the dead agreeWithAi client write path (CLUE-645)`
 
 ---
 

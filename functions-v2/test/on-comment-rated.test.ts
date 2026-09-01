@@ -13,6 +13,10 @@ const {fft, cleanup} = initialize();
 
 const kRoot = "demo";
 const kSpace = "test";
+// Deliberately different from each other: a legacy metadata document's id carries a uid or network
+// prefix, so both writers derive the summary path from the `key` field rather than the id. Every
+// test here runs against that mismatch, so a trigger reaching for the id would look up a summary
+// that does not exist and record nothing.
 const kDocumentId = "metadata-doc-1";
 const kDocumentKey = "doc-key-1";
 const kCommentId = "comment-1";
@@ -300,6 +304,20 @@ describe("onCommentRated", () => {
       expect(summary?.numAiAgreements).toBe(1);
     });
 
+    test("ignores a ratings field that is an array rather than a map", async () => {
+      // `ratings` is client-writable in the open realms, so its type is not guaranteed. An array
+      // would otherwise enumerate as {"0": "yes"} and forge an entry for a rater named "0".
+      await seedSummary();
+      await setComment(adaComment(["yes"] as unknown as Data));
+
+      await deliver({
+        before: adaComment(),
+        after: adaComment(["yes"] as unknown as Data),
+      });
+
+      expect((await readSummary())?.aiAgreements).toEqual({});
+    });
+
     test("writes nothing when the ratings map did not change", async () => {
       await seedSummary();
       await setComment(adaComment({"student-1": "yes"}));
@@ -505,6 +523,10 @@ describe("onCommentRated", () => {
       await deliver({before: {uid: "student-9", content: "just a comment"}, time: kLate});
 
       expect(await readSummary()).toEqual(before);
+      // Nothing is logged because the function returns on the deletion filter, before reading
+      // anything. Without that, it would reach the transaction and find nothing to do — which
+      // leaves the same data behind, so only the absence of a log tells the two apart.
+      expect(logger.info).not.toHaveBeenCalled();
     });
   });
 
@@ -522,6 +544,24 @@ describe("onCommentRated", () => {
       const summary = await readSummary();
       expect(summary?.numAiAgreements).toBe(2);
       expect(summary?.numAgreements).toBe(2);
+    });
+
+    test("treats an aiAgreements field that is an array as an empty map", async () => {
+      // Not reachable from a client — no rule grants `summaries` — but the guard is what stops a
+      // malformed record from spreading into entries keyed "0", "1" and counted as agreements.
+      await seedSummary({
+        numAiAgreements: 1,
+        numAgreements: 1,
+        aiAgreements: [v1Entry("yes")] as unknown as Data,
+      });
+      await setComment(adaComment({"student-1": "yes"}));
+
+      await deliver({before: adaComment(), after: adaComment({"student-1": "yes"})});
+
+      const summary = await readSummary();
+      expect(Object.keys(summary?.aiAgreements)).toEqual([`${kCommentId}_student-1`]);
+      expect(summary?.numAiAgreements).toBe(1);
+      expect(summary?.numAgreements).toBe(1);
     });
 
     test("handles a summary that has no aiAgreements map at all", async () => {
@@ -561,7 +601,25 @@ describe("onCommentRated", () => {
       expect((await readSummary())?.aiAgreements).toEqual({});
       expect(logger.info).toHaveBeenCalledWith(
         "ON COMMENT RATED:",
-        "No document key; nothing to record a rating against:",
+        "No usable document key; nothing to record a rating against:",
+        `${kRoot}/${kSpace}/documents/${kDocumentId}`
+      );
+    });
+
+    test("skips when the parent document's key is not a string", async () => {
+      // Metadata documents are writable directly in the open realms, so `key` is not guaranteed to
+      // be the type the schema says. Deriving the summary path from a number would throw out of the
+      // escaping rather than skip.
+      await firestore().doc(`${kRoot}/${kSpace}/documents/${kDocumentId}`).set({key: 1234});
+      await seedSummary();
+      await setComment(adaComment({"student-1": "yes"}));
+
+      await deliver({before: adaComment(), after: adaComment({"student-1": "yes"})});
+
+      expect((await readSummary())?.aiAgreements).toEqual({});
+      expect(logger.info).toHaveBeenCalledWith(
+        "ON COMMENT RATED:",
+        "No usable document key; nothing to record a rating against:",
         `${kRoot}/${kSpace}/documents/${kDocumentId}`
       );
     });
