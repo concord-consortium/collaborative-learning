@@ -12,10 +12,10 @@ const logInfo = (...message: any[]) => logger.info("ON COMMENT RATED:", ...messa
 /*
  * The `ratings` map as stored on a comment, with anything the app could not have written removed.
  *
- * Rules validate rating values in the `authed` and `qa` realms, but `demo` and `dev` let any
- * signed-in user write anything, so an unrecognized value is a shape this function really can be
- * handed. Dropping it here means it is never recorded, and a rating changed from a valid value to
- * an invalid one reads as a removal.
+ * Rules validate rating values in the `authed` realm, but `demo` and `dev` let any signed-in user
+ * write anything, while `qa` and `test` allow arbitrary writes within the user's own root. An
+ * unrecognized value is therefore a shape this function really can be handed. Dropping it here
+ * means it is never recorded, and a valid value changed to an invalid one reads as a removal.
  */
 function readRatings(data: FirebaseFirestore.DocumentData | undefined): Record<string, RatingValue> {
   const ratings = data?.ratings;

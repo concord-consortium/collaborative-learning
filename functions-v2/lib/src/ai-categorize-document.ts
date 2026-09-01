@@ -112,10 +112,15 @@ async function findRelatedSummaries(summary: string, apiKey: string, firestoreDo
  * Which stored agreements are allowed to reach the prompt.
  *
  * Two conditions. The value has to be one the app can actually produce. Firestore rules check that
- * in the `authed` and `qa` realms, but `demo` and `dev` let any signed-in user write anything, and
- * values stored before those rules were tightened are still there. `summaryContentParts` builds its
- * agreement sentence out of the keys of the record this function feeds, so an unrecognized value
- * would otherwise be copied into the prompt verbatim as a label.
+ * in the `authed` realm only: `demo` and `dev` let any signed-in user write anything, and `qa` and
+ * `test` allow arbitrary writes within the user's own root.
+ *
+ * This is the second line of that defense rather than the first — `onCommentRated` drops
+ * out-of-enum values as it ingests them, and nothing else can write `summaries`, which no rule
+ * grants. What it uniquely covers is whatever is already stored: the version-1 entries the retired
+ * `onDocumentSummarized` copied out of `agreeWithAi` with no value check at all.
+ * `summaryContentParts` builds its agreement sentence out of the keys of the record this function
+ * feeds, so an unrecognized value would otherwise be copied into the prompt verbatim as a label.
  *
  * And the agreement has to be with an AI comment. A rating on another student's comment is stored
  * with `isAiComment: false` and is deliberately held back from the prompt for now.

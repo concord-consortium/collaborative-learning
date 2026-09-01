@@ -54,8 +54,8 @@ Pipeline change 4 and Resolved Decision 7.)
 
 ## Prerequisite (ship first, as its own PR): validate rating values (#10)
 
-A rating value is arbitrary client-supplied text: `isValidRatingUpdate` (`firestore.rules:434`,
-`:615`) checks only which map key changed. A student can store any string as their own rating by
+A rating value is arbitrary client-supplied text: `isValidRatingUpdate` (`firestore.rules:432`,
+`:610`) checks only which map key changed. A student can store any string as their own rating by
 writing to Firestore from the browser console.
 
 Today that string is read only by the comment UI (`comment-card.tsx:29-32`); nothing in the analysis
@@ -91,8 +91,13 @@ Task 5 deletes that consumer; the read-side filter below is what covers values a
   the user population and the fact that this window has existed since 2025-07 without observed
   abuse; **the Task 5 cutover is the closing event**, and the finding is recorded on the ticket.
 - Read side: `mapRelatedSummaries` drops values outside the enum instead of passing them through as
-  prompt-visible labels. This defense is required regardless of rules, because the `demo` and `dev`
-  realms allow any authed user to write anything (`firestore.rules:880-889`).
+  prompt-visible labels. Rules validate values in `authed` only: `demo` and `dev` let any signed-in
+  user write anything (`firestore.rules:880-889`), and `qa`/`test` allow the same inside the
+  writer's own root (`:890-899`). This is the second line of that defense rather than the first —
+  Task 5's ingestion drops out-of-enum values before they are stored, and no client can write
+  `summaries` in any realm, since no rule matches that collection and it falls through to the
+  catch-all deny (`:11-13`). What the read side uniquely covers is what is already stored: the
+  version-1 entries `onDocumentSummarized` copied out of `agreeWithAi` with no value check.
 - **What the read side does not defend against, and why it is left to the write path** (added
   2026-08-31 after a review finding; the containment argument above used to be stated more broadly
   than it holds). `demo` and `dev` allow any signed-in user to write anywhere

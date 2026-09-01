@@ -28,9 +28,10 @@ function peerRating(value: RatingValue, content = "a comment"): AiAgreementV2 {
   return {...aiRating(value, content), commentUid: "student-2", isAiComment: false};
 }
 
-// An entry whose value is not one of the three the app can produce. The `demo` and `dev` realms let
-// any signed-in user write anything, so this is a shape the read side really can be handed; the
-// cast is what the type system would otherwise prevent us from writing down.
+// An entry whose value is not one of the three the app can produce. Version-1 entries were copied
+// out of `agreeWithAi` with no value check at all, and a version-2 entry could only reach the store
+// if the ingestion filter were bypassed, so the read side is checked against both; the cast is what
+// the type system would otherwise prevent us from writing down.
 function outOfEnum(value: string, entry: AiAgreement = aiRating("yes")): AiAgreement {
   return {...entry, value: value as RatingValue};
 }
