@@ -2,6 +2,8 @@ import {FirestoreEvent, onDocumentCreated, QueryDocumentSnapshot} from "firebase
 import {getAnalysisQueueFirestorePath, isKnownEvaluator} from "./utils";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
+// Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
+import {FieldValue} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
@@ -168,7 +170,7 @@ export const onAnalysisDocumentPending =
       }
       nextQueueDoc = {
         ...nextQueueDoc,
-        docImaged: admin.firestore.FieldValue.serverTimestamp(),
+        docImaged: FieldValue.serverTimestamp(),
         docImageUrl: (responseJSON as { url: string }).url,
       };
     } else {

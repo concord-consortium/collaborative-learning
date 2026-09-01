@@ -1,4 +1,6 @@
 import * as admin from "firebase-admin";
+// Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
+import {FieldValue} from "firebase-admin/firestore";
 import {CallableRequest, onCall, HttpsError} from "firebase-functions/v2/https";
 import {
   IPostDocumentCommentUnionParams, isCurriculumMetadata, isDocumentMetadata, isWarmUpParams,
@@ -50,7 +52,7 @@ export const postExemplarComment = onCall(async (request: CallableRequest<IPostD
     ...comment,
     uid: kExemplarUserParams.id,
     name: kExemplarUserParams.fullName,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
   });
   return {version, id: result.id};
 });
