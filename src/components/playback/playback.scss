@@ -193,4 +193,21 @@
       cursor: auto;
     }
   }
+
+  // Sits above the playback bar rather than in its row, which is a fixed height.
+  .playback-history-request-error {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    text-align: center;
+    z-index: 10;
+  }
 }

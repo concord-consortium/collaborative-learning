@@ -58,6 +58,9 @@ export class FirestoreHistoryManager {
   savedLastHistoryEntryId: string | undefined;
   onContentDrift: ((message: string) => void) | undefined;
   driftChecked = false;
+  // Why a requested history entry could not be shown, for the playback UI to
+  // display. Undefined when no request has failed.
+  historyEntryRequestError = undefined as string | undefined;
 
   constructor({
     firestore,
@@ -85,9 +88,15 @@ export class FirestoreHistoryManager {
     makeObservable(this, {
       historyError: observable,
       setHistoryError: action,
+      historyEntryRequestError: observable,
+      setHistoryEntryRequestError: action,
       historyStatus: computed,
       historyStatusString: computed
     });
+  }
+
+  setHistoryEntryRequestError(message: string | undefined) {
+    this.historyEntryRequestError = message;
   }
 
   setHistoryError(error: any) {
@@ -294,6 +303,8 @@ export class FirestoreHistoryManager {
     // not stop on NO_HISTORY, or we'd give up before the entries arrive and never seek. A bounded
     // timeout avoids leaking the reaction if the load never completes (e.g. a genuinely empty document,
     // which stays NO_HISTORY forever).
+    const historyNotLoadedMessage =
+      "Could not load this document's history, so it could not be shown at the requested point.";
     try {
       await when(
         () => this.historyStatus === HistoryStatus.HISTORY_LOADED ||
@@ -303,19 +314,27 @@ export class FirestoreHistoryManager {
     } catch {
       console.warn("moveToHistoryEntryAfterLoad: history did not load within timeout; status:",
         this.historyStatus);
+      this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
     if (this.historyStatus !== HistoryStatus.HISTORY_LOADED) {
       console.warn("moveToHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
+      this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
     // "first" is the sentinel logDocumentEvent emits for a change made before the document had any
     // history entry, so it never resolves via findHistoryEntryIndex; it maps to position 0.
     const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
     if (entry >= 0) {
+      this.setHistoryEntryRequestError(undefined);
       this.treeManager.goToHistoryEntry(entry);
     } else {
       console.warn("Did not find history entry with id: ", historyId);
+      // Without this the document silently shows the end of its history, which the reader has no
+      // way to tell apart from the moment they asked for.
+      this.setHistoryEntryRequestError(
+        `Could not find the requested point in this document's history (id: ${historyId}). ` +
+        "The document is showing the end of its history.");
     }
   }
 

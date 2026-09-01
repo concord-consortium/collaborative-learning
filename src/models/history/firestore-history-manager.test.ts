@@ -355,6 +355,40 @@ describe("history loading", () => {
       expect(warnSpy).toHaveBeenCalled();
     });
 
+    // A console.warn is invisible to the researcher following a link from a report, who would
+    // otherwise just read the end of the history believing it to be the requested moment.
+    it("reports an unresolved id so it can be shown to the user", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+      expect(historyManager.historyEntryRequestError).toEqual(expect.stringContaining("no-such-id"));
+    });
+
+    it("reports nothing when the seek succeeds", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      await historyManager.moveToHistoryEntryAfterLoad("a2");
+      expect(historyManager.historyEntryRequestError).toBeUndefined();
+    });
+
+    it("reports a history that never loads so it can be shown to the user", async () => {
+      jest.useFakeTimers();
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
+      jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("first");
+      await jest.advanceTimersByTimeAsync(30000);
+      await seekPromise;
+      expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
+      jest.useRealTimers();
+    });
+
     // The real ordering: PlaybackComponent calls this from a mount effect while the status is still
     // the initial NO_HISTORY, before the Firestore query resolves. The seek must wait for the load
     // and then happen — this is the case the earlier "stop on NO_HISTORY" version regressed.
