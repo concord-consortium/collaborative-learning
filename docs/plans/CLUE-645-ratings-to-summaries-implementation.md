@@ -248,6 +248,13 @@ merge stays trivial. Task 3's import switch touches the same import hunk.
 
 > Drafted against `CLUE-371-production-mixed-mode.md` items 5–6. First step of this track is to
 > re-read the merged code and reconcile function/field names; record differences under DEVIATIONS.
+>
+> **Realm scoping is a requirement of this track, not an optional extra** (added 2026-08-31; see the
+> design doc's "Realm scoping" section for why). The `summaries` lookup filters only on the context
+> fields, so nothing confines a match to the realm it was written in. Track C is what first
+> populates the collection, so it is what must close this: `root` and `space` written on the record
+> (Task 8), filtered in the query (Task 7), and added to the composite index (Task 7). Do not ship
+> the pipeline write without all three.
 
 ### Task 7: Hoist the embedding; handle the `undefined` return
 
@@ -270,8 +277,19 @@ merge stays trivial. Task 3's import switch touches the same import hunk.
 3. `getEmbeddings` returns `undefined` on any OpenAI error (:158-170). Handle it at both uses:
    no query (related summaries `[]`, log) and no summary write (Task 8) — never
    `FieldValue.vector(undefined)`, which persists a permanently poisoned zero-dimension vector.
+4. **Scope the query to its realm.** Add `.where("root", "==", root).where("space", "==", space)` to
+   the `findNearest` query, from the `root`/`space` this function already parses out of
+   `firestoreDocumentPath` for the metadata read. Without it a record written under one realm can be
+   returned to a document analyzed in another whenever the context fields coincide.
+5. **Add both fields to the `summaries` composite index in `firestore.indexes.json`**, as equality
+   fields ahead of the `summaryEmbedding` vector field (the index today is `context_id`,
+   `investigation`, `problem`, `unit`, `key`, `numAiAgreements`, vector). A vector query needs an
+   exact composite index: without it the lookup errors rather than degrading, so **deploy the index
+   before the function**. Records that predate the fields stop matching; that is one demo record, and
+   re-analysis rewrites it.
 
-**Verify:** existing categorize tests plus an explicit `getEmbeddings → undefined` case.
+**Verify:** existing categorize tests plus an explicit `getEmbeddings → undefined` case, and a test
+that a summary in another realm is not returned.
 **Commit:** `refactor: compute summary embedding once, handle embedding failure (CLUE-645)`
 
 ### Task 8: Pipeline writes the summary record
@@ -285,10 +303,12 @@ merge stays trivial. Task 3's import switch touches the same import hunk.
    comment (ordering per design Pipeline change 3 — a fast rating must not beat the summary into
    existence), write `getSummaryPath(root, space, key)` in a transaction with two explicit paths
    (design Pipeline change 4):
-   - *Create:* full record — `key`, context fields, `summary`, `summaryEmbedding`, `analyzedAt`
-     (server time), `adaCommentId`, `aiAgreements: {}`, `numAiAgreements: 0`, `numAgreements: 0`.
-   - *Update:* only `key`, context fields, `summary`, `summaryEmbedding`, `analyzedAt`,
-     `adaCommentId`; never touch `aiAgreements` or either count.
+   - *Create:* full record — `key`, `root`, `space`, context fields, `summary`, `summaryEmbedding`,
+     `analyzedAt` (server time), `adaCommentId`, `aiAgreements: {}`, `numAiAgreements: 0`,
+     `numAgreements: 0`.
+   - *Update:* only `key`, `root`, `space`, context fields, `summary`, `summaryEmbedding`,
+     `analyzedAt`, `adaCommentId`; never touch `aiAgreements` or either count. `root`/`space` are
+     written on this path too, so a record that predates them gains them on the next analysis.
    `root`/`space`/`key` and the context fields come from Task 7's widened return
    (`documentMetadata`) — the imaged handler has no metadata of its own under the CLUE-371
    contract, and never derives any of this from the queue `docId`. No `documentMetadata` (read
@@ -312,7 +332,9 @@ merge stays trivial. Task 3's import switch touches the same import hunk.
 Cases: first analysis initializes the counts; re-analysis updates only summary fields and preserves
 agreements and counts; summary exists before the Ada comment; `sendSummary: false` / `mock` /
 missing embedding → no write, run completes; id-derivation fixtures — the same `(root, space, key)`
-triples run through Task 4's helper from both writers and land on the same path.
+triples run through Task 4's helper from both writers and land on the same path; `root` and `space`
+written on both the create and the update path; a record in another realm with otherwise matching
+context fields is not returned by the lookup.
 
 **Commit:** `test: pipeline summary-write coverage (CLUE-645)`
 
@@ -348,10 +370,13 @@ means the trigger swap is already soaked). Track C (7 → 8 → 9 → 10) as a s
    delivery; the summary document itself is never created or deleted by the rating trigger.
 5. Re-analysis of a rated document refreshes its summary and preserves its agreements; first
    analysis initializes empty agreements and zero counts.
-6. No client files changed; no index changes; `summaries` remains admin-only.
+6. No client files changed; `summaries` remains admin-only. Track B changes no indexes; Track C adds
+   `root` and `space` to the `summaries` composite index (see 9).
 7. A rating on a document with no summary produces an info log and nothing else.
 8. The deployed `onDocumentSummarized` trigger is deleted in the same cutover that deploys
    `onCommentRated`; the `package.json` deploy script is updated to match.
+9. The related-summaries lookup returns records from its own realm only, and the index it needs is
+   deployed before the function that queries it.
 
 ## DEVIATIONS
 

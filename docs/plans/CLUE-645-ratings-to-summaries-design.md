@@ -82,17 +82,36 @@ Task 5 deletes that consumer; the read-side filter below is what covers values a
 - **Two accepted residues (decided 2026-08-31, simplifying an earlier broader plan).** The create
   path is left as-is: `isValidCommentCreateRequest()` forbids no extra fields, so a hand-crafted
   create can seed a `ratings` map on one's own comment. Accepted: it is a data-integrity nuisance
-  only — out-of-enum values are dropped at ingestion (Task 5's reconcile) and fabricated
-  peer-attributed entries never reach the prompt (Task 6) — and the app itself creates comments
-  through the `postDocumentComment_v2` admin callable, so no honest path is involved. And
-  `agreeWithAi` is left untouched by the rules: until Task 5's cutover deletes
-  `onDocumentSummarized`, a hand-crafted `agreeWithAi` on a `cas`-unit comment is ingested with no
-  author or value check and its raw value can reach peers' prompts. Accepted given the user
-  population and the fact that this window has existed since 2025-07 without observed abuse; **the
-  Task 5 cutover is the closing event**, and the finding is recorded on the ticket.
+  only — out-of-enum values are dropped at ingestion (Task 5's reconcile), and because the comment
+  is the fabricator's own, its entries carry `isAiComment: false` and Task 6 keeps them out of the
+  prompt — and the app itself creates comments through the `postDocumentComment_v2` admin callable,
+  so no honest path is involved. And `agreeWithAi` is left untouched by the rules: until Task 5's
+  cutover deletes `onDocumentSummarized`, a hand-crafted `agreeWithAi` on a `cas`-unit comment is
+  ingested with no author or value check and its raw value can reach peers' prompts. Accepted given
+  the user population and the fact that this window has existed since 2025-07 without observed
+  abuse; **the Task 5 cutover is the closing event**, and the finding is recorded on the ticket.
 - Read side: `mapRelatedSummaries` drops values outside the enum instead of passing them through as
   prompt-visible labels. This defense is required regardless of rules, because the `demo` and `dev`
-  realms allow any authed user to write anything (`firestore.rules:779-791`).
+  realms allow any authed user to write anything (`firestore.rules:880-889`).
+- **What the read side does not defend against, and why it is left to the write path** (added
+  2026-08-31 after a review finding; the containment argument above used to be stated more broadly
+  than it holds). `demo` and `dev` allow any signed-in user to write anywhere
+  (`firestore.rules:880-889`), and `qa`/`test` allow the same inside the writer's own root
+  (`:890-899`). So in those realms the `ratings` map on **someone else's** comment — Ada's included
+  — can be replaced wholesale with forged rater keys. Those entries carry valid values, and
+  `isAiComment` is derived from the *comment's* author rather than the rater's, so it is `true`:
+  neither the enum filter nor Task 6's AI-only filter removes them. They inflate `numAiAgreements`
+  and their counts reach the prompts of other documents in the same class, unit and problem in that
+  realm. **The enum filter validates values, not attribution**, and no read-side filter can supply
+  attribution that was never recorded.
+  Attribution is enforced on the write path instead, which is where it belongs: in `authed`,
+  `isValidRatingUpdate()` limits a write to the actor's own key, so production is closed. The open
+  realms are open deliberately, so testing can write anything, and their data has always been test
+  data. Accepted on that basis.
+  **Do not answer this by restating the check inside `onCommentRated`.** That function reconciles
+  from a fresh snapshot precisely so that lost and reordered events converge; scoping an event to
+  its actor's key would make a lost event unrepairable, trading a test-realm data-integrity nuisance
+  for a production correctness bug. If the open realms ever need closing, close them in the rules.
 - Same treatment for the legacy `agreeWithAi.value` read path while it exists.
 
 ## Requirements
@@ -119,6 +138,8 @@ Task 5 deletes that consumer; the read-side filter below is what covers values a
 ```typescript
 interface Summary {
   key: string;                    // canonical document key
+  root: string;                   // realm root of the document ("authed", "demo", "qa", "dev", "test")
+  space: string;                  // portal, demo name, or instance id that follows the root
   context_id: string;
   unit: string;
   investigation: string;
@@ -142,9 +163,13 @@ writer ever derives the id from a queue `docId` or the trigger's `documentId` pa
 legacy network-prefixed id — review #5): both go through `key`, so they agree by construction
 rather than by the coincidence that a path segment happens to equal the key.
 
-The lookup filter **stays `numAiAgreements > 0`**. No index change, and the existing corpus (a
-handful of legacy records at most) stays visible (#1). `numAgreements` is stored for analysis and
-for the future endorsement step, which will do its own index work.
+`root` and `space` are stored so the lookup can be **scoped to one realm** — see "Realm scoping"
+below. They duplicate what the `summaryId` already encodes, deliberately: the id is not queryable,
+and the query is what needs the constraint.
+
+The agreement filter **stays `numAiAgreements > 0`**, and the existing corpus (a handful of legacy
+records at most) stays visible (#1). `numAgreements` is stored for analysis and for the future
+endorsement step, which will do its own index work.
 
 ### `AiAgreement` (written by `onCommentRated`)
 
@@ -259,6 +284,30 @@ Same trigger pattern (`{root}/{space}/documents/{documentId}/comments/{commentId
 The legacy `agreeWithAi` ingestion branch is dropped: nothing has written that field since 2026-02-25
 (`adb9762a55`), and existing v1 entries in `summaries` are preserved by rule 5's deletion handling.
 
+### Realm scoping (Track C requirement, added 2026-08-31)
+
+`summaries` is a single flat collection. The `summaryId` begins `{root}-{space}-`, but ids are not
+queryable, and `findRelatedSummaries` filters only on `context_id`, `unit`, `problem`,
+`investigation` and `key !=`. Nothing confines a match to the realm the query came from, so a record
+written under one realm can be returned to a document being analyzed in another whenever those
+context fields coincide. That matters because the open realms let a signed-in user author both the
+context fields and the agreement counts (see the Prerequisite section), which is a route for
+test-realm data to reach a production prompt.
+
+Untriggered today: the collection holds one record and nothing writes to it. It becomes reachable
+the moment Track C starts populating it, so Track C must close it, not discover it:
+
+1. The pipeline writes `root` and `space` on every summary record (create and update paths alike).
+2. `findRelatedSummaries` adds `.where("root", "==", root).where("space", "==", space)`, from the
+   same `firestoreDocumentPath` it already parses for the summary id.
+3. **This changes `firestore.indexes.json`** — the composite `summaries` index (`context_id`,
+   `investigation`, `problem`, `unit`, `key`, `numAiAgreements`, then the `summaryEmbedding` vector)
+   needs `root` and `space` added as equality fields ahead of the vector field. Vector queries
+   require an exact composite index, so the deploy has to include it or the lookup returns an error
+   rather than degrading. Deploy the index **before** the function that queries it.
+4. Existing records predate both fields and will not match a scoped query. Acceptable — the corpus
+   is one demo record, and re-analysis rewrites it with the fields present.
+
 ## Read Side
 
 `findRelatedSummaries` is unchanged in its filters (`numAiAgreements > 0`, class/unit/problem/
@@ -282,7 +331,8 @@ today.
   so treat early production behavior as a first run, not a regression baseline.
 - **No client deploy is required.** The web app is untouched; the rules change (prerequisite) and the
   functions deploy are independent.
-- **No index deploy.** The lookup filter is unchanged.
+- **No index deploy for Track B.** The lookup filter is unchanged by the trigger work. Track C's
+  realm scoping does change `firestore.indexes.json` — see "Realm scoping" above.
 - **`summaries` stays admin-only**: it falls through to the rules catch-all deny, which is correct —
   note here so nobody adds a client read later.
 
@@ -393,4 +443,6 @@ covers the read side and is extended.
 | `functions-v2/test/…` | New `onCommentRated` suite; pipeline-write and read-side test updates |
 | `firebase-test/src/…` | Rules tests for the value enum |
 
-No client files change. No `firestore.indexes.json` change.
+| `firestore.indexes.json` | Track C: `root` and `space` added to the `summaries` composite index (realm scoping) |
+
+No client files change.
