@@ -73,6 +73,21 @@ export async function categorizeUrl(url: string, apiKey: string, aiPrompt = defa
 }
 
 /**
+ * The module's Firestore client.
+ *
+ * Each `new Firestore()` opens its own gRPC channel and nothing closes it, and a warm container
+ * reuses this module across invocations — so one per call becomes one per call that never goes
+ * away. Created on first use rather than at import so that loading this module costs nothing.
+ *
+ * @return {Firestore} the shared client
+ */
+function firestoreClient(): Firestore {
+  sharedFirestore ??= new Firestore();
+  return sharedFirestore;
+}
+let sharedFirestore: Firestore | undefined;
+
+/**
  * What the related-summaries lookup and the `summaries/` record are both built from.
  *
  * `root` and `space` name the realm — `demo/AI`, `authed/{portalId}` — and come from the document's
@@ -121,7 +136,7 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
   }
   const [root, space] = segments;
 
-  const db = new Firestore();
+  const db = firestoreClient();
   const document = await db.doc(firestoreDocumentPath).get();
   if (!document.exists) {
     logger.warn(`Document ${firestoreDocumentPath} does not exist`);
@@ -166,7 +181,7 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
 export async function findRelatedSummaries(
   metadata: DocumentMetadata, queryVector: number[]
 ): Promise<RelatedSummary[]> {
-  const db = new Firestore();
+  const db = firestoreClient();
   const { root, space, key, context_id, unit, problem, investigation } = metadata;
 
   // lookup related documents based on summary embedding that have ai agreements
@@ -342,9 +357,8 @@ export async function categorizeRepresentations(
     }
 
     // Only when a summary is being sent, so a document that receives agreement counts is always one
-    // that can contribute them. Related summaries are enrichment and their absence costs the
-    // evaluation nothing, so the three steps share one catch, and each step's failure stops the
-    // ones after it.
+    // that can contribute them. Related summaries are enrichment: their absence costs the
+    // evaluation nothing.
     if (summary !== null) {
       try {
         ({metadata: documentMetadata, gap: metadataGap} =
