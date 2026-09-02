@@ -41,6 +41,19 @@ $ npm run build   # build the functions code (transpile TypeScript)
 
 There is also a script, `src/categorize-docs.ts`, that uses the same procedure as _onAnalysisDocumentImaged_ to categorize a directory full of screenshots using ChatGPT. In order to use this, you would need to set an environment variable with the API key, as described in the comment at the top of that script.
 
+## Runtime settings
+
+Some behavior is read from Firestore on every invocation rather than from a Firebase parameter,
+because parameters are read at deploy time and changing one means another `firebase deploy`.
+
+|Document|Field|Effect|
+|--------|-----|------|
+|`analysis/settings`|`imagesEnabled`|`false` stops _onAnalysisDocumentPending_ calling Shutterbug. Any other value, a missing field, or a missing document means screenshots are taken as usual — the switch only ever turns them off.|
+
+Flip it in the Firestore console; no deploy or redeploy is needed, and it takes effect on the next
+document analyzed. It is there for a Shutterbug that is failing or overloaded. Firestore rules deny
+clients everything under `analysis`, so only the functions can read or write it.
+
 ## Testing cloud functions
 
 ### Running tests locally (without running functions in the emulator)

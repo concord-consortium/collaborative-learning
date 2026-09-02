@@ -4,6 +4,8 @@
 
 Outside of the main collections for users and documents, there is a collection of information about the status of documents submitted for AI analysis.  The top-level collection for this is `analysis`. Within that there is a queue containing the various statuses: `pending`, `imaged`, `done`, `failedImaging`, and `failedAnalyzing`. These contain status documents keyed by documentIds.
 
+`analysis` also holds a `settings` document, read by the analysis functions on every invocation. Its `imagesEnabled` field turns document screenshots off when it is `false`; see `functions-v2/README.md` under "Runtime settings".
+
 ## Top level collections
 
 Besides `analysis`, the rest of the top-level collections are similar to Firebase:

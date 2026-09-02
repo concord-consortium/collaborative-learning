@@ -5,9 +5,15 @@
  * instance-level checks (does this Text tile actually have text?), so `computedModality` describes
  * the document in front of us rather than the tile types it happens to use.
  */
-import { tileTypes } from "../../../shared/tile-types.js";
-import { slateToMarkdown } from "../../../shared/slate-to-markdown.js";
-import type { Modality } from "./schemas.js";
+import { tileTypes } from "./tile-types";
+import { slateToMarkdown } from "./slate-to-markdown";
+
+/**
+ * What a document needs to be shown to the model: its student text, a picture of it, both, or
+ * neither. The harness re-exports this from `src/schemas.ts`, where the matching list of strings
+ * validates the values it reads from disk.
+ */
+export type Modality = "mixed" | "text-only" | "visual-only" | "empty";
 
 export interface TileRepresentationCapability {
   /** Can students author text content in this tile type? */
@@ -46,7 +52,10 @@ export const tileCapabilities: Record<string, TileRepresentationCapability> = {
   Simulator: capability(false, "partial", true),
   // A Question tile is a container: its children classify individually (see classifyDocument).
   Question: capability(false, "partial", false),
-  Drawing: capability(true, "stub", true),
+  // The summarizer emits a table of the drawing's objects — geometry, colors, labels and any
+  // text — so the summary carries what the tile holds. A table is still not a picture, which
+  // is why an image is required all the same.
+  Drawing: capability(true, "full", true),
   Image: capability(false, "stub", true),
   Geometry: capability(false, "fallback", true),
   Diagram: capability(false, "fallback", true),
@@ -99,6 +108,44 @@ export function drawingTileHasText(content: any): boolean {
     object?.type === "text" && typeof object.text === "string" && object.text.trim().length > 0);
 }
 
+/**
+ * Whether a tile of a detailed-summary type actually holds the thing its summarizer describes.
+ *
+ * Fidelity is a fact about the tile *type*. This asks about the instance, because a Drawing with
+ * no objects or a Dataflow with no program has a full-fidelity handler and a summary that says
+ * only that the tile is there. Each answer below is a judgment about that type's handler in
+ * shared/ai-summarizer, and is recorded rather than inferred.
+ */
+function tileHoldsSummarizableContent(tileType: string, content: any): boolean {
+  switch (tileType) {
+    // The student typed it, and the handler passes it through.
+    case "Text": return textTileHasContent(content);
+    // The handler emits a row per object, so one object is one row of student work.
+    case "Drawing": return Array.isArray(content?.objects) && content.objects.length > 0;
+    // A table's cases live in a shared data set, not in the tile, so there is nothing here to
+    // count. It does not matter: a Table is `containsStudentText`, so `hasStudentText` already
+    // carries it through the first half of the rule.
+    case "Table": return true;
+    // The handler renders the wired program. An absent or empty program is an empty canvas.
+    // Note this never decides anything today: Dataflow is `containsStudentText`, which is not
+    // narrowed per instance, so the first half of the rule has already answered true. Narrowing it
+    // would change `computedModality` for an empty canvas, so it waits for the thin-summary work.
+    case "Dataflow": return Object.keys(content?.program?.nodes ?? {}).length > 0;
+    // The handler describes axes, plot type and one entry per layer. With no layers it is
+    // describing an empty pair of axes.
+    case "Graph": return Array.isArray(content?.layers) && content.layers.length > 0;
+    // The handler emits the simulation's own description and variable table, which the unit
+    // authored. A Simulator tile holds no student input, so its summary is never student work.
+    case "Simulator": return false;
+    // A container: its prompt and its response rows are classified as tiles in their own right.
+    case "Question": return false;
+    // An empty slot. Its handler returns an empty string.
+    case "Placeholder": return false;
+    // Stub and fallback types never reach here, and an unlisted type is not one we can vouch for.
+    default: return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Document classification
 // ---------------------------------------------------------------------------
@@ -114,11 +161,33 @@ export interface ClassifiedTile {
   capability: TileRepresentationCapability;
   /** Type capability narrowed by the instance-level checks above. */
   hasStudentText: boolean;
+  /**
+   * Whether this tile puts student work into the summary — by carrying text the student typed, or
+   * by being a type the summarizer describes in detail and actually holding something to describe.
+   * A drawing of two shapes and no labels has no student text and still carries student work.
+   */
+  carriesStudentWork: boolean;
   requiresVisualRepresentation: boolean;
 }
 
 export interface DocumentClassification {
   computedModality: Modality;
+  /**
+   * Whether a picture is needed to make sense of the *question*, rather than of the answer.
+   *
+   * A question's authored prompt is not student work, so every per-tile flag is zeroed for it and
+   * stays zeroed. That is the right answer to "is this student work?" and the wrong one to "does
+   * this request need a picture?": an Image tile used as a prompt contributes nothing a summary can
+   * carry, so an answer sent without it is judged without the question it answers. Read from the
+   * tile *type*, since the instance flag is deliberately zeroed for prompts.
+   */
+  promptNeedsImage: boolean;
+  /**
+   * Whether sending the summary would put any student work in front of the model. This is what
+   * decides whether the summary is sent; `computedModality` groups documents for reporting and is
+   * deliberately left alone.
+   */
+  summaryCarriesStudentWork: boolean;
   tiles: ClassifiedTile[];
   warnings: string[];
 }
@@ -171,6 +240,7 @@ export function classifyDocument(content: any): DocumentClassification {
         role,
         capability: tileCapability,
         hasStudentText: false,
+        carriesStudentWork: false,
         requiresVisualRepresentation: false
       });
       if (depth >= kMaxQuestionDepth) {
@@ -196,12 +266,21 @@ export function classifyDocument(content: any): DocumentClassification {
     // An authored question prompt is not student work, whatever it happens to contain.
     if (role === "prompt") hasStudentText = false;
 
+    // Typed text, or a detailed summary of something the student made. The second half is what a
+    // drawing-only document needs: CLUE-646 turned a Drawing's summary into a table of its
+    // objects, so the summary carries the student's work even with no text anywhere in it.
+    const detailedSummary =
+      tileCapability.summaryFidelity === "full" || tileCapability.summaryFidelity === "partial";
+    const carriesStudentWork = role === "prompt" ? false
+      : hasStudentText || (detailedSummary && tileHoldsSummarizableContent(tileType, tile.content));
+
     tiles.push({
       tileId,
       tileType,
       role,
       capability: tileCapability,
       hasStudentText,
+      carriesStudentWork,
       requiresVisualRepresentation: role === "prompt" ? false : tileCapability.requiresVisualRepresentation
     });
   };
@@ -221,5 +300,9 @@ export function classifyDocument(content: any): DocumentClassification {
     : hasVisual ? "visual-only"
     : "empty";
 
-  return { computedModality, tiles, warnings };
+  const summaryCarriesStudentWork = tiles.some((tile) => tile.carriesStudentWork);
+  const promptNeedsImage = tiles.some((tile) =>
+    tile.role === "prompt" && tile.capability.requiresVisualRepresentation);
+
+  return { computedModality, summaryCarriesStudentWork, promptNeedsImage, tiles, warnings };
 }

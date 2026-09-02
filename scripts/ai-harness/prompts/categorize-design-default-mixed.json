@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "name": "categorize-design-default-mixed",
+  "aiPrompt": {
+    "mainPrompt": "Below is a text summary of a student document and a picture of it. Either one may be absent.\nThey are working on an engineering task. Please tell me which of the following areas of their design they are focusing on:\n- user: who's it for?\n- environment: where's it used?\n- form: what's it look like?\n- function: what does it do?\nand why you chose that area.\nOr if the document doesn't include enough content to clearly identify a focus area let me know by setting \"category\" to \"unknown\".\nYour answer should be a JSON document in the given format.",
+    "categorizationDescription": "Categorize the document based on its content.",
+    "categories": [
+      "user",
+      "environment",
+      "form",
+      "function"
+    ],
+    "keyIndicatorsPrompt": "What are the key indicators that support this categorization?",
+    "discussionPrompt": "Please provide any additional discussion or context regarding the categorization.",
+    "systemPrompt": "You are a teaching assistant in an engineering design course."
+  },
+  "provenance": {
+    "source": "shared/ai-analysis-messages.ts: defaultAiPrompt (the built-in categorize-design prompt), as production sends it now that every analysis carries a summary and a picture together. Two things differ from categorize-design-default, which is the same prompt as production sent when a request carried one representation and the opening could name it: the opening sentence, and the missing article in \"working on engineering task\". Both are kept: runs recorded against either stay comparable, and their hashes are part of every request key. categorize-design-mixed keeps the typo deliberately, because it was authored for the harness to differ from production in the opening alone.",
+    "retrievedAt": "2026-08-27",
+    "aiPromptSha256": "3ec0346777edd695576156cd589a9e21f0ac2661066a324f3fe9980dcc87ff0d"
+  }
+}

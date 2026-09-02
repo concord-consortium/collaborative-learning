@@ -4,19 +4,59 @@ import * as admin from "firebase-admin";
 // Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
 import {FieldValue} from "firebase-admin/firestore";
 import {getAnalysisQueueFirestorePath} from "./utils";
-import {categorizeSummary, categorizeUrl} from "../lib/src/ai-categorize-document";
+import {
+  type DocumentRepresentations, categorizeRepresentations,
+} from "../lib/src/ai-categorize-document";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
-// 2. Create screenshots of those documents
-// 3. (This function) Send those screenshots to the AI service for processing along with any custom AI prompt, and
+// 2. Summarize and screenshot those documents
+// 3. (This function) Send what was produced to the AI service for processing along with any custom AI prompt, and
 //    create comments with the results
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
 const imagedQueuePath = getAnalysisQueueFirestorePath("imaged", "{docId}");
+
+/**
+ * A usable value or nothing: an empty string is not a summary, and not a URL either.
+ *
+ * @param {unknown} value the field read off the queue record
+ * @return {string | null} the value if it is a non-empty string, otherwise null
+ */
+function stringOrNull(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+/**
+ * What to send, read from the queue record.
+ *
+ * The values decide, not the flags. A record claiming `sendImage: true` with no `docImageUrl`
+ * yields null rather than a request built around an empty string, and if both come out null
+ * `categorizeRepresentations` refuses, so the record lands in `failedAnalyzing` with a clear
+ * message instead of the model being asked to judge a bare prompt.
+ *
+ * A record with no `analysisVersion` was written by the previous version of the producer during
+ * the seconds a deploy takes. It carries one representation and says which in `summarizer`. This
+ * branch and the producer's `summarizer` field go together in a later cleanup, once the `done`
+ * queue shows no version-less records.
+ *
+ * @param {Record<string, unknown>} queueDoc the record from the imaged queue
+ * @return {DocumentRepresentations} what is being sent, with null for anything that is not
+ */
+export function representationsOf(queueDoc: Record<string, unknown>): DocumentRepresentations {
+  if (queueDoc.analysisVersion !== 2) {
+    return queueDoc.summarizer === "text" ?
+      {summary: stringOrNull(queueDoc.docSummary), imageUrl: null} :
+      {summary: null, imageUrl: stringOrNull(queueDoc.docImageUrl)};
+  }
+  return {
+    summary: queueDoc.sendSummary === true ? stringOrNull(queueDoc.docSummary) : null,
+    imageUrl: queueDoc.sendImage === true ? stringOrNull(queueDoc.docImageUrl) : null,
+  };
+}
 
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
   logger.warn("Error processing document", event.document, error);
@@ -51,19 +91,23 @@ export const onAnalysisDocumentImaged =
       let promptTokens = 0;
       let completionTokens = 0;
       let fullResponse = "";
+      let messageShape;
 
       if (queueDoc.evaluator === "mock") {
         message = "Mock reply from AI analysis";
       } else if (queueDoc.evaluator === "categorize-design" || queueDoc.evaluator === "custom") {
-        const docImageUrl = queueDoc.docImageUrl;
-        const docSummary = queueDoc.docSummary;
         const aiPrompt = queueDoc.evaluator === "custom" ? queueDoc.aiPrompt : undefined;
-        const summarizer = queueDoc.summarizer;
         const firestoreDocumentPath = queueDoc.firestoreDocumentPath;
 
-        const completion = summarizer === "text" ?
-          await categorizeSummary(docSummary, openaiApiKey.value(), firestoreDocumentPath, aiPrompt) :
-          await categorizeUrl(docImageUrl, openaiApiKey.value(), aiPrompt);
+        const representations = representationsOf(queueDoc);
+        let completion;
+        try {
+          ({completion, messageShape} = await categorizeRepresentations(
+            representations, openaiApiKey.value(), firestoreDocumentPath, aiPrompt));
+        } catch (err) {
+          await error(`${err}`, event);
+          return;
+        }
         const reply = completion?.choices[0].message;
         promptTokens = completion?.usage?.prompt_tokens || 0;
         completionTokens = completion?.usage?.completion_tokens || 0;
@@ -104,6 +148,7 @@ export const onAnalysisDocumentImaged =
         promptTokens,
         completionTokens,
         fullResponse,
+        ...(messageShape ? {messageShape} : {}),
       });
 
       // Remove from the "imaged" queue

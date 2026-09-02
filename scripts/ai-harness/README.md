@@ -100,9 +100,9 @@ npx tsx harness.ts review    --results data/results/synthetic-corpus__text-basel
 
 Flags are plain `--name value` pairs. An unknown flag is an error, not a warning.
 
-`plan` on the committed synthetic corpus projects a worst case of about **$0.03** for both text
-baselines — 14 calls, because skip-empty sends a text run only the documents that carry
-student-authored text (7 of 26), and records the other 19 as skipped rows. Image runs send every
+`plan` on the committed synthetic corpus projects a worst case of about **$0.04** for both text
+baselines — 18 calls, because skip-empty sends a text run only the documents whose summary carries
+student work (9 of 26), and records the other 17 as skipped rows. Image runs send every
 document that has any content at all, so they are both larger and dominated by image tokens; run
 `plan` after rendering to see the figure for a particular mode and image set, since a per-tile set
 multiplies the count. The reservation assumes every retry is used.
@@ -210,14 +210,24 @@ the point, and a new variant is how someone shows they have. It is no longer the
 that carries what a student drew — `default` describes a drawing too, in a different shape — but it
 is what the recorded runs below were produced with.
 
-**A text run reaches it only on a document that carries student text elsewhere**, which today means
-the geometry half is barely exercised. Skip-empty asks the classifier whether any tile holds
-student-authored text, and a Drawing tile counts only when it has a text object with something in it
-(`drawingTileHasText` in `src/capability.ts`) — so the `drawing` fixture, two shapes and no text, is
-skipped by a text-only run before the variant is consulted. Of the two fixtures with Drawing tiles,
-only `mixed` is sent, and that one has a Text tile as well. The variant's own summary of a drawing
-*is* student content, so the skip is asking the wrong question for this combination; the decision is
-made from the classifier alone and knows nothing about which variant is about to run.
+**A text run now reaches it on a drawing-only document, which it did not used to.** Skip-empty
+asked whether any tile held student-authored *text*, and a Drawing tile counts as holding text only
+when it has a text object with something in it (`drawingTileHasText` in
+`shared/ai-analysis-classify.ts`) — so the `drawing` fixture, two shapes and no text, was skipped by
+a text-only run before the variant was ever consulted, and only `mixed` reached it, which has a Text
+tile as well. That was the skip asking the wrong question: the variant's summary of a drawing *is*
+student content.
+
+CLUE-646 made the same true of `default`, and the rule changed with it. Skip-empty now asks
+`summaryCarriesStudentWork`, which counts a drawing that holds objects whether or not any of them
+are text, so both fixtures with Drawing tiles reach a text-only run. The decision is still made from
+the classifier alone and still knows nothing about which variant is about to run — it no longer
+needs to, because the two variants now agree about this document.
+
+The variant hook that papered over the old gap is still there: a variant may declare
+`findsStudentContentWithoutText`, and the skip check ORs it with the classifier's answer.
+`drawing-text` still declares it, which is now redundant for drawings and kept because a future
+variant could find content the classifier does not look for.
 
 Two further ways to shrink a data set — sending a fixed sample of cases, and sending aggregate
 statistics — are named in the plan and not built. Both are variants of their own when someone wants
@@ -276,35 +286,18 @@ modes are named and separate, and an improvement never gets folded into the base
 so it cannot drift while the other modes evolve, and it has been verified by hand against the real
 service.
 
-**Deliberate differences from production's HTML**, all from sharing one hardened generator across
-all three modes rather than keeping a third near-copy. The page is the `content` field of that
-request body, so these are differences in what gets rendered, not in the request around it:
+**The page body is production's page body.** Both are built by `shared/render-page.ts`, so the only
+things that differ between this mode and production are the arguments: the CLUE URL and the unit.
+The generator escapes the document into the `<script>` element, ignores a non-positive
+`updateHeight`, and sets `window.__clueRender = { initialValuePosted: false }`, flipping it to
+`true` once the document has been handed to the iframe. `puppeteer.ts` waits on that marker, because
+whether the parent posted the document is the one thing a local capture cannot see from outside;
+Shutterbug and the analysis functions ignore it.
 
-- The document is escaped before it goes into the `<script>` element. Production does not escape it,
-  which is the injection bug reported under "Findings for elsewhere". Reproducing a vulnerability in
-  the harness's own code is not a baseline worth having. The escaped form parses back to an
-  identical object, so this changes the render only for a document that would have triggered the
-  bug.
-- The height message is applied only when it is a positive number; production assigns it
-  unconditionally, so a `height: 0` message collapses production's iframe to `0px` and leaves the
-  harness's at its initial height. Against the deployment production actually renders through this
-  is unobservable — it posts 650 then 190 — but it would diverge on a target that reports 0, which
-  is the scenario "Findings for elsewhere" describes. If reproducing that collapse ever becomes the
-  point, the guard is the one line to make mode-specific.
-- The page sets `window.__clueRender = { initialValuePosted: false }` and flips it to `true` once
-  the document has been handed to the iframe. Production has no equivalent; `puppeteer.ts` waits on
-  it, because whether the parent posted the document is the one thing a local capture cannot see
-  from outside. Shutterbug ignores it.
-- Smaller hardening in the same generator, none of which changes what a working page draws: the
-  missing-`contentWindow` branch returns instead of falling through to post to nothing; the message
-  listener guards `event.data` before reading `.type`; `console.warn` is used where production
-  writes `console.warning` (not a function, so production's warning throws instead of printing); and
-  the iframe `src` is HTML-escaped inside double quotes where production writes a raw `&` inside
-  single quotes.
-
-So the mode is parity of the *request envelope* (endpoint, headers, height, `fullPage`) and of the
-render target, not of the page body. It is not a recommendation; it is what production does today. Nothing about it is configurable, and passing `--clue-url` or
-`--unit` to it is an error rather than a silently ignored flag.
+So the mode is parity of the *request envelope* (endpoint, headers, height, `fullPage`), of the
+render target, and of the page body. It is not a recommendation; it is what production does today.
+Nothing about it is configurable, and passing `--clue-url` or `--unit` to it is an error rather than
+a silently ignored flag.
 
 **The endpoint has to be the final address.** Both Shutterbug modes post with `redirect: "manual"`,
 and a 3xx answer fails the render naming the `Location` rather than being followed. That request
@@ -516,27 +509,40 @@ except the CLUE server you point it at.
 
 ### Capability registry
 
-`src/capability.ts` records, per tile type, three separate things: whether students can author text
-in it, how well the current text summarizer carries it (`full` / `partial` / `stub` / `fallback`),
-and whether an image adds information text cannot. Unlisted tile types are treated conservatively as
+`shared/ai-analysis-classify.ts` records, per tile type, three separate things: whether students
+can author text in it, how well the current text summarizer carries it (`full` / `partial` / `stub`
+/ `fallback`), and whether an image adds information text cannot. Unlisted tile types are treated conservatively as
 needing an image, so nothing silently drops.
 
 The authoritative tile-type list is `shared/tile-types.ts`. `test/tile-types.test.ts` parses
 `src/register-tile-types.ts` as text and fails if the two drift apart, so registering a new tile type
 also forces a capability record for it.
 
-Classification of a real document adds instance-level checks: a Text tile counts as text only when
-its content is non-empty after trimming, and a Drawing tile counts as containing student text only
-when it has text objects with content. Question tiles are traversed into: the authored prompt is not
-student work, response tiles classify by their own types, missing references are skipped with a
-warning, a tile referenced twice counts once, and nesting is capped at 8 levels.
+Classification of a real document adds instance-level checks, but only for two types: a Text tile
+counts as text only when its content is non-empty after trimming, and a Drawing tile counts as
+containing student text only when it has text objects with content. The other types that claim
+student text — Table and Dataflow — are taken at their type's word, so an empty one still counts.
+See "Which documents a run declines to send" for what that means in practice.
+
+Question tiles are traversed into: the authored prompt is not student work, response tiles classify
+by their own types, missing references are skipped with a warning, a tile referenced twice counts
+once, and nesting is capped at 8 levels.
 
 ### Prompts
 
 `prompts/<name>.json` holds an `aiPrompt` plus provenance, including `aiPromptSha256`. Reports
 identify a prompt by hash, not only by name. `test/prompt.test.ts` asserts the committed
-`categorize-design-default` still hashes identically to `defaultAiPrompt` in
+`categorize-design-default-mixed` still hashes identically to `defaultAiPrompt` in
 `shared/ai-analysis-messages.ts`, so the copy cannot drift from production unnoticed.
+
+A prompt file is never edited once runs have been recorded against it: the hash is part of every
+request key, so rewording one in place would make past results claim to answer a question they were
+never asked. When production's built-in prompt changes, the old file stays and a new one is added
+beside it. `categorize-design-default` is the built-in prompt from when a request carried one
+representation and its opening could name that one; `categorize-design-default-mixed` is the same
+prompt as production sends it now that every request carries a summary and a picture together. The
+committed experiments still name `categorize-design-default`, which is what keeps their recorded
+runs comparable.
 
 ### Experiments
 
@@ -598,12 +604,24 @@ classifying the document's own content — never from a `modalityOverride`, whic
 judgement about how to group a result, not a claim about what the document contains.
 
 - **Any shape** skips a document classified `empty`: no tile carries text, and none needs a picture.
-- **`text-only`** skips a document with no student-authored text — the summary would carry no
-  student content, which is the thing a text run measures. On the synthetic corpus that is most of
-  it: 7 of 26 documents carry student text.
-- **`mixed`** sends a document with no student text *without* its summary and related summaries, and
-  records `textPartOmitted` on the row. The picture still has something to say, so skipping it would
-  throw away the answer this shape exists to get.
+- **`text-only`** skips a document whose summary would carry no student work — the thing a text run
+  measures. That question is broader than "does a tile hold typed text". A tile also counts when its
+  summarizer describes it in detail (a `full` or `partial` handler) *and* it actually holds
+  something to describe: a drawing with at least one object, a graph with at least one layer. A
+  `stub` or `fallback` type never counts, whatever it holds; its summary is a sentence or a property
+  dump. This is production's rule, in `summaryCarriesStudentWork` on the shared classifier, and the
+  harness reads the same field so a run measures the request production would actually send.
+
+  **Table and Dataflow are exceptions: they count even when empty.** Both are marked as holding
+  student-authored text at the type level, and unlike Text and Drawing that mark is never narrowed
+  per instance — so the first half of the rule answers `true` before the "does it hold anything"
+  check is reached. An empty Dataflow canvas and a Table with no data set therefore send a summary
+  that describes little more than the tile's presence. That is pre-existing rather than something
+  the rule introduced, and narrowing it would move such documents between modalities, which would
+  reclassify recorded results; it is logged with the thin-summary work instead.
+- **`mixed`** sends a document whose summary carries no student work *without* its summary and
+  related summaries, and records `textPartOmitted` on the row. The picture still has something to
+  say, so skipping it would throw away the answer this shape exists to get.
 - **`visual-tiles-only`** skips a document where no captured tile is one the classification marks as
   needing a picture.
 
@@ -919,7 +937,6 @@ apply-key-map.ts           fills a production corpus's provenance fields from a 
 debug-render.ts            renders ONE corpus document with full observability (console, DOM probes)
 src/schemas.ts             types, validators, canonicalJson / sha256Canonical
 src/corpus.ts              corpus layout, import, manifest read/write
-src/capability.ts          tile capability registry, document classification
 src/key-map.ts             reading a survey key map, and filling a manifest's provenance from it
 src/represent-text.ts      text representation variants
 src/represent-image.ts     image envelopes: paths, writing, freshness (files included)
@@ -927,7 +944,6 @@ src/png.ts                 PNG header reader (dimensions + "is this really a PNG
 src/files.ts               atomic writes, path containment, JSON reads, git
 src/backends/types.ts      what a render backend is, and the limits every one is held to
 src/backends/index.ts      the named render modes
-src/backends/render-html.ts  the render page, with safe interpolation — shared by all modes
 src/backends/puppeteer.ts  local capture through CLUE's iframe pathway
 src/backends/shutterbug.ts the three hosted modes and the network contract
 src/backends/render-unit.ts  the harness's rendering unit and the server that hands it over
@@ -942,6 +958,15 @@ experiments/               experiment definitions
 examples/synthetic-corpus/ committed fixtures + expectations.json (no manifest — import makes it)
 test/                      jest suite
 data/                      generated at runtime; never committed
+```
+
+Three modules the harness shares with the analysis functions, so both build the same thing from the
+same code:
+
+```
+shared/ai-analysis-classify.ts  tile capability registry, document classification
+shared/render-page.ts           the render page, with safe interpolation
+shared/ai-analysis-messages.ts  the OpenAI request builders
 ```
 
 ## Findings for elsewhere
@@ -970,13 +995,16 @@ Things this milestone surfaced that are not the harness's to fix.
   non-positive height, and production's render target is the released build's
   `authoring-iframe/index.html` (from v7.5.0), rendered with each document's own unit and `mods`
   as the fallback. The paragraphs above describe the state the harness was built against.
-- **The `generateHtml()` script injection exists in production.** That same file interpolates
+- **The `generateHtml()` script injection exists in production.** That same file interpolated
   `JSON.stringify(content)` into a `<script>` element with real student work. Text containing
-  `</script>` can inject markup into the render page. The harness fixed its own copy
-  (`src/backends/render-html.ts`, with a snapshot test); production needs a small PR of its own, and
-  it becomes more pressing with the text+image-always rollout.
+  `</script>` could inject markup into the render page.
+
+  *Since resolved.* The escaping landed in production first, and the page generator itself now lives
+  in `shared/render-page.ts`, which production, the harness and `scripts/shutterbug.ts` all call, so
+  there is no copy left to drift.
 - **`scripts/shutterbug.ts` is not production parity**, despite the harness plan describing it that
   way. It posts `height: 500, fullPage: true` against production's `height: 1500` and no `fullPage`.
+  It builds the same page as production now, so the difference is the request alone.
 
 ## DEVIATIONS
 
@@ -1198,8 +1226,8 @@ Milestone 4 (against
     hashes it actually sent. For `full-document` and `per-tile` the set is structural, so re-applying
     it reproduces exactly what went; for `visual-tiles-only` the membership is the classifier's, and
     the report classifies the document again to recover it. Flipping `requiresVisualRepresentation`
-    for a tile type in `src/capability.ts` would therefore change which pictures a *past* run is
-    shown as having sent, with no notice — the newly selected picture is still among the recorded
+    for a tile type in `shared/ai-analysis-classify.ts` would therefore change which pictures a
+    *past* run is shown as having sent, with no notice — the newly selected picture is still among the recorded
     hashes, so nothing on the row can catch it. Closing it means recording what was sent (a
     `sentImageSha256s` on the descriptor, optional for existing rows), which changes what a run
     writes and is out of scope for a milestone that is a renderer. Worth doing before a judging
@@ -1208,6 +1236,51 @@ Milestone 4 (against
     from the resolved output path, so an `--out` with another extension would produce a key whose
     name the next invocation could not predict — and predicting it is how a key is found and not
     overwritten.
+
+### Recorded run: does the drawing table earn its place? (2026-08-28)
+
+Run before opening the CLUE-371 mixed-mode PR, to answer one question: production now sends the
+summary for a document whose only student work is a drawing, because CLUE-646 turned a Drawing
+tile's summary into a table of its objects. Does that table improve the feedback, do nothing, or
+drag answers toward `unknown` the way thin summaries did in finding 8d?
+
+`experiments/g5-drawing-mixed-vs-image.json` — three `image-only` runs against three `mixed` runs,
+identical apart from the message shape, both arms on `categorize-design-default-mixed`, which is the
+prompt production sends. Three repeats per arm because a single pair cannot tell a real difference
+from noise (finding 7b). `--no-cache`, or the repeats would be served from the cache and measure
+nothing.
+
+| | |
+|---|---|
+| rows written | 156 — 6 runs × 26 documents |
+| sent, skipped | 138, 18 |
+| spend | $0.3447 of a $1.50 ceiling |
+| text variant | `default`, version 2 (CLUE-646 summaries) |
+| render | `puppeteer-full-height` against a local dev server, 24 rendered, `empty` and `error-test` did not |
+
+**The table earns its place, and nothing regressed.** Corpus-wide, `unknown` fell from 47 of 69
+evaluations in the image-only arm to 39 in the mixed arm. No refusals and no errors in either.
+Three documents changed answer, all in the same direction, and every repeat agreed:
+
+| document | image-only | mixed |
+|---|---|---|
+| `drawing` | `unknown` ×3, no key indicators | `form` ×3, 2–3 indicators each |
+| `graph` | `unknown`, `unknown`, `function` | `function` ×3 |
+| `adversarial-text` | `unknown` ×3 | `function` ×3 |
+
+The other 20 documents answered identically in both arms. On `drawing` the image-only arm did not
+merely answer less confidently — it returned no usable feedback at all, saying the image contained
+insufficient information to identify a focus area, three times out of three. That is the case the
+rule change exists for.
+
+Two caveats worth carrying into any decision this informs. **The measurable population is two
+documents.** Only `drawing` and `graph` are documents the rule actually changes — no typed text, but
+a summary that now carries student work — and the 50-document `teacher-workshop` corpus contains
+**none**: 42 mixed, 7 text-only, 1 visual-only that does not qualify. So this is evidence from
+hand-built fixtures, and the rule change is close to unobservable on the real documents held today.
+**And the comparison is broader than the rule.** A mixed run sends text for every document that
+carries student work, which is 8 of the 23 sent here, so `adversarial-text` moving is the mixed
+shape helping generally rather than anything the new rule did.
 
 ### Verified against a real API call, a real browser, a real service?
 

@@ -96,13 +96,24 @@ These properties are configurable at the application (built into the code) or th
 ```json
 "aiPrompt": {
   "systemPrompt": "You are a master teacher.",
-  "mainPrompt": "This is a picture of a student document. Please evaluate and categorize it.",
+  "mainPrompt": "Below is a text summary of a student document and a picture of it. Either one may be absent. Please evaluate and categorize it.",
   "categorizationDescription": "Categorize the document based on its content.",
   "categories": ["user", "environment", "form", "function"],
   "keyIndicatorsPrompt": "What are the key indicators that support this categorization?",
   "discussionPrompt": "Please provide any additional information."
 }
 ```
+
+**What the AI is sent.** Every evaluation sends a text summary of the document and a screenshot of it in one request. Which of the two arrive depends on the document, not on any setting.
+
+- The **summary** is sent when it would carry the student's work. That means the student typed something, or the document holds something the summary describes in detail — a drawing with at least one object, for instance, is summarized as a table of those objects. A tile that is empty, or one the summary can only name rather than describe, does not count.
+- The **screenshot** is sent when the document holds something a picture is needed to understand.
+
+So a document of only text gets no screenshot; a drawing with objects in it gets both, while an empty drawing gets only the screenshot. Write "mainPrompt" so it reads correctly whichever arrives — the built-in prompt opens by saying that either may be absent.
+
+A document with no content at all is an exception: it is evaluated anyway, and only its summary is sent. That summary describes an empty document, so the feedback will not say anything useful. This may be temporary. Not evaluating such a document is the better answer, but the student is shown a "thinking about it" message that only an arriving comment removes, so refusing to evaluate would leave that message up for good. Changing this needs a matching change in the interface, to say plainly that the document is empty.
+
+An `aiPrompt` may still carry a `summarizer` property, written by older versions of the authoring interface to choose between sending text and sending a picture. It is ignored.
 
 `showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
 which checks if the the aiEvaluation is set or if there are invisible exemplar documents.

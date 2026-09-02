@@ -31,8 +31,8 @@ export interface RelatedSummary {
 }
 
 export const defaultAiPrompt: IAiPrompt = {
-  mainPrompt: `This is a picture of a student document.
-They are working on engineering task. Please tell me which of the following areas of their design they are focusing on:
+  mainPrompt: `Below is a text summary of a student document and a picture of it. Either one may be absent.
+They are working on an engineering task. Please tell me which of the following areas of their design they are focusing on:
 - user: who's it for?
 - environment: where's it used?
 - form: what's it look like?

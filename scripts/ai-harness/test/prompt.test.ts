@@ -5,14 +5,16 @@ import { harnessRoot } from "../src/corpus.js";
 import { sha256Canonical, validatePromptFile } from "../src/schemas.js";
 
 const promptsDir = path.join(harnessRoot, "prompts");
-const promptFile = path.join(promptsDir, "categorize-design-default.json");
+// The copy of what production sends today. `categorize-design-default` is the same prompt from
+// before every request carried both representations, and is kept for comparing older runs.
+const promptFile = path.join(promptsDir, "categorize-design-default-mixed.json");
 
 /**
  * Every committed prompt, not just the one below.
  *
  * `validatePromptFile` checks each file's declared `aiPromptSha256` against its own `aiPrompt`, and
  * `buildTasks` loads prompts through it — so a file that fails this aborts `plan` and `run` before a
- * single task is built. Nothing exercised any prompt but `categorize-design-default`, and a reworded
+ * single task is built. Nothing exercised any prompt but the production copy, and a reworded
  * `categorize-design-mixed` shipped with a stale hash and a green suite: the only experiment that
  * covers mixed, detail, imageSet and extras could not run at all.
  *
@@ -40,12 +42,12 @@ describe("every committed prompt file", () => {
  * The committed prompt is a copy of production's built-in default, and this
  * is what stops the copy drifting away from it unnoticed.
  */
-describe("the committed default prompt", () => {
+describe("the committed copy of production's default prompt", () => {
   const raw = JSON.parse(fs.readFileSync(promptFile, "utf8"));
 
   it("validates, which also checks its own declared hash", () => {
     const prompt = validatePromptFile(raw, promptFile);
-    expect(prompt.name).toBe("categorize-design-default");
+    expect(prompt.name).toBe("categorize-design-default-mixed");
     expect(prompt.provenance.source).toContain("ai-analysis-messages");
   });
 
