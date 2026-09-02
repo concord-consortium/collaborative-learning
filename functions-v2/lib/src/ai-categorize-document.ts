@@ -144,8 +144,18 @@ export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummar
  */
 type ParsedCompletion = NonNullable<Awaited<ReturnType<typeof categorizeUrl>>>;
 
+/**
+ * One request's shape together with the representations that shape guarantees are there. Decided
+ * once, so the shape reported to the caller and the messages actually built cannot disagree, and
+ * so each builder gets its strings without a non-null assertion.
+ */
+type AnalysisRequest =
+  | { shape: "mixed"; summary: string; imageUrl: string }
+  | { shape: "summary-only"; summary: string }
+  | { shape: "image-only"; imageUrl: string };
+
 /** Which of the two representations a request carried. Recorded on the `done` queue record. */
-export type AnalysisMessageShape = "mixed" | "summary-only" | "image-only";
+export type AnalysisMessageShape = AnalysisRequest["shape"];
 
 /** What is being sent to the model. `null` means "not being sent", not "does not exist". */
 export interface DocumentRepresentations {
@@ -193,8 +203,14 @@ export async function categorizeRepresentations(
     // prompt and paying for an answer about nothing.
     throw new Error("no representation to send");
   }
-  const messageShape: AnalysisMessageShape =
-    summary !== null && imageUrl !== null ? "mixed" : summary !== null ? "summary-only" : "image-only";
+  // imageUrl is non-null in the last case: the check above returned when both were null.
+  const request: AnalysisRequest =
+    summary !== null && imageUrl !== null ?
+      { shape: "mixed", summary, imageUrl } :
+      summary !== null ?
+        { shape: "summary-only", summary } :
+        { shape: "image-only", imageUrl: imageUrl! };
+  const messageShape = request.shape;
   logger.info(`Categorizing ${messageShape} for: ${firestoreDocumentPath}`);
 
   try {
@@ -215,11 +231,19 @@ export async function categorizeRepresentations(
       }
     }
 
-    const messages = summary !== null && imageUrl !== null ?
-      buildMixedMessages(aiPrompt, summary, relatedSummaries, imageUrl) :
-      summary !== null ?
-        buildSummaryMessages(aiPrompt, summary, relatedSummaries) :
-        buildMixedMessages(aiPrompt, null, [], imageUrl!);
+    // One builder per shape, over the shape decided above. The image-only case uses the mixed
+    // builder with a null summary, as this function's comment explains.
+    const buildMessages = () => {
+      switch (request.shape) {
+      case "mixed":
+        return buildMixedMessages(aiPrompt, request.summary, relatedSummaries, request.imageUrl);
+      case "summary-only":
+        return buildSummaryMessages(aiPrompt, request.summary, relatedSummaries);
+      case "image-only":
+        return buildMixedMessages(aiPrompt, null, [], request.imageUrl);
+      }
+    };
+    const messages = buildMessages();
 
     const completion = await deps.createOpenAI(apiKey).chat.completions.parse({
       model: "gpt-4o-mini",
