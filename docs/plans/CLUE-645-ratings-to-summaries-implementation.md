@@ -421,6 +421,11 @@ Written 2026-09-02, from a read-only probe run against both staging and producti
 (`functions-v2/probe-vector-query.ts`, untracked; its header carries the findings). Everything here
 was measured, not assumed — inspection alone had the index field order wrong.
 
+The durable half of this — deploy indexes before the functions that query them, and why the wrong
+order fails quietly — now lives in `functions-v2/README.md` under "To deploy firebase functions",
+where the next person deploying anything will find it. What follows is the rest: what this
+particular deploy will encounter.
+
 **The order is index first, functions second.** Not because the wrong order breaks loudly, but
 because it does not: a query whose index is missing fails with `FAILED_PRECONDITION`, and
 `categorizeRepresentations` catches that and continues without related summaries. So deploying the
@@ -617,47 +622,30 @@ departure and reason here (and in the design doc when it changes a decision).
 ### Track C reconciliation (Tasks 7 to 9, as implemented)
 
 Tasks 7 to 9 were drafted against `CLUE-371-production-mixed-mode-implementation.md` before that
-work merged, so they describe what the pipeline was expected to look like. The reconciliation pass
-this track opens with found the following. Task 7's central claim held: the merged
-`categorizeRepresentations` did return `{completion, messageShape}` and did leave the imaged handler
-with nothing Task 8 needed.
+work merged, so they describe what the pipeline was expected to look like. Task 7's central claim
+held: the merged `categorizeRepresentations` did return `{completion, messageShape}` and did leave
+the imaged handler with nothing Task 8 needed.
 
-- **The function is `categorizeRepresentations`**, not `categorizeDocumentRepresentations`.
-- **Hoisting `getEmbeddings` forced two more entries into `CategorizeDeps`.** Until this change no
-  test reached OpenAI or Firestore from this module, because both calls sat *inside* the injected
-  `findRelatedSummaries`. Moving them to the entry point would have had the existing integration
-  tests issue real embedding calls, so `readDocumentMetadata` and `getEmbeddings` are injected too.
-- **The metadata read became `readDocumentMetadata`, which returns `undefined` rather than
-  throwing.** A missing document used to throw into the lookup's catch, which was fine when the
-  only consumer was enrichment. The summary write needs to tell "no metadata" apart from "the
-  lookup failed", so the three unusable cases — not a document path, no such document, incomplete
-  context — are one answer, given once.
+Departures the code now states for itself, listed only so this plan is not mistaken for the current
+design: the function is `categorizeRepresentations`, not `categorizeDocumentRepresentations`; the
+metadata read became `readDocumentMetadata`, which reports why it found nothing rather than
+throwing; hoisting it and `getEmbeddings` out of the lookup put both into `CategorizeDeps`, and
+exported them and `findRelatedSummaries` so the realm filter could be tested against a real
+Firestore; `offeringId` is normalized to `""`; `Summary.summaryEmbedding` was typed `FieldValue` and
+is now `VectorValue`; `adaCommentId` is written once rather than written-then-updated; and Task 9's
+realm case lives in Task 7's test file with the other realm tests.
+
+Three have no home in the code, and are why this section is worth keeping.
+
 - **The summary-write gate is "the request carried a summary", not `queueDoc.sendSummary`.** Same
   condition: `representationsOf` has already folded `sendSummary` into `summary !== null`, and the
   handler never sees the raw field. One source, and it is the same one that decides whether related
   summaries are looked up, which is what keeps a document from receiving agreement counts it can
   never contribute to.
-- **`offeringId` is normalized to `""`.** It is optional on a metadata document, required on
-  `Summary`, and absent from the context guard, so it can genuinely be missing — and `undefined`
-  cannot be written to Firestore.
-- **`Summary.summaryEmbedding` was typed `FieldValue` and is now `VectorValue`.** `FieldValue.vector()`
-  returns the latter. The type had never had a writer, so nothing had caught it; Task 8 is the first.
-- **`adaCommentId` is written once, not written-then-updated.** `collection.doc()` generates an id
-  locally without writing anything, so the summary can name the comment *and* still be written
-  first. Task 8 step 2 offered this as the alternative; it is strictly better than the two-write
-  version, which would leave a window where the record named no comment.
 - **A summary write that fails is logged and the run continues to the comment.** Neither doc
   settled this. The evaluation succeeded and the student is owed its feedback; a missing record
   costs only ratings of that comment, which `onCommentRated` already logs and skips, and the next
-  analysis writes the record again. This matches how the surrounding code already treats this
-  collection ("enrichment, their absence costs the evaluation nothing").
-- **Task 9's last case is covered in Task 7's test file, not Task 8's.** "A record in another realm
-  is not returned by the lookup" is a fact about `findRelatedSummaries`, so it lives with the other
-  realm tests in `functions-v2/test/related-summaries-emulator.test.ts`.
-- **`findRelatedSummaries` and `readDocumentMetadata` are exported.** They were module-local,
-  reachable only through the injection seam. The realm filter is the kind of thing that has to be
-  checked against a real Firestore rather than against a recording of the calls it made, and the
-  emulator supports `findNearest`.
+  analysis writes the record again.
 - **What the realm tests do not prove.** The emulator does not enforce composite indexes, so those
   tests cover the *filter*, not the index entry. The index itself was checked against real Firestore
   on 2026-09-02 — see "Deploying Track C" — and inspection had got its field order wrong.

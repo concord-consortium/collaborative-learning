@@ -136,6 +136,34 @@ Then run:
 $ npm run deploy                        # deploy all functions
 ```
 
+### Deploy Firestore indexes before the functions that query them
+
+A query whose composite index is missing fails with `FAILED_PRECONDITION`. Callers here catch that
+and carry on — the related-summaries lookup, for one, returns nothing and logs a warning — so
+deploying in the wrong order does not break anything visibly. It quietly drops whatever the query
+was for, one log line per run.
+
+So when a change adds or alters an index in `firestore.indexes.json`, deploy the index first, wait
+for it to finish building, and only then deploy the functions:
+
+```shell
+$ npm run deploy:firestore:indexes      # from the repo root
+```
+
+Two things about that command:
+
+- **It deploys the whole file**, not the index you changed. Run
+  `npx firebase firestore:indexes --project [project]` first and compare, so you know whether it is
+  about to build an index over a large collection.
+- **It asks whether to delete indexes that exist in the project but not in the file, and the answer
+  is normally no.** One of them is usually the index serving the functions that are still deployed.
+  Deleting an index is quick; rebuilding one is not, and every query needing it fails meanwhile.
+  Never pass `--force` to it without first reading what it would remove.
+
+"deployed indexes successfully" means the request was accepted, not that the index is ready —
+creation is asynchronous and is logged only at debug level. Check the Firebase console, or run a
+query that needs it: while it builds, Firestore says so in the error text.
+
 ## Differences with functions-v1
 
 - in `v2` the firebase-tools are a devDependency: it is not necessary to install them globally

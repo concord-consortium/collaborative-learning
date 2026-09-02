@@ -32,8 +32,9 @@ npm run lint:fix               # ESLint with auto-fix
 npm run check:types            # TypeScript type checking
 
 # Firebase
-npm run deploy:firestore:rules # Deploy Firestore security rules
-npm run deploy:database:rules  # Deploy realtime database rules
+npm run deploy:firestore:rules   # Deploy Firestore security rules
+npm run deploy:firestore:indexes # Deploy Firestore indexes (see functions-v2/README.md first)
+npm run deploy:database:rules    # Deploy realtime database rules
 ```
 
 ## Architecture
