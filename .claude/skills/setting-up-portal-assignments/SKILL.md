@@ -98,8 +98,7 @@ Stripping means names collide: `CLUE-1-add-widget` and `CLUE-2-add-widget` both 
 ## 5. Choose the portal and Firebase project
 
 Default to `--portal staging` for testing. Both portals have a `clue` OAuth client, so the
-redirect step works against either. (`docs/oauth2.md` claims the production portal is not
-configured for CLUE OAuth2 — that is out of date; the client exists there.)
+redirect step works against either.
 
 The script pairs `firebaseEnv` to the portal automatically; override with `--firebase-env`
 only deliberately, and keep the student and teacher launches on the *same* Firebase project or
