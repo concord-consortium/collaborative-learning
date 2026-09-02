@@ -8,6 +8,10 @@ import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./h
 import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 
+const seekIncompleteMessage = (historyId: string) =>
+  `Could not show this document at the requested point in its history (id: ${historyId}): ` +
+  "some of its history could not be replayed.";
+
 interface IFirestoreHistoryInfo {
   documentPath: string;
   lastEntryIndex: number;
@@ -325,16 +329,32 @@ export class FirestoreHistoryManager {
     // "first" is the sentinel logDocumentEvent emits for a change made before the document had any
     // history entry, so it never resolves via findHistoryEntryIndex; it maps to position 0.
     const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
-    if (entry >= 0) {
-      this.setHistoryEntryRequestError(undefined);
-      this.treeManager.goToHistoryEntry(entry);
-    } else {
+    if (entry < 0) {
       console.warn("Did not find history entry with id: ", historyId);
-      // Without this the document silently shows the end of its history, which the reader has no
-      // way to tell apart from the moment they asked for.
+      // Without this the document silently shows some other moment, which the reader has no way
+      // to tell apart from the one they asked for. The message doesn't say where the document
+      // ended up: it outlives the failed request, and the reader can move the scrubber.
       this.setHistoryEntryRequestError(
-        `Could not find the requested point in this document's history (id: ${historyId}). ` +
-        "The document is showing the end of its history.");
+        `Could not find the requested point in this document's history (id: ${historyId}).`);
+      return;
+    }
+
+    // Resolving the id only says where to go. Replaying an entry can fail, and goToHistoryEntry
+    // then stops at the last position it could apply, so the seek has to be awaited and its
+    // result checked before the request can be called successful.
+    try {
+      await this.treeManager.goToHistoryEntry(entry);
+    } catch (error) {
+      console.warn("moveToHistoryEntryAfterLoad: seek failed for id:", historyId, error);
+      this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
+      return;
+    }
+    if (this.treeManager.numHistoryEventsApplied === entry) {
+      this.setHistoryEntryRequestError(undefined);
+    } else {
+      console.warn("moveToHistoryEntryAfterLoad: seek stopped at",
+        this.treeManager.numHistoryEventsApplied, "instead of", entry, "for id:", historyId);
+      this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
     }
   }
 

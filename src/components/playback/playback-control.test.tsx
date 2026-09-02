@@ -68,7 +68,7 @@ describe("PlaybackControlComponent", () => {
     mockComments = [];
   });
 
-  it("moves the thumb when the document is seeked programmatically", async () => {
+  it("moves the thumb when a programmatic seek moves the document", async () => {
     const treeManager = setupTreeManager(5);
     render(<PlaybackControlComponent treeManager={treeManager} />);
 
