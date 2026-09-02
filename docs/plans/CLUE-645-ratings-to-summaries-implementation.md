@@ -7,10 +7,11 @@ record the departure (see DEVIATIONS at the end).
 **Verified against:** `master` at `c08e75c28` (2026-08-27), post-harness-merge. File and symbol
 references below were re-checked on that commit.
 
-**Status (2026-09-01).** Track A shipped in PR #2990. Track B — tasks 3 to 6 — is merged, and its
-functions are deployed to production, where `onCommentRated` runs but finds no summaries to record
-against. Track C's tasks 7 to 9 are implemented on `CLUE-645-track-c`, which is what makes the
-collection exist; task 11 is the only one here that describes work still to do.
+**Status (2026-09-02).** Track A (tasks 1 and 2) shipped in PR #2990 and Track B (tasks 3 to 6) in
+PR #2991. Both are merged and deployed to production, where `onCommentRated` runs on every rating
+but finds no summary to record it against. Track C — tasks 7 to 11 — is implemented on
+`CLUE-645-persist-document-summaries`, and is what makes those summaries exist. Every task in this
+plan is now written; what remains is the deployment.
 
 **The one thing in Track C with no equivalent in code is the index deploy.** The realm-scoped
 lookup needs `root` and `space` in the `summaries` composite index, so `firestore.indexes.json` must
@@ -509,8 +510,10 @@ the first record the staging pipeline writes is what would settle it.
    delivery; the summary document itself is never created or deleted by the rating trigger.
 5. Re-analysis of a rated document refreshes its summary and preserves its agreements; first
    analysis initializes empty agreements and zero counts.
-6. No client files changed; `summaries` remains admin-only. Track B changes no indexes; Track C adds
-   `root` and `space` to the `summaries` composite index (see 9).
+6. No client *behavior* changes, and `summaries` remains admin-only. Client files do change: Track A
+   in `shared/shared.ts` and `comment-card.tsx`, Task 11 in `chat-panel.tsx` and
+   `document-comment-hooks.ts`. Track B changes no indexes; Track C adds `root` and `space` to the
+   `summaries` composite index (see 9).
 7. A rating on a document with no summary produces an info log and nothing else.
 8. The deployed `onDocumentSummarized` trigger is deleted in the same cutover that deploys
    `onCommentRated`; the `package.json` deploy script is updated to match.

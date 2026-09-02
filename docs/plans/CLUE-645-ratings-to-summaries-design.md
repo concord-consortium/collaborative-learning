@@ -448,10 +448,13 @@ covers the read side and is extended.
 | Shared summary-id helper (new, alongside path helpers) | Canonical `summaryId` derivation for both writers |
 | `functions-v2/test/…` | New `onCommentRated` suite; pipeline-write and read-side test updates |
 | `firebase-test/src/…` | Rules tests for the value enum |
-
 | `firestore.indexes.json` | Track C: `root` and `space` added to the `summaries` composite index (realm scoping) |
 
-No client files change.
+Client files do change, though client behavior does not. Track A moved the rating values into
+`shared/shared.ts` and had `comment-card.tsx` derive its buttons from them; Track C removes the
+retired `agreeWithAi` parameter from `chat-panel.tsx` and `document-comment-hooks.ts`. The
+stored-comment schema keeps `agreeWithAi`, which `onCommentRated` reads when a legacy comment is
+deleted.
 
 ## Deviations (Track C, 2026-09-01)
 
