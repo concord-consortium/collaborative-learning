@@ -3,18 +3,19 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 // Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
 import {FieldValue} from "firebase-admin/firestore";
-import {getAnalysisQueueFirestorePath} from "./utils";
+import {getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
 import {
-  type DocumentRepresentations, categorizeRepresentations,
+  type DocumentMetadata, type DocumentRepresentations, categorizeRepresentations,
 } from "../lib/src/ai-categorize-document";
+import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
 // 2. Summarize and screenshot those documents
-// 3. (This function) Send what was produced to the AI service for processing along with any custom AI prompt, and
-//    create comments with the results
+// 3. (This function) Send what was produced to the AI service for processing along with any custom AI prompt,
+//    record the summary that was evaluated in `summaries/`, and create comments with the results
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
@@ -58,6 +59,72 @@ export function representationsOf(queueDoc: Record<string, unknown>): DocumentRe
   };
 }
 
+/**
+ * What became of this run's summary record, stored on the `done` queue entry so that "did this
+ * document get a summary, and if not why not" is a query rather than a log search.
+ *
+ * `no-summary-sent` is the ordinary shape of an image-only or mock run; `no-metadata` and
+ * `no-embedding` mean something was expected and did not arrive.
+ */
+export type SummaryOutcome =
+  "created" | "refreshed" | "failed" | "no-summary-sent" | "no-metadata" | "no-embedding";
+
+/**
+ * Records the summary this run evaluated, so ratings of the comments it produces have somewhere to
+ * land and later evaluations of similar documents can find it.
+ *
+ * Two paths, because a merge that never touches the agreements cannot also initialize them. A new
+ * record starts with no agreements and both counts at zero; an existing one has only its summary,
+ * vector, timestamp and comment id refreshed, since the agreements belong to the people who made
+ * them. A record written before `root` and `space` existed gains them here, which is what puts it
+ * back within reach of the realm-scoped lookup.
+ *
+ * The read and the write share a transaction because a rating can arrive at any moment.
+ *
+ * @param {admin.firestore.Firestore} firestore the admin Firestore instance
+ * @param {DocumentMetadata} metadata where the document lives and what class and problem it is for
+ * @param {string} summary the summary text that was sent to the AI service
+ * @param {number[]} summaryEmbedding the vector of that text, computed once for this run
+ * @param {string} adaCommentId the comment this run is about to create
+ * @return {Promise<SummaryOutcome>} whether the record was created or refreshed
+ */
+async function writeSummaryRecord(
+  firestore: admin.firestore.Firestore,
+  metadata: DocumentMetadata,
+  summary: string,
+  summaryEmbedding: number[],
+  adaCommentId: string
+): Promise<SummaryOutcome> {
+  const summaryRef = firestore.doc(getSummaryPath(metadata.root, metadata.space, metadata.key));
+  // Typed as a subset of Summary so a field this run has no business writing cannot be added here.
+  const analyzed: Omit<Summary, "aiAgreements" | "numAiAgreements" | "numAgreements"> = {
+    key: metadata.key,
+    root: metadata.root,
+    space: metadata.space,
+    context_id: metadata.context_id,
+    unit: metadata.unit,
+    investigation: metadata.investigation,
+    problem: metadata.problem,
+    offeringId: metadata.offeringId,
+    summary,
+    summaryEmbedding: FieldValue.vector(summaryEmbedding),
+    analyzedAt: Date.now(),
+    adaCommentId,
+  };
+
+  return firestore.runTransaction(async (transaction): Promise<SummaryOutcome> => {
+    const existing = await transaction.get(summaryRef);
+    if (existing.exists) {
+      transaction.update(summaryRef, analyzed);
+      logger.info("Refreshed summary", summaryRef.path);
+      return "refreshed";
+    }
+    transaction.set(summaryRef, {...analyzed, aiAgreements: {}, numAiAgreements: 0, numAgreements: 0});
+    logger.info("Created summary", summaryRef.path);
+    return "created";
+  });
+}
+
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
   logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
@@ -92,6 +159,11 @@ export const onAnalysisDocumentImaged =
       let completionTokens = 0;
       let fullResponse = "";
       let messageShape;
+      // All three are set together or not at all: a run that sends no summary reads no metadata and
+      // buys no embedding.
+      let sentSummary: string | null = null;
+      let summaryEmbedding: number[] | undefined;
+      let documentMetadata: DocumentMetadata | undefined;
 
       if (queueDoc.evaluator === "mock") {
         message = "Mock reply from AI analysis";
@@ -100,9 +172,10 @@ export const onAnalysisDocumentImaged =
         const firestoreDocumentPath = queueDoc.firestoreDocumentPath;
 
         const representations = representationsOf(queueDoc);
+        sentSummary = representations.summary;
         let completion;
         try {
-          ({completion, messageShape} = await categorizeRepresentations(
+          ({completion, messageShape, summaryEmbedding, documentMetadata} = await categorizeRepresentations(
             representations, openaiApiKey.value(), firestoreDocumentPath, aiPrompt));
         } catch (err) {
           await error(`${err}`, event);
@@ -130,9 +203,36 @@ export const onAnalysisDocumentImaged =
         return;
       }
 
+      // Generating the id writes nothing, so the summary record can name the comment and still be
+      // written first. It has to be first: a student can rate a comment the moment it appears, and
+      // onCommentRated drops a rating whose summary does not exist yet.
+      const commentRef = firestore.collection(commentsPath).doc();
+
+      let summaryRecorded: SummaryOutcome;
+
+      // `.length`, not truthiness: an empty array is truthy, and writing one would persist a
+      // zero-dimension vector no search can find. categorizeRepresentations also turns an empty
+      // result into undefined, so neither guard alone is load-bearing.
+      if (sentSummary && documentMetadata && summaryEmbedding?.length) {
+        try {
+          summaryRecorded =
+            await writeSummaryRecord(firestore, documentMetadata, sentSummary, summaryEmbedding, commentRef.id);
+        } catch (err) {
+          // The evaluation succeeded and the student is owed its feedback. A missing record only
+          // costs ratings of this comment, and the next analysis writes it again.
+          summaryRecorded = "failed";
+          logger.warn("Could not record the summary; continuing to the comment", event.document, err);
+        }
+      } else {
+        // Not logged: a line per image-only run would bury the cases that matter, and the two that
+        // are anomalies are already logged where they are detected.
+        summaryRecorded = !sentSummary ? "no-summary-sent" :
+          !documentMetadata ? "no-metadata" : "no-embedding";
+      }
+
       logger.info("Creating comment for", event.document);
       // NOTE we are leaving the "network" and "tileId" fields empty in the comment doc.
-      await firestore.collection(commentsPath).add({
+      await commentRef.set({
         tags,
         content: message,
         createdAt: FieldValue.serverTimestamp(),
@@ -148,6 +248,7 @@ export const onAnalysisDocumentImaged =
         promptTokens,
         completionTokens,
         fullResponse,
+        summaryRecorded,
         ...(messageShape ? {messageShape} : {}),
       });
 

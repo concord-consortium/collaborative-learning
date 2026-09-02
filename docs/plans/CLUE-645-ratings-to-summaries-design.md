@@ -452,3 +452,29 @@ covers the read side and is extended.
 | `firestore.indexes.json` | Track C: `root` and `space` added to the `summaries` composite index (realm scoping) |
 
 No client files change.
+
+## Deviations (Track C, 2026-09-01)
+
+Where this document and the code disagree, prefer the code. The full reconciliation list is in the
+implementation plan under DEVIATIONS; recorded here are the three that change something this
+document states.
+
+1. **`summaryEmbedding` is a `VectorValue`, not a `FieldValue`** (Data Model). `FieldValue.vector()`
+   is what produces a vector; `VectorValue` is what a vector is, and what a read gives back. The
+   type had never had a writer, so nothing had caught it.
+2. **The categorize function is `categorizeRepresentations`** (Pipeline change 1), and hoisting the
+   embedding out of `findRelatedSummaries` also hoisted the metadata read, because the summary write
+   needs the same fields the lookup does and reading them twice would be two reads of one document.
+3. **A failed summary write does not fail the run** — it is logged, and Ada's comment is posted
+   anyway. Pipeline change 3 fixes the *order* of the two writes but says nothing about what happens
+   when the first one fails. The evaluation succeeded and the student is owed its feedback; a
+   missing record costs only ratings of that comment, which `onCommentRated` already logs and skips,
+   and the next analysis writes the record again.
+
+Unchanged by reconciliation, and worth restating because it is the one thing here that has to
+happen in a particular order outside the code: **the `summaries` composite index carrying `root`
+and `space` must be deployed and built before the functions deploy.** Note the failure mode is
+quiet, not loud: a missing index fails the query with `FAILED_PRECONDITION`, which
+`categorizeRepresentations` catches and continues past, so the wrong order costs agreement counts
+in prompts without anything appearing to break. The measured procedure is in the implementation
+plan under "Deploying Track C".

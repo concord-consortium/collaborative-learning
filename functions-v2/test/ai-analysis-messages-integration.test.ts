@@ -13,7 +13,7 @@ import {
   defaultAiPrompt,
 } from "../../shared/ai-analysis-messages";
 import * as categorizeDocumentModule from "../lib/src/ai-categorize-document";
-import {CategorizeDeps, categorizeRepresentations} from "../lib/src/ai-categorize-document";
+import {CategorizeDeps, DocumentMetadata, categorizeRepresentations} from "../lib/src/ai-categorize-document";
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -77,11 +77,19 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
   describe("every request shape comes from the shared builders", () => {
     const summary = "A summary of the student's work.";
     const imageUrl = "https://example.com/image.png";
+    const documentMetadata: DocumentMetadata = {
+      root: "demo", space: "AI", key: "testdoc1", context_id: "class1",
+      unit: "vibe", investigation: "1", problem: "1.1", offeringId: "1234",
+    };
 
-    // A CategorizeDeps whose OpenAI client records the request instead of sending it.
+    // A CategorizeDeps whose OpenAI client records the request instead of sending it. Everything
+    // that would reach Firestore or the network has a default, so a test overrides only what it
+    // cares about.
     function recordingDeps(overrides: Partial<CategorizeDeps> = {}) {
       const sent: Record<string, any>[] = [];
       const deps: CategorizeDeps = {
+        readDocumentMetadata: jest.fn().mockResolvedValue(documentMetadata),
+        getEmbeddings: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
         findRelatedSummaries: jest.fn().mockResolvedValue([]),
         createOpenAI: () => ({
           chat: {
@@ -135,15 +143,101 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
     test("related summaries are looked up only when a summary is being sent", async () => {
       const {deps} = recordingDeps();
 
-      await categorizeRepresentations(
+      const result = await categorizeRepresentations(
         {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
 
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+      // An image-only run pays for no embedding and reads no metadata, so it also reports nothing
+      // for the caller to write a summary record from.
+      expect(deps.getEmbeddings).not.toHaveBeenCalled();
+      expect(deps.readDocumentMetadata).not.toHaveBeenCalled();
+      expect(result.summaryEmbedding).toBeUndefined();
+      expect(result.documentMetadata).toBeUndefined();
+    });
+
+    test("the summary is embedded once, and the vector is both searched with and reported", async () => {
+      const embedding = [0.4, 0.5, 0.6];
+      const {deps} = recordingDeps({getEmbeddings: jest.fn().mockResolvedValue(embedding)});
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(deps.getEmbeddings).toHaveBeenCalledTimes(1);
+      expect(deps.getEmbeddings).toHaveBeenCalledWith(summary, "key");
+      expect(deps.findRelatedSummaries).toHaveBeenCalledWith(documentMetadata, embedding);
+      expect(result.summaryEmbedding).toBe(embedding);
+      expect(result.documentMetadata).toEqual(documentMetadata);
+    });
+
+    test("no embedding means no lookup and no vector to store, and the run still completes", async () => {
+      // getEmbeddings resolves undefined on any OpenAI error. A query vector of undefined throws
+      // from findNearest, and a stored one would persist as a zero-dimension vector.
+      const {deps, sent} = recordingDeps({getEmbeddings: jest.fn().mockResolvedValue(undefined)});
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+      expect(result.summaryEmbedding).toBeUndefined();
+      expect(result.completion).toBeDefined();
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+    });
+
+    test("an empty embedding is treated as no embedding", async () => {
+      const {deps} = recordingDeps({getEmbeddings: jest.fn().mockResolvedValue([])});
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+      expect(result.summaryEmbedding).toBeUndefined();
+      expect(result.completion).toBeDefined();
+    });
+
+    test("a document with no usable metadata is neither looked up nor embedded", async () => {
+      const {deps, sent} = recordingDeps({readDocumentMetadata: jest.fn().mockResolvedValue(undefined)});
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(deps.getEmbeddings).not.toHaveBeenCalled();
+      expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+      expect(result.documentMetadata).toBeUndefined();
+      expect(result.summaryEmbedding).toBeUndefined();
+      expect(result.completion).toBeDefined();
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+    });
+
+    test("a failed metadata read does not cost the evaluation", async () => {
+      const {deps, sent} = recordingDeps({
+        readDocumentMetadata: jest.fn().mockRejectedValue(new Error("Firestore unavailable")),
+      });
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(result.completion).toBeDefined();
+      expect(result.documentMetadata).toBeUndefined();
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+    });
+
+    test("a failed lookup still reports the metadata and vector for the summary record", async () => {
+      // The record is worth writing even when the search that shares its vector fails: the two are
+      // separate jobs that happen to want the same embedding.
+      const {deps} = recordingDeps({
+        findRelatedSummaries: jest.fn().mockRejectedValue(new Error("vector search unavailable")),
+      });
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(result.documentMetadata).toEqual(documentMetadata);
+      expect(result.summaryEmbedding).toEqual([0.1, 0.2, 0.3]);
     });
 
     test("a failed related-summaries lookup does not cost the evaluation", async () => {
-      // getEmbeddings resolves undefined on error and FieldValue.vector(undefined) then throws
-      // from inside the lookup, so the whole call can fail, not just the embeddings part.
+      // The vector search can fail on its own — an index that is not ready, Firestore unavailable —
+      // and related summaries are enrichment, so the request goes out without them.
       const {deps, sent} = recordingDeps({
         findRelatedSummaries: jest.fn().mockRejectedValue(new Error("vector search unavailable")),
       });
