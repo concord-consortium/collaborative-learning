@@ -5,6 +5,7 @@
 import {ZodArray, ZodEnum, ZodString} from "zod";
 import {
   IAiPrompt,
+  RelatedSummary,
   buildImageMessages,
   buildMixedMessages,
   buildSummaryMessages,
@@ -81,6 +82,14 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       root: "demo", space: "AI", key: "testdoc1", context_id: "class1",
       unit: "vibe", investigation: "1", problem: "1.1", offeringId: "1234",
     };
+    const defaultEmbedding = [0.1, 0.2, 0.3];
+    // Non-empty by default, so an assertion that the built messages carry it is the difference
+    // between covering the builders and covering the wiring from the lookup to them. Every empty
+    // list below is then a claim about that path rather than an artifact of the fixture.
+    const relatedSummary: RelatedSummary = {
+      summary: "A peer's work, found by the lookup.",
+      agreements: {yes: [{content: "Ada said something.", tags: []}]},
+    };
 
     // A CategorizeDeps whose OpenAI client records the request instead of sending it. Everything
     // that would reach Firestore or the network has a default, so a test overrides only what it
@@ -89,8 +98,8 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const sent: Record<string, any>[] = [];
       const deps: CategorizeDeps = {
         readDocumentMetadata: jest.fn().mockResolvedValue({metadata: documentMetadata}),
-        getEmbeddings: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
-        findRelatedSummaries: jest.fn().mockResolvedValue([]),
+        getEmbeddings: jest.fn().mockResolvedValue(defaultEmbedding),
+        findRelatedSummaries: jest.fn().mockResolvedValue([relatedSummary]),
         createOpenAI: () => ({
           chat: {
             completions: {
@@ -113,7 +122,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
 
       expect(result.messageShape).toBe("mixed");
-      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [relatedSummary], imageUrl));
       expect(sent[0].model).toBe("gpt-4o-mini");
     });
 
@@ -124,7 +133,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
 
       expect(result.messageShape).toBe("summary-only");
-      expect(sent[0].messages).toEqual(buildSummaryMessages(fullPrompt, summary, []));
+      expect(sent[0].messages).toEqual(buildSummaryMessages(fullPrompt, summary, [relatedSummary]));
     });
 
     test("an image-only request is both builders at once", async () => {
@@ -251,7 +260,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
 
       expect(result.documentMetadata).toEqual(documentMetadata);
-      expect(result.summaryEmbedding).toEqual([0.1, 0.2, 0.3]);
+      expect(result.summaryEmbedding).toEqual(defaultEmbedding);
     });
 
     test("a failed related-summaries lookup does not cost the evaluation", async () => {
