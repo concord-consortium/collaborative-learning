@@ -789,16 +789,9 @@ describe("functions", () => {
       });
     });
 
-    // `root` and `space` are optional on the Summary type, so nothing in the compiler notices if a
-    // write path drops them. These two tests are the only thing that does.
-    test("the created record says which realm it belongs to", async () => {
-      mockCategorizeResponse({parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadata: documentMetadata});
-
-      await runImaged(summarySent());
-
-      expect(await readSummary().then((record) => record.data())).toMatchObject({root: "demo", space: "AI"});
-    });
-
+    // `root` and `space` are optional on the Summary type, so nothing in the compiler notices if the
+    // update path drops them. This is the only test that does; the create path is covered by the
+    // exact-match assertion above.
     test("a re-analysis adds the realm to a record that predates it", async () => {
       // A record written before root and space existed, which the realm-scoped lookup cannot match
       // until an analysis rewrites it.
@@ -921,6 +914,7 @@ describe("functions", () => {
       }));
 
       expect((await readSummary()).exists).toBe(false);
+      expect(await doneRecord()).toMatchObject({summaryRecorded: "no-summary-sent"});
       expect(await admin.firestore().collection(commentsPath).count().get()
         .then((result) => result.data().count)).toBe(1);
     });
@@ -938,25 +932,14 @@ describe("functions", () => {
       expect(await doneRecord()).toMatchObject({summaryRecorded: "no-embedding"});
     });
 
-    test.each([
-      ["created on a first analysis", "created"],
-      ["failed", "failed"],
-    ])("the done record says the summary was %s", async (_label, expected) => {
+    test("the done record says a first analysis created the record", async () => {
       mockCategorizeResponse({
         parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadata: documentMetadata,
       });
-      const spy = expected === "failed" ?
-        jest.spyOn(admin.firestore.Firestore.prototype, "runTransaction")
-          .mockRejectedValueOnce(new Error("Firestore unavailable")) :
-        undefined;
 
-      try {
-        await runImaged(summarySent());
-      } finally {
-        spy?.mockRestore();
-      }
+      await runImaged(summarySent());
 
-      expect(await doneRecord()).toMatchObject({summaryRecorded: expected});
+      expect(await doneRecord()).toMatchObject({summaryRecorded: "created"});
     });
 
     test("the done record says a re-analysis refreshed the record", async () => {
@@ -972,18 +955,6 @@ describe("functions", () => {
       await runImaged(summarySent());
 
       expect(await doneRecord()).toMatchObject({summaryRecorded: "refreshed"});
-    });
-
-    test("the done record distinguishes a run that sent no summary from one that failed", async () => {
-      mockCategorizeResponse({parsed, messageShape: "image-only"});
-
-      await runImaged(versionTwoDoc({
-        sendSummary: false, docSummary: "The student's work.",
-        summaryOmittedReason: "no-student-work-in-summary",
-        sendImage: true, docImageUrl: "https://x/y.png",
-      }));
-
-      expect(await doneRecord()).toMatchObject({summaryRecorded: "no-summary-sent"});
     });
 
     test("the done record names a missing metadata read", async () => {
@@ -1036,6 +1007,7 @@ describe("functions", () => {
       }
 
       expect((await readSummary()).exists).toBe(false);
+      expect(await doneRecord()).toMatchObject({summaryRecorded: "failed"});
       expect(logger.warn).toHaveBeenCalledWith("Could not record the summary; continuing to the comment",
         "analysis/queue/imaged/testdoc1", expect.any(Error));
       expect(await admin.firestore().collection(commentsPath).count().get()
