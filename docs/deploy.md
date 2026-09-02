@@ -6,7 +6,14 @@ Deploying to S3 is handled by the [S3 Deploy Action](https://github.com/concord-
 
 ## Where to find builds
 
-- **branch builds**: when a developer pushes a branch, GitHub actions will build and deploy it to `https://collaborative-learning.concord.org/branch/[branch-name]/`. If the branch starts or ends with a number this is automatically stripped off and not included in the folder name.
+- **branch builds**: when a developer pushes a branch, GitHub actions will build and deploy it to `https://collaborative-learning.concord.org/branch/[branch-name]/`. An issue-tracker prefix or suffix is stripped off and not included in the folder name, so the deployed name is often not the branch's git name. `concord-consortium/s3-deploy-action` (`src/deploy-props.ts`) strips the first of these that matches:
+  | pattern | example branch | deployed to |
+  |---|---|---|
+  | `^[A-Za-z]{2,}-[0-9]+-(.+)$` | `CLUE-123-my-feature` | `branch/my-feature/` |
+  | `^#?[0-9]{8,}-(.+)$` | `187654321-my-feature` | `branch/my-feature/` |
+  | `^(.+)-#?[0-9]{8,}$` | `my-feature-187654321` | `branch/my-feature/` |
+
+  The first pattern is the one that applies to the Jira branch names we use now. This matters wherever a branch URL is written down rather than followed from a link — the `clue` OAuth client's redirect URIs, for instance, must list the *deployed* path or portal login fails.
 - **version builds**: when a developer pushes a tag, GitHub actions will build and deploy it to `https://collaborative-learning.concord.org/version/[tag-name]/`
 - **released version path**: the released version of the application is available at `https://collaborative-learning.concord.org`
 - **master branch**: the master branch build is available at both `https://collaborative-learning.concord.org/index-master.html` and `https://collaborative-learning.concord.org/branch/master/`.  The `index-master.html` form is preferred because it verifies the top level deployment is working for the current code. Additional branches can be added to the top level by updating the `topBranches` configuration in `ci.yml`
