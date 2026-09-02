@@ -29,6 +29,9 @@ import {
   PortalSession, PortalError, isPortalName, portalNames, PortalName,
   readFormField, readCheckedValues, collectAdminIndexIds
 } from "./lib/portal-api.js";
+import {
+  IUrlOptions, buildUrls, defaultName, describeCluePath, firebaseLabel
+} from "./lib/portal-urls.js";
 
 const kClueBase = "https://collaborative-learning.concord.org";
 /** The `app_id` of the portal OAuth client CLUE authenticates against (OAUTH_CLIENT_NAME). */
@@ -50,15 +53,10 @@ const kValueOptions = [
 ];
 const kFlagOptions = ["help", "no-report", "no-redirect", "dry-run"];
 
-interface IOptions {
+interface IOptions extends IUrlOptions {
   portal: PortalName;
-  cluePath: string;
   classId: string;
-  unit: string;
-  problem: string;
-  firebaseEnv: string;
   name?: string;
-  clueBase: string;
   activityId?: number;
   oauthClientId?: number;
   withReport: boolean;
@@ -88,8 +86,12 @@ Optional:
                         which is CLUE's own default.
   --name <name>         Resource name (default: derived from unit, problem and CLUE path).
   --clue-base <url>     CLUE deployment root (default: ${kClueBase}).
-  --activity-id <id>    Use this existing external activity instead of finding or creating one.
-  --oauth-client-id <id>  Portal OAuth client to update (default: found by app_id "${kClueOAuthAppId}").
+  --activity-id <id>    Use this existing external activity instead of searching for one. It
+                        must be the activity at the URL these options build: the offering is
+                        made from the URL, so an id belonging to anything else would attach
+                        the report to one activity and assign another.
+  --oauth-client-id <id>  Portal OAuth client to update. Must have app_id "${kClueOAuthAppId}", which
+                        is what it is checked against (default: found by that app_id).
   --no-report           Skip creating and attaching the teacher report.
   --no-redirect         Skip adding the OAuth redirect URI.
   --dry-run             Report what would change without writing anything.
@@ -153,6 +155,15 @@ function parseOptions(argv: string[]): IOptions {
   if (!kFirebaseEnvs.includes(firebaseEnv)) {
     usage(`--firebase-env must be one of: ${kFirebaseEnvs.join(", ")}, got "${firebaseEnv}"`);
   }
+  // The redirect URI is built from this, and ensureRedirectUri refuses to touch the client's
+  // shared field if any entry on it fails this same test. Writing an entry that fails it
+  // would therefore wedge the redirect step for everyone using this script against that
+  // portal, until somebody hand-edited the client — so hold the new entry to the rule the
+  // existing ones are held to, here, before it can be written.
+  const clueBase = (raw["clue-base"] ?? kClueBase).replace(/\/$/, "");
+  if (!/^https?:\/\/[^\s/]+/.test(clueBase)) {
+    usage(`--clue-base must be an http:// or https:// URL, got "${clueBase}"`);
+  }
 
   return {
     portal,
@@ -165,73 +176,13 @@ function parseOptions(argv: string[]): IOptions {
     // Firebase would be testing the rules of a project the assignment does not belong to.
     firebaseEnv,
     name: raw.name,
-    clueBase: (raw["clue-base"] ?? kClueBase).replace(/\/$/, ""),
+    clueBase,
     activityId: parseId(raw, "activity-id"),
     oauthClientId: parseId(raw, "oauth-client-id"),
     withReport: !flags.has("no-report"),
     withRedirect: !flags.has("no-redirect"),
     dryRun: flags.has("dry-run")
   };
-}
-
-//
-// URL construction
-//
-
-/** `production` is CLUE's own default, so naming it in the URL only adds noise. */
-function firebaseEnvParam(firebaseEnv: string) {
-  return firebaseEnv !== "production" ? { firebaseEnv } : {};
-}
-
-/** How a non-default Firebase project is named in a portal record, so the two agree. */
-function firebaseLabel(firebaseEnv: string) {
-  return firebaseEnv !== "production" ? `, ${firebaseEnv} FB` : "";
-}
-
-function buildUrl(base: string, params: Record<string, string>) {
-  // A slash is legal unescaped in a query value, and demo units are passed as paths
-  // ("./demo/units/qa/content.json"). Leaving them as slashes keeps these URLs readable in
-  // the portal's UI and matches how the existing CLUE resources there are written.
-  const query = new URLSearchParams(params).toString().replace(/%2F/g, "/");
-  return query ? `${base}?${query}` : base;
-}
-
-function buildUrls(options: IOptions) {
-  const root = `${options.clueBase}/${options.cluePath}/`;
-  return {
-    /** What a student launches. The unit and problem make this assignment-specific. */
-    activity: buildUrl(root, {
-      unit: options.unit,
-      problem: options.problem,
-      ...firebaseEnvParam(options.firebaseEnv)
-    }),
-    /**
-     * What a teacher launches. The portal merges its own report params (reportType,
-     * offering, class, token, ...) into whatever query this already has, so firebaseEnv
-     * set here survives — and it has to be here, or the teacher's CLUE would talk to a
-     * different Firebase project than the students'.
-     */
-    report: buildUrl(root, firebaseEnvParam(options.firebaseEnv)),
-    /**
-     * What CLUE sends as its OAuth redirect_uri: `window.location.origin + pathname`, with
-     * no query string. The portal compares this by exact string equality against the
-     * client's list, so the trailing slash is significant.
-     */
-    redirect: root
-  };
-}
-
-function describeCluePath(cluePath: string) {
-  const [kind, ...rest] = cluePath.split("/");
-  const label = rest.join("/");
-  return kind === "branch" ? `${label} branch` : label;
-}
-
-function defaultName(options: IOptions) {
-  // A demo unit's "code" is a path; its directory name is the readable part.
-  const unitLabel = options.unit.replace(/^.*\/units\//, "").replace(/\/content\.json$/, "");
-  return `CLUE ${unitLabel} ${options.problem} ` +
-    `(${describeCluePath(options.cluePath)}${firebaseLabel(options.firebaseEnv)})`;
 }
 
 //
@@ -297,18 +248,47 @@ async function claimActivityByUrl(portal: PortalSession, url: string) {
   }
 }
 
+/**
+ * The external activity this run should assign, and whether `append_auth_token` was set on it.
+ *
+ * `--activity-id` names the activity that already lives at this url — it is the recovery path
+ * for a search that could not resolve the id. Nothing downstream re-establishes that: the
+ * offering is keyed by url and the report is attached by id, so an id belonging to some other
+ * activity would attach the teacher's report to one activity while students launched another.
+ * Both checks below exist to keep those two from drifting apart.
+ */
 async function ensureActivity(portal: PortalSession, options: IOptions, url: string, name: string) {
   if (options.activityId) {
-    if (!options.dryRun) await claimActivityByUrl(portal, url);
-    return { id: options.activityId, created: false };
+    // The claim targets the url, not the given id, so its result is the only evidence that
+    // an activity lives there at all. A false here means the id cannot be the url's owner.
+    if (!options.dryRun) {
+      const claimed = await claimActivityByUrl(portal, url);
+      if (!claimed) {
+        throw new Error(
+          `--activity-id ${options.activityId} was given, but no external activity could be ` +
+          `found at ${url}. Re-run without --activity-id to create one, or correct the ` +
+          `flags that build the URL.`
+        );
+      }
+    }
+    // Best effort, since the search covers only recent materials: a hit on a different id is
+    // proof of a mismatch, while a miss proves nothing.
+    const found = await findActivityIdByUrl(portal, url);
+    if (found && found !== options.activityId) {
+      throw new Error(
+        `--activity-id ${options.activityId} was given, but the activity at ${url} is ` +
+        `${found}. Re-run with --activity-id ${found}, or drop the flag.`
+      );
+    }
+    return { id: options.activityId, created: false, authTokenSet: !options.dryRun };
   }
 
   // A dry run may not write, and the only existence probe the portal offers is a write. So
   // fall back to the read-only search, and be explicit that a miss is inconclusive rather
   // than reporting a create that may turn out to be a reuse.
   if (options.dryRun) {
-    const searchId = await findActivityIdByUrl(portal, url);
-    return { id: searchId ?? 0, created: !searchId, uncertain: !searchId };
+    const foundId = await findActivityIdByUrl(portal, url);
+    return { id: foundId ?? 0, created: !foundId, uncertain: !foundId, authTokenSet: false };
   }
 
   const exists = await claimActivityByUrl(portal, url);
@@ -321,7 +301,7 @@ async function ensureActivity(portal: PortalSession, options: IOptions, url: str
         `re-run with --activity-id <id>.`
       );
     }
-    return { id: existingId, created: false };
+    return { id: existingId, created: false, authTokenSet: true };
   }
 
   // Two 500s say the activity is probably absent, but "probably" is doing real work there:
@@ -352,7 +332,7 @@ async function ensureActivity(portal: PortalSession, options: IOptions, url: str
   });
   const id = Number(created.edit_url.match(/\/eresources\/(\d+)/)?.[1]);
   if (!id) throw new Error(`Could not read the new activity's id from ${created.edit_url}`);
-  return { id, created: true };
+  return { id, created: true, authTokenSet: true };
 }
 
 async function ensureOffering(portal: PortalSession, options: IOptions, url: string, name: string) {
@@ -368,9 +348,15 @@ async function ensureOffering(portal: PortalSession, options: IOptions, url: str
   // createPortalOffering in src/lib/portal-api.ts), whose patterns cover
   // collaborative-learning.concord.org, so the call would still work if that stopped
   // holding.
+  //
+  // `append_auth_token` is redundant on an activity this script already set it on, and is
+  // sent because of the case where it is not redundant: if this endpoint does create the
+  // activity, that activity's flag has never been set, and an unflagged activity is the
+  // silent preview-mode failure the rest of the script exists to prevent. CLUE's own
+  // createPortalOffering sends it for the same reason.
   const offering = await portal.json<{ id: number }>("/api/v1/offerings/create_for_external_activity", {
     method: "POST",
-    form: { class_id: options.classId, name, url, rule: kClueStandaloneRule }
+    form: { class_id: options.classId, name, url, rule: kClueStandaloneRule, append_auth_token: "true" }
   });
   return offering;
 }
@@ -386,6 +372,28 @@ async function findOAuthClientId(portal: PortalSession, appId: string) {
     `No portal OAuth client found with app_id "${appId}" (searched ${ids.length} clients). ` +
     `Pass --oauth-client-id to name it directly.`
   );
+}
+
+/**
+ * Confirm a caller-supplied client id really is the CLUE client.
+ *
+ * `--oauth-client-id` skips `findOAuthClientId`, which is the only thing that reads app_id,
+ * and `parseId` proves nothing beyond "a positive integer". Every id in this range names a
+ * real, shared OAuth client, so an adjacent typo does not 404 — it names somebody else's
+ * client, which would then get a CLUE redirect URI appended to its list and a report bound
+ * to it. Cheap to check: this is the same page ensureRedirectUri already fetches.
+ */
+async function verifyOAuthClientId(portal: PortalSession, clientId: number, appId: string) {
+  const page = await portal.getText(`/admin/clients/${clientId}/edit`);
+  const actual = readFormField(page, "client_app_id");
+  if (actual !== appId) {
+    const found = actual === undefined ? "no app_id field" : `app_id "${actual}"`;
+    throw new Error(
+      `--oauth-client-id ${clientId} has ${found}, not app_id "${appId}". That is a ` +
+      `different OAuth client; adding CLUE's redirect URI to it would be wrong.`
+    );
+  }
+  return clientId;
 }
 
 async function findReportIdByUrl(portal: PortalSession, url: string) {
@@ -437,12 +445,36 @@ async function attachReport(portal: PortalSession, options: IOptions, activityId
     },
     "put"
   );
+
+  // Read it back, as ensureReport and ensureRedirectUri do. Success here is otherwise only a
+  // 3xx status, and a 3xx is also what an unauthorized post gets: the activity may be one
+  // this run did not create (reused via --activity-id, or found by search), and getText
+  // follows redirects, so a denied GET above would have returned some other page with a 200
+  // and no checkboxes on it. That whole path ends in "yes (added)" unless it is checked.
+  const verifyPage = await portal.getText(`/eresources/${activityId}/edit`);
+  if (!readCheckedValues(verifyPage, "external_reports[]").includes(String(reportId))) {
+    throw new Error(
+      `The portal accepted the update, but report ${reportId} is still not attached to ` +
+      `activity ${activityId}. Check that this token may edit that activity.`
+    );
+  }
   return { changed: true };
 }
 
 async function ensureRedirectUri(portal: PortalSession, options: IOptions, clientId: number, redirectUri: string) {
   const editPage = await portal.getText(`/admin/clients/${clientId}/edit`);
-  const current = readFormField(editPage, "client_redirect_uris") ?? "";
+  const current = readFormField(editPage, "client_redirect_uris");
+  // "field not found" and "field is empty" must not collapse into each other. They differ by
+  // one `?? ""`, and the consequences are opposite: an empty field is appended to safely,
+  // while an unparsed one — a renamed field id, a changed admin page — would make the write
+  // below replace every other deployment's redirect URI with this run's single entry.
+  if (current === undefined) {
+    throw new Error(
+      `Could not find the redirect URIs field (client_redirect_uris) on the OAuth client's ` +
+      `edit page. Refusing to write: an unreadable field is indistinguishable from an empty ` +
+      `one, and writing would replace the whole shared list.`
+    );
+  }
   const currentUris = current.split(/\s+/).filter(Boolean);
 
   // This client is shared by every CLUE deployment, and the field is rewritten whole. If the
@@ -508,7 +540,10 @@ async function main() {
       "(a dry run cannot tell — the read-only search covers only recent materials)");
   } else {
     const state = activity.created ? "created" : "reused";
-    console.log(`Activity ${activity.id}: ${state}, append_auth_token=true`);
+    // Only a run that actually set the flag says it is set. A dry run reaching here has
+    // written nothing, so the most it can say is what a real run would do.
+    const flag = activity.authTokenSet ? "append_auth_token=true" : "would set append_auth_token";
+    console.log(`Activity ${activity.id}: ${state}, ${flag}`);
   }
 
   const offering = await ensureOffering(portal, options, urls.activity, name);
@@ -521,7 +556,9 @@ async function main() {
   let reportId: number | undefined;
   let clientId: number | undefined;
   if (options.withReport || options.withRedirect) {
-    clientId = options.oauthClientId ?? await findOAuthClientId(portal, kClueOAuthAppId);
+    clientId = options.oauthClientId
+      ? await verifyOAuthClientId(portal, options.oauthClientId, kClueOAuthAppId)
+      : await findOAuthClientId(portal, kClueOAuthAppId);
     console.log(`OAuth client ${clientId}: app_id "${kClueOAuthAppId}"`);
   }
 
