@@ -237,6 +237,10 @@ export const kRatingValues = ["yes", "no", "notSure"] as const;
 
 export type RatingValue = typeof kRatingValues[number];
 
+/**
+ * The retired "do you agree with the AI?" flag. Nothing writes it any more; it describes comments
+ * already stored, which `onCommentRated` reads when such a comment is deleted.
+ */
 export interface IAgreeWithAi {
   version: 1;
   value: RatingValue;
@@ -247,7 +251,6 @@ export interface IClientCommentParams {
   content: string;    // plain text for now; potentially html if we need rich text
   tags?: string[];    // list of tags to apply to the comment
   linkedDocumentKey?: string; // Key of the document that this comment should link to
-  agreeWithAi?: IAgreeWithAi; // Whether the comment agrees with the AI's suggestion
 }
 
 export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseParams {

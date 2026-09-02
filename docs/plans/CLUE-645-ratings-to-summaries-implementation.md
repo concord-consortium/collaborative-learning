@@ -7,9 +7,16 @@ record the departure (see DEVIATIONS at the end).
 **Verified against:** `master` at `c08e75c28` (2026-08-27), post-harness-merge. File and symbol
 references below were re-checked on that commit.
 
-**Status (2026-09-01).** Track A shipped in PR #2990. Track B — tasks 3 to 6 — is the branch this
-plan sits on. Track C has not started; it is gated on `CLUE-371-ai-feedback-text-and-images`, and
-tasks 7 to 11 are the only ones here that describe work still to do.
+**Status (2026-09-02).** Track A (tasks 1 and 2) shipped in PR #2990 and Track B (tasks 3 to 6) in
+PR #2991. Both are merged and deployed to production, where `onCommentRated` runs on every rating
+but finds no summary to record it against. Track C — tasks 7 to 11 — is implemented on
+`CLUE-645-persist-document-summaries`, and is what makes those summaries exist. Every task in this
+plan is now written; what remains is the deployment.
+
+**The one thing in Track C with no equivalent in code is the index deploy.** The realm-scoped
+lookup needs `root` and `space` in the `summaries` composite index, so `firestore.indexes.json` must
+be deployed and the index built *before* the functions deploy that queries it. The full procedure,
+and what goes wrong in which order, is under "Deploying Track C" below.
 
 Tasks 1 to 6 describe work that is finished, and are kept at full detail as the record of what was
 asked. What is durable about them now lives where it is enforced: the reconcile and timestamp rules
@@ -298,7 +305,7 @@ merge stays trivial. Task 3's import switch touches the same import hunk.
    `investigation`, `problem`, `unit`, `key`, `numAiAgreements`, vector). A vector query needs an
    exact composite index: without it the lookup errors rather than degrading, so **deploy the index
    before the function**. Records that predate the fields stop matching; that is one demo record, and
-   re-analysis rewrites it.
+   re-analysis rewrites it — see the caveat under Task 8 for the legacy ids it cannot reach.
 
 **Verify:** existing categorize tests plus an explicit `getEmbeddings → undefined` case, and a test
 that a summary in another realm is not returned.
@@ -320,7 +327,10 @@ that a summary in another realm is not returned.
      `numAgreements: 0`.
    - *Update:* only `key`, `root`, `space`, context fields, `summary`, `summaryEmbedding`,
      `analyzedAt`, `adaCommentId`; never touch `aiAgreements` or either count. `root`/`space` are
-     written on this path too, so a record that predates them gains them on the next analysis.
+     written on this path too, so a record that predates them gains them on the next analysis —
+     but only one already at the id `getSummaryPath` derives. The retired trigger keyed records by
+     the metadata document id, which differs from `key` on older documents; a record at one of
+     those ids is never found, and re-analysis writes a fresh record beside it.
    `root`/`space`/`key` and the context fields come from Task 7's widened return
    (`documentMetadata`) — the imaged handler has no metadata of its own under the CLUE-371
    contract, and never derives any of this from the queue `docId`. No `documentMetadata` (read
@@ -405,6 +415,98 @@ is inert until summaries exist (its no-summary skip is the designed behavior, an
 means the trigger swap is already soaked). Track C (7 → 8 → 9 → 10) as a second PR once
 `CLUE-371-ai-feedback-text-and-images` merges, starting with the reconciliation pass.
 
+## Deploying Track C
+
+Written 2026-09-02, from a read-only probe run against both staging and production
+(`functions-v2/probe-vector-query.ts`, untracked; its header carries the findings). Everything here
+was measured, not assumed — inspection alone had the index field order wrong.
+
+The durable half of this — deploy indexes before the functions that query them, and why the wrong
+order fails quietly — now lives in `functions-v2/README.md` under "To deploy firebase functions",
+where the next person deploying anything will find it. What follows is the rest: what this
+particular deploy will encounter.
+
+**The order is index first, functions second.** Not because the wrong order breaks loudly, but
+because it does not: a query whose index is missing fails with `FAILED_PRECONDITION`, and
+`categorizeRepresentations` catches that and continues without related summaries. So deploying the
+functions first produces prompts quietly missing their agreement counts, one warning line per run,
+and nothing else. Easy to miss for a long time.
+
+### Step 1 — look before writing
+
+```
+npx firebase firestore:indexes --project <staging|production>
+```
+
+Diff that against `firestore.indexes.json`. Two things to learn from it: what the delete prompt in
+step 2 will offer to remove, and whether any *other* index in the file is missing from that project.
+The deploy sends the whole file — `docs`, `documents`, `messages` and `summaries` — so a project
+missing one of the first three would start building it over a real-sized collection. Staging already
+had all three; production has not been checked.
+
+### Step 2 — deploy the indexes
+
+```
+npx firebase deploy --only firestore:indexes --project <staging|production>
+```
+
+- **Rules are not deployed by this command.** `--only firestore:indexes` sets `firestoreRules` to
+  false in `deploy/firestore/prepare.js`. It does still *compile* `firestore.rules`, so a syntax
+  error there fails the command — harmlessly, and any warning it prints is pre-existing.
+- **A delete prompt will appear, and the answer is no.** Creation is additive and unconditional;
+  deletion only happens if you say yes or pass `--force`, and the default is no. In production the
+  list will include the **old `summaries` composite index** (the one without `root`/`space`) — and
+  that index is what serves the *currently deployed* function. Deleting it during the window
+  between this step and step 4 breaks the live lookup. It only becomes redundant once Track C is
+  live, and even then leaving it costs almost nothing.
+- **Never pass `--force` to this command.** Creating an index is cheap and reversible; deleting one
+  is cheap to do and expensive to undo, because recreating it means a rebuild during which every
+  query that needs it fails.
+
+### Step 3 — wait for the build, and check it
+
+"deployed indexes successfully" means the API accepted the request, not that anything is ready. The
+CLI logs index creation at `debug` level only, so the normal output never mentions it, and
+`firestore:indexes` does not print a state field. Index builds take minutes regardless of collection
+size.
+
+The reliable check is the probe: the production-query variant flips from `FAILED_PRECONDITION` to
+`OK`. While it is still building, Firestore says so in the error text — "That index is currently
+building" — which is a *different* answer from "missing", and means the shape is right. If it is
+still building after ~15 minutes, open the console link in the message: a failed build lands in
+`NEEDS_REPAIR` rather than retrying, and looks the same from outside.
+
+### Step 4 — deploy the functions
+
+Note that Track B's cutover (Task 5 step 3) also has to be honored if it has not already happened.
+
+### What to expect afterwards, so it is not read as a fault
+
+- **The lookup returns nothing at first.** Realm scoping needs `root` and `space`, which only the
+  pipeline writes. Every record that predates Track C is invisible until its document is analyzed
+  again. Measured: production holds exactly **one** summary record, a `cas` demo record with no
+  realm fields, which confirms the CLUE-371 spike's count; staging holds three, two of them real
+  artifacts of the retired pipeline and one a hand-made Track B fixture.
+- **Records also need agreements.** A newly written record has `numAiAgreements: 0` and so does not
+  qualify for the lookup until somebody rates one of its comments. So the ramp is: analyze, then
+  rate, then a *different* document in the same class, unit and problem sees the counts.
+- Taken together, expect the related-summaries feature to return nothing for a while after this
+  ships, and treat that as the designed migration behavior rather than a regression. The design
+  doc's Migration section makes the same point: this is the first time the feature runs end to end.
+
+### What was and was not verified
+
+Verified against real Firestore: inequality pre-filters are legal with `findNearest` (every probe
+variant returned `FAILED_PRECONDITION`, never `INVALID_ARGUMENT`); the index in
+`firestore.indexes.json` is field-for-field what Firestore asks for; and with realm scoping removed
+the query returns real records, so vector search, the context filters and both inequality filters
+all work over live data.
+
+Not verified: that `root` and `space` select correctly, because no record anywhere carries them
+until the pipeline writes one. That is two more equality filters through an index Firestore has
+already accepted the full query against, so the residual risk is small — but it is inference, and
+the first record the staging pipeline writes is what would settle it.
+
 ## Acceptance (done when…)
 
 1. Rules reject out-of-enum rating values and allow toggle-off, with tests in `firebase-test/src`.
@@ -416,8 +518,10 @@ means the trigger swap is already soaked). Track C (7 → 8 → 9 → 10) as a s
    delivery; the summary document itself is never created or deleted by the rating trigger.
 5. Re-analysis of a rated document refreshes its summary and preserves its agreements; first
    analysis initializes empty agreements and zero counts.
-6. No client files changed; `summaries` remains admin-only. Track B changes no indexes; Track C adds
-   `root` and `space` to the `summaries` composite index (see 9).
+6. No client *behavior* changes, and `summaries` remains admin-only. Client files do change: Track A
+   in `shared/shared.ts` and `comment-card.tsx`, Task 11 in `chat-panel.tsx` and
+   `document-comment-hooks.ts`. Track B changes no indexes; Track C adds `root` and `space` to the
+   `summaries` composite index (see 9).
 7. A rating on a document with no summary produces an info log and nothing else.
 8. The deployed `onDocumentSummarized` trigger is deleted in the same cutover that deploys
    `onCommentRated`; the `package.json` deploy script is updated to match.
@@ -514,3 +618,34 @@ departure and reason here (and in the design doc when it changes a decision).
   an agreeing stale event, and the two "no write" tests could not tell a skipped write from an
   identical one, because the emulator does not move `updateTime` when the data does not change.
   Both now assert on the log line instead.
+
+### Track C reconciliation (Tasks 7 to 9, as implemented)
+
+Tasks 7 to 9 were drafted against `CLUE-371-production-mixed-mode-implementation.md` before that
+work merged, so they describe what the pipeline was expected to look like. Task 7's central claim
+held: the merged `categorizeRepresentations` did return `{completion, messageShape}` and did leave
+the imaged handler with nothing Task 8 needed.
+
+Departures the code now states for itself, listed only so this plan is not mistaken for the current
+design: the function is `categorizeRepresentations`, not `categorizeDocumentRepresentations`; the
+metadata read became `readDocumentMetadata`, which reports why it found nothing rather than
+throwing; hoisting it and `getEmbeddings` out of the lookup put both into `CategorizeDeps`, and
+exported them and `findRelatedSummaries` so the realm filter could be tested against a real
+Firestore; `offeringId` is normalized to `""`; `Summary.summaryEmbedding` was typed `FieldValue` and
+is now `VectorValue`; `adaCommentId` is written once rather than written-then-updated; and Task 9's
+realm case lives in Task 7's test file with the other realm tests.
+
+Three have no home in the code, and are why this section is worth keeping.
+
+- **The summary-write gate is "the request carried a summary", not `queueDoc.sendSummary`.** Same
+  condition: `representationsOf` has already folded `sendSummary` into `summary !== null`, and the
+  handler never sees the raw field. One source, and it is the same one that decides whether related
+  summaries are looked up, which is what keeps a document from receiving agreement counts it can
+  never contribute to.
+- **A summary write that fails is logged and the run continues to the comment.** Neither doc
+  settled this. The evaluation succeeded and the student is owed its feedback; a missing record
+  costs only ratings of that comment, which `onCommentRated` already logs and skips, and the next
+  analysis writes the record again.
+- **What the realm tests do not prove.** The emulator does not enforce composite indexes, so those
+  tests cover the *filter*, not the index entry. The index itself was checked against real Firestore
+  on 2026-09-02 — see "Deploying Track C" — and inspection had got its field order wrong.
