@@ -2,7 +2,7 @@ import {zodResponseFormat} from "openai/helpers/zod";
 import { AutoParseableResponseFormat } from "openai/lib/parser";
 import { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import {z} from "zod";
-import { AgreementValue } from "./shared";
+import { RatingValue } from "./shared";
 
 export interface IAiPrompt {
   systemPrompt: string;
@@ -23,7 +23,7 @@ export interface AgreementInfo {
  * everyone agreed with has a `yes` key and nothing else — and the prompt line built from this reads
  * the entries that are there rather than assuming all of them.
  */
-export type Agreements = Partial<Record<AgreementValue, AgreementInfo[]>>;
+export type Agreements = Partial<Record<RatingValue, AgreementInfo[]>>;
 
 export interface RelatedSummary {
   summary: string;

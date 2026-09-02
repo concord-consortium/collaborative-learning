@@ -1,6 +1,8 @@
 import {FirestoreEvent, onDocumentCreated, QueryDocumentSnapshot} from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
+// Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
+import {FieldValue} from "firebase-admin/firestore";
 import {getAnalysisQueueFirestorePath} from "./utils";
 import {
   type DocumentRepresentations, categorizeRepresentations,
@@ -133,7 +135,7 @@ export const onAnalysisDocumentImaged =
       await firestore.collection(commentsPath).add({
         tags,
         content: message,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
         name: kAnalyzerUserParams.fullName,
         uid: kAnalyzerUserParams.id,
       });
@@ -142,7 +144,7 @@ export const onAnalysisDocumentImaged =
       await firestore.collection(getAnalysisQueueFirestorePath("done")).add({
         ...queueDoc,
         documentId: event.params.docId,
-        completedAt: admin.firestore.FieldValue.serverTimestamp(),
+        completedAt: FieldValue.serverTimestamp(),
         promptTokens,
         completionTokens,
         fullResponse,

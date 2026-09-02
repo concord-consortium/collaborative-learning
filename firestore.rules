@@ -421,8 +421,10 @@ service cloud.firestore {
                   request.resource.data.keys().hasAll(["name", "createdAt", "content", "network"]);
         }
 
+        // `ratings` is listed here so a comment edit can't carry a rating change: isValidRatingUpdate
+        // is the only path that changes it, authors included.
         function preservesReadOnlyCommentFields() {
-          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId"].toSet();
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
@@ -432,8 +434,10 @@ service cloud.firestore {
           let userId = string(request.auth.token.platform_user_id);
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
+          // The user's own key missing from the new map is the toggle-off case, which is allowed.
           return affectedFields.hasOnly(['ratings'])
-            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
+            && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
         }
 
         function isValidCommentUpdateRequest() {
@@ -595,8 +599,10 @@ service cloud.firestore {
                   request.resource.data.keys().hasAll(["name", "createdAt", "content"]);
         }
 
+        // `ratings` is listed here so a comment edit can't carry a rating change: isValidRatingUpdate
+        // is the only path that changes it, authors included.
         function preservesReadOnlyCommentFields() {
-          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId"].toSet();
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
@@ -606,8 +612,10 @@ service cloud.firestore {
           let userId = string(request.auth.token.platform_user_id);
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
+          // The user's own key missing from the new map is the toggle-off case, which is allowed.
           return affectedFields.hasOnly(['ratings'])
-            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
+            && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
         }
 
         function isValidCommentUpdateRequest() {
@@ -728,6 +736,15 @@ service cloud.firestore {
           // promptReplace/promptAppend carry the unit-authored generic-prompt overrides. Like
           // leftContext, they are client-supplied text sent to the model at developer authority
           // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
+          // provider selects the AI backend. Unlike the fields above it is pinned to an ENUM, not
+          // just a type: once the trigger routes on this field an arbitrary string would decide
+          // where a paid turn goes. The trigger builds an OpenAI backend unconditionally today,
+          // so the field is inert on the server and the pin is guarding the routing that comes
+          // with the second backend. Keep the list in lockstep with kTutorProviders in
+          // shared/chat-tutor-providers.ts, and with the identical pin in the demo block below —
+          // src/components/chat-tutor/tutor-provider-rules.test.ts fails if either drifts.
+          // The client omits the field entirely for the default provider, so most messages carry
+          // no provider at all; 'openai' is accepted so the enum mirrors the shared list.
           function chatMessageCreate() {
             let data = request.resource.data;
             return isStudentClaim() &&
@@ -735,12 +752,13 @@ service cloud.firestore {
               classIsRequestContextId() &&
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                    'problemPath', 'leftContext', 'rightContext',
-                                   'promptReplace', 'promptAppend']) &&
+                                   'promptReplace', 'promptAppend', 'provider']) &&
               data.kind == 'user' &&
               'createdAt' in data &&
               (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
               (!('promptReplace' in data) || data.promptReplace is string) &&
-              (!('promptAppend' in data) || data.promptAppend is string);
+              (!('promptAppend' in data) || data.promptAppend is string) &&
+              (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
           }
 
           allow read: if userIsResourceUser() && isStudentClaim();
@@ -819,17 +837,23 @@ service cloud.firestore {
     // (status/lock/cursor/conversationId/...), which would otherwise corrupt the rendered
     // transcript and the drain cursor. The parent doc is server-created (admin SDK bypasses rules).
     match /demo/{demoName}/chatTutor/{conversationId} {
+      // The provider whitelist and enum pin must match the authed block's chatMessageCreate
+      // exactly (tutor-provider-rules.test.ts fails if they drift). This root is where a new
+      // provider gets exercised first, so whitelisting it only under authed would break
+      // precisely the path it was added for, with a permission-denied that reads nothing like
+      // a config error.
       function demoChatMessageCreate() {
         let data = request.resource.data;
         return isAuthed() &&
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                'problemPath', 'leftContext', 'rightContext',
-                               'promptReplace', 'promptAppend']) &&
+                               'promptReplace', 'promptAppend', 'provider']) &&
           data.kind == 'user' &&
           'createdAt' in data &&
           (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
           (!('promptReplace' in data) || data.promptReplace is string) &&
-          (!('promptAppend' in data) || data.promptAppend is string);
+          (!('promptAppend' in data) || data.promptAppend is string) &&
+          (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
       }
 
       allow read: if isAuthed();
