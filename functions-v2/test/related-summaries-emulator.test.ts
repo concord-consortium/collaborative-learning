@@ -117,6 +117,8 @@ describe("the related-summaries lookup", () => {
       await writeSummary("demo-AI-thisdoc", {summary: "This document's own summary."});
       await writeSummary("demo-AI-otherunit", {key: "otherunit", unit: "mods", summary: "Another unit."});
       await writeSummary("demo-AI-otherclass", {key: "otherclass", context_id: "class2", summary: "Another class."});
+      await writeSummary("demo-AI-otherproblem", {key: "otherproblem", problem: "1.2", summary: "Another problem."});
+      await writeSummary("demo-AI-otherinv", {key: "otherinv", investigation: "2", summary: "Another investigation."});
       await db.doc("summaries/demo-AI-unrated").set({
         ...demoMetadata,
         key: "unrated",
