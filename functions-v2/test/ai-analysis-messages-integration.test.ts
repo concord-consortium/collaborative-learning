@@ -88,7 +88,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
     function recordingDeps(overrides: Partial<CategorizeDeps> = {}) {
       const sent: Record<string, any>[] = [];
       const deps: CategorizeDeps = {
-        readDocumentMetadata: jest.fn().mockResolvedValue(documentMetadata),
+        readDocumentMetadata: jest.fn().mockResolvedValue({metadata: documentMetadata}),
         getEmbeddings: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
         findRelatedSummaries: jest.fn().mockResolvedValue([]),
         createOpenAI: () => ({
@@ -195,7 +195,9 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
     });
 
     test("a document with no usable metadata is neither looked up nor embedded", async () => {
-      const {deps, sent} = recordingDeps({readDocumentMetadata: jest.fn().mockResolvedValue(undefined)});
+      const {deps, sent} = recordingDeps({
+        readDocumentMetadata: jest.fn().mockResolvedValue({gap: "no-metadata"}),
+      });
 
       const result = await categorizeRepresentations(
         {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
@@ -203,9 +205,26 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
       expect(result.documentMetadata).toBeUndefined();
+      expect(result.metadataGap).toBe("no-metadata");
       expect(result.summaryEmbedding).toBeUndefined();
       expect(result.completion).toBeDefined();
       expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+    });
+
+    // A personal document has no class or problem. It is reported apart from an unreadable document
+    // so the run's record can say "nothing to summarize here" rather than "something went wrong".
+    test("a document with no context reports that, not a failure", async () => {
+      const {deps} = recordingDeps({
+        readDocumentMetadata: jest.fn().mockResolvedValue({gap: "no-context"}),
+      });
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      expect(deps.getEmbeddings).not.toHaveBeenCalled();
+      expect(result.documentMetadata).toBeUndefined();
+      expect(result.metadataGap).toBe("no-context");
+      expect(result.completion).toBeDefined();
     });
 
     test("a failed metadata read does not cost the evaluation", async () => {

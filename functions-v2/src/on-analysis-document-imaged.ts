@@ -5,7 +5,7 @@ import * as admin from "firebase-admin";
 import {FieldValue} from "firebase-admin/firestore";
 import {getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
 import {
-  type DocumentMetadata, type DocumentRepresentations, categorizeRepresentations,
+  type DocumentMetadata, type DocumentRepresentations, type MetadataGap, categorizeRepresentations,
 } from "../lib/src/ai-categorize-document";
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
@@ -63,11 +63,12 @@ export function representationsOf(queueDoc: Record<string, unknown>): DocumentRe
  * What became of this run's summary record, stored on the `done` queue entry so that "did this
  * document get a summary, and if not why not" is a query rather than a log search.
  *
- * `no-summary-sent` is the ordinary shape of an image-only or mock run; `no-metadata` and
- * `no-embedding` mean something was expected and did not arrive.
+ * `no-summary-sent` and `no-context` are ordinary: the first is an image-only or mock run, the
+ * second a document with no class or problem, which is what a personal document looks like.
+ * `no-metadata`, `no-embedding` and `failed` mean something was expected and did not arrive.
  */
 export type SummaryOutcome =
-  "created" | "refreshed" | "failed" | "no-summary-sent" | "no-metadata" | "no-embedding";
+  "created" | "refreshed" | "failed" | "no-summary-sent" | MetadataGap | "no-embedding";
 
 /**
  * Records the summary this run evaluated, so ratings of the comments it produces have somewhere to
@@ -76,8 +77,10 @@ export type SummaryOutcome =
  * Two paths, because a merge that never touches the agreements cannot also initialize them. A new
  * record starts with no agreements and both counts at zero; an existing one has only its summary,
  * vector, timestamp and comment id refreshed, since the agreements belong to the people who made
- * them. A record written before `root` and `space` existed gains them here, which is what puts it
- * back within reach of the realm-scoped lookup.
+ * them. A record written before `root` and `space` existed gains them here, but only if it sits at
+ * the id `getSummaryPath` derives: the retired trigger keyed records by the metadata document id,
+ * which differs from the key on older documents, and such a record is never found — re-analysis
+ * writes a fresh one beside it.
  *
  * The read and the write share a transaction because a rating can arrive at any moment.
  *
@@ -159,11 +162,12 @@ export const onAnalysisDocumentImaged =
       let completionTokens = 0;
       let fullResponse = "";
       let messageShape;
-      // All three are set together or not at all: a run that sends no summary reads no metadata and
-      // buys no embedding.
+      // None of these is set unless a summary was sent; the metadata and the embedding can still
+      // go missing individually, which is what the outcomes below tell apart.
       let sentSummary: string | null = null;
       let summaryEmbedding: number[] | undefined;
       let documentMetadata: DocumentMetadata | undefined;
+      let metadataGap: MetadataGap | undefined;
 
       if (queueDoc.evaluator === "mock") {
         message = "Mock reply from AI analysis";
@@ -175,8 +179,9 @@ export const onAnalysisDocumentImaged =
         sentSummary = representations.summary;
         let completion;
         try {
-          ({completion, messageShape, summaryEmbedding, documentMetadata} = await categorizeRepresentations(
-            representations, openaiApiKey.value(), firestoreDocumentPath, aiPrompt));
+          ({completion, messageShape, summaryEmbedding, documentMetadata, metadataGap} =
+            await categorizeRepresentations(
+              representations, openaiApiKey.value(), firestoreDocumentPath, aiPrompt));
         } catch (err) {
           await error(`${err}`, event);
           return;
@@ -211,8 +216,8 @@ export const onAnalysisDocumentImaged =
       let summaryRecorded: SummaryOutcome;
 
       // `.length`, not truthiness: an empty array is truthy, and writing one would persist a
-      // zero-dimension vector no search can find. categorizeRepresentations also turns an empty
-      // result into undefined, so neither guard alone is load-bearing.
+      // zero-dimension vector no search can find. Kept even though categorizeRepresentations
+      // normalizes an empty result too, so a change to either file alone cannot open this.
       if (sentSummary && documentMetadata && summaryEmbedding?.length) {
         try {
           summaryRecorded =
@@ -226,8 +231,8 @@ export const onAnalysisDocumentImaged =
       } else {
         // Not logged: a line per image-only run would bury the cases that matter, and the two that
         // are anomalies are already logged where they are detected.
-        summaryRecorded = !sentSummary ? "no-summary-sent" :
-          !documentMetadata ? "no-metadata" : "no-embedding";
+        // metadataGap is set exactly when the metadata is missing, so it answers for that case.
+        summaryRecorded = !sentSummary ? "no-summary-sent" : metadataGap ?? "no-embedding";
       }
 
       logger.info("Creating comment for", event.document);

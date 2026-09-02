@@ -148,22 +148,23 @@ describe("the related-summaries lookup", () => {
         offeringId: "1234", title: "Not a field the lookup uses",
       });
 
-      expect(await readDocumentMetadata(documentPath)).toEqual(demoMetadata);
+      expect(await readDocumentMetadata(documentPath)).toEqual({metadata: demoMetadata});
     });
 
-    it("returns nothing for a document with incomplete context", async () => {
-      // What a personal document looks like: no class, no problem.
+    // A personal document: no class, no problem. Reported apart from the unreadable cases, because
+    // it is the ordinary state of a whole class of documents rather than something going wrong.
+    it("reports no-context for a document with incomplete context", async () => {
       await writeMetadataDocument({key: "thisdoc", unit: "vibe"});
 
-      expect(await readDocumentMetadata(documentPath)).toBeUndefined();
+      expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-context"});
     });
 
-    it("returns nothing for a document with no key", async () => {
+    it("reports no-metadata for a document with no key", async () => {
       await writeMetadataDocument({
         context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
       });
 
-      expect(await readDocumentMetadata(documentPath)).toBeUndefined();
+      expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-metadata"});
     });
 
     // `getSummaryPath` escapes the key with a string method, so a non-string throws rather than
@@ -173,23 +174,23 @@ describe("the related-summaries lookup", () => {
       ["an object", {oops: true}],
       ["an array", ["a", "b"]],
       ["a boolean", true],
-    ])("returns nothing when key is %s rather than a string", async (_label, key) => {
+    ])("reports no-metadata when key is %s rather than a string", async (_label, key) => {
       await writeMetadataDocument({
         key, context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
       });
 
-      expect(await readDocumentMetadata(documentPath)).toBeUndefined();
+      expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-metadata"});
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("no usable key"));
     });
 
-    it("returns nothing when the document does not exist", async () => {
-      expect(await readDocumentMetadata(documentPath)).toBeUndefined();
+    it("reports no-metadata when the document does not exist", async () => {
+      expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-metadata"});
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("does not exist"));
     });
 
-    it("returns nothing for a path that is not a document path", async () => {
-      expect(await readDocumentMetadata("demo/AI/curriculum/vibe%2F1%2F1%2Fintro")).toBeUndefined();
-      expect(await readDocumentMetadata("demo/AI/documents/testdoc1/comments/c1")).toBeUndefined();
+    it("reports no-metadata for a path that is not a document path", async () => {
+      expect(await readDocumentMetadata("demo/AI/curriculum/vibe%2F1%2F1%2Fintro")).toEqual({gap: "no-metadata"});
+      expect(await readDocumentMetadata("demo/AI/documents/testdoc1/comments/c1")).toEqual({gap: "no-metadata"});
       expect(logger.warn).toHaveBeenCalledTimes(2);
     });
 
@@ -200,7 +201,7 @@ describe("the related-summaries lookup", () => {
         key: "thisdoc", context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
       });
 
-      expect(await readDocumentMetadata(documentPath)).toEqual({...demoMetadata, offeringId: ""});
+      expect(await readDocumentMetadata(documentPath)).toEqual({metadata: {...demoMetadata, offeringId: ""}});
     });
   });
 });

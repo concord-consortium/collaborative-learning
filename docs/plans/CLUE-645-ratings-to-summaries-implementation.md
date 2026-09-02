@@ -305,7 +305,7 @@ merge stays trivial. Task 3's import switch touches the same import hunk.
    `investigation`, `problem`, `unit`, `key`, `numAiAgreements`, vector). A vector query needs an
    exact composite index: without it the lookup errors rather than degrading, so **deploy the index
    before the function**. Records that predate the fields stop matching; that is one demo record, and
-   re-analysis rewrites it.
+   re-analysis rewrites it — see the caveat under Task 8 for the legacy ids it cannot reach.
 
 **Verify:** existing categorize tests plus an explicit `getEmbeddings → undefined` case, and a test
 that a summary in another realm is not returned.
@@ -327,7 +327,10 @@ that a summary in another realm is not returned.
      `numAgreements: 0`.
    - *Update:* only `key`, `root`, `space`, context fields, `summary`, `summaryEmbedding`,
      `analyzedAt`, `adaCommentId`; never touch `aiAgreements` or either count. `root`/`space` are
-     written on this path too, so a record that predates them gains them on the next analysis.
+     written on this path too, so a record that predates them gains them on the next analysis —
+     but only one already at the id `getSummaryPath` derives. The retired trigger keyed records by
+     the metadata document id, which differs from `key` on older documents; a record at one of
+     those ids is never found, and re-analysis writes a fresh record beside it.
    `root`/`space`/`key` and the context fields come from Task 7's widened return
    (`documentMetadata`) — the imaged handler has no metadata of its own under the CLUE-371
    contract, and never derives any of this from the queue `docId`. No `documentMetadata` (read

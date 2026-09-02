@@ -12,8 +12,8 @@ the `deploy:` scripts target, so `getAiContent` is called as `getAiContent_v2`.
 |--------|-------|
 |_onUserDocWritten_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
 |_onAnalyzableTestDocWritten_, _onAnalyzableProdDocWritten_|Monitor Firestore user metadata for updates to documents that request AI analysis, and put them into the analysis queue. One each for the test and prod roots.|
-|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, and sends them to Shutterbug to create a screenshot of the document|
-|_onAnalysisDocumentImaged_|Sends new screenshots to ChatGPT for analysis and creates a comment on the original document|
+|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, summarizes their text, and sends them to Shutterbug to create a screenshot of the document|
+|_onAnalysisDocumentImaged_|Sends what the previous step produced to ChatGPT for analysis, records the summary it evaluated in `summaries/`, and creates a comment on the original document|
 |_atMidnight_|Clears old Firebase roots for dev and qa instances|
 |_onDocumentTagged_|Updates metadata documents with strategies as needed whenever a comment is made|
 |_onCommentRated_|Records what people said about a document's comments on that document's summary, whenever a comment's ratings change or a rated comment is deleted. Never creates or deletes a summary; the analysis pipeline owns those|

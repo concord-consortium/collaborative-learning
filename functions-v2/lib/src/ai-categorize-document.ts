@@ -92,21 +92,32 @@ export interface DocumentMetadata {
 }
 
 /**
+ * Why a document yielded no metadata. The two are worth telling apart: a personal document has no
+ * class or problem and reports `no-context` on every run, where `no-metadata` means a document that
+ * should have been readable was not.
+ */
+export type MetadataGap = "no-context" | "no-metadata";
+
+/** The document's metadata, or why there is none. Exactly one of the two is set. */
+export type DocumentMetadataResult =
+  | {metadata: DocumentMetadata; gap?: never}
+  | {metadata?: never; gap: MetadataGap};
+
+/**
  * Reads the document's Firestore metadata.
  *
- * `undefined` means there is nothing here to look up related summaries with and nothing to write a
- * summary record from: a path that is not a document path, a missing document, or the incomplete
- * context that personal documents have.
+ * A gap means there is nothing here to look up related summaries with and nothing to write a
+ * summary record from.
  *
  * `offeringId` is normalized because it is optional on a metadata document while the `summaries`
  * record stores it unconditionally, and `undefined` cannot be written to Firestore.
  */
-export async function readDocumentMetadata(firestoreDocumentPath: string): Promise<DocumentMetadata | undefined> {
+export async function readDocumentMetadata(firestoreDocumentPath: string): Promise<DocumentMetadataResult> {
   // `{root}/{space}/documents/{docId}`, as built by on-analyzable-doc-written.
   const segments = firestoreDocumentPath.split("/");
   if (segments.length !== 4 || segments[2] !== "documents") {
     logger.warn(`Not a document path, skipping related summaries and the summary record: ${firestoreDocumentPath}`);
-    return undefined;
+    return {gap: "no-metadata"};
   }
   const [root, space] = segments;
 
@@ -114,7 +125,7 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
   const document = await db.doc(firestoreDocumentPath).get();
   if (!document.exists) {
     logger.warn(`Document ${firestoreDocumentPath} does not exist`);
-    return undefined;
+    return {gap: "no-metadata"};
   }
   const { key, context_id, unit, problem, investigation, offeringId } = document.data()!;
   logger.info("Document data", { key, context_id, unit, problem, investigation });
@@ -124,17 +135,17 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
   // open realms, and `onCommentRated` guards the same field the same way.
   if (typeof key !== "string" || !key) {
     logger.warn(`Document ${firestoreDocumentPath} has no usable key; skipping the summary record.`);
-    return undefined;
+    return {gap: "no-metadata"};
   }
 
   if (!context_id || !unit || !problem || !investigation) {
     logger.info("Skipping related summary lookup. " +
       "Document doesn't have a complete context for finding related summaries. " +
       "Personal documents don't have this context. ");
-    return undefined;
+    return {gap: "no-context"};
   }
 
-  return {
+  return {metadata: {
     root,
     space,
     key,
@@ -143,7 +154,7 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
     problem,
     investigation,
     offeringId: typeof offeringId === "string" ? offeringId : "",
-  };
+  }};
 }
 
 /**
@@ -281,6 +292,8 @@ export interface CategorizeResult {
   messageShape: AnalysisMessageShape;
   summaryEmbedding: number[] | undefined;
   documentMetadata: DocumentMetadata | undefined;
+  /** Set when `documentMetadata` is not: why the read produced nothing. */
+  metadataGap: MetadataGap | undefined;
 }
 
 /**
@@ -318,6 +331,7 @@ export async function categorizeRepresentations(
 
   // Declared out here so both exits report them; an OpenAI failure is not a reason to lose them.
   let documentMetadata: DocumentMetadata | undefined;
+  let metadataGap: MetadataGap | undefined;
   let summaryEmbedding: number[] | undefined;
   let relatedSummaries: RelatedSummary[] = [];
 
@@ -333,7 +347,8 @@ export async function categorizeRepresentations(
     // ones after it.
     if (summary !== null) {
       try {
-        documentMetadata = await deps.readDocumentMetadata(firestoreDocumentPath);
+        ({metadata: documentMetadata, gap: metadataGap} =
+          await deps.readDocumentMetadata(firestoreDocumentPath));
         if (documentMetadata) {
           // getEmbeddings resolves undefined on any OpenAI error, and neither use may see it: a
           // query vector of undefined throws from findNearest, and a stored one would persist as a
@@ -369,10 +384,10 @@ export async function categorizeRepresentations(
       messages,
       response_format: categorizationResponseFormat(responseSchema),
     });
-    return { completion, messageShape, summaryEmbedding, documentMetadata };
+    return { completion, messageShape, summaryEmbedding, documentMetadata, metadataGap };
   } catch (error) {
     console.log("OpenAI error", error);
-    return { completion: undefined, messageShape, summaryEmbedding, documentMetadata };
+    return { completion: undefined, messageShape, summaryEmbedding, documentMetadata, metadataGap };
   }
 }
 

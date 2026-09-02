@@ -68,6 +68,7 @@ function mockCategorizeResponse({
   // Absent by default, which is what an image-only run reports.
   summaryEmbedding,
   metadata,
+  metadataGap,
 }: {
   parsed?: { category: string, discussion: string, keyIndicators: string[] },
   usage?: { prompt_tokens: number, completion_tokens: number },
@@ -75,10 +76,12 @@ function mockCategorizeResponse({
   messageShape?: string,
   summaryEmbedding?: number[],
   metadata?: typeof documentMetadata,
+  metadataGap?: string,
 }) {
   categorizeRepresentations.mockResolvedValueOnce({
     summaryEmbedding,
     documentMetadata: metadata,
+    metadataGap,
     completion: {
       choices: [{
         message: {
@@ -984,12 +987,30 @@ describe("functions", () => {
     });
 
     test("the done record names a missing metadata read", async () => {
-      mockCategorizeResponse({parsed, messageShape: "summary-only", summaryEmbedding: embedding});
+      mockCategorizeResponse({
+        parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadataGap: "no-metadata",
+      });
 
       await runImaged(summarySent());
 
       expect((await readSummary()).exists).toBe(false);
       expect(await doneRecord()).toMatchObject({summaryRecorded: "no-metadata"});
+    });
+
+    // A personal document has no class or problem, so it records nothing on every run. Recording
+    // that apart from an unreadable document is what keeps the field worth querying: the ordinary
+    // case does not drown the one worth looking at.
+    test("a document with no context is recorded apart from an unreadable one", async () => {
+      mockCategorizeResponse({
+        parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadataGap: "no-context",
+      });
+
+      await runImaged(summarySent());
+
+      expect((await readSummary()).exists).toBe(false);
+      expect(await doneRecord()).toMatchObject({summaryRecorded: "no-context"});
+      expect(await admin.firestore().collection(commentsPath).count().get()
+        .then((result) => result.data().count)).toBe(1);
     });
 
     test("a run whose summary could not be embedded records nothing", async () => {

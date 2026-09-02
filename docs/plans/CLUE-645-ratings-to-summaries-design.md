@@ -312,7 +312,11 @@ the moment Track C starts populating it, so Track C must close it, not discover 
    require an exact composite index, so the deploy has to include it or the lookup returns an error
    rather than degrading. Deploy the index **before** the function that queries it.
 4. Existing records predate both fields and will not match a scoped query. Acceptable — the corpus
-   is one demo record, and re-analysis rewrites it with the fields present.
+   is one demo record, and re-analysis rewrites it with the fields present. That holds only for a
+   record already at the id the shared helper derives: `onDocumentSummarized` keyed by the metadata
+   document id, which differs from `key` on older documents, so such a record is never found again
+   and is stranded rather than refreshed. Consistent with Resolved Decision 3 (no backfill), and
+   the one production record is not one of them.
 
 ## Read Side
 
