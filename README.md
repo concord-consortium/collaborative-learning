@@ -32,7 +32,10 @@ For information on how to add a new tile type to the CLUE codebase, see the [Add
 
 Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
 
-Branches are deployed to `https://collaborative-learning.concord.org/branch/<name>/`.
+Branches are deployed to `https://collaborative-learning.concord.org/branch/<name>/`, where
+`<name>` is the branch name **with any issue-tracker prefix or suffix stripped** — so
+`CLUE-123-my-feature` is served at `/branch/my-feature/`. See [docs/deploy.md](docs/deploy.md)
+for the exact patterns.
 
 Tags are deployed to `https://collaborative-learning.concord.org/version/<name>/`
 

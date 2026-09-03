@@ -16,7 +16,8 @@ import {classifyDocument} from "../../shared/ai-analysis-classify";
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
 // 2. (This function) Summarize and screenshot those documents
-// 3. Send what was produced to the AI service for processing, and create document comments with the results
+// 3. Send what was produced to the AI service for processing, record the summary that was evaluated
+//    in `summaries/`, and create document comments with the results
 
 // The released CLUE build. The release workflow copies only a few entry points to the top level
 // (see .github/workflows/release.yml), and `iframe.html` is not one of them, so the document

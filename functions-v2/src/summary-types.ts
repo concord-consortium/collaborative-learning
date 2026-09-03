@@ -1,4 +1,4 @@
-import type {FieldValue} from "firebase-admin/firestore";
+import type {VectorValue} from "@google-cloud/firestore";
 import {RatingValue} from "../../shared/shared";
 
 // The agreement entries stored in a summary's `aiAgreements` map.
@@ -55,15 +55,14 @@ export function isAiAgreement(entry: AiAgreement): boolean {
  * A `summaries/{summaryId}` record: the summary the AI evaluated for one document, the vector it
  * was found by, and what people said about the comments it produced.
  *
- * The analysis pipeline creates and refreshes the record, `root` and `space` included;
- * `onCommentRated` only ever adjusts `aiAgreements` and the two counts.
+ * The analysis pipeline creates and refreshes the record; `onCommentRated` only ever adjusts
+ * `aiAgreements` and the two counts.
  *
- * Three fields are optional on read, all because a stored record need not carry them — this type
- * describes what a reader may find, where the design doc's Data Model describes what the pipeline
- * writes. `numAgreements` postdates the records that exist today, and the recompute in
- * `onCommentRated` fills it in the first time a rating touches one. `root` and `space` are written
- * by nothing yet: they arrive with the pipeline write in Track C, which needs them to scope the
- * related-summaries lookup to a single realm, and an older record gains them on its next analysis.
+ * `root`, `space` and `numAgreements` are optional because this type describes what a reader may
+ * find, and records predating them are still stored. Each gains its missing fields when it is next
+ * written: the pipeline supplies the realm on the next analysis, `onCommentRated` recomputes
+ * `numAgreements` on the next rating. Note the compiler will not tell you if a write path forgets
+ * the realm, and a record without it cannot match the realm-scoped lookup.
  */
 export interface Summary {
   key: string;
@@ -75,7 +74,7 @@ export interface Summary {
   problem: string;
   offeringId: string;
   summary: string;
-  summaryEmbedding: FieldValue;
+  summaryEmbedding: VectorValue;
   analyzedAt: number;
   adaCommentId?: string;
   numAiAgreements: number;

@@ -12,8 +12,8 @@ the `deploy:` scripts target, so `getAiContent` is called as `getAiContent_v2`.
 |--------|-------|
 |_onUserDocWritten_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
 |_onAnalyzableTestDocWritten_, _onAnalyzableProdDocWritten_|Monitor Firestore user metadata for updates to documents that request AI analysis, and put them into the analysis queue. One each for the test and prod roots.|
-|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, and sends them to Shutterbug to create a screenshot of the document|
-|_onAnalysisDocumentImaged_|Sends new screenshots to ChatGPT for analysis and creates a comment on the original document|
+|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, summarizes their text, and sends them to Shutterbug to create a screenshot of the document|
+|_onAnalysisDocumentImaged_|Sends what the previous step produced to ChatGPT for analysis, records the summary it evaluated in `summaries/`, and creates a comment on the original document|
 |_atMidnight_|Clears old Firebase roots for dev and qa instances|
 |_onDocumentTagged_|Updates metadata documents with strategies as needed whenever a comment is made|
 |_onCommentRated_|Records what people said about a document's comments on that document's summary, whenever a comment's ratings change or a rated comment is deleted. Never creates or deletes a summary; the analysis pipeline owns those|
@@ -135,6 +135,34 @@ Then run:
 ```shell
 $ npm run deploy                        # deploy all functions
 ```
+
+### Deploy Firestore indexes before the functions that query them
+
+A query whose composite index is missing fails with `FAILED_PRECONDITION`. Callers here catch that
+and carry on — the related-summaries lookup, for one, returns nothing and logs a warning — so
+deploying in the wrong order does not break anything visibly. It quietly drops whatever the query
+was for, one log line per run.
+
+So when a change adds or alters an index in `firestore.indexes.json`, deploy the index first, wait
+for it to finish building, and only then deploy the functions:
+
+```shell
+$ npm run deploy:firestore:indexes      # from the repo root
+```
+
+Two things about that command:
+
+- **It deploys the whole file**, not the index you changed. Run
+  `npx firebase firestore:indexes --project [project]` first and compare, so you know whether it is
+  about to build an index over a large collection.
+- **It asks whether to delete indexes that exist in the project but not in the file, and the answer
+  is normally no.** One of them is usually the index serving the functions that are still deployed.
+  Deleting an index is quick; rebuilding one is not, and every query needing it fails meanwhile.
+  Never pass `--force` to it without first reading what it would remove.
+
+"deployed indexes successfully" means the request was accepted, not that the index is ready —
+creation is asynchronous and is logged only at debug level. Check the Firebase console, or run a
+query that needs it: while it builds, Firestore says so in the error text.
 
 ## Differences with functions-v1
 
