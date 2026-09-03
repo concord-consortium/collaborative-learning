@@ -40,6 +40,8 @@ export const AIPromptModel = types.model("AIPrompt", {
   keyIndicatorsPrompt: types.maybe(types.string),
   discussionPrompt: types.maybe(types.string),
   systemPrompt: types.string,
+  // The analysis pipeline ignores summarizer; it stays declared to describe unit JSON that
+  // still carries it.
   summarizer: types.maybe(types.string)
 });
 
