@@ -37,9 +37,17 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
         {historyManager ? historyManager.historyStatusString : "Uninitialized"}
       </div>;
 
+  const historyEntryRequestError = historyManager?.historyEntryRequestError;
+
 return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {playbackControls}
+      {historyEntryRequestError &&
+        <div className="playback-history-request-error" data-testid="playback-history-request-error"
+            role="alert">
+          {historyEntryRequestError}
+        </div>
+      }
     </div>
   );
 });
