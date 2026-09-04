@@ -15,6 +15,7 @@ cypress/screenshots
 stats.json
 top-test/
 docs/drafts
+scripts/output
 src/public/ai/dataset*
 src/public/ai/screenshotDataset*
 
