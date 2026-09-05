@@ -56,9 +56,13 @@ const documentMetadata = {
   context_id: "class1",
   unit: "vibe",
   investigation: "1",
-  problem: "1.1",
+  problem: "1",
   offeringId: "offering-1",
+  contextSource: "document" as const,
 };
+
+// What readDocumentMetadata reports for a personal document: the same fields, from the request.
+const personalDocumentMetadata = {...documentMetadata, contextSource: "request" as const};
 
 function mockCategorizeResponse({
   parsed,
@@ -75,7 +79,7 @@ function mockCategorizeResponse({
   refusal?: string,
   messageShape?: string,
   summaryEmbedding?: number[],
-  metadata?: typeof documentMetadata,
+  metadata?: typeof documentMetadata | typeof personalDocumentMetadata,
   metadataGap?: string,
 }) {
   categorizeRepresentations.mockResolvedValueOnce({
@@ -98,6 +102,11 @@ function mockCategorizeResponse({
 // The representations the mock was asked to send, from its most recent call.
 function sentRepresentations() {
   return categorizeRepresentations.mock.calls[0][0];
+}
+
+// The request context it was given, the fifth argument.
+function sentRequestContext() {
+  return categorizeRepresentations.mock.calls[0][4];
 }
 
 // A record in the shape the current producer writes. Pass a field as undefined to leave it out;
@@ -710,6 +719,32 @@ describe("functions", () => {
       });
     });
 
+    test("the request context goes to the analysis", async () => {
+      mockCategorizeResponse({parsed, messageShape: "summary-only"});
+      const requestContext = {unit: "vibe", investigation: "1", problem: "1", offeringId: "offering-1"};
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: false, docImageUrl: undefined,
+        requestContext,
+      }));
+
+      expect(sentRequestContext()).toEqual(requestContext);
+      // And rides through to `done`, where the harness and the survey script can read it.
+      expect(await doneRecord()).toMatchObject({requestContext});
+    });
+
+    test("a record written without a request context passes none", async () => {
+      mockCategorizeResponse({parsed, messageShape: "summary-only"});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: false, docImageUrl: undefined,
+      }));
+
+      expect(sentRequestContext()).toBeUndefined();
+    });
+
     test("a record with nothing to send fails the analysis instead of asking the model", async () => {
       categorizeRepresentations.mockRejectedValueOnce(new Error("no representation to send"));
 
@@ -796,7 +831,7 @@ describe("functions", () => {
       // A record written before root and space existed, which the realm-scoped lookup cannot match
       // until an analysis rewrites it.
       await admin.firestore().doc(summaryPath).set({
-        key: documentMetadata.key, context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
+        key: documentMetadata.key, context_id: "class1", unit: "vibe", investigation: "1", problem: "1",
         summary: "An older summary.", numAiAgreements: 1, aiAgreements: anAgreement(),
       });
       mockCategorizeResponse({parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadata: documentMetadata});
@@ -832,6 +867,39 @@ describe("functions", () => {
       expect(data?.aiAgreements).toEqual(anAgreement());
       expect(data?.numAiAgreements).toBe(1);
       expect(data?.numAgreements).toBe(1);
+    });
+
+    // A personal document has no curriculum fields of its own, so its record is stored under the
+    // problem the student was running.
+    test("a personal document's record says its context came from the request", async () => {
+      mockCategorizeResponse({
+        parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadata: personalDocumentMetadata,
+      });
+
+      await runImaged(summarySent());
+
+      expect(await readSummary().then((record) => record.data())).toMatchObject({
+        unit: "vibe", investigation: "1", problem: "1", contextSource: "request",
+      });
+      expect(await doneRecord()).toMatchObject({summaryRecorded: "created", contextSource: "request"});
+    });
+
+    // `contextSource` is optional on Summary, so nothing in the compiler notices if the update
+    // path drops it. The create path is covered by the exact-match assertion above.
+    test("a re-analysis adds the context source to a record that predates it", async () => {
+      const beforeTheField: Record<string, unknown> = {...documentMetadata};
+      delete beforeTheField.contextSource;
+      await admin.firestore().doc(summaryPath).set({
+        ...beforeTheField,
+        summary: "An older summary.", numAiAgreements: 1, aiAgreements: anAgreement(),
+      });
+      mockCategorizeResponse({
+        parsed, messageShape: "summary-only", summaryEmbedding: embedding, metadata: personalDocumentMetadata,
+      });
+
+      await runImaged(summarySent());
+
+      expect(await readSummary().then((record) => record.data())).toMatchObject({contextSource: "request"});
     });
 
     test("the summary exists before the comment does", async () => {
@@ -980,6 +1048,8 @@ describe("functions", () => {
 
       expect((await readSummary()).exists).toBe(false);
       expect(await doneRecord()).toMatchObject({summaryRecorded: "no-context"});
+      // Nothing was read, so there is no source to name.
+      expect(await doneRecord()).not.toHaveProperty("contextSource");
       expect(await admin.firestore().collection(commentsPath).count().get()
         .then((result) => result.data().count)).toBe(1);
     });

@@ -11,6 +11,7 @@ import {
 } from "./analysis-queue-types";
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 import {generateRenderHtml} from "../../shared/render-page";
+import {kPlaceholderUnitCode} from "../../shared/shared";
 import {classifyDocument} from "../../shared/ai-analysis-classify";
 
 // This is one of three functions for AI analysis of documents:
@@ -127,8 +128,14 @@ async function postToShutterbug(html: string): Promise<string> {
 // Only a plain unit code is accepted. The metadata's unit is sometimes null, and a unit loaded
 // from a custom URL has a code that does not exist on the curriculum site; either would make
 // CLUE load its default unit or show an error page, which Shutterbug would capture just the same.
+// A document created before its unit loaded carries the placeholder code, which only has the shape
+// of a unit code and fetches nothing, so that one is refused by name.
+export function isRenderableUnit(unit: unknown): unit is string {
+  return typeof unit === "string" && /^[A-Za-z0-9_+-]+$/.test(unit) && unit !== kPlaceholderUnitCode;
+}
+
 export function renderUnitFor(unit: unknown) {
-  return typeof unit === "string" && /^[A-Za-z0-9_+-]+$/.test(unit) ? unit : fallbackClueUnit;
+  return isRenderableUnit(unit) ? unit : fallbackClueUnit;
 }
 
 // The page Shutterbug is given: the document in a script element plus an iframe that loads CLUE
@@ -277,9 +284,22 @@ export const onAnalysisDocumentPending =
       // The build and unit any screenshot of this document is rendered with. Recorded on the queue
       // record whether or not a screenshot is taken, so a record always says what a picture of this
       // document would have been a picture of.
-      const unit = renderUnitFor(documentUnit);
-      if (unit !== documentUnit) {
-        logger.warn(`Document unit ${JSON.stringify(documentUnit)} is not usable for rendering, using "${unit}"`);
+      //
+      // Deliberately wider than the fill rule in readDocumentMetadata, which serves personal
+      // documents only: any document with no usable unit is better drawn with the unit the student
+      // was running than with the fallback.
+      const requestUnit = queueDoc?.requestContext?.unit;
+      const unit = renderUnitFor(isRenderableUnit(documentUnit) ? documentUnit : requestUnit);
+      // Two levels: using the request's unit is the ordinary path for every personal document,
+      // while reaching the fallback means the picture may show placeholders instead of the work.
+      if (!isRenderableUnit(documentUnit)) {
+        if (isRenderableUnit(requestUnit)) {
+          logger.info(`Document has no usable unit (${JSON.stringify(documentUnit)}); ` +
+            `rendering with the unit the student was running: "${unit}"`);
+        } else {
+          logger.warn(`Document unit ${JSON.stringify(documentUnit)} and request unit ` +
+            `${JSON.stringify(requestUnit)} are both unusable for rendering, using "${unit}"`);
+        }
       }
       accumulated.renderTarget = {clueUrl: clueIframeURL, unit};
       accumulated.analysisVersion = 2;
