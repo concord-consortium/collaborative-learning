@@ -21,10 +21,13 @@ jest.mock("../../hooks/use-stores", () => ({
   usePersistentUIStore: () => ({ focusDocument: "test" })
 }));
 
+// Stable array identities, as the real query hooks give. A fresh [] per call would make the
+// component's memos recompute every render and hide staleness bugs.
+const noComments: any[] = [];
 jest.mock("../../hooks/document-comment-hooks", () => ({
-  useDocumentComments: () => ({ isLoading: false, isError: false, data: [], error: undefined }),
+  useDocumentComments: () => ({ isLoading: false, isError: false, data: noComments, error: undefined }),
   useDocumentCommentsAtSimplifiedPath: () =>
-    ({ isLoading: false, isError: false, data: [], error: undefined })
+    ({ isLoading: false, isError: false, data: noComments, error: undefined })
 }));
 
 jest.mock("../../hooks/use-nav-tab-panel-info", () => ({

@@ -71,6 +71,11 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   // const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
+  // An MST array keeps its identity when entries are appended, so `history` alone can never
+  // invalidate a memo. Anything derived from the entries has to depend on the length as well,
+  // or it will not grow as the document is edited while its history is open. The history is
+  // append-only, so the length is enough to notice every change to it.
+  const historyLength = history.length;
 
   // The numHistoryEntriesApplied should be set to the position of the history entry
   // that last "modified" the current document.
@@ -88,8 +93,13 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     // History entries must stay in index order (their position in the array),
     // not sorted by created time. Created times can be out of order when
     // sub-actions complete before their parent action.
-    const historyStops: IHistorySliderStop[] = history
-      .map((entry, index) => ({kind: "history" as const, entry, created: entry.created, index}));
+    // Indexed by historyLength rather than mapped over history, so that the entry count is
+    // an input to this memo and not just something read from a value that never changes.
+    const historyStops: IHistorySliderStop[] = [];
+    for (let index = 0; index < historyLength; index++) {
+      const entry = history[index];
+      historyStops.push({kind: "history", entry, created: entry.created, index});
+    }
 
     // Insert comments at the correct position among history entries based
     // on the comment's created time. Each comment goes after the last
@@ -112,7 +122,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       commentIdx++;
     }
     return stops;
-  }, [history, allComments]);
+  }, [history, historyLength, allComments]);
 
   // A slider stop is a state of the document rather than a change to it. A history position
   // counts applied entries, so position p is the document with entries 0..p-1 applied.

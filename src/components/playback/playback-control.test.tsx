@@ -5,6 +5,7 @@ import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
+import { HistoryEntry } from "../../models/history/history";
 import { PlaybackControlComponent } from "./playback-control";
 
 // The slider is the subject of these tests, so everything the component pulls
@@ -19,11 +20,15 @@ jest.mock("../../hooks/use-stores", () => ({
   usePersistentUIStore: () => ({ focusDocument: "test" })
 }));
 
+// Both hooks must hand back the same array identity on every call, the way the real
+// query hooks do. Returning a fresh [] each render makes the component's memos recompute
+// every render, which hides staleness bugs that only appear against stable data.
 let mockComments: any[] = [];
+const noComments: any[] = [];
 jest.mock("../../hooks/document-comment-hooks", () => ({
   useDocumentComments: () => ({ isLoading: false, isError: false, data: mockComments, error: undefined }),
   useDocumentCommentsAtSimplifiedPath: () =>
-    ({ isLoading: false, isError: false, data: [], error: undefined })
+    ({ isLoading: false, isError: false, data: noComments, error: undefined })
 }));
 
 jest.mock("../../hooks/use-nav-tab-panel-info", () => ({
@@ -62,6 +67,7 @@ function setupTreeManager(entryCount: number) {
 }
 
 const sliderValue = () => screen.getByRole("slider").getAttribute("aria-valuenow");
+const sliderMax = () => screen.getByRole("slider").getAttribute("aria-valuemax");
 
 describe("PlaybackControlComponent", () => {
   beforeEach(() => {
@@ -96,6 +102,30 @@ describe("PlaybackControlComponent", () => {
     expect(treeManager.numHistoryEventsApplied).toBe(2);
     // The thumb belongs on the comment the user clicked, which is the third stop.
     expect(sliderValue()).toBe("3");
+  });
+
+  // The document can be edited while its history is open — an undo in the primary document
+  // records an entry — and the slider has to grow with it, or the reader cannot reach the
+  // change that was just made and the play button stays disabled at what is no longer the end.
+  it("grows the slider when the document records a new history entry", async () => {
+    const treeManager = setupTreeManager(3);
+    render(<PlaybackControlComponent treeManager={treeManager} />);
+    expect(sliderMax()).toBe("3");
+
+    await act(async () => {
+      treeManager.addHistoryEntryAfterApplying(HistoryEntry.create({
+        id: "entry-3",
+        tree: "test",
+        model: "TestTile",
+        action: "/setText",
+        undoable: true,
+        state: "complete",
+        created: entryCreated(3),
+        records: []
+      }));
+    });
+
+    expect(sliderMax()).toBe("4");
   });
 
   // The readout names the change the reader is looking at. Naming the entry that has not
