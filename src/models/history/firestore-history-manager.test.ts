@@ -390,6 +390,23 @@ describe("history loading", () => {
       expect(historyManager.historyEntryRequestError).toEqual(expect.stringContaining("no-such-id"));
     });
 
+    // Waiting for the history to load can take up to 30 seconds, and the message from an
+    // earlier request would otherwise sit on screen for all of it, describing a request the
+    // reader has already replaced.
+    it("clears an earlier request's message as soon as a new request starts", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+      expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
+
+      mockCompletedSeek(treeManager);
+      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("a2");
+      expect(historyManager.historyEntryRequestError).toBeUndefined();
+      await seekPromise;
+    });
+
     it("reports nothing when the seek succeeds", async () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]

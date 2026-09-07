@@ -302,6 +302,10 @@ export class FirestoreHistoryManager {
   }
 
   async moveToHistoryEntryAfterLoad(historyId: string) {
+    // Any message on screen describes a request this one replaces, and the wait below can take
+    // 30 seconds, so drop it before starting rather than when this request resolves.
+    this.setHistoryEntryRequestError(undefined);
+
     // NO_HISTORY is the INITIAL status, not a terminal one — a freshly constructed manager reports it
     // before the Firestore query has run. So we must wait for the history to actually load (or error),
     // not stop on NO_HISTORY, or we'd give up before the entries arrive and never seek. A bounded
