@@ -60,8 +60,13 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
-  const allComments = [...comments||[], ...simplePathComments||[]]
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  // Memoized because sliderStops depends on it, and so in turn do goToSliderStop and the
+  // auto-play effect. Rebuilt on every render, it would restart auto-play's 500ms timer on
+  // every render.
+  const allComments = useMemo(
+    () => [...comments||[], ...simplePathComments||[]]
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
+    [comments, simplePathComments]);
   const { setPlaybackTime } = useNavTabPanelInfo();
 
   // const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
@@ -89,22 +94,20 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     // Insert comments at the correct position among history entries based
     // on the comment's created time. Each comment goes after the last
     // history entry whose created time is <= the comment's created time.
-    const sortedComments = [...allComments].sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-    );
+    // allComments is already in created order.
     const stops: ISliderStop[] = [{kind: "initial"}];
     let commentIdx = 0;
     for (const historyStop of historyStops) {
-      while (commentIdx < sortedComments.length &&
-             sortedComments[commentIdx].createdAt.getTime() < historyStop.created.getTime()) {
-        const comment = sortedComments[commentIdx];
+      while (commentIdx < allComments.length &&
+             allComments[commentIdx].createdAt.getTime() < historyStop.created.getTime()) {
+        const comment = allComments[commentIdx];
         stops.push({kind: "comment", entry: comment, created: comment.createdAt});
         commentIdx++;
       }
       stops.push(historyStop);
     }
-    while (commentIdx < sortedComments.length) {
-      const comment = sortedComments[commentIdx];
+    while (commentIdx < allComments.length) {
+      const comment = allComments[commentIdx];
       stops.push({kind: "comment", entry: comment, created: comment.createdAt});
       commentIdx++;
     }
