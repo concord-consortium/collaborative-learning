@@ -23,18 +23,26 @@ export interface IMarkerProps {
   location: number;
 }
 
-interface IHistorySliderEntry {
+// A stop's array index is the slider value that selects it, so the document before any of its
+// history was applied needs a stop of its own at index 0. It describes no change, so it has no
+// date. This is history position 0, which is where a `studentDocumentHistoryId=first` link
+// lands — "first" being the sentinel logDocumentEvent emits for a change made before the
+// document had any history entry.
+interface IInitialSliderStop {
+  kind: "initial";
+}
+interface IHistorySliderStop {
   kind: "history";
   entry: HistoryEntryType;
   index: number;
   created: Date;
 }
-export interface ICommentSliderEntry {
+export interface ICommentSliderStop {
   kind: "comment";
   entry: WithId<CommentDocument>;
   created: Date;
 }
-type ISliderEntry = IHistorySliderEntry | ICommentSliderEntry;
+type ISliderStop = IInitialSliderStop | IHistorySliderStop | ICommentSliderStop;
 
 interface IProps {
   treeManager: Instance<typeof TreeManager>;
@@ -71,11 +79,11 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const {numHistoryEventsApplied} = treeManager;
   // numHistoryEventsApplied can be 0 or undefined, the event is undefined in both cases
 
-  const sliderEntries = useMemo(() => {
+  const sliderStops = useMemo(() => {
     // History entries must stay in index order (their position in the array),
     // not sorted by created time. Created times can be out of order when
     // sub-actions complete before their parent action.
-    const historyEntries: ISliderEntry[] = history
+    const historyStops: IHistorySliderStop[] = history
       .map((entry, index) => ({kind: "history" as const, entry, created: entry.created, index}));
 
     // Insert comments at the correct position among history entries based
@@ -84,71 +92,71 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const sortedComments = [...allComments].sort(
       (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     );
-    const entries: ISliderEntry[] = [];
+    const stops: ISliderStop[] = [{kind: "initial"}];
     let commentIdx = 0;
-    for (const historyEntry of historyEntries) {
+    for (const historyStop of historyStops) {
       while (commentIdx < sortedComments.length &&
-             sortedComments[commentIdx].createdAt.getTime() < historyEntry.created.getTime()) {
+             sortedComments[commentIdx].createdAt.getTime() < historyStop.created.getTime()) {
         const comment = sortedComments[commentIdx];
-        entries.push({kind: "comment", entry: comment, created: comment.createdAt});
+        stops.push({kind: "comment", entry: comment, created: comment.createdAt});
         commentIdx++;
       }
-      entries.push(historyEntry);
+      stops.push(historyStop);
     }
     while (commentIdx < sortedComments.length) {
       const comment = sortedComments[commentIdx];
-      entries.push({kind: "comment", entry: comment, created: comment.createdAt});
+      stops.push({kind: "comment", entry: comment, created: comment.createdAt});
       commentIdx++;
     }
-    return entries;
+    return stops;
   }, [history, allComments]);
 
-  // The history position a slider value represents. A history entry maps to its own
-  // index. A comment maps to the history entry just before it, so the canvas shows
-  // the document as it stood when the comment was made. The slider max is
-  // sliderEntries.length, one past the last index, which means the end of the history.
-  const historyPositionForSliderValue = useCallback((value: number) => {
-    const sliderEntry = sliderEntries[value];
-    if (!sliderEntry) return history.length;
-    if (sliderEntry.kind === "history") return sliderEntry.index;
-    for (let i = value - 1; i >= 0; i--) {
-      const entry = sliderEntries[i];
-      if (entry.kind === "history") return entry.index;
+  // A slider stop is a state of the document rather than a change to it. A history position
+  // counts applied entries, so position p is the document with entries 0..p-1 applied.
+  //
+  // A history stop is the document once its entry has been applied. A comment stop takes the
+  // position of the entry before it, which is the document its author was looking at. The
+  // initial stop is the document before any of the history was applied.
+  const historyPositionForStopIndex = useCallback((stopIndex: number) => {
+    for (let i = stopIndex; i >= 0; i--) {
+      const stop = sliderStops[i];
+      if (stop?.kind === "history") return stop.index + 1;
     }
     return 0;
-  }, [history.length, sliderEntries]);
+  }, [sliderStops]);
 
-  // The inverse: the slider value for a history position. Returns -1 if the position
-  // has no entry in the slider.
-  const sliderIndexForHistoryPosition = useCallback((historyPosition: number) => {
-    // The end-of-history position is sliderEntries.length rather than any entry
-    // inside sliderEntries, so findIndex can't locate it.
-    if (historyPosition >= history.length) return sliderEntries.length;
-    return sliderEntries.findIndex(e => e.kind === "history" && e.index === historyPosition);
-  }, [history.length, sliderEntries]);
+  // The inverse: the stop that represents a history position.
+  const stopIndexForHistoryPosition = useCallback((historyPosition: number) => {
+    if (historyPosition <= 0) return 0;
+    // The end of the history is the last stop. Comments written after the final entry sit
+    // beyond that entry and represent the same position, so the last stop stands for it.
+    if (historyPosition >= history.length) return sliderStops.length - 1;
+    return sliderStops.findIndex(s => s.kind === "history" && s.index === historyPosition - 1);
+  }, [history.length, sliderStops]);
 
-  const [sliderValue, setSliderValue] = useState(() => sliderEntries.length);
+  const [currentStopIndex, setCurrentStopIndex] = useState(() => sliderStops.length - 1);
 
   // The document's history position can move without the slider being touched: a link
-  // into a document's history seeks with goToHistoryEntry. Follow it, so the thumb
-  // reports where the document actually is. Several slider values can share one history
-  // position — a comment and the entry before it — so a value that already represents
-  // the position is left alone rather than snapped onto the history entry.
+  // into a document's history seeks with goToHistoryEntryPosition. Follow it, so the thumb
+  // reports where the document actually is. Several stops can share one history position —
+  // a comment and the entry before it — so a stop that already represents the position is
+  // left alone rather than snapped onto the history entry.
   useEffect(() => {
     if (numHistoryEventsApplied === undefined) return;
-    setSliderValue(current => {
-      if (historyPositionForSliderValue(current) === numHistoryEventsApplied) return current;
-      const index = sliderIndexForHistoryPosition(numHistoryEventsApplied);
-      return index >= 0 ? index : current;
+    setCurrentStopIndex(current => {
+      if (historyPositionForStopIndex(current) === numHistoryEventsApplied) return current;
+      return stopIndexForHistoryPosition(numHistoryEventsApplied);
     });
-  }, [numHistoryEventsApplied, historyPositionForSliderValue, sliderIndexForHistoryPosition]);
+  }, [numHistoryEventsApplied, historyPositionForStopIndex, stopIndexForHistoryPosition]);
 
+  // Undefined at the initial stop, which describes no change.
   const eventCreatedTime = useMemo(() => {
-    const entry = sliderEntries[sliderValue] ?? sliderEntries[sliderEntries.length - 1];
-    return entry?.created;
-  }, [sliderValue, sliderEntries]);
+    const stop = sliderStops[currentStopIndex];
+    return stop?.kind === "initial" ? undefined : stop?.created;
+  }, [currentStopIndex, sliderStops]);
 
-  const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === sliderEntries.length;
+  const playbackDisabled =
+    numHistoryEventsApplied === undefined || currentStopIndex === sliderStops.length - 1;
 
   const handlePlayPauseToggle = useCallback((playing?: boolean) => {
     const playStatus = playing !== undefined ? playing : !sliderPlaying;
@@ -156,41 +164,40 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     setSliderPlaying(playStatus);
   }, [sliderPlaying, treeManager]);
 
-  // After goToHistoryEntry runs, numHistoryEventsApplied may differ from
+  // After goToHistoryEntryPosition runs, numHistoryEventsApplied may differ from
   // what we requested if a failed entry blocked the move. We detect this
   // and show a warning.
   const [playbackFailureWarning, setPlaybackFailureWarning] = useState<string | null>(null);
 
-  const goToSliderValue = useCallback(async (value: number) => {
+  const goToSliderStop = useCallback(async (stopIndex: number) => {
     // set the playback time to the time of the entry so that the comment thread is in sync
-    const sliderEntry = sliderEntries[value];
-    if (sliderEntry) {
-      setPlaybackTime(sliderEntry.created);
+    const sliderStop = sliderStops[stopIndex];
+    if (sliderStop && sliderStop.kind !== "initial") {
+      setPlaybackTime(sliderStop.created);
     }
 
-    const newHistoryEntryIndex = historyPositionForSliderValue(value);
-    await treeManager.goToHistoryEntry(newHistoryEntryIndex);
+    const newHistoryPosition = historyPositionForStopIndex(stopIndex);
+    await treeManager.goToHistoryEntryPosition(newHistoryPosition);
 
     // Check if the move was blocked by a failed entry. If so, snap the
     // slider to the last fully applied position and show a warning.
     const actual = treeManager.numHistoryEventsApplied;
-    if (actual !== undefined && actual !== newHistoryEntryIndex) {
-      const actualSliderIndex = sliderIndexForHistoryPosition(actual);
-      setSliderValue(actualSliderIndex >= 0 ? actualSliderIndex : value);
+    if (actual !== undefined && actual !== newHistoryPosition) {
+      setCurrentStopIndex(stopIndexForHistoryPosition(actual));
       setPlaybackFailureWarning("History playback could not apply some changes and was stopped.");
     } else {
-      setSliderValue(value);
+      setCurrentStopIndex(stopIndex);
       setPlaybackFailureWarning(null);
     }
-  }, [treeManager, sliderEntries, setPlaybackTime,
-      historyPositionForSliderValue, sliderIndexForHistoryPosition]);
+  }, [treeManager, sliderStops, setPlaybackTime,
+      historyPositionForStopIndex, stopIndexForHistoryPosition]);
 
   const goToComment = useCallback((comment: WithId<CommentDocument>) => {
-    const index = sliderEntries.findIndex(e => e.kind === "comment" && e.entry.id === comment.id);
+    const index = sliderStops.findIndex(s => s.kind === "comment" && s.entry.id === comment.id);
     if (index !== -1) {
-      goToSliderValue(index);
+      goToSliderStop(index);
     }
-  }, [sliderEntries, goToSliderValue]);
+  }, [sliderStops, goToSliderStop]);
 
   useEffect(() => {
     if (sliderPlaying) {
@@ -200,16 +207,16 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
         return;
       }
       const slider = setTimeout(()=>{
-        if (sliderValue < sliderEntries.length) {
-          goToSliderValue(sliderValue + 1);
+        if (currentStopIndex < sliderStops.length - 1) {
+          goToSliderStop(currentStopIndex + 1);
         } else {
           handlePlayPauseToggle(false);
         }
       }, 500);
       return () => clearTimeout(slider);
     }
-  }, [handlePlayPauseToggle, sliderEntries.length, sliderPlaying, sliderValue,
-      goToSliderValue, playbackFailureWarning]);
+  }, [handlePlayPauseToggle, sliderStops.length, sliderPlaying, currentStopIndex,
+      goToSliderStop, playbackFailureWarning]);
 
   //TODO: need to add a modal that warns users about max number of markers. Currently, a generic alert is shown
   //TODO: Currently, if add marker is on and user moves the time handle, a marker is added where the user
@@ -234,7 +241,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // };
 
   const handleSliderValueChange = (value: any) => {
-    goToSliderValue(value);
+    goToSliderStop(value);
   };
 
   const handleSliderAfterChange = (value: any) => {
@@ -248,25 +255,26 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const renderTimeInfo = () => {
     const monthMap: Record<number,string> = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun",
                       6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec"};
+    // The initial stop describes no change, so the readout stays empty there.
     const date = eventCreatedTime;
-    const month = date?.getMonth();
-    const monthStr = month !== undefined ? monthMap[month] : "";
-    const dateDay = date?.getDate();
-    const year = date?.getFullYear();
-    let hours = date?.getHours() ?? 0;
-    const minutes = date?.getMinutes() ?? 0;
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12;
-    hours = date && (hours !== 0) ? hours : 12; // the hour '0' should be '12'
-    const minutesStr = minutes < 10 ? "0" + minutes : minutes;
-    const strTime = date ? hours + ":" + minutesStr + " " + ampm : "";
+    let strDate = "";
+    let strTime = "";
+    if (date) {
+      strDate = `${monthMap[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+      const ampm = date.getHours() >= 12 ? 'pm' : 'am';
+      const hours = date.getHours() % 12 || 12; // the hour '0' should be '12'
+      const minutes = date.getMinutes();
+      const minutesStr = minutes < 10 ? "0" + minutes : minutes;
+      strTime = `${hours}:${minutesStr} ${ampm}`;
+    }
 
-    const entry = sliderEntries[sliderValue];
-    const historyIndex = entry?.kind === "history" ? entry.index : undefined;
+    // The entry this stop applied, which is the change on screen.
+    const stop = sliderStops[currentStopIndex];
+    const historyIndex = stop?.kind === "history" ? stop.index : undefined;
 
     return (
       <div className={"time-info"} data-testid="playback-time-info">
-        <div className={"date-info"}>{monthStr} {dateDay}, {year}</div>
+        <div className={"date-info"}>{strDate}</div>
         <div className={"time-info"}>{strTime} {historyIndex !== undefined && `(${historyIndex})`}</div>
       </div>
     );
@@ -291,12 +299,14 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   };
 
   const getCommentLocation = (comment: WithId<CommentDocument>) => {
-    if (sliderEntries.length === 0) {
+    // The rail spans the stops after the initial one, so that is what a position is a fraction of.
+    const lastStop = sliderStops.length - 1;
+    if (lastStop <= 0) {
       return 0;
     }
 
-    const index = sliderEntries.findIndex(entry => entry.kind === "comment" && entry.entry.id === comment.id);
-    return Math.max(0, Math.min(100, 100 * (index / sliderEntries.length)));
+    const index = sliderStops.findIndex(stop => stop.kind === "comment" && stop.entry.id === comment.id);
+    return Math.max(0, Math.min(100, 100 * (index / lastStop)));
   };
 
   const getMarkerLocation = (location: number) => {
@@ -316,9 +326,9 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
         <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
           <Slider
             min={0}
-            max={sliderEntries.length}
+            max={sliderStops.length - 1}
             step={1}
-            value={sliderValue}
+            value={currentStopIndex}
             ref={railRef}
             className={`${activeNavTab}`}
             onChange={handleSliderValueChange}
@@ -363,7 +373,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   const renderPlaybackFailureMarkers = () => {
     const failures = treeManager.historyPlaybackFailures;
-    if (failures.length === 0 || sliderEntries.length === 0) return null;
+    const lastStop = sliderStops.length - 1;
+    if (failures.length === 0 || lastStop <= 0) return null;
 
     // Deduplicate by history index for marker placement
     const seenIndices = new Set<number>();
@@ -376,11 +387,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     return (
       <div className="playback-failure-markers-container" data-testid="playback-failure-markers">
         {uniqueFailures.map(failure => {
-          const sliderIndex = sliderEntries.findIndex(
-            e => e.kind === "history" && e.index === failure.historyIndex
-          );
-          if (sliderIndex < 0) return null;
-          const location = Math.max(0, Math.min(100, 100 * (sliderIndex / sliderEntries.length)));
+          // The stop that would have applied the failing entry, which is the one playback
+          // could not reach.
+          const stopIndex = stopIndexForHistoryPosition(failure.historyIndex + 1);
+          const location = Math.max(0, Math.min(100, 100 * (stopIndex / lastStop)));
           const isSelected = selectedFailure?.historyIndex === failure.historyIndex;
           return (
             <button

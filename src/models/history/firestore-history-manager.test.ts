@@ -336,16 +336,27 @@ describe("history loading", () => {
     afterEach(() => jest.restoreAllMocks());
 
     /**
-     * Stands in for goToHistoryEntry doing its job: a seek that replays every entry it was
+     * Stands in for goToHistoryEntryPosition doing its job: a seek that replays every entry it was
      * asked for ends with numHistoryEventsApplied at the requested position. Callers now
      * check that, so a stub that leaves the position alone reads as a seek that stopped short.
      */
     function mockCompletedSeek(treeManager: Instance<typeof TreeManager>) {
-      return jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(((position: number) => {
+      return jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(((position: number) => {
         treeManager.setNumHistoryEntriesApplied(position);
         return Promise.resolve();
       }) as any);
     }
+
+    // A link names the entry the document had reached when the event was logged, so the
+    // requested moment is the one with that entry applied: the position after it, not before.
+    it("seeks to the position where the requested entry has been applied", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      const goToSpy = mockCompletedSeek(treeManager);
+      await historyManager.moveToHistoryEntryAfterLoad("a2");
+      expect(goToSpy).toHaveBeenCalledWith(2);
+    });
 
     it("treats the 'first' sentinel as position 0", async () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
@@ -360,7 +371,7 @@ describe("history loading", () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]
       });
-      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
       const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
       expect(goToSpy).not.toHaveBeenCalled();
@@ -373,7 +384,7 @@ describe("history loading", () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]
       });
-      jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
       jest.spyOn(console, "warn").mockImplementation(() => undefined);
       await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
       expect(historyManager.historyEntryRequestError).toEqual(expect.stringContaining("no-such-id"));
@@ -388,13 +399,13 @@ describe("history loading", () => {
       expect(historyManager.historyEntryRequestError).toBeUndefined();
     });
 
-    // Resolving the id only says where to go. Replaying an entry can fail, and goToHistoryEntry
+    // Resolving the id only says where to go. Replaying an entry can fail, and goToHistoryEntryPosition
     // then stops at the last position it could apply, which is not the one that was asked for.
     it("reports a seek that stops short of the requested entry", async () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }, { id: "a3" }]
       });
-      jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation((() => {
+      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation((() => {
         treeManager.setNumHistoryEntriesApplied(1);
         return Promise.resolve();
       }) as any);
@@ -410,7 +421,7 @@ describe("history loading", () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]
       });
-      jest.spyOn(treeManager, "goToHistoryEntry")
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
         .mockImplementation((() => Promise.reject(new Error("replay blew up"))) as any);
       jest.spyOn(console, "warn").mockImplementation(() => undefined);
 
@@ -423,7 +434,7 @@ describe("history loading", () => {
       jest.useFakeTimers();
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
       jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const seekPromise = historyManager.moveToHistoryEntryAfterLoad("first");
       await jest.advanceTimersByTimeAsync(30000);
@@ -463,7 +474,7 @@ describe("history loading", () => {
       jest.useFakeTimers();
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntry").mockImplementation(() => undefined as any);
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
       const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const seekPromise = historyManager.moveToHistoryEntryAfterLoad("first");
       await jest.advanceTimersByTimeAsync(30000);

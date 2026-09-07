@@ -326,34 +326,39 @@ export class FirestoreHistoryManager {
       this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
-    // "first" is the sentinel logDocumentEvent emits for a change made before the document had any
-    // history entry, so it never resolves via findHistoryEntryIndex; it maps to position 0.
-    const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
-    if (entry < 0) {
-      console.warn("Did not find history entry with id: ", historyId);
-      // Without this the document silently shows some other moment, which the reader has no way
-      // to tell apart from the one they asked for. The message doesn't say where the document
-      // ended up: it outlives the failed request, and the reader can move the scrubber.
-      this.setHistoryEntryRequestError(
-        `Could not find the requested point in this document's history (id: ${historyId}).`);
-      return;
+    // goToHistoryEntryPosition takes a position, which counts applied entries: position p is the
+    // document with entries 0..p-1 applied. A historyId names the entry the document had reached,
+    // so the moment it names is the position that includes it, one past its index.
+    // "first" is the sentinel logDocumentEvent emits for a change made before the document had
+    // any entry at all, which is position 0.
+    let position = 0;
+    if (historyId !== "first") {
+      const index = this.treeManager.findHistoryEntryIndex(historyId);
+      if (index < 0) {
+        console.warn("Did not find history entry with id: ", historyId);
+        // The message says only what failed. It outlives the request, and the reader can move
+        // the scrubber, so where the document sits is the scrubber's to report.
+        this.setHistoryEntryRequestError(
+          `Could not find the requested point in this document's history (id: ${historyId}).`);
+        return;
+      }
+      position = index + 1;
     }
 
-    // Resolving the id only says where to go. Replaying an entry can fail, and goToHistoryEntry
-    // then stops at the last position it could apply, so the seek has to be awaited and its
-    // result checked before the request can be called successful.
+    // Replaying an entry can fail, and goToHistoryEntryPosition then stops at the last position it
+    // could apply, so the applied position has to be checked before the request counts as met.
     try {
-      await this.treeManager.goToHistoryEntry(entry);
+      await this.treeManager.goToHistoryEntryPosition(position);
     } catch (error) {
       console.warn("moveToHistoryEntryAfterLoad: seek failed for id:", historyId, error);
       this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
       return;
     }
-    if (this.treeManager.numHistoryEventsApplied === entry) {
+    if (this.treeManager.numHistoryEventsApplied === position) {
       this.setHistoryEntryRequestError(undefined);
     } else {
       console.warn("moveToHistoryEntryAfterLoad: seek stopped at",
-        this.treeManager.numHistoryEventsApplied, "instead of", entry, "for id:", historyId);
+        this.treeManager.numHistoryEventsApplied, "instead of", position, "for id:", historyId);
       this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
     }
   }

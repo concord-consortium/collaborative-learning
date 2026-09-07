@@ -360,7 +360,7 @@ it("can replay the history entries", async () => {
   manager.setNumHistoryEntriesApplied(manager.document.history.length);
   expect(manager.numHistoryEventsApplied).toBe(5);
 
-  await manager.goToHistoryEntry(2);
+  await manager.goToHistoryEntryPosition(2);
   expect(tileContent.actionText).toBe("action 1");
 
   // The history should not change after it is replayed
@@ -507,7 +507,7 @@ describe("history playback failure handling", () => {
     seedHistory(manager, historyWithFailingEntry, 1, () => tileContent.setActionText("action 1"));
 
     // Scrub forward past the failing entry
-    await manager.goToHistoryEntry(3);
+    await manager.goToHistoryEntryPosition(3);
 
     // Should have stopped at the failing entry without applying action2
     expect(manager.numHistoryEventsApplied).toBe(1);
@@ -525,7 +525,7 @@ describe("history playback failure handling", () => {
     seedHistory(manager, historyWithFailingEntry, 3, () => tileContent.setActionText("action 2"));
 
     // Scrub backward past the failing entry
-    await manager.goToHistoryEntry(0);
+    await manager.goToHistoryEntryPosition(0);
 
     // Entry 2 (action2) should have been undone successfully, then entry 1
     // (failingEntry) failed to undo. Rollback position is failedEntryIndex + 1 = 2,
@@ -545,7 +545,7 @@ describe("history playback failure handling", () => {
     seedHistory(manager, [makeRealHistoryEntry(mixedEntry)], 0,
       () => tileContent.setActionText("initial"));
 
-    await manager.goToHistoryEntry(1);
+    await manager.goToHistoryEntryPosition(1);
 
     expect(tileContent.actionText).toBe("initial");
     expect(tileContent.flag).toBeUndefined();
@@ -564,7 +564,7 @@ describe("history playback failure handling", () => {
       tileContent.setFlag(true);
     });
 
-    await manager.goToHistoryEntry(0);
+    await manager.goToHistoryEntryPosition(0);
 
     expect(tileContent.flag).toBe(true);
     expect(tileContent.actionText).toBe("good first");
@@ -580,7 +580,7 @@ describe("history playback failure handling", () => {
     seedHistory(manager, [makeRealHistoryEntry(mixedPatchesEntry)], 0,
       () => tileContent.setActionText("initial"));
 
-    await manager.goToHistoryEntry(1);
+    await manager.goToHistoryEntryPosition(1);
 
     expect(tileContent.actionText).toBe("initial");
     expect(tileContent.flag).toBeUndefined();
@@ -600,7 +600,7 @@ describe("history playback failure handling", () => {
       tileContent.setFlag(true);
     });
 
-    await manager.goToHistoryEntry(0);
+    await manager.goToHistoryEntryPosition(0);
 
     expect(tileContent.flag).toBe(true);
     expect(tileContent.actionText).toBe("good patch first");
@@ -642,7 +642,7 @@ describe("history playback failure handling", () => {
     seedHistory(manager, [makeRealHistoryEntry(pathlessPatchEntry)], 0);
 
     await jestSpyConsole("warn", async () => {
-      await manager.goToHistoryEntry(1);
+      await manager.goToHistoryEntryPosition(1);
     });
 
     // Pathless patches must not escape as an unhandled error — they

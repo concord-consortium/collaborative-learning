@@ -73,12 +73,12 @@ describe("PlaybackControlComponent", () => {
     render(<PlaybackControlComponent treeManager={treeManager} />);
 
     // A deep link into history seeks the document without touching the slider.
-    await act(async () => { await treeManager.goToHistoryEntry(2); });
+    await act(async () => { await treeManager.goToHistoryEntryPosition(2); });
 
     expect(sliderValue()).toBe("2");
   });
 
-  it("leaves the thumb on a comment when its marker is clicked", async () => {
+  it("shows the document as it stood when a clicked comment was written", async () => {
     const treeManager = setupTreeManager(3);
     // Between entries 1 and 2, so the slider entries are [h0, h1, comment, h2].
     mockComments = [{
@@ -91,9 +91,24 @@ describe("PlaybackControlComponent", () => {
     assertIsDefined(marker);
     await act(async () => { fireEvent.click(marker); });
 
-    // The document goes back to entry 1, the last entry before the comment, but
-    // the thumb belongs on the comment the user clicked.
-    expect(treeManager.numHistoryEventsApplied).toBe(1);
-    expect(sliderValue()).toBe("2");
+    // Entries 0 and 1 were both applied before the comment was written, so both belong
+    // in the document the commenter was looking at.
+    expect(treeManager.numHistoryEventsApplied).toBe(2);
+    // The thumb belongs on the comment the user clicked, which is the third stop.
+    expect(sliderValue()).toBe("3");
+  });
+
+  // The readout names the change the reader is looking at. Naming the entry that has not
+  // been applied yet would describe the document they are about to see, not this one.
+  it("labels the position with the entry that has been applied", async () => {
+    const treeManager = setupTreeManager(3);
+    render(<PlaybackControlComponent treeManager={treeManager} />);
+
+    await act(async () => { await treeManager.goToHistoryEntryPosition(2); });
+
+    // Position 2 is entries 0 and 1 applied, so entry 1 is the change on screen.
+    const timeInfo = screen.getByTestId("playback-time-info").textContent;
+    expect(timeInfo).toContain("(1)");
+    expect(timeInfo).toContain("9:01 am");
   });
 });
