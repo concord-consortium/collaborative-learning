@@ -17,10 +17,11 @@ top-test/
 docs/drafts
 scripts/output
 
-# Throwaway investigation scripts and their output. These query production directly, and their
-# output holds real class hashes, portal user ids and document keys, so nothing matching this
-# belongs in a public repository.
-scripts/investigate-*
+# Throwaway scripts and their output. A script here queries production directly and writes real
+# class hashes, portal user ids and document keys, none of which should reach the repository.
+# The directory is ignored rather than a filename pattern, so no name is off limits to a script
+# that is meant to be committed.
+scripts/local
 src/public/ai/dataset*
 src/public/ai/screenshotDataset*
 
