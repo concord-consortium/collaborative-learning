@@ -311,6 +311,50 @@ describe("createMissingDocumentMetadata", () => {
     expect(result.counts.ownerIsTeacher).toBe(0);
   });
 
+  it("refuses a type that is on neither allowlist rather than assuming it is class-contained", async () => {
+    // `section` is deprecated and offering-contained — its schema requires an offeringId
+    // (DBSectionDocumentMetadataDEPRECATED in src/lib/db-types.ts). Defaulting it to class-contained
+    // would stamp `unit: null` and no offeringId, putting 108 real documents on the wrong container
+    // axis. Firestore holds no `section` row anywhere, so what to do with them is a decision for a
+    // person, not a default.
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "section", createdAt: 1, offeringId: "off-1" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.unsupportedType).toBe(1);
+    expect(result.counts.created).toBe(0);
+    expect(store.k1).toBeUndefined();
+    expect(result.skipped[0]).toMatchObject({ key: "k1", reason: "unsupportedType", type: "section" });
+  });
+
+  it("refuses a group document, whose axis fields live only in Firestore", async () => {
+    // A group document's scope, owner, kind and title are stamped into Firestore at creation; the
+    // realtime database holds only base metadata (see DBGroupDocMetadata). There is nothing here to
+    // rebuild one from.
+    const { firestore } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "group", createdAt: 1 } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.unsupportedType).toBe(1);
+  });
+
+  it("refuses a document whose node records no type at all", async () => {
+    const { firestore } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { createdAt: 1, title: "typeless" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.unsupportedType).toBe(1);
+  });
+
   it("counts each bucket by document type, so an operator can see the distribution", async () => {
     // Thousands of writes are about to happen; per-space totals hide a type nobody expected. This is
     // the check that a type outside the offering allowlist really is class-contained.

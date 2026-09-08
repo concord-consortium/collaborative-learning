@@ -29,6 +29,24 @@ const kBatchSize = 400;
 export const kOfferingContainedTypes = ["problem", "planning", "publication", "supportPublication"];
 
 /**
+ * The types kept in the class. These carry no curriculum position, and get an explicit `unit: null`.
+ *
+ * Listed rather than inferred from "not offering-contained". The realtime database holds types this
+ * repair has no business reconstructing, and defaulting them to class-contained would put them on the
+ * wrong container axis silently:
+ *
+ * - `section` is deprecated and offering-contained — its schema requires an `offeringId`
+ *   (`DBSectionDocumentMetadataDEPRECATED` in src/lib/db-types.ts). 108 of them have no Firestore row,
+ *   and no `section` row exists anywhere in Firestore, so whether they should exist at all is a
+ *   question for a person.
+ * - `group` (and the `axes` type it is being renamed to) keeps its scope, owner, kind and title only
+ *   in Firestore; the realtime database has base metadata and nothing else to rebuild from.
+ * - `drivingQuestionBoard` and anything added later would otherwise be guessed at.
+ */
+export const kClassContainedTypes =
+  ["personal", "learningLog", "personalPublication", "learningLogPublication"];
+
+/**
  * Publication types whose `originDoc` is worth recovering, and the class-level list holding it.
  *
  * `originDoc` is established practice for exactly these two — 296 of 296 learning log publications and
@@ -55,14 +73,15 @@ export type CreateBucket =
   | "unresolvedCurriculum" // offering-contained, but its unit/investigation/problem are unknown
   | "unreadableContent"   // the row was written, but without `tools`: its content would not parse
   | "appearedDuringRun"   // a client created the row between the scan and the write; left alone
-  | "ownerIsTeacher";     // created, but with a null network that cannot be reconstructed
+  | "ownerIsTeacher"      // created, but with a null network that cannot be reconstructed
+  | "unsupportedType";    // a type on neither allowlist: which container it belongs to is unknown
 
 export type ICreateCounts = Record<CreateBucket, number>;
 
 const emptyCounts = (): ICreateCounts => ({
   created: 0, written: 0, alreadyPresent: 0, skippedNoContent: 0,
   skippedUnaddressable: 0, nodeUnreadable: 0, unresolvedCurriculum: 0, unreadableContent: 0,
-  appearedDuringRun: 0, ownerIsTeacher: 0
+  appearedDuringRun: 0, ownerIsTeacher: 0, unsupportedType: 0
 });
 
 /** Firestore's ALREADY_EXISTS, the one write failure that is a race rather than a fault. */
@@ -297,6 +316,12 @@ export async function createMissingDocumentMetadata(
     if (!indexed.hasContent) { skip(key, indexed, "skippedNoContent", node); continue; }
     if (!node) { skip(key, indexed, "nodeUnreadable"); continue; }
 
+    const offeringContained = kOfferingContainedTypes.includes(node.type);
+    if (!offeringContained && !kClassContainedTypes.includes(node.type)) {
+      skip(key, indexed, "unsupportedType", node);
+      continue;
+    }
+
     const row: Record<string, any> = {
       key,
       type: node.type,
@@ -317,7 +342,7 @@ export async function createMissingDocumentMetadata(
     const originDoc = await originDocFor(node.type, indexed.classHash, key);
     if (originDoc != null) row.originDoc = originDoc;
 
-    if (kOfferingContainedTypes.includes(node.type)) {
+    if (offeringContained) {
       const position = node.offeringId ? await curriculumFor(node.offeringId) : undefined;
       if (!position) {
         // Writing the row without these would place the document on the wrong container axis and
@@ -372,7 +397,8 @@ export async function createMissingDocumentMetadata(
         `unresolved curriculum ${counts.unresolvedCurriculum}, ` +
         `unreadable content ${counts.unreadableContent}, ` +
         `appeared during run ${counts.appearedDuringRun}, ` +
-        `owner is a teacher ${counts.ownerIsTeacher}`);
+        `owner is a teacher ${counts.ownerIsTeacher}, ` +
+        `unsupported type ${counts.unsupportedType}`);
     // Per type, so an unexpected distribution is visible before thousands of writes are applied.
     for (const [type, forType] of Object.entries(byType).sort((a, b) => b[1].created - a[1].created)) {
       const shown = Object.entries(forType).filter(([, n]) => n > 0).map(([b, n]) => `${b} ${n}`);
