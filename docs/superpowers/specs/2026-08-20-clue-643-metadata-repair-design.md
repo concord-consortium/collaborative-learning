@@ -60,8 +60,13 @@ SDK's `.once("value")`, which would pull whole subtrees. Get the token from
 `credential.getAccessToken()` and refresh it on an interval for long runs. Pool at 40 concurrent
 requests. URL-encode each path segment — `authed/localhost:3000` is a real space.
 
-**Assert that each key maps to a single home** and report violations rather than assuming. All 116,000
-production keys were distinct, but that is a finding about one space, not a guarantee.
+**Assert that each key maps to a single home**, report the violation, and **drop the key from the
+index**. All 116,000 production keys were distinct, but `authed/learn_staging_concord_org` has 9 that
+are not, so this is a live case rather than a hypothetical. Reporting alone is not enough: the callers
+log "NOT repaired" and then hand the same index onward, so a key left in it would be repaired using
+whichever home happened to be recorded first. Once ambiguous, always ambiguous — the halves are read
+per user-class pair, so a third home can turn up after the key has been dropped and must not put it
+back.
 
 ## Space enumeration
 
@@ -98,9 +103,12 @@ costs nothing and guessing at it could do harm.
 
 For each indexed key with content and no Firestore row, create one from the realtime-database node.
 
-The 2026-08-25 dry run over every space: **5,682 rows to create**, 119,819 already present, 665
-skipped. The 6,240 above was the earlier census, taken before the skip rules existed and before the
-population had another few weeks to grow; 5,682 creatable plus 665 refused is the number that matters.
+The 2026-09-08 dry run over every space: **5,566 rows to create**, 120,113 already present, 773
+skipped. The 6,240 above was the earlier census, taken before the skip rules existed; 5,566 creatable
+plus 773 refused is the number that matters.
+
+Of the 5,566, **483 are owned by a teacher** and so get a `network` that cannot be reconstructed — see
+the field discussion below.
 
 The starting point is the field set `DB.createFirestoreMetadataDocument` writes (`src/lib/db.ts`):
 `type`, `createdAt`, `network`, `key`, `properties`, `uid`, `title` where present, plus the owner and
@@ -233,8 +241,17 @@ Follow `backfill-document-offering-id.ts`, which is the template these should ma
 - **Batch at 400 writes**, and increment `written` only after a commit resolves, so a crash cannot
   overstate what landed.
 - **Per-space and per-type counts** for every bucket, including the skipped ones. Judge a run by the
-  per-space lines, not the totals.
-- **Report on crash** as well as on success, so a killed run still says what it did.
+  per-space lines, not the totals. The per-type split is what shows a type nobody expected — the
+  offering/class decision rests on a four-type allowlist, so a `section` or `group` appearing in the
+  population is a signal to revisit the allowlist rather than to trust the default.
+- **Report on crash** as well as on success, so a killed run still says what it did. Both repairs log
+  from a `finally` and attach their counts to the thrown error: a partial apply is exactly when the
+  numbers are needed, and rejecting before the report is emitted loses them.
+- **Create, never set.** The scan that decides what is missing runs once per space, and the sweep then
+  runs for minutes. A client can create a row for one of these documents in that window — production
+  was still accumulating them in 2026 — and `set` would overwrite a row written with the full creation
+  context by one reconstructed from the realtime database. A batch is all-or-nothing, so a batch that
+  loses the race is retried per document and only the loser is counted as such.
 - **`SPACES=` to limit the run** to named spaces, for staged rollout — production alone, or one demo
   space first.
 
@@ -248,7 +265,8 @@ The skip rules above leave a residue: documents repair 2 will not write a row fo
 stay invisible to Sort Work, to the class dashboard, and to every Firestore-driven view. They are not
 harmless — they are realtime-database nodes no product surface can reach.
 
-The 2026-08-25 dry run over every space put that residue at 665 documents:
+The 2026-09-08 dry run over every space put the skip report at 773 documents, of which 665 are the
+deletable residue — the other 108 are `section`, refused above:
 
 | reason | count |
 |---|---|
@@ -256,7 +274,7 @@ The 2026-08-25 dry run over every space put that residue at 665 documents:
 | `skippedNoContent` — a metadata node whose content is gone | 86 |
 | `nodeUnreadable` | 6 |
 
-None was created in the past year; the newest dates from 2025-04-25, and 455 of the 665 predate 2023.
+None of the 665 was created in the past year; the newest dates from 2025-04-25, and 455 predate 2023.
 Three sit in production and the rest in demo spaces. So the residue is debris, and deleting it is
 cheaper and more honest than carrying 665 unreachable nodes forward.
 
@@ -268,6 +286,12 @@ scripts/delete-unrepairable-documents.ts   performs the deletion
 The plan is a separate module from the script that acts on it so the rules can be read and tested
 without a database. Every rule refuses rather than adapts:
 
+- **Only the reasons that mean debris.** The repair skips for two different kinds of reason:
+  the document is unreachable (`unresolvedCurriculum`, `skippedNoContent`, `nodeUnreadable`), or the
+  repair did not know what it was looking at (`unsupportedType`). Only the first kind is deletable.
+  Refusing to create a row for the 108 `section` documents put them in the skip report, and without
+  this rule the fix that deferred that decision would have handed them to the irreversible script. The
+  deletable reasons are listed, so a bucket added later is refused until someone decides it belongs.
 - **`authed/learn_concord_org` is never touched**, under any flag. Its three entries are content with
   no metadata node — student work rather than demo debris — and want looking at individually.
 - **Nothing created inside the retention window** (a year by default, `RETENTION_DAYS` to change it).
