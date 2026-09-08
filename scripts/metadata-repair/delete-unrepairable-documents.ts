@@ -17,14 +17,16 @@
 // report is a claim about repairability at the moment it was written, so generate it from the same
 // code, against the same data, immediately before deleting. See "Order" in the design doc.
 //
-// Dry run (default, deletes nothing):  npx tsx scripts/delete-unrepairable-documents.ts
-// Apply (performs the deletions):      APPLY=1 npx tsx scripts/delete-unrepairable-documents.ts
+// Dry run (default, deletes nothing):  npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
+// Apply (performs the deletions):      APPLY=1 npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
 // Use a different report:              REPORT=path/to/skipped.json npx tsx ...
 // Change the retention window:         RETENTION_DAYS=730 npx tsx ...
+//
+// Read ./README.md before running any of these: the order matters, and two of the three write.
 
 import fs from "fs";
 import admin from "firebase-admin";
-import { getScriptRootFilePath } from "./lib/script-utils.js";
+import { getScriptRootFilePath } from "../lib/script-utils.js";
 import { createRtdbReader, kSkipReportFile, resolveDatabaseUrl } from "./lib/repair-cli";
 import {
   kDefaultRetentionMs, kProtectedSpaces, planDeletions,

@@ -95,7 +95,7 @@ export function resolveDatabaseUrl(projectId: string, override?: string): string
   const url = kDatabaseUrls[projectId];
   if (!url) {
     throw new Error(`No realtime database URL known for project "${projectId}". ` +
-      `Add it to kDatabaseUrls in scripts/lib/repair-cli.ts, or set DATABASE_URL.`);
+      `Add it to kDatabaseUrls in scripts/metadata-repair/lib/repair-cli.ts, or set DATABASE_URL.`);
   }
   return url;
 }

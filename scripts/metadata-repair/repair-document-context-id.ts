@@ -11,9 +11,11 @@
 // of the 35 mismatches in production, 25 carry a legacy value equal to the true home and 10 carry the
 // placeholder "ignored". Copying that field would fix 25 and leave 10 looking correct.
 //
-// Dry run (default, writes nothing):  npx tsx scripts/repair-document-context-id.ts
-// Apply (performs the writes):        APPLY=1 npx tsx scripts/repair-document-context-id.ts
+// Dry run (default, writes nothing):  npx tsx scripts/metadata-repair/repair-document-context-id.ts
+// Apply (performs the writes):        APPLY=1 npx tsx scripts/metadata-repair/repair-document-context-id.ts
 // Limit to named spaces:              SPACES=demo/CLUE,authed/learn_concord_org npx tsx ...
+//
+// Read ./README.md before running any of these: the order matters, and two of the three write.
 
 import type { Firestore } from "firebase-admin/firestore";
 import type { IDocumentHome } from "./lib/rtdb-document-index";
@@ -155,7 +157,7 @@ async function main() {
   // firebase-admin or the import.meta-using script-utils module.
   const admin = (await import("firebase-admin")).default;
   const nodeFs = (await import("fs")).default;
-  const { getScriptRootFilePath } = await import("./lib/script-utils.js");
+  const { getScriptRootFilePath } = await import("../lib/script-utils.js");
   const {
     createRtdbReader, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
   } = await import("./lib/repair-cli");

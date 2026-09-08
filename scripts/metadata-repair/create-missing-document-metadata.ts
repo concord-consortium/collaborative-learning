@@ -7,9 +7,11 @@
 // remain across all real spaces, of which 4,996 are in demo spaces. The cause is fixed (CLUE-647);
 // this is a one-time repair.
 //
-// Dry run (default, writes nothing):  npx tsx scripts/create-missing-document-metadata.ts
-// Apply (performs the writes):        APPLY=1 npx tsx scripts/create-missing-document-metadata.ts
+// Dry run (default, writes nothing):  npx tsx scripts/metadata-repair/create-missing-document-metadata.ts
+// Apply (performs the writes):        APPLY=1 npx tsx scripts/metadata-repair/create-missing-document-metadata.ts
 // Limit to named spaces:              SPACES=demo/CLUE npx tsx ...
+//
+// Read ./README.md before running any of these: the order matters, and two of the three write.
 
 import type { Firestore } from "firebase-admin/firestore";
 import { isRtdbAddressable, type IDocumentHome } from "./lib/rtdb-document-index";
@@ -414,7 +416,7 @@ async function main() {
   // firebase-admin or the import.meta-using script-utils module.
   const admin = (await import("firebase-admin")).default;
   const nodeFs = (await import("fs")).default;
-  const { getScriptRootFilePath, getProblemDetails } = await import("./lib/script-utils.js");
+  const { getScriptRootFilePath, getProblemDetails } = await import("../lib/script-utils.js");
   const {
     createRtdbReader, kOutputDir, kSkipReportFile, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
   } = await import("./lib/repair-cli");
@@ -444,7 +446,7 @@ async function main() {
 
   const resolveFromPortal = async (offeringId: string) => {
     try {
-      const { fetchPortalOffering } = await import("./lib/fetch-portal-entity.js");
+      const { fetchPortalOffering } = await import("../lib/fetch-portal-entity.js");
       const offering: any = await fetchPortalOffering(portal, offeringId);
       if (!offering?.activity_url) return undefined;
       return getProblemDetails(offering.activity_url);
@@ -561,10 +563,18 @@ async function main() {
     Object.entries(byYear).sort()
   ), null, 2));
   if (newest) console.log(`newest skipped document: ${new Date(newest).toISOString().slice(0, 10)}`);
-  const reportPath = getScriptRootFilePath(kSkipReportFile);
+  // A filtered run has only seen part of the database, so its report must not sit at the path the
+  // deletion script reads by default. Deleting from a partial report would under-delete rather than
+  // over-delete, but silently: the run would look complete and simply not mention the rest.
+  const reportPath = getScriptRootFilePath(
+    filter ? kSkipReportFile.replace(/\.json$/, ".partial.json") : kSkipReportFile);
   nodeFs.mkdirSync(getScriptRootFilePath(kOutputDir), { recursive: true });
   nodeFs.writeFileSync(reportPath, JSON.stringify(everySkipped, null, 2));
   console.log(`skipped documents written to ${reportPath}`);
+  if (filter) {
+    console.log("This run was limited to named spaces, so the report covers only those. " +
+      "Re-run without SPACES before deleting anything from it.");
+  }
   if (dryRun) console.log("DRY RUN — set APPLY=1 to write");
   process.exit(0);
 }

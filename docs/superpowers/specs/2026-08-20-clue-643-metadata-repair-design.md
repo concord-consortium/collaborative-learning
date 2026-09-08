@@ -21,15 +21,21 @@ The index is the expensive part and both repairs need it, so it becomes a module
 built twice:
 
 ```
-scripts/lib/rtdb-document-index.ts           shared: walk a space, produce the index
-scripts/lib/repair-cli.ts                    space selection, database URLs, the retrying reader
-scripts/lib/curriculum-position.ts           decode an offering id, validate against content.json
-scripts/lib/document-tools.ts                derive `tools` from content, as the client does
-scripts/lib/deletion-plan.ts                 what a deletion run may remove, and why it refuses the rest
-scripts/repair-document-context-id.ts        repair 1
-scripts/create-missing-document-metadata.ts  repair 2
-scripts/delete-unrepairable-documents.ts     the residue repair 2 cannot fix
+scripts/metadata-repair/
+  README.md                            how to run them, in what order, and what each refuses
+  repair-document-context-id.ts        repair 1
+  create-missing-document-metadata.ts  repair 2
+  delete-unrepairable-documents.ts     the residue repair 2 cannot fix
+  lib/rtdb-document-index.ts           shared: walk a space, produce the index
+  lib/repair-cli.ts                    space selection, database URLs, the retrying reader
+  lib/curriculum-position.ts           decode an offering id, validate against content.json
+  lib/document-tools.ts                derive `tools` from content, as the client does
+  lib/deletion-plan.ts                 what a deletion run may remove, and why it refuses the rest
 ```
+
+The operational detail — invocations, environment variables, the order, how to read a run's output —
+lives in that README rather than here. A design doc records why the code is shaped as it is and stops
+being read once the shape is settled; the instructions for running a script need to survive that.
 
 Separate scripts rather than one with modes, because the three have different risk profiles — one
 rewrites a field on an existing row, one creates rows, one deletes realtime-database nodes — and an
@@ -129,7 +135,7 @@ all 5,682 file under "No Tools".
 
 `visibility` comes straight off the node. `tools` is derived from the document's content the way the
 client derives it — unique tile types, plus "Sparrow" for arrow annotations — in
-`scripts/lib/document-tools.ts`, which exists to be diffed against the client's copy.
+`scripts/metadata-repair/lib/document-tools.ts`, which exists to be diffed against the client's copy.
 
 The content read is the run's only read of the largest node in the database, so it happens **last**,
 after every skip check: the documents a run declines never pull content. It cost about 7 minutes on
@@ -279,8 +285,8 @@ Three sit in production and the rest in demo spaces. So the residue is debris, a
 cheaper and more honest than carrying 665 unreachable nodes forward.
 
 ```
-scripts/lib/deletion-plan.ts               what a run may remove, and why it refuses the rest
-scripts/delete-unrepairable-documents.ts   performs the deletion
+scripts/metadata-repair/lib/deletion-plan.ts             what a run may remove, and why it refuses the rest
+scripts/metadata-repair/delete-unrepairable-documents.ts performs the deletion
 ```
 
 The plan is a separate module from the script that acts on it so the rules can be read and tested
