@@ -31,8 +31,11 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const playbackComponentClass = classNames("playback-component show-control", activeNavTab,
                                             {"disabled" : disablePlayback});
 
+  // The control builds a model around the tree manager when it mounts, so switching to
+  // another document has to give it a new one rather than leave it holding the old.
   const playbackControls = historyManager?.historyStatus === HistoryStatus.HISTORY_LOADED
-    ? <PlaybackControlComponent treeManager={treeManager} />
+    ? <PlaybackControlComponent key={document?.key} treeManager={treeManager}
+          requestedHistoryId={props.requestedHistoryId} />
     : <div className="playback-controls loading">
         {historyManager ? historyManager.historyStatusString : "Uninitialized"}
       </div>;
