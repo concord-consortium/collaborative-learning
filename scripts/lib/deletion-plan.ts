@@ -14,6 +14,20 @@ import { isRtdbAddressable, resolveSpace } from "./rtdb-document-index";
  */
 export const kProtectedSpaces = ["authed/learn_concord_org"];
 
+/**
+ * The skip reasons this script will act on.
+ *
+ * The repair declines a document for two quite different kinds of reason. Three of them mean the
+ * document is unreachable debris: its curriculum position is unrecoverable, its content is gone, or
+ * its metadata node could not be read. The rest mean the repair did not know what it was looking at —
+ * `unsupportedType` covers 108 deprecated `section` documents it deliberately refused to guess about.
+ *
+ * Deleting for the second kind would turn a deferred decision into an irreversible one, so the
+ * deletable reasons are listed rather than inferred. A bucket added to the repair later is refused
+ * until someone decides it belongs here.
+ */
+export const kDeletableReasons = ["unresolvedCurriculum", "skippedNoContent", "nodeUnreadable"];
+
 /** A year. Documents newer than this are refused, whatever else is true of them. */
 export const kDefaultRetentionMs = 365 * 24 * 60 * 60 * 1000;
 
@@ -86,6 +100,10 @@ export function planDeletions(
 
     if (protectedSpaces.includes(record.space)) {
       refuse("protected space");
+      continue;
+    }
+    if (!kDeletableReasons.includes(record.reason)) {
+      refuse(`"${record.reason}" is not a reason this script deletes for`);
       continue;
     }
     // A document still in use is not debris, whatever the repair could not work out about it.

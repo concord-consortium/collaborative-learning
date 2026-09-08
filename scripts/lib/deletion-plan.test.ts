@@ -40,6 +40,36 @@ describe("planDeletions", () => {
     ]);
   });
 
+  it("refuses a reason that means a person should decide, not that the document is debris", () => {
+    // The repair skips a document for two quite different kinds of reason: "this is unreachable
+    // debris" and "I do not know what this is". `unsupportedType` is the second — 108 deprecated
+    // `section` documents, which the repair deliberately declined to guess about. Deleting them
+    // would turn a deferred decision into an irreversible one.
+    const { deletions, refused } = planDeletions([skipped({ reason: "unsupportedType" })], { now });
+
+    expect(deletions).toEqual([]);
+    expect(refused[0].reason).toMatch(/not a reason this script deletes for/i);
+  });
+
+  it("refuses a reason it has never heard of", () => {
+    // A bucket added to the repair later must not become deletable by default.
+    const { deletions, refused } = planDeletions([skipped({ reason: "somethingNew" })], { now });
+
+    expect(deletions).toEqual([]);
+    expect(refused).toHaveLength(1);
+  });
+
+  it("deletes for each of the three debris reasons", () => {
+    const records = [
+      skipped({ key: "a", reason: "unresolvedCurriculum" }),
+      skipped({ key: "b", reason: "skippedNoContent", hasContent: false }),
+      skipped({ key: "c", reason: "nodeUnreadable", hasMetadata: false })
+    ];
+    const { deletions } = planDeletions(records, { now });
+
+    expect(deletions.map(d => d.key)).toEqual(["a", "b", "c"]);
+  });
+
   it("refuses anything in a protected space", () => {
     // Production is never touched by this script. Three of its documents appear in the skip report,
     // and they are student work with no metadata rather than demo debris.
