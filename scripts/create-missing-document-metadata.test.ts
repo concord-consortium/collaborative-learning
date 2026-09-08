@@ -275,6 +275,42 @@ describe("createMissingDocumentMetadata", () => {
     expect(failure.counts.written).toBe(2);
   });
 
+  it("still creates a teacher's document, but flags that its network cannot be reconstructed", async () => {
+    // `network` is a snapshot of the creating teacher's primary network, and firestore.rules reads it
+    // back to let teachers in that network see each other's documents. Nothing in the realtime
+    // database records it, so a reconstructed row cannot carry it.
+    //
+    // The row is still written. Today the document has no row at all, so no teacher can reach it;
+    // a row with a null network is reachable by the teachers of its class, which is strictly more
+    // than none. What it does not restore is cross-network visibility, so those rows are reported.
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "problem", createdAt: 1, offeringId: "off-1" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index, {
+      rtdbRoot: kRoot,
+      readNode: nodeReaderFor(nodes),
+      resolveCurriculum: async () => ({ unit: "sas", investigation: "1", problem: "2" }),
+      isTeacherOwned: async () => true
+    }, { dryRun: false, log: silent });
+
+    expect(result.counts.created).toBe(1);
+    expect(result.counts.ownerIsTeacher).toBe(1);
+    expect(store.k1.network).toBeNull();
+  });
+
+  it("does not flag a student's document", async () => {
+    const { firestore } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "personal", createdAt: 1, title: "P" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes), isTeacherOwned: async () => false },
+      { dryRun: false, log: silent });
+
+    expect(result.counts.ownerIsTeacher).toBe(0);
+  });
+
   it("counts each bucket by document type, so an operator can see the distribution", async () => {
     // Thousands of writes are about to happen; per-space totals hide a type nobody expected. This is
     // the check that a type outside the offering allowlist really is class-contained.

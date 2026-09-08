@@ -54,14 +54,15 @@ export type CreateBucket =
   | "nodeUnreadable"     // the metadata node could not be read; nothing to build a row from
   | "unresolvedCurriculum" // offering-contained, but its unit/investigation/problem are unknown
   | "unreadableContent"   // the row was written, but without `tools`: its content would not parse
-  | "appearedDuringRun";  // a client created the row between the scan and the write; left alone
+  | "appearedDuringRun"   // a client created the row between the scan and the write; left alone
+  | "ownerIsTeacher";     // created, but with a null network that cannot be reconstructed
 
 export type ICreateCounts = Record<CreateBucket, number>;
 
 const emptyCounts = (): ICreateCounts => ({
   created: 0, written: 0, alreadyPresent: 0, skippedNoContent: 0,
   skippedUnaddressable: 0, nodeUnreadable: 0, unresolvedCurriculum: 0, unreadableContent: 0,
-  appearedDuringRun: 0
+  appearedDuringRun: 0, ownerIsTeacher: 0
 });
 
 /** Firestore's ALREADY_EXISTS, the one write failure that is a race rather than a fault. */
@@ -120,6 +121,18 @@ export interface ICreateMissingDeps {
    * portal API in the CLI; omitted, an unresolved offering is reported and skipped.
    */
   resolveCurriculum?: (offeringId: string) => Promise<ICurriculumPosition | undefined>;
+  /**
+   * Whether a document's owner teaches its class.
+   *
+   * `network` is a snapshot of the creating teacher's primary network, and firestore.rules reads it
+   * back so teachers in that network can see each other's documents. Nothing in the realtime database
+   * records it, so a reconstructed row cannot carry it and is written with `network: null`.
+   *
+   * The row is still created: with no row at all the document is reachable by nobody, and a row with a
+   * null network is reachable by the teachers of its class. Cross-network visibility is the part that
+   * is not restored, so those rows are counted and reported rather than passed off as complete.
+   */
+  isTeacherOwned?: (classHash: string, uid: string) => Promise<boolean>;
 }
 
 export interface ICreateMissingOptions {
@@ -140,7 +153,7 @@ export async function createMissingDocumentMetadata(
   firestore: Firestore,
   spacePath: string,
   index: Map<string, IDocumentHome>,
-  { rtdbRoot, readNode, network = null, resolveCurriculum }: ICreateMissingDeps,
+  { rtdbRoot, readNode, network = null, resolveCurriculum, isTeacherOwned }: ICreateMissingDeps,
   { dryRun = true, log = console.log, pageSize = 500, batchSize = kBatchSize }: ICreateMissingOptions = {}
 ): Promise<ICreateMissingResult> {
   const counts = emptyCounts();
@@ -334,6 +347,10 @@ export async function createMissingDocumentMetadata(
     if (tools) row.tools = tools;
     else count("unreadableContent", node.type);
 
+    if (isTeacherOwned && await isTeacherOwned(indexed.classHash, indexed.uid)) {
+      count("ownerIsTeacher", node.type);
+    }
+
     count("created", node.type);
     if (!dryRun) {
       pending.push({ path: `${spacePath}/${key}`, row, type: node.type });
@@ -354,7 +371,8 @@ export async function createMissingDocumentMetadata(
         `unaddressable ${counts.skippedUnaddressable}, unreadable ${counts.nodeUnreadable}, ` +
         `unresolved curriculum ${counts.unresolvedCurriculum}, ` +
         `unreadable content ${counts.unreadableContent}, ` +
-        `appeared during run ${counts.appearedDuringRun}`);
+        `appeared during run ${counts.appearedDuringRun}, ` +
+        `owner is a teacher ${counts.ownerIsTeacher}`);
     // Per type, so an unexpected distribution is visible before thousands of writes are applied.
     for (const [type, forType] of Object.entries(byType).sort((a, b) => b[1].created - a[1].created)) {
       const shown = Object.entries(forType).filter(([, n]) => n > 0).map(([b, n]) => `${b} ${n}`);
@@ -473,11 +491,24 @@ async function main() {
     // "m2s101", which learn.concord.org knows nothing about; an authed space's are portal ids, which
     // encode nothing. Either way the sibling lookup inside the pass is tried first.
     const portalBacked = space.label.startsWith("authed/");
+    // A class's teacher list, read once per class. The space path ends in "/documents", and the
+    // classes live alongside it.
+    const classTeachers = new Map<string, string[]>();
+    const isTeacherOwned = async (classHash: string, uid: string) => {
+      if (!classTeachers.has(classHash)) {
+        const classPath = `${space.spacePath.replace(/\/documents$/, "")}/classes/${classHash}`;
+        const snapshot = await firestore.doc(classPath).get();
+        classTeachers.set(classHash, (snapshot.data()?.teachers as string[]) ?? []);
+      }
+      return classTeachers.get(classHash)!.includes(uid);
+    };
+
     const { counts, skipped } = await createMissingDocumentMetadata(
       firestore, space.spacePath, index,
       {
         rtdbRoot: space.rtdbRoot, readNode: reader.readNode,
-        resolveCurriculum: portalBacked ? resolveFromPortal : async (id: string) => resolveFromOfferingId(id)
+        resolveCurriculum: portalBacked ? resolveFromPortal : async (id: string) => resolveFromOfferingId(id),
+        isTeacherOwned
       },
       { dryRun }
     );
