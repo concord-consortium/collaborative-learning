@@ -16,6 +16,11 @@ stats.json
 top-test/
 docs/drafts
 scripts/output
+
+# Throwaway investigation scripts and their output. These query production directly, and their
+# output holds real class hashes, portal user ids and document keys, so nothing matching this
+# belongs in a public repository.
+scripts/investigate-*
 src/public/ai/dataset*
 src/public/ai/screenshotDataset*
 
