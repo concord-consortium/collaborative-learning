@@ -112,7 +112,20 @@ export async function buildRtdbDocumentIndex(
     }
   });
 
+  // Keys proven to live in more than one place. Held separately and never re-indexed: the halves are
+  // read per user-class pair, so a third home can turn up after the key has been dropped, and
+  // re-adding it would put an ambiguous key back in front of a caller.
+  const ambiguous = new Map<string, string>();
+
   const record = (key: string, classHash: string, uid: string, half: "hasContent" | "hasMetadata") => {
+    const firstHome = ambiguous.get(key);
+    if (firstHome) {
+      const homes = [firstHome, `${classHash}/${uid}`];
+      if (homes[0] !== homes[1] && !duplicates.some(d => d.key === key && d.homes[1] === homes[1])) {
+        duplicates.push({ key, homes });
+      }
+      return;
+    }
     const existing = index.get(key);
     if (!existing) {
       index.set(key, { classHash, uid, hasContent: false, hasMetadata: false, [half]: true });
@@ -122,6 +135,11 @@ export async function buildRtdbDocumentIndex(
       const homes = [`${existing.classHash}/${existing.uid}`, `${classHash}/${uid}`];
       // One duplicate entry per offending home pair, however many halves disagree.
       if (!duplicates.some(d => d.key === key && d.homes[1] === homes[1])) duplicates.push({ key, homes });
+      // Drop it: "the class this document lives in" has no answer, and every caller of this index
+      // needs one. Reporting alone would leave the key available to whichever caller ignored the
+      // report.
+      ambiguous.set(key, homes[0]);
+      index.delete(key);
       return;
     }
     existing[half] = true;

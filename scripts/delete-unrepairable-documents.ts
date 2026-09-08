@@ -11,8 +11,11 @@
 // database. It NEVER touches `authed/learn_concord_org` — see kProtectedSpaces — and never touches
 // Firestore, because by definition these documents have no Firestore row.
 //
-// Every document is re-checked against the live database before anything is removed, so a stale skip
-// report cannot cause a wrong deletion.
+// Every document is re-checked against the live database before anything is removed. That check
+// catches a document that has since been repaired or already removed; it CANNOT tell that a document
+// has become repairable — say because an offering the run could not resolve is resolvable now. The
+// report is a claim about repairability at the moment it was written, so generate it from the same
+// code, against the same data, immediately before deleting. See "Order" in the design doc.
 //
 // Dry run (default, deletes nothing):  npx tsx scripts/delete-unrepairable-documents.ts
 // Apply (performs the deletions):      APPLY=1 npx tsx scripts/delete-unrepairable-documents.ts
@@ -31,21 +34,37 @@ import {
 async function main() {
   const reportPath = process.env.REPORT ?? getScriptRootFilePath(kSkipReportFile);
   const records: ISkippedRecord[] = JSON.parse(fs.readFileSync(reportPath, "utf8"));
-  const retentionMs = process.env.RETENTION_DAYS
-    ? Number(process.env.RETENTION_DAYS) * 24 * 60 * 60 * 1000
-    : kDefaultRetentionMs;
+  const retentionDays = process.env.RETENTION_DAYS ? Number(process.env.RETENTION_DAYS) : undefined;
+  if (retentionDays != null && (!Number.isFinite(retentionDays) || retentionDays < 0)) {
+    throw new Error(`RETENTION_DAYS must be a non-negative number, got "${process.env.RETENTION_DAYS}". ` +
+      `An unreadable value would disable the age guard rather than tighten it.`);
+  }
+  const retentionMs = retentionDays != null ? retentionDays * 24 * 60 * 60 * 1000 : kDefaultRetentionMs;
   const dryRun = process.env.APPLY !== "1";
 
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
   const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
 
-  console.log(`- Report: ${reportPath} (${records.length} skipped documents)`);
+  const reportAgeMs = Date.now() - fs.statSync(reportPath).mtimeMs;
+  const reportAgeHours = reportAgeMs / 3600000;
+
+  console.log(`- Report: ${reportPath} (${records.length} skipped documents, ` +
+    `${reportAgeHours.toFixed(1)}h old)`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);
   console.log(`- Realtime Database URL: ${databaseURL}`);
   console.log(`- Protected spaces: ${kProtectedSpaces.join(", ")}`);
   console.log(`- Retention: ${Math.round(retentionMs / 86400000)} days`);
   console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will delete"}\n`);
+
+  // A stale report is the one input that can cause a wrong deletion, and its age is the only signal
+  // available for that. Refuse rather than warn: this is the irreversible script.
+  const maxReportAgeHours = Number(process.env.MAX_REPORT_AGE_HOURS ?? 24);
+  if (!dryRun && reportAgeHours > maxReportAgeHours) {
+    throw new Error(`The skip report is ${reportAgeHours.toFixed(1)}h old, over the ${maxReportAgeHours}h ` +
+      `limit. Re-run create-missing-document-metadata.ts so the residue reflects the current data, ` +
+      `or raise MAX_REPORT_AGE_HOURS if you are certain nothing has changed.`);
+  }
 
   const plan = planDeletions(records, { now: Date.now(), retentionMs });
   console.log("plan", JSON.stringify(plan.summary, null, 2));
@@ -58,7 +77,12 @@ async function main() {
   const reader = createRtdbReader(databaseURL, () => (credential as any).getAccessToken());
 
   // Re-check against the live database rather than trusting the report. Between the dry run that
-  // produced it and this run, a document may have been repaired, edited, or already removed.
+  // produced it and this run, a document may have been repaired or already removed.
+  //
+  // This is a check on the document still being *unreachable*, not on it still being *unrepairable*.
+  // Nothing here re-runs the curriculum resolution, so a document that became resolvable since the
+  // report would still be deleted. Only a fresh report rules that out, which is why the deletion runs
+  // last and against a report generated after the repair.
   const stillDeletable = async (d: IPlannedDeletion): Promise<string | undefined> => {
     const firestoreDoc = await firestore.doc(`${d.space}/documents/${d.key}`).get();
     if (firestoreDoc.exists) return "it now has Firestore metadata";

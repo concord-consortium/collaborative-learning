@@ -2,8 +2,9 @@ import { repairDocumentContextId } from "./repair-document-context-id";
 import type { IDocumentHome } from "./lib/rtdb-document-index";
 
 /** A Firestore stand-in exposing only what the repair uses: paged reads and batched writes. */
-function fakeFirestore(docs: Record<string, any>) {
+function fakeFirestore(docs: Record<string, any>, failCommitAfter?: number) {
   const committed: Array<Record<string, any>> = [];
+  let commits = 0;
   let pendingWrites: Array<{ id: string; data: any }> = [];
   const store = { ...docs };
 
@@ -29,6 +30,8 @@ function fakeFirestore(docs: Record<string, any>) {
     batch: () => ({
       update: (ref: any, data: any) => { pendingWrites.push({ id: ref.id, data }); },
       commit: async () => {
+        commits++;
+        if (failCommitAfter != null && commits > failCommitAfter) throw new Error("commit exploded");
         committed.push(...pendingWrites.map(w => ({ [w.id]: w.data })));
         for (const w of pendingWrites) Object.assign(store[w.id], w.data);
         pendingWrites = [];
@@ -153,6 +156,24 @@ describe("repairDocumentContextId", () => {
     expect(result.counts.needsRepair).toBe(1);
     expect(store.doc1.context_id).toBe("trueClass");
   });
+  it("reports what landed even when a later commit fails", async () => {
+    // The rows an earlier batch rewrote are already live. Rejecting before the report is emitted
+    // leaves nobody able to say which ones.
+    const logged: string[] = [];
+    const existing = Object.fromEntries(Array.from({ length: 5 }, (_, i) =>
+      [`k${i}`, { key: `k${i}`, context_id: "wrong", uid: "u1", type: "problem" }]));
+    const { firestore } = fakeFirestore(existing, 1);
+    const index = new Map(Object.keys(existing).map(k =>
+      [k, { classHash: "c1", uid: "u1", hasContent: true, hasMetadata: true }] as const));
+
+    const failure = await repairDocumentContextId(firestore, "demo/S/documents", index as any,
+      { dryRun: false, log: (m: string) => logged.push(m), batchSize: 2 }).catch(err => err);
+
+    expect(failure).toBeInstanceOf(Error);
+    expect(logged.join("\n")).toMatch(/written 2/);
+    expect(failure.counts.written).toBe(2);
+  });
+
 });
 
 /** As above, but each commit can be made to reject, to prove the count follows what actually landed. */

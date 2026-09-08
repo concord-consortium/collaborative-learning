@@ -93,6 +93,7 @@ export async function repairDocumentContextId(
   };
 
   let lastDoc: any = null;
+  try {
   for (;;) {
     let query: any = (firestore.collection(spacePath) as any)
       .select("key", "context_id", "uid", "type").limit(pageSize);
@@ -134,10 +135,17 @@ export async function repairDocumentContextId(
   }
 
   await commit();
-
-  log(`${spacePath}: needs repair ${counts.needsRepair}, written ${counts.written}, ` +
-      `already correct ${counts.alreadyCorrect}, not in index ${counts.notInIndex}, ` +
-      `uid mismatches ${counts.uidMismatch}`);
+  } catch (err: any) {
+    // Rows this run rewrote are already live. Carry the counts out with the failure, and log them
+    // below, so a partial apply can be reconciled rather than guessed at.
+    err.counts = counts;
+    err.repairs = repairs;
+    throw err;
+  } finally {
+    log(`${spacePath}: needs repair ${counts.needsRepair}, written ${counts.written}, ` +
+        `already correct ${counts.alreadyCorrect}, not in index ${counts.notInIndex}, ` +
+        `uid mismatches ${counts.uidMismatch}`);
+  }
 
   return { counts, repairs, uidMismatches };
 }

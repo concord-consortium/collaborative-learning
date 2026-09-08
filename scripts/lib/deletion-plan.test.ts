@@ -54,6 +54,25 @@ describe("planDeletions", () => {
     expect(kProtectedSpaces).toContain("authed/learn_concord_org");
   });
 
+  it("refuses to plan anything when the retention window is not a usable number", () => {
+    // `RETENTION_DAYS=abc` yields NaN, and `now - createdAt < NaN` is false for every document, so
+    // the age guard would silently pass everything through. A deletion script must not treat an
+    // unreadable safety setting as "no limit".
+    expect(() => planDeletions([skipped()], { now, retentionMs: Number("abc") }))
+      .toThrow(/retention/i);
+  });
+
+  it("refuses to plan anything when the retention window is negative", () => {
+    expect(() => planDeletions([skipped()], { now, retentionMs: -1 })).toThrow(/retention/i);
+  });
+
+  it("accepts a zero retention window, which deliberately means no age limit", () => {
+    // Distinct from the invalid cases: someone can ask for this, and it reads as a decision.
+    const { deletions } = planDeletions([skipped({ createdAt: now })], { now, retentionMs: 0 });
+
+    expect(deletions).toHaveLength(1);
+  });
+
   it("refuses a document created within the retention window", () => {
     const { deletions, refused } = planDeletions(
       [skipped({ createdAt: Date.parse("2026-06-01") })], { now });

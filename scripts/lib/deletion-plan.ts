@@ -71,6 +71,13 @@ export function planDeletions(
   records: ISkippedRecord[],
   { now, protectedSpaces = kProtectedSpaces, retentionMs = kDefaultRetentionMs }: IPlanOptions
 ): IDeletionPlan {
+  // An unreadable window must stop the run, not widen it. `RETENTION_DAYS=abc` gives NaN, and every
+  // `now - createdAt < NaN` comparison is false, which would quietly disable the age guard entirely.
+  if (!Number.isFinite(retentionMs) || retentionMs < 0) {
+    throw new Error(`retention window must be a non-negative number of milliseconds, got ${retentionMs}. ` +
+      `Check RETENTION_DAYS.`);
+  }
+
   const deletions: IPlannedDeletion[] = [];
   const refused: IRefusal[] = [];
 

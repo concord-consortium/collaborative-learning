@@ -53,14 +53,19 @@ export type CreateBucket =
   | "skippedUnaddressable" // a key the realtime database cannot express in a path
   | "nodeUnreadable"     // the metadata node could not be read; nothing to build a row from
   | "unresolvedCurriculum" // offering-contained, but its unit/investigation/problem are unknown
-  | "unreadableContent";  // the row was written, but without `tools`: its content would not parse
+  | "unreadableContent"   // the row was written, but without `tools`: its content would not parse
+  | "appearedDuringRun";  // a client created the row between the scan and the write; left alone
 
 export type ICreateCounts = Record<CreateBucket, number>;
 
 const emptyCounts = (): ICreateCounts => ({
   created: 0, written: 0, alreadyPresent: 0, skippedNoContent: 0,
-  skippedUnaddressable: 0, nodeUnreadable: 0, unresolvedCurriculum: 0, unreadableContent: 0
+  skippedUnaddressable: 0, nodeUnreadable: 0, unresolvedCurriculum: 0, unreadableContent: 0,
+  appearedDuringRun: 0
 });
+
+/** Firestore's ALREADY_EXISTS, the one write failure that is a race rather than a fault. */
+const isAlreadyExists = (err: any) => err?.code === 6;
 
 export interface ICurriculumPosition {
   unit?: string | null;
@@ -89,6 +94,15 @@ export interface ISkippedDocument {
 
 export interface ICreateMissingResult {
   counts: ICreateCounts;
+  /**
+   * The same buckets split by document `type`.
+   *
+   * A per-space total hides the thing an operator most needs to see before thousands of writes: a type
+   * nobody expected. The offering/class split is decided by a four-type allowlist, so a `section` or a
+   * `group` appearing here is the signal that the allowlist needs revisiting rather than a default.
+   * Documents skipped before their node was read are counted under "(unknown)".
+   */
+  byType: Record<string, ICreateCounts>;
   /** Documents skipped, with the reason, so a run says what it declined rather than only what it did. */
   skipped: ISkippedDocument[];
 }
@@ -130,25 +144,44 @@ export async function createMissingDocumentMetadata(
   { dryRun = true, log = console.log, pageSize = 500, batchSize = kBatchSize }: ICreateMissingOptions = {}
 ): Promise<ICreateMissingResult> {
   const counts = emptyCounts();
+  const byType: Record<string, ICreateCounts> = {};
   const skipped: ISkippedDocument[] = [];
+
+  /** Credits a bucket to the run and to the document's type. */
+  const count = (bucket: CreateBucket, type: string | undefined, amount = 1) => {
+    counts[bucket] += amount;
+    const forType = byType[type || "(unknown)"] ??= emptyCounts();
+    forType[bucket] += amount;
+  };
+
+  /**
+   * All three parts or none.
+   *
+   * A sibling row is another document's stored answer, and rows exist carrying a unit with null
+   * investigation and problem. Writing one of those through would either store `undefined` — which the
+   * Firestore SDK rejects, failing the whole batch and not just the offending document — or record a
+   * curriculum position missing two of its three parts, which reads as a whole-unit document.
+   */
+  const isCompletePosition = (position: ICurriculumPosition | undefined): boolean =>
+    !!position?.unit && position.investigation != null && position.problem != null;
 
   // One pass over Firestore serves two purposes: the ids already present, so the run writes only what
   // is genuinely absent, and a curriculum position per offering, so most rows need no portal call.
-  const present = new Set<string>();
+  const present = new Map<string, string | undefined>();
   const curriculumByOffering = new Map<string, ICurriculumPosition>();
   let lastDoc: any = null;
   for (;;) {
     let query: any = (firestore.collection(spacePath) as any)
-      .select("offeringId", "unit", "investigation", "problem").limit(pageSize);
+      .select("type", "offeringId", "unit", "investigation", "problem").limit(pageSize);
     if (lastDoc) query = query.startAfter(lastDoc);
     const snapshot = await query.get();
     if (snapshot.empty) break;
     for (const doc of snapshot.docs) {
-      present.add(doc.id);
       const d = doc.data() ?? {};
-      if (d.offeringId && d.unit && !curriculumByOffering.has(d.offeringId)) {
-        curriculumByOffering.set(d.offeringId,
-          { unit: d.unit, investigation: d.investigation, problem: d.problem });
+      present.set(doc.id, d.type);
+      const sibling = { unit: d.unit, investigation: d.investigation, problem: d.problem };
+      if (d.offeringId && !curriculumByOffering.has(d.offeringId) && isCompletePosition(sibling)) {
+        curriculumByOffering.set(d.offeringId, sibling);
       }
     }
     lastDoc = snapshot.docs[snapshot.docs.length - 1];
@@ -161,7 +194,7 @@ export async function createMissingDocumentMetadata(
   const curriculumFor = async (offeringId: string): Promise<ICurriculumPosition | undefined> => {
     if (curriculumByOffering.has(offeringId)) return curriculumByOffering.get(offeringId);
     const resolved = resolveCurriculum ? await resolveCurriculum(offeringId) : undefined;
-    const usable = resolved?.unit ? resolved : undefined;
+    const usable = isCompletePosition(resolved) ? resolved : undefined;
     curriculumByOffering.set(offeringId, usable as ICurriculumPosition);
     return usable;
   };
@@ -180,33 +213,65 @@ export async function createMissingDocumentMetadata(
     return (entry as any)?.originDoc;
   };
 
-  let batch = firestore.batch();
-  let batched = 0;
+  /**
+   * Rows waiting to be written, held as data rather than queued onto a batch, so that a batch which
+   * fails can be retried one document at a time.
+   */
+  let pending: Array<{ path: string; row: Record<string, any>; type?: string }> = [];
+
+  /**
+   * Writes with `create`, never `set`.
+   *
+   * The scan that decides what is missing happens once per space, and the sweep then runs for
+   * minutes. A client or cloud function can create a row for one of these documents in that window —
+   * these are not all abandoned documents — and `set` would overwrite it, replacing a row written
+   * with the full creation context by one reconstructed from the realtime database. `create` refuses
+   * instead, and the loser of that race is the script.
+   *
+   * A batch is all-or-nothing, so one such conflict fails every write queued with it. That is why the
+   * retry is per document: the conflict is expected, and the other rows in the batch did nothing
+   * wrong.
+   */
   const commit = async () => {
-    if (!batched) return;
-    await batch.commit();
-    // Credited only now, so a crash understates rather than overstates what landed.
-    counts.written += batched;
-    batch = firestore.batch();
-    batched = 0;
+    if (!pending.length) return;
+    const batch = firestore.batch();
+    for (const p of pending) (batch as any).create(firestore.doc(p.path), p.row);
+    try {
+      await batch.commit();
+      // Credited only now, so a crash understates rather than overstates what landed.
+      for (const p of pending) count("written", p.type);
+    } catch (err) {
+      if (!isAlreadyExists(err)) throw err;
+      for (const p of pending) {
+        try {
+          await (firestore.doc(p.path) as any).create(p.row);
+          count("written", p.type);
+        } catch (retryErr) {
+          if (!isAlreadyExists(retryErr)) throw retryErr;
+          count("appearedDuringRun", p.type);
+        }
+      }
+    }
+    pending = [];
   };
 
   const skip = (key: string, indexed: IDocumentHome, reason: CreateBucket, node?: any) => {
-    counts[reason]++;
+    count(reason, node?.type);
     const entry: ISkippedDocument = {
       key, classHash: indexed.classHash, uid: indexed.uid,
       hasContent: indexed.hasContent, hasMetadata: indexed.hasMetadata, reason
     };
     if (node?.createdAt != null) entry.createdAt = node.createdAt;
-    if (reason === "unresolvedCurriculum") {
-      entry.type = node?.type;
-      entry.offeringId = node?.offeringId;
-    }
+    // Recorded for every reason, not just unresolved curriculum: the deletion script reads this report,
+    // and "what kind of documents am I about to remove" is the first question to ask of it.
+    if (node?.type != null) entry.type = node.type;
+    if (reason === "unresolvedCurriculum") entry.offeringId = node?.offeringId;
     skipped.push(entry);
   };
 
+  try {
   for (const [key, indexed] of index) {
-    if (present.has(key)) { counts.alreadyPresent++; continue; }
+    if (present.has(key)) { count("alreadyPresent", present.get(key)); continue; }
     if (!isRtdbAddressable(indexed.classHash, indexed.uid, key)) {
       skip(key, indexed, "skippedUnaddressable");
       continue;
@@ -267,24 +332,37 @@ export async function createMissingDocumentMetadata(
     // Absent rather than `[]` when the content would not parse: an empty array asserts the document
     // has no tiles, which is a different claim from "this run could not tell".
     if (tools) row.tools = tools;
-    else counts.unreadableContent++;
+    else count("unreadableContent", node.type);
 
-    counts.created++;
+    count("created", node.type);
     if (!dryRun) {
-      batch.set(firestore.doc(`${spacePath}/${key}`), row);
-      if (++batched >= batchSize) await commit();
+      pending.push({ path: `${spacePath}/${key}`, row, type: node.type });
+      if (pending.length >= batchSize) await commit();
     }
   }
 
   await commit();
+  } catch (err: any) {
+    // A partial apply is exactly when the counts matter, so carry them out with the failure as well
+    // as logging them below: a caller should not have to scrape stdout to reconcile.
+    err.counts = counts;
+    err.byType = byType;
+    throw err;
+  } finally {
+    log(`${spacePath}: created ${counts.created}, written ${counts.written}, ` +
+        `already present ${counts.alreadyPresent}, no content ${counts.skippedNoContent}, ` +
+        `unaddressable ${counts.skippedUnaddressable}, unreadable ${counts.nodeUnreadable}, ` +
+        `unresolved curriculum ${counts.unresolvedCurriculum}, ` +
+        `unreadable content ${counts.unreadableContent}, ` +
+        `appeared during run ${counts.appearedDuringRun}`);
+    // Per type, so an unexpected distribution is visible before thousands of writes are applied.
+    for (const [type, forType] of Object.entries(byType).sort((a, b) => b[1].created - a[1].created)) {
+      const shown = Object.entries(forType).filter(([, n]) => n > 0).map(([b, n]) => `${b} ${n}`);
+      if (shown.length) log(`    ${type}: ${shown.join(", ")}`);
+    }
+  }
 
-  log(`${spacePath}: created ${counts.created}, written ${counts.written}, ` +
-      `already present ${counts.alreadyPresent}, no content ${counts.skippedNoContent}, ` +
-      `unaddressable ${counts.skippedUnaddressable}, unreadable ${counts.nodeUnreadable}, ` +
-      `unresolved curriculum ${counts.unresolvedCurriculum}, ` +
-      `unreadable content ${counts.unreadableContent}`);
-
-  return { counts, skipped };
+  return { counts, byType, skipped };
 }
 
 async function main() {

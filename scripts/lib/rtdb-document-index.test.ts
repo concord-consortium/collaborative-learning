@@ -158,6 +158,43 @@ describe("buildRtdbDocumentIndex", () => {
     expect(duplicates).toEqual([{ key: "shared", homes: ["c1/u1", "c2/u2"] }]);
   });
 
+  it("keeps an ambiguous key out of the index, so no caller can act on the first home seen", async () => {
+    // Reporting it is not enough: the callers log "NOT repaired" and then hand this same map to the
+    // repair, which would use whichever home happened to be recorded first. 9 such keys exist in
+    // authed/learn_staging_concord_org.
+    const tree = treeWith({
+      c1: { u1: { documents: ["shared"], documentMetadata: ["shared"] } },
+      c2: { u2: { documents: ["shared"], documentMetadata: ["shared"] } }
+    });
+    const { index } = await buildRtdbDocumentIndex(kRoot, readerFor(tree));
+
+    expect(index.has("shared")).toBe(false);
+  });
+
+  it("keeps an ambiguous key out however late the second home turns up", async () => {
+    // The halves are read per user-class pair, so a conflict can surface after the key has already
+    // been recorded once and again afterwards. Once ambiguous, always ambiguous.
+    const tree = treeWith({
+      c1: { u1: { documents: ["shared"], documentMetadata: [] } },
+      c2: { u2: { documents: ["shared"], documentMetadata: ["shared"] } },
+      c3: { u3: { documents: [], documentMetadata: ["shared"] } }
+    });
+    const { index, duplicates } = await buildRtdbDocumentIndex(kRoot, readerFor(tree));
+
+    expect(index.has("shared")).toBe(false);
+    expect(duplicates.length).toBeGreaterThan(0);
+  });
+
+  it("keeps the unambiguous keys when another key in the same space is ambiguous", async () => {
+    const tree = treeWith({
+      c1: { u1: { documents: ["shared", "mine"], documentMetadata: ["shared", "mine"] } },
+      c2: { u2: { documents: ["shared"], documentMetadata: ["shared"] } }
+    });
+    const { index } = await buildRtdbDocumentIndex(kRoot, readerFor(tree));
+
+    expect([...index.keys()]).toEqual(["mine"]);
+  });
+
   it("returns an empty index for a space with no classes", async () => {
     const { index, classes, duplicates } = await buildRtdbDocumentIndex(kRoot, readerFor({}));
 

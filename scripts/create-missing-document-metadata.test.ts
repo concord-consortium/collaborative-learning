@@ -1,11 +1,29 @@
 import { createMissingDocumentMetadata } from "./create-missing-document-metadata";
 import type { IDocumentHome } from "./lib/rtdb-document-index";
 
-/** A Firestore stand-in exposing only what the creation pass uses: a paged id read and batched sets. */
-function fakeFirestore(existing: Record<string, any> = {}) {
+/** Mimics Firestore's ALREADY_EXISTS, whose numeric gRPC code the script branches on. */
+class AlreadyExists extends Error {
+  code = 6;
+  constructor(id: string) { super(`document ${id} already exists`); }
+}
+
+/**
+ * A Firestore stand-in exposing only what the creation pass uses: a paged read and batched creates.
+ *
+ * `appearDuringRun` seeds rows that are absent from the initial scan but present by the time the batch
+ * commits, which is the race a real sweep is exposed to: it takes minutes, and a client can create a
+ * row for one of these documents at any point during it.
+ */
+function fakeFirestore(existing: Record<string, any> = {}, appearDuringRun: string[] = [],
+                       failCommitAfter?: number) {
   const store: Record<string, any> = { ...existing };
-  let pending: Array<{ id: string; data: any }> = [];
+  const appearing = new Set(appearDuringRun);
   let commits = 0;
+
+  const createOne = (id: string, data: any) => {
+    if (id in store || appearing.has(id)) throw new AlreadyExists(id);
+    store[id] = data;
+  };
 
   const firestore: any = {
     collection: (path: string) => ({
@@ -23,15 +41,26 @@ function fakeFirestore(existing: Record<string, any> = {}) {
         }
       })
     }),
-    doc: (path: string) => ({ path, id: path.split("/").pop() }),
-    batch: () => ({
-      set: (ref: any, data: any) => { pending.push({ id: ref.id, data }); },
-      commit: async () => {
-        commits++;
-        for (const w of pending) store[w.id] = w.data;
-        pending = [];
-      }
-    })
+    doc: (path: string) => ({
+      path,
+      id: path.split("/").pop(),
+      create: async (data: any) => createOne(path.split("/").pop()!, data)
+    }),
+    batch: () => {
+      let queued: Array<{ id: string; data: any }> = [];
+      return {
+        create: (ref: any, data: any) => { queued.push({ id: ref.id, data }); },
+        commit: async () => {
+          commits++;
+          // A hard failure — not a race — on the nth commit, to exercise the error path.
+          if (failCommitAfter != null && commits > failCommitAfter) throw new Error("commit exploded");
+          // All or nothing, as a real batch is: one conflicting document fails every write in it.
+          for (const w of queued) if (w.id in store || appearing.has(w.id)) throw new AlreadyExists(w.id);
+          for (const w of queued) store[w.id] = w.data;
+          queued = [];
+        }
+      };
+    }
   };
   return { firestore, store, commitCount: () => commits };
 }
@@ -131,6 +160,39 @@ describe("createMissingDocumentMetadata", () => {
     expect("tools" in store.k1).toBe(false);
   });
 
+  it("skips an offering-contained document whose sibling supplies only a unit", async () => {
+    // A sibling row is trusted wholesale, but rows exist with a unit and no investigation or problem
+    // — 4 personal rows in production carry null ones. Writing those through would either store
+    // undefined, which the Firestore SDK rejects and which would fail the whole batch, or record a
+    // curriculum position that is missing two of its three parts.
+    const { firestore, store } = fakeFirestore({
+      sibling: { offeringId: "off-1", unit: "sas", investigation: null, problem: null }
+    });
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "problem", createdAt: 1, offeringId: "off-1" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.unresolvedCurriculum).toBe(1);
+    expect(store.k1).toBeUndefined();
+  });
+
+  it("skips an offering-contained document whose resolver answers with a partial position", async () => {
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "problem", createdAt: 1, offeringId: "off-1" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index, {
+      rtdbRoot: kRoot,
+      readNode: nodeReaderFor(nodes),
+      resolveCurriculum: async () => ({ unit: "sas", investigation: "1" })
+    }, { dryRun: false, log: silent });
+
+    expect(result.counts.unresolvedCurriculum).toBe(1);
+    expect(store.k1).toBeUndefined();
+  });
+
   it("copies visibility from the realtime-database node", async () => {
     // The client keeps this field in step through useDocumentSyncToFirebase, but only from the moment
     // a row exists: its updater finds rows by query, so a toggle made while the row was missing
@@ -155,6 +217,82 @@ describe("createMissingDocumentMetadata", () => {
       { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
 
     expect("visibility" in store.k1).toBe(false);
+  });
+
+  it("leaves a row alone when a client created it after the scan", async () => {
+    // The scan happens once per space and the sweep then runs for minutes. These are not all
+    // abandoned documents — production was still accumulating them in 2026 — so a client can create
+    // the real row mid-run. Overwriting it would replace a row written with the full creation context
+    // by one reconstructed from the realtime database.
+    const { firestore, store } = fakeFirestore({}, ["k1"]);
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "personal", createdAt: 1, title: "Mine" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.appearedDuringRun).toBe(1);
+    expect(result.counts.written).toBe(0);
+    expect(store.k1).toBeUndefined();
+  });
+
+  it("still writes the rest of a batch when one document lost the race", async () => {
+    // A batch is all-or-nothing, so without a per-document retry one conflicting row would take the
+    // other 399 writes down with it.
+    const { firestore, store } = fakeFirestore({}, ["k2"]);
+    const index = new Map([["k1", home()], ["k2", home()], ["k3", home()]]);
+    const nodes = {
+      k1: { type: "personal", createdAt: 1, title: "A" },
+      k2: { type: "personal", createdAt: 1, title: "B" },
+      k3: { type: "personal", createdAt: 1, title: "C" }
+    };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.counts.written).toBe(2);
+    expect(result.counts.appearedDuringRun).toBe(1);
+    expect(Object.keys(store).sort()).toEqual(["k1", "k3"]);
+  });
+
+  it("reports what landed even when a later commit fails", async () => {
+    // A partial apply is exactly when the counts matter: without them nobody can tell which rows to
+    // reconcile. Rejecting before the report is emitted loses that information.
+    const logged: string[] = [];
+    const { firestore } = fakeFirestore({}, [], 1);
+    const index = new Map(
+      Array.from({ length: 5 }, (_, i) => [`k${i}`, home()] as [string, IDocumentHome]));
+    const nodes = Object.fromEntries(
+      Array.from({ length: 5 }, (_, i) => [`k${i}`, { type: "personal", createdAt: 1, title: `t${i}` }]));
+
+    const failure = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) },
+      { dryRun: false, log: (m) => logged.push(m), batchSize: 2 }).catch(err => err);
+
+    expect(failure).toBeInstanceOf(Error);
+    expect(logged.join("\n")).toMatch(/written 2/);
+    // Carried on the error too, so a caller can reconcile without scraping the log.
+    expect(failure.counts.written).toBe(2);
+  });
+
+  it("counts each bucket by document type, so an operator can see the distribution", async () => {
+    // Thousands of writes are about to happen; per-space totals hide a type nobody expected. This is
+    // the check that a type outside the offering allowlist really is class-contained.
+    const { firestore } = fakeFirestore();
+    const index = new Map([
+      ["k1", home()], ["k2", home()], ["k3", home({ hasContent: false })]
+    ]);
+    const nodes = {
+      k1: { type: "personal", createdAt: 1, title: "P" },
+      k2: { type: "learningLog", createdAt: 1, title: "L" },
+      k3: { type: "personal", createdAt: 1, title: "Gone" }
+    };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(result.byType.personal).toMatchObject({ created: 1, skippedNoContent: 1 });
+    expect(result.byType.learningLog).toMatchObject({ created: 1 });
   });
 
   it("never creates a row for a document whose content is gone", async () => {
@@ -519,8 +657,10 @@ describe("createMissingDocumentMetadata skip reporting", () => {
       { key: "k1", classHash: "c1", uid: "u1", hasContent: true, hasMetadata: true,
         reason: "unresolvedCurriculum", createdAt: 1600000000000, type: "problem",
         offeringId: "nosuch1" },
+      // `type` is recorded for every reason, not only unresolved curriculum: the deletion script
+      // reads this report, and what kind of documents it is about to remove is the first question.
       { key: "k2", classHash: "c1", uid: "u1", hasContent: false, hasMetadata: true,
-        reason: "skippedNoContent", createdAt: 1700000000000 }
+        reason: "skippedNoContent", createdAt: 1700000000000, type: "personal" }
     ]);
   });
 });
