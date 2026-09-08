@@ -141,33 +141,32 @@ context('History Playback', () => {
       tableToolTile.getTableCell().eq(2).should('contain', '2');
     });
 
-    cy.log('verify undo action in primary document and verify playback of history');
+    cy.log('verify a playback view at the end follows an undo made in the primary document');
     clueCanvas.getUndoTool().click();
+    // The playback view is at the end of the history, so it follows the entry the undo
+    // recorded rather than being left one stop behind it.
     tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
-      tableToolTile.getTableCell().eq(2).should('contain', '2');
+      tableToolTile.getTableCell().eq(2).should('not.contain', '2');
     });
     tableToolTile.getTableTile().within(() => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
       tableToolTile.getTableCell().eq(2).should('not.contain', '2');
     });
-    cy.get('[data-testid="playback-play-button"]').click();
-    cy.wait(2000);
-    tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
-      tableToolTile.getTableCell().eq(1).should('contain', '1');
-      tableToolTile.getTableCell().eq(2).should('not.contain', '2');
-    });
+
+    cy.log('verify a playback view earlier in the history stays put, and can play up to a new entry');
+    moveSliderTo(10);
+    cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .table-tool').should('not.exist');
     clueCanvas.getRedoTool().click();
+    // The primary document has the row back...
     tableToolTile.getTableTile().within(() => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
       tableToolTile.getTableCell().eq(2).should('contain', '2');
     });
-    tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
-      tableToolTile.getTableCell().eq(1).should('contain', '1');
-      tableToolTile.getTableCell().eq(2).should('not.contain', '2');
-    });
+    // ...while the playback view, no longer at the end, stays on the stop it was left on.
+    cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .table-tool').should('not.exist');
+    // Playing walks it forward a stop at a time until it reaches the entry the redo recorded.
     cy.get('[data-testid="playback-play-button"]').click();
-    cy.wait(2000);
     tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
       tableToolTile.getTableCell().eq(2).should('contain', '2');
