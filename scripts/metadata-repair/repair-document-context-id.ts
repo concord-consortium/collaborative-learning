@@ -3,7 +3,7 @@
 // Repairs `context_id` on Firestore document metadata whose stored class disagrees with the class the
 // document actually lives in.
 //
-// A networked teacher commenting on another teacher's document used to mint a metadata row stamped
+// A networked teacher commenting on another teacher's document used to mint a metadata document stamped
 // with the commenter's class. Such a document then appears in the wrong teacher's Sort Work and throws
 // when opened, because the realtime-database path built from it never existed.
 //
@@ -67,9 +67,9 @@ export interface IRepairOptions {
  * Compare every Firestore metadata document in one space against the realtime-database index and
  * rewrite `context_id` where they disagree.
  *
- * Documents whose key is absent from the index are left alone: they are Firestore-native rows such as
- * multi-class teacher supports, which never had a realtime-database node, so there is no home to
- * compare against and nothing to repair.
+ * Documents whose key is absent from the index are left alone: they are Firestore-native metadata
+ * documents such as multi-class teacher supports, which never had a realtime-database node, so there
+ * is no home to compare against and nothing to repair.
  */
 export async function repairDocumentContextId(
   firestore: Firestore,
@@ -138,7 +138,7 @@ export async function repairDocumentContextId(
 
   await commit();
   } catch (err: any) {
-    // Rows this run rewrote are already live. Carry the counts out with the failure, and log them
+    // Metadata documents this run rewrote are already live. Carry the counts out with the failure, and log them
     // below, so a partial apply can be reconciled rather than guessed at.
     err.counts = counts;
     err.repairs = repairs;

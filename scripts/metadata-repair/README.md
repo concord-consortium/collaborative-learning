@@ -6,15 +6,15 @@ modules they share. Written for CLUE-643.
 Two defects motivated them, both now fixed in the client, so these are a repair rather than something
 that runs on a schedule:
 
-1. **`context_id` names the wrong class** on some metadata rows — 35 in production.
-2. **The metadata row is missing entirely** for realtime-database documents that have one — around
-   5,600 across all real spaces. A document with no row is invisible to Sort Work, to the class
-   dashboard, and to every other Firestore-driven view.
+1. **`context_id` names the wrong class** on some metadata documents — 35 in production.
+2. **The metadata document is missing entirely** for realtime-database documents that have one —
+   around 5,600 across all real spaces. A document without one is invisible to Sort Work, to the
+   class dashboard, and to every other Firestore-driven view.
 
 | script | what it does | writes to |
 |---|---|---|
 | `repair-document-context-id.ts` | rewrites `context_id` to the class the document actually lives in | Firestore |
-| `create-missing-document-metadata.ts` | creates the missing metadata rows | Firestore |
+| `create-missing-document-metadata.ts` | creates the missing metadata documents | Firestore |
 | `delete-unrepairable-documents.ts` | removes the residue the repair cannot fix | realtime database |
 
 ## Before you start
@@ -42,7 +42,7 @@ This matters, and it is not the order the scripts are listed in.
 **1 and 2 are independent** and may run in either order.
 
 **Both must run before `backfill-document-offering-id.ts`**, which finds a document's realtime-database
-node through its `context_id` — a wrong one makes the document look unrecoverable, and a row that does
+node through its `context_id` — a wrong one makes the document look unrecoverable, and one that does
 not exist yet cannot be scanned at all.
 
 **The deletion runs last, against a report regenerated after the repair.** Not because the deletion is
@@ -62,7 +62,7 @@ Every script is **dry run by default** and prints its mode at startup. `APPLY=1`
 npx tsx scripts/metadata-repair/repair-document-context-id.ts
 APPLY=1 npx tsx scripts/metadata-repair/repair-document-context-id.ts
 
-# 2. Create the missing rows. Takes about 20 minutes over every space.
+# 2. Create the missing metadata documents. Takes about 20 minutes over every space.
 npx tsx scripts/metadata-repair/create-missing-document-metadata.ts
 APPLY=1 npx tsx scripts/metadata-repair/create-missing-document-metadata.ts
 
@@ -100,10 +100,10 @@ Counts to read carefully:
 
 - **`written`** is incremented only after a commit resolves, so it understates rather than overstates
   a crashed run. If a run dies, both repairs still print their counts and attach them to the error.
-- **`appearedDuringRun`** means a client created the row while the sweep was running. Those are left
-  alone, not overwritten.
-- **`ownerIsTeacher`** counts rows created for a teacher's document. Their `network` cannot be
-  reconstructed and is written as null, so cross-network visibility is not restored for them.
+- **`appearedDuringRun`** means a client created the metadata document while the sweep was running.
+  Those are left alone, not overwritten.
+- **`ownerIsTeacher`** counts metadata documents created for a teacher's document. Their `network`
+  cannot be reconstructed and is written as null, so cross-network visibility is not restored.
 - **`unsupportedType`** is a refusal, not a failure. The document's type is on neither container
   allowlist, so which axis it belongs on is unknown.
 
@@ -114,10 +114,10 @@ be turned off.
 
 - **`qa` and `dev` spaces.** `delete-qa-user-data.ts` purges their realtime-database side while leaving
   Firestore metadata behind, so every document there reads as damaged by construction.
-- **A metadata node whose content is gone.** A row would promote an invisible orphan into a Sort Work
-  entry that throws when opened.
-- **A key absent from the realtime database.** Firestore-native rows; a `documentMetadata` lookup on
-  them is meaningless.
+- **A metadata node whose content is gone.** Creating one would promote an invisible orphan into a
+  Sort Work entry that throws when opened.
+- **A key absent from the realtime database.** These are Firestore-native metadata documents; a
+  `documentMetadata` lookup on them is meaningless.
 - **A key that appears under two homes.** "The class this document lives in" has no answer, so the key
   is dropped from the index rather than resolved to whichever home was seen first.
 - **A key containing `.`, `#`, `$`, `[`, `]` or `/`.** These cannot appear in a realtime-database path,

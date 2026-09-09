@@ -45,7 +45,7 @@ describe("selectSpaces", () => {
 
   it("refuses qa even when it is named explicitly", () => {
     // Naming a space should not be able to override the refusal: qa's realtime side is purged, so a
-    // creation run there would invent thousands of rows for content that no longer exists.
+    // creation run there would invent thousands of metadata documents for content that no longer exists.
     const result = selectSpaces(paths, ["qa/someRoot"]);
 
     expect(result.selected).toEqual([]);

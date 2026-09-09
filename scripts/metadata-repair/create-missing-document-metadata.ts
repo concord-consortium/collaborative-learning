@@ -1,8 +1,8 @@
 #!/usr/bin/node
 
-// Creates the Firestore metadata rows for realtime-database documents that have none.
+// Creates the Firestore metadata documents for realtime-database documents that have none.
 //
-// Until 2025-06-24 the client created these rows with a fire-and-forget cloud-function call, so a
+// Until 2025-06-24 the client created these with a fire-and-forget cloud-function call, so a
 // document whose page navigated away before the call completed never got one. 6,240 such documents
 // remain across all real spaces, of which 4,996 are in demo spaces. The cause is fixed (CLUE-647);
 // this is a one-time repair.
@@ -23,7 +23,7 @@ const kBatchSize = 400;
 /**
  * The types kept in an offering rather than in the class. Each needs `offeringId` plus a curriculum
  * position; `isInClassUnitContainer` reads the *absence* of `offeringId` as "class-contained", so a
- * row written without one would place the document on the wrong container axis.
+ * metadata document written without one would place the document on the wrong container axis.
  *
  * The stored value for a problem publication is "publication" — `ProblemPublication` in
  * document-types.ts is the constant's name, not its value.
@@ -38,9 +38,9 @@ export const kOfferingContainedTypes = ["problem", "planning", "publication", "s
  * wrong container axis silently:
  *
  * - `section` is deprecated and offering-contained — its schema requires an `offeringId`
- *   (`DBSectionDocumentMetadataDEPRECATED` in src/lib/db-types.ts). 108 of them have no Firestore row,
- *   and no `section` row exists anywhere in Firestore, so whether they should exist at all is a
- *   question for a person.
+ *   (`DBSectionDocumentMetadataDEPRECATED` in src/lib/db-types.ts). 108 of them have no Firestore
+ *   metadata document, and no `section` metadata document exists anywhere in Firestore, so whether
+ *   they should exist at all is a question for a person.
  * - `group` (and the `axes` type it is being renamed to) keeps its scope, owner, kind and title only
  *   in Firestore; the realtime database has base metadata and nothing else to rebuild from.
  * - `drivingQuestionBoard` and anything added later would otherwise be guessed at.
@@ -66,15 +66,15 @@ const kOriginDocLists: Record<string, (classHash: string) => string> = {
 };
 
 export type CreateBucket =
-  | "created"            // a row this run would write, or did
+  | "created"            // a metadata document this run would write, or did
   | "written"            // credited only once the commit resolved
-  | "alreadyPresent"     // Firestore already has a row for this key
-  | "skippedNoContent"   // metadata without content: creating a row would surface a broken document
+  | "alreadyPresent"     // Firestore already has a metadata document for this key
+  | "skippedNoContent"   // metadata without content: creating one would surface a broken document
   | "skippedUnaddressable" // a key the realtime database cannot express in a path
-  | "nodeUnreadable"     // the metadata node could not be read; nothing to build a row from
+  | "nodeUnreadable"     // the metadata node could not be read; nothing to build from
   | "unresolvedCurriculum" // offering-contained, but its unit/investigation/problem are unknown
-  | "unreadableContent"   // the row was written, but without `tools`: its content would not parse
-  | "appearedDuringRun"   // a client created the row between the scan and the write; left alone
+  | "unreadableContent"   // written, but without `tools`: its content would not parse
+  | "appearedDuringRun"   // a client created it between the scan and the write; left alone
   | "ownerIsTeacher"      // created, but with a null network that cannot be reconstructed
   | "unsupportedType";    // a type on neither allowlist: which container it belongs to is unknown
 
@@ -135,7 +135,7 @@ export type ReadNode = (path: string) => Promise<any>;
 export interface ICreateMissingDeps {
   rtdbRoot: string;
   readNode: ReadNode;
-  /** Stored on every row this run creates, matching what the client stamps at creation. */
+  /** Stored on every metadata document this run creates, matching what the client stamps at creation. */
   network?: string | null;
   /**
    * Last resort for an offering whose curriculum position no existing document reveals. Backed by the
@@ -147,11 +147,13 @@ export interface ICreateMissingDeps {
    *
    * `network` is a snapshot of the creating teacher's primary network, and firestore.rules reads it
    * back so teachers in that network can see each other's documents. Nothing in the realtime database
-   * records it, so a reconstructed row cannot carry it and is written with `network: null`.
+   * records it, so a reconstructed metadata document cannot carry it and is written with
+   * `network: null`.
    *
-   * The row is still created: with no row at all the document is reachable by nobody, and a row with a
-   * null network is reachable by the teachers of its class. Cross-network visibility is the part that
-   * is not restored, so those rows are counted and reported rather than passed off as complete.
+   * The metadata document is still created: without one the document is reachable by nobody, while
+   * one with a null network is reachable by the teachers of its class. Cross-network visibility is
+   * the part that is not restored, so those are counted and reported rather than passed off as
+   * complete.
    */
   isTeacherOwned?: (classHash: string, uid: string) => Promise<boolean>;
 }
@@ -164,11 +166,11 @@ export interface ICreateMissingOptions {
 }
 
 /**
- * Create a Firestore metadata row for every indexed document that lacks one.
+ * Create a Firestore metadata document for every indexed document that lacks one.
  *
- * Only documents whose content still exists get a row. A document with metadata but no content is
- * already unreachable; giving it a Firestore row would promote it into Sort Work, where opening it
- * throws. That skip is the reason the index reads both realtime-database halves.
+ * Only documents whose content still exists get one. A document with metadata but no content is
+ * already unreachable; giving it a Firestore metadata document would promote it into Sort Work,
+ * where opening it throws. That skip is the reason the index reads both realtime-database halves.
  */
 export async function createMissingDocumentMetadata(
   firestore: Firestore,
@@ -191,16 +193,17 @@ export async function createMissingDocumentMetadata(
   /**
    * All three parts or none.
    *
-   * A sibling row is another document's stored answer, and rows exist carrying a unit with null
-   * investigation and problem. Writing one of those through would either store `undefined` — which the
-   * Firestore SDK rejects, failing the whole batch and not just the offending document — or record a
-   * curriculum position missing two of its three parts, which reads as a whole-unit document.
+   * A sibling's metadata document is another document's stored answer, and metadata documents exist
+   * carrying a unit with null investigation and problem. Writing one of those through would either
+   * store `undefined` — which the Firestore SDK rejects, failing the whole batch and not just the
+   * offending document — or record a curriculum position missing two of its three parts, which reads
+   * as a whole-unit document.
    */
   const isCompletePosition = (position: ICurriculumPosition | undefined): boolean =>
     !!position?.unit && position.investigation != null && position.problem != null;
 
   // One pass over Firestore serves two purposes: the ids already present, so the run writes only what
-  // is genuinely absent, and a curriculum position per offering, so most rows need no portal call.
+  // is genuinely absent, and a curriculum position per offering, so most of them need no portal call.
   const present = new Map<string, string | undefined>();
   const curriculumByOffering = new Map<string, ICurriculumPosition>();
   let lastDoc: any = null;
@@ -248,28 +251,27 @@ export async function createMissingDocumentMetadata(
   };
 
   /**
-   * Rows waiting to be written, held as data rather than queued onto a batch, so that a batch which
-   * fails can be retried one document at a time.
+   * Metadata documents waiting to be written, held as data rather than queued onto a batch, so that
+   * a batch which fails can be retried one document at a time.
    */
-  let pending: Array<{ path: string; row: Record<string, any>; type?: string }> = [];
+  let pending: Array<{ path: string; metadata: Record<string, any>; type?: string }> = [];
 
   /**
    * Writes with `create`, never `set`.
    *
    * The scan that decides what is missing happens once per space, and the sweep then runs for
-   * minutes. A client or cloud function can create a row for one of these documents in that window —
-   * these are not all abandoned documents — and `set` would overwrite it, replacing a row written
-   * with the full creation context by one reconstructed from the realtime database. `create` refuses
+   * minutes. A client or cloud function can create a metadata document for one of these documents in
+   * that window — these are not all abandoned documents — and `set` would overwrite it, replacing one
+   * written with the full creation context by one reconstructed from the realtime database. `create` refuses
    * instead, and the loser of that race is the script.
    *
    * A batch is all-or-nothing, so one such conflict fails every write queued with it. That is why the
-   * retry is per document: the conflict is expected, and the other rows in the batch did nothing
-   * wrong.
+   * retry is per document: the conflict is expected, and the rest of the batch did nothing wrong.
    */
   const commit = async () => {
     if (!pending.length) return;
     const batch = firestore.batch();
-    for (const p of pending) (batch as any).create(firestore.doc(p.path), p.row);
+    for (const p of pending) (batch as any).create(firestore.doc(p.path), p.metadata);
     try {
       await batch.commit();
       // Credited only now, so a crash understates rather than overstates what landed.
@@ -278,7 +280,7 @@ export async function createMissingDocumentMetadata(
       if (!isAlreadyExists(err)) throw err;
       for (const p of pending) {
         try {
-          await (firestore.doc(p.path) as any).create(p.row);
+          await (firestore.doc(p.path) as any).create(p.metadata);
           count("written", p.type);
         } catch (retryErr) {
           if (!isAlreadyExists(retryErr)) throw retryErr;
@@ -324,7 +326,7 @@ export async function createMissingDocumentMetadata(
       continue;
     }
 
-    const row: Record<string, any> = {
+    const metadata: Record<string, any> = {
       key,
       type: node.type,
       uid: indexed.uid,
@@ -334,34 +336,35 @@ export async function createMissingDocumentMetadata(
       properties: {}
     };
     // Stamped only when present, so Firestore never stores `title: undefined`.
-    if (node.title != null) row.title = node.title;
-    // The client keeps this in step from the moment a row exists — useDocumentSyncToFirebase finds
-    // rows by query, so every toggle made while the row was missing updated nothing. Taking the node's
-    // value makes the row right now rather than at the owner's next toggle, which for a document this
-    // old may never come.
-    if (node.visibility != null) row.visibility = node.visibility;
+    if (node.title != null) metadata.title = node.title;
+    // The client keeps this in step from the moment a metadata document exists —
+    // useDocumentSyncToFirebase finds them by query, so every toggle made while it was missing
+    // updated nothing. Taking the node's value makes the metadata right now rather than at the
+    // owner's next toggle, which for a document this old may never come.
+    if (node.visibility != null) metadata.visibility = node.visibility;
 
     const originDoc = await originDocFor(node.type, indexed.classHash, key);
-    if (originDoc != null) row.originDoc = originDoc;
+    if (originDoc != null) metadata.originDoc = originDoc;
 
     if (offeringContained) {
       const position = node.offeringId ? await curriculumFor(node.offeringId) : undefined;
       if (!position) {
-        // Writing the row without these would place the document on the wrong container axis and
-        // hand it to the offeringId backfill as new work. Report it and leave it alone.
+        // Writing it without these would place the document on the wrong container axis and hand it
+        // to the offeringId backfill as new work. Report it and leave it alone.
         skip(key, indexed, "unresolvedCurriculum", node);
         continue;
       }
-      row.offeringId = node.offeringId;
-      row.unit = position.unit;
-      row.investigation = position.investigation;
-      row.problem = position.problem;
+      metadata.offeringId = node.offeringId;
+      metadata.unit = position.unit;
+      metadata.investigation = position.investigation;
+      metadata.problem = position.problem;
     } else {
       // Written as an explicit null, not left out. Sort Work finds class-contained documents with
       // `where("unit", "==", null)` (sorted-documents.ts), and Firestore cannot match a field that is
-      // absent — a row without it is invisible under every filter but "All". This is what the client's
-      // "class" container stamps, and all 19,649 class-contained rows in production carry it.
-      row.unit = null;
+      // absent — a metadata document without it is invisible under every filter but "All". This is
+      // what the client's "class" container stamps, and all 19,649 class-contained metadata
+      // documents in production carry it.
+      metadata.unit = null;
     }
 
     // Read last, so the 573 documents skipped above never pull a content node. Content is the largest
@@ -371,7 +374,7 @@ export async function createMissingDocumentMetadata(
     const tools = toolsFromDocumentNode(await readNode(contentPath));
     // Absent rather than `[]` when the content would not parse: an empty array asserts the document
     // has no tiles, which is a different claim from "this run could not tell".
-    if (tools) row.tools = tools;
+    if (tools) metadata.tools = tools;
     else count("unreadableContent", node.type);
 
     if (isTeacherOwned && await isTeacherOwned(indexed.classHash, indexed.uid)) {
@@ -380,7 +383,7 @@ export async function createMissingDocumentMetadata(
 
     count("created", node.type);
     if (!dryRun) {
-      pending.push({ path: `${spacePath}/${key}`, row, type: node.type });
+      pending.push({ path: `${spacePath}/${key}`, metadata, type: node.type });
       if (pending.length >= batchSize) await commit();
     }
   }

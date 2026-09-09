@@ -38,13 +38,13 @@ lives in that README rather than here. A design doc records why the code is shap
 being read once the shape is settled; the instructions for running a script need to survive that.
 
 Separate scripts rather than one with modes, because the three have different risk profiles — one
-rewrites a field on an existing row, one creates rows, one deletes realtime-database nodes — and an
-operator will want to run and judge them separately.
+rewrites a field on an existing metadata document, one creates them, one deletes realtime-database
+nodes — and an operator will want to run and judge them separately.
 
 The two repairs are independent of each other and may run in either order. Both must run **before**
 `backfill-document-offering-id.ts`, which resolves a document's `offeringId` through its `context_id`
-and therefore mis-reports documents whose `context_id` is wrong or whose row is absent. The deletion
-runs last of all — see **Order** under the deletion section.
+and therefore mis-reports documents whose `context_id` is wrong or whose metadata document is
+absent. The deletion runs last of all — see **Order** under the deletion section.
 
 ## The index
 
@@ -90,7 +90,7 @@ root. The portal segment is in the RTDB path but not the Firestore path:
 **Skip `qa` and `dev` entirely.** `scripts/delete-qa-user-data.ts` purges their realtime-database side
 while leaving Firestore metadata behind, so every document there reads as damaged by construction and
 nothing there is repairable. `test` has no spaces. This must be a refusal, not a default — a `qa` run
-would try to create thousands of metadata rows for content that no longer exists.
+would try to create thousands of metadata documents for content that no longer exists.
 
 ## Repair 1 — `context_id`
 
@@ -105,11 +105,12 @@ Also compare `uid` against the indexed uid and **report** disagreements without 
 was never analysed, and a wrong `uid` is a different bug with different consequences; surfacing it
 costs nothing and guessing at it could do harm.
 
-## Repair 2 — create the missing rows
+## Repair 2 — create the missing metadata documents
 
-For each indexed key with content and no Firestore row, create one from the realtime-database node.
+For each indexed key with content and no Firestore metadata document, create one from the
+realtime-database node.
 
-The 2026-09-08 dry run over every space: **5,566 rows to create**, 120,113 already present, 773
+The 2026-09-08 dry run over every space: **5,566 to create**, 120,113 already present, 773
 skipped. The 6,240 above was the earlier census, taken before the skip rules existed; 5,566 creatable
 plus 773 refused is the number that matters.
 
@@ -122,14 +123,15 @@ location fields. Read `getDocumentLocationFields` in `src/models/document/docume
 fields each kind carries — but do not import from `src/`; the scripts stay standalone, as the
 offeringId backfill does.
 
-That set is necessary and not sufficient, which a census of all 114,882 production rows established
-(2026-08-25). Two fields the client never writes at creation belong on these rows anyway:
+That set is necessary and not sufficient, which a census of all 114,882 production metadata documents
+established (2026-08-25). Two fields the client never writes at creation belong on them anyway:
 
 **`visibility` and `tools`.** Both are maintained by `useDocumentSyncToFirebase`
-(`src/hooks/use-document-sync-to-firebase.ts`), whose `updateFirestoreDocumentProp` finds rows by
-query and calls `update()`. With no row to match, every visibility toggle and every content save these
-documents ever had wrote nothing at all — which is why the census shows both fields decaying on recent
-rows while the client still faithfully writes them. Waiting for the owner's next edit is not realistic
+(`src/hooks/use-document-sync-to-firebase.ts`), whose `updateFirestoreDocumentProp` finds metadata
+documents by query and calls `update()`. With none to match, every visibility toggle and every content
+save these documents ever had wrote nothing at all — which is why the census shows both fields decaying
+on recent ones while the client still faithfully writes them. Waiting for the owner's next edit is not
+realistic
 for a document last touched years ago, and `tools` decides how Sort Work groups a document: without it
 all 5,682 file under "No Tools".
 
@@ -145,15 +147,16 @@ A node with no `content` key is a document created and never saved — it has no
 says so. Only content that will not parse yields no field at all, because `[]` there would assert an
 emptiness the run never established. Across all 5,682 documents, zero fell into that case.
 
-**`strategies` is deliberately absent**, though most existing rows have it. `on-document-tagged`
-recomputes it from the comments subcollection *of the metadata row*, so a document with no row can
-have no comments and nothing to derive. It fills in the first time a teacher tags one.
+**`strategies` is deliberately absent**, though most existing metadata documents have it.
+`on-document-tagged` recomputes it from the comments subcollection *of the metadata document*, so a
+document without one can have no comments and nothing to derive. It fills in the first time a teacher
+tags one.
 
-Two fields on many existing rows are also deliberately absent. `teachers` is a denormalized
-class-teacher list that `firestore.rules` uses only as a fallback for "legacy documents which contain
+Two fields on many existing metadata documents are also deliberately absent. `teachers` is a
+denormalized class-teacher list that `firestore.rules` uses only as a fallback for "legacy documents which contain
 their own list"; the live path resolves teachers from `context_id`. And `contextId` — camelCase,
-distinct from `context_id` — holds the literal string `"ignored"` in 130 of 130 sampled rows. It is
-the dead field from the deleted v1 comment path, the same one repair 1 refuses to trust.
+distinct from `context_id` — holds the literal string `"ignored"` in 130 of 130 sampled metadata
+documents. It is the dead field from the deleted v1 comment path, the same one repair 1 refuses to trust.
 
 **Curriculum fields.** Offering-contained types (`problem`, `planning`, `publication`,
 `supportPublication`) need `offeringId`, `unit`, `investigation`, and `problem`. The realtime-database
@@ -168,8 +171,8 @@ node carries `offeringId` directly. For the other three, resolve in this order:
    `getProblemDetails` parses `unit` from it and splits `problem` into investigation and problem. It
    is one network round trip per distinct offering, so cache by `offeringId` — the 932 offering-
    contained missing documents in production cover far fewer offerings than that.
-3. **Report and skip** if neither resolves. Do not invent values, and do not write the row with the
-   fields absent — that would hand it to the offeringId backfill as new work.
+3. **Report and skip** if neither resolves. Do not invent values, and do not write the metadata
+   document with the fields absent — that would hand it to the offeringId backfill as new work.
 
 Class-contained types (`personal`, `learningLog`, `personalPublication`, `learningLogPublication`)
 have no curriculum position, so none of the above applies to them. They are 45 of the 1,244 in
@@ -177,10 +180,10 @@ production and a larger share in demo.
 
 They still get **`unit: null`** — written explicitly, not left out. Sort Work finds them with
 `.where("unit", "==", null)` (`src/models/stores/sorted-documents.ts`), and Firestore cannot match a
-field that is absent, so a row without it is invisible under every filter but "All". All 19,649
-class-contained rows in production carry it, and the client's `class` container stamps it. This is the
-one place where "omit what you don't know" is the wrong instinct: null here is a value meaning "not
-about a unit", not an absence.
+field that is absent, so a metadata document without it is invisible under every filter but "All".
+All 19,649 class-contained metadata documents in production carry it, and the client's `class`
+container stamps it. This is the one place where "omit what you don't know" is the wrong instinct:
+null here is a value meaning "not about a unit", not an absence.
 
 **`title` comes from the node, where it is reliably present.** Of the 312 missing production documents
 whose type stores a title, **311 carry one** on their `documentMetadata` node. The exception is a
@@ -197,13 +200,14 @@ live in the publication list instead. The two list shapes differ, and a script m
 | `publication` | `classes/<class>/offerings/<offeringId>/publications` | `documentKey`, **top level** | `groupId`, `pubVersion`, `userId` |
 | `personalPublication`, `learningLogPublication` | `classes/<class>/personalPublications`, `classes/<class>/publications` | `self.documentKey` | `originDoc`, `pubVersion`, `properties`, `uid` |
 
-All three publication-type documents missing rows in production do have a list entry, so this is a
-usable source rather than a hope.
+All three publication-type documents missing metadata in production do have a list entry, so this is
+a usable source rather than a hope.
 
 **Only `originDoc` is taken from these lists**, and only for `personalPublication` and
 `learningLogPublication`. The list also offers `groupId`, and an earlier draft of this design argued
 for copying it because `IDocumentMetadata` declares it. Checking the data killed that: exactly **1 of
-114,763** production rows carries `groupId`, and the two fields do not mean the same thing. In the
+114,763** production metadata documents carries `groupId`, and the two fields do not mean the same
+thing. In the
 publication list it names the group that *published* the document; in Firestore it is an owner-axis
 field meaning the document *belongs to* that group. Copying it would make every published document
 read as group-owned. The declaration was not evidence, and the axis reading is the one that matters.
@@ -223,13 +227,13 @@ offering, since documents share them.
 
 These are refusals, not filters — each one prevents a write that would make things worse.
 
-**No content, metadata only (`-B-`) — never create a row.** 86 such documents exist outside production,
+**No content, metadata only (`-B-`) — never create one.** 86 such documents exist outside production,
 all from 2021, 83 of them `personal`. Their content is gone. Giving them metadata would promote an
 invisible orphan into a Sort Work entry that throws when opened.
 
 **Key absent from the realtime database (`--C`) — never touch.** 7 in production, 1,082 elsewhere.
-These are `mcsupports`-style Firestore-native rows plus curriculum documents; they never had a
-realtime-database node, so a `documentMetadata` lookup on them is meaningless. Report them.
+These are `mcsupports`-style Firestore-native metadata documents plus curriculum documents; they
+never had a realtime-database node, so a `documentMetadata` lookup on them is meaningless. Report them.
 
 **Content with no metadata anywhere (`A--`) — out of scope.** 6 documents in the whole database. A
 script indexing from `documentMetadata` cannot see them, and six is small enough to handle by hand.
@@ -254,22 +258,22 @@ Follow `backfill-document-offering-id.ts`, which is the template these should ma
   from a `finally` and attach their counts to the thrown error: a partial apply is exactly when the
   numbers are needed, and rejecting before the report is emitted loses them.
 - **Create, never set.** The scan that decides what is missing runs once per space, and the sweep then
-  runs for minutes. A client can create a row for one of these documents in that window — production
-  was still accumulating them in 2026 — and `set` would overwrite a row written with the full creation
-  context by one reconstructed from the realtime database. A batch is all-or-nothing, so a batch that
+  runs for minutes. A client can create a metadata document for one of these documents in that window
+  — production was still accumulating them in 2026 — and `set` would overwrite one written with the
+  full creation context by one reconstructed from the realtime database. A batch is all-or-nothing, so a batch that
   loses the race is retried per document and only the loser is counted as such.
 - **`SPACES=` to limit the run** to named spaces, for staged rollout — production alone, or one demo
   space first.
 
 Repair 2 writes to documents that do not exist yet, so it cannot clobber anything. Repair 1 overwrites
-a field on live rows; it should log every before/after pair at 35-odd documents, which is small enough
-to read in full.
+a field on live metadata documents; it should log every before/after pair at 35-odd documents, which
+is small enough to read in full.
 
 ## Deleting what the repair cannot fix
 
-The skip rules above leave a residue: documents repair 2 will not write a row for, and which therefore
-stay invisible to Sort Work, to the class dashboard, and to every Firestore-driven view. They are not
-harmless — they are realtime-database nodes no product surface can reach.
+The skip rules above leave a residue: documents repair 2 will not write metadata for, and which
+therefore stay invisible to Sort Work, to the class dashboard, and to every Firestore-driven view.
+They are not harmless — they are realtime-database nodes no product surface can reach.
 
 The 2026-09-08 dry run over every space put the skip report at 773 documents, of which 665 are the
 deletable residue — the other 108 are `section`, refused above:
@@ -295,8 +299,9 @@ without a database. Every rule refuses rather than adapts:
 - **Only the reasons that mean debris.** The repair skips for two different kinds of reason:
   the document is unreachable (`unresolvedCurriculum`, `skippedNoContent`, `nodeUnreadable`), or the
   repair did not know what it was looking at (`unsupportedType`). Only the first kind is deletable.
-  Refusing to create a row for the 108 `section` documents put them in the skip report, and without
-  this rule the fix that deferred that decision would have handed them to the irreversible script. The
+  Refusing to create metadata for the 108 `section` documents put them in the skip report, and
+  without this rule the fix that deferred that decision would have handed them to the irreversible
+  script. The
   deletable reasons are listed, so a bucket added later is refused until someone decides it belongs.
 - **`authed/learn_concord_org` is never touched**, under any flag. Its three entries are content with
   no metadata node — student work rather than demo debris — and want looking at individually.
@@ -319,10 +324,10 @@ Two things specific to it:
 - **Content is deleted before metadata.** An interrupted run then leaves a document the same report
   would classify the same way next time, rather than one that has changed category underneath it.
 - **Every document is re-checked against the live database immediately before removal** — Firestore for
-  a row that has since appeared, the realtime database for a node already gone. A stale report cannot
-  cause a wrong deletion; it can only cause a skip, which the run reports.
+  a metadata document that has since appeared, the realtime database for a node already gone. A stale
+  report cannot cause a wrong deletion; it can only cause a skip, which the run reports.
 
-It never writes to Firestore, because by definition these documents have no Firestore row.
+It never writes to Firestore, because by definition these documents have no Firestore metadata.
 
 **Order.** Run the deletion last: repair 2 first, then re-run its dry run, then delete from the report
 that reflects post-repair reality.
@@ -357,7 +362,7 @@ Unit tests against a mock Firestore and a mock realtime database, as
 - a mismatch driven by the index where the legacy `contextId` says something different
 - a mismatch where the legacy `contextId` is `"ignored"`
 - a document whose key is absent from the index — untouched
-- a key with metadata but no content — no row created
+- a key with metadata but no content — no metadata document created
 - a key with content but no metadata — not seen, and not created
 - an offering-contained document whose curriculum fields come from a sibling
 - an offering-contained document with no sibling and no portal answer — reported, not written
@@ -389,5 +394,5 @@ None outstanding. Both questions this design opened with were settled against pr
 schema fields the node lacks — both written up above.
 
 One thing to watch rather than resolve: the demo spaces hold 77 publication-type documents needing
-rows against production's 3, and the list-shape finding rests on those 3. Report per-type resolution
-counts on the first demo dry run rather than assuming the shapes generalize.
+metadata against production's 3, and the list-shape finding rests on those 3. Report per-type
+resolution counts on the first demo dry run rather than assuming the shapes generalize.

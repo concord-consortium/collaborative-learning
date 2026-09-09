@@ -87,7 +87,7 @@ describe("repairDocumentContextId", () => {
   });
 
   it("never touches a document whose key is absent from the index", async () => {
-    // mcsupports-style rows are Firestore-native and never existed in the realtime database, so
+    // mcsupports-style metadata documents are Firestore-native and never existed in the realtime database, so
     // there is no "true" class to compare against. 7 in production, 1,082 elsewhere.
     const { firestore, committed } = fakeFirestore({
       native: { key: "native", context_id: "someClass", uid: "u1", type: "supportPublication" }
@@ -157,7 +157,7 @@ describe("repairDocumentContextId", () => {
     expect(store.doc1.context_id).toBe("trueClass");
   });
   it("reports what landed even when a later commit fails", async () => {
-    // The rows an earlier batch rewrote are already live. Rejecting before the report is emitted
+    // The metadata documents an earlier batch rewrote are already live. Rejecting before the report is emitted
     // leaves nobody able to say which ones.
     const logged: string[] = [];
     const existing = Object.fromEntries(Array.from({ length: 5 }, (_, i) =>

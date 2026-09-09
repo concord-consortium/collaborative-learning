@@ -9,7 +9,7 @@
 //
 // This script reads the skip report a dry run produces and removes those documents from the realtime
 // database. It NEVER touches `authed/learn_concord_org` — see kProtectedSpaces — and never touches
-// Firestore, because by definition these documents have no Firestore row.
+// Firestore, because by definition these documents have no Firestore metadata document.
 //
 // Every document is re-checked against the live database before anything is removed. That check
 // catches a document that has since been repaired or already removed; it CANNOT tell that a document

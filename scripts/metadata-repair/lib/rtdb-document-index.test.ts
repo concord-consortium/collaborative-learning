@@ -30,7 +30,7 @@ describe("resolveSpace", () => {
   it("refuses qa and dev rather than treating them as ordinary spaces", () => {
     // delete-qa-user-data.ts purges the RTDB side of these partitions while leaving the Firestore
     // metadata behind. Every document there reads as damaged, so a repair run would try to create
-    // thousands of rows for content that no longer exists. This has to be a refusal, not a default.
+    // thousands of metadata documents for content that no longer exists. This has to be a refusal, not a default.
     for (const appMode of ["qa", "dev"]) {
       expect(resolveSpace(`${appMode}/someRootId/documents`)).toEqual({
         status: "refused",
@@ -114,7 +114,7 @@ describe("buildRtdbDocumentIndex", () => {
     expect(index.get("k1")).toEqual({ classHash: "c1", uid: "u1", hasContent: true, hasMetadata: true });
   });
 
-  it("records metadata with no content, which must never be given a Firestore row", async () => {
+  it("records metadata with no content, which must never be given a Firestore metadata document", async () => {
     // 86 such documents exist outside production. Minting metadata for them would promote an
     // invisible orphan into a Sort Work entry that throws when opened.
     const tree = treeWith({ c1: { u1: { documentMetadata: ["orphan"] } } });

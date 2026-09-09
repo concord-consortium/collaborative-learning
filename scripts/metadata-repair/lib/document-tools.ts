@@ -1,6 +1,7 @@
 // The `tools` field, derived from a document's content the way the running client derives it.
 //
-// Sort Work groups documents by this field, so a row without it files the document under "No Tools".
+// Sort Work groups documents by this field, so a metadata document that lacks it files its document
+// under "No Tools".
 // The client recomputes it on every content save, in `useDocumentSyncToFirebase`; this is the same
 // computation for a document whose content is only ever read, never saved again. Keep the two in step.
 

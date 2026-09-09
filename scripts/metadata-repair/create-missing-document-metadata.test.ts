@@ -10,9 +10,9 @@ class AlreadyExists extends Error {
 /**
  * A Firestore stand-in exposing only what the creation pass uses: a paged read and batched creates.
  *
- * `appearDuringRun` seeds rows that are absent from the initial scan but present by the time the batch
- * commits, which is the race a real sweep is exposed to: it takes minutes, and a client can create a
- * row for one of these documents at any point during it.
+ * `appearDuringRun` seeds metadata documents that are absent from the initial scan but present by
+ * the time the batch commits, which is the race a real sweep is exposed to: it takes minutes, and a
+ * client can create a metadata document for one of these documents at any point during it.
  */
 function fakeFirestore(existing: Record<string, any> = {}, appearDuringRun: string[] = [],
                        failCommitAfter?: number) {
@@ -84,7 +84,7 @@ const pathReaderFor = (nodes: Record<string, any>) =>
   async (path: string) => nodes[path.split("/").slice(-2).join("/")] ?? null;
 
 describe("createMissingDocumentMetadata", () => {
-  it("creates a row for an indexed document that has no Firestore metadata", async () => {
+  it("creates a metadata document for an indexed document that has no Firestore metadata", async () => {
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
     const nodes = { k1: { type: "learningLog", createdAt: 1700000000000, title: "My Log" } };
@@ -101,8 +101,8 @@ describe("createMissingDocumentMetadata", () => {
   });
 
   it("derives tools from the document's content, so Sort Work can group it", async () => {
-    // The client recomputes tools on every content save. These documents had no row to save into, so
-    // the value was never recorded; without it Sort Work files them all under "No Tools".
+    // The client recomputes tools on every content save. These documents had no metadata document to
+    // save into, so the value was never recorded; without it Sort Work files them under "No Tools".
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
     const nodes = {
@@ -161,9 +161,9 @@ describe("createMissingDocumentMetadata", () => {
   });
 
   it("skips an offering-contained document whose sibling supplies only a unit", async () => {
-    // A sibling row is trusted wholesale, but rows exist with a unit and no investigation or problem
-    // — 4 personal rows in production carry null ones. Writing those through would either store
-    // undefined, which the Firestore SDK rejects and which would fail the whole batch, or record a
+    // A sibling's metadata document is trusted wholesale, but some carry a unit and no investigation
+    // or problem — 4 personal ones in production have null values. Writing those through would either
+    // store undefined, which the Firestore SDK rejects and which would fail the whole batch, or record a
     // curriculum position that is missing two of its three parts.
     const { firestore, store } = fakeFirestore({
       sibling: { offeringId: "off-1", unit: "sas", investigation: null, problem: null }
@@ -195,8 +195,8 @@ describe("createMissingDocumentMetadata", () => {
 
   it("copies visibility from the realtime-database node", async () => {
     // The client keeps this field in step through useDocumentSyncToFirebase, but only from the moment
-    // a row exists: its updater finds rows by query, so a toggle made while the row was missing
-    // updated nothing. The node holds the truth, and isDocumentAccessibleToUser prefers the Firestore
+    // a metadata document exists: its updater finds them by query, so a toggle made while one was
+    // missing updated nothing. The node holds the truth, and isDocumentAccessibleToUser prefers the Firestore
     // copy because that one is reactive.
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
@@ -219,11 +219,11 @@ describe("createMissingDocumentMetadata", () => {
     expect("visibility" in store.k1).toBe(false);
   });
 
-  it("leaves a row alone when a client created it after the scan", async () => {
+  it("leaves a metadata document alone when a client created it after the scan", async () => {
     // The scan happens once per space and the sweep then runs for minutes. These are not all
     // abandoned documents — production was still accumulating them in 2026 — so a client can create
-    // the real row mid-run. Overwriting it would replace a row written with the full creation context
-    // by one reconstructed from the realtime database.
+    // the real metadata document mid-run. Overwriting it would replace one written with the full
+    // creation context by one reconstructed from the realtime database.
     const { firestore, store } = fakeFirestore({}, ["k1"]);
     const index = new Map([["k1", home()]]);
     const nodes = { k1: { type: "personal", createdAt: 1, title: "Mine" } };
@@ -237,8 +237,8 @@ describe("createMissingDocumentMetadata", () => {
   });
 
   it("still writes the rest of a batch when one document lost the race", async () => {
-    // A batch is all-or-nothing, so without a per-document retry one conflicting row would take the
-    // other 399 writes down with it.
+    // A batch is all-or-nothing, so without a per-document retry one conflicting write would take
+    // the other 399 down with it.
     const { firestore, store } = fakeFirestore({}, ["k2"]);
     const index = new Map([["k1", home()], ["k2", home()], ["k3", home()]]);
     const nodes = {
@@ -256,8 +256,8 @@ describe("createMissingDocumentMetadata", () => {
   });
 
   it("reports what landed even when a later commit fails", async () => {
-    // A partial apply is exactly when the counts matter: without them nobody can tell which rows to
-    // reconcile. Rejecting before the report is emitted loses that information.
+    // A partial apply is exactly when the counts matter: without them nobody can tell what is left
+    // to reconcile. Rejecting before the report is emitted loses that information.
     const logged: string[] = [];
     const { firestore } = fakeFirestore({}, [], 1);
     const index = new Map(
@@ -278,11 +278,11 @@ describe("createMissingDocumentMetadata", () => {
   it("still creates a teacher's document, but flags that its network cannot be reconstructed", async () => {
     // `network` is a snapshot of the creating teacher's primary network, and firestore.rules reads it
     // back to let teachers in that network see each other's documents. Nothing in the realtime
-    // database records it, so a reconstructed row cannot carry it.
+    // database records it, so a reconstructed metadata document cannot carry it.
     //
-    // The row is still written. Today the document has no row at all, so no teacher can reach it;
-    // a row with a null network is reachable by the teachers of its class, which is strictly more
-    // than none. What it does not restore is cross-network visibility, so those rows are reported.
+    // It is still written. Today the document has none at all, so no teacher can reach it; one with a
+    // null network is reachable by the teachers of its class, which is strictly more than none. What
+    // it does not restore is cross-network visibility, so those are reported.
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
     const nodes = { k1: { type: "problem", createdAt: 1, offeringId: "off-1" } };
@@ -315,8 +315,8 @@ describe("createMissingDocumentMetadata", () => {
     // `section` is deprecated and offering-contained — its schema requires an offeringId
     // (DBSectionDocumentMetadataDEPRECATED in src/lib/db-types.ts). Defaulting it to class-contained
     // would stamp `unit: null` and no offeringId, putting 108 real documents on the wrong container
-    // axis. Firestore holds no `section` row anywhere, so what to do with them is a decision for a
-    // person, not a default.
+    // axis. Firestore holds no `section` metadata document anywhere, so what to do with them is a
+    // decision for a person, not a default.
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
     const nodes = { k1: { type: "section", createdAt: 1, offeringId: "off-1" } };
@@ -375,8 +375,8 @@ describe("createMissingDocumentMetadata", () => {
     expect(result.byType.learningLog).toMatchObject({ created: 1 });
   });
 
-  it("never creates a row for a document whose content is gone", async () => {
-    // 86 such documents exist outside production. A row here would promote an invisible orphan into
+  it("never creates a metadata document for a document whose content is gone", async () => {
+    // 86 such documents exist outside production. Creating one would promote an invisible orphan into
     // a Sort Work entry that throws when opened.
     const { firestore, store } = fakeFirestore();
     const index = new Map([["orphan", home({ hasContent: false })]]);
@@ -390,7 +390,7 @@ describe("createMissingDocumentMetadata", () => {
     expect(result.counts.created).toBe(0);
   });
 
-  it("leaves a document that already has a Firestore row untouched", async () => {
+  it("leaves a document that already has a Firestore metadata document untouched", async () => {
     const { firestore, store } = fakeFirestore({ k1: { key: "k1", type: "problem", context_id: "old" } });
     const index = new Map([["k1", home()]]);
     const nodes = { k1: { type: "problem", createdAt: 1 } };
@@ -414,7 +414,7 @@ describe("createMissingDocumentMetadata", () => {
     expect(result.counts.skippedUnaddressable).toBe(1);
   });
 
-  it("reports a node that cannot be read rather than inventing a row", async () => {
+  it("reports a node that cannot be read rather than inventing a metadata document", async () => {
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
 
@@ -522,7 +522,7 @@ describe("createMissingDocumentMetadata curriculum fields", () => {
   });
 
   it("skips an offering-contained document whose curriculum cannot be resolved", async () => {
-    // Writing the row without these fields would hand it straight to the offeringId backfill as new
+    // Writing it without these fields would hand the document straight to the offeringId backfill as new
     // work, and leave a document that reads as belonging to the wrong container in the meantime.
     const { firestore, store } = fakeFirestore();
     const index = new Map([["k1", home()]]);
@@ -650,7 +650,7 @@ describe("createMissingDocumentMetadata publication fields", () => {
     expect(store.pub1).toMatchObject({ type: "publication", unit: "sas" });
   });
 
-  it("still creates the row when the publication has no list entry", async () => {
+  it("still creates the metadata document when the publication has no list entry", async () => {
     const { firestore, store } = fakeFirestore();
     const index = new Map([["pub1", home()]]);
     const nodes = { pub1: { type: "personalPublication", createdAt: 1, title: "t" } };

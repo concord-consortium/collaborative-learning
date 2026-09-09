@@ -54,8 +54,8 @@ describe("toolsFromDocumentNode", () => {
   });
 
   it("reports unparseable content as undefined, which is not the same as having no tools", () => {
-    // A row written with `tools: []` would claim the document is empty. Undefined lets the caller say
-    // it could not tell.
+    // A metadata document written with `tools: []` would claim the document is empty. Undefined
+    // lets the caller say it could not tell.
     expect(toolsFromDocumentNode({ content: "{not json" })).toBeUndefined();
   });
 
