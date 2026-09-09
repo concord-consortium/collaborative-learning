@@ -322,6 +322,11 @@ export class PlaybackControlModel {
   }
 
   dispose() {
+    // A step whose seek is still running has no timer left to clear, so it has to be told
+    // to stop the same way pausing tells it: by clearing the playing flag it checks before
+    // scheduling the next step. Set directly rather than through togglePlay, which would
+    // log a pause the reader never asked for.
+    this.sliderPlaying = false;
     this.clearAdvanceTimer();
     this.followEndDisposer();
   }

@@ -587,6 +587,21 @@ describe("PlaybackControlModel", () => {
 
       expect(model.currentStopIndex).toBe(0);
     });
+
+    it("stops advancing when disposed while a step is seeking", async () => {
+      const { model } = setupModel(3, { appliedPosition: 0 });
+      model.togglePlay(true);
+
+      // The timer has already fired, so there is no pending one for disposal to clear. The
+      // step in flight has to notice the disposal itself rather than schedule the next one.
+      jest.advanceTimersByTime(kPlaybackStepMs);
+      model.dispose();
+      await flushPromises();
+      expect(model.currentStopIndex).toBe(1);
+
+      await runPlaybackStep();
+      expect(model.currentStopIndex).toBe(1);
+    });
   });
 
   describe("uniqueFailures", () => {
