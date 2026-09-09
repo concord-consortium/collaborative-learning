@@ -337,8 +337,8 @@ describe("history loading", () => {
 
     /**
      * Stands in for goToHistoryEntryPosition doing its job: a seek that replays every entry it was
-     * asked for ends with numHistoryEventsApplied at the requested position. Callers now
-     * check that, so a stub that leaves the position alone reads as a seek that stopped short.
+     * asked for ends with numHistoryEventsApplied at the requested position. Callers check that, so
+     * a stub which leaves the position alone reads as a seek that stopped short.
      */
     function mockCompletedSeek(treeManager: Instance<typeof TreeManager>) {
       return jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(((position: number) => {
