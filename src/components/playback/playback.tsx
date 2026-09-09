@@ -45,12 +45,13 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
 return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {playbackControls}
-      {historyEntryRequestError &&
-        <div className="playback-history-request-error" data-testid="playback-history-request-error"
-            role="alert">
-          {historyEntryRequestError}
-        </div>
-      }
+      {/* Rendered whether or not there is anything to say. A seek resolves long after the
+          reader's attention has moved on, and screen readers announce a live region reliably
+          only when the region was already there and its contents changed. */}
+      <div className="playback-history-request-error" data-testid="playback-history-request-error"
+          role="alert">
+        {historyEntryRequestError}
+      </div>
     </div>
   );
 });

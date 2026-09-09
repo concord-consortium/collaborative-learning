@@ -95,13 +95,14 @@ describe("PlaybackComponent", () => {
   });
 
   // The seek resolves well after the reader's attention has moved on, so the message has to
-  // arrive into a live region rather than be present when one is first rendered.
+  // arrive into a live region that was already there. A region rendered together with its
+  // text is announced inconsistently, and that is the case this test has to rule out.
   it("announces a request failure that arrives after the document has loaded", async () => {
     const docModel = setupDocument();
     const historyManager = makeRealHistoryManager(docModel);
     render(<PlaybackComponent document={docModel} historyManager={historyManager}
               requestedHistoryId={undefined} />);
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
 
     act(() => {
       historyManager.setHistoryEntryRequestError(
@@ -112,12 +113,12 @@ describe("PlaybackComponent", () => {
       .toHaveTextContent("Could not find the requested point");
   });
 
-  it("renders nothing when there is no request error", () => {
+  it("says nothing when there is no request error", () => {
     const historyManager = makeHistoryManager();
     render(<PlaybackComponent document={setupDocument()} historyManager={historyManager}
               requestedHistoryId="entry-0" />);
 
-    expect(screen.queryByTestId("playback-history-request-error")).not.toBeInTheDocument();
+    expect(screen.getByTestId("playback-history-request-error")).toBeEmptyDOMElement();
     expect(historyManager.moveToHistoryEntryAfterLoad).toHaveBeenCalledWith("entry-0");
   });
 });

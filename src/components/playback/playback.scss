@@ -203,5 +203,15 @@
     bottom: calc(100% + #{$playback-alert-height});
     max-width: 90%;
     text-align: center;
+
+    // The region is rendered from the start, so that a message arriving later lands in a live
+    // region the reader's software is already watching rather than one appearing with its text.
+    // Until then it must not paint an empty pill. It is absolutely positioned either way, so it
+    // takes up no room in the bar.
+    &:empty {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
   }
 }
