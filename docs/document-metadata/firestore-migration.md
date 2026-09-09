@@ -90,18 +90,19 @@ There were mismatches in:
 - title
 - unit
 
-It isn't clear how these conflicts were created. For the context_id my best guess is that previous versions of the CLUE runtime created them by recording the context id of the current user that was leaving a comment instead of the context id of the document they were commenting on. Perhaps the code still does this I didn't check.
-
-However would be good to digging into this more because it could mean there is some runtime or function code that is creating documents with wrong context_id's and this would then probably prevent students from reading and writing to these documents.
-
-*Confirmed 2026-08-21 (CLUE-643).* The guess above was right, and the code still does it:
+The context_id conflicts were created by CLUE recording the context id of the user leaving a comment
+instead of the context id of the document being commented on, and the code still does this.
 `createFirestoreMetadataDocumentIfNecessaryWithoutValidation` in
 `functions-v2/src/create-firestore-metadata-document.ts` stamps `context_id: context.classHash` — the
-commenter's class, not the document's — and it writes only when no metadata row exists yet, so a
-missing row is the precondition. A census of production on 2026-08-20 found 35 documents whose
-`context_id` disagrees with the class they live in, plus about 8 more outside `learn_concord_org`.
-Opening one throws, because the realtime-database path built from the commenter's class and the
-owner's uid never existed. CLUE-643 repairs the data and fixes the function.
+commenter's class, not the document's. It writes only when no metadata document exists yet, so a
+missing metadata document is the precondition.
+
+This reaches beyond the 13 conflicts found here: it is runtime code creating metadata documents with
+the wrong context_id, which prevents students from reading and writing those documents. A census of
+production on 2026-08-20 found 35 metadata documents whose `context_id` disagrees with the class the
+document lives in, plus about 8 more outside `learn_concord_org`. Opening one throws, because the realtime-database path built from
+the commenter's class and the owner's uid never existed. CLUE-643 repairs the data and fixes the
+function.
 
 The title conflicts were all in learning log documents whose title was updated by what looks like a researcher user.
 
