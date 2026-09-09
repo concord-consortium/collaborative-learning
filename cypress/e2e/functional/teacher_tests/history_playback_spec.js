@@ -143,8 +143,6 @@ context('History Playback', () => {
 
     cy.log('verify a playback view at the end follows an undo made in the primary document');
     clueCanvas.getUndoTool().click();
-    // The playback view is at the end of the history, so it follows the entry the undo
-    // recorded rather than being left one stop behind it.
     tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
       tableToolTile.getTableCell().eq(2).should('not.contain', '2');
