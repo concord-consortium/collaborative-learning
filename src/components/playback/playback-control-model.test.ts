@@ -32,6 +32,8 @@ const failingRecord = {
 interface ISetupOptions {
   comments?: WithId<CommentDocument>[];
   // Where the document sits before the test starts. Defaults to the end of the history.
+  // Present but undefined means the position is not known yet, which is where the manager
+  // leaves it while it looks up the document's last entry.
   appliedPosition?: number;
   // The one entry whose records cannot be applied.
   failingEntryIndex?: number;
@@ -62,7 +64,8 @@ function setupTreeManager(entryCount: number, options: ISetupOptions = {}) {
     records: index === options.failingEntryIndex ? [failingRecord] : []
   }));
   treeManager.setChangeDocument(CDocument.create({ history }));
-  treeManager.setNumHistoryEntriesApplied(options.appliedPosition ?? entryCount);
+  treeManager.setNumHistoryEntriesApplied(
+    "appliedPosition" in options ? options.appliedPosition : entryCount);
 
   return treeManager;
 }
@@ -300,6 +303,22 @@ describe("PlaybackControlModel", () => {
 
       expect(model.currentStopIndex).toBe(3);
     });
+
+    // The control can open while the manager is still looking up where the document sits.
+    // There is nothing to follow yet, so it answers with what was asked for, which for a
+    // reader who has asked for nothing is the end.
+    it("shows the end of the history while the document's position is unknown", () => {
+      const { model } = setupModel(3, { appliedPosition: undefined });
+
+      expect(model.currentStopIndex).toBe(3);
+      expect(model.playbackDisabled).toBe(true);
+    });
+
+    it("shows the stop a link asked for while the document's position is unknown", () => {
+      const { model } = setupModel(3, { appliedPosition: undefined, initialRequest: 1 });
+
+      expect(model.currentStopIndex).toBe(1);
+    });
   });
 
   describe("sliderValue", () => {
@@ -318,9 +337,11 @@ describe("PlaybackControlModel", () => {
     });
 
     it("shows where the document is once nothing is moving it", () => {
-      const { model } = setupModel(5);
+      // The reader has asked for nothing, so the end is what is requested, and the document
+      // is elsewhere. The thumb belongs on the document.
+      const { model } = setupModel(5, { appliedPosition: 2 });
 
-      expect(model.sliderValue).toBe(model.currentStopIndex);
+      expect(model.sliderValue).toBe(2);
     });
 
     // requestedStopIndex is kept after a seek lands, because it is the only record of which
@@ -410,13 +431,33 @@ describe("PlaybackControlModel", () => {
     // The control can open before the manager has finished looking up where the document
     // sits, so the position arrives afterwards. That is not the reader going anywhere.
     it("keeps following the end when the document's position arrives after it opens", async () => {
-      const { model, treeManager } = setupModel(3, { appliedPosition: 0 });
+      const { model, treeManager } = setupModel(3, { appliedPosition: undefined });
       treeManager.setNumHistoryEntriesApplied(3);
 
       addEntry(treeManager, 3);
       await flushPromises();
 
       expect(model.currentStopIndex).toBe(4);
+    });
+
+    // A seek that could not reach the end is not a reader following it. Left following, they
+    // would be dragged back to the end by every new entry, replaying the history into the
+    // same failure each time.
+    it("stops following the end once a seek towards it is blocked", async () => {
+      const { model, treeManager } = setupModel(4, { appliedPosition: 0, failingEntryIndex: 2 });
+
+      await jestSpyConsole("warn", async () => {
+        await model.goToSliderStop(4);
+      });
+      expect(model.currentStopIndex).toBe(2);
+
+      addEntry(treeManager, 4);
+
+      // The reaction runs as the entry is added, so a thumb still following the end has
+      // already left for the new one by here.
+      expect(model.sliderValue).toBe(2);
+      await flushPromises();
+      expect(model.currentStopIndex).toBe(2);
     });
 
     it("leaves a reader who has picked a stop where they are", async () => {
@@ -431,8 +472,8 @@ describe("PlaybackControlModel", () => {
   });
 
   describe("goToSliderStop", () => {
-    // rc-slider reports every mouse move of a drag, and each one used to start its own
-    // replay through the trees on top of the ones already running.
+    // rc-slider reports every mouse move of a drag, so without coalescing each one starts its
+    // own replay through the trees on top of the ones already running.
     it("runs one seek at a time, skipping the stops a drag passed through", async () => {
       const { model, treeManager } = setupModel(6, { appliedPosition: 0 });
       const seekSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition");
@@ -459,6 +500,38 @@ describe("PlaybackControlModel", () => {
 
       expect(model.sliderValue).toBe(5);
       await Promise.all([first, second]);
+    });
+
+    // A seek that throws rather than stopping short leaves the document where it was. The
+    // thumb has to come back to it: a thumb left on the destination reports a moment the
+    // reader is not looking at, which is the failure this control exists to prevent.
+    it("brings the thumb back to the document when a seek throws", async () => {
+      const { model, treeManager } = setupModel(4, { appliedPosition: 0 });
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation((() => Promise.reject(new Error("seek failed"))) as any);
+
+      await jestSpyConsole("warn", async () => {
+        await model.goToSliderStop(3);
+      });
+
+      expect(model.currentStopIndex).toBe(0);
+      expect(model.sliderValue).toBe(0);
+      expect(model.playbackFailureWarning).toBeTruthy();
+      jest.restoreAllMocks();
+    });
+
+    it("stops playing when a seek throws", async () => {
+      const { model, treeManager } = setupModel(4, { appliedPosition: 0 });
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation((() => Promise.reject(new Error("seek failed"))) as any);
+
+      model.togglePlay(true);
+      await jestSpyConsole("warn", async () => {
+        await runPlaybackStep();
+      });
+
+      expect(model.sliderPlaying).toBe(false);
+      jest.restoreAllMocks();
     });
 
     it("reports the moment the document is showing", async () => {
@@ -617,6 +690,27 @@ describe("PlaybackControlModel", () => {
       expect(model.uniqueFailures.length).toBe(1);
       // The stop that would have applied entry 2 is stop 3, which is 3 of 4 along the rail.
       expect(model.uniqueFailures[0].location).toBe(75);
+    });
+
+    // The tree manager keys its own dedup on the direction as well as the entry, so an entry
+    // that fails on the way back and again on the way forward is two failures there. They are
+    // one place on the rail, so they are one marker here.
+    it("reports one marker for an entry that fails in both directions", async () => {
+      const { model, treeManager } = setupModel(4, { appliedPosition: 0, failingEntryIndex: 2 });
+
+      await jestSpyConsole("warn", async () => {
+        // Playing forward stops at the bad entry, recorded as a failure to redo it.
+        await model.goToSliderStop(4);
+        // A seek cannot then get back below the entry to fail it the other way. What can is
+        // the position arriving from Firestore, which counts the entries the document has
+        // rather than the ones that could be applied, and so can sit past a bad one.
+        treeManager.setNumHistoryEntriesApplied(4);
+        await model.goToSliderStop(0);
+      });
+
+      expect(treeManager.historyPlaybackFailures.map(f => f.direction).sort())
+        .toEqual(["redo", "undo"]);
+      expect(model.uniqueFailures.length).toBe(1);
     });
   });
 });

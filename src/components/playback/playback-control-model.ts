@@ -13,11 +13,7 @@ export const kPlaybackStepMs = 500;
 
 const kPlaybackFailureWarning = "History playback could not apply some changes and was stopped.";
 
-// A stop's array index is the slider value that selects it, so the document before any of its
-// history was applied needs a stop of its own at index 0. It describes no change, so it has no
-// date. This is history position 0, which is where a `studentDocumentHistoryId=first` link
-// lands — "first" being the sentinel logDocumentEvent emits for a change made before the
-// document had any history entry.
+// The document before any of its history was applied. It describes no change, so it has no date.
 interface IInitialSliderStop {
   kind: "initial";
 }
@@ -178,11 +174,8 @@ export class PlaybackControlModel {
   get currentStopIndex() {
     const requested = this.requestedStopIndex;
     const historyPosition = this.treeManager.numHistoryEventsApplied;
-    // The position is undefined only while the manager looks up the document's last history
-    // entry. That lookup is fired alongside the history load this control waits for, so the
-    // two can land in either order and the control can mount during it. There is nothing to
-    // follow yet, so answer with the request — which, before the reader has made one, is the
-    // end of the history.
+    // The position is unknown only while the manager looks up the document's last entry, which
+    // can still be running when the control mounts. There is nothing to follow yet.
     if (historyPosition === undefined) return requested ?? this.lastStopIndex;
     // Several stops can share one history position — a comment and the entry before it — so
     // a stop that already represents the position is left alone rather than snapped onto the
@@ -322,10 +315,8 @@ export class PlaybackControlModel {
   }
 
   dispose() {
-    // A step whose seek is still running has no timer left to clear, so it has to be told
-    // to stop the same way pausing tells it: by clearing the playing flag it checks before
-    // scheduling the next step. Set directly rather than through togglePlay, which would
-    // log a pause the reader never asked for.
+    // A step whose seek is still running has no timer left to clear, so this is what stops it.
+    // Set directly rather than through togglePlay, which would log a pause nobody performed.
     this.sliderPlaying = false;
     this.clearAdvanceTimer();
     this.followEndDisposer();
@@ -338,13 +329,22 @@ export class PlaybackControlModel {
     while (this.queuedStopIndex !== undefined) {
       const target = this.queuedStopIndex;
       const position = this.historyPositionForStopIndex(target);
-      await this.treeManager.goToHistoryEntryPosition(position);
+      // A throw leaves the document part-way, like a seek that stops short, so it is reported
+      // the same way. Catching it here is also what lets the queue below clear, bringing the
+      // thumb back to the document rather than leaving it on a stop nothing reached.
+      let threw = false;
+      try {
+        await this.treeManager.goToHistoryEntryPosition(position);
+      } catch (error) {
+        console.warn("PlaybackControlModel: seek to history position", position, "failed:", error);
+        threw = true;
+      }
       runInAction(() => {
         // A failed entry can block the move, leaving the document short of where it was
         // asked to go. currentStopIndex reports where it landed; the warning says why that
         // is not where the reader clicked.
         const actual = this.treeManager.numHistoryEventsApplied;
-        const blocked = actual !== undefined && actual !== position;
+        const blocked = threw || (actual !== undefined && actual !== position);
         this.playbackFailureWarning = blocked ? kPlaybackFailureWarning : null;
         // The stop that was asked for was never reached, so there is nothing left to prefer
         // over wherever the document actually stopped.
@@ -356,7 +356,7 @@ export class PlaybackControlModel {
     }
   }
 
-  // Percentage along the rail, which spans the stops after the initial one.
+  // Percentage along the rail, which runs from the initial stop at 0 to the last stop.
   private railLocation(stopIndex: number) {
     if (this.lastStopIndex <= 0) return 0;
     return Math.max(0, Math.min(100, 100 * (stopIndex / this.lastStopIndex)));

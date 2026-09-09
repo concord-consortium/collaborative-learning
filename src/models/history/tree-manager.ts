@@ -252,7 +252,9 @@ export const TreeManager = types
     self.historyManager = manager;
   },
 
-  setNumHistoryEntriesApplied(value: number) {
+  // Undefined means the position is not known yet, which is how it is left while
+  // setNumHistoryEntriesAppliedFromFirestore looks up the document's last entry.
+  setNumHistoryEntriesApplied(value: number | undefined) {
     self.numHistoryEventsApplied = value;
   },
 
