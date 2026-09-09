@@ -337,8 +337,7 @@ describe("history loading", () => {
 
     /**
      * Stands in for goToHistoryEntryPosition doing its job: a seek that replays every entry it was
-     * asked for ends with numHistoryEventsApplied at the requested position. Callers check that, so
-     * a stub which leaves the position alone reads as a seek that stopped short.
+     * asked for ends with numHistoryEventsApplied at the requested position.
      */
     function mockCompletedSeek(treeManager: Instance<typeof TreeManager>) {
       return jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(((position: number) => {
@@ -416,8 +415,6 @@ describe("history loading", () => {
       expect(historyManager.historyEntryRequestError).toBeUndefined();
     });
 
-    // Resolving the id only says where to go. Replaying an entry can fail, and goToHistoryEntryPosition
-    // then stops at the last position it could apply, which is not the one that was asked for.
     it("reports a seek that stops short of the requested entry", async () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }, { id: "a3" }]
@@ -445,6 +442,25 @@ describe("history loading", () => {
       await historyManager.moveToHistoryEntryAfterLoad("a2");
 
       expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
+    });
+
+    // A Firestore failure ends the load in HISTORY_ERROR rather than leaving it unfinished, so
+    // the wait resolves and it is the status, not a timeout, that says the request cannot be met.
+    it("reports a history that fails to load so it can be shown to the user", async () => {
+      const { treeManager, historyManager } = await mirrorMockHistory({
+        entries: [],
+        loadingError: { message: "fake error" } as firebase.firestore.FirestoreError,
+        lastHistoryEntry: { index: 1, id: "1234" }
+      });
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => undefined as any);
+      jest.spyOn(console, "warn").mockImplementation(() => undefined);
+
+      await historyManager.moveToHistoryEntryAfterLoad("first");
+
+      expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
+      expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
+      expect(goToSpy).not.toHaveBeenCalled();
     });
 
     it("reports a history that never loads so it can be shown to the user", async () => {

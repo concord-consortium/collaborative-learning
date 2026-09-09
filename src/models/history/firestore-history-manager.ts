@@ -340,8 +340,6 @@ export class FirestoreHistoryManager {
       const index = this.treeManager.findHistoryEntryIndex(historyId);
       if (index < 0) {
         console.warn("Did not find history entry with id: ", historyId);
-        // The message says only what failed. It outlives the request, and the reader can move
-        // the scrubber, so where the document sits is the scrubber's to report.
         this.setHistoryEntryRequestError(
           `Could not find the requested point in this document's history (id: ${historyId}).`);
         return;
@@ -349,8 +347,8 @@ export class FirestoreHistoryManager {
       position = index + 1;
     }
 
-    // Replaying an entry can fail, and goToHistoryEntryPosition then stops at the last position it
-    // could apply, so the applied position has to be checked before the request counts as met.
+    // goToHistoryEntryPosition stops at the last position it could apply, so where it landed
+    // has to be checked.
     try {
       await this.treeManager.goToHistoryEntryPosition(position);
     } catch (error) {
@@ -358,9 +356,8 @@ export class FirestoreHistoryManager {
       this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
       return;
     }
-    if (this.treeManager.numHistoryEventsApplied === position) {
-      this.setHistoryEntryRequestError(undefined);
-    } else {
+    // Nothing to report on success: the message was cleared before the request started.
+    if (this.treeManager.numHistoryEventsApplied !== position) {
       console.warn("moveToHistoryEntryAfterLoad: seek stopped at",
         this.treeManager.numHistoryEventsApplied, "instead of", position, "for id:", historyId);
       this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
