@@ -30,6 +30,19 @@ This access token should be stored in a /scripts/.env file with:
 PORTAL_ACCESS_TOKEN=[token]
 ```
 
+The staging portal (<https://learn.portal.staging.concord.org>) has its own admin api user,
+whose token is stored separately. Get it the same way, from the staging portal, and add it
+alongside the production one:
+
+```shell
+PORTAL_STAGING_ACCESS_TOKEN=[token]
+```
+
+Note this admin api user is not your own portal account. It is not a teacher or a student, so
+endpoints that answer "the current user's own things" — `GET /api/v1/classes/mine`, for
+instance — return 403. That is the token working correctly, not a broken token. Fetch classes
+by id instead.
+
 ## Running on Google Cloud Virtual Machine
 
 It can be useful to offload the running of scripts to a virtual machine in Google Cloud. They will usually run faster there.

@@ -59,6 +59,14 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "root",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "space",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "unit",
           "order": "ASCENDING"
         },

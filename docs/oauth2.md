@@ -1,6 +1,8 @@
 # Overview
 
-CLUE will use an OAuth2 flow to authenticate with the portal if an `authDomain` parameter is included in the URL. A typical value of `authDomain` would be `https://learn.concord.org`. However the production portal is not configured to allow CLUE to use OAuth2, so for testing you should use `https://learn.portal.staging.concord.org`.
+CLUE will use an OAuth2 flow to authenticate with the portal if an `authDomain` parameter is included in the URL. A typical value of `authDomain` would be `https://learn.concord.org`. Both the production portal and `https://learn.portal.staging.concord.org` have a `clue` OAuth2 client, so either can be used; prefer staging for testing.
+
+What is per-deployment is the redirect URI: the OAuth2 client only accepts a redirect back to a URL listed on it, so each version or branch of CLUE has to be added to that list before it can authenticate. `scripts/setup-portal-assignment.ts` does that as part of setting up an assignment; see the `Tech Debt` note below about not having to.
 
 This OAuth2 authentication will result in an `accessToken`. This `accessToken` can be used by CLUE to access other portal APIs the same way that the nonce `token` parameter is used by the current portal launches. However the portal's nonce `token` has some extra information in it in addition to the user authentication. So in order for the OAuth2 launch to work property a second parameter `resourceLinkId` needs to be included in the CLUE URL. This is an LTI name for the portal's offering id. This `resourceLinkId` is passed to the Portal JWT and Firebase JWT requests and it takes the place of the extra info that was original included in the portal's nonce `token`.
 

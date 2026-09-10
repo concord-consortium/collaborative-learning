@@ -2,41 +2,15 @@
  * The render page: a document embedded in a script element plus an iframe that loads CLUE and is
  * handed that document.
  *
- * There is exactly one generator, shared by all three modes. The two prior-art copies and production
- * itself each interpolate `JSON.stringify(content)` straight into a `<script>` element, so a student
- * whose text contains `</script>` ends the element early and injects markup into the render page.
- * This copy escapes instead. Production's copy needs the same fix, which is a production change
- * rather than a harness one.
- */
-
-/**
- * Makes a JSON string safe to sit inside a `<script>` element.
+ * There is exactly one generator. The AI analysis pipeline
+ * (`functions-v2/src/on-analysis-document-pending.ts`), the harness's render modes and the
+ * `scripts/shutterbug.ts` dev script all build their page here, so the only thing that differs
+ * between them is the CLUE build and unit they point at.
  *
- * `<` and `>` are escaped so no character sequence can close the element or open a comment; `&` goes
- * with them so the result cannot be misread if the page is ever parsed as XHTML. U+2028 and U+2029
- * are valid in JSON strings but are line terminators in JavaScript source, so an unescaped one is a
- * syntax error rather than a security problem — either way the page stops working.
+ * The document is escaped on the way into the `<script>` element: a student whose text contains
+ * `</script>` would otherwise end the element early and inject markup into the page.
  */
-export function escapeJsonForScript(json: string): string {
-  return json
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    // Written as regex escapes rather than literal characters: an invisible line separator in
-    // this source would be impossible to review and easy to delete by accident.
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
-}
-
-/** Escapes a value for use inside a double-quoted HTML attribute. */
-export function escapeHtmlAttribute(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import { escapeHtmlAttribute, escapeJsonForScript } from "./escape-for-html";
 
 /**
  * The height the iframe starts at, before anything resizes it.
@@ -86,11 +60,12 @@ export function isClueFrameUrl(url: string): boolean {
 }
 
 /**
- * The same page production posts to Shutterbug, with the injection hole closed and one addition: the
- * page records on `window` that it handed the document to the iframe, which is the one thing a local
- * capture cannot observe from outside. Readiness itself is measured inside the CLUE frame — the
- * `updateHeight` message reports 0 in this build — so nothing else is recorded here. Shutterbug
- * ignores it either way.
+ * Builds the page.
+ *
+ * It records on `window` that it handed the document to the iframe, which is the one thing a local
+ * capture cannot observe from outside; the harness's puppeteer mode waits on that. Readiness itself
+ * is measured inside the CLUE frame, so nothing else is recorded here. Shutterbug and the analysis
+ * pipeline ignore the marker.
  */
 export function generateRenderHtml(options: RenderHtmlOptions): string {
   const { content, clueUrl, unit, initialHeightPx = kInitialFrameHeightPx } = options;
@@ -112,9 +87,9 @@ export function generateRenderHtml(options: RenderHtmlOptions): string {
           return;
         }
         window.addEventListener("message", (event) => {
-          // Production assigns this unconditionally, so a height of 0 collapses its iframe to
-          // "0px". Guarded here because the local mode sizes the frame itself after settling and a
-          // late zero would wipe the capture. See the README on what parity does and does not cover.
+          // A height of 0, or anything that is not a positive number, would collapse the iframe
+          // and hide the document the picture is meant to show. Ignoring it leaves the iframe at
+          // its starting height.
           if (event.data && event.data.type === "updateHeight") {
             const height = Number(event.data.height);
             if (!Number.isFinite(height) || height <= 0) return;

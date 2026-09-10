@@ -5,7 +5,8 @@
  * silently dropped from the counts.
  */
 import path from "node:path";
-import { ManifestDocument, MessageShape, Modality, ResultRow, kSchemaVersion } from "./schemas.js";
+import { ManifestDocument, MessageShape, ResultRow, kSchemaVersion } from "./schemas.js";
+import type { Modality } from "../../../shared/ai-analysis-classify.js";
 import { writeJsonFile } from "./corpus.js";
 
 /**

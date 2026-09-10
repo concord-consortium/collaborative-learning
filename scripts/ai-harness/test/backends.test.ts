@@ -8,7 +8,7 @@ import {
 import {
   RenderLimitExceeded, checkCaptureSize, checkEncodedSize, isPublicHttpsUrl, redirectDowngradeReason
 } from "../src/backends/types.js";
-import { generateRenderHtml } from "../src/backends/render-html.js";
+import { generateRenderHtml } from "../../../shared/render-page.js";
 import { readPngInfo } from "../src/png.js";
 import { makeTestPng } from "./helpers.js";
 

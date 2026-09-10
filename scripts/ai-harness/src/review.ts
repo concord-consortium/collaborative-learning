@@ -31,12 +31,12 @@ import {
   imageRepresentationIsUsable, imageRepresentationPath, imagesForSet, readImageEnvelope,
   resolveImageFile, sha256Bytes
 } from "./represent-image.js";
-import { classifyDocument } from "./capability.js";
+import { Modality, classifyDocument } from "../../../shared/ai-analysis-classify.js";
 import { visualTileIdsOf } from "./execute.js";
 import { partitionSuperseded } from "./report.js";
 import {
   EnvelopeImage, ExperimentFile, ExperimentRun, ExtrasMode, ImageDetail, ImageRepresentation,
-  ImageSet, ManifestDocument, MessageShape, Modality, ResultRow, ReviewKeyFile, ReviewKeyPair,
+  ImageSet, ManifestDocument, MessageShape, ResultRow, ReviewKeyFile, ReviewKeyPair,
   TextRepresentation, canonicalJson, kSchemaVersion, modalities, sendsImages, sendsText,
   sha256Canonical
 } from "./schemas.js";

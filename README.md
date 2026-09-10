@@ -32,7 +32,10 @@ For information on how to add a new tile type to the CLUE codebase, see the [Add
 
 Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
 
-Branches are deployed to `https://collaborative-learning.concord.org/branch/<name>/`.
+Branches are deployed to `https://collaborative-learning.concord.org/branch/<name>/`, where
+`<name>` is the branch name **with any issue-tracker prefix or suffix stripped** — so
+`CLUE-123-my-feature` is served at `/branch/my-feature/`. See [docs/deploy.md](docs/deploy.md)
+for the exact patterns.
 
 Tags are deployed to `https://collaborative-learning.concord.org/version/<name>/`
 
@@ -55,37 +58,47 @@ Each folder has its own readme:
 
 ## Testing/Deploying database rules
 
-### Requirements
-
-- The tests currently only run with Node.js version 16.x
-- You need the firebase CLI. Version 12 is compatible with Node 16: `npm install -g firebase-tools@12`
-- You should be logged in to firebase: `firebase login`
-
-Java is also required for running the emulators. There are various ways to install it; I did this:
-
-```shell
-brew install java
-echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
-```
-
 Firestore security rules are unit tested and realtime database rules could be with some additional work.
 
 ### To test database rules
 
-The emulator must be running when the test is invoked.
+The tests live in `firebase-test/`, which has its own `package-lock.json` — the root `npm install`
+does not reach it. It pins its own `firebase-tools`, so no global CLI install is needed:
 
 ```shell
-cd firebase-test
-npm run start &
-npm run test
+npm --prefix firebase-test ci
+npm --prefix firebase-test run test:exec
+```
+
+`test:exec` starts the Firestore emulator, runs the tests against it, and shuts it down. CI runs
+these same two commands (the `firebase-rules` job).
+
+Requirements:
+
+- Node.js 20 or newer (`firebase-tools` 15 requires it, and `firebase-test/package.json` declares it)
+- Java 21 or newer — the emulator is a JVM process, and `firebase-tools` 15 refuses to start it on
+  anything older. There are various ways to install it; this works on macOS:
+
+  ```shell
+  brew install openjdk
+  echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
+  ```
+
+To leave the emulator running across several test runs instead, start it in one terminal and run the
+tests in another:
+
+```shell
+npm --prefix firebase-test start
+npm --prefix firebase-test test
 ```
 
 ### To deploy database rules
 
-You deploy firebase functions and rules directly from the working directory using
-the `firebase deploy` command. You can see `firebase deploy help` for more info.
+Deploying uses the `firebase` CLI directly from the repository root, which is not a dependency of
+the root project, so you need it globally (`npm install -g firebase-tools`) and you need to be
+logged in (`firebase login`).
 
-See which project you have access to and which you are currently using via: `firebase projects:list`
+See which projects you have access to and which you are currently using via: `firebase projects:list`
 
 ```shell
 npm run deploy:firestore:rules    # deploys firestore rules

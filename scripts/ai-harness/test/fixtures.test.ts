@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { tileTypes } from "../../../shared/tile-types.js";
-import { classifyDocument } from "../src/capability.js";
+import { classifyDocument } from "../../../shared/ai-analysis-classify.js";
 import { harnessRoot } from "../src/corpus.js";
 import { textVariants } from "../src/represent-text.js";
 import { validateExpectationsFile } from "../src/schemas.js";

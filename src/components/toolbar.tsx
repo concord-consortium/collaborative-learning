@@ -150,9 +150,20 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
       return true;
     }
 
-    // don't allow the following tools when the document is the primary document
+    // don't allow the following tools when the document is the primary document.
+    // Require a primary document key: this toolbar also serves sections, which have no document,
+    // and an undefined key must not be read as a match with an undefined document key.
     const disallowedPrimaryDocumentTools = ["edit", "copyToWorkspace"];
-    if (disallowedPrimaryDocumentTools.includes(toolButton.id) && document?.key === primaryDocumentKey) {
+    if (disallowedPrimaryDocumentTools.includes(toolButton.id) &&
+        !!primaryDocumentKey && document?.key === primaryDocumentKey) {
+      return true;
+    }
+
+    // Copying to the workspace needs a loaded primary document to copy into. Until one is
+    // available the action can do nothing, so keep the button disabled rather than letting it
+    // accept clicks that are silently discarded.
+    if (toolButton.id === "copyToWorkspace" &&
+        !stores.documents.getDocument(primaryDocumentKey ?? "")?.content) {
       return true;
     }
 

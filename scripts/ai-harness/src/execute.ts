@@ -35,7 +35,7 @@ import {
   TextRepresentation, effectiveModality, kResultSchemaVersion, kSchemaVersion, sendsImages, sendsText,
   validatePromptFile, validateResultRow
 } from "./schemas.js";
-import { DocumentClassification, classifyDocument } from "./capability.js";
+import { DocumentClassification, classifyDocument } from "../../../shared/ai-analysis-classify.js";
 
 /**
  * Enough of the file to read the IHDR chunk; the rest is hashed and discarded.
@@ -212,7 +212,6 @@ export function skipReasonsFor(
   message: MessageShape, classification: DocumentClassification, document?: ManifestDocument,
   variantFindsStudentContent = false
 ): string[] {
-  const hasStudentText = classification.tiles.some((tile) => tile.hasStudentText);
   const reasons: string[] = [];
   // A document the corpus says cannot be rendered has no picture to send, and never will. That is a
   // fact about the document, so an image-carrying run skips it rather than failing on a missing
@@ -227,13 +226,13 @@ export function skipReasonsFor(
       "no tile carries text, and none needs a picture");
     return reasons;
   }
-  // The variant gets the last word, because it is the thing that builds the summary. `hasStudentText`
-  // asks whether a tile holds text a student wrote, which is the right question only for a variant
-  // that passes text through — `drawing-text` turns geometry into words, and a document of two
-  // shapes has student work in it that this question cannot see.
-  if (message === "text-only" && !hasStudentText && !variantFindsStudentContent) {
-    reasons.push("text-only run: no tile carries student-authored text, so the summary would " +
-      "carry no student content");
+  // The same question production asks: does the summary carry student work in any form? Typed
+  // text, or a detailed description of something the student made — a drawing tile's summary
+  // contains a table of its objects, so a document of two shapes counts. The variant still gets
+  // the last word, because a variant can find student content this question does not look for.
+  if (message === "text-only" && !classification.summaryCarriesStudentWork && !variantFindsStudentContent) {
+    reasons.push("text-only run: no tile puts student work into the summary, so the summary " +
+      "would carry no student content");
   }
   return reasons;
 }
@@ -245,9 +244,15 @@ export function visualTileIdsOf(classification: DocumentClassification): Set<str
     .map((tile) => tile.tileId));
 }
 
-/** Whether a mixed run can send a summary for this document, or only its pictures. */
+/**
+ * Whether a mixed run can send a summary for this document, or only its pictures.
+ *
+ * This is production's rule, and has to stay production's rule: a mixed run that sent its text
+ * half where production would not, or withheld it where production would, would be measuring a
+ * request production never makes.
+ */
 export function mixedSendsText(classification: DocumentClassification): boolean {
-  return classification.tiles.some((tile) => tile.hasStudentText);
+  return classification.summaryCarriesStudentWork;
 }
 
 /**

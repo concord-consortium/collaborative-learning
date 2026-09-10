@@ -20,7 +20,7 @@
  */
 import { RenderTarget } from "../schemas.js";
 import { NotAPngError, readPngInfo } from "../png.js";
-import { generateRenderHtml } from "./render-html.js";
+import { generateRenderHtml } from "../../../../shared/render-page.js";
 import {
   RenderBackend, RenderLimitExceeded, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
   isPublicHttpsUrl, kDefaultRenderLimits, kUnobservedDiagnostics, readBodyWithin,

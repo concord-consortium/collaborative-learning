@@ -12,7 +12,7 @@ import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import ChatAvatar from "./chat-avatar";
 import WaitingMessage from "./waiting-message";
-import { isSectionPath, escapeKey, RatingValue } from "../../../shared/shared";
+import { isSectionPath, escapeKey, kRatingValues, RatingValue } from "../../../shared/shared";
 import { useCommentsCollectionPath } from "../../hooks/document-comment-hooks";
 import { useUpdateCommentRating } from "../../hooks/use-update-comment-rating";
 import { logCommentEvent } from "../../models/tiles/log/log-comment-event";
@@ -27,7 +27,7 @@ import "./comment-card.scss";
 import "../themes.scss";
 
 function countRatings(ratings: Record<string, RatingValue> | undefined): Record<RatingValue, number> {
-  const counts: Record<RatingValue, number> = { yes: 0, no: 0, notSure: 0 };
+  const counts = Object.fromEntries(kRatingValues.map(value => [value, 0])) as Record<RatingValue, number>;
   if (ratings) {
     Object.values(ratings).forEach(v => { counts[v]++; });
   }
@@ -187,11 +187,14 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
       : `documents/${focusDocument}/comments`)
     : "";
 
-  const ratingButtons: { value: RatingValue; label: string; icon: JSX.Element; testId: string }[] = [
-    { value: "yes", label: "Yes", icon: <YesIcon />, testId: "rating-yes-button" },
-    { value: "no", label: "No", icon: <NoIcon />, testId: "rating-no-button" },
-    { value: "notSure", label: "Not Sure", icon: <NotSureIcon />, testId: "rating-not-sure-button" },
-  ];
+  const ratingButtonProps: Record<RatingValue, { label: string; icon: JSX.Element; testId: string }> = {
+    yes: { label: "Yes", icon: <YesIcon />, testId: "rating-yes-button" },
+    no: { label: "No", icon: <NoIcon />, testId: "rating-no-button" },
+    notSure: { label: "Not Sure", icon: <NotSureIcon />, testId: "rating-not-sure-button" },
+  };
+  // Keyed by rating value, so a value added to kRatingValues doesn't compile here until it has a
+  // label and an icon. The order shown follows kRatingValues.
+  const ratingButtons = kRatingValues.map(value => ({ value, ...ratingButtonProps[value] }));
 
   const renderRatingButtons = (comment: WithId<CommentDocument>) => {
     if (!showCommentRating) return null;

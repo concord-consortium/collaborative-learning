@@ -233,19 +233,24 @@ export interface IPublishSupportParams extends IFirebaseFunctionBaseParams {
 }
 export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFunctionWarmUpParams;
 
+export const kRatingValues = ["yes", "no", "notSure"] as const;
+
+export type RatingValue = typeof kRatingValues[number];
+
+/**
+ * The retired "do you agree with the AI?" flag. Nothing writes it any more; it describes comments
+ * already stored, which `onCommentRated` reads when such a comment is deleted.
+ */
 export interface IAgreeWithAi {
   version: 1;
-  value: "yes" | "no" | "notSure";
+  value: RatingValue;
 }
 
-export type AgreementValue = IAgreeWithAi["value"]
-export type RatingValue = "yes" | "no" | "notSure";
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text
   tags?: string[];    // list of tags to apply to the comment
   linkedDocumentKey?: string; // Key of the document that this comment should link to
-  agreeWithAi?: IAgreeWithAi; // Whether the comment agrees with the AI's suggestion
 }
 
 export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseParams {

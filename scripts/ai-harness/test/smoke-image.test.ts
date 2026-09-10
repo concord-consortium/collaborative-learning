@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
-import { buildImageMessages, defaultAiPrompt } from "../../../shared/ai-analysis-messages.js";
+import { buildImageMessages } from "../../../shared/ai-analysis-messages.js";
 import { corpusPaths, readRepresentation, representationPath } from "../src/corpus.js";
 import {
   dataUrlFor, imageRepresentationPath, readImageEnvelope, resolveImageFile, sha256Bytes
@@ -12,7 +12,8 @@ import { ReportSummary } from "../src/report.js";
 import { ExperimentFile, ResultRow } from "../src/schemas.js";
 import { harnessRoot, isContainedBy } from "../src/files.js";
 import {
-  listFilesUnder, makeTestDataRoot, makeTestPng, readLines, syntheticCorpusShape, testRunsRoot
+  listFilesUnder, makeTestDataRoot, makeTestPng, promptFromFile, readLines, syntheticCorpusShape,
+  testRunsRoot
 } from "./helpers.js";
 
 /** Derived from the committed fixtures, so adding one moves the counts instead of breaking them. */
@@ -253,7 +254,7 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     const printed = output.join("\n");
     // Skip-empty means the call count is no longer runs × documents: the text runs send only what
     // carries student text, and no shape sends an empty document.
-    const sent = shape.withStudentText.length * 2 + shape.withContent.length;
+    const sent = shape.withSummaryContent.length * 2 + shape.withContent.length;
     expect(printed).toContain(
       `3 run(s) × ${documentIds().length} document(s) = ${documentIds().length * 3} pair(s); ` +
       `${sent} call(s), ${documentIds().length * 3 - sent} skipped.`);
@@ -310,7 +311,7 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     const file = imageRepresentationPath(paths, "puppeteer-full-height", "drawing");
     const envelope = readImageEnvelope(file);
     const bytes = fs.readFileSync(resolveImageFile(file, envelope.images[0]));
-    const expected = buildImageMessages(defaultAiPrompt, dataUrlFor(bytes));
+    const expected = buildImageMessages(promptFromFile("categorize-design-default"), dataUrlFor(bytes));
     const sent = requests.find((request) => JSON.stringify(request.messages) === JSON.stringify(expected));
     expect(sent).toBeDefined();
   });
@@ -407,7 +408,7 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     // rows are sent, not skipped, because the picture still has something to say.
     const omitted = sent.filter((row) => row.textPartOmitted).map((row) => row.docId).sort();
     const expectedOmitted = shape.withContent
-      .filter((docId) => !shape.withStudentText.includes(docId)).sort();
+      .filter((docId) => !shape.withSummaryContent.includes(docId)).sort();
     expect(omitted).toEqual(expectedOmitted);
     expect(omitted.length).toBeGreaterThan(0);
 
@@ -424,7 +425,7 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
         .toEqual({ docId: row.docId, sameAsImageOnly: Boolean(row.textPartOmitted) });
     }
     // And the dispatched calls were only the ones carrying a summary; the rest were cache hits.
-    expect(requests).toHaveLength(shape.withStudentText.length);
+    expect(requests).toHaveLength(shape.withSummaryContent.length);
     for (const request of requests) {
       expect((request.messages[1].content as any[]).map((part: any) => part.type))
         .toEqual(["text", "text", "image_url"]);

@@ -7,11 +7,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
-  CorpusManifest, CorpusSource, ManifestDocument, Modality, RepresentationEnvelope,
+  CorpusManifest, CorpusSource, ManifestDocument, RepresentationEnvelope,
   kDocumentIdPattern, kSchemaVersion, sha256Canonical, validateCorpusManifest, validateExpectationsFile,
   validateRepresentationEnvelope
 } from "./schemas.js";
-import { classifyDocument } from "./capability.js";
+import { Modality, classifyDocument } from "../../../shared/ai-analysis-classify.js";
 import { removeImageRepresentation } from "./represent-image.js";
 import { harnessRoot, isContainedBy, readJsonFile, writeJsonFile } from "./files.js";
 

@@ -14,9 +14,6 @@ export interface ISortWorkConfig {
 export const aiEvaluations = ["categorize-design", "custom"] as const;
 export type AIEvaluation = typeof aiEvaluations[number];
 
-export const summarizers = ["text", "image"] as const;
-export type Summarizer = typeof summarizers[number];
-
 export const commentRoles = ["student", "teacher", "researcher"] as const;
 export type CommentRole = typeof commentRoles[number];
 
@@ -151,7 +148,8 @@ export interface IAiPrompt {
   categories: string[];
   keyIndicatorsPrompt: string;
   discussionPrompt: string;
-  summarizer?: Summarizer;
+  // Accepted in existing unit JSON and ignored: every evaluation sends both representations.
+  summarizer?: string;
 }
 
 // Optional per-unit overrides of the AI chat tutor's server-side generic prompt.

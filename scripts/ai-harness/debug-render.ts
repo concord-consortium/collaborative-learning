@@ -27,7 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { corpusPaths, defaultDataRoot, readCorpusDocument, readManifest } from "./src/corpus.js";
 import { kDocumentIdPattern } from "./src/schemas.js";
-import { generateRenderHtml, isClueFrameUrl, kInitialFrameHeightPx } from "./src/backends/render-html.js";
+import { generateRenderHtml, isClueFrameUrl, kInitialFrameHeightPx } from "../../shared/render-page.js";
 import {
   FrameLike, PageLike, launchPuppeteer, startRenderPageServer, viewportPageOffset
 } from "./src/backends/puppeteer.js";

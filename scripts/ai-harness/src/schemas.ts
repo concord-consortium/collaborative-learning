@@ -6,6 +6,7 @@
  */
 import { createHash } from "node:crypto";
 import { isPublicHttpsUrl } from "./urls.js";
+import type { Modality } from "../../../shared/ai-analysis-classify.js";
 
 export const kSchemaVersion = 1;
 
@@ -136,8 +137,13 @@ function describe(value: unknown): string {
 // Corpus manifest
 // ---------------------------------------------------------------------------
 
-export const modalities = ["text-only", "visual-only", "mixed", "empty"] as const;
-export type Modality = typeof modalities[number];
+/**
+ * The runtime list behind `Modality`, used to check values read from disk. The type itself is
+ * defined in `shared/ai-analysis-classify.ts`, beside the classifier that produces it, and callers
+ * import it from there; `satisfies` fails to compile if this list names something that type does
+ * not.
+ */
+export const modalities = ["text-only", "visual-only", "mixed", "empty"] as const satisfies readonly Modality[];
 
 export const corpusSources = ["synthetic", "demo", "qa", "production"] as const;
 export type CorpusSource = typeof corpusSources[number];

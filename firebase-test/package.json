@@ -8,10 +8,9 @@
     "test:exec": "firebase emulators:exec --only firestore \"npm run test\""
   },
   "engines": {
-    "node": "16"
+    "node": ">=20"
   },
   "main": "lib/index.js",
-  "dependencies": {},
   "devDependencies": {
     "@firebase/rules-unit-testing": "^1.3.16",
     "@types/jest": "^27.4.0",
@@ -22,6 +21,7 @@
     "eslint-plugin-import": "^2.25.4",
     "firebase": "^8.10.1",
     "firebase-admin": "^9.12.0",
+    "firebase-tools": "^15.28.1",
     "jest": "^27.4.7",
     "rewire": "^6.0.0",
     "ts-jest": "^27.1.3",

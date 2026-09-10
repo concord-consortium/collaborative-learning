@@ -421,8 +421,10 @@ service cloud.firestore {
                   request.resource.data.keys().hasAll(["name", "createdAt", "content", "network"]);
         }
 
+        // `ratings` is listed here so a comment edit can't carry a rating change: isValidRatingUpdate
+        // is the only path that changes it, authors included.
         function preservesReadOnlyCommentFields() {
-          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId"].toSet();
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
@@ -432,8 +434,10 @@ service cloud.firestore {
           let userId = string(request.auth.token.platform_user_id);
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
+          // The user's own key missing from the new map is the toggle-off case, which is allowed.
           return affectedFields.hasOnly(['ratings'])
-            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
+            && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
         }
 
         function isValidCommentUpdateRequest() {
@@ -595,8 +599,10 @@ service cloud.firestore {
                   request.resource.data.keys().hasAll(["name", "createdAt", "content"]);
         }
 
+        // `ratings` is listed here so a comment edit can't carry a rating change: isValidRatingUpdate
+        // is the only path that changes it, authors included.
         function preservesReadOnlyCommentFields() {
-          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId"].toSet();
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId", "ratings"].toSet();
           let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
           return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
         }
@@ -606,8 +612,10 @@ service cloud.firestore {
           let userId = string(request.auth.token.platform_user_id);
           let existingRatings = resource.data.get('ratings', {});
           let newRatings = request.resource.data.get('ratings', {});
+          // The user's own key missing from the new map is the toggle-off case, which is allowed.
           return affectedFields.hasOnly(['ratings'])
-            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId]);
+            && newRatings.diff(existingRatings).affectedKeys().hasOnly([userId])
+            && (!(userId in newRatings) || newRatings[userId] in ['yes', 'no', 'notSure']);
         }
 
         function isValidCommentUpdateRequest() {

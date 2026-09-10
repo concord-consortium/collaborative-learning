@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { main } from "../harness.js";
-import { buildSummaryMessages, defaultAiPrompt } from "../../../shared/ai-analysis-messages.js";
+import { buildSummaryMessages } from "../../../shared/ai-analysis-messages.js";
 import { corpusPaths, readRepresentation, representationPath } from "../src/corpus.js";
 import { CompletionRequest, CompletionResult } from "../src/execute.js";
 import { ReportSummary } from "../src/report.js";
 import { ResultRow } from "../src/schemas.js";
-import { makeTestDataRoot, readLines, syntheticCorpusShape } from "./helpers.js";
+import { makeTestDataRoot, promptFromFile, readLines, syntheticCorpusShape } from "./helpers.js";
 
 /**
  * import -> represent -> plan -> run -> report, driven through the same argv parsing the CLI uses,
@@ -96,8 +96,8 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     // `= N call(s)` did not, on any corpus with a skip.
     expect(printed).toContain(
       `2 run(s) × ${shape.documents.length} document(s) = ${shape.documents.length * 2} pair(s); ` +
-      `${shape.withStudentText.length * 2} call(s), ` +
-      `${(shape.documents.length - shape.withStudentText.length) * 2} skipped.`);
+      `${shape.withSummaryContent.length * 2} call(s), ` +
+      `${(shape.documents.length - shape.withSummaryContent.length) * 2} skipped.`);
     expect(printed).toContain("max_completion_tokens 1024");
     expect(printed).toMatch(/Worst-case total \(retries included\): \$\d+\.\d+/);
     expect(requests).toHaveLength(0);
@@ -116,14 +116,14 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
 
     const sent = rows.filter((row) => row.status !== "skipped");
     const skipped = rows.filter((row) => row.status === "skipped");
-    expect(sent).toHaveLength(shape.withStudentText.length * 2);
-    expect(skipped).toHaveLength((shape.documents.length - shape.withStudentText.length) * 2);
+    expect(sent).toHaveLength(shape.withSummaryContent.length * 2);
+    expect(skipped).toHaveLength((shape.documents.length - shape.withSummaryContent.length) * 2);
     // Every skip says why, in terms a reader can act on.
     for (const row of skipped) {
       expect(row.status === "skipped" && row.skipReasons.join(" "))
-        .toMatch(/no student content at all|no tile carries student-authored text/);
+        .toMatch(/no student content at all|no tile puts student work into the summary/);
     }
-    expect(new Set(sent.map((row) => row.docId))).toEqual(new Set(shape.withStudentText));
+    expect(new Set(sent.map((row) => row.docId))).toEqual(new Set(shape.withSummaryContent));
 
     const distinctRequests = new Set(sent.map((row) => row.requestKey));
     expect(requests.length).toBeGreaterThanOrEqual(distinctRequests.size);
@@ -140,7 +140,7 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
       expect(forDoc).toHaveLength(2);
       for (const row of forDoc) expect(row.status).toBe("skipped");
     }
-    const visualOnly = shape.withContent.filter((docId) => !shape.withStudentText.includes(docId));
+    const visualOnly = shape.withContent.filter((docId) => !shape.withSummaryContent.includes(docId));
     expect(visualOnly.length).toBeGreaterThan(0);
     for (const docId of visualOnly) {
       expect(rows.filter((row) => row.docId === docId).every((row) => row.status === "skipped")).toBe(true);
@@ -149,7 +149,8 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
 
   it("builds its messages with the shared production builders", () => {
     const envelope = readRepresentation(representationPath(paths, "default", "text"));
-    const expected = buildSummaryMessages(defaultAiPrompt, envelope.markdown, []);
+    const expected = buildSummaryMessages(
+      promptFromFile("categorize-design-default"), envelope.markdown, []);
     const sent = requests.find((request) => JSON.stringify(request.messages) === JSON.stringify(expected));
     expect(sent).toBeDefined();
     expect(sent!.model).toBe("gpt-4o-mini");
@@ -227,7 +228,7 @@ describe("end-to-end smoke run against the synthetic corpus", () => {
     ) as ReportSummary;
     expect(fs.existsSync(resultsFile)).toBe(true);
     const pairs = shape.documents.length * 2;
-    const sentPairs = shape.withStudentText.length * 2;
+    const sentPairs = shape.withSummaryContent.length * 2;
     expect(summary.rows).toBe(pairs);
     const overall = summary.groups.find((group) =>
       group.runId === "(all runs)" && group.message === "all" && group.modality === "all")!;
