@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import { isAlive, getSnapshot } from "mobx-state-tree";
 import { MobXProviderContext, observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tiles/tile-component";
@@ -22,9 +23,57 @@ import { IContainerContextType, useContainerContext } from "../../../components/
 import { userSelectTile } from "../../../models/stores/ui";
 import { useDrawingAreaContext } from "./drawing-area-context";
 import { calculateFitContent } from "../model/drawing-utils";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import type { HighlightState } from "../../../models/document/document-content-with-highlights";
+import { highlightClassesFor } from "../../../models/highlights/highlight-classes";
+
+/**
+ * Picks out the objects the document is currently highlighting, and the one state they share.
+ *
+ * A single state rather than a per-object one is not a simplification: only one reference is
+ * active at a time, so objectHighlightState can never report "pinned" for one object and "preview" for
+ * another in the same render. See docs/highlights.md.
+ *
+ * `objectHighlightState` is passed in rather than read here so this stays a pure function. The caller must
+ * invoke it from inside an observer's render body — the backing computed is only memoized while a
+ * reaction observes it.
+ */
+export function collectHighlightedObjects(
+  objects: DrawingObjectType[],
+  objectHighlightState: (objectId: string) => HighlightState | undefined
+): { objects: DrawingObjectType[], state: HighlightState | undefined } {
+  const highlighted: DrawingObjectType[] = [];
+  let state: HighlightState | undefined;
+  objects.forEach(object => {
+    const objectHighlight = objectHighlightState(object.id);
+    if (objectHighlight) {
+      highlighted.push(object);
+      state = objectHighlight;
+    }
+  });
+  return { objects: highlighted, state };
+}
+
+/**
+ * Whether a highlighted object should actually get a ring drawn around it.
+ *
+ * Extracted for the same reason as collectHighlightedObjects: the decision is worth testing on its
+ * own, and the render path it lives in needs a tile environment and SVG layout to reach.
+ *
+ * The rule follows conditionallyRenderObject rather than restating it loosely — an object the
+ * drawing renderer omits must not get a ring around empty space. Note it is not simply `visible`:
+ * a hidden object that is selected still renders, and should still be ringed.
+ */
+export function shouldRingObject(object: DrawingObjectType, isSelected: boolean) {
+  if (object.animating) return false;
+  return object.visible || isSelected;
+}
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
+// The highlight ring's colors live in components/highlight-vars.scss, shared with every other
+// target tile; only its geometry is set here, because both values are divided by the current zoom.
+const HIGHLIGHT_STROKE_WIDTH = 3;
 const SELECTION_BOX_PADDING = 10;
 const SELECTION_BOX_RESIZE_HANDLE_SIZE = 10;
 
@@ -629,6 +678,60 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     return null;
   };
 
+  /**
+   * Renders the ephemeral highlight for objects a HighlightReference points at.
+   *
+   * Deliberately not renderSelectionBorders: that reads `object.boundingBox` directly, which is
+   * the object's box in its OWN coordinate space. An object inside a GroupObject renders within
+   * the group's scale() transform, so a border drawn for it at layer level from the raw box lands
+   * in the wrong place. getObjectBoundingBox walks the enclosing groups and applies their
+   * adjustments, which is what a layer-level ring needs. See docs/highlights.md.
+   *
+   * That grouping case is unexercised rather than unreachable, and which of the two it is depends
+   * on the reference kind. A `variable` reference reaches only variable chips, and those cannot be
+   * grouped at all: VariableChipObject extends DrawingObject rather than SizedObject, so it never
+   * implements setUnrotatedDragBounds and grouping one throws. An `object` reference names any
+   * object by id, including a shape that groups fine — so a grouped target is reachable, and the
+   * group-adjusted box is load-bearing rather than defensive. Nothing groups an object in the
+   * fixtures or tests yet, so this path is correct by reading and not by test.
+   */
+  public renderHighlightBorders(objects: DrawingObjectType[], state: HighlightState) {
+    const zoom = this.zoom;
+    const padding = SELECTION_BOX_PADDING / zoom;
+    const content = this.getContent();
+
+    return objects.map(object => {
+      if (!shouldRingObject(object, content.isIdSelected(object.id))) return null;
+      const box = content.getObjectBoundingBox(object.id);
+      if (!box) return null;
+
+      const nwX = box.nw.x - padding;
+      const nwY = box.nw.y - padding;
+      const seX = box.se.x + padding;
+      const seY = box.se.y + padding;
+
+      return (
+        <rect
+          key={object.id}
+          className={classNames("highlight-reference-box", highlightClassesFor(state))}
+          data-testid="highlight-reference-box"
+          // Which object is highlighted is the point of the feature, not an implementation
+          // detail: a reference that lights the wrong object, or every object, is the failure
+          // mode worth testing against. Cypress needs to name the object to assert that.
+          data-object-id={object.id}
+          x={nwX}
+          y={nwY}
+          width={seX - nwX}
+          height={seY - nwY}
+          strokeWidth={HIGHLIGHT_STROKE_WIDTH / zoom}
+          // Pinned reads as a commitment, preview as a passing glance — same idiom as the
+          // Dataflow node rings.
+          strokeDasharray={state === "preview" ? [10 / zoom, 5 / zoom].join(" ") : undefined}
+        />
+      );
+    });
+  }
+
   public render() {
     let highlightObject = null;
     if (!this.props.readOnly) {
@@ -640,6 +743,21 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
         highlightObject = this.state.hoverObject;
       }
     }
+
+    // Deliberately OUTSIDE the readOnly gate above. That gate belongs to the editing affordances
+    // (canvas hover, object-list hover), which are meaningless when you cannot edit. A highlight
+    // directs attention instead, and must show in read-only documents, 4-up cells and thumbnails
+    // exactly as text chips and Dataflow nodes do. See docs/highlights.md.
+    //
+    // Keep the objectHighlightState reads in the render body: it is memoized only while a reaction observes
+    // it. objectMap rather than `objects` because it recurses into groups, matching the set
+    // getObjectsForVariable reports; renderHighlightBorders then uses the group-adjusted box.
+    const documentContent = getDocumentContentFromNode(this.getContent());
+    const allObjects = Object.values(this.getContent().objectMap).filter(o => !!o);
+    const highlighted = collectHighlightedObjects(
+      allObjects as DrawingObjectType[],
+      objectId => documentContent?.objectHighlightState(this.props.model.id, objectId)
+    );
 
     // If an offset value for the drawing is provided, the `object-canvas` group will be translated to place
     // the drawing objects appropriately.
@@ -671,6 +789,9 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
             {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
             {highlightObject
               ? this.renderSelectionBorders([highlightObject], false)
+              : null}
+            {highlighted.state
+              ? this.renderHighlightBorders(highlighted.objects, highlighted.state)
               : null}
             {this.state.currentDrawingObject
               ? renderDrawingObject(this.state.currentDrawingObject)

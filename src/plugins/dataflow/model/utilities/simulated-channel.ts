@@ -9,7 +9,7 @@ import { NodeChannelInfo } from "./channel";
 export const kSimulatedChannelPrefix = "SIM";
 export const kSimulatedChannelType = "simulated-channel";
 
-function simulatedChannelId(variable: VariableType) {
+export function simulatedChannelId(variable: VariableType) {
   return `${kSimulatedChannelPrefix}${variable.name}`;
 }
 

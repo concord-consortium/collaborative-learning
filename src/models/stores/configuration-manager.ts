@@ -79,6 +79,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["chatTutorIntro"]>("chatTutorIntro");
   }
 
+  get chatTutorHighlights(){
+    return this.getProp<UC["chatTutorHighlights"]>("chatTutorHighlights");
+  }
+
   get autoAssignStudentsToIndividualGroups() {
     return this.getProp<UC["autoAssignStudentsToIndividualGroups"]>("autoAssignStudentsToIndividualGroups");
   }
