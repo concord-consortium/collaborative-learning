@@ -73,6 +73,91 @@ describe("import", () => {
     expect(readManifest(paths).documents).toHaveLength(2);
   });
 
+  describe("related summaries seeded from the source directory", () => {
+    const sidecar = {
+      schemaVersion: 1,
+      documents: {
+        "a-text": [{
+          summary: "A classmate's document.",
+          agreements: { yes: [{ content: "Ada said something.", tags: [] }] },
+          peerComments: [{
+            commentId: "c1", commentUid: "student-2", content: "Say why it matters.",
+            tags: ["user"], ratings: { yes: 2, no: 1 }, updatedAt: 1756000000000
+          }]
+        }]
+      }
+    };
+
+    /** A source directory holding both fixtures and a `related-summaries.json` beside them. */
+    function sourceWithSidecar(dataRoot: string, contents: unknown = sidecar): string {
+      const from = sourceDir(dataRoot, { "a-text.json": textDoc, "b-image.json": imageDoc });
+      fs.writeFileSync(path.join(from, "related-summaries.json"), JSON.stringify(contents, null, 2));
+      return from;
+    }
+
+    const importFrom = (from: string, dataRoot: string) =>
+      importCorpus({ from, corpus: "demo1", source: "synthetic", prune: false, dataRoot, now });
+
+    it("gives a named document its related summaries, and everything else an empty list", () => {
+      const dataRoot = makeTestDataRoot("import-related-summaries");
+      const result = importFrom(sourceWithSidecar(dataRoot), dataRoot);
+
+      const seeded = result.manifest.documents.find((entry) => entry.id === "a-text")!;
+      expect(seeded.relatedSummaries).toHaveLength(1);
+      expect(seeded.relatedSummaries[0].peerComments[0].ratings).toEqual({ yes: 2, no: 1 });
+      // A document the sidecar says nothing about is exactly as it was before the file existed.
+      expect(result.manifest.documents.find((entry) => entry.id === "b-image")!.relatedSummaries)
+        .toEqual([]);
+    });
+
+    it("keeps a hand-edited manifest value rather than seeding over it", () => {
+      const dataRoot = makeTestDataRoot("import-related-summaries-handedit");
+      const from = sourceWithSidecar(dataRoot);
+      importFrom(from, dataRoot);
+
+      const paths = corpusPaths(dataRoot, "demo1");
+      const manifest = JSON.parse(fs.readFileSync(paths.manifest, "utf8"));
+      for (const entry of manifest.documents) {
+        if (entry.id === "a-text") {
+          entry.relatedSummaries = [{ summary: "A human put this here.", agreements: {}, peerComments: [] }];
+        }
+      }
+      fs.writeFileSync(paths.manifest, JSON.stringify(manifest, null, 2));
+
+      // Same rule as expectedRenderFailure: a human's value on the manifest wins on re-import.
+      const result = importFrom(from, dataRoot);
+      expect(result.manifest.documents.find((entry) => entry.id === "a-text")!.relatedSummaries)
+        .toEqual([{ summary: "A human put this here.", agreements: {}, peerComments: [] }]);
+    });
+
+    it("seeds a corpus imported before the sidecar existed, whose entries hold an empty list", () => {
+      const dataRoot = makeTestDataRoot("import-related-summaries-backfill");
+      // First import with no sidecar at all, which is the state every corpus was in before this
+      // file existed: present, and empty.
+      const bare = sourceDir(dataRoot, { "a-text.json": textDoc, "b-image.json": imageDoc });
+      expect(importFrom(bare, dataRoot).manifest.documents[0].relatedSummaries).toEqual([]);
+
+      // Adding the sidecar and re-importing has to fill it. An empty list is what every entry
+      // starts as, so it cannot mean "a human chose none".
+      const result = importFrom(sourceWithSidecar(dataRoot), dataRoot);
+      expect(result.manifest.documents.find((entry) => entry.id === "a-text")!.relatedSummaries)
+        .toHaveLength(1);
+    });
+
+    it("changes nothing when the source directory has no such file", () => {
+      const dataRoot = makeTestDataRoot("import-related-summaries-absent");
+      const from = sourceDir(dataRoot, { "a-text.json": textDoc });
+      expect(importFrom(from, dataRoot).manifest.documents[0].relatedSummaries).toEqual([]);
+    });
+
+    it("refuses a sidecar whose entries are malformed, naming the field", () => {
+      const dataRoot = makeTestDataRoot("import-related-summaries-invalid");
+      const broken = { ...sidecar, documents: { "a-text": [{ summary: "s", agreements: {}, peerComments: [{}] }] } };
+      expect(() => importFrom(sourceWithSidecar(dataRoot, broken), dataRoot))
+        .toThrow(/documents\.a-text\[0\]\.peerComments\[0\]\.ratings must be an object/);
+    });
+  });
+
   it("stamps a retrieval time on documents that came from somewhere", () => {
     const dataRoot = makeTestDataRoot("import-retrieved");
     const from = sourceDir(dataRoot, { "a-text.json": textDoc });

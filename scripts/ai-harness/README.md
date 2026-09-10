@@ -563,13 +563,34 @@ the one the file describes:
 |---|---|---|---|
 | `detail` | image-carrying runs | the builder's `auto` | `low`, `high` |
 | `imageSet` | image-carrying runs | `full-document` | `per-tile`, `visual-tiles-only` |
-| `extras` | text-carrying runs | `all` | `none` |
+| `extras` | text-carrying runs | `all` | `ai-counts`, `none` |
 
 `extras` is what a run puts in the related-summary parts. `all` — the default — sends every related
 summary the manifest carries, each one that document's own, which is what the harness has always
 sent; an experiment file written before this dimension existed therefore keeps its meaning *and its
-request key*. `none` sends the parts empty. A setting that sends *some* of them would belong here
-too, and the names leave room for it.
+request key*. `none` sends the parts empty. `ai-counts` sends the related summaries with their peer
+comments removed, which is what production sent before rated human comments reached the prompt.
+
+The three together are what `experiments/peer-comments.json` compares, and the middle one is the
+point of it: `all` against `none` cannot say whether any gain came from the comments or from the
+related summaries carrying them. `test/peer-comments.test.ts` checks that the three build three
+different requests, because `plan` never builds a request body and a paid comparison of three
+identical inputs would report a null result that meant nothing.
+
+### Giving a corpus related summaries
+
+A source directory may hold a `related-summaries.json` beside its documents, keyed by document id
+and holding the entries that document's manifest record should start with. `import` seeds from it on
+the same rule as `expectations.json`: a value already in the manifest wins, because a human put it
+there on purpose.
+
+It exists because the manifest is generated and never committed, so without it the only way to give
+a fixture a related summary is to hand-edit a generated file, which no review ever sees. It names no
+corpus: one source directory is imported under whatever corpus name the command gives it, so the
+file's location is what says which fixtures it describes.
+`examples/synthetic-corpus/related-summaries.json` is the worked example, and its peer comments are
+deliberately awkward — a tag-only comment, an all-`no` comment, text containing the closing
+delimiter, a tag carrying a quote and a `<`, and one comment past the length cap.
 
 **The open question is whether they help at all**, and neither setting answers it on its own. The
 feature has never run for real: production's `summaries` collection holds one document, so the

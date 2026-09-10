@@ -79,6 +79,55 @@ describe("validators name the file and the field", () => {
   });
 });
 
+describe("peer comments on a related summary", () => {
+  const manifestWith = (relatedSummaries: unknown[]) => ({
+    schemaVersion: 1,
+    name: "c",
+    createdAt: "now",
+    documents: [{
+      id: "a", file: "documents/a.json", source: "synthetic", contentSha256: "x",
+      computedModality: "empty", relatedSummaries
+    }]
+  });
+  const peerComment = {
+    commentId: "c1", commentUid: "student-2", content: "Say why it matters.",
+    tags: ["user"], ratings: { yes: 2, no: 1 }, updatedAt: 1756000000000
+  };
+
+  it("reads a validated comment back unchanged", () => {
+    const manifest = validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [peerComment] }]), "manifest.json");
+    expect(manifest.documents[0].relatedSummaries[0].peerComments).toEqual([peerComment]);
+  });
+
+  it("defaults to an empty list, so a corpus written before them reads unchanged", () => {
+    const manifest = validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {} }]), "manifest.json");
+    expect(manifest.documents[0].relatedSummaries[0].peerComments).toEqual([]);
+  });
+
+  it("keeps a comment that carries only a tag", () => {
+    const tagOnly = { ...peerComment, content: "" };
+    const manifest = validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [tagOnly] }]), "manifest.json");
+    expect(manifest.documents[0].relatedSummaries[0].peerComments[0].content).toBe("");
+  });
+
+  it("names the offending field when a count is not a number", () => {
+    expect(() => validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, ratings: { yes: "lots" } }] }]),
+      "manifest.json"))
+      .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.ratings\.yes must be a finite number/);
+  });
+
+  it("names the offending field when a tag is not a string", () => {
+    expect(() => validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, tags: [7] }] }]),
+      "manifest.json"))
+      .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.tags\[0\] must be a string/);
+  });
+});
+
 describe("experiment validation", () => {
   const context = {
     knownTextVariants: ["default", "minimal"],
@@ -172,7 +221,7 @@ describe("experiment validation", () => {
         imageMode: "puppeteer-full-height", imageSet: "every-other-tile" }))
         .toThrow(/imageSet must be one of full-document, per-tile, visual-tiles-only/);
       expect(validate({ extras: "extras-improved" }))
-        .toThrow(/extras must be one of all, none/);
+        .toThrow(/extras must be one of all, ai-counts, none/);
     });
 
     it("leaves an unset dimension unset, so defaults stay the caller's business", () => {

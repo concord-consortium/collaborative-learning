@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "name": "peer-comments",
+  "runs": [
+    {
+      "id": "mixed-extras-none",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "extras": "none",
+      "prompt": "categorize-design-mixed"
+    },
+    {
+      "id": "mixed-extras-ai-counts",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "extras": "ai-counts",
+      "prompt": "categorize-design-mixed"
+    },
+    {
+      "id": "mixed-extras-all",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "extras": "all",
+      "prompt": "categorize-design-mixed"
+    }
+  ]
+}

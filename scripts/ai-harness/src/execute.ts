@@ -182,12 +182,21 @@ function checkedImageBytes(file: string, expectedSha256: string): Buffer {
 /**
  * The related summaries a run sends, which is a dimension rather than a fact about the document.
  *
- * `all` sends the manifest's entries; `none` sends an empty list. Whether they help at all, and
- * whether any help comes from their content or their length, is unmeasured — see the README.
+ * `all` sends the manifest's entries; `ai-counts` sends them with their peer comments dropped, so
+ * the request carries what production sent before peer comments reached the prompt; `none` sends an
+ * empty list. Whether they help at all, and whether any help comes from their content or their
+ * length, is unmeasured — see the README.
  */
 export function relatedSummariesFor(run: ExperimentRun, document: ManifestDocument): RelatedSummary[] {
   const entries = (document.relatedSummaries ?? []) as unknown as RelatedSummary[];
-  return (run.extras ?? "all") === "none" ? [] : entries;
+  switch (run.extras ?? "all") {
+  case "none":
+    return [];
+  case "ai-counts":
+    return entries.map((entry) => ({ ...entry, peerComments: [] }));
+  case "all":
+    return entries;
+  }
 }
 
 /**
