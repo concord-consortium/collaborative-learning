@@ -6,10 +6,11 @@ import {
   FieldValue,
   VectorQuery
 } from "@google-cloud/firestore";
-import { AiAgreement, isAiAgreement } from "../../src/summary-types";
+import { AiAgreement, AiAgreementV2, isAiAgreement } from "../../src/summary-types";
 import { IEvaluationRequestContext, kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
+  PeerComment,
   RelatedSummary,
   buildImageMessages,
   buildMixedMessages,
@@ -42,7 +43,9 @@ export {
   categorizationResponseFormat,
   defaultAiPrompt
 };
-export type { AgreementInfo, Agreements, IAiPrompt, RelatedSummary } from "../../../shared/ai-analysis-messages";
+export type {
+  AgreementInfo, Agreements, IAiPrompt, PeerComment, RelatedSummary
+} from "../../../shared/ai-analysis-messages";
 
 export async function categorizeDocument(file: string, apiKey: string) {
   const imageLoading = fs.readFile(file).then((data) => data.toString("base64"));
@@ -219,47 +222,196 @@ export async function findRelatedSummaries(
       distanceMeasure: "EUCLIDEAN",
     });
   const snapshot = await query.get();
-  return mapRelatedSummaries(snapshot.docs.map((doc) => doc.data() as RelatedSummarySource));
+  const {relatedSummaries, stats} =
+    mapRelatedSummaries(snapshot.docs.map((doc) => doc.data() as RelatedSummarySource));
+  // Counts only, in every environment: what people wrote about each other must not reach the logs.
+  logger.info("Related summaries found", {found: snapshot.docs.length, stats});
+  return relatedSummaries;
 }
 
 /**
- * Which stored agreements are allowed to reach the prompt.
+ * The most rated human comments one related document may contribute.
+ *
+ * A cap so that one heavily discussed document cannot crowd everything else out of the prompt.
+ */
+const kMaxPeerCommentsPerSummary = 10;
+
+/**
+ * Whether an entry's rating value is one the app can produce.
  *
  * Rules validate rating values in `authed` only, and version-1 entries were stored with no value
- * check, so an out-of-enum value can already be in the collection — and `summaryContentParts` would
- * copy it into the prompt as a label. Ratings on peer comments are recorded with
- * `isAiComment: false` and deliberately not prompted yet.
+ * check, so an out-of-enum value can already be in the collection — and the prompt would copy it in
+ * as a label. Every entry that reaches the prompt, by either route below, passes this first.
  */
-function isPromptableAgreement(entry: AiAgreement): boolean {
-  if (!kRatingValues.includes(entry.value)) return false;
-  return isAiAgreement(entry);
+function hasValidValue(entry: AiAgreement): boolean {
+  return kRatingValues.includes(entry.value);
+}
+
+/**
+ * Whether an entry records a rating of a comment a person wrote.
+ *
+ * Only a version-2 entry can be one: a version-1 entry records agreement with the AI's summary by
+ * construction (see `summary-types`). Narrowing to that version is also what lets the grouping
+ * below read `commentId` and `raterUid`, which version 1 does not carry.
+ *
+ * `=== false` rather than "not true", matching `isAiAgreement`: an entry whose `isAiComment` is
+ * neither boolean belongs to neither group, so a malformed record is left out of the prompt rather
+ * than having its text sent as somebody's comment.
+ */
+function isPeerEntry(entry: AiAgreement): entry is AiAgreementV2 {
+  return entry.version === 2 && entry.isAiComment === false;
+}
+
+/**
+ * Whether a comment's ratings earn it a place in the prompt.
+ *
+ * True for every comment as written, because a comment is only grouped when somebody rated it. It
+ * is a named function because a stricter rule — a majority of `yes`, say — would go here and
+ * nowhere else.
+ */
+function qualifiesForPrompt(comment: PeerComment): boolean {
+  return Object.values(comment.ratings).some((count) => count > 0);
+}
+
+/** How many people rated a comment, across all values. */
+function totalRatings(comment: PeerComment): number {
+  return Object.values(comment.ratings).reduce((sum, count) => sum + count, 0);
+}
+
+/**
+ * When a rating was made, treating a missing time as the beginning of time.
+ *
+ * `updatedAt` is required on the type but these entries are read back from Firestore, where one can
+ * lack it; `onCommentRated` guards the same field the same way before moving a timestamp forwards.
+ * Without the default, a single entry missing the field makes every comparison in its group false,
+ * and the choice below falls back to the order the entries came out of the map — which is the thing
+ * the tie-break exists to prevent.
+ */
+function ratedAt(entry: AiAgreementV2): number {
+  return entry.updatedAt ?? 0;
+}
+
+/**
+ * Turns one document's peer entries into one record per comment.
+ *
+ * An entry is per rater, so a comment three people rated arrives as three entries carrying three
+ * copies of its text — and the copies can differ, since each was captured when that person rated.
+ * One entry supplies the text and tags: the one with the latest `updatedAt`, ties broken by the
+ * lower `raterUid`.
+ *
+ * That rule gives a stable choice, not the newest wording, and the stored data cannot give the
+ * newest wording: `onCommentRated` bumps an existing rater's `updatedAt` to the current event's
+ * time while leaving that rater's older text in place, so two entries can hold the same timestamp
+ * and different wording.
+ */
+function groupPeerComments(entries: AiAgreementV2[]): PeerComment[] {
+  const byCommentId = new Map<string, AiAgreementV2[]>();
+  for (const entry of entries) {
+    const group = byCommentId.get(entry.commentId);
+    if (group) {
+      group.push(entry);
+    } else {
+      byCommentId.set(entry.commentId, [entry]);
+    }
+  }
+
+  return Array.from(byCommentId, ([commentId, group]) => {
+    const ratings: PeerComment["ratings"] = {};
+    for (const entry of group) {
+      ratings[entry.value] = (ratings[entry.value] ?? 0) + 1;
+    }
+    const source = group.reduce((best, entry) =>
+      ratedAt(entry) > ratedAt(best) ||
+        (ratedAt(entry) === ratedAt(best) && entry.raterUid < best.raterUid) ? entry : best);
+    return {
+      commentId,
+      commentUid: source.commentUid,
+      content: source.content,
+      tags: source.tags,
+      ratings,
+      // The chosen entry holds the latest timestamp, so this is the latest among the ratings.
+      updatedAt: ratedAt(source),
+    };
+  });
+}
+
+/**
+ * Orders comments by how much of the class stood behind them and keeps the first
+ * `kMaxPeerCommentsPerSummary`.
+ *
+ * `commentId` is the last sort key so that the same stored entries always send the same comments.
+ * Without it the cut would follow whatever order the entries came out of the map in.
+ */
+function selectPeerComments(comments: PeerComment[]): PeerComment[] {
+  return comments
+    .filter(qualifiesForPrompt)
+    .sort((a, b) =>
+      (b.ratings.yes ?? 0) - (a.ratings.yes ?? 0) ||
+      totalRatings(b) - totalRatings(a) ||
+      (a.commentId < b.commentId ? -1 : a.commentId > b.commentId ? 1 : 0))
+    .slice(0, kMaxPeerCommentsPerSummary);
+}
+
+/**
+ * How many entries one related document contributed at each stage of selection.
+ *
+ * Reported because nothing downstream can recover it: once the prompt is built, everything that
+ * was filtered out is gone.
+ */
+export interface RelatedSummaryStats {
+  /** Entries stored in the document's `aiAgreements` map. */
+  storedEntries: number;
+  /** Of those, ratings of the AI's comments carrying a usable value. */
+  aiEntries: number;
+  /** Of those, ratings of people's comments carrying a usable value. */
+  peerEntries: number;
+  /** Distinct comments those peer entries describe. */
+  peerComments: number;
+  /** Comments left after `qualifiesForPrompt` and the cap. */
+  sent: number;
 }
 
 /**
  * Maps the documents found by the related-summaries search into the entries injected into the AI
- * prompt. A document with an empty `aiAgreements` map still yields an entry; only a missing map is
- * skipped. A document whose entries are all filtered out by `isPromptableAgreement` is the same
- * case as an empty map. Exported for unit testing.
+ * prompt, and counts what each one contributed. A document with an empty `aiAgreements` map still
+ * yields an entry; only a missing map is skipped. A document whose entries are all filtered out is
+ * the same case as an empty map. `stats` has one element per returned entry, in the same order.
+ * Exported for unit testing.
  */
-export function mapRelatedSummaries(docs: RelatedSummarySource[]): RelatedSummary[] {
+export function mapRelatedSummaries(
+  docs: RelatedSummarySource[]
+): {relatedSummaries: RelatedSummary[]; stats: RelatedSummaryStats[]} {
   const relatedSummaries: RelatedSummary[] = [];
+  const stats: RelatedSummaryStats[] = [];
   for (const data of docs) {
     if (data.aiAgreements && typeof data.summary === "string" && data.summary.length > 0) {
-      const agreements = Object.values(data.aiAgreements)
-        .filter(isPromptableAgreement)
-        .reduce<Agreements>((acc, cur) => {
-          const value = cur.value;
-          acc[value] = acc[value] || [];
-          acc[value].push({content: cur.content, tags: cur.tags});
-          return acc;
-        }, {});
+      const storedEntries = Object.values(data.aiAgreements);
+      const valid = storedEntries.filter(hasValidValue);
+      const aiEntries = valid.filter(isAiAgreement);
+      const peerEntries = valid.filter(isPeerEntry);
+      const agreements = aiEntries.reduce<Agreements>((acc, cur) => {
+        const value = cur.value;
+        acc[value] = acc[value] || [];
+        acc[value].push({content: cur.content, tags: cur.tags});
+        return acc;
+      }, {});
+      const peerComments = groupPeerComments(peerEntries);
+      const sent = selectPeerComments(peerComments);
       relatedSummaries.push({
         summary: data.summary,
         agreements,
+        peerComments: sent,
+      });
+      stats.push({
+        storedEntries: storedEntries.length,
+        aiEntries: aiEntries.length,
+        peerEntries: peerEntries.length,
+        peerComments: peerComments.length,
+        sent: sent.length,
       });
     }
   }
-  return relatedSummaries;
+  return {relatedSummaries, stats};
 }
 
 /**

@@ -25,7 +25,7 @@ const emptySchemaPrompt: IAiPrompt = {
 };
 
 function makeRelatedSummary(summary: string, agreements: Partial<Agreements>): RelatedSummary {
-  return { summary, agreements: agreements as Agreements };
+  return { summary, agreements: agreements as Agreements, peerComments: [] };
 }
 
 describe("ai-analysis-messages", () => {

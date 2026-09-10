@@ -90,6 +90,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
     const relatedSummary: RelatedSummary = {
       summary: "A peer's work, found by the lookup.",
       agreements: {yes: [{content: "Ada said something.", tags: []}]},
+      peerComments: [],
     };
 
     // A CategorizeDeps whose OpenAI client records the request instead of sending it. Everything

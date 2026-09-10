@@ -25,9 +25,29 @@ export interface AgreementInfo {
  */
 export type Agreements = Partial<Record<RatingValue, AgreementInfo[]>>;
 
+/** One human comment on a related document, with what classmates said about it. */
+export interface PeerComment {
+  commentId: string;
+  commentUid: string;
+  content: string;
+  tags: string[];
+  /** One count per value people actually chose, following `Agreements`. */
+  ratings: Partial<Record<RatingValue, number>>;
+  /** Latest `updatedAt` among the comment's ratings. Carried, not yet sent. */
+  updatedAt: number;
+}
+
 export interface RelatedSummary {
   summary: string;
+  /** Ratings of the AI's comments on this document, grouped by value. */
   agreements: Agreements;
+  /**
+   * Rated human comments on this document, after selection.
+   *
+   * A separate field rather than more `agreements`, so that the counts of who agreed with the AI
+   * and the text people wrote reach the prompt as two things the reader cannot confuse.
+   */
+  peerComments: PeerComment[];
 }
 
 export const defaultAiPrompt: IAiPrompt = {
