@@ -31,6 +31,7 @@ const relatedSummary: RelatedSummary = {
 const documentMetadata: DocumentMetadata = {
   root: "demo", space: "AI", key: "testdoc1", context_id: "class1",
   unit: "vibe", investigation: "1", problem: "1.1", offeringId: "1234",
+  contextSource: "document",
 };
 
 function deps(overrides: Partial<CategorizeDeps> = {}): CategorizeDeps {
@@ -105,7 +106,7 @@ describe("the prompt-text logging param", () => {
   });
 
   const categorize = () => categorizeRepresentations(
-    {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, deps());
+    {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, undefined, deps());
 
   it("logs nothing when the param is unset, which is what production is", async () => {
     // An unset param reads back as "", not as the declared default, so this is the production case.
@@ -143,7 +144,7 @@ describe("the prompt-text logging param", () => {
     process.env[variable] = "on";
 
     await categorizeRepresentations(
-      {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt,
+      {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, undefined,
       deps({findRelatedSummaries: jest.fn().mockResolvedValue([])}));
 
     expect(loggedPromptText()).toBeUndefined();
@@ -153,7 +154,7 @@ describe("the prompt-text logging param", () => {
     process.env[variable] = "on";
 
     await categorizeRepresentations(
-      {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, deps());
+      {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, undefined, deps());
 
     expect(loggedPromptText()).toBeUndefined();
   });

@@ -162,7 +162,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps, sent} = recordingDeps();
 
       await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       // The equality assertions above already pin every part to a shared builder. This says the
       // peer half of a related summary is carried there at all, which an equality between two
