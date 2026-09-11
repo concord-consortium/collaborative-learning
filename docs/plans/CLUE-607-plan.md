@@ -198,7 +198,7 @@ Use the `vibe` unit (Decision 6). Students can create personal documents in it w
 
 Answered 2026-09-04 by the requester, from the open questions in the first draft.
 
-1. **Only personal documents get this.** Learning logs and class-wide documents are skipped by the pipeline even though the same data would cover them. (Change 4.)
+1. **Only personal documents get this.** Learning logs and class-wide documents are skipped by the pipeline even though the same data would cover them. (Change 4.) The [Jira story](https://concord-consortium.atlassian.net/browse/CLUE-607) only specifies personal documents, so the work was scoped to only those. There wasn't an explicit UX or pedagogical reason for skipping learning logs and class-wide documents.
 2. **Old agreements stay on the record when a personal document is re-analyzed under a different problem.** May be revisited later; this is the rule for this story. (Change 5.)
 3. **`contextSource` is stored on the `summaries/` record**, not only on the `done` queue record. (Change 4.)
 4. **The request context does not carry `context_id`**, and the pipeline does not cross-check the document's class against the running class. (Change 1.)
