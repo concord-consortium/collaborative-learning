@@ -22,6 +22,22 @@ export function escapeJsonForScript(json: string): string {
     .replace(/\u2029/g, "\\u2029");
 }
 
+/**
+ * Escapes a value for use as element content, between a start tag and an end tag.
+ *
+ * Three characters, not the five an attribute needs. A quote and an apostrophe cannot do anything
+ * between tags — only an attribute is ended by one — and student prose is full of both, so escaping
+ * them buys nothing and turns "don\'t" into "don&#39;t" everywhere the text is read back: a logged
+ * prompt, a harness result, a review report. `&` is escaped so that text which already reads
+ * `&lt;` is not mistaken for a character the writer never typed.
+ */
+export function escapeHtmlText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 /** Escapes a value for use inside a double-quoted HTML attribute. */
 export function escapeHtmlAttribute(value: string): string {
   return value

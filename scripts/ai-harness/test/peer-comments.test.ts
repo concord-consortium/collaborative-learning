@@ -126,10 +126,7 @@ describe("the three conditions against a real corpus", () => {
     expect(body).not.toContain("<comment");
   });
 
-  // The three below fail until Task 3 adds the peer section to `summaryContentParts`. `it.failing`
-  // rather than a skip, so that finishing Task 3 turns them red and they get flipped to `it`
-  // instead of sitting green and unexercised.
-  it.failing("fences the peer comments under `all`", () => {
+  it("fences the peer comments under `all`", () => {
     const body = bodyFor("all", "text");
     expect(body).toContain("<comment");
     expect(body).toContain("did not say why the rows are equivalent");
@@ -137,13 +134,13 @@ describe("the three conditions against a real corpus", () => {
     expect(body).toContain("Other users agreed with this summary as follows");
   });
 
-  it.failing("gives the three conditions three different requests", () => {
+  it("gives the three conditions three different requests", () => {
     const bodies = ["all", "ai-counts", "none"].map(
       (extras) => bodyFor(extras as ExperimentRun["extras"], "text"));
     expect(new Set(bodies).size).toBe(3);
   });
 
-  it.failing("carries a document seeded from the committed sidecar into its request", () => {
+  it("carries a document seeded from the committed sidecar into its request", () => {
     // Checks the sidecar, `import`'s seeding and the message builder in one line: nothing here
     // hand-edits the manifest for `dataflow`.
     expect(bodyFor("all", "dataflow")).toContain("<comment");

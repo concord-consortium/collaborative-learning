@@ -90,7 +90,14 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
     const relatedSummary: RelatedSummary = {
       summary: "A peer's work, found by the lookup.",
       agreements: {yes: [{content: "Ada said something.", tags: []}]},
-      peerComments: [],
+      peerComments: [{
+        commentId: "c1",
+        commentUid: "student-2",
+        content: "A classmate wrote this about that document.",
+        tags: ["user"],
+        ratings: {yes: 2},
+        updatedAt: 1756000000000,
+      }],
     };
 
     // A CategorizeDeps whose OpenAI client records the request instead of sending it. Everything
@@ -149,6 +156,23 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       // is what lets the one code path stand in for two.
       expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, null, [], imageUrl));
       expect(sent[0].messages).toEqual(buildImageMessages(fullPrompt, imageUrl));
+    });
+
+    test("a rated human comment from the lookup reaches the request", async () => {
+      const {deps, sent} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+
+      // The equality assertions above already pin every part to a shared builder. This says the
+      // peer half of a related summary is carried there at all, which an equality between two
+      // empty lists would not.
+      const parts = (sent[0].messages[1].content as any[]).map((part: any) => part.text ?? "");
+      const related = parts.find((text: string) => text.includes("A peer's work"))!;
+      expect(related).toContain("A classmate wrote this about that document.");
+      expect(related).toContain("<comment tag=\"user\" ratings=\"yes: 2\">");
+      // And the agreement counts still travel as their own sentence.
+      expect(related).toContain("Other users agreed with this summary as follows: yes: 1");
     });
 
     test("related summaries are looked up only when a summary is being sent", async () => {
