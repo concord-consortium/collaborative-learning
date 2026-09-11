@@ -207,12 +207,17 @@ export async function findRelatedSummaries(
   const db = firestoreClient();
   const { root, space, key, context_id, unit, problem, investigation } = metadata;
 
-  // lookup related documents based on summary embedding that have ai agreements
+  // Documents in the same realm and problem that somebody has rated a comment on. The gate counts
+  // every rating, not only ratings of the AI's comments: a document whose human comments were rated
+  // has something to contribute even if nobody rated Ada there. `numAgreements >= numAiAgreements`
+  // always, so this is strictly wider than the gate it replaced and nothing that qualified before
+  // stops qualifying — though which five come back can change, since a newly eligible record that
+  // is nearer displaces one that used to be returned.
   const query: VectorQuery = db.collection('summaries')
     .where("root", "==", root)
     .where("space", "==", space)
     .where("key", "!=", key)
-    .where("numAiAgreements", ">", 0)
+    .where("numAgreements", ">", 0)
     .where("context_id", "==", context_id)
     .where("unit", "==", unit)
     .where("problem", "==", problem)
