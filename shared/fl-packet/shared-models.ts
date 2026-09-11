@@ -7,9 +7,14 @@
 // Tiles name these by model_id, many-to-many — the SharedVariables a simulator publishes are read
 // by the Dataflow program beside it.
 //
-// None of this is a second copy of the ai-summarizer's work: that summarizer names a dataset
-// without its rows, and describes a simulation from its static definition rather than from its
-// live variables. Neither the rows nor the readings reach any AI today.
+// Extraction is the ai-summarizer's normalize(), not a second copy of it: normalize() already
+// reads both shared model types this understands, and teaching it the rest benefits every AI
+// consumer rather than this one. What is left here is projection — choosing what a diagnostic
+// reader needs and dropping the rest.
+
+import {
+  NormalizedDataSet, NormalizedModel, NormalizedVariable, SharedModelMapEntry
+} from "../ai-summarizer/ai-summarizer-types";
 
 export type SharedModelType =
   "SharedDataSet" | "SharedVariables" | "SharedProgramData" | "SharedCaseMetadata";
@@ -36,22 +41,23 @@ export interface ProjectSharedModelsOptions {
 
 const kDefaultCaseSampleSize = 50;
 
-// Labels that say what a variable is FOR. The rest — decimalPlaces, className, __volatile__ — are
+// Labels that say what a variable is FOR. normalize() passes every label through, because which
+// ones matter is the consumer's call; here the rest — decimalPlaces, className, __volatile__ — are
 // rendering hints, and they were most of the raw bulk.
-function roleLabels(labels: unknown): string[] {
+function roleLabels(labels: string[] | undefined): string[] {
   if (!Array.isArray(labels)) return [];
-  return labels.filter((l): l is string =>
+  return labels.filter(l =>
     typeof l === "string" &&
     (l === "input" || l === "output" || l.startsWith("sensor:") || l.startsWith("live-output:")));
 }
 
-function projectVariables(model: any): Record<string, unknown> {
-  const variables = (model.variables ?? []).map((v: any) => {
+function projectVariables(vars: NormalizedVariable[]): Record<string, unknown> {
+  const variables = vars.map(v => {
     const out: Record<string, unknown> = {
-      id: String(v.id ?? ""),
+      id: v.id,
       // The name a student sees, not the internal key — naming a thing to a learner by its
       // internal identifier reads wrong, and the same reasoning put titles in the graph summary.
-      name: String(v.displayName ?? v.name ?? ""),
+      name: v.displayName ?? v.name ?? "",
       value: v.value,
     };
     if (v.unit) out.unit = v.unit;
@@ -62,65 +68,82 @@ function projectVariables(model: any): Record<string, unknown> {
   return { variables };
 }
 
-function projectDataSet(model: any, sampleSize: number): {
+function projectDataSet(ds: NormalizedDataSet, sampleSize: number): {
   content: Record<string, unknown>; title?: string;
 } {
-  const ds = model.dataSet ?? {};
-  const rawAttributes: any[] = ds.attributes ?? [];
-  const attributes = rawAttributes.map(a => {
-    const out: Record<string, unknown> = { id: String(a.id ?? ""), name: String(a.name ?? "") };
+  const attributes = ds.attributes.map(a => {
+    const out: Record<string, unknown> = { id: a.id, name: a.name };
     if (a.units) out.units = a.units;
+    if (a.formula) out.formula = a.formula;
     return out;
   });
 
-  // Values sit on the attributes as parallel arrays and `cases` holds the row identities, so a row
-  // is a zip across the attributes.
-  const caseCount = Array.isArray(ds.cases)
-    ? ds.cases.length
-    : rawAttributes.reduce((n, a) => Math.max(n, (a.values ?? []).length), 0);
-  const take = Math.min(caseCount, sampleSize);
-  const cases: Record<string, unknown>[] = [];
-  for (let i = 0; i < take; i++) {
-    const row: Record<string, unknown> = {};
-    rawAttributes.forEach(a => { row[String(a.name ?? "")] = (a.values ?? [])[i]; });
-    cases.push(row);
-  }
+  // normalize() zips the attributes' parallel value arrays into positional rows; a reader with no
+  // column order needs them named.
+  const take = Math.min(ds.numCases, sampleSize);
+  const cases = ds.data.slice(0, take).map(row => {
+    const out: Record<string, unknown> = {};
+    ds.attributes.forEach((a, i) => { out[a.name] = row[i]; });
+    return out;
+  });
 
-  const content: Record<string, unknown> = { attributes, case_count: caseCount, cases };
+  const content: Record<string, unknown> = { attributes, case_count: ds.numCases, cases };
   // Present only when true, so its absence is not a claim either way. case_count stays truthful
   // regardless, which is what makes the truncation visible rather than silent.
-  if (take < caseCount) content.cases_truncated = true;
-  return { content, title: ds.name ? String(ds.name) : undefined };
+  if (take < ds.numCases) content.cases_truncated = true;
+  return { content, title: ds.name || undefined };
 }
 
+/**
+ * Projects the shared models of one document.
+ *
+ * `normalized` supplies the content, but the raw `sharedModelMap` is what we walk: normalize()
+ * understands two of the four shared model types, and a model a tile references that we send empty
+ * is visibly different from one we never mentioned at all.
+ */
 export function projectSharedModels(
-  sharedModelMap: any, opts: ProjectSharedModelsOptions = {}
+  normalized: NormalizedModel, sharedModelMap: unknown, opts: ProjectSharedModelsOptions = {}
 ): ProjectSharedModelsResult {
   const sampleSize = opts.caseSampleSize ?? kDefaultCaseSampleSize;
   const shared_models: ProjectedSharedModel[] = [];
   const tileModelIds: Record<string, string[]> = {};
 
-  for (const [key, entry] of Object.entries((sharedModelMap ?? {}) as Record<string, any>)) {
+  const dataSetsByKey = new Map<string, NormalizedDataSet>();
+  normalized.dataSets.forEach(ds => {
+    if (ds.sharedDataSetId) dataSetsByKey.set(ds.sharedDataSetId, ds);
+  });
+  const varsByModel = new Map<string, NormalizedVariable[]>();
+  normalized.variables.forEach(v => {
+    if (!v.sharedModelId) return;
+    const list = varsByModel.get(v.sharedModelId) ?? [];
+    list.push(v);
+    varsByModel.set(v.sharedModelId, list);
+  });
+
+  const entries = Object.entries((sharedModelMap ?? {}) as Record<string, SharedModelMapEntry>);
+  for (const [key, entry] of entries) {
     const model = entry?.sharedModel;
     if (!model?.type) continue;
-    const modelId = String(model.id ?? key);
+    const modelId = model.id ?? key;
 
     let content: Record<string, unknown> = {};
     let title: string | undefined;
     if (model.type === "SharedVariables") {
-      content = projectVariables(model);
+      content = projectVariables(varsByModel.get(modelId) ?? []);
     } else if (model.type === "SharedDataSet") {
-      ({ content, title } = projectDataSet(model, sampleSize));
+      const ds = dataSetsByKey.get(key);
+      if (ds) ({ content, title } = projectDataSet(ds, sampleSize));
     }
     // Other shared-model types carry nothing we know how to project yet. They are still worth
-    // naming: a model a tile references but that we send empty is visibly different from one we
-    // never mentioned at all.
+    // naming, per the doc comment above.
 
-    const projected: ProjectedSharedModel = { model_id: modelId, type: model.type, content };
+    const projected: ProjectedSharedModel = {
+      model_id: modelId, type: model.type as SharedModelType, content
+    };
     if (title !== undefined) projected.title = title;
     shared_models.push(projected);
 
-    for (const tileId of (entry.tiles ?? []) as string[]) {
+    for (const tileId of entry.tiles ?? []) {
       (tileModelIds[tileId] ??= []).push(modelId);
     }
   }
