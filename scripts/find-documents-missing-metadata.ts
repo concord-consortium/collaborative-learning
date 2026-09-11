@@ -15,6 +15,8 @@
 
 import admin from "firebase-admin";
 import { QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { getOfferingIdFromFirebaseMetadata, getUserDocumentMetadataPath }
+  from "./lib/document-metadata-lookup.js";
 import { fetchPortalOffering } from "./lib/fetch-portal-entity.js";
 import { getFirebaseBasePath, getFirestoreBasePath, getProblemDetails, getScriptRootFilePath }
   from "./lib/script-utils.js";
@@ -52,7 +54,7 @@ const offeringInfo = {};
 async function updateBasedOnOffering(doc: QueryDocumentSnapshot) {
   const docdata = doc.data();
   if (docdata.context_id && docdata.uid && docdata.key) {
-    const offeringId = await getOfferingIdFromFirebaseMetadata(docdata.context_id, docdata.uid, docdata.key);
+    const offeringId = await getOfferingIdFromDocumentMetadata(docdata.context_id, docdata.uid, docdata.key);
     if (!offeringId) return false;
     if (offeringId in offeringInfo) {
       console.log("Already looked up offering info for", offeringId);
@@ -78,19 +80,15 @@ async function getOfferingInfo(offeringId: string) {
   return getProblemDetails(activity_url);
 }
 
-async function getOfferingIdFromFirebaseMetadata(context_id: string, user_id: string, key: string) {
-  // Path is like:
-  //  /authed/portals/portal_name/classes/context_id/users/user_id/documentMetadata/key
-  // and contains offeringId, etc.
-  const firebasePath = `${firebaseBasePath}/${context_id}/users/${user_id}/documentMetadata/${key}`;
+async function getOfferingIdFromDocumentMetadata(context_id: string, user_id: string, key: string) {
+  const firebasePath = getUserDocumentMetadataPath(firebaseBasePath, context_id, user_id, key);
   try {
-    const mdDoc = await admin.database().ref(firebasePath).once("value");
-    if (mdDoc.exists() && mdDoc.val()) {
-      return mdDoc.val().offeringId;
-    } else {
-      console.log(`No metadata found at ${firebasePath}`);
-      return undefined;
-    }
+    const lookup = await getOfferingIdFromFirebaseMetadata(
+      admin.database(), firebaseBasePath, context_id, user_id, key
+    );
+    if (lookup.status === "found") return lookup.offeringId;
+    if (lookup.status === "noMetadataNode") console.log(`No metadata found at ${firebasePath}`);
+    return undefined;
   } catch (error) {
     console.error(`Error fetching metadata at ${firebasePath}: ${error}`);
     return undefined;
