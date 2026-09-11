@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import fs from "node:fs/promises";
 import * as logger from "firebase-functions/logger";
+import { defineString } from "firebase-functions/params";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import {
   Firestore,
   FieldValue,
@@ -415,6 +417,41 @@ export function mapRelatedSummaries(
 }
 
 /**
+ * Whether the related-summary text is logged exactly as it was sent.
+ *
+ * The counts beside it are logged everywhere; this is the switch for the text itself, which is
+ * what people in the class wrote about each other's work. Only .env.local sets it, which the
+ * emulator reads and Firebase never deploys, so no deployed project has it.
+ *
+ * Read as exactly `"on"`, and nothing else. A param that is not set reads back as `""` at runtime:
+ * the declared default is what Firebase provisions, not what `value()` returns. So an unset param,
+ * a misspelt one and a `"true"` all leave the text out, which is the safe direction for a switch
+ * whose other position writes student prose to the logs.
+ */
+const promptTextLogging = defineString("AI_PROMPT_TEXT_LOGGING", {default: "off"});
+
+/**
+ * The related-summary parts of a built message, as text.
+ *
+ * Read back out of the message rather than rendered a second time from the entries, so that what
+ * is logged is what was sent — a fault in the builder then shows up in the log instead of being
+ * hidden by a second rendering that happens to be correct. `summaryContentParts` emits the
+ * document's own summary first and then one part per related summary, and the pictures come after
+ * every text part, so the related ones are the last `count` text parts. Exported for unit testing.
+ */
+export function relatedSummaryTextParts(
+  messages: ChatCompletionMessageParam[], count: number
+): string[] {
+  if (count <= 0) return [];
+  const content = messages[messages.length - 1]?.content;
+  if (!Array.isArray(content)) return [];
+  return content
+    .filter((part): part is {type: "text"; text: string} => part.type === "text")
+    .map((part) => part.text)
+    .slice(-count);
+}
+
+/**
  * What a categorization request resolves to.
  *
  * Taken from `categorizeUrl` rather than written as `ChatCompletion`, which is the unparsed shape:
@@ -563,6 +600,16 @@ export async function categorizeRepresentations(
       }
     };
     const messages = buildMessages();
+
+    // Off in production. The counts for these same entries are logged unconditionally by
+    // findRelatedSummaries; this is the text, and it is only for checking in the emulator that
+    // the agreement counts and the peer comments arrive as two separate things.
+    if (promptTextLogging.value() === "on") {
+      const parts = relatedSummaryTextParts(messages, relatedSummaries.length);
+      if (parts.length > 0) {
+        logger.info("Related summary prompt text", {firestoreDocumentPath, parts});
+      }
+    }
 
     const completion = await deps.createOpenAI(apiKey).chat.completions.parse({
       model: "gpt-4o-mini",

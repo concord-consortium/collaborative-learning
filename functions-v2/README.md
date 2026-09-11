@@ -71,6 +71,14 @@ The tutor also reads its model from an `OPENAI_MODEL` param, which every other f
 
 **Use `.env.local`, not `.env`.** The Firebase CLI reads `.env` at deploy time and applies its values to the deployed functions of whichever project is selected — so a local `OPENAI_MODEL` in `.env` would decide which model production calls. `.env.local` is the one Firebase reserves for emulation and never deploys.
 
+A per-project file — `.env.collaborative-learning-staging`, `.env.collaborative-learning-ec215` — is applied only when deploying to that project, which is how a setting can be true of staging and not of production.
+
+**`AI_PROMPT_TEXT_LOGGING` — for the emulator, and off everywhere else.** The analysis pipeline always logs how many agreement entries and peer comments each related summary contributed; those are counts, with no text and nobody's id, and they are on everywhere. This param additionally logs the related-summary text *as it was sent to OpenAI* — the stored summary, the agreement counts sentence and the fenced peer comments together — so that a person can confirm that rated human comments arrive intact and separate from the counts. It writes what people in the class wrote about each other's work, so:
+
+- Set it in `.env.local`, which the emulator reads and Firebase never deploys. **It must never appear in `.env` or in any `.env.collaborative-learning-*` file.** No deployed environment needs it: the emulator runs the whole read path, and the one thing the emulator cannot check — that a composite index exists — shows in the count-only log line, not in the text.
+- It is read as exactly `on`. Absent, `off`, `true`, `ON` and everything else leave the text out. An unset param reads back as `""` at runtime rather than as its declared default, so absent is off by construction.
+- Remove it from `.env.local` when the check is done, so the next emulator run is quiet.
+
 In this approach the functions are running inside of Jest and they connect to the emulated Firestore and Realtime database services.
 
 The tests use `firebase-functions-test`. This package does a little setup of environment variables so when the functions run they will connect to the emulator. This package also provides a way to mock some standard events and wraps the calls to the functions to emulate how they would be called in the cloud.  This is a simple and efficient way of testing the basic functionality without loading the function code into the emulator itself. The downside is that the functions are not responding to real events in Firestore or realtime database. If they are http functions they are not receiving the actual request event.
