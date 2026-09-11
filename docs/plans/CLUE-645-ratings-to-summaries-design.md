@@ -386,7 +386,14 @@ else in this design changes.
    `isAiComment: false`; wiring it into the prompt is a separate follow-up gated on prompt-injection
    fencing, selection criteria (which values, minimum bar, Ada exclusion), a length cap, and sign-off
    on sending student prose to OpenAI in bulk (#6, #8). *(2026-08-24; sequencing of the 2026-08-20
-   decision, to be confirmed with the requester.)*
+   decision. Confirmed with the requester in late August 2026: all comment ratings are to matter,
+   AI- and human-authored alike; the follow-up that wires peer ratings into the prompt is planned
+   work, outlined in 2026-09-02-peer-ratings-outline.md. **The "how" is now designed and built:
+   see `CLUE-660-plan.md`.** Ratings of human comments reach the prompt as the comment itself —
+   text, tag and a count per rating value — fenced and escaped, kept separate from the AI agreement
+   counts per Resolved Decision 1, and the lookup gate moved from `numAiAgreements` to
+   `numAgreements` so a document qualifies on peer ratings alone. Nothing this decision records
+   about *storage* changed.)*
 7. **Summary drift on re-analysis is accepted.** Re-analysis refreshes `summary`/`summaryEmbedding`
    in place while preserving agreements, so an older agreement sits attached to newer summary text.
    Accepted because only per-value counts reach the prompt. The known fix if this stops being

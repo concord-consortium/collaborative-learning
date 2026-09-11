@@ -172,6 +172,14 @@ Two things about that command:
 creation is asynchronous and is logged only at debug level. Check the Firebase console, or run a
 query that needs it: while it builds, Firestore says so in the error text.
 
+**`summaries` currently carries two composite indexes on purpose.** They differ in one field: the
+older one ends `numAiAgreements`, the newer one `numAgreements`. The related-summaries lookup moved
+to `numAgreements` so a document can be found on ratings of human comments alone (CLUE-660), and the
+older index is kept only so the functions already deployed keep working until the new one has been
+built and the new functions verified. **Remove the `numAiAgreements` one in a follow-up, once that
+is done** — it is the case the second bullet above warns about, where the index the deployed
+functions depend on is the one the delete prompt offers to remove.
+
 ## Differences with functions-v1
 
 - in `v2` the firebase-tools are a devDependency: it is not necessary to install them globally
