@@ -558,9 +558,14 @@ Not declared in `DBBaseDocumentMetadata` — an undeclared child of the metadata
 
 - **Stores:** RTDB only
 - **Location:** `/{classPath}/users/{uid}/documentMetadata/{key}/evaluation/{evaluator}` —
-  `{ aiPrompt?, timestamp }`
+  `{ aiPrompt?, context?, timestamp }`
 - **Applies to:** documents submitted for AI analysis; the `{evaluator}` segment comes from
   `appConfig.aiEvaluation`
+- **`context`:** `{ unit, investigation, problem, offeringId }`, all strings, the problem the student
+  was running when they asked. Written for every document type, but only once the app has loaded a
+  real unit and resolved a real problem; while either is still the app's placeholder, no `context`
+  is written at all. The pipeline uses it only for personal documents, whose own metadata record
+  names no problem; see [firestore-schema.md](../firestore-schema.md#summaries).
 - **Runtime:** not surfaced on any model
 - **Updated by:** [firebase.ts:198](../../src/lib/firebase.ts#L198)
 - **Reactive:** No — consumed server-side by the `on-analyzable-doc-written` cloud function trigger.

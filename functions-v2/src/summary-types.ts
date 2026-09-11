@@ -73,6 +73,11 @@ export interface Summary {
   investigation: string;
   problem: string;
   offeringId: string;
+  /**
+   * Where `unit`, `investigation` and `problem` came from. Optional because records written before
+   * this field existed do not have it.
+   */
+  contextSource?: "document" | "request";
   summary: string;
   summaryEmbedding: VectorValue;
   analyzedAt: number;

@@ -15,6 +15,7 @@ import {
 } from "../../shared/ai-analysis-messages";
 import * as categorizeDocumentModule from "../lib/src/ai-categorize-document";
 import {CategorizeDeps, DocumentMetadata, categorizeRepresentations} from "../lib/src/ai-categorize-document";
+import {IEvaluationRequestContext} from "../../shared/shared";
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -80,7 +81,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
     const imageUrl = "https://example.com/image.png";
     const documentMetadata: DocumentMetadata = {
       root: "demo", space: "AI", key: "testdoc1", context_id: "class1",
-      unit: "vibe", investigation: "1", problem: "1.1", offeringId: "1234",
+      unit: "vibe", investigation: "1", problem: "1", offeringId: "1234", contextSource: "document",
     };
     const defaultEmbedding = [0.1, 0.2, 0.3];
     // Non-empty by default, so an assertion that the built messages carry it is the difference
@@ -119,7 +120,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps, sent} = recordingDeps();
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(result.messageShape).toBe("mixed");
       expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [relatedSummary], imageUrl));
@@ -130,7 +131,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps, sent} = recordingDeps();
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(result.messageShape).toBe("summary-only");
       expect(sent[0].messages).toEqual(buildSummaryMessages(fullPrompt, summary, [relatedSummary]));
@@ -140,7 +141,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps, sent} = recordingDeps();
 
       const result = await categorizeRepresentations(
-        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(result.messageShape).toBe("image-only");
       // The mixed builder with a null summary produces the image-only message. Pinning both here
@@ -153,7 +154,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps} = recordingDeps();
 
       const result = await categorizeRepresentations(
-        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
       // An image-only run pays for no embedding and reads no metadata, so it also reports nothing
@@ -169,7 +170,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps} = recordingDeps({getEmbeddings: jest.fn().mockResolvedValue(embedding)});
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.getEmbeddings).toHaveBeenCalledTimes(1);
       expect(deps.getEmbeddings).toHaveBeenCalledWith(summary, "key");
@@ -178,13 +179,26 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       expect(result.documentMetadata).toEqual(documentMetadata);
     });
 
+    // The metadata read is the only thing that uses the context, so this covers the whole wiring.
+    test("the request context is handed to the metadata read", async () => {
+      const {deps} = recordingDeps();
+      const requestContext: IEvaluationRequestContext = {
+        unit: "vibe", investigation: "1", problem: "1", offeringId: "1234",
+      };
+
+      await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, requestContext, deps);
+
+      expect(deps.readDocumentMetadata).toHaveBeenCalledWith("demo/AI/documents/testdoc1", requestContext);
+    });
+
     test("no embedding means no lookup and no vector to store, and the run still completes", async () => {
       // getEmbeddings resolves undefined on any OpenAI error. A query vector of undefined throws
       // from findNearest, and a stored one would persist as a zero-dimension vector.
       const {deps, sent} = recordingDeps({getEmbeddings: jest.fn().mockResolvedValue(undefined)});
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
       expect(result.summaryEmbedding).toBeUndefined();
@@ -196,7 +210,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps} = recordingDeps({getEmbeddings: jest.fn().mockResolvedValue([])});
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
       expect(result.summaryEmbedding).toBeUndefined();
@@ -209,7 +223,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       });
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
@@ -228,7 +242,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       });
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
       expect(result.documentMetadata).toBeUndefined();
@@ -242,7 +256,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       });
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(result.completion).toBeDefined();
       expect(result.documentMetadata).toBeUndefined();
@@ -257,7 +271,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       });
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(result.documentMetadata).toEqual(documentMetadata);
       expect(result.summaryEmbedding).toEqual(defaultEmbedding);
@@ -271,7 +285,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       });
 
       const result = await categorizeRepresentations(
-        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps);
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(result.completion).toBeDefined();
       expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
@@ -281,7 +295,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       const {deps, sent} = recordingDeps();
 
       await expect(categorizeRepresentations(
-        {summary: null, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, deps))
+        {summary: null, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps))
         .rejects.toThrow("no representation to send");
       expect(sent).toHaveLength(0);
     });

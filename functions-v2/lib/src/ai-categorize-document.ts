@@ -7,7 +7,7 @@ import {
   VectorQuery
 } from "@google-cloud/firestore";
 import { AiAgreement, isAiAgreement } from "../../src/summary-types";
-import { kRatingValues } from "../../../shared/shared";
+import { IEvaluationRequestContext, kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
   RelatedSummary,
@@ -104,12 +104,14 @@ export interface DocumentMetadata {
   investigation: string;
   problem: string;
   offeringId: string;
+  /** Where the unit, investigation and problem came from. Stored on the summary and `done` records. */
+  contextSource: "document" | "request";
 }
 
 /**
- * Why a document yielded no metadata. The two are worth telling apart: a personal document has no
- * class or problem and reports `no-context` on every run, where `no-metadata` means a document that
- * should have been readable was not.
+ * Why a document yielded no metadata. The two are worth telling apart: a document with no class or
+ * problem, and no request context to stand in for one, reports `no-context`, where `no-metadata`
+ * means a document that should have been readable was not.
  */
 export type MetadataGap = "no-context" | "no-metadata";
 
@@ -126,8 +128,13 @@ export type DocumentMetadataResult =
  *
  * `offeringId` is normalized because it is optional on a metadata document while the `summaries`
  * record stores it unconditionally, and `undefined` cannot be written to Firestore.
+ *
+ * `requestContext` stands in for the curriculum fields of a personal document, which has none of
+ * its own. It is ignored for every other kind of document.
  */
-export async function readDocumentMetadata(firestoreDocumentPath: string): Promise<DocumentMetadataResult> {
+export async function readDocumentMetadata(
+  firestoreDocumentPath: string, requestContext?: IEvaluationRequestContext
+): Promise<DocumentMetadataResult> {
   // `{root}/{space}/documents/{docId}`, as built by on-analyzable-doc-written.
   const segments = firestoreDocumentPath.split("/");
   if (segments.length !== 4 || segments[2] !== "documents") {
@@ -142,8 +149,8 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
     logger.warn(`Document ${firestoreDocumentPath} does not exist`);
     return {gap: "no-metadata"};
   }
-  const { key, context_id, unit, problem, investigation, offeringId } = document.data()!;
-  logger.info("Document data", { key, context_id, unit, problem, investigation });
+  const { key, type, context_id, unit, problem, investigation, offeringId } = document.data()!;
+  logger.info("Document data", { key, type, context_id, unit, problem, investigation });
 
   // Typed, not just present: `getSummaryPath` escapes the key with a string method, so a non-string
   // throws where every other bad value skips. Clients can write metadata documents directly in the
@@ -153,10 +160,20 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
     return {gap: "no-metadata"};
   }
 
-  if (!context_id || !unit || !problem || !investigation) {
+  // A personal document's record has no curriculum fields, so the request is its only context.
+  // "personal" is `PersonalDocument` in src/models/document/document-types.ts.
+  const fromRequest = type === "personal" ? requestContext : undefined;
+  const filledUnit = unit || fromRequest?.unit;
+  const filledProblem = problem || fromRequest?.problem;
+  const filledInvestigation = investigation || fromRequest?.investigation;
+  const filledOfferingId = offeringId || fromRequest?.offeringId;
+  // `offeringId` does not count towards this: the lookup does not filter on it.
+  const filledFromRequest = !!fromRequest && (!unit || !problem || !investigation);
+
+  if (!context_id || !filledUnit || !filledProblem || !filledInvestigation) {
     logger.info("Skipping related summary lookup. " +
-      "Document doesn't have a complete context for finding related summaries. " +
-      "Personal documents don't have this context. ");
+      "Document doesn't have a complete context for finding related summaries, " +
+      "and the evaluation request didn't supply one. ");
     return {gap: "no-context"};
   }
 
@@ -165,10 +182,11 @@ export async function readDocumentMetadata(firestoreDocumentPath: string): Promi
     space,
     key,
     context_id,
-    unit,
-    problem,
-    investigation,
-    offeringId: typeof offeringId === "string" ? offeringId : "",
+    unit: filledUnit,
+    problem: filledProblem,
+    investigation: filledInvestigation,
+    offeringId: typeof filledOfferingId === "string" ? filledOfferingId : "",
+    contextSource: filledFromRequest ? "request" : "document",
   }};
 }
 
@@ -325,6 +343,7 @@ export async function categorizeRepresentations(
   apiKey: string,
   firestoreDocumentPath: string,
   aiPrompt = defaultAiPrompt,
+  requestContext?: IEvaluationRequestContext,
   deps: CategorizeDeps = defaultCategorizeDeps
 ): Promise<CategorizeResult> {
   const { summary, imageUrl } = representations;
@@ -362,7 +381,7 @@ export async function categorizeRepresentations(
     if (summary !== null) {
       try {
         ({metadata: documentMetadata, gap: metadataGap} =
-          await deps.readDocumentMetadata(firestoreDocumentPath));
+          await deps.readDocumentMetadata(firestoreDocumentPath, requestContext));
         if (documentMetadata) {
           // getEmbeddings resolves undefined on any OpenAI error, and neither use may see it: a
           // query vector of undefined throws from findNearest, and a stored one would persist as a
