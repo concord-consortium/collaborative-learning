@@ -34,7 +34,7 @@ interface PatchSegment {
 /**
  * Build the list of patches for a single history entry that a tree
  * would receive in a given direction, in the same order and record
- * ordering that goToHistoryEntry uses when batching. Used to
+ * ordering that goToHistoryEntryPosition uses when batching. Used to
  * reconstruct patches without needing the onPatch-collected inverses.
  */
 function getEntryPatchesForTree(
@@ -252,7 +252,9 @@ export const TreeManager = types
     self.historyManager = manager;
   },
 
-  setNumHistoryEntriesApplied(value: number) {
+  // Undefined means the position is not known yet, which is how it is left while
+  // setNumHistoryEntriesAppliedFromFirestore looks up the document's last entry.
+  setNumHistoryEntriesApplied(value: number | undefined) {
     self.numHistoryEventsApplied = value;
   },
 
@@ -524,7 +526,7 @@ export const TreeManager = types
     // after the finish call.
   }),
 
-  goToHistoryEntry: flow(function* goToHistoryEntry(
+  goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(
                                       newHistoryPosition: number) {
     const trees = Object.values(self.trees);
 

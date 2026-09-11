@@ -167,6 +167,12 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
   componentDidUpdate(prevProps: IProps) {
     if (prevProps.document !== this.props.document) {
       this.maybeUpdateHistoryDocument();
+      // The store hands out a history request once and then forgets it, so an id read for an
+      // earlier document must not be applied to this one. checkForHistoryRequest only ever
+      // sets the id, so nothing else would drop it.
+      if (this.state.requestedHistoryId !== undefined) {
+        this.setState({ requestedHistoryId: undefined });
+      }
     }
     this.checkForHistoryRequest();
   }

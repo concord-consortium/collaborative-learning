@@ -8,6 +8,10 @@ import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./h
 import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 
+const seekIncompleteMessage = (historyId: string) =>
+  `Could not show this document at the requested point in its history (id: ${historyId}): ` +
+  "some of its history could not be replayed.";
+
 interface IFirestoreHistoryInfo {
   documentPath: string;
   lastEntryIndex: number;
@@ -58,6 +62,9 @@ export class FirestoreHistoryManager {
   savedLastHistoryEntryId: string | undefined;
   onContentDrift: ((message: string) => void) | undefined;
   driftChecked = false;
+  // Why a requested history entry could not be shown, for the playback UI to
+  // display. Undefined when no request has failed.
+  historyEntryRequestError = undefined as string | undefined;
 
   constructor({
     firestore,
@@ -85,9 +92,15 @@ export class FirestoreHistoryManager {
     makeObservable(this, {
       historyError: observable,
       setHistoryError: action,
+      historyEntryRequestError: observable,
+      setHistoryEntryRequestError: action,
       historyStatus: computed,
       historyStatusString: computed
     });
+  }
+
+  setHistoryEntryRequestError(message: string | undefined) {
+    this.historyEntryRequestError = message;
   }
 
   setHistoryError(error: any) {
@@ -289,11 +302,17 @@ export class FirestoreHistoryManager {
   }
 
   async moveToHistoryEntryAfterLoad(historyId: string) {
+    // Any message on screen describes a request this one replaces, and the wait below can take
+    // 30 seconds, so drop it before starting rather than when this request resolves.
+    this.setHistoryEntryRequestError(undefined);
+
     // NO_HISTORY is the INITIAL status, not a terminal one — a freshly constructed manager reports it
     // before the Firestore query has run. So we must wait for the history to actually load (or error),
     // not stop on NO_HISTORY, or we'd give up before the entries arrive and never seek. A bounded
     // timeout avoids leaking the reaction if the load never completes (e.g. a genuinely empty document,
     // which stays NO_HISTORY forever).
+    const historyNotLoadedMessage =
+      "Could not load this document's history, so it could not be shown at the requested point.";
     try {
       await when(
         () => this.historyStatus === HistoryStatus.HISTORY_LOADED ||
@@ -303,19 +322,45 @@ export class FirestoreHistoryManager {
     } catch {
       console.warn("moveToHistoryEntryAfterLoad: history did not load within timeout; status:",
         this.historyStatus);
+      this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
     if (this.historyStatus !== HistoryStatus.HISTORY_LOADED) {
       console.warn("moveToHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
+      this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
-    // "first" is the sentinel logDocumentEvent emits for a change made before the document had any
-    // history entry, so it never resolves via findHistoryEntryIndex; it maps to position 0.
-    const entry = historyId === "first" ? 0 : this.treeManager.findHistoryEntryIndex(historyId);
-    if (entry >= 0) {
-      this.treeManager.goToHistoryEntry(entry);
-    } else {
-      console.warn("Did not find history entry with id: ", historyId);
+    // goToHistoryEntryPosition takes a position, which counts applied entries: position p is the
+    // document with entries 0..p-1 applied. A historyId names the entry the document had reached,
+    // so the moment it names is the position that includes it, one past its index.
+    // "first" is the sentinel logDocumentEvent emits for a change made before the document had
+    // any entry at all, which is position 0.
+    let position = 0;
+    if (historyId !== "first") {
+      const index = this.treeManager.findHistoryEntryIndex(historyId);
+      if (index < 0) {
+        console.warn("Did not find history entry with id: ", historyId);
+        this.setHistoryEntryRequestError(
+          `Could not find the requested point in this document's history (id: ${historyId}).`);
+        return;
+      }
+      position = index + 1;
+    }
+
+    // goToHistoryEntryPosition stops at the last position it could apply, so where it landed
+    // has to be checked.
+    try {
+      await this.treeManager.goToHistoryEntryPosition(position);
+    } catch (error) {
+      console.warn("moveToHistoryEntryAfterLoad: seek failed for id:", historyId, error);
+      this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
+      return;
+    }
+    // Nothing to report on success: the message was cleared before the request started.
+    if (this.treeManager.numHistoryEventsApplied !== position) {
+      console.warn("moveToHistoryEntryAfterLoad: seek stopped at",
+        this.treeManager.numHistoryEventsApplied, "instead of", position, "for id:", historyId);
+      this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
     }
   }
 
