@@ -9,10 +9,16 @@
 //   conversation — the prose reply, token by token
 //   display      — a clue.response_packet.v2, streamed as JSON text the same way
 //
-// They say the same thing at different grain: across eleven captured streams the conversation text
-// is identical to the packet's own student.message. The packet is the one to believe, because it
-// is the only one carrying the directives; the prose is what a human would read if it failed to
-// parse.
+// They are NOT two encodings of one reply, and assuming so costs the student the most important
+// part of it. Across eleven captured streams the two agree nine times; in the other two the prose
+// is the fuller form, folding in the packet's one_next_action and a closing question — and in one
+// of those it rewrites the tail of student.message rather than appending to it.
+//
+// So each part is authoritative for something different. The prose is the reply to show the
+// student: it is what the diagnostic composed for them to read, and one_next_action is the
+// productive-struggle invariant the whole packet is built around. The packet is authoritative for
+// the directives, which appear nowhere else. Taking student.message as the reply would silently
+// drop the next action; taking the prose as the whole answer would silently drop the highlights.
 
 export interface SseEvent {
   type: string;
