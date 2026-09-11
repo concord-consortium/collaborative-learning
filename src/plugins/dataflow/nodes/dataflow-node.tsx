@@ -13,6 +13,8 @@ import { ControlNode } from "./control-node";
 import { ReteManager } from "../rete/rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
 import { EditableNodeName } from "./editable-node-name";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { highlightClassesFor } from "../../../models/highlights/highlight-classes";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -181,17 +183,29 @@ export const CustomDataflowNode = observer(
   // render — keeps this reactive to collapse/expand and membership changes.
   const inCollapsedGroup = !!reteManager?.isNodeInCollapsedGroup(id);
 
-  const dynamicClasses = classNames({
-    "selected": data.selected,
-    "gate-active": node instanceof ControlNode && node.model.gateActive,
-    "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
-    "plot-open": showPlot,
-    "collapsed-hidden": inCollapsedGroup,
-  });
+  // Keep these reads in the render body: objectHighlightState is memoized only while a reaction
+  // observes it, so hoisting into a useMemo or callback makes every node re-resolve the document.
+  // getDocumentContentFromNode returns undefined for detached trees (tests, standalone editors).
+  const tileId = reteManager?.tileId;
+  const documentContent = getDocumentContentFromNode(model);
+  const emphasis = tileId ? documentContent?.objectHighlightState(tileId, id) : undefined;
+
+  const dynamicClasses = classNames(
+    "node",
+    model.type.toLowerCase().replace(/ /g, "-"),
+    {
+      "selected": data.selected,
+      "gate-active": node instanceof ControlNode && node.model.gateActive,
+      "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
+      "plot-open": showPlot,
+      "collapsed-hidden": inCollapsedGroup,
+      ...highlightClassesFor(emphasis),
+    }
+  );
 
   return (
     <div
-      className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
+      className={dynamicClasses}
       data-testid="node"
       tabIndex={0}
       role="group"

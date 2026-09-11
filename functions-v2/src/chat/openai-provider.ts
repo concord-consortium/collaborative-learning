@@ -36,7 +36,7 @@ export function createOpenAIProvider(args: {
         await installDeveloperPrompt(openai, conversationId, item);
       }
 
-      const {userText} = await createTutorResponse(openai, {model, conversationId, input: turn.input});
+      const reply = await createTutorResponse(openai, {model, conversationId, input: turn.input});
 
       // only NOW (developer items written + response succeeded) is conversationId/
       // problemInstalled/seq earned; the drain persists them batched with the cursor so they
@@ -52,7 +52,7 @@ export function createOpenAIProvider(args: {
         parentUpdate.seq = turn.seq;
       }
 
-      return {assistantText: userText, parentUpdate};
+      return {assistantText: reply.userText, highlights: reply.highlights, parentUpdate};
     },
   };
 }

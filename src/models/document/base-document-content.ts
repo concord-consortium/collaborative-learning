@@ -33,11 +33,9 @@ import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { REMOTE_COMMENT, PendingComment } from "./document-comments-manager";
 
 /**
- * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
- * - BaseDocumentContentModel
- * - DocumentContentModelWithAnnotations
- * - DocumentContentModelWithTileDragging
- * - DocumentContentModel
+ * This is one part of the DocumentContentModel. See the doc comment on
+ * DocumentContentModel in document-content.ts for the full list of parts and
+ * why the model is split this way.
  *
  * This file contains the most fundamental views and actions.
  */

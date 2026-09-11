@@ -31,7 +31,7 @@ describe("createOpenAIProvider", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     createConversation.mockResolvedValue("conv_new");
-    createTutorResponse.mockResolvedValue({userText: "What do you notice about the sensor?"});
+    createTutorResponse.mockResolvedValue({userText: "What do you notice about the sensor?", highlights: []});
   });
 
   it("creates a conversation and installs the prompt and problem on a first turn", async () => {
@@ -99,5 +99,19 @@ describe("createOpenAIProvider", () => {
       .rejects.toThrow("install failed");
 
     expect(createTutorResponse).not.toHaveBeenCalled();
+  });
+
+  // The seam carries the structured half of the reply, not just its prose. Dropping it here is
+  // invisible from the client's side — the tutor simply stops pointing at anything — so the
+  // pass-through is pinned rather than left to the type checker, which a `string | null` text
+  // field alone would have satisfied.
+  it("carries the reply's highlights through to the TurnResult", async () => {
+    const highlights = [{tileId: "t1", objectId: "n1", label: "the sensor"}];
+    createTutorResponse.mockResolvedValue({userText: "look here", highlights});
+
+    const result = await provider().processTurn(
+      {conversationId: "conv_existing", problemInstalled: true}, {text: "where?"});
+
+    expect(result.highlights).toEqual(highlights);
   });
 });

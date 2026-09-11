@@ -84,6 +84,16 @@ export interface ITileContentAPIViews {
    * see annotations.md for more info.
    */
   get annotatableObjects(): IClueTileObject[],
+
+  /**
+   * Return the objects in this tile associated with the given shared variable, for
+   * highlighting. The tile resolves the id against its own shared model, because tiles
+   * bind to variables in tile-specific ways (Dataflow, for instance, matches on a derived
+   * string rather than the variable id).
+   *
+   * Defaults to [] — a tile that has no relationship to variables need not implement it.
+   */
+  getObjectsForVariable(variableId: string): IClueTileObject[],
 }
 
 /**
@@ -104,6 +114,9 @@ export function tileContentAPIViews(clientViews: Partial<ITileContentAPIViews>) 
       return undefined;
     },
     get annotatableObjects(): IClueTileObject[] {
+      return [];
+    },
+    getObjectsForVariable(_variableId: string): IClueTileObject[] {
       return [];
     },
   };

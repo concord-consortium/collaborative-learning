@@ -17,7 +17,25 @@ interface IProps {
   // Optional persona intro pinned at the top of the message column. Render-only: it is never a
   // ChatTurn, so it never enters the AI context, the transport, or the copied transcript.
   introText?: string;
+  // Highlight buttons. The component stays free of MST: it reports which button was acted on by
+  // turn id and index, and is told which one is currently pinned as a plain string.
+  onHighlightHover?: (turnId: string, index: number, hovering: boolean) => void;
+  onHighlightToggle?: (turnId: string, index: number) => void;
+  activeHighlightKey?: string;
+  // Whether this unit offers highlight buttons at all. Defaults to false, matching the unit-config
+  // default: a caller that forgets to pass it gets the feature off rather than on for every unit.
+  enableHighlights?: boolean;
 }
+
+// Identifies one button across the conversation. The turn id is the message document id, so this is
+// stable for the life of the conversation and unique even when two replies point at the same object.
+export const highlightKey = (turnId: string, index: number) => `${turnId}:${index}`;
+
+/** Which highlight button a pointer or focus claim is resting on. */
+interface IHighlightId { turnId: string; index: number }
+
+const isSameHighlightId = (id: IHighlightId | undefined, turnId: string, index: number) =>
+  id?.turnId === turnId && id.index === index;
 
 // Build a plain-markdown transcript of the visible conversation for copy-to-clipboard.
 // Debug dry-run turns and empty turns are excluded; message bodies are copied verbatim.
@@ -99,7 +117,8 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
   );
 };
 
-export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText }) => {
+export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
+    onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
   const { turns, error, pending, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -112,6 +131,38 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   // Copy-to-clipboard: only offer it when there's real conversation to copy.
   const hasCopyableTurns = useMemo(
     () => turns.some(t => t.variant !== "debug" && t.text.trim()), [turns]);
+
+  // Hover and focus are two independent reasons to preview a highlight, and they can rest on two
+  // different buttons at once. Each button records only its own claim; the winner is derived from
+  // both. A button must not withdraw the preview itself: the preview is shared by every button in
+  // the sidebar, and a button can only ask the DOM about itself, so it cannot see another button's
+  // claim on it.
+  const [hoverId, setHoverId] = useState<IHighlightId | undefined>(undefined);
+  const [focusId, setFocusId] = useState<IHighlightId | undefined>(undefined);
+
+  // Focus arriving from a pointer press is not a preview reason. Browsers focus a button on
+  // mousedown, but only keyboard focus paints a visible ring (`:focus-visible`, chat.scss), so
+  // counting it leaves a highlight on screen with nothing to indicate why. This draws the same line
+  // `:focus-visible` draws, from events we control rather than the DOM: jsdom reports
+  // `:focus-visible` for any focused element, so a guard written against the pseudo-class cannot be
+  // tested.
+  const pointerFocus = useRef(false);
+
+  // Hover outranks focus, matching the model's rule that a hovered reference replaces a pinned one.
+  const activePreview = hoverId ?? focusId;
+  const reportedPreview = useRef<IHighlightId | undefined>(undefined);
+  useEffect(() => {
+    const previous = reportedPreview.current;
+    if (previous === activePreview) return;
+    reportedPreview.current = activePreview;
+    if (activePreview) {
+      onHighlightHover?.(activePreview.turnId, activePreview.index, true);
+    } else if (previous) {
+      // The sidebar ignores the identity when withdrawing — it releases by source token — but pass
+      // the button that was holding it rather than inventing one.
+      onHighlightHover?.(previous.turnId, previous.index, false);
+    }
+  }, [activePreview, onHighlightHover]);
 
   useEffect(() => {
     if (!copied) return;
@@ -154,6 +205,18 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
     }
     return "";
   }, [turns]);
+
+  // The label of whichever button is currently pinned, for the highlight live region. Empty when
+  // nothing is pinned, which clears the region rather than announcing anything — see the region
+  // itself for why a release is not announced.
+  const activeHighlightLabel = useMemo(() => {
+    if (!activeHighlightKey) return "";
+    for (const turn of turns) {
+      const index = turn.highlights?.findIndex((_, i) => highlightKey(turn.id, i) === activeHighlightKey);
+      if (index !== undefined && index >= 0) return turn.highlights?.[index].label ?? "";
+    }
+    return "";
+  }, [activeHighlightKey, turns]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -223,6 +286,41 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
                 {/* per-turn sender attribution in the DOM (sender is otherwise conveyed by position+color only) */}
                 <span className="visually-hidden">{turn.sender === "user" ? "You said:" : "Tutor said:"}</span>
                 <div className={classNames("chat-bubble", { pending: turn.pending })}>{turn.text}</div>
+                {enableHighlights && turn.highlights?.length
+                  ? <div className="chat-highlights" data-testid="chat-highlights">
+                      {turn.highlights.map((highlight, index) => (
+                        <button
+                          key={highlightKey(turn.id, index)}
+                          type="button"
+                          className={classNames("chat-highlight", {
+                            active: activeHighlightKey === highlightKey(turn.id, index)
+                          })}
+                          aria-pressed={activeHighlightKey === highlightKey(turn.id, index)}
+                          // Each handler records or withdraws only this button's own claim. The winner
+                          // across all buttons is decided by activePreview above.
+                          onMouseEnter={() => setHoverId({ turnId: turn.id, index })}
+                          onMouseLeave={() => {
+                            // Also clears the pointer-focus flag: a press that drags off the button
+                            // and releases elsewhere fires neither onMouseUp here nor onFocus, so a
+                            // flag left standing would swallow the next keyboard focus of any button.
+                            pointerFocus.current = false;
+                            setHoverId(cur => isSameHighlightId(cur, turn.id, index) ? undefined : cur);
+                          }}
+                          onMouseDown={() => { pointerFocus.current = true; }}
+                          onMouseUp={() => { pointerFocus.current = false; }}
+                          onFocus={() => {
+                            if (!pointerFocus.current) setFocusId({ turnId: turn.id, index });
+                            pointerFocus.current = false;
+                          }}
+                          onBlur={() => setFocusId(cur => isSameHighlightId(cur, turn.id, index)
+                            ? undefined : cur)}
+                          onClick={() => onHighlightToggle?.(turn.id, index)}
+                        >
+                          Show me {highlight.label}
+                        </button>
+                      ))}
+                    </div>
+                  : null}
               </div>
         ))}
         {(pending || sending) &&
@@ -242,6 +340,25 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       <div className="visually-hidden" aria-live="polite" data-testid="chat-live">
         {!pending && lastAssistantText ? `Tutor said: ${lastAssistantText}` : ""}
       </div>
+
+      {/* Pinning a highlight moves a ring onto an object elsewhere in the document, where nothing
+          announces it: aria-pressed reports the button's own state, and the target changes by CSS
+          class alone. Without this the button is, to a screen reader, a control with no effect. Its
+          own region rather than the one above, so a highlight does not re-announce the reply.
+
+          Announced on pin only, deliberately. A polite region's default aria-relevant is
+          "additions text", so emptying it says nothing — a release is silent here, and aria-pressed
+          carries that state for anyone on the button. The hover/focus preview is likewise not
+          announced: the button's own accessible name already says what it points at, so narrating
+          every arrow-key preview would be chatter. Both are affordances beyond what WCAG asks
+          (4.1.2 wants state programmatically determinable, which aria-pressed satisfies), not gaps
+          in it. The real gap is one layer down: a highlighted target carries CSS classes and no
+          ARIA, so its state is invisible to assistive tech whatever set it. That belongs to the
+          highlight system, not here. */}
+      {enableHighlights &&
+        <div className="visually-hidden" aria-live="polite" data-testid="chat-highlight-live">
+          {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
+        </div>}
 
       {error && <div className="chat-error" role="alert" data-testid="chat-error">{error}</div>}
 

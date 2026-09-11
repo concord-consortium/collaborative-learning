@@ -30,6 +30,13 @@ export interface ITextPluginInfo {
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
   getAnnotatableObjects?: (textContent: TextContentModelType) => IClueTileObject[];
+  /**
+   * Objects this plugin contributes as highlight targets for a variable. Kept as a plugin hook
+   * rather than implemented on the text content model so the plugin's own element format stays
+   * in the plugin; the model layer should not have to know what a variable chip looks like.
+   */
+  getObjectsForVariable?:
+    (textContent: TextContentModelType, variableId: string) => IClueTileObject[];
 }
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};
