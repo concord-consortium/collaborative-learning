@@ -1,0 +1,146 @@
+// Reading ForeverLearning's streamed reply.
+//
+// The transport is Server-Sent Events over plain HTTPS — not WebSockets, despite what a reader
+// primed on chat APIs might assume. Every event is one `data:` line holding one JSON object, and
+// the object's `type` says what it is.
+//
+// Two content streams are interleaved on one connection, told apart by `part`:
+//
+//   conversation — the prose reply, token by token
+//   display      — a clue.response_packet.v2, streamed as JSON text the same way
+//
+// They say the same thing at different grain: across eleven captured streams the conversation text
+// is identical to the packet's own student.message. The packet is the one to believe, because it
+// is the only one carrying the directives; the prose is what a human would read if it failed to
+// parse.
+
+export interface SseEvent {
+  type: string;
+  [key: string]: unknown;
+}
+
+function parseBlock(block: string): SseEvent | undefined {
+  // A block may carry `event:`, `id:`, `retry:` and comment lines beginning `:`. FL sends none of
+  // them today; ignoring rather than choking on them is what makes this a reader of the protocol
+  // rather than of one server's current habits.
+  const data = block.split("\n")
+    .filter(line => line.startsWith("data:"))
+    .map(line => line.slice(5).trimStart())
+    .join("\n");
+  if (!data) return undefined;
+  try {
+    const parsed = JSON.parse(data);
+    return parsed && typeof parsed === "object" && typeof parsed.type === "string"
+      ? parsed as SseEvent : undefined;
+  } catch {
+    // One malformed event is not worth abandoning the stream over. If it was carrying something
+    // that mattered, the display JSON will fail to parse and say so there.
+    return undefined;
+  }
+}
+
+/**
+ * A chunk-boundary-tolerant SSE reader.
+ *
+ * A network read does not arrive in event-sized pieces, so an event split across two reads has to
+ * be reassembled rather than dropped — with the response packet streaming as ~2,500 fragments of a
+ * single JSON document, one dropped fragment is a packet that will not parse.
+ */
+export class SseParser {
+  private buffer = "";
+
+  /** Feeds one chunk and returns whatever complete events it completed. */
+  push(chunk: string): SseEvent[] {
+    // Normalising CRLF on the way in keeps the separator single-form, including across a chunk
+    // boundary that falls between the CR and the LF.
+    this.buffer += chunk.replace(/\r\n/g, "\n");
+    const blocks = this.buffer.split("\n\n");
+    // The last block is either empty (the buffer ended on a separator) or a partial event. Either
+    // way it stays buffered until more arrives.
+    this.buffer = blocks.pop() ?? "";
+    const events: SseEvent[] = [];
+    for (const block of blocks) {
+      const event = parseBlock(block);
+      if (event) events.push(event);
+    }
+    return events;
+  }
+
+  /**
+   * Flushes a trailing event that arrived without its separator.
+   *
+   * A well-formed stream ends on a blank line, so this is normally empty. It exists because the
+   * alternative is silently discarding the last event of a stream that ended a byte early, and
+   * that event is `done`.
+   */
+  end(): SseEvent[] {
+    const block = this.buffer;
+    this.buffer = "";
+    const event = block.trim() ? parseBlock(block) : undefined;
+    return event ? [event] : [];
+  }
+}
+
+export interface CollectedStream {
+  /** The prose reply, reassembled. */
+  conversation: string;
+  /** The response packet's JSON text, reassembled but not parsed. */
+  display: string;
+  sessionId?: string;
+  displayName?: string;
+  stopReason?: string;
+  /**
+   * What FL says about retrieving its own configured content, passed through unjudged.
+   *
+   * "ok" does not mean our context was ingested — it means nothing failed, and it comes back that
+   * way with no retrieval configured at all. The captures show "no_content" for concordclue,
+   * which is the honest reading: there is no ingested corpus behind that solution.
+   */
+  retrievalStatus?: string;
+  /** True once `done` has been seen. A stream that ends without it was cut short. */
+  complete: boolean;
+  /** True once `display_complete` has been seen. */
+  displayComplete: boolean;
+}
+
+export function emptyStream(): CollectedStream {
+  return { conversation: "", display: "", complete: false, displayComplete: false };
+}
+
+/** Folds one event into the accumulating stream state. Unknown types are ignored by design. */
+export function collectEvent(into: CollectedStream, event: SseEvent): CollectedStream {
+  switch (event.type) {
+    case "content": {
+      const text = typeof event.text === "string" ? event.text : "";
+      if (event.part === "conversation") into.conversation += text;
+      else if (event.part === "display") into.display += text;
+      break;
+    }
+    case "metadata":
+      if (typeof event.sessionId === "string") into.sessionId = event.sessionId;
+      if (typeof event.displayName === "string") into.displayName = event.displayName;
+      break;
+    case "retrieval_status":
+      if (typeof event.status === "string") into.retrievalStatus = event.status;
+      break;
+    case "display_complete":
+      into.displayComplete = true;
+      break;
+    case "done":
+      into.complete = true;
+      if (typeof event.sessionId === "string") into.sessionId = event.sessionId;
+      if (typeof event.stopReason === "string") into.stopReason = event.stopReason;
+      break;
+    default:
+      break;
+  }
+  return into;
+}
+
+/** Convenience for a stream already in hand: parse and collect the whole text at once. */
+export function collectSseText(text: string): CollectedStream {
+  const parser = new SseParser();
+  const state = emptyStream();
+  for (const event of [...parser.push(text), ...parser.end()]) collectEvent(state, event);
+  return state;
+}

@@ -12,6 +12,7 @@ import * as path from "path";
 import Ajv2020 from "ajv/dist/2020";
 
 import { buildEnvelope } from "./envelope";
+import { buildContextPacket } from "./packet";
 
 const schemaDir = process.env.FL_SCHEMA_DIR;
 const contextSchemaPath = schemaDir
@@ -62,4 +63,69 @@ describe("clue.context_packet.v2 conformance", () => {
   itIfSchema("rejects a packet whose envelope we did not build", () => {
     expect(validator()({ schema_version: "clue.context_packet.v2", envelope: {} })).toBe(false);
   });
+
+  // The envelope-only cases above pass on a packet no student document produced. This validates
+  // what buildContextPacket actually emits, which is the only version of this check that can
+  // catch a field we named wrong or a required one we never filled in.
+  itIfSchema("accepts a fully assembled packet built from a document", () => {
+    const { packet } = buildContextPacket({
+      content: aConformanceDocument(),
+      documentId: "doc-abc",
+      revision: "r22",
+      envelope: {
+        traceId: "clue-trace-1", requestId: "clue-trace-1-t2", turn: 2,
+        protection: { classes: ["protected_threshold_value"], patternRefs: ["protected:brain-1"] },
+        catalogCommit: "95b684b01a0616f826a43fcc55cb6d4c40cbd391",
+      },
+    });
+    const validateFn = validator();
+    const ok = validateFn(packet);
+    expect(validateFn.errors ?? []).toEqual([]);
+    expect(ok).toBe(true);
+  });
+
+  itIfSchema("accepts a packet that had to declare an omission", () => {
+    const { packet } = buildContextPacket({
+      content: aConformanceDocument(),
+      documentId: "doc-abc",
+      revision: "r22",
+      caseSampleSize: 2,
+      envelope: {
+        traceId: "clue-trace-1", requestId: "clue-trace-1-t2", turn: 2,
+        protection: { classes: ["protected_threshold_value"], patternRefs: ["protected:brain-1"] },
+        catalogCommit: "95b684b01a0616f826a43fcc55cb6d4c40cbd391",
+      },
+    });
+    expect(packet.workspace_state?.omitted).toEqual([{ kind: "dataset_cases", count: 2 }]);
+    const validateFn = validator();
+    const ok = validateFn(packet);
+    expect(validateFn.errors ?? []).toEqual([]);
+    expect(ok).toBe(true);
+  });
 });
+
+function aConformanceDocument() {
+  return {
+    rowOrder: ["row-1"],
+    rowMap: { "row-1": { id: "row-1", tiles: [{ tileId: "t-text" }, { tileId: "t-table" }] } },
+    tileMap: {
+      "t-text": { id: "t-text", title: "Notes",
+                  content: { type: "Text", format: "html", text: ["<p>Flex.</p>"] } },
+      "t-table": { id: "t-table", content: { type: "Table" } },
+    },
+    sharedModelMap: {
+      "sm-data": {
+        sharedModel: {
+          type: "SharedDataSet", id: "sm-data", providerId: "t-table",
+          dataSet: {
+            id: "ds-1", name: "Program 1",
+            attributes: [{ id: "ATTRx", name: "time", units: "s",
+                           values: ["0", "1", "2", "3"] }],
+            cases: [{ __id__: "c1" }, { __id__: "c2" }, { __id__: "c3" }, { __id__: "c4" }],
+          },
+        },
+        tiles: ["t-table"],
+      },
+    },
+  };
+}
