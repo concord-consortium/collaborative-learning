@@ -27,15 +27,44 @@ import {defineSecret, defineString} from "firebase-functions/params";
 import {getFirestore} from "firebase-admin/firestore";
 
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
+import {ProtectionClass, kProtectionClasses} from "../../shared/fl-packet/envelope";
 import {createOpenAIClient} from "./chat/openai";
 import {createOpenAIProvider} from "./chat/openai-provider";
+import {createFlProvider} from "./chat/fl-provider";
+import {createRoutingProvider} from "./chat/routing-provider";
 import {DrainContext, acquireLock, processAndDrain, pickOwnerFields} from "./chat/drain";
 
-// Only the API key is a true secret (defineSecret). OPENAI_MODEL stays a defineString param
-// (server-side config, provisioned per environment). The generic tutor prompt is a source
-// constant (shared/chat-tutor-generic-prompt), not a param.
+// Only the API keys are true secrets (defineSecret). Everything else is server-side config
+// provisioned per environment (defineString). The generic tutor prompt is a source constant
+// (shared/chat-tutor-generic-prompt), not a param.
 const openaiKey = defineSecret("OPENAI_TUTOR_API_KEY");
 const openaiModel = defineString("OPENAI_MODEL");
+
+// ForeverLearning. The answer-protection refs are params rather than source because the CLUE
+// curriculum repo is public and what a unit protects must not be readable there; the refs
+// themselves are opaque, and the values behind them are resolved on FL's side and never travel.
+const flKey = defineSecret("FL_CONCORDCLUE_API_KEY");
+const flBaseUrl = defineString("FL_BASE_URL");
+const flSolutionId = defineString("FL_SOLUTION_ID");
+const flCatalogCommit = defineString("FL_CATALOG_COMMIT");
+const flProtectionClasses = defineString("FL_PROTECTION_CLASSES");
+const flProtectionPatternRefs = defineString("FL_PROTECTION_PATTERN_REFS");
+
+const kDefaultProvider = "openai";
+
+// Comma-separated because a Cloud Functions param is a string. Empty entries are dropped rather
+// than passed along as "", which buildEnvelope would take for a real ref.
+function splitParam(value: string): string[] {
+  return value.split(",").map((entry) => entry.trim()).filter(Boolean);
+}
+
+// Unknown class names are dropped here rather than sent. buildEnvelope refuses a policy with no
+// classes at all, so a wholly mistyped param fails the turn loudly instead of declaring a
+// protection we do not have.
+function protectionClasses(value: string): ProtectionClass[] {
+  const known = new Set<string>(kProtectionClasses);
+  return splitParam(value).filter((entry): entry is ProtectionClass => known.has(entry));
+}
 
 const MESSAGES = "{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId}";
 
@@ -43,7 +72,7 @@ const MESSAGES = "{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId
 // functions-v2 triggers run), or a 1st-gen Firestore trigger won't deploy/fire.
 export const chatTutorOnWrite = functionsV1
   .region("us-central1")
-  .runWith({secrets: [openaiKey]})
+  .runWith({secrets: [openaiKey, flKey]})
   .firestore.document(MESSAGES)
   .onWrite(async (change, context) => {
     const doc = change.after.data();
@@ -62,13 +91,38 @@ export const chatTutorOnWrite = functionsV1
     const acquired = await acquireLock(parentRef, ownerFields);
     if (!acquired) return null;
 
+    // Factories, not instances: each backend needs its own credential, and only the one this
+    // conversation belongs to gets built. The choice is made from the conversation's first
+    // message and held on the parent thereafter — see chat/routing-provider.
     const ctx: DrainContext = {
       parentRef,
       messagesCol,
-      provider: createOpenAIProvider({
-        openai: createOpenAIClient(openaiKey.value()),
-        model: openaiModel.value(),
-        genericText: CHAT_GENERIC_PROMPT,
+      provider: createRoutingProvider({
+        defaultProvider: kDefaultProvider,
+        providers: {
+          openai: () => createOpenAIProvider({
+            openai: createOpenAIClient(openaiKey.value()),
+            model: openaiModel.value(),
+            genericText: CHAT_GENERIC_PROMPT,
+          }),
+          fl: () => createFlProvider({
+            config: {
+              baseUrl: flBaseUrl.value(),
+              apiKey: flKey.value(),
+              solutionId: flSolutionId.value(),
+            },
+            catalogCommit: flCatalogCommit.value(),
+            protection: {
+              classes: protectionClasses(flProtectionClasses.value()),
+              patternRefs: splitParam(flProtectionPatternRefs.value()),
+            },
+            // Not yet plumbed: the server cannot reach the student's document. rightContext is a
+            // markdown summary rather than content, and the RTDB path needs a documentKey the
+            // message does not carry. Until that is settled the packet carries its envelope and
+            // says it has no workspace, rather than describing one it cannot see.
+            readDocument: async () => undefined,
+          }),
+        },
       }),
     };
 
