@@ -737,10 +737,11 @@ service cloud.firestore {
           // leftContext, they are client-supplied text sent to the model at developer authority
           // (TRUST-1 tier, accepted for the spike) — rules can enforce only shape, not content.
           // provider selects the AI backend. Unlike the fields above it is pinned to an ENUM, not
-          // just a type: once the trigger routes on this field an arbitrary string would decide
-          // where a paid turn goes. The trigger builds an OpenAI backend unconditionally today,
-          // so the field is inert on the server and the pin is guarding the routing that comes
-          // with the second backend. Keep the list in lockstep with kTutorProviders in
+          // just a type: the trigger routes on this field, so an arbitrary string would decide
+          // where a paid turn goes. The trigger reads it off a conversation's FIRST message and
+          // records the choice on the parent, ignoring the field thereafter — a later message
+          // cannot move a conversation between backends. Keep the list in lockstep with
+          // kTutorProviders in
           // shared/chat-tutor-providers.ts, and with the identical pin in the demo block below —
           // src/components/chat-tutor/tutor-provider-rules.test.ts fails if either drifts.
           // The client omits the field entirely for the default provider, so most messages carry

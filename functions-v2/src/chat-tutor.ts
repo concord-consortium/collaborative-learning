@@ -27,6 +27,7 @@ import {defineSecret, defineString} from "firebase-functions/params";
 import {getFirestore} from "firebase-admin/firestore";
 
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
+import {kDefaultTutorProvider} from "../../shared/chat-tutor-providers";
 import {ProtectionClass, kProtectionClasses} from "../../shared/fl-packet/envelope";
 import {createOpenAIClient} from "./chat/openai";
 import {createOpenAIProvider} from "./chat/openai-provider";
@@ -50,7 +51,7 @@ const flCatalogCommit = defineString("FL_CATALOG_COMMIT");
 const flProtectionClasses = defineString("FL_PROTECTION_CLASSES");
 const flProtectionPatternRefs = defineString("FL_PROTECTION_PATTERN_REFS");
 
-const kDefaultProvider = "openai";
+const kDefaultProvider = kDefaultTutorProvider;
 
 // Comma-separated because a Cloud Functions param is a string. Empty entries are dropped rather
 // than passed along as "", which buildEnvelope would take for a real ref.
@@ -105,7 +106,7 @@ export const chatTutorOnWrite = functionsV1
             model: openaiModel.value(),
             genericText: CHAT_GENERIC_PROMPT,
           }),
-          fl: () => createFlProvider({
+          foreverlearning: () => createFlProvider({
             config: {
               baseUrl: flBaseUrl.value(),
               apiKey: flKey.value(),

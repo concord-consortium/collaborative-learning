@@ -19,7 +19,7 @@ function fakeBackend(name: string): TutorProvider & {calls: number} {
 
 function routing(over: {onBuild?: (name: string) => void} = {}) {
   const openai = fakeBackend("openai");
-  const fl = fakeBackend("fl");
+  const fl = fakeBackend("foreverlearning");
   const provider = createRoutingProvider({
     defaultProvider: "openai",
     providers: {
@@ -27,8 +27,8 @@ function routing(over: {onBuild?: (name: string) => void} = {}) {
         over.onBuild?.("openai");
         return openai;
       },
-      fl: () => {
-        over.onBuild?.("fl");
+      foreverlearning: () => {
+        over.onBuild?.("foreverlearning");
         return fl;
       },
     },
@@ -39,8 +39,8 @@ function routing(over: {onBuild?: (name: string) => void} = {}) {
 describe("createRoutingProvider", () => {
   it("routes a first turn to the backend the message names", async () => {
     const {provider, fl, openai} = routing();
-    const result = await provider.processTurn({}, {text: "hi", provider: "fl"});
-    expect(result.assistantText).toBe("reply from fl");
+    const result = await provider.processTurn({}, {text: "hi", provider: "foreverlearning"});
+    expect(result.assistantText).toBe("reply from foreverlearning");
     expect(fl.calls).toBe(1);
     expect(openai.calls).toBe(0);
   });
@@ -56,8 +56,8 @@ describe("createRoutingProvider", () => {
   // The choice is persisted on the first turn precisely so a later message cannot change it.
   it("records the chosen backend on the parent from the first turn", async () => {
     const {provider} = routing();
-    const result = await provider.processTurn({}, {text: "hi", provider: "fl"});
-    expect(result.parentUpdate.provider).toBe("fl");
+    const result = await provider.processTurn({}, {text: "hi", provider: "foreverlearning"});
+    expect(result.parentUpdate.provider).toBe("foreverlearning");
   });
 
   it("records the default too, so an unset field never means two things", async () => {
@@ -72,7 +72,7 @@ describe("createRoutingProvider", () => {
   it("ignores a later message that names a different backend", async () => {
     const {provider, openai, fl} = routing();
     const result = await provider.processTurn(
-      {provider: "openai", conversationId: "conv_1"}, {text: "hi", provider: "fl"});
+      {provider: "openai", conversationId: "conv_1"}, {text: "hi", provider: "foreverlearning"});
     expect(result.assistantText).toBe("reply from openai");
     expect(openai.calls).toBe(1);
     expect(fl.calls).toBe(0);
@@ -80,14 +80,16 @@ describe("createRoutingProvider", () => {
 
   it("does not rewrite a choice the parent already holds", async () => {
     const {provider} = routing();
-    const result = await provider.processTurn({provider: "fl"}, {text: "hi", provider: "fl"});
+    const result = await provider.processTurn(
+      {provider: "foreverlearning"}, {text: "hi", provider: "foreverlearning"});
     expect(result.parentUpdate).not.toHaveProperty("provider");
   });
 
   it("passes the backend's own parent state through untouched", async () => {
     const {provider} = routing();
-    const result = await provider.processTurn({}, {text: "hi", provider: "fl"});
-    expect(result.parentUpdate).toEqual({flState: "earned", provider: "fl"});
+    const result = await provider.processTurn({}, {text: "hi", provider: "foreverlearning"});
+    expect(result.parentUpdate)
+      .toEqual({foreverlearningState: "earned", provider: "foreverlearning"});
   });
 
   // A name we have no backend for is a routing bug or a client sending something we never
@@ -110,7 +112,7 @@ describe("createRoutingProvider", () => {
   it("builds only the backend it routes to", async () => {
     const built: string[] = [];
     const {provider} = routing({onBuild: (name) => built.push(name)});
-    await provider.processTurn({}, {text: "hi", provider: "fl"});
-    expect(built).toEqual(["fl"]);
+    await provider.processTurn({}, {text: "hi", provider: "foreverlearning"});
+    expect(built).toEqual(["foreverlearning"]);
   });
 });

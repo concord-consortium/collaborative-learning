@@ -16,13 +16,26 @@
 // a ForeverLearning key.
 import {DocumentData} from "firebase-admin/firestore";
 
+import {kTutorProviders, TutorProviderId} from "../../../shared/chat-tutor-providers";
 import {TurnResult, TutorProvider} from "./provider";
 
+function isTutorProviderId(value: string): value is TutorProviderId {
+  return (kTutorProviders as readonly string[]).includes(value);
+}
+
 export interface RoutingProviderArgs {
-  /** Backend name -> a factory for it. Only the selected factory runs. */
-  providers: Record<string, () => TutorProvider>;
+  /**
+   * Backend id -> a factory for it. Only the selected factory runs.
+   *
+   * Keyed by TutorProviderId rather than string on purpose. That vocabulary is pinned in three
+   * other places — the client that stamps the field, the unit config schema, and an enum in both
+   * chatTutor rules blocks — and a router that accepted any string could register a name no
+   * client is permitted to send. As a Record over the union, a missing backend and an invented
+   * one are both compile errors instead of a throw on a student's turn.
+   */
+  providers: Record<TutorProviderId, () => TutorProvider>;
   /** Used when a conversation names no backend, as every conversation predating the field does. */
-  defaultProvider: string;
+  defaultProvider: TutorProviderId;
 }
 
 export function createRoutingProvider(args: RoutingProviderArgs): TutorProvider {
@@ -34,16 +47,19 @@ export function createRoutingProvider(args: RoutingProviderArgs): TutorProvider 
       const requested = typeof message.provider === "string" ? message.provider : undefined;
       const name = held ?? requested ?? defaultProvider;
 
-      const build = providers[name];
-      if (!build) {
-        // A name we have no backend for is a routing bug, a retired backend still recorded on an
-        // old conversation, or a client sending something we never shipped. Falling back to the
-        // default would answer as the wrong backend and look like it worked; throwing becomes
-        // status:"error", which is visible and leaves the cursor unadvanced.
+      // The Record above makes a missing backend a compile error, but the name arriving here came
+      // off a document, so it still has to be checked against the vocabulary at runtime: a
+      // retired backend recorded on an old conversation reaches this with a perfectly valid
+      // string that no longer maps to anything.
+      //
+      // Falling back to the default would answer as the wrong backend and look like it worked.
+      // Throwing becomes status:"error" with the cursor unadvanced, which is visible and
+      // recoverable.
+      if (!isTutorProviderId(name)) {
         throw new Error(`unknown tutor provider "${name}"`);
       }
 
-      const result = await build().processTurn(parent, message);
+      const result = await providers[name]().processTurn(parent, message);
 
       // Recorded even when it is the default, so an unset field never has to mean two things:
       // after the first turn of any conversation, the parent says which backend owns it.
