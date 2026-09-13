@@ -20,6 +20,8 @@ import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.scss";
 
+const kGroupMembershipWaitMs = 30000;
+
 interface IProps extends IBaseProps {
 }
 
@@ -31,6 +33,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private primaryDocument?: DocumentModelType;
   private primaryDocumentLoaded = false;
   private groupChangeDisposer?: IReactionDisposer;
+  private groupWaitDisposer?: () => void;
 
   constructor(props: IProps) {
     super(props);
@@ -65,8 +68,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         if (!primaryDocGroupId) return;
         if (primaryDocGroupId === currentGroupId) return;
         // When the unit starts students in the group document, follow the student to their NEW
-        // group's document; otherwise fall back to the default document as before.
-        if (this.stores.appConfig.startsInGroupDocument && this.stores.user.isStudent) {
+        // group's document.
+        if (this.startsInGroupDocumentAsStudent) {
           this.loadGroupPrimaryDocument();
         } else {
           this.loadDefaultPrimaryDocument();
@@ -78,6 +81,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   public componentWillUnmount() {
     this.groupChangeDisposer?.();
+    this.groupWaitDisposer?.();
   }
 
   public componentDidUpdate(): void {
@@ -192,9 +196,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     return defaultContent;
   }
 
-  // Guarantees the unit's default (problem/personal) document exists and is open in the store,
-  // WITHOUT making it the workspace primary. When the unit starts students in the group document the
-  // student still needs their own problem document — 4-up and publishing depend on it existing.
+  private get startsInGroupDocumentAsStudent() {
+    return this.stores.appConfig.startsInGroupDocument && this.stores.user.isStudent;
+  }
+
+  // When the unit starts students in the group document the student still needs their own problem
+  // document — 4-up and publishing depend on it existing.
   private async guaranteeDefaultDocument() {
     const { db, sectionsLoadedPromise } = this.stores;
     const { type, content } = this.getDefaultDocumentContentSpec();
@@ -210,24 +217,41 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
   }
 
-  // The unit starts students in their group's shared document. Group membership resolves after mount
-  // (the groups listener sets currentGroupId), so wait for it — bounded, then fall back to the default
-  // document rather than an empty workspace. The student's own default document is still guaranteed in
-  // the background.
+  // Group membership resolves after mount, so wait for it — bounded, then fall back to the default
+  // document rather than an empty workspace. In practice app.tsx gates students behind the group modal
+  // until currentGroupId is set, so the wait resolves immediately; the timeout is defensive. The
+  // student's own default document is still guaranteed afterward — 4-up and publishing depend on it.
   private async loadGroupPrimaryDocument() {
-    const { db, persistentUI: { problemWorkspace }, user } = this.stores;
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
+    let primarySet = false;
+    this.groupWaitDisposer?.();
     try {
-      await when(() => !!user.currentGroupId && !!user.offeringId, { timeout: 30000 });
+      // Same precondition db.requireGroupContext enforces; waiting here turns its throw into a wait.
+      const groupWait = when(() => !!this.stores.user.currentGroupId && !!this.stores.user.offeringId,
+        { timeout: kGroupMembershipWaitMs });
+      this.groupWaitDisposer = groupWait.cancel;
+      await groupWait;
       const groupDocument = await db.getOrCreateGroupDocument();
-      problemWorkspace.setPrimaryDocument(groupDocument);
+      if (groupDocument) {
+        problemWorkspace.setPrimaryDocument(groupDocument);
+        primarySet = true;
+      }
+      const defaultDocument = await this.guaranteeDefaultDocument();
+      if (!defaultDocument) {
+        console.warn("Student's own default document was not created; 4-up and publishing need it");
+      }
     } catch (err) {
       console.warn("Could not open the group document as the default; using the default document", err);
-      await this.loadDefaultPrimaryDocument();
-      return;
+      // Only fall back while the workspace is still empty — the group document is already primary
+      // when the failure came from the later default-document guarantee, and must not be replaced.
+      if (!primarySet) {
+        await this.loadDefaultPrimaryDocument().catch((fallbackErr) => {
+          console.error("Fallback to the default document also failed", fallbackErr);
+        });
+      }
+    } finally {
+      this.groupWaitDisposer = undefined;
     }
-    this.guaranteeDefaultDocument().catch((err) => {
-      console.warn("Failed to guarantee the background default document", err);
-    });
   }
 
   private async guaranteeInitialDocuments() {
@@ -236,7 +260,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             db, persistentUI: { problemWorkspace },
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      if (this.stores.appConfig.startsInGroupDocument && this.stores.user.isStudent) {
+      if (this.startsInGroupDocumentAsStudent) {
         await this.loadGroupPrimaryDocument();
       } else {
         await this.loadDefaultPrimaryDocument();
