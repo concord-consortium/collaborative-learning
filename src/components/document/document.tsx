@@ -322,8 +322,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return this.renderGenericTitleBar({
       title,
       hideButtons,
-      // The kind is the stylesheet hook; documents predating the kind axis fall back to their type.
-      docType: document.kind ?? document.type,
+      // The type ("axes") is the shared stylesheet hook — class-wide kinds are arbitrary author
+      // strings — with the kind alongside for per-kind overrides.
+      docType: document.kind ? `${document.type} ${document.kind}` : document.type,
     });
   }
 
