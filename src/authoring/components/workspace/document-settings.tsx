@@ -34,7 +34,8 @@ const DocumentSettings: React.FC = () => {
       documentTemplateEnabled: config?.defaultDocumentTemplateEnabled ?? hasDocumentTemplate,
       planningTemplateEnabled: config?.planningTemplateEnabled ?? hasPlanningTemplate,
       defaultDocumentType: config?.defaultDocumentType ?? "problem",
-      groupDocumentsEnabled: config?.groupDocumentsEnabled ?? false,
+      // "group" implies group documents even without the explicit flag (mirrors documentTemplateEnabled above).
+      groupDocumentsEnabled: config?.groupDocumentsEnabled ?? config?.defaultDocumentType === "group",
     };
   }, [config, hasDocumentTemplate, hasPlanningTemplate]);
 
@@ -46,9 +47,7 @@ const DocumentSettings: React.FC = () => {
     reset(formDefaults);
   }, [formDefaults, reset]);
 
-  // watch() returns undefined before the field's first change, so fall back to the loaded default.
-  const watchedDefaultDocumentType = watch("defaultDocumentType") ?? formDefaults.defaultDocumentType;
-  const groupDocSelected = watchedDefaultDocumentType === "group";
+  const groupDocSelected = watch("defaultDocumentType") === "group";
 
   const onSubmit: SubmitHandler<DocumentSettingsFormInputs> = (data) => {
     setUnitConfig(draft => {

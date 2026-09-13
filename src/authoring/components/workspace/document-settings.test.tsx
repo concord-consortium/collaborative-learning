@@ -142,6 +142,14 @@ describe("DocumentSettings — Starting Document", () => {
     expect(groupDocumentsCheckbox()).toBeDisabled();
   });
 
+  it("loads defaultDocumentType:\"group\" with the checkbox checked and disabled (implied, no explicit flag)", () => {
+    mockConfig.defaultDocumentType = "group";
+    render(<DocumentSettings />);
+
+    expect(groupDocumentsCheckbox()).toBeChecked();
+    expect(groupDocumentsCheckbox()).toBeDisabled();
+  });
+
   it("writes defaultDocumentType: \"group\" and groupDocumentsEnabled: true when Group doc is selected", async () => {
     const user = userEvent.setup();
     render(<DocumentSettings />);
