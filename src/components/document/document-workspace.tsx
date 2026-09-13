@@ -165,8 +165,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private getDefaultDocumentContentSpec() {
     const { appConfig: { defaultDocumentType, defaultDocumentTemplate, defaultDocumentTemplateEnabled } }
       = this.stores;
-    // "group" reaches here only as the fallback (teacher, no group, or misconfiguration) — the group-doc
-    // start path is chosen before this spec is consulted — so it degrades to the problem document.
+    // "group" has no default-content spec; degrade to the problem document.
     const type = defaultDocumentType === "group" ? ProblemDocument : defaultDocumentType;
     // Apply the template unless it has been explicitly switched off (undefined/legacy → apply).
     const template = defaultDocumentTemplateEnabled !== false ? defaultDocumentTemplate : undefined;

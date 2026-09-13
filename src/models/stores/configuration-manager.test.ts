@@ -275,6 +275,8 @@ describe("ConfigurationManager", () => {
   });
 
   describe("groupDocumentsEnabled / startsInGroupDocument", () => {
+    afterEach(() => jest.restoreAllMocks());
+
     it("is enabled explicitly, without changing the start document", () => {
       const config = new ConfigurationManager({ ...defaults, groupDocumentsEnabled: true }, []);
       expect(config.groupDocumentsEnabled).toBe(true);
@@ -293,8 +295,10 @@ describe("ConfigurationManager", () => {
         { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: false }, []);
       expect(config.groupDocumentsEnabled).toBe(false);
       expect(config.startsInGroupDocument).toBe(false);
-      expect(warn).toHaveBeenCalled();
-      warn.mockRestore();
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("explicitly false"), expect.any(String));
+      expect(config.startsInGroupDocument).toBe(false);
+      expect(warn).toHaveBeenCalledTimes(1);
     });
 
     it("autoAssignStudentsToIndividualGroups trumps both group settings", () => {
@@ -304,7 +308,8 @@ describe("ConfigurationManager", () => {
           autoAssignStudentsToIndividualGroups: true }, []);
       expect(config.groupDocumentsEnabled).toBe(false);
       expect(config.startsInGroupDocument).toBe(false);
-      warn.mockRestore();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("autoAssignStudentsToIndividualGroups"), expect.any(String));
     });
 
     it("never affects classWideDocuments", () => {
@@ -312,6 +317,14 @@ describe("ConfigurationManager", () => {
         { ...defaults, autoAssignStudentsToIndividualGroups: true,
           classWideDocuments: [{ kind: "dqb", title: "DQB" }] }, []);
       expect(config.classWideDocuments).toEqual([{ kind: "dqb", title: "DQB" }]);
+    });
+
+    it("is enabled and starts in the group document when set across override layers", () => {
+      const groupDocsOverride: Partial<UnitConfiguration> = { groupDocumentsEnabled: true };
+      const groupStartOverride: Partial<UnitConfiguration> = { defaultDocumentType: "group" };
+      const config = new ConfigurationManager(defaults, [groupDocsOverride, groupStartOverride]);
+      expect(config.groupDocumentsEnabled).toBe(true);
+      expect(config.startsInGroupDocument).toBe(true);
     });
   });
 
