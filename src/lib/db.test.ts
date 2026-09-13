@@ -1181,6 +1181,15 @@ describe("db", () => {
       expect(resolveSpy).toHaveBeenCalledTimes(1);
     });
 
+    it("re-registration disposes the previous reaction", async () => {
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      (db as any).autoResolveGroupDocuments();
+      stores.user.setCurrentGroupId("3");
+      expect(resolveSpy).toHaveBeenCalledTimes(1);   // not 2
+    });
+
     it("disconnect disposes the reaction", async () => {
       const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
       await db.connect({ appMode: "test", stores, dontStartListeners: true });

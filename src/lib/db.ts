@@ -923,19 +923,22 @@ export class DB {
 
   // Eagerly converge each group onto its default document as soon as the student's group membership is
   // known — and again when it changes — so group documents exist (and appear in Sort Work) before anyone
-  // opens one. Resolver-only: nothing is opened here. Mirrors createDeclaredClassWideDocuments; a
-  // reaction rather than a one-shot call because the groups listener sets currentGroupId after unit
-  // load, and it covers group switching for free. DBGroupsListener itself stays document-free.
+  // opens one. Resolver-only, fire-and-forget, like resolveClassWideDocument's callers: a reaction rather
+  // than a one-shot call because the groups listener sets currentGroupId after unit load, and it covers
+  // group switching for free. fireImmediately covers membership already known at registration. A failed
+  // resolve is not retried here: File > Group Doc self-heals through getOrCreateGroupDocument.
   private autoResolveGroupDocuments() {
-    const { appConfig, user } = this.stores;
-    if (!appConfig.groupDocumentsEnabled) return;
     this.groupDocumentDisposer?.();
+    if (!this.stores.appConfig.groupDocumentsEnabled) return;
     this.groupDocumentDisposer = reaction(
-      () => (user.isStudent ? user.currentGroupId : undefined),
+      () => {
+        const { user } = this.stores;
+        return user.isStudent && user.offeringId ? user.currentGroupId : undefined;
+      },
       (groupId) => {
-        if (!groupId || !user.offeringId) return;
+        if (!groupId) return;
         this.resolveGroupDocument().catch((err) => {
-          console.error("Failed to auto-create group document", err);
+          console.error("Failed to auto-create group document", groupId, err);
         });
       },
       { fireImmediately: true }
