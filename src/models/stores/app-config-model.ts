@@ -110,6 +110,7 @@ export const AppConfigModel = types
     get initiallyHideExemplars() { return self.configMgr.initiallyHideExemplars; },
     get showIdeasButton() { return self.configMgr.showIdeasButton; },
     get groupDocumentsEnabled() { return self.configMgr.groupDocumentsEnabled; },
+    get startsInGroupDocument() { return self.configMgr.startsInGroupDocument; },
     get hide4up() { return self.configMgr.hide4up; },
     get sortWorkConfig() { return self.configMgr.sortWorkConfig; },
     get termOverrides() { return self.configMgr.termOverrides; },

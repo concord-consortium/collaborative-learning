@@ -57,7 +57,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // disable grouping of students (e.g. Dataflow)
   autoAssignStudentsToIndividualGroups: boolean;
   // type of user document to create/show by default
-  defaultDocumentType: "problem" | "personal";
+  defaultDocumentType: "problem" | "personal" | "group";
   // default title of personal documents (problem documents don't have user-assigned titles)
   defaultDocumentTitle: string;
   // following two properties used for displaying titles for documents

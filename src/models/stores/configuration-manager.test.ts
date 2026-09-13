@@ -175,9 +175,9 @@ describe("ConfigurationManager", () => {
     expect(configManager.commentTags).toEqual({});
   });
 
-  it("should return undefined for groupDocumentsEnabled when not configured", () => {
+  it("should return false for groupDocumentsEnabled when not configured", () => {
     const configManager = new ConfigurationManager(defaults, []);
-    expect(configManager.groupDocumentsEnabled).toBeUndefined();
+    expect(configManager.groupDocumentsEnabled).toBe(false);
   });
 
   it("should return true for groupDocumentsEnabled when set in config", () => {
@@ -272,6 +272,47 @@ describe("ConfigurationManager", () => {
     const config = new ConfigurationManager(defaults, []);
     expect(config.fixedStartView).toBeUndefined();
     expect(config.fixedStartTab).toBeUndefined();
+  });
+
+  describe("groupDocumentsEnabled / startsInGroupDocument", () => {
+    it("is enabled explicitly, without changing the start document", () => {
+      const config = new ConfigurationManager({ ...defaults, groupDocumentsEnabled: true }, []);
+      expect(config.groupDocumentsEnabled).toBe(true);
+      expect(config.startsInGroupDocument).toBe(false);
+    });
+
+    it("is implied when the unit starts students in the group document", () => {
+      const config = new ConfigurationManager({ ...defaults, defaultDocumentType: "group" }, []);
+      expect(config.groupDocumentsEnabled).toBe(true);
+      expect(config.startsInGroupDocument).toBe(true);
+    });
+
+    it("explicit false wins over the implication and falls back with a warning", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const config = new ConfigurationManager(
+        { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: false }, []);
+      expect(config.groupDocumentsEnabled).toBe(false);
+      expect(config.startsInGroupDocument).toBe(false);
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it("autoAssignStudentsToIndividualGroups trumps both group settings", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const config = new ConfigurationManager(
+        { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: true,
+          autoAssignStudentsToIndividualGroups: true }, []);
+      expect(config.groupDocumentsEnabled).toBe(false);
+      expect(config.startsInGroupDocument).toBe(false);
+      warn.mockRestore();
+    });
+
+    it("never affects classWideDocuments", () => {
+      const config = new ConfigurationManager(
+        { ...defaults, autoAssignStudentsToIndividualGroups: true,
+          classWideDocuments: [{ kind: "dqb", title: "DQB" }] }, []);
+      expect(config.classWideDocuments).toEqual([{ kind: "dqb", title: "DQB" }]);
+    });
   });
 
 });

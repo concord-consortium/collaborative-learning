@@ -7,6 +7,7 @@ export class ConfigurationManager implements UnitConfiguration {
 
   private defaults: UnitConfiguration;
   private configs: Array<Partial<UnitConfiguration>>;
+  private warnedGroupStartFallback = false;
 
   // input configs should be top-to-bottom, e.g. unit, investigation, problem
   constructor(defaults: UnitConfiguration, configs: Array<Partial<UnitConfiguration>>) {
@@ -239,8 +240,25 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["showIdeasButton"]>("showIdeasButton");
   }
 
-  get groupDocumentsEnabled() {
-    return this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
+  // Group documents exist for this unit when explicitly enabled, or implicitly when the unit starts
+  // students in the group document. An explicit false wins over the implication, and
+  // autoAssignStudentsToIndividualGroups (no real groups) trumps both. classWideDocuments is unrelated.
+  get groupDocumentsEnabled(): boolean {
+    if (this.autoAssignStudentsToIndividualGroups) return false;
+    const explicit = this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
+    return explicit !== undefined ? explicit : this.defaultDocumentType === "group";
+  }
+
+  // True when students should start in their group's shared document. Warns once when the unit asks for
+  // a group start it cannot have (explicitly disabled group docs, or no real groups) and falls back.
+  get startsInGroupDocument(): boolean {
+    const wantsGroup = this.defaultDocumentType === "group";
+    if (wantsGroup && !this.groupDocumentsEnabled && !this.warnedGroupStartFallback) {
+      this.warnedGroupStartFallback = true;
+      console.warn("defaultDocumentType is 'group' but group documents are not enabled;",
+        "students will start in the problem document instead");
+    }
+    return wantsGroup && this.groupDocumentsEnabled;
   }
 
   get hide4up() {

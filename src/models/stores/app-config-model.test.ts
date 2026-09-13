@@ -266,9 +266,9 @@ describe("ConfigurationManager", () => {
     });
   });
 
-  it("should return undefined for groupDocumentsEnabled when not configured", () => {
+  it("should return false for groupDocumentsEnabled when not configured", () => {
     const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
-    expect(appConfig.groupDocumentsEnabled).toBeUndefined();
+    expect(appConfig.groupDocumentsEnabled).toBe(false);
   });
 
   it("should return true for groupDocumentsEnabled when set in config", () => {
