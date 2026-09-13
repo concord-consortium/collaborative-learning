@@ -216,3 +216,49 @@ describe("createFlProvider", () => {
     }
   });
 });
+
+// The client resends the document only when it changed, but every FL turn needs one: its context
+// is a per-request field, not conversation state that accumulates the way OpenAI's items do. So
+// the provider keeps the last document it was given, and readDocument falls back to it.
+describe("createFlProvider document reuse", () => {
+  function providerWith(document: ReturnType<typeof aDocument> & {raw?: string}) {
+    const chat = jest.fn(async () => aReply());
+    return {
+      chat,
+      provider: createFlProvider({
+        config: kConfig,
+        catalogCommit: kCommit,
+        protection: kProtection,
+        readDocument: async () => document,
+        newTraceId: () => "trace-new",
+        chat: chat as never,
+      }),
+    };
+  }
+
+  it("persists the document it used so a later turn can reuse it", async () => {
+    const raw = JSON.stringify({rowOrder: []});
+    const {provider: p} = providerWith({...aDocument(), raw});
+    const result = await p.processTurn({}, aMessage());
+    expect(result.parentUpdate.flContent).toBe(raw);
+  });
+
+  // Rewriting an unchanged document would put the whole workspace back on the parent doc every
+  // turn, for a value that did not move.
+  it("does not rewrite a document the parent already holds", async () => {
+    const raw = JSON.stringify({rowOrder: []});
+    const {provider: p} = providerWith({...aDocument(), raw});
+    const result = await p.processTurn({flContent: raw, flTurn: 1}, aMessage());
+    expect(result.parentUpdate).not.toHaveProperty("flContent");
+  });
+
+  it("persists nothing when there was no document to describe", async () => {
+    const chat = jest.fn(async () => aReply());
+    const p = createFlProvider({
+      config: kConfig, catalogCommit: kCommit, protection: kProtection,
+      readDocument: async () => undefined, newTraceId: () => "t", chat: chat as never,
+    });
+    const result = await p.processTurn({}, aMessage());
+    expect(result.parentUpdate).not.toHaveProperty("flContent");
+  });
+});

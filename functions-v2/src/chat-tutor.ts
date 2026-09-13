@@ -28,6 +28,7 @@ import {getFirestore} from "firebase-admin/firestore";
 
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {kDefaultTutorProvider} from "../../shared/chat-tutor-providers";
+import {hashString} from "../../shared/hash-string";
 import {ProtectionClass, kProtectionClasses} from "../../shared/fl-packet/envelope";
 import {createOpenAIClient} from "./chat/openai";
 import {createOpenAIProvider} from "./chat/openai-provider";
@@ -117,11 +118,33 @@ export const chatTutorOnWrite = functionsV1
               classes: protectionClasses(flProtectionClasses.value()),
               patternRefs: splitParam(flProtectionPatternRefs.value()),
             },
-            // Not yet plumbed: the server cannot reach the student's document. rightContext is a
-            // markdown summary rather than content, and the RTDB path needs a documentKey the
-            // message does not carry. Until that is settled the packet carries its envelope and
-            // says it has no workspace, rather than describing one it cannot see.
-            readDocument: async () => undefined,
+            readDocument: async (parent, msg) => {
+              // The client resends the document only when it changed, but every FL turn needs
+              // one — its context is a per-request field, not conversation state that
+              // accumulates. The provider keeps the last one on the parent, so an unchanged
+              // turn still has a workspace to describe.
+              const sent = typeof msg.rightContent === "string" ? msg.rightContent : "";
+              const held = typeof parent.flContent === "string" ? parent.flContent : "";
+              const json = sent || held;
+              if (!json) return undefined;
+              let content: unknown;
+              try {
+                content = JSON.parse(json);
+              } catch {
+                // A workspace we cannot read is not one we can describe. An envelope-only packet
+                // says we have no workspace, which is true, and beats a packet built from a
+                // document we only half understood.
+                return undefined;
+              }
+              return {
+                content,
+                // A conversation is 1:1 with (student, document, problem), so its id identifies
+                // the document this packet describes without a second field on every message.
+                documentId: conversationId,
+                revision: hashString(json),
+                raw: json,
+              };
+            },
           }),
         },
       }),

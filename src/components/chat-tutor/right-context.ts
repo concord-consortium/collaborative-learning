@@ -1,21 +1,12 @@
 import { getSnapshot, IAnyStateTreeNode } from "mobx-state-tree";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
+import { hashString } from "../../../shared/hash-string";
 
 export interface RightSummary {
   markdown: string;
   hash: string;
 }
 
-// djb2 — a cheap non-cryptographic hash, sufficient to detect summary changes.
-export function hashString(str: string): string {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    // eslint-disable-next-line no-bitwise
-    hash = (hash * 33) ^ str.charCodeAt(i);
-  }
-  // eslint-disable-next-line no-bitwise
-  return (hash >>> 0).toString(36);
-}
 
 // Summarizes the workspace document as compact markdown. The caller must ensure
 // content is defined — documentSummarizer(undefined) throws.

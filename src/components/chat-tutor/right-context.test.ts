@@ -1,6 +1,7 @@
 import "../../models/tiles/text/text-registration";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { decideContext, hashString, serializeRight, summarizeRight } from "./right-context";
+import { hashString } from "../../../shared/hash-string";
+import { decideContext, serializeRight, summarizeRight } from "./right-context";
 
 describe("summarizeRight", () => {
   it("summarizes a live content node to markdown with a stable hash", () => {

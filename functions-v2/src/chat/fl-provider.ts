@@ -22,6 +22,15 @@ export interface FlDocument {
   content: DocumentContentSnapshotType;
   documentId: string;
   revision: string;
+  /**
+   * The serialized form, kept on the parent so a later turn can reuse it.
+   *
+   * The client resends the document only when it changed, but every FL turn needs one: its
+   * context is a per-request field, not conversation state that accumulates the way OpenAI's
+   * conversation items do. A message doc and a parent doc share the same 1MB ceiling, so a
+   * document that fits on the message that carried it fits here too.
+   */
+  raw?: string;
 }
 
 export interface FlProviderArgs {
@@ -93,6 +102,11 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       }
       if (stream.sessionId && stream.sessionId !== parent.flSessionId) {
         parentUpdate.flSessionId = stream.sessionId;
+      }
+      // Only when it moved. Rewriting an unchanged document would put the whole workspace back on
+      // the parent every turn for a value that did not change.
+      if (document?.raw && document.raw !== parent.flContent) {
+        parentUpdate.flContent = document.raw;
       }
 
       return {
