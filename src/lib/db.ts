@@ -141,6 +141,10 @@ interface IResolvedCanonicalDocument {
   // Firestore metadata, because resolving is separated from opening precisely so a caller that only needs
   // convergence pays nothing extra for a document it is not going to open.
   firestoreMetadata?: IDocumentMetadata;
+  // True when the resolution is usable but the slot was NOT claimed (the backfill transaction failed and a
+  // re-read showed the slot still empty). Such a result must not be memoized for the session — a later
+  // resolve has to retry the claim, or clients could keep opening different legacy duplicates.
+  provisional?: boolean;
 }
 
 /**
@@ -980,18 +984,19 @@ export class DB {
     });
     // Concurrent resolves of one slot within this client (the autocreate reaction, the start-in-group-doc
     // workspace branch, and the File ▸ Group Doc menu can all fire around login) share one resolution
-    // instead of racing each other into create-then-delete churn. A rejected resolve is evicted so a
-    // later call can retry; a resolved one is kept — the pointer is immutable once claimed.
+    // instead of racing each other into create-then-delete churn. A rejected or provisional resolve is
+    // evicted so a later call can retry; a claimed one is kept — the pointer is immutable once claimed.
     const inFlight = this.canonicalResolvePromiseMap.get(pointerPath);
     if (inFlight) return inFlight;
     const promise = this.resolveCanonicalDocumentUncached(opts, pointerPath);
     this.canonicalResolvePromiseMap.set(pointerPath, promise);
-    promise.catch(() => {
+    const evict = () => {
       // Only evict our own entry: a retry may already have stored a newer promise for this slot.
       if (this.canonicalResolvePromiseMap.get(pointerPath) === promise) {
         this.canonicalResolvePromiseMap.delete(pointerPath);
       }
-    });
+    };
+    promise.then((resolved) => resolved.provisional && evict(), evict);
     return promise;
   }
 
@@ -1012,6 +1017,7 @@ export class DB {
     if (findLegacy) {
       const legacy = await findLegacy();
       if (legacy) {
+        let slotUnclaimed = false;
         const slotKey: string = await this.firestore.runTransaction(async (txn) => {
           const s = await txn.get(pointerRef);
           if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
@@ -1027,7 +1033,9 @@ export class DB {
           console.warn("Canonical backfill transaction failed; re-reading the slot",
             { slot: pointerPath, legacy: legacy.key, err });
           const s = await pointerRef.get().catch(() => undefined);
-          return s?.exists ? (s.data() as ICanonicalPointer).documentKey : legacy.key;
+          if (s?.exists) return (s.data() as ICanonicalPointer).documentKey;
+          slotUnclaimed = true;
+          return legacy.key;
         });
         if (slotKey !== legacy.key) {
           // The losing duplicate is left in place: unlike a just-minted orphan it may hold student work,
@@ -1036,7 +1044,8 @@ export class DB {
             "converging on the slot's document", { slot: pointerPath, pointer: slotKey, legacy: legacy.key });
           return { documentKey: slotKey };
         }
-        return { documentKey: legacy.key, firestoreMetadata: legacy };
+        // provisional: the fallback handed back a key no pointer claims, so the memo must not keep it.
+        return { documentKey: legacy.key, firestoreMetadata: legacy, ...(slotUnclaimed ? { provisional: true } : {}) };
       }
     }
 
@@ -1065,9 +1074,15 @@ export class DB {
       // A pointer naming someone else's document falls through to the lost-race branch below, which deletes
       // the orphan; a pointer naming ours means the claim landed after all.
       if (s?.exists) return (s.data() as ICanonicalPointer).documentKey;
-      // Slot empty or unreadable: nothing names our document, so drop it and fail rather than hand back a key
-      // no pointer claims. getOrCreateGroupDocument surfaces the rejection; the autocreate's .catch logs it.
-      await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
+      if (s) {
+        // The read succeeded and proved the slot empty: our claim did not land, so drop the orphan and fail
+        // rather than hand back a key no pointer claims. getOrCreateGroupDocument surfaces the rejection;
+        // the autocreate's .catch logs it.
+        await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
+      }
+      // Read failed: the outcome is ambiguous — the claim may have committed, and deleting the document
+      // would leave the immutable pointer targeting deleted metadata. A leaked orphan is recoverable
+      // (visible in Sort Work, deletable by any class member); a broken pointer is not.
       throw err;
     });
 

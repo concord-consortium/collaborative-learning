@@ -274,7 +274,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className={`titlebar ${docType}`}>
+      <div className={classNames("titlebar", docType)}>
         {!hideButtons &&
           <div className="actions left">
             <DocumentFileMenu document={document}
@@ -470,7 +470,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const hasDisplayId = !!displayId;
     const showShareToggle = this.shareButtonEnabled();
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={classNames("titlebar", type)}>
         <div className="actions">
           { !hideButtons &&
               <DocumentFileMenu document={document}
@@ -523,7 +523,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderSupportTitleBar(type: string) {
     const { document } = this.props;
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={classNames("titlebar", type)}>
         <div className="title" data-test="document-title">
           {document.getProperty("caption")}
         </div>

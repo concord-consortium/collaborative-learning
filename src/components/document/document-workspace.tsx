@@ -223,9 +223,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   // document rather than an empty workspace. In practice app.tsx gates students behind the group modal
   // until currentGroupId is set, so the wait resolves immediately; the timeout is defensive. The
   // student's own default document is still guaranteed afterward — 4-up and publishing depend on it.
-  private async loadGroupPrimaryDocument() {
+  private async loadGroupPrimaryDocument(): Promise<void> {
     const { db, persistentUI: { problemWorkspace } } = this.stores;
     let primarySet = false;
+    let requestedGroupId: string | undefined;
     // Same precondition db.requireGroupContext enforces; waiting here turns its throw into a wait.
     const groupWait = when(() => !!this.stores.user.currentGroupId && !!this.stores.user.offeringId,
       { timeout: kGroupMembershipWaitMs });
@@ -233,7 +234,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.groupWaitDisposer = groupWait.cancel;
     try {
       await groupWait;
+      requestedGroupId = this.stores.user.currentGroupId;
       const groupDocument = await db.getOrCreateGroupDocument();
+      if (this.unmounted || this.groupWaitDisposer !== groupWait.cancel) return;
+      if (this.stores.user.currentGroupId !== requestedGroupId) {
+        // Membership moved while the resolve was in flight and no primary is set yet, so the
+        // group-change reaction cannot re-point; load the current group's document instead.
+        return this.loadGroupPrimaryDocument();
+      }
       if (groupDocument) {
         problemWorkspace.setPrimaryDocument(groupDocument);
         primarySet = true;
@@ -249,6 +257,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       // about it would be noise and falling back would write a primary document nobody asked for.
       // A group switch cancels it the same way — and a newer invocation owns the workspace now.
       if (this.unmounted || this.groupWaitDisposer !== groupWait.cancel) return;
+      if (!primarySet && requestedGroupId && this.stores.user.currentGroupId !== requestedGroupId) {
+        // The failed resolve belonged to a group the student already left, and with no primary set the
+        // group-change reaction cannot recover — retry for the current group rather than falling back.
+        return this.loadGroupPrimaryDocument();
+      }
       console.warn("Could not open the group document as the default; using the default document", err);
       // Only fall back while the workspace is still empty — the group document is already primary
       // when the failure came from the later default-document guarantee, and must not be replaced.

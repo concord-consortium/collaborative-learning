@@ -519,6 +519,48 @@ describe("db", () => {
       warn.mockRestore();
     });
 
+    // An unclaimed fallback must not be memoized for the session: with the pointer never written, a cached
+    // "success" would let clients keep opening different legacy duplicates after one transient failure.
+    it("legacy backfill failure with the slot still empty is provisional: the next resolve retries", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+      }));
+      const txnSpy = jest.fn(async () => { throw new Error("too much contention"); });
+      (db as any).firestore.runTransaction = txnSpy;
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      expect(await db.resolveGroupDocument()).toBe("legacy-A");
+      expect(await db.resolveGroupDocument()).toBe("legacy-A");
+      expect(txnSpy).toHaveBeenCalledTimes(2);   // memo evicted the provisional result; the claim was retried
+      warn.mockRestore();
+    });
+
+    // A rejected claim txn is normally aborted, but a lost commit response makes the outcome ambiguous: the
+    // claim may have landed. Deleting the minted document then would leave the immutable pointer targeting
+    // deleted metadata, so cleanup requires a successful read proving the slot is empty or names another doc.
+    it("create-path claim failure with an unreadable slot: keeps the orphan and rejects", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const createSpy = jest.spyOn(db, "createDocument")
+        .mockResolvedValue({ firestoreMetadata: { key: "minted-key", uid: "group_off-1_3" } } as any);
+      const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
+      let pointerReads = 0;
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => ++pointerReads === 1
+          ? Promise.resolve({ exists: false })          // fast-path read: no pointer yet
+          : Promise.reject(new Error("network down")) }),  // the catch's re-read fails: outcome ambiguous
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async () => { throw new Error("deadline exceeded"); });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await expect(db.resolveGroupDocument()).rejects.toThrow("deadline exceeded");
+      expect(orphanSpy).not.toHaveBeenCalled();
+      createSpy.mockRestore();
+      warn.mockRestore();
+    });
+
     it("dedup is per slot: repeat resolves reuse it, a different group fetches its own pointer", async () => {
       const fetchedPaths: string[] = [];
       mockPointerFetches(fetchedPaths);
