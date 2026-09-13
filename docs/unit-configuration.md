@@ -41,7 +41,7 @@ These properties are configurable at the application (built into the code) or th
 
 `autoAssignStudentsToIndividualGroups`: (boolean) disable grouping of students (e.g. Dataflow)
 
-`defaultDocumentType`: ("problem" | "personal" | "group") which document a student starts in. "group" starts students in their group's shared document (teachers start in the problem document instead) and implies `groupDocumentsEnabled`. Applied on first visit and when the student switches groups; otherwise the last-opened document is restored.
+`defaultDocumentType`: ("problem" | "personal" | "group") which document a student starts in. "group" starts students in their group's shared document (teachers start in the problem document instead) and implies `groupDocumentsEnabled`. Applied on first visit, and on a group switch while the group document is open; otherwise the last-opened document is restored.
 
 `defaultDocumentTitle`: (string) default title of personal documents (problem documents don't have user-assigned titles)
 
