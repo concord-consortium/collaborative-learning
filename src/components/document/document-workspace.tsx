@@ -68,8 +68,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         if (!currentGroupId) return;
         if (!primaryDocGroupId) return;
         if (primaryDocGroupId === currentGroupId) return;
-        // When the unit starts students in the group document, follow the student to their NEW
-        // group's document.
         if (this.startsInGroupDocumentAsStudent) {
           this.loadGroupPrimaryDocument();
         } else {
@@ -202,8 +200,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     return this.stores.appConfig.startsInGroupDocument && this.stores.user.isStudent;
   }
 
-  // When the unit starts students in the group document the student still needs their own problem
-  // document — 4-up and publishing depend on it existing.
+  // Guarantees (opening if needed) the unit's default document without making it the workspace primary.
   private async guaranteeDefaultDocument() {
     const { db, sectionsLoadedPromise } = this.stores;
     const { type, content } = this.getDefaultDocumentContentSpec();
@@ -232,11 +229,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       { timeout: kGroupMembershipWaitMs });
     this.groupWaitDisposer?.();
     this.groupWaitDisposer = groupWait.cancel;
+    // True once this invocation no longer owns the workspace: the component unmounted, or a newer
+    // loadGroupPrimaryDocument installed its own wait.
+    const superseded = () => this.unmounted || this.groupWaitDisposer !== groupWait.cancel;
     try {
       await groupWait;
       requestedGroupId = this.stores.user.currentGroupId;
       const groupDocument = await db.getOrCreateGroupDocument();
-      if (this.unmounted || this.groupWaitDisposer !== groupWait.cancel) return;
+      if (superseded()) return;
       if (this.stores.user.currentGroupId !== requestedGroupId) {
         // Membership moved while the resolve was in flight and no primary is set yet, so the
         // group-change reaction cannot re-point; load the current group's document instead.
@@ -253,10 +253,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         console.warn("Student's own default document was not created; 4-up and publishing need it");
       }
     } catch (err) {
-      // Unmounting cancels the wait, which rejects here. That is a teardown, not a failure: warning
-      // about it would be noise and falling back would write a primary document nobody asked for.
-      // A group switch cancels it the same way — and a newer invocation owns the workspace now.
-      if (this.unmounted || this.groupWaitDisposer !== groupWait.cancel) return;
+      // A superseded invocation's wait was cancelled, which rejects here: teardown, not a failure.
+      if (superseded()) return;
       if (!primarySet && requestedGroupId && this.stores.user.currentGroupId !== requestedGroupId) {
         // The failed resolve belonged to a group the student already left, and with no primary set the
         // group-change reaction cannot recover — retry for the current group rather than falling back.

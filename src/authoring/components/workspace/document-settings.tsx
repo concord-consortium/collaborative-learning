@@ -36,8 +36,7 @@ const DocumentSettings: React.FC = () => {
       planningTemplateEnabled: config?.planningTemplateEnabled ?? hasPlanningTemplate,
       defaultDocumentType: config?.defaultDocumentType ?? "problem",
       // "group" implies group documents even without the explicit flag (mirrors documentTemplateEnabled
-      // above). Declarative so an external reset (e.g. switching units) can't show a stale unchecked box;
-      // the driving effect below only covers the interactive select-change path.
+      // above). Declarative so an external reset (e.g. switching units) can't show a stale unchecked box.
       groupDocumentsEnabled: config?.defaultDocumentType === "group"
         ? true
         : (config?.groupDocumentsEnabled ?? false),
@@ -103,9 +102,8 @@ const DocumentSettings: React.FC = () => {
       } else {
         delete draft.config.defaultDocumentType;
       }
-      // Omit-the-default: write true only when on, delete otherwise. The `=== "group"` arm is
-      // defense in case submit races the driving effect above; by product decision, selecting
-      // "Group doc" always means group docs on.
+      // Omit-the-default. The `=== "group"` arm guards against submit racing the driving effect above:
+      // selecting "Group doc" always means group docs on.
       if (data.defaultDocumentType === "group" || data.groupDocumentsEnabled) {
         draft.config.groupDocumentsEnabled = true;
       } else {
@@ -253,7 +251,8 @@ const DocumentSettings: React.FC = () => {
           <span>Enable group documents</span>
         </label>
         <p className="muted small">
-          Independent of which document students start in.
+          Turn on group documents without changing which document students start in. Selecting
+          &quot;Group doc&quot; above enables them automatically.
         </p>
       </fieldset>
 

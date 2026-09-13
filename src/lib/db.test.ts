@@ -249,6 +249,14 @@ describe("db", () => {
     });
   });
 
+  // The collection half of the firestore mock: findLegacyGroupDocument's chain
+  // (collection → withConverter → three wheres → get). Returns the named legacy docs, or none.
+  const mockLegacyQuery = (...keys: string[]) => () => ({
+    withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+      get: async () => ({ empty: !keys.length, docs: keys.map(key => ({ data: () => ({ key }) })) })
+    }) }) }) })
+  });
+
   describe("getOrCreateGroupDocument", () => {
     const openStub = jest.fn(async (m: any) => ({ opened: m.key }));
     beforeEach(() => {
@@ -275,8 +283,7 @@ describe("db", () => {
       (db as any).createDocument = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({
@@ -301,8 +308,7 @@ describe("db", () => {
       const setCalls: any[] = [];
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-doc" }) }] }) }) }) }) }) })
+        collection: mockLegacyQuery("legacy-doc")
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({ get: async () => ({ exists: false }), set: (_r: any, d: any) => setCalls.push(d), update: () => {} }));
@@ -318,8 +324,7 @@ describe("db", () => {
       const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }), delete: () => Promise.resolve() }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({
@@ -336,11 +341,16 @@ describe("db", () => {
   });
 
   describe("resolveGroupDocument", () => {
+    // Several of these tests drive paths that warn; the spy keeps the run's output clean and gives the
+    // tests that do assert on a warning something to assert against.
+    let warnSpy: jest.SpyInstance;
     beforeEach(() => {
       stores.user = UserModel.create({ id: "1", portal: "example.com", offeringId: "off-1", currentGroupId: "3" });
       (db as any).openDocumentFromFirestoreMetadata = jest.fn();
       (db as any).findFirestoreMetadata = jest.fn();
+      warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     });
+    afterEach(() => jest.restoreAllMocks());
 
     // Every pointer path the client asked Firestore for, in order. The paths are full paths (firestore.doc
     // prepends the root folder), so assertions match on the canonical-path suffix.
@@ -378,8 +388,7 @@ describe("db", () => {
         .mockResolvedValue({ firestoreMetadata: { key: "minted-key" } } as any);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({ get: async () => ({ exists: false }), set: () => {}, update: () => {} }));
@@ -398,8 +407,7 @@ describe("db", () => {
         .mockResolvedValue({ firestoreMetadata: { key: "second-key" } } as any);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({ get: async () => ({ exists: false }), set: () => {}, update: () => {} }));
@@ -423,11 +431,9 @@ describe("db", () => {
     it("legacy candidate loses to a concurrently-claimed pointer: converges on the pointer's document", async () => {
       // The old behavior returned the local legacy candidate unconditionally — two clients whose
       // legacy queries surfaced different pre-pointer duplicates would keep different documents.
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+        collection: mockLegacyQuery("legacy-A")
       }));
       (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
         fn({
@@ -436,20 +442,17 @@ describe("db", () => {
         }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       expect(await db.resolveGroupDocument()).toBe("winner-B");
-      expect(warn).toHaveBeenCalled();
-      warn.mockRestore();
+      expect(warnSpy).toHaveBeenCalled();
     });
 
     // A failed backfill transaction says nothing about who holds the slot, so the slot is re-read rather
     // than assumed to be ours.
     it("legacy backfill transaction failure: re-reads the slot and converges on the pointer it finds", async () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       let pointerExists = false;   // the concurrent winner claims the slot while our txn is failing
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve(
           pointerExists ? { exists: true, data: () => ({ documentKey: "winner-C" }) } : { exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+        collection: mockLegacyQuery("legacy-A")
       }));
       (db as any).firestore.runTransaction = jest.fn(async () => {
         pointerExists = true;
@@ -457,28 +460,23 @@ describe("db", () => {
       });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       expect(await db.resolveGroupDocument()).toBe("winner-C");
-      expect(warn).toHaveBeenCalled();
-      warn.mockRestore();
+      expect(warnSpy).toHaveBeenCalled();
     });
 
     it("legacy backfill transaction failure with the slot still empty: keeps the legacy document", async () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+        collection: mockLegacyQuery("legacy-A")
       }));
       (db as any).firestore.runTransaction = jest.fn(async () => { throw new Error("too much contention"); });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       expect(await db.resolveGroupDocument()).toBe("legacy-A");
-      warn.mockRestore();
     });
 
     // The claim txn can reject outright (rules denial, retries exhausted under a whole-class login). The
     // minted document must never be left behind unclaimed: its Firestore metadata is live, so Sort Work
     // would show it permanently.
     it("create-path claim failure: converges on the racer's pointer and deletes the orphan", async () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const createSpy = jest.spyOn(db, "createDocument")
         .mockResolvedValue({ firestoreMetadata: { key: "minted-key", uid: "group_off-1_3" } } as any);
       const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
@@ -486,8 +484,7 @@ describe("db", () => {
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve(
           pointerExists ? { exists: true, data: () => ({ documentKey: "racer-key" }) } : { exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async () => {
         pointerExists = true;
@@ -496,37 +493,31 @@ describe("db", () => {
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       expect(await db.resolveGroupDocument()).toBe("racer-key");
       expect(orphanSpy).toHaveBeenCalledWith("minted-key", "group_off-1_3");
-      expect(warn).toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalled();
       createSpy.mockRestore();
-      warn.mockRestore();
     });
 
     it("create-path claim failure with the slot still empty: deletes the orphan and rejects", async () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const createSpy = jest.spyOn(db, "createDocument")
         .mockResolvedValue({ firestoreMetadata: { key: "minted-key", uid: "group_off-1_3" } } as any);
       const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async () => { throw new Error("permission denied"); });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       await expect(db.resolveGroupDocument()).rejects.toThrow("permission denied");
       expect(orphanSpy).toHaveBeenCalledWith("minted-key", "group_off-1_3");
       createSpy.mockRestore();
-      warn.mockRestore();
     });
 
     // An unclaimed fallback must not be memoized for the session: with the pointer never written, a cached
     // "success" would let clients keep opening different legacy duplicates after one transient failure.
     it("legacy backfill failure with the slot still empty is provisional: the next resolve retries", async () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+        collection: mockLegacyQuery("legacy-A")
       }));
       const txnSpy = jest.fn(async () => { throw new Error("too much contention"); });
       (db as any).firestore.runTransaction = txnSpy;
@@ -534,14 +525,12 @@ describe("db", () => {
       expect(await db.resolveGroupDocument()).toBe("legacy-A");
       expect(await db.resolveGroupDocument()).toBe("legacy-A");
       expect(txnSpy).toHaveBeenCalledTimes(2);   // memo evicted the provisional result; the claim was retried
-      warn.mockRestore();
     });
 
     // A rejected claim txn is normally aborted, but a lost commit response makes the outcome ambiguous: the
     // claim may have landed. Deleting the minted document then would leave the immutable pointer targeting
     // deleted metadata, so cleanup requires a successful read proving the slot is empty or names another doc.
     it("create-path claim failure with an unreadable slot: keeps the orphan and rejects", async () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const createSpy = jest.spyOn(db, "createDocument")
         .mockResolvedValue({ firestoreMetadata: { key: "minted-key", uid: "group_off-1_3" } } as any);
       const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
@@ -550,15 +539,13 @@ describe("db", () => {
         doc: () => ({ get: () => ++pointerReads === 1
           ? Promise.resolve({ exists: false })          // fast-path read: no pointer yet
           : Promise.reject(new Error("network down")) }),  // the catch's re-read fails: outcome ambiguous
-        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
-          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+        collection: mockLegacyQuery()
       }));
       (db as any).firestore.runTransaction = jest.fn(async () => { throw new Error("deadline exceeded"); });
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       await expect(db.resolveGroupDocument()).rejects.toThrow("deadline exceeded");
       expect(orphanSpy).not.toHaveBeenCalled();
       createSpy.mockRestore();
-      warn.mockRestore();
     });
 
     it("dedup is per slot: repeat resolves reuse it, a different group fetches its own pointer", async () => {

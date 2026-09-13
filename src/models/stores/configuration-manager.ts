@@ -242,15 +242,15 @@ export class ConfigurationManager implements UnitConfiguration {
 
   // Group documents exist for this unit when explicitly enabled, or implicitly when the unit starts
   // students in the group document. An explicit false wins over the implication, and
-  // autoAssignStudentsToIndividualGroups (no real groups) trumps both. classWideDocuments is unrelated.
+  // autoAssignStudentsToIndividualGroups (no real groups) trumps both.
   get groupDocumentsEnabled(): boolean {
     if (this.autoAssignStudentsToIndividualGroups) return false;
     const explicit = this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
     return explicit != null ? explicit : this.defaultDocumentType === "group";
   }
 
-  // True when students should start in their group's shared document. Warns once per config load when
-  // the unit asks for a group start it cannot have, and falls back.
+  // The warn-once flag is per ConfigurationManager instance: this getter is read on every render, so
+  // an unguarded warn would spam the console for the whole session.
   get startsInGroupDocument(): boolean {
     const wantsGroup = this.defaultDocumentType === "group";
     if (wantsGroup && !this.groupDocumentsEnabled && !this.warnedGroupStartFallback) {
@@ -258,7 +258,7 @@ export class ConfigurationManager implements UnitConfiguration {
       const cause = this.autoAssignStudentsToIndividualGroups
         ? "autoAssignStudentsToIndividualGroups is set (no real groups)"
         : "groupDocumentsEnabled is explicitly false";
-      console.warn(`defaultDocumentType is "group" but ${cause};`,
+      console.warn(`defaultDocumentType is "group" but ${cause}; ` +
         "students will start in the problem document instead");
     }
     return wantsGroup && this.groupDocumentsEnabled;

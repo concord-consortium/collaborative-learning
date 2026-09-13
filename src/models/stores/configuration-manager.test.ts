@@ -296,7 +296,7 @@ describe("ConfigurationManager", () => {
       expect(config.groupDocumentsEnabled).toBe(false);
       expect(config.startsInGroupDocument).toBe(false);
       expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("explicitly false"), expect.any(String));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("explicitly false"));
       expect(config.startsInGroupDocument).toBe(false);
       expect(warn).toHaveBeenCalledTimes(1);
     });
@@ -308,8 +308,7 @@ describe("ConfigurationManager", () => {
           autoAssignStudentsToIndividualGroups: true }, []);
       expect(config.groupDocumentsEnabled).toBe(false);
       expect(config.startsInGroupDocument).toBe(false);
-      expect(warn).toHaveBeenCalledWith(
-        expect.stringContaining("autoAssignStudentsToIndividualGroups"), expect.any(String));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("autoAssignStudentsToIndividualGroups"));
     });
 
     it("never affects classWideDocuments", () => {
