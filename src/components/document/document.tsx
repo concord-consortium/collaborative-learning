@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
@@ -324,7 +325,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       hideButtons,
       // The type ("axes") is the shared stylesheet hook — class-wide kinds are arbitrary author
       // strings — with the kind alongside for per-kind overrides.
-      docType: document.kind ? `${document.type} ${document.kind}` : document.type,
+      docType: classNames(document.type, document.kind),
     });
   }
 
