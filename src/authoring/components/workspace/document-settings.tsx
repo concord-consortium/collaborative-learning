@@ -35,8 +35,12 @@ const DocumentSettings: React.FC = () => {
       documentTemplateEnabled: config?.defaultDocumentTemplateEnabled ?? hasDocumentTemplate,
       planningTemplateEnabled: config?.planningTemplateEnabled ?? hasPlanningTemplate,
       defaultDocumentType: config?.defaultDocumentType ?? "problem",
-      // "group" implies group documents even without the explicit flag (mirrors documentTemplateEnabled above).
-      groupDocumentsEnabled: config?.groupDocumentsEnabled ?? config?.defaultDocumentType === "group",
+      // "group" implies group documents even without the explicit flag (mirrors documentTemplateEnabled
+      // above). Declarative so an external reset (e.g. switching units) can't show a stale unchecked box;
+      // the driving effect below only covers the interactive select-change path.
+      groupDocumentsEnabled: config?.defaultDocumentType === "group"
+        ? true
+        : (config?.groupDocumentsEnabled ?? false),
     };
   }, [config, hasDocumentTemplate, hasPlanningTemplate]);
 
@@ -244,13 +248,12 @@ const DocumentSettings: React.FC = () => {
           <input
             type="checkbox"
             {...register("groupDocumentsEnabled")}
-            disabled={groupDocSelected}
+            disabled={groupDocSelected || groupDocDisabledByAutoAssign}
           />
           <span>Enable group documents</span>
         </label>
         <p className="muted small">
-          Group documents are auto-created per group and appear in Sort Work, independent of which
-          document students start in.
+          Independent of which document students start in.
         </p>
       </fieldset>
 
