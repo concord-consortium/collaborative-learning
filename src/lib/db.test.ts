@@ -474,6 +474,51 @@ describe("db", () => {
       warn.mockRestore();
     });
 
+    // The claim txn can reject outright (rules denial, retries exhausted under a whole-class login). The
+    // minted document must never be left behind unclaimed: its Firestore metadata is live, so Sort Work
+    // would show it permanently.
+    it("create-path claim failure: converges on the racer's pointer and deletes the orphan", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const createSpy = jest.spyOn(db, "createDocument")
+        .mockResolvedValue({ firestoreMetadata: { key: "minted-key", uid: "group_off-1_3" } } as any);
+      const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
+      let pointerExists = false;   // the racer claims the slot while our txn is failing
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve(
+          pointerExists ? { exists: true, data: () => ({ documentKey: "racer-key" }) } : { exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async () => {
+        pointerExists = true;
+        throw new Error("permission denied");
+      });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      expect(await db.resolveGroupDocument()).toBe("racer-key");
+      expect(orphanSpy).toHaveBeenCalledWith("minted-key", "group_off-1_3");
+      expect(warn).toHaveBeenCalled();
+      createSpy.mockRestore();
+      warn.mockRestore();
+    });
+
+    it("create-path claim failure with the slot still empty: deletes the orphan and rejects", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const createSpy = jest.spyOn(db, "createDocument")
+        .mockResolvedValue({ firestoreMetadata: { key: "minted-key", uid: "group_off-1_3" } } as any);
+      const orphanSpy = jest.spyOn(db as any, "deleteOrphanDocument").mockResolvedValue(undefined);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async () => { throw new Error("permission denied"); });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await expect(db.resolveGroupDocument()).rejects.toThrow("permission denied");
+      expect(orphanSpy).toHaveBeenCalledWith("minted-key", "group_off-1_3");
+      createSpy.mockRestore();
+      warn.mockRestore();
+    });
+
     it("dedup is per slot: repeat resolves reuse it, a different group fetches its own pointer", async () => {
       const fetchedPaths: string[] = [];
       mockPointerFetches(fetchedPaths);

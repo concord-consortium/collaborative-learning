@@ -1055,6 +1055,20 @@ export class DB {
       });
       txn.update(metadataRef, { canonical: canonicalLabel });
       return documentKey;
+    }).catch(async (err) => {
+      // Same reasoning as the legacy path's catch, with one addition: we have just minted a document, so any
+      // outcome that does not leave us holding the slot has to clean the orphan up — an axes document with
+      // live Firestore metadata shows in Sort Work forever. deleteOrphanDocument is already best-effort.
+      console.warn("Canonical claim transaction failed; re-reading the slot",
+        { slot: pointerPath, minted: documentKey, err });
+      const s = await pointerRef.get().catch(() => undefined);
+      // A pointer naming someone else's document falls through to the lost-race branch below, which deletes
+      // the orphan; a pointer naming ours means the claim landed after all.
+      if (s?.exists) return (s.data() as ICanonicalPointer).documentKey;
+      // Slot empty or unreadable: nothing names our document, so drop it and fail rather than hand back a key
+      // no pointer claims. getOrCreateGroupDocument surfaces the rejection; the autocreate's .catch logs it.
+      await this.deleteOrphanDocument(documentKey, firestoreMetadata.uid);
+      throw err;
     });
 
     if (wonKey !== documentKey) {
