@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
-import { decideContext, RightSummary } from "./right-context";
+import { decideContext, RightContent, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
 import { turnFromDoc } from "./turn-from-doc";
 import { isAwaitingReply } from "./awaiting-reply";
@@ -26,6 +26,9 @@ export interface FirestoreTransportOptions {
   getLeftContext: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
+  // The workspace document itself, for a backend that projects it server-side; undefined until
+  // the document content has loaded. Only read for conversations on such a backend.
+  getRightContent?: () => RightContent | undefined;
   // unit-authored generic-prompt overrides; static for the page's lifetime (unit
   // config can't change without a reload, which rebuilds the transport)
   tutorPrompts?: TutorPrompts;
@@ -133,9 +136,28 @@ export class FirestoreTransport implements ChatTransport {
     return () => this.dispose();
   }
 
+  // Which workspace payload a message carries is decided by the backend the conversation belongs
+  // to. OpenAI reads a markdown summary; ForeverLearning projects the document server-side, so
+  // what travels is the document itself. Sending both would put two readings of one workspace on
+  // every message, one of which no backend reads.
+  //
+  // The change gate keys on the hash of whichever payload is actually sent. The two derive from
+  // the same document but not identically — an edit can move one and not the other — so gating
+  // the document on the summary's hash would skip a send the server needed.
+  private workspacePayload(): { field: "rightContext" | "rightContent"; value: string; hash: string }
+      | undefined {
+    const { getRightSummary, getRightContent, provider } = this.opts;
+    if (provider === "foreverlearning") {
+      const content = getRightContent?.();
+      return content && { field: "rightContent", value: content.json, hash: content.hash };
+    }
+    const summary = getRightSummary();
+    return summary && { field: "rightContext", value: summary.markdown, hash: summary.hash };
+  }
+
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, getRightSummary, tutorPrompts, provider } = this.opts;
-    const right = getRightSummary();
+    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider } = this.opts;
+    const right = this.workspacePayload();
     const decision = decideContext({
       leftAlreadyInstalled: this.problemInstalled,
       currentRightHash: right?.hash ?? "",
@@ -183,7 +205,7 @@ export class FirestoreTransport implements ChatTransport {
       if (tutorPrompts?.append) message.promptAppend = tutorPrompts.append;
     }
     if (decision.attachRight && right) {
-      message.rightContext = right.markdown;
+      message[right.field] = right.value;
     }
 
     await this.messagesRef().add(message);

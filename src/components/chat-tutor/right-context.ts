@@ -1,3 +1,4 @@
+import { getSnapshot, IAnyStateTreeNode } from "mobx-state-tree";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 
 export interface RightSummary {
@@ -21,6 +22,21 @@ export function hashString(str: string): string {
 export function summarizeRight(content: unknown): RightSummary {
   const markdown = documentSummarizer(content, {});
   return { markdown, hash: hashString(markdown) };
+}
+
+export interface RightContent {
+  json: string;
+  hash: string;
+}
+
+// The document itself, for a backend that projects it server-side rather than reading a summary.
+//
+// A snapshot rather than the live node: it is what normalize() reads on the other side, and it is
+// the only form that survives the trip. There is no dirty-tracking around this the way there is
+// around summarizeRight — serializing is cheap, and the cache exists for the summarizer's cost.
+export function serializeRight(content: unknown): RightContent {
+  const json = JSON.stringify(getSnapshot(content as IAnyStateTreeNode));
+  return { json, hash: hashString(json) };
 }
 
 export interface DecideContextArgs {

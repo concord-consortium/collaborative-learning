@@ -71,3 +71,63 @@ describe("FirestoreTransport prompt overrides", () => {
     expect(added[0].promptAppend).toBe("APPENDED");
   });
 });
+
+// Which workspace payload a message carries is decided by the backend the conversation belongs
+// to: OpenAI reads a markdown summary, ForeverLearning projects the document server-side. Sending
+// both would put two readings of the same workspace on every message, one of which no backend
+// reads.
+describe("FirestoreTransport workspace payload", () => {
+  function transportFor(provider: TutorProviderId | undefined) {
+    const { added, firestore } = fakeFirestore();
+    const transport = new FirestoreTransport({
+      firestore,
+      conversationId: "conv1",
+      uid: "123",
+      contextId: "class1",
+      problemPath: "sas/1/2",
+      getLeftContext: () => "{}",
+      getRightSummary: () => ({ markdown: "# Workspace", hash: "h-md" }),
+      getRightContent: () => ({ json: '{"rowOrder":[]}', hash: "h-json" }),
+      provider,
+    });
+    return { added, transport };
+  }
+
+  it("sends the markdown summary under the default backend", async () => {
+    const { added, transport } = transportFor(undefined);
+    await transport.sendUserMessage("hello");
+    expect(added[0].rightContext).toBe("# Workspace");
+    expect(added[0]).not.toHaveProperty("rightContent");
+  });
+
+  it("sends the document itself under ForeverLearning", async () => {
+    const { added, transport } = transportFor("foreverlearning");
+    await transport.sendUserMessage("hello");
+    expect(added[0].rightContent).toBe('{"rowOrder":[]}');
+    expect(added[0]).not.toHaveProperty("rightContext");
+  });
+
+  // The gate keys on the payload actually sent, not on the summary's hash. The two derive from
+  // one document but not identically — a change can move one and not the other, and gating the
+  // document on the summary's hash would skip a send the server needed.
+  it("does not resend an unchanged document", async () => {
+    const { added, transport } = transportFor("foreverlearning");
+    await transport.sendUserMessage("first");
+    await transport.sendUserMessage("second");
+    expect(added[0]).toHaveProperty("rightContent");
+    expect(added[1]).not.toHaveProperty("rightContent");
+  });
+
+  it("sends nothing for a workspace that has not loaded", async () => {
+    const { added, firestore } = fakeFirestore();
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => "{}",
+      getRightSummary: () => undefined, getRightContent: () => undefined,
+      provider: "foreverlearning",
+    });
+    await transport.sendUserMessage("hello");
+    expect(added[0]).not.toHaveProperty("rightContent");
+    expect(added[0]).not.toHaveProperty("rightContext");
+  });
+});

@@ -60,6 +60,23 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    // The ForeverLearning backend projects the document server-side, so its messages carry the
+    // document itself rather than a summary of it. The whitelist is a hasOnly, so a field the
+    // client sends and the rules have not been told about fails the write outright.
+    it("allows an optional rightContent payload (the document, for a server-side projection)", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({
+        add: { rightContent: `{"rowOrder":[],"rowMap":{},"tileMap":{}}`, provider: "foreverlearning" }
+      }));
+    });
+
+    it("rejects a rightContent that is not a string", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({
+        add: { rightContent: { rowOrder: [] } }
+      }));
+    });
+
     it("allows optional promptReplace/promptAppend payloads (unit-authored prompt overrides)", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToSucceed(db, `${kParentPath}/messages/msg-replace`, specMessage({
