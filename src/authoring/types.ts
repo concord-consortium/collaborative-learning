@@ -72,6 +72,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   showShare?: boolean;
   defaultDocumentType?: "problem" | "personal" | "group";
   groupDocumentsEnabled?: boolean;
+  autoAssignStudentsToIndividualGroups?: boolean;
 }
 
 export interface IAuthorTool {

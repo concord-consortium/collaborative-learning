@@ -32,7 +32,7 @@ const fourUpCheckbox = () =>
   screen.getByRole("checkbox", { name: "Show the 4-up view button" });
 
 const defaultDocumentTypeSelect = () =>
-  screen.getByRole("combobox");
+  screen.getByRole("combobox", { name: "Starting document" });
 
 const groupDocumentsCheckbox = () =>
   screen.getByRole("checkbox", { name: "Enable group documents" });
@@ -142,12 +142,29 @@ describe("DocumentSettings — Starting Document", () => {
     expect(groupDocumentsCheckbox()).toBeDisabled();
   });
 
+  it("checks and disables the group-documents checkbox when Group doc is selected on a fresh config", async () => {
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    expect(groupDocumentsCheckbox()).not.toBeChecked();
+    await user.selectOptions(defaultDocumentTypeSelect(), "group");
+    expect(groupDocumentsCheckbox()).toBeChecked();
+    expect(groupDocumentsCheckbox()).toBeDisabled();
+  });
+
   it("loads defaultDocumentType:\"group\" with the checkbox checked and disabled (implied, no explicit flag)", () => {
     mockConfig.defaultDocumentType = "group";
     render(<DocumentSettings />);
 
     expect(groupDocumentsCheckbox()).toBeChecked();
     expect(groupDocumentsCheckbox()).toBeDisabled();
+  });
+
+  it("disables the Group doc option when the unit auto-assigns individual groups", () => {
+    mockConfig.autoAssignStudentsToIndividualGroups = true;
+    render(<DocumentSettings />);
+
+    expect(screen.getByRole("option", { name: "Group doc" })).toBeDisabled();
   });
 
   it("writes defaultDocumentType: \"group\" and groupDocumentsEnabled: true when Group doc is selected", async () => {
@@ -163,7 +180,19 @@ describe("DocumentSettings — Starting Document", () => {
     expect(mockDraft.config.groupDocumentsEnabled).toBe(true);
   });
 
-  it("writes groupDocumentsEnabled truthy and omits defaultDocumentType for Problem doc, box checked", async () => {
+  it("writes defaultDocumentType: \"personal\" when Personal doc is selected", async () => {
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.selectOptions(defaultDocumentTypeSelect(), "personal");
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater();
+    expect(mockDraft.config.defaultDocumentType).toBe("personal");
+  });
+
+  it("writes groupDocumentsEnabled: true and omits defaultDocumentType for Problem doc, box checked", async () => {
     const user = userEvent.setup();
     render(<DocumentSettings />);
 
@@ -174,6 +203,33 @@ describe("DocumentSettings — Starting Document", () => {
     // Seed the draft with pre-existing values so the deletes/writes are observable.
     const mockDraft = applyLastUpdater({ defaultDocumentType: "personal" });
     expect(mockDraft.config.defaultDocumentType).toBeUndefined();
-    expect(mockDraft.config.groupDocumentsEnabled).toBeTruthy();
+    expect(mockDraft.config.groupDocumentsEnabled).toBe(true);
+  });
+
+  it("deletes groupDocumentsEnabled when unchecked and saved with Problem doc", async () => {
+    mockConfig.groupDocumentsEnabled = true;
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.click(groupDocumentsCheckbox()); // was checked; uncheck it
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ groupDocumentsEnabled: true });
+    expect(mockDraft.config.groupDocumentsEnabled).toBeUndefined();
+  });
+
+  it("keeps groupDocumentsEnabled: true (sticky) when switching from Group doc to Personal doc", async () => {
+    mockConfig.defaultDocumentType = "group";
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.selectOptions(defaultDocumentTypeSelect(), "personal");
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ defaultDocumentType: "group" });
+    expect(mockDraft.config.defaultDocumentType).toBe("personal");
+    expect(mockDraft.config.groupDocumentsEnabled).toBe(true);
   });
 });

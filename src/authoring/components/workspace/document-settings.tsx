@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useCurriculum } from "../../hooks/use-curriculum";
-import { ISettings } from "../../types";
+import { ISettings, IUnitConfig } from "../../types";
 import { buildSectionDividerTemplate } from "../../utils/template-utils";
 
 interface DocumentSettingsFormInputs {
@@ -11,7 +11,7 @@ interface DocumentSettingsFormInputs {
   showTextTitles: boolean;
   documentTemplateEnabled: boolean;
   planningTemplateEnabled: boolean;
-  defaultDocumentType: "problem" | "personal" | "group";
+  defaultDocumentType: NonNullable<IUnitConfig["defaultDocumentType"]>;
   groupDocumentsEnabled: boolean;
 }
 
@@ -21,6 +21,7 @@ const DocumentSettings: React.FC = () => {
 
   const hasDocumentTemplate = !!config?.defaultDocumentTemplate;
   const hasPlanningTemplate = !!config?.planningTemplate;
+  const groupDocDisabledByAutoAssign = !!config?.autoAssignStudentsToIndividualGroups;
 
   const formDefaults: DocumentSettingsFormInputs = useMemo(() => {
     return {
@@ -39,7 +40,7 @@ const DocumentSettings: React.FC = () => {
     };
   }, [config, hasDocumentTemplate, hasPlanningTemplate]);
 
-  const { handleSubmit, register, reset, watch } = useForm<DocumentSettingsFormInputs>({
+  const { handleSubmit, register, reset, watch, setValue } = useForm<DocumentSettingsFormInputs>({
     defaultValues: formDefaults,
   });
 
@@ -48,6 +49,12 @@ const DocumentSettings: React.FC = () => {
   }, [formDefaults, reset]);
 
   const groupDocSelected = watch("defaultDocumentType") === "group";
+
+  // "Group doc" means group docs on: drive the checkbox so the display matches what Save will write,
+  // including visibly repairing a contradictory saved "group" + explicit false.
+  useEffect(() => {
+    if (groupDocSelected) setValue("groupDocumentsEnabled", true);
+  }, [groupDocSelected, setValue]);
 
   const onSubmit: SubmitHandler<DocumentSettingsFormInputs> = (data) => {
     setUnitConfig(draft => {
@@ -92,11 +99,10 @@ const DocumentSettings: React.FC = () => {
       } else {
         delete draft.config.defaultDocumentType;
       }
-      // "Group doc" implies group documents; the checkbox is disabled (and its submitted value
-      // unreliable) in that case, so force true explicitly rather than trust/delete it.
-      if (data.defaultDocumentType === "group") {
-        draft.config.groupDocumentsEnabled = true;
-      } else if (data.groupDocumentsEnabled) {
+      // Omit-the-default: write true only when on, delete otherwise. The `=== "group"` arm is
+      // defense in case submit races the driving effect above; by product decision, selecting
+      // "Group doc" always means group docs on.
+      if (data.defaultDocumentType === "group" || data.groupDocumentsEnabled) {
         draft.config.groupDocumentsEnabled = true;
       } else {
         delete draft.config.groupDocumentsEnabled;
@@ -219,17 +225,20 @@ const DocumentSettings: React.FC = () => {
       <fieldset>
         <legend>Starting Document</legend>
         <select
+          aria-label="Starting document"
           aria-describedby="default-document-type-description"
           {...register("defaultDocumentType")}
         >
           <option value="problem">Problem doc</option>
           <option value="personal">Personal doc</option>
-          <option value="group">Group doc</option>
+          <option value="group" disabled={groupDocDisabledByAutoAssign}>Group doc</option>
         </select>
         <p className="muted small" id="default-document-type-description">
           Which document students start in. &quot;Group doc&quot; also enables group documents for
-          the unit (each group&apos;s document is auto-created and appears in Sort Work). Teachers
-          always start in the problem document.
+          the unit (each group&apos;s document is auto-created and appears in Sort Work). When Group
+          doc is selected, teachers start in the problem document instead.
+          {groupDocDisabledByAutoAssign &&
+            " This unit auto-assigns students to individual groups, which disables group documents."}
         </p>
         <label className="horizontal middle">
           <input
@@ -239,6 +248,10 @@ const DocumentSettings: React.FC = () => {
           />
           <span>Enable group documents</span>
         </label>
+        <p className="muted small">
+          Group documents are auto-created per group and appear in Sort Work, independent of which
+          document students start in.
+        </p>
       </fieldset>
 
       <div className="bottomButtons">
