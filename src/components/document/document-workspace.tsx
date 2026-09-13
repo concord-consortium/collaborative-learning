@@ -247,7 +247,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     } catch (err) {
       // Unmounting cancels the wait, which rejects here. That is a teardown, not a failure: warning
       // about it would be noise and falling back would write a primary document nobody asked for.
-      if (this.unmounted) return;
+      // A group switch cancels it the same way — and a newer invocation owns the workspace now.
+      if (this.unmounted || this.groupWaitDisposer !== groupWait.cancel) return;
       console.warn("Could not open the group document as the default; using the default document", err);
       // Only fall back while the workspace is still empty — the group document is already primary
       // when the failure came from the later default-document guarantee, and must not be replaced.
