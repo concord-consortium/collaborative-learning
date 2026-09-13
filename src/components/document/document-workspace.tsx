@@ -226,17 +226,19 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private async loadGroupPrimaryDocument() {
     const { db, persistentUI: { problemWorkspace } } = this.stores;
     let primarySet = false;
+    // Same precondition db.requireGroupContext enforces; waiting here turns its throw into a wait.
+    const groupWait = when(() => !!this.stores.user.currentGroupId && !!this.stores.user.offeringId,
+      { timeout: kGroupMembershipWaitMs });
     this.groupWaitDisposer?.();
+    this.groupWaitDisposer = groupWait.cancel;
     try {
-      // Same precondition db.requireGroupContext enforces; waiting here turns its throw into a wait.
-      const groupWait = when(() => !!this.stores.user.currentGroupId && !!this.stores.user.offeringId,
-        { timeout: kGroupMembershipWaitMs });
-      this.groupWaitDisposer = groupWait.cancel;
       await groupWait;
       const groupDocument = await db.getOrCreateGroupDocument();
       if (groupDocument) {
         problemWorkspace.setPrimaryDocument(groupDocument);
         primarySet = true;
+      } else {
+        throw new Error("getOrCreateGroupDocument returned no document");
       }
       const defaultDocument = await this.guaranteeDefaultDocument();
       if (!defaultDocument) {
@@ -255,7 +257,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         });
       }
     } finally {
-      this.groupWaitDisposer = undefined;
+      // Only clear our own wait: a later invocation may already have installed its cancel here.
+      if (this.groupWaitDisposer === groupWait.cancel) {
+        this.groupWaitDisposer = undefined;
+      }
     }
   }
 
