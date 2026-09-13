@@ -180,6 +180,7 @@ export class DB {
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
   private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
+  private canonicalResolvePromiseMap = new Map<string, Promise<IResolvedCanonicalDocument>>();
 
   constructor() {
     makeObservable(this);
@@ -279,6 +280,7 @@ export class DB {
     this.listeners.stop();
     this.authStateUnsubscribe?.();
     this.authStateUnsubscribe = undefined;
+    this.canonicalResolvePromiseMap.clear();
   }
 
   /**
@@ -846,6 +848,22 @@ export class DB {
     });
   }
 
+  // Resolver-only twin of getOrCreateGroupDocument, mirroring resolveClassWideDocument: converge the
+  // group onto its one default document — creating it if absent — WITHOUT opening it. Used by the
+  // eager autocreate so group documents exist (and appear in Sort Work) before anyone opens one.
+  public async resolveGroupDocument() {
+    const { user } = this.stores;
+    const { groupId, offeringId } = this.requireGroupContext();
+    const { documentKey } = await this.resolveCanonicalDocument({
+      container: { classHash: user.classHash, offeringId },
+      canonicalLabel: kDefaultCanonicalDocumentLabel,
+      type: AxesDocument,
+      kind: GroupDocument,
+      findLegacy: () => this.findLegacyGroupDocument(groupId)
+    });
+    return documentKey;
+  }
+
   // Synthetic owner uid for this class's class-wide documents, minted by the same function hasClassOwner
   // reads back, so the two cannot drift.
   private get userIdForClassWideDocuments() {
@@ -922,16 +940,31 @@ export class DB {
       : this.openCanonicalDocumentByKey(documentKey);
   }
 
-  private async resolveCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts): Promise<IResolvedCanonicalDocument> {
-    const { container, type, kind, canonicalLabel, findLegacy } = opts;
+  private resolveCanonicalDocument(opts: IGetOrCreateCanonicalDocumentOpts): Promise<IResolvedCanonicalDocument> {
     // The slot's owner is the same uid createDocument stamps on the document, from the same registry
     // call. firestore.rules builds the pointer path from the document's stored `uid`, so a claim whose
     // path named a different owner would be rejected rather than silently mis-slotted.
     const pointerPath = getCanonicalPointerPath({
-      ...container,
-      owner: getDocumentOwner(kind, this.documentOwnerContext),
-      label: canonicalLabel
+      ...opts.container,
+      owner: getDocumentOwner(opts.kind, this.documentOwnerContext),
+      label: opts.canonicalLabel
     });
+    // Concurrent resolves of one slot within this client (the autocreate reaction, the start-in-group-doc
+    // workspace branch, and the File ▸ Group Doc menu can all fire around login) share one resolution
+    // instead of racing each other into create-then-delete churn. A rejected resolve is evicted so a
+    // later call can retry; a resolved one is kept — the pointer is immutable once claimed.
+    const inFlight = this.canonicalResolvePromiseMap.get(pointerPath);
+    if (inFlight) return inFlight;
+    const promise = this.resolveCanonicalDocumentUncached(opts, pointerPath);
+    this.canonicalResolvePromiseMap.set(pointerPath, promise);
+    promise.catch(() => this.canonicalResolvePromiseMap.delete(pointerPath));
+    return promise;
+  }
+
+  private async resolveCanonicalDocumentUncached(
+    opts: IGetOrCreateCanonicalDocumentOpts, pointerPath: string
+  ): Promise<IResolvedCanonicalDocument> {
+    const { type, kind, canonicalLabel, findLegacy } = opts;
     const pointerRef = this.firestore.doc(pointerPath);
 
     // 1. Fast path: pointer already exists. Only the pointer is read — the metadata is left to whoever
@@ -945,17 +978,23 @@ export class DB {
     if (findLegacy) {
       const legacy = await findLegacy();
       if (legacy) {
-        await this.firestore.runTransaction(async (txn) => {
+        const legacyWonKey: string = await this.firestore.runTransaction(async (txn) => {
           const s = await txn.get(pointerRef);
-          if (!s.exists) {
-            txn.set(pointerRef, {
-              documentKey: legacy.key, createdAt: this.firestore.timestamp(),
-              createdBy: this.stores.user.id   // the real user backfilling the pointer, for provenance
-            });
-            txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
-          }
-        }).catch(() => undefined); // If the backfill txn throws (e.g. a concurrent caller already
-        // claimed the pointer), swallow it — we still return the legacy doc below either way.
+          if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
+          txn.set(pointerRef, {
+            documentKey: legacy.key, createdAt: this.firestore.timestamp(),
+            createdBy: this.stores.user.id   // the real user backfilling the pointer, for provenance
+          });
+          txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
+          return legacy.key;
+        }).catch(() => legacy.key); // txn failure: fall back to the legacy doc rather than blocking
+        if (legacyWonKey !== legacy.key) {
+          // The losing duplicate is left in place: unlike a just-minted orphan it may hold student work,
+          // so the clients converge on the slot's document rather than deleting the other one.
+          console.warn("Canonical slot already names a different document than the legacy candidate;",
+            "converging on the slot's document", { slot: pointerPath, pointer: legacyWonKey, legacy: legacy.key });
+          return { documentKey: legacyWonKey };
+        }
         return { documentKey: legacy.key, firestoreMetadata: legacy };
       }
     }

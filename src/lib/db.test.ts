@@ -334,6 +334,83 @@ describe("db", () => {
     });
   });
 
+  describe("resolveGroupDocument", () => {
+    beforeEach(() => {
+      stores.user = UserModel.create({ id: "1", portal: "example.com", offeringId: "off-1", currentGroupId: "3" });
+      (db as any).openDocumentFromFirestoreMetadata = jest.fn();
+      (db as any).findFirestoreMetadata = jest.fn();
+    });
+
+    it("fast path: returns the pointer's documentKey without opening anything", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) }) })
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      expect(await db.resolveGroupDocument()).toBe("existing");
+      expect((db as any).openDocumentFromFirestoreMetadata).not.toHaveBeenCalled();
+      expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
+    });
+
+    it("throws when the user is not in a group with an offering", async () => {
+      stores.user = UserModel.create({ id: "1", portal: "example.com" });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await expect(db.resolveGroupDocument()).rejects.toThrow();
+    });
+
+    it("two concurrent resolves of the same slot share one resolution (no create churn)", async () => {
+      const createSpy = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
+      (db as any).createDocument = createSpy;
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }), set: () => {}, update: () => {} }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const [k1, k2] = await Promise.all([db.resolveGroupDocument(), db.resolveGroupDocument()]);
+      expect(k1).toBe("minted-key");
+      expect(k2).toBe("minted-key");
+      expect(createSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("legacy candidate loses to a concurrently-claimed pointer: converges on the pointer's document", async () => {
+      // The old behavior returned the local legacy candidate unconditionally — two clients whose
+      // legacy queries surfaced different pre-pointer duplicates would keep different documents.
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({
+          get: async () => ({ exists: true, data: () => ({ documentKey: "winner-B" }) }),
+          set: () => {}, update: () => {}
+        }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      expect(await db.resolveGroupDocument()).toBe("winner-B");
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it("dedup does not leak across slots: a different group fetches its own pointer", async () => {
+      const fetchedPaths: string[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: (path: string) => {
+          fetchedPaths.push(path);
+          return { get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: `doc-for-${path}` }) }) };
+        }
+      }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const k3 = await db.resolveGroupDocument();
+      stores.user.setCurrentGroupId("4");
+      const k4 = await db.resolveGroupDocument();
+      expect(k4).not.toBe(k3);
+      expect(new Set(fetchedPaths).size).toBe(2); // one pointer path per group slot
+    });
+  });
+
   it("writes group-document metadata to Firestore client-side (no contextId)", async () => {
     const setPayloads: any[] = [];
     mockFirestore.mockImplementation(() => ({
