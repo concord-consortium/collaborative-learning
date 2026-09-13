@@ -34,6 +34,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private primaryDocumentLoaded = false;
   private groupChangeDisposer?: IReactionDisposer;
   private groupWaitDisposer?: () => void;
+  private unmounted = false;
 
   constructor(props: IProps) {
     super(props);
@@ -80,6 +81,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public componentWillUnmount() {
+    this.unmounted = true;
     this.groupChangeDisposer?.();
     this.groupWaitDisposer?.();
   }
@@ -241,6 +243,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         console.warn("Student's own default document was not created; 4-up and publishing need it");
       }
     } catch (err) {
+      // Unmounting cancels the wait, which rejects here. That is a teardown, not a failure: warning
+      // about it would be noise and falling back would write a primary document nobody asked for.
+      if (this.unmounted) return;
       console.warn("Could not open the group document as the default; using the default document", err);
       // Only fall back while the workspace is still empty — the group document is already primary
       // when the failure came from the later default-document guarantee, and must not be replaced.
