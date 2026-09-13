@@ -4,7 +4,7 @@ import "firebase/database";
 import "firebase/firestore";
 import "firebase/functions";
 import "firebase/storage";
-import { observable, makeObservable } from "mobx";
+import { observable, makeObservable, reaction, IReactionDisposer } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
@@ -182,6 +182,7 @@ export class DB {
   private authStateUnsubscribe?: firebase.Unsubscribe;
   private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
   private canonicalResolvePromiseMap = new Map<string, Promise<IResolvedCanonicalDocument>>();
+  private groupDocumentDisposer?: IReactionDisposer;
 
   constructor() {
     makeObservable(this);
@@ -230,6 +231,7 @@ export class DB {
               this.listeners.start().then(resolve).catch(reject);
               exemplarController.initialize(this.stores);
               this.createDeclaredClassWideDocuments();
+              this.autoResolveGroupDocuments();
 
               // Once unit config is available, apply the unit's default panel layout (first-time
               // visitors only, see applyDefaultPanelLayout) and then layer the author's fixed start
@@ -284,6 +286,8 @@ export class DB {
     // Slot resolutions are tied to this session's user/group context; documentFetchPromiseMap is not cleared
     // because it is keyed by document key, which stays valid for documents already in the documents store.
     this.canonicalResolvePromiseMap.clear();
+    this.groupDocumentDisposer?.();
+    this.groupDocumentDisposer = undefined;
   }
 
   /**
@@ -915,6 +919,27 @@ export class DB {
         console.error("Failed to create class-wide document", classWideDoc.kind, err);
       });
     }
+  }
+
+  // Eagerly converge each group onto its default document as soon as the student's group membership is
+  // known — and again when it changes — so group documents exist (and appear in Sort Work) before anyone
+  // opens one. Resolver-only: nothing is opened here. Mirrors createDeclaredClassWideDocuments; a
+  // reaction rather than a one-shot call because the groups listener sets currentGroupId after unit
+  // load, and it covers group switching for free. DBGroupsListener itself stays document-free.
+  private autoResolveGroupDocuments() {
+    const { appConfig, user } = this.stores;
+    if (!appConfig.groupDocumentsEnabled) return;
+    this.groupDocumentDisposer?.();
+    this.groupDocumentDisposer = reaction(
+      () => (user.isStudent ? user.currentGroupId : undefined),
+      (groupId) => {
+        if (!groupId || !user.offeringId) return;
+        this.resolveGroupDocument().catch((err) => {
+          console.error("Failed to auto-create group document", err);
+        });
+      },
+      { fireImmediately: true }
+    );
   }
 
   // The candidate owner uids for a document created in this session. getDocumentOwner picks among them by

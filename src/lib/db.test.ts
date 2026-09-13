@@ -1137,4 +1137,58 @@ describe("db", () => {
     });
   });
 
+  describe("autoResolveGroupDocuments", () => {
+    beforeEach(() => {
+      stores.user = UserModel.create({ id: "1", portal: "example.com", type: "student", offeringId: "off-1" });
+      stores.appConfig.setConfigs([{ groupDocumentsEnabled: true }]);
+    });
+
+    it("resolves the group document when membership arrives, and again on group switch", async () => {
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      expect(resolveSpy).not.toHaveBeenCalled();       // no group yet
+      stores.user.setCurrentGroupId("3");
+      expect(resolveSpy).toHaveBeenCalledTimes(1);
+      stores.user.setCurrentGroupId("4");
+      expect(resolveSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("does nothing when group documents are not enabled", async () => {
+      stores.appConfig.setConfigs([{ groupDocumentsEnabled: false }]);
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      stores.user.setCurrentGroupId("3");
+      expect(resolveSpy).not.toHaveBeenCalled();
+    });
+
+    it("does nothing for a teacher", async () => {
+      stores.user = UserModel.create({ id: "1", portal: "example.com", type: "teacher", offeringId: "off-1" });
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      stores.user.setCurrentGroupId("3");
+      expect(resolveSpy).not.toHaveBeenCalled();
+    });
+
+    it("resolves immediately when membership is already known at registration", async () => {
+      stores.user = UserModel.create({ id: "1", portal: "example.com", type: "student",
+        offeringId: "off-1", currentGroupId: "3" });
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      expect(resolveSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("disconnect disposes the reaction", async () => {
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument").mockResolvedValue("k");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      db.disconnect();
+      stores.user.setCurrentGroupId("3");
+      expect(resolveSpy).not.toHaveBeenCalled();
+    });
+  });
+
 });
