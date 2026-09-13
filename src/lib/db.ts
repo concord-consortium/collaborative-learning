@@ -135,10 +135,11 @@ interface IGetOrCreateCanonicalDocumentOpts {
 interface IResolvedCanonicalDocument {
   documentKey: string;
   // Present when the resolving path already read or wrote the metadata as part of its work: the legacy
-  // fallback, and the create path when it wins the pointer claim. Absent when the path only ever learns the
-  // documentKey — the pointer fast path, and the create path's lost-race branch. Neither goes and fetches the
-  // Firestore metadata: resolving is separated from opening precisely so a caller that only needs convergence
-  // pays nothing extra for a document it is not going to open.
+  // fallback that wins the slot, and the create path when it wins the pointer claim. Absent whenever the
+  // returned key names another racer's document (the pointer fast path, the create path's lost-race branch,
+  // and a legacy candidate losing to a concurrently-claimed pointer): none of those goes and fetches the
+  // Firestore metadata, because resolving is separated from opening precisely so a caller that only needs
+  // convergence pays nothing extra for a document it is not going to open.
   firestoreMetadata?: IDocumentMetadata;
 }
 
@@ -280,6 +281,8 @@ export class DB {
     this.listeners.stop();
     this.authStateUnsubscribe?.();
     this.authStateUnsubscribe = undefined;
+    // Slot resolutions are tied to this session's user/group context; documentFetchPromiseMap is not cleared
+    // because it is keyed by document key, which stays valid for documents already in the documents store.
     this.canonicalResolvePromiseMap.clear();
   }
 
@@ -832,35 +835,33 @@ export class DB {
     return this.stores.documentMetadata.fetchMetadata(documentKey);
   }
 
-  public async getOrCreateGroupDocument() {
-    const { user } = this.stores;
-    const { groupId, offeringId } = this.requireGroupContext();
-    // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
-    // The slot is labeled "default" (the group's default canonical document) rather than by the
-    // document's type — see kDefaultCanonicalDocumentLabel. Its `type` is the generic axes value while
-    // its `kind` is GroupDocument; the two axes are independent.
-    return this.getOrCreateCanonicalDocument({
-      container: { classHash: user.classHash, offeringId },
+  // The one slot descriptor both group-document entry points must share: if they ever diverged, the eager
+  // autocreate and File ▸ Group Doc would mint two different documents for one group.
+  // A group document is kept in the offering; its group-ness is its owner, which the kind supplies.
+  // The slot is labeled "default" (the group's default canonical document) rather than by the
+  // document's type — see kDefaultCanonicalDocumentLabel. Its `type` is the generic axes value while
+  // its `kind` is GroupDocument; the two axes are independent.
+  private groupDocumentCanonicalOpts(groupId: string, offeringId: string): IGetOrCreateCanonicalDocumentOpts {
+    return {
+      container: { classHash: this.stores.user.classHash, offeringId },
       canonicalLabel: kDefaultCanonicalDocumentLabel,
       type: AxesDocument,
       kind: GroupDocument,
       findLegacy: () => this.findLegacyGroupDocument(groupId)
-    });
+    };
+  }
+
+  public async getOrCreateGroupDocument() {
+    const { groupId, offeringId } = this.requireGroupContext();
+    return this.getOrCreateCanonicalDocument(this.groupDocumentCanonicalOpts(groupId, offeringId));
   }
 
   // Resolver-only twin of getOrCreateGroupDocument, mirroring resolveClassWideDocument: converge the
   // group onto its one default document — creating it if absent — WITHOUT opening it. Used by the
   // eager autocreate so group documents exist (and appear in Sort Work) before anyone opens one.
   public async resolveGroupDocument() {
-    const { user } = this.stores;
     const { groupId, offeringId } = this.requireGroupContext();
-    const { documentKey } = await this.resolveCanonicalDocument({
-      container: { classHash: user.classHash, offeringId },
-      canonicalLabel: kDefaultCanonicalDocumentLabel,
-      type: AxesDocument,
-      kind: GroupDocument,
-      findLegacy: () => this.findLegacyGroupDocument(groupId)
-    });
+    const { documentKey } = await this.resolveCanonicalDocument(this.groupDocumentCanonicalOpts(groupId, offeringId));
     return documentKey;
   }
 
@@ -957,7 +958,12 @@ export class DB {
     if (inFlight) return inFlight;
     const promise = this.resolveCanonicalDocumentUncached(opts, pointerPath);
     this.canonicalResolvePromiseMap.set(pointerPath, promise);
-    promise.catch(() => this.canonicalResolvePromiseMap.delete(pointerPath));
+    promise.catch(() => {
+      // Only evict our own entry: a retry may already have stored a newer promise for this slot.
+      if (this.canonicalResolvePromiseMap.get(pointerPath) === promise) {
+        this.canonicalResolvePromiseMap.delete(pointerPath);
+      }
+    });
     return promise;
   }
 
@@ -978,7 +984,7 @@ export class DB {
     if (findLegacy) {
       const legacy = await findLegacy();
       if (legacy) {
-        const legacyWonKey: string = await this.firestore.runTransaction(async (txn) => {
+        const slotKey: string = await this.firestore.runTransaction(async (txn) => {
           const s = await txn.get(pointerRef);
           if (s.exists) return (s.data() as ICanonicalPointer).documentKey;   // lost the race
           txn.set(pointerRef, {
@@ -987,13 +993,20 @@ export class DB {
           });
           txn.update(this.firestore.doc(getSimpleDocumentPath(legacy.key)), { canonical: canonicalLabel });
           return legacy.key;
-        }).catch(() => legacy.key); // txn failure: fall back to the legacy doc rather than blocking
-        if (legacyWonKey !== legacy.key) {
+        }).catch(async (err) => {
+          // A failed txn (retries exhausted under class-login contention) says nothing about who holds the
+          // slot, so re-read it rather than assuming our candidate won and re-introducing the divergence.
+          console.warn("Canonical backfill transaction failed; re-reading the slot",
+            { slot: pointerPath, legacy: legacy.key, err });
+          const s = await pointerRef.get().catch(() => undefined);
+          return s?.exists ? (s.data() as ICanonicalPointer).documentKey : legacy.key;
+        });
+        if (slotKey !== legacy.key) {
           // The losing duplicate is left in place: unlike a just-minted orphan it may hold student work,
           // so the clients converge on the slot's document rather than deleting the other one.
           console.warn("Canonical slot already names a different document than the legacy candidate;",
-            "converging on the slot's document", { slot: pointerPath, pointer: legacyWonKey, legacy: legacy.key });
-          return { documentKey: legacyWonKey };
+            "converging on the slot's document", { slot: pointerPath, pointer: slotKey, legacy: legacy.key });
+          return { documentKey: slotKey };
         }
         return { documentKey: legacy.key, firestoreMetadata: legacy };
       }

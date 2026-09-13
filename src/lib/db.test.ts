@@ -10,6 +10,7 @@ import {
 import {
   AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
+import { getCanonicalPointerPath, kDefaultCanonicalDocumentLabel } from "./scoped-document-pointers";
 import { specStores } from "../models/stores/spec-stores";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores } from "../models/stores/stores";
@@ -341,12 +342,27 @@ describe("db", () => {
       (db as any).findFirestoreMetadata = jest.fn();
     });
 
-    it("fast path: returns the pointer's documentKey without opening anything", async () => {
+    // Every pointer path the client asked Firestore for, in order. The paths are full paths (firestore.doc
+    // prepends the root folder), so assertions match on the canonical-path suffix.
+    const mockPointerFetches = (fetchedPaths: string[], key = (path: string) => `doc-for-${path}`) => {
       mockFirestore.mockImplementation(() => ({
-        doc: () => ({ get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: "existing" }) }) })
+        doc: (path: string) => {
+          fetchedPaths.push(path);
+          return { get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: key(path) }) }) };
+        }
       }));
+    };
+
+    it("fast path: returns the pointer's documentKey without opening anything", async () => {
+      const fetchedPaths: string[] = [];
+      mockPointerFetches(fetchedPaths, () => "existing");
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       expect(await db.resolveGroupDocument()).toBe("existing");
+      // Pin the slot the resolver reads: a wrongly-constructed path would otherwise pass against any mock.
+      expect(fetchedPaths[0]).toContain(getCanonicalPointerPath({
+        classHash: stores.user.classHash, offeringId: "off-1",
+        owner: "group_off-1_3", label: kDefaultCanonicalDocumentLabel
+      }));
       expect((db as any).openDocumentFromFirestoreMetadata).not.toHaveBeenCalled();
       expect((db as any).findFirestoreMetadata).not.toHaveBeenCalled();
     });
@@ -358,8 +374,8 @@ describe("db", () => {
     });
 
     it("two concurrent resolves of the same slot share one resolution (no create churn)", async () => {
-      const createSpy = jest.fn(async () => ({ firestoreMetadata: { key: "minted-key" } }));
-      (db as any).createDocument = createSpy;
+      const createSpy = jest.spyOn(db, "createDocument")
+        .mockResolvedValue({ firestoreMetadata: { key: "minted-key" } } as any);
       mockFirestore.mockImplementation(() => ({
         doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
         collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
@@ -372,6 +388,36 @@ describe("db", () => {
       expect(k1).toBe("minted-key");
       expect(k2).toBe("minted-key");
       expect(createSpy).toHaveBeenCalledTimes(1);
+      expect((db as any).openDocumentFromFirestoreMetadata).not.toHaveBeenCalled();
+      createSpy.mockRestore();
+    });
+
+    it("a rejected resolve is evicted from the memo, so a later call retries", async () => {
+      const createSpy = jest.spyOn(db, "createDocument")
+        .mockRejectedValueOnce(new Error("create failed"))
+        .mockResolvedValue({ firestoreMetadata: { key: "second-key" } } as any);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: true, docs: [] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }), set: () => {}, update: () => {} }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await expect(db.resolveGroupDocument()).rejects.toThrow("create failed");
+      expect(await db.resolveGroupDocument()).toBe("second-key");
+      expect(createSpy).toHaveBeenCalledTimes(2);
+      createSpy.mockRestore();
+    });
+
+    it("disconnect clears the memo, so the next resolve reads the slot again", async () => {
+      const fetchedPaths: string[] = [];
+      mockPointerFetches(fetchedPaths, () => "existing");
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await db.resolveGroupDocument();
+      db.disconnect();
+      await db.resolveGroupDocument();
+      expect(fetchedPaths).toHaveLength(2);
     });
 
     it("legacy candidate loses to a concurrently-claimed pointer: converges on the pointer's document", async () => {
@@ -394,20 +440,50 @@ describe("db", () => {
       warn.mockRestore();
     });
 
-    it("dedup does not leak across slots: a different group fetches its own pointer", async () => {
-      const fetchedPaths: string[] = [];
+    // A failed backfill transaction says nothing about who holds the slot, so the slot is re-read rather
+    // than assumed to be ours.
+    it("legacy backfill transaction failure: re-reads the slot and converges on the pointer it finds", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      let pointerExists = false;   // the concurrent winner claims the slot while our txn is failing
       mockFirestore.mockImplementation(() => ({
-        doc: (path: string) => {
-          fetchedPaths.push(path);
-          return { get: () => Promise.resolve({ exists: true, data: () => ({ documentKey: `doc-for-${path}` }) }) };
-        }
+        doc: () => ({ get: () => Promise.resolve(
+          pointerExists ? { exists: true, data: () => ({ documentKey: "winner-C" }) } : { exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
       }));
+      (db as any).firestore.runTransaction = jest.fn(async () => {
+        pointerExists = true;
+        throw new Error("too much contention");
+      });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      expect(await db.resolveGroupDocument()).toBe("winner-C");
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it("legacy backfill transaction failure with the slot still empty: keeps the legacy document", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ withConverter: () => ({ where: () => ({ where: () => ({ where: () => ({
+          get: () => Promise.resolve({ empty: false, docs: [{ data: () => ({ key: "legacy-A" }) }] }) }) }) }) }) })
+      }));
+      (db as any).firestore.runTransaction = jest.fn(async () => { throw new Error("too much contention"); });
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      expect(await db.resolveGroupDocument()).toBe("legacy-A");
+      warn.mockRestore();
+    });
+
+    it("dedup is per slot: repeat resolves reuse it, a different group fetches its own pointer", async () => {
+      const fetchedPaths: string[] = [];
+      mockPointerFetches(fetchedPaths);
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       const k3 = await db.resolveGroupDocument();
+      expect(await db.resolveGroupDocument()).toBe(k3);   // memoized: no second read of group 3's slot
       stores.user.setCurrentGroupId("4");
       const k4 = await db.resolveGroupDocument();
       expect(k4).not.toBe(k3);
-      expect(new Set(fetchedPaths).size).toBe(2); // one pointer path per group slot
+      expect(fetchedPaths).toHaveLength(2);   // one fetch per slot, not per call
     });
   });
 
