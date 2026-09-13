@@ -1,4 +1,4 @@
-import { comparer, reaction, IReactionDisposer } from "mobx";
+import { comparer, reaction, when, IReactionDisposer } from "mobx";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../../components/base";
@@ -64,7 +64,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         if (!currentGroupId) return;
         if (!primaryDocGroupId) return;
         if (primaryDocGroupId === currentGroupId) return;
-        this.loadDefaultPrimaryDocument();
+        // When the unit starts students in the group document, follow the student to their NEW
+        // group's document; otherwise fall back to the default document as before.
+        if (this.stores.appConfig.startsInGroupDocument && this.stores.user.isStudent) {
+          this.loadGroupPrimaryDocument();
+        } else {
+          this.loadDefaultPrimaryDocument();
+        }
       },
       { equals: comparer.shallow }
     );
@@ -186,15 +192,42 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     return defaultContent;
   }
 
-  private async loadDefaultPrimaryDocument() {
-    const { db, persistentUI: { problemWorkspace }, sectionsLoadedPromise } = this.stores;
+  // Guarantees the unit's default (problem/personal) document exists and is open in the store,
+  // WITHOUT making it the workspace primary. When the unit starts students in the group document the
+  // student still needs their own problem document — 4-up and publishing depend on it existing.
+  private async guaranteeDefaultDocument() {
+    const { db, sectionsLoadedPromise } = this.stores;
     const { type, content } = this.getDefaultDocumentContentSpec();
     await sectionsLoadedPromise;
     const documentContent = this.getDefaultSectionedDocumentContent(type, content);
-    const defaultDocument = await db.guaranteeOpenDefaultDocument(type, documentContent);
+    return db.guaranteeOpenDefaultDocument(type, documentContent);
+  }
+
+  private async loadDefaultPrimaryDocument() {
+    const defaultDocument = await this.guaranteeDefaultDocument();
     if (defaultDocument) {
-      problemWorkspace.setPrimaryDocument(defaultDocument);
+      this.stores.persistentUI.problemWorkspace.setPrimaryDocument(defaultDocument);
     }
+  }
+
+  // The unit starts students in their group's shared document. Group membership resolves after mount
+  // (the groups listener sets currentGroupId), so wait for it — bounded, then fall back to the default
+  // document rather than an empty workspace. The student's own default document is still guaranteed in
+  // the background.
+  private async loadGroupPrimaryDocument() {
+    const { db, persistentUI: { problemWorkspace }, user } = this.stores;
+    try {
+      await when(() => !!user.currentGroupId && !!user.offeringId, { timeout: 30000 });
+      const groupDocument = await db.getOrCreateGroupDocument();
+      problemWorkspace.setPrimaryDocument(groupDocument);
+    } catch (err) {
+      console.warn("Could not open the group document as the default; using the default document", err);
+      await this.loadDefaultPrimaryDocument();
+      return;
+    }
+    this.guaranteeDefaultDocument().catch((err) => {
+      console.warn("Failed to guarantee the background default document", err);
+    });
   }
 
   private async guaranteeInitialDocuments() {
@@ -203,7 +236,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             db, persistentUI: { problemWorkspace },
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      await this.loadDefaultPrimaryDocument();
+      if (this.stores.appConfig.startsInGroupDocument && this.stores.user.isStudent) {
+        await this.loadGroupPrimaryDocument();
+      } else {
+        await this.loadDefaultPrimaryDocument();
+      }
     } else if (groupDocumentsEnabled || classWideDocuments?.length) {
       // Group documents and class-wide documents are both not loaded automatically like other
       // documents, so if the primary document is one of those, make sure it is opened properly.
