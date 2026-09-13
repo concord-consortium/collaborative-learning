@@ -31,6 +31,12 @@ const shareCheckbox = () =>
 const fourUpCheckbox = () =>
   screen.getByRole("checkbox", { name: "Show the 4-up view button" });
 
+const defaultDocumentTypeSelect = () =>
+  screen.getByRole("combobox");
+
+const groupDocumentsCheckbox = () =>
+  screen.getByRole("checkbox", { name: "Enable group documents" });
+
 describe("DocumentSettings — Share Button", () => {
   beforeEach(() => {
     mockSetUnitConfig.mockClear();
@@ -117,5 +123,49 @@ describe("DocumentSettings — 4-up View", () => {
     await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
     const mockDraft = applyLastUpdater({ hide4up: true });
     expect(mockDraft.config.hide4up).toBeUndefined();
+  });
+});
+
+describe("DocumentSettings — Starting Document", () => {
+  beforeEach(() => {
+    mockSetUnitConfig.mockClear();
+    for (const key of Object.keys(mockConfig)) delete mockConfig[key];
+    mockCurriculumValue.saveState = undefined;
+  });
+
+  it("disables the group-documents checkbox when Group doc is selected", async () => {
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    expect(groupDocumentsCheckbox()).not.toBeDisabled();
+    await user.selectOptions(defaultDocumentTypeSelect(), "group");
+    expect(groupDocumentsCheckbox()).toBeDisabled();
+  });
+
+  it("writes defaultDocumentType: \"group\" and groupDocumentsEnabled: true when Group doc is selected", async () => {
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.selectOptions(defaultDocumentTypeSelect(), "group");
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater();
+    expect(mockDraft.config.defaultDocumentType).toBe("group");
+    expect(mockDraft.config.groupDocumentsEnabled).toBe(true);
+  });
+
+  it("writes groupDocumentsEnabled truthy and omits defaultDocumentType for Problem doc, box checked", async () => {
+    const user = userEvent.setup();
+    render(<DocumentSettings />);
+
+    await user.click(groupDocumentsCheckbox());
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    // Seed the draft with pre-existing values so the deletes/writes are observable.
+    const mockDraft = applyLastUpdater({ defaultDocumentType: "personal" });
+    expect(mockDraft.config.defaultDocumentType).toBeUndefined();
+    expect(mockDraft.config.groupDocumentsEnabled).toBeTruthy();
   });
 });

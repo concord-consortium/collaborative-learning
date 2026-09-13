@@ -11,6 +11,8 @@ interface DocumentSettingsFormInputs {
   showTextTitles: boolean;
   documentTemplateEnabled: boolean;
   planningTemplateEnabled: boolean;
+  defaultDocumentType: "problem" | "personal" | "group";
+  groupDocumentsEnabled: boolean;
 }
 
 const DocumentSettings: React.FC = () => {
@@ -31,16 +33,22 @@ const DocumentSettings: React.FC = () => {
       // Default to on when a legacy template already exists (flag undefined → applied at runtime).
       documentTemplateEnabled: config?.defaultDocumentTemplateEnabled ?? hasDocumentTemplate,
       planningTemplateEnabled: config?.planningTemplateEnabled ?? hasPlanningTemplate,
+      defaultDocumentType: config?.defaultDocumentType ?? "problem",
+      groupDocumentsEnabled: config?.groupDocumentsEnabled ?? false,
     };
   }, [config, hasDocumentTemplate, hasPlanningTemplate]);
 
-  const { handleSubmit, register, reset } = useForm<DocumentSettingsFormInputs>({
+  const { handleSubmit, register, reset, watch } = useForm<DocumentSettingsFormInputs>({
     defaultValues: formDefaults,
   });
 
   useEffect(() => {
     reset(formDefaults);
   }, [formDefaults, reset]);
+
+  // watch() returns undefined before the field's first change, so fall back to the loaded default.
+  const watchedDefaultDocumentType = watch("defaultDocumentType") ?? formDefaults.defaultDocumentType;
+  const groupDocSelected = watchedDefaultDocumentType === "group";
 
   const onSubmit: SubmitHandler<DocumentSettingsFormInputs> = (data) => {
     setUnitConfig(draft => {
@@ -79,6 +87,21 @@ const DocumentSettings: React.FC = () => {
         draft.config.defaultDocumentTemplate = buildSectionDividerTemplate(Object.keys(draft.sections ?? {}));
       }
       draft.config.planningTemplateEnabled = data.planningTemplateEnabled;
+      // Omit-the-default: "problem" is implicit, so only persist the other two choices.
+      if (data.defaultDocumentType !== "problem") {
+        draft.config.defaultDocumentType = data.defaultDocumentType;
+      } else {
+        delete draft.config.defaultDocumentType;
+      }
+      // "Group doc" implies group documents; the checkbox is disabled (and its submitted value
+      // unreliable) in that case, so force true explicitly rather than trust/delete it.
+      if (data.defaultDocumentType === "group") {
+        draft.config.groupDocumentsEnabled = true;
+      } else if (data.groupDocumentsEnabled) {
+        draft.config.groupDocumentsEnabled = true;
+      } else {
+        delete draft.config.groupDocumentsEnabled;
+      }
     });
   };
 
@@ -192,6 +215,31 @@ const DocumentSettings: React.FC = () => {
           {hasPlanningTemplate &&
             <> <button type="button" className="danger" onClick={deletePlanningTemplate}>Delete</button></>}
         </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Starting Document</legend>
+        <select
+          aria-describedby="default-document-type-description"
+          {...register("defaultDocumentType")}
+        >
+          <option value="problem">Problem doc</option>
+          <option value="personal">Personal doc</option>
+          <option value="group">Group doc</option>
+        </select>
+        <p className="muted small" id="default-document-type-description">
+          Which document students start in. &quot;Group doc&quot; also enables group documents for
+          the unit (each group&apos;s document is auto-created and appears in Sort Work). Teachers
+          always start in the problem document.
+        </p>
+        <label className="horizontal middle">
+          <input
+            type="checkbox"
+            {...register("groupDocumentsEnabled")}
+            disabled={groupDocSelected}
+          />
+          <span>Enable group documents</span>
+        </label>
       </fieldset>
 
       <div className="bottomButtons">

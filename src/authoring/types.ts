@@ -70,6 +70,8 @@ export interface IUnitConfig extends IItemTemplateConfig {
   fixedStartTab?: string;
   defaultSharedDocuments?: boolean;
   showShare?: boolean;
+  defaultDocumentType?: "problem" | "personal" | "group";
+  groupDocumentsEnabled?: boolean;
 }
 
 export interface IAuthorTool {
