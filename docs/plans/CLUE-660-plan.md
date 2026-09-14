@@ -212,7 +212,12 @@ Requirements the wording has to keep, whatever it ends up saying:
   stripping because `<` is ordinary student text in a math unit ("x < 5"), and the model reads
   `&lt;` without trouble. Text is capped at a fixed length (start with 500 characters, applied
   before escaping so the cap counts characters the student wrote) with a visible truncation
-  marker.
+  marker. **Characters, not UTF-16 code units.** An emoji is two code units, so cutting with
+  `slice` can land between them and leave an unpaired surrogate, which survives `JSON.stringify`
+  and reaches the model as a broken character; it also makes the cap half as generous as its name
+  says for text of that kind. Cut the spread form (`[...content]`), which cannot split one. The
+  same reasoning applies to the 64-character tag cap, though a tag long enough to hit it is
+  already suspect.
 - **Labeled as being about the other document.** The existing heading says "similar document";
   the model can otherwise repeat a comment back as though it were about the student's own work.
 - **Counts stated per comment: every value somebody chose is listed, and values nobody chose are
@@ -239,6 +244,25 @@ today becomes ineligible. Which five come back can still change: the search retu
 nearest eligible records, and a newly eligible record that is closer displaces one that used to
 be returned. The outline records why records missing `numAgreements` are not a concern: only
 pre-Track-C records lack it, and those are already invisible to the realm-scoped lookup.
+
+**That displacement is the intended effect, not a side effect of it.** A review pass read it as a
+regression — documents carrying AI agreement counts being crowded out by documents carrying only
+peer comments — and that reading assumes an AI-rated document is more relevant than a peer-rated
+one, which nothing supports. The old gate was never "prefer AI-rated documents"; it was "has
+something to contribute", and AI ratings were the only thing that could. Ranking is unchanged:
+still the five nearest by embedding distance, and a record that displaces another is *more*
+similar. Every returned record contributes its summary either way, which is the bulk of what a
+related summary is; what differs is only which extra signal rides along.
+
+The case that genuinely contributes nothing needs every entry on a record to fail `hasValidValue`,
+or to carry an `isAiComment` that is neither `true` nor `false`. Both are rare, and both cost one
+of the five slots rather than correctness.
+
+**It is already observable.** `findRelatedSummaries` logs `stats` per returned record, and each
+carries `aiEntries`. Five records all reporting `aiEntries: 0` is exactly the situation where the
+counts line has gone quiet — visible in the count-only log line without building anything, which
+is why this needs no code. What nobody has decided is whether it would matter; that is open
+question 5, and it should be argued from real runs rather than guessed at with a weighting.
 
 This needs a second composite index in `firestore.indexes.json`, identical to the existing
 `summaries` index with `numAgreements` in place of `numAiAgreements`. Keep the old index until the
@@ -679,6 +703,13 @@ which the emulator answered rather than refusing. There is no emulator flag that
 **8c — production.** Same order and the same two halves as 8b: index first, built, then functions.
 Confirm from the count-only line that the lookup ran and that nothing broke for a student.
 
+**Then read `aiEntries` across the first real runs.** The widened gate makes more documents
+eligible, so the five nearest can now be records carrying peer comments and no AI agreements —
+intended, and explained in §4. If returned records essentially never report `aiEntries > 0` in a
+live class, the AI-agreement counts line has gone quiet in practice. That is not a fault, and it
+needs no fix; it is a fact worth having before anyone argues about which signal helps, because it
+is the difference between "we send both" and "we send one of them".
+
 **List production's indexes before deploying them.** Staging turned out to hold four `summaries`
 indexes nobody had recorded; production may hold a different set, and the delete prompt is not the
 place to find out. Answer no to deletions there too.
@@ -923,6 +954,27 @@ field makes every comparison in its group false, so the choice falls back to the
 came out of the map — the thing the tie-break exists to prevent — and `undefined` reaches a
 `PeerComment.updatedAt` typed `number`, which the plan carries forward for a later recency rule. Two
 tests cover it, both verified to fail without the helper.
+
+**Review pass, 2026-09-14, after 8a.** An adversarial read of the read and prompt paths turned up
+two defects and one thing I had mis-called.
+
+1. **The length cap cut UTF-16 code units** (§3). Fixed by cutting characters; §3 now says so,
+   because it is a constraint on the requirement rather than an implementation detail.
+2. **`content` and `tags` were read off a stored record without a type check**, and the prompt
+   builder would throw on a non-string `content` — inside `buildMessages`, which
+   `categorizeRepresentations` catches, so one malformed entry would have cost a student their
+   whole evaluation rather than one comment. `groupPeerComments` now coerces both. Low likelihood,
+   since `onCommentRated` normalizes them and no client can write `summaries`; kept because the
+   guard is one line and the failure is silent and total.
+3. **The widened gate "crowding out" documents with AI agreements was not a defect**, and §4 now
+   records why: ranking is unchanged, a displacing record is more similar, and `aiEntries` in the
+   count-only line already makes the effect visible. 8c asks whoever deploys to read it.
+
+A fourth, not fixed and worth knowing: the prompt's byte-for-byte content depends on Firestore map
+iteration order, because `ratings` keys are inserted in the order entries come back. Which comments
+are sent is stable — `selectPeerComments` has a `commentId` tie-break — but the rendered string is
+not, which makes harness request keys unstable and quietly defeats its cache. The same is already
+true of the AI counts line, so this is inherited rather than introduced.
 
 **Task 8b, 2026-09-14.** Split into 8b-i (the index) and 8b-ii (the functions and the lookup
 check), because the first needs only the working tree and the second needs the merge. The plan had
