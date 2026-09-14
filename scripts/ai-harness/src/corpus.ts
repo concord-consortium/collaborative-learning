@@ -146,8 +146,18 @@ export const importableSources: readonly CorpusSource[] = ["synthetic", "demo", 
  * cannot render" is exactly the kind of thing it already records. A source directory without one —
  * every real corpus — simply has no expectations, and the manifest keeps whatever a human set.
  */
+/**
+ * Files that sit beside a source directory's documents and describe them, rather than being one.
+ *
+ * Named here rather than at each reader so the import scan below and the readers cannot drift: a
+ * flat source directory holds these alongside the documents, and the scan takes every `.json` it
+ * finds.
+ */
+const kSidecarFiles = ["expectations.json", "related-summaries.json"] as const;
+const [kExpectationsFile, kRelatedSummariesFile] = kSidecarFiles;
+
 function readSourceRenderExpectations(from: string): Map<string, string> {
-  const file = path.join(from, "expectations.json");
+  const file = path.join(from, kExpectationsFile);
   if (!fs.existsSync(file)) return new Map();
   const expectations = validateExpectationsFile(readJsonFile(file), file);
   return new Map(Object.entries(expectations.documents)
@@ -163,7 +173,7 @@ function readSourceRenderExpectations(from: string): Map<string, string> {
  * generated file, which no review ever sees.
  */
 function readSourceRelatedSummaries(from: string): Map<string, RelatedSummaryEntry[]> {
-  const file = path.join(from, "related-summaries.json");
+  const file = path.join(from, kRelatedSummariesFile);
   if (!fs.existsSync(file)) return new Map();
   return new Map(Object.entries(validateRelatedSummariesFile(readJsonFile(file), file).documents));
 }
@@ -204,8 +214,14 @@ export function importCorpus(options: ImportOptions): ImportResult {
   const entries: ManifestDocument[] = [];
   const seen = new Set<string>();
 
+  // A flat source directory holds its sidecars beside its documents, and every `.json` here would
+  // otherwise be imported as one — `expectations.json` becoming a document called "expectations".
+  // In the nested layout the sidecars sit outside `documents/` and never reach this scan, so the
+  // exclusion is limited to the flat case rather than banning those names everywhere.
+  const isFlatLayout = documentsDir === sourceDir;
   const sourceFiles = fs.readdirSync(documentsDir)
     .filter((name) => name.endsWith(".json"))
+    .filter((name) => !(isFlatLayout && (kSidecarFiles as readonly string[]).includes(name)))
     .sort();
 
   for (const name of sourceFiles) {

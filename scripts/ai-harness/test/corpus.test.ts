@@ -144,6 +144,21 @@ describe("import", () => {
         .toHaveLength(1);
     });
 
+    // A flat source directory — no `documents/` subdirectory — holds its sidecars beside its
+    // documents, and the scan takes every `.json`. Both were being imported as documents:
+    // `expectations.json` became a document called "expectations", which passes the id pattern.
+    it("does not import the sidecars themselves as documents", () => {
+      const dataRoot = makeTestDataRoot("import-sidecars-not-documents");
+      const from = sourceWithSidecar(dataRoot);
+      fs.writeFileSync(path.join(from, "expectations.json"),
+        JSON.stringify({ schemaVersion: 1, corpus: "demo1", documents: {} }));
+
+      const result = importFrom(from, dataRoot);
+
+      expect(result.manifest.documents.map((entry) => entry.id)).toEqual(["a-text", "b-image"]);
+      expect(result.imported).toEqual(["a-text", "b-image"]);
+    });
+
     it("changes nothing when the source directory has no such file", () => {
       const dataRoot = makeTestDataRoot("import-related-summaries-absent");
       const from = sourceDir(dataRoot, { "a-text.json": textDoc });
