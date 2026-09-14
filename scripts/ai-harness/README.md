@@ -581,8 +581,11 @@ identical inputs would report a null result that meant nothing.
 
 A source directory may hold a `related-summaries.json` beside its documents, keyed by document id
 and holding the entries that document's manifest record should start with. `import` seeds from it on
-the same rule as `expectations.json`: a value already in the manifest wins, because a human put it
-there on purpose.
+almost the same rule as `expectations.json`: a value already in the manifest wins, because a human
+put it there on purpose. The exception is an empty list, which is seeded over. An unset
+`expectedRenderFailure` is `null`, but an unset list of related summaries is `[]`, which every
+entry starts as and which therefore cannot mean a human chose none — so without the exception a
+corpus imported before this file existed could never be seeded at all.
 
 It exists because the manifest is generated and never committed, so without it the only way to give
 a fixture a related summary is to hand-edit a generated file, which no review ever sees. It names no

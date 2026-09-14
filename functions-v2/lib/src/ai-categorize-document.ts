@@ -385,10 +385,11 @@ export interface RelatedSummaryStats {
 
 /**
  * Maps the documents found by the related-summaries search into the entries injected into the AI
- * prompt, and counts what each one contributed. A document with an empty `aiAgreements` map still
- * yields an entry; only a missing map is skipped. A document whose entries are all filtered out is
- * the same case as an empty map. `stats` has one element per returned entry, in the same order.
- * Exported for unit testing.
+ * prompt, and counts what each one contributed. A document is skipped entirely — no entry, no stats
+ * — when it has no `aiAgreements` map, or no summary worth sending (missing, not a string, or
+ * empty). An empty map is not one of those cases: it still yields an entry, as does a document
+ * whose entries are all filtered out. `stats` has one element per returned entry, in the same
+ * order. Exported for unit testing.
  */
 export function mapRelatedSummaries(
   docs: RelatedSummarySource[]

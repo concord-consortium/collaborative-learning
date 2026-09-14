@@ -15,11 +15,10 @@ prompt shape cannot carry a comment, and three closed decisions this plan inheri
 re-arguing: confidentiality is settled by the class-scoped lookup; summary drift is ignored (send
 every qualifying comment regardless of when the summary was last written); and selection happens in
 memory over the query result, never in the query. `CLUE-645-ratings-to-summaries-design.md` and its
-implementation doc describe how ratings reach the summary record. `CLUE-607-plan.md` describes a
-branch that is in review and touches the same file; see "Coordination with CLUE-607". That plan is
-not on `master` or on this branch — it lives only on
-`origin/CLUE-607-personal-doc-ai-evaluations-agreements`, so read it with
-`git show origin/CLUE-607-personal-doc-ai-evaluations-agreements:docs/plans/CLUE-607-plan.md`.
+implementation doc describe how ratings reach the summary record. `CLUE-607-plan.md` describes work
+that touches the same file; it merged to master on 2026-09-11 and this branch has been rebased onto
+it, so both the merge and the plan file are present here. See "Coordination with CLUE-607", which is
+kept as a record of how the two were held apart while 607 was still open.
 
 **Story:** https://concord-consortium.atlassian.net/browse/CLUE-660
 
@@ -35,7 +34,10 @@ leave the changes in the working tree for review. Do not push, open a pull reque
 run anything that spends money or touches staging or production. Tasks 4 and 8 are marked as
 needing a person; at those, do the preparation the task describes and then hand off.
 
-Record any departure from the plan under DEVIATIONS as it happens, not afterwards.
+Record any departure from the plan under DEVIATIONS as it happens, not afterwards — then cut it
+back when the work is done. A departure that ends up fixed in the sections above, or explained in a
+code comment, or described in a commit message, does not also need an entry; keep only what has
+nowhere else to live.
 
 ## Background, in the order things happen
 
@@ -280,9 +282,12 @@ implementation doc say why the wrong order fails quietly.
   document's list to `[]` (`corpus.ts` line 242 keeps only what an existing manifest already had).
   The manifest is generated and never committed, so hand-editing it is not a fixture. Add a
   committed sidecar, `examples/synthetic-corpus/related-summaries.json`, keyed by document id and
-  holding `RelatedSummaryEntry[]`, and have `import` seed from it exactly as it seeds
+  holding `RelatedSummaryEntry[]`, and have `import` seed from it almost as it seeds
   `expectedRenderFailure` from `expectations.json`: a value already in the manifest wins, because a
-  human put it there. Validate the sidecar with `validateRelatedSummary` at import.
+  human put it there — except an empty list, which is seeded over. `expectedRenderFailure` is `null`
+  when unset, but a list is `[]`, which is what every entry starts as and so cannot mean a human
+  chose none; without the exception, a corpus imported before this file existed could never be
+  seeded. Validate the sidecar with `validateRelatedSummary` at import.
 - Sidecar content: entries for a few documents covering a tagged comment, a tag-only comment, an
   all-`no` comment, a comment whose text contains the closing delimiter, a tag containing a quote
   and a `<`, and one comment over the length cap.
@@ -716,7 +721,15 @@ place to find out. Answer no to deletions there too.
 
 ## Coordination with CLUE-607
 
-Branch `CLUE-607-personal-doc-ai-evaluations-agreements` is in review. It edits
+**Historical, and settled.** 607 merged to master on 2026-09-11 (`5d1bac1e5`) and this branch was
+rebased onto it the same day. It cost one import-line conflict, one content conflict in
+`docs/firestore-schema.md` where 607 had added its own `summaries` section, and — the one with no
+conflict to warn you — a build break, because the new positional parameter silently made `deps` the
+wrong argument in test files this branch had added. The detail is in the
+`fix: adapt to the CLUE-607 signature change after rebase` commit. The rest of this section is as it
+read while 607 was open.
+
+Branch `CLUE-607-personal-doc-ai-evaluations-agreements` was in review. It edits
 `ai-categorize-document.ts` (`readDocumentMetadata`, and a new positional `requestContext`
 parameter on `categorizeRepresentations` inserted before `deps`), `on-analysis-document-imaged.ts`,
 `summary-types.ts`, `shared.ts`, and extends `related-summaries-emulator.test.ts`. It does not
@@ -929,169 +942,29 @@ done
 
 ## DEVIATIONS
 
-*(Recorded as the work departs from the plan above.)*
+Written as the work went, then cut back once it was done. Most of what was here had been recorded
+twice: a departure would be fixed in the design sections above, or in a code comment, or in a
+commit message, and then described again here. The detail of how the work actually ran — the
+CLUE-607 rebase and what it cost, the four wrong things in Task 8a's instructions, the seeding bug
+found while preparing Task 4 — is in the commit messages on this branch, where it belongs.
 
-**Task 1, 2026-09-10.** Two corrections to the plan's own text, neither a change to what Task 1
-builds.
+What is kept is the one thing with nowhere else to live.
 
-1. `CLUE-607-plan.md` is not in `docs/plans/` on master or on this branch. It exists only on
-   `origin/CLUE-607-personal-doc-ai-evaluations-agreements`, at commit `17f694cae`, and was read
-   from there with `git show`. The "Builds on" line above should say so.
-2. Task 1's file list says the harness "casts through `unknown` and compiles either way". That
-   holds for `execute.ts` and `messages.ts`, but not for
-   `scripts/ai-harness/test/image-messages.test.ts`, which builds a `RelatedSummary` literal passed
-   straight to a `RelatedSummary[]` parameter. It is a fourth file needing `peerComments: []`, and
-   it was found by the grep the task prescribes.
+**A known limit, found in review on 2026-09-14 and deliberately not fixed.** The prompt's exact
+bytes depend on Firestore map iteration order. `ratings` keys are inserted in the order entries come
+back from `aiAgreements`, so the same stored data can render as `ratings="yes: 2, no: 1"` or
+`ratings="no: 1, yes: 2"`.
 
-*Both corrections above were folded into the plan text on 2026-09-10; they stay here as the
-record of what the first draft got wrong.*
+*Which* comments are sent is stable — `selectPeerComments` sorts with a `commentId` tie-break for
+exactly this reason. What is not stable is the rendered string, so two analyses of unchanged data
+can send prompts that differ in byte order, and a logged prompt is not reproducible from the stored
+record alone.
 
-**Task 1, from review.** `groupPeerComments` reads `updatedAt` through a `ratedAt` helper that
-defaults a missing value to 0, rather than comparing the field directly. The type says the field is
-required, but the entries are read back from Firestore and `on-comment-rated.ts` line 165 guards the
-same field the same way before moving a timestamp forwards. Compared directly, one entry missing the
-field makes every comparison in its group false, so the choice falls back to the order the entries
-came out of the map — the thing the tie-break exists to prevent — and `undefined` reaches a
-`PeerComment.updatedAt` typed `number`, which the plan carries forward for a later recency rule. Two
-tests cover it, both verified to fail without the helper.
+It does **not** affect the harness today, which was claimed here in an earlier draft and is wrong:
+the harness reads `relatedSummaries` from the manifest and never runs `mapRelatedSummaries` or the
+Firestore lookup, so its request keys are as stable as its JSON files. It would start to matter if a
+corpus were ever imported from production records, where the order could differ between imports.
 
-**Review pass, 2026-09-14, after 8a.** An adversarial read of the read and prompt paths turned up
-two defects and one thing I had mis-called.
-
-1. **The length cap cut UTF-16 code units** (§3). Fixed by cutting characters; §3 now says so,
-   because it is a constraint on the requirement rather than an implementation detail.
-2. **`content` and `tags` were read off a stored record without a type check**, and the prompt
-   builder would throw on a non-string `content` — inside `buildMessages`, which
-   `categorizeRepresentations` catches, so one malformed entry would have cost a student their
-   whole evaluation rather than one comment. `groupPeerComments` now coerces both. Low likelihood,
-   since `onCommentRated` normalizes them and no client can write `summaries`; kept because the
-   guard is one line and the failure is silent and total.
-3. **The widened gate "crowding out" documents with AI agreements was not a defect**, and §4 now
-   records why: ranking is unchanged, a displacing record is more similar, and `aiEntries` in the
-   count-only line already makes the effect visible. 8c asks whoever deploys to read it.
-
-A fourth, not fixed and worth knowing: the prompt's byte-for-byte content depends on Firestore map
-iteration order, because `ratings` keys are inserted in the order entries come back. Which comments
-are sent is stable — `selectPeerComments` has a `commentId` tie-break — but the rendered string is
-not, which makes harness request keys unstable and quietly defeats its cache. The same is already
-true of the AI counts line, so this is inherited rather than introduced.
-
-**Task 8b, 2026-09-14.** Split into 8b-i (the index) and 8b-ii (the functions and the lookup
-check), because the first needs only the working tree and the second needs the merge. The plan had
-implied they happen together, which would have delayed the index until after the PR — the opposite
-of the deploy order §4 asks for. 8b-i is done.
-
-Two things found while doing it, both now recorded in the task. `firebase-tools` lives only in
-`functions-v2`, with no global install, so the root `deploy:firestore:*` scripts in `package.json`
-cannot run on this machine — they call a bare `firebase`. And staging holds four `summaries` indexes
-the repository has never described, including one at 2048 dimensions when ours are 1536; the deploy
-offers to delete them and the answer is no.
-
-**Task 8a, 2026-09-14: the task's own instructions were wrong in four ways.** Rewritten in place;
-the reasons are recorded there rather than here because the next person needs them in the
-instructions, not in a list of amendments. In short: `appMode=qa` cannot work for a two-student
-exercise, because `getRootId` gives each browser session its own root; `functions=emulator` is a
-separate URL param and without it callables hit the real cloud project; `unit=qa` resolves to the
-remote curriculum site, not to the local demo unit; and no unit in the repo has a real
-`aiEvaluation`, so `src/public/demo/units/qa/content.json` has to be switched from `"mock"` to
-`"categorize-design"` for the run. Two further traps were found and are now written down: publishing
-a document to share it defeats the test, and `summaries` is admin-only so an unauthenticated read
-returns an empty list indistinguishable from an empty database.
-
-None of this changes the design or the code — every one of them is a fact about driving the app that
-the plan had guessed at. The run itself passed on the first attempt once the setup was right.
-
-**Task 7, 2026-09-11.** Two of the four bullets could not be done as written, because they assumed
-documentation that does not exist.
-
-1. `docs/firestore-schema.md` has **no `summaries` section at all** — the collection is undocumented
-   there, so "note that peer entries are now read" had nowhere to go. A short section was added
-   instead: what the collection is, who writes it, that ratings of any comment have been stored
-   since CLUE-645 while only the AI ones used to be read, that peer comments now reach the prompt as
-   text, that no stored shape changed, and that the lookup filters on `numAgreements`. The
-   field-by-field shape is linked to `functions-v2/src/summary-types.ts` rather than copied, so it
-   cannot rot. The comments subsection also gained its missing `ratings` field, which is where the
-   entries come from and which the new section refers to.
-2. `functions-v2/README.md` keeps **no list of indexes** — the "if any" in the task covers it. What
-   it does keep is the deploy-order procedure, so the note went there: `summaries` now carries two
-   composite indexes on purpose, why the `numAiAgreements` one is still needed, and that removing it
-   is a follow-up. That section already warns against deleting the index the deployed functions
-   depend on, which is exactly the mistake available here.
-
-**Task 5, 2026-09-11.** The related-summary parts are pulled out of the built message by an
-exported `relatedSummaryTextParts(messages, count)` rather than by code inline in
-`categorizeRepresentations`. §6 does not ask for one. It exists so that "what would be logged" can
-be tested without going through `categorizeRepresentations`, and so the rule it depends on — the
-related parts are the last `count` text parts of the user message, because `summaryContentParts`
-emits the document's own summary first and the pictures come after every text part — is written
-down in one place. Nothing was added to `categorizeRepresentations` or `CategorizeDeps`, per
-"Coordination with CLUE-607".
-
-**Task 4 prep, 2026-09-11: a bug in Task 2's seeding, found and fixed.** `import` wrote
-`before?.relatedSummaries ?? sourceRelatedSummaries.get(id) ?? []`, copying the
-`expectedRenderFailure` line above it. That line works because its unset value is `null`, which
-`??` falls through. A list's unset value is `[]`, which is not nullish, so the sidecar could only
-ever seed a corpus that had never been imported before. Every corpus already on disk — including
-the `synthetic-corpus` this task runs against, created 2026-08-12 — was immune, and the first
-`import` of Task 4's prep duly produced a corpus with no peer comments in it at all. The rule is
-now "an existing *non-empty* list wins"; an empty one is what every entry starts as and cannot mean
-a human chose none. `test/corpus.test.ts` covers it, and the test was checked to fail against the
-old expression. *Task 2's verification now asks for the re-import case as well.*
-
-**Task 3, from review.** Comment text is escaped with a new `escapeHtmlText` (`&`, `<`, `>`), not
-with `escapeHtmlAttribute`. The two attributes still use `escapeHtmlAttribute`, where a quote really
-can end the value.
-
-§3 names `escapeHtmlAttribute` for the text, but names the characters `&`, `<`, `>` and `"` — it
-never mentions the apostrophe, which that function also escapes. Between the tags neither a quote
-nor an apostrophe can end anything, and both are ordinary in student prose, so escaping them bought
-nothing and put `don&#39;t` into every logged prompt (Task 5), harness result and review report.
-`&`, `<` and `>` are the standard text-node escape and are what the fence actually needs. Tested in
-`shared/escape-for-html.test.ts` and in the prompt tests. `shared/render-page.ts`, the only other
-caller of `escapeHtmlAttribute`, is untouched: it escapes a real attribute.
-*§3 was updated to name both escapes on 2026-09-11.*
-
-**Task 3, 2026-09-10.** Two notes, one of them a question §3 leaves unanswered.
-
-1. §3 requires "counts stated per comment, every value that was chosen, zero omitted", and then
-   shows `ratings="yes: 2, no: 0, notSure: 1"` — a zero, for a value nobody chose. The sentence
-   reads both ways ("zeros are omitted" or "none of them omitted"), and the example contradicts the
-   first reading. Settled by the clause that follows it, "same convention the AI counts line uses":
-   the attribute lists exactly the keys the `ratings` map holds, as the agreement sentence lists
-   exactly the keys `agreements` holds. Task 1's grouping only creates a key for a value somebody
-   chose, so production cannot produce a zero either way and the two readings never diverge on real
-   data. If the wording tuning in Task 4 wants explicit zeros, that is one line here.
-   *§3's sentence and example were corrected to match on 2026-09-11.*
-2. §3's tag rules — dropped if not a string, newlines stripped, capped at 64, escaped — leave an
-   empty tag surviving all four. One is dropped, because `tag=", user"` is worse than no tag, and
-   §3 already anticipates none surviving. *Added to §3's rules on 2026-09-11.*
-
-**Task 2, 2026-09-10.** Two files changed that Task 2's list does not name, both because the
-change made an existing statement false rather than by choice.
-
-1. `scripts/ai-harness/README.md`: the `extras` table and paragraph spell out the setting's allowed
-   values, so `ai-counts` had to be added there or the documented values would be wrong. The same
-   edit documents the new `related-summaries.json` sidecar, which nothing else described.
-2. `scripts/ai-harness/test/smoke-image.test.ts`: one assertion required a mixed request to carry
-   exactly `["text", "text", "image_url"]`. That held only because no fixture had related
-   summaries; a seeded document adds a third text part. The assertion now states what it meant —
-   text parts first, the picture last — rather than a count that was an accident of the corpus.
-   The comment in `test/extras.test.ts` saying the committed fixtures carry no `relatedSummaries`
-   was corrected for the same reason.
-
-**Task 2, from review.** The sidecar carries no `corpus` field. It had one, copied from
-`expectations.json`, which validates the same field and likewise never compares it to anything. A
-check would have been wrong rather than merely absent: `import --from <dir> --corpus <name>` lets
-one source directory be imported under any corpus name, and the tests import
-`examples/synthetic-corpus` as `extras-corpus`, `peer-comments-corpus` and `synthetic-corpus`. The
-file's location says which fixtures it describes. `expectations.json` still has the unchecked field;
-that is pre-existing and not touched here.
-
-**Task 2 choice worth recording.** The three fence-dependent assertions in
-`test/peer-comments.test.ts` use `it.failing` rather than a skip, which the plan allows. Finishing
-Task 3 turns them red, which is the prompt to flip them to `it`; a skip would sit green and
-unexercised.
-
-**Task 1 detail the plan left open.** `stats` has one element per *returned* `RelatedSummary`, in
-the same order — a document skipped for a missing or unusable `summary` contributes neither an
-entry nor a stats element. Chosen so the two arrays can be read side by side in the logs.
+Left alone because the AI counts line has always had this, so it is inherited rather than
+introduced, and fixing it means ordering both by `kRatingValues` — a change to what production sends
+for a problem no student experiences.

@@ -160,7 +160,7 @@ Collection:
 - tileId: (string, mobx id)
 - uid: (string)
 - tags: (array of strings)
-- ratings: (map of rater user id to `"yes" | "no" | "notSure"`, written by the comment UI; the rules restrict a writer to their own key and to those three values. `onCommentRated` copies each rating onto the document's `summaries` record — see "Summaries" above.)
+- ratings: (map of rater user id to `"yes" | "no" | "notSure"`, written by the comment UI. Under `authed` the rules restrict a writer to their own key and to those three values; `demo` and `dev` let any signed-in user write anything, and `qa`/`test` allow the same inside the writer's own root, so in those realms neither the key nor the value is a guarantee. `onCommentRated` copies each rating onto the document's `summaries` record — see "Summaries" above, and note the read side drops values outside the three.)
 
 ### Contents of `offerings/{offeringId}`
 
