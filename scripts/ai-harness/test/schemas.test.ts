@@ -113,11 +113,33 @@ describe("peer comments on a related summary", () => {
     expect(manifest.documents[0].relatedSummaries[0].peerComments[0].content).toBe("");
   });
 
+  it("names the offending field when the content is not a string", () => {
+    // An unvalidated `content` reaches the request builder, which spreads it to characters and
+    // throws on anything that is not iterable — a manifest error surfacing as a build failure.
+    expect(() => validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, content: 42 }] }]),
+      "manifest.json"))
+      .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.content must be a string/);
+  });
+
   it("names the offending field when a count is not a number", () => {
     expect(() => validateCorpusManifest(
       manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, ratings: { yes: "lots" } }] }]),
       "manifest.json"))
       .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.ratings\.yes must be a finite number/);
+  });
+
+  // A count is a number of people. Production builds the map by counting entries, so it can only
+  // produce whole numbers of at least one; a fraction would be serialized straight into the prompt.
+  it.each([
+    ["a fraction", 1.5],
+    ["zero, which production represents by leaving the key out", 0],
+    ["a negative count", -1],
+  ])("refuses %s", (_label, yes) => {
+    expect(() => validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, ratings: { yes } }] }]),
+      "manifest.json"))
+      .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.ratings\.yes must be a positive integer/);
   });
 
   it("names the offending field when a tag is not a string", () => {
