@@ -131,6 +131,7 @@ function imageContentParts(
 const kMaxPeerCommentLength = 500;
 
 const kMaxPeerCommentTagLength = 64;
+const kMaxPeerCommentTags = 10;
 
 const kTruncationMarker = "…[truncated]";
 
@@ -157,6 +158,7 @@ function peerCommentTagAttribute(tags: string[]): string {
     // Spread before cutting, so a cut cannot leave an unpaired surrogate in the attribute.
     .map((tag) => [...tag.replace(/[\r\n]+/g, "")].slice(0, kMaxPeerCommentTagLength).join(""))
     .filter((tag) => tag.length > 0)
+    .slice(0, kMaxPeerCommentTags)
     .map(escapeHtmlAttribute);
   return cleaned.length > 0 ? ` tag="${cleaned.join(", ")}"` : "";
 }

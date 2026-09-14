@@ -308,6 +308,18 @@ describe("ai-analysis-messages", () => {
         expect(text).toContain("<comment tag=\"user\" ratings=");
       });
 
+      it("sends at most ten, so one comment cannot crowd out the prompt", () => {
+        const text = relatedPartOf([
+          makeRelatedSummary("s", {}, [makePeerComment({
+            tags: Array.from({ length: 40 }, (_, i) => `tag-${i}`)
+          })])
+        ]);
+
+        const tag = /tag="([^"]*)"/.exec(text)![1];
+        expect(tag.split(", ")).toEqual(
+          Array.from({ length: 10 }, (_, i) => `tag-${i}`));
+      });
+
       it("caps the length without splitting a character in half", () => {
         // Same hazard as the comment text: cutting UTF-16 code units can leave an unpaired
         // surrogate, here inside a quoted attribute.
