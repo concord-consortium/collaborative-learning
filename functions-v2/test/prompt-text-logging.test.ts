@@ -68,7 +68,6 @@ describe("relatedSummaryTextParts", () => {
     expect(relatedSummaryTextParts(messages, 1)).toEqual([
       expect.stringContaining("A peer's work, found by the lookup."),
     ]);
-    // Not the document's own summary, and not the main prompt.
     expect(relatedSummaryTextParts(messages, 1)[0]).not.toContain(summary);
   });
 
@@ -117,8 +116,7 @@ describe("the prompt-text logging gate", () => {
     {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, undefined, deps());
 
   it("logs nothing outside the emulator, whatever the param says", async () => {
-    // The second half of the gate. `.env.local` never deploying is a convention; this is what makes
-    // a deployed project unable to log student prose even if the variable reaches it.
+    // The second half of the gate: what a deployed project cannot satisfy.
     process.env[variable] = "on";
     delete process.env[emulator];
 

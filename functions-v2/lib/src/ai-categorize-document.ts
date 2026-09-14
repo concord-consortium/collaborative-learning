@@ -207,12 +207,8 @@ export async function findRelatedSummaries(
   const db = firestoreClient();
   const { root, space, key, context_id, unit, problem, investigation } = metadata;
 
-  // Documents in the same realm and problem that somebody has rated a comment on. The gate counts
-  // every rating, not only ratings of the AI's comments: a document whose human comments were rated
-  // has something to contribute even if nobody rated Ada there. `numAgreements >= numAiAgreements`
-  // always, so this is strictly wider than the gate it replaced and nothing that qualified before
-  // stops qualifying — though which five come back can change, since a newly eligible record that
-  // is nearer displaces one that used to be returned.
+  // `numAgreements` counts every rating, so a document qualifies on ratings of human comments
+  // alone.
   const query: VectorQuery = db.collection('summaries')
     .where("root", "==", root)
     .where("space", "==", space)
@@ -231,16 +227,11 @@ export async function findRelatedSummaries(
   const snapshot = await query.get();
   const {relatedSummaries, stats} =
     mapRelatedSummaries(snapshot.docs.map((doc) => doc.data() as RelatedSummarySource));
-  // Counts only, in every environment: what people wrote about each other must not reach the logs.
+  // Counts only: what people wrote about each other must not reach the logs.
   logger.info("Related summaries found", {found: snapshot.docs.length, stats});
   return relatedSummaries;
 }
 
-/**
- * The most rated human comments one related document may contribute.
- *
- * A cap so that one heavily discussed document cannot crowd everything else out of the prompt.
- */
 const kMaxPeerCommentsPerSummary = 10;
 
 /**
@@ -257,13 +248,9 @@ function hasValidValue(entry: AiAgreement): boolean {
 /**
  * Whether an entry records a rating of a comment a person wrote.
  *
- * Only a version-2 entry can be one: a version-1 entry records agreement with the AI's summary by
- * construction (see `summary-types`). Narrowing to that version is also what lets the grouping
- * below read `commentId` and `raterUid`, which version 1 does not carry.
- *
- * `=== false` rather than "not true", matching `isAiAgreement`: an entry whose `isAiComment` is
- * neither boolean belongs to neither group, so a malformed record is left out of the prompt rather
- * than having its text sent as somebody's comment.
+ * Only version 2 can be one: a version-1 entry records agreement with the AI by construction, and
+ * carries neither `commentId` nor `raterUid`. `=== false` rather than "not true", matching
+ * `isAiAgreement`, so an entry whose `isAiComment` is neither boolean belongs to neither group.
  */
 function isPeerEntry(entry: AiAgreement): entry is AiAgreementV2 {
   return entry.version === 2 && entry.isAiComment === false;
@@ -272,15 +259,13 @@ function isPeerEntry(entry: AiAgreement): entry is AiAgreementV2 {
 /**
  * Whether a comment's ratings earn it a place in the prompt.
  *
- * True for every comment as written, because a comment is only grouped when somebody rated it. It
- * is a named function because a stricter rule — a majority of `yes`, say — would go here and
- * nowhere else.
+ * True for every comment as written, since a comment is only grouped once somebody rated it. It is
+ * a named function because a stricter rule — a majority of `yes`, say — would go here.
  */
 function qualifiesForPrompt(comment: PeerComment): boolean {
   return Object.values(comment.ratings).some((count) => count > 0);
 }
 
-/** How many people rated a comment, across all values. */
 function totalRatings(comment: PeerComment): number {
   return Object.values(comment.ratings).reduce((sum, count) => sum + count, 0);
 }
@@ -289,10 +274,8 @@ function totalRatings(comment: PeerComment): number {
  * When a rating was made, treating a missing time as the beginning of time.
  *
  * `updatedAt` is required on the type but these entries are read back from Firestore, where one can
- * lack it; `onCommentRated` guards the same field the same way before moving a timestamp forwards.
- * Without the default, a single entry missing the field makes every comparison in its group false,
- * and the choice below falls back to the order the entries came out of the map — which is the thing
- * the tie-break exists to prevent.
+ * lack it. Without the default, one such entry makes every comparison in its group false and the
+ * choice below falls back to map order, which is what the tie-break exists to prevent.
  */
 function ratedAt(entry: AiAgreementV2): number {
   return entry.updatedAt ?? 0;
@@ -302,14 +285,12 @@ function ratedAt(entry: AiAgreementV2): number {
  * Turns one document's peer entries into one record per comment.
  *
  * An entry is per rater, so a comment three people rated arrives as three entries carrying three
- * copies of its text — and the copies can differ, since each was captured when that person rated.
- * One entry supplies the text and tags: the one with the latest `updatedAt`, ties broken by the
- * lower `raterUid`.
+ * copies of its text, captured when each person rated. One entry supplies the text and tags: the
+ * one with the latest `updatedAt`, ties broken by the lower `raterUid`.
  *
- * That rule gives a stable choice, not the newest wording, and the stored data cannot give the
- * newest wording: `onCommentRated` bumps an existing rater's `updatedAt` to the current event's
- * time while leaving that rater's older text in place, so two entries can hold the same timestamp
- * and different wording.
+ * That gives a stable choice, not the newest wording, which the stored data cannot give:
+ * `onCommentRated` bumps an existing rater's `updatedAt` without refreshing that rater's text, so
+ * two entries can hold the same timestamp and different wording.
  */
 function groupPeerComments(entries: AiAgreementV2[]): PeerComment[] {
   const byCommentId = new Map<string, AiAgreementV2[]>();
@@ -333,26 +314,20 @@ function groupPeerComments(entries: AiAgreementV2[]): PeerComment[] {
     return {
       commentId,
       commentUid: source.commentUid,
-      // Typed as `string` and `string[]`, but read back off a stored record rather than built here.
-      // `onCommentRated` normalizes both when it writes them, so this only covers a record written
-      // some other way — and the cost of not covering it is the whole evaluation: the builder would
-      // throw inside `buildMessages`, which `categorizeRepresentations` catches, leaving the student
-      // with no feedback at all rather than one comment missing.
+      // Typed, but read back off a stored record. A non-string `content` would throw inside
+      // `buildMessages`, which `categorizeRepresentations` catches — costing the whole evaluation
+      // rather than one comment.
       content: typeof source.content === "string" ? source.content : "",
       tags: Array.isArray(source.tags) ? source.tags : [],
       ratings,
-      // The chosen entry holds the latest timestamp, so this is the latest among the ratings.
       updatedAt: ratedAt(source),
     };
   });
 }
 
 /**
- * Orders comments by how much of the class stood behind them and keeps the first
- * `kMaxPeerCommentsPerSummary`.
- *
- * `commentId` is the last sort key so that the same stored entries always send the same comments.
- * Without it the cut would follow whatever order the entries came out of the map in.
+ * `commentId` is the last sort key so the same stored entries always send the same comments, rather
+ * than whichever order they came out of the map in.
  */
 function selectPeerComments(comments: PeerComment[]): PeerComment[] {
   return comments
@@ -365,13 +340,10 @@ function selectPeerComments(comments: PeerComment[]): PeerComment[] {
 }
 
 /**
- * How many entries one related document contributed at each stage of selection.
- *
- * Reported because nothing downstream can recover it: once the prompt is built, everything that
- * was filtered out is gone.
+ * How many entries one related document contributed at each stage of selection. Nothing downstream
+ * can recover this: once the prompt is built, everything filtered out is gone.
  */
 export interface RelatedSummaryStats {
-  /** Entries stored in the document's `aiAgreements` map. */
   storedEntries: number;
   /** Of those, ratings of the AI's comments carrying a usable value. */
   aiEntries: number;
@@ -428,30 +400,21 @@ export function mapRelatedSummaries(
 }
 
 /**
- * Whether the related-summary text is logged exactly as it was sent.
- *
- * The counts beside it are logged everywhere; this is the switch for the text itself, which is
- * what people in the class wrote about each other's work. Only .env.local sets it, which the
+ * Whether the related-summary text is logged exactly as it was sent. Set in `.env.local`, which the
  * emulator reads and Firebase never deploys.
  *
- * Read as exactly `"on"`, and nothing else. A param that is not set reads back as `""` at runtime:
- * the declared default is what Firebase provisions, not what `value()` returns. So an unset param,
- * a misspelt one and a `"true"` all leave the text out, which is the safe direction for a switch
- * whose other position writes student prose to the logs.
- *
- * The emulator check at the call site is the other half of the gate: that `.env.local` never
- * deploys is a convention, and this makes a deployed project unable to log the text at all.
+ * Read as exactly `"on"`: an unset param reads back as `""` at runtime, since the declared default
+ * is what Firebase provisions rather than what `value()` returns. The emulator check at the call
+ * site is the other half of the gate, and is what a deployed project cannot satisfy.
  */
 const promptTextLogging = defineString("AI_PROMPT_TEXT_LOGGING", {default: "off"});
 
 /**
  * The related-summary parts of a built message, as text.
  *
- * Read back out of the message rather than rendered a second time from the entries, so that what
- * is logged is what was sent — a fault in the builder then shows up in the log instead of being
- * hidden by a second rendering that happens to be correct. `summaryContentParts` emits the
- * document's own summary first and then one part per related summary, and the pictures come after
- * every text part, so the related ones are the last `count` text parts. Exported for unit testing.
+ * Read back out of the message rather than rendered again, so what is logged is what was sent.
+ * `summaryContentParts` emits the document's own summary first and the pictures come after every
+ * text part, so the related ones are the last `count` text parts. Exported for unit testing.
  */
 export function relatedSummaryTextParts(
   messages: ChatCompletionMessageParam[], count: number
@@ -615,8 +578,7 @@ export async function categorizeRepresentations(
     };
     const messages = buildMessages();
 
-    // Emulator only, and only when asked: this is what people wrote about each other. The counts
-    // for the same entries are logged everywhere, by findRelatedSummaries.
+    // This is what people wrote about each other.
     if (process.env.FUNCTIONS_EMULATOR === "true" && promptTextLogging.value() === "on") {
       const parts = relatedSummaryTextParts(messages, relatedSummaries.length);
       if (parts.length > 0) {

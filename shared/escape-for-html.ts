@@ -25,11 +25,9 @@ export function escapeJsonForScript(json: string): string {
 /**
  * Escapes a value for use as element content, between a start tag and an end tag.
  *
- * Three characters, not the five an attribute needs. A quote and an apostrophe cannot do anything
- * between tags — only an attribute is ended by one — and student prose is full of both, so escaping
- * them buys nothing and turns "don\'t" into "don&#39;t" everywhere the text is read back: a logged
- * prompt, a harness result, a review report. `&` is escaped so that text which already reads
- * `&lt;` is not mistaken for a character the writer never typed.
+ * Three characters, not the five an attribute needs: only an attribute is ended by a quote, and
+ * escaping apostrophes would turn "don't" into "don&#39;t" wherever the text is read back. `&` is
+ * escaped so text that already reads `&lt;` is not mistaken for a character nobody typed.
  */
 export function escapeHtmlText(value: string): string {
   return value

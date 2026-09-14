@@ -195,8 +195,7 @@ export const onCommentRated = onDocumentWritten(
       }
 
       // The summary is never deleted, even at zero agreements: it belongs to the analysis, and
-      // `numAgreements: 0` is already what drops it out of the related-summaries lookup. That gate
-      // counts every rating, so a document stays findable on ratings of human comments alone.
+      // `numAgreements: 0` is already what drops it out of the related-summaries lookup.
       transaction.update(summaryRef, {aiAgreements: agreements, numAiAgreements, numAgreements});
       logInfo("Recorded ratings on summary", summaryRef.path, {numAiAgreements, numAgreements});
     });

@@ -10,11 +10,8 @@ import { makeTestDataRoot } from "./helpers.js";
 
 /**
  * The three conditions `experiments/peer-comments.json` compares, checked on the requests they
- * build rather than on the settings that produced them.
- *
- * `plan` cannot show this: it is network-free by design and reports run details and cost, never
- * request bodies. Without this file the paid comparison could measure three identical inputs and
- * report a null result that meant nothing.
+ * build rather than on the settings that produced them. `plan` cannot show this: it is network-free
+ * and reports run details and cost, never request bodies.
  */
 
 const peerComment = {
@@ -51,7 +48,7 @@ describe("what each extras setting puts in the related summaries", () => {
   it("keeps the peer comments under `all`", () => {
     expect(relatedSummariesFor(run("all"), document([relatedEntry]))[0].peerComments)
       .toEqual([peerComment]);
-    // Saying nothing is still `all`, as it was before this setting had a third value.
+    // Saying nothing is still `all`.
     expect(relatedSummariesFor(run(), document([relatedEntry]))[0].peerComments)
       .toEqual([peerComment]);
   });

@@ -8,7 +8,6 @@ function agreement(value: RatingValue, content = "a comment", tags: string[] = [
   return {version: 1, value, content, tags};
 }
 
-// A rating on one of Ada's comments — the entries that become the agreement counts.
 function aiRating(value: RatingValue, content = "a comment", tags: string[] = []): AiAgreementV2 {
   return {
     version: 2,
@@ -23,9 +22,8 @@ function aiRating(value: RatingValue, content = "a comment", tags: string[] = []
   };
 }
 
-// A rating on a comment a person wrote — the entries that become peer comments. `overrides` is
-// where a case says which comment was rated, by whom, and when, since those are what the grouping
-// reads and the shared defaults above would otherwise make every entry identical.
+// A rating on a comment a person wrote. `overrides` says which comment, by whom and when — what
+// the grouping reads, and what the shared defaults would otherwise make identical.
 function peerRating(
   value: RatingValue, content = "a comment", overrides: Partial<AiAgreementV2> = {}
 ): AiAgreementV2 {
@@ -100,7 +98,6 @@ describe("mapRelatedSummaries", () => {
     const {relatedSummaries, stats} = mapRelatedSummaries(docs);
 
     expect(relatedSummaries.map((entry) => entry.summary)).toEqual(["The only usable one"]);
-    // One stats element per returned entry, so the two can be read side by side.
     expect(stats).toHaveLength(1);
   });
 
@@ -169,8 +166,7 @@ describe("mapRelatedSummaries", () => {
 
     const [entry] = mapRelatedSummaries(docs).relatedSummaries;
 
-    // The version-1 entry is here too: it records agreement with Ada by construction, so no entry
-    // of that version can ever be a peer comment.
+    // The version-1 entry records agreement with Ada by construction, so it can never be one.
     expect(entry.peerComments).toEqual([]);
   });
 
@@ -259,7 +255,7 @@ describe("mapRelatedSummaries", () => {
     });
 
     it("takes the wording and tags from the entry rated last, whichever was stored first", () => {
-      // Both orders, or "the last entry wins" would pass this and the timestamps would be decoration.
+      // Both orders, or "the last entry stored wins" would pass and the timestamps mean nothing.
       const older = peerRating("yes", "the older wording",
         {commentId: "c1", tags: ["form"], updatedAt: 1756000000000});
       const newer = peerRating("yes", "the newer wording",
@@ -278,16 +274,15 @@ describe("mapRelatedSummaries", () => {
     });
 
     it("breaks a tie on updatedAt with the lower raterUid, for a stable choice rather than a recent one", () => {
-      // Two entries can hold the same timestamp and different wording: `onCommentRated` bumps an
-      // existing rater's `updatedAt` to the current event's time without refreshing that rater's
-      // text. So neither wording here is knowably the newer one, and the rule only has to give the
-      // same answer every run.
+      // `onCommentRated` bumps a rater's `updatedAt` without refreshing that rater's text, so two
+      // entries can hold the same timestamp and different wording. Neither is knowably newer; the
+      // rule only has to give the same answer every run.
       const high = peerRating("yes", "one rater's copy",
         {commentId: "c1", raterUid: "student-9", updatedAt: 1756000000000});
       const low = peerRating("yes", "another rater's copy",
         {commentId: "c1", raterUid: "student-3", updatedAt: 1756000000000});
 
-      // Both orders, so the uid is what decides rather than which entry happened to be stored last.
+      // Both orders, so the uid decides rather than which entry was stored last.
       for (const aiAgreements of [
         {"c1_student-9": high, "c1_student-3": low},
         {"c1_student-3": low, "c1_student-9": high},
@@ -299,9 +294,8 @@ describe("mapRelatedSummaries", () => {
     });
 
     it("prefers a dated entry over one stored without a rating time, whichever came first", () => {
-      // `updatedAt` is required on the type, but these entries are read back from Firestore and
-      // `onCommentRated` guards the same field before moving a timestamp forwards. Both orders are
-      // built here because the bug this covers is a silent fall back to map order.
+      // `updatedAt` is required on the type but can be missing on a stored record. Both orders,
+      // because what this covers is a silent fall back to map order.
       const dated = peerRating("yes", "the dated copy",
         {commentId: "c1", raterUid: "student-3", updatedAt: 1756000000000});
       const undated = {...peerRating("yes", "the undated copy",
@@ -331,10 +325,9 @@ describe("mapRelatedSummaries", () => {
       expect(entry.peerComments[0].updatedAt).toBe(0);
     });
 
-    // `content` and `tags` are typed but read back off a stored record. `onCommentRated` normalizes
-    // both, so these cover a record written some other way. What makes them worth covering is the
-    // blast radius: the prompt builder would throw inside `buildMessages`, which
-    // `categorizeRepresentations` catches, so one malformed entry costs the whole evaluation.
+    // Typed, but read back off a stored record. The prompt builder throws inside `buildMessages`,
+    // which `categorizeRepresentations` catches, so one malformed entry costs the whole
+    // evaluation.
     it("substitutes an empty string for a content that is not a string", () => {
       const docs: RelatedSummarySource[] = [{
         summary: "A related summary",
@@ -383,7 +376,6 @@ describe("mapRelatedSummaries", () => {
       const docs: RelatedSummarySource[] = [{
         summary: "A related summary",
         aiAgreements: {
-          // One yes, one rater.
           "c-b_student-1": peerRating("yes", "b", {commentId: "c-b"}),
           // One yes, one rater — same counts as c-b, so the comment id decides.
           "c-a_student-1": peerRating("yes", "a", {commentId: "c-a"}),
@@ -405,10 +397,9 @@ describe("mapRelatedSummaries", () => {
 
     it("ranks before it cuts, so a late-stored comment can still make the ten", () => {
       const aiAgreements: Record<string, AiAgreementV2> = {};
-      // Stored in reverse, and the best-rated comment is stored last of all. Cutting before
-      // ranking would keep the first ten stored — c-11 down to c-02 — and drop the one comment
-      // two people agreed with. Stored in ranking order, as an earlier version of this fixture
-      // was, the cut and the ranking cannot be told apart.
+      // Stored in reverse, and the best-rated comment last of all. Cutting before ranking would
+      // keep the first ten stored — c-11 down to c-02 — and drop the one comment two people
+      // agreed with.
       for (let index = 11; index >= 0; index--) {
         const commentId = `c-${String(index).padStart(2, "0")}`;
         aiAgreements[`${commentId}_student-1`] = peerRating("yes", commentId, {commentId});
@@ -452,8 +443,6 @@ describe("mapRelatedSummaries", () => {
         peerComments: 2,
         sent: 2,
       }]);
-      // The counts describe the entry beside them: two comments sent, and the AI entries are the
-      // two the counts line will be built from.
       expect(relatedSummaries[0].peerComments).toHaveLength(2);
       expect(relatedSummaries[0].agreements.yes).toHaveLength(2);
     });

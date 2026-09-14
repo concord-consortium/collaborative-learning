@@ -88,7 +88,6 @@ describe("import", () => {
       }
     };
 
-    /** A source directory holding both fixtures and a `related-summaries.json` beside them. */
     function sourceWithSidecar(dataRoot: string, contents: unknown = sidecar): string {
       const from = sourceDir(dataRoot, { "a-text.json": textDoc, "b-image.json": imageDoc });
       fs.writeFileSync(path.join(from, "related-summaries.json"), JSON.stringify(contents, null, 2));
@@ -105,7 +104,6 @@ describe("import", () => {
       const seeded = result.manifest.documents.find((entry) => entry.id === "a-text")!;
       expect(seeded.relatedSummaries).toHaveLength(1);
       expect(seeded.relatedSummaries[0].peerComments[0].ratings).toEqual({ yes: 2, no: 1 });
-      // A document the sidecar says nothing about is exactly as it was before the file existed.
       expect(result.manifest.documents.find((entry) => entry.id === "b-image")!.relatedSummaries)
         .toEqual([]);
     });
@@ -132,21 +130,17 @@ describe("import", () => {
 
     it("seeds a corpus imported before the sidecar existed, whose entries hold an empty list", () => {
       const dataRoot = makeTestDataRoot("import-related-summaries-backfill");
-      // First import with no sidecar at all, which is the state every corpus was in before this
-      // file existed: present, and empty.
       const bare = sourceDir(dataRoot, { "a-text.json": textDoc, "b-image.json": imageDoc });
       expect(importFrom(bare, dataRoot).manifest.documents[0].relatedSummaries).toEqual([]);
 
-      // Adding the sidecar and re-importing has to fill it. An empty list is what every entry
-      // starts as, so it cannot mean "a human chose none".
+      // An empty list is what every entry starts as, so it cannot mean "a human chose none".
       const result = importFrom(sourceWithSidecar(dataRoot), dataRoot);
       expect(result.manifest.documents.find((entry) => entry.id === "a-text")!.relatedSummaries)
         .toHaveLength(1);
     });
 
     // A flat source directory — no `documents/` subdirectory — holds its sidecars beside its
-    // documents, and the scan takes every `.json`. Both were being imported as documents:
-    // `expectations.json` became a document called "expectations", which passes the id pattern.
+    // documents, and the scan takes every `.json`.
     it("does not import the sidecars themselves as documents", () => {
       const dataRoot = makeTestDataRoot("import-sidecars-not-documents");
       const from = sourceWithSidecar(dataRoot);

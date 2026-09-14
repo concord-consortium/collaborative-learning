@@ -164,14 +164,12 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       await categorizeRepresentations(
         {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
-      // The equality assertions above already pin every part to a shared builder. This says the
-      // peer half of a related summary is carried there at all, which an equality between two
-      // empty lists would not.
+      // The equality assertions above pin every part to a shared builder; this says the peer half
+      // is carried there at all, which an equality between two empty lists would not.
       const parts = (sent[0].messages[1].content as any[]).map((part: any) => part.text ?? "");
       const related = parts.find((text: string) => text.includes("A peer's work"))!;
       expect(related).toContain("A classmate wrote this about that document.");
       expect(related).toContain("<comment tag=\"user\" ratings=\"yes: 2\">");
-      // And the agreement counts still travel as their own sentence.
       expect(related).toContain("Other users agreed with this summary as follows: yes: 1");
     });
 
