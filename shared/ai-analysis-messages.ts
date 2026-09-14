@@ -126,10 +126,12 @@ function imageContentParts(
 }
 
 /**
- * How much of one comment reaches the prompt.
+ * How much of one comment reaches the prompt, counted in characters.
  *
  * Applied to what the person wrote, before escaping, so the limit counts their characters rather
- * than the `&amp;` an escape expands one into.
+ * than the `&amp;` an escape expands one into. Characters, not UTF-16 code units: an emoji is two
+ * code units, and cutting between them leaves an unpaired surrogate that survives `JSON.stringify`
+ * and reaches the model as a broken character.
  */
 const kMaxPeerCommentLength = 500;
 
@@ -196,8 +198,10 @@ function peerCommentRatingsAttribute(ratings: PeerComment["ratings"]): string {
 function fencePeerComment(comment: PeerComment): string {
   const attributes =
     `${peerCommentTagAttribute(comment.tags)}${peerCommentRatingsAttribute(comment.ratings)}`;
-  const content = comment.content.length > kMaxPeerCommentLength
-    ? comment.content.slice(0, kMaxPeerCommentLength) + kTruncationMarker
+  // Spread to characters rather than slicing code units, so a cut can never split one in half.
+  const characters = [...comment.content];
+  const content = characters.length > kMaxPeerCommentLength
+    ? characters.slice(0, kMaxPeerCommentLength).join("") + kTruncationMarker
     : comment.content;
   const text = escapeHtmlText(content);
   return text.length > 0

@@ -329,6 +329,39 @@ describe("mapRelatedSummaries", () => {
       expect(entry.peerComments[0].updatedAt).toBe(0);
     });
 
+    // `content` and `tags` are typed but read back off a stored record. `onCommentRated` normalizes
+    // both, so these cover a record written some other way. What makes them worth covering is the
+    // blast radius: the prompt builder would throw inside `buildMessages`, which
+    // `categorizeRepresentations` catches, so one malformed entry costs the whole evaluation.
+    it("substitutes an empty string for a content that is not a string", () => {
+      const docs: RelatedSummarySource[] = [{
+        summary: "A related summary",
+        aiAgreements: {
+          "c1_student-1": {...peerRating("yes", "", {commentId: "c1"}),
+            content: undefined as unknown as string},
+        },
+      }];
+
+      const [entry] = mapRelatedSummaries(docs).relatedSummaries;
+
+      expect(entry.peerComments[0].content).toBe("");
+    });
+
+    it("substitutes an empty list for tags that are not an array", () => {
+      const docs: RelatedSummarySource[] = [{
+        summary: "A related summary",
+        aiAgreements: {
+          "c1_student-1": {...peerRating("yes", "kept", {commentId: "c1"}),
+            tags: "function" as unknown as string[]},
+        },
+      }];
+
+      const [entry] = mapRelatedSummaries(docs).relatedSummaries;
+
+      expect(entry.peerComments[0].tags).toEqual([]);
+      expect(entry.peerComments[0].content).toBe("kept");
+    });
+
     it("keeps a comment that has only a tag", () => {
       const docs: RelatedSummarySource[] = [{
         summary: "A related summary",

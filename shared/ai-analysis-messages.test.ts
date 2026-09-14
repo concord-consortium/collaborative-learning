@@ -323,6 +323,30 @@ describe("ai-analysis-messages", () => {
       expect(text).not.toContain("x".repeat(501));
     });
 
+    it("never splits a character in half at the cap", () => {
+      // An emoji is two UTF-16 code units. Cutting between them leaves an unpaired surrogate, which
+      // survives JSON.stringify and reaches the model as a broken character.
+      const content = "x".repeat(499) + "\u{1F44D}tail";
+      const text = relatedPartOf([makeRelatedSummary("s", {}, [makePeerComment({ content })])]);
+
+      const fenced = /<comment[^>]*>\n([\s\S]*?)\n<\/comment>/.exec(text)![1];
+      expect(fenced).toContain("…[truncated]");
+      expect(/[\uD800-\uDBFF]$/.test(fenced.replace("…[truncated]", ""))).toBe(false);
+      // The emoji is the 500th character, so it survives whole.
+      expect(fenced).toContain("\u{1F44D}");
+    });
+
+    it("truncates at 500 characters even when some of them are two code units", () => {
+      // A long comment with a few emoji in it. Every emoji is two UTF-16 code units, so counting
+      // units rather than characters would cut this one ten characters short of the cap.
+      const content = "Great work on this, I really like the diagram. \u{1F44D} ".repeat(12);
+      const text = relatedPartOf([makeRelatedSummary("s", {}, [makePeerComment({ content })])]);
+
+      const fenced = /<comment[^>]*>\n([\s\S]*?)\n<\/comment>/.exec(text)![1];
+      expect(fenced).toContain("…[truncated]");
+      expect([...fenced.replace("…[truncated]", "")]).toHaveLength(500);
+    });
+
     it("counts the characters the person wrote, not the characters an escape expands them into", () => {
       // 300 ampersands become 1800 characters once escaped. Capping after escaping would cut this
       // comment in half, and could cut it in the middle of an entity.

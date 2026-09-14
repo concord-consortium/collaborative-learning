@@ -333,8 +333,13 @@ function groupPeerComments(entries: AiAgreementV2[]): PeerComment[] {
     return {
       commentId,
       commentUid: source.commentUid,
-      content: source.content,
-      tags: source.tags,
+      // Typed as `string` and `string[]`, but read back off a stored record rather than built here.
+      // `onCommentRated` normalizes both when it writes them, so this only covers a record written
+      // some other way — and the cost of not covering it is the whole evaluation: the builder would
+      // throw inside `buildMessages`, which `categorizeRepresentations` catches, leaving the student
+      // with no feedback at all rather than one comment missing.
+      content: typeof source.content === "string" ? source.content : "",
+      tags: Array.isArray(source.tags) ? source.tags : [],
       ratings,
       // The chosen entry holds the latest timestamp, so this is the latest among the ratings.
       updatedAt: ratedAt(source),
