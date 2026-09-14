@@ -91,22 +91,41 @@ describe("relatedSummaryTextParts", () => {
   });
 });
 
-describe("the prompt-text logging param", () => {
+describe("the prompt-text logging gate", () => {
   const variable = "AI_PROMPT_TEXT_LOGGING";
-  const before = process.env[variable];
+  const emulator = "FUNCTIONS_EMULATOR";
+  const before = {param: process.env[variable], emulator: process.env[emulator]};
+
+  const restore = (name: string, value: string | undefined) => {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env[variable];
+    // The functions emulator sets this itself; a deployed function never has it.
+    process.env[emulator] = "true";
   });
 
   afterAll(() => {
-    if (before === undefined) delete process.env[variable];
-    else process.env[variable] = before;
+    restore(variable, before.param);
+    restore(emulator, before.emulator);
   });
 
   const categorize = () => categorizeRepresentations(
     {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", prompt, undefined, deps());
+
+  it("logs nothing outside the emulator, whatever the param says", async () => {
+    // The second half of the gate. `.env.local` never deploying is a convention; this is what makes
+    // a deployed project unable to log student prose even if the variable reaches it.
+    process.env[variable] = "on";
+    delete process.env[emulator];
+
+    await categorize();
+
+    expect(loggedPromptText()).toBeUndefined();
+  });
 
   it("logs nothing when the param is unset, which is what production is", async () => {
     // An unset param reads back as "", not as the declared default, so this is the production case.

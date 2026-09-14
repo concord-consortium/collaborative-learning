@@ -337,14 +337,19 @@ param, following the `defineString` pattern `chat-tutor.ts` already uses for `OP
 const promptTextLogging = defineString("AI_PROMPT_TEXT_LOGGING", {default: "off"});
 ```
 
-The text is logged only when the value is exactly `"on"`. **It is meant to be turned on in the
-local emulator, not on a deployed environment.** The functions emulator runs the whole read path —
-`onCommentRated` writing the entry, `findRelatedSummaries` finding it (the Firestore emulator
-supports `findNearest`), `mapRelatedSummaries` grouping it, the builder fencing it — so everything
-the text log exists to show can be seen locally. Set it in `functions-v2/.env.local`, which is
-the file Firebase reserves for emulation and never deploys, so the setting cannot reach any
-deployed project by any route. It is never set in `.env`, which the README already warns applies
-to whichever project is selected, and there is no reason to set it in a per-project file either.
+The text is logged only when the value is exactly `"on"` **and the code is running in the functions
+emulator**, which sets `FUNCTIONS_EMULATOR=true` itself. Both halves are required, and the second is
+what makes "emulator only" a property of the code rather than a rule people follow: `.env.local`
+never deploying is a convention, and a variable added to `.env`, to a per-project file, or to a
+deployed function's environment would otherwise switch this on in production. Turning it on for a
+deployed project is a code change, which is the right weight for a decision to log student prose.
+
+The emulator is also where it is useful. It runs the whole read path — `onCommentRated` writing the
+entry, `findRelatedSummaries` finding it (the Firestore emulator supports `findNearest`),
+`mapRelatedSummaries` grouping it, the builder fencing it — so everything the text log exists to
+show can be seen locally. Set it in `functions-v2/.env.local`, the file Firebase reserves for
+emulation. Do not set it in `.env` or in a per-project file; those deploy, and while the emulator
+check now makes that harmless, a variable that looks live and does nothing is its own trap.
 Deployed environments never have it: an unset param reads back as `""` at runtime —
 `StringParam.value()` returns `process.env[name] || ""`, not the declared default — so the check
 has to be an equality with `"on"`, never an inequality with `"off"`.

@@ -432,12 +432,15 @@ export function mapRelatedSummaries(
  *
  * The counts beside it are logged everywhere; this is the switch for the text itself, which is
  * what people in the class wrote about each other's work. Only .env.local sets it, which the
- * emulator reads and Firebase never deploys, so no deployed project has it.
+ * emulator reads and Firebase never deploys.
  *
  * Read as exactly `"on"`, and nothing else. A param that is not set reads back as `""` at runtime:
  * the declared default is what Firebase provisions, not what `value()` returns. So an unset param,
  * a misspelt one and a `"true"` all leave the text out, which is the safe direction for a switch
  * whose other position writes student prose to the logs.
+ *
+ * The emulator check at the call site is the other half of the gate: that `.env.local` never
+ * deploys is a convention, and this makes a deployed project unable to log the text at all.
  */
 const promptTextLogging = defineString("AI_PROMPT_TEXT_LOGGING", {default: "off"});
 
@@ -612,10 +615,9 @@ export async function categorizeRepresentations(
     };
     const messages = buildMessages();
 
-    // Off in production. The counts for these same entries are logged unconditionally by
-    // findRelatedSummaries; this is the text, and it is only for checking in the emulator that
-    // the agreement counts and the peer comments arrive as two separate things.
-    if (promptTextLogging.value() === "on") {
+    // Emulator only, and only when asked: this is what people wrote about each other. The counts
+    // for the same entries are logged everywhere, by findRelatedSummaries.
+    if (process.env.FUNCTIONS_EMULATOR === "true" && promptTextLogging.value() === "on") {
       const parts = relatedSummaryTextParts(messages, relatedSummaries.length);
       if (parts.length > 0) {
         logger.info("Related summary prompt text", {firestoreDocumentPath, parts});
