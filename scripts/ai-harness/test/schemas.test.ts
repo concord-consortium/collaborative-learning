@@ -142,6 +142,13 @@ describe("peer comments on a related summary", () => {
       .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.ratings\.yes must be a positive integer/);
   });
 
+  it("refuses a comment nobody rated", () => {
+    expect(() => validateCorpusManifest(
+      manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, ratings: {} }] }]),
+      "manifest.json"))
+      .toThrow(/relatedSummaries\[0\]\.peerComments\[0\]\.ratings must record at least one rating/);
+  });
+
   it("names the offending field when a tag is not a string", () => {
     expect(() => validateCorpusManifest(
       manifestWith([{ summary: "s", agreements: {}, peerComments: [{ ...peerComment, tags: [7] }] }]),

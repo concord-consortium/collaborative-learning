@@ -302,11 +302,17 @@ function validatePeerComment(value: unknown, file: string, field: string): PeerC
   const record = asObject(value, file, field);
   const ratings = asObject(record.ratings, file, `${field}.ratings`);
   const counts: PeerCommentEntry["ratings"] = {};
+
   for (const [ratingValue, count] of Object.entries(ratings)) {
     // A whole number of people, and at least one: production builds this map by counting entries,
     // so a value nobody chose has no key rather than a key of zero.
     counts[ratingValue] = asPositiveInteger(count, file, `${field}.ratings.${ratingValue}`);
   }
+
+  if (Object.keys(counts).length === 0) {
+    fail(file, `${field}.ratings`, "must record at least one rating");
+  }
+
   return {
     commentId: asString(record.commentId, file, `${field}.commentId`),
     commentUid: asString(record.commentUid, file, `${field}.commentUid`),
