@@ -165,7 +165,9 @@ const kPeerCommentsGuidance =
 function peerCommentTagAttribute(tags: string[]): string {
   const cleaned = (tags ?? [])
     .filter((tag): tag is string => typeof tag === "string")
-    .map((tag) => tag.replace(/[\r\n]+/g, "").slice(0, kMaxPeerCommentTagLength))
+    // Spread before cutting, for the same reason the comment text is: slicing code units can
+    // split a character and leave an unpaired surrogate in the attribute.
+    .map((tag) => [...tag.replace(/[\r\n]+/g, "")].slice(0, kMaxPeerCommentTagLength).join(""))
     .filter((tag) => tag.length > 0)
     .map(escapeHtmlAttribute);
   // The field is an array and the UI writes one, but an authored document can carry several.

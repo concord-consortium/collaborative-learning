@@ -294,6 +294,19 @@ describe("ai-analysis-messages", () => {
         expect(text).toContain("<comment tag=\"user\" ratings=");
       });
 
+      it("caps the length without splitting a character in half", () => {
+        // Same hazard as the comment text: cutting UTF-16 code units can leave an unpaired
+        // surrogate, here inside a quoted attribute.
+        const text = relatedPartOf([
+          makeRelatedSummary("s", {}, [makePeerComment({ tags: ["a".repeat(63) + "\u{1F44D}b"] })])
+        ]);
+
+        const tag = /tag="([^"]*)"/.exec(text)![1];
+        expect([...tag]).toHaveLength(64);
+        expect(/[\uD800-\uDBFF]$/.test(tag)).toBe(false);
+        expect(tag.endsWith("\u{1F44D}")).toBe(true);
+      });
+
       it("removes newlines and caps the length", () => {
         const text = relatedPartOf([
           makeRelatedSummary("s", {}, [makePeerComment({ tags: [`a\nb${"c".repeat(100)}`] })])
