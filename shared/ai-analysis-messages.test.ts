@@ -253,6 +253,20 @@ describe("ai-analysis-messages", () => {
         expect(text).toContain("Your rule fails when x &lt; 5.");
       });
 
+      it("escapes a rating value, so it cannot end the attribute either", () => {
+        // Production can only produce the three enum values, which need no escaping. The harness
+        // can: a corpus manifest's `ratings` is keyed by an arbitrary string from a JSON file, so
+        // the same request builder has to survive one that carries a quote.
+        const text = relatedPartOf([
+          makeRelatedSummary("s", {}, [makePeerComment({
+            ratings: { ["yes\" onload=\"alert(1)"]: 2 } as never
+          })])
+        ]);
+
+        expect(text).toContain("ratings=\"yes&quot; onload=&quot;alert(1): 2\"");
+        expect(text.match(/<comment/g)).toHaveLength(1);
+      });
+
       it("escapes a quote in a tag, so it cannot end the attribute", () => {
         const text = relatedPartOf([
           makeRelatedSummary("s", {}, [makePeerComment({ tags: ["form\" onload=\"alert(1)"] })])

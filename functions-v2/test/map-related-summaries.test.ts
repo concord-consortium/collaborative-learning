@@ -258,22 +258,23 @@ describe("mapRelatedSummaries", () => {
       expect(entry.peerComments[0].ratings).toEqual({yes: 1, no: 1});
     });
 
-    it("takes the wording and tags from the entry rated last", () => {
-      const docs: RelatedSummarySource[] = [{
-        summary: "A related summary",
-        aiAgreements: {
-          "c1_student-1": peerRating("yes", "the older wording",
-            {commentId: "c1", tags: ["form"], updatedAt: 1756000000000}),
-          "c1_student-3": peerRating("yes", "the newer wording",
-            {commentId: "c1", raterUid: "student-3", tags: ["user"], updatedAt: 1756000009999}),
-        },
-      }];
+    it("takes the wording and tags from the entry rated last, whichever was stored first", () => {
+      // Both orders, or "the last entry wins" would pass this and the timestamps would be decoration.
+      const older = peerRating("yes", "the older wording",
+        {commentId: "c1", tags: ["form"], updatedAt: 1756000000000});
+      const newer = peerRating("yes", "the newer wording",
+        {commentId: "c1", raterUid: "student-3", tags: ["user"], updatedAt: 1756000009999});
 
-      const [entry] = mapRelatedSummaries(docs).relatedSummaries;
+      for (const aiAgreements of [
+        {"c1_student-1": older, "c1_student-3": newer},
+        {"c1_student-3": newer, "c1_student-1": older},
+      ]) {
+        const [entry] = mapRelatedSummaries([{summary: "A related summary", aiAgreements}]).relatedSummaries;
 
-      expect(entry.peerComments[0].content).toBe("the newer wording");
-      expect(entry.peerComments[0].tags).toEqual(["user"]);
-      expect(entry.peerComments[0].updatedAt).toBe(1756000009999);
+        expect(entry.peerComments[0].content).toBe("the newer wording");
+        expect(entry.peerComments[0].tags).toEqual(["user"]);
+        expect(entry.peerComments[0].updatedAt).toBe(1756000009999);
+      }
     });
 
     it("breaks a tie on updatedAt with the lower raterUid, for a stable choice rather than a recent one", () => {
@@ -281,19 +282,20 @@ describe("mapRelatedSummaries", () => {
       // existing rater's `updatedAt` to the current event's time without refreshing that rater's
       // text. So neither wording here is knowably the newer one, and the rule only has to give the
       // same answer every run.
-      const docs: RelatedSummarySource[] = [{
-        summary: "A related summary",
-        aiAgreements: {
-          "c1_student-9": peerRating("yes", "one rater's copy",
-            {commentId: "c1", raterUid: "student-9", updatedAt: 1756000000000}),
-          "c1_student-3": peerRating("yes", "another rater's copy",
-            {commentId: "c1", raterUid: "student-3", updatedAt: 1756000000000}),
-        },
-      }];
+      const high = peerRating("yes", "one rater's copy",
+        {commentId: "c1", raterUid: "student-9", updatedAt: 1756000000000});
+      const low = peerRating("yes", "another rater's copy",
+        {commentId: "c1", raterUid: "student-3", updatedAt: 1756000000000});
 
-      const [entry] = mapRelatedSummaries(docs).relatedSummaries;
+      // Both orders, so the uid is what decides rather than which entry happened to be stored last.
+      for (const aiAgreements of [
+        {"c1_student-9": high, "c1_student-3": low},
+        {"c1_student-3": low, "c1_student-9": high},
+      ]) {
+        const [entry] = mapRelatedSummaries([{summary: "A related summary", aiAgreements}]).relatedSummaries;
 
-      expect(entry.peerComments[0].content).toBe("another rater's copy");
+        expect(entry.peerComments[0].content).toBe("another rater's copy");
+      }
     });
 
     it("prefers a dated entry over one stored without a rating time, whichever came first", () => {
@@ -401,22 +403,27 @@ describe("mapRelatedSummaries", () => {
         .toEqual(["c-d", "c-c", "c-a", "c-b"]);
     });
 
-    it("sends at most ten comments per related document", () => {
+    it("ranks before it cuts, so a late-stored comment can still make the ten", () => {
       const aiAgreements: Record<string, AiAgreementV2> = {};
-      // Twelve comments, each rated once, so every sort key but the comment id is a tie and the
-      // ten that survive are the ten lowest ids.
-      for (let index = 0; index < 12; index++) {
+      // Stored in reverse, and the best-rated comment is stored last of all. Cutting before
+      // ranking would keep the first ten stored — c-11 down to c-02 — and drop the one comment
+      // two people agreed with. Stored in ranking order, as an earlier version of this fixture
+      // was, the cut and the ranking cannot be told apart.
+      for (let index = 11; index >= 0; index--) {
         const commentId = `c-${String(index).padStart(2, "0")}`;
         aiAgreements[`${commentId}_student-1`] = peerRating("yes", commentId, {commentId});
       }
+      aiAgreements["c-00_student-3"] =
+        peerRating("yes", "c-00", {commentId: "c-00", raterUid: "student-3"});
 
       const {relatedSummaries, stats} = mapRelatedSummaries([{summary: "A related summary", aiAgreements}]);
 
+      // c-00 first on two yeses; the rest tie on one yes and fall back to the comment id.
       expect(relatedSummaries[0].peerComments.map((comment) => comment.commentId)).toEqual([
         "c-00", "c-01", "c-02", "c-03", "c-04", "c-05", "c-06", "c-07", "c-08", "c-09",
       ]);
       expect(stats[0]).toEqual({
-        storedEntries: 12, aiEntries: 0, peerEntries: 12, peerComments: 12, sent: 10,
+        storedEntries: 13, aiEntries: 0, peerEntries: 13, peerComments: 12, sent: 10,
       });
     });
   });
