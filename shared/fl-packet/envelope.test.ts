@@ -56,4 +56,19 @@ describe("buildEnvelope", () => {
     expect(() => buildEnvelope({ ...base, protection: { classes: [], patternRefs: [] } }))
       .toThrow(/protection/i);
   });
+
+  // Each half of the guard, separately. Tested only with both halves empty, `||` could be mutated
+  // to `&&` and survive — and the mutant accepts a policy with classes but no refs, or refs but no
+  // classes, which is the half-declared protection the guard exists to refuse.
+  it("refuses a policy that names classes but no pattern refs", () => {
+    expect(() => buildEnvelope({
+      ...base, protection: { classes: ["protected_threshold_value"], patternRefs: [] },
+    })).toThrow(/answer protection/i);
+  });
+
+  it("refuses a policy that names pattern refs but no classes", () => {
+    expect(() => buildEnvelope({
+      ...base, protection: { classes: [], patternRefs: ["protected:x"] },
+    })).toThrow(/answer protection/i);
+  });
 });

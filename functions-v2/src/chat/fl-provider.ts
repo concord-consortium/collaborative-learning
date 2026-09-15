@@ -70,12 +70,21 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       const document = await readDocument(parent, message);
       let context: ContextPacket;
       if (document) {
-        context = buildContextPacket({
+        const built = buildContextPacket({
           content: document.content,
           documentId: document.documentId,
           revision: document.revision,
           envelope,
-        }).packet;
+        });
+        context = built.packet;
+        // buildContextPacket reports rather than enforces, on the grounds that the caller is
+        // better placed to decide. This is that caller, and the decision is to send it anyway and
+        // say so: the cap is ForeverLearning's, we have never been near it, and a turn silently
+        // truncated would be worse than one that went over and left a line saying it did.
+        if (built.overLimit) {
+          console.warn(`FL context packet over cap: ${built.bytes} bytes`,
+            {trace: envelope.traceId, turn, omitted: built.packet.workspace_state?.omitted});
+        }
       } else {
         // The envelope is the only section a packet cannot omit. A turn with no document to
         // describe is still a turn, and an envelope-only packet says "no workspace" rather than

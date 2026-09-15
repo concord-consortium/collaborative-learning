@@ -275,6 +275,25 @@ describe("Firestore security rules: chat tutor", () => {
       await expectWriteToFail(db, kDemoMessage, demoMessage());
     });
 
+    // Both chatTutor blocks were widened for rightContent, and demo/qa is where a new provider is
+    // exercised first — so a whitelist that was only updated in the authed block would fail
+    // exactly where the feature gets tried. The whitelist is a hasOnly, so the write is rejected
+    // outright rather than dropping the field.
+    it("allows a rightContent payload under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kDemoMessage, demoMessage({
+        add: { rightContent: `{"rowOrder":[],"rowMap":{},"tileMap":{}}`,
+               provider: "foreverlearning" }
+      }));
+    });
+
+    it("rejects a non-string rightContent under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, kDemoMessage, demoMessage({
+        add: { rightContent: { rowOrder: [] } }
+      }));
+    });
+
     // If the carve-out failed, the permissive catch-all would grant these and the writes would
     // succeed — so these double as the carve-out verification.
     it("rejects a forged kind:'assistant' and server-owned fields", async () => {

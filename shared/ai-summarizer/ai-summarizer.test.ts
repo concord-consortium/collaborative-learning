@@ -1599,3 +1599,58 @@ describe('normalize', () => {
     });
   });
 });
+
+// normalize() is tolerant of a malformed shared model in four places, not the one that was
+// originally documented. The policy is the same in all four — a shared model we cannot read costs
+// the reader that model, never the whole document summary — but a policy applied four times and
+// tested once is three untested behaviour changes. These pin the other three, plus the one value
+// change: providerId used to come out undefined despite its non-optional type.
+describe('normalize tolerates a malformed shared model', () => {
+  const withSharedModel = (sharedModel: any, tiles?: any) => ({
+    rowOrder: [], rowMap: {}, tileMap: {},
+    sharedModelMap: { 'sm-1': { sharedModel, ...(tiles === undefined ? {} : { tiles }) } },
+  });
+
+  it('treats a dataset with no cases array as having no cases', () => {
+    const content = withSharedModel({
+      type: 'SharedDataSet', id: 'sm-1',
+      dataSet: { id: 'ds', name: 'D', attributes: [{ id: 'a', name: 'a', values: ['1'] }] },
+    }, ['t1']);
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.dataSets[0].numCases).toBe(0);
+    expect(normalizedModel.dataSets[0].data).toEqual([]);
+  });
+
+  it('treats a dataset entry with no tiles list as referenced by no tiles', () => {
+    const content = withSharedModel({
+      type: 'SharedDataSet', id: 'sm-1',
+      dataSet: { id: 'ds', name: 'D', attributes: [], cases: [] },
+    }, undefined);
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.dataSets[0].tileIds).toEqual([]);
+  });
+
+  it('treats a variables model with no variables list as carrying none', () => {
+    const content = withSharedModel({ type: 'SharedVariables', id: 'sm-1' }, ['t1']);
+    expect(() => normalize(content as any)).not.toThrow();
+    expect(normalize(content as any).normalizedModel.variables).toEqual([]);
+  });
+
+  it('treats a variables entry with no tiles list as referenced by no tiles', () => {
+    const content = withSharedModel(
+      { type: 'SharedVariables', id: 'sm-1', variables: [{ id: 'v' }] }, undefined);
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.variables[0].tileIds).toEqual([]);
+  });
+
+  // NormalizedDataSet.providerId is typed non-optional, but a dataset that names no provider used
+  // to produce undefined at runtime. A consumer that only tests truthiness cannot tell, but one
+  // comparing to undefined can.
+  it('reports no provider as an empty string rather than undefined', () => {
+    const content = withSharedModel({
+      type: 'SharedDataSet', id: 'sm-1',
+      dataSet: { id: 'ds', name: 'D', attributes: [], cases: [] },
+    }, ['t1']);
+    expect(normalize(content as any).normalizedModel.dataSets[0].providerId).toBe('');
+  });
+});

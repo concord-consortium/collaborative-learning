@@ -8,8 +8,11 @@
 //     reading order. normalize() already walks rowOrder, so the packet inherits it for free.
 //   - Limits. The schema caps tiles at 100, shared models at 20 and run values at 100. Going over
 //     does not make a big packet, it makes an invalid one.
-//   - Omission. Anything dropped — by a projection or by those caps — is declared, or the packet
-//     reads as a complete account of a workspace it only partly describes.
+//   - Omission. Anything dropped that the student would recognize as their own work — by a
+//     projection or by those caps — is declared, or the packet reads as a complete account of a
+//     workspace it only partly describes. Placeholder tiles are the deliberate exception: they are
+//     the empty scaffolding of an auto-sectioned document, so declaring them would report a
+//     workspace fuller than the one the student sees. See tiles.ts.
 //
 // An omitted[] entry carries a kind and a count and deliberately NO id. That is the schema's
 // design, and its own note says why: these are declarations of absence, never addressable and
