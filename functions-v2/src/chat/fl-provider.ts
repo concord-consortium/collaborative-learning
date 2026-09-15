@@ -4,10 +4,11 @@
 // only once this returns — so a turn that fails part-way leaves nothing recorded, exactly as the
 // OpenAI path earns its conversation id.
 //
-// Where the student's document comes from is deliberately injected. The server cannot currently
-// reach it: message.rightContext is a markdown summary rather than content, and the RTDB path
-// needs a documentKey the message does not carry. Whatever closes that gap — a new whitelisted
-// message field, or a projection the client builds — lands in readDocument and nowhere else.
+// Where the student's document comes from is injected rather than reached for. The trigger
+// supplies it from the message's rightContent, or from the copy kept on the parent when an
+// unchanged document was not resent; a different source would change readDocument and nothing
+// else here. Same reasoning for the identity: it is derived by the caller from values the rules
+// pin, because a provider that read either off the message would trust a field a client controls.
 import {DocumentData} from "firebase-admin/firestore";
 
 import {DocumentContentSnapshotType} from "../../../shared/ai-summarizer/ai-summarizer-types";
