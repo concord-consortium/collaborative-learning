@@ -17,6 +17,14 @@ export const kChatTutorCollection = "chatTutor";
 // Firestore's own overhead — cannot push a payload that measured as fitting over the edge.
 const kMaxAttachedWorkspace = 900_000;
 
+// Bytes, not string length. Firestore counts bytes and a JavaScript string's length is UTF-16 code
+// units, so a snapshot of mostly non-ASCII content measures far smaller than it travels — an emoji
+// is one unit of length and four bytes on the wire. Measuring the wrong one lets exactly the
+// payload this budget exists to stop through the check and into a failed write.
+function workspaceBytes(json: string): number {
+  return new TextEncoder().encode(json).length;
+}
+
 export interface FirestoreTransportOptions {
   firestore: Firestore;
   // canonical conversation doc id (already escaped — see conversationDocId)
@@ -160,7 +168,7 @@ export class FirestoreTransport implements ChatTransport {
       // Over the cap the write itself fails and the turn never reaches the trigger, so dropping
       // the attachment is the lesser loss: the server then describes no workspace, or reuses the
       // last one it was given, instead of the student getting no answer at all.
-      if (content.json.length > kMaxAttachedWorkspace) return undefined;
+      if (workspaceBytes(content.json) > kMaxAttachedWorkspace) return undefined;
       return { field: "rightContent", value: content.json, hash: content.hash };
     }
     const summary = getRightSummary();

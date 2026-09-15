@@ -18,6 +18,9 @@ import { isTutorHighlight, TutorHighlight } from "../chat-tutor-highlight";
 import { ContextPacket } from "./packet";
 import { CollectedStream } from "./sse";
 
+/** The one response contract this module implements. */
+export const kResponseSchemaVersion = "clue.response_packet.v2";
+
 export interface ResponseStudent {
   surface: "student";
   message: string;
@@ -78,9 +81,14 @@ export function parseResponsePacket(json: string): ResponsePacket | undefined {
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return undefined;
   const packet = parsed as Partial<ResponsePacket>;
-  if (typeof packet.schema_version !== "string") return undefined;
+  // The exact version, not merely a string. The fields this module reads — components, directives,
+  // student.message — could well exist in a later version and mean something different, so a
+  // permissive check would have us confidently misread a packet we do not implement.
+  if (packet.schema_version !== kResponseSchemaVersion) return undefined;
   const message = packet.student?.message;
-  if (typeof message !== "string" || !message.length) return undefined;
+  // Trimmed, for the same reason replyText trims the prose: whitespace has a length, so a
+  // length-only check admits a blank message that then gets written as a finished reply.
+  if (typeof message !== "string" || !message.trim()) return undefined;
   return packet as ResponsePacket;
 }
 

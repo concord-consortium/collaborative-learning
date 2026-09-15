@@ -190,3 +190,23 @@ describe("replyText", () => {
     expect(replyText(stream, packet)).toBe("Compare the two readings you recorded.");
   });
 });
+
+// Fail closed on anything that is not the exact contract this parser implements. Both of these
+// were flagged by a Copilot review as accepting input that looks valid and is not.
+describe("parseResponsePacket version and emptiness", () => {
+  it("refuses a schema version this parser does not implement", () => {
+    const v3 = JSON.parse(aResponse([]));
+    v3.schema_version = "clue.response_packet.v3";
+    // Accepting it would mean reading v3 components and directives as though they were v2 — the
+    // fields may well still be there and mean something different.
+    expect(parseResponsePacket(JSON.stringify(v3))).toBeUndefined();
+  });
+
+  it("refuses a student message that is only whitespace", () => {
+    const blank = JSON.parse(aResponse([]));
+    blank.student.message = "   \n ";
+    // It has a length, so a length check passes it, and replyText would then return it as the
+    // reply — a blank assistant turn that looks like a finished one.
+    expect(parseResponsePacket(JSON.stringify(blank))).toBeUndefined();
+  });
+});

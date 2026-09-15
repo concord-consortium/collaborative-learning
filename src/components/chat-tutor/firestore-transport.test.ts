@@ -214,3 +214,23 @@ describe("FirestoreTransport oversized workspace", () => {
     expect(added[0].text).toBe("hello");
   });
 });
+
+// Firestore enforces its limit in bytes; a JavaScript string's length is UTF-16 code units. A
+// snapshot full of non-ASCII can pass a length check and still exceed 1 MiB on the wire, which is
+// the write failure the budget exists to avoid.
+describe("FirestoreTransport measures the workspace in bytes", () => {
+  it("drops a snapshot that is under the budget in characters but over it in bytes", async () => {
+    const { added, firestore } = fakeFirestore();
+    // Each emoji is 2 UTF-16 units and 4 UTF-8 bytes: 280k of them is 560k "length" but 1.12 MB.
+    const json = `{"x":"${"\u{1F600}".repeat(280_000)}"}`;
+    expect(json.length).toBeLessThan(900_000);
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => "{}", getRightSummary: () => undefined,
+      getRightContent: () => ({ json, hash: "h" }), provider: "foreverlearning",
+    });
+    await transport.sendUserMessage("hello");
+    expect(added).toHaveLength(1);
+    expect(added[0]).not.toHaveProperty("rightContent");
+  });
+});

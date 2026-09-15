@@ -68,12 +68,21 @@ function splitParam(value: string): string[] {
   return value.split(",").map((entry) => entry.trim()).filter(Boolean);
 }
 
-// Unknown class names are dropped here rather than sent. buildEnvelope refuses a policy with no
-// classes at all, so a wholly mistyped param fails the turn loudly instead of declaring a
-// protection we do not have.
+// An unknown class name fails the turn rather than being dropped. Dropping was the original
+// behaviour and it failed OPEN on the case that actually happens: one typo among several valid
+// classes left the others standing, so buildEnvelope saw a non-empty policy and the turn went out
+// quietly declaring less protection than the configuration asked for. Only a wholly mistyped param
+// failed loudly, which is the case least likely to occur and easiest to spot.
 function protectionClasses(value: string): ProtectionClass[] {
   const known = new Set<string>(kProtectionClasses);
-  return splitParam(value).filter((entry): entry is ProtectionClass => known.has(entry));
+  const entries = splitParam(value);
+  const unknown = entries.filter((entry) => !known.has(entry));
+  if (unknown.length > 0) {
+    throw new Error(
+      `FL_PROTECTION_CLASSES names unknown protection ${unknown.length > 1 ? "classes" : "class"}: ` +
+      `${unknown.join(", ")}`);
+  }
+  return entries as ProtectionClass[];
 }
 
 const MESSAGES = "{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId}";

@@ -114,9 +114,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // server's built-in generic tutor prompt; appendToGenericPrompt is added after the
   // (possibly replaced) generic prompt
   chatTutorPrompts?: { replaceGenericPrompt?: string; appendToGenericPrompt?: string };
-  // which AI backend is selected for this unit's tutor turns. Only openai is implemented:
-  // the selection starts a separate conversation and is stamped on each message, but the
-  // server builds an OpenAI backend unconditionally, so setting anything else does not yet
   // Selects which AI backend answers this unit's tutor turns. Both values are implemented. The
   // choice is read from a conversation's first message and then held on the conversation, so a
   // later message naming a different backend is ignored. Unset uses the default (openai); the
