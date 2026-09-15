@@ -6,9 +6,41 @@ Outside of the main collections for users and documents, there is a collection o
 
 `analysis` also holds a `settings` document, read by the analysis functions on every invocation. Its `imagesEnabled` field turns document screenshots off when it is `false`; see `functions-v2/README.md` under "Runtime settings".
 
+## Summaries
+
+The top-level `summaries` collection holds one record per analyzed document: the summary the AI was
+given, the vector it is found by, and the ratings students gave the comment it produced. The
+analysis pipeline creates and refreshes these records; `onCommentRated` adds the ratings. No rule in
+`firestore.rules` matches this collection, so the catch-all denies every client read and write and
+only the cloud functions, which use the admin SDK, reach it.
+
+A record's id is `{root}-{space}-{key}`, so `demo-CLUE-abc123` for a document with the key `abc123`
+in the `CLUE` demo space. `root` and `space` are the realm the document lives in, taken from its
+Firestore path, and they scope the related-summaries search: the collection is flat, so without them
+a record written in one realm could reach a document analyzed in another.
+
+Fields:
+
+- key: (string, the document's key, as on `documents/{docId}`)
+- root, space: (strings, the realm; absent on records written before realm scoping)
+- context_id, unit, investigation, problem, offeringId: (strings, the class and problem the
+  related-summaries search matches on; `offeringId` is stored but not searched on)
+- contextSource: ("document" | "request") where `unit`, `investigation` and `problem` came from:
+  the document's own metadata, or the evaluation request naming the problem the student was running.
+  Only a personal document can say `request`, since only those have no problem of their own. Absent
+  on records written before the field existed.
+- summary: (string, the text the AI was given)
+- summaryEmbedding: (vector of that text)
+- analyzedAt: (number, epoch milliseconds)
+- adaCommentId: (string, the comment this analysis created)
+- aiAgreements: (map of ratings, keyed `{commentId}_{raterUid}`; entries from the retired
+  `agreeWithAi` flow are keyed by the rater's uid alone)
+- numAiAgreements: (number, ratings of Ada's comments; the search returns only records above zero)
+- numAgreements: (number, ratings of any comment; absent on records written before it existed)
+
 ## Top level collections
 
-Besides `analysis`, the rest of the top-level collections are similar to Firebase:
+Besides `analysis` and `summaries`, the rest of the top-level collections are similar to Firebase:
 
 `authed, demo, dev, qa, tests, users`
 

@@ -6,6 +6,7 @@ import {
   DocumentMetadata, findRelatedSummaries, readDocumentMetadata,
 } from "../lib/src/ai-categorize-document";
 import {AiAgreementV2} from "../src/summary-types";
+import {IEvaluationRequestContext} from "../../shared/shared";
 
 jest.mock("firebase-functions/logger");
 
@@ -20,8 +21,9 @@ const demoMetadata: DocumentMetadata = {
   context_id: "class1",
   unit: "vibe",
   investigation: "1",
-  problem: "1.1",
+  problem: "1",
   offeringId: "1234",
+  contextSource: "document",
 };
 
 function aiRating(): AiAgreementV2 {
@@ -72,6 +74,18 @@ describe("the related-summaries lookup", () => {
       const found = await findRelatedSummaries(demoMetadata, [0.1, 0.2, 0.3]);
 
       expect(summaryTexts(found)).toEqual(["A peer's work."]);
+    });
+
+    // The lookup does not filter on `contextSource`, so a personal document's record is found the
+    // same way a problem document's is.
+    it("returns a record whose context came from the evaluation request", async () => {
+      await writeSummary("demo-AI-personaldoc", {
+        key: "personaldoc", contextSource: "request", summary: "A peer's personal document.",
+      });
+
+      const found = await findRelatedSummaries(demoMetadata, [0.1, 0.2, 0.3]);
+
+      expect(summaryTexts(found)).toEqual(["A peer's personal document."]);
     });
 
     // Why realm scoping exists: `summaries` is one flat collection, and the open realms let a
@@ -146,7 +160,7 @@ describe("the related-summaries lookup", () => {
 
     it("reads the context fields and takes the realm from the path", async () => {
       await writeMetadataDocument({
-        key: "thisdoc", context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
+        key: "thisdoc", context_id: "class1", unit: "vibe", investigation: "1", problem: "1",
         offeringId: "1234", title: "Not a field the lookup uses",
       });
 
@@ -163,7 +177,7 @@ describe("the related-summaries lookup", () => {
 
     it("reports no-metadata for a document with no key", async () => {
       await writeMetadataDocument({
-        context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
+        context_id: "class1", unit: "vibe", investigation: "1", problem: "1",
       });
 
       expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-metadata"});
@@ -178,7 +192,7 @@ describe("the related-summaries lookup", () => {
       ["a boolean", true],
     ])("reports no-metadata when key is %s rather than a string", async (_label, key) => {
       await writeMetadataDocument({
-        key, context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
+        key, context_id: "class1", unit: "vibe", investigation: "1", problem: "1",
       });
 
       expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-metadata"});
@@ -196,11 +210,113 @@ describe("the related-summaries lookup", () => {
       expect(logger.warn).toHaveBeenCalledTimes(2);
     });
 
+    const requestContext: IEvaluationRequestContext = {
+      unit: "vibe", investigation: "1", problem: "1", offeringId: "1234",
+    };
+
+    it("fills a personal document's missing fields from the request", async () => {
+      await writeMetadataDocument({key: "thisdoc", type: "personal", context_id: "class1", unit: null});
+
+      expect(await readDocumentMetadata(documentPath, requestContext))
+        .toEqual({metadata: {...demoMetadata, contextSource: "request"}});
+    });
+
+    // The completeness check treats "" as missing, so the fill has to as well.
+    it("treats an empty string on the record as a missing field", async () => {
+      await writeMetadataDocument({
+        key: "thisdoc", type: "personal", context_id: "class1", unit: "", investigation: "", problem: "",
+      });
+
+      expect(await readDocumentMetadata(documentPath, requestContext))
+        .toEqual({metadata: {...demoMetadata, contextSource: "request"}});
+    });
+
+    it("keeps the record's own fields for a document that has them", async () => {
+      await writeMetadataDocument({
+        key: "thisdoc", type: "problem", context_id: "class1", unit: "vibe", investigation: "1",
+        problem: "1", offeringId: "1234",
+      });
+
+      expect(await readDocumentMetadata(documentPath, {
+        unit: "mods", investigation: "3", problem: "3.2", offeringId: "9999",
+      })).toEqual({metadata: demoMetadata});
+    });
+
+    // A group document is tied to an offering, so its record carries the full context. Both
+    // spellings are in use: CLUE-604's sweep rewrites "group" to "axes".
+    it.each([["group"], ["axes"]])("reads a group document's own context, stored as %s", async (type) => {
+      await writeMetadataDocument({
+        key: "thisdoc", type, context_id: "class1", unit: "vibe", investigation: "1",
+        problem: "1", offeringId: "1234",
+      });
+
+      expect(await readDocumentMetadata(documentPath, requestContext)).toEqual({metadata: demoMetadata});
+    });
+
+    // Only `unit` is covered by the mixed case above, so reversing the precedence of any other
+    // field would otherwise go unnoticed.
+    it("keeps every field the record has, and takes only the ones it lacks", async () => {
+      await writeMetadataDocument({
+        key: "thisdoc", type: "personal", context_id: "class1", investigation: "3", problem: "2",
+        offeringId: "9999",
+      });
+
+      expect(await readDocumentMetadata(documentPath, requestContext)).toEqual({metadata: {
+        ...demoMetadata, investigation: "3", problem: "2", offeringId: "9999",
+        contextSource: "request",
+      }});
+    });
+
+    // `offeringId` is not part of the lookup, so taking it from the request does not make the
+    // record's context any less the document's own.
+    it("says document when only the offeringId came from the request", async () => {
+      await writeMetadataDocument({
+        key: "thisdoc", type: "personal", context_id: "class1", unit: "vibe", investigation: "1",
+        problem: "1",
+      });
+
+      expect(await readDocumentMetadata(documentPath, requestContext))
+        .toEqual({metadata: demoMetadata});
+    });
+
+    // The class has no fallback: the request does not carry one, and the record is the only source.
+    it("reports no-context for a personal document with no class, however good the request", async () => {
+      await writeMetadataDocument({key: "thisdoc", type: "personal", unit: null});
+
+      expect(await readDocumentMetadata(documentPath, requestContext)).toEqual({gap: "no-context"});
+    });
+
+    // Decision 1: only personal documents get this, and the type match is exact.
+    it.each([
+      ["a learning log", "learningLog"],
+      ["a class-wide document", "axes"],
+      ["a published personal document", "personalPublication"],
+    ])("reports no-context for %s even with a request context", async (_label, type) => {
+      await writeMetadataDocument({key: "thisdoc", type, context_id: "class1", unit: null});
+
+      expect(await readDocumentMetadata(documentPath, requestContext)).toEqual({gap: "no-context"});
+    });
+
+    it("reports no-context for a personal document when the request carried no context", async () => {
+      await writeMetadataDocument({key: "thisdoc", type: "personal", context_id: "class1", unit: null});
+
+      expect(await readDocumentMetadata(documentPath)).toEqual({gap: "no-context"});
+    });
+
+    // Not a state a personal document is known to reach. Any field taken from the request makes
+    // the whole record say so.
+    it("says request when only some of the curriculum fields came from the request", async () => {
+      await writeMetadataDocument({key: "thisdoc", type: "personal", context_id: "class1", unit: "mods"});
+
+      expect(await readDocumentMetadata(documentPath, requestContext))
+        .toEqual({metadata: {...demoMetadata, unit: "mods", contextSource: "request"}});
+    });
+
     // Optional on a metadata document, stored unconditionally on a summary record, and undefined
     // cannot be written to Firestore.
     it("substitutes an empty string for a missing offeringId", async () => {
       await writeMetadataDocument({
-        key: "thisdoc", context_id: "class1", unit: "vibe", investigation: "1", problem: "1.1",
+        key: "thisdoc", context_id: "class1", unit: "vibe", investigation: "1", problem: "1",
       });
 
       expect(await readDocumentMetadata(documentPath)).toEqual({metadata: {...demoMetadata, offeringId: ""}});

@@ -97,6 +97,8 @@ describe("renderUnitFor", () => {
     expect(renderUnitFor(null)).toBe(fallbackClueUnit);
     expect(renderUnitFor("")).toBe(fallbackClueUnit);
     expect(renderUnitFor("https://example.com/content.json")).toBe(fallbackClueUnit);
+    // The placeholder code, which a document created before its unit loaded carries.
+    expect(renderUnitFor("NULL")).toBe(fallbackClueUnit);
     expect(renderUnitFor("some/path")).toBe(fallbackClueUnit);
     expect(renderUnitFor(42)).toBe(fallbackClueUnit);
   });
@@ -214,6 +216,10 @@ async function givenDocument(
   if (unit !== kNoMetadata) {
     await admin.firestore().doc(`demo/AI/documents/${docId}`).set({unit});
   }
+}
+
+function aRequestContext(unit: string) {
+  return {unit, investigation: "1", problem: "1", offeringId: "1234"};
 }
 
 // Runs the function over a pending-queue entry for the document.
@@ -426,7 +432,8 @@ describe("functions", () => {
           renderTarget: {clueUrl: clueIframeURL, unit: fallbackClueUnit},
         });
         expect(logger.warn).toHaveBeenCalledWith(
-          `Document unit undefined is not usable for rendering, using "${fallbackClueUnit}"`);
+          "Document unit undefined and request unit undefined are both unusable for rendering, " +
+          `using "${fallbackClueUnit}"`);
       });
 
       test("a metadata unit of null renders with the fallback unit", async () => {
@@ -441,9 +448,92 @@ describe("functions", () => {
           renderTarget: {clueUrl: clueIframeURL, unit: fallbackClueUnit},
         });
         expect(logger.warn).toHaveBeenCalledWith(
-          `Document unit null is not usable for rendering, using "${fallbackClueUnit}"`);
+          "Document unit null and request unit undefined are both unusable for rendering, " +
+          `using "${fallbackClueUnit}"`);
         // The render was posted with the fallback unit, not the null one.
         expect(shutterbug.postedPage()).toContain(`?unit=${fallbackClueUnit}&amp;unwrapped&amp;readOnly"`);
+      });
+
+      // A personal document's record has no unit. Rendering with the fallback would draw every
+      // tile the fallback unit does not list as an "unknown tile" placeholder.
+      test("a metadata unit of null gives way to the unit the student was running", async () => {
+        await givenDocument("requnit1", mixedDoc, null);
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("requnit1", {requestContext: aRequestContext("msa")});
+
+        // The next function reads the context off this record, not off the evaluation request.
+        expect(await imagedRecord("requnit1")).toMatchObject({
+          renderTarget: {clueUrl: clueIframeURL, unit: "msa"},
+          requestContext: aRequestContext("msa"),
+        });
+        expect(logger.info).toHaveBeenCalledWith(
+          "Document has no usable unit (null); rendering with the unit the student was running: \"msa\"");
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(shutterbug.postedPage()).toContain("?unit=msa&amp;unwrapped&amp;readOnly\"");
+      });
+
+      test("a document with its own unit keeps it, whatever the student was running", async () => {
+        await givenDocument("ownunit1", mixedDoc, "vibe");
+        stubShutterbug(shutterbugOk());
+
+        await runPending("ownunit1", {requestContext: aRequestContext("msa")});
+
+        expect(await imagedRecord("ownunit1")).toMatchObject({
+          renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
+        });
+      });
+
+      // A unit loaded from a custom URL: stored, but not a code the curriculum site can serve.
+      test("a metadata unit that cannot be rendered gives way to the request unit", async () => {
+        await givenDocument("badunit1", mixedDoc, "https://example.com/content.json");
+        stubShutterbug(shutterbugOk());
+
+        await runPending("badunit1", {requestContext: aRequestContext("msa")});
+
+        expect(await imagedRecord("badunit1")).toMatchObject({
+          renderTarget: {clueUrl: clueIframeURL, unit: "msa"},
+        });
+      });
+
+      test("a request unit that cannot be rendered falls back like any other", async () => {
+        await givenDocument("badrequnit1", mixedDoc, null);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("badrequnit1", {requestContext: aRequestContext("https://example.com/content.json")});
+
+        expect(await imagedRecord("badrequnit1")).toMatchObject({
+          renderTarget: {clueUrl: clueIframeURL, unit: fallbackClueUnit},
+        });
+        // Nothing said which unit to render with, so the picture may show placeholders.
+        expect(logger.warn).toHaveBeenCalledWith(
+          "Document unit null and request unit \"https://example.com/content.json\" are both " +
+          `unusable for rendering, using "${fallbackClueUnit}"`);
+      });
+
+      // The screenshot rule is wider than the fill rule in readDocumentMetadata: a learning log
+      // gets no context from the request, but its tiles still belong to the student's unit.
+      test("a document that is not personal is still rendered with the request unit", async () => {
+        await givenDocument("llunit1", mixedDoc, null);
+        await admin.firestore().doc("demo/AI/documents/llunit1").set({unit: null, type: "learningLog"});
+        stubShutterbug(shutterbugOk());
+
+        await runPending("llunit1", {requestContext: aRequestContext("msa")});
+
+        expect(await imagedRecord("llunit1")).toMatchObject({
+          renderTarget: {clueUrl: clueIframeURL, unit: "msa"},
+        });
+      });
+
+      test("a metadata unit of NULL gives way to the request unit", async () => {
+        await givenDocument("nullcode1", mixedDoc, "NULL");
+        stubShutterbug(shutterbugOk());
+
+        await runPending("nullcode1", {requestContext: aRequestContext("msa")});
+
+        expect(await imagedRecord("nullcode1")).toMatchObject({
+          renderTarget: {clueUrl: clueIframeURL, unit: "msa"},
+        });
       });
 
       test("a question whose prompt is a picture is screenshotted for the answer's sake", async () => {

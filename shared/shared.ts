@@ -162,6 +162,26 @@ export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;
 }
 
+/**
+ * The unit code the app holds before a unit loads, and keeps when one cannot be loaded. It has the
+ * shape of a unit code but names no unit, so the evaluation request and the screenshot renderer
+ * both refuse it.
+ */
+export const kPlaceholderUnitCode = "NULL";
+
+/**
+ * The unit and problem the student was running when an AI evaluation was requested, written beside
+ * the timestamp under `documentMetadata/{docId}/evaluation/{evaluator}`. A personal document is not
+ * tied to a problem, so this is the only record of the context it was evaluated in.
+ */
+export interface IEvaluationRequestContext {
+  unit: string;
+  // Ordinals as strings, as the metadata records hold them.
+  investigation: string;
+  problem: string;
+  offeringId: string;      // "" outside a portal
+}
+
 export interface ICurriculumMetadata {
   unit: string;         // unit code, e.g. "sas", "msa", etc.
   facet?: string;       // e.g. "guide" for teacher guide; undefined for regular curriculum

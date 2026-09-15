@@ -109,6 +109,9 @@ async function writeSummaryRecord(
     investigation: metadata.investigation,
     problem: metadata.problem,
     offeringId: metadata.offeringId,
+    // Firestore rejects undefined, and `readDocumentMetadata` is injectable, so a caller the
+    // compiler cannot see could omit this and fail the write.
+    ...(metadata.contextSource ? {contextSource: metadata.contextSource} : {}),
     summary,
     summaryEmbedding: FieldValue.vector(summaryEmbedding),
     analyzedAt: Date.now(),
@@ -181,7 +184,8 @@ export const onAnalysisDocumentImaged =
         try {
           ({completion, messageShape, summaryEmbedding, documentMetadata, metadataGap} =
             await categorizeRepresentations(
-              representations, openaiApiKey.value(), firestoreDocumentPath, aiPrompt));
+              representations, openaiApiKey.value(), firestoreDocumentPath, aiPrompt,
+              queueDoc.requestContext));
         } catch (err) {
           await error(`${err}`, event);
           return;
@@ -254,6 +258,8 @@ export const onAnalysisDocumentImaged =
         completionTokens,
         fullResponse,
         summaryRecorded,
+        // A run that ended in a gap has no metadata, so there is no source to name.
+        ...(documentMetadata ? {contextSource: documentMetadata.contextSource} : {}),
         ...(messageShape ? {messageShape} : {}),
       });
 

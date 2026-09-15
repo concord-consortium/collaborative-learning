@@ -7,6 +7,12 @@ on:
         required: true
 jobs:
   release:
+    # These permissions are passed through to the called workflow, which cannot have
+    # more than its caller. `id-token: write` is never granted by default.
+    permissions:
+      id-token: write
+      contents: read
+      deployments: write
     uses: ./.github/workflows/release.yml
     with:
       version: ${{ inputs.version }}

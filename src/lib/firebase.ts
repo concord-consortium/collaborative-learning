@@ -9,6 +9,7 @@ import { escapeKey } from "./fire-utils";
 import { urlParams } from "../utilities/url-params";
 import { DocumentModelType } from "src/models/document/document";
 import { getRootId } from "./root-id";
+import { IEvaluationRequestContext, kPlaceholderUnitCode } from "../../shared/shared";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -488,8 +489,32 @@ export class Firebase {
     }
   };
 
+  /**
+   * The problem the student is running as they ask for the evaluation. Sent for every document
+   * type; the pipeline decides which documents it applies to.
+   *
+   * Nothing is sent while the stores hold their placeholders. `loadUnitAndProblem` keeps the
+   * placeholder investigation and problem whenever an ordinal does not resolve, so this is a
+   * running state and not only a startup one, and the values would otherwise file the document
+   * under a problem that does not exist. An investigation ordinal of 0 is real (vibe has problems
+   * 0.1 and 0.2); a problem ordinal of 0 is not.
+   */
+  private get evaluationRequestContext(): IEvaluationRequestContext | undefined {
+    const { investigation, problem, unit, user } = this.db.stores;
+    if (unit.code === kPlaceholderUnitCode || problem.ordinal === 0) return undefined;
+    return {
+      unit: unit.code,
+      investigation: String(investigation.ordinal),
+      problem: String(problem.ordinal),
+      offeringId: user.offeringId
+    };
+  }
+
 private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect) => {
   const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
+  // Firebase rejects undefined, so an unknown context is written as no field at all.
+  const context = this.evaluationRequestContext;
+  const contextField = context ? { context } : {};
 
   // If this unit uses "custom" evaluation, read and store the prompt strings if they're defined.
   if (aiEvaluation === "custom") {
@@ -502,10 +527,12 @@ private updateEvaluation = (targetRef: firebase.database.Reference | firebase.da
     const promptToWrite = customCategories.length > 0
       ? { ...aiPrompt, categories: Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories])) }
       : aiPrompt;
-    return targetRef.set({ aiPrompt: promptToWrite, timestamp: firebase.database.ServerValue.TIMESTAMP });
+    return targetRef.set({
+      aiPrompt: promptToWrite, ...contextField, timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
   }
 
-  return targetRef.set({ timestamp: firebase.database.ServerValue.TIMESTAMP });
+  return targetRef.set({ ...contextField, timestamp: firebase.database.ServerValue.TIMESTAMP });
 };
 
 }

@@ -32,6 +32,8 @@ For information on how to add a new tile type to the CLUE codebase, see the [Add
 
 Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
 
+S3 deployment is handled by GitHub Actions using OIDC for AWS authentication. See [deploy-setup.md in starter-projects](https://github.com/concord-consortium/starter-projects/blob/main/doc/deploy-setup.md) for how the AWS side is set up, and [docs/deploy.md](docs/deploy.md) for how deploys work in this repo.
+
 Branches are deployed to `https://collaborative-learning.concord.org/branch/<name>/`, where
 `<name>` is the branch name **with any issue-tracker prefix or suffix stripped** — so
 `CLUE-123-my-feature` is served at `/branch/my-feature/`. See [docs/deploy.md](docs/deploy.md)

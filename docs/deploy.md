@@ -4,6 +4,16 @@ This project is configured to automatically deploy branches and tags to S3. Thes
 
 Deploying to S3 is handled by the [S3 Deploy Action](https://github.com/concord-consortium/s3-deploy-action). Building the `index-top.html` is done by webpack when it receives a `DEPLOY_PATH` environment variable from the S3 Deploy Action.
 
+Pushes are deployed to `models-resources/collaborative-learning/` by the `s3-deploy` job in [`ci.yml`](../.github/workflows/ci.yml). A released version is promoted to the top-level `index.html` (production) or `staging.html` (staging) by [`release.yml`](../.github/workflows/release.yml), which is started by [`release-production.yml`](../.github/workflows/release-production.yml) or [`release-staging.yml`](../.github/workflows/release-staging.yml) via `workflow_dispatch`.
+
+## AWS Access
+
+The GitHub actions in this project are allowed to update files in S3 using OIDC. An IAM role has been created in AWS with a trust policy that allows GitHub actions in this specific repository to assume this IAM role. The IAM role has a `RepoName` tag and a managed policy that uses this tag to give the role's users permission to update files in `models-resources/[RepoName]`.
+
+See [deploy-setup.md in starter-projects](https://github.com/concord-consortium/starter-projects/blob/main/doc/deploy-setup.md) for how the AWS side is set up.
+
+`release.yml` is a reusable workflow, so `release-production.yml` and `release-staging.yml` must each grant `id-token: write`. A called workflow can never have more token permissions than its caller, and GitHub does not grant `id-token: write` by default.
+
 ## Where to find builds
 
 - **branch builds**: when a developer pushes a branch, GitHub actions will build and deploy it to `https://collaborative-learning.concord.org/branch/[branch-name]/`. An issue-tracker prefix or suffix is stripped off and not included in the folder name, so the deployed name is often not the branch's git name. `concord-consortium/s3-deploy-action` (`src/deploy-props.ts`) strips the first of these that matches:

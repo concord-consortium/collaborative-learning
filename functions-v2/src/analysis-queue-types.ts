@@ -2,6 +2,8 @@ import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
 
 // What the second AI analysis function hands to the third. The `done` queue is mined by the
 // evaluation harness and by scripts/survey-class-documents.ts, so these names are a contract.
+// The `AnalysisQueueDocument` fields ride along too, `requestContext` among them: both later
+// functions spread the queue record forward, so a `done` record carries them.
 
 /** Why a representation was deliberately not sent. A fixed code, never free text. */
 export type OmittedReason = "no-student-work-in-summary" | "no-visual-content" | "images-disabled";
