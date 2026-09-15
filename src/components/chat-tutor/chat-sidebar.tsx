@@ -14,6 +14,7 @@ import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
+import { serializeRight } from "./right-context";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
@@ -72,10 +73,14 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       problemPath,
       getLeftContext,
       getRightSummary,
+      // Read only for a backend that projects the document server-side. No dirty-tracking
+      // around it the way there is around the summary: serializing a snapshot is cheap, and
+      // useRightDirty's cache exists for the summarizer's cost.
+      getRightContent: () => content ? serializeRight(content) : undefined,
       tutorPrompts,
       provider,
     });
-  }, [documentKey, problemPath, problem, getRightSummary, appConfig, db, user]);
+  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user]);
 
   // The drawer header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.

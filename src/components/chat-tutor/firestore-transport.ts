@@ -1,16 +1,22 @@
 import firebase from "firebase/app";
+import { TutorProviderId } from "../../../shared/chat-tutor-providers";
+import { utf8ByteLength } from "../../../shared/utf8-byte-length";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
-import { decideContext, RightSummary } from "./right-context";
+import { decideContext, RightContent, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
 import { turnFromDoc } from "./turn-from-doc";
 import { isAwaitingReply } from "./awaiting-reply";
-import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
 // server-side on the first send — the client writes only message docs.
 export const kChatTutorCollection = "chatTutor";
+
+// Firestore caps a document at 1 MiB. This is the budget for the workspace snapshot alone, left
+// short of the cap so the rest of the message — the text, the problem path, the timestamps and
+// Firestore's own overhead — cannot push a payload that measured as fitting over the edge.
+export const kMaxAttachedWorkspace = 900_000;
 
 export interface FirestoreTransportOptions {
   firestore: Firestore;
@@ -26,6 +32,9 @@ export interface FirestoreTransportOptions {
   getLeftContext: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
+  // The workspace document itself, for a backend that projects it server-side; undefined until
+  // the document content has loaded. Only read for conversations on such a backend.
+  getRightContent?: () => RightContent | undefined;
   // unit-authored generic-prompt overrides; static for the page's lifetime (unit
   // config can't change without a reload, which rebuilds the transport)
   tutorPrompts?: TutorPrompts;
@@ -133,11 +142,39 @@ export class FirestoreTransport implements ChatTransport {
     return () => this.dispose();
   }
 
+  // Which workspace payload a message carries is decided by the backend the conversation belongs
+  // to. OpenAI reads a markdown summary; ForeverLearning projects the document server-side, so
+  // what travels is the document itself. Sending both would put two readings of one workspace on
+  // every message, one of which no backend reads.
+  //
+  // The change gate keys on the hash of whichever payload is actually sent. The two derive from
+  // the same document but not identically — an edit can move one and not the other — so gating
+  // the document on the summary's hash would skip a send the server needed.
+  private workspacePayload(): { field: "rightContext" | "rightContent"; value: string; hash: string }
+      | undefined {
+    const { getRightSummary, getRightContent, provider } = this.opts;
+    if (provider === "foreverlearning") {
+      const content = getRightContent?.();
+      if (!content) return undefined;
+      // Over the budget the write itself would fail and the turn would never reach the trigger,
+      // so dropping the attachment is the lesser loss — see kMaxAttachedWorkspace.
+      if (utf8ByteLength(content.json) > kMaxAttachedWorkspace) return undefined;
+      return { field: "rightContent", value: content.json, hash: content.hash };
+    }
+    const summary = getRightSummary();
+    return summary && { field: "rightContext", value: summary.markdown, hash: summary.hash };
+  }
+
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, getRightSummary, tutorPrompts, provider } = this.opts;
-    const right = getRightSummary();
+    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider } = this.opts;
+    const right = this.workspacePayload();
+    // LEFT is an OpenAI-path concept: that provider installs the problem once and flips the
+    // parent's problemInstalled flag. The ForeverLearning provider reads neither, so its flag
+    // never flips — without this, every FL message would carry the whole problem JSON and every
+    // byte of it would be discarded on arrival.
+    const backendInstallsProblem = provider !== "foreverlearning";
     const decision = decideContext({
-      leftAlreadyInstalled: this.problemInstalled,
+      leftAlreadyInstalled: this.problemInstalled || !backendInstallsProblem,
       currentRightHash: right?.hash ?? "",
       lastSentRightHash: this.lastSentRightHash,
     });
@@ -176,14 +213,12 @@ export class FirestoreTransport implements ChatTransport {
     }
     // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
     // them only while installing the generic prompt, and ignores them afterwards).
-    // Provider-independent, which is why conversationDocId forks on the prompts key even
-    // under a non-default provider: whatever installs the prompt, it installs it once.
     if (decision.attachLeft) {
       if (tutorPrompts?.replace) message.promptReplace = tutorPrompts.replace;
       if (tutorPrompts?.append) message.promptAppend = tutorPrompts.append;
     }
     if (decision.attachRight && right) {
-      message.rightContext = right.markdown;
+      message[right.field] = right.value;
     }
 
     await this.messagesRef().add(message);

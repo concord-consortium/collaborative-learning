@@ -7,7 +7,7 @@ TODO: Support more tile types.
 
 import {
   AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
-  NormalizedModel, NormalizedSection, NormalizedVariable, TileMap
+  NormalizedModel, NormalizedSection, NormalizedVariable, SharedModelMapEntry, TileMap
 } from "./ai-summarizer-types";
 import {
   generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize
@@ -160,26 +160,29 @@ export function normalize(model: DocumentContentSnapshotType) {
 
   // add the data sets
   if (sharedModelMap) {
-    for (const [id, entry] of Object.entries(sharedModelMap)) {
-      const sharedModel: any = (entry as any).sharedModel;
-      if (sharedModel?.type === "SharedDataSet") {
+    for (const [id, entry] of
+         Object.entries(sharedModelMap as Record<string, SharedModelMapEntry>)) {
+      const sharedModel = entry.sharedModel;
+      if (sharedModel?.type === "SharedDataSet" && sharedModel.dataSet) {
         const { attributes, cases, name } = sharedModel.dataSet;
+        const caseCount = cases?.length ?? 0;
         const dataSet: NormalizedDataSet = {
           id: sharedModel.dataSet.id,
-          providerId: sharedModel.providerId,
+          providerId: sharedModel.providerId ?? "",
           name,
-          tileIds: (entry as any).tiles.map((tile: any) => `${tile}`),
-          attributes: (attributes || []).map((attr: any) => ({
+          tileIds: (entry.tiles ?? []).map(tile => `${tile}`),
+          attributes: (attributes || []).map(attr => ({
             id: attr.id,
             name: attr.name,
+            units: attr.units || undefined,
             values: attr.values || [],
             formula: attr.formula?.display || undefined
           })),
-          numCases: cases.length,
+          numCases: caseCount,
           data: [],
           sharedDataSetId: id
         };
-        for (let i = 0; i < cases.length; i++) {
+        for (let i = 0; i < caseCount; i++) {
           const cols: string[] = [];
           for (const attr of dataSet.attributes) {
             cols.push(attr.values[i] || "");
@@ -199,12 +202,15 @@ export function normalize(model: DocumentContentSnapshotType) {
           });
         }
       } else if (sharedModel?.type === "SharedVariables") {
-        sharedModel.variables.forEach((v: any) => (variables.push({
+        (sharedModel.variables ?? []).forEach(v => (variables.push({
           description: v.description,
           displayName: v.displayName,
           expression: v.expression,
           id: v.id,
+          labels: v.labels,
           name: v.name,
+          sharedModelId: sharedModel.id ?? id,
+          tileIds: (entry.tiles ?? []).map(tile => `${tile}`),
           unit: v.unit,
           value: v.value
         })));
