@@ -59,10 +59,13 @@ describe("FirestoreTransport message provider stamp", () => {
 // Re-gating this send on the default provider would reinstate the failure the stacking fixed
 // — an authored prompt installed once on a conversation whose id can no longer change.
 describe("FirestoreTransport prompt overrides", () => {
-  it("sends the prompt overrides under a non-default provider", async () => {
+  // The overrides ride the same install-eligible sends as LEFT, and ForeverLearning reads neither
+  // — it never installs a generic prompt to override. Sending them would be the same dead weight
+  // LEFT was, so the gate that stops one stops both.
+  it("does not send the prompt overrides to a backend that installs no prompt", async () => {
     const { added, transport } = makeTransport("foreverlearning", { replace: "REPLACED" });
     await transport.sendUserMessage("hello");
-    expect(added[0].promptReplace).toBe("REPLACED");
+    expect(added[0]).not.toHaveProperty("promptReplace");
   });
 
   it("sends the prompt overrides under the default provider", async () => {
@@ -132,31 +135,49 @@ describe("FirestoreTransport workspace payload", () => {
   });
 });
 
-// A tutor backend keys its memory on this, not on uid — see canonical-user-id.ts. It rides on
-// every message rather than only FL-bound ones, so the field means the same thing whatever
-// backend a conversation later turns out to use.
-describe("FirestoreTransport canonical user id", () => {
-  function transportWith(canonicalUserId?: string) {
+
+// LEFT is an OpenAI-path concept: the provider installs the problem once and flips the parent's
+// problemInstalled flag. The ForeverLearning provider reads neither, so without this the flag
+// never flips, every FL message carries the whole problem JSON, and every byte of it is discarded
+// on arrival.
+describe("FirestoreTransport problem context by backend", () => {
+  function transportFor(provider: TutorProviderId | undefined) {
     const { added, firestore } = fakeFirestore();
     const transport = new FirestoreTransport({
       firestore, conversationId: "conv1", uid: "123", contextId: "class1",
-      problemPath: "sas/1/2", getLeftContext: () => "{}",
-      getRightSummary: () => undefined, canonicalUserId,
+      problemPath: "sas/1/2", getLeftContext: () => '{"sections":[{"type":"intro"}]}',
+      getRightSummary: () => ({ markdown: "# W", hash: "h" }),
+      getRightContent: () => ({ json: "{}", hash: "j" }),
+      provider,
     });
     return { added, transport };
   }
 
-  it("stamps the canonical user id on the message", async () => {
-    const { added, transport } = transportWith("https://learn.concord.org/users/123");
+  it("attaches the problem for the default backend, which installs it", async () => {
+    const { added, transport } = transportFor(undefined);
     await transport.sendUserMessage("hello");
-    expect(added[0].canonicalUserId).toBe("https://learn.concord.org/users/123");
-    // uid stays: it is what the rules pin to the token and what owns the document.
-    expect(added[0].uid).toBe("123");
+    expect(added[0].leftContext).toEqual(expect.any(String));
   });
 
-  it("omits the field when the caller has none, rather than sending an empty one", async () => {
-    const { added, transport } = transportWith(undefined);
-    await transport.sendUserMessage("hello");
-    expect(added[0]).not.toHaveProperty("canonicalUserId");
+  it("never attaches the problem for ForeverLearning, which does not read it", async () => {
+    const { added, transport } = transportFor("foreverlearning");
+    await transport.sendUserMessage("first");
+    await transport.sendUserMessage("second");
+    expect(added[0]).not.toHaveProperty("leftContext");
+    expect(added[1]).not.toHaveProperty("leftContext");
+  });
+
+  // The first-send gate exists to stop an OpenAI conversation being grounded with no problem.
+  // It must not block a backend that never wanted the problem in the first place.
+  it("does not block an FL send while the problem is still loading", async () => {
+    const { added, firestore } = fakeFirestore();
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => undefined,
+      getRightSummary: () => undefined, getRightContent: () => ({ json: "{}", hash: "j" }),
+      provider: "foreverlearning",
+    });
+    await expect(transport.sendUserMessage("hello")).resolves.toBeUndefined();
+    expect(added).toHaveLength(1);
   });
 });

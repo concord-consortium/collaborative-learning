@@ -87,6 +87,7 @@ function provider(overrides: {
       catalogCommit: kCommit,
       protection: kProtection,
       readDocument: async () => hasDocument,
+      resolveUserId: () => "clue:authed/learn_concord_org/users/42",
       newTraceId: () => "trace-new",
       chat: chat as never,
     }),
@@ -94,7 +95,7 @@ function provider(overrides: {
 }
 
 const aMessage = (over: Record<string, unknown> = {}) =>
-  ({uid: "user-42", canonicalUserId: "https://learn.concord.org/users/42",
+  ({uid: "user-42", tutorUserId: "clue:authed/learn_concord_org/users/42",
     text: "Is my program right?", ...over});
 
 describe("createFlProvider", () => {
@@ -103,8 +104,8 @@ describe("createFlProvider", () => {
     await p.processTurn({}, aMessage());
 
     const [, args] = chat.mock.calls[0];
-    // The canonical url, not the bare platform id — see shared canonical-user-id.
-    expect(args.userId).toBe("https://learn.concord.org/users/42");
+    // The server-derived identity, not the bare platform id — see shared/tutor-user-id.
+    expect(args.userId).toBe("clue:authed/learn_concord_org/users/42");
     expect(args.prompt).toBe("Is my program right?");
     const packet = args.context as ContextPacket;
     expect(packet.schema_version).toBe("clue.context_packet.v2");
@@ -232,6 +233,7 @@ describe("createFlProvider document reuse", () => {
         catalogCommit: kCommit,
         protection: kProtection,
         readDocument: async () => document,
+        resolveUserId: () => "clue:qa/r/users/42",
         newTraceId: () => "trace-new",
         chat: chat as never,
       }),
@@ -259,33 +261,44 @@ describe("createFlProvider document reuse", () => {
     const p = createFlProvider({
       config: kConfig, catalogCommit: kCommit, protection: kProtection,
       readDocument: async () => undefined, newTraceId: () => "t", chat: chat as never,
+      resolveUserId: () => "clue:qa/r/users/42",
     });
     const result = await p.processTurn({}, aMessage());
     expect(result.parentUpdate).not.toHaveProperty("flContent");
   });
 });
 
-// ForeverLearning keys its cross-session memory on X-User-Id. The bare platform id is not unique
-// across portals, so sending it would merge two students — silently, and in a way that surfaces
-// as one student's history informing another's tutoring.
+// ForeverLearning keys cross-session memory on X-User-Id, so this identity decides whose tutoring
+// history a turn reads and writes. It is derived by the caller from the trigger path and the
+// rules-pinned uid — never taken from the message, which the rules only type-check.
 describe("createFlProvider user identity", () => {
-  it("refuses a turn whose message carries no canonical user id", async () => {
-    const {provider: p} = provider();
-    await expect(p.processTurn({}, {uid: "42", text: "hi"}))
-      .rejects.toThrow(/canonical user id/i);
+  it("refuses the turn when the caller cannot derive an identity", async () => {
+    const chat = jest.fn(async () => aReply());
+    const p = createFlProvider({
+      config: kConfig, catalogCommit: kCommit, protection: kProtection,
+      readDocument: async () => undefined, newTraceId: () => "t", chat: chat as never,
+      resolveUserId: () => "",
+    });
+    await expect(p.processTurn({}, aMessage())).rejects.toThrow(/derive a tutor user id/i);
+    expect(chat).not.toHaveBeenCalled();
   });
 
-  it("refuses an empty one rather than sending a blank identity", async () => {
-    const {provider: p} = provider();
-    await expect(p.processTurn({}, {uid: "42", canonicalUserId: "", text: "hi"}))
-      .rejects.toThrow(/canonical user id/i);
-  });
-
-  // It must never quietly substitute uid: that is the exact value whose ambiguity this avoids.
-  it("does not fall back to uid", async () => {
+  // The defect this design exists to make impossible: a student writing a classmate's identity
+  // onto their own message and reading that classmate's tutoring memory. The rules pin uid but
+  // cannot pin an arbitrary string, so the provider must not read one.
+  it("ignores any identity asserted on the message itself", async () => {
     const {chat, provider: p} = provider();
-    await p.processTurn({}, aMessage({canonicalUserId: "https://p.example/users/9"}));
-    expect(chat.mock.calls[0][1].userId).toBe("https://p.example/users/9");
-    expect(chat.mock.calls[0][1].userId).not.toBe("user-42");
+    await p.processTurn({}, aMessage({
+      canonicalUserId: "https://learn.concord.org/users/999",
+      tutorUserId: "clue:authed/learn_concord_org/users/999",
+      uid: "999",
+    }));
+    expect(chat.mock.calls[0][1].userId).toBe("clue:authed/learn_concord_org/users/42");
+  });
+
+  it("sends the derived identity as the ForeverLearning user", async () => {
+    const {chat, provider: p} = provider();
+    await p.processTurn({}, aMessage());
+    expect(chat.mock.calls[0][1].userId).toBe("clue:authed/learn_concord_org/users/42");
   });
 });

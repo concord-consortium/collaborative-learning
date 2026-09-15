@@ -77,23 +77,6 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
-    // A tutor backend keys its memory on this rather than on uid, which is unique only within a
-    // portal. The whitelist is a hasOnly, so a field the client sends and the rules do not know
-    // about fails the write outright.
-    it("allows an optional canonicalUserId", async () => {
-      db = initFirestore(learnerAuth);
-      await expectWriteToSucceed(db, kMessagePath, specMessage({
-        add: { canonicalUserId: "https://learn.concord.org/users/101" }
-      }));
-    });
-
-    it("rejects a canonicalUserId that is not a string", async () => {
-      db = initFirestore(learnerAuth);
-      await expectWriteToFail(db, kMessagePath, specMessage({
-        add: { canonicalUserId: 101 }
-      }));
-    });
-
     it("allows optional promptReplace/promptAppend payloads (unit-authored prompt overrides)", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToSucceed(db, `${kParentPath}/messages/msg-replace`, specMessage({

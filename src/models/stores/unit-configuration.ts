@@ -117,8 +117,10 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // which AI backend is selected for this unit's tutor turns. Only openai is implemented:
   // the selection starts a separate conversation and is stamped on each message, but the
   // server builds an OpenAI backend unconditionally, so setting anything else does not yet
-  // change which AI answers. Unset uses the default (openai); the chatProvider URL param
-  // overrides this so QA can flip a session without re-authoring.
+  // Selects which AI backend answers this unit's tutor turns. Both values are implemented. The
+  // choice is read from a conversation's first message and then held on the conversation, so a
+  // later message naming a different backend is ignored. Unset uses the default (openai); the
+  // chatProvider URL param overrides this so QA can flip a session without re-authoring.
   chatTutorProvider?: TutorProviderId;
   // if true, the AI chat tutor is enabled for students in this unit. The chatTutor URL param also
   // enables it (so authors can preview it). Like other config this merges bottom-up (problem, then

@@ -22,10 +22,6 @@ export interface FirestoreTransportOptions {
   contextId: string;
   // raw (unescaped) problemPath, kept queryable on every message doc
   problemPath: string;
-  // The identity a tutor backend keys its memory on — see canonical-user-id.ts. Distinct from
-  // uid, which is the bare platform user id: the same one names different people on different
-  // portals, and on a backend with a flat namespace that merges two students into one.
-  canonicalUserId?: string;
   // LEFT problem JSON; undefined until the problem's sections have loaded
   getLeftContext: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
@@ -160,11 +156,15 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider,
-            canonicalUserId } = this.opts;
+    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider } = this.opts;
     const right = this.workspacePayload();
+    // LEFT is an OpenAI-path concept: that provider installs the problem once and flips the
+    // parent's problemInstalled flag. The ForeverLearning provider reads neither, so its flag
+    // never flips — without this, every FL message would carry the whole problem JSON and every
+    // byte of it would be discarded on arrival.
+    const backendInstallsProblem = provider !== "foreverlearning";
     const decision = decideContext({
-      leftAlreadyInstalled: this.problemInstalled,
+      leftAlreadyInstalled: this.problemInstalled || !backendInstallsProblem,
       currentRightHash: right?.hash ?? "",
       lastSentRightHash: this.lastSentRightHash,
     });
@@ -200,11 +200,6 @@ export class FirestoreTransport implements ChatTransport {
     // conversation's state across two backends.
     if (provider) {
       message.provider = provider;
-    }
-    // Absent rather than empty when the caller has none: a blank identity is one that every such
-    // user would share.
-    if (canonicalUserId) {
-      message.canonicalUserId = canonicalUserId;
     }
     // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
     // them only while installing the generic prompt, and ignores them afterwards).

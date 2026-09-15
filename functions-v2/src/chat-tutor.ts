@@ -29,6 +29,7 @@ import {getFirestore} from "firebase-admin/firestore";
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {kDefaultTutorProvider} from "../../shared/chat-tutor-providers";
 import {hashString} from "../../shared/hash-string";
+import {tutorUserId} from "../../shared/tutor-user-id";
 import {ProtectionClass, kProtectionClasses} from "../../shared/fl-packet/envelope";
 import {createOpenAIClient} from "./chat/openai";
 import {createOpenAIProvider} from "./chat/openai-provider";
@@ -125,6 +126,11 @@ export const chatTutorOnWrite = functionsV1
               classes: protectionClasses(flProtectionClasses.value()),
               patternRefs: splitParam(flProtectionPatternRefs.value()),
             },
+            // Derived here, not read off the message: root and rootId come from the trigger
+            // path and uid is the field the rules pin to the caller's token, so a student cannot
+            // assert a classmate's identity by writing a different value.
+            resolveUserId: (msg) =>
+              tutorUserId({root, rootId, uid: String(msg.uid ?? "")}),
             readDocument: async (parent, msg) => {
               // The client resends the document only when it changed, but every FL turn needs
               // one — its context is a per-request field, not conversation state that
@@ -145,9 +151,11 @@ export const chatTutorOnWrite = functionsV1
               }
               return {
                 content,
-                // A conversation is 1:1 with (student, document, problem), so its id identifies
-                // the document this packet describes without a second field on every message.
-                documentId: conversationId,
+                // Hashed, not the conversation id itself: that id begins with the student's
+                // platform uid (conversationDocId -> networkDocumentKey), and this packet's
+                // envelope asserts contains_pii:false and deidentified:true. A hash identifies
+                // the same document across turns without putting the student in the payload.
+                documentId: hashString(conversationId),
                 revision: hashString(json),
                 raw: json,
               };
