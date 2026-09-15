@@ -48,6 +48,13 @@ const openaiModel = defineString("OPENAI_MODEL");
 const flKey = defineSecret("FL_CONCORDCLUE_API_KEY");
 const flBaseUrl = defineString("FL_BASE_URL");
 const flSolutionId = defineString("FL_SOLUTION_ID");
+// The commit of docs/ai-context/clue-object-catalog.md that our projection conforms to. It is a
+// claim about a document ForeverLearning holds a copy of and validates against, so it is only
+// true while both sides name the same version.
+//
+// Bump it when they have the newer catalog, not when we merge one. Moving it first asserts
+// conformance to a vocabulary they do not have, which is the same failure as over-declaring
+// client_capabilities — see the note in shared/fl-packet/envelope.ts.
 const flCatalogCommit = defineString("FL_CATALOG_COMMIT");
 const flProtectionClasses = defineString("FL_PROTECTION_CLASSES");
 const flProtectionPatternRefs = defineString("FL_PROTECTION_PATTERN_REFS");
