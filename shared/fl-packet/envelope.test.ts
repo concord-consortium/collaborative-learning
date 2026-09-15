@@ -1,4 +1,4 @@
-import { buildEnvelope } from "./envelope";
+import { buildEnvelope, parseProtectionClasses, splitListParam } from "./envelope";
 
 const base = {
   traceId: "clue-trace-1",
@@ -13,9 +13,9 @@ const base = {
 
 describe("buildEnvelope", () => {
   // The capabilities are a fact about CLUE, not a caller's choice, so they are not parameters.
-  // Every packet we sent before this declared a per-tile response area we do not have and a
-  // construct tier we cannot apply, which had the diagnostic reasoning about a richer interface
-  // than exists. Making them un-overridable is what stops that recurring.
+  // Declaring a per-tile response area we do not have, or a construct tier we cannot apply, has
+  // the diagnostic reasoning about a richer interface than exists. Un-overridable is what keeps
+  // the declaration honest.
   it("declares only the directive tiers CLUE can act on", () => {
     expect(buildEnvelope(base).client_capabilities.directive_tiers).toEqual(["observe"]);
   });
@@ -70,5 +70,38 @@ describe("buildEnvelope", () => {
     expect(() => buildEnvelope({
       ...base, protection: { classes: [], patternRefs: ["protected:x"] },
     })).toThrow(/answer protection/i);
+  });
+});
+
+describe("splitListParam", () => {
+  it("splits, trims and drops empties", () => {
+    expect(splitListParam(" a , b ,, c,")).toEqual(["a", "b", "c"]);
+  });
+
+  it("returns nothing for an unset param", () => {
+    expect(splitListParam("")).toEqual([]);
+  });
+});
+
+describe("parseProtectionClasses", () => {
+  it("round-trips a valid list", () => {
+    expect(parseProtectionClasses("protected_threshold_value, protected_binary_stamp"))
+      .toEqual(["protected_threshold_value", "protected_binary_stamp"]);
+  });
+
+  // The case that matters: one typo among valid classes used to leave the others standing, so the
+  // turn went out declaring less protection than was configured, with nothing to notice it.
+  it("refuses one unknown class among valid ones, naming it", () => {
+    expect(() => parseProtectionClasses("protected_threshold_value,protected_canonical_topolgy"))
+      .toThrow(/protected_canonical_topolgy/);
+  });
+
+  it("names every unknown class it found", () => {
+    expect(() => parseProtectionClasses("nope,protected_threshold_value,alsonope"))
+      .toThrow(/nope.*alsonope|alsonope.*nope/);
+  });
+
+  it("returns nothing for an unset param, leaving buildEnvelope to refuse the empty policy", () => {
+    expect(parseProtectionClasses("")).toEqual([]);
   });
 });

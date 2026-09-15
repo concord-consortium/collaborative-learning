@@ -77,7 +77,7 @@ describe("serializeRight", () => {
     } as any);
     const serialized = serializeRight(content);
     const parsed = JSON.parse(serialized.json);
-    // The four keys normalize() walks. Sending anything a snapshot does not have would be
+    // Three of the four keys normalize() walks; sharedModelMap is covered by its own tests. Sending anything a snapshot does not have would be
     // sending something the server cannot read back.
     expect(parsed).toHaveProperty("rowMap");
     expect(parsed).toHaveProperty("rowOrder");

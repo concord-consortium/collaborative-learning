@@ -53,14 +53,8 @@ const mockStores = {
     chatTutorPrompts: undefined,
     chatTutorIntro: undefined,
   },
-  db: { firestore: {}, firebase: { userId: "fb-1" } },
-  user: { id: "1", network: undefined, classHash: "class-hash", portal: undefined },
-  // Read to build the canonical user id the transport stamps on each message: the platform id
-  // alone is unique only within a portal, so the partition CLUE roots documents under is part of
-  // the identity. See canonical-user-id.
-  appMode: "qa",
-  demo: { name: "" },
-  portal: { portalJWT: undefined },
+  db: { firestore: {} },
+  user: { id: "1", network: undefined, classHash: "class-hash" },
 };
 jest.mock("../../hooks/use-stores", () => ({ useStores: () => mockStores }));
 

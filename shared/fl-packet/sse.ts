@@ -57,12 +57,12 @@ export class SseParser {
 
   /** Feeds one chunk and returns whatever complete events it completed. */
   push(chunk: string): SseEvent[] {
-    // Raw first, normalise after. Normalising each chunk on the way in cannot see a CR and its LF
+    // Raw first, normalize after. Normalizing each chunk on the way in cannot see a CR and its LF
     // when they land in different reads: the pair stays unmatched at the seam, the blank line
     // between two events disappears, and both are merged into one unparseable block — losing two
     // events from a stream that was perfectly well formed.
     //
-    // A trailing CR is then held back unnormalised, because its LF may still be in the next chunk.
+    // A trailing CR is then held back unnormalized, because its LF may still be in the next chunk.
     // Without that, the same split is simply moved one character later.
     this.buffer += chunk;
     const heldCr = this.buffer.endsWith("\r");

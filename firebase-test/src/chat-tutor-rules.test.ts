@@ -100,10 +100,8 @@ describe("Firestore security rules: chat tutor", () => {
         specMessage({ add: { provider: "openai" } }));
     });
 
-    // The enum pin, not just the whitelist: once the trigger routes on this field, an arbitrary
-    // provider string would send a paid turn to whatever its fallback happens to be. The trigger
-    // builds an OpenAI backend unconditionally today, so the pin is guarding the routing that
-    // arrives with the second backend rather than anything the server reads now.
+    // The enum pin, not just the whitelist: the trigger routes on this field, so an arbitrary
+    // provider string would send a paid turn to whatever its fallback happens to be.
     it("rejects a provider outside the known set", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: "some-other-vendor" } }));
@@ -275,10 +273,9 @@ describe("Firestore security rules: chat tutor", () => {
       await expectWriteToFail(db, kDemoMessage, demoMessage());
     });
 
-    // Both chatTutor blocks were widened for rightContent, and demo/qa is where a new provider is
-    // exercised first — so a whitelist that was only updated in the authed block would fail
-    // exactly where the feature gets tried. The whitelist is a hasOnly, so the write is rejected
-    // outright rather than dropping the field.
+    // demo/qa is where a new provider is exercised first, so this block's whitelist has to carry
+    // the same fields as the authed one. The whitelist is a hasOnly, so a field it does not know
+    // about rejects the write outright rather than being dropped.
     it("allows a rightContent payload under the demo root", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToSucceed(db, kDemoMessage, demoMessage({

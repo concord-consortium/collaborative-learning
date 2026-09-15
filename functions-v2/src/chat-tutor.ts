@@ -30,7 +30,7 @@ import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {kDefaultTutorProvider} from "../../shared/chat-tutor-providers";
 import {hashString} from "../../shared/hash-string";
 import {tutorUserId} from "../../shared/tutor-user-id";
-import {ProtectionClass, kProtectionClasses} from "../../shared/fl-packet/envelope";
+import {parseProtectionClasses, splitListParam} from "../../shared/fl-packet/envelope";
 import {createOpenAIClient} from "./chat/openai";
 import {createOpenAIProvider} from "./chat/openai-provider";
 import {createFlProvider} from "./chat/fl-provider";
@@ -38,8 +38,9 @@ import {createRoutingProvider} from "./chat/routing-provider";
 import {DrainContext, acquireLock, processAndDrain, pickOwnerFields} from "./chat/drain";
 
 // Only the API keys are true secrets (defineSecret). Everything else is server-side config
-// provisioned per environment (defineString). The generic tutor prompt is a source constant
-// (shared/chat-tutor-generic-prompt), not a param.
+// provisioned per environment (defineString), and each has an empty default so a deploy that
+// never routes to ForeverLearning is not prompted for values it will not use. The generic
+// tutor prompt is a source constant (shared/chat-tutor-generic-prompt), not a param.
 const openaiKey = defineSecret("OPENAI_TUTOR_API_KEY");
 const openaiModel = defineString("OPENAI_MODEL");
 
@@ -47,8 +48,8 @@ const openaiModel = defineString("OPENAI_MODEL");
 // curriculum repo is public and what a unit protects must not be readable there; the refs
 // themselves are opaque, and the values behind them are resolved on FL's side and never travel.
 const flKey = defineSecret("FL_CONCORDCLUE_API_KEY");
-const flBaseUrl = defineString("FL_BASE_URL");
-const flSolutionId = defineString("FL_SOLUTION_ID");
+const flBaseUrl = defineString("FL_BASE_URL", {default: ""});
+const flSolutionId = defineString("FL_SOLUTION_ID", {default: ""});
 // The commit of docs/ai-context/clue-object-catalog.md that our projection conforms to. It is a
 // claim about a document ForeverLearning holds a copy of and validates against, so it is only
 // true while both sides name the same version.
@@ -56,34 +57,9 @@ const flSolutionId = defineString("FL_SOLUTION_ID");
 // Bump it when they have the newer catalog, not when we merge one. Moving it first asserts
 // conformance to a vocabulary they do not have, which is the same failure as over-declaring
 // client_capabilities — see the note in shared/fl-packet/envelope.ts.
-const flCatalogCommit = defineString("FL_CATALOG_COMMIT");
-const flProtectionClasses = defineString("FL_PROTECTION_CLASSES");
-const flProtectionPatternRefs = defineString("FL_PROTECTION_PATTERN_REFS");
-
-const kDefaultProvider = kDefaultTutorProvider;
-
-// Comma-separated because a Cloud Functions param is a string. Empty entries are dropped rather
-// than passed along as "", which buildEnvelope would take for a real ref.
-function splitParam(value: string): string[] {
-  return value.split(",").map((entry) => entry.trim()).filter(Boolean);
-}
-
-// An unknown class name fails the turn rather than being dropped. Dropping was the original
-// behaviour and it failed OPEN on the case that actually happens: one typo among several valid
-// classes left the others standing, so buildEnvelope saw a non-empty policy and the turn went out
-// quietly declaring less protection than the configuration asked for. Only a wholly mistyped param
-// failed loudly, which is the case least likely to occur and easiest to spot.
-function protectionClasses(value: string): ProtectionClass[] {
-  const known = new Set<string>(kProtectionClasses);
-  const entries = splitParam(value);
-  const unknown = entries.filter((entry) => !known.has(entry));
-  if (unknown.length > 0) {
-    throw new Error(
-      `FL_PROTECTION_CLASSES names unknown protection ${unknown.length > 1 ? "classes" : "class"}: ` +
-      `${unknown.join(", ")}`);
-  }
-  return entries as ProtectionClass[];
-}
+const flCatalogCommit = defineString("FL_CATALOG_COMMIT", {default: ""});
+const flProtectionClasses = defineString("FL_PROTECTION_CLASSES", {default: ""});
+const flProtectionPatternRefs = defineString("FL_PROTECTION_PATTERN_REFS", {default: ""});
 
 const MESSAGES = "{root}/{rootId}/chatTutor/{conversationId}/messages/{messageId}";
 
@@ -117,7 +93,7 @@ export const chatTutorOnWrite = functionsV1
       parentRef,
       messagesCol,
       provider: createRoutingProvider({
-        defaultProvider: kDefaultProvider,
+        defaultProvider: kDefaultTutorProvider,
         providers: {
           openai: () => createOpenAIProvider({
             openai: createOpenAIClient(openaiKey.value()),
@@ -132,19 +108,19 @@ export const chatTutorOnWrite = functionsV1
             },
             catalogCommit: flCatalogCommit.value(),
             protection: {
-              classes: protectionClasses(flProtectionClasses.value()),
-              patternRefs: splitParam(flProtectionPatternRefs.value()),
+              classes: parseProtectionClasses(flProtectionClasses.value()),
+              patternRefs: splitListParam(flProtectionPatternRefs.value()),
             },
-            // Derived here, not read off the message: root and rootId come from the trigger
-            // path and uid is the field the rules pin to the caller's token, so a student cannot
-            // assert a classmate's identity by writing a different value.
-            resolveUserId: (msg) =>
-              tutorUserId({root, rootId, uid: String(msg.uid ?? "")}),
+            // Derived here, not read off the message. uid and context_id are the two fields the
+            // rules pin to the caller's token, so a student cannot assert another's identity by
+            // writing different values — see shared/tutor-user-id for why the path's portal
+            // segment is not used.
+            resolveUserId: (msg) => tutorUserId({
+              root, rootId, uid: String(msg.uid ?? ""), contextId: String(msg.context_id ?? ""),
+            }),
             readDocument: async (parent, msg) => {
-              // The client resends the document only when it changed, but every FL turn needs
-              // one — its context is a per-request field, not conversation state that
-              // accumulates. The provider keeps the last one on the parent, so an unchanged
-              // turn still has a workspace to describe.
+              // The message's copy when it carries one, else the copy held on the parent — see
+              // FlDocument.raw for why an unchanged turn still needs a workspace.
               const sent = typeof msg.rightContent === "string" ? msg.rightContent : "";
               const held = typeof parent.flContent === "string" ? parent.flContent : "";
               const json = sent || held;

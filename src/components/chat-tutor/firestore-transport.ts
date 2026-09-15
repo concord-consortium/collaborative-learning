@@ -1,11 +1,12 @@
 import firebase from "firebase/app";
+import { TutorProviderId } from "../../../shared/chat-tutor-providers";
+import { utf8ByteLength } from "../../../shared/utf8-byte-length";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightContent, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
 import { turnFromDoc } from "./turn-from-doc";
 import { isAwaitingReply } from "./awaiting-reply";
-import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -15,15 +16,7 @@ export const kChatTutorCollection = "chatTutor";
 // Firestore caps a document at 1 MiB. This is the budget for the workspace snapshot alone, left
 // short of the cap so the rest of the message — the text, the problem path, the timestamps and
 // Firestore's own overhead — cannot push a payload that measured as fitting over the edge.
-const kMaxAttachedWorkspace = 900_000;
-
-// Bytes, not string length. Firestore counts bytes and a JavaScript string's length is UTF-16 code
-// units, so a snapshot of mostly non-ASCII content measures far smaller than it travels — an emoji
-// is one unit of length and four bytes on the wire. Measuring the wrong one lets exactly the
-// payload this budget exists to stop through the check and into a failed write.
-function workspaceBytes(json: string): number {
-  return new TextEncoder().encode(json).length;
-}
+export const kMaxAttachedWorkspace = 900_000;
 
 export interface FirestoreTransportOptions {
   firestore: Firestore;
@@ -163,12 +156,9 @@ export class FirestoreTransport implements ChatTransport {
     if (provider === "foreverlearning") {
       const content = getRightContent?.();
       if (!content) return undefined;
-      // A Firestore document is capped at 1 MiB and this payload is the whole workspace snapshot,
-      // which a CLUE dataset can push past — a long recorded Dataflow run writes a row per tick.
-      // Over the cap the write itself fails and the turn never reaches the trigger, so dropping
-      // the attachment is the lesser loss: the server then describes no workspace, or reuses the
-      // last one it was given, instead of the student getting no answer at all.
-      if (workspaceBytes(content.json) > kMaxAttachedWorkspace) return undefined;
+      // Over the budget the write itself would fail and the turn would never reach the trigger,
+      // so dropping the attachment is the lesser loss — see kMaxAttachedWorkspace.
+      if (utf8ByteLength(content.json) > kMaxAttachedWorkspace) return undefined;
       return { field: "rightContent", value: content.json, hash: content.hash };
     }
     const summary = getRightSummary();
@@ -223,8 +213,6 @@ export class FirestoreTransport implements ChatTransport {
     }
     // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
     // them only while installing the generic prompt, and ignores them afterwards).
-    // Provider-independent, which is why conversationDocId forks on the prompts key even
-    // under a non-default provider: whatever installs the prompt, it installs it once.
     if (decision.attachLeft) {
       if (tutorPrompts?.replace) message.promptReplace = tutorPrompts.replace;
       if (tutorPrompts?.append) message.promptAppend = tutorPrompts.append;

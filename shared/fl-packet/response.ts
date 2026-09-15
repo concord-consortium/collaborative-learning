@@ -150,8 +150,15 @@ export function responseHighlights(
   const names = nodeNamesOf(sent);
   const highlights: TutorHighlight[] = [];
   const seen = new Set<string>();
-  for (const component of packet.components ?? []) {
-    for (const directive of component.directives ?? []) {
+  // Shape-checked rather than trusted. This is whatever arrived on the wire, so `components` or
+  // `directives` can be an object, and an entry can be null — each of which throws when iterated
+  // or dereferenced, out of processTurn and into status:"error". That would cost the student the
+  // whole reply over a malformed directive, when the prose they were going to read arrived intact.
+  const components = Array.isArray(packet.components) ? packet.components : [];
+  for (const component of components) {
+    const directives = Array.isArray(component?.directives) ? component.directives : [];
+    for (const directive of directives) {
+      if (!directive || typeof directive !== "object") continue;
       if (!kRenderableOps.has(directive.op)) continue;
       const target = directive.target;
       if (target?.kind !== "node") continue;

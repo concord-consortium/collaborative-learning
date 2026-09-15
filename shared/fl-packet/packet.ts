@@ -25,6 +25,7 @@
 
 import { normalize } from "../ai-summarizer/ai-summarizer";
 import { DocumentContentSnapshotType } from "../ai-summarizer/ai-summarizer-types";
+import { utf8ByteLength } from "../utf8-byte-length";
 import {
   dataflowRunValues, ProjectedDataflowTile, projectDataflowTile, RunValue
 } from "./dataflow-tile";
@@ -78,10 +79,6 @@ export interface BuildContextPacketResult {
   /** Size of the packet as UTF-8 JSON, which is what the cap is measured in. */
   bytes: number;
   overLimit: boolean;
-}
-
-function byteLength(json: string): number {
-  return new TextEncoder().encode(json).length;
 }
 
 // Truncated rows are counted from the projected models rather than reported back by the
@@ -179,6 +176,6 @@ export function buildContextPacket(
     packet.run_state = { values: runValues };
   }
 
-  const bytes = byteLength(JSON.stringify(packet));
+  const bytes = utf8ByteLength(JSON.stringify(packet));
   return { packet, bytes, overLimit: bytes > kMaxPacketBytes };
 }

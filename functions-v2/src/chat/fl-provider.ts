@@ -79,12 +79,34 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
         });
         context = built.packet;
         // buildContextPacket reports rather than enforces, on the grounds that the caller is
-        // better placed to decide. This is that caller, and the decision is to send it anyway and
-        // say so: the cap is ForeverLearning's, we have never been near it, and a turn silently
-        // truncated would be worse than one that went over and left a line saying it did.
+        // better placed to decide. This is that caller.
+        //
+        // The decision is to send something that fits, because of how the drain replays. A failed
+        // turn leaves the cursor unadvanced, so every later trigger re-processes this same message
+        // first — and its rightContent is immutable, so an over-cap packet would rebuild
+        // identically every time. If ForeverLearning ever refuses one, that conversation is wedged
+        // for good, and the student cannot free it by shrinking their document: the stale message
+        // payload still wins over the copy held on the parent.
+        //
+        // So the workspace goes and the omission is declared in its place. Degraded rather than
+        // silently emptied — the reader can tell a workspace we could not fit from one the student
+        // never had, which an envelope-only packet could not express.
         if (built.overLimit) {
-          console.warn(`FL context packet over cap: ${built.bytes} bytes`,
-            {trace: envelope.traceId, turn, omitted: built.packet.workspace_state?.omitted});
+          console.warn(`FL context packet over cap: ${built.bytes} bytes; sending workspace as omitted`,
+            {trace: envelope.traceId, turn});
+          context = {
+            schema_version: "clue.context_packet.v2",
+            envelope: built.packet.envelope,
+            workspace_state: {
+              document_id: document.documentId,
+              revision: document.revision,
+              tiles: [],
+              omitted: [
+                ...(built.packet.workspace_state?.omitted ?? []),
+                {kind: "workspace_over_cap", count: built.packet.workspace_state?.tiles.length || 1},
+              ],
+            },
+          };
         }
       } else {
         // The envelope is the only section a packet cannot omit. A turn with no document to

@@ -53,7 +53,7 @@ describe("projectSharedModels", () => {
   });
 
   // The simulator's live readings are direct evidence for "why won't my gripper close" — but only
-  // the reading matters. Colour, icon and rendering hints are presentation, and they were most of
+  // the reading matters. Color, icon and rendering hints are presentation, and they were most of
   // the raw bulk.
   it("projects variables to the reading and its role, dropping presentation metadata", () => {
     const { shared_models } = project();

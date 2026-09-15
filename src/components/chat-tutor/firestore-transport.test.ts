@@ -7,7 +7,7 @@ jest.mock("firebase/app", () => ({
   default: { firestore: { FieldValue: { serverTimestamp: () => "server-timestamp" } } },
 }));
 
-import { FirestoreTransport } from "./firestore-transport";
+import { FirestoreTransport, kMaxAttachedWorkspace } from "./firestore-transport";
 import { TutorPrompts } from "./tutor-prompts";
 import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 
@@ -54,10 +54,10 @@ describe("FirestoreTransport message provider stamp", () => {
   });
 });
 
-// The other half of the stacking contract in conversationDocId: the prompts key forks the
-// conversation under a non-default provider *because* the overrides are still sent there.
-// Re-gating this send on the default provider would reinstate the failure the stacking fixed
-// — an authored prompt installed once on a conversation whose id can no longer change.
+// The overrides ride the install-eligible sends, so they reach only a backend that installs a
+// generic prompt for them to override. The prompts key still forks the conversation id under
+// every provider: an authored prompt is installed once per conversation, so editing one has to
+// start a new conversation whatever backend answers it.
 describe("FirestoreTransport prompt overrides", () => {
   // The overrides ride the same install-eligible sends as LEFT, and ForeverLearning reads neither
   // — it never installs a generic prompt to override. Sending them would be the same dead weight
@@ -200,10 +200,18 @@ describe("FirestoreTransport oversized workspace", () => {
     return { added, transport };
   }
 
-  it("attaches a workspace that fits", async () => {
-    const { added, transport } = transportWith(`{"x":"${"a".repeat(1000)}"}`);
+  // The boundary, not a value either side of it: cases at 1 KB and 1.1 MB would both stay green
+  // while the budget drifted anywhere between them, including above Firestore's own 1 MiB limit.
+  it("attaches a workspace of exactly the budget", async () => {
+    const { added, transport } = transportWith("a".repeat(kMaxAttachedWorkspace));
     await transport.sendUserMessage("hello");
     expect(added[0].rightContent).toEqual(expect.any(String));
+  });
+
+  it("drops a workspace one byte over the budget", async () => {
+    const { added, transport } = transportWith("a".repeat(kMaxAttachedWorkspace + 1));
+    await transport.sendUserMessage("hello");
+    expect(added[0]).not.toHaveProperty("rightContent");
   });
 
   it("sends the turn without the workspace rather than failing the write", async () => {

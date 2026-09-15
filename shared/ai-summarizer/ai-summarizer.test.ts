@@ -1600,11 +1600,10 @@ describe('normalize', () => {
   });
 });
 
-// normalize() is tolerant of a malformed shared model in four places, not the one that was
-// originally documented. The policy is the same in all four — a shared model we cannot read costs
-// the reader that model, never the whole document summary — but a policy applied four times and
-// tested once is three untested behaviour changes. These pin the other three, plus the one value
-// change: providerId used to come out undefined despite its non-optional type.
+// normalize() is tolerant of a malformed shared model in four places, and the policy is the same
+// in each: a shared model we cannot read costs the reader that model, never the whole document
+// summary. Each place is pinned here, along with providerId, which is reported as "" rather than
+// undefined so it matches its non-optional type.
 describe('normalize tolerates a malformed shared model', () => {
   const withSharedModel = (sharedModel: any, tiles?: any) => ({
     rowOrder: [], rowMap: {}, tileMap: {},

@@ -50,6 +50,7 @@ describe("projectDataflowTile", () => {
 
   it("projects nodes as a list carrying the real id and the student-visible name", () => {
     const { nodes } = projectDataflowTile(content, "tile-df-1").content;
+    expect(nodes).toHaveLength(3);
     expect(nodes.map(n => n.id)).toEqual(["n-sensor", "n-logic", "n-out"]);
     expect(nodes[1]).toMatchObject({
       id: "n-logic", type: "Logic", orderedDisplayName: "Compare 1", plot: true,
@@ -76,6 +77,7 @@ describe("projectDataflowTile", () => {
   // Canvas position says nothing about the program's logic.
   it("drops node coordinates", () => {
     const { nodes } = projectDataflowTile(content, "tile-df-1").content;
+    expect(nodes).toHaveLength(3);
     nodes.forEach(n => expect(n).not.toHaveProperty("x"));
     nodes.forEach(n => expect(n).not.toHaveProperty("y"));
   });
@@ -84,6 +86,7 @@ describe("projectDataflowTile", () => {
   // sample has no such field — a value in the wrong place is one the diagnostic will not read.
   it("does not put live values in node options", () => {
     const { nodes } = projectDataflowTile(content, "tile-df-1").content;
+    expect(nodes).toHaveLength(3);
     nodes.forEach(n => expect(n.options ?? {}).not.toHaveProperty("nodeValue"));
   });
 
@@ -97,7 +100,7 @@ describe("projectDataflowTile", () => {
   });
 
   // The rendering is only useful beside the structured form because it carries the same ids their
-  // citations resolve against — which CLUE-598 put there deliberately.
+  // citations resolve against.
   it("the rendering carries the real node ids", () => {
     const { rendering } = projectDataflowTile(content, "tile-df-1").content;
     expect(rendering).toEqual(expect.stringContaining("n-logic"));
@@ -117,5 +120,25 @@ describe("dataflowRunValues", () => {
   it("yields nothing for a program that has never been run", () => {
     const unrun = { ...content, program: { ...program, recentTicks: [] } };
     expect(dataflowRunValues(unrun)).toEqual([]);
+  });
+});
+
+// The renderer is reached through one call site and walks the program unguarded — Object.values on
+// a missing nodes map, node.data.type on a node without data. This projection defends its own
+// reads but then hands the same snapshot straight to it, so a malformed program threw out of
+// buildContextPacket and failed the whole turn. The Drawing projection wraps its renderer for
+// exactly this reason; this one now does too.
+describe("projectDataflowTile survives a malformed program", () => {
+  it("degrades a tile with no program to a note rather than throwing", () => {
+    const tile = projectDataflowTile({ type: "Dataflow" }, "tile-df-x");
+    expect(tile.tile_id).toBe("tile-df-x");
+    expect(tile.content.rendering).toEqual(expect.stringMatching(/could not|malformed/i));
+  });
+
+  it("degrades a node with no data rather than throwing", () => {
+    const tile = projectDataflowTile(
+      { type: "Dataflow", program: { id: "p", nodes: { n1: { id: "n1" } }, connections: {} } },
+      "tile-df-y");
+    expect(tile.content.rendering).toEqual(expect.stringMatching(/could not|malformed/i));
   });
 });

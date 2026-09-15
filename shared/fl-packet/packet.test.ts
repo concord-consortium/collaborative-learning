@@ -206,6 +206,12 @@ describe("buildContextPacket", () => {
     }
     const { packet } = buildContextPacket({ content: doc, ...docOpts, envelope: envelopeOpts });
     const carried = new Set(packet.workspace_state!.shared_models!.map(m => m.model_id));
+    const textTile = packet.workspace_state!.tiles.find(t => t.tile_id === "tile-tx-1")!;
+    // Assert the count first: a loop over an empty list passes without testing anything, and the
+    // filter under test is exactly what could empty it. The tile references kMaxSharedModels
+    // models, but the document's own shared model takes one of the carried slots, so exactly one
+    // referenced model falls outside the cap and must be filtered out of this list.
+    expect(textTile.shared_model_ids).toHaveLength(kMaxSharedModels - 1);
     for (const tile of packet.workspace_state!.tiles) {
       for (const id of tile.shared_model_ids ?? []) expect(carried.has(id)).toBe(true);
     }

@@ -6,15 +6,11 @@
 // and near-identical from tick to tick — collapse to a single current value that belongs in
 // run_state, not on the node. See dataflowRunValues below.
 //
-// The tile carries BOTH forms. `nodes`/`edges` is what their live schema specifies. `rendering` is
-// our summarizer's Graphviz form, which states the program's logic rather than its structure and
-// which ForeverLearning have agreed in principle to take as the payload — but they have not
-// switched, wanting to validate their answer-protection against it first. A probe confirmed the
-// extra key is accepted today, so sending both lets them evaluate it on live turns instead of from
-// an emailed sample, and costs roughly a doubling of a packet we are using a quarter of.
-//
-// When they do switch, `nodes`/`edges` goes and this becomes a one-line change here rather than a
-// rewrite — which is why the renderer is reached through a single call site.
+// The tile carries BOTH forms. `nodes`/`edges` is what ForeverLearning's schema specifies;
+// `rendering` is the summarizer's Graphviz form, which states the program's logic rather than its
+// structure. Sending both lets the DOT form be evaluated on live turns while the schema form
+// stays authoritative, and costs roughly a doubling of a packet we use a quarter of. The renderer
+// is reached through a single call site so that dropping either form is a one-line change.
 
 import { programToGraphviz } from "../ai-summarizer/tile-summarizers/dataflow-to-graphviz";
 
@@ -71,6 +67,19 @@ function programOf(content: any): RawProgram {
   return (content?.program ?? {}) as RawProgram;
 }
 
+// The renderer walks the program unguarded — Object.values on the nodes map, node.data.type on
+// each node — while everything around it here defends its own reads. Handing it a snapshot this
+// module has already accepted therefore turned a malformed program into a thrown error out of
+// packet assembly, costing the whole turn rather than one tile's rendering. Same reasoning, and
+// the same shape, as the Drawing projection's guard.
+function renderProgram(program: RawProgram): string {
+  try {
+    return programToGraphviz(program as any);
+  } catch {
+    return "This program was malformed and could not be rendered.";
+  }
+}
+
 export function projectDataflowTile(
   content: any, tileId: string, title?: string
 ): ProjectedDataflowTile {
@@ -102,7 +111,7 @@ export function projectDataflowTile(
     type: "Dataflow",
     content: {
       program_id: String(program.id ?? ""), nodes, edges,
-      rendering: programToGraphviz(program as any),
+      rendering: renderProgram(program),
     },
   };
   if (title !== undefined) tile.title = title;

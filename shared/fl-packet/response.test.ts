@@ -191,8 +191,7 @@ describe("replyText", () => {
   });
 });
 
-// Fail closed on anything that is not the exact contract this parser implements. Both of these
-// were flagged by a Copilot review as accepting input that looks valid and is not.
+// Fail closed on anything that is not the exact contract this parser implements.
 describe("parseResponsePacket version and emptiness", () => {
   it("refuses a schema version this parser does not implement", () => {
     const v3 = JSON.parse(aResponse([]));
@@ -208,5 +207,36 @@ describe("parseResponsePacket version and emptiness", () => {
     // It has a length, so a length check passes it, and replyText would then return it as the
     // reply — a blank assistant turn that looks like a finished one.
     expect(parseResponsePacket(JSON.stringify(blank))).toBeUndefined();
+  });
+});
+
+// The display part is whatever arrived on the wire, so its shape is not guaranteed by anything.
+// Iterating a non-array throws out of processTurn, the drain records status:"error", and the
+// student gets no reply even though the prose arrived complete — breaking the one contract this
+// module states: losing the directives is not a reason to lose the reply.
+describe("responseHighlights survives a malformed display part", () => {
+  function withComponents(components: unknown) {
+    const packet = JSON.parse(aResponse([]));
+    packet.components = components;
+    return parseResponsePacket(JSON.stringify(packet))!;
+  }
+
+  it("ignores components that are not an array", () => {
+    expect(responseHighlights(withComponents({}), sentPacket)).toEqual([]);
+  });
+
+  it("ignores directives that are not an array", () => {
+    const packet = withComponents([{ component_ref: {}, directives: {}, evidence_refs: [] }]);
+    expect(responseHighlights(packet, sentPacket)).toEqual([]);
+  });
+
+  it("skips a directive that is not an object", () => {
+    const packet = withComponents([
+      { component_ref: {}, directives: [null, "x", 7, nodeDirective("n-logic")], evidence_refs: [] },
+    ]);
+    // the one well-formed directive still resolves
+    expect(responseHighlights(packet, sentPacket)).toEqual([
+      { tileId: "tile-df-1", objectId: "n-logic", label: "Compare 1" },
+    ]);
   });
 });

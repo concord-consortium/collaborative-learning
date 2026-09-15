@@ -46,15 +46,15 @@ export interface BuildEnvelopeOptions {
   audiences?: Audience[];
 }
 
-// What CLUE can actually act on, as of the highlight feature landing. These are deliberately not
-// parameters: a capability declaration is a fact about the client, and every packet sent before
-// this one over-declared — claiming a per-tile response area that does not exist and a construct
-// tier with nothing behind it, which had the diagnostic proposing actions we could only discard.
+// What CLUE can actually act on. These are deliberately not parameters: a capability declaration
+// is a fact about the client, and over-declaring one has the diagnostic proposing actions we can
+// only discard — a per-tile response area that does not exist, or a construct tier with nothing
+// behind it.
 //
 // `observe` covers highlight and focus, both of which we can do. `focus_annotate` admits `annotate`
 // as well as `set_plot`, and our annotations are two-ended arrows that are also unit-configurable,
 // so declaring the tier would invite directives we cannot render. `construct` has no mechanism at
-// all. Widen these only alongside the code that honours them.
+// all. Widen these only alongside the code that honors them.
 const kDirectiveTiers: DirectiveTier[] = ["observe"];
 // Empty because the tutor is a document sidebar: no tile has a response area to render into.
 const kDisplayTextComponentTypes: ComponentType[] = [];
@@ -88,4 +88,31 @@ export function buildEnvelope(opts: BuildEnvelopeOptions): Envelope {
     },
     catalog_version: { commit: opts.catalogCommit, projection: "clue-catalog-proj-v1" },
   };
+}
+
+/**
+ * Splits a comma-separated Cloud Functions param. Empty entries are dropped rather than passed
+ * along as "", which buildEnvelope would take for a real ref.
+ */
+export function splitListParam(value: string): string[] {
+  return value.split(",").map(entry => entry.trim()).filter(Boolean);
+}
+
+/**
+ * Parses a comma-separated protection-class param, refusing any name that is not a real class.
+ *
+ * Refusing rather than dropping, because dropping fails open on the case that actually happens:
+ * one typo among several valid classes leaves the others standing, buildEnvelope sees a non-empty
+ * policy, and the turn goes out quietly declaring less protection than the configuration asked
+ * for. Only a wholly mistyped param would have failed loudly — the case least likely to occur.
+ */
+export function parseProtectionClasses(value: string): ProtectionClass[] {
+  const known = new Set<string>(kProtectionClasses);
+  const entries = splitListParam(value);
+  const unknown = entries.filter(entry => !known.has(entry));
+  if (unknown.length > 0) {
+    throw new Error(
+      `unknown answer-protection ${unknown.length > 1 ? "classes" : "class"}: ${unknown.join(", ")}`);
+  }
+  return entries as ProtectionClass[];
 }

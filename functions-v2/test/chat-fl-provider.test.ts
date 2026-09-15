@@ -3,9 +3,9 @@
 //
 // The HTTP client is injected rather than mocked globally, so each test states the stream it is
 // answering with. Assertions prefer the returned TurnResult; the injected client is inspected only
-// where the behaviour under test is a request the provider is supposed to make.
+// where the behavior under test is a request the provider is supposed to make.
 import {CollectedStream, emptyStream} from "../../shared/fl-packet/sse";
-import {ContextPacket} from "../../shared/fl-packet/packet";
+import {ContextPacket, kMaxPacketBytes} from "../../shared/fl-packet/packet";
 import {createFlProvider} from "../src/chat/fl-provider";
 
 const kConfig = {baseUrl: "https://api.example.test", apiKey: "k", solutionId: "concordclue"};
@@ -201,13 +201,15 @@ describe("createFlProvider", () => {
   });
 
   // Session state is earned by a successful turn, exactly as the OpenAI path earns its
-  // conversation id: a turn that throws must leave nothing recorded for the next one to build on.
-  it("records no session state when the call fails", async () => {
+  // conversation id: a turn that throws returns no TurnResult, so the drain commits no
+  // parentUpdate and the next turn starts from the state before this one.
+  it("surfaces a failed call and returns no turn result to persist", async () => {
     const chat = jest.fn(async () => {
       throw new Error("ForeverLearning chat request failed with status 503");
     });
     const {provider: p} = provider({chat});
     await expect(p.processTurn({}, aMessage())).rejects.toThrow(/503/);
+    expect(chat).toHaveBeenCalledTimes(1);
   });
 
   // status, lockedAt and error belong to the drain; a provider that writes them corrupts the lock.
@@ -220,9 +222,7 @@ describe("createFlProvider", () => {
   });
 });
 
-// The client resends the document only when it changed, but every FL turn needs one: its context
-// is a per-request field, not conversation state that accumulates the way OpenAI's items do. So
-// the provider keeps the last document it was given, and readDocument falls back to it.
+// Every FL turn needs a workspace even when the client did not resend one — see FlDocument.raw.
 describe("createFlProvider document reuse", () => {
   function providerWith(document: ReturnType<typeof aDocument> & {raw?: string}) {
     const chat = jest.fn(async () => aReply());
@@ -295,12 +295,6 @@ describe("createFlProvider user identity", () => {
     }));
     expect(chat.mock.calls[0][1].userId).toBe("clue:authed/learn_concord_org/users/42");
   });
-
-  it("sends the derived identity as the ForeverLearning user", async () => {
-    const {chat, provider: p} = provider();
-    await p.processTurn({}, aMessage());
-    expect(chat.mock.calls[0][1].userId).toBe("clue:authed/learn_concord_org/users/42");
-  });
 });
 
 // flChat reports a stream that never received `done` as complete:false. Writing that partial prose
@@ -312,13 +306,66 @@ describe("createFlProvider incomplete streams", () => {
     const {provider: p} = provider({reply: cut});
     await expect(p.processTurn({}, aMessage())).rejects.toThrow(/incomplete|did not finish/i);
   });
+});
 
-  it("earns no session state from an unfinished turn", async () => {
-    const cut = {...aReply(), complete: false};
-    const {provider: p} = provider({reply: cut});
-    await p.processTurn({}, aMessage()).catch(() => undefined);
-    // nothing to assert on the parent directly — a throw means the drain commits no parentUpdate,
-    // which is the contract. This pins that the provider throws rather than returning a TurnResult.
-    await expect(p.processTurn({}, aMessage())).rejects.toThrow();
+// A failed turn leaves the drain's cursor unadvanced, so every later trigger re-processes the same
+// message first — and that message's rightContent is immutable. An over-cap packet therefore
+// rebuilds identically forever: if ForeverLearning ever rejects one, the conversation is wedged,
+// and the student cannot free it by shrinking their document because the stale message payload
+// still wins over the copy held on the parent. Sending something that fits is what keeps a turn
+// recoverable.
+describe("createFlProvider over-cap packets", () => {
+  function hugeDocument() {
+    // Wide rather than tall: the default case sample keeps 50 rows, so a tall table truncates to
+    // something small. Large cell values survive sampling and are what actually pushes a real
+    // workspace over the cap.
+    const values = Array.from({length: 60}, (_, i) => `${i}`.padEnd(2000, "x"));
+    return {
+      content: {
+        rowOrder: ["row-1"],
+        rowMap: {"row-1": {id: "row-1", tiles: [{tileId: "t-tbl"}]}},
+        tileMap: {"t-tbl": {id: "t-tbl", content: {type: "Table"}}},
+        sharedModelMap: {
+          "sm-data": {
+            sharedModel: {
+              type: "SharedDataSet", id: "sm-data",
+              dataSet: {id: "ds", name: "Big",
+                attributes: [{id: "a", name: "a", values}],
+                cases: values.map((_, i) => ({__id__: `c${i}`}))},
+            },
+            tiles: ["t-tbl"],
+          },
+        },
+      },
+      documentId: "doc-big", revision: "r1",
+    };
+  }
+
+  it("sends a packet that fits, rather than one known to exceed the cap", async () => {
+    const chat: jest.Mock = jest.fn(async () => aReply());
+    const p = createFlProvider({
+      config: kConfig, catalogCommit: kCommit, protection: kProtection,
+      readDocument: async () => hugeDocument(), newTraceId: () => "t", chat: chat as never,
+      resolveUserId: () => "clue:class/c/users/1",
+    });
+    await p.processTurn({}, aMessage());
+    const sent = JSON.stringify(chat.mock.calls[0][1].context);
+    expect(new TextEncoder().encode(sent).length).toBeLessThanOrEqual(kMaxPacketBytes);
+  });
+
+  // Degraded, not silently emptied: the reader must be able to tell a workspace we could not fit
+  // from one the student never had.
+  it("declares what it had to drop to fit", async () => {
+    const chat: jest.Mock = jest.fn(async () => aReply());
+    const p = createFlProvider({
+      config: kConfig, catalogCommit: kCommit, protection: kProtection,
+      readDocument: async () => hugeDocument(), newTraceId: () => "t", chat: chat as never,
+      resolveUserId: () => "clue:class/c/users/1",
+    });
+    await p.processTurn({}, aMessage());
+    const ctx = chat.mock.calls[0][1].context as ContextPacket;
+    expect(ctx.workspace_state?.omitted).toEqual(
+      expect.arrayContaining([expect.objectContaining({kind: "workspace_over_cap"})]));
+    expect(ctx.workspace_state?.document_id).toBe("doc-big");
   });
 });
