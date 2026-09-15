@@ -131,3 +131,32 @@ describe("FirestoreTransport workspace payload", () => {
     expect(added[0]).not.toHaveProperty("rightContext");
   });
 });
+
+// A tutor backend keys its memory on this, not on uid — see canonical-user-id.ts. It rides on
+// every message rather than only FL-bound ones, so the field means the same thing whatever
+// backend a conversation later turns out to use.
+describe("FirestoreTransport canonical user id", () => {
+  function transportWith(canonicalUserId?: string) {
+    const { added, firestore } = fakeFirestore();
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => "{}",
+      getRightSummary: () => undefined, canonicalUserId,
+    });
+    return { added, transport };
+  }
+
+  it("stamps the canonical user id on the message", async () => {
+    const { added, transport } = transportWith("https://learn.concord.org/users/123");
+    await transport.sendUserMessage("hello");
+    expect(added[0].canonicalUserId).toBe("https://learn.concord.org/users/123");
+    // uid stays: it is what the rules pin to the token and what owns the document.
+    expect(added[0].uid).toBe("123");
+  });
+
+  it("omits the field when the caller has none, rather than sending an empty one", async () => {
+    const { added, transport } = transportWith(undefined);
+    await transport.sendUserMessage("hello");
+    expect(added[0]).not.toHaveProperty("canonicalUserId");
+  });
+});

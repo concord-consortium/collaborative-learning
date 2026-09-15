@@ -75,8 +75,19 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
         context = {schema_version: "clue.context_packet.v2", envelope: buildEnvelope(envelope)};
       }
 
+      // ForeverLearning keys its cross-session memory on X-User-Id, so this has to be an identity
+      // that names one human. message.uid is the bare platform user id, which is a per-portal
+      // sequence — the same value names different people on different portals, and on a flat
+      // namespace that merges two students, with one student's history informing the other's
+      // tutoring. Refusing is deliberate: falling back to uid would do exactly the thing the
+      // canonical id exists to prevent, and it would do it without a trace.
+      const userId = typeof message.canonicalUserId === "string" ? message.canonicalUserId : "";
+      if (!userId) {
+        throw new Error("message carries no canonical user id; refusing to key a session on uid");
+      }
+
       const stream = await chat(config, {
-        userId: String(message.uid ?? ""),
+        userId,
         prompt: String(message.text ?? ""),
         context,
         sessionId: parent.flSessionId,

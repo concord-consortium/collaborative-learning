@@ -753,6 +753,7 @@ service cloud.firestore {
               classIsRequestContextId() &&
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                    'problemPath', 'leftContext', 'rightContext', 'rightContent',
+                                   'canonicalUserId',
                                    'promptReplace', 'promptAppend', 'provider']) &&
               data.kind == 'user' &&
               'createdAt' in data &&
@@ -760,6 +761,7 @@ service cloud.firestore {
               (!('promptReplace' in data) || data.promptReplace is string) &&
               (!('promptAppend' in data) || data.promptAppend is string) &&
               (!('rightContent' in data) || data.rightContent is string) &&
+              (!('canonicalUserId' in data) || data.canonicalUserId is string) &&
               (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
           }
 
@@ -849,6 +851,7 @@ service cloud.firestore {
         return isAuthed() &&
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                'problemPath', 'leftContext', 'rightContext', 'rightContent',
+                                   'canonicalUserId',
                                'promptReplace', 'promptAppend', 'provider']) &&
           data.kind == 'user' &&
           'createdAt' in data &&
@@ -856,6 +859,7 @@ service cloud.firestore {
           (!('promptReplace' in data) || data.promptReplace is string) &&
           (!('promptAppend' in data) || data.promptAppend is string) &&
               (!('rightContent' in data) || data.rightContent is string) &&
+              (!('canonicalUserId' in data) || data.canonicalUserId is string) &&
           (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
       }
 

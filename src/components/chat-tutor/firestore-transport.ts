@@ -22,6 +22,10 @@ export interface FirestoreTransportOptions {
   contextId: string;
   // raw (unescaped) problemPath, kept queryable on every message doc
   problemPath: string;
+  // The identity a tutor backend keys its memory on — see canonical-user-id.ts. Distinct from
+  // uid, which is the bare platform user id: the same one names different people on different
+  // portals, and on a backend with a flat namespace that merges two students into one.
+  canonicalUserId?: string;
   // LEFT problem JSON; undefined until the problem's sections have loaded
   getLeftContext: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
@@ -156,7 +160,8 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider } = this.opts;
+    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider,
+            canonicalUserId } = this.opts;
     const right = this.workspacePayload();
     const decision = decideContext({
       leftAlreadyInstalled: this.problemInstalled,
@@ -195,6 +200,11 @@ export class FirestoreTransport implements ChatTransport {
     // conversation's state across two backends.
     if (provider) {
       message.provider = provider;
+    }
+    // Absent rather than empty when the caller has none: a blank identity is one that every such
+    // user would share.
+    if (canonicalUserId) {
+      message.canonicalUserId = canonicalUserId;
     }
     // Prompt overrides ride the same install-eligible sends as LEFT (the server uses
     // them only while installing the generic prompt, and ignores them afterwards).

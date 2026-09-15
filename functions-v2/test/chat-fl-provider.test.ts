@@ -94,7 +94,8 @@ function provider(overrides: {
 }
 
 const aMessage = (over: Record<string, unknown> = {}) =>
-  ({uid: "user-42", text: "Is my program right?", ...over});
+  ({uid: "user-42", canonicalUserId: "https://learn.concord.org/users/42",
+    text: "Is my program right?", ...over});
 
 describe("createFlProvider", () => {
   it("sends the student's text with a packet built from their document", async () => {
@@ -102,7 +103,8 @@ describe("createFlProvider", () => {
     await p.processTurn({}, aMessage());
 
     const [, args] = chat.mock.calls[0];
-    expect(args.userId).toBe("user-42");
+    // The canonical url, not the bare platform id — see shared canonical-user-id.
+    expect(args.userId).toBe("https://learn.concord.org/users/42");
     expect(args.prompt).toBe("Is my program right?");
     const packet = args.context as ContextPacket;
     expect(packet.schema_version).toBe("clue.context_packet.v2");
@@ -260,5 +262,30 @@ describe("createFlProvider document reuse", () => {
     });
     const result = await p.processTurn({}, aMessage());
     expect(result.parentUpdate).not.toHaveProperty("flContent");
+  });
+});
+
+// ForeverLearning keys its cross-session memory on X-User-Id. The bare platform id is not unique
+// across portals, so sending it would merge two students — silently, and in a way that surfaces
+// as one student's history informing another's tutoring.
+describe("createFlProvider user identity", () => {
+  it("refuses a turn whose message carries no canonical user id", async () => {
+    const {provider: p} = provider();
+    await expect(p.processTurn({}, {uid: "42", text: "hi"}))
+      .rejects.toThrow(/canonical user id/i);
+  });
+
+  it("refuses an empty one rather than sending a blank identity", async () => {
+    const {provider: p} = provider();
+    await expect(p.processTurn({}, {uid: "42", canonicalUserId: "", text: "hi"}))
+      .rejects.toThrow(/canonical user id/i);
+  });
+
+  // It must never quietly substitute uid: that is the exact value whose ambiguity this avoids.
+  it("does not fall back to uid", async () => {
+    const {chat, provider: p} = provider();
+    await p.processTurn({}, aMessage({canonicalUserId: "https://p.example/users/9"}));
+    expect(chat.mock.calls[0][1].userId).toBe("https://p.example/users/9");
+    expect(chat.mock.calls[0][1].userId).not.toBe("user-42");
   });
 });

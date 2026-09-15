@@ -14,6 +14,8 @@ import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
+import { getRootId } from "../../lib/root-id";
+import { canonicalUserId } from "./canonical-user-id";
 import { serializeRight } from "./right-context";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
@@ -43,7 +45,7 @@ interface IProps {
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
-  const { appConfig, db, user } = useStores();
+  const { appConfig, appMode, db, demo, portal, user } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +71,15 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       firestore: db.firestore,
       conversationId: conversationDocId(user.id, documentKey, user.network, problemPath, promptsKey, provider),
       uid: user.id,
+      // The identity a tutor backend keys memory on. Distinct from uid, which is unique only
+      // within a portal — see canonical-user-id.
+      canonicalUserId: canonicalUserId({
+        appMode,
+        userId: user.id,
+        rootId: getRootId({ appMode, demo, user }, db?.firebase?.userId ?? ""),
+        portalHost: user.portal,
+        portalUserUrl: (portal.portalJWT as { user_id?: string } | undefined)?.user_id,
+      }),
       contextId: user.classHash,
       problemPath,
       getLeftContext,
