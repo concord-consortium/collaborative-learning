@@ -1,6 +1,6 @@
-# CLUE Object Catalog — Dataflow, Simulations, Tables
+# CLUE Object Catalog — Dataflow, Simulations, Tables, Text, Drawing
 
-**Purpose.** This is a reference catalog of the objects an AI system may need to **detect** in, or **create** for, a CLUE document. It covers three tile types — **Dataflow**, **Simulator**, and **Table** — enumerating every object/node/variable type, its internal identifier, and every user-configurable option with its exact allowed values. It is generated from the CLUE source and cites `file:line` so it can be re-verified.
+**Purpose.** This is a reference catalog of the objects an AI system may need to **detect** in, or **create** for, a CLUE document. It covers five tile types — **Dataflow**, **Simulator**, **Table**, **Text** and **Drawing** (plus the two it can name but not describe, **Image** and **Geometry**) — enumerating every object/node/variable type, its internal identifier, and every user-configurable option with its exact allowed values. It is generated from the CLUE source and cites `file:line` so it can be re-verified.
 
 **Conventions.**
 - A CLUE document is a set of **tiles**. Each tile has a `content` object with a `type` string (e.g. `"Dataflow"`, `"Simulator"`, `"Table"`).
@@ -13,7 +13,7 @@
 
 A Dataflow tile holds a **program**: a graph of **nodes** connected by wires. Each node has a `type` string, a set of input/output **sockets**, and type-specific options.
 
-Source of the master option lists: `src/plugins/dataflow/model/utilities/node.ts`. Node models: `src/plugins/dataflow/nodes/*.ts`. Node union: `src/plugins/dataflow/model/dataflow-program-model.ts:58-70`.
+Source of the master option lists: `src/plugins/dataflow/model/utilities/node.ts`. Node models: `src/plugins/dataflow/nodes/*.ts`. Node union: `src/plugins/dataflow/model/dataflow-program-model.ts:95-107`.
 
 ## 1.1 Node types
 
@@ -58,7 +58,7 @@ Program-wide: default data/sampling rate = **1000 ms** (node.ts).
 
 ### Generator (`"Generator"`)
 `src/plugins/dataflow/nodes/generator-node.ts`
-- **`generatorType`** (dropdown) — `NodeGeneratorTypes` (node.ts:454-470): `Sine`, `Square`, `Triangle`. Default `Sine`.
+- **`generatorType`** (dropdown) — `NodeGeneratorTypes` (node.ts:489-505): `Sine`, `Square`, `Triangle`. Default `Sine`.
 - **`amplitude`** (numeric) — default `1`.
 - **`period`** (numeric) — default `10`; **`periodUnits`** (dropdown) — `NodePeriodUnits`: `sec`, `min`, `hour`. Default `sec`.
 
@@ -98,7 +98,7 @@ Program-wide: default data/sampling rate = **1000 ms** (node.ts).
 ### Live Output (`"Live Output"`)
 `src/plugins/dataflow/nodes/live-output-node.ts`
 - **`liveOutputType`** (dropdown) — `NodeLiveOutputTypes` (node.ts:403-440): `Gripper 2.0`; `Grabber` → "Gripper"; `Humidifier`; `Fan`; `Heat Lamp`; `Servo`. Default `Gripper 2.0`.
-- **`hubSelect`** (dropdown) — target device/hub. Dynamically populated: micro:bit relay hubs `NodeMicroBitHubs` identifiers `a`–`h` (node.ts:451-452) for relay outputs (Fan/Humidifier/Heat Lamp); physical/simulated gripper/servo options otherwise (`baseLiveOutputOptions`, node.ts:472-502). May show "⚠️ connect device" when no device is present.
+- **`hubSelect`** (dropdown) — target device/hub. Dynamically populated: micro:bit relay hubs `NodeMicroBitHubs` identifiers `a`–`h` (node.ts:486-487) for relay outputs (Fan/Humidifier/Heat Lamp); physical/simulated gripper/servo options otherwise (`baseLiveOutputOptions`, node.ts:507). May show "⚠️ connect device" when no device is present.
 
 ### Counter (`"Counter"`, not creatable from toolbar)
 `src/plugins/dataflow/nodes/counter-node.ts` — increments an internal `count` each cycle; no user options. Present in the model union only; excluded from `NodeTypes`, so it cannot be added from the UI.
@@ -123,6 +123,8 @@ The tile creates/links a **SharedVariables** model on attach and seeds it from t
 ## 2.2 Simulation registry
 `src/plugins/simulator/simulations/simulations.ts` — **3 simulations**. `defaultSimulationKey = "EMG_and_claw"`.
 
+Two registries exist over the same three keys and they are not duplicates. The one above maps a key to the **runnable** simulation (React components, frames); `shared/simulations/simulations.ts` maps the same key to the **authored description data** an AI reads — `ISimulationData`, the `description` and `values` enumerated in §2.3. Both import the key constants from `shared/simulations/*`, so the vocabulary is single-sourced. Anything under `shared/` is reachable from the summarizer and the server; anything under `src/plugins/` is not.
+
 | Key (`simulation`) | Name | `delay` | Variables (exposed/total) | Modes |
 |---|---|---|---|---|
 | `EMG_and_claw` *(default)* | Brainwaves & Gripper | 67 ms | 5 / 7 | Pressure / Temperature |
@@ -133,7 +135,7 @@ The tile creates/links a **SharedVariables** model on attach and seeds it from t
 
 Each variable is a `VariableSnapshot` (`@concord-consortium/diagram-view`) with: `name` (identifier), `displayName`, `unit`, `value` (initial), and `labels` (roles/formatting). Hidden = no `input`/`output` label, so not shown as a chip.
 
-### `EMG_and_claw` — Brainwaves & Gripper (`.../brainwaves-gripper/brainwaves-gripper.tsx`)
+### `EMG_and_claw` — Brainwaves & Gripper (`shared/simulations/brainwaves-gripper/brainwaves-gripper.ts`)
 | name | displayName | unit | init | labels |
 |---|---|---|---|---|
 | `emg_key` | EMG | mV | 40 | `input`, `sensor:emg-reading`, `decimalPlaces:0` |
@@ -245,10 +247,112 @@ Registered buttons (`src/components/tiles/table/table-toolbar-registration.tsx`)
 
 ---
 
+# 4. Text tile (`type: "Text"`)
+
+`kTextTileType = "Text"` (`src/models/tiles/text/text-content.ts:14`). A text tile holds one body of prose plus the ranges a reader has highlighted in it.
+
+## 4.1 Structure
+
+| Field | Type | Notes |
+|---|---|---|
+| `type` | `"Text"` | `text-content.ts:26` |
+| `text` | string **or** string[] | `text-content.ts:27`. The array form is one entry per line; both forms occur in stored documents. |
+| `format` | string, optional | `text-content.ts:29`. **Absent means plain text**, not a default format. |
+| `highlightedText` | array of `{ id, text }` | `text-content.ts:30`. `id` is an identifier; `text` is the highlighted excerpt, stored verbatim. |
+
+## 4.2 Formats
+
+Handled at `text-content.ts:85-89`. The value is the exact string stored in the model.
+
+| `format` | Meaning |
+|---|---|
+| `"slate"` | Slate editor JSON, stored as a JSON **string** (not an object). This is what the editor writes, so it is the common case in student work. |
+| `"html"` | HTML markup |
+| `"markdown"` | Markdown source |
+| *absent / anything else* | plain text |
+
+**For detection:** `format: "slate"` means `text` must be JSON-parsed before it means anything; the summarizer converts it with `shared/slate-to-markdown.ts`. Reading a slate tile's `text` as prose yields editor JSON, not what the student wrote.
+
+**For creation:** `markdown` is the format to write. It round-trips, needs no editor state, and is what `setMarkdown` (`text-content.ts:143`) stores.
+
+---
+
+# 5. Drawing tile (`type: "Drawing"`)
+
+`kDrawingTileType = "Drawing"` (`src/plugins/drawing/model/drawing-types.ts:4`). A drawing tile holds a flat, back-to-front ordered list of **objects**. Order in the list is z-order: later objects paint over earlier ones.
+
+## 5.1 Object types
+
+Eight types, each declaring its `type` string with `typeField(...)`. Seven live in `src/plugins/drawing/objects/`; the eighth comes from the shared-variables plugin.
+
+| `type` (internal) | Defined at | Composed from | Type-specific fields |
+|---|---|---|---|
+| `rectangle` | `objects/rectangle.tsx:16` | Stroked + Filled + Sized | — |
+| `ellipse` | `objects/ellipse.tsx:14` | Stroked + Filled | `rx`, `ry` (x/y radius — **not** width/height) |
+| `line` | `objects/line.tsx:34` | Stroked + Filled | `deltaPoints` (points relative to `x`,`y`) |
+| `vector` | `objects/vector.tsx:17` | Stroked | `dx`, `dy`, `headShape`, `tailShape` |
+| `text` | `objects/text.tsx:20` | Editable + Sized | `stroke`, `text` |
+| `image` | `objects/image.tsx:15` | Sized | `url`, `filename` (optional) |
+| `group` | `objects/group.tsx:24` | Sized | `objects` (nested array of drawing objects) |
+| `variable` | `src/plugins/shared-variables/drawing/variable-object.tsx:28` | *(base only)* | `variableId` — a chip referencing a SharedVariables variable |
+
+## 5.2 Shared fields
+
+**Every object** (`DrawingObject`, `objects/drawing-object.tsx:59-68`):
+
+| Field | Type | Default |
+|---|---|---|
+| `type` | string | must be overridden |
+| `id` | identifier | auto (`uniqueId()`) |
+| `x`, `y` | number | required |
+| `hFlip`, `vFlip` | boolean | `false` |
+| `rotation` | number | `0` |
+| `visible` | boolean | `true` |
+
+The mixins, and what each adds:
+
+| Mixin | Defined at | Adds |
+|---|---|---|
+| `StrokedObject` | `objects/drawing-object.tsx:237-241` | `stroke`, `strokeDashArray`, `strokeWidth` |
+| `FilledObject` | `objects/drawing-object.tsx:264-266` | `fill` |
+| `SizedObject` | `objects/sized-object.ts:7-11` | `width`, `height` |
+| `EditableObject` | `objects/drawing-object.tsx:280-286` | **nothing stored** — only volatile `isEditing` |
+
+So an object's geometry is read differently per type: `rectangle`/`text`/`image`/`group` have `width`/`height`; `ellipse` has `rx`/`ry`; `line` has `deltaPoints`; `vector` has `dx`/`dy`. There is no single size field across the type set.
+
+## 5.3 Allowed values
+
+- **`headShape` / `tailShape`** — `VectorEndShape` (`src/plugins/drawing/model/drawing-basic-types.ts:42-44`): `triangle` is the only member. Both fields are optional; absent means a plain end.
+- **`stroke`, `fill`** — colour strings, not an enumeration.
+- **`deltaPoints`** — array of `{ x, y }` offsets from the object's own `x`,`y`.
+
+## 5.4 Coordinates, nesting and reading order
+
+- Positions are in the **tile's** coordinate space, including for objects inside a `group`. Nested coordinates are *not* group-relative, which is the opposite of most drawing conventions and the thing most likely to be read wrong.
+- A `group` nests arbitrarily; `objects` holds full objects, not ids.
+- Legacy drawings store a **change log** (`changes`) instead of `objects`. Replaying it needs `DrawingMigrator`, which reaches React and so cannot run server-side; a summary of such a tile says it cannot be read rather than reporting an empty drawing.
+
+---
+
+# 6. Tiles that can be named but not described
+
+These have no projection today. They are worth naming so that a tile present-but-undescribed is distinguishable from one that was never mentioned.
+
+| Tile | Type constant | Defined at | What is readable |
+|---|---|---|---|
+| Image | `"Image"` | `src/models/tiles/image/image-content.ts:13` | `url`, `filename` (optional) |
+| Geometry | `"Geometry"` | `src/models/tiles/geometry/geometry-types.ts:3` | nothing enumerated here yet |
+
+---
+
 ## Appendix — quick "create" summary
 
 - **Dataflow node:** `{ type: <one of the 10 type strings>, ...type-specific option fields }`, wired via input/output sockets. Options and allowed values per §1.2.
 - **Simulator tile:** `{ type: "Simulator", simulation: <"EMG_and_claw"|"terrarium"|"potentiometer_chip_servo"> }`; variables are seeded from the chosen simulation (§2.3).
 - **Table tile:** `{ type: "Table" }` backed by a DataSet of attributes (columns, optionally with `formula`, `units`, `precision`) and cases (rows). Toolbar tools per §3.3.
+- **Text tile:** `{ type: "Text", format: "markdown", text: "..." }`. Write `markdown`; `slate` is editor JSON and needs the editor to produce it (§4.2).
+- **Drawing object:** `{ type: <one of the 8 type strings>, x, y, ...type-specific fields }`, appended back-to-front to the tile's object list. Geometry fields differ by type — §5.2.
 
-*Regenerate/verify against source: `src/plugins/dataflow/model/utilities/node.ts`, `src/plugins/simulator/simulations/*`, `src/models/tiles/table/*` and `src/models/data/*`.*
+*Regenerate/verify against source: `src/plugins/dataflow/model/utilities/node.ts`, `src/plugins/simulator/simulations/*` and `shared/simulations/*`, `src/models/tiles/table/*` and `src/models/data/*`, `src/models/tiles/text/text-content.ts`, `src/plugins/drawing/objects/*` and `src/plugins/drawing/model/*`.*
+
+*Line citations are the perishable part. They were re-verified against master on 2026-09-14: of eleven line-numbered citations, eight still resolved exactly and three had drifted by roughly thirty lines within `node.ts` — corrected here. Every enumerated value was still accurate, so drift shows up as a wrong line number long before it shows up as a wrong answer. Check the enumerations first; they are what a reader acts on.*
