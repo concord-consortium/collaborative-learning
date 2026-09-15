@@ -241,3 +241,37 @@ describe("buildContextPacket", () => {
     expect(packet.workspace_state!.tiles).toHaveLength(3);
   });
 });
+
+// A run value carries only node_id — no tile_id — so it can only be understood by finding the node
+// in a tile the packet carries. Collecting values before the tile cap leaves values behind from
+// tiles that were dropped: evidence in the packet that resolves to nothing, which is the same
+// dangling reference shared_model_ids is filtered to prevent.
+describe("buildContextPacket run values follow their tiles", () => {
+  function docWithDataflowAfterCap() {
+    const doc: any = aDocument();
+    // push the Dataflow tile past the cap with filler tiles ahead of it
+    doc.rowMap["row-1"].tiles = [];
+    for (let i = 0; i < kMaxTiles + 2; i++) {
+      doc.tileMap[`f${i}`] = { id: `f${i}`, content: { type: "Text", format: "html", text: "x" } };
+      doc.rowMap["row-1"].tiles.push({ tileId: `f${i}` });
+    }
+    return doc;
+  }
+
+  it("drops the run values of a tile the cap dropped", () => {
+    const { packet } = buildContextPacket({
+      content: docWithDataflowAfterCap(), ...docOpts, envelope: envelopeOpts });
+    const carried = new Set(packet.workspace_state!.tiles.map(t => t.tile_id));
+    expect(carried.has("tile-df-1")).toBe(false);
+    // its nodes were n-sensor and n-out; neither may appear as evidence
+    const nodeIds = (packet.run_state?.values ?? []).map(v => v.node_id);
+    expect(nodeIds).not.toContain("n-sensor");
+    expect(nodeIds).not.toContain("n-out");
+  });
+
+  it("still carries run values for a Dataflow tile that survived the cap", () => {
+    const { packet } = buildContextPacket({
+      content: aDocument(), ...docOpts, envelope: envelopeOpts });
+    expect(packet.run_state!.values.map(v => v.node_id)).toEqual(["n-sensor", "n-out"]);
+  });
+});

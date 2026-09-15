@@ -302,3 +302,23 @@ describe("createFlProvider user identity", () => {
     expect(chat.mock.calls[0][1].userId).toBe("clue:authed/learn_concord_org/users/42");
   });
 });
+
+// flChat reports a stream that never received `done` as complete:false. Writing that partial prose
+// as the assistant's reply would present a truncated answer as a finished one — and worse, advance
+// flTurn and persist flSessionId, so the next turn continues from a turn that did not happen.
+describe("createFlProvider incomplete streams", () => {
+  it("refuses a stream that never finished, however much prose arrived", async () => {
+    const cut = {...aReply(), complete: false};
+    const {provider: p} = provider({reply: cut});
+    await expect(p.processTurn({}, aMessage())).rejects.toThrow(/incomplete|did not finish/i);
+  });
+
+  it("earns no session state from an unfinished turn", async () => {
+    const cut = {...aReply(), complete: false};
+    const {provider: p} = provider({reply: cut});
+    await p.processTurn({}, aMessage()).catch(() => undefined);
+    // nothing to assert on the parent directly — a throw means the drain commits no parentUpdate,
+    // which is the contract. This pins that the provider throws rather than returning a TurnResult.
+    await expect(p.processTurn({}, aMessage())).rejects.toThrow();
+  });
+});

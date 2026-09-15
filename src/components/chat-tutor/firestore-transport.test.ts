@@ -181,3 +181,36 @@ describe("FirestoreTransport problem context by backend", () => {
     expect(added).toHaveLength(1);
   });
 });
+
+// rightContent is the whole document snapshot in one Firestore message doc, and a Firestore
+// document is capped at 1 MiB. A CLUE dataset can grow without bound — a long recorded Dataflow
+// run writes a row per tick — so a valid workspace can exceed the cap and make the write itself
+// fail, before the trigger ever runs. Skipping the attachment degrades that to a turn with no
+// workspace; attaching it loses the turn entirely.
+describe("FirestoreTransport oversized workspace", () => {
+  function transportWith(json: string) {
+    const { added, firestore } = fakeFirestore();
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => "{}",
+      getRightSummary: () => undefined,
+      getRightContent: () => ({ json, hash: `h${json.length}` }),
+      provider: "foreverlearning",
+    });
+    return { added, transport };
+  }
+
+  it("attaches a workspace that fits", async () => {
+    const { added, transport } = transportWith(`{"x":"${"a".repeat(1000)}"}`);
+    await transport.sendUserMessage("hello");
+    expect(added[0].rightContent).toEqual(expect.any(String));
+  });
+
+  it("sends the turn without the workspace rather than failing the write", async () => {
+    const { added, transport } = transportWith(`{"x":"${"a".repeat(1_100_000)}"}`);
+    await transport.sendUserMessage("hello");
+    expect(added).toHaveLength(1);
+    expect(added[0]).not.toHaveProperty("rightContent");
+    expect(added[0].text).toBe("hello");
+  });
+});

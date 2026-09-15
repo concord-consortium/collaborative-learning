@@ -119,17 +119,22 @@ export function buildContextPacket(
   // it failed to look up.
   const carried = new Set(sharedModels.map(m => m.model_id));
 
-  const allTiles: PacketTile[] = [];
-  const allRunValues: RunValue[] = [];
+  // Run values are collected per tile rather than into one list, because they only mean anything
+  // beside the tile they came from: a value carries node_id and nothing else, so the reader can
+  // only resolve it by finding that node in a tile the packet carries. Collected flat, the values
+  // of a tile the cap later drops would stay behind as evidence that resolves to nothing — the
+  // same dangling reference shared_model_ids is filtered above to prevent.
+  const allTiles: Array<{ tile: PacketTile; runValues: RunValue[] }> = [];
   for (const section of normalizedModel.sections) {
     for (const row of section.rows) {
       for (const { model } of row.tiles) {
         const content = model?.content;
         if (!content) continue;
         let tile: PacketTile | undefined;
+        let tileRunValues: RunValue[] = [];
         if (content.type === "Dataflow") {
           tile = projectDataflowTile(content, model.id, model.title);
-          allRunValues.push(...dataflowRunValues(content));
+          tileRunValues = dataflowRunValues(content);
         } else {
           // projectTile returns undefined for tiles that do not belong in the packet at all.
           tile = projectTile(content, model.id, model.title);
@@ -137,15 +142,18 @@ export function buildContextPacket(
         if (!tile) continue;
         const modelIds = (projection.tileModelIds[model.id] ?? []).filter(id => carried.has(id));
         if (modelIds.length) tile.shared_model_ids = modelIds;
-        allTiles.push(tile);
+        allTiles.push({ tile, runValues: tileRunValues });
       }
     }
   }
 
-  const tiles = allTiles.slice(0, kMaxTiles);
-  if (allTiles.length > tiles.length) {
-    omitted.push({ kind: "tiles", count: allTiles.length - tiles.length });
+  const kept = allTiles.slice(0, kMaxTiles);
+  const tiles = kept.map(k => k.tile);
+  if (allTiles.length > kept.length) {
+    omitted.push({ kind: "tiles", count: allTiles.length - kept.length });
   }
+  // Only from the tiles that survived, so no value outlives the tile that gave it meaning.
+  const allRunValues = kept.flatMap(k => k.runValues);
   const runValues = allRunValues.slice(0, kMaxRunValues);
   if (allRunValues.length > runValues.length) {
     omitted.push({ kind: "run_values", count: allRunValues.length - runValues.length });

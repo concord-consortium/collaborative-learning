@@ -76,6 +76,26 @@ describe("SseParser", () => {
     expect(parser.end().map(e => e.type)).toEqual(["done"]);
   });
 
+  // The CR and the LF of one separator can land in different chunks. Normalizing per chunk leaves
+  // that pair unmatched at the seam, so the blank line between two events disappears and both are
+  // merged into one unparseable block — losing both, silently, on a stream that was perfectly
+  // valid. Found independently by a Copilot review and by a self-review of the same code.
+  it("reassembles a CRLF separator split across two chunks", () => {
+    const parser = new SseParser();
+    const first = parser.push(`data: {"type":"metadata"}\r\n\r`);
+    const second = parser.push(`\ndata: {"type":"done"}\r\n\r\n`);
+    expect([...first, ...second].map(e => e.type)).toEqual(["metadata", "done"]);
+  });
+
+  it("reassembles a CRLF stream arriving one character at a time", () => {
+    const crlf = kStream.replace(/\n/g, "\r\n");
+    const parser = new SseParser();
+    const events = [];
+    for (const ch of crlf) events.push(...parser.push(ch));
+    expect(events).toHaveLength(8);
+    expect(events[events.length - 1].type).toBe("done");
+  });
+
   it("drops a malformed event rather than abandoning the stream", () => {
     const events = new SseParser().push(
       `data: {not json\n\ndata: {"type":"done"}\n\n`);

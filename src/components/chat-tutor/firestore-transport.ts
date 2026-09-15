@@ -12,6 +12,11 @@ import { TutorProviderId } from "../../../shared/chat-tutor-providers";
 // server-side on the first send — the client writes only message docs.
 export const kChatTutorCollection = "chatTutor";
 
+// Firestore caps a document at 1 MiB. This is the budget for the workspace snapshot alone, left
+// short of the cap so the rest of the message — the text, the problem path, the timestamps and
+// Firestore's own overhead — cannot push a payload that measured as fitting over the edge.
+const kMaxAttachedWorkspace = 900_000;
+
 export interface FirestoreTransportOptions {
   firestore: Firestore;
   // canonical conversation doc id (already escaped — see conversationDocId)
@@ -149,7 +154,14 @@ export class FirestoreTransport implements ChatTransport {
     const { getRightSummary, getRightContent, provider } = this.opts;
     if (provider === "foreverlearning") {
       const content = getRightContent?.();
-      return content && { field: "rightContent", value: content.json, hash: content.hash };
+      if (!content) return undefined;
+      // A Firestore document is capped at 1 MiB and this payload is the whole workspace snapshot,
+      // which a CLUE dataset can push past — a long recorded Dataflow run writes a row per tick.
+      // Over the cap the write itself fails and the turn never reaches the trigger, so dropping
+      // the attachment is the lesser loss: the server then describes no workspace, or reuses the
+      // last one it was given, instead of the student getting no answer at all.
+      if (content.json.length > kMaxAttachedWorkspace) return undefined;
+      return { field: "rightContent", value: content.json, hash: content.hash };
     }
     const summary = getRightSummary();
     return summary && { field: "rightContext", value: summary.markdown, hash: summary.hash };

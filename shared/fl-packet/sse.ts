@@ -57,13 +57,20 @@ export class SseParser {
 
   /** Feeds one chunk and returns whatever complete events it completed. */
   push(chunk: string): SseEvent[] {
-    // Normalising CRLF on the way in keeps the separator single-form, including across a chunk
-    // boundary that falls between the CR and the LF.
-    this.buffer += chunk.replace(/\r\n/g, "\n");
-    const blocks = this.buffer.split("\n\n");
+    // Raw first, normalise after. Normalising each chunk on the way in cannot see a CR and its LF
+    // when they land in different reads: the pair stays unmatched at the seam, the blank line
+    // between two events disappears, and both are merged into one unparseable block — losing two
+    // events from a stream that was perfectly well formed.
+    //
+    // A trailing CR is then held back unnormalised, because its LF may still be in the next chunk.
+    // Without that, the same split is simply moved one character later.
+    this.buffer += chunk;
+    const heldCr = this.buffer.endsWith("\r");
+    const scan = heldCr ? this.buffer.slice(0, -1) : this.buffer;
+    const blocks = scan.replace(/\r\n/g, "\n").split("\n\n");
     // The last block is either empty (the buffer ended on a separator) or a partial event. Either
-    // way it stays buffered until more arrives.
-    this.buffer = blocks.pop() ?? "";
+    // way it stays buffered until more arrives, with the held-back CR restored on the end.
+    this.buffer = (blocks.pop() ?? "") + (heldCr ? "\r" : "");
     const events: SseEvent[] = [];
     for (const block of blocks) {
       const event = parseBlock(block);

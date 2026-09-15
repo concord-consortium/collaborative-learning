@@ -107,6 +107,17 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
         sessionId: parent.flSessionId,
       });
 
+      // `complete` is set by the stream's own `done` event, so its absence means the connection
+      // ended before ForeverLearning said it had finished. Refusing here rather than further down
+      // is deliberate: prose arrives token by token, so a dropped connection almost always leaves
+      // a readable-looking fragment, and writing that would present a truncated answer as a
+      // finished one — while advancing flTurn and persisting flSessionId, so the next turn would
+      // continue from a turn that never happened. A failed turn is recoverable; a plausible
+      // half-answer recorded as final is not.
+      if (!stream.complete) {
+        throw new Error("ForeverLearning stream ended incomplete; refusing to record a partial turn");
+      }
+
       // The prose part and the packet are separate parts of one stream and either can arrive
       // without the other. Losing the directives is not a reason to lose the reply.
       const response = parseResponsePacket(stream.display);
