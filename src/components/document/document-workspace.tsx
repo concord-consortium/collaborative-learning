@@ -1,4 +1,4 @@
-import { comparer, reaction, when, IReactionDisposer } from "mobx";
+import { comparer, reaction, IReactionDisposer } from "mobx";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../../components/base";
@@ -20,8 +20,6 @@ import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.scss";
 
-const kGroupMembershipWaitMs = 30000;
-
 interface IProps extends IBaseProps {
 }
 
@@ -33,7 +31,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private primaryDocument?: DocumentModelType;
   private primaryDocumentLoaded = false;
   private groupChangeDisposer?: IReactionDisposer;
-  private groupWaitDisposer?: () => void;
   private unmounted = false;
 
   constructor(props: IProps) {
@@ -48,40 +45,48 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   public componentDidMount() {
     this.guaranteeInitialDocuments();
 
-    // Watch the primary doc's group id alongside the user's current group
-    // id. When the user is in a group AND the primary is a group doc for a
-    // different group, fall back to the default doc. Skipping when
-    // currentGroupId is undefined avoids closing during bootstrap before
-    // the groups listener has set the user's group. Tracking both values
-    // also handles the stale-doc case where the persisted primary group
-    // doc loads before or after currentGroupId resolves on next session.
+    // Keep the primary document in step with the user's group. Watching the primary's group id
+    // alongside the user's current group id covers the persisted primary loading before or after
+    // currentGroupId resolves, and a group switch mid-session; firing immediately covers the first
+    // visit, when no primary is set yet. Skipping when currentGroupId is undefined avoids closing
+    // anything during bootstrap before the groups listener has set the user's group. A primary that
+    // is not a group document is left alone: the last-opened document is restored as usual.
     this.groupChangeDisposer = reaction(
       () => {
         const { persistentUI: { problemWorkspace }, user } = this.stores;
         const primary = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
         return {
+          hasPrimary: !!problemWorkspace.primaryDocumentKey,
           primaryDocGroupId: primary && hasGroupOwner(primary) ? primary.groupId : undefined,
           currentGroupId: user.currentGroupId,
         };
       },
-      ({ primaryDocGroupId, currentGroupId }) => {
+      ({ hasPrimary, primaryDocGroupId, currentGroupId }) => {
         if (!currentGroupId) return;
-        if (!primaryDocGroupId) return;
-        if (primaryDocGroupId === currentGroupId) return;
+        if (!hasPrimary) {
+          // Nothing to show yet. When the unit starts students in their group's document, open it;
+          // otherwise guaranteeInitialDocuments opens the default document.
+          if (this.startsInGroupDocumentAsStudent) {
+            this.openGroupPrimaryDocument(currentGroupId);
+          }
+          return;
+        }
+        if (!primaryDocGroupId || primaryDocGroupId === currentGroupId) return;
+        // The primary is another group's document. Follow the student to their new group's document
+        // when the unit starts them there; otherwise fall back to the default document.
         if (this.startsInGroupDocumentAsStudent) {
-          this.loadGroupPrimaryDocument();
+          this.openGroupPrimaryDocument(currentGroupId);
         } else {
-          this.loadDefaultPrimaryDocument();
+          this.openDefaultPrimaryDocument();
         }
       },
-      { equals: comparer.shallow }
+      { equals: comparer.shallow, fireImmediately: true }
     );
   }
 
   public componentWillUnmount() {
     this.unmounted = true;
     this.groupChangeDisposer?.();
-    this.groupWaitDisposer?.();
   }
 
   public componentDidUpdate(): void {
@@ -209,69 +214,35 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     return db.guaranteeOpenDefaultDocument(type, documentContent);
   }
 
-  private async loadDefaultPrimaryDocument() {
+  private async openDefaultPrimaryDocument() {
     const defaultDocument = await this.guaranteeDefaultDocument();
     if (defaultDocument) {
       this.stores.persistentUI.problemWorkspace.setPrimaryDocument(defaultDocument);
     }
   }
 
-  // Group membership resolves after mount, so wait for it — bounded, then fall back to the default
-  // document rather than an empty workspace. In practice app.tsx gates students behind the group modal
-  // until currentGroupId is set, so the wait resolves immediately; the timeout is defensive. The
-  // student's own default document is still guaranteed afterward — 4-up and publishing depend on it.
-  private async loadGroupPrimaryDocument(): Promise<void> {
-    const { db, persistentUI: { problemWorkspace } } = this.stores;
-    let primarySet = false;
-    let requestedGroupId: string | undefined;
-    // Same precondition db.requireGroupContext enforces; waiting here turns its throw into a wait.
-    const groupWait = when(() => !!this.stores.user.currentGroupId && !!this.stores.user.offeringId,
-      { timeout: kGroupMembershipWaitMs });
-    this.groupWaitDisposer?.();
-    this.groupWaitDisposer = groupWait.cancel;
-    // True once this invocation no longer owns the workspace: the component unmounted, or a newer
-    // loadGroupPrimaryDocument installed its own wait.
-    const superseded = () => this.unmounted || this.groupWaitDisposer !== groupWait.cancel;
+  // Opens the given group's document as the primary. Called from the group-change reaction, which fires
+  // again if membership moves while the resolve is in flight, so a result for a group the student has
+  // since left is simply dropped. app.tsx only mounts the workspace once a student is in a group, so the
+  // group context db.requireGroupContext needs is already in place.
+  private async openGroupPrimaryDocument(groupId: string): Promise<void> {
+    const { db, persistentUI: { problemWorkspace }, user } = this.stores;
+    const stale = () => this.unmounted || user.currentGroupId !== groupId;
     try {
-      await groupWait;
-      requestedGroupId = this.stores.user.currentGroupId;
       const groupDocument = await db.getOrCreateGroupDocument();
-      if (superseded()) return;
-      if (this.stores.user.currentGroupId !== requestedGroupId) {
-        // Membership moved while the resolve was in flight and no primary is set yet, so the
-        // group-change reaction cannot re-point; load the current group's document instead.
-        return this.loadGroupPrimaryDocument();
-      }
-      if (groupDocument) {
-        problemWorkspace.setPrimaryDocument(groupDocument);
-        primarySet = true;
-      } else {
+      if (stale()) return;
+      if (!groupDocument) {
         throw new Error("getOrCreateGroupDocument returned no document");
       }
-      const defaultDocument = await this.guaranteeDefaultDocument();
-      if (!defaultDocument) {
-        console.warn("Student's own default document was not created; 4-up and publishing need it");
-      }
+      problemWorkspace.setPrimaryDocument(groupDocument);
     } catch (err) {
-      // A superseded invocation's wait was cancelled, which rejects here: teardown, not a failure.
-      if (superseded()) return;
-      if (!primarySet && requestedGroupId && this.stores.user.currentGroupId !== requestedGroupId) {
-        // The failed resolve belonged to a group the student already left, and with no primary set the
-        // group-change reaction cannot recover — retry for the current group rather than falling back.
-        return this.loadGroupPrimaryDocument();
-      }
+      if (stale()) return;
       console.warn("Could not open the group document as the default; using the default document", err);
-      // Only fall back while the workspace is still empty — the group document is already primary
-      // when the failure came from the later default-document guarantee, and must not be replaced.
-      if (!primarySet) {
-        await this.loadDefaultPrimaryDocument().catch((fallbackErr) => {
+      // Only fall back while the workspace is still empty rather than replacing whatever is shown.
+      if (!problemWorkspace.primaryDocumentKey) {
+        await this.openDefaultPrimaryDocument().catch((fallbackErr) => {
           console.error("Fallback to the default document also failed", fallbackErr);
         });
-      }
-    } finally {
-      // Only clear our own wait: a later invocation may already have installed its cancel here.
-      if (this.groupWaitDisposer === groupWait.cancel) {
-        this.groupWaitDisposer = undefined;
       }
     }
   }
@@ -283,9 +254,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       if (this.startsInGroupDocumentAsStudent) {
-        await this.loadGroupPrimaryDocument();
+        // The group-change reaction opens the group document as the primary. The student's own default
+        // document is still guaranteed, without being shown — 4-up and publishing depend on it.
+        const defaultDocument = await this.guaranteeDefaultDocument();
+        if (!defaultDocument) {
+          console.warn("Student's own default document was not created; 4-up and publishing need it");
+        }
       } else {
-        await this.loadDefaultPrimaryDocument();
+        await this.openDefaultPrimaryDocument();
       }
     } else if (groupDocumentsEnabled || classWideDocuments?.length) {
       // Group documents and class-wide documents are both not loaded automatically like other
@@ -488,7 +464,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       if (confirmDelete) {
         document.setProperty("isDeleted", "true");
         // Replace the now-tombstoned primary with the default doc.
-        this.loadDefaultPrimaryDocument();
+        this.openDefaultPrimaryDocument();
       }
     });
   };
