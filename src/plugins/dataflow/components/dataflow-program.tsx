@@ -10,7 +10,6 @@ import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowGroupsOverlay } from "./ui/dataflow-groups-overlay";
-import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { ProgramDataRates } from "../model/utilities/node";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { ITileProps } from "../../../components/tiles/tile-component";
@@ -41,7 +40,6 @@ export interface IDataflowProgramApi {
 }
 
 interface IProps {
-  documentProperties?: { [key: string]: string };
   tileId?: string;
   program?: DataflowProgramModelType;
   programDataRate: number;
@@ -50,7 +48,7 @@ interface IProps {
   tileContent: DataflowContentModelType;
   tileElt: HTMLElement | null;
   onRegisterTileApi: ITileProps["onRegisterTileApi"];
-  onReteManagerCreated?: (reteManager: ReteManager | undefined) => void;
+  onActiveReteManagerChanged?: (reteManager: ReteManager | undefined) => void;
   onProgramContainerRef?: (el: HTMLElement | null) => void;
   onProgramApiRef?: (api: IDataflowProgramApi | null) => void;
 }
@@ -97,7 +95,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, tileContent, programDataRate } = this.props;
+    const { readOnly, tileContent, programDataRate } = this.props;
     const { playBackIndex, isPlaying } = this.state;
     const programMode = this.determineProgramMode();
 
@@ -105,9 +103,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const editorClass = `editor ${editorClassForDisplayState}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
-    const showZoomControl = !documentProperties?.dfHasData;
-    const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
-    const showProgramToolbar = showZoomControl && !disableToolBarModes;
+    const showProgramToolbar = programMode !== ProgramMode.Recording && programMode !== ProgramMode.Done;
 
     // The palette must be a sibling of content (not a descendant) so the focus
     // trap can treat it as its own single-tab-stop slot without nested-slot
@@ -168,12 +164,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   <DataflowGroupsOverlay reteManager={this.reteManager} /> }
                 { this.shouldShowProgramCover() &&
                   <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
-                {showZoomControl && this.reteManager &&
-                  <DataflowProgramZoom
-                    onZoomInClick={this.handleZoomIn}
-                    onZoomOutClick={this.handleZoomOut}
-                    disabled={false}
-                  /> }
               </div>
             </DataflowDropZone>
             <div
@@ -255,16 +245,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private handleZoomIn = () => {
-    const zoomManager = this.playbackReteManager || this.reteManager;
-    zoomManager?.zoomIn();
-  };
-
-  private handleZoomOut = () => {
-    const zoomManager = this.playbackReteManager || this.reteManager;
-    zoomManager?.zoomOut();
-  };
-
   public componentDidMount() {
     this.initReteManagersIfNeeded();
 
@@ -285,7 +265,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.reteManager = undefined;
     this.playbackReteManager?.dispose();
     this.playbackReteManager = undefined;
-    this.props.onReteManagerCreated?.(undefined);
+    this.props.onActiveReteManagerChanged?.(undefined);
     this.props.onProgramApiRef?.(null);
   }
 
@@ -303,7 +283,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const nodeModel = this.props.program?.nodes.get(objectId);
 
-    const reteManager = this.playbackReteManager || this.reteManager;
+    const reteManager = this.activeReteManager;
     const nodeView = reteManager?.area.nodeViews.get(objectId);
     const { tileElt } = this.props;
     if (!nodeModel || !nodeView || !tileElt) return undefined;
@@ -348,10 +328,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // If the playbackReteManager has just been created its elements
     // won't be setup yet so we need to wait for that to finish before
     // the boundingBoxes are re computed.
-    const reteManager = this.playbackReteManager || this.reteManager;
+    const reteManager = this.activeReteManager;
     reteManager?.setupComplete.then(() =>
       runInAction(() => this.updateObservable.updateCount++)
     );
+  }
+
+  // The manager owning the canvas the user is looking at: the playback manager in Done mode, the
+  // editor manager otherwise (the editor's canvas is only hidden while playback is up).
+  private get activeReteManager() {
+    return this.playbackReteManager ?? this.reteManager;
+  }
+
+  private reportActiveReteManager() {
+    this.props.onActiveReteManagerChanged?.(this.activeReteManager);
   }
 
   private initReteManagersIfNeeded() {
@@ -375,6 +365,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // position
       const dataSet = this.props.tileContent.dataSet;
       this.playbackNodesWithCaseData(dataSet, 0);
+
+      this.reportActiveReteManager();
     }
   }
 
@@ -410,7 +402,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly, false);
 
     this.reteManager = reteManager;
-    this.props.onReteManagerCreated?.(reteManager);
+    this.reportActiveReteManager();
   };
 
   private setDataRate = (rate: number) => {
@@ -531,6 +523,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         if (this.playbackReteManager) {
           this.playbackReteManager.dispose();
           this.playbackReteManager = undefined;
+          this.reportActiveReteManager();
         }
         tileContent.resetRecording();
         break;

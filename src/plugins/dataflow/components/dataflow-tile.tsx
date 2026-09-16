@@ -90,7 +90,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   }
 
-  private handleReteManagerCreated = (reteManager: ReteManager | undefined) => {
+  private handleActiveReteManagerChanged = (reteManager: ReteManager | undefined) => {
     this.setState({ reteManager });
   };
 
@@ -134,7 +134,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         </TileTitleArea>
         <div className={classes} onPointerDownCapture={this.handleTileContentPointerDown}>
           <DataflowProgram
-            documentProperties={this.getDocumentProperties()}
             tileId={model.id}
             program={program}
             programDataRate={programDataRate}
@@ -143,7 +142,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             tileContent={tileContent}
             tileElt={tileElt}
             onRegisterTileApi={onRegisterTileApi}
-            onReteManagerCreated={this.handleReteManagerCreated}
+            onActiveReteManagerChanged={this.handleActiveReteManagerChanged}
             onProgramContainerRef={el => this.programContainerEl = el}
             onProgramApiRef={api => this.programApi = api}
           />
@@ -169,16 +168,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         </>
       </DataflowReteManagerContext.Provider>
     );
-  }
-
-  private getDocument() {
-    const { documents, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
-    return primaryDocumentKey ? documents.getDocument(primaryDocumentKey) : undefined;
-  }
-
-  private getDocumentProperties() {
-    const document = this.getDocument();
-    return document && document.properties.toJSON();
   }
 
   private handleBeginEditTitle = () => {
