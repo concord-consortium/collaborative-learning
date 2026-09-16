@@ -142,6 +142,8 @@ interface IResolvedCanonicalDocument {
   // True when the resolution is usable but the slot was NOT claimed (the backfill transaction failed and a
   // re-read showed the slot still empty). Such a result must not be memoized for the session — a later
   // resolve has to retry the claim, or clients could keep opening different legacy duplicates.
+  // Only the legacy fallback sets this, so it retires when that fallback does (step 2 of
+  // resolveCanonicalDocumentUncached says what removal waits on).
   provisional?: boolean;
 }
 
@@ -1008,6 +1010,17 @@ export class DB {
     }
 
     // 2. Legacy fallback: pre-pointer group docs are found by query; backfill a pointer.
+    //
+    // TRANSITIONAL: this serves only group documents created before canonical pointers existed. It finds one
+    // by owner query — the only query anywhere that filters on an owner, see "Locating" in
+    // docs/document-axes/axes.md — and backfills its pointer the first time someone opens it.
+    //
+    // Removal is not gated on scripts/backfill-group-document-axes.ts alone: that script stamps axis fields
+    // and writes no pointers. A pre-pointer group document nobody has opened therefore still has no slot, and
+    // dropping this step would converge its group onto a freshly minted empty document while the real one,
+    // holding their work, became unreachable. Remove it once either the script has grown a pointer-backfill
+    // pass that has run in every environment, or no pre-pointer group documents remain in one that matters.
+    // findLegacyGroupDocument, the findLegacy option, and the provisional flag all go with it.
     if (findLegacy) {
       const legacy = await findLegacy();
       if (legacy) {
