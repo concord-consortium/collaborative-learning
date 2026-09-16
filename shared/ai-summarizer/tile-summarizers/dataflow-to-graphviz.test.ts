@@ -143,7 +143,7 @@ describe("programToGraphviz", () => {
       <tr><td>title</td><td>Math 1</td></tr>
     </table>
   >];
-  "Logic:Logic 1" [label=<
+  "Compare:Logic 1" [label=<
     <table>
       <tr><td>plot</td><td>false</td></tr>
       <tr><td>logicOperator</td><td>Greater Than</td></tr>
@@ -327,12 +327,86 @@ describe("programToGraphviz", () => {
       expect(dot).not.toContain("<tr><td>title</td><td>Sensor:Sensor 1</td></tr>");
     });
 
-    it("falls back to the node name when there is no ordered display name", () => {
+    // "Sensor" is identity-mapped, so this coincides with the node's own name; the CLUE-667 describe
+    // block below covers a renamed type, where the two diverge.
+    it("falls back to the type's display name when there is no ordered display name", () => {
       const unnamed = {
         ...program,
         nodes: { n1: { ...program.nodes.n1, data: { type: "Sensor", plot: false } } }
       };
       expect(programToGraphviz(unnamed)).toContain("<tr><td>title</td><td>Sensor</td></tr>");
+    });
+  });
+
+  // The block palette has been renamed since these internal type strings were chosen (CLUE-667):
+  // Generator/Logic/Control/Demo Output/Live Output display as Waves/Compare/Hold/Demo Device/Live
+  // Device. Neither half of that rename reaches the AI unless the summarizer maps it explicitly.
+  describe("type display names (CLUE-667)", () => {
+    it.each([
+      ["Generator", "Waves"],
+      ["Logic", "Compare"],
+      ["Control", "Hold"],
+      ["Demo Output", "Demo Device"],
+      ["Live Output", "Live Device"],
+    ])("identifies a %s block by its display name %s, not its internal type", (type, displayName) => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: type, x: 0, y: 0,
+            data: { type, plot: false, orderedDisplayName: `${displayName} 1` } }
+        },
+        connections: {}
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain(`"${displayName}:${displayName} 1" [label=<`);
+      expect(dot).not.toContain(`"${type}:`);
+    });
+
+    it("identity-mapped types (e.g. Number) are unaffected", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Number", x: 0, y: 0,
+            data: { type: "Number", plot: false, orderedDisplayName: "Number 1" } }
+        },
+        connections: {}
+      };
+      expect(programToGraphviz(program)).toContain('"Number:Number 1" [label=<');
+    });
+
+    it("falls back to the display name, not the raw internal type, when a legacy node has no " +
+       "ordered display name", () => {
+      // createAndAddNode stamps the raw type as both `data.type` and the node's own `name` field, so a
+      // node saved before orderedDisplayName existed has no display-worthy name at all: node.name IS
+      // the internal type string. The title (and the identifier's name half, which falls back to
+      // node.name too) must not surface that raw string to the AI.
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Generator", x: 0, y: 0, data: { type: "Generator", plot: false } }
+        },
+        connections: {}
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain("<tr><td>title</td><td>Waves</td></tr>");
+      expect(dot).not.toContain("<tr><td>title</td><td>Generator</td></tr>");
+    });
+
+    it("an edge between renamed blocks references the display-name identifier at both ends", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Generator", x: 0, y: 0,
+            data: { type: "Generator", plot: false, orderedDisplayName: "Waves 1" } },
+          n2: { id: "n2", name: "Control", x: 0, y: 0,
+            data: { type: "Control", plot: false, orderedDisplayName: "Hold 1" } },
+        },
+        connections: {
+          c1: { id: "c1", source: "n1", sourceOutput: "value", target: "n2", targetInput: "num1" }
+        }
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain('"Waves:Waves 1":"value" -> "Hold:Hold 1":"num1";');
     });
   });
 });

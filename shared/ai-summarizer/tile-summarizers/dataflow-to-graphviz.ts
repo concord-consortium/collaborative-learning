@@ -1,3 +1,5 @@
+import { NodeTypes } from "../../dataflow-node-types";
+
 interface TickEntry {
   nodeValue?: string;
   open?: boolean;
@@ -49,6 +51,14 @@ interface Program {
   connections: Record<string, Connection>;
   groups?: Record<string, Group>;
   recentTicks?: string[];
+}
+
+const displayNameByType = new Map(NodeTypes.map(nt => [nt.name, nt.displayName]));
+
+// The block palette has been renamed since these internal type strings were chosen (e.g. "Generator"
+// displays as "Waves"); a student never sees the internal type, so the AI must not either.
+function displayNameForType(type: string): string {
+  return displayNameByType.get(type) ?? type;
 }
 
 /** Escape a string for use inside a double-quoted Graphviz attribute value. */
@@ -242,7 +252,7 @@ export function programToGraphviz(program: Program): string {
   const nodeNameCounts = new Map<string, number>();
 
   Object.values(program.nodes).forEach(node => {
-    const nodeType = node.data.type;
+    const nodeType = displayNameForType((node.data as NodeDataBase).type);
     const nodeName = node.data.orderedDisplayName || node.name;
     const baseId = `${nodeType}:${nodeName}`;
 
@@ -257,7 +267,7 @@ export function programToGraphviz(program: Program): string {
 
   // Fix up IDs: only add index if there are duplicates
   Object.values(program.nodes).forEach(node => {
-    const nodeType = node.data.type;
+    const nodeType = displayNameForType((node.data as NodeDataBase).type);
     const nodeName = node.data.orderedDisplayName || node.name;
     const baseId = `${nodeType}:${nodeName}`;
     const count = nodeNameCounts.get(baseId) || 0;
@@ -346,8 +356,13 @@ export function programToGraphviz(program: Program): string {
     // `type:name` so it stays legible as an edge endpoint, but that prefix is not on screen — a
     // consumer that quotes the identifier to a student names a block `Sensor:Sensor 1` that the
     // student sees titled `Sensor 1`.
+    //
+    // A node saved before orderedDisplayName existed has none, and its own `name` field is just the
+    // raw internal type (createAndAddNode stamps both from the same value) — so the fallback goes
+    // through the same type -> display-name mapping as the identifier, not the raw node.name.
     const propertyRows = propertiesToTableRows({
-      ...automaticNodeProperties, ...properties, id: node.id, title: orderedDisplayName || node.name
+      ...automaticNodeProperties, ...properties, id: node.id,
+      title: orderedDisplayName || displayNameForType(nodeType)
     });
 
     // Build HTML table label
