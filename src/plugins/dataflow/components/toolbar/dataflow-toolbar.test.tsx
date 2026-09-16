@@ -263,4 +263,26 @@ describe("Dataflow pan split button (CLUE-573)", () => {
     expect(content.panPaletteOpen).toBe(false);
   });
 
+  // During recorded-data playback the active manager's mstContent is a snapshot copy whose volatiles
+  // reset; the remembered direction must live on the real tile content instead.
+  it("pan state lives on the tile content, not the active manager's content copy", () => {
+    const tileContent = DataflowContentModel.create();
+    const managerCopy = DataflowContentModel.create();
+    renderToolbarButton("pan", { content: tileContent, manager: makeManagerStub(managerCopy) });
+    fireEvent.click(screen.getByTestId("pan-expand-triangle"));
+    fireEvent.click(screen.getByRole("button", { name: "Pan up" }));
+    expect(tileContent.lastPanDirection).toBe("up");
+    expect(tileContent.panPaletteOpen).toBe(true);
+    expect(managerCopy.lastPanDirection).toBe("right");   // the copy is untouched
+    expect(managerCopy.panPaletteOpen).toBe(false);
+  });
+
+  it("pointerdown outside closes the palette; inside it does not", () => {
+    const { content } = openPalette();
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Pan up" }));
+    expect(content.panPaletteOpen).toBe(true);
+    fireEvent.pointerDown(document.body);
+    expect(content.panPaletteOpen).toBe(false);
+  });
+
 });

@@ -3,9 +3,10 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
+import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useTouchHold } from "../../../../hooks/use-touch-hold";
 import { DataflowReteManagerContext } from "../dataflow-rete-manager-context";
-import { PanDirection } from "../../model/dataflow-content";
+import { DataflowContentModelType, PanDirection } from "../../model/dataflow-content";
 import { MIN_ZOOM, MAX_ZOOM, kPanStep } from "../../rete/rete-manager";
 
 import ZoomInIcon from "../../../../clue/assets/icons/zoom-in-icon.svg";
@@ -153,12 +154,28 @@ function PanPalette({ onSelect, onClose }: IPanPaletteProps) {
 // (default right); the corner triangle (or touch-hold) opens the palette to pick another.
 export const PanButton = observer(function PanButton({ name }: IToolbarButtonComponentProps) {
   const reteManager = useContext(DataflowReteManagerContext);
-  const content = reteManager?.mstContent;
+  // Toolbar-only state lives on the real tile content: the active manager's mstContent is a snapshot
+  // COPY during recorded-data playback, whose volatiles would reset the remembered direction on every
+  // mode change. Pan operations still go to the active manager, which owns the visible canvas.
+  const content = useContext(TileModelContext)?.content as DataflowContentModelType | undefined;
   const isOpen = !!content?.panPaletteOpen;
   const lastDirection = content?.lastPanDirection ?? "right";
 
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open.
   useEffect(() => () => content?.setPanPaletteOpen(false), [content]);
+
+  // Clicking anywhere outside the trigger or the palette closes the flyout (capture phase, so a
+  // click that something else swallows still closes it).
+  useEffect(() => {
+    if (!isOpen) return;
+    const handlePointerDown = (e: PointerEvent) => {
+      if (!(e.target as Element | null)?.closest?.(".toolbar-button.pan, .dataflow-pan-palette")) {
+        content?.setPanPaletteOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
+  }, [isOpen, content]);
 
   const { onClick } = useTouchHold(toggleOpen, panLastDirection);
 
