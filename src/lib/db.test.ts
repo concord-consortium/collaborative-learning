@@ -10,7 +10,9 @@ import {
 import {
   AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
-import { getCanonicalPointerPath, kDefaultCanonicalDocumentLabel } from "./scoped-document-pointers";
+import {
+  CanonicalSlotOwnerChangedError, getCanonicalPointerPath, kDefaultCanonicalDocumentLabel
+} from "./scoped-document-pointers";
 import { specStores } from "../models/stores/spec-stores";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores } from "../models/stores/stores";
@@ -53,6 +55,8 @@ jest.mock("firebase/app", () => {
     functions: () => mockFunctions()
   };
   (mockFirebase.auth as any).Auth = { Persistence: { SESSION: "session"}};
+  // createDocument stamps the RTDB server-timestamp sentinel and reads the resolved value back.
+  (mockFirebase.database as any).ServerValue = { TIMESTAMP: { ".sv": "timestamp" } };
   return mockFirebase;
 });
 
@@ -559,17 +563,104 @@ describe("db", () => {
       expect(k4).not.toBe(k3);
       expect(fetchedPaths).toHaveLength(2);   // one fetch per slot, not per call
     });
+
+    // The slot path is fixed when the resolve starts; the document is minted later from the stores as
+    // they are then. Without a guard, a switch in between mints a document for the new group while
+    // claiming the old group's slot.
+    it("aborts rather than minting for the new group when membership moves mid-resolve", async () => {
+      const createSpy = jest.spyOn(db, "createDocument")
+        .mockResolvedValue({ firestoreMetadata: { key: "minted-key" } } as any);
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({
+          get: () => {
+            stores.user.setCurrentGroupId("4");   // membership moves while the slot read is in flight
+            return Promise.resolve({ exists: false });
+          }
+        }),
+        collection: mockLegacyQuery()
+      }));
+      // Stubbed so that without the guard the claim succeeds and the resolve returns a key, rather than
+      // failing for an unrelated reason.
+      (db as any).firestore.runTransaction = jest.fn(async (fn: any) =>
+        fn({ get: async () => ({ exists: false }), set: () => {}, update: () => {} }));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      // A distinct type rather than a message, so callers can tell this apart from a real failure.
+      await expect(db.resolveGroupDocument()).rejects.toBeInstanceOf(CanonicalSlotOwnerChangedError);
+      // Nothing is minted, so there is no stray document for the other group's resolve to adopt.
+      expect(createSpy).not.toHaveBeenCalled();
+      createSpy.mockRestore();
+    });
   });
 
-  it("writes group-document metadata to Firestore client-side (no contextId)", async () => {
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
-    // group scope: createFirestoreMetadataDocument derives context_id/groupId/offeringId from the stores.
+  // A new document's Firestore metadata is built from the stores in one synchronous pass, so everything
+  // the stores contribute agrees with whatever the caller validated just before creating.
+  describe("Firestore metadata content is pinned before any await", () => {
+    beforeEach(() => {
+      stores.user = UserModel.create({
+        id: "1", portal: "example.com", classHash: "class-h", offeringId: "off-1", currentGroupId: "3"
+      });
+    });
+
+    // `onFirstWrite` fires on the document write, which is the first await in createDocument — after its
+    // synchronous prologue and before the Firestore metadata is written.
+    const stubRtdbForCreate = (onFirstWrite?: () => void) => {
+      mockDatabase.mockImplementation(() => ({
+        ref: () => ({
+          push: () => ({
+            key: "new-key",
+            set: () => { onFirstWrite?.(); return Promise.resolve(); }
+          }),
+          set: () => Promise.resolve(),
+          once: () => Promise.resolve({ val: () => ({ createdAt: 999 }) })
+        })
+      }));
+    };
+
+    it("builds a snapshot of the stores rather than a live view of them", async () => {
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const content: any = db.buildFirestoreMetadataContent({
+        documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3"
+      });
+      stores.user.setCurrentGroupId("4");
+      expect(content.groupId).toBe("3");
+    });
+
+    it("createDocument pins the owner's group before the first write, so a switch cannot alter it", async () => {
+      const written: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({
+          get: () => Promise.resolve({ exists: false }),
+          set: (data: any) => { written.push(data); return Promise.resolve(); }
+        })
+      }));
+      stubRtdbForCreate(() => stores.user.setCurrentGroupId("4"));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await db.createDocument({ type: AxesDocument, kind: GroupDocument });
+      // Both come from the same reading of currentGroupId, so neither follows the switch.
+      expect(written[0]).toMatchObject({ uid: "group_off-1_3", groupId: "3" });
+    });
+
+    it("merges the resolved createdAt into the content it was given", async () => {
+      const written: any[] = [];
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({
+          get: () => Promise.resolve({ exists: false }),
+          set: (data: any) => { written.push(data); return Promise.resolve(); }
+        })
+      }));
+      stubRtdbForCreate();
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      await db.createDocument({ type: AxesDocument, kind: GroupDocument });
+      // The RTDB read resolves the server timestamp; Firestore stores the same value.
+      expect(written[0].createdAt).toBe(999);
+    });
+  });
+
+  // These pin which fields the builder derives from the stores and which it takes from its caller. They
+  // need no Firestore mock: building the content is synchronous and writing it is a separate step, covered
+  // by "Firestore metadata content is pinned before any await" above.
+  it("builds group-document metadata with no contextId", async () => {
+    // group scope: the builder derives context_id/groupId/offeringId from the stores.
     stores = specStores({
       appMode: "test",
       documents: DocumentsModel.create(),
@@ -579,114 +670,69 @@ describe("db", () => {
     });
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     // context_id/groupId/offeringId come from the user via the kind's scope; owner→uid is passed directly.
-    const written = await db.createFirestoreMetadataDocument({
-      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3"
     });
-    expect(written).toMatchObject({
+    expect(content).toMatchObject({
       context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3", offeringId: "off-1"
     });
-    expect(written).not.toHaveProperty("contextId");
-    expect(setPayloads[0]).toMatchObject({ context_id: "class-h", network: null });
+    expect(content).not.toHaveProperty("contextId");
   });
 
-  it("stamps kind and concurrent on a group document's Firestore metadata", async () => {
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
-    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+  it("stamps kind and concurrent on a group document's metadata", async () => {
+    stores.user.setCurrentGroupId("3");   // group scope: the builder derives groupId from the stores
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    const written = await db.createFirestoreMetadataDocument({
-      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3"
     });
-    expect(written).toMatchObject({ kind: "group", concurrent: true });
-    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
+    expect(content).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
   });
 
   it("stamps the axis profile a class-wide document is created at, without reaching the runtime", async () => {
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
     registerClassWideDocumentKind("testProfileStamp", "DQB", "msu");
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    await db.createFirestoreMetadataDocument({
-      documentKey: "dqb", type: AxesDocument, kind: "testProfileStamp", owner: "class_c1", createdAt: 123
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "dqb", type: AxesDocument, kind: "testProfileStamp", owner: "class_c1"
     });
     // Every kind a unit declares lands on this one profile, which is what makes the profile — not the
     // kind — the cohort a migration can select on.
-    expect(setPayloads[0]).toMatchObject({ kind: "testProfileStamp", axisProfile: "classWide" });
-    // The value is written, but `createFirestoreMetadataDocument` returns `IDocumentMetadata`, which does
-    // not declare it, so a consumer cannot read it back without widening a type first. The barrier is at
-    // the type level; see document-axis-profiles.test.ts for the runtime model staying clear of it.
+    expect(content).toMatchObject({ kind: "testProfileStamp", axisProfile: "classWide" });
+    // The value is built and written, but `IDocumentMetadata` — what the write returns — does not declare
+    // it, so a consumer cannot read it back without widening a type first. The barrier is at the type
+    // level; see document-axis-profiles.test.ts for the runtime model staying clear of it.
   });
 
   it("does NOT stamp an axis profile on a personal document", async () => {
     // Same gate as `kind`: only axes-typed documents are stamped, so nothing is written that would have
     // to be migrated if the other types' kinds are reorganized.
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    await db.createFirestoreMetadataDocument({
-      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1"
     });
-    expect(setPayloads[0]).not.toHaveProperty("axisProfile");
+    expect(content).not.toHaveProperty("axisProfile");
   });
 
-  it("stamps kind and concurrent on an axes-typed document's Firestore metadata", async () => {
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
-    stores.user.setCurrentGroupId("3");   // group scope: createFirestoreMetadataDocument derives groupId from stores
+  it("stamps kind and concurrent on an axes-typed document's metadata", async () => {
+    stores.user.setCurrentGroupId("3");   // group scope: the builder derives groupId from the stores
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    const written = await db.createFirestoreMetadataDocument({
-      documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3", createdAt: 123
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3"
     });
-    expect(written).toMatchObject({ kind: "group", concurrent: true });
-    expect(setPayloads[0]).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
+    expect(content).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
   });
 
   it("does NOT stamp kind/concurrent on a personal document", async () => {
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    const written = await db.createFirestoreMetadataDocument({
-      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123, title: "t"
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", title: "t"
     });
-    // `kind` is stamped only on type:"group" docs; non-group docs are left kind-less to avoid persisting a
+    // `kind` is stamped only on axes-typed docs; other docs are left kind-less to avoid persisting a
     // (possibly-to-be-consolidated) publication/personal kind we would later have to migrate.
-    expect(written).not.toHaveProperty("kind");
-    expect(written).not.toHaveProperty("concurrent");
+    expect(content).not.toHaveProperty("kind");
+    expect(content).not.toHaveProperty("concurrent");
   });
 
-  it("writes context_id from the user's classHash", async () => {
-    const setPayloads: any[] = [];
-    mockFirestore.mockImplementation(() => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false }),
-        set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-      })
-    }));
+  it("stamps context_id from the user's classHash", async () => {
     stores = specStores({
       appMode: "test",
       documents: DocumentsModel.create(),
@@ -694,15 +740,14 @@ describe("db", () => {
     });
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     // context_id is stamped from the user's classHash (it is the class scope field).
-    const written = await db.createFirestoreMetadataDocument({
-      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", createdAt: 123, title: "t"
+    const content = db.buildFirestoreMetadataContent({
+      documentKey: "pk", type: PersonalDocument, kind: PersonalDocument, owner: "user-1", title: "t"
     });
-    expect(written).toMatchObject({ context_id: "class-h", key: "pk" });
-    expect(setPayloads[0]).toMatchObject({ context_id: "class-h" });
+    expect(content).toMatchObject({ context_id: "class-h", key: "pk" });
   });
 
   describe("class-wide document creation", () => {
-    it("createFirestoreMetadataDocument stamps class+unit scope, kind, and concurrent (but not title)", async () => {
+    it("builds class+unit scope, kind, and concurrent (but not title)", async () => {
       // The kind must be registered as class-scoped so getDocumentKindMetadataFields returns its axis fields and
       // getDocumentLocationFields returns the class `unit` (read from the stores' current unit). The authored title
       // is registered too, to prove it is resolved by kind and NOT persisted into the Firestore metadata.
@@ -717,39 +762,23 @@ describe("db", () => {
         user: UserModel.create({ id: "1", portal: "example.com", classHash: "class-1" }),
         unit: UnitModel.create({ code: "msu", title: "Unit" })
       });
-      const setPayloads: any[] = [];
-      mockFirestore.mockImplementation(() => ({
-        doc: () => ({
-          get: () => Promise.resolve({ exists: false }),
-          set: (data: any) => { setPayloads.push(data); return Promise.resolve(); }
-        })
-      }));
       await db.connect({ appMode: "test", stores, dontStartListeners: true });
       // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner
       // is passed directly. No title is passed — a class-wide doc's title is resolved live by kind at display.
-      const written: any = await db.createFirestoreMetadataDocument({
-        documentKey: "dqb-1", type: GroupDocument, kind: "drivingQuestionBoard",
-        owner: "class_class-1", createdAt: 1
+      const content: any = db.buildFirestoreMetadataContent({
+        documentKey: "dqb-1", type: GroupDocument, kind: "drivingQuestionBoard", owner: "class_class-1"
       });
-      expect(written).toMatchObject({
+      expect(content).toMatchObject({
         type: "group", context_id: "class-1", unit: "msu",
         kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
-      expect(written.title).toBeUndefined();       // title is looked up by kind, never stored
-      expect(written.offeringId).toBeUndefined();
-      expect(written.groupId).toBeUndefined();
-      expect(written.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
-      expect(setPayloads[0]).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu",
-        kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
-      });
-      expect(setPayloads[0].title).toBeUndefined();
-      // The class+unit scope states its absent curriculum fields explicitly so the scope is
-      // queryable; it must still carry no offering or group.
-      expect(setPayloads.some((d: any) =>
-        d.investigation === null && d.problem === null &&
-        d.offeringId === undefined && d.groupId === undefined
-      )).toBe(true);
+      expect(content.title).toBeUndefined();       // title is looked up by kind, never stored
+      expect(content.offeringId).toBeUndefined();
+      expect(content.groupId).toBeUndefined();
+      expect(content.canonical).toBeUndefined();   // canonical is set only by the pointer-claim transaction
+      // The class+unit scope states its absent curriculum fields explicitly so the scope is queryable.
+      expect(content.investigation).toBeNull();
+      expect(content.problem).toBeNull();
     });
   });
 
@@ -1271,6 +1300,34 @@ describe("db", () => {
       db.disconnect();
       stores.user.setCurrentGroupId("3");
       expect(resolveSpy).not.toHaveBeenCalled();
+    });
+
+    // Membership moving mid-resolve is ordinary and self-correcting — the switch that caused it has
+    // already started a resolve for the new group — so reporting it as a failure would cry wolf.
+    it("stays quiet when a resolve is abandoned because membership moved", async () => {
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument")
+        .mockRejectedValue(new CanonicalSlotOwnerChangedError("slots/a", "slots/b"));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      stores.user.setCurrentGroupId("3");
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(errorSpy).not.toHaveBeenCalled();
+      resolveSpy.mockRestore();
+      errorSpy.mockRestore();
+    });
+
+    it("still reports a resolve that failed for any other reason", async () => {
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const resolveSpy = jest.spyOn(db, "resolveGroupDocument")
+        .mockRejectedValue(new Error("firestore unavailable"));
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      (db as any).autoResolveGroupDocuments();
+      stores.user.setCurrentGroupId("3");
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(errorSpy).toHaveBeenCalled();
+      resolveSpy.mockRestore();
+      errorSpy.mockRestore();
     });
   });
 

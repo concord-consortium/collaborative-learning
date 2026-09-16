@@ -52,7 +52,7 @@ import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
 import {
-  getCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
+  CanonicalSlotOwnerChangedError, getCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
 } from "./scoped-document-pointers";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
@@ -167,12 +167,34 @@ type IDocumentMetadataAtCreation = IDocumentMetadata & {
   axisProfile?: string;
 };
 
-interface ICreateFirestoreMetadataDocumentOpts {
+/**
+ * A new document's Firestore metadata, minus `createdAt`. That one field is the realtime database's server
+ * timestamp, which is not known until the write that stamps it has been read back, so it is the only part
+ * that cannot be decided up front. Everything else is settled in one synchronous pass by
+ * `buildFirestoreMetadataContent`.
+ */
+export type IDocumentMetadataContent = Omit<IDocumentMetadataAtCreation, "createdAt">;
+
+/**
+ * Give up on an operation the environment cannot support: log it with the context that shows why, then
+ * throw the same sentence. `action` completes "cannot ___", e.g. "build Firestore document metadata".
+ *
+ * Logging and throwing are not the same report made twice. The console error includes the context object.
+ * Folding the context in the thrown error would require serializing it into the message. That would
+ * make the error message harder to read, and it is likely the context includes fields that don't
+ * serialize well.
+ */
+function throwInvalidEnvironment(action: string, context: Record<string, unknown>): never {
+  const message = `cannot ${action} because environment is not valid`;
+  console.error(message, context);
+  throw new Error(message);
+}
+
+interface IBuildFirestoreMetadataContentOpts {
   documentKey: string;
   type: DBDocumentType;
   kind: string;
   owner: string;
-  createdAt: number;
   title?: string;
 }
 
@@ -644,23 +666,23 @@ export class DB {
     });
   }
 
-  async createFirestoreMetadataDocument(opts: ICreateFirestoreMetadataDocumentOpts): Promise<IDocumentMetadata> {
-    const { documentKey, type, kind, owner, createdAt, title } = opts;
+  /**
+   * Build a new document's Firestore metadata from the stores as they are right now.
+   *
+   * Every store-derived value — the owner's group, the container, the curriculum position, the creator's
+   * network — is read in this one synchronous pass, and nothing here awaits. That is the point rather than
+   * an implementation detail: a caller that has just checked those values against something else gets back
+   * content that agrees with what it checked, because no other code can run in between. `createDocument`
+   * calls this before its first write, and `resolveCanonicalDocumentUncached` relies on it to keep a
+   * document's owner in step with the canonical slot it is about to claim.
+   */
+  public buildFirestoreMetadataContent(opts: IBuildFirestoreMetadataContentOpts): IDocumentMetadataContent {
+    const { documentKey, type, kind, owner, title } = opts;
     const { user } = this.stores;
-    const userContext = this.stores.userContextProvider.userContext;
+    const userContext = this.stores.userContextProvider?.userContext;
 
-    if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
-      console.error("cannot create Firestore metadata document because environment is not valid",
-        { userContext, firestore: this.firestore });
-      throw new Error("cannot create Firestore metadata document because environment is not valid");
-    }
-
-    const documentPath = getSimpleDocumentPath(documentKey);
-    const documentRef = this.firestore.doc(documentPath);
-    const docSnapshot = await documentRef.get();
-
-    if (docSnapshot.exists) {
-      return docSnapshot.data() as IDocumentMetadata;
+    if (!this.stores.userContextProvider || !userContext?.uid) {
+      throwInvalidEnvironment("build Firestore document metadata", { userContext });
     }
 
     // Resolve where the document is kept and what it is about (context_id, unit/investigation/problem,
@@ -695,9 +717,8 @@ export class DB {
     const profileName = isAxesType(type) ? getDocumentAxisProfileName(kind) : undefined;
     const profileField = profileName ? { axisProfile: profileName } : {};
 
-    const firestoreMetadata: IDocumentMetadataAtCreation = {
+    return {
       type,
-      createdAt,
       // A creation-time snapshot that rules read back; storing it here is problematic — see the
       // `network` section in docs/document-metadata/metadata-fields.md. Null for students/group docs.
       network: userContext.network || null,
@@ -710,6 +731,31 @@ export class DB {
       ...kindFields,
       ...profileField
     };
+  }
+
+  /**
+   * Write a new document's Firestore metadata: the content decided earlier, plus the `createdAt` the
+   * realtime database has now resolved.
+   *
+   * Returns the existing metadata untouched if the document already has some.
+   */
+  async createFirestoreMetadataDocument(
+    opts: { content: IDocumentMetadataContent, createdAt: number }
+  ): Promise<IDocumentMetadata> {
+    const { content, createdAt } = opts;
+
+    if (!this.firestore) {
+      throwInvalidEnvironment("write Firestore document metadata", { firestore: this.firestore });
+    }
+
+    const documentRef = this.firestore.doc(getSimpleDocumentPath(content.key));
+    const docSnapshot = await documentRef.get();
+
+    if (docSnapshot.exists) {
+      return docSnapshot.data() as IDocumentMetadata;
+    }
+
+    const firestoreMetadata: IDocumentMetadataAtCreation = { ...content, createdAt };
     await documentRef.set(firestoreMetadata);
     return firestoreMetadata;
   }
@@ -771,6 +817,11 @@ export class DB {
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
       const {classHash, offeringId} = user;
 
+      // Built here, before the first write, so every store-derived field is read in the same synchronous
+      // pass as `owner` above. Nothing the stores hold can change between the two, which is what lets a
+      // caller validate the context once and rely on the document matching it.
+      const metadataContent = this.buildFirestoreMetadataContent({ documentKey, type, kind, owner, title });
+
       const self = {
         uid: owner,
         documentKey,
@@ -822,7 +873,7 @@ export class DB {
           // This way the RTDB and Firestore metadata have the same createdAt value.
           const resolvedCreatedAt: number = metadataValue.val().createdAt;
           return this.createFirestoreMetadataDocument({
-            documentKey, type, kind, owner, createdAt: resolvedCreatedAt, title
+            content: metadataContent, createdAt: resolvedCreatedAt
           });
         })
         .then((firestoreMetadata) => {
@@ -938,6 +989,9 @@ export class DB {
       (groupId) => {
         if (!groupId) return;
         this.resolveGroupDocument().catch((err) => {
+          // The user left this group while its document was being resolved. The reaction has already
+          // fired again for the group they moved to, so there is nothing to report or retry.
+          if (err instanceof CanonicalSlotOwnerChangedError) return;
           console.error("Failed to auto-create group document", groupId, err);
         });
       },
@@ -1055,6 +1109,19 @@ export class DB {
 
     // 3. Create document-first, then claim the pointer atomically.
     const { user } = this.stores;
+
+    // The slot path above was fixed when this resolve started, from the owner the stores named then, while
+    // the document below is built from the stores as they are now. If the owner has moved in between, the
+    // document would be minted for the new owner and claimed into the old owner's slot, so check that the
+    // two still agree before anything is written. `createDocument` settles every store-derived field before
+    // its first await, so this check and the document it guards see the same stores.
+    //
+    // Bailing costs nothing, while minting first costs something real. A student switching groups is the
+    // case that reaches this today: the switch starts its own resolve for the new group's slot, so the
+    // document they need is already on its way, whereas the stray one would be visible to that group's
+    // legacy query for as long as it existed.
+    this.assertCanonicalSlotContextUnchanged(opts, pointerPath);
+
     const { firestoreMetadata } = await this.createDocument({ type, kind });
     const documentKey = firestoreMetadata.key;
 
@@ -1097,6 +1164,26 @@ export class DB {
       Logger.log(LogEventName.CREATE_GROUP_DOCUMENT);
     }
     return { documentKey, firestoreMetadata };
+  }
+
+  /**
+   * Throw unless the stores still describe the slot this resolve set out to fill.
+   *
+   * The owner segment is the part that can move, so the check rebuilds the path from the current stores
+   * and compares. What an owner is made of depends on the kind: a group owner encodes the offering and the
+   * group, a class owner the class, a user owner the user. Comparing whole paths keeps this indifferent to
+   * which of those it is, so a kind added later is covered without touching this. The container came from
+   * the caller and does not drift.
+   */
+  private assertCanonicalSlotContextUnchanged(opts: IGetOrCreateCanonicalDocumentOpts, pointerPath: string) {
+    const currentPath = getCanonicalPointerPath({
+      ...opts.container,
+      owner: getDocumentOwner(opts.kind, this.documentOwnerContext),
+      label: opts.canonicalLabel
+    });
+    if (currentPath !== pointerPath) {
+      throw new CanonicalSlotOwnerChangedError(pointerPath, currentPath);
+    }
   }
 
   private pointerKey(snap: firebase.firestore.DocumentSnapshot) {

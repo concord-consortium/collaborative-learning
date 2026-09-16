@@ -12,6 +12,7 @@ import {
 } from "../../models/document/document-types";
 import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import { kImageTileType } from "../../models/tiles/image/image-content";
+import { CanonicalSlotOwnerChangedError } from "../../lib/scoped-document-pointers";
 import {
   removeLoadingMessage, showLoadingMessage, logLoadingAndDocumentMeasurements
 } from "../../utilities/loading-utils";
@@ -19,6 +20,10 @@ import { translate } from "../../utilities/translation/translate";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 
 import "./document-workspace.scss";
+
+// How many times File ▸ Group Doc re-resolves when the user's group moves under the click. Two covers a
+// single switch, which is the realistic case; the bound is what stops a run of switches from spinning.
+const kGroupDocumentOpenAttempts = 2;
 
 interface IProps extends IBaseProps {
 }
@@ -402,17 +407,28 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handleOpenGroupDocument = async () => {
     const { db, persistentUI: { problemWorkspace }, ui } = this.stores;
-    try {
-      const groupDocument = await db.getOrCreateGroupDocument();
+    for (let attempt = 1; attempt <= kGroupDocumentOpenAttempts; attempt++) {
+      try {
+        const groupDocument = await db.getOrCreateGroupDocument();
 
-      if (groupDocument) {
-        problemWorkspace.setPrimaryDocument(groupDocument);
+        if (groupDocument) {
+          problemWorkspace.setPrimaryDocument(groupDocument);
+        }
+        return;
+      } catch (error) {
+        // The user changed groups between the click and the resolve, so the resolve was abandoned before
+        // writing anything. Ask again for the group they are in now: they asked to see their group's
+        // document, and unless the unit starts students in one, nothing else will open it for them.
+        if (error instanceof CanonicalSlotOwnerChangedError) continue;
+        // Reached from an onClick with nothing awaiting it, so without this the user sees the click do
+        // nothing at all. The sibling document-open handlers report the same way.
+        ui.setError(error);
+        return;
       }
-    } catch (error) {
-      // Reached from an onClick with nothing awaiting it, so without this the user sees the click do
-      // nothing at all. The sibling document-open handlers report the same way.
-      ui.setError(error);
     }
+    // Every attempt was overtaken by another group change. Rare enough to be worth a trace, and not
+    // worth an error display: the click is stale rather than broken, and the user can click again.
+    console.warn("Gave up opening the group document: the user's group kept changing");
   };
 
   private defaultOtherDocumentContent = (type: OtherDocumentType) => {
