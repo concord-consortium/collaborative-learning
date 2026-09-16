@@ -241,11 +241,27 @@ Common toolbar framework.  Supports:
 
 - `data-set-view`: Immediate creation of a linked tile.
 - `data-set-link`: Bring up a dialog to choose a tile to link to (or create a new one)
+- `delete`: Delete the selected block(s).
+- `group`: Group the selected blocks.
+- `ungroup`: Ungroup the selected group.
+- `zoom-in`: Zoom the program canvas in one step. Disabled at maximum zoom.
+- `zoom-out`: Zoom the program canvas out one step. Disabled at minimum zoom.
+- `fit-all`: Zoom and centre the canvas so every block is visible. Disabled when the program is empty.
+- `pan`: Pan the canvas. The button's face repeats the last direction used; its corner triangle opens
+  a palette of the four directions.
 
 Defaults:
 
 - `["data-set-view", "Table"]`
 - `["data-set-link", "Graph"]`
+- `delete`
+- `group`
+- `ungroup`
+- `|`
+- `zoom-in`
+- `zoom-out`
+- `fit-all`
+- `pan`
 
 Additional Live Output / sampling keys (all optional; each defaults to today's behavior):
 

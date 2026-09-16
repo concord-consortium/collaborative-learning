@@ -102,7 +102,6 @@ function PanPalette({ onSelect, onClose }: IPanPaletteProps) {
   useEffect(() => {
     focusArrow(panDirections[0]);
     // Mount-only: re-running on re-render would yank focus back to the first arrow.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Capture phase is required for Escape: the toolbar's focus-trap exit is a native capture-phase
