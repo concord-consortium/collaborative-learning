@@ -51,8 +51,10 @@ import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { serialSensorChannels } from "../model/utilities/channel";
 
-const MAX_ZOOM = 2;
-const MIN_ZOOM = .1;
+export const MAX_ZOOM = 2;
+export const MIN_ZOOM = .1;
+export const kPanStep = 40;
+export const kZoomStep = .05;
 
 export interface IContentBounds {
   maxX: number;
@@ -552,17 +554,16 @@ export class ReteManager implements INodeServices {
   private setupArrowKeyPan() {
     const container = this.area.container;
     if (!container) return;
-    // The groups overlay and the zoom control are siblings of the rete container, not descendants,
-    // so a plain container.contains() test deactivated arrow panning as soon as the user touched a
-    // group chip, a collapse toggle or a zoom button — the overlay interactions being the most
-    // likely thing to precede a pan. Accept those siblings too, matched by class rather than by
-    // testing the shared parent wholesale, so the hidden editing canvas doesn't claim pointer
-    // presses landing on the playback canvas in Done mode.
+    // The groups overlay is a sibling of the rete container, not a descendant, so a plain
+    // container.contains() test deactivated arrow panning as soon as the user touched a group chip
+    // or a collapse toggle — the most likely thing to precede a pan. Accept that sibling too,
+    // matched by class rather than by testing the shared parent wholesale, so the hidden editing
+    // canvas doesn't claim pointer presses landing on the playback canvas in Done mode.
     const editorEl = container.parentElement;
     const inThisCanvas = (target: EventTarget | null) =>
       (target instanceof Node && container.contains(target)) ||
       (target instanceof Element && !!editorEl?.contains(target) &&
-        !!target.closest(".dataflow-groups-overlay, .program-editor-zoom"));
+        !!target.closest(".dataflow-groups-overlay"));
     const onDocPointerDown = (e: PointerEvent) => {
       this.canvasActive = inThisCanvas(e.target);
       // Connections are committed via the keyboard, so any pointer press abandons an in-progress
@@ -576,7 +577,7 @@ export class ReteManager implements INodeServices {
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (!this.canvasActive || e.altKey || e.ctrlKey || e.metaKey) return;
-      const step = e.shiftKey ? 120 : 40;
+      const step = e.shiftKey ? kPanStep * 3 : kPanStep;
       let dx = 0, dy = 0;
       switch (e.key) {
         case "ArrowLeft":  dx = step;  break;
@@ -1482,15 +1483,15 @@ export class ReteManager implements INodeServices {
     sharedProgramModel.setProgramSamplingRate(rateNum);
   };
 
-  public zoomIn = () => {
+  public zoomIn() {
     const { k } = this.area.area.transform;
-    this.setZoom(Math.min(MAX_ZOOM, k + .05));
-  };
+    return this.setZoom(Math.min(MAX_ZOOM, k + kZoomStep));
+  }
 
-  public zoomOut = () => {
+  public zoomOut() {
     const { k } = this.area.area.transform;
-    this.setZoom(Math.max(MIN_ZOOM, k - .05));
-  };
+    return this.setZoom(Math.max(MIN_ZOOM, k - kZoomStep));
+  }
 
   /**
    * Get the effective container dimensions for fitting content.
@@ -1668,6 +1669,8 @@ export class ReteManager implements INodeServices {
   private async setZoom(zoom: number) {
     await this.area.area.zoom(zoom);
     const { transform } = this.area.area;
+    // Redundant with the "zoomed" pipe in setup(): area.zoom() emits "zoomed", which writes this same
+    // transform. Kept so this path doesn't depend on pipe wiring; safe to drop if that's verified.
     this.mstContent.setLiveProgramZoom(transform);
   }
 }
