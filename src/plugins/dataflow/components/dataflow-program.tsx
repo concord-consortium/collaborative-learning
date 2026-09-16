@@ -281,6 +281,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const tileBorder = 2;
     const padding = 5;
 
+    // Observe the updateCount so every time the component is updated
+    // we recompute the bounding boxes. This is mainly important so changes
+    // to the recording state are taken into account.
+    // Read this, and the canvas transform, before the bail-out below: returning without
+    // touching an observable registers no dependency, so nothing can ever re-run this.
+    // A box that is only momentarily unavailable — entering playback, where the incoming
+    // manager's nodeViews are still being populated — would then stay missing for good,
+    // taking its annotation with it.
+    // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
+    const {updateCount} = this.updateObservable;
+
+    // Observe program canvas changes like translation and zooming.
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const {dx, dy, scale: programScale} = this.props.tileContent.liveProgramZoom;
+
     const nodeModel = this.props.program?.nodes.get(objectId);
 
     const reteManager = this.activeReteManager;
@@ -288,20 +303,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { tileElt } = this.props;
     if (!nodeModel || !nodeView || !tileElt) return undefined;
 
-    // Observe the updateCount so every time the component is updated
-    // we recompute the bounding boxes. This is mainly important so changes
-    // to the recording state are taken into account.
-    // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
-    const {updateCount} = this.updateObservable;
-
     // Observe node position changes. We use liveX and liveY so we update during
     // the drag.
     // eslint-disable-next-line unused-imports/no-unused-vars
     const {liveX, liveY} = nodeModel;
-
-    // Observe program canvas changes like translation and zooming.
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    const {dx, dy, scale: programScale} = this.props.tileContent.liveProgramZoom;
 
     const tileRect = tileElt.getBoundingClientRect();
     const scale = tileElt.offsetWidth / tileRect.width;
