@@ -1,8 +1,11 @@
 import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
+import { nanoid } from "nanoid";
 import React from "react";
 import FileSaver from "file-saver";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
 import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -10,7 +13,9 @@ import { DocumentModelType } from "../../models/document/document";
 import { CommentWithId } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
+import { IDEAS_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
+import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -134,13 +139,14 @@ const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const IdeasButton = ({ onClick }: { onClick: () => void }) => {
+const IdeasButton = ({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) => {
   return (
     <button
       title={"Request Idea"}
       onClick={onClick}
       className="ideas-button"
       data-test="ideas-button"
+      disabled={disabled}
     >
       <IdeaIcon/>
       Ideas?
@@ -369,6 +375,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderIdeasButton() {
+    const { document } = this.props;
     const { documents, appConfig: { aiEvaluation, showIdeasButton } } = this.stores;
     // if showIdeasButton is explicitly set in the unit config, use that, otherwise
     // show the button if aiEvaluation is enabled or if there are exemplar documents
@@ -377,7 +384,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       : aiEvaluation || documents.invisibleExemplarDocuments.length > 0;
     if (showButton) {
       return (
-        <IdeasButton onClick={this.handleIdeasButtonClick} />
+        <IdeasButton
+          onClick={this.handleIdeasButtonClick}
+          disabled={!document.commentsManager?.canRequestIdeas}
+        />
       );
     }
   }
@@ -535,43 +545,82 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // based on rules defined in exemplar-controller-rules. So we just
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   // The AI evaluation is triggered by updating the last-edited timestamp.
+  //
+  // On an empty document (no `documentHasStudentWork`), this shows a nudge instead of requesting
+  // an evaluation: no Realtime Database write, no REQUEST_IDEA log. On a populated document, the
+  // click is gated by `canRequestIdeas` (one Ideas click, one evaluation in flight at a time) and
+  // carries a `requestId` so the server's eventual completion status can be correlated back to it.
   private handleIdeasButtonClick = async () => {
+    // --- synchronous section: no await above this line ---
     const { document } = this.props;
     const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
+    // commentsManager is created in the document model's afterCreate, so it is always present at
+    // runtime; the check below satisfies its optional type rather than guarding a real case.
+    const commentsManager = document.commentsManager;
+    if (!commentsManager || !commentsManager.canRequestIdeas) return;
 
-    await firebase.setLastEditedNow(user, document.key, document.uid);
+    commentsManager.clearEmptyDocumentNudge();
+    const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
+    const requestId = (!isEmpty && appConfig.aiEvaluation) ? nanoid() : null;
+    // Recorded synchronously, before any await: see Constraint C13 in the implementation guide.
+    commentsManager.setLatestIdeasRequestId(requestId);
 
     // Unselect all tiles, so that the whole-document comments are shown
     ui.clearSelectedTiles();
     persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
 
-    if (appConfig.aiEvaluation) {
-      if (document.commentsManager) {
+    if (isEmpty) {
+      commentsManager.showEmptyDocumentNudge(IDEAS_EMPTY_MESSAGE);
+      return;
+    }
+
+    commentsManager.setIdeasClickInProgress(true);
+    try {
+      // --- asynchronous section ---
+      await waitForSaveSettled(document);
+      await firebase.setLastEditedNow(user, document.key, document.uid, undefined, requestId ?? undefined);
+
+      if (requestId) {
         // Use the comments manager to queue a pending AI comment.
         // The manager will automatically check when new comments arrive
         // and remove this pending item when AI analysis completes.
         const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
         const effectiveLastEdited = docLastEditedTime || Date.now();
 
-        document.commentsManager.queueRemoteComment({
-          triggeredAt: effectiveLastEdited,
-          source: "ai",
-          checkCompleted: (comments: CommentWithId[]) => {
-            // Check if AI analysis is complete by finding an AI comment
-            // that was created after the document was last edited.
-            const lastAIComment = [...comments]
-              .reverse()
-              .find(comment => comment.uid === kAnalyzerUserParams.id);
+        const statusPath = firebase.getEvaluationStatusPath(user, document.key, document.uid);
+        if (statusPath) {
+          const statusRef = firebase.ref(statusPath);
+          const onStatus = (snapshot: any) => commentsManager.applyEvaluationStatus(snapshot.val());
 
-            return !!(lastAIComment &&
-                     lastAIComment.createdAt.getTime() > effectiveLastEdited);
-          }
-        });
+          // Queued before the listener is attached, so a value Firebase happens to deliver
+          // synchronously always finds its pending entry already in place.
+          commentsManager.queueRemoteComment({
+            triggeredAt: effectiveLastEdited,
+            source: "ai",
+            requestId,
+            checkCompleted: (comments: CommentWithId[]) => {
+              // Check if AI analysis is complete by finding an AI comment
+              // that was created after the document was last edited.
+              const lastAIComment = [...comments]
+                .reverse()
+                .find(comment => comment.uid === kAnalyzerUserParams.id);
+
+              return !!(lastAIComment &&
+                       lastAIComment.createdAt.getTime() > effectiveLastEdited);
+            },
+            dispose: () => statusRef.off("value", onStatus)
+          });
+          statusRef.on("value", onStatus);
+        }
       }
-    }
 
-    logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+      logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+    } finally {
+      // The pending entry, if one was queued, now carries the gate — canRequestIdeas stays false
+      // until it resolves (comment, status, or expiry).
+      commentsManager.setIdeasClickInProgress(false);
+    }
   };
 
   private handleToggleWorkspaceMode = () => {

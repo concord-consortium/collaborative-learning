@@ -415,4 +415,56 @@ describe("CommentThread", () => {
     fireEvent.click(screen.getByTestId("comment-card"));
     expect(mockSetSelectedTileId).toHaveBeenCalledWith("");
   });
+
+  describe("empty-document nudge", () => {
+    afterEach(() => {
+      // Restore the module-level default so later tests are unaffected.
+      const useStoresMock = jest.requireMock("../../hooks/use-stores");
+      useStoresMock.useCurriculumOrDocumentContent = () => undefined;
+    });
+
+    it("expands the collapsed document thread when the empty-document nudge appears", () => {
+      // A tile is focused, so the document thread starts collapsed.
+      const chatThreads =
+        [makeFakeCommentThread("Doc Thread", "", "u1"), makeFakeCommentThread("Tile Thread", "tile-abc", "u2")];
+      const testUser = {id: "u1", name: "test user"} as UserModelType;
+
+      const useStoresMock = jest.requireMock("../../hooks/use-stores");
+      let emptyDocumentNudge: { message: string; shownAt: number } | null = null;
+      useStoresMock.useCurriculumOrDocumentContent = () => ({ emptyDocumentNudge });
+
+      const { rerender } = render((
+        <ModalProvider>
+          <ChatThread
+            focusTileId="tile-abc"
+            user={testUser}
+            chatThreads={chatThreads}
+            activeNavTab={ENavTab.kMyWork}
+            focusDocument="document-key"
+          />
+        </ModalProvider>
+      ));
+
+      expect(screen.queryByText("Doc Thread Comment 1")).not.toBeInTheDocument();
+
+      emptyDocumentNudge = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+      // ChatThread is `observer`-wrapped, which applies React.memo on props; a real content model
+      // would trigger a re-render through MobX's own reactivity regardless of props. The mocked
+      // hook here is a plain function, so a changed (but equivalent) prop reference is needed to
+      // get React to re-invoke the component and read the hook again.
+      rerender((
+        <ModalProvider>
+          <ChatThread
+            focusTileId="tile-abc"
+            user={testUser}
+            chatThreads={[...chatThreads]}
+            activeNavTab={ENavTab.kMyWork}
+            focusDocument="document-key"
+          />
+        </ModalProvider>
+      ));
+
+      expect(screen.getByText("Doc Thread Comment 1")).toBeInTheDocument();
+    });
+  });
 });

@@ -11,7 +11,7 @@ import { useCurriculumOrDocumentContent, useStores } from "../../hooks/use-store
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import ChatAvatar from "./chat-avatar";
-import WaitingMessage from "./waiting-message";
+import WaitingMessage, { EmptyDocumentNudge } from "./waiting-message";
 import { isSectionPath, escapeKey, kRatingValues, RatingValue } from "../../../shared/shared";
 import { useCommentsCollectionPath } from "../../hooks/document-comment-hooks";
 import { useUpdateCommentRating } from "../../hooks/use-update-comment-rating";
@@ -312,6 +312,7 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
           })
         }
         { showWaitingMessage && <WaitingMessage content={content} /> }
+        { showWaitingMessage && <EmptyDocumentNudge content={content} /> }
         <CommentTextBox
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}

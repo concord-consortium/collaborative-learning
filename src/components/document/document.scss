@@ -206,6 +206,10 @@
           cursor: pointer;
           border-color: white;
         }
+        &:disabled {
+          opacity: 0.5;
+          cursor: default;
+        }
       }
       .icon-button {
         background-color: $color1-3;
