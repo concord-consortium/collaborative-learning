@@ -447,5 +447,108 @@ describe("Firebase class", () => {
           expect(mockRef.set).toHaveBeenCalledTimes(1); // only lastEditedAt
         });
     });
+
+    it("includes requestId in the standard evaluation write when passed", () => {
+      const storesWithNonCustomEvaluation = {
+        ...mockStores,
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
+      };
+      const firebaseWithNonCustom = new Firebase({ stores: storesWithNonCustomEvaluation } as unknown as DB);
+      const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
+      jest.spyOn(firebaseWithNonCustom, 'ref').mockReturnValue(mockRef as any);
+
+      return firebaseWithNonCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId, undefined, "req-1")
+        .then(() => {
+          expect(mockRef.set).toHaveBeenCalledWith({
+            context: expectedContext,
+            requestId: "req-1",
+            timestamp: "server-timestamp"
+          });
+        });
+    });
+
+    it("includes requestId in the custom evaluation write when passed", () => {
+      const storesWithCustomEvaluation = {
+        ...mockStores,
+        appConfig: { aiEvaluation: "custom", aiPrompt: "test prompt" }
+      };
+      const firebaseWithCustom = new Firebase({ stores: storesWithCustomEvaluation } as unknown as DB);
+      const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
+      jest.spyOn(firebaseWithCustom, 'ref').mockReturnValue(mockRef as any);
+
+      return firebaseWithCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId, undefined, "req-2")
+        .then(() => {
+          expect(mockRef.set).toHaveBeenCalledWith({
+            aiPrompt: "test prompt",
+            context: expectedContext,
+            requestId: "req-2",
+            timestamp: "server-timestamp"
+          });
+        });
+    });
+
+    // toHaveBeenCalledWith (like toEqual) treats a key whose value is undefined as equal to a
+    // missing key, so the exact-object assertions above would not catch a regression that writes
+    // `requestId: undefined` instead of leaving the key out. Firebase rejects undefined values, so
+    // the distinction is not cosmetic. This checks the actual own-property presence instead.
+    function evaluationWriteArgs(mockRef: { set: jest.Mock }) {
+      return mockRef.set.mock.calls.map(call => call[0]).find(arg => typeof arg === "object");
+    }
+
+    it("omits the requestId key entirely when not passed (custom evaluation)", async () => {
+      const storesWithCustomEvaluation = {
+        ...mockStores,
+        appConfig: { aiEvaluation: "custom", aiPrompt: "test prompt" }
+      };
+      const firebaseWithCustom = new Firebase({ stores: storesWithCustomEvaluation } as unknown as DB);
+      const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
+      jest.spyOn(firebaseWithCustom, 'ref').mockReturnValue(mockRef as any);
+
+      await firebaseWithCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
+
+      expect(evaluationWriteArgs(mockRef)).not.toHaveProperty("requestId");
+    });
+
+    it("omits the requestId key entirely when not passed (standard evaluation)", async () => {
+      const storesWithNonCustomEvaluation = {
+        ...mockStores,
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
+      };
+      const firebaseWithNonCustom = new Firebase({ stores: storesWithNonCustomEvaluation } as unknown as DB);
+      const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
+      jest.spyOn(firebaseWithNonCustom, 'ref').mockReturnValue(mockRef as any);
+
+      await firebaseWithNonCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
+
+      expect(evaluationWriteArgs(mockRef)).not.toHaveProperty("requestId");
+    });
+  });
+
+  describe("getEvaluationStatusPath", () => {
+    const mockUser = {
+      id: "test-user",
+      classHash: "test-class",
+      portal: "test-portal",
+      offeringId: "test-offering"
+    } as unknown as UserModelType;
+    const mockDocumentKey = "test-document";
+    const mockUserId = "test-user-id";
+
+    it("is a sibling of the evaluation node, keyed by the same evaluator", () => {
+      const stores = { ...mockStores, appConfig: { aiEvaluation: "standard", aiPrompt: undefined } };
+      const firebase = new Firebase({ stores } as unknown as DB);
+
+      const evaluationPath = firebase.getEvaluationMetadataPath(mockUser, mockDocumentKey, mockUserId);
+      const statusPath = firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId);
+
+      expect(statusPath).toBe(evaluationPath?.replace("/evaluation/", "/evaluationStatus/"));
+    });
+
+    it("is undefined when aiEvaluation is unset, like the evaluation path", () => {
+      const stores = { ...mockStores, appConfig: { aiEvaluation: undefined, aiPrompt: undefined } };
+      const firebase = new Firebase({ stores } as unknown as DB);
+
+      expect(firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId)).toBeUndefined();
+    });
   });
 });

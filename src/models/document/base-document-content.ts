@@ -579,6 +579,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
 
       return false;
+    },
+    // The "add some work" message shown in place of a real Ideas request when the document is
+    // empty. Client-only state: never written to Firestore, so it does not survive a reload.
+    get emptyDocumentNudge() {
+      const doc = getParentWithTypeName(self, "Document");
+      return doc?.commentsManager?.emptyDocumentNudge ?? null;
     }
   }))
   .actions(self => ({
