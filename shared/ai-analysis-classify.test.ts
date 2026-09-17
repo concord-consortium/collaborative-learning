@@ -423,10 +423,16 @@ describe("documentHasStudentWork", () => {
       .toBe(true);
   });
 
-  it("never counts an AI, Simulator, or Placeholder tile", () => {
+  it("never counts an AI, Simulator, Placeholder, ErrorTest, or Starter tile", () => {
     expect(documentHasStudentWork(doc([[{ tileId: "a1" }]], { a1: { content: { type: "AI" } } }))).toBe(false);
     expect(documentHasStudentWork(doc([[{ tileId: "s1" }]], { s1: { content: { type: "Simulator" } } }))).toBe(false);
     expect(documentHasStudentWork(doc([[{ tileId: "p1" }]], { p1: { content: { type: "Placeholder" } } })))
+      .toBe(false);
+    // Dev-only tile types, but still part of kNeverStudentWorkTypes: worth pinning so a change to
+    // that set is a deliberate edit here, not a silent gap.
+    expect(documentHasStudentWork(doc([[{ tileId: "e1" }]], { e1: { content: { type: "ErrorTest" } } })))
+      .toBe(false);
+    expect(documentHasStudentWork(doc([[{ tileId: "st1" }]], { st1: { content: { type: "Starter" } } })))
       .toBe(false);
   });
 

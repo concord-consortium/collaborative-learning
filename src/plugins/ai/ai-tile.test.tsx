@@ -194,8 +194,8 @@ describe("AIComponent", () => {
     // AI tiles sit in authored curriculum sections (mods, clueful) too, where the tile has no
     // documentId and the lookup finds nothing — Constraint C15. There the tile must stay silent
     // and keep its authored text, not show the empty-document nudge.
-    it("with no student document, leaves the tile's text unchanged and never calls getAiContent, " +
-       "on mount", async () => {
+    it("with a documentId whose lookup finds nothing, leaves the tile's text unchanged and never " +
+       "calls getAiContent, on mount", async () => {
       mockStores.documents.getDocument.mockReturnValue(undefined);
       mockStores.networkDocuments.getDocument.mockReturnValue(undefined);
       const aiContent = defaultAIContent();
@@ -209,8 +209,8 @@ describe("AIComponent", () => {
       expect(mockGetAiContent).not.toHaveBeenCalled();
     });
 
-    it("with no student document, leaves the tile's text unchanged and never calls getAiContent, " +
-       "on Update", async () => {
+    it("with a documentId whose lookup finds nothing, leaves the tile's text unchanged and never " +
+       "calls getAiContent, on Update", async () => {
       mockStores.documents.getDocument.mockReturnValue(undefined);
       mockStores.networkDocuments.getDocument.mockReturnValue(undefined);
       const aiContent = defaultAIContent();
@@ -230,6 +230,45 @@ describe("AIComponent", () => {
       });
 
       expect(aiContent.text).toBe(authoredText);
+      expect(mockGetAiContent).not.toHaveBeenCalled();
+    });
+
+    // The literal curriculum-pane case (Constraint C15): documentId itself is absent, not merely a
+    // lookup that fails. The ternary in the component short-circuits before either lookup runs.
+    it("with no documentId at all, leaves the tile's text unchanged, never looks up a document, " +
+       "and never calls getAiContent, on mount", async () => {
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const authoredText = aiContent.text;
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId={undefined} />));
+
+      expect(aiContent.text).toBe(authoredText);
+      expect(mockStores.documents.getDocument).not.toHaveBeenCalled();
+      expect(mockStores.networkDocuments.getDocument).not.toHaveBeenCalled();
+      expect(mockGetAiContent).not.toHaveBeenCalled();
+    });
+
+    it("with no documentId at all, leaves the tile's text unchanged, never looks up a document, " +
+       "and never calls getAiContent, on Update", async () => {
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const authoredText = aiContent.text;
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId={undefined} />));
+      mockGetAiContent.mockClear();
+
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).toBe(authoredText);
+      expect(mockStores.documents.getDocument).not.toHaveBeenCalled();
+      expect(mockStores.networkDocuments.getDocument).not.toHaveBeenCalled();
       expect(mockGetAiContent).not.toHaveBeenCalled();
     });
 
@@ -287,7 +326,10 @@ describe("AIComponent", () => {
     });
 
     // Constraint C20: isUpdating must end false however queryAI exits, and a rejection must not
-    // overwrite whatever text the tile already had.
+    // overwrite whatever text the tile already had. previousText here is the model's authored
+    // default ("This is where..."), which is non-empty, so this already distinguishes "restored"
+    // from "left blank" — but see the next test for the more realistic case of a real prior
+    // response.
     it("on a populated document, when getAiContent rejects: text is unchanged, Loading is gone, " +
        "and nothing escapes as an unhandled rejection", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
@@ -303,6 +345,27 @@ describe("AIComponent", () => {
 
       expect(aiContent.text).toBe(previousText);
       expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
+
+    it("on a populated document, when a later refresh's getAiContent rejects: a real prior " +
+       "response survives, not just the authored placeholder", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      // First render succeeds and leaves a real AI response in place.
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).toBe("Mocked customized content");
     });
   });
 
