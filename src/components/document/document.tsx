@@ -10,10 +10,10 @@ import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
-import { CommentWithId } from "../../models/document/document-comments-manager";
+import { CommentWithId, kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
-import { IDEAS_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
@@ -559,7 +559,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const commentsManager = document.commentsManager;
     if (!commentsManager || !commentsManager.canRequestIdeas) return;
 
-    commentsManager.clearEmptyDocumentNudge();
+    commentsManager.clearStatusMessage();
     const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
     const requestId = (!isEmpty && appConfig.aiEvaluation) ? nanoid() : null;
     // Recorded synchronously, before any await: see Constraint C13 in the implementation guide.
@@ -571,13 +571,21 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     persistentUI.toggleShowChatPanel(true);
 
     if (isEmpty) {
-      commentsManager.showEmptyDocumentNudge(IDEAS_EMPTY_MESSAGE);
+      commentsManager.showStatusMessage(IDEAS_EMPTY_MESSAGE);
       return;
     }
 
     commentsManager.setIdeasClickInProgress(true);
-    try {
-      // --- asynchronous section ---
+
+    // The two Firebase calls below (recording the last-edited time, then reading it back) have no
+    // timeout of their own, so a stalled connection could otherwise leave ideasClickInProgress —
+    // and so the Ideas button — disabled forever. `attempt` is raced against a deadline below: if
+    // it loses, we release the gate and show a failure message, but let `attempt` keep running
+    // rather than abandon the underlying writes. Should it resolve after all, or should a newer
+    // click have already superseded it, the staleness check just before queueing keeps it from
+    // reviving the gate for a request the student has moved on from.
+    let timedOut = false;
+    const attempt = (async () => {
       await waitForSaveSettled(document);
       await firebase.setLastEditedNow(user, document.key, document.uid, undefined, requestId ?? undefined);
 
@@ -588,7 +596,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
         const effectiveLastEdited = docLastEditedTime || Date.now();
 
-        const statusPath = firebase.getEvaluationStatusPath(user, document.key, document.uid);
+        // A newer click (or this one already having timed out) means the student has moved on:
+        // queuing now would only re-raise the gate for a request nothing is waiting on anymore.
+        const isStillCurrent = !timedOut && commentsManager.latestIdeasRequestId === requestId;
+        const statusPath = isStillCurrent && firebase.getEvaluationStatusPath(user, document.key, document.uid);
         if (statusPath) {
           const statusRef = firebase.ref(statusPath);
           const onStatus = (snapshot: any) => commentsManager.applyEvaluationStatus(snapshot.val());
@@ -616,9 +627,32 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       }
 
       logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+    })();
+
+    // Never rejects: a failure is reported here (unless a later attempt has already shown its own
+    // message) rather than left for the race below to catch, so a late failure — after the
+    // deadline has already put up a failure message of its own — doesn't stomp on it.
+    const guardedAttempt = attempt.catch(error => {
+      console.error("Ideas request failed:", error);
+      if (!timedOut && commentsManager.latestIdeasRequestId === requestId) {
+        commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      }
+    });
+    let resolveDeadline: (value: "timeout") => void;
+    const deadline = new Promise<"timeout">(resolve => { resolveDeadline = resolve; });
+    const deadlineTimer = setTimeout(() => {
+      timedOut = true;
+      resolveDeadline("timeout");
+    }, kIdeasRequestDeadlineMs);
+
+    try {
+      const result = await Promise.race([guardedAttempt.then(() => "done" as const), deadline]);
+      if (result === "timeout") {
+        commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      } else {
+        clearTimeout(deadlineTimer);
+      }
     } finally {
-      // The pending entry, if one was queued, now carries the gate — canRequestIdeas stays false
-      // until it resolves (comment, status, or expiry).
       commentsManager.setIdeasClickInProgress(false);
     }
   };

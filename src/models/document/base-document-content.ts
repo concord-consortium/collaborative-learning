@@ -580,11 +580,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
 
       return false;
     },
-    // The "add some work" message shown in place of a real Ideas request when the document is
-    // empty. Client-only state: never written to Firestore, so it does not survive a reload.
-    get emptyDocumentNudge() {
+    // An inline status message shown in place of (or ahead of) a real AI comment: an "add some
+    // work" nudge for an empty document, or a "something went wrong" message for a failed
+    // request. Client-only state: never written to Firestore, so it does not survive a reload.
+    get statusMessage() {
       const doc = getParentWithTypeName(self, "Document");
-      return doc?.commentsManager?.emptyDocumentNudge ?? null;
+      return doc?.commentsManager?.statusMessage ?? null;
     }
   }))
   .actions(self => ({

@@ -3,7 +3,7 @@ import { kAnalyzerUserParams } from "../../../shared/shared";
 import { DocumentModel, DocumentModelType } from "./document";
 import { CommentWithId, DocumentCommentsManager } from "./document-comments-manager";
 import { ProblemDocument } from "./document-types";
-import { IDEAS_EMPTY_MESSAGE } from "./empty-document-messages";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "./ai-evaluation-messages";
 
 jest.mock("firebase/app", () => ({
   __esModule: true,
@@ -330,16 +330,16 @@ describe("DocumentCommentsManager", () => {
 
   describe("empty-document nudge", () => {
     it("shows and clears the nudge", () => {
-      manager.showEmptyDocumentNudge("Add some work");
-      expect(manager.emptyDocumentNudge).toMatchObject({ message: "Add some work" });
+      manager.showStatusMessage("Add some work");
+      expect(manager.statusMessage).toMatchObject({ message: "Add some work" });
 
-      manager.clearEmptyDocumentNudge();
-      expect(manager.emptyDocumentNudge).toBeNull();
+      manager.clearStatusMessage();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("clears the nudge when a newer AI comment arrives", () => {
-      manager.showEmptyDocumentNudge("Add some work");
-      const shownAt = manager.emptyDocumentNudge!.shownAt;
+      manager.showStatusMessage("Add some work");
+      const shownAt = manager.statusMessage!.shownAt;
 
       manager.setComments([{
         id: "ai-1",
@@ -350,12 +350,12 @@ describe("DocumentCommentsManager", () => {
         network: "test"
       }]);
 
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("does not clear the nudge for a comment older than when it was shown", () => {
-      manager.showEmptyDocumentNudge("Add some work");
-      const shownAt = manager.emptyDocumentNudge!.shownAt;
+      manager.showStatusMessage("Add some work");
+      const shownAt = manager.statusMessage!.shownAt;
 
       manager.setComments([{
         id: "ai-1",
@@ -366,11 +366,11 @@ describe("DocumentCommentsManager", () => {
         network: "test"
       }]);
 
-      expect(manager.emptyDocumentNudge).not.toBeNull();
+      expect(manager.statusMessage).not.toBeNull();
     });
 
     it("does not block a queued local (exemplar) comment from posting", async () => {
-      manager.showEmptyDocumentNudge("Add some work");
+      manager.showStatusMessage("Add some work");
       const postFunction = jest.fn().mockResolvedValue({ id: "ex1" });
 
       manager.queueComment({
@@ -384,7 +384,7 @@ describe("DocumentCommentsManager", () => {
       await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(postFunction).toHaveBeenCalled();
-      expect(manager.emptyDocumentNudge).not.toBeNull();
+      expect(manager.statusMessage).not.toBeNull();
     });
   });
 
@@ -426,7 +426,7 @@ describe("DocumentCommentsManager", () => {
     });
 
     it("is unaffected by the nudge or a queued local (exemplar) entry", () => {
-      manager.showEmptyDocumentNudge("Add some work");
+      manager.showStatusMessage("Add some work");
       expect(manager.canRequestIdeas).toBe(true);
 
       manager.queueComment({
@@ -454,7 +454,7 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(1);
       expect(dispose).not.toHaveBeenCalled();
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("ignores a null status", () => {
@@ -473,10 +473,10 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(0);
       expect(dispose).toHaveBeenCalled();
-      expect(manager.emptyDocumentNudge).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
+      expect(manager.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
     });
 
-    it("resolves the matching entry and shows nothing for a failed status", () => {
+    it("resolves the matching entry and shows a failure message for a failed status on the latest request", () => {
       const dispose = queueForRequest("req-a");
       manager.setLatestIdeasRequestId("req-a");
 
@@ -484,7 +484,18 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(0);
       expect(dispose).toHaveBeenCalled();
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
+    });
+
+    it("resolves an entry whose request id is not the latest, and shows no failure message", () => {
+      const disposeA = queueForRequest("req-a");
+      manager.setLatestIdeasRequestId("req-b"); // the student has since clicked again
+
+      manager.applyEvaluationStatus({ outcome: "failed", requestId: "req-a", docUpdated: 1, completedAt: 1 });
+
+      expect(manager.pendingComments).toHaveLength(0);
+      expect(disposeA).toHaveBeenCalled();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("resolves an entry whose request id is not the latest, and shows nothing", () => {
@@ -495,7 +506,7 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(0);
       expect(disposeA).toHaveBeenCalled();
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("with A then B pending, A's skipped-empty resolves A only and shows no nudge", () => {
@@ -509,7 +520,7 @@ describe("DocumentCommentsManager", () => {
       expect(manager.pendingComments[0]).toMatchObject({ requestId: "req-b" });
       expect(disposeA).toHaveBeenCalled();
       expect(disposeB).not.toHaveBeenCalled();
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("shows no nudge when A's status lands while B is still waiting for its save (B's entry not yet queued)", () => {
@@ -518,7 +529,7 @@ describe("DocumentCommentsManager", () => {
 
       manager.applyEvaluationStatus({ outcome: "skipped-empty", requestId: "req-a", docUpdated: 1, completedAt: 1 });
 
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toBeNull();
     });
 
     it("shows no nudge for a skipped-empty on an older request, arriving after the latest has already resolved", () => {
@@ -531,7 +542,7 @@ describe("DocumentCommentsManager", () => {
 
       manager.applyEvaluationStatus({ outcome: "skipped-empty", requestId: "req-a", docUpdated: 1, completedAt: 1 });
 
-      expect(manager.emptyDocumentNudge).toBeNull();
+      expect(manager.statusMessage).toBeNull();
     });
   });
 

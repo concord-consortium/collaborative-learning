@@ -3,7 +3,12 @@ import { nanoid } from "nanoid";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { WithId } from "../../hooks/firestore-hooks";
 import { IClientCommentParams, IDocumentMetadata, IUserContext, kAnalyzerUserParams } from "../../../shared/shared";
-import { IDEAS_EMPTY_MESSAGE } from "./empty-document-messages";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "./ai-evaluation-messages";
+
+// How long an Ideas click waits for its own Firebase writes/reads (recording the last-edited
+// time, then reading it back) before giving up on this attempt. Short: this is a couple of small
+// foreground calls, not the AI evaluation itself, which has its own much longer budget below.
+export const kIdeasRequestDeadlineMs = 15_000;
 
 export const REMOTE_COMMENT = "remote";
 export const LOCAL_COMMENT = "local";
@@ -87,10 +92,12 @@ export class DocumentCommentsManager {
   pendingComments: PendingComment[] = [];
   private isCheckingPending = false;
 
-  /** The "add some work" message shown instead of a real Ideas request on an empty document.
-   * Client-only: never written to Firestore, and deliberately not a `pendingComments` entry (a
-   * nudge waiting for an AI comment would block an exemplar comment queued behind it). */
-  emptyDocumentNudge: { message: string; shownAt: number } | null = null;
+  /** An inline status line shown in place of (or ahead of) a real AI comment: either the
+   * "add some work" nudge for an empty document, or a "something went wrong" message when an
+   * Ideas request could not be completed. Client-only: never written to Firestore, and
+   * deliberately not a `pendingComments` entry (a message waiting for an AI comment would block an
+   * exemplar comment queued behind it). */
+  statusMessage: { message: string; shownAt: number } | null = null;
 
   /** The request id of the most recent Ideas click that made a request, or `null` if the most
    * recent click made none (an empty-document click). Records which click is latest, not which
@@ -168,11 +175,11 @@ export class DocumentCommentsManager {
   setComments(comments: CommentWithId[]) {
     this.comments = comments;
 
-    if (this.emptyDocumentNudge) {
-      const shownAt = this.emptyDocumentNudge.shownAt;
+    if (this.statusMessage) {
+      const shownAt = this.statusMessage.shownAt;
       const hasNewerAnalyzerComment = comments.some(c =>
         c.uid === kAnalyzerUserParams.id && c.createdAt.getTime() > shownAt);
-      if (hasNewerAnalyzerComment) this.clearEmptyDocumentNudge();
+      if (hasNewerAnalyzerComment) this.clearStatusMessage();
     }
 
     this.checkPendingComments();
@@ -230,12 +237,12 @@ export class DocumentCommentsManager {
     this.ideasClickInProgress = inProgress;
   }
 
-  showEmptyDocumentNudge(message: string) {
-    this.emptyDocumentNudge = { message, shownAt: Date.now() };
+  showStatusMessage(message: string) {
+    this.statusMessage = { message, shownAt: Date.now() };
   }
 
-  clearEmptyDocumentNudge() {
-    this.emptyDocumentNudge = null;
+  clearStatusMessage() {
+    this.statusMessage = null;
   }
 
   /**
@@ -256,9 +263,15 @@ export class DocumentCommentsManager {
     this.removePendingComments(matchingIds);
 
     // Only the latest click's status may change what the student sees — an older request
-    // resolving late must not show the nudge over a click the student already made.
-    if (status.requestId === this.latestIdeasRequestId && status.outcome === "skipped-empty") {
-      this.showEmptyDocumentNudge(IDEAS_EMPTY_MESSAGE);
+    // resolving late must not show a message over a click the student already made.
+    if (status.requestId === this.latestIdeasRequestId) {
+      if (status.outcome === "skipped-empty") {
+        this.showStatusMessage(IDEAS_EMPTY_MESSAGE);
+      } else if (status.outcome === "failed") {
+        // Otherwise the pending entry's removal above silently drops the waiting bubble, with
+        // nothing telling the student the pipeline actually failed server-side.
+        this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      }
     }
 
     this.checkPendingComments();

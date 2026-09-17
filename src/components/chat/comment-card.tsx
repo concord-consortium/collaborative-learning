@@ -11,7 +11,7 @@ import { useCurriculumOrDocumentContent, useStores } from "../../hooks/use-store
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import ChatAvatar from "./chat-avatar";
-import WaitingMessage, { EmptyDocumentNudge } from "./waiting-message";
+import WaitingMessage, { StatusMessage } from "./waiting-message";
 import { isSectionPath, escapeKey, kRatingValues, RatingValue } from "../../../shared/shared";
 import { useCommentsCollectionPath } from "../../hooks/document-comment-hooks";
 import { useUpdateCommentRating } from "../../hooks/use-update-comment-rating";
@@ -176,10 +176,10 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
   };
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
-  // Mirrors showWaitingMessage's shape, but for the nudge's own condition: adding a tile selects
-  // it, which would otherwise hide the nudge (via !focusTileId going false) the moment the student
-  // starts working, before they click Ideas again or a new comment arrives to clear it.
-  const showNudge = !focusTileId || !!content?.emptyDocumentNudge;
+  // Mirrors showWaitingMessage's shape, but for the message's own condition: adding a tile selects
+  // it, which would otherwise hide the message (via !focusTileId going false) the moment the
+  // student starts working, before they click Ideas again or a new comment arrives to clear it.
+  const showStatusMessage = !focusTileId || !!content?.statusMessage;
 
   const updateRating = useUpdateCommentRating();
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
@@ -316,7 +316,7 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
           })
         }
         { showWaitingMessage && <WaitingMessage content={content} /> }
-        { showNudge && <EmptyDocumentNudge content={content} /> }
+        { showStatusMessage && <StatusMessage content={content} /> }
         <CommentTextBox
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}

@@ -9,7 +9,8 @@ import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { kAnalyzerUserParams } from "../../../shared/shared";
-import { IDEAS_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
 
@@ -88,6 +89,12 @@ describe("Ideas button", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    // Guards against a failed assertion in the deadline test below leaving fake timers on for
+    // later tests.
+    jest.useRealTimers();
+  });
+
   it("on an empty document: no evaluation write, no log, nudge shown, gate not raised", async () => {
     const stores = makeStores("categorize-design");
     const document = emptyDocument();
@@ -100,7 +107,7 @@ describe("Ideas button", () => {
     expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
     expect(logDocumentEvent).not.toHaveBeenCalled();
     expect(document.commentsManager?.latestIdeasRequestId).toBeNull();
-    expect(document.commentsManager?.emptyDocumentNudge).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
+    expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
     // The gate is not raised by an empty click, so the button stays enabled while the nudge shows.
     expect(screen.getByTestId("ideas-button")).not.toBeDisabled();
@@ -113,11 +120,11 @@ describe("Ideas button", () => {
 
     clickIdeas();
     await flushMicrotasks();
-    document.commentsManager?.clearEmptyDocumentNudge();
+    document.commentsManager?.clearStatusMessage();
     clickIdeas();
     await flushMicrotasks();
 
-    expect(document.commentsManager?.emptyDocumentNudge).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
+    expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
     expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
     expect(logDocumentEvent).not.toHaveBeenCalled();
   });
@@ -166,7 +173,7 @@ describe("Ideas button", () => {
     // The stale status's requestId doesn't match this click's, so it neither resolves the new
     // entry nor shows the nudge, regardless of whether it "arrives" before or after queueing.
     expect(document.commentsManager?.pendingComments).toHaveLength(1);
-    expect(document.commentsManager?.emptyDocumentNudge).toBeNull();
+    expect(document.commentsManager?.statusMessage).toBeNull();
   });
 
   it("on a populated document, the queued entry still resolves on an arriving comment, and the " +
@@ -272,28 +279,67 @@ describe("Ideas button", () => {
 
     clickIdeas();
     await flushMicrotasks();
-    expect(document.commentsManager?.emptyDocumentNudge).not.toBeNull();
+    expect(document.commentsManager?.statusMessage).not.toBeNull();
 
     clickIdeas();
     await flushMicrotasks();
 
-    expect(document.commentsManager?.emptyDocumentNudge).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
+    expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
     expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
   });
 
-  it("setIdeasClickInProgress ends false even when setLastEditedNow rejects", async () => {
+  it("releases the gate and shows a failure message, with no unhandled rejection, when " +
+     "setLastEditedNow rejects", async () => {
     const stores = makeStores("categorize-design");
     (stores.db.firebase.setLastEditedNow as jest.Mock).mockRejectedValue(new Error("network error"));
     const document = populatedDocument();
-    const ref = renderDocument(document, stores);
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    renderDocument(document, stores);
 
-    // Invoked directly (rather than via a DOM click) so the test can await and catch the
-    // handler's own promise, instead of leaving it an unhandled rejection.
+    // A plain DOM click discards the handler's returned promise — if it still rejected, this
+    // would be an unhandled rejection. It no longer does: the failure is caught internally.
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.canRequestIdeas).toBe(true);
+    expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Ideas request failed:", expect.any(Error));
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("releases the gate and shows a failure message if the request exceeds its deadline, and " +
+     "does not queue a pending entry once the stalled call eventually resolves", async () => {
+    jest.useFakeTimers();
+    const stores = makeStores("categorize-design");
+    let resolveSetLastEditedNow: () => void = () => undefined;
+    (stores.db.firebase.setLastEditedNow as jest.Mock).mockReturnValue(
+      new Promise<void>(resolve => { resolveSetLastEditedNow = resolve; })
+    );
+    const document = populatedDocument();
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+    expect(document.commentsManager?.canRequestIdeas).toBe(false);
+
     await act(async () => {
-      await expect((ref.current as any).handleIdeasButtonClick()).rejects.toThrow("network error");
+      await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
     });
 
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
+    expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
+
+    // The abandoned call finally resolves after the client already gave up on it.
+    await act(async () => {
+      resolveSetLastEditedNow();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(document.commentsManager?.pendingComments).toHaveLength(0);
+
+    jest.useRealTimers();
   });
 
   it("disables the button while canRequestIdeas is false, and re-enables it once it is true", async () => {

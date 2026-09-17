@@ -13,7 +13,7 @@ import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
+import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
 

@@ -7,7 +7,7 @@ import { UserModelType } from "../../models/stores/user";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
-// jsdom does not implement scrollIntoView, which EmptyDocumentNudge calls when it renders.
+// jsdom does not implement scrollIntoView, which StatusMessage calls when it renders.
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 jest.mock("../../hooks/use-update-comment-rating", () => ({
@@ -433,8 +433,8 @@ describe("CommentThread", () => {
       const testUser = {id: "u1", name: "test user"} as UserModelType;
 
       const useStoresMock = jest.requireMock("../../hooks/use-stores");
-      let emptyDocumentNudge: { message: string; shownAt: number } | null = null;
-      useStoresMock.useCurriculumOrDocumentContent = () => ({ emptyDocumentNudge });
+      let statusMessage: { message: string; shownAt: number } | null = null;
+      useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage });
 
       const { rerender } = render((
         <ModalProvider>
@@ -450,7 +450,7 @@ describe("CommentThread", () => {
 
       expect(screen.queryByText("Doc Thread Comment 1")).not.toBeInTheDocument();
 
-      emptyDocumentNudge = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+      statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
       // ChatThread is `observer`-wrapped, which applies React.memo on props; a real content model
       // would trigger a re-render through MobX's own reactivity regardless of props. The mocked
       // hook here is a plain function, so a changed (but equivalent) prop reference is needed to

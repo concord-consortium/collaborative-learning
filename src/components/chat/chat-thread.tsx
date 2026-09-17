@@ -187,17 +187,17 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     }
   }, [pendingRemoteComment]);
 
-  // Likewise, force the document thread open when the empty-document nudge appears, so the
-  // student sees it without needing to click. A distinct condition from the one above — clearing
-  // tile selection (which the Ideas click already does) does not by itself expand a thread the
-  // student collapsed.
-  const emptyDocumentNudge = content?.emptyDocumentNudge;
+  // Likewise, force the document thread open when a status message (the empty-document nudge, or
+  // a request-failed message) appears, so the student sees it without needing to click. A distinct
+  // condition from the one above — clearing tile selection (which the Ideas click already does)
+  // does not by itself expand a thread the student collapsed.
+  const statusMessage = content?.statusMessage;
 
   useEffect(() => {
-    if (emptyDocumentNudge) {
+    if (statusMessage) {
       setExpandedThreads(prev => new Set(prev).add('document'));
     }
-  }, [emptyDocumentNudge]);
+  }, [statusMessage]);
 
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   let overrideTitle = undefined;

@@ -30,7 +30,7 @@ import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event
 import { LogEventName } from "../../lib/logger-types";
 import { defaultAIContent } from "./ai-content";
 import { AIComponent } from "./ai-tile";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
+import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { DocumentContentModel } from "../../models/document/document-content";
 
 // The starter tile needs to be registered so the TileModel.create

@@ -13,8 +13,8 @@ interface IAdaStatusMessageProps {
 
 /**
  * Ada's avatar, name, and an italic status line. The presentation shared by the "Ada is
- * thinking about it..." waiting bubble and the empty-document nudge — the two decide separately
- * *whether* to show (WaitingMessage and EmptyDocumentNudge below), this only renders *what*.
+ * thinking about it..." waiting bubble and the document status message — the two decide
+ * separately *whether* to show (WaitingMessage and StatusMessage below), this only renders *what*.
  */
 export const AdaStatusMessage: React.FC<IAdaStatusMessageProps> = ({ message }) => (
   <>
@@ -54,38 +54,39 @@ const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
 
 export default observer(_WaitingMessage);
 
-interface IEmptyDocumentNudgeProps {
+interface IStatusMessageProps {
   content?: DocumentContentModelType;
 }
 
 /**
- * Displays the "add some work" nudge in place of a real Ideas request when the document is
- * empty. A distinct condition from WaitingMessage's `isAwaitingRemoteComment` — the two can both
+ * Displays the document's inline status message — the "add some work" nudge for an empty
+ * document, or a "something went wrong" message for a failed request — in place of a real Ideas
+ * request. A distinct condition from WaitingMessage's `isAwaitingRemoteComment` — the two can both
  * be true at once (see comment-card.tsx) and are never folded together.
  *
- * Renders nothing at all (not even an empty wrapper) when there is no nudge: comment-card.tsx
+ * Renders nothing at all (not even an empty wrapper) when there is no message: comment-card.tsx
  * renders this next to WaitingMessage, whose own wrapper always renders per its existing
  * behavior, and a second empty `.comment-thread` div would double that div's bottom margin on
- * every comment card, nudge or not.
+ * every comment card, message or not.
  */
-const _EmptyDocumentNudge: React.FC<IEmptyDocumentNudgeProps> = ({ content }) => {
+const _StatusMessage: React.FC<IStatusMessageProps> = ({ content }) => {
 
-  const nudgeRef = useRef<HTMLDivElement>(null);
-  const nudge = content?.emptyDocumentNudge;
+  const messageRef = useRef<HTMLDivElement>(null);
+  const status = content?.statusMessage;
 
   useEffect(() => {
-    if (nudgeRef.current && nudge) {
-      nudgeRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messageRef.current && status) {
+      messageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [nudge]);
+  }, [status]);
 
-  if (!nudge) return null;
+  if (!status) return null;
 
   return (
-    <div className="comment-thread" ref={nudgeRef}>
-      <AdaStatusMessage message={nudge.message} />
+    <div className="comment-thread" ref={messageRef}>
+      <AdaStatusMessage message={status.message} />
     </div>
   );
 };
 
-export const EmptyDocumentNudge = observer(_EmptyDocumentNudge);
+export const StatusMessage = observer(_StatusMessage);

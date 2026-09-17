@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import WaitingMessage, { EmptyDocumentNudge } from "./waiting-message";
+import WaitingMessage, { StatusMessage } from "./waiting-message";
 
 jest.mock("../../hooks/use-stores", () => ({
   useStores: () => ({
@@ -25,30 +25,30 @@ describe("WaitingMessage", () => {
   });
 });
 
-describe("EmptyDocumentNudge", () => {
-  it("renders nothing when there is no nudge", () => {
-    render(<EmptyDocumentNudge content={{ emptyDocumentNudge: null } as any} />);
+describe("StatusMessage", () => {
+  it("renders nothing when there is no status message", () => {
+    render(<StatusMessage content={{ statusMessage: null } as any} />);
     expect(screen.queryByTestId("comment")).not.toBeInTheDocument();
   });
 
-  it("renders the nudge message when one is set", () => {
-    const emptyDocumentNudge = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
-    render(<EmptyDocumentNudge content={{ emptyDocumentNudge } as any} />);
-    expect(screen.getByTestId("comment")).toHaveTextContent(emptyDocumentNudge.message);
+  it("renders the status message when one is set", () => {
+    const statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+    render(<StatusMessage content={{ statusMessage } as any} />);
+    expect(screen.getByTestId("comment")).toHaveTextContent(statusMessage.message);
   });
 });
 
-describe("WaitingMessage and EmptyDocumentNudge together", () => {
+describe("WaitingMessage and StatusMessage together", () => {
   it("can both render at once", () => {
-    const emptyDocumentNudge = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
-    const content = { isAwaitingRemoteComment: true, emptyDocumentNudge } as any;
+    const statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+    const content = { isAwaitingRemoteComment: true, statusMessage } as any;
     render(
       <>
         <WaitingMessage content={content} />
-        <EmptyDocumentNudge content={content} />
+        <StatusMessage content={content} />
       </>
     );
     expect(screen.getByText("Ada is thinking about it...")).toBeInTheDocument();
-    expect(screen.getByText(emptyDocumentNudge.message)).toBeInTheDocument();
+    expect(screen.getByText(statusMessage.message)).toBeInTheDocument();
   });
 });

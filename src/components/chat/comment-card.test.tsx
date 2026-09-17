@@ -7,9 +7,9 @@ import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
-import { IDEAS_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
+import { IDEAS_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
 
-// jsdom does not implement scrollIntoView, which EmptyDocumentNudge calls when it renders.
+// jsdom does not implement scrollIntoView, which StatusMessage calls when it renders.
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 
@@ -298,7 +298,7 @@ describe("the empty-document nudge with a tile focused", () => {
   it("still renders when a tile is focused and the nudge is set", () => {
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => ({
-      emptyDocumentNudge: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
+      statusMessage: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
     });
 
     render((
@@ -312,7 +312,7 @@ describe("the empty-document nudge with a tile focused", () => {
 
   it("does not render when a tile is focused and there is no nudge", () => {
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
-    useStoresMock.useCurriculumOrDocumentContent = () => ({ emptyDocumentNudge: null });
+    useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage: null });
 
     render((
       <ModalProvider>
