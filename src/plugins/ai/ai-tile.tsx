@@ -1,7 +1,8 @@
 import Markdown from "markdown-to-jsx";
 import { observer } from "mobx-react";
-import { getParentOfType } from "mobx-state-tree";
+import { getParentOfType, getSnapshot } from "mobx-state-tree";
 import React, { useEffect, useRef, useState } from "react";
+import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
@@ -12,6 +13,7 @@ import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
+import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
 
@@ -47,6 +49,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         setIsUpdating(true);
         if (!identifier || !model.id) {
           console.error("No document identifier or tileId found");
+          setIsUpdating(false);
           return;
         }
         if (!content.prompt) {
@@ -58,8 +61,23 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         const document = documentId
           ? documents.getDocument(documentId) ?? networkDocuments.getDocument(documentId)
           : undefined;
+
+        // No student document at all: the tile is being shown somewhere other than a student's
+        // document (an authored curriculum section in the problem panel, which has no documentId).
+        // Make no request and leave the tile's text alone — see Constraint C15.
+        if (!document?.content) {
+          setIsUpdating(false);
+          return;
+        }
+        // A student document with no work in it: nudge, and make no request.
+        if (!documentHasStudentWork(getSnapshot(document.content))) {
+          content.setText(AI_TILE_EMPTY_MESSAGE);
+          setIsUpdating(false);
+          return;
+        }
+
         content.setText("");
-        const summary = document ? documentSummarizer(document.content, {}) : "";
+        const summary = documentSummarizer(document.content, {});
         let dynamicContentPrompt = summary
           ? `This is a summary of the current document:\n\n${summary}\n\n\n`
           : `No information about the current document could be found.\n\n\n`;
