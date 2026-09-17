@@ -367,6 +367,33 @@ describe("AIComponent", () => {
 
       expect(aiContent.text).toBe("Mocked customized content");
     });
+
+    // getAiContent resolves rather than rejects on a server-side failure (see get-ai-content.ts:
+    // an LLM error there leaves `content` — and so `text` — empty and sets `error` instead), so
+    // this is a distinct path from the rejection tests above.
+    it("on a populated document, when a later refresh's response carries a server-side error: " +
+       "a real prior response survives, and the error is logged", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      // First render succeeds and leaves a real AI response in place.
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "", error: "Backend exploded" } });
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).toBe("Mocked customized content");
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to query AI", expect.any(Error));
+      consoleErrorSpy.mockRestore();
+    });
   });
 
 });

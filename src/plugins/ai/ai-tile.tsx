@@ -92,13 +92,17 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             documentId: changeSlashesToUnderscores(identifier),
             tileId: model.id
           });
+          // getAiContent resolves rather than rejects on a server-side failure (e.g. the LLM call
+          // itself failing), pairing a truthy error with an empty (or absent) text. Routed through
+          // the same catch below rather than setting text first and checking after, so a failure
+          // reported this way restores previousText exactly like a rejection does.
+          if (response.data.error) {
+            throw new Error(response.data.error);
+          }
           content.setText(response.data.text);
           if (response.data.lastUpdated) {
             const timestamp = response.data.lastUpdated;
             setLastUpdated(new Date(timestamp._seconds*1000));
-          }
-          if (response.data.error) {
-            console.error("Error querying AI", response.data.error);
           }
         } catch (error) {
           // Restore rather than leave the tile on the blank text set above, in anticipation of a
