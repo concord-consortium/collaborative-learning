@@ -855,6 +855,35 @@ describe("functions", () => {
         .once("value").then((snapshot) => snapshot.val());
       expect(status).toMatchObject({outcome: "failed", requestId: "req-badwrite"});
     });
+
+    test("a failed status is still written when the imaged queue entry cannot be removed", async () => {
+      mockCategorizeResponse({parsed: undefined});
+      const realDoc = admin.firestore().doc.bind(admin.firestore());
+      const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+        if (path !== "analysis/queue/imaged/testdoc1") return realDoc(path);
+        return {
+          delete: async () => {
+            throw new Error("firestore unavailable");
+          },
+        } as any;
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestId: "req-nodelete",
+      }));
+      docSpy.mockRestore();
+
+      // The rejection above did not escape the helper: the handler completed normally, and the
+      // failure record was still written even though the queue entry could not be removed.
+      expect(logger.error).toHaveBeenCalledWith(
+        "Could not remove the imaged queue entry, which will not be retried", expect.any(Error));
+      expect(await admin.firestore().collection("analysis/queue/failedAnalyzing").count().get()
+        .then((result) => result.data().count)).toEqual(1);
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-nodelete`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "failed", requestId: "req-nodelete"});
+    });
   });
 
   describe("the summary record the run leaves behind", () => {

@@ -916,6 +916,29 @@ describe("functions", () => {
         expect((await failedRecord())?.error).toContain("invalid document JSON");
       });
 
+      test("a failed status is still written when the pending queue entry cannot be removed", async () => {
+        await givenDocument("bad2", "this is not JSON");
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "analysis/queue/pending/bad2") return realDoc(path);
+          return {
+            delete: async () => {
+              throw new Error("firestore unavailable");
+            },
+          } as any;
+        });
+
+        await runPending("bad2", {requestId: "req-bad2"});
+        docSpy.mockRestore();
+
+        // The rejection above did not escape the helper: the handler completed normally, and the
+        // failure record was still written even though the queue entry could not be removed.
+        expect(logger.error).toHaveBeenCalledWith(
+          "Could not remove the pending queue entry, which will not be retried", expect.any(Error));
+        expect((await failedRecord())?.error).toContain("invalid document JSON");
+        expect(await statusFor("bad2", "req-bad2")).toMatchObject({outcome: "failed", requestId: "req-bad2"});
+      });
+
       test("a throw from the classifier is caught and recorded", async () => {
         await givenDocument("boom1", mixedDoc);
         jest.spyOn(classifier, "classifyDocument").mockImplementation(() => {
