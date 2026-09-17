@@ -489,6 +489,30 @@ describe("functions", () => {
           expect.stringContaining("Could not write evaluation status"), expect.any(Error));
       });
 
+      test("a skipped-empty status is still written when the pending queue entry cannot be removed", async () => {
+        await givenDocument("empty5", emptyDoc);
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "analysis/queue/pending/empty5") return realDoc(path);
+          return {
+            delete: async () => {
+              throw new Error("firestore unavailable");
+            },
+          } as any;
+        });
+
+        await runPending("empty5", {requestId: "req-empty5"});
+        docSpy.mockRestore();
+
+        // The delete failure did not fall through to the generic error path: no contradictory
+        // failure record, and the correct status was still written.
+        expect(logger.error).toHaveBeenCalledWith(
+          "Could not remove the pending queue entry, which will not be retried", expect.any(Error));
+        expect(await countIn("failedImaging")).toEqual(0);
+        expect(await doneRecord("empty5")).toMatchObject({summaryOmittedReason: "empty-document"});
+        expect(await statusFor("empty5", "req-empty5")).toMatchObject({outcome: "skipped-empty"});
+      });
+
       test("a document holding only an AI tile is skipped: AI output is never student work", async () => {
         await givenDocument("aitile1", aiTileDoc);
         const shutterbug = stubShutterbug(shutterbugOk());

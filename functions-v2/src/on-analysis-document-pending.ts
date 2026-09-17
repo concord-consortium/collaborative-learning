@@ -349,7 +349,11 @@ export const onAnalysisDocumentPending =
           summaryOmittedReason: "empty-document",
           imageOmittedReason: "empty-document",
         });
-        await firestore.doc(event.document).delete();
+        try {
+          await firestore.doc(event.document).delete();
+        } catch (err) {
+          logger.error("Could not remove the pending queue entry, which will not be retried", err);
+        }
         await writeEvaluationStatus(doc.metadataPath, doc.evaluator, {
           outcome: "skipped-empty",
           requestId: doc.requestId,

@@ -727,6 +727,37 @@ describe("functions", () => {
         expect.stringContaining("Could not write evaluation status"), expect.any(Error));
     });
 
+    test("a commented status is still written when the imaged queue entry cannot be removed", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+      const realDoc = admin.firestore().doc.bind(admin.firestore());
+      const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+        if (path !== "analysis/queue/imaged/testdoc1") return realDoc(path);
+        return {
+          delete: async () => {
+            throw new Error("firestore unavailable");
+          },
+        } as any;
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestId: "req-imaged-nodelete",
+      }));
+      docSpy.mockRestore();
+
+      // The delete failure did not escape the handler, and the comment/done work that already
+      // happened is still correctly reported as "commented".
+      expect(logger.error).toHaveBeenCalledWith(
+        "Could not remove the imaged queue entry, which will not be retried", expect.any(Error));
+      const comments = await admin.firestore().collection(sampleDoc.commentsPath).get();
+      expect(comments.docs).toHaveLength(1);
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-imaged-nodelete`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "commented", requestId: "req-imaged-nodelete"});
+    });
+
     test("a summary-only record sends no image", async () => {
       mockCategorizeResponse({parsed, messageShape: "summary-only"});
 

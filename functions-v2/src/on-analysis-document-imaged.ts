@@ -281,7 +281,11 @@ export const onAnalysisDocumentImaged =
       });
 
       // Remove from the "imaged" queue
-      await firestore.doc(event.document).delete();
+      try {
+        await firestore.doc(event.document).delete();
+      } catch (err) {
+        logger.error("Could not remove the imaged queue entry, which will not be retried", err);
+      }
 
       await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
         outcome: "commented",
