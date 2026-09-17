@@ -84,6 +84,25 @@ In this approach the functions are running inside of Jest and they connect to th
 
 The tests use `firebase-functions-test`. This package does a little setup of environment variables so when the functions run they will connect to the emulator. This package also provides a way to mock some standard events and wraps the calls to the functions to emulate how they would be called in the cloud.  This is a simple and efficient way of testing the basic functionality without loading the function code into the emulator itself. The downside is that the functions are not responding to real events in Firestore or realtime database. If they are http functions they are not receiving the actual request event.
 
+### ForeverLearning tutor backend
+
+The tutor can route a conversation to ForeverLearning instead of OpenAI (`chatTutorProvider` in the
+unit config, or the `chatProvider` URL param). That path needs one secret and five params, none of
+which the OpenAI path reads:
+
+| Where | Name |
+|---|---|
+| `.secret.local` | `FL_CONCORDCLUE_API_KEY` |
+| `.env.local` | `FL_BASE_URL`, `FL_SOLUTION_ID`, `FL_CATALOG_COMMIT`, `FL_PROTECTION_CLASSES`, `FL_PROTECTION_PATTERN_REFS` |
+
+See `.env.example` for what each one means and a working set of values. An FL turn with them unset
+fails the turn rather than sending an unprotected packet — `buildEnvelope` refuses an empty
+answer-protection policy — so the failure is loud rather than silent. An OpenAI conversation is
+unaffected either way: the backends are built as factories, so only the one a conversation is routed
+to is constructed, and a missing FL key cannot break an OpenAI turn.
+
+Both secrets are declared in the trigger's `runWith({secrets: [...]})`, so a deploy provisions both.
+
 #### Notes
 
 In the tests, the function cannot be imported normally. This is because the `firebase-functions-test`'s initialize function has to be called before the function code calls `initializeApp`. The standard practice for Firebase functions seems to be calling `initializeApp` at the module level not inside of the function body, so it will be called when the module is imported. The work around is to dynamically import the function. The docs for the `firebase-functions-test` use `require` to import the function, but we are trying to stick with the `import` syntax. The dynamic `import` syntax is asynchronous so it requires waiting, which means it can't be at the top level of the module. So the dynamic import of the function is inside of the test body. Typescript is able to track down the types for these dynamic imports. There is info about this approach in the code.

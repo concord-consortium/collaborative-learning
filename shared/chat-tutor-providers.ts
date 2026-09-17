@@ -1,8 +1,9 @@
 // The chat tutor's backend vocabulary. It lives in shared/ because the places that reference it
-// must not disagree: today the client (which resolves and stamps the provider) and the unit config
-// schema, and — once a second backend exists — the Firestore trigger, which will pick a
-// TutorProvider from this same list. The trigger does not consult it yet: it builds an OpenAI
-// provider unconditionally, so a stamped provider selects nothing on the server today.
+// must not disagree: the client (which resolves and stamps the provider), the unit config schema,
+// and the Firestore trigger, which picks a TutorProvider from this same list. The trigger's
+// router keys its backend map on TutorProviderId, so a backend registered under a name that is
+// not in this list — or a name in this list with no backend — is a compile error there rather
+// than a throw on a student's turn.
 //
 // A fourth place can't import it: the enum pin in the chatTutor rules blocks. Adding a provider
 // here means editing BOTH rules blocks — authed and demo — or every message write under the new
