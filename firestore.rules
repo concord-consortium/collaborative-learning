@@ -52,6 +52,22 @@ service cloud.firestore {
       return hasUserId() && hasRole("researcher");
     }
 
+    // The Researcher Dashboard runs a per-researcher MicroVM that reads a class's corpus
+    // with a researcher token carrying this claim. It must never write here: its results
+    // go to report-service, and the analysis packages it runs are fetched code that must
+    // not be able to mutate the data they were handed. Reads are deliberately untouched,
+    // so the claim narrows a researcher token rather than replacing it, and every deny
+    // below is `!isResearcherDashboardRunner()` ANDed into a write that a researcher
+    // token could otherwise satisfy. Only the portal mints these tokens; a browser never
+    // receives one.
+    // `.get` with a default rather than a bare property read: the claim is absent from
+    // every token but the runner's, and reading an undefined property on the token is an
+    // evaluation error, not null, which would deny every teacher and researcher instead
+    // of only the runner.
+    function isResearcherDashboardRunner() {
+      return isAuthed() && request.auth.token.get("researcher_dashboard_runner", false) == true;
+    }
+
     // uid of submitted document must match user's platform_user_id
     function userIsRequestUser() {
       return isAuthed() &&
@@ -158,7 +174,8 @@ service cloud.firestore {
     // portal-authenticated secure access rules
     //
     match /authed/{portal} {
-      allow read, write: if isAuthedTeacher() || isAuthedResearcher();
+      allow read: if isAuthedTeacher() || isAuthedResearcher();
+      allow write: if (isAuthedTeacher() || isAuthedResearcher()) && !isResearcherDashboardRunner();
 
       // Check that the class given by the context_id exists and includes the given teacher
       function aTeacherIsInClass(uid, contextid) {
@@ -326,9 +343,11 @@ service cloud.firestore {
 
       match /classes/{classId} {
         // portal-authenticated teachers can create valid classes
-        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && isValidClassCreateRequest();
+        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && !isResearcherDashboardRunner()
+          && isValidClassCreateRequest();
         // teachers can only update their own classes and only if they're valid
-        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && isValidClassUpdateRequest();
+        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && !isResearcherDashboardRunner()
+          && isValidClassUpdateRequest();
         // we don't support deleting classes at this time
         allow delete: if false;
         // teachers can read, non existing classes, their own classes, or any class in their network
@@ -364,9 +383,11 @@ service cloud.firestore {
 
       match /offerings/{offeringId} {
         // portal-authenticated teachers can create valid offerings
-        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && isValidOfferingCreateRequest();
+        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && !isResearcherDashboardRunner()
+          && isValidOfferingCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && isValidOfferingUpdateRequest();
+        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && !isResearcherDashboardRunner()
+          && isValidOfferingUpdateRequest();
         // we don't support deleting offerings at this time
         allow delete: if false;
         // teachers can read offerings in their network
@@ -516,18 +537,19 @@ service cloud.firestore {
         }
 
         // portal-authenticated teachers can create valid documents
-        allow create: if isValidDocumentCreateRequest();
+        allow create: if isValidDocumentCreateRequest() && !isResearcherDashboardRunner();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk();
+        allow update: if isValidDocumentUpdateRequest() && canonicalFieldOk() && !isResearcherDashboardRunner();
         // teachers can only delete their own documents
-        allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
+        allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && !isResearcherDashboardRunner()
+          && userIsResourceUser();
         // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
         // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
         // stored type has run in every environment. Neither branch below is dead code — dropping `"group"`
         // here before that sweep has completed would leave the losing side of a race undeletable for every
         // not-yet-swept document.
-        allow delete: if isAuthed()
+        allow delete: if isAuthed() && !isResearcherDashboardRunner()
           && request.auth.token.class_hash == resource.data.context_id
           && (resource.data.type == "group" || resource.data.type == "axes")
           && !isCanonicalValue(resource.data.get('canonical', ""));
@@ -643,15 +665,16 @@ service cloud.firestore {
 
         match /comments/{commentId} {
           // Any user with access to the document can read or create comments and make valid update/delete requests
-          allow create: if hasDocumentAccess() && isValidCommentCreateRequest();
-          allow update: if hasDocumentAccess() && isValidCommentUpdateRequest();
-          allow delete: if hasDocumentAccess() && userIsResourceUser();
+          allow create: if hasDocumentAccess() && !isResearcherDashboardRunner() && isValidCommentCreateRequest();
+          allow update: if hasDocumentAccess() && !isResearcherDashboardRunner() && isValidCommentUpdateRequest();
+          allow delete: if hasDocumentAccess() && !isResearcherDashboardRunner() && userIsResourceUser();
           allow read: if hasDocumentAccess();
         }
 
         // For writing individual history entries
         match /history/{entryId} {
-          allow create: if isAuthed() && (userOwnsDocument() || isConcurrentClassDocument());
+          allow create: if isAuthed() && !isResearcherDashboardRunner()
+            && (userOwnsDocument() || isConcurrentClassDocument());
           allow read: if (isAuthed() && (userOwnsDocument() || isConcurrentClassDocument()))
             || teacherCanAccessDocument() || researcherCanAccessDocument();
           allow delete: if false;
@@ -796,10 +819,10 @@ service cloud.firestore {
         // requires the pointer at the path built from that document's own `uid` to already name it.
         // A class-level slot (classes/<classId>/owners/<uid>/slots/<label>) has no block, so none can be created.
         match /offerings/{offeringId}/owners/{ownerId}/slots/{label} {
-          allow create: if canonicalPointerCreatable();
+          allow create: if canonicalPointerCreatable() && !isResearcherDashboardRunner();
         }
         match /units/{unit}/owners/{ownerId}/slots/{label} {
-          allow create: if canonicalPointerCreatable();
+          allow create: if canonicalPointerCreatable() && !isResearcherDashboardRunner();
         }
       }
 

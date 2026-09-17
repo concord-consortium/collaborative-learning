@@ -26,12 +26,12 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true",
               "users": {
                 "$user_id": {
                   "latestGroupId": {
                     ".read": "auth !== null",
-                    ".write": "auth !== null"
+                    ".write": "auth !== null && auth.researcher_dashboard_runner != true"
                   }
                 }
               }
@@ -42,12 +42,12 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true",
               "users": {
                 "$user_id": {
                   "latestGroupId": {
                     ".read": "auth !== null",
-                    ".write": "auth !== null"
+                    ".write": "auth !== null && auth.researcher_dashboard_runner != true"
                   }
                 }
               }
@@ -58,12 +58,12 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true",
               "users": {
                 "$user_id": {
                   "latestGroupId": {
                     ".read": "auth !== null",
-                    ".write": "auth !== null"
+                    ".write": "auth !== null && auth.researcher_dashboard_runner != true"
                   }
                 }
               }
@@ -74,12 +74,12 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true",
               "users": {
                 "$user_id": {
                   "latestGroupId": {
                     ".read": "auth !== null",
-                    ".write": "auth !== null"
+                    ".write": "auth !== null && auth.researcher_dashboard_runner != true"
                   }
                 }
               }
@@ -90,12 +90,12 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true",
               "users": {
                 "$user_id": {
                   "latestGroupId": {
                     ".read": "auth !== null",
-                    ".write": "auth !== null"
+                    ".write": "auth !== null && auth.researcher_dashboard_runner != true"
                   }
                 }
               }
@@ -110,7 +110,7 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash"
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true"
             }
           }
         },
@@ -118,7 +118,7 @@
           "classes": {
             "$class_hash": {
               ".read": "auth != null && auth.class_hash == $class_hash",
-              ".write": "auth != null && auth.class_hash == $class_hash"
+              ".write": "auth != null && auth.class_hash == $class_hash && auth.researcher_dashboard_runner != true"
             }
           }
         }

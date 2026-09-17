@@ -50,6 +50,15 @@ export const researcherId = `${researcherIdNumeric}`;
 export const researcherName = "Rita Researcher";
 export const researcherAuth = { uid: researcherId, platform_user_id: researcherIdNumeric, user_type: "researcher", class_hash: thisClass };
 
+// The Researcher Dashboard's MicroVM holds a researcher token carrying
+// `researcher_dashboard_runner`. It is the same researcher, with the same class, so the
+// only difference the rules may key on is the claim: everything this token reads, the
+// plain researcher token above reads too, and everything it writes must be denied.
+export const researcherRunnerAuth = { ...researcherAuth, researcher_dashboard_runner: true };
+// A second runner token, for the class the researcher is not in, so a denial cannot be
+// mistaken for the class check doing the work.
+export const researcherRunnerOtherClassAuth = { ...researcherRunnerAuth, class_hash: otherClass };
+
 export const noNetwork = null;
 export const network1 = "network-1";
 export const network2 = "network-2";
@@ -63,8 +72,51 @@ export const cPathWithFacet = `${cUnit}:${cFacet}/1/2/intro`;
 // @firebase/rules-unit-testing doesn't support firebase.firestore.FieldValue.serverTimestamp()
 export const mockTimestamp = () => Date.now();
 
-useEmulators({ firestore: { host: "localhost", port: 8088 } });
+useEmulators({
+  firestore: { host: "localhost", port: 8088 },
+  database: { host: "localhost", port: 9000 }
+});
 const dbAdmin = initializeAdminApp({ projectId: kCLUEFirebaseProjectId }).firestore();
+
+// CLUE keeps document *content* in the Realtime Database while Firestore holds the
+// metadata and history, so the two rule files have to be tested separately. The RTDB
+// portal key is part of the path rather than a claim, and the rules name each portal
+// explicitly, so a test has to use one of the four they list.
+// The emulator applies database.rules.json to the namespace named by the project, and
+// creates any other namespace on demand with OPEN rules. Naming a different database here
+// therefore runs every test against a ruleless instance, where each assertFails fails and
+// each assertSucceeds passes for the wrong reason.
+export const kCLUEDatabaseName = kCLUEFirebaseProjectId;
+export const kRtdbPortal = "learn_portal_staging_concord_org";
+const rtdbAdmin = initializeAdminApp({ databaseName: kCLUEDatabaseName }).database();
+
+export const initDatabase = (auth?: any) => {
+  return initializeTestApp({ databaseName: kCLUEDatabaseName, auth: auth || null }).database();
+};
+
+export const adminWriteRtdb = async (path: string, value: any) => {
+  await rtdbAdmin.ref(path).set(value);
+};
+
+export const clearRtdb = async () => {
+  await rtdbAdmin.ref("/").set(null);
+};
+
+export const expectRtdbReadToSucceed = async (db: firebase.database.Database, path: string) => {
+  expect(await assertSucceeds(db.ref(path).once("value"))).toBeDefined();
+};
+
+export const expectRtdbReadToFail = async (db: firebase.database.Database, path: string) => {
+  await assertFails(db.ref(path).once("value"));
+};
+
+export const expectRtdbWriteToSucceed = async (db: firebase.database.Database, path: string, value: any) => {
+  await assertSucceeds(db.ref(path).set(value));
+};
+
+export const expectRtdbWriteToFail = async (db: firebase.database.Database, path: string, value: any) => {
+  await assertFails(db.ref(path).set(value));
+};
 
 export const prepareEachTest = async () => {
   await clearFirestoreData({ projectId: kCLUEFirebaseProjectId });
