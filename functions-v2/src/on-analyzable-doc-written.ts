@@ -62,12 +62,21 @@ export interface AnalysisQueueDocument {
   firestoreDocumentPath: string;
   /** The unit and problem the student was running when the evaluation was requested. */
   requestContext?: IEvaluationRequestContext;
+  /**
+   * The Ideas click's id, when this evaluation was requested that way. Echoed in the completion
+   * status (see evaluation-status.ts) so the client can correlate it back to the request. The
+   * automatic routes (onDisconnect, sync-hook cleanup) write no id, so this is absent for them.
+   */
+  requestId?: string;
 }
 
 // The lengths cap what a client can write: a long enough value pushes the queue record past
 // Firestore's document limit, which fails the write and leaves the document unanalyzed.
 const kMaxUnitCodeLength = 40;
 const kMaxOfferingIdLength = 100;
+// Matches the client's nanoid() output, which is well under this; a longer value is dropped
+// rather than truncated, since a truncated id would never match the one the client is waiting on.
+const kMaxRequestIdLength = 64;
 
 // The same shape `isRenderableUnit` accepts in on-analysis-document-pending.ts, since a unit that
 // cannot be rendered with is not worth storing either.
@@ -83,6 +92,9 @@ const isOrdinal = (value: unknown): value is string =>
 // Investigations can be numbered 0 (vibe, mods and sas all have a 0.1); problems are numbered from
 // 1, so 0 is the app's unresolved placeholder. The client refuses to send it, and so does this.
 const isProblemOrdinal = (value: unknown): value is string => isOrdinal(value) && value !== "0";
+
+const isRequestId = (value: unknown): value is string =>
+  typeof value === "string" && value.length > 0 && value.length <= kMaxRequestIdLength;
 
 /**
  * The value comes from the realtime database, where a class member can write anything under their
@@ -111,6 +123,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const timestamp = typeof content === "object" ? content.timestamp : content;
   const aiPrompt = (typeof content === "object" && content.aiPrompt) ? content.aiPrompt : null;
   const requestContext = typeof content === "object" ? normalizeRequestContext(content.context) : undefined;
+  const requestId = typeof content === "object" && isRequestId(content.requestId) ? content.requestId : undefined;
   // onValueWritten will trigger on create, update, or delete. Ignore deletes.
 
   // Determine all the database paths that we are going to need
@@ -138,6 +151,10 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
 
   if (requestContext) {
     newDocument.requestContext = requestContext;
+  }
+
+  if (requestId) {
+    newDocument.requestId = requestId;
   }
 
   await firestore.doc(getAnalysisQueueFirestorePath("pending", docId)).set(newDocument);

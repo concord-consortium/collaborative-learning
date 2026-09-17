@@ -213,6 +213,66 @@ describe("functions", () => {
     });
   });
 
+  describe("on-analyzable-doc-written with a requestId", () => {
+    const writeEvaluation = async (value: any, evaluator = "categorize-design") => {
+      const path =
+        `demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/${evaluator}`;
+      const delta = makeChange(makeDataSnapshot(null, path), makeDataSnapshot(value, path));
+      await fft.wrap(onAnalyzableTestDocWritten)({
+        data: delta,
+        params: {
+          realm: "demo",
+          realmId: "AI",
+          portalId: "demo",
+          classId: "democlass1",
+          userId: "1",
+          docId: "testdoc1",
+          evaluator,
+        }});
+      return admin.firestore().collection("analysis/queue/pending").doc("testdoc1").get()
+        .then((result) => result.data());
+    };
+
+    test("copies requestId for the standard evaluation shape", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "req-abc"});
+      expect(queued).toMatchObject({requestId: "req-abc"});
+    });
+
+    test("copies requestId for the custom evaluation shape", async () => {
+      const queued = await writeEvaluation(
+        {timestamp: 1001, requestId: "req-xyz", aiPrompt: {mainPrompt: "prompt"}}, "custom");
+      expect(queued).toMatchObject({requestId: "req-xyz"});
+    });
+
+    // The automatic routes (onDisconnect, the sync-hook cleanup) write no requestId.
+    test("stores no requestId when the request carries none", async () => {
+      const queued = await writeEvaluation({timestamp: 1001});
+      expect(queued).not.toHaveProperty("requestId");
+    });
+
+    test("keeps a requestId at the length limit", async () => {
+      const requestId = "x".repeat(64);
+      const queued = await writeEvaluation({timestamp: 1001, requestId});
+      expect(queued).toMatchObject({requestId});
+    });
+
+    // Dropped, not truncated: a truncated id would never match the one the client is waiting on.
+    test("drops an over-long requestId", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "x".repeat(65)});
+      expect(queued).not.toHaveProperty("requestId");
+    });
+
+    test("drops a non-string requestId", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: 12345});
+      expect(queued).not.toHaveProperty("requestId");
+    });
+
+    test("drops an empty-string requestId", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: ""});
+      expect(queued).not.toHaveProperty("requestId");
+    });
+  });
+
   describe("normalizeRequestContext", () => {
     const context = {unit: "vibe", investigation: "1", problem: "2", offeringId: "2001"};
 

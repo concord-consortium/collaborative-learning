@@ -12,7 +12,8 @@ import {
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 import {generateRenderHtml} from "../../shared/render-page";
 import {kPlaceholderUnitCode} from "../../shared/shared";
-import {classifyDocument} from "../../shared/ai-analysis-classify";
+import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
+import {writeEvaluationStatus} from "./evaluation-status";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
@@ -174,6 +175,7 @@ async function error(
   const firestore = admin.firestore();
   const failedImaging = firestore.collection(getAnalysisQueueFirestorePath("failedImaging"));
   const documentId = event.params.docId;
+  const queueDoc = event.data?.data() as AnalysisQueueDocument | undefined;
   try {
     await failedImaging.add({...event.data?.data(), ...accumulated, documentId, error});
   } catch (err) {
@@ -194,6 +196,14 @@ async function error(
     await firestore.doc(event.document).delete();
   } catch (err) {
     logger.error("Could not remove the pending queue entry, which will not be retried", err);
+  }
+  // Best-effort, and only after the failure record and the queue cleanup above have landed (C12).
+  if (queueDoc?.metadataPath && queueDoc?.evaluator) {
+    await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
+      outcome: "failed",
+      requestId: queueDoc.requestId,
+      docUpdated: queueDoc.docUpdated,
+    });
   }
 }
 
@@ -323,18 +333,34 @@ export const onAnalysisDocumentPending =
         promptNeedsImage,
       };
 
-      // 2. An empty document is still evaluated, as it was before this work.
-      //
-      //    Turning it away is the better answer on its own terms — the summarizer emits only a
-      //    preamble and headings for a blank document, so the model is paid to comment on nothing.
-      //    But the client has no way to say so. It queues an "Ada is thinking about it…"
-      //    placeholder when the student clicks Ideas, and nothing clears that placeholder except
-      //    an arriving comment, so a student who asks for ideas before doing any work waits for a
-      //    comment that is never coming. Leaving them there is worse than one wasted evaluation.
-      //
-      //    The fix belongs in the client — a plain message saying the document is empty — and that
-      //    is a design decision for the team. Until it is made, empty documents are evaluated.
-      const isEmpty = classified.computedModality === "empty";
+      // 2. Skip empty documents outright: the client shows its own nudge instead of requesting an
+      //    evaluation, and this is what stops the routes it cannot intercept (document close,
+      //    disconnect). Both sides decide "empty" with documentHasStudentWork, so they can never
+      //    disagree about it.
+      if (!documentHasStudentWork(parsed)) {
+        const doc = queueDoc as AnalysisQueueDocument;
+        await firestore.collection(getAnalysisQueueFirestorePath("done")).add({
+          ...doc,
+          documentId: docId,
+          completedAt: FieldValue.serverTimestamp(),
+          analysisVersion: 2,
+          classification: accumulated.classification,
+          renderTarget: accumulated.renderTarget,
+          sendSummary: false,
+          sendImage: false,
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+        });
+        await firestore.doc(event.document).delete();
+        // Best-effort, and only after the done record and the queue cleanup above have landed (C12).
+        await writeEvaluationStatus(doc.metadataPath, doc.evaluator, {
+          outcome: "skipped-empty",
+          requestId: doc.requestId,
+          docUpdated: doc.docUpdated,
+        });
+        logger.info(`Document ${documentPath} is empty; skipped evaluation`);
+        return;
+      }
 
       // 3. Summary. Always produced, and stored whenever it was
       //    produced, sent or not: an investigator reading a `done` record can then see the summary
@@ -357,9 +383,7 @@ export const onAnalysisDocumentPending =
       if (docSummary !== undefined) {
         accumulated.docSummary = docSummary;
       }
-      if (docSummary !== undefined && (summaryCarriesStudentWork || isEmpty)) {
-        // An empty document's summary carries no student work, and is sent anyway so that a
-        // comment comes back and the student's placeholder clears. See step 2.
+      if (docSummary !== undefined && summaryCarriesStudentWork) {
         accumulated.sendSummary = true;
       } else if (docSummary !== undefined) {
         accumulated.sendSummary = false;

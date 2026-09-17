@@ -676,6 +676,57 @@ describe("functions", () => {
       });
     });
 
+    test("a successful run's completion status is written as commented", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestId: "req-imaged-1",
+      }));
+
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({
+        outcome: "commented", requestId: "req-imaged-1", docUpdated: sampleDoc.docUpdated,
+      });
+    });
+
+    test("a rejected status write leaves the comment and done record in place", async () => {
+      // Simulates the underlying Realtime Database write itself failing, not just the helper being
+      // unavailable, so evaluation-status.ts's own catch-and-warn runs for real.
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+      const db = getDatabase();
+      const realRef = db.ref.bind(db);
+      const spy = jest.spyOn(db, "ref").mockImplementation((path) => {
+        const ref = realRef(path);
+        if (typeof path === "string" && path.includes("evaluationStatus")) {
+          return Object.assign(Object.create(Object.getPrototypeOf(ref)), ref, {
+            set: async () => {
+              throw new Error("rtdb unavailable");
+            },
+          });
+        }
+        return ref;
+      });
+
+      try {
+        await runImaged(versionTwoDoc({
+          sendSummary: true, docSummary: "A summary",
+          sendImage: true, docImageUrl: "https://x/y.png",
+        }));
+      } finally {
+        spy.mockRestore();
+      }
+
+      expect(await doneRecord()).toMatchObject({sendSummary: true, sendImage: true});
+      const comments = await admin.firestore().collection(sampleDoc.commentsPath).get();
+      expect(comments.docs).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Could not write evaluation status"), expect.any(Error));
+    });
+
     test("a summary-only record sends no image", async () => {
       mockCategorizeResponse({parsed, messageShape: "summary-only"});
 
@@ -763,12 +814,19 @@ describe("functions", () => {
     test("no response from the model fails the analysis", async () => {
       mockCategorizeResponse({parsed: undefined});
 
-      await runImaged(versionTwoDoc({sendSummary: true, docSummary: "A summary", sendImage: false}));
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestId: "req-noresponse",
+      }));
 
       expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
         "analysis/queue/imaged/testdoc1", "No response from AI");
       expect(await admin.firestore().collection("analysis/queue/failedAnalyzing").count().get()
         .then((result) => result.data().count)).toEqual(1);
+      // The failure still resolves the waiting bubble, via the same status mechanism as success.
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "failed", requestId: "req-noresponse"});
     });
   });
 

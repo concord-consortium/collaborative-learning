@@ -6,7 +6,8 @@ import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
 // functions spread the queue record forward, so a `done` record carries them.
 
 /** Why a representation was deliberately not sent. A fixed code, never free text. */
-export type OmittedReason = "no-student-work-in-summary" | "no-visual-content" | "images-disabled";
+export type OmittedReason =
+  "no-student-work-in-summary" | "no-visual-content" | "images-disabled" | "empty-document";
 
 /** What the document holds, from walking its tiles. */
 export interface AnalysisClassification {

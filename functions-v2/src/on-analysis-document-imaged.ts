@@ -10,6 +10,7 @@ import {
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
+import {writeEvaluationStatus} from "./evaluation-status";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
@@ -134,12 +135,21 @@ async function writeSummaryRecord(
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
   logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
+  const queueDoc = event.data?.data();
   await firestore.collection(getAnalysisQueueFirestorePath("failedAnalyzing")).add({
-    ...event.data?.data(),
+    ...queueDoc,
     documentId: event.params.docId,
     error,
   });
   await firestore.doc(event.document).delete();
+  // Best-effort, and only after the failure record and the queue cleanup above have landed (C12).
+  if (queueDoc?.metadataPath && queueDoc?.evaluator) {
+    await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
+      outcome: "failed",
+      requestId: queueDoc.requestId,
+      docUpdated: queueDoc.docUpdated,
+    });
+  }
 }
 
 export const onAnalysisDocumentImaged =
@@ -265,5 +275,13 @@ export const onAnalysisDocumentImaged =
 
       // Remove from the "imaged" queue
       await firestore.doc(event.document).delete();
+
+      // Best-effort, and only after the comment, the done record and the queue cleanup above have
+      // landed (C12).
+      await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
+        outcome: "commented",
+        requestId: queueDoc.requestId,
+        docUpdated: queueDoc.docUpdated,
+      });
     }
   );

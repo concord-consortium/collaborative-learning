@@ -139,8 +139,21 @@ const sampleTile = JSON.parse(sampleDoc).tileMap["3EkhEN1cWCZ6SQ9X"];
 const drawingDoc = docOf(drawingTile);
 // A Text tile with content and a Drawing tile without: mixed.
 const mixedDoc = docOf(sampleTile, drawingTile);
-// A Drawing tile with nothing in it: a full-fidelity handler with nothing to describe.
+// A Drawing tile with nothing in it: a full-fidelity handler with nothing to describe. Now empty
+// under documentHasStudentWork (§4.1): a Drawing counts as work only when it has objects.
 const emptyDrawingDoc = docOf({...drawingTile, content: {...drawingTile.content, objects: []}});
+
+// An Image tile alone: the classifier cannot inspect it, so it always counts as student work
+// (documentHasStudentWork never skips it) even though its stub summary carries none — the case a
+// failed screenshot needs to reach a "nothing to send" failure record.
+const imageDoc = docOf({id: "image-1", content: {type: "Image", url: "photo.png"}});
+
+// A Geometry tile alone: same shape as imageDoc for classification purposes — inspectable-only,
+// so it always counts as student work and is never skipped.
+const geometryDoc = docOf({id: "geometry-1", content: {type: "Geometry"}});
+
+// An AI tile alone: AI output is never student work, whatever it contains.
+const aiTileDoc = docOf({id: "ai-1", content: {type: "AI", prompt: "What do you think?"}});
 
 // A Question whose authored prompt is an Image, answered with text. The prompt contributes nothing
 // a summary can carry, so the screenshot is the only way the model sees the question.
@@ -252,6 +265,13 @@ const imagedRecord = (docId: string) =>
   admin.firestore().doc(`analysis/queue/imaged/${docId}`).get().then((doc) => doc.data());
 const failedRecord = () =>
   queue("failedImaging").get().then((snapshot) => snapshot.docs[0]?.data());
+// "done" records are added with an auto-generated id (unlike "imaged", which is keyed by docId),
+// so they are found by the documentId field instead.
+const doneRecord = (docId: string) =>
+  queue("done").where("documentId", "==", docId).get().then((snapshot) => snapshot.docs[0]?.data());
+const statusFor = (docId: string, evaluator = "categorize-design") =>
+  getDatabase().ref(`${kDocumentRoot}/documentMetadata/${docId}/evaluationStatus/${evaluator}`)
+    .once("value").then((snapshot) => snapshot.val());
 
 // The rule that makes the queue countable: a representation is either sent, left out by decision,
 // or failed — never two of those at once, and never annotated when it was sent.
@@ -327,6 +347,15 @@ describe("functions", () => {
         expect(shutterbug.postedRequest()).toEqual({content: expect.any(String), height: 1500});
       });
 
+      test("a populated document's requestId rides through to the imaged record", async () => {
+        await givenDocument("mixed1b", mixedDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("mixed1b", {requestId: "req-mixed1b"});
+
+        expect(await imagedRecord("mixed1b")).toMatchObject({requestId: "req-mixed1b"});
+      });
+
       test("a text-only document is not screenshotted", async () => {
         await givenDocument("text1", sampleDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
@@ -375,51 +404,123 @@ describe("functions", () => {
         expectReasonsAreExclusive(record);
       });
 
-      test("a drawing with no objects has nothing worth summarizing", async () => {
-        // A full-fidelity handler with nothing to describe. The summary would say only that a
-        // drawing tile is there, so it is produced, stored and withheld.
+      test("a drawing with no objects is skipped, not partially evaluated", async () => {
+        // A Drawing counts as student work only when it has objects (§4.1), so this one has none
+        // to describe and the document is empty as a whole, not just short a summary.
         await givenDocument("emptydraw1", emptyDrawingDoc);
-        stubShutterbug(shutterbugOk());
+        const shutterbug = stubShutterbug(shutterbugOk());
 
-        await runPending("emptydraw1");
+        await runPending("emptydraw1", {requestId: "req-emptydraw1"});
 
-        const record = await imagedRecord("emptydraw1");
+        expect(await countIn("pending")).toEqual(0);
+        expect(await countIn("imaged")).toEqual(0);
+        expect(await countIn("failedImaging")).toEqual(0);
+        const record = await doneRecord("emptydraw1");
         expect(record).toMatchObject({
+          analysisVersion: 2,
           sendSummary: false,
-          summaryOmittedReason: "no-student-work-in-summary",
-          sendImage: true,
-          summarizer: "image",
+          sendImage: false,
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+          classification: {
+            modality: "visual-only", hasStudentText: false, summaryCarriesStudentWork: false,
+            needsImage: true, promptNeedsImage: false,
+          },
+          renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
-        expect(record?.docSummary).toEqual(expect.any(String));
-        expectReasonsAreExclusive(record);
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+        expect(await statusFor("emptydraw1")).toMatchObject({outcome: "skipped-empty", requestId: "req-emptydraw1"});
       });
 
-      test("an empty document is still evaluated, so the student gets an answer", async () => {
-        // Deliberately not turned away. The client's "Ada is thinking about it…" placeholder is
-        // cleared only by an arriving comment, so failing here would leave a student who clicked
-        // Ideas before doing any work waiting for good. See step 2 in the producer.
+      test("an empty document is skipped, not evaluated", async () => {
+        // A student who has not done any work gets the client's nudge instead — see the plan doc.
+        // Nothing here reaches the model or Shutterbug, and a `done` record is written directly.
         await givenDocument("empty1", emptyDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
-        await runPending("empty1");
+        await runPending("empty1", {requestId: "req-empty1"});
 
+        expect(await countIn("pending")).toEqual(0);
+        expect(await countIn("imaged")).toEqual(0);
         expect(await countIn("failedImaging")).toEqual(0);
-        const record = await imagedRecord("empty1");
+        const record = await doneRecord("empty1");
         expect(record).toMatchObject({
-          sendSummary: true,
+          analysisVersion: 2,
+          sendSummary: false,
           sendImage: false,
-          imageOmittedReason: "no-visual-content",
-          summarizer: "text",
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
           classification: {
             modality: "empty", hasStudentText: false, summaryCarriesStudentWork: false,
             needsImage: false, promptNeedsImage: false,
           },
+          renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
-        // The summary is boilerplate — that is the cost of not leaving the placeholder up.
-        expect(record?.docSummary).toEqual(expect.any(String));
-        // No picture: there is nothing to photograph.
+        // No summary, and no picture: nothing was produced at all, unlike the old behavior.
+        expect(record?.docSummary).toBeUndefined();
         expect(shutterbug.spy).not.toHaveBeenCalled();
-        expectReasonsAreExclusive(record);
+        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining("is empty; skipped evaluation"));
+
+        const status = await statusFor("empty1");
+        expect(status).toMatchObject({outcome: "skipped-empty", requestId: "req-empty1", docUpdated: "1001"});
+      });
+
+      test("a rejected status write after a skip still leaves the done record and cleanup in place", async () => {
+        // Simulates the underlying Realtime Database write itself failing, not just the helper
+        // being unavailable, so evaluation-status.ts's own catch-and-warn runs for real.
+        await givenDocument("empty4", emptyDoc);
+        const db = getDatabase();
+        const realRef = db.ref.bind(db);
+        jest.spyOn(db, "ref").mockImplementation((path) => {
+          const ref = realRef(path);
+          if (typeof path === "string" && path.includes("evaluationStatus")) {
+            return Object.assign(Object.create(Object.getPrototypeOf(ref)), ref, {
+              set: async () => {
+                throw new Error("rtdb unavailable");
+              },
+            });
+          }
+          return ref;
+        });
+
+        await runPending("empty4");
+
+        const record = await doneRecord("empty4");
+        expect(record).toMatchObject({summaryOmittedReason: "empty-document", imageOmittedReason: "empty-document"});
+        expect(await countIn("pending")).toEqual(0);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining("Could not write evaluation status"), expect.any(Error));
+      });
+
+      test("a document holding only an AI tile is skipped: AI output is never student work", async () => {
+        await givenDocument("aitile1", aiTileDoc);
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("aitile1");
+
+        expect(await countIn("imaged")).toEqual(0);
+        const record = await doneRecord("aitile1");
+        expect(record).toMatchObject({
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+        });
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+      });
+
+      test("a Geometry-only document is not skipped: the classifier cannot inspect it", async () => {
+        await givenDocument("geo1", geometryDoc);
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("geo1");
+
+        expect(await countIn("done")).toEqual(0);
+        const record = await imagedRecord("geo1");
+        expect(record).toMatchObject({
+          sendSummary: false,
+          summaryOmittedReason: "no-student-work-in-summary",
+          sendImage: true,
+        });
+        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
       });
 
       test("a document with no metadata document renders with the fallback unit", async () => {
@@ -560,24 +661,26 @@ describe("functions", () => {
         expectReasonsAreExclusive(record);
       });
 
-      test("a picture prompt with no answer gets no screenshot", async () => {
-        // A picture of the question is context for student work, never a substitute for it, so
-        // the prompt alone earns no screenshot however visual it is. The document is still
-        // evaluated, because every empty document is — see the empty-document case above.
+      test("a picture prompt with no answer is skipped: there is no student work to judge", async () => {
+        // A picture of the question is context for student work, never a substitute for it, and
+        // an authored prompt is never student work itself (§4.1) — with no response rows, this
+        // document has nothing of the student's in it at all.
         await givenDocument("imgq2", imagePromptQuestionDoc(false));
         const shutterbug = stubShutterbug(shutterbugOk());
 
         await runPending("imgq2");
 
-        const record = await imagedRecord("imgq2");
+        expect(await countIn("imaged")).toEqual(0);
+        expect(await countIn("failedImaging")).toEqual(0);
+        const record = await doneRecord("imgq2");
         expect(record).toMatchObject({
           sendImage: false,
-          imageOmittedReason: "no-visual-content",
+          sendSummary: false,
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
           classification: {modality: "empty", promptNeedsImage: true},
         });
         expect(shutterbug.spy).not.toHaveBeenCalled();
-        expect(await countIn("failedImaging")).toEqual(0);
-        expectReasonsAreExclusive(record);
       });
 
       test("the mock evaluator produces nothing at all", async () => {
@@ -633,26 +736,25 @@ describe("functions", () => {
           expectReasonsAreExclusive(record);
         });
 
-      test("a document with nothing but an empty drawing has nothing left to send", async () => {
+      test("an empty drawing is skipped before Shutterbug is ever called, whatever it would answer", async () => {
+        // A failing Shutterbug is stubbed deliberately: the skip check must happen first regardless,
+        // so nothing here should depend on what Shutterbug would have said.
         await givenDocument("draw2", emptyDrawingDoc);
-        stubShutterbug(new Error("connection refused"));
+        const shutterbug = stubShutterbug(new Error("connection refused"));
 
         await runPending("draw2");
 
         expect(await countIn("imaged")).toEqual(0);
-        const failed = await failedRecord();
-        // The message names why each half is absent, so the record alone explains the failure.
-        expect(failed?.error).toContain("nothing to send");
-        expect(failed?.error).toContain("summary: no-student-work-in-summary");
-        expect(failed?.error).toContain("image: Shutterbug error");
-        expect(failed).toMatchObject({
+        expect(await countIn("failedImaging")).toEqual(0);
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+        const record = await doneRecord("draw2");
+        expect(record).toMatchObject({
           analysisVersion: 2,
           classification: {modality: "visual-only"},
           renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
-          summaryOmittedReason: "no-student-work-in-summary",
-          docSummary: expect.any(String),
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
         });
-        expect(failed?.imageError).toContain("Shutterbug error");
       });
 
       test("the request carries an abort signal, so a hung service cannot hang the function", async () => {
@@ -729,15 +831,19 @@ describe("functions", () => {
         expect(shutterbug.spy).toHaveBeenCalledTimes(1);
       });
 
-      test("an empty drawing has nothing to send while the switch is off", async () => {
+      test("an empty drawing is skipped without ever reading the screenshot switch", async () => {
         await admin.firestore().doc(analysisSettingsPath).set({imagesEnabled: false});
         await givenDocument("draw3", emptyDrawingDoc);
+        const settingsReads = jest.spyOn(admin.firestore(), "doc");
 
         await runPending("draw3");
 
-        const failed = await failedRecord();
-        expect(failed?.error).toContain("summary: no-student-work-in-summary");
-        expect(failed?.error).toContain("image: images-disabled");
+        expect(settingsReads.mock.calls.map((call) => call[0])).not.toContain(analysisSettingsPath);
+        const record = await doneRecord("draw3");
+        expect(record).toMatchObject({
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+        });
       });
     });
 
@@ -761,7 +867,9 @@ describe("functions", () => {
         // The recorder of last resort must not fail for the reason the work did. Here the first
         // write is refused the way Firestore refuses an oversized document; the retry has to land
         // and the pending entry has to go.
-        await givenDocument("bigfail1", emptyDrawingDoc);
+        // imageDoc, not emptyDrawingDoc: an empty drawing is now skipped before reaching this
+        // failure path at all, and this test's point is the failure-record retry, not emptiness.
+        await givenDocument("bigfail1", imageDoc);
         stubShutterbug(new Error("connection refused"));
         const attempts: Record<string, unknown>[] = [];
         const realCollection = admin.firestore().collection.bind(admin.firestore());
@@ -778,7 +886,7 @@ describe("functions", () => {
             } as any;
           });
 
-        await runPending("bigfail1");
+        await runPending("bigfail1", {requestId: "req-bigfail1"});
         collectionSpy.mockRestore();
 
         expect(attempts).toHaveLength(2);
@@ -791,6 +899,8 @@ describe("functions", () => {
         const failed = await failedRecord();
         expect(failed?.error).toContain("nothing to send");
         expect(failed?.error).toContain("accumulated fields omitted");
+        // The failure still resolves the waiting bubble, via the same status mechanism as a skip.
+        expect(await statusFor("bigfail1")).toMatchObject({outcome: "failed", requestId: "req-bigfail1"});
       });
     });
 
