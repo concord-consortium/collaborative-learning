@@ -288,14 +288,14 @@ describe("CommentCard with showCommentRating disabled", () => {
   });
 });
 
-describe("the empty-document nudge with a tile focused", () => {
+describe("the empty-document nudge, scoped to the document thread", () => {
   afterEach(() => {
     // Restore the module-level default so later tests are unaffected.
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => undefined;
   });
 
-  it("still renders when a tile is focused and the nudge is set", () => {
+  it("still renders in the document thread's card when a tile is focused and the nudge is set", () => {
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => ({
       statusMessage: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
@@ -303,20 +303,42 @@ describe("the empty-document nudge with a tile focused", () => {
 
     render((
       <ModalProvider>
-        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1" />
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1"
+          isDocumentThread={true} />
       </ModalProvider>
     ));
 
     expect(screen.getByText(IDEAS_EMPTY_MESSAGE)).toBeInTheDocument();
   });
 
-  it("does not render when a tile is focused and there is no nudge", () => {
+  it("does not render in the document thread's card when there is no nudge", () => {
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage: null });
 
     render((
       <ModalProvider>
-        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1" />
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1"
+          isDocumentThread={true} />
+      </ModalProvider>
+    ));
+
+    expect(screen.queryByText(IDEAS_EMPTY_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it("does not render in a tile thread's card even when the nudge is set", () => {
+    // Regression test: a tile thread's card shares the same document-level `content` as the
+    // document thread's card, so gating only on `content?.statusMessage` (without also checking
+    // which thread this card belongs to) would render the nudge redundantly in every expanded
+    // tile thread too.
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => ({
+      statusMessage: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
+    });
+
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1"
+          isDocumentThread={false} />
       </ModalProvider>
     ));
 

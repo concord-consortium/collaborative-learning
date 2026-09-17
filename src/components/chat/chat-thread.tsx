@@ -145,6 +145,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
           postedComments={comments}
           focusDocument={focusDocument}
           focusTileId={focusTileId}
+          isDocumentThread={threadId === "document"}
           isFocused={isFocused}
           onSelect={handleSelectCard}
           readingCommentId={readingCommentId}

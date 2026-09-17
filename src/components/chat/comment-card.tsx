@@ -42,6 +42,10 @@ interface IProps {
   onDeleteComment?: DeleteCommentFn;
   focusDocument?: string;
   focusTileId?: string;
+  /** Whether this card is the document-level thread, as opposed to a tile's thread. Both threads
+   * can be expanded at once (see chat-thread.tsx), so this — not `focusTileId` — is what scopes
+   * the document status message to a single card. */
+  isDocumentThread?: boolean;
   isFocused?: boolean;
   onSelect?: () => void;
   readingCommentId?: string | null;
@@ -128,7 +132,8 @@ const CommentItem: React.FC<ICommentItemProps> = ({
 
 export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, postedComments,
                                                 onPostComment, onDeleteComment,
-                                                focusDocument, focusTileId, isFocused, onSelect,
+                                                focusDocument, focusTileId, isDocumentThread,
+                                                isFocused, onSelect,
                                                 readingCommentId, pendingCommentId, onCommentClick }) => {
   const commentIdRef = useRef<string>();
   const commentContentRef = useRef<string>("");
@@ -176,10 +181,11 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
   };
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
-  // Mirrors showWaitingMessage's shape, but for the message's own condition: adding a tile selects
-  // it, which would otherwise hide the message (via !focusTileId going false) the moment the
-  // student starts working, before they click Ideas again or a new comment arrives to clear it.
-  const showStatusMessage = !focusTileId || !!content?.statusMessage;
+  // The status message is about the whole document, so only its own thread's card shows it — the
+  // document and every tile thread can be expanded at once (see chat-thread.tsx), and all of them
+  // share this same `content`, so gating on `focusTileId` instead would show it redundantly under
+  // every other expanded tile thread too.
+  const showStatusMessage = isDocumentThread && !!content?.statusMessage;
 
   const updateRating = useUpdateCommentRating();
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
