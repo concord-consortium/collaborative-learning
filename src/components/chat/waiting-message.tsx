@@ -21,7 +21,7 @@ export const AdaStatusMessage: React.FC<IAdaStatusMessageProps> = ({ message }) 
       <ChatAvatar uid={kAnalyzerUserParams.id} pulse />
       <div className="user-name">{userName}</div>
     </div>
-    <div className="comment-text" data-testid="comment">
+    <div className="comment-text" data-testid="comment" role="status" aria-live="polite">
       <em>{message}</em>
     </div>
   </>

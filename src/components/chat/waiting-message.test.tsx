@@ -23,6 +23,12 @@ describe("WaitingMessage", () => {
     render(<WaitingMessage content={{ isAwaitingRemoteComment: true } as any} />);
     expect(screen.getByTestId("comment")).toHaveTextContent("Ada is thinking about it...");
   });
+
+  it("announces itself as a polite live region", () => {
+    render(<WaitingMessage content={{ isAwaitingRemoteComment: true } as any} />);
+    expect(screen.getByTestId("comment")).toHaveAttribute("role", "status");
+    expect(screen.getByTestId("comment")).toHaveAttribute("aria-live", "polite");
+  });
 });
 
 describe("StatusMessage", () => {
