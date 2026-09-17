@@ -53,9 +53,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     // Keep the primary document in step with the user's group. Watching the primary's group id
     // alongside the user's current group id covers the persisted primary loading before or after
     // currentGroupId resolves, and a group switch mid-session; firing immediately covers the first
-    // visit, when no primary is set yet. Skipping when currentGroupId is undefined avoids closing
-    // anything during bootstrap before the groups listener has set the user's group. A primary that
-    // is not a group document is left alone: the last-opened document is restored as usual.
+    // visit, when no primary is set yet. Skipping when currentGroupId is undefined is what keeps
+    // teachers — who never have a group — on a group document they opened from Sort Work; for a
+    // student it also leaves the primary alone while app.tsx has the group modal up, so rejoining
+    // remounts onto a primary the reaction can then re-point. A primary that is not a group document
+    // is left alone: the last-opened document is restored as usual.
     this.groupChangeDisposer = reaction(
       () => {
         const { persistentUI: { problemWorkspace }, user } = this.stores;
