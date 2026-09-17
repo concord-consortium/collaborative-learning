@@ -285,4 +285,14 @@ describe("Dataflow pan split button (CLUE-573)", () => {
     expect(content.panPaletteOpen).toBe(false);
   });
 
+  // Opening moves focus into the palette, so every close path owes focus somewhere. Closing by
+  // clicking outside unmounts the focused arrow, and without this focus falls to <body> — which
+  // silently sends the next Tab back to the top of the document.
+  it("closing by outside pointerdown returns focus to the trigger", () => {
+    const { container } = openPalette();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Pan up" }));
+    fireEvent.pointerDown(document.body);
+    expect(document.activeElement).toBe(getTrigger(container));
+  });
+
 });

@@ -168,9 +168,14 @@ export const PanButton = observer(function PanButton({ name }: IToolbarButtonCom
   useEffect(() => {
     if (!isOpen) return;
     const handlePointerDown = (e: PointerEvent) => {
-      if (!(e.target as Element | null)?.closest?.(".toolbar-button.pan, .dataflow-pan-palette")) {
-        content?.setPanPaletteOpen(false);
-      }
+      if ((e.target as Element | null)?.closest?.(".toolbar-button.pan, .dataflow-pan-palette")) return;
+      // Opening moved focus into the palette, and closing unmounts the focused arrow — without
+      // handing focus back, it falls to <body> and the next Tab restarts at the top of the
+      // document. Only matters when the palette actually holds focus; a press that lands on
+      // something focusable still claims focus itself, since that happens after pointerdown.
+      const focusedPalette = document.activeElement?.closest(".dataflow-pan-palette");
+      focusedPalette?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button")?.focus();
+      content?.setPanPaletteOpen(false);
     };
     document.addEventListener("pointerdown", handlePointerDown, true);
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
