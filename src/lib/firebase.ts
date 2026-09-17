@@ -205,11 +205,8 @@ export class Firebase {
     }
   }
 
-  // Returns the path to the completion status the analysis pipeline writes when it finishes
-  // handling this specific evaluation request — a child of a node that sits beside the evaluation
-  // node above, keyed by requestId so an older or newer request's status is never read here
-  // (Constraint C18). Callers always have a requestId: the automatic routes (onDisconnect,
-  // sync-hook cleanup) write no client-visible request and so have no client subscribing here.
+  // Path to the completion status for this specific request, keyed by requestId so an older or
+  // newer request's status is never read here.
   public getEvaluationStatusPath(user: UserModelType, documentKey: string, userId: string | undefined,
                                   requestId: string) {
     const evaluation = this.db.stores.appConfig.aiEvaluation;
@@ -246,10 +243,9 @@ export class Firebase {
 
   /**
    * Set the lastEditedAt timestamp to the current time, optionally cancelling any onDisconnect handlers.
-   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well.
-   * `requestId` is written alongside it so the pipeline's completion status can be correlated back
-   * to this specific request; it is omitted (not just left undefined) when not supplied, which is
-   * how the automatic routes (onDisconnect, sync-hook cleanup) write no id at all.
+   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well, alongside
+   * `requestId` (omitted, not just undefined, when not supplied) so the completion status can be
+   * correlated back to this request.
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
       onDisconnects?: firebase.database.OnDisconnect[], requestId?: string) {

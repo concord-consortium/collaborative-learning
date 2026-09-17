@@ -487,9 +487,6 @@ describe("DocumentCommentsManager", () => {
       expect(manager.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
     });
 
-    // Constraint C21: the status and the comment arrive over different channels with no ordering
-    // between them, so resolving on the status here could let a queued exemplar comment post
-    // before Ada's own comment lands.
     it("a commented status for the latest request leaves the entry pending and shows nothing", () => {
       const dispose = queueForRequest("req-a");
       manager.setLatestIdeasRequestId("req-a");
@@ -544,14 +541,13 @@ describe("DocumentCommentsManager", () => {
       const disposeB = queueForRequest("req-b");
       manager.setLatestIdeasRequestId("req-b");
 
-      // B is the latest, so its status shows its own message.
       manager.applyEvaluationStatus({ outcome: "skipped-empty", requestId: "req-b", docUpdated: 2, completedAt: 2 });
       expect(disposeB).toHaveBeenCalled();
       expect(manager.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
       const shownAt = manager.statusMessage!.shownAt;
 
-      // A's status arrives after, out of order. A different outcome from B's, so an incorrect
-      // overwrite would be visible as the wrong message rather than coincidentally the same one.
+      // A different outcome than B's, so an overwrite would show as the wrong message, not
+      // coincidentally the same one.
       manager.applyEvaluationStatus({ outcome: "failed", requestId: "req-a", docUpdated: 1, completedAt: 1 });
 
       expect(manager.pendingComments).toHaveLength(0);

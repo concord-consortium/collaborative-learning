@@ -41,8 +41,7 @@ import "./ai-registration";
 import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
-// A stable, clearable mock so tests can assert on it directly, rather than a fresh jest.fn()
-// returned on every call.
+// Stable across tests, so assertions and mockClear() apply to the same instance.
 const mockGetAiContent = jest.fn().mockResolvedValue({
   data: { text: "Mocked customized content" }
 });
@@ -50,9 +49,8 @@ jest.mock("../../hooks/use-firebase-function", () => ({
   useFirebaseFunction: jest.fn(() => mockGetAiContent)
 }));
 
-// Mock the useUserContext hook to avoid user context errors during testing. classHash is absent
-// by default — see Constraint C8: getAiContent is null without it, so the request path (and this
-// task's guard) never runs. Tests that need to reach it swap in mockUserContextWithClassHash.
+// classHash is absent by default, so getAiContent is null and the request path never runs; tests
+// that need to reach it swap in mockUserContextWithClassHash.
 const mockUserContextWithoutClassHash = {
   user: { id: "test-user-id" },
   isAuthenticated: true,
@@ -75,9 +73,8 @@ jest.mock("mobx-state-tree", () => ({
       title: "Test Document"
     };
   })
-  // getSnapshot is left as the real implementation: the request-effect tests below give
-  // document.content a real DocumentContentModel instance specifically so a real getSnapshot()
-  // call is exercised, not just a mocked pass-through.
+  // getSnapshot is left real: the tests below use a real DocumentContentModel, so it's genuinely
+  // exercised, not just mocked through.
 }));
 
 jest.mock("../../models/document/document-utils", () => ({
@@ -155,17 +152,15 @@ describe("AIComponent", () => {
     });
   });
 
-  // classHash is required to reach the request path at all (Constraint C8): the mocks above
-  // otherwise return no classHash, so getAiContent is null and none of this runs.
+  // classHash is required to reach the request path; the mocks above otherwise return none, so
+  // getAiContent stays null.
   describe("the request effect, with classHash present", () => {
-    // Real DocumentContentModel instances, not plain objects: documentHasStudentWork's own
-    // getSnapshot() call needs a live MST node, and building one here means these tests would fail
-    // if that call were ever removed from the component, rather than passing regardless.
+    // Real DocumentContentModel instances: documentHasStudentWork's getSnapshot() call needs a
+    // live MST node, so these tests fail if that call is ever removed.
 
     // Genuinely empty per documentHasStudentWork: no tiles at all.
     const emptyDocContent = () => DocumentContentModel.create({});
-    // A Text tile with real content, so documentHasStudentWork is true and documentSummarizer has
-    // something of the student's to describe.
+    // A Text tile with real content, so documentHasStudentWork is true.
     const populatedDocContent = () => DocumentContentModel.create({
       rowMap: { row1: { id: "row1", tiles: [{ tileId: "tile1" }] } },
       rowOrder: ["row1"],
@@ -191,9 +186,8 @@ describe("AIComponent", () => {
       mockGetAiContent.mockClear();
     });
 
-    // AI tiles sit in authored curriculum sections (mods, clueful) too, where the tile has no
-    // documentId and the lookup finds nothing — Constraint C15. There the tile must stay silent
-    // and keep its authored text, not show the empty-document nudge.
+    // AI tiles also sit in authored curriculum sections, with no documentId — the tile must stay
+    // silent and keep its authored text, not show the empty-document nudge.
     it("with a documentId whose lookup finds nothing, leaves the tile's text unchanged and never " +
        "calls getAiContent, on mount", async () => {
       mockStores.documents.getDocument.mockReturnValue(undefined);
@@ -233,8 +227,8 @@ describe("AIComponent", () => {
       expect(mockGetAiContent).not.toHaveBeenCalled();
     });
 
-    // The literal curriculum-pane case (Constraint C15): documentId itself is absent, not merely a
-    // lookup that fails. The ternary in the component short-circuits before either lookup runs.
+    // documentId itself is absent here, not just a failed lookup — the ternary short-circuits
+    // before either lookup runs.
     it("with no documentId at all, leaves the tile's text unchanged, never looks up a document, " +
        "and never calls getAiContent, on mount", async () => {
       const aiContent = defaultAIContent();
@@ -300,8 +294,6 @@ describe("AIComponent", () => {
 
       await act(async () => {
         aiContent.requestRefresh();
-        // The effect's queryAI() is fire-and-forget from the effect's own perspective, so give its
-        // microtasks a chance to run within this act() before asserting.
         await Promise.resolve();
         await Promise.resolve();
       });
@@ -325,11 +317,8 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
     });
 
-    // Constraint C20: isUpdating must end false however queryAI exits, and a rejection must not
-    // overwrite whatever text the tile already had. previousText here is the model's authored
-    // default ("This is where..."), which is non-empty, so this already distinguishes "restored"
-    // from "left blank" — but see the next test for the more realistic case of a real prior
-    // response.
+    // previousText here is the model's non-empty authored default, so this distinguishes
+    // "restored" from "left blank" — the next test covers a real prior response.
     it("on a populated document, when getAiContent rejects: text is unchanged, Loading is gone, " +
        "and nothing escapes as an unhandled rejection", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
@@ -368,9 +357,8 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
     });
 
-    // getAiContent resolves rather than rejects on a server-side failure (see get-ai-content.ts:
-    // an LLM error there leaves `content` — and so `text` — empty and sets `error` instead), so
-    // this is a distinct path from the rejection tests above.
+    // getAiContent resolves (not rejects) on a server-side failure, a distinct path from the
+    // rejection tests above.
     it("on a populated document, when a later refresh's response carries a server-side error: " +
        "a real prior response survives, and the error is logged", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));

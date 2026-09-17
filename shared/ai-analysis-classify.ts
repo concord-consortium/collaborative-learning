@@ -215,20 +215,13 @@ interface DocumentWalk {
 
 /**
  * Walks every tile a document holds, following Question tiles into their nested rows and
- * assigning each tile a role, without deciding anything about what a tile's content means.
- * Shared by `classifyDocument` (which turns each walked tile into a `ClassifiedTile`) and
- * `documentHasStudentWork` (which applies a different per-tile rule), so the two can never see a
- * different set of tiles or disagree about roles.
+ * assigning each a role, without judging its content. Shared by `classifyDocument` and
+ * `documentHasStudentWork` so both see the same tiles and roles.
  *
- * Rules for Question traversal (the nested rowOrder/rowMap resolves ids through the *document's*
- * top-level tileMap, exactly as handleQuestionTile() in shared/ai-summarizer does):
- * - the first row holds the authored prompt, which is not student work and contributes nothing;
- * - the remaining rows are the student response and classify individually by their own types;
- * - a Question nested inside a prompt stays authored all the way down: its own rows do not get to
- *   reintroduce "student", because the whole subtree is curriculum content;
- * - a missing tile reference is skipped and recorded as a warning;
- * - a tile referenced twice counts once;
- * - nested Questions recurse, up to kMaxQuestionDepth.
+ * Question traversal: the first row is the authored prompt; the rest is the student response,
+ * classified individually. A Question nested inside a prompt stays "prompt" throughout, even in
+ * its own rows. A missing tile reference is skipped with a warning; a tile referenced twice counts
+ * once; nested Questions recurse up to kMaxQuestionDepth.
  */
 function walkDocumentTiles(content: any): DocumentWalk {
   const tileMap = content?.tileMap ?? {};
@@ -344,17 +337,9 @@ export function classifyDocument(content: any): DocumentClassification {
 const kNeverStudentWorkTypes = new Set(["AI", "Simulator", "Placeholder", "Question", "ErrorTest", "Starter"]);
 
 /**
- * Whether a single walked tile counts as student work:
- * - Text: counts when `textTileHasContent` is true.
- * - Drawing: counts when `content.objects` is a non-empty array.
- * - Graph: counts when `content.layers` is a non-empty array.
- * - Table, Dataflow: always counts (no per-instance check exists for either today; a Table's
- *   cases live in a shared data set, not the tile).
- * - AI, Simulator, Placeholder, Question, ErrorTest, Starter: never counts.
- * - Every other type, known or not (Image, Geometry, Diagram, BarGraph, DataCard, Numberline,
- *   Expression, Timeline, WaveRunner, IframeInteractive, an unregistered type, ...): always
- *   counts, because the classifier cannot inspect it and the safe assumption is that the student
- *   put something there.
+ * Table and Dataflow always count — neither has a per-instance check. An unrecognized type also
+ * always counts, since the classifier can't inspect it and the safe assumption is that the
+ * student put something there.
  */
 function tileCountsAsStudentWork(tileType: string, content: any): boolean {
   switch (tileType) {
@@ -366,20 +351,12 @@ function tileCountsAsStudentWork(tileType: string, content: any): boolean {
 }
 
 /**
- * Whether any tile in the document counts as student work. A document is "empty", for the
- * purposes of deciding whether to send it for AI evaluation, exactly when this is false — always
- * write that as `!documentHasStudentWork(...)` rather than a second predicate, so the two
- * questions cannot drift apart.
+ * Whether any tile in the document counts as student work — "empty" means this is false. Shares
+ * classifyDocument's walk, so both agree on tiles and roles; only the per-tile rule differs.
  *
- * Reuses the same walk `classifyDocument` uses (Question recursion, role assignment, the depth
- * cap), so both answer from an identical view of the document; only the per-tile rule differs
- * (`tileCountsAsStudentWork` above). An authored Question prompt never counts, whatever it
- * contains — only a `student`-role tile can.
- *
- * The input must be a plain snapshot, not a live mobx-state-tree model: the walk indexes
- * `rowMap`/`tileMap` as plain objects, so a live model's maps (which need `.get()`) would make
- * every lookup fail and every document classify as empty. On the client, call this with
- * `getSnapshot(document.content)`.
+ * Requires a plain snapshot, not a live mobx-state-tree model: the walk indexes `rowMap`/`tileMap`
+ * as plain objects, so a live model (whose maps need `.get()`) would classify every document as
+ * empty. On the client, call with `getSnapshot(document.content)`.
  */
 export function documentHasStudentWork(content: unknown): boolean {
   const { tiles } = walkDocumentTiles(content);

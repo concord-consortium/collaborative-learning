@@ -47,8 +47,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
-        // Set only once the text below is actually cleared, so the catch can tell "nothing was
-        // touched yet" (an earlier guard threw) apart from "a response was expected" (restore it).
+        // Only assigned once cleared below, so the catch can tell whether restoring is needed.
         let previousText: string | undefined;
         try {
           if (!identifier || !model.id) {
@@ -64,9 +63,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             ? documents.getDocument(documentId) ?? networkDocuments.getDocument(documentId)
             : undefined;
 
-          // No student document at all: the tile is being shown somewhere other than a student's
-          // document (an authored curriculum section in the problem panel, which has no documentId).
-          // Make no request and leave the tile's text alone — see Constraint C15.
+          // No student document at all — e.g. an authored curriculum section shown in the problem
+          // panel, which has no documentId. Make no request and leave the text alone.
           if (!document?.content) {
             return;
           }
@@ -92,10 +90,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             documentId: changeSlashesToUnderscores(identifier),
             tileId: model.id
           });
-          // getAiContent resolves rather than rejects on a server-side failure (e.g. the LLM call
-          // itself failing), pairing a truthy error with an empty (or absent) text. Routed through
-          // the same catch below rather than setting text first and checking after, so a failure
-          // reported this way restores previousText exactly like a rejection does.
+          // getAiContent resolves (not rejects) on a server-side failure, with a truthy error and
+          // empty text. Thrown here to route it through the same catch as a rejection.
           if (response.data.error) {
             throw new Error(response.data.error);
           }
@@ -105,9 +101,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // Restore rather than leave the tile on the blank text set above, in anticipation of a
-          // new response — a failed request should not erase a previous good one. Skipped when
-          // nothing was cleared yet (an earlier guard threw before reaching that point).
+          // Restore rather than leave the blank text set above — a failed request shouldn't erase
+          // a good prior response. No-op if nothing was cleared yet.
           if (previousText !== undefined) content.setText(previousText);
           console.error("Failed to query AI", error);
         } finally {

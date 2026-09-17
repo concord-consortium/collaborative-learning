@@ -580,9 +580,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
 
       return false;
     },
-    // An inline status message shown in place of (or ahead of) a real AI comment: an "add some
-    // work" nudge for an empty document, or a "something went wrong" message for a failed
-    // request. Client-only state: never written to Firestore, so it does not survive a reload.
+    // An inline status message shown in place of a real AI comment (empty-document nudge, or a
+    // failure message). Client-only: never written to Firestore, so it doesn't survive a reload.
     get statusMessage() {
       const doc = getParentWithTypeName(self, "Document");
       return doc?.commentsManager?.statusMessage ?? null;

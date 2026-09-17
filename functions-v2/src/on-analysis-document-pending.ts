@@ -197,7 +197,6 @@ async function error(
   } catch (err) {
     logger.error("Could not remove the pending queue entry, which will not be retried", err);
   }
-  // Best-effort, and only after the failure record and the queue cleanup above have landed (C12).
   if (queueDoc?.metadataPath && queueDoc?.evaluator) {
     await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
       outcome: "failed",
@@ -333,10 +332,9 @@ export const onAnalysisDocumentPending =
         promptNeedsImage,
       };
 
-      // 2. Skip empty documents outright: the client shows its own nudge instead of requesting an
-      //    evaluation, and this is what stops the routes it cannot intercept (document close,
-      //    disconnect). Both sides decide "empty" with documentHasStudentWork, so they can never
-      //    disagree about it.
+      // 2. Skip empty documents. The client shows its own nudge instead of requesting an
+      //    evaluation, but can't intercept every route (document close, disconnect); this covers
+      //    those using the same documentHasStudentWork check.
       if (!documentHasStudentWork(parsed)) {
         const doc = queueDoc as AnalysisQueueDocument;
         await firestore.collection(getAnalysisQueueFirestorePath("done")).add({
@@ -352,7 +350,6 @@ export const onAnalysisDocumentPending =
           imageOmittedReason: "empty-document",
         });
         await firestore.doc(event.document).delete();
-        // Best-effort, and only after the done record and the queue cleanup above have landed (C12).
         await writeEvaluationStatus(doc.metadataPath, doc.evaluator, {
           outcome: "skipped-empty",
           requestId: doc.requestId,

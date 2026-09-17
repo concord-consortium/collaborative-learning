@@ -55,9 +55,8 @@ function renderDocument(document: DocumentModelType, stores: ReturnType<typeof s
 }
 
 function makeStores(aiEvaluation?: "categorize-design" | "custom") {
-  // showIdeasButton is forced on so the button renders regardless of aiEvaluation — the
-  // aiEvaluation-unset scenario is specifically about what the click handler does, not about
-  // whether the button itself is shown (a separate, unit-level decision).
+  // Forced on so the button renders regardless of aiEvaluation — that scenario is about what
+  // the click handler does, not whether the button itself shows.
   const appConfig = specAppConfig({ config: { aiEvaluation, showIdeasButton: true } });
   const stores = specStores({ appConfig });
   jest.spyOn(stores.db.firebase, "setLastEditedNow").mockResolvedValue(undefined as any);
@@ -137,8 +136,7 @@ describe("Ideas button", () => {
     renderDocument(document, stores);
 
     clickIdeas();
-    // Still inside the synchronous section of the handler at this point: no await has run yet
-    // inside the current microtask, so this checks the id was recorded before any async gap.
+    // No await has run yet, so this confirms the id was recorded before any async gap.
     expect(document.commentsManager?.latestIdeasRequestId).toEqual(expect.any(String));
     const requestId = document.commentsManager?.latestIdeasRequestId;
 

@@ -326,10 +326,8 @@ describe("the empty-document nudge, scoped to the document thread", () => {
   });
 
   it("does not render in a tile thread's card even when the nudge is set", () => {
-    // Regression test: a tile thread's card shares the same document-level `content` as the
-    // document thread's card, so gating only on `content?.statusMessage` (without also checking
-    // which thread this card belongs to) would render the nudge redundantly in every expanded
-    // tile thread too.
+    // A tile thread's card shares the same document-level `content` as the document thread's, so
+    // gating on `statusMessage` alone would render the nudge there too.
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => ({
       statusMessage: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }

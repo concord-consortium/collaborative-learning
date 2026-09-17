@@ -12,9 +12,8 @@ interface IAdaStatusMessageProps {
 }
 
 /**
- * Ada's avatar, name, and an italic status line. The presentation shared by the "Ada is
- * thinking about it..." waiting bubble and the document status message — the two decide
- * separately *whether* to show (WaitingMessage and StatusMessage below), this only renders *what*.
+ * Ada's avatar, name, and a status line — shared presentation for WaitingMessage and StatusMessage
+ * below, which each decide separately whether to show it.
  */
 export const AdaStatusMessage: React.FC<IAdaStatusMessageProps> = ({ message }) => (
   <>
@@ -59,15 +58,12 @@ interface IStatusMessageProps {
 }
 
 /**
- * Displays the document's inline status message — the "add some work" nudge for an empty
- * document, or a "something went wrong" message for a failed request — in place of a real Ideas
- * request. A distinct condition from WaitingMessage's `isAwaitingRemoteComment` — the two can both
- * be true at once (see comment-card.tsx) and are never folded together.
+ * Displays the document's status message (empty-document nudge, or a failure message). Distinct
+ * from WaitingMessage's `isAwaitingRemoteComment` — both can be true at once.
  *
- * Renders nothing at all (not even an empty wrapper) when there is no message: comment-card.tsx
- * renders this next to WaitingMessage, whose own wrapper always renders per its existing
- * behavior, and a second empty `.comment-thread` div would double that div's bottom margin on
- * every comment card, message or not.
+ * Renders nothing, not even an empty wrapper, when there's no message: comment-card.tsx renders
+ * this beside WaitingMessage's own always-present wrapper, and a second empty div would double
+ * the margin on every comment card.
  */
 const _StatusMessage: React.FC<IStatusMessageProps> = ({ content }) => {
 

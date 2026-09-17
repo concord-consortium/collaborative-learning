@@ -487,10 +487,8 @@ describe("Firebase class", () => {
         });
     });
 
-    // toHaveBeenCalledWith (like toEqual) treats a key whose value is undefined as equal to a
-    // missing key, so the exact-object assertions above would not catch a regression that writes
-    // `requestId: undefined` instead of leaving the key out. Firebase rejects undefined values, so
-    // the distinction is not cosmetic. This checks the actual own-property presence instead.
+    // toHaveBeenCalledWith treats a key with value undefined as equal to a missing key, but
+    // Firebase rejects undefined values — so this checks own-property presence directly.
     function evaluationWriteArgs(mockRef: { set: jest.Mock }) {
       return mockRef.set.mock.calls.map(call => call[0]).find(arg => typeof arg === "object");
     }

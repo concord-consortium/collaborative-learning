@@ -546,23 +546,21 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   // The AI evaluation is triggered by updating the last-edited timestamp.
   //
-  // On an empty document (no `documentHasStudentWork`), this shows a nudge instead of requesting
-  // an evaluation: no Realtime Database write, no REQUEST_IDEA log. On a populated document, the
-  // click is gated by `canRequestIdeas` (one Ideas click, one evaluation in flight at a time) and
-  // carries a `requestId` so the server's eventual completion status can be correlated back to it.
+  // An empty document (no `documentHasStudentWork`) shows a nudge instead: no database write, no
+  // REQUEST_IDEA log. A populated document is gated by `canRequestIdeas` and carries a `requestId`
+  // to correlate the server's eventual completion status.
   private handleIdeasButtonClick = async () => {
-    // --- synchronous section: no await above this line ---
     const { document } = this.props;
     const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
-    // commentsManager is created in the document model's afterCreate, so it is always present at
-    // runtime; the check below satisfies its optional type rather than guarding a real case.
+    // Always present at runtime (created in the document model's afterCreate); this satisfies the
+    // optional type rather than guarding a real case.
     const commentsManager = document.commentsManager;
     if (!commentsManager || !commentsManager.canRequestIdeas) return;
 
     commentsManager.clearStatusMessage();
     const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
     const requestId = (!isEmpty && appConfig.aiEvaluation) ? nanoid() : null;
-    // Recorded synchronously, before any await: see Constraint C13 in the implementation guide.
+    // Must be recorded before any await below, so a status for this click can never find a stale id.
     commentsManager.setLatestIdeasRequestId(requestId);
 
     // Unselect all tiles, so that the whole-document comments are shown
@@ -577,27 +575,20 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
     commentsManager.setIdeasClickInProgress(true);
 
-    // The two Firebase calls below (recording the last-edited time, then reading it back) have no
-    // timeout of their own, so a stalled connection could otherwise leave ideasClickInProgress —
-    // and so the Ideas button — disabled forever. `attempt` is raced against a deadline below: if
-    // it loses, we release the gate and show a failure message, but let `attempt` keep running
-    // rather than abandon the underlying writes. Should it resolve after all, or should a newer
-    // click have already superseded it, the staleness check just before queueing keeps it from
-    // reviving the gate for a request the student has moved on from.
+    // setLastEditedNow/getLastEditedTimestamp have no timeout of their own, so a stalled
+    // connection could leave ideasClickInProgress (and the Ideas button) disabled forever.
+    // `attempt` races against a deadline below; on timeout we release the gate and show a failure
+    // message but let `attempt` keep running. The staleness check before queueing then keeps a
+    // late resolution (or a newer click superseding this one) from reviving the gate.
     let timedOut = false;
     const attempt = (async () => {
       await waitForSaveSettled(document);
       await firebase.setLastEditedNow(user, document.key, document.uid, undefined, requestId ?? undefined);
 
       if (requestId) {
-        // Use the comments manager to queue a pending AI comment.
-        // The manager will automatically check when new comments arrive
-        // and remove this pending item when AI analysis completes.
         const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
         const effectiveLastEdited = docLastEditedTime || Date.now();
 
-        // A newer click (or this one already having timed out) means the student has moved on:
-        // queuing now would only re-raise the gate for a request nothing is waiting on anymore.
         const isStillCurrent = !timedOut && commentsManager.latestIdeasRequestId === requestId;
         const statusPath = isStillCurrent &&
           firebase.getEvaluationStatusPath(user, document.key, document.uid, requestId);
@@ -605,15 +596,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           const statusRef = firebase.ref(statusPath);
           const onStatus = (snapshot: any) => commentsManager.applyEvaluationStatus(snapshot.val());
 
-          // Queued before the listener is attached, so a value Firebase happens to deliver
-          // synchronously always finds its pending entry already in place.
+          // Queued before the listener attaches, so a value Firebase delivers synchronously
+          // always finds its pending entry already in place.
           commentsManager.queueRemoteComment({
             triggeredAt: effectiveLastEdited,
             source: "ai",
             requestId,
             checkCompleted: (comments: CommentWithId[]) => {
-              // Check if AI analysis is complete by finding an AI comment
-              // that was created after the document was last edited.
               const lastAIComment = [...comments]
                 .reverse()
                 .find(comment => comment.uid === kAnalyzerUserParams.id);
@@ -630,9 +619,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
     })();
 
-    // Never rejects: a failure is reported here (unless a later attempt has already shown its own
-    // message) rather than left for the race below to catch, so a late failure — after the
-    // deadline has already put up a failure message of its own — doesn't stomp on it.
+    // Never rejects, so a late failure (after the deadline below has already shown its own
+    // message) can't stomp on it.
     const guardedAttempt = attempt.catch(error => {
       console.error("Ideas request failed:", error);
       if (!timedOut && commentsManager.latestIdeasRequestId === requestId) {

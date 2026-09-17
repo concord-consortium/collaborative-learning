@@ -150,8 +150,6 @@ async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot 
   } catch (err) {
     logger.error("Could not remove the imaged queue entry, which will not be retried", err);
   }
-  // Best-effort, and only after the failure record and the queue cleanup above have been attempted
-  // (C12, C19) — even when neither actually landed, so the status write is never skipped.
   if (queueDoc?.metadataPath && queueDoc?.evaluator) {
     await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
       outcome: "failed",
@@ -285,8 +283,6 @@ export const onAnalysisDocumentImaged =
       // Remove from the "imaged" queue
       await firestore.doc(event.document).delete();
 
-      // Best-effort, and only after the comment, the done record and the queue cleanup above have
-      // landed (C12).
       await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
         outcome: "commented",
         requestId: queueDoc.requestId,

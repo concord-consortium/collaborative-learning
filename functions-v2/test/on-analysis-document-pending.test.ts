@@ -139,17 +139,16 @@ const sampleTile = JSON.parse(sampleDoc).tileMap["3EkhEN1cWCZ6SQ9X"];
 const drawingDoc = docOf(drawingTile);
 // A Text tile with content and a Drawing tile without: mixed.
 const mixedDoc = docOf(sampleTile, drawingTile);
-// A Drawing tile with nothing in it: a full-fidelity handler with nothing to describe. Now empty
-// under documentHasStudentWork (§4.1): a Drawing counts as work only when it has objects.
+// A Drawing tile with no objects: empty under documentHasStudentWork, which counts a Drawing only
+// when it has objects.
 const emptyDrawingDoc = docOf({...drawingTile, content: {...drawingTile.content, objects: []}});
 
-// An Image tile alone: the classifier cannot inspect it, so it always counts as student work
-// (documentHasStudentWork never skips it) even though its stub summary carries none — the case a
-// failed screenshot needs to reach a "nothing to send" failure record.
+// An Image tile alone: the classifier can't inspect it, so it always counts as student work even
+// though its stub summary carries none — the case a failed screenshot needs to reach a
+// "nothing to send" failure record.
 const imageDoc = docOf({id: "image-1", content: {type: "Image", url: "photo.png"}});
 
-// A Geometry tile alone: same shape as imageDoc for classification purposes — inspectable-only,
-// so it always counts as student work and is never skipped.
+// A Geometry tile alone: inspectable-only, so it always counts as student work and is never skipped.
 const geometryDoc = docOf({id: "geometry-1", content: {type: "Geometry"}});
 
 // An AI tile alone: AI output is never student work, whatever it contains.
@@ -405,8 +404,6 @@ describe("functions", () => {
       });
 
       test("a drawing with no objects is skipped, not partially evaluated", async () => {
-        // A Drawing counts as student work only when it has objects (§4.1), so this one has none
-        // to describe and the document is empty as a whole, not just short a summary.
         await givenDocument("emptydraw1", emptyDrawingDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
@@ -434,8 +431,7 @@ describe("functions", () => {
       });
 
       test("an empty document is skipped, not evaluated", async () => {
-        // A student who has not done any work gets the client's nudge instead — see the plan doc.
-        // Nothing here reaches the model or Shutterbug, and a `done` record is written directly.
+        // Nothing here reaches the model or Shutterbug; a `done` record is written directly.
         await givenDocument("empty1", emptyDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
@@ -467,8 +463,8 @@ describe("functions", () => {
       });
 
       test("a rejected status write after a skip still leaves the done record and cleanup in place", async () => {
-        // Simulates the underlying Realtime Database write itself failing, not just the helper
-        // being unavailable, so evaluation-status.ts's own catch-and-warn runs for real.
+        // Simulates the Realtime Database write itself failing, so writeEvaluationStatus's own
+        // catch-and-warn runs for real.
         await givenDocument("empty4", emptyDoc);
         const db = getDatabase();
         const realRef = db.ref.bind(db);
@@ -663,9 +659,7 @@ describe("functions", () => {
       });
 
       test("a picture prompt with no answer is skipped: there is no student work to judge", async () => {
-        // A picture of the question is context for student work, never a substitute for it, and
-        // an authored prompt is never student work itself (§4.1) — with no response rows, this
-        // document has nothing of the student's in it at all.
+        // An authored prompt is never student work; with no response rows, nothing here is either.
         await givenDocument("imgq2", imagePromptQuestionDoc(false));
         const shutterbug = stubShutterbug(shutterbugOk());
 
@@ -738,8 +732,7 @@ describe("functions", () => {
         });
 
       test("an empty drawing is skipped before Shutterbug is ever called, whatever it would answer", async () => {
-        // A failing Shutterbug is stubbed deliberately: the skip check must happen first regardless,
-        // so nothing here should depend on what Shutterbug would have said.
+        // Shutterbug is stubbed to fail; the skip check must happen before it's ever consulted.
         await givenDocument("draw2", emptyDrawingDoc);
         const shutterbug = stubShutterbug(new Error("connection refused"));
 
@@ -868,8 +861,8 @@ describe("functions", () => {
         // The recorder of last resort must not fail for the reason the work did. Here the first
         // write is refused the way Firestore refuses an oversized document; the retry has to land
         // and the pending entry has to go.
-        // imageDoc, not emptyDrawingDoc: an empty drawing is now skipped before reaching this
-        // failure path at all, and this test's point is the failure-record retry, not emptiness.
+        // imageDoc, not emptyDrawingDoc — an empty drawing is now skipped before reaching this
+        // path; the point here is the failure-record retry, not emptiness.
         await givenDocument("bigfail1", imageDoc);
         stubShutterbug(new Error("connection refused"));
         const attempts: Record<string, unknown>[] = [];
@@ -931,8 +924,6 @@ describe("functions", () => {
         await runPending("bad2", {requestId: "req-bad2"});
         docSpy.mockRestore();
 
-        // The rejection above did not escape the helper: the handler completed normally, and the
-        // failure record was still written even though the queue entry could not be removed.
         expect(logger.error).toHaveBeenCalledWith(
           "Could not remove the pending queue entry, which will not be retried", expect.any(Error));
         expect((await failedRecord())?.error).toContain("invalid document JSON");

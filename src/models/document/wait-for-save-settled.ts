@@ -9,26 +9,22 @@ function isSettled(document: DocumentModelType) {
 }
 
 /**
- * Waits until `document` is no longer in the middle of saving, so a request that reads the
- * document (an Ideas click writing the evaluation timestamp) is more likely to see what the
- * student just saved rather than racing an in-progress save.
+ * Waits until `document` is no longer mid-save, so a request that reads it (an Ideas click writing
+ * the evaluation timestamp) is more likely to see what the student just saved.
  *
- * Resolves immediately when `saveState` is `Idle` or `Saved`. Waiting for `Saved` specifically
- * would hang: `SaveIndicator` resets `Saved` back to `Idle` a few seconds after every save, so an
- * ordinary click on an untouched or recently-saved document would never see it. While `Saving` or
- * `Retrying`, waits for the state to leave those values, capped at `kWaitForSaveSettledCapMs`; past
- * the cap it resolves anyway, since a mismatch this leaves behind is still caught by the server's
- * completion status, which is the primary mechanism, not this wait.
+ * Resolves immediately on `Idle` or `Saved`. Does not wait for `Saved` specifically: `SaveIndicator`
+ * resets it to `Idle` a few seconds after every save, so an untouched or recently-saved document
+ * would hang forever. While `Saving`/`Retrying`, waits up to `kWaitForSaveSettledCapMs`, then gives
+ * up — the server's completion status is the real fallback, not this wait.
  */
 export function waitForSaveSettled(document: DocumentModelType): Promise<void> {
   if (isSettled(document)) return Promise.resolve();
 
   return new Promise<void>(resolve => {
     let settled = false;
-    // Defaults to a no-op so `finish` always has something safe to call. `when`'s effect can run
-    // synchronously if its predicate is already true — impossible here today, since the guard
-    // above already confirmed it is false, but this keeps a future reorder from hitting a
-    // temporal-dead-zone error instead of silently relying on that invariant.
+    // No-op default so `finish` always has something to call. `when` can invoke its effect
+    // synchronously if the predicate is already true, which would otherwise call disposeWhen
+    // before `when()` below has assigned it.
     let disposeWhen = () => {};
 
     function finish() {

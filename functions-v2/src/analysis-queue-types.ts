@@ -8,10 +8,9 @@ import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
 /**
  * Why a representation was deliberately not sent. A fixed code, never free text.
  *
- * `"empty-document"` is set on both `summaryOmittedReason` and `imageOmittedReason` together, only
- * for a document `documentHasStudentWork` (shared/ai-analysis-classify.ts) says has no student
- * work at all — see on-analysis-document-pending.ts's real skip. The other three reasons are about
- * one representation of an otherwise non-empty document.
+ * `"empty-document"` is set on both summary and image together, for a document
+ * `documentHasStudentWork` says has no student work at all. The other reasons are each about one
+ * representation of an otherwise non-empty document.
  */
 export type OmittedReason =
   "no-student-work-in-summary" | "no-visual-content" | "images-disabled" | "empty-document";

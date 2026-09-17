@@ -62,11 +62,8 @@ export interface AnalysisQueueDocument {
   firestoreDocumentPath: string;
   /** The unit and problem the student was running when the evaluation was requested. */
   requestContext?: IEvaluationRequestContext;
-  /**
-   * The Ideas click's id, when this evaluation was requested that way. Echoed in the completion
-   * status (see evaluation-status.ts) so the client can correlate it back to the request. The
-   * automatic routes (onDisconnect, sync-hook cleanup) write no id, so this is absent for them.
-   */
+  /** The Ideas click's id, echoed in the completion status so the client can correlate it back.
+   * Absent for the automatic routes (onDisconnect, sync-hook cleanup). */
   requestId?: string;
 }
 
@@ -74,8 +71,7 @@ export interface AnalysisQueueDocument {
 // Firestore's document limit, which fails the write and leaves the document unanalyzed.
 const kMaxUnitCodeLength = 40;
 const kMaxOfferingIdLength = 100;
-// Matches the client's nanoid() output, which is well under this; a longer value is dropped
-// rather than truncated, since a truncated id would never match the one the client is waiting on.
+// A longer value is dropped rather than truncated, since a truncated id would never match.
 const kMaxRequestIdLength = 64;
 
 // The same shape `isRenderableUnit` accepts in on-analysis-document-pending.ts, since a unit that

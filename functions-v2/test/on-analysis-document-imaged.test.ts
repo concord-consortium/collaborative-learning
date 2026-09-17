@@ -694,8 +694,8 @@ describe("functions", () => {
     });
 
     test("a rejected status write leaves the comment and done record in place", async () => {
-      // Simulates the underlying Realtime Database write itself failing, not just the helper being
-      // unavailable, so evaluation-status.ts's own catch-and-warn runs for real.
+      // Simulates the Realtime Database write itself failing, so writeEvaluationStatus's own
+      // catch-and-warn runs for real.
       mockCategorizeResponse({parsed, messageShape: "mixed"});
       const db = getDatabase();
       const realRef = db.ref.bind(db);
@@ -847,7 +847,7 @@ describe("functions", () => {
       }));
       collectionSpy.mockRestore();
 
-      // The rejection above did not escape the helper: the handler completed normally.
+      // Completed normally: the injected rejection did not escape the helper.
       expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
         "analysis/queue/imaged/testdoc1", "No response from AI");
       const status = await getDatabase()
@@ -873,8 +873,6 @@ describe("functions", () => {
       }));
       docSpy.mockRestore();
 
-      // The rejection above did not escape the helper: the handler completed normally, and the
-      // failure record was still written even though the queue entry could not be removed.
       expect(logger.error).toHaveBeenCalledWith(
         "Could not remove the imaged queue entry, which will not be retried", expect.any(Error));
       expect(await admin.firestore().collection("analysis/queue/failedAnalyzing").count().get()

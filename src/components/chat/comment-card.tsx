@@ -42,9 +42,8 @@ interface IProps {
   onDeleteComment?: DeleteCommentFn;
   focusDocument?: string;
   focusTileId?: string;
-  /** Whether this card is the document-level thread, as opposed to a tile's thread. Both threads
-   * can be expanded at once (see chat-thread.tsx), so this — not `focusTileId` — is what scopes
-   * the document status message to a single card. */
+  /** Whether this is the document-level thread, not a tile's. Both kinds can be expanded at once,
+   * so this — not `focusTileId` — scopes the status message to one card. */
   isDocumentThread?: boolean;
   isFocused?: boolean;
   onSelect?: () => void;
@@ -181,10 +180,8 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
   };
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
-  // The status message is about the whole document, so only its own thread's card shows it — the
-  // document and every tile thread can be expanded at once (see chat-thread.tsx), and all of them
-  // share this same `content`, so gating on `focusTileId` instead would show it redundantly under
-  // every other expanded tile thread too.
+  // Scoped to the document thread, not focusTileId: every expanded tile thread shares this same
+  // `content`, so focusTileId alone would show the message under all of them.
   const showStatusMessage = isDocumentThread && !!content?.statusMessage;
 
   const updateRating = useUpdateCommentRating();

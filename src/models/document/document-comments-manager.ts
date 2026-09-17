@@ -5,17 +5,15 @@ import { WithId } from "../../hooks/firestore-hooks";
 import { IClientCommentParams, IDocumentMetadata, IUserContext, kAnalyzerUserParams } from "../../../shared/shared";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "./ai-evaluation-messages";
 
-// How long an Ideas click waits for its own Firebase writes/reads (recording the last-edited
-// time, then reading it back) before giving up on this attempt. Short: this is a couple of small
-// foreground calls, not the AI evaluation itself, which has its own much longer budget below.
+// How long an Ideas click's own Firebase writes/reads may take before giving up on this attempt.
+// Short — these are small foreground calls, not the evaluation itself (see below).
 export const kIdeasRequestDeadlineMs = 15_000;
 
 export const REMOTE_COMMENT = "remote";
 export const LOCAL_COMMENT = "local";
 
-// How long a remote (e.g. AI) pending comment waits for a resolving signal — a comment, a
-// completion status, or this expiry — before it gives up on its own. Comfortably above
-// Shutterbug's ~45s budget plus the model call.
+// How long a pending remote comment waits for a comment, a status, or this expiry before giving
+// up. Comfortably above Shutterbug's ~45s budget plus the model call.
 const kRemoteCommentExpiryMs = 120_000;
 
 export type CommentWithId = WithId<CommentDocument>;
@@ -31,13 +29,11 @@ export interface IPendingRemoteComment extends IPendingComment {
   triggeredAt: number;
   postingType: typeof REMOTE_COMMENT;
   checkCompleted: (comments: CommentWithId[]) => boolean;
-  /** The Ideas click's request id, when this entry was queued for one. Used to correlate a
-   * server-written completion status back to the request that caused it. */
+  /** The Ideas click's request id, used to correlate a completion status back to it. */
   requestId?: string;
   expiresAt: number;
-  /** Called whenever this entry is removed from the queue, for any reason (a comment arrived, a
-   * status resolved it, or it expired) — the caller's chance to detach anything set up for it,
-   * such as a Realtime Database listener. */
+  /** Called when this entry leaves the queue, so the caller can detach anything it set up (e.g. a
+   * Realtime Database listener). */
   dispose?: () => void;
 }
 
@@ -51,8 +47,8 @@ interface IQueueRemoteCommentParams {
 
 export type EvaluationOutcome = "skipped-empty" | "commented" | "failed";
 
-/** The completion status the analysis pipeline writes when it finishes handling an evaluation
- * request — see docs/firebase-schema.md's evaluationStatus node. */
+/** The completion status the analysis pipeline writes for an evaluation request — see
+ * docs/firebase-schema.md's evaluationStatus node. */
 export interface IEvaluationStatus {
   outcome: EvaluationOutcome;
   requestId?: string;
@@ -92,30 +88,25 @@ export class DocumentCommentsManager {
   pendingComments: PendingComment[] = [];
   private isCheckingPending = false;
 
-  /** An inline status line shown in place of (or ahead of) a real AI comment: either the
-   * "add some work" nudge for an empty document, or a "something went wrong" message when an
-   * Ideas request could not be completed. Client-only: never written to Firestore, and
-   * deliberately not a `pendingComments` entry (a message waiting for an AI comment would block an
-   * exemplar comment queued behind it). */
+  /** An inline status line shown in place of a real AI comment: the "add some work" nudge, or a
+   * failure message. Client-only, and deliberately not a `pendingComments` entry — it would
+   * otherwise block an exemplar comment queued behind it. */
   statusMessage: { message: string; shownAt: number } | null = null;
 
-  /** The request id of the most recent Ideas click that made a request, or `null` if the most
-   * recent click made none (an empty-document click). Records which click is latest, not which
-   * request is still pending — it is not cleared when a request resolves. */
+  /** The request id of the most recent Ideas click, or `null` if it made none (an empty-document
+   * click). Not cleared when a request resolves — it tracks the latest click, not what's pending. */
   latestIdeasRequestId: string | null = null;
 
-  /** True from the moment an Ideas click starts until its pending entry is queued (or, for an
-   * empty-document click, until the handler returns). Covers the window the handler itself
-   * `await`s through, before a pending entry exists to gate on. */
+  /** True from the start of an Ideas click until its pending entry is queued (or, for an
+   * empty-document click, until the handler returns). */
   ideasClickInProgress = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  /** Whether a new Ideas click may make a request right now: false while a click is already in
-   * progress, or while an AI evaluation is still pending. The nudge does not factor in — an
-   * empty-document click makes no request, so the button stays enabled while it shows. */
+  /** Whether a new Ideas click may make a request: false while one is in progress or an AI
+   * evaluation is pending. The nudge doesn't factor in — an empty click makes no request. */
   get canRequestIdeas() {
     return !this.ideasClickInProgress &&
       !this.pendingComments.some(p => p.postingType === REMOTE_COMMENT && p.source === "ai");
@@ -185,9 +176,8 @@ export class DocumentCommentsManager {
     this.checkPendingComments();
   }
 
-  /** Removes the given pending entries and, for any that are remote comments, calls their
-   * `dispose`. The single place entries leave `pendingComments`, so a listener set up for one is
-   * never left dangling. */
+  /** Removes the given pending entries, calling `dispose` on any remote ones. The single place
+   * entries leave `pendingComments`, so a listener set up for one is never left dangling. */
   private removePendingComments(ids: Set<string>) {
     if (ids.size === 0) return;
     const removed = this.pendingComments.filter(p => ids.has(p.id));
@@ -246,16 +236,14 @@ export class DocumentCommentsManager {
   }
 
   /**
-   * Applies a completion status the analysis pipeline wrote for an evaluation request. A status
-   * with no `requestId` matches nothing (the automatic routes write none, so there is never an
-   * entry waiting on them). Matching is always by `requestId`, never by `completedAt` — an older
-   * request finishing late must resolve its own entry and nothing more.
+   * Applies a completion status the analysis pipeline wrote for an evaluation request. Matches by
+   * `requestId` only, never `completedAt` — an older request finishing late must resolve only its
+   * own entry.
    *
-   * A `"commented"` status does nothing at all (Constraint C21): the status arrives over the
-   * Realtime Database and the comment over Firestore, with no ordering guaranteed between them, so
-   * resolving the entry here could let a queued exemplar comment post before Ada's own comment
-   * lands — the ordering `pendingComments` exists to prevent. Only the comment itself, via
-   * `checkCompleted`, or the 120s expiry resolves a commented request.
+   * A `"commented"` status does nothing: it arrives over the Realtime Database while the comment
+   * itself arrives over Firestore, with no ordering between the two, so resolving on the status
+   * could let a queued exemplar comment post before Ada's own comment lands. Only the comment
+   * (via `checkCompleted`) or the 120s expiry resolves a commented request.
    */
   applyEvaluationStatus(status: IEvaluationStatus | null | undefined) {
     if (!status?.requestId) return;
@@ -275,8 +263,6 @@ export class DocumentCommentsManager {
       if (status.outcome === "skipped-empty") {
         this.showStatusMessage(IDEAS_EMPTY_MESSAGE);
       } else if (status.outcome === "failed") {
-        // Otherwise the pending entry's removal above silently drops the waiting bubble, with
-        // nothing telling the student the pipeline actually failed server-side.
         this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
       }
     }
@@ -300,9 +286,6 @@ export class DocumentCommentsManager {
   }
 
   dispose() {
-    // A pending remote comment's dispose clears its expiry timer and detaches whatever the caller
-    // set up for it (e.g. a Realtime Database listener) — tearing down the manager counts as the
-    // entry being removed, same as a comment, a status, or expiry resolving it.
     this.pendingComments.forEach(p => {
       if (p.postingType === REMOTE_COMMENT) p.dispose?.();
     });

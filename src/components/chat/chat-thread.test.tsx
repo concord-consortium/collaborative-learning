@@ -451,10 +451,8 @@ describe("CommentThread", () => {
       expect(screen.queryByText("Doc Thread Comment 1")).not.toBeInTheDocument();
 
       statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
-      // ChatThread is `observer`-wrapped, which applies React.memo on props; a real content model
-      // would trigger a re-render through MobX's own reactivity regardless of props. The mocked
-      // hook here is a plain function, so a changed (but equivalent) prop reference is needed to
-      // get React to re-invoke the component and read the hook again.
+      // ChatThread's observer wrapper applies React.memo; the mocked hook is a plain function, so
+      // a changed prop reference is needed to force a re-render and re-read it.
       rerender((
         <ModalProvider>
           <ChatThread
