@@ -40,6 +40,16 @@ function aiRating(): AiAgreementV2 {
   };
 }
 
+function peerRating(): AiAgreementV2 {
+  return {
+    ...aiRating(),
+    commentId: "comment-2",
+    commentUid: "student-2",
+    isAiComment: false,
+    content: "A classmate said something.",
+  };
+}
+
 // A stored summary record, with only the fields the lookup filters or reads.
 async function writeSummary(id: string, fields: Partial<DocumentMetadata> & {summary: string}) {
   await db.doc(`summaries/${id}`).set({
@@ -148,6 +158,67 @@ describe("the related-summaries lookup", () => {
       const found = await findRelatedSummaries(demoMetadata, [0.1, 0.2, 0.3]);
 
       expect(summaryTexts(found)).toEqual(["The one that qualifies."]);
+    });
+
+    // The gate counts every rating, not only ratings of Ada's comments. A document whose human
+    // comments were rated is worth finding even though nobody rated Ada there — which in a small
+    // class is the common case, since it takes only one rating rather than two separate ones.
+    it("returns a record rated only on a human comment", async () => {
+      await db.doc("summaries/demo-AI-peeronly").set({
+        ...demoMetadata,
+        key: "peeronly",
+        summary: "Rated on a classmate's comment.",
+        summaryEmbedding: FieldValue.vector([0.1, 0.2, 0.3]),
+        numAiAgreements: 0,
+        numAgreements: 1,
+        aiAgreements: {"comment-2_student-1": peerRating()},
+        analyzedAt: 1_700_000_000_000,
+      });
+
+      const found = await findRelatedSummaries(demoMetadata, [0.1, 0.2, 0.3]);
+
+      expect(summaryTexts(found)).toEqual(["Rated on a classmate's comment."]);
+    });
+
+    it("does not return a record nobody has rated at all", async () => {
+      await db.doc("summaries/demo-AI-unrated").set({
+        ...demoMetadata,
+        key: "unrated",
+        summary: "Nobody rated this one.",
+        summaryEmbedding: FieldValue.vector([0.1, 0.2, 0.3]),
+        numAiAgreements: 0,
+        numAgreements: 0,
+        aiAgreements: {},
+        analyzedAt: 1_700_000_000_000,
+      });
+
+      const found = await findRelatedSummaries(demoMetadata, [0.1, 0.2, 0.3]);
+
+      expect(found).toEqual([]);
+    });
+
+    // The peer entry has to survive the read side as well as the query, or widening the gate finds
+    // records that then contribute nothing.
+    it("carries the peer comment of a record found on peer ratings alone", async () => {
+      await db.doc("summaries/demo-AI-peeronly").set({
+        ...demoMetadata,
+        key: "peeronly",
+        summary: "Rated on a classmate's comment.",
+        summaryEmbedding: FieldValue.vector([0.1, 0.2, 0.3]),
+        numAiAgreements: 0,
+        numAgreements: 1,
+        aiAgreements: {"comment-2_student-1": peerRating()},
+        analyzedAt: 1_700_000_000_000,
+      });
+
+      const [related] = await findRelatedSummaries(demoMetadata, [0.1, 0.2, 0.3]);
+
+      expect(related.agreements).toEqual({});
+      expect(related.peerComments).toEqual([expect.objectContaining({
+        commentId: "comment-2",
+        content: "A classmate said something.",
+        ratings: {yes: 1},
+      })]);
     });
   });
 

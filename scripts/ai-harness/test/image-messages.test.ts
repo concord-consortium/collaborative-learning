@@ -187,7 +187,8 @@ describe("a detail that disagrees with what is sent cannot be built", () => {
 describe("mixed requests are built by the shared production builder", () => {
   const related = [{
     summary: "A related document's summary.",
-    agreements: { yes: [{ content: "Agreed.", tags: [] }] } as never
+    agreements: { yes: [{ content: "Agreed.", tags: [] }] } as never,
+    peerComments: []
   }];
 
   const buildMixed = (overrides: Partial<Parameters<typeof buildMixedRequest>[0]> = {}) =>
