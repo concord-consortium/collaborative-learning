@@ -151,6 +151,8 @@ describe("Ideas button", () => {
     expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.REQUEST_IDEA, { document });
     expect(document.commentsManager?.pendingComments).toHaveLength(1);
     expect(document.commentsManager?.pendingComments[0]).toMatchObject({ requestId, postingType: "remote" });
+    expect(stores.db.firebase.getEvaluationStatusPath)
+      .toHaveBeenCalledWith(stores.user, document.key, document.uid, requestId);
     expect(stores.db.firebase.ref).toHaveBeenCalledWith("status/path");
   });
 

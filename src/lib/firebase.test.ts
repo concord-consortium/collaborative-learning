@@ -533,22 +533,33 @@ describe("Firebase class", () => {
     } as unknown as UserModelType;
     const mockDocumentKey = "test-document";
     const mockUserId = "test-user-id";
+    const mockRequestId = "test-request-id";
 
-    it("is a sibling of the evaluation node, keyed by the same evaluator", () => {
+    it("is a child, keyed by the request id, of a node beside the evaluation node's own", () => {
       const stores = { ...mockStores, appConfig: { aiEvaluation: "standard", aiPrompt: undefined } };
       const firebase = new Firebase({ stores } as unknown as DB);
 
       const evaluationPath = firebase.getEvaluationMetadataPath(mockUser, mockDocumentKey, mockUserId);
-      const statusPath = firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId);
+      const statusPath = firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId, mockRequestId);
 
-      expect(statusPath).toBe(evaluationPath?.replace("/evaluation/", "/evaluationStatus/"));
+      expect(statusPath).toBe(`${evaluationPath?.replace("/evaluation/", "/evaluationStatus/")}/${mockRequestId}`);
+    });
+
+    it("differs for two different request ids on the same document", () => {
+      const stores = { ...mockStores, appConfig: { aiEvaluation: "standard", aiPrompt: undefined } };
+      const firebase = new Firebase({ stores } as unknown as DB);
+
+      const pathA = firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId, "request-a");
+      const pathB = firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId, "request-b");
+
+      expect(pathA).not.toEqual(pathB);
     });
 
     it("is undefined when aiEvaluation is unset, like the evaluation path", () => {
       const stores = { ...mockStores, appConfig: { aiEvaluation: undefined, aiPrompt: undefined } };
       const firebase = new Firebase({ stores } as unknown as DB);
 
-      expect(firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId)).toBeUndefined();
+      expect(firebase.getEvaluationStatusPath(mockUser, mockDocumentKey, mockUserId, mockRequestId)).toBeUndefined();
     });
   });
 });

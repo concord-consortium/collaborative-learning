@@ -206,11 +206,16 @@ export class Firebase {
   }
 
   // Returns the path to the completion status the analysis pipeline writes when it finishes
-  // handling an evaluation request, a sibling of the evaluation node above.
-  public getEvaluationStatusPath(user: UserModelType, documentKey: string, userId?: string) {
+  // handling this specific evaluation request — a child of a node that sits beside the evaluation
+  // node above, keyed by requestId so an older or newer request's status is never read here
+  // (Constraint C18). Callers always have a requestId: the automatic routes (onDisconnect,
+  // sync-hook cleanup) write no client-visible request and so have no client subscribing here.
+  public getEvaluationStatusPath(user: UserModelType, documentKey: string, userId: string | undefined,
+                                  requestId: string) {
     const evaluation = this.db.stores.appConfig.aiEvaluation;
     if (evaluation) {
-      return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/evaluationStatus/${evaluation}`;
+      const metadataPath = this.getUserDocumentMetadataPath(user, documentKey, userId);
+      return `${metadataPath}/evaluationStatus/${evaluation}/${requestId}`;
     } else {
       return undefined;
     }

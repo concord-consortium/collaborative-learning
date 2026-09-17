@@ -686,7 +686,7 @@ describe("functions", () => {
       }));
 
       const status = await getDatabase()
-        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}`)
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-imaged-1`)
         .once("value").then((snapshot) => snapshot.val());
       expect(status).toMatchObject({
         outcome: "commented", requestId: "req-imaged-1", docUpdated: sampleDoc.docUpdated,
@@ -824,9 +824,36 @@ describe("functions", () => {
         .then((result) => result.data().count)).toEqual(1);
       // The failure still resolves the waiting bubble, via the same status mechanism as success.
       const status = await getDatabase()
-        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}`)
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-noresponse`)
         .once("value").then((snapshot) => snapshot.val());
       expect(status).toMatchObject({outcome: "failed", requestId: "req-noresponse"});
+    });
+
+    test("a failed status is still written when the failure record itself cannot be written", async () => {
+      mockCategorizeResponse({parsed: undefined});
+      const realCollection = admin.firestore().collection.bind(admin.firestore());
+      const collectionSpy = jest.spyOn(admin.firestore(), "collection")
+        .mockImplementation((path: string) => {
+          if (!path.endsWith("failedAnalyzing")) return realCollection(path);
+          return {
+            add: async () => {
+              throw new Error("document exceeds the maximum size");
+            },
+          } as any;
+        });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestId: "req-badwrite",
+      }));
+      collectionSpy.mockRestore();
+
+      // The rejection above did not escape the helper: the handler completed normally.
+      expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
+        "analysis/queue/imaged/testdoc1", "No response from AI");
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-badwrite`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "failed", requestId: "req-badwrite"});
     });
   });
 

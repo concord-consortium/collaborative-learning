@@ -269,8 +269,8 @@ const failedRecord = () =>
 // so they are found by the documentId field instead.
 const doneRecord = (docId: string) =>
   queue("done").where("documentId", "==", docId).get().then((snapshot) => snapshot.docs[0]?.data());
-const statusFor = (docId: string, evaluator = "categorize-design") =>
-  getDatabase().ref(`${kDocumentRoot}/documentMetadata/${docId}/evaluationStatus/${evaluator}`)
+const statusFor = (docId: string, requestId = "automatic", evaluator = "categorize-design") =>
+  getDatabase().ref(`${kDocumentRoot}/documentMetadata/${docId}/evaluationStatus/${evaluator}/${requestId}`)
     .once("value").then((snapshot) => snapshot.val());
 
 // The rule that makes the queue countable: a representation is either sent, left out by decision,
@@ -429,7 +429,8 @@ describe("functions", () => {
           renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
         expect(shutterbug.spy).not.toHaveBeenCalled();
-        expect(await statusFor("emptydraw1")).toMatchObject({outcome: "skipped-empty", requestId: "req-emptydraw1"});
+        expect(await statusFor("emptydraw1", "req-emptydraw1"))
+          .toMatchObject({outcome: "skipped-empty", requestId: "req-emptydraw1"});
       });
 
       test("an empty document is skipped, not evaluated", async () => {
@@ -461,7 +462,7 @@ describe("functions", () => {
         expect(shutterbug.spy).not.toHaveBeenCalled();
         expect(logger.info).toHaveBeenCalledWith(expect.stringContaining("is empty; skipped evaluation"));
 
-        const status = await statusFor("empty1");
+        const status = await statusFor("empty1", "req-empty1");
         expect(status).toMatchObject({outcome: "skipped-empty", requestId: "req-empty1", docUpdated: "1001"});
       });
 
@@ -900,7 +901,7 @@ describe("functions", () => {
         expect(failed?.error).toContain("nothing to send");
         expect(failed?.error).toContain("accumulated fields omitted");
         // The failure still resolves the waiting bubble, via the same status mechanism as a skip.
-        expect(await statusFor("bigfail1")).toMatchObject({outcome: "failed", requestId: "req-bigfail1"});
+        expect(await statusFor("bigfail1", "req-bigfail1")).toMatchObject({outcome: "failed", requestId: "req-bigfail1"});
       });
     });
 

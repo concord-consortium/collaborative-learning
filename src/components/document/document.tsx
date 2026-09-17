@@ -599,7 +599,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         // A newer click (or this one already having timed out) means the student has moved on:
         // queuing now would only re-raise the gate for a request nothing is waiting on anymore.
         const isStillCurrent = !timedOut && commentsManager.latestIdeasRequestId === requestId;
-        const statusPath = isStillCurrent && firebase.getEvaluationStatusPath(user, document.key, document.uid);
+        const statusPath = isStillCurrent &&
+          firebase.getEvaluationStatusPath(user, document.key, document.uid, requestId);
         if (statusPath) {
           const statusRef = firebase.ref(statusPath);
           const onStatus = (snapshot: any) => commentsManager.applyEvaluationStatus(snapshot.val());

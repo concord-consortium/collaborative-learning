@@ -15,8 +15,16 @@ export interface EvaluationStatus {
 
 /**
  * Writes the completion status for an evaluation request to the Realtime Database, at
- * `${metadataPath}/evaluationStatus/${evaluator}` — a sibling of the `evaluation/${evaluator}`
- * node the client wrote to make the request.
+ * `${metadataPath}/evaluationStatus/${evaluator}/${requestId ?? "automatic"}` — a child of a node
+ * that sits beside the `evaluation/${evaluator}` node the client wrote to make the request.
+ *
+ * Keyed per request (Constraint C18), not a single shared node under the evaluator: a single node
+ * can be overwritten by a slow older request's write landing after a newer one's, and hands every
+ * new listener the previous request's status the moment it subscribes. The client subscribes only
+ * to its own request's child, so an older or newer request's status can never resolve or change
+ * what it sees. A request with no id (the automatic routes: onDisconnect, sync-hook cleanup) lands
+ * under the fixed key `"automatic"` — no client listens there; it exists so that route's outcome
+ * can still be inspected.
  *
  * Best-effort: it catches its own rejection, logs it, and resolves either way, so it can never
  * fail the calling function or leave a queue entry or comment stranded because this write
@@ -34,7 +42,7 @@ export async function writeEvaluationStatus(
   metadataPath: string, evaluator: string, status: EvaluationStatus
 ): Promise<void> {
   const {outcome, requestId, docUpdated} = status;
-  const path = `${metadataPath}/evaluationStatus/${evaluator}`;
+  const path = `${metadataPath}/evaluationStatus/${evaluator}/${requestId ?? "automatic"}`;
   try {
     await getDatabase().ref(path).set({
       outcome,
