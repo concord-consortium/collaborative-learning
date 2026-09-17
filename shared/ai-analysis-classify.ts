@@ -336,6 +336,25 @@ export function classifyDocument(content: any): DocumentClassification {
  */
 const kNeverStudentWorkTypes = new Set(["AI", "Simulator", "Placeholder", "Question", "ErrorTest", "Starter"]);
 
+/** Whether a Graph layer's data configuration has any attribute assigned to it. Every Graph tile
+ * gets a default "unlinked" layer with an empty configuration, so a layer merely existing is not
+ * evidence of anything — this checks whether the student (or a shared dataset link) actually put
+ * an attribute on an axis. */
+function graphLayerHasAttributes(layer: any): boolean {
+  const config = layer?.config;
+  const xyCount = Object.keys(config?._attributeDescriptions ?? {}).length;
+  const yCount = Array.isArray(config?._yAttributeDescriptions) ? config._yAttributeDescriptions.length : 0;
+  return xyCount + yCount > 0;
+}
+
+/** A Graph tile counts as student work when it has an adornment, or any layer has an assigned
+ * attribute. `layers.length` alone never distinguishes this — see graphLayerHasAttributes. */
+export function graphTileHasContent(content: any): boolean {
+  const hasAdornments = Array.isArray(content?.adornments) && content.adornments.length > 0;
+  const layers = Array.isArray(content?.layers) ? content.layers : [];
+  return hasAdornments || layers.some(graphLayerHasAttributes);
+}
+
 /**
  * Table and Dataflow always count — neither has a per-instance check. An unrecognized type also
  * always counts, since the classifier can't inspect it and the safe assumption is that the
@@ -345,7 +364,7 @@ function tileCountsAsStudentWork(tileType: string, content: any): boolean {
   switch (tileType) {
     case "Text": return textTileHasContent(content);
     case "Drawing": return Array.isArray(content?.objects) && content.objects.length > 0;
-    case "Graph": return Array.isArray(content?.layers) && content.layers.length > 0;
+    case "Graph": return graphTileHasContent(content);
     default: return !kNeverStudentWorkTypes.has(tileType);
   }
 }

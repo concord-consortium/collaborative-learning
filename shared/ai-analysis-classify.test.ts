@@ -4,6 +4,10 @@ import {
 } from "./ai-analysis-classify";
 import { DocumentContentModel } from "../src/models/document/document-content";
 import { registerTileTypes } from "../src/register-tile-types";
+import { GraphModel } from "../src/plugins/graph/models/graph-model";
+import "../src/models/shared/shared-data-set-registration";
+import "../src/models/shared/shared-case-metadata-registration";
+import "../src/plugins/graph/graph-registration";
 
 registerTileTypes(["Text"]);
 
@@ -399,11 +403,29 @@ describe("documentHasStudentWork", () => {
     expect(documentHasStudentWork(doc([[{ tileId: "d1" }]], { d1: drawingTile([]) }))).toBe(false);
   });
 
-  it("counts a Graph tile only when it has layers", () => {
-    const withLayers = { content: { type: "Graph", layers: [{ id: "l1" }] } };
-    const bare = { content: { type: "Graph", layers: [] } };
-    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: withLayers }))).toBe(true);
-    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: bare }))).toBe(false);
+  // A real GraphModel, not a hand-written fixture: GraphModel.afterCreate() always adds a default
+  // "unlinked" layer, so `layers: []` can never actually occur, and `layers.length > 0` alone
+  // can't tell an untouched graph from one the student configured.
+  it("does not count an untouched Graph tile, whose default layer has no assigned attributes", () => {
+    const graphModel = GraphModel.create();
+    expect(graphModel.layers.length).toBe(1);
+    const content = getSnapshot(graphModel);
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content } }))).toBe(false);
+  });
+
+  it("counts a Graph tile once an attribute is assigned to a layer", () => {
+    const graphModel = GraphModel.create();
+    graphModel.layers[0].config.setAttributeForRole("x", { attributeID: "attr1" });
+    const content = getSnapshot(graphModel);
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content } }))).toBe(true);
+  });
+
+  it("counts a Graph tile with an adornment, even with no assigned attribute", () => {
+    const graphModel = GraphModel.create();
+    // Only the presence of an adornment is under test here, not any specific adornment's shape,
+    // so this overrides just that field on an otherwise-real snapshot.
+    const content = { ...getSnapshot(graphModel), adornments: [{ id: "adorn1", type: "Movable Point" }] };
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content } }))).toBe(true);
   });
 
   it("always counts a Table, even with no cases", () => {
