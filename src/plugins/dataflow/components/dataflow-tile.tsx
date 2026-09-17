@@ -1,6 +1,7 @@
 import React from "react";
 import { observer, inject } from "mobx-react";
 import classNames from "classnames";
+import { getVisibleFocusables } from "@concord-consortium/accessibility-tools/hooks";
 
 import { DataflowProgram, IDataflowProgramApi } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
@@ -154,9 +155,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             onRegisterTileApi={this.props.onRegisterTileApi}
             onUnregisterTileApi={this.props.onUnregisterTileApi}
             getTitleElement={() => getEditableTitleElement(this.props.tileElt ?? undefined)}
-            getContentElement={() =>
-              this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content")
-              ?? undefined}
+            getContentElement={() => {
+              const el = this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content");
+              // The focus trap advances past a slot only if it can put focus somewhere inside it,
+              // and it treats a slot with no element as "not present" and skips it. An empty
+              // program has no focusable blocks — and since zoom moved to the toolbar, nothing
+              // else — so reporting the element here would swallow Tab instead of moving on.
+              return el && getVisibleFocusables(el).length > 0 ? el : undefined;
+            }}
             getTopbarElement={() =>
               this.programContainerEl?.querySelector<HTMLElement>(".program-editor-topbar")
               ?? undefined}

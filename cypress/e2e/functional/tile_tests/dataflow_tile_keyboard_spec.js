@@ -32,11 +32,7 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
     else cy.focused().should('have.attr', attr, value);
   }
 
-  // Skipped: CLUE-573 moved zoom out of the tile body and into the toolbar, emptying the `content`
-  // focus slot, and these two expectations no longer match the traversal. The record button is
-  // slated to change shape shortly, which will move these stops again — re-derive the order (and
-  // confirm record-data-button is still keyboard-reachable) once it lands, rather than twice.
-  it.skip('Tab cycles through every focus slot of an empty Dataflow tile in expected order', function () {
+  it('Tab cycles through every focus slot of an empty Dataflow tile in expected order', function () {
     selectDataflowTile();
 
     focusOrder.forEach((entry) => {
@@ -49,7 +45,7 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
     cy.focused().should('have.class', 'editable-tile-title-text');
   });
 
-  it.skip('Shift+Tab cycles in reverse through every focus slot of an empty Dataflow tile', function () {
+  it('Shift+Tab cycles in reverse through every focus slot of an empty Dataflow tile', function () {
     selectDataflowTile();
 
     [...focusOrder].reverse().forEach((entry) => {
