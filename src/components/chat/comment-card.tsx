@@ -176,6 +176,10 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
   };
 
   const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
+  // Mirrors showWaitingMessage's shape, but for the nudge's own condition: adding a tile selects
+  // it, which would otherwise hide the nudge (via !focusTileId going false) the moment the student
+  // starts working, before they click Ideas again or a new comment arrives to clear it.
+  const showNudge = !focusTileId || !!content?.emptyDocumentNudge;
 
   const updateRating = useUpdateCommentRating();
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
@@ -312,7 +316,7 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
           })
         }
         { showWaitingMessage && <WaitingMessage content={content} /> }
-        { showWaitingMessage && <EmptyDocumentNudge content={content} /> }
+        { showNudge && <EmptyDocumentNudge content={content} /> }
         <CommentTextBox
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}

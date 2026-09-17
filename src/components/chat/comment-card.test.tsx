@@ -7,6 +7,10 @@ import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
+import { IDEAS_EMPTY_MESSAGE } from "../../models/document/empty-document-messages";
+
+// jsdom does not implement scrollIntoView, which EmptyDocumentNudge calls when it renders.
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 
 const mockUpdateRating = jest.fn().mockResolvedValue(undefined);
@@ -281,5 +285,41 @@ describe("CommentCard with showCommentRating disabled", () => {
     expect(screen.getByText("rated comment")).toBeInTheDocument();
     expect(screen.queryByTestId("comment-rating-buttons")).not.toBeInTheDocument();
     expect(screen.queryByTestId("rating-yes-button")).not.toBeInTheDocument();
+  });
+});
+
+describe("the empty-document nudge with a tile focused", () => {
+  afterEach(() => {
+    // Restore the module-level default so later tests are unaffected.
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => undefined;
+  });
+
+  it("still renders when a tile is focused and the nudge is set", () => {
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => ({
+      emptyDocumentNudge: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
+    });
+
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1" />
+      </ModalProvider>
+    ));
+
+    expect(screen.getByText(IDEAS_EMPTY_MESSAGE)).toBeInTheDocument();
+  });
+
+  it("does not render when a tile is focused and there is no nudge", () => {
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => ({ emptyDocumentNudge: null });
+
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1" />
+      </ModalProvider>
+    ));
+
+    expect(screen.queryByText(IDEAS_EMPTY_MESSAGE)).not.toBeInTheDocument();
   });
 });

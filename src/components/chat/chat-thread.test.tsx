@@ -7,6 +7,9 @@ import { UserModelType } from "../../models/stores/user";
 import { AppConfigModel } from "../../models/stores/app-config-model";
 import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
+// jsdom does not implement scrollIntoView, which EmptyDocumentNudge calls when it renders.
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
 jest.mock("../../hooks/use-update-comment-rating", () => ({
   useUpdateCommentRating: () => jest.fn()
 }));
