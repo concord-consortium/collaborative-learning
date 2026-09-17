@@ -250,9 +250,16 @@ export class DocumentCommentsManager {
    * with no `requestId` matches nothing (the automatic routes write none, so there is never an
    * entry waiting on them). Matching is always by `requestId`, never by `completedAt` — an older
    * request finishing late must resolve its own entry and nothing more.
+   *
+   * A `"commented"` status does nothing at all (Constraint C21): the status arrives over the
+   * Realtime Database and the comment over Firestore, with no ordering guaranteed between them, so
+   * resolving the entry here could let a queued exemplar comment post before Ada's own comment
+   * lands — the ordering `pendingComments` exists to prevent. Only the comment itself, via
+   * `checkCompleted`, or the 120s expiry resolves a commented request.
    */
   applyEvaluationStatus(status: IEvaluationStatus | null | undefined) {
     if (!status?.requestId) return;
+    if (status.outcome === "commented") return;
 
     const matchingIds = new Set(
       this.pendingComments

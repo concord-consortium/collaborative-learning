@@ -487,6 +487,21 @@ describe("DocumentCommentsManager", () => {
       expect(manager.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
     });
 
+    // Constraint C21: the status and the comment arrive over different channels with no ordering
+    // between them, so resolving on the status here could let a queued exemplar comment post
+    // before Ada's own comment lands.
+    it("a commented status for the latest request leaves the entry pending and shows nothing", () => {
+      const dispose = queueForRequest("req-a");
+      manager.setLatestIdeasRequestId("req-a");
+
+      manager.applyEvaluationStatus({ outcome: "commented", requestId: "req-a", docUpdated: 1, completedAt: 1 });
+
+      expect(manager.pendingComments).toHaveLength(1);
+      expect(dispose).not.toHaveBeenCalled();
+      expect(manager.statusMessage).toBeNull();
+      expect(manager.canRequestIdeas).toBe(false);
+    });
+
     it("resolves an entry whose request id is not the latest, and shows no failure message", () => {
       const disposeA = queueForRequest("req-a");
       manager.setLatestIdeasRequestId("req-b"); // the student has since clicked again
@@ -521,6 +536,27 @@ describe("DocumentCommentsManager", () => {
       expect(disposeA).toHaveBeenCalled();
       expect(disposeB).not.toHaveBeenCalled();
       expect(manager.statusMessage).toBeNull();
+    });
+
+    it("B's status (the latest) landing first, then A's arriving late, resolves A but does not " +
+       "touch B's already-shown message", () => {
+      const disposeA = queueForRequest("req-a");
+      const disposeB = queueForRequest("req-b");
+      manager.setLatestIdeasRequestId("req-b");
+
+      // B is the latest, so its status shows its own message.
+      manager.applyEvaluationStatus({ outcome: "skipped-empty", requestId: "req-b", docUpdated: 2, completedAt: 2 });
+      expect(disposeB).toHaveBeenCalled();
+      expect(manager.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
+      const shownAt = manager.statusMessage!.shownAt;
+
+      // A's status arrives after, out of order. A different outcome from B's, so an incorrect
+      // overwrite would be visible as the wrong message rather than coincidentally the same one.
+      manager.applyEvaluationStatus({ outcome: "failed", requestId: "req-a", docUpdated: 1, completedAt: 1 });
+
+      expect(manager.pendingComments).toHaveLength(0);
+      expect(disposeA).toHaveBeenCalled();
+      expect(manager.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE, shownAt });
     });
 
     it("shows no nudge when A's status lands while B is still waiting for its save (B's entry not yet queued)", () => {
