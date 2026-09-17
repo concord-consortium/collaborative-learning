@@ -11,6 +11,31 @@ export interface EvaluationStatus {
   docUpdated: number | string;
 }
 
+// How long a status is kept before it's pruned as stale. Comfortably past the ~2.5 minutes
+// (120s pending-entry expiry + 15s click deadline) anything client-side ever waits for one.
+export const kStatusRetentionMs = 10 * 60 * 1000;
+
+/**
+ * Deletes this evaluator's own children older than kStatusRetentionMs. Each request writes to its
+ * own child (see writeEvaluationStatus), so without this the node would grow by one entry per
+ * Ideas click, forever.
+ *
+ * @param {string} parentPath the evaluator's evaluationStatus node, whose direct children are requests
+ * @return {Promise<void>}
+ */
+async function pruneStaleStatuses(parentPath: string): Promise<void> {
+  const cutoff = Date.now() - kStatusRetentionMs;
+  const snapshot = await getDatabase().ref(parentPath).once("value");
+  const staleKeys: string[] = [];
+  snapshot.forEach((child) => {
+    const completedAt = child.val()?.completedAt;
+    if (typeof completedAt === "number" && completedAt < cutoff) staleKeys.push(child.key as string);
+  });
+  if (staleKeys.length > 0) {
+    await getDatabase().ref(parentPath).update(Object.fromEntries(staleKeys.map((key) => [key, null])));
+  }
+}
+
 /**
  * Writes the completion status for an evaluation request, keyed per request under
  * `${metadataPath}/evaluationStatus/${evaluator}/${requestId ?? "automatic"}` rather than a single
@@ -29,7 +54,15 @@ export async function writeEvaluationStatus(
   metadataPath: string, evaluator: string, status: EvaluationStatus
 ): Promise<void> {
   const {outcome, requestId, docUpdated} = status;
-  const path = `${metadataPath}/evaluationStatus/${evaluator}/${requestId ?? "automatic"}`;
+  const parentPath = `${metadataPath}/evaluationStatus/${evaluator}`;
+  const path = `${parentPath}/${requestId ?? "automatic"}`;
+
+  try {
+    await pruneStaleStatuses(parentPath);
+  } catch (err) {
+    logger.warn(`Could not prune stale evaluation statuses at ${parentPath}`, err);
+  }
+
   try {
     await getDatabase().ref(path).set({
       outcome,

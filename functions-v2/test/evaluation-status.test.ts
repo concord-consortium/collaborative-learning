@@ -1,6 +1,6 @@
 import {getDatabase} from "firebase-admin/database";
 import {initialize} from "./initialize";
-import {writeEvaluationStatus} from "../src/evaluation-status";
+import {kStatusRetentionMs, writeEvaluationStatus} from "../src/evaluation-status";
 
 const {cleanup} = initialize();
 
@@ -52,5 +52,24 @@ describe("writeEvaluationStatus", () => {
     const status = await statusAt("automatic");
     expect(status).toMatchObject({outcome: "skipped-empty", docUpdated: "1001"});
     expect(status).not.toHaveProperty("requestId");
+  });
+
+  it("prunes a sibling older than the retention window, but not a recent one", async () => {
+    const evaluationStatusPath = `${metadataPath}/evaluationStatus/${evaluator}`;
+    await getDatabase().ref(`${evaluationStatusPath}/req-old`).set({
+      outcome: "commented", requestId: "req-old", docUpdated: "999",
+      completedAt: Date.now() - kStatusRetentionMs - 1,
+    });
+    await getDatabase().ref(`${evaluationStatusPath}/req-recent`).set({
+      outcome: "commented", requestId: "req-recent", docUpdated: "1000", completedAt: Date.now(),
+    });
+
+    await writeEvaluationStatus(metadataPath, evaluator, {
+      outcome: "commented", requestId: "req-new", docUpdated: "1001",
+    });
+
+    expect(await statusAt("req-old")).toBeNull();
+    expect(await statusAt("req-recent")).toMatchObject({outcome: "commented", requestId: "req-recent"});
+    expect(await statusAt("req-new")).toMatchObject({outcome: "commented", requestId: "req-new"});
   });
 });
