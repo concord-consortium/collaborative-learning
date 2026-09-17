@@ -47,59 +47,68 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
-        if (!identifier || !model.id) {
-          console.error("No document identifier or tileId found");
-          setIsUpdating(false);
-          return;
-        }
-        if (!content.prompt) {
-          console.warn("No prompt found");
-          setIsUpdating(false);
-          return;
-        }
+        // Set only once the text below is actually cleared, so the catch can tell "nothing was
+        // touched yet" (an earlier guard threw) apart from "a response was expected" (restore it).
+        let previousText: string | undefined;
+        try {
+          if (!identifier || !model.id) {
+            console.error("No document identifier or tileId found");
+            return;
+          }
+          if (!content.prompt) {
+            console.warn("No prompt found");
+            return;
+          }
 
-        const document = documentId
-          ? documents.getDocument(documentId) ?? networkDocuments.getDocument(documentId)
-          : undefined;
+          const document = documentId
+            ? documents.getDocument(documentId) ?? networkDocuments.getDocument(documentId)
+            : undefined;
 
-        // No student document at all: the tile is being shown somewhere other than a student's
-        // document (an authored curriculum section in the problem panel, which has no documentId).
-        // Make no request and leave the tile's text alone — see Constraint C15.
-        if (!document?.content) {
+          // No student document at all: the tile is being shown somewhere other than a student's
+          // document (an authored curriculum section in the problem panel, which has no documentId).
+          // Make no request and leave the tile's text alone — see Constraint C15.
+          if (!document?.content) {
+            return;
+          }
+          // A student document with no work in it: nudge, and make no request.
+          if (!documentHasStudentWork(getSnapshot(document.content))) {
+            content.setText(AI_TILE_EMPTY_MESSAGE);
+            return;
+          }
+
+          previousText = content.text;
+          content.setText("");
+          const summary = documentSummarizer(document.content, {});
+          let dynamicContentPrompt = summary
+            ? `This is a summary of the current document:\n\n${summary}\n\n\n`
+            : `No information about the current document could be found.\n\n\n`;
+          dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
+
+          const response = await getAiContent({
+            context: userContext,
+            dynamicContentPrompt,
+            systemPrompt,
+            unit: unit.code,
+            documentId: changeSlashesToUnderscores(identifier),
+            tileId: model.id
+          });
+          content.setText(response.data.text);
+          if (response.data.lastUpdated) {
+            const timestamp = response.data.lastUpdated;
+            setLastUpdated(new Date(timestamp._seconds*1000));
+          }
+          if (response.data.error) {
+            console.error("Error querying AI", response.data.error);
+          }
+        } catch (error) {
+          // Restore rather than leave the tile on the blank text set above, in anticipation of a
+          // new response — a failed request should not erase a previous good one. Skipped when
+          // nothing was cleared yet (an earlier guard threw before reaching that point).
+          if (previousText !== undefined) content.setText(previousText);
+          console.error("Failed to query AI", error);
+        } finally {
           setIsUpdating(false);
-          return;
         }
-        // A student document with no work in it: nudge, and make no request.
-        if (!documentHasStudentWork(getSnapshot(document.content))) {
-          content.setText(AI_TILE_EMPTY_MESSAGE);
-          setIsUpdating(false);
-          return;
-        }
-
-        content.setText("");
-        const summary = documentSummarizer(document.content, {});
-        let dynamicContentPrompt = summary
-          ? `This is a summary of the current document:\n\n${summary}\n\n\n`
-          : `No information about the current document could be found.\n\n\n`;
-        dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
-
-        const response = await getAiContent({
-          context: userContext,
-          dynamicContentPrompt,
-          systemPrompt,
-          unit: unit.code,
-          documentId: changeSlashesToUnderscores(identifier),
-          tileId: model.id
-        });
-        content.setText(response.data.text);
-        if (response.data.lastUpdated) {
-          const timestamp = response.data.lastUpdated;
-          setLastUpdated(new Date(timestamp._seconds*1000));
-        }
-        if (response.data.error) {
-          console.error("Error querying AI", response.data.error);
-        }
-        setIsUpdating(false);
       };
       queryAI();
     }

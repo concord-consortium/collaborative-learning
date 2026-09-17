@@ -285,6 +285,25 @@ describe("AIComponent", () => {
       expect(request.dynamicContentPrompt).toContain("What do you think?");
       expect(aiContent.text).toBe("Mocked customized content");
     });
+
+    // Constraint C20: isUpdating must end false however queryAI exits, and a rejection must not
+    // overwrite whatever text the tile already had.
+    it("on a populated document, when getAiContent rejects: text is unchanged, Loading is gone, " +
+       "and nothing escapes as an unhandled rejection", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const previousText = aiContent.text;
+      const aiModel = TileModel.create({ content: aiContent });
+
+      const { queryByText } = await act(async () => render(
+        <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
+      ));
+
+      expect(aiContent.text).toBe(previousText);
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
   });
 
 });
