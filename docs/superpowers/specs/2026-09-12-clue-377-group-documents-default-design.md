@@ -60,6 +60,20 @@ Let a unit make the per-group shared document the students' default work mode (e
   incident of two users in one group landing on separate group documents. Eager creation increases
   concurrent first-creates, so convergence must be tested deliberately.
 
+## Revised in review (2026-09-17)
+
+Three decisions below changed during Scott's review of PR #2998:
+
+- **`groupDocumentsEnabled` is no longer implied by `defaultDocumentType: "group"`.** A unit states both,
+  so anything parsing the unit JSON (researcher reports) reads the same answer the app does; the authoring
+  form already writes both. A unit asking for a group start without the flag falls back, with a warning.
+- **Re-pointing on a group switch is unconditional.** A student looking at a group document when their
+  group changes gets the new group's document in any unit — that is not a question the start setting
+  answers. The setting still governs only what opens on a first visit.
+- **Group and class-wide documents share one title-bar style**, keyed on the `concurrent` axis rather than
+  on document `type` or `kind`. Distinguishing them later is an owner question (`hasGroupOwner` /
+  `hasClassOwner`), per `docs/document-axes/`.
+
 ## Decisions (confirmed with product)
 
 - **Setting shape**: extend `defaultDocumentType` to `"problem" | "personal" | "group"` — no new setting,

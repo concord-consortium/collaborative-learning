@@ -77,13 +77,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           return;
         }
         if (!primaryDocGroupId || primaryDocGroupId === currentGroupId) return;
-        // The primary is another group's document. Follow the student to their new group's document
-        // when the unit starts them there; otherwise fall back to the default document.
-        if (this.startsInGroupDocumentAsStudent) {
-          this.openGroupPrimaryDocument(currentGroupId);
-        } else {
-          this.openDefaultPrimaryDocument();
-        }
+        // The primary is another group's document, so follow the student to their new group's — in
+        // any unit. Someone looking at a group document when their group changes wants the document
+        // for the group they are now in; that is not a question the unit's start setting answers.
+        this.openGroupPrimaryDocument(currentGroupId);
       },
       { equals: comparer.shallow, fireImmediately: true }
     );

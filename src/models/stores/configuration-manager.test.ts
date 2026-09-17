@@ -283,20 +283,22 @@ describe("ConfigurationManager", () => {
       expect(config.startsInGroupDocument).toBe(false);
     });
 
-    it("is implied when the unit starts students in the group document", () => {
-      const config = new ConfigurationManager({ ...defaults, defaultDocumentType: "group" }, []);
+    it("starts in the group document when both keys are set", () => {
+      const config = new ConfigurationManager(
+        { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: true }, []);
       expect(config.groupDocumentsEnabled).toBe(true);
       expect(config.startsInGroupDocument).toBe(true);
     });
 
-    it("explicit false wins over the implication and falls back with a warning", () => {
+    // Not implied: a unit asking for a group start without enabling group documents falls back, so
+    // anything reading the unit JSON sees the same answer the app does.
+    it("is not implied by the start setting alone; it falls back with a warning", () => {
       const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      const config = new ConfigurationManager(
-        { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: false }, []);
+      const config = new ConfigurationManager({ ...defaults, defaultDocumentType: "group" }, []);
       expect(config.groupDocumentsEnabled).toBe(false);
       expect(config.startsInGroupDocument).toBe(false);
       expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("explicitly false"));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("not set"));
       expect(config.startsInGroupDocument).toBe(false);
       expect(warn).toHaveBeenCalledTimes(1);
     });

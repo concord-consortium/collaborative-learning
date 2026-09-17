@@ -323,9 +323,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return this.renderGenericTitleBar({
       title,
       hideButtons,
-      // The type ("axes") is the shared stylesheet hook — class-wide kinds are arbitrary author
-      // strings — with the kind alongside for per-kind overrides.
-      docType: classNames(document.type, document.kind),
+      // Styled by the concurrent axis, not by type or kind: group and class-wide documents share one
+      // appearance, and a kind is an arbitrary author string. Distinguishing them later is an owner
+      // question (hasGroupOwner / hasClassOwner), not a type one.
+      docType: "concurrent",
     });
   }
 

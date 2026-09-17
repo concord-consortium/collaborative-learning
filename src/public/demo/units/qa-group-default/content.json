@@ -6,6 +6,7 @@
   "config": {
     "placeholderText": "Enter notes here",
     "defaultDocumentType": "group",
+    "groupDocumentsEnabled": true,
     "classWideDocuments": [
       { "kind": "drivingQuestionBoard", "title": "Driving Question Board" }
     ],
