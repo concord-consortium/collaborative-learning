@@ -433,7 +433,7 @@ describe("CommentThread", () => {
       const testUser = {id: "u1", name: "test user"} as UserModelType;
 
       const useStoresMock = jest.requireMock("../../hooks/use-stores");
-      let statusMessage: { message: string; shownAt: number } | null = null;
+      let statusMessage: { message: string } | null = null;
       useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage });
 
       const { rerender } = render((
@@ -450,7 +450,7 @@ describe("CommentThread", () => {
 
       expect(screen.queryByText("Doc Thread Comment 1")).not.toBeInTheDocument();
 
-      statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+      statusMessage = { message: "Add some work to your document before requesting Ideas" };
       // ChatThread's observer wrapper applies React.memo; the mocked hook is a plain function, so
       // a changed prop reference is needed to force a re-render and re-read it.
       rerender((

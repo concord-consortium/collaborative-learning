@@ -32,7 +32,7 @@ describe("StatusMessage", () => {
   });
 
   it("renders the status message when one is set", () => {
-    const statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+    const statusMessage = { message: "Add some work to your document before requesting Ideas" };
     render(<StatusMessage content={{ statusMessage } as any} />);
     expect(screen.getByTestId("comment")).toHaveTextContent(statusMessage.message);
   });
@@ -40,7 +40,7 @@ describe("StatusMessage", () => {
 
 describe("WaitingMessage and StatusMessage together", () => {
   it("can both render at once", () => {
-    const statusMessage = { message: "Add some work to your document before requesting Ideas", shownAt: 1 };
+    const statusMessage = { message: "Add some work to your document before requesting Ideas" };
     const content = { isAwaitingRemoteComment: true, statusMessage } as any;
     render(
       <>

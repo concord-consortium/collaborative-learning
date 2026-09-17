@@ -90,8 +90,10 @@ export class DocumentCommentsManager {
 
   /** An inline status line shown in place of a real AI comment: the "add some work" nudge, or a
    * failure message. Client-only, and deliberately not a `pendingComments` entry — it would
-   * otherwise block an exemplar comment queued behind it. */
-  statusMessage: { message: string; shownAt: number } | null = null;
+   * otherwise block an exemplar comment queued behind it. `priorAnalyzerCommentIds` is the set of
+   * analyzer comment ids that already existed when the message was shown, so a newer one can be
+   * detected by id rather than by comparing this client's clock against Firestore's server clock. */
+  statusMessage: { message: string; priorAnalyzerCommentIds: Set<string> } | null = null;
 
   /** The request id of the most recent Ideas click, or `null` if it made none (an empty-document
    * click). Not cleared when a request resolves — it tracks the latest click, not what's pending. */
@@ -167,10 +169,10 @@ export class DocumentCommentsManager {
     this.comments = comments;
 
     if (this.statusMessage) {
-      const shownAt = this.statusMessage.shownAt;
-      const hasNewerAnalyzerComment = comments.some(c =>
-        c.uid === kAnalyzerUserParams.id && c.createdAt.getTime() > shownAt);
-      if (hasNewerAnalyzerComment) this.clearStatusMessage();
+      const { priorAnalyzerCommentIds } = this.statusMessage;
+      const hasNewAnalyzerComment = comments.some(c =>
+        c.uid === kAnalyzerUserParams.id && !priorAnalyzerCommentIds.has(c.id));
+      if (hasNewAnalyzerComment) this.clearStatusMessage();
     }
 
     this.checkPendingComments();
@@ -228,7 +230,10 @@ export class DocumentCommentsManager {
   }
 
   showStatusMessage(message: string) {
-    this.statusMessage = { message, shownAt: Date.now() };
+    const priorAnalyzerCommentIds = new Set(
+      this.comments.filter(c => c.uid === kAnalyzerUserParams.id).map(c => c.id)
+    );
+    this.statusMessage = { message, priorAnalyzerCommentIds };
   }
 
   clearStatusMessage() {

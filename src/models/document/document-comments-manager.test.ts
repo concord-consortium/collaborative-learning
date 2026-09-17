@@ -337,32 +337,58 @@ describe("DocumentCommentsManager", () => {
       expect(manager.statusMessage).toBeNull();
     });
 
-    it("clears the nudge when a newer AI comment arrives", () => {
+    it("clears the nudge when a new AI comment arrives", () => {
       manager.showStatusMessage("Add some work");
-      const shownAt = manager.statusMessage!.shownAt;
 
       manager.setComments([{
         id: "ai-1",
         uid: kAnalyzerUserParams.id,
         name: "Ada Insight",
         content: "hi",
-        createdAt: new Date(shownAt + 1000),
+        createdAt: new Date(),
         network: "test"
       }]);
 
       expect(manager.statusMessage).toBeNull();
     });
 
-    it("does not clear the nudge for a comment older than when it was shown", () => {
+    // A new comment's id is enough on its own; nothing here depends on comparing this client's
+    // clock against the server's, so an arbitrarily old server timestamp (as a fast client clock
+    // would otherwise appear to be, relative to shownAt) still clears the message.
+    it("clears the nudge for a new AI comment even with a server timestamp far in the past", () => {
       manager.showStatusMessage("Add some work");
-      const shownAt = manager.statusMessage!.shownAt;
 
       manager.setComments([{
         id: "ai-1",
         uid: kAnalyzerUserParams.id,
         name: "Ada Insight",
         content: "hi",
-        createdAt: new Date(shownAt - 1000),
+        createdAt: new Date(0),
+        network: "test"
+      }]);
+
+      expect(manager.statusMessage).toBeNull();
+    });
+
+    it("does not clear the nudge for an AI comment that already existed when it was shown", () => {
+      // Present before the nudge is shown, so its id is already in priorAnalyzerCommentIds.
+      manager.setComments([{
+        id: "ai-1",
+        uid: kAnalyzerUserParams.id,
+        name: "Ada Insight",
+        content: "hi",
+        createdAt: new Date(),
+        network: "test"
+      }]);
+      manager.showStatusMessage("Add some work");
+
+      // Re-delivering the same comments (e.g. a Firestore snapshot re-firing) must not clear it.
+      manager.setComments([{
+        id: "ai-1",
+        uid: kAnalyzerUserParams.id,
+        name: "Ada Insight",
+        content: "hi",
+        createdAt: new Date(),
         network: "test"
       }]);
 
@@ -544,7 +570,7 @@ describe("DocumentCommentsManager", () => {
       manager.applyEvaluationStatus({ outcome: "skipped-empty", requestId: "req-b", docUpdated: 2, completedAt: 2 });
       expect(disposeB).toHaveBeenCalled();
       expect(manager.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
-      const shownAt = manager.statusMessage!.shownAt;
+      const statusMessageAfterB = manager.statusMessage;
 
       // A different outcome than B's, so an overwrite would show as the wrong message, not
       // coincidentally the same one.
@@ -552,7 +578,8 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(0);
       expect(disposeA).toHaveBeenCalled();
-      expect(manager.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE, shownAt });
+      // Same object, not just an equal-looking one: B's message was never touched.
+      expect(manager.statusMessage).toBe(statusMessageAfterB);
     });
 
     it("shows no nudge when A's status lands while B is still waiting for its save (B's entry not yet queued)", () => {

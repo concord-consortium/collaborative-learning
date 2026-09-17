@@ -298,7 +298,7 @@ describe("the empty-document nudge, scoped to the document thread", () => {
   it("still renders in the document thread's card when a tile is focused and the nudge is set", () => {
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => ({
-      statusMessage: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
+      statusMessage: { message: IDEAS_EMPTY_MESSAGE }
     });
 
     render((
@@ -330,7 +330,7 @@ describe("the empty-document nudge, scoped to the document thread", () => {
     // gating on `statusMessage` alone would render the nudge there too.
     const useStoresMock = jest.requireMock("../../hooks/use-stores");
     useStoresMock.useCurriculumOrDocumentContent = () => ({
-      statusMessage: { message: IDEAS_EMPTY_MESSAGE, shownAt: 1 }
+      statusMessage: { message: IDEAS_EMPTY_MESSAGE }
     });
 
     render((
