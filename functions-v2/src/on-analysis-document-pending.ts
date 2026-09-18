@@ -150,6 +150,24 @@ export function generateHtml(clueDocument: unknown, unit = fallbackClueUnit) {
 const pendingQueuePath = getAnalysisQueueFirestorePath("pending", "{docId}");
 
 /**
+ * Reads a queue document's requestIds and deletes it atomically, so an id added after this
+ * trigger's own event fired (see AnalysisQueueDocument.requestIds) isn't lost to a `.delete()`
+ * racing that write.
+ *
+ * @param {admin.firestore.DocumentReference} docRef the queue document to remove
+ * @return {Promise<string[] | undefined>} the requestIds it held at the moment of deletion
+ */
+async function claimRequestIds(
+  docRef: admin.firestore.DocumentReference
+): Promise<string[] | undefined> {
+  return docRef.firestore.runTransaction(async (transaction) => {
+    const requestIds = (await transaction.get(docRef)).data()?.requestIds;
+    transaction.delete(docRef);
+    return Array.isArray(requestIds) ? requestIds : undefined;
+  });
+}
+
+/**
  * Files the document under `failedImaging` and takes it off the pending queue.
  *
  * `accumulated` carries whatever had been worked out before the failure — the classification, the
@@ -192,13 +210,14 @@ async function error(
       logger.error("Could not write a failure record at all", retryErr);
     }
   }
+  let requestIds = queueDoc?.requestIds;
   try {
-    await firestore.doc(event.document).delete();
+    requestIds = await claimRequestIds(firestore.doc(event.document)) ?? requestIds;
   } catch (err) {
     logger.error("Could not remove the pending queue entry, which will not be retried", err);
   }
   if (queueDoc?.metadataPath && queueDoc?.evaluator) {
-    await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, queueDoc.requestIds, {
+    await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, requestIds, {
       outcome: "failed",
       docUpdated: queueDoc.docUpdated,
     });
@@ -219,8 +238,13 @@ async function writeImaged(
   queueDoc: ImagedQueueDocument,
   event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>
 ) {
-  await firestore.doc(getAnalysisQueueFirestorePath("imaged", docId)).set(queueDoc);
-  await firestore.doc(event.document).delete();
+  const imagedDocRef = firestore.doc(getAnalysisQueueFirestorePath("imaged", docId));
+  await imagedDocRef.set(queueDoc);
+  // A later id (see claimRequestIds) must still reach the next function's own frozen snapshot.
+  const requestIds = await claimRequestIds(firestore.doc(event.document));
+  if (requestIds && requestIds.length > 0) {
+    await imagedDocRef.update({requestIds});
+  }
 }
 
 export const onAnalysisDocumentPending =
@@ -348,12 +372,13 @@ export const onAnalysisDocumentPending =
           summaryOmittedReason: "empty-document",
           imageOmittedReason: "empty-document",
         });
+        let requestIds = doc.requestIds;
         try {
-          await firestore.doc(event.document).delete();
+          requestIds = await claimRequestIds(firestore.doc(event.document)) ?? requestIds;
         } catch (err) {
           logger.error("Could not remove the pending queue entry, which will not be retried", err);
         }
-        await writeEvaluationStatusForRequests(doc.metadataPath, doc.evaluator, doc.requestIds, {
+        await writeEvaluationStatusForRequests(doc.metadataPath, doc.evaluator, requestIds, {
           outcome: "skipped-empty",
           docUpdated: doc.docUpdated,
         });

@@ -5,6 +5,7 @@ import {
 import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
+import {FieldValue} from "firebase-admin/firestore";
 import {initialize, projectConfig} from "./initialize";
 import {
   analysisSettingsPath, clueIframeURL, fallbackClueUnit, generateHtml, onAnalysisDocumentPending,
@@ -234,10 +235,8 @@ function aRequestContext(unit: string) {
   return {unit, investigation: "1", problem: "1", offeringId: "1234"};
 }
 
-// Runs the function over a pending-queue entry for the document.
-async function runPending(docId: string, overrides: Record<string, unknown> = {}) {
-  const wrapped = fft.wrap(onAnalysisDocumentPending);
-  const entry = {
+function pendingEntryFields(docId: string, overrides: Record<string, unknown> = {}) {
+  const entry: Record<string, unknown> = {
     metadataPath: `${kDocumentRoot}/documentMetadata/${docId}`,
     documentPath: `${kDocumentRoot}/documents/${docId}`,
     commentsPath: `demo/AI/documents/${docId}/comments`,
@@ -248,8 +247,21 @@ async function runPending(docId: string, overrides: Record<string, unknown> = {}
   };
   // Firestore cannot encode undefined, so an override of undefined drops the field instead.
   for (const [key, value] of Object.entries(entry)) {
-    if (value === undefined) delete (entry as Record<string, unknown>)[key];
+    if (value === undefined) delete entry[key];
   }
+  return entry;
+}
+
+// runPending hands the trigger a synthetic event, not a real document — a test simulating another
+// write landing on the document must create it here first.
+function seedPendingDoc(docId: string, overrides: Record<string, unknown> = {}) {
+  return admin.firestore().doc(`analysis/queue/pending/${docId}`).set(pendingEntryFields(docId, overrides));
+}
+
+// Runs the function over a pending-queue entry for the document.
+async function runPending(docId: string, overrides: Record<string, unknown> = {}) {
+  const wrapped = fft.wrap(onAnalysisDocumentPending);
+  const entry = pendingEntryFields(docId, overrides);
   await wrapped({
     data: makeDocumentSnapshot(entry, `analysis/queue/pending/${docId}`),
     params: {docId},
@@ -353,6 +365,25 @@ describe("functions", () => {
         await runPending("mixed1b", {requestIds: ["req-mixed1b"]});
 
         expect(await imagedRecord("mixed1b")).toMatchObject({requestIds: ["req-mixed1b"]});
+      });
+
+      // A second click's id, added to the document while Shutterbug is awaited, would otherwise
+      // be lost when this function deletes the document it read at creation.
+      test("a requestId added to the queue document while Shutterbug is being awaited still " +
+           "reaches the imaged record", async () => {
+        await givenDocument("midflight1", mixedDoc);
+        await seedPendingDoc("midflight1", {requestIds: ["req-midflight-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/midflight1");
+        jest.spyOn(global, "fetch").mockImplementationOnce(async () => {
+          await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-midflight-b")});
+          return shutterbugOk();
+        });
+
+        await runPending("midflight1", {requestIds: ["req-midflight-a"]});
+
+        expect(await imagedRecord("midflight1")).toMatchObject({
+          requestIds: ["req-midflight-a", "req-midflight-b"],
+        });
       });
 
       test("a text-only document is not screenshotted", async () => {
@@ -471,6 +502,33 @@ describe("functions", () => {
 
         expect(await statusFor("emptyMulti", "req-empty-a")).toMatchObject({outcome: "skipped-empty"});
         expect(await statusFor("emptyMulti", "req-empty-b")).toMatchObject({outcome: "skipped-empty"});
+      });
+
+      // Same case as the imaged-record test above, but the id lands while metadata is being read,
+      // before the empty check.
+      test("a requestId added to the queue document while its metadata is being read still gets " +
+           "its own skipped-empty status", async () => {
+        await givenDocument("emptymidflight1", emptyDoc);
+        await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptymidflight1");
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "demo/AI/documents/emptymidflight1") return realDoc(path);
+          return {
+            get: async () => {
+              await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-emptymidflight-b")});
+              return realDoc(path).get();
+            },
+          } as any;
+        });
+
+        await runPending("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        docSpy.mockRestore();
+
+        expect(await statusFor("emptymidflight1", "req-emptymidflight-a"))
+          .toMatchObject({outcome: "skipped-empty"});
+        expect(await statusFor("emptymidflight1", "req-emptymidflight-b"))
+          .toMatchObject({outcome: "skipped-empty"});
       });
 
       test("a rejected status write after a skip still leaves the done record and cleanup in place", async () => {
@@ -973,6 +1031,30 @@ describe("functions", () => {
 
         expect(await statusFor("bad3", "req-bad-a")).toMatchObject({outcome: "failed"});
         expect(await statusFor("bad3", "req-bad-b")).toMatchObject({outcome: "failed"});
+      });
+
+      // Same case as the skipped-empty version above, but through the error boundary.
+      test("a requestId added to the queue document while its metadata is being read still gets " +
+           "its own failed status", async () => {
+        await givenDocument("badmidflight1", "this is not JSON");
+        await seedPendingDoc("badmidflight1", {requestIds: ["req-badmidflight-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/badmidflight1");
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "demo/AI/documents/badmidflight1") return realDoc(path);
+          return {
+            get: async () => {
+              await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-badmidflight-b")});
+              return realDoc(path).get();
+            },
+          } as any;
+        });
+
+        await runPending("badmidflight1", {requestIds: ["req-badmidflight-a"]});
+        docSpy.mockRestore();
+
+        expect(await statusFor("badmidflight1", "req-badmidflight-a")).toMatchObject({outcome: "failed"});
+        expect(await statusFor("badmidflight1", "req-badmidflight-b")).toMatchObject({outcome: "failed"});
       });
 
       test("a throw from the classifier is caught and recorded", async () => {
