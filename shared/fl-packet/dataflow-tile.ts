@@ -13,6 +13,7 @@
 // is reached through a single call site so that dropping either form is a one-line change.
 
 import { programToGraphviz } from "../ai-summarizer/tile-summarizers/dataflow-to-graphviz";
+import { displayNameForType } from "../dataflow-node-types";
 
 export interface DataflowNode {
   id: string;
@@ -92,8 +93,13 @@ export function projectDataflowTile(
     }
     const node: DataflowNode = {
       id: String(raw.id ?? ""),
+      // `type` stays the internal string: it is the stable machine-readable key the schema is
+      // written against. `orderedDisplayName` is the opposite — its whole contract is the word the
+      // student reads — and a node saved before that field existed has none, falling back to the
+      // node's own `name`, which is the raw internal type (createAndAddNode stamps both from the
+      // same value). So the fallback maps, while `type` does not.
       type: String(data.type ?? raw.name ?? ""),
-      orderedDisplayName: String(data.orderedDisplayName ?? raw.name ?? ""),
+      orderedDisplayName: String(data.orderedDisplayName ?? displayNameForType(String(raw.name ?? ""))),
     };
     if (data.plot !== undefined) node.plot = !!data.plot;
     if (Object.keys(options).length) node.options = options;

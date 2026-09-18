@@ -142,3 +142,34 @@ describe("projectDataflowTile survives a malformed program", () => {
     expect(tile.content.rendering).toEqual(expect.stringMatching(/could not|malformed/i));
   });
 });
+
+// A node saved before orderedDisplayName existed falls back to the node's own `name`,
+// which createAndAddNode stamps with the raw internal type — so the fallback has to map, or a field
+// whose contract is "the word the student reads" reports "Generator" for a block titled Waves.
+describe("projectDataflowTile names legacy nodes by display name", () => {
+  const legacy = {
+    type: "Dataflow",
+    program: {
+      id: "p",
+      nodes: { n1: { id: "n1", name: "Generator", data: { type: "Generator", plot: false } } },
+      connections: {}
+    }
+  };
+
+  it("maps the orderedDisplayName fallback through the display-name table", () => {
+    const tile = projectDataflowTile(legacy, "tile-df-legacy");
+    expect(tile.content.nodes[0].orderedDisplayName).toBe("Waves");
+  });
+
+  it("leaves `type` as the internal key the schema is written against", () => {
+    const tile = projectDataflowTile(legacy, "tile-df-legacy");
+    expect(tile.content.nodes[0].type).toBe("Generator");
+  });
+
+  it("reports an empty name for a node carrying neither, rather than a mapped placeholder", () => {
+    const tile = projectDataflowTile(
+      { type: "Dataflow", program: { id: "p", nodes: { n1: { id: "n1" } }, connections: {} } },
+      "tile-df-nameless");
+    expect(tile.content.nodes[0].orderedDisplayName).toBe("");
+  });
+});
