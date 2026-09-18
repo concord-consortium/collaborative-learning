@@ -13,7 +13,7 @@ import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 import {generateRenderHtml} from "../../shared/render-page";
 import {kPlaceholderUnitCode} from "../../shared/shared";
 import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
-import {writeEvaluationStatus} from "./evaluation-status";
+import {writeEvaluationStatusForRequests} from "./evaluation-status";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
@@ -198,9 +198,8 @@ async function error(
     logger.error("Could not remove the pending queue entry, which will not be retried", err);
   }
   if (queueDoc?.metadataPath && queueDoc?.evaluator) {
-    await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
+    await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, queueDoc.requestIds, {
       outcome: "failed",
-      requestId: queueDoc.requestId,
       docUpdated: queueDoc.docUpdated,
     });
   }
@@ -354,9 +353,8 @@ export const onAnalysisDocumentPending =
         } catch (err) {
           logger.error("Could not remove the pending queue entry, which will not be retried", err);
         }
-        await writeEvaluationStatus(doc.metadataPath, doc.evaluator, {
+        await writeEvaluationStatusForRequests(doc.metadataPath, doc.evaluator, doc.requestIds, {
           outcome: "skipped-empty",
-          requestId: doc.requestId,
           docUpdated: doc.docUpdated,
         });
         logger.info(`Document ${documentPath} is empty; skipped evaluation`);

@@ -235,41 +235,56 @@ describe("functions", () => {
 
     test("copies requestId for the standard evaluation shape", async () => {
       const queued = await writeEvaluation({timestamp: 1001, requestId: "req-abc"});
-      expect(queued).toMatchObject({requestId: "req-abc"});
+      expect(queued).toMatchObject({requestIds: ["req-abc"]});
     });
 
     test("copies requestId for the custom evaluation shape", async () => {
       const queued = await writeEvaluation(
         {timestamp: 1001, requestId: "req-xyz", aiPrompt: {mainPrompt: "prompt"}}, "custom");
-      expect(queued).toMatchObject({requestId: "req-xyz"});
+      expect(queued).toMatchObject({requestIds: ["req-xyz"]});
     });
 
     // The automatic routes (onDisconnect, the sync-hook cleanup) write no requestId.
-    test("stores no requestId when the request carries none", async () => {
+    test("stores no requestIds when the request carries none", async () => {
       const queued = await writeEvaluation({timestamp: 1001});
-      expect(queued).not.toHaveProperty("requestId");
+      expect(queued).not.toHaveProperty("requestIds");
     });
 
     test("keeps a requestId at the length limit", async () => {
       const requestId = "x".repeat(64);
       const queued = await writeEvaluation({timestamp: 1001, requestId});
-      expect(queued).toMatchObject({requestId});
+      expect(queued).toMatchObject({requestIds: [requestId]});
     });
 
     // Dropped, not truncated: a truncated id would never match the one the client is waiting on.
     test("drops an over-long requestId", async () => {
       const queued = await writeEvaluation({timestamp: 1001, requestId: "x".repeat(65)});
-      expect(queued).not.toHaveProperty("requestId");
+      expect(queued).not.toHaveProperty("requestIds");
     });
 
     test("drops a non-string requestId", async () => {
       const queued = await writeEvaluation({timestamp: 1001, requestId: 12345});
-      expect(queued).not.toHaveProperty("requestId");
+      expect(queued).not.toHaveProperty("requestIds");
     });
 
     test("drops an empty-string requestId", async () => {
       const queued = await writeEvaluation({timestamp: 1001, requestId: ""});
-      expect(queued).not.toHaveProperty("requestId");
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    // See AnalysisQueueDocument.requestIds for why more than one id can land here.
+    test("accumulates a second requestId instead of replacing the first, when both land before " +
+         "the document is picked up for processing", async () => {
+      await writeEvaluation({timestamp: 1001, requestId: "req-first"});
+      const queued = await writeEvaluation({timestamp: 1002, requestId: "req-second"});
+      expect(queued).toMatchObject({requestIds: ["req-first", "req-second"]});
+    });
+
+    // An automatic write carries no id, but must not erase one a click is already waiting on.
+    test("keeps an earlier requestId when a later write carries none of its own", async () => {
+      await writeEvaluation({timestamp: 1001, requestId: "req-first"});
+      const queued = await writeEvaluation({timestamp: 1002});
+      expect(queued).toMatchObject({requestIds: ["req-first"]});
     });
   });
 

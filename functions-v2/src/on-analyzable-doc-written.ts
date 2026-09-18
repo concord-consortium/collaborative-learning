@@ -62,9 +62,10 @@ export interface AnalysisQueueDocument {
   firestoreDocumentPath: string;
   /** The unit and problem the student was running when the evaluation was requested. */
   requestContext?: IEvaluationRequestContext;
-  /** The Ideas click's id, echoed in the completion status so the client can correlate it back.
-   * Absent for the automatic routes (onDisconnect, sync-hook cleanup). */
-  requestId?: string;
+  /** Ideas click ids that landed on this queue document before it was picked up (keyed by docId,
+   * not request, so more than one can land); each gets its own completion status. Absent when only
+   * automatic routes (onDisconnect, sync-hook cleanup) ever wrote here. */
+  requestIds?: string[];
 }
 
 // The lengths cap what a client can write: a long enough value pushes the queue record past
@@ -130,8 +131,9 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const firestoreDocumentPath = `${firestoreRoot}/documents/${docId}`;
 
   const firestore = admin.firestore();
+  const queueDocRef = firestore.doc(getAnalysisQueueFirestorePath("pending", docId));
 
-  // This should be safe in the event of duplicate calls; the second will just overwrite the first.
+  // Safe for duplicate calls: the second overwrites the first, except requestIds, which accumulates.
   const newDocument: AnalysisQueueDocument = {
     metadataPath,
     documentPath,
@@ -149,10 +151,16 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
     newDocument.requestContext = requestContext;
   }
 
-  if (requestId) {
-    newDocument.requestId = requestId;
-  }
-
-  await firestore.doc(getAnalysisQueueFirestorePath("pending", docId)).set(newDocument);
+  // A transaction: a plain `.set()` would replace an existing document's requestIds outright
+  // instead of joining this write's id (if any) to them.
+  await firestore.runTransaction(async (transaction) => {
+    const existing = (await transaction.get(queueDocRef)).data() as AnalysisQueueDocument | undefined;
+    const priorRequestIds = Array.isArray(existing?.requestIds) ? existing.requestIds : [];
+    const requestIds = requestId ? [...priorRequestIds, requestId] : priorRequestIds;
+    if (requestIds.length > 0) {
+      newDocument.requestIds = requestIds;
+    }
+    transaction.set(queueDocRef, newDocument);
+  });
   logger.info(`Added document ${documentPath} to queue for ${evaluator} with aiPrompt ${JSON.stringify(aiPrompt)}`);
 };

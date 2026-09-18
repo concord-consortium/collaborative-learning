@@ -682,7 +682,7 @@ describe("functions", () => {
       await runImaged(versionTwoDoc({
         sendSummary: true, docSummary: "A summary",
         sendImage: true, docImageUrl: "https://x/y.png",
-        requestId: "req-imaged-1",
+        requestIds: ["req-imaged-1"],
       }));
 
       const status = await getDatabase()
@@ -691,6 +691,23 @@ describe("functions", () => {
       expect(status).toMatchObject({
         outcome: "commented", requestId: "req-imaged-1", docUpdated: sampleDoc.docUpdated,
       });
+    });
+
+    // See AnalysisQueueDocument.requestIds for why a queue entry can carry more than one id.
+    test("a commented status is written for every requestId a coalesced queue entry carries", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imaged-a", "req-imaged-b"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-imaged-a")).toMatchObject({outcome: "commented"});
+      expect(await statusFor("req-imaged-b")).toMatchObject({outcome: "commented"});
     });
 
     test("a rejected status write leaves the comment and done record in place", async () => {
@@ -742,7 +759,7 @@ describe("functions", () => {
       await runImaged(versionTwoDoc({
         sendSummary: true, docSummary: "A summary",
         sendImage: true, docImageUrl: "https://x/y.png",
-        requestId: "req-imaged-nodelete",
+        requestIds: ["req-imaged-nodelete"],
       }));
       docSpy.mockRestore();
 
@@ -846,7 +863,7 @@ describe("functions", () => {
       mockCategorizeResponse({parsed: undefined});
 
       await runImaged(versionTwoDoc({
-        sendSummary: true, docSummary: "A summary", sendImage: false, requestId: "req-noresponse",
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestIds: ["req-noresponse"],
       }));
 
       expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
@@ -874,7 +891,7 @@ describe("functions", () => {
         });
 
       await runImaged(versionTwoDoc({
-        sendSummary: true, docSummary: "A summary", sendImage: false, requestId: "req-badwrite",
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestIds: ["req-badwrite"],
       }));
       collectionSpy.mockRestore();
 
@@ -885,6 +902,22 @@ describe("functions", () => {
         .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-badwrite`)
         .once("value").then((snapshot) => snapshot.val());
       expect(status).toMatchObject({outcome: "failed", requestId: "req-badwrite"});
+    });
+
+    // Same coalescing case as the commented version above, but through the error boundary.
+    test("a failed status is written for every requestId a coalesced queue entry carries", async () => {
+      mockCategorizeResponse({parsed: undefined});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false,
+        requestIds: ["req-fail-a", "req-fail-b"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-fail-a")).toMatchObject({outcome: "failed"});
+      expect(await statusFor("req-fail-b")).toMatchObject({outcome: "failed"});
     });
 
     test("a failed status is still written when the imaged queue entry cannot be removed", async () => {
@@ -900,7 +933,7 @@ describe("functions", () => {
       });
 
       await runImaged(versionTwoDoc({
-        sendSummary: true, docSummary: "A summary", sendImage: false, requestId: "req-nodelete",
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestIds: ["req-nodelete"],
       }));
       docSpy.mockRestore();
 

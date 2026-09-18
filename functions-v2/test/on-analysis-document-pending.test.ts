@@ -350,9 +350,9 @@ describe("functions", () => {
         await givenDocument("mixed1b", mixedDoc);
         stubShutterbug(shutterbugOk());
 
-        await runPending("mixed1b", {requestId: "req-mixed1b"});
+        await runPending("mixed1b", {requestIds: ["req-mixed1b"]});
 
-        expect(await imagedRecord("mixed1b")).toMatchObject({requestId: "req-mixed1b"});
+        expect(await imagedRecord("mixed1b")).toMatchObject({requestIds: ["req-mixed1b"]});
       });
 
       test("a text-only document is not screenshotted", async () => {
@@ -407,7 +407,7 @@ describe("functions", () => {
         await givenDocument("emptydraw1", emptyDrawingDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
-        await runPending("emptydraw1", {requestId: "req-emptydraw1"});
+        await runPending("emptydraw1", {requestIds: ["req-emptydraw1"]});
 
         expect(await countIn("pending")).toEqual(0);
         expect(await countIn("imaged")).toEqual(0);
@@ -435,7 +435,7 @@ describe("functions", () => {
         await givenDocument("empty1", emptyDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
-        await runPending("empty1", {requestId: "req-empty1"});
+        await runPending("empty1", {requestIds: ["req-empty1"]});
 
         expect(await countIn("pending")).toEqual(0);
         expect(await countIn("imaged")).toEqual(0);
@@ -460,6 +460,17 @@ describe("functions", () => {
 
         const status = await statusFor("empty1", "req-empty1");
         expect(status).toMatchObject({outcome: "skipped-empty", requestId: "req-empty1", docUpdated: "1001"});
+      });
+
+      // See AnalysisQueueDocument.requestIds for why a queue entry can carry more than one id.
+      test("a skipped-empty status is written for every requestId a coalesced queue entry carries", async () => {
+        await givenDocument("emptyMulti", emptyDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("emptyMulti", {requestIds: ["req-empty-a", "req-empty-b"]});
+
+        expect(await statusFor("emptyMulti", "req-empty-a")).toMatchObject({outcome: "skipped-empty"});
+        expect(await statusFor("emptyMulti", "req-empty-b")).toMatchObject({outcome: "skipped-empty"});
       });
 
       test("a rejected status write after a skip still leaves the done record and cleanup in place", async () => {
@@ -501,7 +512,7 @@ describe("functions", () => {
           } as any;
         });
 
-        await runPending("empty5", {requestId: "req-empty5"});
+        await runPending("empty5", {requestIds: ["req-empty5"]});
         docSpy.mockRestore();
 
         // The delete failure did not fall through to the generic error path: no contradictory
@@ -904,7 +915,7 @@ describe("functions", () => {
             } as any;
           });
 
-        await runPending("bigfail1", {requestId: "req-bigfail1"});
+        await runPending("bigfail1", {requestIds: ["req-bigfail1"]});
         collectionSpy.mockRestore();
 
         expect(attempts).toHaveLength(2);
@@ -945,13 +956,23 @@ describe("functions", () => {
           } as any;
         });
 
-        await runPending("bad2", {requestId: "req-bad2"});
+        await runPending("bad2", {requestIds: ["req-bad2"]});
         docSpy.mockRestore();
 
         expect(logger.error).toHaveBeenCalledWith(
           "Could not remove the pending queue entry, which will not be retried", expect.any(Error));
         expect((await failedRecord())?.error).toContain("invalid document JSON");
         expect(await statusFor("bad2", "req-bad2")).toMatchObject({outcome: "failed", requestId: "req-bad2"});
+      });
+
+      // Same coalescing case as the skipped-empty version above, but through the error boundary.
+      test("a failed status is written for every requestId a coalesced queue entry carries", async () => {
+        await givenDocument("bad3", "this is not JSON");
+
+        await runPending("bad3", {requestIds: ["req-bad-a", "req-bad-b"]});
+
+        expect(await statusFor("bad3", "req-bad-a")).toMatchObject({outcome: "failed"});
+        expect(await statusFor("bad3", "req-bad-b")).toMatchObject({outcome: "failed"});
       });
 
       test("a throw from the classifier is caught and recorded", async () => {

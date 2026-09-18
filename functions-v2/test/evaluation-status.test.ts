@@ -1,6 +1,6 @@
 import {getDatabase} from "firebase-admin/database";
 import {initialize} from "./initialize";
-import {kStatusRetentionMs, writeEvaluationStatus} from "../src/evaluation-status";
+import {kStatusRetentionMs, writeEvaluationStatus, writeEvaluationStatusForRequests} from "../src/evaluation-status";
 
 const {cleanup} = initialize();
 
@@ -14,10 +14,6 @@ const statusAt = (requestId: string) =>
 describe("writeEvaluationStatus", () => {
   beforeEach(async () => {
     await getDatabase().ref(metadataPath).set(null);
-  });
-
-  afterAll(async () => {
-    await cleanup();
   });
 
   it("writes statuses for two requests on the same document under two different children", async () => {
@@ -72,4 +68,40 @@ describe("writeEvaluationStatus", () => {
     expect(await statusAt("req-recent")).toMatchObject({outcome: "commented", requestId: "req-recent"});
     expect(await statusAt("req-new")).toMatchObject({outcome: "commented", requestId: "req-new"});
   });
+});
+
+describe("writeEvaluationStatusForRequests", () => {
+  beforeEach(async () => {
+    await getDatabase().ref(metadataPath).set(null);
+  });
+
+  // See AnalysisQueueDocument.requestIds for why a queue document can carry more than one id.
+  it("writes the same outcome under every request id it is given", async () => {
+    await writeEvaluationStatusForRequests(metadataPath, evaluator, ["req-a", "req-b"], {
+      outcome: "commented", docUpdated: "1001",
+    });
+
+    expect(await statusAt("req-a")).toMatchObject({outcome: "commented", requestId: "req-a"});
+    expect(await statusAt("req-b")).toMatchObject({outcome: "commented", requestId: "req-b"});
+  });
+
+  it("falls back to a single status under \"automatic\" when given no request ids", async () => {
+    await writeEvaluationStatusForRequests(metadataPath, evaluator, undefined, {
+      outcome: "skipped-empty", docUpdated: "1001",
+    });
+
+    expect(await statusAt("automatic")).toMatchObject({outcome: "skipped-empty"});
+  });
+
+  it("falls back to a single status under \"automatic\" when given an empty array", async () => {
+    await writeEvaluationStatusForRequests(metadataPath, evaluator, [], {
+      outcome: "skipped-empty", docUpdated: "1001",
+    });
+
+    expect(await statusAt("automatic")).toMatchObject({outcome: "skipped-empty"});
+  });
+});
+
+afterAll(async () => {
+  await cleanup();
 });

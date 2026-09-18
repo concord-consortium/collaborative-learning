@@ -10,7 +10,7 @@ import {
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
-import {writeEvaluationStatus} from "./evaluation-status";
+import {writeEvaluationStatusForRequests} from "./evaluation-status";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
@@ -151,9 +151,8 @@ async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot 
     logger.error("Could not remove the imaged queue entry, which will not be retried", err);
   }
   if (queueDoc?.metadataPath && queueDoc?.evaluator) {
-    await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
+    await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, queueDoc.requestIds, {
       outcome: "failed",
-      requestId: queueDoc.requestId,
       docUpdated: queueDoc.docUpdated,
     });
   }
@@ -287,9 +286,8 @@ export const onAnalysisDocumentImaged =
         logger.error("Could not remove the imaged queue entry, which will not be retried", err);
       }
 
-      await writeEvaluationStatus(queueDoc.metadataPath, queueDoc.evaluator, {
+      await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, queueDoc.requestIds, {
         outcome: "commented",
-        requestId: queueDoc.requestId,
         docUpdated: queueDoc.docUpdated,
       });
     }

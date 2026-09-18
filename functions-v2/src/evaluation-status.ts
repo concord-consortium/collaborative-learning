@@ -75,3 +75,22 @@ export async function writeEvaluationStatus(
     logger.warn(`Could not write evaluation status at ${path}`, err);
   }
 }
+
+/**
+ * Writes the same completion status under every request id given, or a single status under
+ * "automatic" if none — see AnalysisQueueDocument.requestIds for why a queue document can carry
+ * more than one.
+ *
+ * @param {string} metadataPath the document's metadata path, from the queue record
+ * @param {string} evaluator which evaluator this status is for
+ * @param {string[] | undefined} requestIds every request id the queue record carries
+ * @param {Omit<EvaluationStatus, "requestId">} status the outcome to record for each of them
+ * @return {Promise<void>} always resolves, never rejects
+ */
+export async function writeEvaluationStatusForRequests(
+  metadataPath: string, evaluator: string, requestIds: string[] | undefined,
+  status: Omit<EvaluationStatus, "requestId">
+): Promise<void> {
+  const ids: (string | undefined)[] = requestIds && requestIds.length > 0 ? requestIds : [undefined];
+  await Promise.all(ids.map((requestId) => writeEvaluationStatus(metadataPath, evaluator, {...status, requestId})));
+}
