@@ -1,7 +1,7 @@
 import {
   adminWriteDoc, expectDeleteToFail, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectWriteToFail, expectWriteToSucceed,
-  initFirestore, mockTimestamp, noNetwork, otherClass, prepareEachTest,
+  initFirestore, mockTimestamp, network1, noNetwork, offeringId, otherClass, prepareEachTest,
   researcherAuth, researcherId, researcherRunnerAuth, researcherRunnerOtherClassAuth,
   tearDownTests, teacherId, thisClass
 } from "./setup-rules-tests";
@@ -109,5 +109,65 @@ describe("Researcher Dashboard runner claim", () => {
         teachers: [teacherId], uri: "https://example.com/class"
       });
     });
+  });
+});
+
+// Four guards the commit added had no test, so each could have been deleted with the
+// suite still green: the two offering writes, the two canonical slot creates, and the
+// write on the portal document itself.
+describe("Researcher Dashboard runner claim, the remaining write paths", () => {
+  beforeEach(async () => {
+    await prepareEachTest();
+  });
+
+  afterAll(async () => {
+    await tearDownTests();
+  });
+
+  const kPortalDocPath = "authed/myPortal";
+  const kOfferingDocPath = `authed/myPortal/offerings/${network1}_${offeringId}`;
+  const kSlotPath = `authed/myPortal/canonical/v1/classes/${thisClass}` +
+    `/offerings/${offeringId}/owners/${researcherId}/slots/canonical`;
+  const kUnitSlotPath = `authed/myPortal/canonical/v1/classes/${thisClass}` +
+    `/units/abc/owners/${researcherId}/slots/canonical`;
+
+  function specOffering(add: Record<string, unknown> = {}) {
+    return {
+      id: offeringId, name: "Activity Offering", uri: "https://concord.org/offering",
+      context_id: thisClass, teachers: [researcherId], unit: "msa", problem: "1.4",
+      problemPath: "msa/1/4", network: noNetwork, ...add
+    };
+  }
+
+  const pointer = { documentKey: "my-document", createdAt: mockTimestamp(), createdBy: researcherId };
+
+  it("cannot create an offering a plain researcher token can", async () => {
+    await expectWriteToSucceed(initFirestore(researcherAuth), kOfferingDocPath, specOffering());
+    await prepareEachTest();
+    await expectWriteToFail(initFirestore(researcherRunnerAuth), kOfferingDocPath, specOffering());
+  });
+
+  it("cannot update an offering", async () => {
+    await adminWriteDoc(kOfferingDocPath, specOffering());
+    await expectUpdateToFail(initFirestore(researcherRunnerAuth), kOfferingDocPath, { name: "renamed" });
+  });
+
+  it("cannot claim a canonical pointer slot under an offering", async () => {
+    await expectWriteToSucceed(initFirestore(researcherAuth), kSlotPath, pointer);
+    await prepareEachTest();
+    await expectWriteToFail(initFirestore(researcherRunnerAuth), kSlotPath, pointer);
+  });
+
+  it("cannot claim a canonical pointer slot under a unit", async () => {
+    await expectWriteToSucceed(initFirestore(researcherAuth), kUnitSlotPath, pointer);
+    await prepareEachTest();
+    await expectWriteToFail(initFirestore(researcherRunnerAuth), kUnitSlotPath, pointer);
+  });
+
+  // The portal document itself is granted read and write to any teacher or researcher.
+  it("cannot write the portal document", async () => {
+    await expectWriteToSucceed(initFirestore(researcherAuth), kPortalDocPath, { touched: true });
+    await prepareEachTest();
+    await expectWriteToFail(initFirestore(researcherRunnerAuth), kPortalDocPath, { touched: true });
   });
 });
