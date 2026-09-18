@@ -10,6 +10,8 @@ import {
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
+import {writeEvaluationStatusForRequests} from "./evaluation-status";
+import {claimRequestIds} from "./claim-request-ids";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
@@ -134,12 +136,28 @@ async function writeSummaryRecord(
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
   logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
-  await firestore.collection(getAnalysisQueueFirestorePath("failedAnalyzing")).add({
-    ...event.data?.data(),
-    documentId: event.params.docId,
-    error,
-  });
-  await firestore.doc(event.document).delete();
+  const queueDoc = event.data?.data();
+  try {
+    await firestore.collection(getAnalysisQueueFirestorePath("failedAnalyzing")).add({
+      ...queueDoc,
+      documentId: event.params.docId,
+      error,
+    });
+  } catch (err) {
+    logger.error("Could not write a failure record", err);
+  }
+  let requestIds = queueDoc?.requestIds;
+  try {
+    requestIds = await claimRequestIds(firestore.doc(event.document)) ?? requestIds;
+  } catch (err) {
+    logger.error("Could not remove the imaged queue entry, which will not be retried", err);
+  }
+  if (queueDoc?.metadataPath && queueDoc?.evaluator) {
+    await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, requestIds, {
+      outcome: "failed",
+      docUpdated: queueDoc.docUpdated,
+    });
+  }
 }
 
 export const onAnalysisDocumentImaged =
@@ -264,6 +282,16 @@ export const onAnalysisDocumentImaged =
       });
 
       // Remove from the "imaged" queue
-      await firestore.doc(event.document).delete();
+      let requestIds = queueDoc.requestIds;
+      try {
+        requestIds = await claimRequestIds(firestore.doc(event.document)) ?? requestIds;
+      } catch (err) {
+        logger.error("Could not remove the imaged queue entry, which will not be retried", err);
+      }
+
+      await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, requestIds, {
+        outcome: "commented",
+        docUpdated: queueDoc.docUpdated,
+      });
     }
   );

@@ -5,6 +5,7 @@ import {
 import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
+import {FieldValue} from "firebase-admin/firestore";
 import {initialize, projectConfig} from "./initialize";
 import {
   analysisSettingsPath, clueIframeURL, fallbackClueUnit, generateHtml, onAnalysisDocumentPending,
@@ -12,6 +13,7 @@ import {
 } from "../src/on-analysis-document-pending";
 import * as classifier from "../../shared/ai-analysis-classify";
 import * as summarizer from "../../shared/ai-summarizer/ai-summarizer";
+import * as claimRequestIdsModule from "../src/claim-request-ids";
 
 jest.mock("firebase-functions/logger");
 
@@ -139,8 +141,20 @@ const sampleTile = JSON.parse(sampleDoc).tileMap["3EkhEN1cWCZ6SQ9X"];
 const drawingDoc = docOf(drawingTile);
 // A Text tile with content and a Drawing tile without: mixed.
 const mixedDoc = docOf(sampleTile, drawingTile);
-// A Drawing tile with nothing in it: a full-fidelity handler with nothing to describe.
+// A Drawing tile with no objects: empty under documentHasStudentWork, which counts a Drawing only
+// when it has objects.
 const emptyDrawingDoc = docOf({...drawingTile, content: {...drawingTile.content, objects: []}});
+
+// An Image tile alone: the classifier can't inspect it, so it always counts as student work even
+// though its stub summary carries none — the case a failed screenshot needs to reach a
+// "nothing to send" failure record.
+const imageDoc = docOf({id: "image-1", content: {type: "Image", url: "photo.png"}});
+
+// A Geometry tile alone: inspectable-only, so it always counts as student work and is never skipped.
+const geometryDoc = docOf({id: "geometry-1", content: {type: "Geometry"}});
+
+// An AI tile alone: AI output is never student work, whatever it contains.
+const aiTileDoc = docOf({id: "ai-1", content: {type: "AI", prompt: "What do you think?"}});
 
 // A Question whose authored prompt is an Image, answered with text. The prompt contributes nothing
 // a summary can carry, so the screenshot is the only way the model sees the question.
@@ -222,10 +236,8 @@ function aRequestContext(unit: string) {
   return {unit, investigation: "1", problem: "1", offeringId: "1234"};
 }
 
-// Runs the function over a pending-queue entry for the document.
-async function runPending(docId: string, overrides: Record<string, unknown> = {}) {
-  const wrapped = fft.wrap(onAnalysisDocumentPending);
-  const entry = {
+function pendingEntryFields(docId: string, overrides: Record<string, unknown> = {}) {
+  const entry: Record<string, unknown> = {
     metadataPath: `${kDocumentRoot}/documentMetadata/${docId}`,
     documentPath: `${kDocumentRoot}/documents/${docId}`,
     commentsPath: `demo/AI/documents/${docId}/comments`,
@@ -236,8 +248,21 @@ async function runPending(docId: string, overrides: Record<string, unknown> = {}
   };
   // Firestore cannot encode undefined, so an override of undefined drops the field instead.
   for (const [key, value] of Object.entries(entry)) {
-    if (value === undefined) delete (entry as Record<string, unknown>)[key];
+    if (value === undefined) delete entry[key];
   }
+  return entry;
+}
+
+// runPending hands the trigger a synthetic event, not a real document — a test simulating another
+// write landing on the document must create it here first.
+function seedPendingDoc(docId: string, overrides: Record<string, unknown> = {}) {
+  return admin.firestore().doc(`analysis/queue/pending/${docId}`).set(pendingEntryFields(docId, overrides));
+}
+
+// Runs the function over a pending-queue entry for the document.
+async function runPending(docId: string, overrides: Record<string, unknown> = {}) {
+  const wrapped = fft.wrap(onAnalysisDocumentPending);
+  const entry = pendingEntryFields(docId, overrides);
   await wrapped({
     data: makeDocumentSnapshot(entry, `analysis/queue/pending/${docId}`),
     params: {docId},
@@ -252,6 +277,13 @@ const imagedRecord = (docId: string) =>
   admin.firestore().doc(`analysis/queue/imaged/${docId}`).get().then((doc) => doc.data());
 const failedRecord = () =>
   queue("failedImaging").get().then((snapshot) => snapshot.docs[0]?.data());
+// "done" records are added with an auto-generated id (unlike "imaged", which is keyed by docId),
+// so they are found by the documentId field instead.
+const doneRecord = (docId: string) =>
+  queue("done").where("documentId", "==", docId).get().then((snapshot) => snapshot.docs[0]?.data());
+const statusFor = (docId: string, requestId = "automatic", evaluator = "categorize-design") =>
+  getDatabase().ref(`${kDocumentRoot}/documentMetadata/${docId}/evaluationStatus/${evaluator}/${requestId}`)
+    .once("value").then((snapshot) => snapshot.val());
 
 // The rule that makes the queue countable: a representation is either sent, left out by decision,
 // or failed — never two of those at once, and never annotated when it was sent.
@@ -327,6 +359,98 @@ describe("functions", () => {
         expect(shutterbug.postedRequest()).toEqual({content: expect.any(String), height: 1500});
       });
 
+      test("a populated document's requestId rides through to the imaged record", async () => {
+        await givenDocument("mixed1b", mixedDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("mixed1b", {requestIds: ["req-mixed1b"]});
+
+        expect(await imagedRecord("mixed1b")).toMatchObject({requestIds: ["req-mixed1b"]});
+      });
+
+      // A second click's id, added to the document while Shutterbug is awaited, would otherwise
+      // be lost when this function deletes the document it read at creation.
+      test("a requestId added to the queue document while Shutterbug is being awaited still " +
+           "reaches the imaged record", async () => {
+        await givenDocument("midflight1", mixedDoc);
+        await seedPendingDoc("midflight1", {requestIds: ["req-midflight-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/midflight1");
+        jest.spyOn(global, "fetch").mockImplementationOnce(async () => {
+          await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-midflight-b")});
+          return shutterbugOk();
+        });
+
+        await runPending("midflight1", {requestIds: ["req-midflight-a"]});
+
+        expect(await imagedRecord("midflight1")).toMatchObject({
+          requestIds: ["req-midflight-a", "req-midflight-b"],
+        });
+      });
+
+      // The next function's own trigger fires the instant the imaged document is created and
+      // never looks again, so a late id has to be there from that first write — patching it in
+      // with a second write, after the document already exists, would arrive too late for a
+      // trigger that already fired and read the incomplete version.
+      test("a requestId added to the queue document while Shutterbug is being awaited is present " +
+           "from the imaged document's first write, not patched in afterward", async () => {
+        await givenDocument("midflight2", mixedDoc);
+        await seedPendingDoc("midflight2", {requestIds: ["req-midflight2-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/midflight2");
+        jest.spyOn(global, "fetch").mockImplementationOnce(async () => {
+          await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-midflight2-b")});
+          return shutterbugOk();
+        });
+
+        const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/midflight2");
+        let firstWriteRequestIds: unknown;
+        const firstWriteSeen = new Promise<void>((resolve) => {
+          const unsubscribe = imagedDocRef.onSnapshot((snapshot) => {
+            if (snapshot.exists) {
+              firstWriteRequestIds = snapshot.data()?.requestIds;
+              unsubscribe();
+              resolve();
+            }
+          });
+        });
+
+        await runPending("midflight2", {requestIds: ["req-midflight2-a"]});
+        await firstWriteSeen;
+
+        expect(firstWriteRequestIds).toEqual(["req-midflight2-a", "req-midflight2-b"]);
+      });
+
+      // An imaged document already sitting at this docId means an evaluation for it is already in
+      // progress, using that document's own content (a model call, in on-analysis-document-imaged.ts,
+      // can take a while). This run's own freshly-computed content must not replace it — only the
+      // ids need to reach it, so that run's eventual completion status covers this one's click too.
+      test("writeImaged unions its ids into an existing imaged document instead of replacing it",
+        async () => {
+          await givenDocument("union1", mixedDoc);
+          stubShutterbug(shutterbugOk());
+
+          const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/union1");
+          await imagedDocRef.set(pendingEntryFields("union1", {
+            analysisVersion: 2,
+            sendSummary: true,
+            docSummary: "An evaluation already in progress for this document.",
+            sendImage: false,
+            requestIds: ["req-union-existing"],
+          }));
+
+          await runPending("union1", {requestIds: ["req-union-new"]});
+
+          expect(await imagedRecord("union1")).toMatchObject({
+          // The in-progress evaluation's own content survives untouched.
+            docSummary: "An evaluation already in progress for this document.",
+            sendImage: false,
+            // Both ids are present.
+            requestIds: expect.arrayContaining(["req-union-existing", "req-union-new"]),
+          });
+          expect((await imagedRecord("union1"))?.requestIds).toHaveLength(2);
+          // The pending entry is still removed, same as any other run.
+          expect(await countIn("pending")).toEqual(0);
+        });
+
       test("a text-only document is not screenshotted", async () => {
         await givenDocument("text1", sampleDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
@@ -375,51 +499,222 @@ describe("functions", () => {
         expectReasonsAreExclusive(record);
       });
 
-      test("a drawing with no objects has nothing worth summarizing", async () => {
-        // A full-fidelity handler with nothing to describe. The summary would say only that a
-        // drawing tile is there, so it is produced, stored and withheld.
+      test("a drawing with no objects is skipped, not partially evaluated", async () => {
         await givenDocument("emptydraw1", emptyDrawingDoc);
-        stubShutterbug(shutterbugOk());
+        const shutterbug = stubShutterbug(shutterbugOk());
 
-        await runPending("emptydraw1");
+        await runPending("emptydraw1", {requestIds: ["req-emptydraw1"]});
 
-        const record = await imagedRecord("emptydraw1");
+        expect(await countIn("pending")).toEqual(0);
+        expect(await countIn("imaged")).toEqual(0);
+        expect(await countIn("failedImaging")).toEqual(0);
+        const record = await doneRecord("emptydraw1");
         expect(record).toMatchObject({
+          analysisVersion: 2,
           sendSummary: false,
-          summaryOmittedReason: "no-student-work-in-summary",
-          sendImage: true,
-          summarizer: "image",
+          sendImage: false,
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+          classification: {
+            modality: "visual-only", hasStudentText: false, summaryCarriesStudentWork: false,
+            needsImage: true, promptNeedsImage: false,
+          },
+          renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
-        expect(record?.docSummary).toEqual(expect.any(String));
-        expectReasonsAreExclusive(record);
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+        expect(await statusFor("emptydraw1", "req-emptydraw1"))
+          .toMatchObject({outcome: "skipped-empty", requestId: "req-emptydraw1"});
       });
 
-      test("an empty document is still evaluated, so the student gets an answer", async () => {
-        // Deliberately not turned away. The client's "Ada is thinking about it…" placeholder is
-        // cleared only by an arriving comment, so failing here would leave a student who clicked
-        // Ideas before doing any work waiting for good. See step 2 in the producer.
+      test("an empty document is skipped, not evaluated", async () => {
+        // Nothing here reaches the model or Shutterbug; a `done` record is written directly.
         await givenDocument("empty1", emptyDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
-        await runPending("empty1");
+        await runPending("empty1", {requestIds: ["req-empty1"]});
 
+        expect(await countIn("pending")).toEqual(0);
+        expect(await countIn("imaged")).toEqual(0);
         expect(await countIn("failedImaging")).toEqual(0);
-        const record = await imagedRecord("empty1");
+        const record = await doneRecord("empty1");
         expect(record).toMatchObject({
-          sendSummary: true,
+          analysisVersion: 2,
+          sendSummary: false,
           sendImage: false,
-          imageOmittedReason: "no-visual-content",
-          summarizer: "text",
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
           classification: {
             modality: "empty", hasStudentText: false, summaryCarriesStudentWork: false,
             needsImage: false, promptNeedsImage: false,
           },
+          renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
         });
-        // The summary is boilerplate — that is the cost of not leaving the placeholder up.
-        expect(record?.docSummary).toEqual(expect.any(String));
-        // No picture: there is nothing to photograph.
+        // No summary, and no picture: nothing was produced at all, unlike the old behavior.
+        expect(record?.docSummary).toBeUndefined();
         expect(shutterbug.spy).not.toHaveBeenCalled();
-        expectReasonsAreExclusive(record);
+        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining("is empty; skipped evaluation"));
+
+        const status = await statusFor("empty1", "req-empty1");
+        expect(status).toMatchObject({outcome: "skipped-empty", requestId: "req-empty1", docUpdated: "1001"});
+      });
+
+      // See AnalysisQueueDocument.requestIds for why a queue entry can carry more than one id.
+      test("a skipped-empty status is written for every requestId a coalesced queue entry carries", async () => {
+        await givenDocument("emptyMulti", emptyDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("emptyMulti", {requestIds: ["req-empty-a", "req-empty-b"]});
+
+        expect(await statusFor("emptyMulti", "req-empty-a")).toMatchObject({outcome: "skipped-empty"});
+        expect(await statusFor("emptyMulti", "req-empty-b")).toMatchObject({outcome: "skipped-empty"});
+      });
+
+      // Same case as the imaged-record test above, but the id lands while metadata is being read,
+      // before the empty check.
+      test("a requestId added to the queue document while its metadata is being read gets its " +
+           "own skipped-empty status, and a late id is re-queued instead of also skipped",
+      async () => {
+        await givenDocument("emptymidflight1", emptyDoc);
+        await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptymidflight1");
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "demo/AI/documents/emptymidflight1") return realDoc(path);
+          return {
+            get: async () => {
+              await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-emptymidflight-b")});
+              return realDoc(path).get();
+            },
+          } as any;
+        });
+
+        await runPending("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        docSpy.mockRestore();
+
+        expect(await statusFor("emptymidflight1", "req-emptymidflight-a"))
+          .toMatchObject({outcome: "skipped-empty"});
+        // Not part of this run's own snapshot, so it gets no status here.
+        expect(await statusFor("emptymidflight1", "req-emptymidflight-b")).toBeNull();
+
+        // It's back on a fresh pending document instead, for its own run to judge.
+        const requeued = await pendingDocRef.get();
+        expect(requeued.exists).toBe(true);
+        expect(requeued.data()).toMatchObject({requestIds: ["req-emptymidflight-b"]});
+      });
+
+      // A third click can independently create a fresh pending document in this gap; re-creation
+      // must union into it, not replace it.
+      test("re-creating a pending document for a late id unions into one that appeared in the " +
+           "meantime, rather than replacing it", async () => {
+        await givenDocument("emptyunion1", emptyDoc);
+        await seedPendingDoc("emptyunion1", {requestIds: ["req-emptyunion-a"]});
+
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptyunion1");
+        const realClaimRequestIds = claimRequestIdsModule.claimRequestIds;
+        const claimSpy = jest.spyOn(claimRequestIdsModule, "claimRequestIds")
+          .mockImplementation(async (docRef) => {
+            const claimed = await realClaimRequestIds(docRef);
+            // A distinct docUpdated, so the assertion below can tell this document's own fields
+            // apart from the skipped run's older copy of them.
+            await pendingDocRef.set(pendingEntryFields("emptyunion1", {
+              requestIds: ["req-emptyunion-appeared"], docUpdated: "9999",
+            }));
+            return [...(claimed ?? []), "req-emptyunion-b"];
+          });
+
+        await runPending("emptyunion1", {requestIds: ["req-emptyunion-a"]});
+        claimSpy.mockRestore();
+
+        const requeued = await pendingDocRef.get();
+        expect(requeued.exists).toBe(true);
+        expect(requeued.data()?.requestIds).toEqual(
+          expect.arrayContaining(["req-emptyunion-appeared", "req-emptyunion-b"])
+        );
+        // The document that appeared in the meantime is kept, not replaced with the skipped run's
+        // own (older) copy of the same fields.
+        expect(requeued.data()?.docUpdated).toBe("9999");
+      });
+
+      test("a rejected status write after a skip still leaves the done record and cleanup in place", async () => {
+        // Simulates the Realtime Database write itself failing, so writeEvaluationStatus's own
+        // catch-and-warn runs for real.
+        await givenDocument("empty4", emptyDoc);
+        const db = getDatabase();
+        const realRef = db.ref.bind(db);
+        jest.spyOn(db, "ref").mockImplementation((path) => {
+          const ref = realRef(path);
+          if (typeof path === "string" && path.includes("evaluationStatus")) {
+            return Object.assign(Object.create(Object.getPrototypeOf(ref)), ref, {
+              set: async () => {
+                throw new Error("rtdb unavailable");
+              },
+            });
+          }
+          return ref;
+        });
+
+        await runPending("empty4");
+
+        const record = await doneRecord("empty4");
+        expect(record).toMatchObject({summaryOmittedReason: "empty-document", imageOmittedReason: "empty-document"});
+        expect(await countIn("pending")).toEqual(0);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining("Could not write evaluation status"), expect.any(Error));
+      });
+
+      test("a skipped-empty status is still written when the pending queue entry cannot be removed", async () => {
+        await givenDocument("empty5", emptyDoc);
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "analysis/queue/pending/empty5") return realDoc(path);
+          return {
+            delete: async () => {
+              throw new Error("firestore unavailable");
+            },
+          } as any;
+        });
+
+        await runPending("empty5", {requestIds: ["req-empty5"]});
+        docSpy.mockRestore();
+
+        // The delete failure did not fall through to the generic error path: no contradictory
+        // failure record, and the correct status was still written.
+        expect(logger.error).toHaveBeenCalledWith(
+          "Could not remove the pending queue entry, which will not be retried", expect.any(Error));
+        expect(await countIn("failedImaging")).toEqual(0);
+        expect(await doneRecord("empty5")).toMatchObject({summaryOmittedReason: "empty-document"});
+        expect(await statusFor("empty5", "req-empty5")).toMatchObject({outcome: "skipped-empty"});
+      });
+
+      test("a document holding only an AI tile is skipped: AI output is never student work", async () => {
+        await givenDocument("aitile1", aiTileDoc);
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("aitile1");
+
+        expect(await countIn("imaged")).toEqual(0);
+        const record = await doneRecord("aitile1");
+        expect(record).toMatchObject({
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+        });
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+      });
+
+      test("a Geometry-only document is not skipped: the classifier cannot inspect it", async () => {
+        await givenDocument("geo1", geometryDoc);
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("geo1");
+
+        expect(await countIn("done")).toEqual(0);
+        const record = await imagedRecord("geo1");
+        expect(record).toMatchObject({
+          sendSummary: false,
+          summaryOmittedReason: "no-student-work-in-summary",
+          sendImage: true,
+        });
+        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
       });
 
       test("a document with no metadata document renders with the fallback unit", async () => {
@@ -560,24 +855,24 @@ describe("functions", () => {
         expectReasonsAreExclusive(record);
       });
 
-      test("a picture prompt with no answer gets no screenshot", async () => {
-        // A picture of the question is context for student work, never a substitute for it, so
-        // the prompt alone earns no screenshot however visual it is. The document is still
-        // evaluated, because every empty document is — see the empty-document case above.
+      test("a picture prompt with no answer is skipped: there is no student work to judge", async () => {
+        // An authored prompt is never student work; with no response rows, nothing here is either.
         await givenDocument("imgq2", imagePromptQuestionDoc(false));
         const shutterbug = stubShutterbug(shutterbugOk());
 
         await runPending("imgq2");
 
-        const record = await imagedRecord("imgq2");
+        expect(await countIn("imaged")).toEqual(0);
+        expect(await countIn("failedImaging")).toEqual(0);
+        const record = await doneRecord("imgq2");
         expect(record).toMatchObject({
           sendImage: false,
-          imageOmittedReason: "no-visual-content",
+          sendSummary: false,
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
           classification: {modality: "empty", promptNeedsImage: true},
         });
         expect(shutterbug.spy).not.toHaveBeenCalled();
-        expect(await countIn("failedImaging")).toEqual(0);
-        expectReasonsAreExclusive(record);
       });
 
       test("the mock evaluator produces nothing at all", async () => {
@@ -633,26 +928,24 @@ describe("functions", () => {
           expectReasonsAreExclusive(record);
         });
 
-      test("a document with nothing but an empty drawing has nothing left to send", async () => {
+      test("an empty drawing is skipped before Shutterbug is ever called, whatever it would answer", async () => {
+        // Shutterbug is stubbed to fail; the skip check must happen before it's ever consulted.
         await givenDocument("draw2", emptyDrawingDoc);
-        stubShutterbug(new Error("connection refused"));
+        const shutterbug = stubShutterbug(new Error("connection refused"));
 
         await runPending("draw2");
 
         expect(await countIn("imaged")).toEqual(0);
-        const failed = await failedRecord();
-        // The message names why each half is absent, so the record alone explains the failure.
-        expect(failed?.error).toContain("nothing to send");
-        expect(failed?.error).toContain("summary: no-student-work-in-summary");
-        expect(failed?.error).toContain("image: Shutterbug error");
-        expect(failed).toMatchObject({
+        expect(await countIn("failedImaging")).toEqual(0);
+        expect(shutterbug.spy).not.toHaveBeenCalled();
+        const record = await doneRecord("draw2");
+        expect(record).toMatchObject({
           analysisVersion: 2,
           classification: {modality: "visual-only"},
           renderTarget: {clueUrl: clueIframeURL, unit: "vibe"},
-          summaryOmittedReason: "no-student-work-in-summary",
-          docSummary: expect.any(String),
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
         });
-        expect(failed?.imageError).toContain("Shutterbug error");
       });
 
       test("the request carries an abort signal, so a hung service cannot hang the function", async () => {
@@ -729,15 +1022,19 @@ describe("functions", () => {
         expect(shutterbug.spy).toHaveBeenCalledTimes(1);
       });
 
-      test("an empty drawing has nothing to send while the switch is off", async () => {
+      test("an empty drawing is skipped without ever reading the screenshot switch", async () => {
         await admin.firestore().doc(analysisSettingsPath).set({imagesEnabled: false});
         await givenDocument("draw3", emptyDrawingDoc);
+        const settingsReads = jest.spyOn(admin.firestore(), "doc");
 
         await runPending("draw3");
 
-        const failed = await failedRecord();
-        expect(failed?.error).toContain("summary: no-student-work-in-summary");
-        expect(failed?.error).toContain("image: images-disabled");
+        expect(settingsReads.mock.calls.map((call) => call[0])).not.toContain(analysisSettingsPath);
+        const record = await doneRecord("draw3");
+        expect(record).toMatchObject({
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+        });
       });
     });
 
@@ -761,7 +1058,9 @@ describe("functions", () => {
         // The recorder of last resort must not fail for the reason the work did. Here the first
         // write is refused the way Firestore refuses an oversized document; the retry has to land
         // and the pending entry has to go.
-        await givenDocument("bigfail1", emptyDrawingDoc);
+        // imageDoc, not emptyDrawingDoc — an empty drawing is now skipped before reaching this
+        // path; the point here is the failure-record retry, not emptiness.
+        await givenDocument("bigfail1", imageDoc);
         stubShutterbug(new Error("connection refused"));
         const attempts: Record<string, unknown>[] = [];
         const realCollection = admin.firestore().collection.bind(admin.firestore());
@@ -778,7 +1077,7 @@ describe("functions", () => {
             } as any;
           });
 
-        await runPending("bigfail1");
+        await runPending("bigfail1", {requestIds: ["req-bigfail1"]});
         collectionSpy.mockRestore();
 
         expect(attempts).toHaveLength(2);
@@ -791,6 +1090,8 @@ describe("functions", () => {
         const failed = await failedRecord();
         expect(failed?.error).toContain("nothing to send");
         expect(failed?.error).toContain("accumulated fields omitted");
+        // The failure still resolves the waiting bubble, via the same status mechanism as a skip.
+        expect(await statusFor("bigfail1", "req-bigfail1")).toMatchObject({outcome: "failed", requestId: "req-bigfail1"});
       });
     });
 
@@ -803,6 +1104,61 @@ describe("functions", () => {
         expect(await countIn("pending")).toEqual(0);
         expect(await countIn("imaged")).toEqual(0);
         expect((await failedRecord())?.error).toContain("invalid document JSON");
+      });
+
+      test("a failed status is still written when the pending queue entry cannot be removed", async () => {
+        await givenDocument("bad2", "this is not JSON");
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "analysis/queue/pending/bad2") return realDoc(path);
+          return {
+            delete: async () => {
+              throw new Error("firestore unavailable");
+            },
+          } as any;
+        });
+
+        await runPending("bad2", {requestIds: ["req-bad2"]});
+        docSpy.mockRestore();
+
+        expect(logger.error).toHaveBeenCalledWith(
+          "Could not remove the pending queue entry, which will not be retried", expect.any(Error));
+        expect((await failedRecord())?.error).toContain("invalid document JSON");
+        expect(await statusFor("bad2", "req-bad2")).toMatchObject({outcome: "failed", requestId: "req-bad2"});
+      });
+
+      // Same coalescing case as the skipped-empty version above, but through the error boundary.
+      test("a failed status is written for every requestId a coalesced queue entry carries", async () => {
+        await givenDocument("bad3", "this is not JSON");
+
+        await runPending("bad3", {requestIds: ["req-bad-a", "req-bad-b"]});
+
+        expect(await statusFor("bad3", "req-bad-a")).toMatchObject({outcome: "failed"});
+        expect(await statusFor("bad3", "req-bad-b")).toMatchObject({outcome: "failed"});
+      });
+
+      // Same case as the skipped-empty version above, but through the error boundary.
+      test("a requestId added to the queue document while its metadata is being read still gets " +
+           "its own failed status", async () => {
+        await givenDocument("badmidflight1", "this is not JSON");
+        await seedPendingDoc("badmidflight1", {requestIds: ["req-badmidflight-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/badmidflight1");
+        const realDoc = admin.firestore().doc.bind(admin.firestore());
+        const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+          if (path !== "demo/AI/documents/badmidflight1") return realDoc(path);
+          return {
+            get: async () => {
+              await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-badmidflight-b")});
+              return realDoc(path).get();
+            },
+          } as any;
+        });
+
+        await runPending("badmidflight1", {requestIds: ["req-badmidflight-a"]});
+        docSpy.mockRestore();
+
+        expect(await statusFor("badmidflight1", "req-badmidflight-a")).toMatchObject({outcome: "failed"});
+        expect(await statusFor("badmidflight1", "req-badmidflight-b")).toMatchObject({outcome: "failed"});
       });
 
       test("a throw from the classifier is caught and recorded", async () => {

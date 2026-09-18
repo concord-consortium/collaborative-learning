@@ -1,4 +1,15 @@
-import { classifyDocument, drawingTileHasText, kMaxQuestionDepth, textTileHasContent } from "./ai-analysis-classify";
+import { getSnapshot } from "mobx-state-tree";
+import {
+  classifyDocument, documentHasStudentWork, drawingTileHasText, kMaxQuestionDepth, textTileHasContent
+} from "./ai-analysis-classify";
+import { DocumentContentModel } from "../src/models/document/document-content";
+import { registerTileTypes } from "../src/register-tile-types";
+import { GraphModel } from "../src/plugins/graph/models/graph-model";
+import "../src/models/shared/shared-data-set-registration";
+import "../src/models/shared/shared-case-metadata-registration";
+import "../src/plugins/graph/graph-registration";
+
+registerTileTypes(["Text"]);
 
 function doc(rows: { tileId: string }[][], tileMap: Record<string, any>) {
   const rowOrder: string[] = [];
@@ -372,5 +383,105 @@ describe("Question traversal", () => {
   it("survives a Question tile that references itself", () => {
     const content = doc([[{ tileId: "q" }]], { q: questionTile([["prompt"], ["q"]]), prompt: textTile("Prompt") });
     expect(() => classifyDocument(content)).not.toThrow();
+  });
+});
+
+describe("documentHasStudentWork", () => {
+  it("is false for a document with no tiles", () => {
+    expect(documentHasStudentWork(doc([], {}))).toBe(false);
+    expect(documentHasStudentWork({})).toBe(false);
+  });
+
+  it("counts a Text tile only when it has content", () => {
+    expect(documentHasStudentWork(doc([[{ tileId: "t1" }]], { t1: textTile("hi") }))).toBe(true);
+    expect(documentHasStudentWork(doc([[{ tileId: "t1" }]], { t1: textTile("   ") }))).toBe(false);
+  });
+
+  it("counts a Drawing tile only when it has objects", () => {
+    expect(documentHasStudentWork(doc([[{ tileId: "d1" }]], { d1: drawingTile([{ type: "rectangle" }]) })))
+      .toBe(true);
+    expect(documentHasStudentWork(doc([[{ tileId: "d1" }]], { d1: drawingTile([]) }))).toBe(false);
+  });
+
+  // A real GraphModel, not a hand-written fixture: GraphModel.afterCreate() always adds a default
+  // "unlinked" layer, so `layers: []` can never actually occur, and `layers.length > 0` alone
+  // can't tell an untouched graph from one the student configured.
+  it("does not count an untouched Graph tile, whose default layer has no assigned attributes", () => {
+    const graphModel = GraphModel.create();
+    expect(graphModel.layers.length).toBe(1);
+    const content = getSnapshot(graphModel);
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content } }))).toBe(false);
+  });
+
+  it("counts a Graph tile once an attribute is assigned to a layer", () => {
+    const graphModel = GraphModel.create();
+    graphModel.layers[0].config.setAttributeForRole("x", { attributeID: "attr1" });
+    const content = getSnapshot(graphModel);
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content } }))).toBe(true);
+  });
+
+  it("counts a Graph tile with an adornment, even with no assigned attribute", () => {
+    const graphModel = GraphModel.create();
+    // Only the presence of an adornment is under test here, not any specific adornment's shape,
+    // so this overrides just that field on an otherwise-real snapshot.
+    const content = { ...getSnapshot(graphModel), adornments: [{ id: "adorn1", type: "Movable Point" }] };
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content } }))).toBe(true);
+  });
+
+  it("always counts a Table, even with no cases", () => {
+    const content = doc([[{ tileId: "tb1" }]], { tb1: { content: { type: "Table" } } });
+    expect(documentHasStudentWork(content)).toBe(true);
+  });
+
+  it("always counts a Dataflow, even with no nodes", () => {
+    const content = doc([[{ tileId: "f1" }]], { f1: { content: { type: "Dataflow", program: { nodes: {} } } } });
+    expect(documentHasStudentWork(content)).toBe(true);
+  });
+
+  it("always counts a tile type it cannot inspect, known or not", () => {
+    expect(documentHasStudentWork(doc([[{ tileId: "i1" }]], { i1: { content: { type: "Image" } } }))).toBe(true);
+    expect(documentHasStudentWork(doc([[{ tileId: "g1" }]], { g1: { content: { type: "Geometry" } } }))).toBe(true);
+    expect(documentHasStudentWork(doc([[{ tileId: "u1" }]], { u1: { content: { type: "SomeFutureTileType" } } })))
+      .toBe(true);
+  });
+
+  it("never counts an AI, Simulator, Placeholder, ErrorTest, or Starter tile", () => {
+    expect(documentHasStudentWork(doc([[{ tileId: "a1" }]], { a1: { content: { type: "AI" } } }))).toBe(false);
+    expect(documentHasStudentWork(doc([[{ tileId: "s1" }]], { s1: { content: { type: "Simulator" } } }))).toBe(false);
+    expect(documentHasStudentWork(doc([[{ tileId: "p1" }]], { p1: { content: { type: "Placeholder" } } })))
+      .toBe(false);
+    // Dev-only tile types, but still part of kNeverStudentWorkTypes: worth pinning so a change to
+    // that set is a deliberate edit here, not a silent gap.
+    expect(documentHasStudentWork(doc([[{ tileId: "e1" }]], { e1: { content: { type: "ErrorTest" } } })))
+      .toBe(false);
+    expect(documentHasStudentWork(doc([[{ tileId: "st1" }]], { st1: { content: { type: "Starter" } } })))
+      .toBe(false);
+  });
+
+  it("is false for a Question whose prompt has text but whose response is empty", () => {
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt"], ["response"]]),
+      prompt: textTile("What problem does your design solve?"),
+      response: textTile("   ")
+    });
+    expect(documentHasStudentWork(content)).toBe(false);
+  });
+
+  it("is true for a Question with content in a response row", () => {
+    const content = doc([[{ tileId: "q1" }]], {
+      q1: questionTile([["prompt"], ["response"]]),
+      prompt: textTile("What problem does your design solve?"),
+      response: textTile("It keeps water out.")
+    });
+    expect(documentHasStudentWork(content)).toBe(true);
+  });
+
+  it("requires a plain snapshot: a live model must be unwrapped with getSnapshot first", () => {
+    const documentContent = DocumentContentModel.create({
+      rowOrder: ["row1"],
+      rowMap: { row1: { id: "row1", tiles: [{ tileId: "t1" }] } },
+      tileMap: { t1: { id: "t1", content: { type: "Text", format: "markdown", text: "hello" } } }
+    } as any);
+    expect(documentHasStudentWork(getSnapshot(documentContent))).toBe(true);
   });
 });

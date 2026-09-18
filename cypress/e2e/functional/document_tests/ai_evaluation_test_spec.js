@@ -1,8 +1,12 @@
 import Canvas from '../../../support/elements/common/Canvas';
+import ClueCanvas from '../../../support/elements/common/cCanvas';
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
 import ChatPanel from "../../../support/elements/common/ChatPanel";
 
 let canvas = new Canvas,
+  clueCanvas = new ClueCanvas,
+  textToolTile = new TextToolTile,
   resourcesPanel = new ResourcesPanel,
   chatPanel = new ChatPanel;
 
@@ -11,6 +15,7 @@ let canvas = new Canvas,
 const queryParams = `${Cypress.config("qaUnitStudent5")}&firebaseEnv=staging`;
 
 const studentDocumentName = "QA 1.1 Solving a Mystery with Proportional Reasoning";
+const aiEvaluationEmptyMessage = "Add some work to your document before requesting Ideas";
 const aiEvaluationPendingMessage = "Ada is thinking about it...";
 
 function beforeTest(params) {
@@ -22,12 +27,24 @@ context('AI Evaluation', function () {
   it('Clicking Ideas button triggers AI analysis', function () {
     beforeTest(queryParams);
 
+    // On an empty document, Ideas shows a nudge instead of requesting an evaluation, and the
+    // button stays enabled.
     canvas.getIdeasButton().should("be.visible").click();
-
-    // The left side should be changed to show the user's document and the comments pane
     resourcesPanel.getPrimaryWorkspaceTab("my-work").click();
     resourcesPanel.getPrimaryWorkspaceTab("my-work").should("have.class", "selected");
     cy.openDocumentThumbnail("my-work", "workspaces", "QA 1.1");
+    resourcesPanel.getFocusDocument().should("be.visible");
+    chatPanel.getChatPanel().should('be.visible').should('contain.text', 'Comments');
+    chatPanel.getCommentCardContent().should("be.visible").and("contain.text", aiEvaluationEmptyMessage);
+    canvas.getIdeasButton().should("not.be.disabled");
+
+    // AI evaluation skips empty documents; add some work first so Ideas triggers a real
+    // evaluation instead of the "add some work" nudge.
+    clueCanvas.addTile('text');
+    textToolTile.enterText('This is my answer.');
+
+    canvas.getIdeasButton().should("be.visible").click();
+
     resourcesPanel.getFocusDocument().should("be.visible");
     resourcesPanel.getFocusDocumentTitle().should("contain.text", studentDocumentName);
 
