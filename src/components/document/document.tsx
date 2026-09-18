@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
@@ -273,7 +274,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className={`titlebar ${docType}`}>
+      <div className={classNames("titlebar", docType)}>
         {!hideButtons &&
           <div className="actions left">
             <DocumentFileMenu document={document}
@@ -322,8 +323,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return this.renderGenericTitleBar({
       title,
       hideButtons,
-      // The kind is the stylesheet hook; documents predating the kind axis fall back to their type.
-      docType: document.kind ?? document.type,
+      // Styled by the concurrent axis, not by type or kind: group and class-wide documents share one
+      // appearance, and a kind is an arbitrary author string. Distinguishing them later is an owner
+      // question (hasGroupOwner / hasClassOwner), not a type one.
+      docType: "concurrent",
     });
   }
 
@@ -468,7 +471,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const hasDisplayId = !!displayId;
     const showShareToggle = this.shareButtonEnabled();
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={classNames("titlebar", type)}>
         <div className="actions">
           { !hideButtons &&
               <DocumentFileMenu document={document}
@@ -521,7 +524,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderSupportTitleBar(type: string) {
     const { document } = this.props;
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={classNames("titlebar", type)}>
         <div className="title" data-test="document-title">
           {document.getProperty("caption")}
         </div>
