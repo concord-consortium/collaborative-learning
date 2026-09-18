@@ -238,13 +238,17 @@ async function writeImaged(
   queueDoc: ImagedQueueDocument,
   event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>
 ) {
+  const pendingDocRef = firestore.doc(event.document);
   const imagedDocRef = firestore.doc(getAnalysisQueueFirestorePath("imaged", docId));
-  await imagedDocRef.set(queueDoc);
-  // A later id (see claimRequestIds) must still reach the next function's own frozen snapshot.
-  const requestIds = await claimRequestIds(firestore.doc(event.document));
-  if (requestIds && requestIds.length > 0) {
-    await imagedDocRef.update({requestIds});
-  }
+  // One transaction: the next function's own trigger fires the instant this document is created
+  // and never looks again, so the requestIds it carries have to be complete from that first write —
+  // a later `.update()` would arrive too late for a trigger that already fired.
+  await firestore.runTransaction(async (transaction) => {
+    const currentRequestIds = (await transaction.get(pendingDocRef)).data()?.requestIds;
+    const requestIds = Array.isArray(currentRequestIds) ? currentRequestIds : queueDoc.requestIds;
+    transaction.set(imagedDocRef, requestIds && requestIds.length > 0 ? {...queueDoc, requestIds} : queueDoc);
+    transaction.delete(pendingDocRef);
+  });
 }
 
 export const onAnalysisDocumentPending =

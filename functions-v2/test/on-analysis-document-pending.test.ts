@@ -386,6 +386,38 @@ describe("functions", () => {
         });
       });
 
+      // The next function's own trigger fires the instant the imaged document is created and
+      // never looks again, so a late id has to be there from that first write — patching it in
+      // with a second write, after the document already exists, would arrive too late for a
+      // trigger that already fired and read the incomplete version.
+      test("a requestId added to the queue document while Shutterbug is being awaited is present " +
+           "from the imaged document's first write, not patched in afterward", async () => {
+        await givenDocument("midflight2", mixedDoc);
+        await seedPendingDoc("midflight2", {requestIds: ["req-midflight2-a"]});
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/midflight2");
+        jest.spyOn(global, "fetch").mockImplementationOnce(async () => {
+          await pendingDocRef.update({requestIds: FieldValue.arrayUnion("req-midflight2-b")});
+          return shutterbugOk();
+        });
+
+        const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/midflight2");
+        let firstWriteRequestIds: unknown;
+        const firstWriteSeen = new Promise<void>((resolve) => {
+          const unsubscribe = imagedDocRef.onSnapshot((snapshot) => {
+            if (snapshot.exists) {
+              firstWriteRequestIds = snapshot.data()?.requestIds;
+              unsubscribe();
+              resolve();
+            }
+          });
+        });
+
+        await runPending("midflight2", {requestIds: ["req-midflight2-a"]});
+        await firstWriteSeen;
+
+        expect(firstWriteRequestIds).toEqual(["req-midflight2-a", "req-midflight2-b"]);
+      });
+
       test("a text-only document is not screenshotted", async () => {
         await givenDocument("text1", sampleDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
