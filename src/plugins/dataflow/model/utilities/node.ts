@@ -55,55 +55,10 @@ interface NodeValueMap {
 }
 export type NodeValue = number | NodeValueMap;
 
-export interface NodeType {
-  name: string;
-  displayName: string;
-}
-
-export const NodeTypes: NodeType[] = [
-  {
-    name: "Sensor",
-    displayName: "Sensor",
-  },
-  {
-    name: "Number",
-    displayName: "Number",
-  },
-  {
-    name: "Generator",
-    displayName: "Waves",
-  },
-  // Timer block hidden from the palette. Kept in code (rete-manager registration, node class) so
-  // existing programs that already contain a Timer node still load.
-  // {
-  //   name: "Timer",
-  //   displayName: "Timer (on/off)"
-  // },
-  {
-    name: "Math",
-    displayName: "Math",
-  },
-  {
-    name: "Logic",
-    displayName: "Compare",
-  },
-  {
-    name: "Transform",
-    displayName: "Transform",
-  },
-  {
-    name: "Control",
-    displayName: "Hold",
-  },
-  {
-    name: "Demo Output",
-    displayName: "Demo Device",
-  },
-  {
-    name: "Live Output",
-    displayName: "Live Device",
-  }
-];
+// The name/displayName table lives in shared/ so the AI workspace summarizer can translate a
+// block's internal type without this file's SVG imports, which Cloud Functions cannot load.
+export type { NodeType } from "../../../../../shared/dataflow-node-types";
+export { NodeTypes, displayNameForType } from "../../../../../shared/dataflow-node-types";
 
 export const NodeOperationTypes = [
   {
