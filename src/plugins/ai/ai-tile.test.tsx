@@ -382,6 +382,97 @@ describe("AIComponent", () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to query AI", expect.any(Error));
       consoleErrorSpy.mockRestore();
     });
+
+    it("on a populated document, an older refresh finishing after a newer one has started does " +
+       "not hide the newer request's loading state, restore over it, or overwrite its response",
+       async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      // Initial mount succeeds via the default mock resolution.
+      const { queryByText } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />)
+      );
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      let rejectOlder: (error: Error) => void;
+      let resolveNewer: (value: { data: { text: string } }) => void;
+      const olderPromise = new Promise((_resolve, reject) => { rejectOlder = reject; });
+      const newerPromise = new Promise(resolve => { resolveNewer = resolve; });
+      mockGetAiContent.mockImplementationOnce(() => olderPromise);
+      mockGetAiContent.mockImplementationOnce(() => newerPromise);
+
+      // Start the older (soon-to-be-superseded) request.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+
+      // Start the newer request before the older one has finished.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+
+      // Must not restore text over the newer request, or hide its loading state, while it's still
+      // in flight.
+      await act(async () => {
+        rejectOlder!(new Error("stale network error"));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(queryByText("Loading...")).toBeInTheDocument();
+
+      // The newer request then succeeds.
+      await act(async () => {
+        resolveNewer!({ data: { text: "Newer response" } });
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("Newer response");
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
+
+    it("on a populated document, an older refresh succeeding after a newer one already " +
+       "succeeded does not overwrite the newer response", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      // Initial mount succeeds via the default mock resolution.
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      let resolveOlder: (value: { data: { text: string } }) => void;
+      const olderPromise = new Promise<{ data: { text: string } }>(resolve => { resolveOlder = resolve; });
+      mockGetAiContent.mockImplementationOnce(() => olderPromise);
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "Newer response" } });
+
+      // Start the older (soon-to-be-superseded) request.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+
+      // Start and finish the newer request before the older one has resolved.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("Newer response");
+
+      // The older request finally resolves — it must not overwrite the newer response.
+      await act(async () => {
+        resolveOlder!({ data: { text: "Stale older response" } });
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("Newer response");
+    });
   });
 
 });

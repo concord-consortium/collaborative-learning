@@ -31,6 +31,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const identifier = getDocumentIdentifier(getParentOfType(model, DocumentContentModel));
+  // Guards against overlapping refresh requests: each run's generation, checked after its await,
+  // tells a superseded request not to touch text or isUpdating.
+  const requestGenerationRef = useRef(0);
 
   useEffect(() => {
     onRegisterTileApi({
@@ -45,6 +48,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
     if (getAiContent) {
+      const generation = ++requestGenerationRef.current;
+      const isCurrent = () => requestGenerationRef.current === generation;
       const queryAI = async () => {
         setIsUpdating(true);
         // Only assigned once cleared below, so the catch can tell whether restoring is needed.
@@ -90,6 +95,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             documentId: changeSlashesToUnderscores(identifier),
             tileId: model.id
           });
+          // A newer refresh has taken over; leave its result and isUpdating alone.
+          if (!isCurrent()) return;
           // getAiContent resolves (not rejects) on a server-side failure, with a truthy error and
           // empty text. Thrown here to route it through the same catch as a rejection.
           if (response.data.error) {
@@ -101,12 +108,12 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // Restore rather than leave the blank text set above — a failed request shouldn't erase
-          // a good prior response. No-op if nothing was cleared yet.
-          if (previousText !== undefined) content.setText(previousText);
+          // Restore rather than leave the blank text set above; no-op if nothing was cleared, or a
+          // newer refresh has taken over.
+          if (isCurrent() && previousText !== undefined) content.setText(previousText);
           console.error("Failed to query AI", error);
         } finally {
-          setIsUpdating(false);
+          if (isCurrent()) setIsUpdating(false);
         }
       };
       queryAI();
