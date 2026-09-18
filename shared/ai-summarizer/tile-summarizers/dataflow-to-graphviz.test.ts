@@ -406,6 +406,29 @@ describe("programToGraphviz", () => {
       const dot = programToGraphviz(program);
       expect(dot).toContain("<tr><td>title</td><td>Waves</td></tr>");
       expect(dot).not.toContain("<tr><td>title</td><td>Generator</td></tr>");
+      // The identifier's name half falls back to node.name as well, and it is repeated at every
+      // edge endpoint — so the raw string reaches the AI far more often there than in the title.
+      expect(dot).toContain('"Waves:Waves" [label=<');
+      expect(dot).not.toContain("Generator");
+    });
+
+    // The identifier is repeated at every edge endpoint, so a raw name in its name half reaches the
+    // AI once per connection rather than once per block.
+    it("an edge between legacy blocks references display names at both ends", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Generator", x: 0, y: 0, data: { type: "Generator", plot: false } },
+          n2: { id: "n2", name: "Control", x: 0, y: 0, data: { type: "Control", plot: false } },
+        },
+        connections: {
+          c1: { id: "c1", source: "n1", sourceOutput: "value", target: "n2", targetInput: "num1" }
+        }
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain('"Waves:Waves":"value" -> "Hold:Hold":"num1";');
+      expect(dot).not.toContain("Generator");
+      expect(dot).not.toContain("Control");
     });
 
     it("an edge between renamed blocks references the display-name identifier at both ends", () => {

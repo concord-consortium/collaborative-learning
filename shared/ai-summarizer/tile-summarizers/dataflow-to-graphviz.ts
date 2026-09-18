@@ -243,10 +243,19 @@ export function programToGraphviz(program: Program): string {
   const nodeIdMap = new Map<string, string>();
   const nodeNameCounts = new Map<string, number>();
 
-  Object.values(program.nodes).forEach(node => {
+  // Both halves are the words on screen, never the internal type. The name half falls back to the
+  // node's own `name` for nodes saved before orderedDisplayName existed, and that field holds the
+  // raw type for them (createAndAddNode stamps both from the same value) — so it maps too. The two
+  // passes below have to agree on this string exactly, since the first counts by it and the second
+  // looks those counts back up; computing it once is what keeps them from drifting apart.
+  const baseIdFor = (node: ProgramNode): string => {
     const nodeType = displayNameForType((node.data as NodeDataBase).type);
-    const nodeName = node.data.orderedDisplayName || node.name;
-    const baseId = `${nodeType}:${nodeName}`;
+    const nodeName = node.data.orderedDisplayName || displayNameForType(node.name);
+    return `${nodeType}:${nodeName}`;
+  };
+
+  Object.values(program.nodes).forEach(node => {
+    const baseId = baseIdFor(node);
 
     // Track how many nodes have this type:name combination
     const count = nodeNameCounts.get(baseId) || 0;
@@ -259,9 +268,7 @@ export function programToGraphviz(program: Program): string {
 
   // Fix up IDs: only add index if there are duplicates
   Object.values(program.nodes).forEach(node => {
-    const nodeType = displayNameForType((node.data as NodeDataBase).type);
-    const nodeName = node.data.orderedDisplayName || node.name;
-    const baseId = `${nodeType}:${nodeName}`;
+    const baseId = baseIdFor(node);
     const count = nodeNameCounts.get(baseId) || 0;
 
     if (count === 1) {
