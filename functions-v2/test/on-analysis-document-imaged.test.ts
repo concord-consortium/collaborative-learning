@@ -710,6 +710,42 @@ describe("functions", () => {
       expect(await statusFor("req-imaged-b")).toMatchObject({outcome: "commented"});
     });
 
+    // This trigger reads the queue document once, at creation. A second click's id, added to the
+    // same document while the model call is in progress, would otherwise be lost when this
+    // function deletes the document it read at creation.
+    test("a requestId added to the imaged document while the model call is in progress " +
+         "receives its own commented status", async () => {
+      const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/testdoc1");
+      await imagedDocRef.set(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imgmidflight-a"],
+      }));
+      categorizeRepresentations.mockImplementationOnce(async () => {
+        await imagedDocRef.update({requestIds: FieldValue.arrayUnion("req-imgmidflight-b")});
+        return {
+          summaryEmbedding: undefined, documentMetadata: undefined, metadataGap: undefined,
+          completion: {
+            choices: [{message: {parsed, refusal: undefined}}],
+            usage: {prompt_tokens: 1, completion_tokens: 2},
+          },
+          messageShape: "mixed",
+        };
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imgmidflight-a"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-imgmidflight-a")).toMatchObject({outcome: "commented"});
+      expect(await statusFor("req-imgmidflight-b")).toMatchObject({outcome: "commented"});
+    });
+
     test("a rejected status write leaves the comment and done record in place", async () => {
       // Simulates the Realtime Database write itself failing, so writeEvaluationStatus's own
       // catch-and-warn runs for real.
@@ -918,6 +954,38 @@ describe("functions", () => {
         .once("value").then((snapshot) => snapshot.val());
       expect(await statusFor("req-fail-a")).toMatchObject({outcome: "failed"});
       expect(await statusFor("req-fail-b")).toMatchObject({outcome: "failed"});
+    });
+
+    // Same mid-flight case as the commented version above, but through the error boundary.
+    test("a requestId added to the imaged document while the model call is in progress " +
+         "receives its own failed status", async () => {
+      const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/testdoc1");
+      await imagedDocRef.set(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false,
+        requestIds: ["req-imgmidflight-err-a"],
+      }));
+      categorizeRepresentations.mockImplementationOnce(async () => {
+        await imagedDocRef.update({requestIds: FieldValue.arrayUnion("req-imgmidflight-err-b")});
+        return {
+          summaryEmbedding: undefined, documentMetadata: undefined, metadataGap: undefined,
+          completion: {
+            choices: [{message: {parsed: undefined, refusal: undefined}}],
+            usage: {prompt_tokens: 1, completion_tokens: 2},
+          },
+          messageShape: "image-only",
+        };
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false,
+        requestIds: ["req-imgmidflight-err-a"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-imgmidflight-err-a")).toMatchObject({outcome: "failed"});
+      expect(await statusFor("req-imgmidflight-err-b")).toMatchObject({outcome: "failed"});
     });
 
     test("a failed status is still written when the imaged queue entry cannot be removed", async () => {

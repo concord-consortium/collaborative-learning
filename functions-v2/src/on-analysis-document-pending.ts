@@ -14,6 +14,7 @@ import {generateRenderHtml} from "../../shared/render-page";
 import {kPlaceholderUnitCode} from "../../shared/shared";
 import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
+import {claimRequestIds} from "./claim-request-ids";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
@@ -150,24 +151,6 @@ export function generateHtml(clueDocument: unknown, unit = fallbackClueUnit) {
 const pendingQueuePath = getAnalysisQueueFirestorePath("pending", "{docId}");
 
 /**
- * Reads a queue document's requestIds and deletes it atomically, so an id added after this
- * trigger's own event fired (see AnalysisQueueDocument.requestIds) isn't lost to a `.delete()`
- * racing that write.
- *
- * @param {admin.firestore.DocumentReference} docRef the queue document to remove
- * @return {Promise<string[] | undefined>} the requestIds it held at the moment of deletion
- */
-async function claimRequestIds(
-  docRef: admin.firestore.DocumentReference
-): Promise<string[] | undefined> {
-  return docRef.firestore.runTransaction(async (transaction) => {
-    const requestIds = (await transaction.get(docRef)).data()?.requestIds;
-    transaction.delete(docRef);
-    return Array.isArray(requestIds) ? requestIds : undefined;
-  });
-}
-
-/**
  * Files the document under `failedImaging` and takes it off the pending queue.
  *
  * `accumulated` carries whatever had been worked out before the failure — the classification, the
@@ -232,6 +215,19 @@ async function error(
  * @param {ImagedQueueDocument} queueDoc the record to hand to the next function
  * @param {FirestoreEvent} event the pending-queue event being handled
  */
+// Combines two possibly-absent requestIds arrays, deduped — order doesn't matter, since
+// writeEvaluationStatusForRequests just writes the same outcome under each one.
+function unionRequestIds(a: unknown, b: string[] | undefined): string[] {
+  const ids = new Set<string>();
+  if (Array.isArray(a)) {
+    a.forEach((id) => {
+      if (typeof id === "string") ids.add(id);
+    });
+  }
+  b?.forEach((id) => ids.add(id));
+  return Array.from(ids);
+}
+
 async function writeImaged(
   firestore: admin.firestore.Firestore,
   docId: string,
@@ -245,8 +241,23 @@ async function writeImaged(
   // a later `.update()` would arrive too late for a trigger that already fired.
   await firestore.runTransaction(async (transaction) => {
     const currentRequestIds = (await transaction.get(pendingDocRef)).data()?.requestIds;
-    const requestIds = Array.isArray(currentRequestIds) ? currentRequestIds : queueDoc.requestIds;
-    transaction.set(imagedDocRef, requestIds && requestIds.length > 0 ? {...queueDoc, requestIds} : queueDoc);
+    const pendingRequestIds = Array.isArray(currentRequestIds) ? currentRequestIds : queueDoc.requestIds;
+
+    const existingImaged = await transaction.get(imagedDocRef);
+    if (existingImaged.exists) {
+      // A document already sitting here means an evaluation for this document is already in
+      // progress, using that document's own content — only the ids need to reach it, not this
+      // run's own (redundant, and by now possibly stale) work.
+      const requestIds = unionRequestIds(existingImaged.data()?.requestIds, pendingRequestIds);
+      if (requestIds.length > 0) {
+        transaction.update(imagedDocRef, {requestIds});
+      }
+    } else {
+      transaction.set(
+        imagedDocRef,
+        pendingRequestIds && pendingRequestIds.length > 0 ? {...queueDoc, requestIds: pendingRequestIds} : queueDoc
+      );
+    }
     transaction.delete(pendingDocRef);
   });
 }

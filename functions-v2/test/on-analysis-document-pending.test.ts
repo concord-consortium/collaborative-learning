@@ -418,6 +418,38 @@ describe("functions", () => {
         expect(firstWriteRequestIds).toEqual(["req-midflight2-a", "req-midflight2-b"]);
       });
 
+      // An imaged document already sitting at this docId means an evaluation for it is already in
+      // progress, using that document's own content (a model call, in on-analysis-document-imaged.ts,
+      // can take a while). This run's own freshly-computed content must not replace it — only the
+      // ids need to reach it, so that run's eventual completion status covers this one's click too.
+      test("writeImaged unions its ids into an existing imaged document instead of replacing it",
+        async () => {
+          await givenDocument("union1", mixedDoc);
+          stubShutterbug(shutterbugOk());
+
+          const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/union1");
+          await imagedDocRef.set(pendingEntryFields("union1", {
+            analysisVersion: 2,
+            sendSummary: true,
+            docSummary: "An evaluation already in progress for this document.",
+            sendImage: false,
+            requestIds: ["req-union-existing"],
+          }));
+
+          await runPending("union1", {requestIds: ["req-union-new"]});
+
+          expect(await imagedRecord("union1")).toMatchObject({
+          // The in-progress evaluation's own content survives untouched.
+            docSummary: "An evaluation already in progress for this document.",
+            sendImage: false,
+            // Both ids are present.
+            requestIds: expect.arrayContaining(["req-union-existing", "req-union-new"]),
+          });
+          expect((await imagedRecord("union1"))?.requestIds).toHaveLength(2);
+          // The pending entry is still removed, same as any other run.
+          expect(await countIn("pending")).toEqual(0);
+        });
+
       test("a text-only document is not screenshotted", async () => {
         await givenDocument("text1", sampleDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
