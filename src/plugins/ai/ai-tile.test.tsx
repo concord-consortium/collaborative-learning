@@ -545,6 +545,90 @@ describe("AIComponent", () => {
 
       expect(aiContent.text).toBe("Newer response");
     });
+
+    it("a run started while an earlier one is still in flight restores the real text, not that " +
+       "run's own blank, before capturing its own restore point — so a later failure restores " +
+       "the real text too", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      const { queryByText } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />)
+      );
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
+      let rejectB: (error: Error) => void;
+      const promiseB = new Promise((_resolve, reject) => { rejectB = reject; });
+      mockGetAiContent.mockImplementationOnce(() => promiseA);
+      mockGetAiContent.mockImplementationOnce(() => promiseB);
+
+      // A starts and blanks the text while its request is in flight.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("");
+
+      // B starts before A settles. It must restore the real text — not A's blank — before its own
+      // request even begins.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+      expect(queryByText("Loading...")).toBeInTheDocument();
+
+      // B fails: it restores what it actually captured, which must be the real text.
+      await act(async () => {
+        rejectB!(new Error("network error"));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).toBe("Mocked customized content");
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
+
+    it("a run started while an earlier one is still in flight restores the real text, then " +
+       "succeeds with its own response and clears its restore point", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
+      mockGetAiContent.mockImplementationOnce(() => promiseA);
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "B's response" } });
+
+      // A starts and blanks the text while its request is in flight.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("");
+
+      // B starts before A settles, restoring the real text, then succeeds with its own response.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("B's response");
+
+      // classHash clearing afterward must not restore anything — B's success already cleared the
+      // restore point.
+      mockUserContext = mockUserContextWithoutClassHash;
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("B's response");
+    });
   });
 
 });

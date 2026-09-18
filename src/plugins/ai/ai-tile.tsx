@@ -52,6 +52,13 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   useEffect(() => {
     const generation = ++requestGenerationRef.current;
     const isCurrent = () => requestGenerationRef.current === generation;
+    // Undo a superseded run's own blanking before anything else runs, so this run starts from real
+    // text — otherwise this run's own capture below would save the blank, not the good text.
+    if (previousTextRef.current !== undefined) {
+      content.setText(previousTextRef.current);
+      previousTextRef.current = undefined;
+      if (!getAiContent) setIsUpdating(false);
+    }
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
@@ -122,12 +129,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         }
       };
       queryAI();
-    } else if (previousTextRef.current !== undefined) {
-      // This run invalidated a request without starting its own; nothing else will restore its
-      // text or clear loading.
-      content.setText(previousTextRef.current);
-      previousTextRef.current = undefined;
-      setIsUpdating(false);
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
