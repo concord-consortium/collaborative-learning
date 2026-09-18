@@ -473,6 +473,46 @@ describe("AIComponent", () => {
       });
       expect(aiContent.text).toBe("Newer response");
     });
+
+    it("a request started while classHash was present is invalidated once classHash clears, so " +
+       "its late response is not applied", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      let resolvePending: (value: { data: { text: string } }) => void;
+      const pendingPromise = new Promise<{ data: { text: string } }>(resolve => { resolvePending = resolve; });
+      mockGetAiContent.mockImplementationOnce(() => pendingPromise);
+
+      // Start a request while classHash is present.
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+
+      // classHash clears; the next refresh finds no client and makes no request of its own, but
+      // must still invalidate the one still in flight.
+      mockUserContext = mockUserContextWithoutClassHash;
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+
+      // The original request finally resolves. Its own text is already blanked by this point (its
+      // "clear before loading" step ran before classHash cleared) and nothing here restores it —
+      // that's a separate, known gap. What matters here is that its late response is discarded.
+      await act(async () => {
+        resolvePending!({ data: { text: "Late response" } });
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).not.toBe("Late response");
+    });
   });
 
 });

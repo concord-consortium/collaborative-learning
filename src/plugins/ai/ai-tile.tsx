@@ -47,9 +47,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Update the AI response
   // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
+    const generation = ++requestGenerationRef.current;
+    const isCurrent = () => requestGenerationRef.current === generation;
     if (getAiContent) {
-      const generation = ++requestGenerationRef.current;
-      const isCurrent = () => requestGenerationRef.current === generation;
       const queryAI = async () => {
         setIsUpdating(true);
         // Only assigned once cleared below, so the catch can tell whether restoring is needed.
