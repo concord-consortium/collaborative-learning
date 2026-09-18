@@ -58,7 +58,7 @@ export type NodeValue = number | NodeValueMap;
 // The name/displayName table lives in shared/ so the AI workspace summarizer can translate a
 // block's internal type without this file's SVG imports, which Cloud Functions cannot load.
 export type { NodeType } from "../../../../../shared/dataflow-node-types";
-export { NodeTypes } from "../../../../../shared/dataflow-node-types";
+export { NodeTypes, displayNameForType } from "../../../../../shared/dataflow-node-types";
 
 export const NodeOperationTypes = [
   {

@@ -1,4 +1,4 @@
-import { NodeTypes } from "../../dataflow-node-types";
+import { displayNameForType } from "../../dataflow-node-types";
 
 interface TickEntry {
   nodeValue?: string;
@@ -51,14 +51,6 @@ interface Program {
   connections: Record<string, Connection>;
   groups?: Record<string, Group>;
   recentTicks?: string[];
-}
-
-const displayNameByType = new Map(NodeTypes.map(nt => [nt.name, nt.displayName]));
-
-// The block palette has been renamed since these internal type strings were chosen (e.g. "Generator"
-// displays as "Waves"); a student never sees the internal type, so the AI must not either.
-function displayNameForType(type: string): string {
-  return displayNameByType.get(type) ?? type;
 }
 
 /** Escape a string for use inside a double-quoted Graphviz attribute value. */

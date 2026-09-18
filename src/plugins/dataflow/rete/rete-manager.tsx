@@ -20,7 +20,7 @@ import { INodeServices } from "../nodes/service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { IBaseNode, IBaseNodeModel, NodeClass } from "../nodes/base-node";
-import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
+import { displayNameForType, ProgramDataRates } from "../model/utilities/node";
 import { channelSatisfiedBy } from "../model/utilities/device-capabilities";
 import { ControlNode } from "../nodes/control-node";
 import { CounterNode } from "../nodes/counter-node";
@@ -1203,7 +1203,7 @@ export class ReteManager implements INodeServices {
    * @returns `{nodeType} {n+1}`
    */
   private getNewNodeName(nodeType: string) {
-    const printableType = NodeTypes.find((nt) => nt.name === nodeType)?.displayName ?? nodeType;
+    const printableType = displayNameForType(nodeType);
 
     const nodesNamedAsType = this.editor.getNodes()
       .map(n=> (n as IBaseNode).model.orderedDisplayName)

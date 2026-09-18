@@ -327,8 +327,8 @@ describe("programToGraphviz", () => {
       expect(dot).not.toContain("<tr><td>title</td><td>Sensor:Sensor 1</td></tr>");
     });
 
-    // "Sensor" is identity-mapped, so this coincides with the node's own name; the CLUE-667 describe
-    // block below covers a renamed type, where the two diverge.
+    // "Sensor" is identity-mapped, so this coincides with the node's own name; the "type display
+    // names" describe block below covers a renamed type, where the two diverge.
     it("falls back to the type's display name when there is no ordered display name", () => {
       const unnamed = {
         ...program,
@@ -338,10 +338,10 @@ describe("programToGraphviz", () => {
     });
   });
 
-  // The block palette has been renamed since these internal type strings were chosen (CLUE-667):
+  // The block palette has been renamed since these internal type strings were chosen:
   // Generator/Logic/Control/Demo Output/Live Output display as Waves/Compare/Hold/Demo Device/Live
   // Device. Neither half of that rename reaches the AI unless the summarizer maps it explicitly.
-  describe("type display names (CLUE-667)", () => {
+  describe("type display names", () => {
     it.each([
       ["Generator", "Waves"],
       ["Logic", "Compare"],
@@ -360,6 +360,22 @@ describe("programToGraphviz", () => {
       const dot = programToGraphviz(program);
       expect(dot).toContain(`"${displayName}:${displayName} 1" [label=<`);
       expect(dot).not.toContain(`"${type}:`);
+    });
+
+    // Distinct from the identity-mapped case below: Number is in the table and maps to itself,
+    // while Timer is commented out of it entirely and reaches the fallback. The Timer block is
+    // hidden from the palette but still registered in rete-manager, so an old program can contain
+    // one, and the graph has to name it something.
+    it("names a block whose type is absent from the table by its internal type", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Timer", x: 0, y: 0,
+            data: { type: "Timer", plot: false, orderedDisplayName: "Timer 1" } }
+        },
+        connections: {}
+      };
+      expect(programToGraphviz(program)).toContain('"Timer:Timer 1" [label=<');
     });
 
     it("identity-mapped types (e.g. Number) are unaffected", () => {

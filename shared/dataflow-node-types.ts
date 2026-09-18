@@ -53,3 +53,16 @@ export const NodeTypes: NodeType[] = [
     displayName: "Live Device",
   }
 ];
+
+const displayNameByType = new Map(NodeTypes.map(nt => [nt.name, nt.displayName]));
+
+/**
+ * The word a student sees for a block of the given internal type. The palette has been renamed
+ * since these internal type strings were chosen (e.g. "Generator" displays as "Waves"), so anything
+ * that names a block to a person — or to an AI that will name it to a person — has to go through
+ * here. Unmapped types (the hidden Timer, and anything a future program carries that the palette no
+ * longer offers) fall back to the internal string, which is better than naming nothing at all.
+ */
+export function displayNameForType(type: string): string {
+  return displayNameByType.get(type) ?? type;
+}
