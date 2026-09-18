@@ -329,6 +329,15 @@ $connected-green-dark: #00ad00;
 $new-comment-notice: #5fff32;
 $error-red: #b00020;
 
+// Alerts that sit above the playback bar. Both are absolutely positioned against
+// .playback-component, so they are stacked by offsetting the upper one.
+$playback-alert-background: #f8d7da;
+$playback-alert-color: #721c24;
+$playback-alert-border: #f5c6cb;
+// The height of a one-line alert: a 12px line box plus 4px of padding and 1px of border,
+// top and bottom, and a little air between the two.
+$playback-alert-height: 28px;
+
 $highlight-blue: #0081ff;
 $highlight-blue-20: #0081ff33;
 $highlight-blue-40: #0081ff66;
@@ -421,6 +430,21 @@ $toolbar-z-index: 3;
 
 $tab-min-height: 50px;
 $nav-tab-height: 36px;
+
+// The shared look of the playback alerts. Callers set their own `bottom` so the two stack,
+// and whatever width behavior they need.
+@mixin playback-alert {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: $playback-alert-background;
+  color: $playback-alert-color;
+  border: 1px solid $playback-alert-border;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  z-index: 10;
+}
 
 @mixin tab($direction) {
   display: flex;
