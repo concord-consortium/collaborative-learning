@@ -13,6 +13,7 @@ import {
 } from "../src/on-analysis-document-pending";
 import * as classifier from "../../shared/ai-analysis-classify";
 import * as summarizer from "../../shared/ai-summarizer/ai-summarizer";
+import * as claimRequestIdsModule from "../src/claim-request-ids";
 
 jest.mock("firebase-functions/logger");
 
@@ -570,8 +571,9 @@ describe("functions", () => {
 
       // Same case as the imaged-record test above, but the id lands while metadata is being read,
       // before the empty check.
-      test("a requestId added to the queue document while its metadata is being read still gets " +
-           "its own skipped-empty status", async () => {
+      test("a requestId added to the queue document while its metadata is being read gets its " +
+           "own skipped-empty status, and a late id is re-queued instead of also skipped",
+      async () => {
         await givenDocument("emptymidflight1", emptyDoc);
         await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
         const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptymidflight1");
@@ -591,8 +593,46 @@ describe("functions", () => {
 
         expect(await statusFor("emptymidflight1", "req-emptymidflight-a"))
           .toMatchObject({outcome: "skipped-empty"});
-        expect(await statusFor("emptymidflight1", "req-emptymidflight-b"))
-          .toMatchObject({outcome: "skipped-empty"});
+        // Not part of this run's own snapshot, so it gets no status here.
+        expect(await statusFor("emptymidflight1", "req-emptymidflight-b")).toBeNull();
+
+        // It's back on a fresh pending document instead, for its own run to judge.
+        const requeued = await pendingDocRef.get();
+        expect(requeued.exists).toBe(true);
+        expect(requeued.data()).toMatchObject({requestIds: ["req-emptymidflight-b"]});
+      });
+
+      // A third click can independently create a fresh pending document in this gap; re-creation
+      // must union into it, not replace it.
+      test("re-creating a pending document for a late id unions into one that appeared in the " +
+           "meantime, rather than replacing it", async () => {
+        await givenDocument("emptyunion1", emptyDoc);
+        await seedPendingDoc("emptyunion1", {requestIds: ["req-emptyunion-a"]});
+
+        const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptyunion1");
+        const realClaimRequestIds = claimRequestIdsModule.claimRequestIds;
+        const claimSpy = jest.spyOn(claimRequestIdsModule, "claimRequestIds")
+          .mockImplementation(async (docRef) => {
+            const claimed = await realClaimRequestIds(docRef);
+            // A distinct docUpdated, so the assertion below can tell this document's own fields
+            // apart from the skipped run's older copy of them.
+            await pendingDocRef.set(pendingEntryFields("emptyunion1", {
+              requestIds: ["req-emptyunion-appeared"], docUpdated: "9999",
+            }));
+            return [...(claimed ?? []), "req-emptyunion-b"];
+          });
+
+        await runPending("emptyunion1", {requestIds: ["req-emptyunion-a"]});
+        claimSpy.mockRestore();
+
+        const requeued = await pendingDocRef.get();
+        expect(requeued.exists).toBe(true);
+        expect(requeued.data()?.requestIds).toEqual(
+          expect.arrayContaining(["req-emptyunion-appeared", "req-emptyunion-b"])
+        );
+        // The document that appeared in the meantime is kept, not replaced with the skipped run's
+        // own (older) copy of the same fields.
+        expect(requeued.data()?.docUpdated).toBe("9999");
       });
 
       test("a rejected status write after a skip still leaves the done record and cleanup in place", async () => {

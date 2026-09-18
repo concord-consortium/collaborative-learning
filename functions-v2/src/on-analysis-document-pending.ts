@@ -387,16 +387,49 @@ export const onAnalysisDocumentPending =
           summaryOmittedReason: "empty-document",
           imageOmittedReason: "empty-document",
         });
-        let requestIds = doc.requestIds;
+        let claimedRequestIds = doc.requestIds;
         try {
-          requestIds = await claimRequestIds(firestore.doc(event.document)) ?? requestIds;
+          claimedRequestIds = await claimRequestIds(firestore.doc(event.document)) ?? claimedRequestIds;
         } catch (err) {
           logger.error("Could not remove the pending queue entry, which will not be retried", err);
         }
-        await writeEvaluationStatusForRequests(doc.metadataPath, doc.evaluator, requestIds, {
+
+        // A late id must not be answered by this skip — the document may have gained work since.
+        // Only the snapshot's own ids get "skipped-empty"; a late one goes back onto a fresh
+        // pending document, to be judged by its own run.
+        const ownRequestIds = new Set(doc.requestIds ?? []);
+        const lateRequestIds = (claimedRequestIds ?? []).filter((id) => !ownRequestIds.has(id));
+
+        await writeEvaluationStatusForRequests(doc.metadataPath, doc.evaluator, doc.requestIds, {
           outcome: "skipped-empty",
           docUpdated: doc.docUpdated,
         });
+
+        if (lateRequestIds.length > 0) {
+          const pendingDocRef = firestore.doc(event.document);
+          const newPendingDoc: AnalysisQueueDocument = {
+            metadataPath: doc.metadataPath,
+            documentPath: doc.documentPath,
+            commentsPath: doc.commentsPath,
+            docUpdated: doc.docUpdated,
+            evaluator: doc.evaluator,
+            firestoreDocumentPath: doc.firestoreDocumentPath,
+          };
+          if (doc.aiPrompt) newPendingDoc.aiPrompt = doc.aiPrompt;
+          if (doc.requestContext) newPendingDoc.requestContext = doc.requestContext;
+
+          // A transaction, as on-analyzable-doc-written.ts uses: a plain `set()` could overwrite a
+          // document created in the meantime instead of joining ids to it. Keeping that document's
+          // own fields (docUpdated, requestContext) rather than this skipped run's older ones,
+          // when it exists, since nothing here makes this run's copy the fresher one.
+          await firestore.runTransaction(async (transaction) => {
+            const existing = (await transaction.get(pendingDocRef)).data() as AnalysisQueueDocument | undefined;
+            const priorRequestIds = Array.isArray(existing?.requestIds) ? existing.requestIds : [];
+            const requestIds = [...priorRequestIds, ...lateRequestIds];
+            transaction.set(pendingDocRef, {...(existing ?? newPendingDoc), requestIds});
+          });
+        }
+
         logger.info(`Document ${documentPath} is empty; skipped evaluation`);
         return;
       }
