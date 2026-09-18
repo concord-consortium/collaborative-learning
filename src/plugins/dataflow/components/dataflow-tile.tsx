@@ -161,6 +161,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
               // and it treats a slot with no element as "not present" and skips it. An empty
               // program has no focusable blocks — and since zoom moved to the toolbar, nothing
               // else — so reporting the element here would swallow Tab instead of moving on.
+              // Deliberately the accessibility-tools helper rather than the similar one in
+              // utilities/dom-utils: this has to agree with what the trap itself counts as
+              // focusable, or the slot can be reported as non-empty and swallow Tab anyway.
               return el && getVisibleFocusables(el).length > 0 ? el : undefined;
             }}
             getTopbarElement={() =>
