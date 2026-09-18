@@ -468,4 +468,88 @@ describe("CommentThread", () => {
       expect(screen.getByText("Doc Thread Comment 1")).toBeInTheDocument();
     });
   });
+
+  describe("document placeholder for a status message with no document thread", () => {
+    afterEach(() => {
+      // Restore the module-level default so later tests are unaffected.
+      const useStoresMock = jest.requireMock("../../hooks/use-stores");
+      useStoresMock.useCurriculumOrDocumentContent = () => undefined;
+    });
+
+    it("shows the status message in a document card when a tile is focused and the document " +
+       "has no comments of its own yet", () => {
+      const useStoresMock = jest.requireMock("../../hooks/use-stores");
+      // Stable reference: a fresh object per call would loop the document-expand effect.
+      const statusMessage = { message: "Add some work to your document before requesting Ideas" };
+      useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage });
+
+      // chatThreads has a thread for the focused tile, but none for the document itself.
+      const chatThreads = [makeFakeCommentThread("Tile Thread", "tile-abc", "u1")];
+      const testUser = {id: "u1", name: "test user"} as UserModelType;
+      render((
+        <ModalProvider>
+          <ChatThread
+            focusTileId="tile-abc"
+            user={testUser}
+            chatThreads={chatThreads}
+            activeNavTab={ENavTab.kMyWork}
+            focusDocument="document-key"
+            docTitle="My Document"
+          />
+        </ModalProvider>
+      ));
+
+      expect(screen.getByText("Add some work to your document before requesting Ideas")).toBeInTheDocument();
+      // The tile's own thread, plus a placeholder document thread carrying the message.
+      expect(screen.getAllByTestId("chat-thread")).toHaveLength(2);
+    });
+
+    it("shows no extra document card when there is no status message", () => {
+      const useStoresMock = jest.requireMock("../../hooks/use-stores");
+      useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage: null });
+
+      const chatThreads = [makeFakeCommentThread("Tile Thread", "tile-abc", "u1")];
+      const testUser = {id: "u1", name: "test user"} as UserModelType;
+      render((
+        <ModalProvider>
+          <ChatThread
+            focusTileId="tile-abc"
+            user={testUser}
+            chatThreads={chatThreads}
+            activeNavTab={ENavTab.kMyWork}
+            focusDocument="document-key"
+            docTitle="My Document"
+          />
+        </ModalProvider>
+      ));
+
+      // Only the tile's own thread — nothing to show in a document card, so none is added.
+      expect(screen.getAllByTestId("chat-thread")).toHaveLength(1);
+    });
+
+    it("does not duplicate the document thread when one already exists", () => {
+      const useStoresMock = jest.requireMock("../../hooks/use-stores");
+      const statusMessage = { message: "Add some work to your document before requesting Ideas" };
+      useStoresMock.useCurriculumOrDocumentContent = () => ({ statusMessage });
+
+      // A document thread (tileId "") already exists, alongside the focused tile's own thread.
+      const chatThreads =
+        [makeFakeCommentThread("Doc Thread", "", "u1"), makeFakeCommentThread("Tile Thread", "tile-abc", "u2")];
+      const testUser = {id: "u1", name: "test user"} as UserModelType;
+      render((
+        <ModalProvider>
+          <ChatThread
+            focusTileId="tile-abc"
+            user={testUser}
+            chatThreads={chatThreads}
+            activeNavTab={ENavTab.kMyWork}
+            focusDocument="document-key"
+          />
+        </ModalProvider>
+      ));
+
+      // Exactly the two real threads — no extra placeholder alongside the real document thread.
+      expect(screen.getAllByTestId("chat-thread")).toHaveLength(2);
+    });
+  });
 });

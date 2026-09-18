@@ -330,8 +330,32 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     }
   }, [stores, ui]);
 
+  // With no document thread and a tile focused, the fallback below renders for the tile instead,
+  // leaving nowhere to show the status message. This placeholder stands in for it.
+  const hasDocumentThread = chatThreads?.some(t => !t.tileId);
+
   return (
     <div className="chat-list" data-testid="chat-list">
+      {statusMessage && focusId && !hasDocumentThread &&
+        <ChatThreadItem
+          key="document"
+          threadId="document"
+          user={user}
+          activeNavTab={activeNavTab}
+          onPostComment={onPostComment}
+          onDeleteComment={onDeleteComment}
+          focusDocument={focusDocument}
+          focusTileId={focusTileId}
+          commentThread={undefined}
+          expandedThreads={expandedThreads}
+          onThreadClick={handleThreadClick}
+          isFocused={false}
+          overrideTitle={docTitle}
+          readingCommentId={readingCommentId}
+          pendingCommentId={pendingCommentId}
+          onCommentClick={handleCommentClick}
+        />
+      }
       {
         chatThreads?.map((commentThread: ChatCommentThread) => {
           const shouldBeFocused = commentThread.tileId === focusId;
