@@ -546,9 +546,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   // The AI evaluation is triggered by updating the last-edited timestamp.
   //
-  // An empty document (no `documentHasStudentWork`) shows a nudge instead: no database write, no
-  // REQUEST_IDEA log. A populated document is gated by `canRequestIdeas` and carries a `requestId`
-  // to correlate the server's eventual completion status.
+  // An empty document (no `documentHasStudentWork`) shows a nudge instead of requesting AI
+  // evaluation, and a failed or stalled request shows a failure message — but only when the unit
+  // has AI evaluation configured. A unit with none has nothing to skip or report, and either
+  // message would misattribute itself to Ada, who plays no part there; the click just logs
+  // normally, which is what lets the exemplar controller reveal an exemplar regardless.
+  // A populated document is gated by `canRequestIdeas` and carries a `requestId` to correlate the
+  // server's eventual completion status.
   private handleIdeasButtonClick = async () => {
     const { document } = this.props;
     const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
@@ -558,8 +562,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (!commentsManager || !commentsManager.canRequestIdeas) return;
 
     commentsManager.clearStatusMessage();
+    const aiEnabled = !!appConfig.aiEvaluation;
     const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
-    const requestId = (!isEmpty && appConfig.aiEvaluation) ? nanoid() : null;
+    const skipEmptyDocument = isEmpty && aiEnabled;
+    const requestId = (!isEmpty && aiEnabled) ? nanoid() : null;
     // Must be recorded before any await below, so a status for this click can never find a stale id.
     commentsManager.setLatestIdeasRequestId(requestId);
 
@@ -568,7 +574,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
 
-    if (isEmpty) {
+    if (skipEmptyDocument) {
       commentsManager.showStatusMessage(IDEAS_EMPTY_MESSAGE);
       return;
     }
@@ -627,7 +633,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     // message) can't stomp on it.
     const guardedAttempt = attempt.catch(error => {
       console.error("Ideas request failed:", error);
-      if (!timedOut && commentsManager.latestIdeasRequestId === requestId) {
+      if (aiEnabled && !timedOut && commentsManager.latestIdeasRequestId === requestId) {
         commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
       }
     });
@@ -641,7 +647,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     try {
       const result = await Promise.race([guardedAttempt.then(() => "done" as const), deadline]);
       if (result === "timeout") {
-        commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+        if (aiEnabled) commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
       } else {
         clearTimeout(deadlineTimer);
       }

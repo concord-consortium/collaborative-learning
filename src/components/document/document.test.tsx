@@ -262,6 +262,24 @@ describe("Ideas button", () => {
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
   });
 
+  it("on an empty document in a unit with aiEvaluation unset: fires as today, shows no nudge — " +
+     "there is no AI evaluation to skip, and the exemplar controller still needs the log", async () => {
+    const stores = makeStores(undefined);
+    const document = emptyDocument();
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(stores.db.firebase.setLastEditedNow)
+      .toHaveBeenCalledWith(stores.user, document.key, document.uid, undefined, undefined);
+    expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.REQUEST_IDEA, { document });
+    expect(document.commentsManager?.statusMessage).toBeNull();
+    expect(document.commentsManager?.pendingComments).toHaveLength(0);
+    expect(stores.db.firebase.ref).not.toHaveBeenCalled();
+    expect(document.commentsManager?.canRequestIdeas).toBe(true);
+  });
+
   it("two synchronous clicks on a populated document produce exactly one evaluation, one queued " +
      "entry, and one log", async () => {
     const stores = makeStores("categorize-design");
@@ -361,6 +379,56 @@ describe("Ideas button", () => {
     });
 
     expect(document.commentsManager?.pendingComments).toHaveLength(0);
+
+    jest.useRealTimers();
+  });
+
+  it("in a unit with aiEvaluation unset, releases the gate with no failure message when " +
+     "setLastEditedNow rejects", async () => {
+    const stores = makeStores(undefined);
+    (stores.db.firebase.setLastEditedNow as jest.Mock).mockRejectedValue(new Error("network error"));
+    const document = populatedDocument();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.canRequestIdeas).toBe(true);
+    expect(document.commentsManager?.statusMessage).toBeNull();
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Ideas request failed:", expect.any(Error));
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("in a unit with aiEvaluation unset, releases the gate with no failure message if the " +
+     "request exceeds its deadline", async () => {
+    jest.useFakeTimers();
+    const stores = makeStores(undefined);
+    let resolveSetLastEditedNow: () => void = () => undefined;
+    (stores.db.firebase.setLastEditedNow as jest.Mock).mockReturnValue(
+      new Promise<void>(resolve => { resolveSetLastEditedNow = resolve; })
+    );
+    const document = populatedDocument();
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+    expect(document.commentsManager?.canRequestIdeas).toBe(false);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
+    });
+
+    expect(document.commentsManager?.canRequestIdeas).toBe(true);
+    expect(document.commentsManager?.statusMessage).toBeNull();
+
+    // The abandoned call finally resolves after the client already gave up on it.
+    await act(async () => {
+      resolveSetLastEditedNow();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
 
     jest.useRealTimers();
   });
