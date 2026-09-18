@@ -474,14 +474,16 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Newer response");
     });
 
-    it("a request started while classHash was present is invalidated once classHash clears, so " +
-       "its late response is not applied", async () => {
+    it("a request started while classHash was present is restored, with loading cleared, as " +
+       "soon as classHash clears — its late response is then discarded", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
       const aiModel = TileModel.create({ content: aiContent });
 
-      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      const { queryByText } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />)
+      );
       expect(aiContent.text).toBe("Mocked customized content");
 
       let resolvePending: (value: { data: { text: string } }) => void;
@@ -493,25 +495,55 @@ describe("AIComponent", () => {
         aiContent.requestRefresh();
         await Promise.resolve();
       });
+      expect(queryByText("Loading...")).toBeInTheDocument();
 
-      // classHash clears; the next refresh finds no client and makes no request of its own, but
-      // must still invalidate the one still in flight.
+      // classHash clears; the refresh makes no request of its own, but must restore the in-flight
+      // request's text and clear loading, since nothing else is left running to do either.
+      mockUserContext = mockUserContextWithoutClassHash;
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("Mocked customized content");
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+
+      // The original request's late response must not undo that restoration.
+      await act(async () => {
+        resolvePending!({ data: { text: "Late response" } });
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("Mocked customized content");
+    });
+
+    it("a later invalidation with no successor request does not roll back a response a " +
+       "still-current request already applied", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      // A refresh succeeds with a new response while classHash is still present.
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "Newer response" } });
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("Newer response");
+
+      // classHash then clears; nothing is left to invalidate, so this must not restore the
+      // pre-refresh text.
       mockUserContext = mockUserContextWithoutClassHash;
       await act(async () => {
         aiContent.requestRefresh();
         await Promise.resolve();
       });
 
-      // The original request finally resolves. Its own text is already blanked by this point (its
-      // "clear before loading" step ran before classHash cleared) and nothing here restores it —
-      // that's a separate, known gap. What matters here is that its late response is discarded.
-      await act(async () => {
-        resolvePending!({ data: { text: "Late response" } });
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(aiContent.text).not.toBe("Late response");
+      expect(aiContent.text).toBe("Newer response");
     });
   });
 

@@ -34,6 +34,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Guards against overlapping refresh requests: each run's generation, checked after its await,
   // tells a superseded request not to touch text or isUpdating.
   const requestGenerationRef = useRef(0);
+  // Text to restore when a request is invalidated with no successor to finish the job (e.g. the
+  // class context disappears mid-request). Shared across runs, and cleared once no longer needed.
+  const previousTextRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     onRegisterTileApi({
@@ -52,8 +55,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
-        // Only assigned once cleared below, so the catch can tell whether restoring is needed.
-        let previousText: string | undefined;
         try {
           if (!identifier || !model.id) {
             console.error("No document identifier or tileId found");
@@ -79,7 +80,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             return;
           }
 
-          previousText = content.text;
+          previousTextRef.current = content.text;
           content.setText("");
           const summary = documentSummarizer(document.content, {});
           let dynamicContentPrompt = summary
@@ -103,6 +104,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             throw new Error(response.data.error);
           }
           content.setText(response.data.text);
+          previousTextRef.current = undefined;
           if (response.data.lastUpdated) {
             const timestamp = response.data.lastUpdated;
             setLastUpdated(new Date(timestamp._seconds*1000));
@@ -110,13 +112,22 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         } catch (error) {
           // Restore rather than leave the blank text set above; no-op if nothing was cleared, or a
           // newer refresh has taken over.
-          if (isCurrent() && previousText !== undefined) content.setText(previousText);
+          if (isCurrent() && previousTextRef.current !== undefined) {
+            content.setText(previousTextRef.current);
+            previousTextRef.current = undefined;
+          }
           console.error("Failed to query AI", error);
         } finally {
           if (isCurrent()) setIsUpdating(false);
         }
       };
       queryAI();
+    } else if (previousTextRef.current !== undefined) {
+      // This run invalidated a request without starting its own; nothing else will restore its
+      // text or clear loading.
+      content.setText(previousTextRef.current);
+      previousTextRef.current = undefined;
+      setIsUpdating(false);
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
