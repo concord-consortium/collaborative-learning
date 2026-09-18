@@ -7,9 +7,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
-  CorpusManifest, CorpusSource, ManifestDocument, RepresentationEnvelope,
+  CorpusManifest, CorpusSource, ManifestDocument, RelatedSummaryEntry, RepresentationEnvelope,
   kDocumentIdPattern, kSchemaVersion, sha256Canonical, validateCorpusManifest, validateExpectationsFile,
-  validateRepresentationEnvelope
+  validateRelatedSummariesFile, validateRepresentationEnvelope
 } from "./schemas.js";
 import { Modality, classifyDocument } from "../../../shared/ai-analysis-classify.js";
 import { removeImageRepresentation } from "./represent-image.js";
@@ -146,13 +146,30 @@ export const importableSources: readonly CorpusSource[] = ["synthetic", "demo", 
  * cannot render" is exactly the kind of thing it already records. A source directory without one —
  * every real corpus — simply has no expectations, and the manifest keeps whatever a human set.
  */
+/**
+ * Files that sit beside a source directory's documents and describe them, rather than being one.
+ * Named here so the import scan below and the readers cannot drift apart.
+ */
+const kSidecarFiles = ["expectations.json", "related-summaries.json"] as const;
+const [kExpectationsFile, kRelatedSummariesFile] = kSidecarFiles;
+
 function readSourceRenderExpectations(from: string): Map<string, string> {
-  const file = path.join(from, "expectations.json");
+  const file = path.join(from, kExpectationsFile);
   if (!fs.existsSync(file)) return new Map();
   const expectations = validateExpectationsFile(readJsonFile(file), file);
   return new Map(Object.entries(expectations.documents)
     .filter(([, entry]) => entry.expectedRenderFailure !== undefined)
     .map(([docId, entry]) => [docId, entry.expectedRenderFailure!]));
+}
+
+/**
+ * The source directory's related summaries, keyed by document id. The manifest is generated and
+ * never committed, so this is the only place a fixture's related summaries can be written down.
+ */
+function readSourceRelatedSummaries(from: string): Map<string, RelatedSummaryEntry[]> {
+  const file = path.join(from, kRelatedSummariesFile);
+  if (!fs.existsSync(file)) return new Map();
+  return new Map(Object.entries(validateRelatedSummariesFile(readJsonFile(file), file).documents));
 }
 
 export function importCorpus(options: ImportOptions): ImportResult {
@@ -184,14 +201,20 @@ export function importCorpus(options: ImportOptions): ImportResult {
   const existing = fs.existsSync(paths.manifest) ? readManifest(paths) : null;
   const previous = new Map((existing?.documents ?? []).map((entry) => [entry.id, entry]));
   const sourceExpectations = readSourceRenderExpectations(from);
+  const sourceRelatedSummaries = readSourceRelatedSummaries(from);
 
   const warnings: string[] = [];
   const imported: string[] = [];
   const entries: ManifestDocument[] = [];
   const seen = new Set<string>();
 
+  // A flat source directory holds its sidecars beside its documents, and every `.json` here would
+  // otherwise be imported as one. In the nested layout they sit outside `documents/` and never
+  // reach this scan, so the exclusion is limited to the flat case.
+  const isFlatLayout = documentsDir === sourceDir;
   const sourceFiles = fs.readdirSync(documentsDir)
     .filter((name) => name.endsWith(".json"))
+    .filter((name) => !(isFlatLayout && (kSidecarFiles as readonly string[]).includes(name)))
     .sort();
 
   for (const name of sourceFiles) {
@@ -239,7 +262,12 @@ export function importCorpus(options: ImportOptions): ImportResult {
       expectedRenderFailure:
         before?.expectedRenderFailure ?? sourceExpectations.get(id) ?? null,
       labels: before?.labels ?? {},
-      relatedSummaries: before?.relatedSummaries ?? [],
+      // Seeded from the source directory's `related-summaries.json`, on the same rule as
+      // `expectedRenderFailure` above: a value already in the manifest wins. An empty list is not
+      // such a value — it is what every entry starts as — so the sidecar fills it.
+      relatedSummaries: before?.relatedSummaries?.length
+        ? before.relatedSummaries
+        : sourceRelatedSummaries.get(id) ?? [],
       historical: before?.historical ?? null
     });
   }

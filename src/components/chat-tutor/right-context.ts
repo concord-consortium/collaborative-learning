@@ -1,26 +1,33 @@
+import { getSnapshot, IAnyStateTreeNode } from "mobx-state-tree";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
+import { hashString } from "../../../shared/hash-string";
 
 export interface RightSummary {
   markdown: string;
   hash: string;
 }
 
-// djb2 — a cheap non-cryptographic hash, sufficient to detect summary changes.
-export function hashString(str: string): string {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    // eslint-disable-next-line no-bitwise
-    hash = (hash * 33) ^ str.charCodeAt(i);
-  }
-  // eslint-disable-next-line no-bitwise
-  return (hash >>> 0).toString(36);
-}
 
 // Summarizes the workspace document as compact markdown. The caller must ensure
 // content is defined — documentSummarizer(undefined) throws.
 export function summarizeRight(content: unknown): RightSummary {
   const markdown = documentSummarizer(content, {});
   return { markdown, hash: hashString(markdown) };
+}
+
+export interface RightContent {
+  json: string;
+  hash: string;
+}
+
+// The document itself, for a backend that projects it server-side rather than reading a summary.
+//
+// A snapshot rather than the live node: it is what normalize() reads on the other side, and it is
+// the only form that survives the trip. There is no dirty-tracking around this the way there is
+// around summarizeRight — serializing is cheap, and the cache exists for the summarizer's cost.
+export function serializeRight(content: unknown): RightContent {
+  const json = JSON.stringify(getSnapshot(content as IAnyStateTreeNode));
+  return { json, hash: hashString(json) };
 }
 
 export interface DecideContextArgs {

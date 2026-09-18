@@ -25,7 +25,7 @@ function makeManagerStub(
   return stub;
 }
 
-describe("ReteManager.getNodeIdsInReadingOrder (CLUE-455)", () => {
+describe("ReteManager.getNodeIdsInReadingOrder", () => {
   it("orders three nodes left-to-right when they share the same row band", () => {
     const manager = makeManagerStub([
       { id: "c", x: 300, y: 10 },
@@ -184,5 +184,47 @@ describe("ReteManager zoom/pan (CLUE-573)", () => {
     const { stub, calls } = makeTransformStub(1, 10, 20);
     await stub.pan(40, -40);
     expect(calls.translate).toEqual([[50, -20]]);
+  });
+});
+
+/**
+ * The title a new block is given. This is where the palette's word first reaches a document: the
+ * student clicks "Waves" and the block must be titled "Waves 1", not "Generator 1", because that
+ * title is persisted and is later what the AI reads back. Stubbed the same way as above —
+ * `getNewNodeName` reads only `this.editor.getNodes()`, and each node only for its
+ * `model.orderedDisplayName`.
+ */
+function makeNamingStub(existingNames: string[]): ReteManager {
+  const stub = Object.create(ReteManager.prototype);
+  stub.editor = { getNodes: () => existingNames.map(name => ({ model: { orderedDisplayName: name } })) };
+  return stub;
+}
+
+// getNewNodeName is private; the tests reach it the same way the stub reaches the prototype.
+function newNodeName(manager: ReteManager, nodeType: string): string {
+  return (manager as any).getNewNodeName(nodeType);
+}
+
+describe("ReteManager.getNewNodeName", () => {
+  it("titles a new block with the palette's word, not the internal type", () => {
+    expect(newNodeName(makeNamingStub([]), "Generator")).toBe("Waves 1");
+  });
+
+  it("counts existing blocks by their display name", () => {
+    expect(newNodeName(makeNamingStub(["Waves 1", "Waves 2"]), "Generator")).toBe("Waves 3");
+  });
+
+  it("does not count blocks of a different type", () => {
+    expect(newNodeName(makeNamingStub(["Hold 1", "Compare 1"]), "Generator")).toBe("Waves 1");
+  });
+
+  it("leaves a type whose display name never changed alone", () => {
+    expect(newNodeName(makeNamingStub(["Sensor 1"]), "Sensor")).toBe("Sensor 2");
+  });
+
+  // The hidden Timer block is absent from the display-name table, and its internal name carries
+  // regex metacharacters that once made every new Timer "Timer (on/off) 1".
+  it("names a block whose type is absent from the table by its internal type", () => {
+    expect(newNodeName(makeNamingStub(["Timer 1"]), "Timer")).toBe("Timer 2");
   });
 });

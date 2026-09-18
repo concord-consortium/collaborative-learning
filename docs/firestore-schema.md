@@ -9,10 +9,10 @@ Outside of the main collections for users and documents, there is a collection o
 ## Summaries
 
 The top-level `summaries` collection holds one record per analyzed document: the summary the AI was
-given, the vector it is found by, and the ratings students gave the comment it produced. The
-analysis pipeline creates and refreshes these records; `onCommentRated` adds the ratings. No rule in
-`firestore.rules` matches this collection, so the catch-all denies every client read and write and
-only the cloud functions, which use the admin SDK, reach it.
+given, the vector it is found by, and the ratings people gave the comments on it — the AI's own and
+each other's alike. The analysis pipeline creates and refreshes these records; `onCommentRated` adds
+the ratings. No rule in `firestore.rules` matches this collection, so the catch-all denies every
+client read and write and only the cloud functions, which use the admin SDK, reach it.
 
 A record's id is `{root}-{space}-{key}`, so `demo-CLUE-abc123` for a document with the key `abc123`
 in the `CLUE` demo space. `root` and `space` are the realm the document lives in, taken from its
@@ -34,9 +34,16 @@ Fields:
 - analyzedAt: (number, epoch milliseconds)
 - adaCommentId: (string, the comment this analysis created)
 - aiAgreements: (map of ratings, keyed `{commentId}_{raterUid}`; entries from the retired
-  `agreeWithAi` flow are keyed by the rater's uid alone)
-- numAiAgreements: (number, ratings of Ada's comments; the search returns only records above zero)
-- numAgreements: (number, ratings of any comment; absent on records written before it existed)
+  `agreeWithAi` flow are keyed by the rater's uid alone. Each entry also keeps the rated comment's
+  text and tags as they read when the rating was made, and `isAiComment` says whether that comment
+  was the AI's.)
+- numAiAgreements: (number, ratings of Ada's comments)
+- numAgreements: (number, ratings of any comment; the related-summaries search returns only records
+  above zero, so a record written before this field existed is never returned)
+
+What reaches the AI prompt depends on who wrote the rated comment. Ratings of Ada's comments are
+sent as a count per value. Ratings of comments people wrote are sent as the comment itself — its
+text, its tag, and a count per value — fenced, escaped and length-capped.
 
 ## Top level collections
 
@@ -153,6 +160,7 @@ Collection:
 - tileId: (string, mobx id)
 - uid: (string)
 - tags: (array of strings)
+- ratings: (map of rater user id to `"yes" | "no" | "notSure"`, written by the comment UI. Under `authed` the rules restrict a writer to their own key and to those three values; `demo` and `dev` let any signed-in user write anything, and `qa`/`test` allow the same inside the writer's own root, so in those realms neither the key nor the value is a guarantee. `onCommentRated` copies each rating onto the document's `summaries` record — see "Summaries" above, and note the read side drops values outside the three.)
 
 ### Contents of `offerings/{offeringId}`
 

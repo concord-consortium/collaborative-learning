@@ -71,9 +71,37 @@ The tutor also reads its model from an `OPENAI_MODEL` param, which every other f
 
 **Use `.env.local`, not `.env`.** The Firebase CLI reads `.env` at deploy time and applies its values to the deployed functions of whichever project is selected — so a local `OPENAI_MODEL` in `.env` would decide which model production calls. `.env.local` is the one Firebase reserves for emulation and never deploys.
 
+A per-project file — `.env.collaborative-learning-staging`, `.env.collaborative-learning-ec215` — is applied only when deploying to that project, which is how a setting can be true of staging and not of production.
+
+**`AI_PROMPT_TEXT_LOGGING` — for the emulator, and off everywhere else.** The analysis pipeline always logs how many agreement entries and peer comments each related summary contributed; those are counts, with no text and nobody's id, and they are on everywhere. This param additionally logs the related-summary text *as it was sent to OpenAI* — the stored summary, the agreement counts sentence and the fenced peer comments together — so that a person can confirm that rated human comments arrive intact and separate from the counts. It writes what people in the class wrote about each other's work, so:
+
+- Set it in `.env.local`, which the emulator reads and Firebase never deploys. **It must never appear in `.env` or in any `.env.collaborative-learning-*` file.** No deployed environment needs it: the emulator runs the whole read path, and the one thing the emulator cannot check — that a composite index exists — shows in the count-only log line, not in the text.
+- **It has no effect outside the functions emulator.** The code requires `FUNCTIONS_EMULATOR=true`, which the emulator sets itself, as well as the param. So setting the variable on a deployed project logs nothing; enabling it there would take a code change.
+- It is read as exactly `on`. Absent, `off`, `true`, `ON` and everything else leave the text out. An unset param reads back as `""` at runtime rather than as its declared default, so absent is off by construction.
+- Remove it from `.env.local` when the check is done, so the next emulator run is quiet.
+
 In this approach the functions are running inside of Jest and they connect to the emulated Firestore and Realtime database services.
 
 The tests use `firebase-functions-test`. This package does a little setup of environment variables so when the functions run they will connect to the emulator. This package also provides a way to mock some standard events and wraps the calls to the functions to emulate how they would be called in the cloud.  This is a simple and efficient way of testing the basic functionality without loading the function code into the emulator itself. The downside is that the functions are not responding to real events in Firestore or realtime database. If they are http functions they are not receiving the actual request event.
+
+### ForeverLearning tutor backend
+
+The tutor can route a conversation to ForeverLearning instead of OpenAI (`chatTutorProvider` in the
+unit config, or the `chatProvider` URL param). That path needs one secret and five params, none of
+which the OpenAI path reads:
+
+| Where | Name |
+|---|---|
+| `.secret.local` | `FL_CONCORDCLUE_API_KEY` |
+| `.env.local` | `FL_BASE_URL`, `FL_SOLUTION_ID`, `FL_CATALOG_COMMIT`, `FL_PROTECTION_CLASSES`, `FL_PROTECTION_PATTERN_REFS` |
+
+See `.env.example` for what each one means and a working set of values. An FL turn with them unset
+fails the turn rather than sending an unprotected packet — `buildEnvelope` refuses an empty
+answer-protection policy — so the failure is loud rather than silent. An OpenAI conversation is
+unaffected either way: the backends are built as factories, so only the one a conversation is routed
+to is constructed, and a missing FL key cannot break an OpenAI turn.
+
+Both secrets are declared in the trigger's `runWith({secrets: [...]})`, so a deploy provisions both.
 
 #### Notes
 
@@ -163,6 +191,14 @@ Two things about that command:
 "deployed indexes successfully" means the request was accepted, not that the index is ready —
 creation is asynchronous and is logged only at debug level. Check the Firebase console, or run a
 query that needs it: while it builds, Firestore says so in the error text.
+
+**`summaries` currently carries two composite indexes on purpose.** They differ in one field: the
+older one ends `numAiAgreements`, the newer one `numAgreements`. The related-summaries lookup moved
+to `numAgreements` so a document can be found on ratings of human comments alone (CLUE-660), and the
+older index is kept only so the functions already deployed keep working until the new one has been
+built and the new functions verified. **Remove the `numAiAgreements` one in a follow-up, once that
+is done** — it is the case the second bullet above warns about, where the index the deployed
+functions depend on is the one the delete prompt offers to remove.
 
 ## Differences with functions-v1
 

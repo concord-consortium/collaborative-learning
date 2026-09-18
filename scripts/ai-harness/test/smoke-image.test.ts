@@ -426,9 +426,15 @@ describe("end-to-end image-only run against the synthetic corpus", () => {
     }
     // And the dispatched calls were only the ones carrying a summary; the rest were cache hits.
     expect(requests).toHaveLength(shape.withSummaryContent.length);
+    // The prompt, then the summary and any related-summary parts, then the picture. The example
+    // corpus seeds related summaries for some documents, so how many text parts a request carries
+    // depends on the document; what does not depend on it is that the text comes first and the
+    // picture last.
     for (const request of requests) {
-      expect((request.messages[1].content as any[]).map((part: any) => part.type))
-        .toEqual(["text", "text", "image_url"]);
+      const types = (request.messages[1].content as any[]).map((part: any) => part.type);
+      expect(types.length).toBeGreaterThanOrEqual(3);
+      expect(types[types.length - 1]).toBe("image_url");
+      expect(types.slice(0, -1)).toEqual(types.slice(0, -1).map(() => "text"));
     }
   });
 

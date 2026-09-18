@@ -1,4 +1,4 @@
-import { documentSummarizer } from './ai-summarizer';
+import { documentSummarizer, normalize } from './ai-summarizer';
 import { TileHandler, TileHandlerParams } from './ai-summarizer-types';
 import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
 import { defaultTileHandlers } from './ai-tile-summarizer';
@@ -1508,5 +1508,148 @@ describe('documentSummarizerWithDrawings', () => {
       // includeModel only affects unknown tile types, not handled ones
       expect(result).not.toContain('"model":{"id":"tile1"');
     });
+  });
+});
+
+describe('normalize', () => {
+  const withVariables = (variables: any[]) => ({
+    rowOrder: [], rowMap: {}, tileMap: {},
+    sharedModelMap: {
+      'sm-vars': {
+        sharedModel: { type: 'SharedVariables', id: 'sm-vars', variables },
+        tiles: ['tile-sim-1', 'tile-df-1'],
+      },
+    },
+  });
+
+  // A variable's labels are what say it is an input read from a named sensor, or an output driving
+  // a named device. Without them a variable is a number with a name, and nothing downstream can
+  // tell the EMG reading a program consumes from the gripper position it controls.
+  it('keeps the labels that say what a variable is for', () => {
+    const { normalizedModel } = normalize(withVariables([
+      { id: 'v-emg', name: 'emg_key', displayName: 'EMG', unit: 'mV', value: 37,
+        labels: ['input', 'sensor:emg-reading', 'decimalPlaces:0'] },
+    ]) as any);
+    expect(normalizedModel.variables[0]).toMatchObject({
+      id: 'v-emg', displayName: 'EMG', unit: 'mV', value: 37,
+      labels: ['input', 'sensor:emg-reading', 'decimalPlaces:0'],
+    });
+  });
+
+  it('leaves labels undefined for a variable that carries none', () => {
+    const { normalizedModel } = normalize(withVariables([
+      { id: 'v-mode', name: 'simulation_mode_key', displayName: 'Simulation Mode', value: 0 },
+    ]) as any);
+    expect(normalizedModel.variables[0].labels).toBeUndefined();
+  });
+
+  // "39" means nothing without "mV". The unit is authored on the attribute and is the difference
+  // between a number and a measurement, so dropping it silently makes a dataset less readable than
+  // the table the student is looking at.
+  it('keeps the unit an attribute is measured in', () => {
+    const content = {
+      rowOrder: [], rowMap: {}, tileMap: {},
+      sharedModelMap: {
+        'sm-data': {
+          sharedModel: {
+            type: 'SharedDataSet', id: 'sm-data',
+            dataSet: {
+              id: 'ds-1', name: 'Program 1',
+              attributes: [
+                { id: 'ATTRx', name: 'time', units: 's', values: ['0', '1'] },
+                { id: 'ATTRn', name: 'label', values: ['a', 'b'] },
+              ],
+              cases: [{ __id__: 'c1' }, { __id__: 'c2' }],
+            },
+          },
+          tiles: ['tile-df-1'],
+        },
+      },
+    };
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.dataSets[0].attributes[0]).toMatchObject({ name: 'time', units: 's' });
+    // Absent rather than empty, so "no unit authored" is not reported as a unit.
+    expect(normalizedModel.dataSets[0].attributes[1].units).toBeUndefined();
+  });
+
+  // A shared model that cannot be read should cost the reader that model and no more. Nothing
+  // guards the caller, so a throw here loses the whole document's summary — every tile with it.
+  it('skips a dataset entry with no dataSet rather than throwing', () => {
+    const content = {
+      rowOrder: [], rowMap: {}, tileMap: {},
+      sharedModelMap: {
+        'sm-broken': { sharedModel: { type: 'SharedDataSet', id: 'sm-broken' }, tiles: ['t1'] },
+      },
+    };
+    expect(() => normalize(content as any)).not.toThrow();
+    expect(normalize(content as any).normalizedModel.dataSets).toEqual([]);
+  });
+
+  // Variables arrive as one flat list across every shared model, so without the owning model a
+  // consumer cannot tell which variables belong together — and datasets already carry exactly this
+  // linkage, so its absence here was an asymmetry rather than a decision.
+  it('records which shared model a variable came from and which tiles reference it', () => {
+    const { normalizedModel } = normalize(withVariables([
+      { id: 'v-emg', displayName: 'EMG', value: 37 },
+    ]) as any);
+    expect(normalizedModel.variables[0]).toMatchObject({
+      id: 'v-emg',
+      sharedModelId: 'sm-vars',
+      tileIds: ['tile-sim-1', 'tile-df-1'],
+    });
+  });
+});
+
+// normalize() is tolerant of a malformed shared model in four places, and the policy is the same
+// in each: a shared model we cannot read costs the reader that model, never the whole document
+// summary. Each place is pinned here, along with providerId, which is reported as "" rather than
+// undefined so it matches its non-optional type.
+describe('normalize tolerates a malformed shared model', () => {
+  const withSharedModel = (sharedModel: any, tiles?: any) => ({
+    rowOrder: [], rowMap: {}, tileMap: {},
+    sharedModelMap: { 'sm-1': { sharedModel, ...(tiles === undefined ? {} : { tiles }) } },
+  });
+
+  it('treats a dataset with no cases array as having no cases', () => {
+    const content = withSharedModel({
+      type: 'SharedDataSet', id: 'sm-1',
+      dataSet: { id: 'ds', name: 'D', attributes: [{ id: 'a', name: 'a', values: ['1'] }] },
+    }, ['t1']);
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.dataSets[0].numCases).toBe(0);
+    expect(normalizedModel.dataSets[0].data).toEqual([]);
+  });
+
+  it('treats a dataset entry with no tiles list as referenced by no tiles', () => {
+    const content = withSharedModel({
+      type: 'SharedDataSet', id: 'sm-1',
+      dataSet: { id: 'ds', name: 'D', attributes: [], cases: [] },
+    }, undefined);
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.dataSets[0].tileIds).toEqual([]);
+  });
+
+  it('treats a variables model with no variables list as carrying none', () => {
+    const content = withSharedModel({ type: 'SharedVariables', id: 'sm-1' }, ['t1']);
+    expect(() => normalize(content as any)).not.toThrow();
+    expect(normalize(content as any).normalizedModel.variables).toEqual([]);
+  });
+
+  it('treats a variables entry with no tiles list as referenced by no tiles', () => {
+    const content = withSharedModel(
+      { type: 'SharedVariables', id: 'sm-1', variables: [{ id: 'v' }] }, undefined);
+    const { normalizedModel } = normalize(content as any);
+    expect(normalizedModel.variables[0].tileIds).toEqual([]);
+  });
+
+  // NormalizedDataSet.providerId is typed non-optional, but a dataset that names no provider used
+  // to produce undefined at runtime. A consumer that only tests truthiness cannot tell, but one
+  // comparing to undefined can.
+  it('reports no provider as an empty string rather than undefined', () => {
+    const content = withSharedModel({
+      type: 'SharedDataSet', id: 'sm-1',
+      dataSet: { id: 'ds', name: 'D', attributes: [], cases: [] },
+    }, ['t1']);
+    expect(normalize(content as any).normalizedModel.dataSets[0].providerId).toBe('');
   });
 });
