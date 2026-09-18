@@ -206,6 +206,29 @@ describe("Ideas button", () => {
     expect(document.commentsManager?.pendingComments).toHaveLength(0);
   });
 
+  it("a comment that arrives while the click's own awaits are still pending is picked up as soon " +
+     "as the entry is queued, instead of sitting unresolved until the expiry", async () => {
+    const stores = makeStores("categorize-design");
+    const document = populatedDocument();
+    renderDocument(document, stores);
+
+    clickIdeas();
+    // The comment lands before this click's own awaits get a chance to queue its pending entry.
+    act(() => {
+      document.commentsManager?.setComments([{
+        id: "ai-1",
+        uid: kAnalyzerUserParams.id,
+        name: "Ada Insight",
+        content: "hi",
+        createdAt: new Date(Date.now() + 60_000),
+        network: "test"
+      }]);
+    });
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.pendingComments).toHaveLength(0);
+  });
+
   it("on a populated document in a unit with aiEvaluation unset: fires as today, queues and " +
      "subscribes to nothing, and an exemplar comment posts immediately", async () => {
     const stores = makeStores(undefined);

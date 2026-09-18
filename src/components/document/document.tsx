@@ -613,6 +613,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             dispose: () => statusRef.off("value", onStatus)
           });
           statusRef.on("value", onStatus);
+
+          // A fast comment can arrive before this entry existed to catch it; recheck now rather
+          // than wait for the 120s expiry above.
+          commentsManager.checkPendingComments();
         }
       }
 
