@@ -343,3 +343,54 @@ describe("the empty-document nudge, scoped to the document thread", () => {
     expect(screen.queryByText(IDEAS_EMPTY_MESSAGE)).not.toBeInTheDocument();
   });
 });
+
+describe("the waiting message, scoped to the document thread", () => {
+  afterEach(() => {
+    // Restore the module-level default so later tests are unaffected.
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => undefined;
+  });
+
+  it("still renders in the document thread's card when a tile is focused and awaiting a comment", () => {
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => ({ isAwaitingRemoteComment: true });
+
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1"
+          isDocumentThread={true} />
+      </ModalProvider>
+    ));
+
+    expect(screen.getByText("Ada is thinking about it...")).toBeInTheDocument();
+  });
+
+  it("does not render in a tile thread's card even when awaiting a comment", () => {
+    // A tile thread's card shares the same document-level `content` as the document thread's, so
+    // gating on `isAwaitingRemoteComment` alone (via focusTileId) would render it there too.
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => ({ isAwaitingRemoteComment: true });
+
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab="my-work" isFocused={true} focusTileId="tile-1" focusDocument="doc1"
+          isDocumentThread={false} />
+      </ModalProvider>
+    ));
+
+    expect(screen.queryByText("Ada is thinking about it...")).not.toBeInTheDocument();
+  });
+
+  it("still renders in the document thread's card with no tile focused", () => {
+    const useStoresMock = jest.requireMock("../../hooks/use-stores");
+    useStoresMock.useCurriculumOrDocumentContent = () => ({ isAwaitingRemoteComment: true });
+
+    render((
+      <ModalProvider>
+        <CommentCard activeNavTab="my-work" isFocused={true} focusDocument="doc1" isDocumentThread={true} />
+      </ModalProvider>
+    ));
+
+    expect(screen.getByText("Ada is thinking about it...")).toBeInTheDocument();
+  });
+});

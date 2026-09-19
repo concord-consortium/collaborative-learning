@@ -179,9 +179,9 @@ export const CommentCard: React.FC<IProps> = observer(({ activeNavTab, user, pos
     logDocumentViewEvent(document);
   };
 
-  const showWaitingMessage = !focusTileId || content?.isAwaitingRemoteComment;
-  // Scoped to the document thread, not focusTileId: every expanded tile thread shares this same
-  // `content`, so focusTileId alone would show the message under all of them.
+  // Both scoped to the document thread, not focusTileId: every expanded tile thread shares this
+  // same `content`, so focusTileId alone would show the message under all of them.
+  const showWaitingMessage = isDocumentThread && !!content?.isAwaitingRemoteComment;
   const showStatusMessage = isDocumentThread && !!content?.statusMessage;
 
   const updateRating = useUpdateCommentRating();
