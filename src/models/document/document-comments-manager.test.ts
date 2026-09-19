@@ -338,6 +338,9 @@ describe("DocumentCommentsManager", () => {
     });
 
     it("clears the nudge when a new AI comment arrives", () => {
+      // Comments have already loaded once this session (even with none yet), establishing a real
+      // baseline before the nudge is shown — see the first-load tests below for the other case.
+      manager.setComments([]);
       manager.showStatusMessage("Add some work");
 
       manager.setComments([{
@@ -356,6 +359,7 @@ describe("DocumentCommentsManager", () => {
     // clock against the server's, so an arbitrarily old server timestamp (as a fast client clock
     // would otherwise appear to be, relative to shownAt) still clears the message.
     it("clears the nudge for a new AI comment even with a server timestamp far in the past", () => {
+      manager.setComments([]);
       manager.showStatusMessage("Add some work");
 
       manager.setComments([{
@@ -366,6 +370,50 @@ describe("DocumentCommentsManager", () => {
         createdAt: new Date(0),
         network: "test"
       }]);
+
+      expect(manager.statusMessage).toBeNull();
+    });
+
+    // The chat panel has not yet loaded comments for this document this session, so `comments` is
+    // still its `[]` default when the nudge is shown. The first real snapshot then arrives
+    // carrying a comment that existed before this session — it must establish the baseline, not
+    // be read as new activity, or the nudge would flash and vanish for no reason.
+    it("does not clear the nudge when the first comments load surfaces a pre-existing AI comment", () => {
+      manager.showStatusMessage("Add some work");
+
+      manager.setComments([{
+        id: "ai-1",
+        uid: kAnalyzerUserParams.id,
+        name: "Ada Insight",
+        content: "hi",
+        createdAt: new Date(),
+        network: "test"
+      }]);
+
+      expect(manager.statusMessage).not.toBeNull();
+    });
+
+    it("still clears the nudge for a genuinely new comment arriving in a later load, after the " +
+       "first one already established the baseline", () => {
+      manager.showStatusMessage("Add some work");
+      // First load: establishes the baseline from whatever already existed.
+      manager.setComments([{
+        id: "ai-1",
+        uid: kAnalyzerUserParams.id,
+        name: "Ada Insight",
+        content: "hi",
+        createdAt: new Date(),
+        network: "test"
+      }]);
+      expect(manager.statusMessage).not.toBeNull();
+
+      // A second, later load brings a comment that was not in the first one.
+      manager.setComments([
+        { id: "ai-1", uid: kAnalyzerUserParams.id, name: "Ada Insight", content: "hi",
+          createdAt: new Date(), network: "test" },
+        { id: "ai-2", uid: kAnalyzerUserParams.id, name: "Ada Insight", content: "new one",
+          createdAt: new Date(), network: "test" }
+      ]);
 
       expect(manager.statusMessage).toBeNull();
     });

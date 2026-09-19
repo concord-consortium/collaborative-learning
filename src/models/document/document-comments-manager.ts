@@ -87,6 +87,10 @@ export class DocumentCommentsManager {
   comments: CommentWithId[] = [];
   pendingComments: PendingComment[] = [];
   private isCheckingPending = false;
+  /** False until `setComments` has run at least once. `comments` is `[]` until then, so a status
+   * message shown before the panel's first Firestore snapshot arrives would otherwise treat every
+   * pre-existing analyzer comment as newly arrived — see `setComments`. */
+  private hasLoadedComments = false;
 
   /** An inline status line shown in place of a real AI comment: the "add some work" nudge, or a
    * failure message. Client-only, and deliberately not a `pendingComments` entry — it would
@@ -166,9 +170,14 @@ export class DocumentCommentsManager {
   }
 
   setComments(comments: CommentWithId[]) {
+    // The first load establishes the baseline rather than reporting new activity: comments is []
+    // until now, so a status message shown before this point would otherwise see every
+    // pre-existing analyzer comment as newly arrived.
+    const isFirstLoad = !this.hasLoadedComments;
+    this.hasLoadedComments = true;
     this.comments = comments;
 
-    if (this.statusMessage) {
+    if (this.statusMessage && !isFirstLoad) {
       const { priorAnalyzerCommentIds } = this.statusMessage;
       const hasNewAnalyzerComment = comments.some(c =>
         c.uid === kAnalyzerUserParams.id && !priorAnalyzerCommentIds.has(c.id));
