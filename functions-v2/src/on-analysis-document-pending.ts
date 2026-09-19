@@ -365,6 +365,8 @@ export const onAnalysisDocumentPending =
       const summaryCarriesStudentWork = classified.summaryCarriesStudentWork;
       const needsImage = classified.tiles.some((tile) => tile.requiresVisualRepresentation);
       const promptNeedsImage = classified.promptNeedsImage;
+      // modality/needsImage are type-level facts and can disagree with the instance-level skip
+      // decision at step 2 below — see AnalysisClassification.modality for why that's expected.
       accumulated.classification = {
         modality: classified.computedModality, hasStudentText, summaryCarriesStudentWork, needsImage,
         promptNeedsImage,

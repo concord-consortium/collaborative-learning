@@ -17,6 +17,15 @@ export type OmittedReason =
 
 /** What the document holds, from walking its tiles. */
 export interface AnalysisClassification {
+  /**
+   * What the document's tile *types* would need to represent it to the model — a type-level fact,
+   * independent of whether any tile actually holds student work. A document skipped as
+   * `"empty-document"` can still show a non-`"empty"` modality here: an untouched Graph tile, for
+   * instance, always needs a picture to make sense of its axes, whatever the student put on them.
+   * This is not a bug — `documentHasStudentWork` (see `summaryOmittedReason`/`imageOmittedReason`)
+   * is the field that answers "did this document have work," and answers it deliberately
+   * differently. `needsImage` below is the same type-level fact, just isolated to the visual half.
+   */
   modality: "mixed" | "text-only" | "visual-only" | "empty";
   hasStudentText: boolean;
   /**
