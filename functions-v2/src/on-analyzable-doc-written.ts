@@ -90,8 +90,12 @@ const isOrdinal = (value: unknown): value is string =>
 // 1, so 0 is the app's unresolved placeholder. The client refuses to send it, and so does this.
 const isProblemOrdinal = (value: unknown): value is string => isOrdinal(value) && value !== "0";
 
+// Real clients only ever send a nanoid() (alphabet A-Za-z0-9_-), but this value is interpolated
+// into a realtime database path (evaluation-status.ts): a "/" would nest the write instead of
+// writing one leaf, and ".", "#", "$", "[", "]" are illegal in a database key and would throw.
 const isRequestId = (value: unknown): value is string =>
-  typeof value === "string" && value.length > 0 && value.length <= kMaxRequestIdLength;
+  typeof value === "string" && value.length > 0 && value.length <= kMaxRequestIdLength &&
+  /^[A-Za-z0-9_-]+$/.test(value);
 
 /**
  * The value comes from the realtime database, where a class member can write anything under their

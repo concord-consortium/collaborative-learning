@@ -272,6 +272,19 @@ describe("functions", () => {
       expect(queued).not.toHaveProperty("requestIds");
     });
 
+    // The id is interpolated into a realtime database path (evaluation-status.ts): a "/" would
+    // nest the status write instead of writing one leaf, and other characters are illegal in a
+    // database key and would throw.
+    test("drops a requestId containing a database path separator", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "a/b"});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    test("drops a requestId containing characters illegal in a database key", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "a.b#c$d"});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
     // See AnalysisQueueDocument.requestIds for why more than one id can land here.
     test("accumulates a second requestId instead of replacing the first, when both land before " +
          "the document is picked up for processing", async () => {
