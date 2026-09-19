@@ -2,7 +2,9 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { nanoid } from "nanoid";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { WithId } from "../../hooks/firestore-hooks";
-import { IClientCommentParams, IDocumentMetadata, IUserContext, kAnalyzerUserParams } from "../../../shared/shared";
+import {
+  EvaluationOutcome, IClientCommentParams, IDocumentMetadata, IUserContext, kAnalyzerUserParams
+} from "../../../shared/shared";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "./ai-evaluation-messages";
 
 // How long an Ideas click's own Firebase writes/reads may take before giving up on this attempt.
@@ -44,8 +46,6 @@ interface IQueueRemoteCommentParams {
   requestId?: string;
   dispose?: () => void;
 }
-
-export type EvaluationOutcome = "skipped-empty" | "commented" | "failed";
 
 /** The completion status the analysis pipeline writes for an evaluation request — see
  * docs/firebase-schema.md's evaluationStatus node. */
@@ -270,10 +270,21 @@ export class DocumentCommentsManager {
     // Only the latest click's status may change what the student sees — an older request
     // resolving late must not show a message over a click the student already made.
     if (status.requestId === this.latestIdeasRequestId) {
-      if (status.outcome === "skipped-empty") {
-        this.showStatusMessage(IDEAS_EMPTY_MESSAGE);
-      } else if (status.outcome === "failed") {
-        this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      switch (status.outcome) {
+        case "skipped-empty":
+          this.showStatusMessage(IDEAS_EMPTY_MESSAGE);
+          break;
+        case "failed":
+          this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+          break;
+        default: {
+          // EvaluationOutcome (shared/shared.ts) gained a value this switch doesn't handle, so
+          // this fails to compile until it's given a message — or, since this value came over the
+          // wire, another class member wrote something unexpected to the writable status node.
+          // Either way, log rather than throwing inside a Realtime Database listener callback.
+          const unhandled: never = status.outcome;
+          console.error(`Unhandled evaluation outcome: ${unhandled}`);
+        }
       }
     }
 

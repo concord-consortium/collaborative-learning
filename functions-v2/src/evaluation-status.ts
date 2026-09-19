@@ -1,8 +1,6 @@
 import {getDatabase, ServerValue} from "firebase-admin/database";
 import * as logger from "firebase-functions/logger";
-
-/** What became of an evaluation request, echoed back to the client. */
-export type EvaluationOutcome = "skipped-empty" | "commented" | "failed";
+import {EvaluationOutcome} from "../../shared/shared";
 
 export interface EvaluationStatus {
   outcome: EvaluationOutcome;
