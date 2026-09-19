@@ -103,12 +103,18 @@ describe("whether the summary carries student work", () => {
       .tiles[0].carriesStudentWork).toBe(true);
   });
 
-  it("counts a graph with layers, and not one with none", () => {
-    const withLayers = { content: { type: "Graph", layers: [{ id: "l1" }] } };
-    const bare = { content: { type: "Graph", layers: [] } };
-    expect(classifyDocument(doc([[{ tileId: "g1" }]], { g1: withLayers }))
+  // A real GraphModel, not a hand-written fixture: GraphModel.afterCreate() always adds a default
+  // "unlinked" layer, so `layers: []` can never actually occur, and `layers.length > 0` alone
+  // can't tell an untouched graph from one the student configured — see graphTileHasContent.
+  it("counts a graph once an attribute is assigned, and not an untouched one", () => {
+    const configured = GraphModel.create();
+    configured.layers[0].config.setAttributeForRole("x", { attributeID: "attr1" });
+    const untouched = GraphModel.create();
+    expect(untouched.layers.length).toBe(1);
+
+    expect(classifyDocument(doc([[{ tileId: "g1" }]], { g1: { content: getSnapshot(configured) } }))
       .summaryCarriesStudentWork).toBe(true);
-    expect(classifyDocument(doc([[{ tileId: "g1" }]], { g1: bare }))
+    expect(classifyDocument(doc([[{ tileId: "g1" }]], { g1: { content: getSnapshot(untouched) } }))
       .summaryCarriesStudentWork).toBe(false);
   });
 

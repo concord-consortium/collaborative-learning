@@ -131,9 +131,10 @@ function tileHoldsSummarizableContent(tileType: string, content: any): boolean {
     // narrowed per instance, so the first half of the rule has already answered true. Narrowing it
     // would change `computedModality` for an empty canvas, so it waits for the thin-summary work.
     case "Dataflow": return Object.keys(content?.program?.nodes ?? {}).length > 0;
-    // The handler describes axes, plot type and one entry per layer. With no layers it is
-    // describing an empty pair of axes.
-    case "Graph": return Array.isArray(content?.layers) && content.layers.length > 0;
+    // The handler describes axes, plot type and one entry per layer. `layers.length` alone can't
+    // tell an untouched graph from one the student configured — every Graph gets a default empty
+    // layer — so this shares graphTileHasContent with tileCountsAsStudentWork below.
+    case "Graph": return graphTileHasContent(content);
     // The handler emits the simulation's own description and variable table, which the unit
     // authored. A Simulator tile holds no student input, so its summary is never student work.
     case "Simulator": return false;
@@ -348,7 +349,8 @@ function graphLayerHasAttributes(layer: any): boolean {
 }
 
 /** A Graph tile counts as student work when it has an adornment, or any layer has an assigned
- * attribute. `layers.length` alone never distinguishes this — see graphLayerHasAttributes. */
+ * attribute. `layers.length` alone never distinguishes this — see graphLayerHasAttributes. Shared
+ * by tileHoldsSummarizableContent and tileCountsAsStudentWork, so the two can't drift again. */
 export function graphTileHasContent(content: any): boolean {
   const hasAdornments = Array.isArray(content?.adornments) && content.adornments.length > 0;
   const layers = Array.isArray(content?.layers) ? content.layers : [];
