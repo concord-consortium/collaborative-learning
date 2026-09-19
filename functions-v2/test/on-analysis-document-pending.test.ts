@@ -667,9 +667,14 @@ describe("functions", () => {
         const realDoc = admin.firestore().doc.bind(admin.firestore());
         const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
           if (path !== "analysis/queue/pending/empty5") return realDoc(path);
+          // claimRequestIds never calls docRef.delete() directly — it goes through
+          // docRef.firestore.runTransaction(), so the failure has to be staged there to actually
+          // be reached, rather than in a .delete() the code never calls.
           return {
-            delete: async () => {
-              throw new Error("firestore unavailable");
+            firestore: {
+              runTransaction: async () => {
+                throw new Error("firestore unavailable");
+              },
             },
           } as any;
         });
@@ -1111,9 +1116,14 @@ describe("functions", () => {
         const realDoc = admin.firestore().doc.bind(admin.firestore());
         const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
           if (path !== "analysis/queue/pending/bad2") return realDoc(path);
+          // claimRequestIds never calls docRef.delete() directly — it goes through
+          // docRef.firestore.runTransaction(), so the failure has to be staged there to actually
+          // be reached, rather than in a .delete() the code never calls.
           return {
-            delete: async () => {
-              throw new Error("firestore unavailable");
+            firestore: {
+              runTransaction: async () => {
+                throw new Error("firestore unavailable");
+              },
             },
           } as any;
         });
