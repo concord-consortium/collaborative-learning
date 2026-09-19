@@ -633,5 +633,33 @@ describe("DocumentCommentsManager", () => {
       expect(dispose).toHaveBeenCalled();
       expect(postFunction).toHaveBeenCalled();
     });
+
+    it("shows the failure message when the latest request's entry expires with no signal", async () => {
+      jest.useFakeTimers();
+
+      manager.setLatestIdeasRequestId("req-a");
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false, requestId: "req-a"
+      });
+
+      await jest.advanceTimersByTimeAsync(120_000);
+
+      expect(manager.pendingComments).toHaveLength(0);
+      expect(manager.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
+    });
+
+    it("shows nothing when an older request's entry expires after a newer click", async () => {
+      jest.useFakeTimers();
+
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false, requestId: "req-a"
+      });
+      manager.setLatestIdeasRequestId("req-b"); // a newer click superseded req-a before it expired
+
+      await jest.advanceTimersByTimeAsync(120_000);
+
+      expect(manager.pendingComments).toHaveLength(0);
+      expect(manager.statusMessage).toBeNull();
+    });
   });
 });

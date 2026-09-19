@@ -199,6 +199,11 @@ export class DocumentCommentsManager {
 
     const timer = setTimeout(() => {
       this.removePendingComments(new Set([id]));
+      // Nothing else resolved this entry (no comment, no status) within the expiry window. Say so
+      // rather than letting the bubble vanish unexplained.
+      if (requestId && requestId === this.latestIdeasRequestId) {
+        this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      }
       this.checkPendingComments();
     }, kRemoteCommentExpiryMs);
 
