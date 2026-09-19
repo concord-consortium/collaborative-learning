@@ -50,6 +50,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Update the AI response
   // TODO: This triggers multiple undoable actions, but shouldn't really trigger any
   useEffect(() => {
+    // A read-only rendering hides the only UI that could trigger this request, so the sole way this effect
+    // would otherwise fire is simply mounting, making every request in that context a waste.
+    if (readOnly) return;
+
     const generation = ++requestGenerationRef.current;
     const isCurrent = () => requestGenerationRef.current === generation;
     // Undo a superseded run's own blanking before anything else runs, so this run starts from real
@@ -132,7 +136,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
-    userContext, unit.code, systemPrompt
+    readOnly, userContext, unit.code, systemPrompt
   ]);
 
   // Track the prompt's value at focus time so we can log once on blur, and only when it changed —

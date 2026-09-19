@@ -32,6 +32,7 @@ import { defaultAIContent } from "./ai-content";
 import { AIComponent } from "./ai-tile";
 import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { DocumentContentModel } from "../../models/document/document-content";
+import { ReadOnlyContext } from "../../components/document/read-only-context";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -315,6 +316,49 @@ describe("AIComponent", () => {
       expect(request.dynamicContentPrompt).toContain("The student's answer.");
       expect(request.dynamicContentPrompt).toContain("What do you think?");
       expect(aiContent.text).toBe("Mocked customized content");
+    });
+
+    // A read-only rendering (e.g. a teacher's 4-up view of another student's document) hides the
+    // Update button entirely, so mounting is the only thing that could otherwise trigger a request.
+    it("in a read-only rendering of a populated document, never calls getAiContent, on mount", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const authoredText = aiContent.text;
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(
+        <ReadOnlyContext.Provider value={true}>
+          <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
+        </ReadOnlyContext.Provider>
+      ));
+
+      expect(mockGetAiContent).not.toHaveBeenCalled();
+      expect(aiContent.text).toBe(authoredText);
+    });
+
+    it("in a read-only rendering of a populated document, a programmatic refresh still makes no " +
+       "request", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const authoredText = aiContent.text;
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(
+        <ReadOnlyContext.Provider value={true}>
+          <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
+        </ReadOnlyContext.Provider>
+      ));
+
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(mockGetAiContent).not.toHaveBeenCalled();
+      expect(aiContent.text).toBe(authoredText);
     });
 
     // previousText here is the model's non-empty authored default, so this distinguishes
