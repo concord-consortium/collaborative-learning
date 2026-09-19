@@ -1,6 +1,6 @@
 import Markdown from "markdown-to-jsx";
 import { observer } from "mobx-react";
-import { getParentOfType, getSnapshot } from "mobx-state-tree";
+import { getParentOfType, getSnapshot, isAlive } from "mobx-state-tree";
 import React, { useEffect, useRef, useState } from "react";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
@@ -121,9 +121,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // Restore rather than leave the blank text set above; no-op if nothing was cleared, or a
-          // newer refresh has taken over.
-          if (isCurrent() && previousTextRef.current !== undefined) {
+          // Restore rather than leave the blank text set above; no-op if nothing was cleared, a
+          // newer refresh has taken over, or the tile was deleted mid-request — writing to a
+          // destroyed node would throw and hide the error this is trying to report.
+          if (isCurrent() && previousTextRef.current !== undefined && isAlive(content)) {
             content.setText(previousTextRef.current);
             previousTextRef.current = undefined;
           }

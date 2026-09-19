@@ -23,6 +23,7 @@ jest.mock("../../hooks/use-stores", () => ({
 }));
 
 import { act, fireEvent, render } from "@testing-library/react";
+import { destroy, getLivelinessChecking, setLivelinessChecking, unprotect } from "mobx-state-tree";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
@@ -378,6 +379,58 @@ describe("AIComponent", () => {
 
       expect(aiContent.text).toBe(previousText);
       expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
+
+    // The tile can be deleted while a request is in flight. Pins that the catch block's isAlive
+    // guard keeps the original error from being hidden by a write to the now-destroyed node, and
+    // from escaping as an unhandled rejection.
+    it("on a populated document, when the tile is deleted before getAiContent rejects, the " +
+       "original error is still logged and nothing escapes as an unhandled rejection", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      let rejectRequest: (error: Error) => void = () => {};
+      mockGetAiContent.mockImplementationOnce(
+        () => new Promise((_resolve, reject) => { rejectRequest = reject; })
+      );
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      const unhandledRejections: unknown[] = [];
+      const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
+      process.on("unhandledRejection", onUnhandledRejection);
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      // The app sets this to "error" at startup (src/initialize-app.tsx); Jest's default ("warn")
+      // would let a write to a destroyed node through silently, hiding the bug this test targets.
+      const previousLivelinessChecking = getLivelinessChecking();
+      setLivelinessChecking("error");
+
+      try {
+        const { unmount } = await act(async () => render(
+          <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
+        ));
+
+        // Simulates the tile itself being deleted while the request is in flight: the component
+        // unmounts (as it would when its tile is removed from the document), and the underlying
+        // model is destroyed. Unmounting first avoids the observer re-rendering against a model
+        // that's already been torn down, which would fail for an unrelated reason.
+        unmount();
+        unprotect(aiModel);
+        destroy(aiModel);
+        const networkError = new Error("network error");
+        await act(async () => {
+          rejectRequest(networkError);
+          await Promise.resolve();
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to query AI", networkError);
+        expect(unhandledRejections).toEqual([]);
+      } finally {
+        setLivelinessChecking(previousLivelinessChecking);
+        process.removeListener("unhandledRejection", onUnhandledRejection);
+        consoleErrorSpy.mockRestore();
+      }
     });
 
     it("on a populated document, when a later refresh's getAiContent rejects: a real prior " +
