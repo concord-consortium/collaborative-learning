@@ -676,6 +676,146 @@ describe("functions", () => {
       });
     });
 
+    test("a successful run's completion status is written as commented", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imaged-1"],
+      }));
+
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-imaged-1`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({
+        outcome: "commented", requestId: "req-imaged-1", docUpdated: sampleDoc.docUpdated,
+      });
+    });
+
+    // See AnalysisQueueDocument.requestIds for why a queue entry can carry more than one id.
+    test("a commented status is written for every requestId a coalesced queue entry carries", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imaged-a", "req-imaged-b"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-imaged-a")).toMatchObject({outcome: "commented"});
+      expect(await statusFor("req-imaged-b")).toMatchObject({outcome: "commented"});
+    });
+
+    // This trigger reads the queue document once, at creation. A second click's id, added to the
+    // same document while the model call is in progress, would otherwise be lost when this
+    // function deletes the document it read at creation.
+    test("a requestId added to the imaged document while the model call is in progress " +
+         "receives its own commented status", async () => {
+      const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/testdoc1");
+      await imagedDocRef.set(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imgmidflight-a"],
+      }));
+      categorizeRepresentations.mockImplementationOnce(async () => {
+        await imagedDocRef.update({requestIds: FieldValue.arrayUnion("req-imgmidflight-b")});
+        return {
+          summaryEmbedding: undefined, documentMetadata: undefined, metadataGap: undefined,
+          completion: {
+            choices: [{message: {parsed, refusal: undefined}}],
+            usage: {prompt_tokens: 1, completion_tokens: 2},
+          },
+          messageShape: "mixed",
+        };
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imgmidflight-a"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-imgmidflight-a")).toMatchObject({outcome: "commented"});
+      expect(await statusFor("req-imgmidflight-b")).toMatchObject({outcome: "commented"});
+    });
+
+    test("a rejected status write leaves the comment and done record in place", async () => {
+      // Simulates the Realtime Database write itself failing, so writeEvaluationStatus's own
+      // catch-and-warn runs for real.
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+      const db = getDatabase();
+      const realRef = db.ref.bind(db);
+      const spy = jest.spyOn(db, "ref").mockImplementation((path) => {
+        const ref = realRef(path);
+        if (typeof path === "string" && path.includes("evaluationStatus")) {
+          return Object.assign(Object.create(Object.getPrototypeOf(ref)), ref, {
+            set: async () => {
+              throw new Error("rtdb unavailable");
+            },
+          });
+        }
+        return ref;
+      });
+
+      try {
+        await runImaged(versionTwoDoc({
+          sendSummary: true, docSummary: "A summary",
+          sendImage: true, docImageUrl: "https://x/y.png",
+        }));
+      } finally {
+        spy.mockRestore();
+      }
+
+      expect(await doneRecord()).toMatchObject({sendSummary: true, sendImage: true});
+      const comments = await admin.firestore().collection(sampleDoc.commentsPath).get();
+      expect(comments.docs).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Could not write evaluation status"), expect.any(Error));
+    });
+
+    test("a commented status is still written when the imaged queue entry cannot be removed", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+      const realDoc = admin.firestore().doc.bind(admin.firestore());
+      const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+        if (path !== "analysis/queue/imaged/testdoc1") return realDoc(path);
+        // claimRequestIds never calls docRef.delete() directly — it goes through
+        // docRef.firestore.runTransaction(), so the failure has to be staged there to actually be
+        // reached, rather than in a .delete() the code never calls.
+        return {
+          firestore: {
+            runTransaction: async () => {
+              throw new Error("firestore unavailable");
+            },
+          },
+        } as any;
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary",
+        sendImage: true, docImageUrl: "https://x/y.png",
+        requestIds: ["req-imaged-nodelete"],
+      }));
+      docSpy.mockRestore();
+
+      // The delete failure did not escape the handler, and the comment/done work that already
+      // happened is still correctly reported as "commented".
+      expect(logger.error).toHaveBeenCalledWith(
+        "Could not remove the imaged queue entry, which will not be retried", expect.any(Error));
+      const comments = await admin.firestore().collection(sampleDoc.commentsPath).get();
+      expect(comments.docs).toHaveLength(1);
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-imaged-nodelete`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "commented", requestId: "req-imaged-nodelete"});
+    });
+
     test("a summary-only record sends no image", async () => {
       mockCategorizeResponse({parsed, messageShape: "summary-only"});
 
@@ -763,12 +903,126 @@ describe("functions", () => {
     test("no response from the model fails the analysis", async () => {
       mockCategorizeResponse({parsed: undefined});
 
-      await runImaged(versionTwoDoc({sendSummary: true, docSummary: "A summary", sendImage: false}));
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestIds: ["req-noresponse"],
+      }));
 
       expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
         "analysis/queue/imaged/testdoc1", "No response from AI");
       expect(await admin.firestore().collection("analysis/queue/failedAnalyzing").count().get()
         .then((result) => result.data().count)).toEqual(1);
+      // The failure still resolves the waiting bubble, via the same status mechanism as success.
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-noresponse`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "failed", requestId: "req-noresponse"});
+    });
+
+    test("a failed status is still written when the failure record itself cannot be written", async () => {
+      mockCategorizeResponse({parsed: undefined});
+      const realCollection = admin.firestore().collection.bind(admin.firestore());
+      const collectionSpy = jest.spyOn(admin.firestore(), "collection")
+        .mockImplementation((path: string) => {
+          if (!path.endsWith("failedAnalyzing")) return realCollection(path);
+          return {
+            add: async () => {
+              throw new Error("document exceeds the maximum size");
+            },
+          } as any;
+        });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestIds: ["req-badwrite"],
+      }));
+      collectionSpy.mockRestore();
+
+      // Completed normally: the injected rejection did not escape the helper.
+      expect(logger.warn).toHaveBeenLastCalledWith("Error processing document",
+        "analysis/queue/imaged/testdoc1", "No response from AI");
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-badwrite`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "failed", requestId: "req-badwrite"});
+    });
+
+    // Same coalescing case as the commented version above, but through the error boundary.
+    test("a failed status is written for every requestId a coalesced queue entry carries", async () => {
+      mockCategorizeResponse({parsed: undefined});
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false,
+        requestIds: ["req-fail-a", "req-fail-b"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-fail-a")).toMatchObject({outcome: "failed"});
+      expect(await statusFor("req-fail-b")).toMatchObject({outcome: "failed"});
+    });
+
+    // Same mid-flight case as the commented version above, but through the error boundary.
+    test("a requestId added to the imaged document while the model call is in progress " +
+         "receives its own failed status", async () => {
+      const imagedDocRef = admin.firestore().doc("analysis/queue/imaged/testdoc1");
+      await imagedDocRef.set(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false,
+        requestIds: ["req-imgmidflight-err-a"],
+      }));
+      categorizeRepresentations.mockImplementationOnce(async () => {
+        await imagedDocRef.update({requestIds: FieldValue.arrayUnion("req-imgmidflight-err-b")});
+        return {
+          summaryEmbedding: undefined, documentMetadata: undefined, metadataGap: undefined,
+          completion: {
+            choices: [{message: {parsed: undefined, refusal: undefined}}],
+            usage: {prompt_tokens: 1, completion_tokens: 2},
+          },
+          messageShape: "image-only",
+        };
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false,
+        requestIds: ["req-imgmidflight-err-a"],
+      }));
+
+      const statusFor = (requestId: string) => getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/${requestId}`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(await statusFor("req-imgmidflight-err-a")).toMatchObject({outcome: "failed"});
+      expect(await statusFor("req-imgmidflight-err-b")).toMatchObject({outcome: "failed"});
+    });
+
+    test("a failed status is still written when the imaged queue entry cannot be removed", async () => {
+      mockCategorizeResponse({parsed: undefined});
+      const realDoc = admin.firestore().doc.bind(admin.firestore());
+      const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
+        if (path !== "analysis/queue/imaged/testdoc1") return realDoc(path);
+        // claimRequestIds never calls docRef.delete() directly — it goes through
+        // docRef.firestore.runTransaction(), so the failure has to be staged there to actually be
+        // reached, rather than in a .delete() the code never calls.
+        return {
+          firestore: {
+            runTransaction: async () => {
+              throw new Error("firestore unavailable");
+            },
+          },
+        } as any;
+      });
+
+      await runImaged(versionTwoDoc({
+        sendSummary: true, docSummary: "A summary", sendImage: false, requestIds: ["req-nodelete"],
+      }));
+      docSpy.mockRestore();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        "Could not remove the imaged queue entry, which will not be retried", expect.any(Error));
+      expect(await admin.firestore().collection("analysis/queue/failedAnalyzing").count().get()
+        .then((result) => result.data().count)).toEqual(1);
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-nodelete`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "failed", requestId: "req-nodelete"});
     });
   });
 

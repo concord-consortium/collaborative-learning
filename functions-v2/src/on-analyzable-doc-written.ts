@@ -62,12 +62,18 @@ export interface AnalysisQueueDocument {
   firestoreDocumentPath: string;
   /** The unit and problem the student was running when the evaluation was requested. */
   requestContext?: IEvaluationRequestContext;
+  /** Ideas click ids that landed on this queue document before it was picked up (keyed by docId,
+   * not request, so more than one can land); each gets its own completion status. Absent when only
+   * automatic routes (onDisconnect, sync-hook cleanup) ever wrote here. */
+  requestIds?: string[];
 }
 
 // The lengths cap what a client can write: a long enough value pushes the queue record past
 // Firestore's document limit, which fails the write and leaves the document unanalyzed.
 const kMaxUnitCodeLength = 40;
 const kMaxOfferingIdLength = 100;
+// A longer value is dropped rather than truncated, since a truncated id would never match.
+const kMaxRequestIdLength = 64;
 
 // The same shape `isRenderableUnit` accepts in on-analysis-document-pending.ts, since a unit that
 // cannot be rendered with is not worth storing either.
@@ -83,6 +89,13 @@ const isOrdinal = (value: unknown): value is string =>
 // Investigations can be numbered 0 (vibe, mods and sas all have a 0.1); problems are numbered from
 // 1, so 0 is the app's unresolved placeholder. The client refuses to send it, and so does this.
 const isProblemOrdinal = (value: unknown): value is string => isOrdinal(value) && value !== "0";
+
+// Real clients only ever send a nanoid() (alphabet A-Za-z0-9_-), but this value is interpolated
+// into a realtime database path (evaluation-status.ts): a "/" would nest the write instead of
+// writing one leaf, and ".", "#", "$", "[", "]" are illegal in a database key and would throw.
+const isRequestId = (value: unknown): value is string =>
+  typeof value === "string" && value.length > 0 && value.length <= kMaxRequestIdLength &&
+  /^[A-Za-z0-9_-]+$/.test(value);
 
 /**
  * The value comes from the realtime database, where a class member can write anything under their
@@ -111,6 +124,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const timestamp = typeof content === "object" ? content.timestamp : content;
   const aiPrompt = (typeof content === "object" && content.aiPrompt) ? content.aiPrompt : null;
   const requestContext = typeof content === "object" ? normalizeRequestContext(content.context) : undefined;
+  const requestId = typeof content === "object" && isRequestId(content.requestId) ? content.requestId : undefined;
   // onValueWritten will trigger on create, update, or delete. Ignore deletes.
 
   // Determine all the database paths that we are going to need
@@ -121,8 +135,9 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const firestoreDocumentPath = `${firestoreRoot}/documents/${docId}`;
 
   const firestore = admin.firestore();
+  const queueDocRef = firestore.doc(getAnalysisQueueFirestorePath("pending", docId));
 
-  // This should be safe in the event of duplicate calls; the second will just overwrite the first.
+  // Safe for duplicate calls: the second overwrites the first, except requestIds, which accumulates.
   const newDocument: AnalysisQueueDocument = {
     metadataPath,
     documentPath,
@@ -140,6 +155,16 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
     newDocument.requestContext = requestContext;
   }
 
-  await firestore.doc(getAnalysisQueueFirestorePath("pending", docId)).set(newDocument);
+  // A transaction: a plain `.set()` would replace an existing document's requestIds outright
+  // instead of joining this write's id (if any) to them.
+  await firestore.runTransaction(async (transaction) => {
+    const existing = (await transaction.get(queueDocRef)).data() as AnalysisQueueDocument | undefined;
+    const priorRequestIds = Array.isArray(existing?.requestIds) ? existing.requestIds : [];
+    const requestIds = requestId ? [...priorRequestIds, requestId] : priorRequestIds;
+    if (requestIds.length > 0) {
+      newDocument.requestIds = requestIds;
+    }
+    transaction.set(queueDocRef, newDocument);
+  });
   logger.info(`Added document ${documentPath} to queue for ${evaluator} with aiPrompt ${JSON.stringify(aiPrompt)}`);
 };

@@ -205,6 +205,19 @@ export class Firebase {
     }
   }
 
+  // Path to the completion status for this specific request, keyed by requestId so an older or
+  // newer request's status is never read here.
+  public getEvaluationStatusPath(user: UserModelType, documentKey: string, userId: string | undefined,
+                                  requestId: string) {
+    const evaluation = this.db.stores.appConfig.aiEvaluation;
+    if (evaluation) {
+      const metadataPath = this.getUserDocumentMetadataPath(user, documentKey, userId);
+      return `${metadataPath}/evaluationStatus/${evaluation}/${requestId}`;
+    } else {
+      return undefined;
+    }
+  }
+
   /**
    * Set up Firebase onDisconnect handlers.
    * All documents get one to update the lastEditedAt timestamp when the user disconnects.
@@ -230,10 +243,12 @@ export class Firebase {
 
   /**
    * Set the lastEditedAt timestamp to the current time, optionally cancelling any onDisconnect handlers.
-   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well.
+   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well, alongside
+   * `requestId` (omitted, not just undefined, when not supplied) so the completion status can be
+   * correlated back to this request.
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
-      onDisconnects?: firebase.database.OnDisconnect[]) {
+      onDisconnects?: firebase.database.OnDisconnect[], requestId?: string) {
 
     if (onDisconnects) {
       onDisconnects.forEach((onDisconnect) => {
@@ -246,7 +261,7 @@ export class Firebase {
       .set(firebase.database.ServerValue.TIMESTAMP));
     const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
     if (evaluation) {
-      const updatePromise = this.updateEvaluation(this.ref(evaluation));
+      const updatePromise = this.updateEvaluation(this.ref(evaluation), requestId);
       updatePromise && promises.push(updatePromise);
     }
 
@@ -510,11 +525,14 @@ export class Firebase {
     };
   }
 
-private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect) => {
+private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect,
+    requestId?: string) => {
   const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
-  // Firebase rejects undefined, so an unknown context is written as no field at all.
+  // Firebase rejects undefined, so an unknown context (and an absent requestId) is written as no
+  // field at all, rather than a field whose value is undefined.
   const context = this.evaluationRequestContext;
   const contextField = context ? { context } : {};
+  const requestIdField = requestId ? { requestId } : {};
 
   // If this unit uses "custom" evaluation, read and store the prompt strings if they're defined.
   if (aiEvaluation === "custom") {
@@ -528,11 +546,11 @@ private updateEvaluation = (targetRef: firebase.database.Reference | firebase.da
       ? { ...aiPrompt, categories: Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories])) }
       : aiPrompt;
     return targetRef.set({
-      aiPrompt: promptToWrite, ...contextField, timestamp: firebase.database.ServerValue.TIMESTAMP
+      aiPrompt: promptToWrite, ...contextField, ...requestIdField, timestamp: firebase.database.ServerValue.TIMESTAMP
     });
   }
 
-  return targetRef.set({ ...contextField, timestamp: firebase.database.ServerValue.TIMESTAMP });
+  return targetRef.set({ ...contextField, ...requestIdField, timestamp: firebase.database.ServerValue.TIMESTAMP });
 };
 
 }

@@ -145,6 +145,7 @@ const ChatThreadItem: React.FC<ChatThreadItemProps> = observer(({
           postedComments={comments}
           focusDocument={focusDocument}
           focusTileId={focusTileId}
+          isDocumentThread={threadId === "document"}
           isFocused={isFocused}
           onSelect={handleSelectCard}
           readingCommentId={readingCommentId}
@@ -186,6 +187,17 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       setExpandedThreads(prev => new Set(prev).add('document'));
     }
   }, [pendingRemoteComment]);
+
+  // Also force the document thread open when a status message appears, so the student sees it
+  // without clicking. Distinct from the effect above — clearing tile selection doesn't by itself
+  // re-expand a thread the student collapsed.
+  const statusMessage = content?.statusMessage;
+
+  useEffect(() => {
+    if (statusMessage) {
+      setExpandedThreads(prev => new Set(prev).add('document'));
+    }
+  }, [statusMessage]);
 
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   let overrideTitle = undefined;
@@ -318,8 +330,32 @@ const _ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     }
   }, [stores, ui]);
 
+  // With no document thread and a tile focused, the fallback below renders for the tile instead,
+  // leaving nowhere to show the status message. This placeholder stands in for it.
+  const hasDocumentThread = chatThreads?.some(t => !t.tileId);
+
   return (
     <div className="chat-list" data-testid="chat-list">
+      {statusMessage && focusId && !hasDocumentThread &&
+        <ChatThreadItem
+          key="document"
+          threadId="document"
+          user={user}
+          activeNavTab={activeNavTab}
+          onPostComment={onPostComment}
+          onDeleteComment={onDeleteComment}
+          focusDocument={focusDocument}
+          focusTileId={focusTileId}
+          commentThread={undefined}
+          expandedThreads={expandedThreads}
+          onThreadClick={handleThreadClick}
+          isFocused={false}
+          overrideTitle={docTitle}
+          readingCommentId={readingCommentId}
+          pendingCommentId={pendingCommentId}
+          onCommentClick={handleCommentClick}
+        />
+      }
       {
         chatThreads?.map((commentThread: ChatCommentThread) => {
           const shouldBeFocused = commentThread.tileId === focusId;

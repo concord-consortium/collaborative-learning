@@ -131,9 +131,10 @@ function tileHoldsSummarizableContent(tileType: string, content: any): boolean {
     // narrowed per instance, so the first half of the rule has already answered true. Narrowing it
     // would change `computedModality` for an empty canvas, so it waits for the thin-summary work.
     case "Dataflow": return Object.keys(content?.program?.nodes ?? {}).length > 0;
-    // The handler describes axes, plot type and one entry per layer. With no layers it is
-    // describing an empty pair of axes.
-    case "Graph": return Array.isArray(content?.layers) && content.layers.length > 0;
+    // The handler describes axes, plot type and one entry per layer. `layers.length` alone can't
+    // tell an untouched graph from one the student configured — every Graph gets a default empty
+    // layer — so this shares graphTileHasContent with tileCountsAsStudentWork below.
+    case "Graph": return graphTileHasContent(content);
     // The handler emits the simulation's own description and variable table, which the unit
     // authored. A Simulator tile holds no student input, so its summary is never student work.
     case "Simulator": return false;
@@ -201,26 +202,35 @@ function rowsOf(container: any): RowLike[] {
   return rowOrder.map((rowId: string) => rowMap[rowId]).filter(Boolean);
 }
 
+interface WalkedTile {
+  tileId: string;
+  tileType: string;
+  role: "student" | "prompt";
+  content: any;
+}
+
+interface DocumentWalk {
+  tiles: WalkedTile[];
+  warnings: string[];
+}
+
 /**
- * Classifies every tile a document holds, following Question tiles into their nested rows.
+ * Walks every tile a document holds, following Question tiles into their nested rows and
+ * assigning each a role, without judging its content. Shared by `classifyDocument` and
+ * `documentHasStudentWork` so both see the same tiles and roles.
  *
- * Rules for Question traversal (the nested rowOrder/rowMap resolves ids through the *document's*
- * top-level tileMap, exactly as handleQuestionTile() in shared/ai-summarizer does):
- * - the first row holds the authored prompt, which is not student work and contributes nothing;
- * - the remaining rows are the student response and classify individually by their own types;
- * - a Question nested inside a prompt stays authored all the way down: its own rows do not get to
- *   reintroduce "student", because the whole subtree is curriculum content;
- * - a missing tile reference is skipped and recorded as a warning;
- * - a tile referenced twice counts once;
- * - nested Questions recurse, up to kMaxQuestionDepth.
+ * Question traversal: the first row is the authored prompt; the rest is the student response,
+ * classified individually. A Question nested inside a prompt stays "prompt" throughout, even in
+ * its own rows. A missing tile reference is skipped with a warning; a tile referenced twice counts
+ * once; nested Questions recurse up to kMaxQuestionDepth.
  */
-export function classifyDocument(content: any): DocumentClassification {
+function walkDocumentTiles(content: any): DocumentWalk {
   const tileMap = content?.tileMap ?? {};
-  const tiles: ClassifiedTile[] = [];
+  const tiles: WalkedTile[] = [];
   const warnings: string[] = [];
   const visited = new Set<string>();
 
-  const visit = (tileId: string, role: ClassifiedTile["role"], depth: number): void => {
+  const visit = (tileId: string, role: WalkedTile["role"], depth: number): void => {
     if (visited.has(tileId)) return;
     visited.add(tileId);
 
@@ -231,18 +241,9 @@ export function classifyDocument(content: any): DocumentClassification {
     }
 
     const tileType = typeof tile.content.type === "string" ? tile.content.type : "Unknown";
-    const tileCapability = getTileCapability(tileType);
+    tiles.push({ tileId, tileType, role, content: tile.content });
 
     if (tileType === "Question") {
-      tiles.push({
-        tileId,
-        tileType,
-        role,
-        capability: tileCapability,
-        hasStudentText: false,
-        carriesStudentWork: false,
-        requiresVisualRepresentation: false
-      });
       if (depth >= kMaxQuestionDepth) {
         warnings.push(`question tile "${tileId}" exceeds the nesting depth cap of ${kMaxQuestionDepth}`);
         return;
@@ -257,32 +258,7 @@ export function classifyDocument(content: any): DocumentClassification {
           visit(ref.tileId, role === "prompt" || rowIndex === 0 ? "prompt" : "student", depth + 1);
         }
       });
-      return;
     }
-
-    let hasStudentText = tileCapability.containsStudentText;
-    if (tileType === "Text") hasStudentText = textTileHasContent(tile.content);
-    if (tileType === "Drawing") hasStudentText = drawingTileHasText(tile.content);
-    // An authored question prompt is not student work, whatever it happens to contain.
-    if (role === "prompt") hasStudentText = false;
-
-    // Typed text, or a detailed summary of something the student made. The second half is what a
-    // drawing-only document needs: CLUE-646 turned a Drawing's summary into a table of its
-    // objects, so the summary carries the student's work even with no text anywhere in it.
-    const detailedSummary =
-      tileCapability.summaryFidelity === "full" || tileCapability.summaryFidelity === "partial";
-    const carriesStudentWork = role === "prompt" ? false
-      : hasStudentText || (detailedSummary && tileHoldsSummarizableContent(tileType, tile.content));
-
-    tiles.push({
-      tileId,
-      tileType,
-      role,
-      capability: tileCapability,
-      hasStudentText,
-      carriesStudentWork,
-      requiresVisualRepresentation: role === "prompt" ? false : tileCapability.requiresVisualRepresentation
-    });
   };
 
   for (const row of rowsOf(content)) {
@@ -292,6 +268,53 @@ export function classifyDocument(content: any): DocumentClassification {
       visit(ref.tileId, "student", 0);
     }
   }
+
+  return { tiles, warnings };
+}
+
+/** Classifies every tile a document holds, following Question tiles into their nested rows. */
+export function classifyDocument(content: any): DocumentClassification {
+  const { tiles: walked, warnings } = walkDocumentTiles(content);
+
+  const tiles: ClassifiedTile[] = walked.map(({ tileId, tileType, role, content: tileContent }) => {
+    const tileCapability = getTileCapability(tileType);
+
+    if (tileType === "Question") {
+      return {
+        tileId,
+        tileType,
+        role,
+        capability: tileCapability,
+        hasStudentText: false,
+        carriesStudentWork: false,
+        requiresVisualRepresentation: false
+      };
+    }
+
+    let hasStudentText = tileCapability.containsStudentText;
+    if (tileType === "Text") hasStudentText = textTileHasContent(tileContent);
+    if (tileType === "Drawing") hasStudentText = drawingTileHasText(tileContent);
+    // An authored question prompt is not student work, whatever it happens to contain.
+    if (role === "prompt") hasStudentText = false;
+
+    // Typed text, or a detailed summary of something the student made. The second half is what a
+    // drawing-only document needs: CLUE-646 turned a Drawing's summary into a table of its
+    // objects, so the summary carries the student's work even with no text anywhere in it.
+    const detailedSummary =
+      tileCapability.summaryFidelity === "full" || tileCapability.summaryFidelity === "partial";
+    const carriesStudentWork = role === "prompt" ? false
+      : hasStudentText || (detailedSummary && tileHoldsSummarizableContent(tileType, tileContent));
+
+    return {
+      tileId,
+      tileType,
+      role,
+      capability: tileCapability,
+      hasStudentText,
+      carriesStudentWork,
+      requiresVisualRepresentation: role === "prompt" ? false : tileCapability.requiresVisualRepresentation
+    };
+  });
 
   const hasText = tiles.some((tile) => tile.hasStudentText);
   const hasVisual = tiles.some((tile) => tile.requiresVisualRepresentation);
@@ -305,4 +328,58 @@ export function classifyDocument(content: any): DocumentClassification {
     tile.role === "prompt" && tile.capability.requiresVisualRepresentation);
 
   return { computedModality, summaryCarriesStudentWork, promptNeedsImage, tiles, warnings };
+}
+
+/**
+ * Tile types that are never student work: AI output, an authored simulation, an empty slot, a
+ * Question container (its rows classify individually), and the dev-only ErrorTest and Starter
+ * types.
+ */
+const kNeverStudentWorkTypes = new Set(["AI", "Simulator", "Placeholder", "Question", "ErrorTest", "Starter"]);
+
+/** Whether a Graph layer's data configuration has any attribute assigned to it. Every Graph tile
+ * gets a default "unlinked" layer with an empty configuration, so a layer merely existing is not
+ * evidence of anything — this checks whether the student (or a shared dataset link) actually put
+ * an attribute on an axis. */
+function graphLayerHasAttributes(layer: any): boolean {
+  const config = layer?.config;
+  const xyCount = Object.keys(config?._attributeDescriptions ?? {}).length;
+  const yCount = Array.isArray(config?._yAttributeDescriptions) ? config._yAttributeDescriptions.length : 0;
+  return xyCount + yCount > 0;
+}
+
+/** A Graph tile counts as student work when it has an adornment, or any layer has an assigned
+ * attribute. `layers.length` alone never distinguishes this — see graphLayerHasAttributes. Shared
+ * by tileHoldsSummarizableContent and tileCountsAsStudentWork, so the two can't drift again. */
+export function graphTileHasContent(content: any): boolean {
+  const hasAdornments = Array.isArray(content?.adornments) && content.adornments.length > 0;
+  const layers = Array.isArray(content?.layers) ? content.layers : [];
+  return hasAdornments || layers.some(graphLayerHasAttributes);
+}
+
+/**
+ * Table and Dataflow always count — neither has a per-instance check. An unrecognized type also
+ * always counts, since the classifier can't inspect it and the safe assumption is that the
+ * student put something there.
+ */
+function tileCountsAsStudentWork(tileType: string, content: any): boolean {
+  switch (tileType) {
+    case "Text": return textTileHasContent(content);
+    case "Drawing": return Array.isArray(content?.objects) && content.objects.length > 0;
+    case "Graph": return graphTileHasContent(content);
+    default: return !kNeverStudentWorkTypes.has(tileType);
+  }
+}
+
+/**
+ * Whether any tile in the document counts as student work — "empty" means this is false. Shares
+ * classifyDocument's walk, so both agree on tiles and roles; only the per-tile rule differs.
+ *
+ * Requires a plain snapshot, not a live mobx-state-tree model: the walk indexes `rowMap`/`tileMap`
+ * as plain objects, so a live model (whose maps need `.get()`) would classify every document as
+ * empty. On the client, call with `getSnapshot(document.content)`.
+ */
+export function documentHasStudentWork(content: unknown): boolean {
+  const { tiles } = walkDocumentTiles(content);
+  return tiles.some((tile) => tile.role === "student" && tileCountsAsStudentWork(tile.tileType, tile.content));
 }

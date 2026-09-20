@@ -182,6 +182,14 @@ export interface IEvaluationRequestContext {
   offeringId: string;      // "" outside a portal
 }
 
+/**
+ * What became of an evaluation request, echoed back to the client under the sibling node
+ * `documentMetadata/{docId}/evaluationStatus/{evaluator}/{requestId}`. Shared so the writer
+ * (functions-v2/src/evaluation-status.ts) and the reader
+ * (src/models/document/document-comments-manager.ts) can't silently drift on what values exist.
+ */
+export type EvaluationOutcome = "skipped-empty" | "commented" | "failed";
+
 export interface ICurriculumMetadata {
   unit: string;         // unit code, e.g. "sas", "msa", etc.
   facet?: string;       // e.g. "guide" for teacher guide; undefined for regular curriculum

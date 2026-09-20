@@ -12,7 +12,9 @@ import {
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 import {generateRenderHtml} from "../../shared/render-page";
 import {kPlaceholderUnitCode} from "../../shared/shared";
-import {classifyDocument} from "../../shared/ai-analysis-classify";
+import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
+import {writeEvaluationStatusForRequests} from "./evaluation-status";
+import {claimRequestIds} from "./claim-request-ids";
 
 // This is one of three functions for AI analysis of documents:
 // 1. Watch for changes to the lastUpdatedAt metadata field and write into the queue of docs to process
@@ -174,6 +176,7 @@ async function error(
   const firestore = admin.firestore();
   const failedImaging = firestore.collection(getAnalysisQueueFirestorePath("failedImaging"));
   const documentId = event.params.docId;
+  const queueDoc = event.data?.data() as AnalysisQueueDocument | undefined;
   try {
     await failedImaging.add({...event.data?.data(), ...accumulated, documentId, error});
   } catch (err) {
@@ -190,10 +193,17 @@ async function error(
       logger.error("Could not write a failure record at all", retryErr);
     }
   }
+  let requestIds = queueDoc?.requestIds;
   try {
-    await firestore.doc(event.document).delete();
+    requestIds = await claimRequestIds(firestore.doc(event.document)) ?? requestIds;
   } catch (err) {
     logger.error("Could not remove the pending queue entry, which will not be retried", err);
+  }
+  if (queueDoc?.metadataPath && queueDoc?.evaluator) {
+    await writeEvaluationStatusForRequests(queueDoc.metadataPath, queueDoc.evaluator, requestIds, {
+      outcome: "failed",
+      docUpdated: queueDoc.docUpdated,
+    });
   }
 }
 
@@ -205,14 +215,51 @@ async function error(
  * @param {ImagedQueueDocument} queueDoc the record to hand to the next function
  * @param {FirestoreEvent} event the pending-queue event being handled
  */
+// Combines two possibly-absent requestIds arrays, deduped — order doesn't matter, since
+// writeEvaluationStatusForRequests just writes the same outcome under each one.
+function unionRequestIds(a: unknown, b: string[] | undefined): string[] {
+  const ids = new Set<string>();
+  if (Array.isArray(a)) {
+    a.forEach((id) => {
+      if (typeof id === "string") ids.add(id);
+    });
+  }
+  b?.forEach((id) => ids.add(id));
+  return Array.from(ids);
+}
+
 async function writeImaged(
   firestore: admin.firestore.Firestore,
   docId: string,
   queueDoc: ImagedQueueDocument,
   event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>
 ) {
-  await firestore.doc(getAnalysisQueueFirestorePath("imaged", docId)).set(queueDoc);
-  await firestore.doc(event.document).delete();
+  const pendingDocRef = firestore.doc(event.document);
+  const imagedDocRef = firestore.doc(getAnalysisQueueFirestorePath("imaged", docId));
+  // One transaction: the next function's own trigger fires the instant this document is created
+  // and never looks again, so the requestIds it carries have to be complete from that first write —
+  // a later `.update()` would arrive too late for a trigger that already fired.
+  await firestore.runTransaction(async (transaction) => {
+    const currentRequestIds = (await transaction.get(pendingDocRef)).data()?.requestIds;
+    const pendingRequestIds = Array.isArray(currentRequestIds) ? currentRequestIds : queueDoc.requestIds;
+
+    const existingImaged = await transaction.get(imagedDocRef);
+    if (existingImaged.exists) {
+      // A document already sitting here means an evaluation for this document is already in
+      // progress, using that document's own content — only the ids need to reach it, not this
+      // run's own (redundant, and by now possibly stale) work.
+      const requestIds = unionRequestIds(existingImaged.data()?.requestIds, pendingRequestIds);
+      if (requestIds.length > 0) {
+        transaction.update(imagedDocRef, {requestIds});
+      }
+    } else {
+      transaction.set(
+        imagedDocRef,
+        pendingRequestIds && pendingRequestIds.length > 0 ? {...queueDoc, requestIds: pendingRequestIds} : queueDoc
+      );
+    }
+    transaction.delete(pendingDocRef);
+  });
 }
 
 export const onAnalysisDocumentPending =
@@ -318,23 +365,76 @@ export const onAnalysisDocumentPending =
       const summaryCarriesStudentWork = classified.summaryCarriesStudentWork;
       const needsImage = classified.tiles.some((tile) => tile.requiresVisualRepresentation);
       const promptNeedsImage = classified.promptNeedsImage;
+      // modality/needsImage are type-level facts and can disagree with the instance-level skip
+      // decision at step 2 below — see AnalysisClassification.modality for why that's expected.
       accumulated.classification = {
         modality: classified.computedModality, hasStudentText, summaryCarriesStudentWork, needsImage,
         promptNeedsImage,
       };
 
-      // 2. An empty document is still evaluated, as it was before this work.
-      //
-      //    Turning it away is the better answer on its own terms — the summarizer emits only a
-      //    preamble and headings for a blank document, so the model is paid to comment on nothing.
-      //    But the client has no way to say so. It queues an "Ada is thinking about it…"
-      //    placeholder when the student clicks Ideas, and nothing clears that placeholder except
-      //    an arriving comment, so a student who asks for ideas before doing any work waits for a
-      //    comment that is never coming. Leaving them there is worse than one wasted evaluation.
-      //
-      //    The fix belongs in the client — a plain message saying the document is empty — and that
-      //    is a design decision for the team. Until it is made, empty documents are evaluated.
-      const isEmpty = classified.computedModality === "empty";
+      // 2. Skip empty documents. The client shows its own nudge instead of requesting an
+      //    evaluation, but can't intercept every route (document close, disconnect); this covers
+      //    those using the same documentHasStudentWork check.
+      if (!documentHasStudentWork(parsed)) {
+        const doc = queueDoc as AnalysisQueueDocument;
+        await firestore.collection(getAnalysisQueueFirestorePath("done")).add({
+          ...doc,
+          documentId: docId,
+          completedAt: FieldValue.serverTimestamp(),
+          analysisVersion: 2,
+          classification: accumulated.classification,
+          renderTarget: accumulated.renderTarget,
+          sendSummary: false,
+          sendImage: false,
+          summaryOmittedReason: "empty-document",
+          imageOmittedReason: "empty-document",
+        });
+        let claimedRequestIds = doc.requestIds;
+        try {
+          claimedRequestIds = await claimRequestIds(firestore.doc(event.document)) ?? claimedRequestIds;
+        } catch (err) {
+          logger.error("Could not remove the pending queue entry, which will not be retried", err);
+        }
+
+        // A late id must not be answered by this skip — the document may have gained work since.
+        // Only the snapshot's own ids get "skipped-empty"; a late one goes back onto a fresh
+        // pending document, to be judged by its own run.
+        const ownRequestIds = new Set(doc.requestIds ?? []);
+        const lateRequestIds = (claimedRequestIds ?? []).filter((id) => !ownRequestIds.has(id));
+
+        await writeEvaluationStatusForRequests(doc.metadataPath, doc.evaluator, doc.requestIds, {
+          outcome: "skipped-empty",
+          docUpdated: doc.docUpdated,
+        });
+
+        if (lateRequestIds.length > 0) {
+          const pendingDocRef = firestore.doc(event.document);
+          const newPendingDoc: AnalysisQueueDocument = {
+            metadataPath: doc.metadataPath,
+            documentPath: doc.documentPath,
+            commentsPath: doc.commentsPath,
+            docUpdated: doc.docUpdated,
+            evaluator: doc.evaluator,
+            firestoreDocumentPath: doc.firestoreDocumentPath,
+          };
+          if (doc.aiPrompt) newPendingDoc.aiPrompt = doc.aiPrompt;
+          if (doc.requestContext) newPendingDoc.requestContext = doc.requestContext;
+
+          // A transaction, as on-analyzable-doc-written.ts uses: a plain `set()` could overwrite a
+          // document created in the meantime instead of joining ids to it. Keeping that document's
+          // own fields (docUpdated, requestContext) rather than this skipped run's older ones,
+          // when it exists, since nothing here makes this run's copy the fresher one.
+          await firestore.runTransaction(async (transaction) => {
+            const existing = (await transaction.get(pendingDocRef)).data() as AnalysisQueueDocument | undefined;
+            const priorRequestIds = Array.isArray(existing?.requestIds) ? existing.requestIds : [];
+            const requestIds = [...priorRequestIds, ...lateRequestIds];
+            transaction.set(pendingDocRef, {...(existing ?? newPendingDoc), requestIds});
+          });
+        }
+
+        logger.info(`Document ${documentPath} is empty; skipped evaluation`);
+        return;
+      }
 
       // 3. Summary. Always produced, and stored whenever it was
       //    produced, sent or not: an investigator reading a `done` record can then see the summary
@@ -357,9 +457,7 @@ export const onAnalysisDocumentPending =
       if (docSummary !== undefined) {
         accumulated.docSummary = docSummary;
       }
-      if (docSummary !== undefined && (summaryCarriesStudentWork || isEmpty)) {
-        // An empty document's summary carries no student work, and is sent anyway so that a
-        // comment comes back and the student's placeholder clears. See step 2.
+      if (docSummary !== undefined && summaryCarriesStudentWork) {
         accumulated.sendSummary = true;
       } else if (docSummary !== undefined) {
         accumulated.sendSummary = false;
