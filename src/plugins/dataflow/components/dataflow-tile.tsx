@@ -1,6 +1,7 @@
 import React from "react";
 import { observer, inject } from "mobx-react";
 import classNames from "classnames";
+import { getVisibleFocusables } from "@concord-consortium/accessibility-tools/hooks";
 
 import { DataflowProgram, IDataflowProgramApi } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
@@ -90,7 +91,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   }
 
-  private handleReteManagerCreated = (reteManager: ReteManager | undefined) => {
+  private handleActiveReteManagerChanged = (reteManager: ReteManager | undefined) => {
     this.setState({ reteManager });
   };
 
@@ -134,7 +135,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         </TileTitleArea>
         <div className={classes} onPointerDownCapture={this.handleTileContentPointerDown}>
           <DataflowProgram
-            documentProperties={this.getDocumentProperties()}
             tileId={model.id}
             program={program}
             programDataRate={programDataRate}
@@ -143,7 +143,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             tileContent={tileContent}
             tileElt={tileElt}
             onRegisterTileApi={onRegisterTileApi}
-            onReteManagerCreated={this.handleReteManagerCreated}
+            onActiveReteManagerChanged={this.handleActiveReteManagerChanged}
             onProgramContainerRef={el => this.programContainerEl = el}
             onProgramApiRef={api => this.programApi = api}
           />
@@ -155,9 +155,17 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             onRegisterTileApi={this.props.onRegisterTileApi}
             onUnregisterTileApi={this.props.onUnregisterTileApi}
             getTitleElement={() => getEditableTitleElement(this.props.tileElt ?? undefined)}
-            getContentElement={() =>
-              this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content")
-              ?? undefined}
+            getContentElement={() => {
+              const el = this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content");
+              // The focus trap advances past a slot only if it can put focus somewhere inside it,
+              // and it treats a slot with no element as "not present" and skips it. An empty
+              // program has no focusable blocks — and since zoom moved to the toolbar, nothing
+              // else — so reporting the element here would swallow Tab instead of moving on.
+              // Deliberately the accessibility-tools helper rather than the similar one in
+              // utilities/dom-utils: this has to agree with what the trap itself counts as
+              // focusable, or the slot can be reported as non-empty and swallow Tab anyway.
+              return el && getVisibleFocusables(el).length > 0 ? el : undefined;
+            }}
             getTopbarElement={() =>
               this.programContainerEl?.querySelector<HTMLElement>(".program-editor-topbar")
               ?? undefined}
@@ -169,16 +177,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         </>
       </DataflowReteManagerContext.Provider>
     );
-  }
-
-  private getDocument() {
-    const { documents, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
-    return primaryDocumentKey ? documents.getDocument(primaryDocumentKey) : undefined;
-  }
-
-  private getDocumentProperties() {
-    const document = this.getDocument();
-    return document && document.properties.toJSON();
   }
 
   private handleBeginEditTitle = () => {

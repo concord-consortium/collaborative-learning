@@ -55,6 +55,28 @@ describe("DataflowContentModel", () => {
     expect(dcm.liveProgramZoom.scale).toBe(newZoom.k);
   });
 
+  describe("pan palette state (CLUE-573)", () => {
+    it("defaults closed, toggles via its action, and never appears in snapshots", () => {
+      const dcm = defaultDataflowContent();
+      expect(dcm.panPaletteOpen).toBe(false);
+      const before = JSON.stringify(getSnapshot(dcm));
+      dcm.setPanPaletteOpen(true);
+      expect(dcm.panPaletteOpen).toBe(true);
+      expect(JSON.stringify(getSnapshot(dcm))).toBe(before);
+      dcm.setPanPaletteOpen(false);
+      expect(dcm.panPaletteOpen).toBe(false);
+    });
+
+    it("last pan direction defaults right, changes via its action, and never appears in snapshots", () => {
+      const dcm = defaultDataflowContent();
+      expect(dcm.lastPanDirection).toBe("right");
+      const before = JSON.stringify(getSnapshot(dcm));
+      dcm.setLastPanDirection("up");
+      expect(dcm.lastPanDirection).toBe("up");
+      expect(JSON.stringify(getSnapshot(dcm))).toBe(before);  // volatile: not persisted
+    });
+  });
+
   it("should be to load a program", () => {
     const content = dataflowThreeNode.tileMap["2cLNVyjzmhF5Mij-"].content;
     // We have to use `as DataflowContentModelSnapshotIn` because the json

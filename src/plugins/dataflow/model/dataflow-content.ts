@@ -78,6 +78,8 @@ const ProgramZoom = types.model({
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
+export type PanDirection = "up" | "down" | "left" | "right";
+
 // Resolved per-unit Live Output config, mirrored onto the tile content (see the `outputConfig` prop).
 // The type is shared with the AI summarizer (which can't import from src/plugins) — see ai-summarizer-types.
 export type { IDataflowOutputConfig };
@@ -113,7 +115,11 @@ export const DataflowContentModel = TileContentModel
     channels: observable([]) as NodeChannelInfo[],
     // Volatile (not persisted): the canvas fits all content on every load rather than restoring a
     // saved pan/zoom, so this only tracks the live transform for the current session.
-    liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM)
+    liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM),
+    // Whether the toolbar's pan flyout is showing (drawing's openPallette pattern; one palette only).
+    panPaletteOpen: false,
+    // The toolbar pan button's face shows and re-performs the last direction chosen from the flyout.
+    lastPanDirection: "right" as PanDirection
   }))
   .views(self => ({
     get sharedModel() {
@@ -346,6 +352,12 @@ export const DataflowContentModel = TileContentModel
     },
     setLiveProgramZoom(transform: Transform) {
       self.liveProgramZoom.update(transform);
+    },
+    setPanPaletteOpen(open: boolean) {
+      self.panPaletteOpen = open;
+    },
+    setLastPanDirection(direction: PanDirection) {
+      self.lastPanDirection = direction;
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing

@@ -35,6 +35,13 @@ export function getToolbarButtonInfo(tileType: string, buttonName: string) {
 }
 
 /**
+ * Returns the tile types that have at least one toolbar button registered.
+ */
+export function getRegisteredTileTypes(): string[] {
+  return Array.from(toolbarButtonInfos.keys());
+}
+
+/**
  * Register one or more buttons for a tile.
  * Generally called by tiles once when the application loads,
  * but this can also be called by plugins or other code that wants to contribute button defs.

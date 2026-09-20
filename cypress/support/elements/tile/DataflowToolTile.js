@@ -59,10 +59,10 @@ class DataflowToolTile {
     return cy.get('.primary-workspace .flow-tool');
   }
   getZoomInButton() {
-    return cy.get(`.primary-workspace [title='Zoom In']`);
+    return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.zoom-in`);
   }
   getZoomOutButton() {
-    return cy.get(`.primary-workspace [title='Zoom Out']`);
+    return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.zoom-out`);
   }
   verifyZoomIn(previousStyle) {
     this.getFlowtool().children().invoke("attr", "style").then(style => {

@@ -73,13 +73,15 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNodeOutput().should("exist");
 
     cy.log("verify zoom in & out");
-    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
-      dataflowToolTile.getZoomInButton().click();
-      dataflowToolTile.verifyZoomIn(scale);
-    });
+    // Zoom out first: fit-on-load can park a single-node program exactly at max zoom,
+    // where the toolbar's Zoom In is correctly disabled.
     dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
       dataflowToolTile.getZoomOutButton().click();
       dataflowToolTile.verifyZoomOut(scale);
+    });
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomInButton().click();
+      dataflowToolTile.verifyZoomIn(scale);
     });
 
     cy.log("can delete number node");

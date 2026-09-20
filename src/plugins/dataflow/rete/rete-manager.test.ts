@@ -1,4 +1,6 @@
-import { ReteManager } from "./rete-manager";
+import { AreaPlugin } from "rete-area-plugin";
+import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { MAX_ZOOM, MIN_ZOOM, ReteManager } from "./rete-manager";
 
 interface IFakeNode { id: string; }
 interface IFakeNodeView { position: { x: number; y: number }; }
@@ -116,6 +118,72 @@ describe("ReteManager.nextNodeIdInReadingOrder", () => {
 
   it("returns undefined for an unrecognized key", () => {
     expect(threeNodes().nextNodeIdInReadingOrder("a", "Backspace")).toBeUndefined();
+  });
+});
+
+// The subset of rete-area-plugin's Area that zoomIn/zoomOut/pan/setZoom actually touch, typed off
+// the real AreaPlugin so a signature change there (e.g. zoom/translate no longer returning a
+// boolean promise) breaks this stub loudly instead of silently.
+type FakeArea = Pick<AreaPlugin<Schemes, AreaExtra>["area"], "transform" | "zoom" | "translate">;
+
+/** Stub with just the surface zoomIn/zoomOut/pan/setZoom touch: the rete area transform + zoom/translate,
+ *  and the MST content that receives the live transform. */
+function makeTransformStub(k = 1, x = 0, y = 0) {
+  const calls = { zoom: [] as number[], translate: [] as Array<[number, number]> };
+  const area: FakeArea = {
+    transform: { k, x, y },
+    // Area.zoom resolves false on a successful zoom (inverted vs. its own JSDoc; rete-area-plugin 2.0.2).
+    zoom: async (scale: number) => { calls.zoom.push(scale); area.transform.k = scale; return false; },
+    translate: async (tx: number, ty: number) => {
+      calls.translate.push([tx, ty]);
+      area.transform.x = tx; area.transform.y = ty;
+      return true;
+    },
+  };
+  const setLiveProgramZoom = jest.fn();
+  const stub = Object.create(ReteManager.prototype) as ReteManager;
+  (stub as unknown as { area: { area: FakeArea } }).area = { area };
+  (stub as unknown as { mstContent: { setLiveProgramZoom: jest.Mock } }).mstContent = { setLiveProgramZoom };
+  return { stub, calls, setLiveProgramZoom };
+}
+
+describe("ReteManager zoom/pan (CLUE-573)", () => {
+  it("zoomIn steps +0.05", async () => {
+    const { stub, calls } = makeTransformStub(1);
+    await stub.zoomIn();
+    expect(calls.zoom).toHaveLength(1);
+    expect(calls.zoom[0]).toBeCloseTo(1.05, 10);
+  });
+
+  it("zoomIn clamps at MAX_ZOOM", async () => {
+    const { stub, calls } = makeTransformStub(MAX_ZOOM - 0.01);
+    await stub.zoomIn();
+    expect(calls.zoom).toEqual([MAX_ZOOM]);
+  });
+
+  it("zoomOut steps -0.05", async () => {
+    const { stub, calls } = makeTransformStub(1);
+    await stub.zoomOut();
+    expect(calls.zoom).toHaveLength(1);
+    expect(calls.zoom[0]).toBeCloseTo(0.95, 10);
+  });
+
+  it("zoomOut clamps at MIN_ZOOM", async () => {
+    const { stub, calls } = makeTransformStub(MIN_ZOOM + 0.01);
+    await stub.zoomOut();
+    expect(calls.zoom).toEqual([MIN_ZOOM]);
+  });
+
+  it("setZoom writes the resulting transform to liveProgramZoom", async () => {
+    const { stub, setLiveProgramZoom } = makeTransformStub(1);
+    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1.5);
+    expect(setLiveProgramZoom).toHaveBeenCalledWith(expect.objectContaining({ k: 1.5 }));
+  });
+
+  it("pan translates by exactly the requested delta", async () => {
+    const { stub, calls } = makeTransformStub(1, 10, 20);
+    await stub.pan(40, -40);
+    expect(calls.translate).toEqual([[50, -20]]);
   });
 });
 
