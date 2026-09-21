@@ -4,9 +4,10 @@
 // part, but the directives are here and nowhere else, so this is the copy that matters.
 //
 // CLUE renders a highlight as a button, and isTutorHighlight rejects an empty label, so every
-// highlight needs words. A highlight directive may carry its own caption naming the block as the
-// prose just named it; when it does not, the name comes from our side, out of the context packet
-// we sent — the node's orderedDisplayName, which is the name the student sees on it.
+// highlight needs words. A highlight directive may carry its own `label`, a caption naming the
+// block as the prose just named it; when it does not, the name comes from our side, out of the
+// context packet we sent — the node's orderedDisplayName, which is the name the student sees on
+// it. "Caption" below always means that `label`, never the one we end up rendering.
 //
 // The id is resolved against what we sent either way, and that is the property worth more than the
 // caption. An id we cannot match is dropped rather than rendered, so a tile that has since gone,
