@@ -126,6 +126,26 @@ which checks if the the aiEvaluation is set or if there are invisible exemplar d
 
 `classWideDocuments`: (array | undefined) Class-wide collaborative documents for the unit. Each entry is `{ kind, title }` and becomes one auto-created, concurrently-edited document shared by the whole class, one per class per unit (e.g. a Driving Question Board). `kind` is a label so multiple class wide documents can be added. This label has to be unique across all document types not just class wide documents. It must be a camelCase identifier — a lowercase letter followed by letters or digits, with no spaces, hyphens, or other special characters (e.g. `drivingQuestionBoard`); entries with an invalid `kind` are ignored. `title` is the fixed document title. Units that omit this array create no class-wide documents.
 
+`aiUnitSummary`: (object | undefined) An AI-generated, author-reviewed synopsis of the unit's curriculum content, produced and edited from the curriculum authoring UI's "Unit Summary" panel. It exists to give AI features (AdaChat, Teacher Summary, AI Tile, Ideas) compact context instead of full unit/problem JSON. Shape:
+
+```json
+"aiUnitSummary": {
+  "generatedAt": "2026-09-21T12:00:00.000Z",
+  "sourceHash": "1a2b3c",
+  "sourceManifest": [
+    { "ordinal": "1.1", "title": "Introduction", "problemHash": "4d5e6f" }
+  ],
+  "overview": "One paragraph describing the whole unit.",
+  "entries": [
+    { "ordinal": "1.1", "priorKnowledge": "What a student should know before this problem.", "problemDigest": "What this problem covers." }
+  ]
+}
+```
+
+Each entry in `entries` describes one problem, keyed by the same `"investigation.problem"` ordinal string used elsewhere (`Unit.getAllProblemOrdinals()`). `priorKnowledge` is cumulative — what a student should already know by the time they reach this problem, from every earlier problem in the unit, not just a restatement of this one. `problemDigest` is a short summary of this problem's own content.
+
+`sourceManifest` and `sourceHash` describe the curriculum content the summary was generated from, not the summary text itself. `sourceHash` is a hash of all problems' assembled Markdown, in authored order; each `sourceManifest` entry's `problemHash` is a hash of that one problem's assembled Markdown. Both hashes cover only what that Markdown conversion captures — not image bytes, not table rows past its row cap, and nothing an unhandled tile type drops — so an identical hash does not guarantee identical content for anything outside what the Markdown covers. `sourceHash` is not a "has the summary text changed" key: editing `overview` or `entries` by hand does not change it, and regenerating from identical curriculum content can produce different summary text under the same hash. The authoring panel uses `sourceManifest` and `sourceHash` only to warn that the curriculum may have changed since the summary was generated (comparing ordinals, titles, and hashes against the unit's current structure); it does not stop a stale summary from being saved or used.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
