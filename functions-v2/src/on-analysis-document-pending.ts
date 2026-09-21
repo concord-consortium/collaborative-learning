@@ -10,7 +10,9 @@ import {
   type AnalysisImagedQueueDocument, type ImagedQueueDocument, type MockImagedQueueDocument,
 } from "./analysis-queue-types";
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
-import {generateRenderHtml} from "../../shared/render-page";
+import {generateRenderHtml, kMaxFrameHeightPx} from "../../shared/render-page";
+import {readPngDimensions} from "../../shared/png-header";
+import {isPublicHttpsUrl} from "../../shared/urls";
 import {kPlaceholderUnitCode} from "../../shared/shared";
 import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
@@ -29,7 +31,8 @@ import {claimRequestIds} from "./claim-request-ids";
 // tiles added or changed in later releases. The cost is that every CLUE release can change the
 // screenshots: the page below starts the iframe at 500px and only grows it on a positive
 // updateHeight, so a release that breaks height reporting in unwrapped mode (src/iframe) yields
-// truncated screenshots, and nothing here can tell.
+// truncated screenshots, and nothing here can tell. The frame is also capped at kMaxFrameHeightPx
+// (shared/render-page.ts): a document past that cap is clipped there, not here.
 export const clueIframeURL = "https://collaborative-learning.concord.org/authoring-iframe/index.html";
 // The unit to render with when the document's own unit is unknown or unusable.
 export const fallbackClueUnit = "mods";
@@ -50,6 +53,10 @@ export const analysisSettingsPath = "analysis/settings";
 // again — later edits only update that entry, so they do not re-trigger either.
 const shutterbugTimeoutMs = 45_000;
 
+// Only the viewport: Shutterbug applies `height` to Puppeteer's `setViewport`, not as a cap on a
+// `fullPage` capture. shared/render-page.ts's frame cap is what actually bounds it.
+const shutterbugViewportHeightPx = 500;
+
 // Comfortably above shutterbugTimeoutMs, and above the 60s default, which the request alone could
 // have used up before the summarizer and two database reads are counted.
 const functionTimeoutSeconds = 120;
@@ -64,6 +71,13 @@ const maxErrorTextLength = 500;
 // anything near that size is past what gpt-4o-mini accepts. The largest summary any real document
 // in the evaluation corpora produces is about 36,000 bytes, so this leaves room to spare.
 const maxSummaryBytes = 200_000;
+
+// The provider's per-image allowance for a URL. A picture over this is omitted rather than sent.
+export const maxImageBytes = 20 * 1024 * 1024;
+
+// Budget for the 24-byte range request that checks the returned picture. Kept well inside
+// functionTimeoutSeconds alongside shutterbugTimeoutMs, the summarizer and two database reads.
+const imageCheckTimeoutMs = 10_000;
 
 function bounded(text: string) {
   return text.length > maxErrorTextLength ? `${text.slice(0, maxErrorTextLength)}…` : text;
@@ -89,7 +103,7 @@ async function postToShutterbug(html: string): Promise<string> {
   try {
     response = await fetch(shutterbugURL, {
       method: "POST",
-      body: JSON.stringify({content: html, height: 1500}),
+      body: JSON.stringify({content: html, height: shutterbugViewportHeightPx, fullPage: true}),
       signal: AbortSignal.timeout(shutterbugTimeoutMs),
     });
   } catch (err) {
@@ -121,7 +135,136 @@ async function postToShutterbug(html: string): Promise<string> {
   if (protocol !== "https:") {
     throw new Error(`Shutterbug returned a non-https image URL: ${bounded(url)}`);
   }
+  // This function fetches that URL itself (see inspectImage): a private or loopback host would
+  // mean it fetching somewhere on its own network, not a picture.
+  if (!isPublicHttpsUrl(url)) {
+    throw new Error(`Shutterbug returned an image URL on a private or loopback host: ${bounded(url)}`);
+  }
   return url;
+}
+
+/**
+ * Reads at most `maxBytes` from a response body and cancels the rest.
+ *
+ * `response.arrayBuffer()` would read the whole body first, defeating the bound when a server
+ * ignores `Range` and sends the whole image. A bodyless response (a test double) falls back to
+ * it, since there is nothing to bound.
+ *
+ * Cancels via the reader, not the stream: `getReader()` locks the stream, so `body.cancel()` would
+ * reject instead of cancelling, leaving the rest to download regardless.
+ *
+ * @param {Response} response the response to read from
+ * @param {number} maxBytes how much of the body to keep
+ * @return {Promise<Uint8Array>} up to `maxBytes` bytes from the start of the body
+ */
+export async function readAtMost(response: Response, maxBytes: number): Promise<Uint8Array> {
+  const body = response.body;
+  if (!body) return new Uint8Array(await response.arrayBuffer());
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (total < maxBytes) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.length;
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+  }
+  const result = new Uint8Array(Math.min(total, maxBytes));
+  let offset = 0;
+  for (const chunk of chunks) {
+    const take = Math.min(chunk.length, result.length - offset);
+    result.set(chunk.subarray(0, take), offset);
+    offset += take;
+  }
+  return result;
+}
+
+/**
+ * The number after "/" in a `Content-Range` header, or `null` when it is missing or malformed.
+ *
+ * @param {string | null} header the `Content-Range` header value
+ * @return {number | null} the total byte count it declares, or `null`
+ */
+function totalBytesFromContentRange(header: string | null): number | null {
+  const total = header?.match(/\/(\d+)$/)?.[1];
+  return total ? Number(total) : null;
+}
+
+/**
+ * A header's declared byte count, or `null` when it is missing or not a number.
+ *
+ * @param {string | null} header the header value, e.g. `Content-Length`
+ * @return {number | null} the byte count it declares, or `null`
+ */
+function bytesFromHeader(header: string | null): number | null {
+  if (header === null) return null;
+  const value = Number(header);
+  return Number.isFinite(value) ? value : null;
+}
+
+/** What checking a picture without downloading it can learn about it. */
+interface ImageInspection {
+  widthPx: number;
+  heightPx: number;
+  /** The file's total size, when the response said so; `null` when it did not. */
+  encodedBytes: number | null;
+}
+
+/**
+ * Checks the picture Shutterbug produced, without downloading it.
+ *
+ * A `Range: bytes=0-23` request returns the PNG header (for dimensions) and the file's total size
+ * via `Content-Range`. S3 always honours `Range` and answers 206; the 200 branch covers a host
+ * that does not.
+ *
+ * @param {string} url the hosted picture to check
+ * @return {Promise<ImageInspection>} its dimensions, and its total size when known
+ */
+async function inspectImage(url: string): Promise<ImageInspection> {
+  // Not "follow": a followed redirect has already delivered the request to wherever it pointed —
+  // possibly somewhere less safe than the checked `url` — by the time anything could inspect
+  // where it went. "manual" means a 3xx never becomes a second request; it lands below as an
+  // unrecognized status and fails like any other bad response, url already checked or not.
+  const response = await fetch(url, {
+    headers: {Range: "bytes=0-23"},
+    redirect: "manual",
+    signal: AbortSignal.timeout(imageCheckTimeoutMs),
+  });
+  let encodedBytes: number | null;
+  if (response.status === 206) {
+    encodedBytes = totalBytesFromContentRange(response.headers.get("content-range"));
+  } else if (response.status === 200) {
+    encodedBytes = bytesFromHeader(response.headers.get("content-length"));
+  } else {
+    throw new Error(`Image check answered ${response.status} ${response.statusText}`);
+  }
+  const bytes = await readAtMost(response, 24);
+  const {widthPx, heightPx} = readPngDimensions(bytes);
+  return {widthPx, heightPx, encodedBytes};
+}
+
+/**
+ * Whether a URL's body is larger than `maxBytes`, without reading more than `maxBytes + 1` of it.
+ *
+ * The fallback for when `inspectImage` could not learn the size cheaply. Essentially never runs
+ * against S3, which always sends `Content-Range` or `Content-Length`.
+ *
+ * @param {string} url the hosted picture to check
+ * @param {number} maxBytes the limit to check against
+ * @return {Promise<boolean>} whether the body is larger than `maxBytes`
+ */
+async function bodyExceedsBytes(url: string, maxBytes: number): Promise<boolean> {
+  // "manual", not "follow" — see inspectImage.
+  const response = await fetch(url, {redirect: "manual", signal: AbortSignal.timeout(imageCheckTimeoutMs)});
+  if (!response.ok) {
+    throw new Error(`Image check answered ${response.status} ${response.statusText}`);
+  }
+  const bytes = await readAtMost(response, maxBytes + 1);
+  return bytes.length > maxBytes;
 }
 
 // Tile types are registered from the loaded unit's configuration, not globally, so the render
@@ -495,10 +638,41 @@ export const onAnalysisDocumentPending =
           try {
             accumulated.docImageUrl = await postToShutterbug(generateHtml(parsed, unit));
             accumulated.docImaged = FieldValue.serverTimestamp();
-            accumulated.sendImage = true;
           } catch (err) {
             accumulated.sendImage = false;
             accumulated.imageError = `Shutterbug error: ${bounded(String(err))}`;
+          }
+
+          // Not sent unverified. A separate try: a failure here is an image-check error, not a
+          // Shutterbug one.
+          if (accumulated.docImageUrl !== undefined) {
+            try {
+              const inspected = await inspectImage(accumulated.docImageUrl);
+              let encodedBytes = inspected.encodedBytes;
+              let overLimit = encodedBytes !== null && encodedBytes > maxImageBytes;
+              if (encodedBytes === null) {
+                overLimit = await bodyExceedsBytes(accumulated.docImageUrl, maxImageBytes);
+                if (overLimit) encodedBytes = maxImageBytes + 1;
+              }
+              if (overLimit) {
+                accumulated.sendImage = false;
+                accumulated.imageOmittedReason = "image-too-large";
+                logger.warn(`Screenshot of ${documentPath} is ${encodedBytes} bytes, over the ` +
+                  `${maxImageBytes} limit; sending the summary alone`);
+              } else {
+                accumulated.sendImage = true;
+                // >=, not >: a clipped capture can land a few pixels past the ceiling (the outer
+                // page's own margin, outside the clamped iframe), which is still a clip, not a bug.
+                if (inspected.heightPx >= kMaxFrameHeightPx) {
+                  accumulated.imageClipped = {capturedHeightPx: inspected.heightPx, ceilingPx: kMaxFrameHeightPx};
+                  logger.warn(`Screenshot of ${documentPath} was clipped at ${kMaxFrameHeightPx}px ` +
+                    `(captured ${inspected.heightPx}px)`);
+                }
+              }
+            } catch (err) {
+              accumulated.sendImage = false;
+              accumulated.imageError = `Image check error: ${bounded(String(err))}`;
+            }
           }
         }
       }

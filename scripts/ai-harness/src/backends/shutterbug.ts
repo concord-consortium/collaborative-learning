@@ -2,25 +2,26 @@
  * The two Shutterbug modes: the production-parity baseline and the parameterized one.
  *
  * `shutterbug-production-current` matches production's request envelope — the production endpoint,
- * the released build's `authoring-iframe/index.html` page, `unit=mods`, `height: 1500`, and no
- * `fullPage` — and renders against production's target, clipping included. Production renders
- * each document with the unit from its Firestore metadata and uses `mods` only as the fallback;
- * the harness corpus has no such metadata, so this mode renders everything with the fallback. It
- * is not byte-for-byte production: the page inside the request body comes from the generator this
- * file shares with the other modes, which escapes the document rather than interpolating it raw
- * and guards a zero `updateHeight`. The README lists every difference under "differences from
- * production's HTML". A snapshot test pins what this mode posts, so it cannot drift while the
- * other modes evolve.
+ * the released build's `authoring-iframe/index.html` page, `unit=mods`, `height: 500`, and
+ * `fullPage: true` — and renders against production's target, floor and ceiling included.
+ * Production renders each document with the unit from its Firestore metadata and uses `mods` only
+ * as the fallback; the harness corpus has no such metadata, so this mode renders everything with
+ * the fallback. It is not byte-for-byte production: the page inside the request body comes from
+ * the generator this file shares with the other modes, which escapes the document rather than
+ * interpolating it raw and guards a zero `updateHeight`. The README lists every difference under
+ * "differences from production's HTML". A snapshot test pins what this mode posts, so it cannot
+ * drift while the other modes evolve.
  *
  * It is a **baseline**, not a recommendation: improvements go into `shutterbug-parameterized`,
  * which is the shape the eventual production fix will take.
  *
  * Note that `scripts/shutterbug.ts` is *not* a production baseline, whatever the harness plan says:
- * it posts `height: 500, fullPage: true`.
+ * it targets staging by default, and nothing pins its request the way a snapshot test pins this
+ * mode's.
  */
 import { RenderTarget } from "../schemas.js";
 import { NotAPngError, readPngInfo } from "../png.js";
-import { generateRenderHtml } from "../../../../shared/render-page.js";
+import { generateRenderHtml, kMaxFrameHeightPx } from "../../../../shared/render-page.js";
 import {
   RenderBackend, RenderLimitExceeded, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
   isPublicHttpsUrl, kDefaultRenderLimits, kUnobservedDiagnostics, readBodyWithin,
@@ -32,7 +33,14 @@ export const kProductionClueUrl = "https://collaborative-learning.concord.org/au
 /** Production's fallback unit, used when a document's metadata has no usable unit code. */
 export const kProductionUnit = "mods";
 export const kProductionShutterbugUrl = "https://api.concord.org/shutterbug-production";
+/**
+ * No longer what production sends (see `kProductionViewportHeightPx`) — kept as the other modes'
+ * default, so `--capture-height`'s absence still means something on them.
+ */
 export const kProductionCaptureHeightPx = 1500;
+/** The viewport production's `fullPage: true` request sends. Only a viewport — the frame ceiling
+ * in `shared/render-page.ts` is what actually bounds the capture. */
+export const kProductionViewportHeightPx = 500;
 export const kStagingShutterbugUrl = "https://api.concord.org/shutterbug-staging";
 
 /** Production's iframe is 100% wide inside Shutterbug's own page; this is what it works out to. */
@@ -70,6 +78,14 @@ export interface ShutterbugOptions {
   downloadTimeoutMs?: number;
   retries?: number;
   sleep?: (ms: number) => Promise<void>;
+  /**
+   * Post `fullPage: true`: Shutterbug captures the whole iframe instead of clipping it at
+   * `captureHeightPx`, which becomes only the starting viewport. The page itself then bounds the
+   * capture, via `maxFrameHeightPx`.
+   */
+  fullPage?: boolean;
+  /** The ceiling `shared/render-page.ts` clamps the frame to. Only meaningful with `fullPage`. */
+  maxFrameHeightPx?: number;
 }
 
 export const kShutterbugBackendVersion = 1;
@@ -77,6 +93,16 @@ export const kShutterbugBackendVersion = 1;
 const kDefaultRequestTimeoutMs = 60_000;
 const kDefaultDownloadTimeoutMs = 60_000;
 const kDefaultRetries = 2;
+
+/**
+ * A correctly clamped full-page capture still comes back a little taller than the ceiling: the
+ * clamp bounds the iframe, but Shutterbug's own screenshot is of the whole outer page, chrome
+ * included, and that chrome adds a small amount on top (observed a few pixels through the real
+ * service; a raw unwrapped page can add more — up to Chromium's default 8px body margin on each
+ * side). Without this, a document that lands exactly at the ceiling — the case the ceiling exists
+ * to handle — fails every time instead of succeeding with a clipped capture.
+ */
+const kFullPageOverflowTolerancePx = 16;
 
 /**
  * How much of Shutterbug's reply will be read.
@@ -124,14 +150,19 @@ async function withTimeout<T>(
  * The request body production posts. Kept as its own function so the parity snapshot test can assert
  * the exact bytes without going anywhere near the network.
  *
- * `fullPage` is deliberately absent: production does not send it, so parity does not either.
+ * `height` is only Puppeteer's starting viewport; with `fullPage: true` it captures the whole
+ * iframe regardless, and the page itself bounds that capture via `maxHeightPx`.
  */
 export function shutterbugRequestBody(
-  content: unknown, options: { clueUrl: string; unit: string; captureHeightPx: number }
-): { content: string; height: number } {
+  content: unknown,
+  options: { clueUrl: string; unit: string; captureHeightPx: number; fullPage?: boolean; maxHeightPx?: number }
+): { content: string; height: number; fullPage?: true } {
   return {
-    content: generateRenderHtml({ content, clueUrl: options.clueUrl, unit: options.unit }),
-    height: options.captureHeightPx
+    content: generateRenderHtml({
+      content, clueUrl: options.clueUrl, unit: options.unit, maxHeightPx: options.maxHeightPx
+    }),
+    height: options.captureHeightPx,
+    ...(options.fullPage ? { fullPage: true as const } : {})
   };
 }
 
@@ -147,7 +178,9 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     limits = kDefaultRenderLimits,
     requestTimeoutMs = kDefaultRequestTimeoutMs,
     downloadTimeoutMs = kDefaultDownloadTimeoutMs,
-    retries = kDefaultRetries
+    retries = kDefaultRetries,
+    fullPage = false,
+    maxFrameHeightPx = kMaxFrameHeightPx
   } = options;
   const sleep = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
   const fetchImpl: FetchLike = options.fetchImpl ?? ((url, init) => fetch(url, init));
@@ -159,11 +192,29 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     throw new Error(`--shutterbug-url must be an https URL, or http on loopback for a local ` +
       `Shutterbug; got "${shutterbugUrl}". The whole document is posted to it.`);
   }
-  // Checked once, at construction, against the height the mode is configured with: an unreasonable
-  // --capture-height should be refused before any student work is posted anywhere, not after.
-  if (captureHeightPx > limits.maxHeightPx || viewportWidthPx * captureHeightPx > limits.maxPixels) {
+  // A ceiling only bounds a full-page capture; without `fullPage` it has nothing to bound and
+  // would be silently ignored rather than applied, which `--max-frame-height` cannot look like it
+  // is doing from the CLI.
+  if (options.maxFrameHeightPx !== undefined && !fullPage) {
+    throw new Error(`--max-frame-height requires --full-page (--mode ${modeId})`);
+  }
+  // With `fullPage`, `captureHeightPx` is only the starting viewport and bounds nothing; the
+  // page's own ceiling does, so that is what construction checks against.
+  const effectiveHeightPx = fullPage ? maxFrameHeightPx : captureHeightPx;
+  // A full-page capture floors at the viewport — it never shrinks below it — so a viewport taller
+  // than the ceiling would defeat the ceiling silently: construction would pass, the document
+  // would post for real, and only the post-download check would catch it, after the upload.
+  if (fullPage && captureHeightPx > maxFrameHeightPx) {
     throw new RenderLimitExceeded(`--mode ${modeId}`,
-      `a ${viewportWidthPx}×${captureHeightPx} capture exceeds the configured limits ` +
+      `--capture-height ${captureHeightPx} exceeds --max-frame-height ${maxFrameHeightPx}; the ` +
+      "viewport would floor every capture above the ceiling it is meant to enforce");
+  }
+  // Checked once, at construction, against the height the mode is configured with: an unreasonable
+  // --capture-height (or --max-frame-height) should be refused before any student work is posted
+  // anywhere, not after.
+  if (effectiveHeightPx > limits.maxHeightPx || viewportWidthPx * effectiveHeightPx > limits.maxPixels) {
+    throw new RenderLimitExceeded(`--mode ${modeId}`,
+      `a ${viewportWidthPx}×${effectiveHeightPx} capture exceeds the configured limits ` +
       `(max ${limits.maxHeightPx}px tall, ${limits.maxPixels} pixels)`);
   }
 
@@ -173,10 +224,15 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     clueRevision,
     shutterbugUrl,
     viewportWidthPx,
-    // Shutterbug is given a fixed height and clips to it. Recording this as a full-document capture
-    // would be a lie the freshness check could never catch.
-    captureMode: "fixed-height",
-    captureHeightPx
+    // Fixed height clips at that height; full-page clips at the page's own ceiling. Recording
+    // either as full-document would be a lie the freshness check could never catch.
+    //
+    // Known gap: in full-page mode this records the ceiling, not `captureHeightPx` (the viewport)
+    // — nothing here records the viewport at all. Two full-page runs that differ only in
+    // --capture-height therefore compare as the same target, and `render` reuses a stale capture
+    // instead of noticing the viewport changed. Use --refresh when varying --capture-height.
+    captureMode: fullPage ? "full-page" : "fixed-height",
+    captureHeightPx: effectiveHeightPx
   };
 
   const post = async (docId: string, body: unknown): Promise<string> => {
@@ -308,7 +364,10 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
     }
     // The bytes being small enough says nothing about the image being reasonable — a tall, flat
     // screenshot compresses to very little. The dimensions are checked on what actually arrived.
-    checkCaptureSize(docId, info.widthPx, info.heightPx, limits);
+    // In full-page mode the check is against the mode's own ceiling (plus its known overflow
+    // tolerance), not the global default: taller than that means the page's clamp failed.
+    checkCaptureSize(docId, info.widthPx, info.heightPx,
+      fullPage ? { ...limits, maxHeightPx: maxFrameHeightPx + kFullPageOverflowTolerancePx } : limits);
     return bytes;
     });
   };
@@ -333,8 +392,18 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
         }
         checkCaptureSize(request.docId, viewportWidthPx, heightPx, limits);
       }
+      // Without `fullPage`, the frame still must not be capped at the shared ceiling: a
+      // fixed-height or accurate-height capture relies on the frame growing to fill (or exceed)
+      // its own configured viewport, which can be taller than kMaxFrameHeightPx on purpose. Capped
+      // there anyway, the frame would stop growing at 4000px while Shutterbug still screenshoted
+      // the full viewport, leaving the rest of the picture blank. `limits.maxHeightPx` is the
+      // ceiling this mode already enforces post-download, so the frame is allowed to grow up to
+      // the same bound rather than a smaller, unrelated one.
       const url = await post(request.docId,
-        shutterbugRequestBody(request.content, { clueUrl, unit, captureHeightPx: heightPx }));
+        shutterbugRequestBody(request.content, {
+          clueUrl, unit, captureHeightPx: heightPx,
+          fullPage, maxHeightPx: fullPage ? maxFrameHeightPx : limits.maxHeightPx
+        }));
       const bytes = await download(request.docId, url);
       // The hosted URL is kept beside the downloaded copy: it is what production sends to the model,
       // and it is what `run` has to check is still resolving before it spends anything.
@@ -366,7 +435,9 @@ export function shutterbugProductionCurrent(options: ProductionParityOptions = {
     clueUrl: kProductionClueUrl,
     unit: kProductionUnit,
     shutterbugUrl: kProductionShutterbugUrl,
-    captureHeightPx: kProductionCaptureHeightPx,
+    // maxFrameHeightPx is left at its default, matching production.
+    captureHeightPx: kProductionViewportHeightPx,
+    fullPage: true,
     // A hosted branch build has no revision the harness can read, so this is recorded as unknown
     // unless a caller can say what it was — and `render` warns when it is null.
     clueRevision: options.clueRevision ?? null,
@@ -381,6 +452,8 @@ export interface ParameterizedOptions extends ProductionParityOptions {
   unit?: string;
   shutterbugUrl?: string;
   captureHeightPx?: number;
+  fullPage?: boolean;
+  maxFrameHeightPx?: number;
 }
 
 /** The same transport with everything configurable — what the production fix will look like. */
@@ -394,7 +467,9 @@ export function shutterbugParameterized(options: ParameterizedOptions = {}): Ren
     clueRevision: options.clueRevision ?? null,
     fetchImpl: options.fetchImpl,
     limits: options.limits,
-    sleep: options.sleep
+    sleep: options.sleep,
+    fullPage: options.fullPage,
+    maxFrameHeightPx: options.maxFrameHeightPx
   });
 }
 

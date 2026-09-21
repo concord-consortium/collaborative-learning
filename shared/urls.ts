@@ -1,11 +1,10 @@
 /**
- * Whether a hosted image URL is one the harness will read bytes from.
+ * Whether a hosted URL is safe to fetch bytes from: public and https.
  *
- * Both places that fetch a rendered image use `redirect: "follow"`, so the URL that was checked is
- * not necessarily the URL that answered: a hosted image can redirect to plain `http`, or to an
- * address on the machine running the harness. Asserting this against the *final* response URL is
- * what closes that — a silent downgrade or a landing on the private network fails instead of being
- * downloaded and stored as a student's document.
+ * A hosted URL can redirect to plain `http`, or to an address on the machine or network doing the
+ * fetching — Shutterbug's own image URLs among them. Checking this against the *final* response
+ * URL, not just the one that was requested, is what closes that: a silent downgrade or a landing
+ * on the private network fails instead of being fetched and treated as trusted content.
  *
  * A public hostname that resolves to a private address still passes; stopping that needs the
  * resolved address, which `fetch` does not expose. The check is on the URL, and says so.
@@ -24,16 +23,15 @@ export function isPublicHttpsUrl(value: string): boolean {
  * Why a redirect must not be followed, or `null` when it is fine.
  *
  * The rule is that a redirect may not land somewhere less safe than the URL that was asked for. A
- * request to a public https URL has to end at a public https URL; an operator who deliberately
- * points the harness at a local server is not downgraded by ending up there, so that case is left
- * alone. Stating it as "no downgrade" rather than "https only" is what lets a local Shutterbug and
- * the tests' loopback servers keep working while the case that matters — a hosted image quietly
- * redirecting to plain http, or to an address on this machine — still fails.
+ * request to a public https URL has to end at a public https URL; a caller who deliberately points
+ * at a local server is not downgraded by ending up there, so that case is left alone. Stating it as
+ * "no downgrade" rather than "https only" is what lets a local Shutterbug and loopback test servers
+ * keep working while the case that matters — a hosted URL quietly redirecting to plain http, or to
+ * an address on the machine making the request — still fails.
  *
  * This says nothing about a URL that was never public https to begin with, because there is no
  * downgrade in that case to describe. Whether such a URL should be fetched at all is a separate
- * question, settled where the URL is admitted rather than where it is followed — see
- * `asOptionalPublicHttpsUrl` in `schemas.ts`.
+ * question, settled where the URL is admitted rather than where it is followed.
  */
 export function redirectDowngradeReason(requestedUrl: string, finalUrl: string): string | null {
   if (!isPublicHttpsUrl(requestedUrl) || isPublicHttpsUrl(finalUrl)) return null;

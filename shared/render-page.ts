@@ -21,6 +21,12 @@ import { escapeHtmlAttribute, escapeJsonForScript } from "./escape-for-html";
  */
 export const kInitialFrameHeightPx = 500;
 
+/**
+ * The ceiling: the iframe never grows past this. Bounds a full-page capture before Shutterbug
+ * rasterizes anything. Shared so production and the harness agree on where it is.
+ */
+export const kMaxFrameHeightPx = 4000;
+
 export interface RenderHtmlOptions {
   /** The document content, as an object — not a string of JSON. */
   content: unknown;
@@ -34,6 +40,8 @@ export interface RenderHtmlOptions {
   unit: string;
   /** Starting height of the iframe before the first `updateHeight` message arrives. */
   initialHeightPx?: number;
+  /** The frame never grows past this. Defaults to `kMaxFrameHeightPx`. */
+  maxHeightPx?: number;
 }
 
 /**
@@ -68,7 +76,9 @@ export function isClueFrameUrl(url: string): boolean {
  * pipeline ignore the marker.
  */
 export function generateRenderHtml(options: RenderHtmlOptions): string {
-  const { content, clueUrl, unit, initialHeightPx = kInitialFrameHeightPx } = options;
+  const {
+    content, clueUrl, unit, initialHeightPx = kInitialFrameHeightPx, maxHeightPx = kMaxFrameHeightPx
+  } = options;
   const serialized = escapeJsonForScript(JSON.stringify(content));
   const source = escapeHtmlAttribute(iframeUrlFor(clueUrl, unit));
   return `
@@ -93,7 +103,8 @@ export function generateRenderHtml(options: RenderHtmlOptions): string {
           if (event.data && event.data.type === "updateHeight") {
             const height = Number(event.data.height);
             if (!Number.isFinite(height) || height <= 0) return;
-            document.getElementById("clue-frame").height = height + "px";
+            const clamped = Math.min(height, ${maxHeightPx});
+            document.getElementById("clue-frame").height = clamped + "px";
           }
         })
         clueFrame.contentWindow.postMessage(

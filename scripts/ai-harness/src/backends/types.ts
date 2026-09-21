@@ -182,9 +182,9 @@ export async function readBodyWithin(
 }
 
 // Re-exported so the modules that reach for these through `backends/types.js` keep working; they
-// are defined in urls.ts so that schemas.ts can use them without importing this module, which
-// imports schemas.ts itself.
-export { isPublicHttpsUrl, redirectDowngradeReason } from "../urls.js";
+// are defined in shared/urls.ts so that schemas.ts can use them without importing this module,
+// which imports schemas.ts itself.
+export { isPublicHttpsUrl, redirectDowngradeReason } from "../../../../shared/urls.js";
 
 export function checkEncodedSize(docId: string, bytes: Buffer, limits: RenderLimits): void {
   if (bytes.length > limits.maxEncodedBytes) {

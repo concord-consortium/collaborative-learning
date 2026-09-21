@@ -23,7 +23,8 @@ exports[`the generated render page matches its snapshot 1`] = `
           if (event.data && event.data.type === "updateHeight") {
             const height = Number(event.data.height);
             if (!Number.isFinite(height) || height <= 0) return;
-            document.getElementById("clue-frame").height = height + "px";
+            const clamped = Math.min(height, 4000);
+            document.getElementById("clue-frame").height = clamped + "px";
           }
         })
         clueFrame.contentWindow.postMessage(

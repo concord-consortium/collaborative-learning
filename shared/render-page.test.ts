@@ -1,4 +1,6 @@
-import { generateRenderHtml, iframeUrlFor, isClueFrameUrl } from "./render-page";
+import {
+  generateRenderHtml, iframeUrlFor, isClueFrameUrl, kInitialFrameHeightPx, kMaxFrameHeightPx
+} from "./render-page";
 
 /**
  * A document whose student text does every dangerous thing at once: closes the script element,
@@ -84,5 +86,91 @@ describe("the generated render page", () => {
 
   it("matches its snapshot", () => {
     expect(html).toMatchSnapshot();
+  });
+
+  it("clamps the frame to the ceiling by default", () => {
+    expect(html).toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
+  });
+
+  it("honors a custom maxHeightPx", () => {
+    const custom = generateRenderHtml({
+      content: adversarialDocument, clueUrl: "http://localhost:8080", unit: "harness-render",
+      maxHeightPx: 1234
+    });
+    expect(custom).toContain("Math.min(height, 1234)");
+    expect(custom).not.toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
+  });
+});
+
+/**
+ * Runs the page's own height-update listener — extracted from the real generated HTML, not
+ * reimplemented — against a real `<iframe id="clue-frame">` in this test's DOM.
+ *
+ * The listener only attaches once `sendInitialValueToEditor` runs on `load`, and that function
+ * returns early if `contentWindow` is falsy. jsdom gives even a bare, src-less iframe a real
+ * (about:blank) `contentWindow`, so dispatching `load` here exercises that guard correctly.
+ */
+function frameAfterListenerSetup(html: string): HTMLIFrameElement {
+  const iframeMarkup = html.match(/<iframe[^]*?<\/iframe>/)![0];
+  const script = html.match(/<script>\s*const clueFrame[^]*?<\/script>/)![0]
+    .replace(/^<script>/, "").replace(/<\/script>$/, "");
+  document.body.innerHTML = iframeMarkup;
+  const frame = document.getElementById("clue-frame") as HTMLIFrameElement;
+  expect(frame.contentWindow).toBeTruthy();
+  // eslint-disable-next-line no-new-func -- runs the page's real script text, not a copy of it.
+  new Function("initialValue", script)({});
+  frame.dispatchEvent(new Event("load"));
+  return frame;
+}
+
+function sendHeightUpdate(height: unknown): void {
+  window.dispatchEvent(new MessageEvent("message", {data: {type: "updateHeight", height}}));
+}
+
+describe("the height-update listener the generated page actually runs", () => {
+  const html = generateRenderHtml({
+    content: adversarialDocument, clueUrl: "http://localhost:8080", unit: "harness-render"
+  });
+
+  it("starts the frame at its initial height, before any message arrives", () => {
+    const frame = frameAfterListenerSetup(html);
+    expect(frame.height).toBe(`${kInitialFrameHeightPx}px`);
+  });
+
+  it("grows the frame to an ordinary height", () => {
+    const frame = frameAfterListenerSetup(html);
+    sendHeightUpdate(1200);
+    expect(frame.height).toBe("1200px");
+  });
+
+  it("clamps a height past the default ceiling", () => {
+    const frame = frameAfterListenerSetup(html);
+    sendHeightUpdate(kMaxFrameHeightPx + 500);
+    expect(frame.height).toBe(`${kMaxFrameHeightPx}px`);
+  });
+
+  it("clamps to a custom maxHeightPx instead of the default ceiling", () => {
+    const custom = generateRenderHtml({
+      content: adversarialDocument, clueUrl: "http://localhost:8080", unit: "harness-render",
+      maxHeightPx: 1234
+    });
+    const frame = frameAfterListenerSetup(custom);
+    sendHeightUpdate(5000);
+    expect(frame.height).toBe("1234px");
+  });
+
+  it.each([0, -10, NaN, "not-a-number", undefined, null])(
+    "ignores an invalid height (%p) and leaves the frame at its previous height", (invalid) => {
+      const frame = frameAfterListenerSetup(html);
+      sendHeightUpdate(1500);
+      expect(frame.height).toBe("1500px");
+      sendHeightUpdate(invalid);
+      expect(frame.height).toBe("1500px");
+    });
+
+  it("ignores a message that is not an updateHeight message", () => {
+    const frame = frameAfterListenerSetup(html);
+    window.dispatchEvent(new MessageEvent("message", {data: {type: "somethingElse", height: 1200}}));
+    expect(frame.height).toBe(`${kInitialFrameHeightPx}px`);
   });
 });

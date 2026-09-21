@@ -572,6 +572,70 @@ describe("a document the corpus says cannot be rendered", () => {
   });
 });
 
+describe("--full-page and --max-frame-height, driven through the CLI", () => {
+  it("posts fullPage, clamps the page's HTML to a nondefault ceiling, and records it", async () => {
+    // Drives the flags through `render`, unlike the unit-level backend tests, which build the
+    // backend directly.
+    const { dataRoot, paths, order } = setUp("full-page-ceiling");
+    const output: string[] = [];
+    const posted: { content: string; height: number; fullPage?: boolean }[] = [];
+    const png = makeTestPng(960, 1200);
+    const fetchImpl = async (url: string, init?: RequestInit): Promise<Response> => {
+      if (init?.method === "POST") {
+        posted.push(JSON.parse(String(init.body)));
+        return {
+          ok: true, status: 200, statusText: "OK",
+          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test/shot.png" })))
+        } as unknown as Response;
+      }
+      return {
+        ok: true, status: 200, statusText: "OK", url: "https://images.test/shot.png",
+        headers: new Headers({ "content-type": "image/png" }), body: bodyOf(png)
+      } as unknown as Response;
+    };
+
+    await main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-parameterized",
+      "--full-page", "--max-frame-height", "1800"], {
+      dataRoot,
+      log: (message: string) => output.push(message),
+      now: () => new Date("2026-08-13T00:00:00.000Z"),
+      renderConcurrency: 1,
+      renderModeOptions: { clueRevision: "test-revision", fetchImpl }
+    });
+
+    expect(posted.length).toBe(order.length);
+    for (const body of posted) {
+      expect(body.fullPage).toBe(true);
+      // The nondefault ceiling reached the page itself, not only the request envelope.
+      expect(body.content).toContain("Math.min(height, 1800)");
+    }
+    const envelope = readImageEnvelope(imageRepresentationPath(paths, "shutterbug-parameterized", order[0]));
+    expect(envelope.renderTarget.captureMode).toBe("full-page");
+    expect(envelope.renderTarget.captureHeightPx).toBe(1800);
+  });
+
+  it("rejects a --max-frame-height that is not a positive whole number", async () => {
+    const { dataRoot } = setUp("full-page-bad-ceiling");
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-parameterized",
+      "--full-page", "--max-frame-height", "-5"], deps(dataRoot, null, [])))
+      .rejects.toThrow(/--max-frame-height must be a positive whole number/);
+  });
+
+  it("rejects --max-frame-height given without --full-page", async () => {
+    const { dataRoot } = setUp("max-frame-height-without-full-page");
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "shutterbug-parameterized",
+      "--max-frame-height", "1800"], deps(dataRoot, null, [])))
+      .rejects.toThrow(/--max-frame-height requires --full-page/);
+  });
+
+  it("rejects --full-page on a mode that does not support it", async () => {
+    const { dataRoot, order } = setUp("full-page-unsupported-mode");
+    await expect(main(["render", "--corpus", "render-corpus", "--mode", "puppeteer-full-height",
+      "--full-page"], deps(dataRoot, browserThatFails(new Set(), order), [])))
+      .rejects.toThrow(/--full-page is not configurable for --mode puppeteer-full-height/);
+  });
+});
+
 describe("--concurrency and --timeout-ms", () => {
   it("refuses anything that is not a positive whole number", async () => {
     const { dataRoot } = setUp("render-bad-limits");

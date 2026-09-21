@@ -10,10 +10,11 @@
 import { git } from "../files.js";
 import { RenderBackend } from "./types.js";
 import { kPuppeteerBackendVersion, puppeteerBackend } from "./puppeteer.js";
+import { kMaxFrameHeightPx } from "../../../../shared/render-page.js";
 import {
   FetchLike, kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl,
-  kProductionUnit, kShutterbugBackendVersion, kStagingShutterbugUrl, shutterbugAccurateHeight,
-  shutterbugParameterized, shutterbugProductionCurrent
+  kProductionUnit, kProductionViewportHeightPx, kShutterbugBackendVersion, kStagingShutterbugUrl,
+  shutterbugAccurateHeight, shutterbugParameterized, shutterbugProductionCurrent
 } from "./shutterbug.js";
 import { kHarnessRenderUnitId } from "./render-unit.js";
 
@@ -77,7 +78,9 @@ const kFlagNames: Partial<Record<keyof RenderModeOptions, string>> = {
   unit: "--unit",
   shutterbugUrl: "--shutterbug-url",
   captureHeightPx: "--capture-height",
-  timeoutMs: "--timeout-ms"
+  timeoutMs: "--timeout-ms",
+  fullPage: "--full-page",
+  maxFrameHeightPx: "--max-frame-height"
 };
 
 /**
@@ -110,6 +113,10 @@ export interface RenderModeOptions {
   pollIntervalMs?: number;
   /** The whole budget for one document: load, readiness and capture together. */
   timeoutMs?: number;
+  /** `shutterbug-parameterized` only: post `fullPage: true` instead of clipping at `captureHeightPx`. */
+  fullPage?: boolean;
+  /** `shutterbug-parameterized` only: the ceiling the page's frame is capped at, with `fullPage`. */
+  maxFrameHeightPx?: number;
 }
 
 export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
@@ -123,7 +130,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     needsUnitServer: true,
     // This mode always captures the whole document, so accepting a capture height and dropping it
     // would silently answer a different question from the one that was asked.
-    unusableFlags: ["shutterbugUrl", "captureHeightPx"],
+    unusableFlags: ["shutterbugUrl", "captureHeightPx", "fullPage", "maxFrameHeightPx"],
     build: (options) => puppeteerBackend({
       modeId: "puppeteer-full-height",
       clueUrl: options.clueUrl ?? kDefaultClueUrl,
@@ -152,7 +159,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       "captured one image per top-level tile",
     defaultUnit: kHarnessRenderUnitId,
     needsUnitServer: true,
-    unusableFlags: ["shutterbugUrl", "captureHeightPx"],
+    unusableFlags: ["shutterbugUrl", "captureHeightPx", "fullPage", "maxFrameHeightPx"],
     build: (options) => puppeteerBackend({
       modeId: "puppeteer-per-tile",
       clueUrl: options.clueUrl ?? kDefaultClueUrl,
@@ -171,11 +178,13 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     backendVersion: kShutterbugBackendVersion,
     prerequisites: `network access to ${kProductionShutterbugUrl} and ${kProductionClueUrl}; no OpenAI key`,
     renderTargetSummary: `${kProductionClueUrl}, unit ${kProductionUnit}, via ` +
-      `${kProductionShutterbugUrl}, clipped at ${kProductionCaptureHeightPx}px (none configurable)`,
+      `${kProductionShutterbugUrl}, fullPage:true (viewport ${kProductionViewportHeightPx}px), ` +
+      `clipped only by the page's own frame ceiling, ${kMaxFrameHeightPx}px (none configurable)`,
     defaultUnit: null,
     needsUnitServer: false,
     // Frozen by definition: this mode exists to match production's request envelope.
-    unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx", "timeoutMs"],
+    unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx", "timeoutMs",
+      "fullPage", "maxFrameHeightPx"],
     build: (options) => shutterbugProductionCurrent({
       clueRevision: options.clueRevision ?? null,
       fetchImpl: options.fetchImpl
@@ -190,7 +199,8 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       `--shutterbug-url says otherwise) and the CLUE URL; no OpenAI key`,
     renderTargetSummary: `${kProductionClueUrl} (--clue-url), unit ${kProductionUnit} (--unit), via ` +
       `${kStagingShutterbugUrl} (--shutterbug-url), clipped at ${kProductionCaptureHeightPx}px ` +
-      "(--capture-height)",
+      "(--capture-height); or, with --full-page, fullPage:true and clipped only by the page's own " +
+      `frame ceiling, ${kMaxFrameHeightPx}px by default (--max-frame-height)`,
     defaultUnit: null,
     needsUnitServer: false,
     unusableFlags: ["timeoutMs"],
@@ -200,7 +210,9 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       shutterbugUrl: options.shutterbugUrl,
       captureHeightPx: options.captureHeightPx,
       clueRevision: options.clueRevision ?? null,
-      fetchImpl: options.fetchImpl
+      fetchImpl: options.fetchImpl,
+      fullPage: options.fullPage,
+      maxFrameHeightPx: options.maxFrameHeightPx
     })
   },
   "shutterbug-accurate-height": {
@@ -215,7 +227,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     needsUnitServer: false,
     needsMeasuredHeight: true,
     // The height is measured, not chosen, so accepting one would answer a different question.
-    unusableFlags: ["captureHeightPx", "timeoutMs"],
+    unusableFlags: ["captureHeightPx", "timeoutMs", "fullPage", "maxFrameHeightPx"],
     build: (options) => shutterbugAccurateHeight({
       clueUrl: options.clueUrl,
       unit: options.unit,
