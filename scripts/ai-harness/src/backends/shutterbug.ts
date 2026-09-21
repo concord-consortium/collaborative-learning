@@ -402,7 +402,7 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
       // Without `fullPage`, the frame still must not be capped at the shared ceiling: a
       // fixed-height or accurate-height capture relies on the frame growing to fill (or exceed)
       // its own configured viewport, which can be taller than kMaxFrameHeightPx on purpose. Capped
-      // there anyway, the frame would stop growing at 4000px while Shutterbug still screenshoted
+      // there anyway, the frame would stop growing at 4000px while Shutterbug still screenshotted
       // the full viewport, leaving the rest of the picture blank. `limits.maxHeightPx` is the
       // ceiling this mode already enforces post-download, so the frame is allowed to grow up to
       // the same bound rather than a smaller, unrelated one.

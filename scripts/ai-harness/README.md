@@ -1045,8 +1045,11 @@ Things this milestone surfaced that are not the harness's to fix.
   in `shared/render-page.ts`, which production, the harness and `scripts/shutterbug.ts` all call, so
   there is no copy left to drift.
 - **`scripts/shutterbug.ts` is not production parity**, despite the harness plan describing it that
-  way. It posts `height: 500, fullPage: true` against production's `height: 1500` and no `fullPage`.
-  It builds the same page as production now, so the difference is the request alone.
+  way. It posted `height: 500, fullPage: true` against production's `height: 1500` and no `fullPage`.
+  It built the same page as production, so the difference was the request alone.
+
+  *Since resolved.* Production now sends the same request — see the next entry — so this script and
+  production match.
 - **Production now sends `fullPage: true` too (as of CLUE-666).** It posts a 500px viewport with
   `fullPage: true`, and the page itself (`shared/render-page.ts`) caps the frame at
   `kMaxFrameHeightPx`, so a capture is scaled to content between that floor and ceiling instead of
