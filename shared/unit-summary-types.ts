@@ -200,5 +200,5 @@ function arraysEqual(a: string[], b: string[]): boolean {
 // content from more than one problem ahead of the student's current problem.
 export const UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION =
   "Do not reference or rely on information from any curriculum problem more than one problem " +
-  "ahead of the student's current problem. You may use the student's current problem and the " +
-  "next problem only; treat anything further ahead as unknown.";
+  "ahead of the student's current problem. You may use earlier problems, the student's current " +
+  "problem, and the next problem; treat anything further ahead as unknown.";

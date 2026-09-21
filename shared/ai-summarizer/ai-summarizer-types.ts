@@ -70,7 +70,8 @@ export interface NormalizedAttribute {
 export interface NormalizedDataSet {
   id: string;
   providerId: string;
-  name: string;
+  // Authored, not guaranteed -- a curriculum SharedDataSet entry can omit it.
+  name?: string;
   tileIds: string[];
   attributes: NormalizedAttribute[];
   numCases: number;
@@ -140,13 +141,21 @@ export interface AiSummarizerOptions {
   minimal?: boolean;      // If true, skip all boilerplate and headers and just return the text content
   tileHandlers?: TileHandler[];
   /**
-   * How much of each data set to write out.
+   * How much of each data set to write out, in the document-level "Data Sets" summary
+   * (documentSummary in ai-summarizer.ts) that lists every data set once at the end.
    *
-   * `full` (the default, and what every caller got before this existed) describes the data set and
-   * then prints every case as a markdown table. `schema-only` keeps the heading, the attributes
-   * table, the formulas and the case count, and leaves the case data out — the shape of the data
-   * without the data itself. A large table can be most of a document's summary, and whether the
-   * model needs the rows to categorize a design is exactly the sort of thing worth measuring.
+   * `full` (the default, and what every caller got before this option existed) describes the data
+   * set and then prints every case as a markdown table, uncapped. `schema-only` keeps the heading,
+   * the attributes table, the formulas and the case count, and leaves the case data out — the
+   * shape of the data without the data itself. A large table can be most of a document's summary,
+   * and whether the model needs the rows to categorize a design is exactly the sort of thing worth
+   * measuring.
+   *
+   * A Table tile's own per-tile rendering (handle-table-tile.ts) reads this same option to decide
+   * whether to show row data at all (`schema-only` suppresses it there too), but "full" does not
+   * mean uncapped at the tile level the way it does here: row data is always capped at
+   * TABLE_MARKDOWN_ROW_CAP rows regardless of this option's value, so a single huge table cannot
+   * dominate either a curriculum digest or a document summary on its own.
    */
   dataSetTables?: "full" | "schema-only";
   /**

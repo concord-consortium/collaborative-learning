@@ -334,7 +334,7 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
           ? `There are ${dataSet.numCases} ${caseWord} in this data set.\n`
           : `There are ${dataSet.numCases} ${caseWord} in this data set, shown below in a Markdown table.\n\n` +
             `${generateMarkdownTable(dataSet.attributes.map(a => a.name), dataSet.data)}\n`;
-        return heading(headingLevel + 2, dataSet.name) +
+        return heading(headingLevel + 2, dataSet.name || `Data set ${dataSet.id}`) +
           `This data set has an id of ${dataSet.id} and is used in ${dataSet.tileIds.length} ${tileWord}.\n` +
           `It contains ${dataSet.attributes.length} ${attributeWord}, described in the following Markdown table.\n\n` +
           `${generateAttributesMarkdownTable(dataSet.attributes)}\n\n` +

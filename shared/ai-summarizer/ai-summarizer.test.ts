@@ -577,6 +577,34 @@ describe('ai-summarizer', () => {
         expect(result).toContain('1 data set');
       });
 
+      // `name` is authored, not guaranteed (curriculum content can omit it), so the "Data Sets"
+      // heading must not literally read "undefined" when it is missing.
+      it('names an unnamed data set by id in the Data Sets heading instead of saying "undefined"', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: { row1: { tiles: [{ tileId: 'tile1' }], isSectionHeader: false } },
+          tileMap: { tile1: { id: 'tile1', content: { type: 'Table' } } },
+          sharedModelMap: {
+            dataSet1: {
+              sharedModel: {
+                type: 'SharedDataSet',
+                providerId: 'provider1',
+                dataSet: {
+                  id: 'ds1',
+                  attributes: [{ name: 'Name', values: ['Alice'] }],
+                  cases: [{ Name: 'Alice' }]
+                }
+              },
+              tiles: ['tile1']
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('Data set ds1');
+        expect(result).not.toContain('undefined');
+      });
+
       describe('the dataSetTables option', () => {
         const withData = {
           rowOrder: ['row1'],

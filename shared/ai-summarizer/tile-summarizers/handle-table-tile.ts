@@ -3,7 +3,9 @@ import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
 // After this many rows a table is truncated with a "...and N more rows" note. Large data sets
 // (sensor logs, simulation output) can run to hundreds of rows; a summary needs the shape of the
-// data, not all of it.
+// data, not all of it. Applies regardless of AiSummarizerOptions.dataSetTables -- that option's
+// "full" means uncapped for the document-level "Data Sets" summary (ai-summarizer.ts), but not
+// here: "full" only decides whether row data is shown at all, capped is not a separate mode.
 export const TABLE_MARKDOWN_ROW_CAP = 20;
 
 interface InlineTableColumn {

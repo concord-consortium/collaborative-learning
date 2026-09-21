@@ -42,6 +42,13 @@ describe("curriculum summarizer (real section shapes)", () => {
       expect(result).toContain("| 2 | 4 |");
     });
 
+    // `name` is authored, not guaranteed -- the question.json fixture's shared data set omits it.
+    it('names an unnamed shared data set by id instead of saying "undefined"', () => {
+      const result = summarize(loadFixture("question.json"));
+      expect(result).toContain("which uses data set zVuFyoxDoyCDety7");
+      expect(result).not.toContain("undefined");
+    });
+
     it("changes its output when a shared dataset's value changes", () => {
       const before = summarize(fixture);
 
