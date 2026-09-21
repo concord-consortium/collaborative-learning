@@ -94,16 +94,24 @@ const kMaxGroupLabel = 60;
 
 // `collapsed` does not travel: it is whether the group is folded away in the editor, which says
 // nothing about the program and has no home in their shape.
+//
+// Ids fail closed here, as they do throughout this projection. Their catalog requires a group id
+// and rejects an empty one, and an id is what a directive or evidence ref would resolve against —
+// so a group without one is unreferenceable as well as invalid, and sending "" would fail the
+// whole packet for a group nothing could have pointed at.
 function projectGroups(program: RawProgram): DataflowGroup[] {
-  return Object.values(program.groups ?? {}).map(raw => {
+  const groups: DataflowGroup[] = [];
+  for (const raw of Object.values(program.groups ?? {})) {
+    if (!raw.id) continue;
     const group: DataflowGroup = {
-      id: String(raw.id ?? ""),
-      node_ids: Object.keys(raw.nodeIds ?? {}),
+      id: raw.id,
+      node_ids: Object.keys(raw.nodeIds ?? {}).filter(Boolean),
       group_ids: [],
     };
     if (raw.label) group.label = raw.label.slice(0, kMaxGroupLabel);
-    return group;
-  });
+    groups.push(group);
+  }
+  return groups;
 }
 
 function programOf(content: any): RawProgram {

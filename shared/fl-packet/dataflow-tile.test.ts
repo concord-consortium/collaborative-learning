@@ -229,3 +229,30 @@ describe("projectDataflowTile groups", () => {
     expect(JSON.stringify(tile.content.groups)).not.toContain("collapsed");
   });
 });
+
+describe("projectDataflowTile group ids", () => {
+  // Their catalog requires `id` with minLength 1, and an id is what a future directive or evidence
+  // ref resolves against — so a group without one is unreferenceable as well as invalid. Dropping
+  // it keeps the rest of the packet sendable, where emitting "" would fail the whole projection
+  // against their validation for a group nothing could have pointed at anyway.
+  it("drops a group carrying no id rather than sending an empty one", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "": { label: "no id here", nodeIds: { "n-sensor": "n-sensor" } },
+        "g-ok": { id: "g-ok", label: "fine", nodeIds: { "n-logic": "n-logic" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups).toEqual([
+      { id: "g-ok", label: "fine", node_ids: ["n-logic"], group_ids: [] },
+    ]);
+  });
+
+  it("drops empty member ids, which their catalog also rejects", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "g1": { id: "g1", nodeIds: { "": "", "n-sensor": "n-sensor" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups?.[0].node_ids).toEqual(["n-sensor"]);
+  });
+});
