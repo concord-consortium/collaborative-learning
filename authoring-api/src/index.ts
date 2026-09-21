@@ -1,9 +1,11 @@
-import {https} from "firebase-functions";
+import {runWith} from "firebase-functions";
 import admin from "firebase-admin";
 import express, {Request, Response, NextFunction} from "express";
 import cors from "cors";
 import {DecodedIdToken} from "firebase-admin/auth";
 import {Octokit} from "@octokit/rest";
+
+import {hashString} from "../../shared/hash-string";
 
 import pullUnit from "./routes/pull-unit";
 import getContent from "./routes/get-content";
@@ -78,15 +80,19 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
 
   // clear out any expired cache entries to avoid unbounded growth
   const now = new Date();
-  for (const [token, entry] of tokenCache) {
+  for (const [tokenHash, entry] of tokenCache) {
     if (entry.expires <= now) {
-      tokenCache.delete(token);
+      tokenCache.delete(tokenHash);
     }
   }
 
+  // Keyed by a hash rather than the raw token, so the token itself isn't retained in memory
+  // (e.g. in a heap snapshot) any longer than the request that carried it needs.
+  const cacheKey = hashString(gitHubToken);
+
   // if we have a cached token and it is still valid (since it wasn't cleared above),
   // use that to determine authorization based on whether the user is a collaborator
-  const entry = tokenCache.get(gitHubToken);
+  const entry = tokenCache.get(cacheKey);
   if (entry) {
     return entry.isCollaborator;
   }
@@ -115,7 +121,7 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
     isCollaborator = false;
   }
 
-  tokenCache.set(gitHubToken, {
+  tokenCache.set(cacheKey, {
     isCollaborator,
     expires: getCacheExpirationDate(),
   });
@@ -214,4 +220,12 @@ app.get("/getPulledFiles", getPulledFiles);
 // NOTE: app.use() is used here to allow for paths with slashes (i.e. /rawContent/:branch/:unit/*)
 app.use("/rawContent", getRawContent);
 
-export const api = https.onRequest(app);
+// A single Express app serves every route above as one function, so this timeout, memory size,
+// and secret binding apply to all of them, not just the unit-summary generation route that needs
+// them (the 60s/256MB 1st-gen defaults were plenty for git-content operations, but a generation
+// call chain can run for minutes). 540s is the 1st-gen ceiling.
+export const api = runWith({
+  timeoutSeconds: 540,
+  memory: "512MB",
+  secrets: ["OPENAI_UNIT_SUMMARY_API_KEY"],
+}).https.onRequest(app);
