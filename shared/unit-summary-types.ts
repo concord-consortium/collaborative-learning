@@ -162,7 +162,7 @@ export function validateUnitSummary(
 
   if (!summary.generatedAt) {
     errors.push("generatedAt is missing");
-  } else if (isNaN(Date.parse(summary.generatedAt))) {
+  } else if (!isIsoTimestamp(summary.generatedAt)) {
     errors.push(`generatedAt ("${summary.generatedAt}") is not a valid ISO timestamp`);
   }
   if (!summary.sourceHash) errors.push("sourceHash is missing");
@@ -178,6 +178,15 @@ export function validateUnitSummary(
   }
 
   return errors.length === 0 ? { valid: true } : { valid: false, errors };
+}
+
+// generatedAt is always written by our own code as `new Date().toISOString()`, never typed by an
+// author, so round-tripping through Date is a precise check: Date.parse alone accepts non-ISO
+// formats ("September 21, 2026") and silently rolls an invalid calendar date like Feb 30 over to
+// March 2, and both would otherwise pass as "valid".
+function isIsoTimestamp(value: string): boolean {
+  const parsed = new Date(value);
+  return !isNaN(parsed.getTime()) && parsed.toISOString() === value;
 }
 
 function arraysEqual(a: string[], b: string[]): boolean {

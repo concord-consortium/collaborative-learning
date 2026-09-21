@@ -134,6 +134,23 @@ describe("validateUnitSummary", () => {
     expect((result as any).errors.join(" ")).toMatch(/not a valid ISO timestamp/);
   });
 
+  it("rejects a generatedAt in a non-ISO date format", () => {
+    const summary = validSummary();
+    summary.generatedAt = "September 21, 2026";
+    const result = validateUnitSummary(summary, liveProblems);
+    expect(result.valid).toBe(false);
+    expect((result as any).errors.join(" ")).toMatch(/not a valid ISO timestamp/);
+  });
+
+  it("rejects a generatedAt with an invalid calendar date", () => {
+    const summary = validSummary();
+    // Date rolls this over to March 2 rather than rejecting it outright.
+    summary.generatedAt = "2026-02-30T00:00:00.000Z";
+    const result = validateUnitSummary(summary, liveProblems);
+    expect(result.valid).toBe(false);
+    expect((result as any).errors.join(" ")).toMatch(/not a valid ISO timestamp/);
+  });
+
   it("rejects a problemDigest over its length limit", () => {
     const summary = validSummary();
     summary.entries[0].problemDigest = "x".repeat(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + 1);

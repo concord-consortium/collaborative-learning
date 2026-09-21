@@ -16,17 +16,72 @@ export function handlePlaceholderTile({ tile }: TileHandlerParams): string|undef
   return "";
 }
 
-// This handler is not in its own file because it recursively uses tileSummary.
-export function handleQuestionTile({
-  dataSets, tile, headingLevel, tileMap, options
-}: TileHandlerParams): string|undefined {
-  if (tile.model.content.type !== "Question") { return undefined; }
+// The prompt is summarized directly rather than through tilesSummary, so it needs its id line
+// added here. Emitted even though the prompt is summarized minimally: a drawing used as a prompt
+// gives every object an id, and those are unusable without the tile's id to go with them.
+function questionPromptSummary({
+  dataSets, tileMap, headingLevel, options, promptTile
+}: TileHandlerBaseParams & { promptTile: any }): string {
+  if (!promptTile?.content) { return ""; }
+  return heading(headingLevel, "Question Prompt") +
+    tileIdLine({ model: promptTile, number: 0 } as INormalizedTile) +
+    tileSummary({
+      dataSets,
+      tile: { model: promptTile, number: 0 },
+      tileMap,
+      headingLevel,
+      options: { ...options, minimal: true }
+    }) +
+    "\n\n";
+}
 
+// A curriculum section's authored JSON inlines the question's child tiles directly, in a `tiles`
+// array using the same shape as the outer content.tiles: a bare object is a one-tile row, an
+// array is a multi-tile row.
+function questionBodyFromInlineTiles(
+  { dataSets, tileMap, headingLevel, options }: TileHandlerParams, inlineTiles: any[]
+): string {
+  if (inlineTiles.length === 0) {
+    return "This question does not contain any response tiles.\n\n";
+  }
+
+  const [promptItem, ...responseItems] = inlineTiles;
+  const promptTile = Array.isArray(promptItem) ? promptItem[0] : promptItem;
+
+  let result = responseItems.length === 0 ? "This question does not contain any response tiles.\n\n" : "";
+  result += questionPromptSummary({ dataSets, tileMap, headingLevel, options, promptTile });
+
+  if (responseItems.length === 0) {
+    return result;
+  }
+
+  let tileNumber = 1;
+  let rowNumber = 1;
+  const normalizedResponseRows: INormalizedRow[] = responseItems.map((item: any) => ({
+    tiles: (Array.isArray(item) ? item : [item]).map((t: any) => ({
+      model: t,
+      number: tileNumber++,
+    } as INormalizedTile)),
+    number: rowNumber++,
+  }));
+  result += heading(headingLevel, "Question Response");
+  result += rowsSummary({
+    dataSets,
+    rows: normalizedResponseRows,
+    rowHeadingPrefix: "Response ",
+    tileMap,
+    headingLevel: headingLevel + 1,
+    options
+  });
+  return result;
+}
+
+// A runtime document has rows/tiles already expanded into rowOrder/rowMap/tileMap -- RowList does
+// that expansion once an authored `tiles` array is loaded into MST, so a live document never has
+// the inlined shape questionBodyFromInlineTiles handles.
+function questionBodyFromRows({ dataSets, tile, headingLevel, tileMap, options }: TileHandlerParams): string {
   const { rowOrder, rowMap } = tile.model.content;
-
-  let result = `This is a question for students to answer. Its question id is \`${tile.model.content.questionId}\`. ` +
-    "This question id can be used to match up student responses to the same question.\n\n";
-
+  let result = "";
   if (!rowOrder || rowOrder.length < 2) {
     result += "This question does not contain any response tiles.\n\n";
   }
@@ -38,21 +93,7 @@ export function handleQuestionTile({
   const firstRow = rowMap?.[firstRowId];
   const promptTileId = firstRow?.tiles?.[0]?.tileId;
   const promptTile = promptTileId ? tileMap?.[promptTileId] : null;
-  if (promptTile && promptTile.content) {
-    result += heading(headingLevel, "Question Prompt");
-    // The prompt is summarized directly rather than through tilesSummary, so it needs its id line
-    // adding here. Emitted even though the prompt is summarized minimally: a drawing used as a
-    // prompt gives every object an id, and those are unusable without the tile's id to go with them.
-    result += tileIdLine({ model: promptTile, number: 0 } as INormalizedTile);
-    result += tileSummary({
-      dataSets,
-      tile: { model: promptTile, number: 0 },
-      tileMap,
-      headingLevel,
-      options: { minimal: true }
-    });
-    result += "\n\n";
-  }
+  result += questionPromptSummary({ dataSets, tileMap, headingLevel, options, promptTile });
 
   if (!rowOrder || rowOrder.length < 2) {
     return result;
@@ -84,6 +125,22 @@ export function handleQuestionTile({
   });
 
   return result;
+}
+
+// This handler is not in its own file because it recursively uses tileSummary.
+export function handleQuestionTile(params: TileHandlerParams): string|undefined {
+  const { tile } = params;
+  if (tile.model.content.type !== "Question") { return undefined; }
+
+  const intro = `This is a question for students to answer. Its question id is \`${tile.model.content.questionId}\`. ` +
+    "This question id can be used to match up student responses to the same question.\n\n";
+
+  const inlineTiles = tile.model.content.tiles;
+  const body = Array.isArray(inlineTiles)
+    ? questionBodyFromInlineTiles(params, inlineTiles)
+    : questionBodyFromRows(params);
+
+  return intro + body;
 }
 
 export const defaultTileHandlers: TileHandler[] = [

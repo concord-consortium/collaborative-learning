@@ -149,4 +149,10 @@ export interface AiSummarizerOptions {
    * model needs the rows to categorize a design is exactly the sort of thing worth measuring.
    */
   dataSetTables?: "full" | "schema-only";
+  /**
+   * If true, an image tile in `minimal` mode is summarized as `(image: filename.png)` instead of
+   * the empty string, so a reader can see where a section relied on a picture the summarizer
+   * cannot otherwise describe. Off by default so existing student-document summaries are unchanged.
+   */
+  imageFilenames?: boolean;
 }

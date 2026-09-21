@@ -1,0 +1,109 @@
+{
+  "type": "first",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Field Notes: record what you found outside.</p>"
+          ]
+        },
+        "id": "TILEkcpkFYuKxrqr"
+      },
+      {
+        "content": {
+          "type": "Table",
+          "name": "Field Notes",
+          "columns": [
+            {
+              "name": "x",
+              "values": [
+                "acorns",
+                "leaves",
+                "puffy clouds",
+                "sun AND moon!"
+              ]
+            },
+            {
+              "name": "y",
+              "values": [
+                "25",
+                "lots",
+                "3",
+                "both"
+              ]
+            }
+          ]
+        },
+        "id": "TILEhNZiAU4lj6NZ"
+      },
+      {
+        "id": "n6Ov7HS8RSe4Y2_G",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "rkDiqfe9RW10O9V9": 80,
+            "GyAwZvXxMPjOsSIp": 248.6640625
+          },
+          "name": "Table 1"
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "0P1MBauHE0iHv0Gv",
+          "providerId": "n6Ov7HS8RSe4Y2_G",
+          "dataSet": {
+            "id": "zpzPoJKhkEtfuUdB",
+            "name": "Table 1",
+            "attributes": [
+              {
+                "id": "rkDiqfe9RW10O9V9",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "1",
+                  "2"
+                ],
+                "title": ""
+              },
+              {
+                "id": "GyAwZvXxMPjOsSIp",
+                "clientKey": "",
+                "name": "longish title for an attribute",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "3",
+                  "4"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "gM8l4d4T-AcZWKjC"
+              },
+              {
+                "__id__": "hgpAkgPugAu1QuAp"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "n6Ov7HS8RSe4Y2_G"
+        ]
+      }
+    ]
+  },
+  "supports": []
+}

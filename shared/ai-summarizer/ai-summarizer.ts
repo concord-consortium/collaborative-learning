@@ -47,14 +47,17 @@ export function documentSummarizer(content: any, options: AiSummarizerOptions): 
  * example the highlighted text is not included in the authoring export.
  */
 export function summarizeCurriculum(
-  content: any, dataSets: NormalizedDataSet[] = [], headingLevel = 1, tileMap?: TileMap
+  content: any, dataSets: NormalizedDataSet[] = [], headingLevel = 1, tileMap?: TileMap,
+  options: Partial<AiSummarizerOptions> = {}
 ): string {
   if ("tiles" in content) {
-    return summarizeCurriculum(content.tiles, dataSets, headingLevel, tileMap);
+    return summarizeCurriculum(content.tiles, dataSets, headingLevel, tileMap, options);
   }
 
   if (Array.isArray(content)) {
-    return content.map(contentItem => summarizeCurriculum(contentItem, dataSets, headingLevel, tileMap)).join("\n\n");
+    return content
+      .map(contentItem => summarizeCurriculum(contentItem, dataSets, headingLevel, tileMap, options))
+      .join("\n\n");
   }
 
   if ("content" in content) {
@@ -67,12 +70,60 @@ export function summarizeCurriculum(
       tile: normalizedTile,
       tileMap,
       headingLevel,
-      options: { includeModel: false, minimal: true }
+      options: { includeModel: false, minimal: true, ...options }
     });
   } else {
     console.error("Unparsable content", content);
     return "";
   }
+}
+
+/**
+ * Builds the same NormalizedDataSet[] `normalize()` builds from a document's `sharedModelMap`
+ * (an object keyed by shared-model id), but from a curriculum section's `content.sharedModels`
+ * (an array of the same per-entry shape). Curriculum JSON is never loaded into an MST document, so
+ * it never has a sharedModelMap to normalize; this is the analogous entry point for it.
+ */
+export function normalizeCurriculumDataSets(sharedModels?: SharedModelMapEntry[]): NormalizedDataSet[] {
+  if (!sharedModels) { return []; }
+  const dataSets: NormalizedDataSet[] = [];
+  sharedModels.forEach((entry, index) => {
+    const dataSet = buildNormalizedDataSet(entry.sharedModel?.id ?? `dataset-${index}`, entry);
+    if (dataSet) { dataSets.push(dataSet); }
+  });
+  return dataSets;
+}
+
+function buildNormalizedDataSet(entryId: string, entry: SharedModelMapEntry): NormalizedDataSet | undefined {
+  const sharedModel = entry.sharedModel;
+  if (sharedModel?.type !== "SharedDataSet" || !sharedModel.dataSet) { return undefined; }
+
+  const { attributes, cases, name } = sharedModel.dataSet;
+  const caseCount = cases?.length ?? 0;
+  const dataSet: NormalizedDataSet = {
+    id: sharedModel.dataSet.id,
+    providerId: sharedModel.providerId ?? "",
+    name,
+    tileIds: (entry.tiles ?? []).map(tile => `${tile}`),
+    attributes: (attributes || []).map(attr => ({
+      id: attr.id,
+      name: attr.name,
+      units: attr.units || undefined,
+      values: attr.values || [],
+      formula: attr.formula?.display || undefined
+    })),
+    numCases: caseCount,
+    data: [],
+    sharedDataSetId: entryId
+  };
+  for (let i = 0; i < caseCount; i++) {
+    const cols: string[] = [];
+    for (const attr of dataSet.attributes) {
+      cols.push(attr.values[i] || "");
+    }
+    dataSet.data.push(cols);
+  }
+  return dataSet;
 }
 
 export function stringifyContent(content: any): string {
@@ -163,32 +214,8 @@ export function normalize(model: DocumentContentSnapshotType) {
     for (const [id, entry] of
          Object.entries(sharedModelMap as Record<string, SharedModelMapEntry>)) {
       const sharedModel = entry.sharedModel;
-      if (sharedModel?.type === "SharedDataSet" && sharedModel.dataSet) {
-        const { attributes, cases, name } = sharedModel.dataSet;
-        const caseCount = cases?.length ?? 0;
-        const dataSet: NormalizedDataSet = {
-          id: sharedModel.dataSet.id,
-          providerId: sharedModel.providerId ?? "",
-          name,
-          tileIds: (entry.tiles ?? []).map(tile => `${tile}`),
-          attributes: (attributes || []).map(attr => ({
-            id: attr.id,
-            name: attr.name,
-            units: attr.units || undefined,
-            values: attr.values || [],
-            formula: attr.formula?.display || undefined
-          })),
-          numCases: caseCount,
-          data: [],
-          sharedDataSetId: id
-        };
-        for (let i = 0; i < caseCount; i++) {
-          const cols: string[] = [];
-          for (const attr of dataSet.attributes) {
-            cols.push(attr.values[i] || "");
-          }
-          dataSet.data.push(cols);
-        }
+      const dataSet = buildNormalizedDataSet(id, entry);
+      if (dataSet) {
         dataSets.push(dataSet);
 
         // add the data set to the tiles that reference it
