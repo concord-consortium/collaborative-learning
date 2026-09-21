@@ -6,11 +6,12 @@
 // and near-identical from tick to tick — collapse to a single current value that belongs in
 // run_state, not on the node. See dataflowRunValues below.
 //
-// The tile carries BOTH forms. `nodes`/`edges` is what ForeverLearning's schema specifies;
-// `rendering` is the summarizer's Graphviz form, which states the program's logic rather than its
-// structure. Sending both lets the DOT form be evaluated on live turns while the schema form
-// stays authoritative, and costs roughly a doubling of a packet we use a quarter of. The renderer
-// is reached through a single call site so that dropping either form is a one-line change.
+// The tile carries BOTH forms for now. `nodes`/`edges` is what ForeverLearning's schema specifies
+// and what every evidence reference and highlight target resolves against; `rendering` is the
+// summarizer's Graphviz form, which no rule on their side reads. The drawing goes once their
+// grouping release is live for us — it is roughly a third of a real packet, and grouping, the one
+// thing it carried that the schema form could not, now has a home in `groups` below. The renderer
+// is reached through a single call site so that dropping it is a one-line change.
 
 import { programToGraphviz } from "../ai-summarizer/tile-summarizers/dataflow-to-graphviz";
 import { displayNameForType } from "../dataflow-node-types";
@@ -29,6 +30,19 @@ export interface DataflowEdge {
   to_input: string;
 }
 
+export interface DataflowGroup {
+  id: string;
+  label?: string;
+  node_ids: string[];
+  /**
+   * Always empty: CLUE groups hold nodes, never other groups.
+   *
+   * Sent rather than omitted so the flatness reads as a fact about our model rather than as
+   * missing data — their shape allows nesting and ours cannot express it.
+   */
+  group_ids: string[];
+}
+
 export interface ProjectedDataflowTile {
   tile_id: string;
   type: "Dataflow";
@@ -37,6 +51,7 @@ export interface ProjectedDataflowTile {
     program_id: string;
     nodes: DataflowNode[];
     edges: DataflowEdge[];
+    groups?: DataflowGroup[];
     rendering: string;
   };
 }
@@ -57,11 +72,38 @@ interface RawNode {
   data?: Record<string, any>;
 }
 
+interface RawGroup {
+  id?: string;
+  label?: string;
+  nodeIds?: Record<string, string>;
+  collapsed?: boolean;
+}
+
 interface RawProgram {
   id?: string;
   nodes?: Record<string, RawNode>;
   connections?: Record<string, Record<string, any>>;
+  groups?: Record<string, RawGroup>;
   recentTicks?: string[];
+}
+
+// Their label is capped at 60 characters; ours is not, so an over-long one would make the packet
+// invalid on the wire. Truncating keeps the group addressable, where dropping the label would
+// leave the diagnostic with a group it cannot name.
+const kMaxGroupLabel = 60;
+
+// `collapsed` does not travel: it is whether the group is folded away in the editor, which says
+// nothing about the program and has no home in their shape.
+function projectGroups(program: RawProgram): DataflowGroup[] {
+  return Object.values(program.groups ?? {}).map(raw => {
+    const group: DataflowGroup = {
+      id: String(raw.id ?? ""),
+      node_ids: Object.keys(raw.nodeIds ?? {}),
+      group_ids: [],
+    };
+    if (raw.label) group.label = raw.label.slice(0, kMaxGroupLabel);
+    return group;
+  });
 }
 
 function programOf(content: any): RawProgram {
@@ -120,6 +162,9 @@ export function projectDataflowTile(
       rendering: renderProgram(program),
     },
   };
+  // Omitted rather than empty, so an ungrouped program is not described as one with no groups.
+  const groups = projectGroups(program);
+  if (groups.length) tile.content.groups = groups;
   if (title !== undefined) tile.title = title;
   return tile;
 }

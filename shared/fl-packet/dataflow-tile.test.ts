@@ -173,3 +173,59 @@ describe("projectDataflowTile names legacy nodes by display name", () => {
     expect(tile.content.nodes[0].orderedDisplayName).toBe("");
   });
 });
+
+// Grouping, in the shape real documents hold it: a map keyed by group id, members as a map whose
+// keys and values are both the node id, and a `collapsed` flag that is presentation state.
+const grouped = {
+  ...program,
+  groups: {
+    "g-emg": {
+      id: "g-emg", collapsed: false, label: "Gripper Control Based on EMG",
+      nodeIds: { "n-sensor": "n-sensor", "n-logic": "n-logic" },
+    },
+    "g-out": {
+      id: "g-out", collapsed: true, label: "Temperature Threshold",
+      nodeIds: { "n-out": "n-out" },
+    },
+  },
+};
+
+describe("projectDataflowTile groups", () => {
+  it("projects each group's members as a node_ids array", () => {
+    const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
+    expect(tile.content.groups).toEqual([
+      { id: "g-emg", label: "Gripper Control Based on EMG", node_ids: ["n-sensor", "n-logic"], group_ids: [] },
+      { id: "g-out", label: "Temperature Threshold", node_ids: ["n-out"], group_ids: [] },
+    ]);
+  });
+
+  it("omits groups entirely when the program has none", () => {
+    const tile = projectDataflowTile(content, "tile-df-1");
+    expect(tile.content.groups).toBeUndefined();
+  });
+
+  // CLUE has no nesting: a group holds nodes, never other groups. Sending the key as an empty
+  // array rather than omitting it says that positively, so a reader cannot mistake our flat
+  // model for missing data.
+  it("always sends group_ids empty, because CLUE groups do not nest", () => {
+    const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
+    expect(tile.content.groups?.every(g => g.group_ids.length === 0)).toBe(true);
+  });
+
+  // Their label is capped at 60. Ours is not, so an over-long label would make the packet invalid
+  // against their schema — truncate rather than send something that fails validation downstream.
+  it("truncates a label longer than the 60 characters their schema allows", () => {
+    const longLabel = "x".repeat(75);
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: { g1: { id: "g1", label: longLabel, nodeIds: {} } } } },
+      "tile-df-1");
+    expect(tile.content.groups?.[0].label).toHaveLength(60);
+  });
+
+  // `collapsed` is whether the student folded the group away in the editor. There is nowhere for
+  // it in their shape and it says nothing about the program, so it does not travel.
+  it("does not send the collapsed flag", () => {
+    const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
+    expect(JSON.stringify(tile.content.groups)).not.toContain("collapsed");
+  });
+});
