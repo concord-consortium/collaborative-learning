@@ -380,11 +380,11 @@ describe("a mode whose height is measured needs a local render to measure from",
         posted.push(String(JSON.parse(String(init.body)).content));
         return {
           ok: true, status: 200, statusText: "OK",
-          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test/shot.png" })))
+          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test.s3.amazonaws.com/shot.png" })))
         } as unknown as Response;
       }
       return {
-        ok: true, status: 200, statusText: "OK", url: "https://images.test/shot.png",
+        ok: true, status: 200, statusText: "OK", url: "https://images.test.s3.amazonaws.com/shot.png",
         headers: new Headers({ "content-type": "image/png" }), body: bodyOf(png)
       } as unknown as Response;
     };
@@ -422,11 +422,11 @@ describe("a mode whose height is measured needs a local render to measure from",
         posted.push({ height: JSON.parse(String(init.body)).height });
         return {
           ok: true, status: 200, statusText: "OK",
-          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test/shot.png" })))
+          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test.s3.amazonaws.com/shot.png" })))
         } as unknown as Response;
       }
       return {
-        ok: true, status: 200, statusText: "OK", url: "https://images.test/shot.png",
+        ok: true, status: 200, statusText: "OK", url: "https://images.test.s3.amazonaws.com/shot.png",
         headers: new Headers({ "content-type": "image/png" }), body: bodyOf(png)
       } as unknown as Response;
     };
@@ -585,11 +585,11 @@ describe("--full-page and --max-frame-height, driven through the CLI", () => {
         posted.push(JSON.parse(String(init.body)));
         return {
           ok: true, status: 200, statusText: "OK",
-          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test/shot.png" })))
+          body: bodyOf(Buffer.from(JSON.stringify({ url: "https://images.test.s3.amazonaws.com/shot.png" })))
         } as unknown as Response;
       }
       return {
-        ok: true, status: 200, statusText: "OK", url: "https://images.test/shot.png",
+        ok: true, status: 200, statusText: "OK", url: "https://images.test.s3.amazonaws.com/shot.png",
         headers: new Headers({ "content-type": "image/png" }), body: bodyOf(png)
       } as unknown as Response;
     };

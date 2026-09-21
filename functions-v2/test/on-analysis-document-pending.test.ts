@@ -227,7 +227,7 @@ const emptyDoc = docOf({
 });
 
 const kDocumentRoot = "demo/AI/portals/demo/classes/democlass1/users/1";
-const kImageUrl = "https://shutterbug.example/testdoc.png";
+const kImageUrl = "https://shutterbug-test.s3.amazonaws.com/testdoc.png";
 
 // A Shutterbug reply that a well-behaved service would send.
 function shutterbugOk(url = kImageUrl) {
@@ -1049,6 +1049,9 @@ describe("functions", () => {
           "non-https"],
         ["a private-host url", {ok: true, status: 200, json: async () => ({url: "https://169.254.169.254/x.png"})} as unknown as Response,
           "private or loopback host"],
+        ["a public https url on an unexpected host",
+          {ok: true, status: 200, json: async () => ({url: "https://images.example.test/x.png"})} as unknown as Response,
+          "unexpected host"],
         ["a request that times out", Object.assign(new Error("aborted"), {name: "TimeoutError"}), "did not answer within"],
       ];
 

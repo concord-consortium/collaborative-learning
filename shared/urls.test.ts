@@ -1,4 +1,4 @@
-import { isPublicHttpsUrl, redirectDowngradeReason } from "./urls";
+import { isPublicHttpsUrl, isShutterbugImageHost, redirectDowngradeReason } from "./urls";
 
 describe("isPublicHttpsUrl", () => {
   it("accepts a public https URL", () => {
@@ -27,6 +27,15 @@ describe("isPublicHttpsUrl", () => {
       expect({ host, allowed: isPublicHttpsUrl(`https://${host}/shot.png`) })
         .toEqual({ host, allowed: true });
     }
+  });
+
+  it("refuses a loopback name written with a trailing dot", () => {
+    // `URL` keeps a trailing dot on a domain (it strips one on an IPv4 literal, which is why that
+    // case is not here too), so "localhost." reaches the check as itself, dot included.
+    expect(isPublicHttpsUrl("https://localhost./shot.png")).toBe(false);
+    expect(isPublicHttpsUrl("https://sub.localhost./shot.png")).toBe(false);
+    // A trailing dot on an ordinary public name is still just that name.
+    expect(isPublicHttpsUrl("https://images.example.test./shot.png")).toBe(true);
   });
 
   it("reads only the IPv4-mapped form, which is the only one that reaches the address", () => {
@@ -64,5 +73,22 @@ describe("redirectDowngradeReason", () => {
     // The rule is "no worse than what was asked for". A caller deliberately pointing at a local
     // server has not been redirected anywhere they did not choose.
     expect(redirectDowngradeReason("http://127.0.0.1:9/a.png", "http://127.0.0.1:9/b.png")).toBeNull();
+  });
+});
+
+describe("isShutterbugImageHost", () => {
+  it("accepts an S3 host, bucket name and region aside", () => {
+    expect(isShutterbugImageHost("https://ccshutterbug.s3.us-east-1.amazonaws.com/shot.png")).toBe(true);
+    expect(isShutterbugImageHost("https://a-different-bucket.s3.amazonaws.com/shot.png")).toBe(true);
+    expect(isShutterbugImageHost("https://amazonaws.com/shot.png")).toBe(true);
+  });
+
+  it("refuses a public https host that merely looks safe, and anything unparseable", () => {
+    // Public and https, so isPublicHttpsUrl would accept it; this rejects it anyway, because it is
+    // not Shutterbug's own host — a host name an attacker can register and point DNS at anything.
+    expect(isShutterbugImageHost("https://images.example.test/shot.png")).toBe(false);
+    expect(isShutterbugImageHost("https://notamazonaws.com/shot.png")).toBe(false);
+    expect(isShutterbugImageHost("https://amazonaws.com.attacker.test/shot.png")).toBe(false);
+    expect(isShutterbugImageHost("amazonaws.com/shot.png")).toBe(false);
   });
 });

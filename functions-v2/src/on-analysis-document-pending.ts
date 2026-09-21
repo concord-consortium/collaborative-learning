@@ -12,7 +12,7 @@ import {
 import {documentSummarizer} from "../../shared/ai-summarizer/ai-summarizer";
 import {generateRenderHtml, kMaxFrameHeightPx} from "../../shared/render-page";
 import {readPngDimensions} from "../../shared/png-header";
-import {isPublicHttpsUrl} from "../../shared/urls";
+import {isPublicHttpsUrl, isShutterbugImageHost} from "../../shared/urls";
 import {kPlaceholderUnitCode} from "../../shared/shared";
 import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
@@ -139,6 +139,13 @@ async function postToShutterbug(html: string): Promise<string> {
   // mean it fetching somewhere on its own network, not a picture.
   if (!isPublicHttpsUrl(url)) {
     throw new Error(`Shutterbug returned an image URL on a private or loopback host: ${bounded(url)}`);
+  }
+  // A host that merely looks public can still resolve to a private address when it is actually
+  // fetched, which isPublicHttpsUrl cannot see (see its doc comment). Pinning the resolved
+  // address before fetching is the real fix for that and is not done here yet; this is a cheap
+  // stopgap that works only because Shutterbug's real host is known.
+  if (!isShutterbugImageHost(url)) {
+    throw new Error(`Shutterbug returned an image URL on an unexpected host: ${bounded(url)}`);
   }
   return url;
 }

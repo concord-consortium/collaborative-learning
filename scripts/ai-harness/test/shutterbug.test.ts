@@ -59,7 +59,7 @@ function fakeFetch(options: {
         ok: true,
         status: 200,
         statusText: "OK",
-        body: streamingBody(Buffer.from(JSON.stringify({ url: "https://images.example.test/shot.png" }))),
+        body: streamingBody(Buffer.from(JSON.stringify({ url: "https://images.test.s3.amazonaws.com/shot.png" }))),
         ...next
       } as Response;
     }
@@ -67,7 +67,7 @@ function fakeFetch(options: {
       ok: true,
       status: 200,
       statusText: "OK",
-      url: "https://images.example.test/shot.png",
+      url: "https://images.test.s3.amazonaws.com/shot.png",
       headers: new Headers({ "content-type": "image/png" }),
       body: streamingBody(png, 4),
       ...options.download
@@ -188,7 +188,7 @@ describe("the network contract", () => {
   it("returns the hosted URL alongside the downloaded bytes", async () => {
     const outcome = await backend({}).render({ docId: "doc", content: emptyDocument });
     expect(outcome.images).toHaveLength(1);
-    expect(outcome.images[0].url).toBe("https://images.example.test/shot.png");
+    expect(outcome.images[0].url).toBe("https://images.test.s3.amazonaws.com/shot.png");
     expect(outcome.images[0].bytes).toEqual(png);
     expect(outcome.images[0].purpose).toBe("full-document");
     // A hosted service renders somewhere else, so it can report nothing about the render itself.
@@ -317,6 +317,15 @@ describe("the network contract", () => {
     await expect(backend({ postResponses: [postBody(JSON.stringify({ url: "https://10.0.0.5/shot.png" }))] })
       .render({ docId: "doc", content: emptyDocument }))
       .rejects.toThrow(/loopback or private host/);
+  });
+
+  it("refuses a public https image URL on a host other than Shutterbug's own", async () => {
+    // Public and https, so it passes isPublicHttpsUrl; refused only because the host is not
+    // Shutterbug's own — the stopgap this test is for.
+    await expect(backend({
+      postResponses: [postBody(JSON.stringify({ url: "https://images.example.test/shot.png" }))]
+    }).render({ docId: "doc", content: emptyDocument }))
+      .rejects.toThrow(/unexpected host/);
   });
 
   it("refuses a capture whose dimensions exceed the limits, even when the bytes are small", async () => {

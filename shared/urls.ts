@@ -38,8 +38,33 @@ export function redirectDowngradeReason(requestedUrl: string, finalUrl: string):
   return `redirected to ${finalUrl}, which is not a public https URL`;
 }
 
+/**
+ * Whether a URL's hostname is one Shutterbug is known to serve pictures from.
+ *
+ * `isPublicHttpsUrl` only rules out a hostname that *looks* private; it says nothing about where a
+ * hostname actually resolves. A hostname an attacker controls DNS for passes it regardless, then
+ * can resolve to any address — including a private one — when it is actually fetched (DNS
+ * rebinding). The real fix is to resolve the hostname and pin the validated address before
+ * fetching; this is not that fix, only a narrow stopgap for the one caller where the expected host
+ * is known: Shutterbug always returns a picture on S3, so a URL on any other host is refused before
+ * a DNS lookup ever happens.
+ */
+export function isShutterbugImageHost(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  const host = url.hostname.toLowerCase();
+  return host === "amazonaws.com" || host.endsWith(".amazonaws.com");
+}
+
 function isPrivateHost(hostname: string): boolean {
-  const host = hostname.toLowerCase();
+  // `URL` strips a trailing dot from an IPv4 literal but keeps one on a domain, so
+  // `https://localhost./x.png` would otherwise reach here as "localhost." and match neither
+  // check below.
+  const host = hostname.toLowerCase().replace(/\.$/, "");
   if (host === "localhost" || host.endsWith(".localhost")) return true;
   // `URL.hostname` returns IPv6 addresses bracketed.
   if (host.startsWith("[")) {

@@ -24,8 +24,8 @@ import { NotAPngError, readPngInfo } from "../png.js";
 import { generateRenderHtml, kMaxFrameHeightPx } from "../../../../shared/render-page.js";
 import {
   RenderBackend, RenderLimitExceeded, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
-  isPublicHttpsUrl, kDefaultRenderLimits, kUnobservedDiagnostics, readBodyWithin,
-  redirectDowngradeReason
+  isPublicHttpsUrl, isShutterbugImageHost, kDefaultRenderLimits, kUnobservedDiagnostics,
+  readBodyWithin, redirectDowngradeReason
 } from "./types.js";
 
 /** Exactly what production uses today. Changing any of these changes what "parity" means. */
@@ -314,6 +314,13 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
         if (!isPublicHttpsUrl(url)) {
           throw new ShutterbugError(docId,
             `Shutterbug returned an image URL on a loopback or private host (${url})`);
+        }
+        // A host that merely looks public can still resolve to a private address when it is
+        // actually fetched, which isPublicHttpsUrl cannot see (see its doc comment). Pinning the
+        // resolved address before fetching is the real fix and is not done here yet; this is a
+        // cheap stopgap that works only because Shutterbug's real host is known.
+        if (!isShutterbugImageHost(url)) {
+          throw new ShutterbugError(docId, `Shutterbug returned an image URL on an unexpected host (${url})`);
         }
         return url;
       } catch (error) {
