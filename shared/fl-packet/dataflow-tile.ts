@@ -35,10 +35,11 @@ export interface DataflowGroup {
   label?: string;
   node_ids: string[];
   /**
-   * Always empty: CLUE groups hold nodes, never other groups.
+   * Empty while CLUE groups hold nodes and never other groups.
    *
    * Sent rather than omitted so the flatness reads as a fact about our model rather than as
-   * missing data — their shape allows nesting and ours cannot express it.
+   * missing data. Their shape allows nesting, so if CLUE ever nests groups this is where they
+   * go and nothing about the contract has to move.
    */
   group_ids: string[];
 }
