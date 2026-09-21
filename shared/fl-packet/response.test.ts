@@ -240,3 +240,37 @@ describe("responseHighlights survives a malformed display part", () => {
     ]);
   });
 });
+
+// v0.13 adds an optional caption to op_highlight, 1-60 characters, naming the block in the words
+// the prose just used. It lives on op_highlight alone: op_focus and op_annotate are
+// additionalProperties:false and reject it, so a focus directive always falls back to our name.
+const captioned = (id: string, label: string) => ({ ...nodeDirective(id), label });
+
+describe("responseHighlights captions", () => {
+  it("prefers the caption ForeverLearning sent over the name we synthesized", () => {
+    const packet = parseResponsePacket(aResponse([captioned("n-logic", "the comparison block")]))!;
+    expect(responseHighlights(packet, sentPacket))
+      .toEqual([{ tileId: "tile-df-1", objectId: "n-logic", label: "the comparison block" }]);
+  });
+
+  it("falls back to the name we sent when the directive carries no caption", () => {
+    const packet = parseResponsePacket(aResponse([nodeDirective("n-logic")]))!;
+    expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
+  });
+
+  // The caption supplies the words, never the licence to point somewhere. Resolving the id against
+  // what we sent is what stops a highlight rendering onto a node that is not there, and a caption
+  // must not buy its way past that: a well-worded button pointing at nothing is still broken.
+  it("still drops a captioned highlight whose node we never sent", () => {
+    const packet = parseResponsePacket(aResponse([captioned("n-invented", "the timer block")]))!;
+    expect(responseHighlights(packet, sentPacket)).toEqual([]);
+  });
+
+  // Their schema says minLength 1, so this is a packet that should not exist — but isTutorHighlight
+  // rejects an empty label, and dropping the highlight would cost the student a pointer we could
+  // have named ourselves.
+  it("falls back to our name when the caption is blank", () => {
+    const packet = parseResponsePacket(aResponse([captioned("n-logic", "   ")]))!;
+    expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
+  });
+});
