@@ -38,8 +38,17 @@ export interface UnitContent {
   contentFiles: UnitContentFile[];
 }
 
-// Load the files + pending updates maps and split into library images and content files.
-export async function getUnitContent(branch: string, unit: string): Promise<UnitContent> {
+// Load the files + pending updates maps and build one UnitContentFile record per path, of any
+// file type -- unlike getUnitContent below, this applies no content.json/images filter. A
+// section can reference a file under any name (see assemble-unit.ts), so a caller that needs to
+// resolve an arbitrary referenced path needs the whole inventory, not just the slice
+// computeImageUsages happens to care about.
+//
+// A path is included if it appears in EITHER map: most saved content ends up in both (putContent
+// always writes updates, and also creates a files entry when the content has a type or title),
+// but nothing guarantees that, so a brand-new, never-committed, update-only file must not be
+// silently dropped from the inventory.
+export async function loadUnitFileInventory(branch: string, unit: string): Promise<UnitContentFile[]> {
   const db = getDb();
   const [filesSnap, updatesSnap] = await Promise.all([
     db.ref(getUnitFilesPath(branch, unit)).get(),
@@ -48,17 +57,32 @@ export async function getUnitContent(branch: string, unit: string): Promise<Unit
   const files: UnitFiles = filesSnap.val() ?? {};
   const updates: Record<string, string> = updatesSnap.val() ?? {};
 
+  const escapedPaths = new Set([...Object.keys(files), ...Object.keys(updates)]);
+  return Array.from(escapedPaths).map((escapedPath) => ({
+    path: unescapeFirebaseKey(escapedPath),
+    escapedPath,
+    sha: files[escapedPath]?.sha,
+    updateText: updates[escapedPath],
+  }));
+}
+
+// Load the inventory and split into library images and content files -- what image-usage
+// scanning needs. The content.json/images split is a convenience filter for that one caller, not
+// a statement about what is part of the curriculum: it includes teacher guides, exemplars, and
+// orphan files, and would miss a referenced section file under a nonstandard name.
+export async function getUnitContent(branch: string, unit: string): Promise<UnitContent> {
+  const inventory = await loadUnitFileInventory(branch, unit);
+
   const imageKeys: string[] = [];
   const imageShas: Record<string, string | undefined> = {};
   const contentFiles: UnitContentFile[] = [];
 
-  Object.entries(files).forEach(([escapedPath, file]) => {
-    const path = unescapeFirebaseKey(escapedPath);
-    if (isImageFile(path)) {
-      imageKeys.push(path);
-      imageShas[path] = file.sha;
-    } else if (isContentFile(path)) {
-      contentFiles.push({path, escapedPath, sha: file.sha, updateText: updates[escapedPath]});
+  inventory.forEach((file) => {
+    if (isImageFile(file.path)) {
+      imageKeys.push(file.path);
+      imageShas[file.path] = file.sha;
+    } else if (isContentFile(file.path)) {
+      contentFiles.push(file);
     }
   });
 
