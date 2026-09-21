@@ -5,7 +5,7 @@
     "start": "firebase emulators:start --only firestore",
     "logs": "firebase functions:log",
     "test": "jest --detectOpenHandles",
-    "test:exec": "firebase emulators:exec --only firestore \"npm run test\""
+    "test:exec": "firebase emulators:exec --only firestore,database --project collaborative-learning-ec215 \"npm run test\""
   },
   "engines": {
     "node": ">=20"
