@@ -1,4 +1,6 @@
-import { ReteManager } from "./rete-manager";
+import { AreaPlugin } from "rete-area-plugin";
+import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { MAX_ZOOM, MIN_ZOOM, ReteManager } from "./rete-manager";
 
 interface IFakeNode { id: string; }
 interface IFakeNodeView { position: { x: number; y: number }; }
@@ -23,7 +25,7 @@ function makeManagerStub(
   return stub;
 }
 
-describe("ReteManager.getNodeIdsInReadingOrder (CLUE-455)", () => {
+describe("ReteManager.getNodeIdsInReadingOrder", () => {
   it("orders three nodes left-to-right when they share the same row band", () => {
     const manager = makeManagerStub([
       { id: "c", x: 300, y: 10 },
@@ -116,5 +118,113 @@ describe("ReteManager.nextNodeIdInReadingOrder", () => {
 
   it("returns undefined for an unrecognized key", () => {
     expect(threeNodes().nextNodeIdInReadingOrder("a", "Backspace")).toBeUndefined();
+  });
+});
+
+// The subset of rete-area-plugin's Area that zoomIn/zoomOut/pan/setZoom actually touch, typed off
+// the real AreaPlugin so a signature change there (e.g. zoom/translate no longer returning a
+// boolean promise) breaks this stub loudly instead of silently.
+type FakeArea = Pick<AreaPlugin<Schemes, AreaExtra>["area"], "transform" | "zoom" | "translate">;
+
+/** Stub with just the surface zoomIn/zoomOut/pan/setZoom touch: the rete area transform + zoom/translate,
+ *  and the MST content that receives the live transform. */
+function makeTransformStub(k = 1, x = 0, y = 0) {
+  const calls = { zoom: [] as number[], translate: [] as Array<[number, number]> };
+  const area: FakeArea = {
+    transform: { k, x, y },
+    // Area.zoom resolves false on a successful zoom (inverted vs. its own JSDoc; rete-area-plugin 2.0.2).
+    zoom: async (scale: number) => { calls.zoom.push(scale); area.transform.k = scale; return false; },
+    translate: async (tx: number, ty: number) => {
+      calls.translate.push([tx, ty]);
+      area.transform.x = tx; area.transform.y = ty;
+      return true;
+    },
+  };
+  const setLiveProgramZoom = jest.fn();
+  const stub = Object.create(ReteManager.prototype) as ReteManager;
+  (stub as unknown as { area: { area: FakeArea } }).area = { area };
+  (stub as unknown as { mstContent: { setLiveProgramZoom: jest.Mock } }).mstContent = { setLiveProgramZoom };
+  return { stub, calls, setLiveProgramZoom };
+}
+
+describe("ReteManager zoom/pan (CLUE-573)", () => {
+  it("zoomIn steps +0.05", async () => {
+    const { stub, calls } = makeTransformStub(1);
+    await stub.zoomIn();
+    expect(calls.zoom).toHaveLength(1);
+    expect(calls.zoom[0]).toBeCloseTo(1.05, 10);
+  });
+
+  it("zoomIn clamps at MAX_ZOOM", async () => {
+    const { stub, calls } = makeTransformStub(MAX_ZOOM - 0.01);
+    await stub.zoomIn();
+    expect(calls.zoom).toEqual([MAX_ZOOM]);
+  });
+
+  it("zoomOut steps -0.05", async () => {
+    const { stub, calls } = makeTransformStub(1);
+    await stub.zoomOut();
+    expect(calls.zoom).toHaveLength(1);
+    expect(calls.zoom[0]).toBeCloseTo(0.95, 10);
+  });
+
+  it("zoomOut clamps at MIN_ZOOM", async () => {
+    const { stub, calls } = makeTransformStub(MIN_ZOOM + 0.01);
+    await stub.zoomOut();
+    expect(calls.zoom).toEqual([MIN_ZOOM]);
+  });
+
+  it("setZoom writes the resulting transform to liveProgramZoom", async () => {
+    const { stub, setLiveProgramZoom } = makeTransformStub(1);
+    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1.5);
+    expect(setLiveProgramZoom).toHaveBeenCalledWith(expect.objectContaining({ k: 1.5 }));
+  });
+
+  it("pan translates by exactly the requested delta", async () => {
+    const { stub, calls } = makeTransformStub(1, 10, 20);
+    await stub.pan(40, -40);
+    expect(calls.translate).toEqual([[50, -20]]);
+  });
+});
+
+/**
+ * The title a new block is given. This is where the palette's word first reaches a document: the
+ * student clicks "Waves" and the block must be titled "Waves 1", not "Generator 1", because that
+ * title is persisted and is later what the AI reads back. Stubbed the same way as above —
+ * `getNewNodeName` reads only `this.editor.getNodes()`, and each node only for its
+ * `model.orderedDisplayName`.
+ */
+function makeNamingStub(existingNames: string[]): ReteManager {
+  const stub = Object.create(ReteManager.prototype);
+  stub.editor = { getNodes: () => existingNames.map(name => ({ model: { orderedDisplayName: name } })) };
+  return stub;
+}
+
+// getNewNodeName is private; the tests reach it the same way the stub reaches the prototype.
+function newNodeName(manager: ReteManager, nodeType: string): string {
+  return (manager as any).getNewNodeName(nodeType);
+}
+
+describe("ReteManager.getNewNodeName", () => {
+  it("titles a new block with the palette's word, not the internal type", () => {
+    expect(newNodeName(makeNamingStub([]), "Generator")).toBe("Waves 1");
+  });
+
+  it("counts existing blocks by their display name", () => {
+    expect(newNodeName(makeNamingStub(["Waves 1", "Waves 2"]), "Generator")).toBe("Waves 3");
+  });
+
+  it("does not count blocks of a different type", () => {
+    expect(newNodeName(makeNamingStub(["Hold 1", "Compare 1"]), "Generator")).toBe("Waves 1");
+  });
+
+  it("leaves a type whose display name never changed alone", () => {
+    expect(newNodeName(makeNamingStub(["Sensor 1"]), "Sensor")).toBe("Sensor 2");
+  });
+
+  // The hidden Timer block is absent from the display-name table, and its internal name carries
+  // regex metacharacters that once made every new Timer "Timer (on/off) 1".
+  it("names a block whose type is absent from the table by its internal type", () => {
+    expect(newNodeName(makeNamingStub(["Timer 1"]), "Timer")).toBe("Timer 2");
   });
 });

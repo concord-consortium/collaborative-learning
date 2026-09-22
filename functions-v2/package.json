@@ -16,7 +16,7 @@
     "deploy:postExemplarComment": "firebase deploy --only functions:functions-v2:postExemplarComment_v2",
     "deploy:createFirestoreMetadataDocument": "firebase deploy --only functions:functions-v2:createFirestoreMetadataDocument_v2",
     "deploy:getAiContent": "firebase deploy --only functions:functions-v2:getAiContent_v2",
-    "deploy:onDocumentSummarized": "firebase deploy --only functions:functions-v2:onDocumentSummarized",
+    "deploy:onCommentRated": "firebase deploy --only functions:functions-v2:onCommentRated",
     "deploy:onAnalyzableTestDocWritten": "firebase deploy --only functions:functions-v2:onAnalyzableTestDocWritten",
     "deploy:onAnalyzableProdDocWritten": "firebase deploy --only functions:functions-v2:onAnalyzableProdDocWritten",
     "deploy:onAnalysisDocumentPending": "firebase deploy --only functions:functions-v2:onAnalysisDocumentPending",

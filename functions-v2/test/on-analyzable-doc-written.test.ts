@@ -8,7 +8,9 @@ import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 
 import {initialize, projectConfig} from "./initialize";
-import {onAnalyzableProdDocWritten, onAnalyzableTestDocWritten} from "../src/on-analyzable-doc-written";
+import {
+  normalizeRequestContext, onAnalyzableProdDocWritten, onAnalyzableTestDocWritten,
+} from "../src/on-analyzable-doc-written";
 
 jest.mock("firebase-functions/logger");
 
@@ -158,6 +160,228 @@ describe("functions", () => {
           },
         });
       });
+    });
+  });
+
+  describe("on-analyzable-doc-written with a request context", () => {
+    const writeEvaluation = async (value: any) => {
+      const path =
+        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/categorize-design";
+      const delta = makeChange(makeDataSnapshot(null, path), makeDataSnapshot(value, path));
+      await fft.wrap(onAnalyzableTestDocWritten)({
+        data: delta,
+        params: {
+          realm: "demo",
+          realmId: "AI",
+          portalId: "demo",
+          classId: "democlass1",
+          userId: "1",
+          docId: "testdoc1",
+          evaluator: "categorize-design",
+        }});
+      return admin.firestore().collection("analysis/queue/pending").doc("testdoc1").get()
+        .then((result) => result.data());
+    };
+
+    test("stores the context alongside the timestamp", async () => {
+      const queued = await writeEvaluation({
+        timestamp: 1001,
+        context: {unit: "vibe", investigation: "1", problem: "1", offeringId: "2001"},
+      });
+
+      expect(queued).toEqual({
+        metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+        documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+        commentsPath: "demo/AI/documents/testdoc1/comments",
+        firestoreDocumentPath: "demo/AI/documents/testdoc1",
+        docUpdated: 1001,
+        evaluator: "categorize-design",
+        requestContext: {unit: "vibe", investigation: "1", problem: "1", offeringId: "2001"},
+      });
+    });
+
+    test("stores no context when the request carries none", async () => {
+      const queued = await writeEvaluation({timestamp: 1001});
+
+      expect(queued).not.toHaveProperty("requestContext");
+    });
+
+    test("stores no context when the request carries a partial one", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, context: {unit: "vibe", investigation: "1"}});
+
+      expect(queued).not.toHaveProperty("requestContext");
+    });
+  });
+
+  describe("on-analyzable-doc-written with a requestId", () => {
+    const writeEvaluation = async (value: any, evaluator = "categorize-design") => {
+      const path =
+        `demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/${evaluator}`;
+      const delta = makeChange(makeDataSnapshot(null, path), makeDataSnapshot(value, path));
+      await fft.wrap(onAnalyzableTestDocWritten)({
+        data: delta,
+        params: {
+          realm: "demo",
+          realmId: "AI",
+          portalId: "demo",
+          classId: "democlass1",
+          userId: "1",
+          docId: "testdoc1",
+          evaluator,
+        }});
+      return admin.firestore().collection("analysis/queue/pending").doc("testdoc1").get()
+        .then((result) => result.data());
+    };
+
+    test("copies requestId for the standard evaluation shape", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "req-abc"});
+      expect(queued).toMatchObject({requestIds: ["req-abc"]});
+    });
+
+    test("copies requestId for the custom evaluation shape", async () => {
+      const queued = await writeEvaluation(
+        {timestamp: 1001, requestId: "req-xyz", aiPrompt: {mainPrompt: "prompt"}}, "custom");
+      expect(queued).toMatchObject({requestIds: ["req-xyz"]});
+    });
+
+    // The automatic routes (onDisconnect, the sync-hook cleanup) write no requestId.
+    test("stores no requestIds when the request carries none", async () => {
+      const queued = await writeEvaluation({timestamp: 1001});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    test("keeps a requestId at the length limit", async () => {
+      const requestId = "x".repeat(64);
+      const queued = await writeEvaluation({timestamp: 1001, requestId});
+      expect(queued).toMatchObject({requestIds: [requestId]});
+    });
+
+    // Dropped, not truncated: a truncated id would never match the one the client is waiting on.
+    test("drops an over-long requestId", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "x".repeat(65)});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    test("drops a non-string requestId", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: 12345});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    test("drops an empty-string requestId", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: ""});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    // The id is interpolated into a realtime database path (evaluation-status.ts): a "/" would
+    // nest the status write instead of writing one leaf, and other characters are illegal in a
+    // database key and would throw.
+    test("drops a requestId containing a database path separator", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "a/b"});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    test("drops a requestId containing characters illegal in a database key", async () => {
+      const queued = await writeEvaluation({timestamp: 1001, requestId: "a.b#c$d"});
+      expect(queued).not.toHaveProperty("requestIds");
+    });
+
+    // See AnalysisQueueDocument.requestIds for why more than one id can land here.
+    test("accumulates a second requestId instead of replacing the first, when both land before " +
+         "the document is picked up for processing", async () => {
+      await writeEvaluation({timestamp: 1001, requestId: "req-first"});
+      const queued = await writeEvaluation({timestamp: 1002, requestId: "req-second"});
+      expect(queued).toMatchObject({requestIds: ["req-first", "req-second"]});
+    });
+
+    // An automatic write carries no id, but must not erase one a click is already waiting on.
+    test("keeps an earlier requestId when a later write carries none of its own", async () => {
+      await writeEvaluation({timestamp: 1001, requestId: "req-first"});
+      const queued = await writeEvaluation({timestamp: 1002});
+      expect(queued).toMatchObject({requestIds: ["req-first"]});
+    });
+  });
+
+  describe("normalizeRequestContext", () => {
+    const context = {unit: "vibe", investigation: "1", problem: "2", offeringId: "2001"};
+
+    test("keeps the four fields", () => {
+      expect(normalizeRequestContext(context)).toEqual(context);
+    });
+
+    test("drops anything else the caller wrote", () => {
+      expect(normalizeRequestContext({...context, context_id: "someclass", nonsense: {a: 1}})).toEqual(context);
+    });
+
+    test("drops the whole context when a curriculum field is missing, empty, or not a string", () => {
+      expect(normalizeRequestContext({...context, unit: undefined})).toBeUndefined();
+      expect(normalizeRequestContext({...context, investigation: ""})).toBeUndefined();
+      expect(normalizeRequestContext({...context, problem: 2})).toBeUndefined();
+    });
+
+    // Shaped like a unit code, but names no unit, so a document filed under it would sit in a
+    // problem that does not exist.
+    test("drops a context naming the placeholder unit", () => {
+      expect(normalizeRequestContext({...context, unit: "NULL"})).toBeUndefined();
+    });
+
+    test("drops a unit that is not shaped like a unit code", () => {
+      expect(normalizeRequestContext({...context, unit: "https://example.com/content.json"})).toBeUndefined();
+      expect(normalizeRequestContext({...context, unit: "vibe/1/1"})).toBeUndefined();
+      expect(normalizeRequestContext({...context, unit: "a".repeat(41)})).toBeUndefined();
+    });
+
+    test("drops ordinals that are not small whole numbers", () => {
+      expect(normalizeRequestContext({...context, problem: "1.1"})).toBeUndefined();
+      expect(normalizeRequestContext({...context, problem: "-1"})).toBeUndefined();
+      expect(normalizeRequestContext({...context, investigation: "1e3"})).toBeUndefined();
+      expect(normalizeRequestContext({...context, investigation: "1".repeat(4)})).toBeUndefined();
+    });
+
+    // Never matches a stored "1", so the document would sit in a pool of one.
+    test("drops ordinals written with a leading zero", () => {
+      expect(normalizeRequestContext({...context, problem: "01"})).toBeUndefined();
+      expect(normalizeRequestContext({...context, investigation: "00"})).toBeUndefined();
+    });
+
+    // The accepted side of each limit: a rule tightened by one would fail here.
+    test("keeps ordinals up to three digits", () => {
+      expect(normalizeRequestContext({...context, investigation: "10", problem: "999"}))
+        .toEqual({...context, investigation: "10", problem: "999"});
+    });
+
+    test("keeps a unit code and an offeringId at the length limit", () => {
+      const unit = "u".repeat(40);
+      const offeringId = "9".repeat(100);
+      expect(normalizeRequestContext({...context, unit, offeringId})).toEqual({...context, unit, offeringId});
+    });
+
+    // Zero is a real investigation: vibe, mods and sas all have a 0.1.
+    test("keeps an investigation ordinal of zero", () => {
+      expect(normalizeRequestContext({...context, investigation: "0"}))
+        .toEqual({...context, investigation: "0"});
+    });
+
+    // Problems are numbered from 1, so 0 is the app's unresolved placeholder. The client refuses
+    // to send it; a hand-authored request is refused here.
+    test("drops a problem ordinal of zero", () => {
+      expect(normalizeRequestContext({...context, problem: "0"})).toBeUndefined();
+    });
+
+    // Long enough to push the queue record past what Firestore will store, failing the write.
+    test("replaces an oversized offeringId with an empty string", () => {
+      expect(normalizeRequestContext({...context, offeringId: "9".repeat(101)}))
+        .toEqual({...context, offeringId: ""});
+    });
+
+    test("replaces an offeringId that is not a string with an empty string", () => {
+      expect(normalizeRequestContext({...context, offeringId: 2001})).toEqual({...context, offeringId: ""});
+      expect(normalizeRequestContext({...context, offeringId: undefined})).toEqual({...context, offeringId: ""});
+    });
+
+    test("returns nothing when there is no context object", () => {
+      expect(normalizeRequestContext(undefined)).toBeUndefined();
+      expect(normalizeRequestContext(null)).toBeUndefined();
+      expect(normalizeRequestContext("vibe/1/2")).toBeUndefined();
     });
   });
 

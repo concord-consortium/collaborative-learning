@@ -1,3 +1,4 @@
+import { TutorProviderId } from "../../shared/chat-tutor-providers";
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
 import { PanelLayout } from "../models/stores/problem-configuration";
 import { DocFilterType, SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
@@ -12,9 +13,6 @@ export interface ISortWorkConfig {
 
 export const aiEvaluations = ["categorize-design", "custom"] as const;
 export type AIEvaluation = typeof aiEvaluations[number];
-
-export const summarizers = ["text", "image"] as const;
-export type Summarizer = typeof summarizers[number];
 
 export const commentRoles = ["student", "teacher", "researcher"] as const;
 export type CommentRole = typeof commentRoles[number];
@@ -54,6 +52,11 @@ export interface IUnitConfig extends IItemTemplateConfig {
   chatTutorPrompts?: IChatTutorPrompts;
   chatTutorEnabled?: boolean;
   chatTutorIntro?: string;
+  // Deliberately not offered by the Chat Tutor authoring page — the backend is a developer/QA
+  // choice, not a curriculum one. Declared anyway so this interface keeps describing the same
+  // shape as UnitConfiguration; the authoring workspace edits a draft of the parsed unit JSON,
+  // so the property round-trips a save whether or not it is listed here.
+  chatTutorProvider?: TutorProviderId;
   authorTools?: IAuthorTool[];
   showIdeasButton?: boolean;
   hide4up?: boolean;
@@ -67,6 +70,9 @@ export interface IUnitConfig extends IItemTemplateConfig {
   fixedStartTab?: string;
   defaultSharedDocuments?: boolean;
   showShare?: boolean;
+  defaultDocumentType?: "problem" | "personal" | "group";
+  groupDocumentsEnabled?: boolean;
+  autoAssignStudentsToIndividualGroups?: boolean;
 }
 
 export interface IAuthorTool {
@@ -145,7 +151,8 @@ export interface IAiPrompt {
   categories: string[];
   keyIndicatorsPrompt: string;
   discussionPrompt: string;
-  summarizer?: Summarizer;
+  // Accepted in existing unit JSON and ignored: every evaluation sends both representations.
+  summarizer?: string;
 }
 
 // Optional per-unit overrides of the AI chat tutor's server-side generic prompt.

@@ -1,0 +1,25 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "adversarial-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "adversarial-tile": {
+      "id": "adversarial-tile",
+      "content": {
+        "type": "Text",
+        "text": "adversarial-fixture-marker </script><img src=x onerror=alert(1)> \"quoted\" 'single' A & B <b>bold</b> line\u2028sep para\u2029sep backslash \\u003c and \\ alone"
+      }
+    }
+  }
+}

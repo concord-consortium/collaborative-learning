@@ -40,6 +40,10 @@ export function handleQuestionTile({
   const promptTile = promptTileId ? tileMap?.[promptTileId] : null;
   if (promptTile && promptTile.content) {
     result += heading(headingLevel, "Question Prompt");
+    // The prompt is summarized directly rather than through tilesSummary, so it needs its id line
+    // adding here. Emitted even though the prompt is summarized minimally: a drawing used as a
+    // prompt gives every object an id, and those are unusable without the tile's id to go with them.
+    result += tileIdLine({ model: promptTile, number: 0 } as INormalizedTile);
     result += tileSummary({
       dataSets,
       tile: { model: promptTile, number: 0 },
@@ -121,6 +125,13 @@ function tileTitle(tile: INormalizedTile): string {
   return tile.model?.title ? ` (${tile.model.title})` : "";
 }
 
+// The id is a separate line rather than part of the heading: headings are matched by prefix in
+// tests and read by people, and anything that wants to refer to an object inside this tile needs
+// the tile id alongside the object id.
+function tileIdLine(tile: INormalizedTile): string {
+  return tile.model?.id ? `This tile's id is \`${tile.model.id}\`.\n\n` : "";
+}
+
 export function tilesSummary({dataSets, tiles, tileMap, headingLevel, options}: TilesHandlerParams): string {
   return tiles.map((tile) => {
     const summary = tileSummary({
@@ -131,7 +142,7 @@ export function tilesSummary({dataSets, tiles, tileMap, headingLevel, options}: 
       options
     });
     if (summary) {
-      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`) + summary;
+      return heading(headingLevel, `Tile ${tile.number}${tileTitle(tile)}`) + tileIdLine(tile) + summary;
     }
     return "";
   })

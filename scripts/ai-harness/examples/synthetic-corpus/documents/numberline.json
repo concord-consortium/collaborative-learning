@@ -1,0 +1,70 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "numberline-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "numberline-tile": {
+      "id": "numberline-tile",
+      "content": {
+        "type": "Numberline",
+        "fixtureMarker": "numberline-fixture-marker",
+        "min": 0,
+        "max": 10,
+        "points": {}
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-numberline-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-numberline-data",
+        "providerId": "numberline-tile",
+        "dataSet": {
+          "id": "numberline-data",
+          "name": "Latch forces",
+          "attributes": [
+            {
+              "id": "numberline-data-x",
+              "name": "Trial",
+              "values": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "numberline-data-y",
+              "name": "Height (cm)",
+              "values": [
+                "12",
+                "19"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "numberline-data-case-1"
+            },
+            {
+              "__id__": "numberline-data-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "numberline-tile"
+      ]
+    }
+  }
+}

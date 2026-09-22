@@ -1,3 +1,5 @@
+import { displayNameForType } from "../../dataflow-node-types";
+
 interface TickEntry {
   nodeValue?: string;
   open?: boolean;
@@ -241,10 +243,19 @@ export function programToGraphviz(program: Program): string {
   const nodeIdMap = new Map<string, string>();
   const nodeNameCounts = new Map<string, number>();
 
+  // Both halves are the words on screen, never the internal type. The name half falls back to the
+  // node's own `name` for nodes saved before orderedDisplayName existed, and that field holds the
+  // raw type for them (createAndAddNode stamps both from the same value) — so it maps too. The two
+  // passes below have to agree on this string exactly, since the first counts by it and the second
+  // looks those counts back up; computing it once is what keeps them from drifting apart.
+  const baseIdFor = (node: ProgramNode): string => {
+    const nodeType = displayNameForType((node.data as NodeDataBase).type);
+    const nodeName = node.data.orderedDisplayName || displayNameForType(node.name);
+    return `${nodeType}:${nodeName}`;
+  };
+
   Object.values(program.nodes).forEach(node => {
-    const nodeType = node.data.type;
-    const nodeName = node.data.orderedDisplayName || node.name;
-    const baseId = `${nodeType}:${nodeName}`;
+    const baseId = baseIdFor(node);
 
     // Track how many nodes have this type:name combination
     const count = nodeNameCounts.get(baseId) || 0;
@@ -257,9 +268,7 @@ export function programToGraphviz(program: Program): string {
 
   // Fix up IDs: only add index if there are duplicates
   Object.values(program.nodes).forEach(node => {
-    const nodeType = node.data.type;
-    const nodeName = node.data.orderedDisplayName || node.name;
-    const baseId = `${nodeType}:${nodeName}`;
+    const baseId = baseIdFor(node);
     const count = nodeNameCounts.get(baseId) || 0;
 
     if (count === 1) {
@@ -337,7 +346,23 @@ export function programToGraphviz(program: Program): string {
     }
     const formatter = getNodeFormatter(nodeType);
     const properties = formatter({ node, inputs, nodeValue });
-    const propertyRows = propertiesToTableRows({...automaticNodeProperties, ...properties});
+    // The real node id rides as a property rather than as the graph identifier: the identifier is
+    // also every edge's endpoint, and nanoids there would make the graph unreadable. Anything that
+    // wants to point at this node needs the id the document actually stores. Spread it last so it
+    // remains authoritative against whatever a node's data carries.
+    //
+    // The title bar string rides alongside it for the same reason in reverse. The identifier is
+    // `type:name` so it stays legible as an edge endpoint, but that prefix is not on screen — a
+    // consumer that quotes the identifier to a student names a block `Sensor:Sensor 1` that the
+    // student sees titled `Sensor 1`.
+    //
+    // A node saved before orderedDisplayName existed has none, and its own `name` field is just the
+    // raw internal type (createAndAddNode stamps both from the same value) — so the fallback goes
+    // through the same type -> display-name mapping as the identifier, not the raw node.name.
+    const propertyRows = propertiesToTableRows({
+      ...automaticNodeProperties, ...properties, id: node.id,
+      title: orderedDisplayName || displayNameForType(nodeType)
+    });
 
     // Build HTML table label
     const labelLines: string[] = [];

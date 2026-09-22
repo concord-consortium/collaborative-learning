@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "name": "categorize-design-mixed",
+  "aiPrompt": {
+    "mainPrompt": "This is a student document. You are given a picture of it. When the student has written something, you are also given a written summary of the document.\nThey are working on engineering task. Please tell me which of the following areas of their design they are focusing on:\n- user: who's it for?\n- environment: where's it used?\n- form: what's it look like?\n- function: what does it do?\nand why you chose that area.\nOr if the document doesn't include enough content to clearly identify a focus area let me know by setting \"category\" to \"unknown\".\nYour answer should be a JSON document in the given format.",
+    "categorizationDescription": "Categorize the document based on its content.",
+    "categories": [
+      "user",
+      "environment",
+      "form",
+      "function"
+    ],
+    "keyIndicatorsPrompt": "What are the key indicators that support this categorization?",
+    "discussionPrompt": "Please provide any additional discussion or context regarding the categorization.",
+    "systemPrompt": "You are a teaching assistant in an engineering design course."
+  },
+  "provenance": {
+    "source": "authored for the harness: categorize-design-default with its opening replaced, for a message carrying a picture and -- when the student wrote something -- a summary as well. It has to cover both, because a mixed run sends the pictures for a document with no student text and drops the summary; an opening that promised one described a message the model had not been given, which was true of 16 of the 23 rows the first recorded run sent. Only the opening differs -- everything else is production's wording verbatim, including \"working on engineering task\", which is production's grammar and not a typo to fix here. Correcting it would make this prompt differ from the one the image-only and text-only runs use in a further way, and those comparisons are the point. It would also change aiPromptSha256, which is part of every request key: the fix belongs in shared/ai-analysis-messages.ts, and this copy follows it.",
+    "retrievedAt": "2026-08-18",
+    "aiPromptSha256": "e9c17e34f3494923473ada2b8879a62021d5a63892dbd13ed6937ac3535551fb"
+  }
+}

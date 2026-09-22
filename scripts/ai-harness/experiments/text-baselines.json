@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "name": "text-baselines",
+  "runs": [
+    { "id": "text-default", "message": "text-only", "textVariant": "default", "prompt": "categorize-design-default" },
+    { "id": "text-minimal", "message": "text-only", "textVariant": "minimal", "prompt": "categorize-design-default" }
+  ]
+}

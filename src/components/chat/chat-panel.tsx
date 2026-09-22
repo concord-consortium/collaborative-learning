@@ -29,7 +29,6 @@ import "./chat-panel.scss";
 interface IPostCommentOptions {
   comment: IClientCommentParams["content"];
   tags?: IClientCommentParams["tags"];
-  agreeWithAi?: IClientCommentParams["agreeWithAi"];
 }
 export type PostCommentFn = (options: IPostCommentOptions) => void;
 
@@ -85,7 +84,7 @@ export const ChatPanel: React.FC<IProps> = observer(({ user, activeNavTab, focus
   const postCommentMutation = usePostDocumentComment();
   const firestore = useFirestore();
 
-  const postComment = useCallback(({ comment, tags, agreeWithAi }: IPostCommentOptions) => {
+  const postComment = useCallback(({ comment, tags }: IPostCommentOptions) => {
     if (focusDocument) {
       const numComments = postedComments ? postedComments.length : 0;
       const focusDocumentId = focusDocument;
@@ -95,14 +94,13 @@ export const ChatPanel: React.FC<IProps> = observer(({ user, activeNavTab, focus
         isFirst: (numComments < 1),
         commentText: comment,
         action: "add",
-        tags,
-        agreeWithAi
+        tags
       };
       logCommentEvent(eventPayload);
     }
     return documentMetadata
       ? postCommentMutation.mutate(
-        { document: documentMetadata, comment: { content: comment, tileId: validFocusTileId, tags, agreeWithAi } })
+        { document: documentMetadata, comment: { content: comment, tileId: validFocusTileId, tags } })
       : undefined;
   }, [documentMetadata, focusDocument, validFocusTileId, postCommentMutation, postedComments]);
 

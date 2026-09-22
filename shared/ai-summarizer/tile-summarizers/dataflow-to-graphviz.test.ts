@@ -115,6 +115,8 @@ describe("programToGraphviz", () => {
       <tr><td>plot</td><td>false</td></tr>
       <tr><td>value</td><td>2</td></tr>
       <tr><td>nodeValue</td><td>2</td></tr>
+      <tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>
+      <tr><td>title</td><td>Number 1</td></tr>
       <tr><td>Output</td><td port="value">value</td></tr>
     </table>
   >];
@@ -123,6 +125,8 @@ describe("programToGraphviz", () => {
       <tr><td>plot</td><td>false</td></tr>
       <tr><td>value</td><td>3</td></tr>
       <tr><td>nodeValue</td><td>3</td></tr>
+      <tr><td>id</td><td>5TnGPjp2Cfvcwnw_</td></tr>
+      <tr><td>title</td><td>Number 2</td></tr>
       <tr><td>Output</td><td port="value">value</td></tr>
     </table>
   >];
@@ -135,15 +139,19 @@ describe("programToGraphviz", () => {
       <tr><td>nodeValue</td><td>5</td></tr>
       <tr><td>formula</td><td>Number:Number 1 + Number:Number 2 = nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>2 + 3 = 5</td></tr>
+      <tr><td>id</td><td>oFu_7v2unK3-Uc1s</td></tr>
+      <tr><td>title</td><td>Math 1</td></tr>
     </table>
   >];
-  "Logic:Logic 1" [label=<
+  "Compare:Logic 1" [label=<
     <table>
       <tr><td>plot</td><td>false</td></tr>
       <tr><td>logicOperator</td><td>Greater Than</td></tr>
       <tr><td>nodeValue</td><td>NaN</td></tr>
       <tr><td>formula</td><td>unset_num1 &gt; unset_num2 ⇒ nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>unset_num1 &gt; unset_num2 ⇒ NaN</td></tr>
+      <tr><td>id</td><td>node4</td></tr>
+      <tr><td>title</td><td>Logic 1</td></tr>
     </table>
   >];
   "Transform:Transform 1" [label=<
@@ -153,6 +161,8 @@ describe("programToGraphviz", () => {
       <tr><td>nodeValue</td><td>NaN</td></tr>
       <tr><td>formula</td><td>|unset_num1| = nodeValue</td></tr>
       <tr><td>formulaWithValues</td><td>|unset_num1| = NaN</td></tr>
+      <tr><td>id</td><td>node5</td></tr>
+      <tr><td>title</td><td>Transform 1</td></tr>
     </table>
   >];
 
@@ -243,5 +253,199 @@ describe("programToGraphviz", () => {
     expect(clusterBlock).toContain("<td>value</td><td>2</td>");
     expect(clusterBlock).not.toContain("<td>value</td><td>3</td>");
     expect(dot).toContain("<td>value</td><td>3</td>");
+  });
+
+  describe("node ids", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        "7ZRiN_2uNGilJII0": {
+          id: "7ZRiN_2uNGilJII0",
+          name: "Number",
+          x: 0,
+          y: 0,
+          data: { type: "Number", plot: false, orderedDisplayName: "Number 1", value: 2 }
+        }
+      },
+      connections: {}
+    };
+
+    it("emits the real node id as a property row", () => {
+      const dot = programToGraphviz(program);
+      expect(dot).toContain("<tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>");
+    });
+
+    it("still uses the readable label as the graph identifier", () => {
+      const dot = programToGraphviz(program);
+      expect(dot).toContain('"Number:Number 1" [label=<');
+      expect(dot).not.toContain('"7ZRiN_2uNGilJII0" [label=<');
+    });
+
+    // The id is spread last so it wins against anything a node's own data carries under the same
+    // key. Without a conflicting case the ordering is unpinned and moving the spread to the front
+    // would break nothing — while quietly making the summary name an id no document stores.
+    it("takes the node's own id over an id in its data", () => {
+      const dot = programToGraphviz({
+        ...program,
+        nodes: {
+          "7ZRiN_2uNGilJII0": {
+            ...program.nodes["7ZRiN_2uNGilJII0"],
+            data: { ...program.nodes["7ZRiN_2uNGilJII0"].data, id: "not-the-real-id" }
+          }
+        }
+      });
+      expect(dot).toContain("<tr><td>id</td><td>7ZRiN_2uNGilJII0</td></tr>");
+      expect(dot).not.toContain("not-the-real-id");
+    });
+  });
+
+  describe("node titles", () => {
+    const program = {
+      id: "dataflow@1",
+      nodes: {
+        n1: {
+          id: "n1",
+          name: "Sensor",
+          x: 0,
+          y: 0,
+          data: { type: "Sensor", plot: false, orderedDisplayName: "Sensor 1" }
+        }
+      },
+      connections: {}
+    };
+
+    it("emits the title the student sees as its own property row", () => {
+      const dot = programToGraphviz(program);
+      expect(dot).toContain("<tr><td>title</td><td>Sensor 1</td></tr>");
+    });
+
+    it("keeps the type prefix on the identifier but not on the title", () => {
+      const dot = programToGraphviz(program);
+      // The identifier carries the type because it doubles as every edge's endpoint; the title is
+      // the bare string on the node's title bar.
+      expect(dot).toContain('"Sensor:Sensor 1" [label=<');
+      expect(dot).not.toContain("<tr><td>title</td><td>Sensor:Sensor 1</td></tr>");
+    });
+
+    // "Sensor" is identity-mapped, so this coincides with the node's own name; the "type display
+    // names" describe block below covers a renamed type, where the two diverge.
+    it("falls back to the type's display name when there is no ordered display name", () => {
+      const unnamed = {
+        ...program,
+        nodes: { n1: { ...program.nodes.n1, data: { type: "Sensor", plot: false } } }
+      };
+      expect(programToGraphviz(unnamed)).toContain("<tr><td>title</td><td>Sensor</td></tr>");
+    });
+  });
+
+  // The block palette has been renamed since these internal type strings were chosen:
+  // Generator/Logic/Control/Demo Output/Live Output display as Waves/Compare/Hold/Demo Device/Live
+  // Device. Neither half of that rename reaches the AI unless the summarizer maps it explicitly.
+  describe("type display names", () => {
+    it.each([
+      ["Generator", "Waves"],
+      ["Logic", "Compare"],
+      ["Control", "Hold"],
+      ["Demo Output", "Demo Device"],
+      ["Live Output", "Live Device"],
+    ])("identifies a %s block by its display name %s, not its internal type", (type, displayName) => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: type, x: 0, y: 0,
+            data: { type, plot: false, orderedDisplayName: `${displayName} 1` } }
+        },
+        connections: {}
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain(`"${displayName}:${displayName} 1" [label=<`);
+      expect(dot).not.toContain(`"${type}:`);
+    });
+
+    // Distinct from the identity-mapped case below: Number is in the table and maps to itself,
+    // while Timer is commented out of it entirely and reaches the fallback. The Timer block is
+    // hidden from the palette but still registered in rete-manager, so an old program can contain
+    // one, and the graph has to name it something.
+    it("names a block whose type is absent from the table by its internal type", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Timer", x: 0, y: 0,
+            data: { type: "Timer", plot: false, orderedDisplayName: "Timer 1" } }
+        },
+        connections: {}
+      };
+      expect(programToGraphviz(program)).toContain('"Timer:Timer 1" [label=<');
+    });
+
+    it("identity-mapped types (e.g. Number) are unaffected", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Number", x: 0, y: 0,
+            data: { type: "Number", plot: false, orderedDisplayName: "Number 1" } }
+        },
+        connections: {}
+      };
+      expect(programToGraphviz(program)).toContain('"Number:Number 1" [label=<');
+    });
+
+    it("falls back to the display name, not the raw internal type, when a legacy node has no " +
+       "ordered display name", () => {
+      // createAndAddNode stamps the raw type as both `data.type` and the node's own `name` field, so a
+      // node saved before orderedDisplayName existed has no display-worthy name at all: node.name IS
+      // the internal type string. The title (and the identifier's name half, which falls back to
+      // node.name too) must not surface that raw string to the AI.
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Generator", x: 0, y: 0, data: { type: "Generator", plot: false } }
+        },
+        connections: {}
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain("<tr><td>title</td><td>Waves</td></tr>");
+      expect(dot).not.toContain("<tr><td>title</td><td>Generator</td></tr>");
+      // The identifier's name half falls back to node.name as well, and it is repeated at every
+      // edge endpoint — so the raw string reaches the AI far more often there than in the title.
+      expect(dot).toContain('"Waves:Waves" [label=<');
+      expect(dot).not.toContain("Generator");
+    });
+
+    // The identifier is repeated at every edge endpoint, so a raw name in its name half reaches the
+    // AI once per connection rather than once per block.
+    it("an edge between legacy blocks references display names at both ends", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Generator", x: 0, y: 0, data: { type: "Generator", plot: false } },
+          n2: { id: "n2", name: "Control", x: 0, y: 0, data: { type: "Control", plot: false } },
+        },
+        connections: {
+          c1: { id: "c1", source: "n1", sourceOutput: "value", target: "n2", targetInput: "num1" }
+        }
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain('"Waves:Waves":"value" -> "Hold:Hold":"num1";');
+      expect(dot).not.toContain("Generator");
+      expect(dot).not.toContain("Control");
+    });
+
+    it("an edge between renamed blocks references the display-name identifier at both ends", () => {
+      const program = {
+        id: "dataflow@1",
+        nodes: {
+          n1: { id: "n1", name: "Generator", x: 0, y: 0,
+            data: { type: "Generator", plot: false, orderedDisplayName: "Waves 1" } },
+          n2: { id: "n2", name: "Control", x: 0, y: 0,
+            data: { type: "Control", plot: false, orderedDisplayName: "Hold 1" } },
+        },
+        connections: {
+          c1: { id: "c1", source: "n1", sourceOutput: "value", target: "n2", targetInput: "num1" }
+        }
+      };
+      const dot = programToGraphviz(program);
+      expect(dot).toContain('"Waves:Waves 1":"value" -> "Hold:Hold 1":"num1";');
+    });
   });
 });

@@ -1,0 +1,26 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "wave-runner-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "wave-runner-tile": {
+      "id": "wave-runner-tile",
+      "content": {
+        "type": "WaveRunner",
+        "fixtureMarker": "wave-runner-fixture-marker",
+        "envelopes": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "starter-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "starter-tile": {
+      "id": "starter-tile",
+      "content": {
+        "type": "Starter",
+        "fixtureMarker": "starter-fixture-marker",
+        "text": "starter tile placeholder content"
+      }
+    }
+  }
+}

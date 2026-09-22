@@ -60,6 +60,23 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    // The ForeverLearning backend projects the document server-side, so its messages carry the
+    // document itself rather than a summary of it. The whitelist is a hasOnly, so a field the
+    // client sends and the rules have not been told about fails the write outright.
+    it("allows an optional rightContent payload (the document, for a server-side projection)", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({
+        add: { rightContent: `{"rowOrder":[],"rowMap":{},"tileMap":{}}`, provider: "foreverlearning" }
+      }));
+    });
+
+    it("rejects a rightContent that is not a string", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({
+        add: { rightContent: { rowOrder: [] } }
+      }));
+    });
+
     it("allows optional promptReplace/promptAppend payloads (unit-authored prompt overrides)", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToSucceed(db, `${kParentPath}/messages/msg-replace`, specMessage({
@@ -71,6 +88,24 @@ describe("Firestore security rules: chat tutor", () => {
       await expectWriteToSucceed(db, `${kParentPath}/messages/msg-both`, specMessage({
         add: { promptReplace: "You are a tutor.", promptAppend: "Focus on energy transfer." }
       }));
+    });
+
+    // Both vocabulary entries, not just the interesting one: 'openai' is in the enum so the pin
+    // mirrors the shared list, and a pin that accidentally omitted it would reject the default
+    // provider's writes the moment anything started stamping it explicitly.
+    it("allows an optional provider naming a known backend", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToSucceed(db, `${kParentPath}/messages/msg-openai`,
+        specMessage({ add: { provider: "openai" } }));
+    });
+
+    // The enum pin, not just the whitelist: the trigger routes on this field, so an arbitrary
+    // provider string would send a paid turn to whatever its fallback happens to be.
+    it("rejects a provider outside the known set", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: "some-other-vendor" } }));
+      await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: 42 } }));
     });
 
     it("rejects non-string promptReplace/promptAppend", async () => {
@@ -238,6 +273,24 @@ describe("Firestore security rules: chat tutor", () => {
       await expectWriteToFail(db, kDemoMessage, demoMessage());
     });
 
+    // demo/qa is where a new provider is exercised first, so this block's whitelist has to carry
+    // the same fields as the authed one. The whitelist is a hasOnly, so a field it does not know
+    // about rejects the write outright rather than being dropped.
+    it("allows a rightContent payload under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kDemoMessage, demoMessage({
+        add: { rightContent: `{"rowOrder":[],"rowMap":{},"tileMap":{}}`,
+               provider: "foreverlearning" }
+      }));
+    });
+
+    it("rejects a non-string rightContent under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, kDemoMessage, demoMessage({
+        add: { rightContent: { rowOrder: [] } }
+      }));
+    });
+
     // If the carve-out failed, the permissive catch-all would grant these and the writes would
     // succeed — so these double as the carve-out verification.
     it("rejects a forged kind:'assistant' and server-owned fields", async () => {
@@ -262,6 +315,26 @@ describe("Firestore security rules: chat tutor", () => {
         demoMessage({ add: { promptReplace: 42 } }));
       await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-append`,
         demoMessage({ add: { promptAppend: ["x"] } }));
+    });
+
+    // The demo block is where a new provider gets exercised first, so whitelisting `provider`
+    // only under the authed block would break exactly the path it was added for — with a
+    // permission-denied that looks nothing like a config error. It carries the identical enum
+    // pin, so it gets the identical cases: a non-string would slip through an `is string`
+    // guard, which is the shape this pin would decay into if someone relaxed it, and asserting
+    // both vocabulary entries here is what catches a provider missing from BOTH rules blocks —
+    // tutor-provider-rules.test.ts compares the blocks to each other, so it sees nothing when
+    // they agree and the shared list is the thing that moved.
+    it("allows a known provider and rejects an unknown one", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-provider`,
+        demoMessage({ add: { provider: "foreverlearning" } }));
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-openai`,
+        demoMessage({ add: { provider: "openai" } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider`,
+        demoMessage({ add: { provider: "some-other-vendor" } }));
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-provider-type`,
+        demoMessage({ add: { provider: 42 } }));
     });
 
     it("allows an authed demo user to read messages/parent, and rejects update/delete", async () => {

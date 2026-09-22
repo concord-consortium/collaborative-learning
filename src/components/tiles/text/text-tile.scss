@@ -1,4 +1,5 @@
 @import '../../vars';
+@import '../../highlight-vars';
 @import '../../../utilities/voice-typing-overlay';
 
 .text-tool-wrapper {
@@ -75,6 +76,38 @@
 
     &.slate-selected {
       outline: 2px solid #87cefa;
+    }
+  }
+
+  // The variable chip is clickable (it pins a highlight), so it should not present a text cursor.
+  .slate-variable-chip {
+    cursor: pointer;
+
+    // Ephemeral highlight; see docs/highlights.md. Deliberately separate from `.slate-selected`,
+    // which indicates Slate selection. The two are different states and have to be able to
+    // disagree: a chip can stay highlighted after the caret moves elsewhere, and the highlight
+    // must be legible in read-only views where selection is not shown at all.
+    &.highlight-preview,
+    &.highlight-pinned {
+      // Drawn as a pseudo-element rather than a border or outline so the chip's own box is
+      // unchanged — adding a highlight must not reflow the prose around it.
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 6px;
+        pointer-events: none;
+      }
+    }
+
+    &.highlight-preview::after {
+      border: 2px dashed $highlight-preview-ring;
+    }
+
+    &.highlight-pinned::after {
+      border: 2px solid $highlight-pinned-ring;
     }
   }
 

@@ -1,5 +1,6 @@
 import { Instance, types } from "mobx-state-tree";
-import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
+import { sizedBoundingBox } from "../../../../shared/drawing/drawing-geometry";
+import { BoundingBoxSides } from "../model/drawing-basic-types";
 import { DrawingObject, DrawingObjectType } from "./drawing-object";
 
 /** Sized objects have an explicit width and height stored in the model. */
@@ -23,16 +24,13 @@ export const SizedObject = DrawingObject.named("SizedObject")
   }))
   .views(self => ({
     get undraggedUnrotatedBoundingBox() {
-      const nw = { x: self.x, y: self.y };
-      const se = { x: self.x + self.width, y: self.y + self.height };
-      return { nw, se };
+      const { x, y, width, height } = self;
+      return sizedBoundingBox({ x, y, width, height });
     },
     get unrotatedBoundingBox() {
       const { x, y } = self.position;
       const { width, height } = self.currentDims;
-      const nw: Point = { x, y };
-      const se: Point = { x: x + width, y: y + height };
-      return { nw, se };
+      return sizedBoundingBox({ x, y, width, height });
     }
   }))
   .actions(self => ({

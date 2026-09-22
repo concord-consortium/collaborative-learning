@@ -1,0 +1,67 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "table-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "table-tile": {
+      "id": "table-tile",
+      "content": {
+        "type": "Table",
+        "columnWidths": {}
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-table-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-table-data",
+        "providerId": "table-tile",
+        "dataSet": {
+          "id": "table-data",
+          "name": "table-fixture-marker",
+          "attributes": [
+            {
+              "id": "table-data-x",
+              "name": "Latch design",
+              "values": [
+                "hook",
+                "magnet"
+              ]
+            },
+            {
+              "id": "table-data-y",
+              "name": "Force to open (N)",
+              "values": [
+                "4",
+                "2"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "table-case-1"
+            },
+            {
+              "__id__": "table-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "table-tile"
+      ]
+    }
+  }
+}

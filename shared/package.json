@@ -1,1 +1,9 @@
-{"type": "module"}
+{
+  "type": "module",
+  "name": "clue-shared",
+  "private": true,
+  "dependencies": {
+    "openai": "6.45.0",
+    "zod": "3.25.76"
+  }
+}

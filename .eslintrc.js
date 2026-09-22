@@ -96,6 +96,62 @@ module.exports = {
           "@typescript-eslint/no-var-requires": "off",
         }
       },
+      { // shared/ is loaded by Firebase Cloud Functions as well as by the browser, and functions
+        // cannot load React, MST, or asset imports. Several files there state that constraint in a
+        // comment; this is what actually enforces it. Breaking it does not fail loudly — the
+        // functions build fails later with an error that does not name the cause.
+        //
+        // Exempt: test files, which only ever run under jest, and ai-summarizer-with-drawings.ts,
+        // which is the deliberately browser-only SVG variant used by the standalone doc editor.
+        // Matches the extensions the lint scripts glob for shared/, so a file cannot be linted
+        // without also being held to this. shared/ holds only .ts today; .tsx and .jsx are absent
+        // deliberately, since a React component there would already be the thing this forbids.
+        files: ["shared/**/*.{ts,js}"],
+        excludedFiles: [
+          "shared/**/*.test.{ts,js}", "shared/ai-summarizer/ai-summarizer-with-drawings.ts"
+        ],
+        rules: {
+          // Cloud Functions and the CLI scripts under shared/ log through console — it is the
+          // logging mechanism there, not a leftover debug statement.
+          "no-console": ["warn", { allow: ["log", "warn", "error"] }],
+          "no-restricted-imports": ["error", {
+            paths: [
+              { name: "react", message: "shared/ is loaded by Cloud Functions, which cannot load React." },
+              { name: "react-dom", message: "shared/ is loaded by Cloud Functions, which cannot load React." },
+              { name: "mobx", message: "shared/ is loaded by Cloud Functions, which cannot load MobX." },
+              { name: "mobx-react", message: "shared/ is loaded by Cloud Functions, which cannot load MobX." },
+              { name: "mobx-state-tree", message: "shared/ works on snapshots, not models; MST cannot load in Cloud Functions." },
+              { name: "@concord-consortium/mobx-state-tree", message: "shared/ works on snapshots, not models; MST cannot load in Cloud Functions." }
+            ],
+            patterns: [
+              {
+                group: ["react/*", "react-dom/*", "*.svg"],
+                message: "shared/ is loaded by Cloud Functions, which cannot load React or asset imports."
+              },
+              {
+                group: ["**/src/**"],
+                message: "Importing from src/ pulls React and MST in transitively. Put the shared piece in shared/ and import it from both sides."
+              }
+            ]
+          }]
+        }
+      },
+      { // A React component under shared/ is the violation this whole boundary exists to prevent,
+        // and it is the one case no-restricted-imports cannot catch: a .tsx there might import
+        // nothing at all and still be a component. So these extensions are globbed by the lint
+        // scripts *in order to be rejected*, not because they are supported.
+        //
+        // The `Program` selector is the root node of a parsed file's syntax tree, present exactly
+        // once in every file including an empty one, so matching it rejects the file's existence
+        // rather than anything in it. No exclusions: a .test.tsx would be just as wrong.
+        files: ["shared/**/*.{tsx,jsx}"],
+        rules: {
+          "no-restricted-syntax": ["error", {
+            selector: "Program",
+            message: "shared/ is loaded by Cloud Functions, which cannot load React. Put the component in src/ and keep the logic it needs in a .ts file here."
+          }]
+        }
+      },
       { // eslint configs
         files: [".eslintrc*.js"],
         env: {

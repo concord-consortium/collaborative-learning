@@ -1,0 +1,25 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "ai-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "ai-tile": {
+      "id": "ai-tile",
+      "content": {
+        "type": "AI",
+        "fixtureMarker": "ai-fixture-marker"
+      }
+    }
+  }
+}

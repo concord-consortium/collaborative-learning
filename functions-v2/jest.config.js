@@ -11,6 +11,13 @@ module.exports = {
     "^firebase-admin/firestore$": "<rootDir>/node_modules/firebase-admin/lib/firestore",
     "^firebase-admin/app$": "<rootDir>/node_modules/firebase-admin/lib/app",
     "^firebase-admin/database$": "<rootDir>/node_modules/firebase-admin/lib/database",
+    // Same reason, for ../shared/ai-analysis-messages: shared/ has its own openai and zod so the
+    // evaluation harness can import it directly, but the deployed function resolves both from
+    // functions-v2/node_modules. Without these, jest would load two copies of zod and `instanceof`
+    // checks on the built schema (expect.any(ZodEnum) and friends) would fail.
+    "^openai$": "<rootDir>/node_modules/openai",
+    "^openai/(.*)$": "<rootDir>/node_modules/openai/$1",
+    "^zod$": "<rootDir>/node_modules/zod",
   },
   // The tests can't be run in parallel because they are using a shared Firestore and
   // Realtime database.

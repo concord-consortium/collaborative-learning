@@ -4,9 +4,50 @@
 
 Outside of the main collections for users and documents, there is a collection of information about the status of documents submitted for AI analysis.  The top-level collection for this is `analysis`. Within that there is a queue containing the various statuses: `pending`, `imaged`, `done`, `failedImaging`, and `failedAnalyzing`. These contain status documents keyed by documentIds.
 
+`analysis` also holds a `settings` document, read by the analysis functions on every invocation. Its `imagesEnabled` field turns document screenshots off when it is `false`; see `functions-v2/README.md` under "Runtime settings".
+
+## Summaries
+
+The top-level `summaries` collection holds one record per analyzed document: the summary the AI was
+given, the vector it is found by, and the ratings people gave the comments on it — the AI's own and
+each other's alike. The analysis pipeline creates and refreshes these records; `onCommentRated` adds
+the ratings. No rule in `firestore.rules` matches this collection, so the catch-all denies every
+client read and write and only the cloud functions, which use the admin SDK, reach it.
+
+A record's id is `{root}-{space}-{key}`, so `demo-CLUE-abc123` for a document with the key `abc123`
+in the `CLUE` demo space. `root` and `space` are the realm the document lives in, taken from its
+Firestore path, and they scope the related-summaries search: the collection is flat, so without them
+a record written in one realm could reach a document analyzed in another.
+
+Fields:
+
+- key: (string, the document's key, as on `documents/{docId}`)
+- root, space: (strings, the realm; absent on records written before realm scoping)
+- context_id, unit, investigation, problem, offeringId: (strings, the class and problem the
+  related-summaries search matches on; `offeringId` is stored but not searched on)
+- contextSource: ("document" | "request") where `unit`, `investigation` and `problem` came from:
+  the document's own metadata, or the evaluation request naming the problem the student was running.
+  Only a personal document can say `request`, since only those have no problem of their own. Absent
+  on records written before the field existed.
+- summary: (string, the text the AI was given)
+- summaryEmbedding: (vector of that text)
+- analyzedAt: (number, epoch milliseconds)
+- adaCommentId: (string, the comment this analysis created)
+- aiAgreements: (map of ratings, keyed `{commentId}_{raterUid}`; entries from the retired
+  `agreeWithAi` flow are keyed by the rater's uid alone. Each entry also keeps the rated comment's
+  text and tags as they read when the rating was made, and `isAiComment` says whether that comment
+  was the AI's.)
+- numAiAgreements: (number, ratings of Ada's comments)
+- numAgreements: (number, ratings of any comment; the related-summaries search returns only records
+  above zero, so a record written before this field existed is never returned)
+
+What reaches the AI prompt depends on who wrote the rated comment. Ratings of Ada's comments are
+sent as a count per value. Ratings of comments people wrote are sent as the comment itself — its
+text, its tag, and a count per value — fenced, escaped and length-capped.
+
 ## Top level collections
 
-Besides `analysis`, the rest of the top-level collections are similar to Firebase:
+Besides `analysis` and `summaries`, the rest of the top-level collections are similar to Firebase:
 
 `authed, demo, dev, qa, tests, users`
 
@@ -119,6 +160,7 @@ Collection:
 - tileId: (string, mobx id)
 - uid: (string)
 - tags: (array of strings)
+- ratings: (map of rater user id to `"yes" | "no" | "notSure"`, written by the comment UI. Under `authed` the rules restrict a writer to their own key and to those three values; `demo` and `dev` let any signed-in user write anything, and `qa`/`test` allow the same inside the writer's own root, so in those realms neither the key nor the value is a guarantee. `onCommentRated` copies each rating onto the document's `summaries` record — see "Summaries" above, and note the read side drops values outside the three.)
 
 ### Contents of `offerings/{offeringId}`
 

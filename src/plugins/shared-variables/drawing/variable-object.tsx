@@ -3,12 +3,14 @@ import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
+import {
+  kVariableChipDefaultHeight, kVariableChipDefaultWidth, sizedBoundingBox
+} from "../../../../shared/drawing/drawing-geometry";
 import { addChipToContent, findVariable, getOrFindSharedModel, getValidInsertPosition } from "./drawing-utils";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 import { variableBuckets } from "../shared-variables-utils";
 import { DrawingObject, IDrawingComponentProps,
    ObjectTypeIconViewBox, typeField } from "../../drawing/objects/drawing-object";
-import { Point } from "../../drawing/model/drawing-basic-types";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType, OpenPaletteValues } from "../../drawing/model/drawing-content";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
@@ -27,8 +29,8 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
     variableId: types.string
   })
   .volatile(self => ({
-    width: 75,
-    height: 24
+    width: kVariableChipDefaultWidth,
+    height: kVariableChipDefaultHeight
   }))
   .actions(self => ({
     setRenderedSize(width: number, height: number) {
@@ -38,11 +40,9 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
   }))
   .views(self => ({
     get boundingBox() {
-      const {width, height} = self;
-      const {x, y} = self.position;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
+      const { width, height } = self;
+      const { x, y } = self.position;
+      return sizedBoundingBox({ x, y, width, height });
     },
     get label() {
       return "Variable";

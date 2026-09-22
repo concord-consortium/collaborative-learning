@@ -76,6 +76,35 @@ Tree --|> TreeAPI : implements
 
 ```
 
+## History positions vs. history indexes
+
+These are two different things and mixing them up is an easy off-by-one.
+
+An **index** identifies an entry: `document.history[i]`. It runs from `0` to `history.length - 1`.
+
+A **position** identifies a *state of the document*: how many entries have been applied to it. `TreeManager.numHistoryEventsApplied` is a position, and so is the argument to `goToHistoryEntryPosition`. Position `p` means entries `0 … p-1` have been applied, and positions run from `0` (the document before any entry) to `history.length` (every entry applied), so there is always one more position than there are entries.
+
+The two convert like this:
+
+| you want | position |
+|---|---|
+| entry `i` applied — undo everything after it, keep it | `i + 1` |
+| entry `i` not yet applied — the document just before it | `i` |
+
+Note that position `0` corresponds to no entry at all, so a position is not simply a 1-based index.
+
+**A history entry id names an applied entry.** Everywhere the code records "which entry is this document at" it records the last entry *included* in the document, never the next one to come:
+
+- `TreeManager.currentHistoryEntry` is `history[numHistoryEventsApplied - 1]`.
+- `logCurrentHistoryEvent` logs `historyEventId` alongside `historyIndex`, where the index is the position — so `historyIndex === indexOf(historyEventId) + 1`.
+- `revisionId` and the envelope's `lastHistoryEntryId` name the last entry the saved content includes.
+
+So restoring the moment an id names means seeking to `index + 1`, which is what `FirestoreHistoryManager.moveToHistoryEntryAfterLoad` does for a `studentDocumentHistoryId` link. The `"first"` sentinel that `logDocumentEvent` emits for a change made before the document had any entry is position `0`.
+
+Be aware that a log event's `documentHistoryId` is the last *completed* entry when the event was written, and history entries complete asynchronously (`TreeMonitor.recordAction` awaits the manager before `completeHistoryEntry` appends). So for a tile that logs from `onTileAction` — which MST calls before the action mutates state — the id names the entry *before* the change being logged, while a tile that logs after its edits have settled (the text tile logs on blur) names the entry the change created. Seeking to `index + 1` restores the document as it stood when the event was logged in both cases; it cannot recover a change whose entry did not exist yet.
+
+**The playback slider follows the same rule.** Its stops are positions, not entries. `sliderStops` is indexed so that a stop's array index is the slider value that selects it: the `"initial"` stop at index 0 is the document before any of the history was applied — position `0`, and where a `studentDocumentHistoryId=first` link lands — and a history stop is the document once its own entry has been applied. A comment stop takes the history position of the entry before it, which is the document its author was looking at. See `historyPositionForStopIndex` in `playback-control-model.ts`.
+
 ## Undo, Redo, Replay History
 
 ### From the tree's point of view

@@ -4,6 +4,10 @@
 // reviewable with no backend and no OpenAI key. The live FirestoreTransport swaps
 // in behind the same interface with no UI changes.
 
+import { TutorHighlight } from "../../../shared/chat-tutor-highlight";
+
+export type { TutorHighlight };
+
 // Authoritative per-conversation status, mirrored from the parent doc in the live path.
 export type ChatStatus = "idle" | "generating" | "error";
 
@@ -28,6 +32,9 @@ export interface ChatTurn {
   // For debug turns: ordered note/payload segments for differentiated rendering. `text`
   // still holds the full concatenation (used for copy-to-clipboard).
   debugSegments?: DebugSegment[];
+  // Objects this reply offered buttons for. Absent on user turns and on replies that pointed at
+  // nothing, which is most of them.
+  highlights?: TutorHighlight[];
 }
 
 export interface ChatTransport {

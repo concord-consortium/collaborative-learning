@@ -41,9 +41,17 @@ The system stores `lastHistoryEntry` (index and id) in the document metadata to 
 
 ## Duplicate Group Documents
 
-Two users in the same group ended up working on completely separate group documents rather than a shared one. The suspicion is that two group documents got created — possibly due to a race during document provisioning — and each user opened a different one.
+Two users in the same group ended up working on completely separate group documents rather than a shared one. The suspicion was that two group documents got created — possibly due to a race during document provisioning — and each user opened a different one.
 
-Not yet investigated. Unknowns: steps to reproduce, the provisioning code path involved, whether this happens reliably, and whether it's recoverable once it has occurred.
+Diagnosed and fixed on this branch, in `resolveCanonicalDocument`/`resolveCanonicalDocumentUncached` ([src/lib/db.ts](../../src/lib/db.ts)). The legacy-backfill path claimed the canonical pointer in a transaction but then returned its own local candidate's key unconditionally, so a client whose claim lost (or whose transaction failed) kept the pre-pointer duplicate its query happened to surface while the other client used the pointer's document — two clients, two documents, one group.
+
+Now every path converges on the slot's key:
+
+- Both the backfill and the create-then-claim paths return the transaction's winning key, and a failed transaction re-reads the pointer rather than assuming the local candidate won.
+- Divergence is logged (`console.warn`) with the slot, the pointer's key, and the local candidate's key. A losing *legacy* duplicate is left in place because it may hold student work; a losing just-minted document is deleted as an orphan.
+- Concurrent resolves of the same slot within one client share a single in-flight resolution, so the several call sites that can fire around login no longer race each other into create-then-delete churn.
+
+Pre-existing duplicates are not migrated: once the slot names one of them, everyone converges on that one, and the other keeps whatever work it holds.
 
 # Implementation TODOs
 

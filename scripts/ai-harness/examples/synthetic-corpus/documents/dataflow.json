@@ -1,0 +1,103 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "dataflow-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "dataflow-tile": {
+      "id": "dataflow-tile",
+      "content": {
+        "type": "Dataflow",
+        "programDataRate": 1000,
+        "program": {
+          "id": "dataflow-program",
+          "nodes": {
+            "node-1": {
+              "id": "node-1",
+              "name": "Number",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Number",
+                "orderedDisplayName": "Number 1",
+                "nodeValue": 5
+              }
+            },
+            "node-2": {
+              "id": "node-2",
+              "name": "Math",
+              "x": 200,
+              "y": 0,
+              "data": {
+                "type": "Math",
+                "orderedDisplayName": "Math 1",
+                "mathOperator": "Add"
+              }
+            }
+          },
+          "connections": {
+            "connection-1": {
+              "id": "connection-1",
+              "source": "node-1",
+              "sourceOutput": "value",
+              "target": "node-2",
+              "targetInput": "num1"
+            }
+          }
+        }
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-dataflow-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-dataflow-data",
+        "providerId": "dataflow-tile",
+        "dataSet": {
+          "id": "dataflow-data",
+          "name": "dataflow-fixture-marker",
+          "attributes": [
+            {
+              "id": "dataflow-data-x",
+              "name": "Trial",
+              "values": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "dataflow-data-y",
+              "name": "Height (cm)",
+              "values": [
+                "12",
+                "19"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "dataflow-data-case-1"
+            },
+            {
+              "__id__": "dataflow-data-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "dataflow-tile"
+      ]
+    }
+  }
+}

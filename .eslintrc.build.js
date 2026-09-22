@@ -15,6 +15,14 @@ module.exports = {
           "no-console": ["warn", { allow: ["log", "warn", "error"] }],
         }
       },
+      { // shared/ runs in Cloud Functions and in CLI scripts, where console is the logging
+        // mechanism. Repeated here rather than only in .eslintrc.js because this config sets
+        // no-console at the top level, which wins over an override inherited through `extends`.
+        files: ["shared/**/*.ts"],
+        rules: {
+          "no-console": ["warn", { allow: ["log", "warn", "error"] }],
+        }
+      },
       {
         files: ["jsxgraph.d.ts"],
         rules: {

@@ -1,0 +1,31 @@
+{
+  "rowOrder": [
+    "section-1",
+    "row-2"
+  ],
+  "rowMap": {
+    "section-1": {
+      "id": "section-1",
+      "isSectionHeader": true,
+      "sectionId": "placeholder-fixture-marker"
+    },
+    "row-2": {
+      "id": "row-2",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "placeholder-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "placeholder-tile": {
+      "id": "placeholder-tile",
+      "content": {
+        "type": "Placeholder",
+        "sectionId": "placeholder-fixture-marker"
+      }
+    }
+  }
+}

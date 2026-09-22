@@ -1,0 +1,96 @@
+{
+  "code": "qa-group-default",
+  "abbrevTitle": "QAGD",
+  "title": "QA Group Default Document Curriculum",
+  "subtitle": "A unit that starts students in the group document",
+  "config": {
+    "placeholderText": "Enter notes here",
+    "defaultDocumentType": "group",
+    "groupDocumentsEnabled": true,
+    "classWideDocuments": [
+      { "kind": "drivingQuestionBoard", "title": "Driving Question Board" }
+    ],
+    "sortWorkConfig": {
+      "sortOptions": ["Group", "Name", "Date"]
+    },
+    "navTabs": {
+      "lazyLoadTabContents": true,
+      "showNavPanel": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Problem",
+          "sections": []
+        },
+        {
+          "tab": "sort-work",
+          "label": "Sort Work",
+          "teacherOnly": false
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": ["student", "teacher"]
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
+      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+    ],
+    "stamps": []
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Group Default Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "1.1 Group Default Document",
+          "subtitle": "Group Default Document",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "qaGroupDefaultIntro01",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p>This unit sets defaultDocumentType to \"group\" (without an explicit groupDocumentsEnabled) so students start in their group's shared document, and also declares a class-wide document.</p>"]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

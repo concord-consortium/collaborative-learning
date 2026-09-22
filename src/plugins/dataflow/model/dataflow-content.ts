@@ -28,6 +28,8 @@ import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summa
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { NodeChannelInfo } from "./utilities/channel";
+import { simulatedChannelId } from "./utilities/simulated-channel";
+import { simulatedHubName } from "./utilities/simulated-output";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -76,6 +78,8 @@ const ProgramZoom = types.model({
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
+export type PanDirection = "up" | "down" | "left" | "right";
+
 // Resolved per-unit Live Output config, mirrored onto the tile content (see the `outputConfig` prop).
 // The type is shared with the AI summarizer (which can't import from src/plugins) — see ai-summarizer-types.
 export type { IDataflowOutputConfig };
@@ -111,7 +115,11 @@ export const DataflowContentModel = TileContentModel
     channels: observable([]) as NodeChannelInfo[],
     // Volatile (not persisted): the canvas fits all content on every load rather than restoring a
     // saved pan/zoom, so this only tracks the live transform for the current session.
-    liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM)
+    liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM),
+    // Whether the toolbar's pan flyout is showing (drawing's openPallette pattern; one palette only).
+    panPaletteOpen: false,
+    // The toolbar pan button's face shows and re-performs the last direction chosen from the flyout.
+    lastPanDirection: "right" as PanDirection
   }))
   .views(self => ({
     get sharedModel() {
@@ -239,6 +247,26 @@ export const DataflowContentModel = TileContentModel
         objectType: "Node",
       }));
     },
+    // Only Sensor and Live Output nodes bind to a variable, and both do it via a derived string
+    // rather than the variable id. simulatedChannelId/simulatedHubName are the single definition
+    // of those strings — always go through them rather than rebuilding "SIM"/"Simulated " inline.
+    // Deliberately simulatedChannelId, not simulatedChannel: the latter builds a full
+    // NodeChannelInfo (computedValue, computedUnit, getType("sensor")), which changes every
+    // simulation tick and would invalidate this computed once per tick while a highlight is
+    // active. simulatedChannelId reads only variable.name, which is stable.
+    getObjectsForVariable(variableId: string): IClueTileObject[] {
+      const variable = self.sharedVariables?.getVariableById(variableId);
+      if (!variable) return [];
+      const channelId = simulatedChannelId(variable);
+      const hubName = simulatedHubName(variable);
+      return [...self.program.nodes.values()]
+        .filter(node => {
+          const data = node.data as any;
+          return (data.type === "Sensor" && data.sensor === channelId)
+            || (data.type === "Live Output" && data.hubSelect === hubName);
+        })
+        .map(node => ({ objectId: node.id, objectType: "Node" }));
+    },
   }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel) {
@@ -324,6 +352,12 @@ export const DataflowContentModel = TileContentModel
     },
     setLiveProgramZoom(transform: Transform) {
       self.liveProgramZoom.update(transform);
+    },
+    setPanPaletteOpen(open: boolean) {
+      self.panPaletteOpen = open;
+    },
+    setLastPanDirection(direction: PanDirection) {
+      self.lastPanDirection = direction;
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing

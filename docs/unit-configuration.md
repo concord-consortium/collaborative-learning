@@ -41,7 +41,7 @@ These properties are configurable at the application (built into the code) or th
 
 `autoAssignStudentsToIndividualGroups`: (boolean) disable grouping of students (e.g. Dataflow)
 
-`defaultDocumentType`: ("problem" | "personal") type of user document to create/show by default
+`defaultDocumentType`: ("problem" | "personal" | "group") which document a student starts in. "group" starts students in their group's shared document (teachers start in the problem document instead) and requires `groupDocumentsEnabled`. Applied on first visit; otherwise the last-opened document is restored. (Switching groups while a group document is open re-points it to the new group's document in any unit, independent of this setting.)
 
 `defaultDocumentTitle`: (string) default title of personal documents (problem documents don't have user-assigned titles)
 
@@ -96,7 +96,7 @@ These properties are configurable at the application (built into the code) or th
 ```json
 "aiPrompt": {
   "systemPrompt": "You are a master teacher.",
-  "mainPrompt": "This is a picture of a student document. Please evaluate and categorize it.",
+  "mainPrompt": "Below is a text summary of a student document and a picture of it. Either one may be absent. Please evaluate and categorize it.",
   "categorizationDescription": "Categorize the document based on its content.",
   "categories": ["user", "environment", "form", "function"],
   "keyIndicatorsPrompt": "What are the key indicators that support this categorization?",
@@ -104,10 +104,21 @@ These properties are configurable at the application (built into the code) or th
 }
 ```
 
+**What the AI is sent.** Every evaluation sends a text summary of the document and a screenshot of it in one request. Which of the two arrive depends on the document, not on any setting.
+
+- The **summary** is sent when it would carry the student's work. That means the student typed something, or the document holds something the summary describes in detail — a drawing with at least one object, for instance, is summarized as a table of those objects. A tile that is empty, or one the summary can only name rather than describe, does not count.
+- The **screenshot** is sent when the document holds something a picture is needed to understand.
+
+So a document of only text gets no screenshot; a drawing with objects in it gets both, while an empty drawing gets only the screenshot. Write "mainPrompt" so it reads correctly whichever arrives — the built-in prompt opens by saying that either may be absent.
+
+A document with no content at all is an exception: it is evaluated anyway, and only its summary is sent. That summary describes an empty document, so the feedback will not say anything useful. This may be temporary. Not evaluating such a document is the better answer, but the student is shown a "thinking about it" message that only an arriving comment removes, so refusing to evaluate would leave that message up for good. Changing this needs a matching change in the interface, to say plainly that the document is empty.
+
+An `aiPrompt` may still carry a `summarizer` property, written by older versions of the authoring interface to choose between sending text and sending a picture. It is ignored.
+
 `showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
 which checks if the the aiEvaluation is set or if there are invisible exemplar documents.
 
-`groupDocumentsEnabled`: (boolean | undefined) If true, group documents are enabled for the unit. If groups are not permitted (`autoAssignStudentsToIndividualGroups` is true), this setting has no effect.
+`groupDocumentsEnabled`: (boolean | undefined) If true, group documents exist for the unit: the File > Group Doc menu item appears, and each group's document is auto-created as members' group membership resolves — so it is visible in Sort Work before anyone edits it. It is never inferred: a unit that sets `defaultDocumentType: "group"` must set this too, so anything reading the unit file sees the same answer the app does (students otherwise fall back to the problem document, with a console warning). If groups are not permitted (`autoAssignStudentsToIndividualGroups` is true), both settings have no effect. `classWideDocuments` is independent of both.
 
 `hide4up`: (boolean | undefined) If true, the button that switches to 4up view is always hidden.
 
@@ -118,6 +129,16 @@ which checks if the the aiEvaluation is set or if there are invisible exemplar d
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
+
+`chatTutorEnabled`: (boolean) If true, the AI chat tutor is enabled for students in this unit. The `chatTutor` URL param also enables it (so authors can preview it). Like other config this merges bottom-up (problem, then investigation, then unit), so a value set at a lower level overrides the unit's. Disabling preserves any `chatTutorPrompts` overrides.
+
+`chatTutorIntro`: (string) Optional per-unit intro message shown at the top of the chat tutor column. Display-only — it is never sent to the AI as context. Unset falls back to the built-in default; an empty string suppresses the intro entirely.
+
+`chatTutorPrompts`: (object) Optional per-unit AI chat tutor prompt overrides: `replaceGenericPrompt` swaps out the server's built-in generic tutor prompt; `appendToGenericPrompt` is added after the (possibly replaced) generic prompt.
+
+`chatTutorHighlights`: (boolean) Whether the tutor may render buttons that highlight an object in the student's document. Separate from `chatTutorEnabled`: a unit can have the tutor without the pointing behavior. Turning it on is necessary but not sufficient: the tutor produces the references those buttons need when the unit's prompt asks it to, via `chatTutorPrompts.appendToGenericPrompt`. With the flag on and no such instruction, replies will rarely have anything to show. Unset behaves as false. Not yet exposed in the authoring UI, so it is set in the curriculum JSON.
+
+`chatTutorProvider`: ("openai" | "foreverlearning") Which AI backend is selected for this unit's tutor turns. Both `openai` and `foreverlearning` are implemented, and the value selects which one answers. The choice is read from a conversation's **first** message and then held on the conversation: a later message naming a different backend is ignored, because a conversation's backend-specific state (an OpenAI conversation id, a ForeverLearning session id) means nothing to the other one. Unset uses `openai`, the default. The `chatProvider` URL param overrides this property so a single session can be flipped for testing without re-authoring; an unrecognized URL param value falls back to the unit config, and an unrecognized unit config value falls back to the default. Switching providers starts a fresh conversation rather than continuing the existing one, because a conversation's backend-specific state cannot transfer. `chatTutorPrompts` still starts a fresh conversation when edited, but it only has an effect under `openai`: `foreverlearning` installs no generic prompt for an override to replace, so the overrides are not sent to it at all. Not exposed in the authoring UI, so it is set in the curriculum JSON.
 
 ```typescript
   disabledFeatures: string[];
@@ -220,11 +241,27 @@ Common toolbar framework.  Supports:
 
 - `data-set-view`: Immediate creation of a linked tile.
 - `data-set-link`: Bring up a dialog to choose a tile to link to (or create a new one)
+- `delete`: Delete the selected block(s).
+- `group`: Group the selected blocks.
+- `ungroup`: Ungroup the selected group.
+- `zoom-in`: Zoom the program canvas in one step. Disabled at maximum zoom.
+- `zoom-out`: Zoom the program canvas out one step. Disabled at minimum zoom.
+- `fit-all`: Zoom and centre the canvas so every block is visible. Disabled when the program is empty.
+- `pan`: Pan the canvas. The button's face repeats the last direction used; its corner triangle opens
+  a palette of the four directions.
 
 Defaults:
 
 - `["data-set-view", "Table"]`
 - `["data-set-link", "Graph"]`
+- `delete`
+- `group`
+- `ungroup`
+- `|`
+- `zoom-in`
+- `zoom-out`
+- `fit-all`
+- `pan`
 
 Additional Live Output / sampling keys (all optional; each defaults to today's behavior):
 

@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "../../../components/highlight-vars";
 @import "../../../utilities/voice-typing-overlay";
 
 $object-list-border-width: 1.5px;
@@ -193,6 +194,22 @@ $closed-object-list-total-width: $closed-object-list-inner-width + 2 * $object-l
 
         .ghost {
           opacity: 0.1;
+        }
+
+        // Ephemeral highlight driven by a HighlightReference; see docs/highlights.md. Only the
+        // color comes from CSS — stroke width and dash length are set inline because both are
+        // divided by the current zoom so the ring keeps a constant on-screen weight.
+        .highlight-reference-box {
+          fill: none;
+          pointer-events: none;
+
+          &.highlight-preview {
+            stroke: $highlight-preview-ring;
+          }
+
+          &.highlight-pinned {
+            stroke: $highlight-pinned-ring;
+          }
         }
 
         .resize-handle {

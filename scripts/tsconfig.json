@@ -7,5 +7,9 @@
       "seisplotjs/nodeonly": ["../node_modules/seisplotjs/dist/index_node"]
     },
     "types": ["node"]
-  }
+  },
+  // Tests here run under the root Jest config, not tsx: they get jest's globals and its
+  // bundler-style resolution, neither of which this config describes. Checking them against
+  // it reports only that mismatch.
+  "exclude": ["**/*.test.ts", "node_modules"]
 }

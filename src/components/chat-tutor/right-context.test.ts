@@ -1,6 +1,7 @@
 import "../../models/tiles/text/text-registration";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { decideContext, hashString, summarizeRight } from "./right-context";
+import { hashString } from "../../../shared/hash-string";
+import { decideContext, serializeRight, summarizeRight } from "./right-context";
 
 describe("summarizeRight", () => {
   it("summarizes a live content node to markdown with a stable hash", () => {
@@ -64,5 +65,41 @@ describe("decideContext", () => {
       currentRightHash: "abc",
       lastSentRightHash: undefined
     }).attachLeft).toBe(false);
+  });
+});
+
+describe("serializeRight", () => {
+  // The ForeverLearning backend projects the document server-side, so what travels is the
+  // document itself rather than a summary of it. Same content node, a different reading of it.
+  it("serializes a live content node to the snapshot the summarizer reads", () => {
+    const content = DocumentContentModel.create({
+      tiles: [{ id: "text-1", content: { type: "Text", format: "html", text: ["Intro content"] } }]
+    } as any);
+    const serialized = serializeRight(content);
+    const parsed = JSON.parse(serialized.json);
+    // Three of the four keys normalize() walks; sharedModelMap is covered by its own tests. Sending anything a snapshot does not have would be
+    // sending something the server cannot read back.
+    expect(parsed).toHaveProperty("rowMap");
+    expect(parsed).toHaveProperty("rowOrder");
+    expect(parsed).toHaveProperty("tileMap");
+    expect(JSON.stringify(parsed.tileMap)).toContain("Intro content");
+  });
+
+  it("hashes what it sends, so the change gate keys on the payload itself", () => {
+    const content = DocumentContentModel.create({
+      tiles: [{ id: "text-1", content: { type: "Text", format: "html", text: ["Intro"] } }]
+    } as any);
+    const serialized = serializeRight(content);
+    expect(serialized.hash).toBe(hashString(serialized.json));
+  });
+
+  it("gives different content different hashes", () => {
+    const one = DocumentContentModel.create({
+      tiles: [{ id: "t", content: { type: "Text", format: "html", text: ["one"] } }]
+    } as any);
+    const two = DocumentContentModel.create({
+      tiles: [{ id: "t", content: { type: "Text", format: "html", text: ["two"] } }]
+    } as any);
+    expect(serializeRight(one).hash).not.toBe(serializeRight(two).hash);
   });
 });

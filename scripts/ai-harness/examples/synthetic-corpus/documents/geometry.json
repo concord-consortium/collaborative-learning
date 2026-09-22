@@ -1,0 +1,78 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "geometry-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "geometry-tile": {
+      "id": "geometry-tile",
+      "content": {
+        "type": "Geometry",
+        "fixtureMarker": "geometry-fixture-marker",
+        "objects": {},
+        "board": {
+          "xAxis": {
+            "min": -5,
+            "max": 5
+          },
+          "yAxis": {
+            "min": -5,
+            "max": 5
+          }
+        }
+      }
+    }
+  },
+  "sharedModelMap": {
+    "shared-geometry-data": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "shared-geometry-data",
+        "providerId": "geometry-tile",
+        "dataSet": {
+          "id": "geometry-data",
+          "name": "Latch points",
+          "attributes": [
+            {
+              "id": "geometry-data-x",
+              "name": "Trial",
+              "values": [
+                "1",
+                "2"
+              ]
+            },
+            {
+              "id": "geometry-data-y",
+              "name": "Height (cm)",
+              "values": [
+                "12",
+                "19"
+              ]
+            }
+          ],
+          "cases": [
+            {
+              "__id__": "geometry-data-case-1"
+            },
+            {
+              "__id__": "geometry-data-case-2"
+            }
+          ]
+        }
+      },
+      "tiles": [
+        "geometry-tile"
+      ]
+    }
+  }
+}

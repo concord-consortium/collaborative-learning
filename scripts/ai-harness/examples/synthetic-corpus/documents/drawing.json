@@ -1,0 +1,51 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "drawing-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "drawing-tile": {
+      "id": "drawing-tile",
+      "content": {
+        "type": "Drawing",
+        "fixtureMarker": "drawing-fixture-marker",
+        "objects": [
+          {
+            "id": "drawing-rect-1",
+            "type": "rectangle",
+            "x": 10,
+            "y": 10,
+            "width": 120,
+            "height": 60,
+            "fill": "#ffffff",
+            "stroke": "#000000",
+            "strokeWidth": 2,
+            "strokeDashArray": "solid"
+          },
+          {
+            "id": "drawing-ellipse-1",
+            "type": "ellipse",
+            "x": 160,
+            "y": 40,
+            "rx": 30,
+            "ry": 20,
+            "fill": "#cfe8ff",
+            "stroke": "#000000",
+            "strokeWidth": 2,
+            "strokeDashArray": "solid"
+          }
+        ]
+      }
+    }
+  }
+}

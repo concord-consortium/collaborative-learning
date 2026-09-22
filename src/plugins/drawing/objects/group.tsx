@@ -14,6 +14,7 @@ import { useReadOnlyContext } from "../../../components/document/read-only-conte
 import { Transformable } from "../components/transformable";
 import { SizedObject } from "./sized-object";
 import { DrawingScaleProvider } from "../components/drawing-scale-context";
+import { absoluteChildBoundingBox } from "../../../../shared/drawing/drawing-geometry";
 import { boundingBoxSidesForPoints, rotatePoint, computeObjectsBoundingBox } from "../model/drawing-utils";
 
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
@@ -44,33 +45,12 @@ export const GroupObject = SizedObject.named("GroupObject")
      * @returns The adjusted bounding box of the object.
      */
     adjustInternalBoundingBox(internalBB: BoundingBox): BoundingBox {
-      const groupBB = self.unrotatedBoundingBox;
-      const groupWidth = groupBB.se.x - groupBB.nw.x;
-      const groupHeight = groupBB.se.y - groupBB.nw.y;
-      const groupRotation = self.rotation;
-      const internalNW = {
-        x: groupBB.nw.x + internalBB.nw.x * groupWidth,
-        y: groupBB.nw.y + internalBB.nw.y * groupHeight
-      };
-      const internalSE = {
-        x: groupBB.nw.x + internalBB.se.x * groupWidth,
-        y: groupBB.nw.y + internalBB.se.y * groupHeight
-      };
-      if (self.vFlip) {
-        internalNW.y = groupBB.nw.y + (groupBB.se.y - internalNW.y);
-        internalSE.y = groupBB.nw.y + (groupBB.se.y - internalSE.y);
-      }
-      if (self.hFlip) {
-        internalNW.x = groupBB.nw.x + (groupBB.se.x - internalNW.x);
-        internalSE.x = groupBB.nw.x + (groupBB.se.x - internalSE.x);
-      }
-      const rotatedNW = rotatePoint(internalNW, groupBB.se, groupRotation);
-      const rotatedSE = rotatePoint(internalSE, groupBB.se, groupRotation);
-      const sides = boundingBoxSidesForPoints([rotatedNW, rotatedSE]);
-      return {
-        nw: { x: sides.left, y: sides.top },
-        se: { x: sides.right, y: sides.bottom }
-      };
+      return absoluteChildBoundingBox(internalBB, {
+        boundingBox: self.unrotatedBoundingBox,
+        rotation: self.rotation,
+        hFlip: self.hFlip,
+        vFlip: self.vFlip
+      });
     },
 
   }))
