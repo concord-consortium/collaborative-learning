@@ -1,4 +1,4 @@
-import { createCurriculumValidator, decodeDemoOfferingId } from "./curriculum-position";
+import { createCurriculumValidator, createUnitContentReader, decodeDemoOfferingId } from "./curriculum-position";
 
 describe("decodeDemoOfferingId", () => {
   // Demo offering ids are built by createFakeOfferingIdFromProblem (src/lib/auth.ts) as
@@ -57,7 +57,7 @@ describe("createCurriculumValidator", () => {
       ]
     }
   };
-  const validator = createCurriculumValidator("/curriculum", { readUnitContent: (u) => units[u] });
+  const validator = createCurriculumValidator((u) => units[u]);
 
   it("accepts a problem the unit's content.json declares", () => {
     expect(validator({ unit: "msa", investigation: "1", problem: "1" })).toBe(true);
@@ -90,6 +90,39 @@ describe("createCurriculumValidator", () => {
   it("rejects an incomplete position", () => {
     expect(validator({ unit: "msa", investigation: "1" })).toBe(false);
     expect(validator({ unit: undefined, investigation: "1", problem: "1" })).toBe(false);
+  });
+});
+
+describe("createUnitContentReader", () => {
+  const files: Record<string, string> = {
+    "/checkout/curriculum/msa/content.json": `{"investigations":[]}`,
+    "/checkout/curriculum/broken/content.json": `{not json`
+  };
+  const makeFs = () => ({
+    existsSync: jest.fn((path: string) => path === "/checkout/curriculum" || path in files),
+    readFileSync: jest.fn((path: string) => files[path])
+  });
+
+  it("refuses a root with no curriculum directory, rather than reading every unit as unknown", () => {
+    // Every position would then be refused and become a deletion candidate, identically on every
+    // run, so nothing downstream could tell a wrong root from a curriculum that lacks those units.
+    expect(() => createUnitContentReader("/elsewhere", makeFs())).toThrow(/CURRICULUM_ROOT/);
+  });
+
+  it("reads a unit's content.json once", () => {
+    const fs = makeFs();
+    const read = createUnitContentReader("/checkout", fs);
+    expect(read("msa")).toEqual({ investigations: [] });
+    expect(read("msa")).toEqual({ investigations: [] });
+    expect(fs.readFileSync).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads a unit the checkout does not have as unknown", () => {
+    expect(createUnitContentReader("/checkout", makeFs())("nosuchunit")).toBeUndefined();
+  });
+
+  it("throws on a content.json it cannot parse, rather than reading the unit as unknown", () => {
+    expect(() => createUnitContentReader("/checkout", makeFs())("broken")).toThrow();
   });
 });
 

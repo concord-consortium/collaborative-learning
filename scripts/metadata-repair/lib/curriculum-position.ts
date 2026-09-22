@@ -54,6 +54,37 @@ export function decodeDemoOfferingId(
 /** A unit's parsed `content.json`, or undefined when the unit is not in the checkout. */
 export type ReadUnitContent = (unit: string) => any | undefined;
 
+/** Just enough of `fs` for the reader, so tests need no checkout. */
+export interface ICurriculumFs {
+  existsSync: (path: string) => boolean;
+  readFileSync: (path: string, encoding: "utf8") => string;
+}
+
+/**
+ * Read units from a `clue-curriculum` checkout, each at most once.
+ *
+ * A validator that cannot read the curriculum refuses every position, and a refused position is a
+ * deletion candidate. So a checkout that is missing, or rooted in the wrong place, has to stop the
+ * run rather than read as "no unit exists": it fails the same way on every run, so comparing the
+ * reports from two runs cannot catch it. Only a unit whose `content.json` is absent reads as unknown;
+ * one that is present but unreadable throws.
+ */
+export function createUnitContentReader(curriculumRoot: string, fs: ICurriculumFs): ReadUnitContent {
+  const unitsDir = `${curriculumRoot}/curriculum`;
+  if (!fs.existsSync(unitsDir)) {
+    throw new Error(`No clue-curriculum checkout at ${curriculumRoot} (${unitsDir} does not exist). ` +
+      `Set CURRICULUM_ROOT to the checkout's root.`);
+  }
+  const cache = new Map<string, any>();
+  return (unit) => {
+    if (!cache.has(unit)) {
+      const path = `${unitsDir}/${unit}/content.json`;
+      cache.set(unit, fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, "utf8")) : undefined);
+    }
+    return cache.get(unit);
+  };
+}
+
 /**
  * Check a decoded position against a `clue-curriculum` checkout.
  *
@@ -67,8 +98,7 @@ export type ReadUnitContent = (unit: string) => any | undefined;
  * declares that, so it is refused instead of stamped onto a document.
  */
 export function createCurriculumValidator(
-  curriculumRoot: string,
-  { readUnitContent }: { readUnitContent: ReadUnitContent }
+  readUnitContent: ReadUnitContent
 ): (position: ICurriculumPosition) => boolean {
   return ({ unit, investigation, problem }) => {
     if (!unit || investigation == null || problem == null) return false;

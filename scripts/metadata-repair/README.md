@@ -25,6 +25,11 @@ that runs on a schedule:
 - **`scripts/.env` with `PORTAL_ACCESS_TOKEN`** — only needed by
   `create-missing-document-metadata.ts`, and only for `authed/` spaces, where an offering's curriculum
   position is resolved through the portal. Also in [the scripts README](../README.md).
+- **A `clue-curriculum` checkout** — only needed by `create-missing-document-metadata.ts`, and only
+  for `demo/` spaces, where a curriculum position is decoded from the offering id and then checked
+  against the unit's `content.json`. Set `CURRICULUM_ROOT` unless the checkout is at
+  `~/Development/clue-curriculum`. The run stops if the checkout is not there. Without that stop,
+  every decoded position would be refused and handed to the deletion script.
 - **`npm --prefix scripts install`** if this is a fresh worktree. `scripts/` has its own
   `package.json` and `node_modules`.
 
@@ -80,6 +85,8 @@ APPLY=1 npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
 |---|---|---|
 | `APPLY=1` | all | perform the writes or deletions. Absent means dry run. |
 | `SPACES=` | 1, 2 | comma-separated space labels, e.g. `demo/CLUE,authed/learn_concord_org`. Use it to do production alone, or one demo space first. A filter narrows the runnable set but cannot widen it — naming a refused space still refuses it. A filtered run writes its skip report to `…create-missing-skipped.partial.json`, so it cannot be mistaken for the full one the deletion script reads. |
+| `CURRICULUM_ROOT=` | 2 | root of a `clue-curriculum` checkout, used to validate demo curriculum positions. Default `~/Development/clue-curriculum`. |
+| `PORTAL=` | 2 | portal consulted for an `authed/` offering's curriculum position when no sibling document has it. Default `https://learn.concord.org`. |
 | `DATABASE_URL=` | all | override the realtime-database URL chosen from the credential's project. |
 | `REPORT=` | 4 | read a different skip report. |
 | `RETENTION_DAYS=` | 4 | age below which a document is refused. Default 365. |

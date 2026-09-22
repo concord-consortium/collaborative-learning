@@ -424,7 +424,9 @@ async function main() {
     createRtdbReader, kOutputDir, kSkipReportFile, listSpacePaths, parseSpacesFilter, resolveDatabaseUrl, selectSpaces
   } = await import("./lib/repair-cli");
   const { buildRtdbDocumentIndex } = await import("./lib/rtdb-document-index");
-  const { createCurriculumValidator, decodeDemoOfferingId } = await import("./lib/curriculum-position");
+  const {
+    createCurriculumValidator, createUnitContentReader, decodeDemoOfferingId
+  } = await import("./lib/curriculum-position");
 
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(nodeFs.readFileSync(serviceAccountFile, "utf8"));
@@ -434,6 +436,8 @@ async function main() {
   // The portal is only consulted for offerings no existing document describes. Without a token the
   // run still works; those documents are reported as unresolved instead of written half-populated.
   const portal = process.env.PORTAL ?? "https://learn.concord.org";
+  const curriculumConfig = JSON.parse(
+    nodeFs.readFileSync(getScriptRootFilePath("../src/clue/curriculum-config.json"), "utf8"));
 
   console.log(`- Service account: ${serviceAccount.client_email}`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);
@@ -460,32 +464,32 @@ async function main() {
     }
   };
 
+  const selection = selectSpaces(await listSpacePaths(firestore), filter);
+  for (const { label, reason } of selection.refused) console.log(`- skipping ${label}: ${reason}`);
+  for (const path of selection.unrecognized) console.log(`- unrecognized space path: ${path}`);
+  for (const name of selection.filterMisses) console.log(`- SPACES named "${name}", which matches no space`);
+
+  // Which fallback applies depends on where the space's offerings came from. A demo space's realtime
+  // root is `demo/<name>/portals/demo` and its offering ids are authored strings like "m2s101", which
+  // learn.concord.org knows nothing about; an authed space's are portal ids, which encode nothing.
+  // Either way the sibling lookup inside the pass is tried first.
+  const isPortalBacked = (label: string) => label.startsWith("authed/");
+
   // Demo documents have no other source: nothing in the realtime database records a curriculum
   // position, so their offering id is it. Decoding splits a string into a name and a number and can
   // split in the wrong place, so every result is checked against a curriculum checkout before use.
+  // Opened only when a demo space is selected, and opening fails when the checkout is not there.
   const curriculumRoot = process.env.CURRICULUM_ROOT ?? `${process.env.HOME}/Development/clue-curriculum`;
-  // Each unit's content.json read at most once; missing units cache as undefined.
-  const unitContent = new Map<string, any>();
-  const readUnitContent = (unit: string) => {
-    if (!unitContent.has(unit)) {
-      const path = `${curriculumRoot}/curriculum/${unit}/content.json`;
-      try {
-        unitContent.set(unit, JSON.parse(nodeFs.readFileSync(path, "utf8")));
-      } catch {
-        unitContent.set(unit, undefined);
-      }
-    }
-    return unitContent.get(unit);
-  };
-  const validate = createCurriculumValidator(curriculumRoot, { readUnitContent });
+  const validate = selection.selected.some(space => !isPortalBacked(space.label))
+    ? createCurriculumValidator(createUnitContentReader(curriculumRoot, nodeFs))
+    : undefined;
 
   // A demo session launched with no `unit` parameter leaves the unit code out of its offering id
   // while the app still loads this unit, so a bare id means this one. Read from the config rather
   // than hardcoded, so it stays true if the default changes.
-  const defaultUnit = JSON.parse(
-    nodeFs.readFileSync(getScriptRootFilePath("../src/clue/curriculum-config.json"), "utf8")
-  ).defaultUnit;
-  console.log(`- Curriculum: ${curriculumRoot} (default unit "${defaultUnit}")`);
+  const defaultUnit = curriculumConfig.defaultUnit;
+  if (validate) console.log(`- Curriculum: ${curriculumRoot} (default unit "${defaultUnit}")`);
+  console.log(`- Running over ${selection.selected.length} spaces\n`);
 
   const resolveFromOfferingId = (offeringId: string) => {
     const decoded = decodeDemoOfferingId(offeringId, defaultUnit);
@@ -493,7 +497,7 @@ async function main() {
       console.log(`    offering ${offeringId} carries no unit code — skipped`);
       return undefined;
     }
-    if (!validate(decoded)) {
+    if (!validate?.(decoded)) {
       console.log(`    offering ${offeringId} decodes to ${decoded.unit} ` +
         `${decoded.investigation}.${decoded.problem}, which the curriculum does not have — skipped`);
       return undefined;
@@ -501,12 +505,6 @@ async function main() {
     console.log(`    offering ${offeringId} -> ${decoded.unit} ${decoded.investigation}.${decoded.problem}`);
     return decoded;
   };
-
-  const selection = selectSpaces(await listSpacePaths(firestore), filter);
-  for (const { label, reason } of selection.refused) console.log(`- skipping ${label}: ${reason}`);
-  for (const path of selection.unrecognized) console.log(`- unrecognized space path: ${path}`);
-  for (const name of selection.filterMisses) console.log(`- SPACES named "${name}", which matches no space`);
-  console.log(`- Running over ${selection.selected.length} spaces\n`);
 
   const totals = emptyCounts();
   const allSkipped: Record<string, number> = {};
@@ -517,11 +515,6 @@ async function main() {
     if (duplicates.length) {
       console.log(`  ${space.label}: ${duplicates.length} keys with more than one home — NOT created`);
     }
-    // Which fallback applies depends on where the space's offerings came from. A demo space's
-    // realtime root is `demo/<name>/portals/demo` and its offering ids are authored strings like
-    // "m2s101", which learn.concord.org knows nothing about; an authed space's are portal ids, which
-    // encode nothing. Either way the sibling lookup inside the pass is tried first.
-    const portalBacked = space.label.startsWith("authed/");
     // A class's teacher list, read once per class. The space path ends in "/documents", and the
     // classes live alongside it.
     const classTeachers = new Map<string, string[]>();
@@ -538,7 +531,7 @@ async function main() {
       firestore, space.spacePath, index,
       {
         rtdbRoot: space.rtdbRoot, readNode: reader.readNode,
-        resolveCurriculum: portalBacked ? resolveFromPortal : async (id: string) => resolveFromOfferingId(id),
+        resolveCurriculum: isPortalBacked(space.label) ? resolveFromPortal : async (id: string) => resolveFromOfferingId(id),
         isTeacherOwned
       },
       { dryRun }
