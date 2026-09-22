@@ -457,7 +457,11 @@ async function main() {
       const { fetchPortalOffering } = await import("../lib/fetch-portal-entity.js");
       const offering: any = await fetchPortalOffering(portal, offeringId);
       if (!offering?.activity_url) return undefined;
-      return getProblemDetails(offering.activity_url);
+      const position = getProblemDetails(offering.activity_url);
+      // An activity_url can carry a legacy unit name. The client stores the unit's code, so map it
+      // the way the client does when it loads the unit.
+      const unit = position.unit && (curriculumConfig.unitCodeMap?.[position.unit] ?? position.unit);
+      return { ...position, unit };
     } catch (err: any) {
       // An offering the portal cannot answer for is reported by the pass, not fatal to the run.
       console.log(`    portal lookup failed for offering ${offeringId}: ${err.message}`);
