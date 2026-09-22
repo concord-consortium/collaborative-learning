@@ -1,6 +1,8 @@
 import { AreaPlugin } from "rete-area-plugin";
 import { AreaExtra, Schemes } from "../nodes/rete-scheme";
-import { kDefaultNodeHeight, kDefaultNodeWidth, MAX_ZOOM, MIN_ZOOM, ReteManager } from "./rete-manager";
+import {
+  kDefaultNodeWidth, kTallestNodeHeight, MAX_ZOOM, MIN_ZOOM, ReteManager
+} from "./rete-manager";
 
 interface IFakeNode { id: string; }
 interface IFakeNodeView { position: { x: number; y: number }; }
@@ -294,9 +296,10 @@ describe("ReteManager.getNewNodePosition (CLUE-689)", () => {
       const pos = makePositionStub(n, transform, container).getNewNodePosition();
       expect(pos[0]).toBeGreaterThanOrEqual(view.left);
       expect(pos[1]).toBeGreaterThanOrEqual(view.top);
-      // The block's own footprint has to fit too, not just its top-left corner.
+      // The block's own footprint has to fit too, not just its top-left corner, and the bound is
+      // the tallest block rather than the average one.
       expect(pos[0] + kDefaultNodeWidth).toBeLessThanOrEqual(view.right);
-      expect(pos[1] + kDefaultNodeHeight).toBeLessThanOrEqual(view.bottom);
+      expect(pos[1] + kTallestNodeHeight).toBeLessThanOrEqual(view.bottom);
     }
   });
 

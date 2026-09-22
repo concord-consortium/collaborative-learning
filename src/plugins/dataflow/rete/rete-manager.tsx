@@ -77,6 +77,13 @@ export interface GroupOutputSocket { nodeId: string; key: string; externals: Ext
 // fixed ($node-width = 176); height varies, so this is an estimate refined on the next layout pass.
 export const kDefaultNodeWidth = 176;
 export const kDefaultNodeHeight = 120;
+// Placement needs an upper bound, not an estimate: kDefaultNodeHeight above is what group-bounds
+// measurement falls back to when it cannot read a node, and real blocks exceed it — a Waves block
+// puts its output socket alone at 141px (dataflow-node.scss). Laying out against the estimate can
+// drop a taller block below the clipped canvas even though its top-left is in view. This covers the
+// tallest block as first added; a block whose plot is later opened grows past any constant, which is
+// why this bounds placement only.
+export const kTallestNodeHeight = 200;
 
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
@@ -1277,7 +1284,7 @@ export class ReteManager implements INodeServices {
     const fits = (extent: number, margin: number, node: number, step: number) =>
       Math.max(1, Math.floor((extent - margin / k - node) / step) + 1);
     const columns = fits(viewWidth, kLeftMargin, kDefaultNodeWidth, kColumnWidth);
-    const rows = fits(viewHeight, kTopMargin, kDefaultNodeHeight, kRowHeight);
+    const rows = fits(viewHeight, kTopMargin, kTallestNodeHeight, kRowHeight);
 
     // Once the grid is full, each further pass cascades so blocks do not land exactly on top of
     // each other; the clamp keeps that cascade from walking back out of the view.
@@ -1290,7 +1297,7 @@ export class ReteManager implements INodeServices {
       clamp(originX + Math.floor(slot / rows) * kColumnWidth + pass * kPageOffset,
         -x / k, -x / k + viewWidth - kDefaultNodeWidth),
       clamp(originY + (slot % rows) * kRowHeight + pass * kPageOffset,
-        -y / k, -y / k + viewHeight - kDefaultNodeHeight)
+        -y / k, -y / k + viewHeight - kTallestNodeHeight)
     ];
   }
 

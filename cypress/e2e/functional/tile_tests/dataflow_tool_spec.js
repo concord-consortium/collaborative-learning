@@ -637,22 +637,26 @@ context('Dataflow Tool Tile', function () {
         cy.realPress(["Shift", "ArrowRight"]);
       }
 
-      dataflowToolTile.getCreateNodeButton("number").click();
+      // Waves is the tallest block (its output socket alone sits at 141px), so it is the one a
+      // placement bound that assumed an average height would drop below the clipped canvas.
+      dataflowToolTile.getCreateNodeButton("generator").click();
 
       // Length and visibility together: the block was created (the button did fire) AND it is
       // somewhere the student can see.
-      dataflowToolTile.getNode("number").should("have.length", 1).and("be.visible");
+      dataflowToolTile.getNode("generator").should("have.length", 1).and("be.visible");
     });
 
     it("keeps every block of a full grid in view", () => {
       addDataflowTile();
 
+      // Alternating types so the grid is filled with blocks of different heights, which is what the
+      // row capacity has to hold for.
       const blockCount = 12;
       for (let i = 0; i < blockCount; i++) {
-        dataflowToolTile.getCreateNodeButton("number").click();
+        dataflowToolTile.getCreateNodeButton(i % 2 ? "generator" : "number").click();
       }
 
-      cy.get(".primary-workspace .node.number").should("have.length", blockCount)
+      cy.get(".primary-workspace .node").should("have.length", blockCount)
         .each($node => cy.wrap($node).should("be.visible"));
     });
   });
