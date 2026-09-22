@@ -94,6 +94,11 @@ export async function assembleUnit(
   const investigations = Array.isArray(root.investigations) ? root.investigations : [];
   const seenOrdinals = new Set<string>();
   const problems: AssembledProblem[] = [];
+  // Unit-wide, not per-problem: a curriculum can reuse the same section byte-for-byte across many
+  // problems (m2s's own review found a "help" section identical in 24 of 35 problems), and the
+  // point is to catch that reuse across the whole unit, not just within one problem. Maps a
+  // section's content hash to the ordinal of the first problem it appeared in.
+  const firstSectionOccurrence = new Map<string, string>();
 
   for (const investigation of investigations) {
     const problemList = Array.isArray(investigation.problems) ? investigation.problems : [];
@@ -135,7 +140,8 @@ export async function assembleUnit(
         // the summarizer ever emits, so it stays unambiguous regardless of what headings a
         // section's own content happens to produce.
         const title = (section.type && root.sections?.[section.type]?.title) || section.type || "Section";
-        sectionMarkdowns.push(`# Section: ${title}\n\n${body}`);
+        const dedupedBody = dedupedSectionBody(body, title, ordinal, firstSectionOccurrence);
+        sectionMarkdowns.push(`# Section: ${title}\n\n${dedupedBody}`);
       }
 
       const markdown = sectionMarkdowns.join("\n\n");
@@ -149,6 +155,29 @@ export async function assembleUnit(
   }));
 
   return {sourceHash, sourceManifest, problems};
+}
+
+// A section byte-identical to one already seen elsewhere in the unit (m2s's own review found a
+// "help" section identical in 24 of 35 problems) is replaced with a short pointer to the first
+// occurrence, so a digest stops spending a sentence re-describing boilerplate it has already
+// described for an earlier problem. Companion to generateProblemDigests's whole-problem dedupe
+// (unit-summary-digest.ts) -- that one catches a problem identical section-for-section to another;
+// this one catches the more common case, a shared section inside otherwise-different problems.
+// Empty content is left alone: nothing to point at usefully, and two blank sections matching each
+// other says nothing "(same content as problem X)" wouldn't already say more directly elsewhere.
+function dedupedSectionBody(
+  body: string, title: string, ordinal: string, firstOccurrence: Map<string, string>
+): string {
+  if (!body.trim()) {
+    return body;
+  }
+  const contentHash = hashString(body);
+  const firstOrdinal = firstOccurrence.get(contentHash);
+  if (firstOrdinal) {
+    return `(same "${title}" content as problem ${firstOrdinal})`;
+  }
+  firstOccurrence.set(contentHash, ordinal);
+  return body;
 }
 
 // Mirrors problem.ts's loadSections: a section is either inline (an object, used as-is) or a

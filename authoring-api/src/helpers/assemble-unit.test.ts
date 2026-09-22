@@ -271,4 +271,42 @@ describe("assembleUnit", () => {
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
     expect(result.problems[0].markdown).toContain("# Section: labWork");
   });
+
+  it("points a section byte-identical to an earlier problem's at that first occurrence", async () => {
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [textSection("shared help text", "help")]},
+        {ordinal: 2, title: "P2", sections: [textSection("shared help text", "help")]},
+      ]},
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    expect(result.problems[0].markdown).toContain("shared help text");
+    expect(result.problems[1].markdown).not.toContain("shared help text");
+    expect(result.problems[1].markdown).toContain("(same \"help\" content as problem 1.1)");
+  });
+
+  it("points every later duplicate section at the true first occurrence, not the previous duplicate", async () => {
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [textSection("shared help text", "help")]},
+        {ordinal: 2, title: "P2", sections: [textSection("shared help text", "help")]},
+        {ordinal: 3, title: "P3", sections: [textSection("shared help text", "help")]},
+      ]},
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    expect(result.problems[1].markdown).toContain("(same \"help\" content as problem 1.1)");
+    expect(result.problems[2].markdown).toContain("(same \"help\" content as problem 1.1)");
+  });
+
+  it("does not dedupe sections with different content, even with the same section type", async () => {
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [textSection("first problem's own text", "help")]},
+        {ordinal: 2, title: "P2", sections: [textSection("a different problem's own text", "help")]},
+      ]},
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    expect(result.problems[1].markdown).toContain("a different problem's own text");
+    expect(result.problems[1].markdown).not.toContain("(same");
+  });
 });
