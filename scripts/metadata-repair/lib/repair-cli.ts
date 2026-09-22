@@ -112,7 +112,8 @@ export async function listSpacePaths(firestore: any, appModes = ["authed", "demo
 }
 
 /** Just enough of `fetch` for the reader, so tests need no network. */
-type FetchLike = (url: string) => Promise<{ ok: boolean; status: number; json: () => Promise<any> }>;
+type FetchLike = (url: string, init: { headers: Record<string, string> }) =>
+  Promise<{ ok: boolean; status: number; json: () => Promise<any> }>;
 
 /** Returns an OAuth access token for the service account. */
 type GetAccessToken = () => Promise<{ access_token: string }>;
@@ -152,9 +153,9 @@ export function createRtdbReader(
     let lastError: unknown;
     for (let attempt = 1; attempt <= kMaxAttempts; attempt++) {
       if (!token) await refresh();
-      const url = `${host}${encode(path)}.json?${shallow ? "shallow=true&" : ""}access_token=${token}`;
+      const url = `${host}${encode(path)}.json${shallow ? "?shallow=true" : ""}`;
       try {
-        const response = await fetchImpl(url);
+        const response = await fetchImpl(url, { headers: { Authorization: `Bearer ${token}` } });
         if (response.ok) return response.json();
         // The token has expired or been rotated; a fresh one usually fixes it.
         // Recorded in case it keeps happening: a credential that refreshes fine but has no access to

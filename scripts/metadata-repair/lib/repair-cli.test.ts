@@ -73,7 +73,22 @@ describe("createRtdbReader", () => {
     });
 
     expect(await reader.readChildKeys("/authed/portals/p/classes")).toEqual(["a", "b"]);
-    expect(urls[0]).toBe("https://db.example.com/authed/portals/p/classes.json?shallow=true&access_token=tok");
+    expect(urls[0]).toBe("https://db.example.com/authed/portals/p/classes.json?shallow=true");
+  });
+
+  it("sends the token in a header, not the URL", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    const reader = createRtdbReader("https://db.example.com", token as any, {
+      fetch: async (url: string, { headers }) => {
+        calls.push({ url, headers });
+        return { ok: true, status: 200, json: async () => null } as any;
+      }
+    });
+
+    await reader.readNode("/p");
+
+    expect(calls[0].headers).toEqual({ Authorization: "Bearer tok" });
+    expect(calls[0].url).not.toContain("tok");
   });
 
   it("escapes each path segment, so a portal named localhost:3000 is addressable", async () => {
@@ -107,10 +122,10 @@ describe("createRtdbReader", () => {
     const reader = createRtdbReader("https://db.example.com",
       (async () => ({ access_token: `tok${++issued}` })) as any,
       {
-        fetch: async (url: string) => {
+        fetch: async (url: string, { headers }) => {
           calls++;
           if (calls === 1) return { ok: false, status: 401, json: async () => null } as any;
-          expect(url).toContain("access_token=tok2");
+          expect(headers.Authorization).toBe("Bearer tok2");
           return { ok: true, status: 200, json: async () => ({ x: true }) } as any;
         }
       });
