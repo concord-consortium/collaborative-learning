@@ -456,8 +456,8 @@ describe("backfillDocumentOfferingId — writing", () => {
   });
 
   it("writes nothing for any bucket other than resolved", async () => {
-    // Everything the script cannot resolve is reported and left alone. That is what keeps the run
-    // re-runnable while the policy for unresolvable documents is still open.
+    // Everything the script cannot resolve is reported and left alone, which also keeps the run
+    // re-runnable.
     const docs = [
       mkDoc(`${kSpace}/documents/a`, { type: "problem", context_id: "c1", uid: "u1", key: "k1" }),
       mkDoc(`${kSpace}/documents/b`, { type: "problem", offeringId: "9", context_id: "c1", uid: "u1", key: "k2" }),

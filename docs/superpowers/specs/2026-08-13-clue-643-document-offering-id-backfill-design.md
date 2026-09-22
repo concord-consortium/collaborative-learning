@@ -300,7 +300,7 @@ the collection group confirmed they were the only two. Notably neither carried a
 never endangered `isInClassUnitContainer` in the first place; removing them was housekeeping, so that
 the residue is not permanently non-zero.
 
-**This settles the deferred question: tier 1 is enough, and the other two sources should not be
+**This settles which sources to build: tier 1 is enough, and the other two sources should not be
 built.** Across real data — `authed` and `demo` — 71,399 documents need an `offeringId` and 51 cannot
 get one (53 at census time, less the two deleted since), a recovery rate of 99.93%. The offering-tree source and the portal-API fuzzy match would be
 substantial machinery to rescue fifty-odd documents. "Report and leave alone" is the right policy for
@@ -327,9 +327,9 @@ four and a half minutes.
 `APPLY=1` writes only the `resolved` bucket, as `set({ offeringId }, { merge: true })`, batched at
 400 like the sibling.
 
-Every other bucket is reported and left untouched. **What to do about documents that cannot be
-resolved is deliberately not decided here** — it is decided from the production dry run's numbers.
-Leaving them alone is the only policy that keeps the run re-runnable while that question is open.
+Every other bucket is reported and left untouched. That is the settled policy for documents that
+cannot be resolved (see the census above): 51 of 71,399 across real data, too few to justify another
+recovery source. Leaving them alone also keeps the run re-runnable.
 
 ## Operating the run
 
@@ -393,11 +393,9 @@ exist yet cannot be scanned at all.
 Against CLUE-604's axes backfill it is order-independent, for the reason given under "Documents in
 scope": that script's rename is accepted by this one either way.
 
-## Open question, deliberately deferred
+## Documents whose `offeringId` cannot be recovered
 
-What to do about documents whose `offeringId` cannot be recovered. Resolving it needs the
-production dry run's numbers — specifically the split between `noMetadataNode` and
-`nodeWithoutOfferingId`, and how the residue distributes across spaces and types. The options are
-building the offering-tree source, building the fuzzy portal-API match, accepting a documented
-residue, or deciding the affected documents are dead and should be deleted. Choosing now would be
-guessing.
+Settled by the production census: they are reported and left alone. The other options were building
+the offering-tree source, building the fuzzy portal-API match, or deleting the documents. Across real
+data 51 documents cannot be recovered, and `nodeWithoutOfferingId` is 0, so every one of them is a
+missing metadata node. The two extra sources would be substantial machinery for fifty-odd documents.
