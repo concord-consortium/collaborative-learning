@@ -1,7 +1,7 @@
 # Firestore document metadata repair
 
 Three one-off scripts that reconcile Firestore document metadata with the realtime database, plus the
-modules they share. Written for CLUE-643.
+modules they share.
 
 Two defects motivated them, both now fixed in the client, so these are a repair rather than something
 that runs on a schedule:

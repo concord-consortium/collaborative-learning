@@ -378,7 +378,7 @@ Unit tests against a mock Firestore and a mock realtime database, as
 - a document whose node carries `visibility` — copied; and one that does not — left off
 - tools derived from content, including a never-saved node (`[]`) and unparseable content (no field)
 - a key mapping to two homes — reported as a violation
-- batch-tail behaviour: a commit that fails does not increment `written`
+- batch-tail behavior: a commit that fails does not increment `written`
 - a `qa`/`dev` space — refused
 
 ## Portal credentials

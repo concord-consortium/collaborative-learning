@@ -150,7 +150,7 @@ describe("planDeletions", () => {
       .toBe("/authed/portals/learn_staging_concord_org/classes/c1/users/u1/documents/k1");
   });
 
-  it("summarises what it plans and what it refused", () => {
+  it("summarizes what it plans and what it refused", () => {
     const { summary } = planDeletions([
       skipped(),
       skipped({ key: "k2", space: "authed/learn_concord_org" }),

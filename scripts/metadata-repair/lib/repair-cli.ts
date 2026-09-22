@@ -1,4 +1,4 @@
-// Plumbing shared by the CLUE-643 repair scripts: reading the realtime database over REST, choosing
+// Plumbing shared by the metadata repair scripts: reading the realtime database over REST, choosing
 // which spaces to run against, and parsing the environment that controls a run.
 
 import { resolveSpace } from "./rtdb-document-index";

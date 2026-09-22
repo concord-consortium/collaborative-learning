@@ -1,4 +1,4 @@
-// Shared by the CLUE-643 repair scripts: resolve a Firestore space to its realtime-database root,
+// Shared by the metadata repair scripts: resolve a Firestore space to its realtime-database root,
 // and index a space's documents from the realtime database.
 
 const kRtdbIllegal = /[.#$[\]/]/;
