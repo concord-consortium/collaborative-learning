@@ -1,7 +1,7 @@
 import {UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
-import {chunkMarkdown, generateProblemDigests} from "./unit-summary-digest";
+import {chunkMarkdown, EMPTY_PROBLEM_DIGEST, generateProblemDigests} from "./unit-summary-digest";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
 
 function problem(ordinal: string, markdown: string): AssembledProblem {
@@ -122,6 +122,32 @@ describe("generateProblemDigests", () => {
     await expect(
       generateProblemDigests([problem("1.1", "content")], {client: fakeClient(generateText), model: "m"})
     ).rejects.toThrow(/empty digest/);
+    expect(generateText).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses a fixed placeholder for a problem with no extractable content, without calling the model", async () => {
+    const generateText = jest.fn().mockResolvedValue("digest");
+    const [digest] = await generateProblemDigests(
+      [problem("1.1", "")], {client: fakeClient(generateText), model: "m"}
+    );
+    expect(digest).toBe(EMPTY_PROBLEM_DIGEST);
+    expect(generateText).not.toHaveBeenCalled();
+  });
+
+  it("treats whitespace-only content the same as empty", async () => {
+    const generateText = jest.fn().mockResolvedValue("digest");
+    const [digest] = await generateProblemDigests(
+      [problem("1.1", "   \n\n  ")], {client: fakeClient(generateText), model: "m"}
+    );
+    expect(digest).toBe(EMPTY_PROBLEM_DIGEST);
+    expect(generateText).not.toHaveBeenCalled();
+  });
+
+  it("still digests other problems normally when one has no content", async () => {
+    const problems = [problem("1.1", ""), problem("1.2", "real content")];
+    const generateText = jest.fn().mockResolvedValue("a real digest");
+    const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
+    expect(digests).toEqual([EMPTY_PROBLEM_DIGEST, "a real digest"]);
     expect(generateText).toHaveBeenCalledTimes(1);
   });
 });

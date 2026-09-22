@@ -20,6 +20,11 @@ const DIGEST_INSTRUCTIONS =
   "problem covers and has students do. Only use information in the provided content -- do not " +
   "infer or reference anything else, including other problems in the unit.";
 
+// A problem can have no extractable text (an image-only section, a not-yet-authored placeholder,
+// etc.), which would otherwise send OpenAI an empty `input` and get back a 400. Skip the call and
+// use this fixed digest instead, so one thin problem doesn't block generating the rest of the unit.
+export const EMPTY_PROBLEM_DIGEST = "(No content provided for this problem.)";
+
 const COMBINE_DIGESTS_INSTRUCTIONS =
   "You are given several partial digests describing different parts of the SAME curriculum " +
   "problem (it was split into parts only because its content was too long for one request). " +
@@ -43,6 +48,9 @@ export async function generateProblemDigests(
 
 async function digestOneProblem(problem: AssembledProblem, options: DigestOptions): Promise<string> {
   try {
+    if (!problem.markdown.trim()) {
+      return EMPTY_PROBLEM_DIGEST;
+    }
     if (problem.markdown.length <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS) {
       return await callDigest(problem.markdown, options);
     }

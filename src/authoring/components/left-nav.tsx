@@ -55,6 +55,10 @@ const LeftNav: React.FC<IProps> = ({ onMediaLibraryClicked }) => {
               label: "Chat Tutor",
             },
             {
+              id: "unitSummarySettings",
+              label: "Unit Summary",
+            },
+            {
               id: "commentsSettings",
               label: "Comments",
             },

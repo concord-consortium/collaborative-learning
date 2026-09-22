@@ -18,18 +18,19 @@ const PREFIX_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given the digests of every problem in " +
   "this unit that comes BEFORE the student's current problem, in order. Write a concise, " +
-  "cumulative statement of what a student should already know or have done by the time they " +
-  "reach the current problem. Only use information in the provided digests -- do not infer or " +
-  "reference anything else, including the current problem itself or anything after it.";
+  "cumulative statement, in at most 8 sentences no matter how many problems come before, of " +
+  "what a student should already know or have done by the time they reach the current problem. " +
+  "Only use information in the provided digests -- do not infer or reference anything else, " +
+  "including the current problem itself or anything after it.";
 
 const ROLLING_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given a cumulative statement of what a " +
   "student has covered in this unit so far, followed by a digest of the one problem completed " +
-  "most recently. Write an UPDATED, concise, cumulative statement of what a student should " +
-  "already know or have done by the time they reach the next problem, folding the most recent " +
-  "problem's digest in with what came before. Only use information in the provided text -- do " +
-  "not infer or reference anything else.";
+  "most recently. Write an UPDATED, concise, cumulative statement, in at most 8 sentences, of " +
+  "what a student should already know or have done by the time they reach the next problem, " +
+  "folding the most recent problem's digest in with what came before. Only use information in " +
+  "the provided text -- do not infer or reference anything else.";
 
 export interface PriorKnowledgeOptions {
   client: UnitSummaryOpenAIClient;
