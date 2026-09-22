@@ -12,8 +12,8 @@ import {
 
 export type PriorKnowledgeMode = "prefix" | "rolling";
 
-// Below the threshold: prefix mode, where call i sees digests 0..i-1 (quadratic in problem count,
-// but the calls are independent and can run concurrently). At or above it: rolling mode, where
+// At or below the threshold: prefix mode, where call i sees digests 0..i-1 (quadratic in problem
+// count, but the calls are independent and can run concurrently). Above it: rolling mode, where
 // call i sees only priorKnowledge(i-1) and digest(i-1) (linear, but sequential by definition).
 export function selectPriorKnowledgeMode(problemCount: number): PriorKnowledgeMode {
   const prefixModeAggregateChars =
