@@ -9,6 +9,15 @@ From that page if you click "Generate a new private key", it will download a jso
 
 Most scripts can be run using `npx tsx <script filename>`
 
+## Where script output and throwaway scripts go
+
+Both directories are gitignored, because what lands in them usually names real classes, users and
+documents:
+
+- **`scripts/output/`** is where committed scripts write their reports.
+- **`scripts/local/`** is for one-off investigation scripts you don't mean to commit, and whatever they
+  write. Put a throwaway script here rather than giving it a special name elsewhere.
+
 ## Running scripts that connect with the portal
 
 You need to first get the portal admin api token.
