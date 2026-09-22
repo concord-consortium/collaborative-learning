@@ -24,32 +24,124 @@
 //
 // Read ./README.md before running any of these: the order matters, and two of the three write.
 
-import fs from "fs";
-import admin from "firebase-admin";
-import { getScriptRootFilePath } from "../lib/script-utils.js";
-import { createRtdbReader, kSkipReportFile, resolveDatabaseUrl } from "./lib/repair-cli";
-import {
-  kDefaultRetentionMs, kProtectedSpaces, planDeletions,
-  type IPlannedDeletion, type ISkippedRecord
-} from "./lib/deletion-plan";
+import { kDefaultRetentionMs, type IDeletionPlan, type IPlannedDeletion } from "./lib/deletion-plan";
+
+export interface IDeletionSettings {
+  dryRun: boolean;
+  retentionMs: number;
+  maxReportAgeHours: number;
+}
+
+/**
+ * A setting that must be a non-negative number, or its default when unset.
+ *
+ * Both settings this script reads guard a deletion, and `Number("48h")` is NaN, against which every
+ * comparison is false. An unreadable value would disable its guard rather than tighten it — the one
+ * direction a guard must never fail in — so it is refused.
+ */
+function nonNegativeSetting(name: string, raw: string | undefined, fallback: number): number {
+  if (raw == null || raw === "") return fallback;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`${name} must be a non-negative number, got "${raw}". ` +
+      `An unreadable value would disable the guard it controls rather than tighten it.`);
+  }
+  return value;
+}
+
+/** The run's settings, from the environment. */
+export function parseDeletionSettings(env: Record<string, string | undefined>): IDeletionSettings {
+  const kDayMs = 24 * 60 * 60 * 1000;
+  return {
+    dryRun: env.APPLY !== "1",
+    retentionMs: nonNegativeSetting("RETENTION_DAYS", env.RETENTION_DAYS, kDefaultRetentionMs / kDayMs) * kDayMs,
+    maxReportAgeHours: nonNegativeSetting("MAX_REPORT_AGE_HOURS", env.MAX_REPORT_AGE_HOURS, 24)
+  };
+}
+
+/**
+ * Refuse a report too old to apply.
+ *
+ * A stale report is the one input that can cause a wrong deletion, and its age is the only signal
+ * available for that. Refuse rather than warn: this is the irreversible script. A dry run is allowed
+ * an old report, since it removes nothing.
+ */
+export function checkReportAge(reportAgeHours: number, { dryRun, maxReportAgeHours }: IDeletionSettings) {
+  if (!dryRun && reportAgeHours > maxReportAgeHours) {
+    throw new Error(`The skip report is ${reportAgeHours.toFixed(1)}h old, over the ${maxReportAgeHours}h ` +
+      `limit. Re-run create-missing-document-metadata.ts so the residue reflects the current data, ` +
+      `or raise MAX_REPORT_AGE_HOURS if you are certain nothing has changed.`);
+  }
+}
+
+export interface IDeletionDeps {
+  /** Why a planned document must now be left alone, or undefined when it is still deletable. */
+  stillDeletable: (d: IPlannedDeletion) => Promise<string | undefined>;
+  removeNode: (path: string) => Promise<void>;
+  log?: (message: string) => void;
+}
+
+export interface IDeletionResult {
+  deletedDocuments: number;
+  deletedNodes: number;
+  changed: Array<{ key: string; space: string; why: string }>;
+}
+
+/** Remove every planned document still deletable, or on a dry run count what would be removed. */
+export async function runDeletions(
+  plan: IDeletionPlan, { dryRun }: { dryRun: boolean },
+  { stillDeletable, removeNode, log = console.log }: IDeletionDeps
+): Promise<IDeletionResult> {
+  const result: IDeletionResult = { deletedDocuments: 0, deletedNodes: 0, changed: [] };
+
+  try {
+    for (const d of plan.deletions) {
+      const why = await stillDeletable(d);
+      if (why) {
+        result.changed.push({ key: d.key, space: d.space, why });
+        continue;
+      }
+      if (dryRun) {
+        result.deletedDocuments++;
+        result.deletedNodes += d.paths.length;
+        continue;
+      }
+      for (const path of d.paths) {
+        await removeNode(path);
+        // Counted only once the removal resolved, so a crash understates what was deleted.
+        result.deletedNodes++;
+      }
+      result.deletedDocuments++;
+      if (result.deletedDocuments % 50 === 0) log(`  deleted ${result.deletedDocuments} documents`);
+    }
+  } catch (err: any) {
+    // What was removed before the failure is gone for good, so carry the counts out with it.
+    err.result = result;
+    throw err;
+  }
+
+  return result;
+}
 
 async function main() {
+  // Imported lazily so the Jest test can import this module without loading firebase-admin or the
+  // import.meta-using script-utils module.
+  const admin = (await import("firebase-admin")).default;
+  const fs = (await import("fs")).default;
+  const { getScriptRootFilePath } = await import("../lib/script-utils.js");
+  const { createRtdbReader, kSkipReportFile, resolveDatabaseUrl } = await import("./lib/repair-cli");
+  const { kProtectedSpaces, planDeletions } = await import("./lib/deletion-plan");
+
+  const settings = parseDeletionSettings(process.env);
+  const { dryRun, retentionMs } = settings;
   const reportPath = process.env.REPORT ?? getScriptRootFilePath(kSkipReportFile);
-  const records: ISkippedRecord[] = JSON.parse(fs.readFileSync(reportPath, "utf8"));
-  const retentionDays = process.env.RETENTION_DAYS ? Number(process.env.RETENTION_DAYS) : undefined;
-  if (retentionDays != null && (!Number.isFinite(retentionDays) || retentionDays < 0)) {
-    throw new Error(`RETENTION_DAYS must be a non-negative number, got "${process.env.RETENTION_DAYS}". ` +
-      `An unreadable value would disable the age guard rather than tighten it.`);
-  }
-  const retentionMs = retentionDays != null ? retentionDays * 24 * 60 * 60 * 1000 : kDefaultRetentionMs;
-  const dryRun = process.env.APPLY !== "1";
+  const records = JSON.parse(fs.readFileSync(reportPath, "utf8"));
 
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
   const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
 
-  const reportAgeMs = Date.now() - fs.statSync(reportPath).mtimeMs;
-  const reportAgeHours = reportAgeMs / 3600000;
+  const reportAgeHours = (Date.now() - fs.statSync(reportPath).mtimeMs) / 3600000;
 
   console.log(`- Report: ${reportPath} (${records.length} skipped documents, ` +
     `${reportAgeHours.toFixed(1)}h old)`);
@@ -59,18 +151,7 @@ async function main() {
   console.log(`- Retention: ${Math.round(retentionMs / 86400000)} days`);
   console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will delete"}\n`);
 
-  // A stale report is the one input that can cause a wrong deletion, and its age is the only signal
-  // available for that. Refuse rather than warn: this is the irreversible script.
-  const maxReportAgeHours = Number(process.env.MAX_REPORT_AGE_HOURS ?? 24);
-  if (!Number.isFinite(maxReportAgeHours) || maxReportAgeHours < 0) {
-    throw new Error(`MAX_REPORT_AGE_HOURS must be a non-negative number, got ` +
-      `"${process.env.MAX_REPORT_AGE_HOURS}". An unreadable value would disable the staleness guard.`);
-  }
-  if (!dryRun && reportAgeHours > maxReportAgeHours) {
-    throw new Error(`The skip report is ${reportAgeHours.toFixed(1)}h old, over the ${maxReportAgeHours}h ` +
-      `limit. Re-run create-missing-document-metadata.ts so the residue reflects the current data, ` +
-      `or raise MAX_REPORT_AGE_HOURS if you are certain nothing has changed.`);
-  }
+  checkReportAge(reportAgeHours, settings);
 
   const plan = planDeletions(records, { now: Date.now(), retentionMs });
   console.log("plan", JSON.stringify(plan.summary, null, 2));
@@ -98,29 +179,10 @@ async function main() {
     return undefined;
   };
 
-  let deletedDocuments = 0;
-  let deletedNodes = 0;
-  const changed: Array<{ key: string; space: string; why: string }> = [];
-
-  for (const d of plan.deletions) {
-    const why = await stillDeletable(d);
-    if (why) {
-      changed.push({ key: d.key, space: d.space, why });
-      continue;
-    }
-    if (dryRun) {
-      deletedDocuments++;
-      deletedNodes += d.paths.length;
-      continue;
-    }
-    for (const path of d.paths) {
-      await database.ref(path).remove();
-      // Counted only once the removal resolved, so a crash understates what was deleted.
-      deletedNodes++;
-    }
-    deletedDocuments++;
-    if (deletedDocuments % 50 === 0) console.log(`  deleted ${deletedDocuments} documents`);
-  }
+  const { deletedDocuments, deletedNodes, changed } = await runDeletions(plan, { dryRun }, {
+    stillDeletable,
+    removeNode: async (path) => { await database.ref(path).remove(); }
+  });
 
   console.log(`\n${dryRun ? "would delete" : "deleted"} ${deletedDocuments} documents ` +
     `(${deletedNodes} realtime-database nodes)`);
