@@ -100,6 +100,19 @@ describe("createMissingDocumentMetadata", () => {
     });
   });
 
+  it("leaves createdAt off rather than writing undefined, which Firestore rejects", async () => {
+    // A real create() throws synchronously on undefined, which would end the whole run.
+    const { firestore, store } = fakeFirestore();
+    const index = new Map([["k1", home()]]);
+    const nodes = { k1: { type: "learningLog", title: "My Log" } };
+
+    await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent });
+
+    expect(store.k1).toBeDefined();
+    expect("createdAt" in store.k1).toBe(false);
+  });
+
   it("derives tools from the document's content, so Sort Work can group it", async () => {
     // The client recomputes tools on every content save. These documents had no metadata document to
     // save into, so the value was never recorded; without it Sort Work files them under "No Tools".

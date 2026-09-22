@@ -332,11 +332,12 @@ export async function createMissingDocumentMetadata(
         type: node.type,
         uid: indexed.uid,
         context_id: indexed.classHash,
-        createdAt: node.createdAt,
         network,
         properties: {}
       };
-      // Stamped only when present, so Firestore never stores `title: undefined`.
+      // Stamped only when present: Firestore rejects `undefined`, and `create()` throws synchronously,
+      // so one such field would end the whole run rather than this document.
+      if (node.createdAt != null) metadata.createdAt = node.createdAt;
       if (node.title != null) metadata.title = node.title;
       // The client keeps this in step from the moment a metadata document exists —
       // useDocumentSyncToFirebase finds them by query, so every toggle made while it was missing
