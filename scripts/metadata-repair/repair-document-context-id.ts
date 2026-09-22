@@ -96,47 +96,47 @@ export async function repairDocumentContextId(
 
   let lastDoc: any = null;
   try {
-  for (;;) {
-    let query: any = (firestore.collection(spacePath) as any)
-      .select("key", "context_id", "uid", "type").limit(pageSize);
-    if (lastDoc) query = query.startAfter(lastDoc);
-    const snapshot = await query.get();
-    if (snapshot.empty) break;
+    for (;;) {
+      let query: any = (firestore.collection(spacePath) as any)
+        .select("key", "context_id", "uid", "type").limit(pageSize);
+      if (lastDoc) query = query.startAfter(lastDoc);
+      const snapshot = await query.get();
+      if (snapshot.empty) break;
 
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const indexed = index.get(doc.id);
-      if (!indexed) {
-        counts.notInIndex++;
-        continue;
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const indexed = index.get(doc.id);
+        if (!indexed) {
+          counts.notInIndex++;
+          continue;
+        }
+
+        // The uid axis was never analysed, and a wrong uid is a different bug with different
+        // consequences. Surface it so it can be investigated; do not guess at a correction.
+        if (data.uid !== indexed.uid) {
+          counts.uidMismatch++;
+          uidMismatches.push({ key: doc.id, stored: data.uid, indexed: indexed.uid });
+        }
+
+        if (data.context_id === indexed.classHash) {
+          counts.alreadyCorrect++;
+          continue;
+        }
+
+        counts.needsRepair++;
+        repairs.push({ key: doc.id, type: data.type, from: data.context_id, to: indexed.classHash });
+
+        if (!dryRun) {
+          batch.update(firestore.doc(`${spacePath}/${doc.id}`), { context_id: indexed.classHash });
+          if (++batched >= batchSize) await commit();
+        }
       }
 
-      // The uid axis was never analysed, and a wrong uid is a different bug with different
-      // consequences. Surface it so it can be investigated; do not guess at a correction.
-      if (data.uid !== indexed.uid) {
-        counts.uidMismatch++;
-        uidMismatches.push({ key: doc.id, stored: data.uid, indexed: indexed.uid });
-      }
-
-      if (data.context_id === indexed.classHash) {
-        counts.alreadyCorrect++;
-        continue;
-      }
-
-      counts.needsRepair++;
-      repairs.push({ key: doc.id, type: data.type, from: data.context_id, to: indexed.classHash });
-
-      if (!dryRun) {
-        batch.update(firestore.doc(`${spacePath}/${doc.id}`), { context_id: indexed.classHash });
-        if (++batched >= batchSize) await commit();
-      }
+      lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      if (snapshot.size < pageSize) break;
     }
 
-    lastDoc = snapshot.docs[snapshot.docs.length - 1];
-    if (snapshot.size < pageSize) break;
-  }
-
-  await commit();
+    await commit();
   } catch (err: any) {
     // Metadata documents this run rewrote are already live. Carry the counts out with the failure, and log them
     // below, so a partial apply can be reconciled rather than guessed at.

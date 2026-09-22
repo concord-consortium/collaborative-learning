@@ -306,89 +306,89 @@ export async function createMissingDocumentMetadata(
   };
 
   try {
-  for (const [key, indexed] of index) {
-    if (present.has(key)) { count("alreadyPresent", present.get(key)); continue; }
-    if (!isRtdbAddressable(indexed.classHash, indexed.uid, key)) {
-      skip(key, indexed, "skippedUnaddressable");
-      continue;
-    }
-
-    const nodePath =
-      `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documentMetadata/${key}`;
-    const node = await readNode(nodePath);
-    // Read before the content check so a skipped document can still report its age.
-    if (!indexed.hasContent) { skip(key, indexed, "skippedNoContent", node); continue; }
-    if (!node) { skip(key, indexed, "nodeUnreadable"); continue; }
-
-    const offeringContained = kOfferingContainedTypes.includes(node.type);
-    if (!offeringContained && !kClassContainedTypes.includes(node.type)) {
-      skip(key, indexed, "unsupportedType", node);
-      continue;
-    }
-
-    const metadata: Record<string, any> = {
-      key,
-      type: node.type,
-      uid: indexed.uid,
-      context_id: indexed.classHash,
-      createdAt: node.createdAt,
-      network,
-      properties: {}
-    };
-    // Stamped only when present, so Firestore never stores `title: undefined`.
-    if (node.title != null) metadata.title = node.title;
-    // The client keeps this in step from the moment a metadata document exists —
-    // useDocumentSyncToFirebase finds them by query, so every toggle made while it was missing
-    // updated nothing. Taking the node's value makes the metadata right now rather than at the
-    // owner's next toggle, which for a document this old may never come.
-    if (node.visibility != null) metadata.visibility = node.visibility;
-
-    const originDoc = await originDocFor(node.type, indexed.classHash, key);
-    if (originDoc != null) metadata.originDoc = originDoc;
-
-    if (offeringContained) {
-      const position = node.offeringId ? await curriculumFor(node.offeringId) : undefined;
-      if (!position) {
-        // Writing it without these would place the document on the wrong container axis and hand it
-        // to the offeringId backfill as new work. Report it and leave it alone.
-        skip(key, indexed, "unresolvedCurriculum", node);
+    for (const [key, indexed] of index) {
+      if (present.has(key)) { count("alreadyPresent", present.get(key)); continue; }
+      if (!isRtdbAddressable(indexed.classHash, indexed.uid, key)) {
+        skip(key, indexed, "skippedUnaddressable");
         continue;
       }
-      metadata.offeringId = node.offeringId;
-      metadata.unit = position.unit;
-      metadata.investigation = position.investigation;
-      metadata.problem = position.problem;
-    } else {
-      // Written as an explicit null, not left out. Sort Work finds class-contained documents with
-      // `where("unit", "==", null)` (sorted-documents.ts), and Firestore cannot match a field that is
-      // absent — a metadata document without it is invisible under every filter but "All". This is
-      // what the client's "class" container stamps, and all 19,649 class-contained metadata
-      // documents in production carry it.
-      metadata.unit = null;
+
+      const nodePath =
+        `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documentMetadata/${key}`;
+      const node = await readNode(nodePath);
+      // Read before the content check so a skipped document can still report its age.
+      if (!indexed.hasContent) { skip(key, indexed, "skippedNoContent", node); continue; }
+      if (!node) { skip(key, indexed, "nodeUnreadable"); continue; }
+
+      const offeringContained = kOfferingContainedTypes.includes(node.type);
+      if (!offeringContained && !kClassContainedTypes.includes(node.type)) {
+        skip(key, indexed, "unsupportedType", node);
+        continue;
+      }
+
+      const metadata: Record<string, any> = {
+        key,
+        type: node.type,
+        uid: indexed.uid,
+        context_id: indexed.classHash,
+        createdAt: node.createdAt,
+        network,
+        properties: {}
+      };
+      // Stamped only when present, so Firestore never stores `title: undefined`.
+      if (node.title != null) metadata.title = node.title;
+      // The client keeps this in step from the moment a metadata document exists —
+      // useDocumentSyncToFirebase finds them by query, so every toggle made while it was missing
+      // updated nothing. Taking the node's value makes the metadata right now rather than at the
+      // owner's next toggle, which for a document this old may never come.
+      if (node.visibility != null) metadata.visibility = node.visibility;
+
+      const originDoc = await originDocFor(node.type, indexed.classHash, key);
+      if (originDoc != null) metadata.originDoc = originDoc;
+
+      if (offeringContained) {
+        const position = node.offeringId ? await curriculumFor(node.offeringId) : undefined;
+        if (!position) {
+          // Writing it without these would place the document on the wrong container axis and hand it
+          // to the offeringId backfill as new work. Report it and leave it alone.
+          skip(key, indexed, "unresolvedCurriculum", node);
+          continue;
+        }
+        metadata.offeringId = node.offeringId;
+        metadata.unit = position.unit;
+        metadata.investigation = position.investigation;
+        metadata.problem = position.problem;
+      } else {
+        // Written as an explicit null, not left out. Sort Work finds class-contained documents with
+        // `where("unit", "==", null)` (sorted-documents.ts), and Firestore cannot match a field that is
+        // absent — a metadata document without it is invisible under every filter but "All". This is
+        // what the client's "class" container stamps, and all 19,649 class-contained metadata
+        // documents in production carry it.
+        metadata.unit = null;
+      }
+
+      // Read last, so the 573 documents skipped above never pull a content node. Content is the largest
+      // thing in the database and this is the run's only read of it.
+      const contentPath =
+        `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documents/${key}`;
+      const tools = toolsFromDocumentNode(await readNode(contentPath));
+      // Absent rather than `[]` when the content would not parse: an empty array asserts the document
+      // has no tiles, which is a different claim from "this run could not tell".
+      if (tools) metadata.tools = tools;
+      else count("unreadableContent", node.type);
+
+      if (isTeacherOwned && await isTeacherOwned(indexed.classHash, indexed.uid)) {
+        count("ownerIsTeacher", node.type);
+      }
+
+      count("created", node.type);
+      if (!dryRun) {
+        pending.push({ path: `${spacePath}/${key}`, metadata, type: node.type });
+        if (pending.length >= batchSize) await commit();
+      }
     }
 
-    // Read last, so the 573 documents skipped above never pull a content node. Content is the largest
-    // thing in the database and this is the run's only read of it.
-    const contentPath =
-      `${rtdbRoot}/classes/${indexed.classHash}/users/${indexed.uid}/documents/${key}`;
-    const tools = toolsFromDocumentNode(await readNode(contentPath));
-    // Absent rather than `[]` when the content would not parse: an empty array asserts the document
-    // has no tiles, which is a different claim from "this run could not tell".
-    if (tools) metadata.tools = tools;
-    else count("unreadableContent", node.type);
-
-    if (isTeacherOwned && await isTeacherOwned(indexed.classHash, indexed.uid)) {
-      count("ownerIsTeacher", node.type);
-    }
-
-    count("created", node.type);
-    if (!dryRun) {
-      pending.push({ path: `${spacePath}/${key}`, metadata, type: node.type });
-      if (pending.length >= batchSize) await commit();
-    }
-  }
-
-  await commit();
+    await commit();
   } catch (err: any) {
     // A partial apply is exactly when the counts matter, so carry them out with the failure as well
     // as logging them below: a caller should not have to scrape stdout to reconcile.
