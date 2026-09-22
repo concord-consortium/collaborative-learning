@@ -109,12 +109,24 @@ describe("generateProblemDigests", () => {
     ).rejects.toThrow(/Problem 1\.2.*digest failed.*openai 500/);
   });
 
-  it("fails on an over-length digest without retrying", async () => {
+  it("asks the model to shorten an over-length digest once, and succeeds if that fits", async () => {
+    const generateText = jest.fn()
+      .mockResolvedValueOnce("x".repeat(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + 1))
+      .mockResolvedValueOnce("a shorter digest");
+    const [digest] = await generateProblemDigests(
+      [problem("1.1", "content")], {client: fakeClient(generateText), model: "m"}
+    );
+    expect(digest).toBe("a shorter digest");
+    expect(generateText).toHaveBeenCalledTimes(2);
+  });
+
+  it("truncates a digest still over length after asking the model to shorten it", async () => {
     const generateText = jest.fn().mockResolvedValue("x".repeat(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + 1));
-    await expect(
-      generateProblemDigests([problem("1.1", "content")], {client: fakeClient(generateText), model: "m"})
-    ).rejects.toThrow(/exceeds/);
-    expect(generateText).toHaveBeenCalledTimes(1);
+    const [digest] = await generateProblemDigests(
+      [problem("1.1", "content")], {client: fakeClient(generateText), model: "m"}
+    );
+    expect(digest.length).toBeLessThanOrEqual(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS);
+    expect(generateText).toHaveBeenCalledTimes(2);
   });
 
   it("fails on an empty digest without retrying", async () => {

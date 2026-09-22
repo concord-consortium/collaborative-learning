@@ -131,11 +131,26 @@ describe("generatePriorKnowledge", () => {
     ).rejects.toThrow(/Problem 1\.3.*priorKnowledge failed.*openai 500/);
   });
 
-  it("fails on an over-length priorKnowledge without retrying", async () => {
+  it("asks the model to shorten an over-length priorKnowledge once, and succeeds if that fits", async () => {
+    const onlyOne = [problem("1.1", "content one"), problem("1.2", "content two")];
+    const generateText = jest.fn()
+      .mockResolvedValueOnce("x".repeat(UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS + 1))
+      .mockResolvedValueOnce("shorter prior knowledge");
+    const [, priorKnowledge] = await generatePriorKnowledge(
+      onlyOne, ["digest one"], {client: fakeClient(generateText), model: "m", mode: "prefix"}
+    );
+    expect(priorKnowledge).toBe("shorter prior knowledge");
+    expect(generateText).toHaveBeenCalledTimes(2);
+  });
+
+  it("truncates priorKnowledge still over length after asking the model to shorten it", async () => {
+    const onlyOne = [problem("1.1", "content one"), problem("1.2", "content two")];
     const generateText = jest.fn().mockResolvedValue("x".repeat(UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS + 1));
-    await expect(
-      generatePriorKnowledge(problems, digests, {client: fakeClient(generateText), model: "m", mode: "prefix"})
-    ).rejects.toThrow(/exceeds/);
+    const [, priorKnowledge] = await generatePriorKnowledge(
+      onlyOne, ["digest one"], {client: fakeClient(generateText), model: "m", mode: "prefix"}
+    );
+    expect(priorKnowledge.length).toBeLessThanOrEqual(UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS);
+    expect(generateText).toHaveBeenCalledTimes(2);
   });
 
   it("fails on an empty priorKnowledge without retrying", async () => {

@@ -47,11 +47,20 @@ describe("generateOverview", () => {
     expect(overview).toBe("combined overview");
   });
 
-  it("fails on an over-length overview without retrying", async () => {
+  it("asks the model to shorten an over-length overview once, and succeeds if that fits", async () => {
+    const generateText = jest.fn()
+      .mockResolvedValueOnce("x".repeat(UNIT_SUMMARY_OVERVIEW_MAX_CHARS + 1))
+      .mockResolvedValueOnce("a shorter overview");
+    const overview = await generateOverview(["digest"], {client: fakeClient(generateText), model: "m"});
+    expect(overview).toBe("a shorter overview");
+    expect(generateText).toHaveBeenCalledTimes(2);
+  });
+
+  it("truncates an overview still over length after asking the model to shorten it", async () => {
     const generateText = jest.fn().mockResolvedValue("x".repeat(UNIT_SUMMARY_OVERVIEW_MAX_CHARS + 1));
-    await expect(generateOverview(["digest"], {client: fakeClient(generateText), model: "m"}))
-      .rejects.toThrow(/exceeds/);
-    expect(generateText).toHaveBeenCalledTimes(1);
+    const overview = await generateOverview(["digest"], {client: fakeClient(generateText), model: "m"});
+    expect(overview.length).toBeLessThanOrEqual(UNIT_SUMMARY_OVERVIEW_MAX_CHARS);
+    expect(generateText).toHaveBeenCalledTimes(2);
   });
 
   it("fails on an empty overview without retrying", async () => {

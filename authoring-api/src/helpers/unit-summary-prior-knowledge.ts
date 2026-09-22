@@ -9,28 +9,30 @@
 import {UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {mapWithConcurrency} from "./concurrency";
+import {generateWithLengthLimit} from "./unit-summary-length-limit";
 import {PriorKnowledgeMode} from "./unit-summary-limits";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT} from "./unit-summary-config";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
-import {callWithRetry} from "./unit-summary-retry";
 
 const PREFIX_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given the digests of every problem in " +
   "this unit that comes BEFORE the student's current problem, in order. Write a concise, " +
-  "cumulative statement, in at most 8 sentences no matter how many problems come before, of " +
-  "what a student should already know or have done by the time they reach the current problem. " +
-  "Only use information in the provided digests -- do not infer or reference anything else, " +
-  "including the current problem itself or anything after it.";
+  "cumulative statement, in at most 8 sentences and no more than " +
+  `${UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} characters no matter how many problems come before, ` +
+  "of what a student should already know or have done by the time they reach the current " +
+  "problem. Only use information in the provided digests -- do not infer or reference anything " +
+  "else, including the current problem itself or anything after it.";
 
 const ROLLING_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given a cumulative statement of what a " +
   "student has covered in this unit so far, followed by a digest of the one problem completed " +
-  "most recently. Write an UPDATED, concise, cumulative statement, in at most 8 sentences, of " +
-  "what a student should already know or have done by the time they reach the next problem, " +
-  "folding the most recent problem's digest in with what came before. Only use information in " +
-  "the provided text -- do not infer or reference anything else.";
+  "most recently. Write an UPDATED, concise, cumulative statement, in at most 8 sentences and no " +
+  `more than ${UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} characters, of what a student should ` +
+  "already know or have done by the time they reach the next problem, folding the most recent " +
+  "problem's digest in with what came before. Only use information in the provided text -- do " +
+  "not infer or reference anything else.";
 
 export interface PriorKnowledgeOptions {
   client: UnitSummaryOpenAIClient;
@@ -93,25 +95,12 @@ async function callPriorKnowledge(
   input: string, problem: AssembledProblem, instructions: string, {client, model}: PriorKnowledgeOptions
 ): Promise<string> {
   try {
-    return await callWithRetry(async () => {
-      const text = await client.generateText({model, instructions, input, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS});
-      return validatePriorKnowledgeText(text);
+    return await generateWithLengthLimit({
+      client, model, instructions, input, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS,
+      maxChars: UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, fieldName: "priorKnowledge",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Problem ${problem.ordinal}: priorKnowledge failed: ${message}`);
   }
-}
-
-function validatePriorKnowledgeText(text: string): string {
-  const trimmed = text.trim();
-  if (!trimmed) {
-    throw new Error("model returned an empty priorKnowledge");
-  }
-  if (trimmed.length > UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS) {
-    throw new Error(
-      `priorKnowledge exceeds ${UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} characters (got ${trimmed.length})`
-    );
-  }
-  return trimmed;
 }

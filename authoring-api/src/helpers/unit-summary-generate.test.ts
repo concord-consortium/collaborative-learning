@@ -1,4 +1,7 @@
-import {UNIT_SUMMARY_TOTAL_BUDGET_CHARS} from "../../../shared/unit-summary-types";
+import {
+  UNIT_SUMMARY_OVERVIEW_MAX_CHARS, UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS,
+  UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS, UNIT_SUMMARY_TOTAL_BUDGET_CHARS,
+} from "../../../shared/unit-summary-types";
 import {AssembledProblem, AssembledUnit} from "./assemble-unit";
 import {
   UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
@@ -141,15 +144,19 @@ describe("runUnitSummaryGeneration", () => {
   });
 
   it("rejects and returns an error, never a partial result, when the total character budget is exceeded", async () => {
-    // 35 problems, each field at its own per-field maximum, sums past the total budget even
-    // though every individual field is within its own limit -- this is the total-budget check
-    // in validateUnitSummary, distinct from any single field's own limit.
-    const problemCount = 35;
+    // Enough problems, each field at its own per-field maximum, to sum past the total budget even
+    // though every individual field is within its own limit -- this is the total-budget check in
+    // validateUnitSummary, distinct from any single field's own limit. Computed from the actual
+    // constants (plus one problem of margin) rather than a hard-coded problem count, so this stays
+    // correct however those budgets get tuned later.
+    const perProblemMaxChars = UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS;
+    const problemCount =
+      Math.ceil((UNIT_SUMMARY_TOTAL_BUDGET_CHARS - UNIT_SUMMARY_OVERVIEW_MAX_CHARS) / perProblemMaxChars) + 1;
     const problems = Array.from({length: problemCount}, (_, i) => problem(`1.${i + 1}`));
     const generateText = jest.fn().mockImplementation(async ({instructions}: GenerateTextParams) => {
-      if (instructions.includes("digest of every problem")) return "x".repeat(1200); // overview
-      if (instructions.includes("what this problem covers")) return "x".repeat(800); // digest
-      return "x".repeat(1500); // priorKnowledge
+      if (instructions.includes("digest of every problem")) return "x".repeat(UNIT_SUMMARY_OVERVIEW_MAX_CHARS);
+      if (instructions.includes("what this problem covers")) return "x".repeat(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS);
+      return "x".repeat(UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS);
     });
     await expect(
       runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)))

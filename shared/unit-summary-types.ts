@@ -73,11 +73,25 @@ export interface IUnitSummaryStatusResponse {
 
 // Per-field and total-summary character limits. Counted as plain string length (no tokenizer),
 // server-side, at roughly 4 characters per token. Starting values from
-// docs/plans/CLUE-685-checklist.md's decision table; tune after the phase 2 benchmarks.
-export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 800;
-export const UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS = 1500;
+// docs/plans/CLUE-685-checklist.md's decision table; tune after the phase 2 benchmarks. Raised
+// from 800 to 1000 on 2026-09-22 after a real gpt-5.5 digest (806 chars) missed the original
+// budget by a hair -- see authoring-api/src/helpers/unit-summary-length-limit.ts for the other
+// half of the fix (one shorten-and-retry chance before a still-over-length response fails).
+export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1000;
+// Raised from 1500 to 1800 on 2026-09-22: cumulative by design, so a later problem in a large
+// unit has the most material to compress into the same fixed budget -- the real near-miss that
+// prompted this (1502 on a real gpt-5.5 run, even after the shorten retry) was on problem 6.1 of
+// the 35-problem `m2s` unit, not an early or small one. See unit-summary-length-limit.ts for the
+// other half of the fix (truncate as a last resort after the shorten retry, rather than fail).
+export const UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS = 1800;
 export const UNIT_SUMMARY_OVERVIEW_MAX_CHARS = 1200;
-export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 80000;
+// Raised from 80,000 to 100,000 on 2026-09-22, alongside the per-field increases above. The
+// original 80,000 was explicitly sized for "a 30-problem unit at the per-field maxima" (see the
+// checklist decision table) -- `m2s`, the real largest unit, has 35, and at worst case (every
+// field maxed) 35 problems now needs ~99,200 (1200 overview + 35 * (1000 digest + 1800
+// priorKnowledge)). Real content rarely maxes out every field at once, so this is headroom for a
+// worst case, not an expected total.
+export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 100000;
 
 export type UnitSummaryValidationResult =
   | { valid: true }

@@ -10,15 +10,16 @@ import {AssembledProblem} from "./assemble-unit";
 import {mapWithConcurrency} from "./concurrency";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS}
   from "./unit-summary-config";
+import {generateWithLengthLimit} from "./unit-summary-length-limit";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
-import {callWithRetry} from "./unit-summary-retry";
 
 const DIGEST_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given the content of ONE problem from " +
-  "the unit, converted to Markdown. Write a concise digest, in 3 to 5 sentences, of what this " +
-  "problem covers and has students do. Only use information in the provided content -- do not " +
-  "infer or reference anything else, including other problems in the unit.";
+  "the unit, converted to Markdown. Write a concise digest, in 3 to 5 sentences and no more than " +
+  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters, of what this problem covers and has ` +
+  "students do. Only use information in the provided content -- do not infer or reference " +
+  "anything else, including other problems in the unit.";
 
 // A problem can have no extractable text (an image-only section, a not-yet-authored placeholder,
 // etc.), which would otherwise send OpenAI an empty `input` and get back a 400. Skip the call and
@@ -28,7 +29,8 @@ export const EMPTY_PROBLEM_DIGEST = "(No content provided for this problem.)";
 const COMBINE_DIGESTS_INSTRUCTIONS =
   "You are given several partial digests describing different parts of the SAME curriculum " +
   "problem (it was split into parts only because its content was too long for one request). " +
-  "Combine them into a single digest, in 3 to 5 sentences, of what this problem covers and has " +
+  "Combine them into a single digest, in 3 to 5 sentences and no more than " +
+  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters, of what this problem covers and has ` +
   "students do. Do not mention that it was split into parts.";
 
 export interface DigestOptions {
@@ -71,33 +73,20 @@ async function digestOneProblem(problem: AssembledProblem, options: DigestOption
 }
 
 function callDigest(markdown: string, {client, model}: DigestOptions): Promise<string> {
-  return callWithRetry(async () => {
-    const text = await client.generateText({
-      model, instructions: DIGEST_INSTRUCTIONS, input: markdown, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS,
-    });
-    return validateDigestText(text);
+  return generateWithLengthLimit({
+    client, model, instructions: DIGEST_INSTRUCTIONS, input: markdown,
+    timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
+    fieldName: "digest",
   });
 }
 
 function callCombineDigests(chunkDigests: string[], {client, model}: DigestOptions): Promise<string> {
   const input = chunkDigests.map((digest, i) => `Part ${i + 1}: ${digest}`).join("\n\n");
-  return callWithRetry(async () => {
-    const text = await client.generateText({
-      model, instructions: COMBINE_DIGESTS_INSTRUCTIONS, input, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS,
-    });
-    return validateDigestText(text);
+  return generateWithLengthLimit({
+    client, model, instructions: COMBINE_DIGESTS_INSTRUCTIONS, input,
+    timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
+    fieldName: "digest",
   });
-}
-
-function validateDigestText(text: string): string {
-  const trimmed = text.trim();
-  if (!trimmed) {
-    throw new Error("model returned an empty digest");
-  }
-  if (trimmed.length > UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS) {
-    throw new Error(`digest exceeds ${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters (got ${trimmed.length})`);
-  }
-  return trimmed;
 }
 
 // Splits on paragraph breaks first, greedily packing paragraphs into each chunk, so a chunk
