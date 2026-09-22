@@ -1,6 +1,6 @@
 import { AreaPlugin } from "rete-area-plugin";
 import { AreaExtra, Schemes } from "../nodes/rete-scheme";
-import { MAX_ZOOM, MIN_ZOOM, ReteManager } from "./rete-manager";
+import { kDefaultNodeHeight, kDefaultNodeWidth, MAX_ZOOM, MIN_ZOOM, ReteManager } from "./rete-manager";
 
 interface IFakeNode { id: string; }
 interface IFakeNodeView { position: { x: number; y: number }; }
@@ -226,5 +226,90 @@ describe("ReteManager.getNewNodeName", () => {
   // regex metacharacters that once made every new Timer "Timer (on/off) 1".
   it("names a block whose type is absent from the table by its internal type", () => {
     expect(newNodeName(makeNamingStub(["Timer 1"]), "Timer")).toBe("Timer 2");
+  });
+});
+
+/**
+ * A new block has to land where the user is looking. Node positions are world coordinates, and the
+ * area transform maps them to the screen as `screen = world * k + (x, y)` — so a stub needs the
+ * transform, the node count the grid steps through, and the container size that bounds the viewport.
+ */
+function makePositionStub(
+  nodeCount: number,
+  transform: { k: number, x: number, y: number },
+  container: { width: number, height: number } | null = { width: 800, height: 600 }
+) {
+  const stub = Object.create(ReteManager.prototype) as ReteManager;
+  const nodes = Array.from({ length: nodeCount }, (_, i) => ({ id: `n${i}` }));
+  (stub as unknown as { editor: { getNodes(): unknown[] } }).editor = { getNodes: () => nodes };
+  (stub as unknown as { area: { area: { transform: typeof transform } } }).area = { area: { transform } };
+  // getContainerDimensions is private and reads the DOM; an own property shadows the prototype.
+  (stub as unknown as { getContainerDimensions(): typeof container }).getContainerDimensions = () => container;
+  return stub;
+}
+
+/** The world-coordinate rect the user can currently see, per `screen = world * k + (x, y)`. */
+function visibleWorldRect(transform: { k: number, x: number, y: number },
+                          container: { width: number, height: number }) {
+  return {
+    left: -transform.x / transform.k,
+    top: -transform.y / transform.k,
+    right: (container.width - transform.x) / transform.k,
+    bottom: (container.height - transform.y) / transform.k,
+  };
+}
+
+describe("ReteManager.getNewNodePosition (CLUE-689)", () => {
+  const container = { width: 800, height: 600 };
+
+  it("places the first block near the top left of the view when nothing is panned", () => {
+    const pos = makePositionStub(0, { k: 1, x: 0, y: 0 }, container).getNewNodePosition();
+    expect(pos[0]).toBeGreaterThanOrEqual(0);
+    expect(pos[0]).toBeLessThan(100);
+    expect(pos[1]).toBeGreaterThanOrEqual(0);
+    expect(pos[1]).toBeLessThan(100);
+  });
+
+  // The bug: the grid was anchored at the world origin, so once the canvas was panned — which
+  // fit-on-load does by itself — a new block was created outside the viewport and the button
+  // looked dead.
+  it("follows a panned view instead of staying at the world origin", () => {
+    const transform = { k: 1, x: -1200, y: -800 };
+    const pos = makePositionStub(0, transform, container).getNewNodePosition();
+    const view = visibleWorldRect(transform, container);
+    expect(pos[0]).toBeGreaterThanOrEqual(view.left);
+    expect(pos[1]).toBeGreaterThanOrEqual(view.top);
+    expect(pos[0]).toBeLessThan(view.right);
+    expect(pos[1]).toBeLessThan(view.bottom);
+  });
+
+  it.each([
+    ["unpanned",      { k: 1,   x: 0,     y: 0 }],
+    ["panned",        { k: 1,   x: -1200, y: -800 }],
+    ["zoomed in",     { k: 2,   x: -300,  y: -150 }],
+    ["zoomed out",    { k: 0.5, x: 400,   y: 250 }],
+  ])("keeps every block of a full grid inside a %s view", (_label, transform) => {
+    const view = visibleWorldRect(transform, container);
+    for (let n = 0; n < 24; n++) {
+      const pos = makePositionStub(n, transform, container).getNewNodePosition();
+      expect(pos[0]).toBeGreaterThanOrEqual(view.left);
+      expect(pos[1]).toBeGreaterThanOrEqual(view.top);
+      // The block's own footprint has to fit too, not just its top-left corner.
+      expect(pos[0] + kDefaultNodeWidth).toBeLessThanOrEqual(view.right);
+      expect(pos[1] + kDefaultNodeHeight).toBeLessThanOrEqual(view.bottom);
+    }
+  });
+
+  it("steps each new block to its own slot rather than stacking them", () => {
+    const transform = { k: 1, x: 0, y: 0 };
+    const first = makePositionStub(0, transform, container).getNewNodePosition();
+    const second = makePositionStub(1, transform, container).getNewNodePosition();
+    expect(second).not.toEqual(first);
+  });
+
+  it("still returns a usable position before the container has been laid out", () => {
+    const pos = makePositionStub(0, { k: 1, x: 0, y: 0 }, null).getNewNodePosition();
+    expect(Number.isFinite(pos[0])).toBe(true);
+    expect(Number.isFinite(pos[1])).toBe(true);
   });
 });

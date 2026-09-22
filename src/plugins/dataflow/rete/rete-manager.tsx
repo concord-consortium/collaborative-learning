@@ -75,8 +75,8 @@ export interface GroupOutputSocket { nodeId: string; key: string; externals: Ext
 // Fallback node dimensions (CSS px) used for group-bounds math when a member element isn't
 // measurable (hidden while collapsed, or not yet laid out just after expanding). Node width is
 // fixed ($node-width = 176); height varies, so this is an estimate refined on the next layout pass.
-const kDefaultNodeWidth = 176;
-const kDefaultNodeHeight = 120;
+export const kDefaultNodeWidth = 176;
+export const kDefaultNodeHeight = 120;
 
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
@@ -1248,22 +1248,50 @@ export class ReteManager implements INodeServices {
     this.area.translate(id, {x: newPosition[0], y: newPosition[1]});
   }
 
-  getNewNodePosition() {
-    const kNodesPerColumn = 5;
-    const kNodesPerRow = 4;
+  /**
+   * Where a block added from the palette goes (a drag-drop add brings its own position). Node
+   * positions are world coordinates and the area transform maps them to the screen as
+   * `screen = world * k + (x, y)`, so the grid is anchored to the visible rect rather than to the
+   * world origin: fit-on-load pans the canvas by itself, and a grid pinned to the origin put new
+   * blocks outside the view, making the palette button look dead. How many slots the grid has is
+   * measured from the container for the same reason — a fixed 4x5 ran off the edge of a small tile.
+   */
+  getNewNodePosition(): [number, number] {
     const kColumnWidth = 200;
     const kRowHeight = 90;
     const kLeftMargin = 40;
     const kTopMargin = 5;
-    const kColumnOffset = 15;
+    const kPageOffset = 15;
 
+    const { k, x, y } = this.area.area.transform;
+    const dims = this.getContainerDimensions();
+    // Fall back to the historical grid's extent when the container has not been laid out yet.
+    const viewWidth = dims ? dims.width / k : kColumnWidth * 4;
+    const viewHeight = dims ? dims.height / k : kRowHeight * 5;
+
+    // Margins are screen-space gaps, so they shrink in world units as the canvas zooms in.
+    const originX = -x / k + kLeftMargin / k;
+    const originY = -y / k + kTopMargin / k;
+
+    // Slots whose whole block fits, not just its top-left corner.
+    const fits = (extent: number, margin: number, node: number, step: number) =>
+      Math.max(1, Math.floor((extent - margin / k - node) / step) + 1);
+    const columns = fits(viewWidth, kLeftMargin, kDefaultNodeWidth, kColumnWidth);
+    const rows = fits(viewHeight, kTopMargin, kDefaultNodeHeight, kRowHeight);
+
+    // Once the grid is full, each further pass cascades so blocks do not land exactly on top of
+    // each other; the clamp keeps that cascade from walking back out of the view.
     const numNodes = this.editor.getNodes().length;
-    const { k } = this.area.area.transform;
-    const nodePos: [number, number] =
-      [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
-        * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
-      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
-    return nodePos;
+    const slot = numNodes % (columns * rows);
+    const pass = Math.floor(numNodes / (columns * rows));
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
+
+    return [
+      clamp(originX + Math.floor(slot / rows) * kColumnWidth + pass * kPageOffset,
+        -x / k, -x / k + viewWidth - kDefaultNodeWidth),
+      clamp(originY + (slot % rows) * kRowHeight + pass * kPageOffset,
+        -y / k, -y / k + viewHeight - kDefaultNodeHeight)
+    ];
   }
 
   public countSerialDataNodes(){
