@@ -5,6 +5,10 @@ import { TutorPrompts } from "./tutor-prompts";
 export interface DebugTransportOptions {
   // LEFT problem JSON; undefined until the problem's sections have loaded.
   getLeftContext: () => string | undefined;
+  // CLUE-685-adachat-spike: a slice of the unit's authored aiUnitSummary, undefined if the unit
+  // has none or the current problem isn't found in it. Rides the same install-eligible sends as
+  // LEFT. See unit-context.ts.
+  getUnitContext?: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded.
   getRightSummary: () => RightSummary | undefined;
   // unit-authored generic-prompt overrides, if any.
@@ -48,6 +52,7 @@ export class DebugTransport implements ChatTransport {
   // so when it is not replaced it is shown as a placeholder.
   private contextSegments(): DebugSegment[] {
     const left = this.options.getLeftContext();
+    const unitContext = this.options.getUnitContext?.();
     const right = this.options.getRightSummary();
     const prompts = this.options.tutorPrompts;
     const genericSegments: DebugSegment[] = prompts?.replace
@@ -80,6 +85,10 @@ export class DebugTransport implements ChatTransport {
       left !== undefined
         ? { kind: "payload" as const, text: left }
         : { kind: "note" as const, text: "(problem sections not loaded yet — LEFT unavailable)" },
+      { kind: "note", text: "── THE UNIT · spike-only unit summary slice (sent once, with LEFT) ──" },
+      unitContext !== undefined
+        ? { kind: "payload" as const, text: unitContext }
+        : { kind: "note" as const, text: "(no aiUnitSummary for this unit/problem — THE UNIT unavailable)" },
       { kind: "note", text: "── RIGHT · your workspace (markdown, re-sent when it changes) ──" },
       right
         ? { kind: "payload" as const, text: right.markdown }
@@ -117,6 +126,7 @@ export class DebugTransport implements ChatTransport {
     await Promise.resolve();
 
     const left = this.options.getLeftContext();
+    const unitContext = this.options.getUnitContext?.();
     const right = this.options.getRightSummary();
     const decision = decideContext({
       leftAlreadyInstalled: this.leftInstalled,
@@ -135,6 +145,15 @@ export class DebugTransport implements ChatTransport {
       segments.push({ kind: "note", text: "── LEFT attached (first message installs the problem) ──" });
       segments.push({ kind: "payload", text: left });
       this.leftInstalled = true;
+    }
+    // CLUE-685-adachat-spike: rides the same install-eligible sends as LEFT.
+    if (decision.attachLeft) {
+      if (unitContext === undefined) {
+        segments.push({ kind: "note", text: "── THE UNIT not attached (no aiUnitSummary available) ──" });
+      } else {
+        segments.push({ kind: "note", text: "── THE UNIT attached (spike-only unit summary slice) ──" });
+        segments.push({ kind: "payload", text: unitContext });
+      }
     }
     // Prompt overrides ride the same install-eligible sends as LEFT, as in the live transport.
     if (decision.attachLeft) {

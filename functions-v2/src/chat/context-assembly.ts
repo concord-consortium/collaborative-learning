@@ -20,6 +20,12 @@ export interface TurnContext {
 export interface TurnMessage {
   text?: unknown;
   leftContext?: unknown;
+  // CLUE-685-adachat-spike (checklist Phase 3, not merged): a slice of the unit's authored
+  // aiUnitSummary, built client-side by unit-context.ts. Rides the same install-eligible sends as
+  // leftContext. Not part of the real CLUE-678 schema -- that story needs conversation-forking on
+  // a changed summary (hashing the whole saved aiUnitSummary, not just sourceHash) and a
+  // manifest-vs-live-structure check that this spike hard-codes around.
+  unitContext?: unknown;
   rightContext?: unknown;
   promptReplace?: unknown;
   promptAppend?: unknown;
@@ -78,6 +84,15 @@ export function assembleTurnContext(args: {
     if (!isEmptyLeft(message.leftContext)) {
       installItems.push(`THE PROBLEM (the student's assignment, as JSON):\n${message.leftContext as string}`);
       markProblemInstalled = true;
+      // CLUE-685-adachat-spike: installed alongside LEFT, gated on the same problemInstalled flag
+      // -- a real per-summary "should this be re-installed" check (CLUE-678 plan §2.1) is exactly
+      // the conversation-forking mechanism this spike hard-codes around, not something to build
+      // here. A unit with no aiUnitSummary, or whose current problem isn't in it, sends nothing.
+      if (typeof message.unitContext === "string" && message.unitContext.length > 0) {
+        installItems.push(
+          `THE UNIT (a summary of this unit's current and nearby problems, as text):\n${message.unitContext}`
+        );
+      }
     }
   }
 

@@ -742,15 +742,19 @@ service cloud.firestore {
             return isStudentClaim() &&
               userIsRequestUser() &&
               classIsRequestContextId() &&
+              // 'unitContext' is CLUE-685-adachat-spike only (checklist Phase 3, not merged) — a
+              // slice of the unit's authored aiUnitSummary, installed alongside leftContext. Not
+              // part of the real CLUE-678 schema.
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
-                                   'problemPath', 'leftContext', 'rightContext', 'rightContent',
-                                   'promptReplace', 'promptAppend', 'provider']) &&
+                                   'problemPath', 'leftContext', 'unitContext', 'rightContext',
+                                   'rightContent', 'promptReplace', 'promptAppend', 'provider']) &&
               data.kind == 'user' &&
               'createdAt' in data &&
               (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
               (!('promptReplace' in data) || data.promptReplace is string) &&
               (!('promptAppend' in data) || data.promptAppend is string) &&
               (!('rightContent' in data) || data.rightContent is string) &&
+              (!('unitContext' in data) || data.unitContext is string) &&
               (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
           }
 
@@ -838,15 +842,18 @@ service cloud.firestore {
       function demoChatMessageCreate() {
         let data = request.resource.data;
         return isAuthed() &&
+          // 'unitContext' is CLUE-685-adachat-spike only (checklist Phase 3, not merged) — kept in
+          // lockstep with the authed block's chatMessageCreate, same as everything else here.
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
-                               'problemPath', 'leftContext', 'rightContext', 'rightContent',
-                               'promptReplace', 'promptAppend', 'provider']) &&
+                               'problemPath', 'leftContext', 'unitContext', 'rightContext',
+                               'rightContent', 'promptReplace', 'promptAppend', 'provider']) &&
           data.kind == 'user' &&
           'createdAt' in data &&
           (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
           (!('promptReplace' in data) || data.promptReplace is string) &&
           (!('promptAppend' in data) || data.promptAppend is string) &&
           (!('rightContent' in data) || data.rightContent is string) &&
+          (!('unitContext' in data) || data.unitContext is string) &&
           (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
       }
 

@@ -12,6 +12,7 @@ import { conversationDocId } from "./conversation-key";
 import { DebugTransport } from "./debug-transport";
 import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
+import { buildUnitContext } from "./unit-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
 import { serializeRight } from "./right-context";
@@ -43,7 +44,7 @@ interface IProps {
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
-  const { appConfig, db, user } = useStores();
+  const { appConfig, db, user, unit } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -57,9 +58,13 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   // prompt edit (config can only change with a reload) also starts a fresh conversation.
   const transport: ChatTransport = useMemo(() => {
     const getLeftContext = () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined;
+    // CLUE-685-adachat-spike: rides the same install-eligible sends as LEFT (see unit-context.ts).
+    // Computed fresh per transport, same as getLeftContext -- unit.config is authored data, not
+    // expected to change without a reload.
+    const getUnitContext = () => buildUnitContext(unit, problem);
     const tutorPrompts = normalizeTutorPrompts(appConfig.chatTutorPrompts);
     if (urlParams.chatDebug) {
-      return new DebugTransport({ getLeftContext, getRightSummary, tutorPrompts });
+      return new DebugTransport({ getLeftContext, getUnitContext, getRightSummary, tutorPrompts });
     }
     const promptsKey = tutorPrompts && tutorPromptsKey(tutorPrompts);
     // Resolved once per transport. Undefined for the default provider, which is what keeps it
@@ -72,6 +77,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       contextId: user.classHash,
       problemPath,
       getLeftContext,
+      getUnitContext,
       getRightSummary,
       // Read only for a backend that projects the document server-side. No dirty-tracking
       // around it the way there is around the summary: serializing a snapshot is cheap, and
@@ -80,7 +86,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       tutorPrompts,
       provider,
     });
-  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user]);
+  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
 
   // The drawer header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.
