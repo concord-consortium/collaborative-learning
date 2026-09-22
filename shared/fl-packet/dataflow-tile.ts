@@ -8,10 +8,10 @@
 //
 // The tile carries BOTH forms for now. `nodes`/`edges` is what ForeverLearning's schema specifies
 // and what every evidence reference and highlight target resolves against; `rendering` is the
-// summarizer's Graphviz form, which no rule on their side reads. The drawing goes once their
+// summarizer's Graphviz form, which no rule on their side reads. `rendering` goes once their
 // grouping release is live for us — it is roughly a third of a real packet, and grouping, the one
-// thing it carried that the schema form could not, now has a home in `groups` below. The renderer
-// is reached through a single call site so that dropping it is a one-line change.
+// thing only it carried, is in `groups` below. The renderer is reached through a single call site
+// so that dropping it is a one-line change.
 
 import { programToGraphviz } from "../ai-summarizer/tile-summarizers/dataflow-to-graphviz";
 import { displayNameForType } from "../dataflow-node-types";
@@ -88,18 +88,19 @@ interface RawProgram {
   recentTicks?: string[];
 }
 
-// Their label is capped at 60 characters; ours is not, so an over-long one would make the packet
-// invalid on the wire. Truncating keeps the group addressable, where dropping the label would
-// leave the diagnostic with a group it cannot name.
+// Their catalog caps a label at 60 characters; ours is not capped, so an over-long one would break
+// their shape. Truncating keeps a name the diagnostic can use, where dropping the label would
+// leave it a group it cannot name.
 const kMaxGroupLabel = 60;
 
 // `collapsed` does not travel: it is whether the group is folded away in the editor, which says
 // nothing about the program and has no home in their shape.
 //
-// Ids fail closed here, as they do throughout this projection. Their catalog requires a group id
-// and rejects an empty one, and an id is what a directive or evidence ref would resolve against —
-// so a group without one is unreferenceable as well as invalid, and sending "" would fail the
-// whole packet for a group nothing could have pointed at.
+// Ids fail closed here, as they do throughout this projection. Their catalog requires a non-empty
+// group id, and an id is what a directive or evidence ref would resolve against, so a group
+// without one is unreferenceable as well as outside their shape. Their packet schema leaves tile
+// content open, so such a group would not be rejected; it would be carried as a group nothing
+// could point at.
 function projectGroups(program: RawProgram): DataflowGroup[] {
   const groups: DataflowGroup[] = [];
   for (const raw of Object.values(program.groups ?? {})) {
@@ -171,7 +172,7 @@ export function projectDataflowTile(
       rendering: renderProgram(program),
     },
   };
-  // Omitted rather than empty, so an ungrouped program is not described as one with no groups.
+  // Their catalog asks for the key to be omitted when there are no groups.
   const groups = projectGroups(program);
   if (groups.length) tile.content.groups = groups;
   if (title !== undefined) tile.title = title;

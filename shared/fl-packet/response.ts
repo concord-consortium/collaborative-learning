@@ -172,10 +172,8 @@ export function responseHighlights(
       const { tile_id: tileId, id: objectId } = target;
       if (!tileId || !objectId) continue;
       const sentName = names.get(tileId)?.get(objectId);
-      // Checked before the caption, and deliberately: not finding a name means we never sent that
-      // node, so there is nothing to point at. A caption supplies the words and never the licence
-      // to point somewhere — a well-worded button aimed at a node that is not there is still
-      // broken, so it must not buy its way past the id check.
+      // Checked before the caption: no name means we never sent that node, and a caption does not
+      // change that (see the file header).
       if (!sentName) continue;
       // Their caption when there is one, because it names the block in the words the prose just
       // used, which our orderedDisplayName cannot do. Blank falls back rather than dropping the

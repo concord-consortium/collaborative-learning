@@ -204,16 +204,11 @@ describe("projectDataflowTile groups", () => {
     expect(tile.content.groups).toBeUndefined();
   });
 
-  // CLUE has no nesting: a group holds nodes, never other groups. Sending the key as an empty
-  // array rather than omitting it says that positively, so a reader cannot mistake our flat
-  // model for missing data.
   it("always sends group_ids empty, because CLUE groups do not nest", () => {
     const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
     expect(tile.content.groups?.every(g => g.group_ids.length === 0)).toBe(true);
   });
 
-  // Their label is capped at 60. Ours is not, so an over-long label would make the packet invalid
-  // against their schema — truncate rather than send something that fails validation downstream.
   it("truncates a label longer than the 60 characters their schema allows", () => {
     const longLabel = "x".repeat(75);
     const tile = projectDataflowTile(
@@ -222,8 +217,6 @@ describe("projectDataflowTile groups", () => {
     expect(tile.content.groups?.[0].label).toHaveLength(60);
   });
 
-  // `collapsed` is whether the student folded the group away in the editor. There is nowhere for
-  // it in their shape and it says nothing about the program, so it does not travel.
   it("does not send the collapsed flag", () => {
     const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
     expect(JSON.stringify(tile.content.groups)).not.toContain("collapsed");
@@ -231,10 +224,6 @@ describe("projectDataflowTile groups", () => {
 });
 
 describe("projectDataflowTile group ids", () => {
-  // Their catalog requires `id` with minLength 1, and an id is what a future directive or evidence
-  // ref resolves against — so a group without one is unreferenceable as well as invalid. Dropping
-  // it keeps the rest of the packet sendable, where emitting "" would fail the whole projection
-  // against their validation for a group nothing could have pointed at anyway.
   it("drops a group carrying no id rather than sending an empty one", () => {
     const tile = projectDataflowTile(
       { ...content, program: { ...program, groups: {
@@ -247,7 +236,7 @@ describe("projectDataflowTile group ids", () => {
     ]);
   });
 
-  it("drops empty member ids, which their catalog also rejects", () => {
+  it("drops empty member ids, which their catalog also forbids", () => {
     const tile = projectDataflowTile(
       { ...content, program: { ...program, groups: {
         "g1": { id: "g1", nodeIds: { "": "", "n-sensor": "n-sensor" } },
