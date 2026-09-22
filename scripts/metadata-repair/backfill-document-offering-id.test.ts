@@ -1,8 +1,8 @@
 import {
   backfillDocumentOfferingId, classifyDocument, getSpaceFromFirestorePath, getSpaceLabel,
-  isRtdbAddressable, kOfferingContainedTypes, parsePageSize, parseTypes, type IBucketCounts
+  kOfferingContainedTypes, parsePageSize, parseTypes, type IBucketCounts
 } from "./backfill-document-offering-id";
-import type { IMetadataDatabase } from "./lib/document-metadata-lookup";
+import type { IMetadataDatabase } from "../lib/document-metadata-lookup";
 import type { Firestore } from "firebase-admin/firestore";
 
 describe("kOfferingContainedTypes", () => {
@@ -41,22 +41,6 @@ describe("getSpaceFromFirestorePath", () => {
     expect(getSpaceFromFirestorePath("nosuchroot/whatever/documents/abc")).toBeUndefined();
     expect(getSpaceFromFirestorePath("authed//documents/abc")).toBeUndefined();
     expect(getSpaceFromFirestorePath("authed/learn_concord_org/other/abc")).toBeUndefined();
-  });
-});
-
-describe("isRtdbAddressable", () => {
-  it("accepts the ordinary push-id shaped segments", () => {
-    expect(isRtdbAddressable("58de0784", "user-1", "-OXiK3RdodVskcYgwaAx")).toBe(true);
-  });
-
-  it("rejects any segment carrying a character the RTDB forbids in a path", () => {
-    // Curriculum-authored supports carry human-readable keys like this one, which production has.
-    expect(isRtdbAddressable("c1", "curriculum", "2.2 Initial Challenge Support 1")).toBe(false);
-    for (const bad of [".", "#", "$", "[", "]", "/", "\u0000", "\n", "\u001f", "\u007f"]) {
-      expect(isRtdbAddressable("c1", "u1", `key${bad}x`)).toBe(false);
-      expect(isRtdbAddressable(`ctx${bad}`, "u1", "k1")).toBe(false);
-      expect(isRtdbAddressable("c1", `uid${bad}`, "k1")).toBe(false);
-    }
   });
 });
 

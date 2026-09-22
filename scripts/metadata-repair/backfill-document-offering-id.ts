@@ -19,20 +19,23 @@
 // prints in the error. Diff against the deployed indexes first: an environment may carry indexes
 // absent from the file, which a --force deploy would delete.
 //
-// Dry run (reports counts, writes nothing):   npx tsx scripts/backfill-document-offering-id.ts
-// Apply (performs the writes):                APPLY=1 npx tsx scripts/backfill-document-offering-id.ts
+// Dry run (reports counts, writes nothing):   npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+// Apply (performs the writes):                APPLY=1 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
 //
 // TYPES limits the scan to a comma-separated subset of the types below, for sampling a large
 // environment before committing to a full sweep. PAGE_SIZE tunes the query page (default 300).
 // DATABASE_URL overrides the Realtime Database URL chosen from the credential's project.
 //
-//   TYPES=planning PAGE_SIZE=1000 npx tsx scripts/backfill-document-offering-id.ts
+//   TYPES=planning PAGE_SIZE=1000 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+//
+// Read ./README.md before running this: it runs after the other repairs in this directory.
 
 import type { Firestore } from "firebase-admin/firestore";
 // Specified without the `.js` extension that the other scripts here use. This module is loaded by a
 // Jest test, and Jest resolves only the extensionless form to the sibling `.ts` file; tsx resolves
 // either form, so running the script is unaffected.
-import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "./lib/document-metadata-lookup";
+import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "../lib/document-metadata-lookup";
+import { isRtdbAddressable } from "./lib/rtdb-document-index";
 
 /**
  * The `type` values of documents kept in an offering, per the `containerType: "offering"` entries in
@@ -96,22 +99,6 @@ export const kUnknownSpaceLabel = "unknown";
 /** How a scanned document is reported in the per-space tallies. */
 export function getSpaceLabel(docPath: string): string {
   return getSpaceFromFirestorePath(docPath)?.label ?? kUnknownSpaceLabel;
-}
-
-/**
- * Firebase rejects these characters in a Realtime Database path, so a document whose key contains one
- * can never be looked up — the failure is permanent, not transient. Curriculum-authored supports carry
- * human-readable keys like "2.2 Initial Challenge Support 1", which is how this arises. The ASCII
- * control characters, U+0000–U+001F and U+007F, are forbidden too.
- */
-const kRtdbIllegal = /[.#$[\]/]/;
-
-const hasControlCharacter = (segment: string) =>
-  [...segment].some((ch) => ch.charCodeAt(0) < 0x20 || ch.charCodeAt(0) === 0x7f);
-
-/** Whether every path segment the lookup would build from this document is legal in the RTDB. */
-export function isRtdbAddressable(contextId: string, uid: string, key: string): boolean {
-  return ![contextId, uid, key].some((segment) => kRtdbIllegal.test(segment) || hasControlCharacter(segment));
 }
 
 /** Every outcome a scanned document can be counted under. */
@@ -398,25 +385,15 @@ async function main() {
   // firebase-admin or the import.meta-using script-utils module.
   const admin = (await import("firebase-admin")).default;
   const fs = (await import("fs")).default;
-  const { getScriptRootFilePath } = await import("./lib/script-utils.js");
+  const { getScriptRootFilePath } = await import("../lib/script-utils.js");
+  const { resolveDatabaseUrl } = await import("./lib/repair-cli");
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
-  // Looked up from the credential's project rather than hardcoded, because this script reads
-  // offeringIds from the Realtime Database and writes them to Firestore. A URL naming a different
-  // project than the credential would copy one environment's offerings onto another environment's
-  // documents, and the census would report it as a clean success.
-  //
-  // Looked up rather than derived: the two projects do not share a host pattern, so a key whose
-  // project is not listed here fails loudly instead of being pointed at a plausible guess. Keep in
-  // step with the `databaseURL` values in src/lib/firebase-config.ts.
-  const databaseURL = process.env.DATABASE_URL ?? {
-    "collaborative-learning-ec215": "https://collaborative-learning-ec215.firebaseio.com",
-    "collaborative-learning-staging": "https://collaborative-learning-staging-default-rtdb.firebaseio.com"
-  }[serviceAccount.project_id as string];
-  if (!databaseURL) {
-    throw new Error(`No Realtime Database URL known for project "${serviceAccount.project_id}". ` +
-      `Add it above, or set DATABASE_URL.`);
-  }
+  // Taken from the credential's project rather than hardcoded, because this script reads offeringIds
+  // from the Realtime Database and writes them to Firestore. A URL naming a different project than
+  // the credential would copy one environment's offerings onto another environment's documents, and
+  // the census would report it as a clean success.
+  const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
   // Parsed before anything connects, so a bad value costs nothing.
   const types = parseTypes(process.env.TYPES);
   const pageSize = parsePageSize(process.env.PAGE_SIZE, 300);

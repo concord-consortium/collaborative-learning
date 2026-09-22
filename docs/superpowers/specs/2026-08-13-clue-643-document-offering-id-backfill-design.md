@@ -113,7 +113,7 @@ anything is wrong.
 
 ### A new script
 
-`scripts/backfill-document-offering-id.ts`, modeled on `scripts/backfill-group-document-axes.ts`:
+`scripts/metadata-repair/backfill-document-offering-id.ts`, modeled on `scripts/backfill-group-document-axes.ts`:
 an exported pure function taking a `Firestore`, unit-tested against a mock, `dryRun` by default with
 `APPLY=1` to write.
 

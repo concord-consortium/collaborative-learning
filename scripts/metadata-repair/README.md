@@ -1,21 +1,25 @@
 # Firestore document metadata repair
 
-Three one-off scripts that reconcile Firestore document metadata with the realtime database, plus the
+Four one-off scripts that reconcile Firestore document metadata with the realtime database, plus the
 modules they share.
 
-Two defects motivated them, both now fixed in the client, so these are a repair rather than something
-that runs on a schedule:
+Three defects motivated them. None is still being produced by the client, so these are a repair
+rather than something that runs on a schedule:
 
 1. **`context_id` names the wrong class** on some metadata documents — 35 in production.
 2. **The metadata document is missing entirely** for realtime-database documents that have one —
    around 5,600 across all real spaces. A document without one is invisible to Sort Work, to the
    class dashboard, and to every other Firestore-driven view.
+3. **`offeringId` is missing** from about 72,000 offering-contained metadata documents.
+   `isInClassUnitContainer` reads the field's absence as "class-contained", so the data has to be
+   true before anything relies on that guard.
 
 | script | what it does | writes to |
 |---|---|---|
 | `repair-document-context-id.ts` | rewrites `context_id` to the class the document actually lives in | Firestore |
 | `create-missing-document-metadata.ts` | creates the missing metadata documents | Firestore |
 | `delete-unrepairable-documents.ts` | removes the residue the repair cannot fix | realtime database |
+| `backfill-document-offering-id.ts` | copies `offeringId` from the realtime-database metadata node | Firestore |
 
 ## Before you start
 
@@ -42,13 +46,15 @@ This matters, and it is not the order the scripts are listed in.
 2. create-missing-document-metadata.ts
 3. re-run 2 as a dry run                 regenerates the skip report
 4. delete-unrepairable-documents.ts      reads that report
+5. backfill-document-offering-id.ts      needs 1 and 2; independent of 3 and 4
 ```
 
 **1 and 2 are independent** and may run in either order.
 
 **Both must run before `backfill-document-offering-id.ts`**, which finds a document's realtime-database
 node through its `context_id` — a wrong one makes the document look unrecoverable, and one that does
-not exist yet cannot be scanned at all.
+not exist yet cannot be scanned at all. It does not depend on the deletion, which only removes
+documents that have no Firestore metadata for it to scan.
 
 **The deletion runs last, against a report regenerated after the repair.** Not because the deletion is
 riskier in itself, but because a document lands in the residue for reasons that are not all
@@ -81,7 +87,14 @@ npx tsx scripts/metadata-repair/create-missing-document-metadata.ts
 # 4. Delete the residue.
 npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
 APPLY=1 npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
+
+# 5. Backfill offeringId. The dry run takes about 4.5 minutes; TYPES=planning samples one type first.
+npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+APPLY=1 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
 ```
+
+`backfill-document-offering-id.ts` needs the `documents` collection-group index on `type`, which
+staging and production already have. Its header says how to add it to a new environment.
 
 ### Environment variables
 
@@ -95,6 +108,8 @@ APPLY=1 npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
 | `REPORT=` | 4 | read a different skip report. |
 | `RETENTION_DAYS=` | 4 | age below which a document is refused. Default 365. |
 | `MAX_REPORT_AGE_HOURS=` | 4 | how stale a report may be before the run refuses. Default 24. |
+| `TYPES=` | 5 | comma-separated subset of the offering-contained types to scan, for sampling. Default all. |
+| `PAGE_SIZE=` | 5 | Firestore query page size. Default 300. |
 
 ### Reading the output
 
@@ -113,6 +128,8 @@ Counts to read carefully:
   a crashed run. If a run dies, both repairs still print their counts and attach them to the error.
 - **`appearedDuringRun`** means a client created the metadata document while the sweep was running.
   Those are left alone, not overwritten.
+- **`deletedDuringRun`** (step 5) means a document was deleted between the scan and the write. It is
+  not recreated.
 - **`ownerIsTeacher`** counts metadata documents created for a teacher's document. Their `network`
   cannot be reconstructed and is written as null, so cross-network visibility is not restored.
 - **`unsupportedType`** is a refusal, not a failure. The document's type is on neither container
@@ -123,8 +140,10 @@ Counts to read carefully:
 Each refusal exists to prevent a write that would make things worse. None of them is a filter that can
 be turned off.
 
-- **`qa` and `dev` spaces.** `delete-qa-user-data.ts` purges their realtime-database side while leaving
-  Firestore metadata behind, so every document there reads as damaged by construction.
+- **`qa` and `dev` spaces**, in steps 1–4. `delete-qa-user-data.ts` purges their realtime-database
+  side while leaving Firestore metadata behind, so every document there reads as damaged by
+  construction. The backfill still scans them, since it only writes an `offeringId` it actually
+  finds in the realtime database; expect most `qa` documents to show up as `noMetadataNode`.
 - **A metadata node whose content is gone.** Creating one would promote an invisible orphan into a
   Sort Work entry that throws when opened.
 - **A key absent from the realtime database.** These are Firestore-native metadata documents; a
@@ -145,3 +164,5 @@ be turned off.
 [docs/superpowers/specs/2026-08-20-clue-643-metadata-repair-design.md](../../docs/superpowers/specs/2026-08-20-clue-643-metadata-repair-design.md)
 covers why the field set is what it is, what the production census found, and the arguments behind the
 refusals above.
+[docs/superpowers/specs/2026-08-13-clue-643-document-offering-id-backfill-design.md](../../docs/superpowers/specs/2026-08-13-clue-643-document-offering-id-backfill-design.md)
+covers the `offeringId` backfill.
