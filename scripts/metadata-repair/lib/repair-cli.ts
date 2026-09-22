@@ -157,7 +157,13 @@ export function createRtdbReader(
         const response = await fetchImpl(url);
         if (response.ok) return response.json();
         // The token has expired or been rotated; a fresh one usually fixes it.
-        if (response.status === 401) { await refresh(); continue; }
+        // Recorded in case it keeps happening: a credential that refreshes fine but has no access to
+        // this database would otherwise end with an error that reads as a missing path.
+        if (response.status === 401) {
+          lastError = new Error(`realtime database rejected the credentials (401) for ${path}`);
+          await refresh();
+          continue;
+        }
         // Never return empty on failure: that reads as "this space has no documents", and the run
         // would report a clean sweep having looked at nothing.
         lastError = new Error(`realtime database returned ${response.status} for ${path}`);

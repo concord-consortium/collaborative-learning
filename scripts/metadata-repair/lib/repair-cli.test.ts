@@ -128,6 +128,16 @@ describe("createRtdbReader", () => {
 
     await expect(reader.readChildKeys("/p")).rejects.toThrow(/500/);
   });
+
+  it("says the credentials were rejected when every attempt gets a 401", async () => {
+    // A credential that refreshes fine but cannot read this database, or a DATABASE_URL aimed at
+    // another project. An error naming only the path would read as "nothing is there".
+    const reader = createRtdbReader("https://db.example.com", token as any, {
+      fetch: async () => ({ ok: false, status: 401, json: async () => null }) as any
+    });
+
+    await expect(reader.readChildKeys("/p")).rejects.toThrow(/rejected the credentials \(401\)/);
+  });
 });
 
 describe("resolveDatabaseUrl", () => {
