@@ -615,4 +615,45 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.verifyRecordButtonText();
     dataflowToolTile.verifyRecordButtonIcon();
   });
+
+  // CLUE-689. A block created outside the viewport still exists, so the only symptom is that the
+  // palette button looks dead. .editor-graph-container clips overflow, so "is it on screen" is a
+  // real visibility question here rather than bounding-box arithmetic.
+  context("new blocks land in view", function () {
+    function addDataflowTile() {
+      cy.visit("/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=qa&noStorage");
+      cy.waitForLoad();
+      clueCanvas.addTile("dataflow");
+      dataflowToolTile.getDataflowTile().should("exist");
+    }
+
+    it("keeps a new block in view after the canvas has been panned away from the origin", () => {
+      addDataflowTile();
+
+      // Arrow-key panning needs the canvas active; Shift+Arrow moves 120px a press, so this leaves
+      // the world origin — where the grid used to be anchored — well off the left edge.
+      dataflowToolTile.getDataflowTile().click();
+      for (let i = 0; i < 8; i++) {
+        cy.realPress(["Shift", "ArrowRight"]);
+      }
+
+      dataflowToolTile.getCreateNodeButton("number").click();
+
+      // Length and visibility together: the block was created (the button did fire) AND it is
+      // somewhere the student can see.
+      dataflowToolTile.getNode("number").should("have.length", 1).and("be.visible");
+    });
+
+    it("keeps every block of a full grid in view", () => {
+      addDataflowTile();
+
+      const blockCount = 12;
+      for (let i = 0; i < blockCount; i++) {
+        dataflowToolTile.getCreateNodeButton("number").click();
+      }
+
+      cy.get(".primary-workspace .node.number").should("have.length", blockCount)
+        .each($node => cy.wrap($node).should("be.visible"));
+    });
+  });
 });

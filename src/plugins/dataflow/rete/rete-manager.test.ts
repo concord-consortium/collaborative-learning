@@ -313,3 +313,67 @@ describe("ReteManager.getNewNodePosition (CLUE-689)", () => {
     expect(Number.isFinite(pos[1])).toBe(true);
   });
 });
+
+/**
+ * getContainerDimensions exists because the rete area element is routinely 0-wide, so it falls back
+ * to a `.cover` ancestor and then to a parent walk. jsdom does no layout — every rect is 0 — so the
+ * sizes here are defined explicitly; what is under test is which element the method decides to
+ * believe, which is the part that silently breaks when the tile's markup moves around.
+ */
+function sizedDiv(className: string, width: number, height: number) {
+  const el = document.createElement("div");
+  el.className = className;
+  Object.defineProperty(el, "offsetWidth", { value: width, configurable: true });
+  Object.defineProperty(el, "offsetHeight", { value: height, configurable: true });
+  Object.defineProperty(el, "clientWidth", { value: width, configurable: true });
+  Object.defineProperty(el, "clientHeight", { value: height, configurable: true });
+  el.getBoundingClientRect = () => ({ width, height, top: 0, left: 0, right: width, bottom: height,
+    x: 0, y: 0, toJSON: () => ({}) });
+  return el;
+}
+
+function makeContainerStub(container: HTMLElement | null) {
+  const stub = Object.create(ReteManager.prototype) as ReteManager;
+  (stub as unknown as { area: { container: HTMLElement | null } }).area = { container };
+  return (stub as unknown as { getContainerDimensions(): { width: number, height: number } | null });
+}
+
+describe("ReteManager.getContainerDimensions (CLUE-689)", () => {
+  it("uses the area element's own size when it has one", () => {
+    expect(makeContainerStub(sizedDiv("area", 640, 480)).getContainerDimensions())
+      .toEqual({ width: 640, height: 480 });
+  });
+
+  // The .cover is deliberately smaller than the ancestor around it: both paths would otherwise
+  // report the same size and the test could not tell which one ran.
+  it("prefers a .cover ancestor over a larger one when the area element is zero-width", () => {
+    const outer = sizedDiv("workspace", 900, 700);
+    const cover = sizedDiv("cover", 250, 150);
+    const area = sizedDiv("area", 0, 0);
+    outer.appendChild(cover);
+    cover.appendChild(area);
+    expect(makeContainerStub(area).getContainerDimensions()).toEqual({ width: 250, height: 150 });
+  });
+
+  it("walks up to a sized ancestor when there is no .cover", () => {
+    const outer = sizedDiv("workspace", 900, 700);
+    const middle = sizedDiv("wrapper", 0, 0);
+    const area = sizedDiv("area", 0, 0);
+    outer.appendChild(middle);
+    middle.appendChild(area);
+    expect(makeContainerStub(area).getContainerDimensions()).toEqual({ width: 900, height: 700 });
+  });
+
+  // The walk requires a "reasonable" ancestor (> 300 x 200), so a chain of small ones yields nothing
+  // rather than a misleading size — getNewNodePosition treats null as "not laid out yet".
+  it("returns null when nothing in the chain is big enough to be the viewport", () => {
+    const outer = sizedDiv("small", 120, 90);
+    const area = sizedDiv("area", 0, 0);
+    outer.appendChild(area);
+    expect(makeContainerStub(area).getContainerDimensions()).toBeNull();
+  });
+
+  it("returns null without a container element at all", () => {
+    expect(makeContainerStub(null).getContainerDimensions()).toBeNull();
+  });
+});
