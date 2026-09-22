@@ -349,6 +349,13 @@ export async function backfillDocumentOfferingId(
     }
 
     if (batch) await commitBatch();
+  } catch (err: any) {
+    // The normal "done" output never runs after a failure, and an interrupted apply is exactly when
+    // the operator needs `written` and the per-type and per-space counts. So print the whole result,
+    // and carry it out with the error for a caller.
+    log(`run failed; partial result: ${JSON.stringify(result, null, 2)}`);
+    err.result = result;
+    throw err;
   } finally {
     report();
   }

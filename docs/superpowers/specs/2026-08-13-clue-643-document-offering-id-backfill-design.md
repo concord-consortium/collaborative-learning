@@ -347,9 +347,10 @@ resolves. A run that dies with a partial batch outstanding therefore under-repor
 over-reports, which is the safe direction: the operator is never told that documents landed when
 they did not.
 
-**A failed run still reports.** The census prints from a `finally`, and each type logs its own
-counts as it completes, so a run that dies after hours still says how far it got and what it found.
-The error itself propagates — nothing is swallowed.
+**A failed run still reports.** A failure prints the whole partial result — `written` and the
+per-type and per-space counts — and attaches it to the error. Each type also logs its own counts as
+it completes, so a run that dies after hours still says how far it got, what it found, and which
+writes landed. The error itself propagates — nothing is swallowed.
 
 **There is no resume.** A re-run is safe, because the in-memory filter on the absence of
 `offeringId` makes repaired documents drop out on their own, but it restarts from the first type.

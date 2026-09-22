@@ -233,7 +233,8 @@ function makeRtdb(nodes: Record<string, any>, throwOn: string[] = []) {
 // `docsByType` supplies the canned result per queried type, so pagination can be exercised by handing
 // one type more documents than a page holds. `calls` records the query shape itself: a script that
 // queried the wrong type string would return an empty, confident census and pass every other test.
-function makeDb(docsByType: Record<string, any[]>) {
+function makeDb(docsByType: Record<string, any[]>, { failCommitAfter }: { failCommitAfter?: number } = {}) {
+  let commits = 0;
   const batches: { writes: any[]; committed: boolean; set: any; commit: () => Promise<void> }[] = [];
   const calls: { collectionGroup?: string; types: string[]; orderBy: string[] } =
     { types: [], orderBy: [] };
@@ -270,7 +271,13 @@ function makeDb(docsByType: Record<string, any[]>) {
         writes,
         committed: false,
         set: (ref: any, data: any, opts: any) => { writes.push({ ref, data, opts }); },
-        commit: () => { b.committed = true; return Promise.resolve(); }
+        commit: () => {
+          if (failCommitAfter != null && ++commits > failCommitAfter) {
+            return Promise.reject(new Error("commit exploded"));
+          }
+          b.committed = true;
+          return Promise.resolve();
+        }
       };
       batches.push(b);
       return b;
@@ -429,6 +436,23 @@ describe("backfillDocumentOfferingId — writing", () => {
       opts: { merge: true }
     }]);
     expect(db.committed.length).toBe(1);
+  });
+
+  it("reports the whole partial result when a commit fails, and carries it on the error", async () => {
+    // The run's normal output never prints after a failure, so this is the only record of which
+    // writes landed and what the census had found by then.
+    const logs: string[] = [];
+    const db = makeDb({ problem: resolvedDocs(401) }, { failCommitAfter: 1 });
+    const err: any = await backfillDocumentOfferingId(db as unknown as Firestore,
+      makeRtdb(resolvedNodes(401)), { dryRun: false, log: (m) => logs.push(m) }).catch((e) => e);
+
+    expect(err.message).toBe("commit exploded");
+    // The first batch of 400 committed; the final batch of 1 did not.
+    expect(err.result.written).toBe(400);
+    expect(err.result.bySpace[kSpace].resolved).toBe(401);
+    const partial = logs.find((m) => m.startsWith("run failed; partial result:"));
+    expect(partial).toContain(`"written": 400`);
+    expect(partial).toContain(kSpace);
   });
 
   it("writes nothing for any bucket other than resolved", async () => {
