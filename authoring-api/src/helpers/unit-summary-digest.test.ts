@@ -1,11 +1,17 @@
 import {UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
-import {chunkMarkdown, EMPTY_PROBLEM_DIGEST, generateProblemDigests} from "./unit-summary-digest";
+import {
+  chunkMarkdown, duplicateProblemDigest, EMPTY_PROBLEM_DIGEST, generateProblemDigests,
+} from "./unit-summary-digest";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
 
-function problem(ordinal: string, markdown: string): AssembledProblem {
-  return {ordinal, title: `Problem ${ordinal}`, markdown, problemHash: "hash"};
+// problemHash defaults to one unique per ordinal (as real problems always are) rather than a
+// shared literal -- otherwise every multi-problem test here would accidentally make every problem
+// after the first look like a duplicate of it, once generateProblemDigests started caring about
+// problemHash at all.
+function problem(ordinal: string, markdown: string, problemHash = `hash-${ordinal}`): AssembledProblem {
+  return {ordinal, title: `Problem ${ordinal}`, markdown, problemHash};
 }
 
 function fakeClient(generateText: jest.Mock): UnitSummaryOpenAIClient {
@@ -157,6 +163,51 @@ describe("generateProblemDigests", () => {
 
   it("still digests other problems normally when one has no content", async () => {
     const problems = [problem("1.1", ""), problem("1.2", "real content")];
+    const generateText = jest.fn().mockResolvedValue("a real digest");
+    const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
+    expect(digests).toEqual([EMPTY_PROBLEM_DIGEST, "a real digest"]);
+    expect(generateText).toHaveBeenCalledTimes(1);
+  });
+
+  it("points a byte-identical duplicate problem at the first occurrence, without calling the model", async () => {
+    const problems = [
+      problem("1.2", "shared content", "same-hash"),
+      problem("1.5", "shared content", "same-hash"),
+    ];
+    const generateText = jest.fn().mockResolvedValue("a real digest");
+    const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
+    expect(digests).toEqual(["a real digest", duplicateProblemDigest("1.2")]);
+    expect(generateText).toHaveBeenCalledTimes(1);
+  });
+
+  it("points every duplicate at the first occurrence, not at the previous duplicate in the chain", async () => {
+    const problems = [
+      problem("1.2", "shared content", "same-hash"),
+      problem("1.5", "shared content", "same-hash"),
+      problem("1.6", "shared content", "same-hash"),
+    ];
+    const generateText = jest.fn().mockResolvedValue("a real digest");
+    const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
+    expect(digests).toEqual(["a real digest", duplicateProblemDigest("1.2"), duplicateProblemDigest("1.2")]);
+    expect(generateText).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not treat two independently-empty problems as duplicates of each other", async () => {
+    // Two empty problems could share a problemHash (both hash the same empty string), but each
+    // gets its own more specific EMPTY_PROBLEM_DIGEST rather than pointing at "an equally empty
+    // problem", which would say less.
+    const problems = [problem("1.1", "", "empty-hash"), problem("1.2", "", "empty-hash")];
+    const generateText = jest.fn().mockResolvedValue("digest");
+    const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
+    expect(digests).toEqual([EMPTY_PROBLEM_DIGEST, EMPTY_PROBLEM_DIGEST]);
+    expect(generateText).not.toHaveBeenCalled();
+  });
+
+  it("digests a problem normally when its content only coincidentally matches after an empty one", async () => {
+    // Guards against the empty-exclusion in findDuplicates ever being implemented the other way
+    // around: an empty problem must never be recorded as "the first occurrence" that a later,
+    // actually-empty-looking-but-real problem could get pointed at.
+    const problems = [problem("1.1", "", "hash-a"), problem("1.2", "real content", "hash-b")];
     const generateText = jest.fn().mockResolvedValue("a real digest");
     const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
     expect(digests).toEqual([EMPTY_PROBLEM_DIGEST, "a real digest"]);

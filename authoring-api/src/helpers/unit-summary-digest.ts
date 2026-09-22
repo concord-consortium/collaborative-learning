@@ -28,6 +28,17 @@ const DIGEST_INSTRUCTIONS =
 // use this fixed digest instead, so one thin problem doesn't block generating the rest of the unit.
 export const EMPTY_PROBLEM_DIGEST = "(No content provided for this problem.)";
 
+// Some curricula reuse the same section files across several problems verbatim (vibe's checklist
+// review found seven such problems -- e.g. a "PRIOR Lesson" variant referencing the same files as
+// the lesson it precedes). A byte-identical problem produces a byte-identical digest, so paying
+// for and storing a second, third, ... copy of the same text is pure waste. This does not lose
+// information for a later prior-knowledge call: the first occurrence's real digest is already
+// somewhere in that call's input, so pointing at it is enough for the model to know nothing new
+// happened here, without restating the content a second time.
+export function duplicateProblemDigest(firstOrdinal: string): string {
+  return `(same content as problem ${firstOrdinal})`;
+}
+
 const COMBINE_DIGESTS_INSTRUCTIONS =
   "You are given several partial digests describing different parts of the SAME curriculum " +
   "problem (it was split into parts only because its content was too long for one request). " +
@@ -44,16 +55,43 @@ export interface DigestOptions {
 export async function generateProblemDigests(
   problems: AssembledProblem[], options: DigestOptions
 ): Promise<string[]> {
+  // Computed once, up front, from the array's authored order -- not from which concurrent call
+  // happens to finish first -- so the choice of which occurrence is "first" is deterministic
+  // regardless of timing.
+  const duplicateOfByOrdinal = findDuplicates(problems);
   return mapWithConcurrency(
     problems, UNIT_SUMMARY_CONCURRENCY_LIMIT,
-    (problem) => digestOneProblem(problem, options)
+    (problem) => digestOneProblem(problem, options, duplicateOfByOrdinal.get(problem.ordinal))
   );
 }
 
-async function digestOneProblem(problem: AssembledProblem, options: DigestOptions): Promise<string> {
+// Maps a duplicate problem's ordinal to the ordinal of the first problem with the same
+// problemHash. Empty problems are excluded on both sides: they already get the more specific
+// EMPTY_PROBLEM_DIGEST message, which says more than "same content as an equally empty problem."
+function findDuplicates(problems: AssembledProblem[]): Map<string, string> {
+  const firstOrdinalByHash = new Map<string, string>();
+  const duplicateOfByOrdinal = new Map<string, string>();
+  for (const problem of problems) {
+    if (!problem.markdown.trim()) continue;
+    const firstOrdinal = firstOrdinalByHash.get(problem.problemHash);
+    if (firstOrdinal) {
+      duplicateOfByOrdinal.set(problem.ordinal, firstOrdinal);
+    } else {
+      firstOrdinalByHash.set(problem.problemHash, problem.ordinal);
+    }
+  }
+  return duplicateOfByOrdinal;
+}
+
+async function digestOneProblem(
+  problem: AssembledProblem, options: DigestOptions, duplicateOfOrdinal?: string
+): Promise<string> {
   try {
     if (!problem.markdown.trim()) {
       return EMPTY_PROBLEM_DIGEST;
+    }
+    if (duplicateOfOrdinal) {
+      return duplicateProblemDigest(duplicateOfOrdinal);
     }
     if (problem.markdown.length <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS) {
       return await callDigest(problem.markdown, options);
