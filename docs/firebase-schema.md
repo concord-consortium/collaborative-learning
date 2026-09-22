@@ -32,6 +32,20 @@ The core design elements of the schema are:
             offeringId?: string
             evaluation {key: aiEvaluation from config file}
               number (timestamp)
+            evaluationStatus {key: aiEvaluation from config file}
+              // Written by the analysis pipeline (functions-v2) when it finishes handling the
+              // request in the sibling `evaluation` node above, so the client can resolve its
+              // "waiting for Ada" state without polling for a comment that may never arrive
+              // (e.g. an empty document, which the pipeline skips outright). Keyed per request,
+              // not a single shared node: a single node could be overwritten by a slow older
+              // request's write landing after a newer one's, and would hand every new listener
+              // the previous request's status the moment it subscribes. The client subscribes
+              // only to its own request's child.
+              {key: requestId, or "automatic" for a request with none (onDisconnect, sync-hook)}
+                outcome: "skipped-empty" | "commented" | "failed"
+                requestId?: string (echoed from the request, when it had one)
+                docUpdated: number | string (the request's evaluation timestamp)
+                completedAt: number (timestamp)
             // TDB: serialized document model metadata
           /documents: {key: documentKey => DBDocument}
             version: "1.0"

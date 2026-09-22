@@ -44,7 +44,7 @@ import admin from "firebase-admin";
 import { kAnalyzerUserParams } from "../shared/shared.js";
 import { getFirebaseBasePath, getFirestoreBasePath, getScriptRootFilePath } from "./lib/script-utils.js";
 import { isContainedBy } from "./ai-harness/src/files.js";
-import { classifyDocument } from "./ai-harness/src/capability.js";
+import { classifyDocument } from "../shared/ai-analysis-classify.js";
 
 const kPortal = "learn.concord.org";
 const kFirestoreDocuments = getFirestoreBasePath(kPortal);
@@ -211,7 +211,7 @@ function textOfTextTile(content: TileContentLike | undefined): string {
 /**
  * Count what one document's tiles hold, for the report's volume figures.
  *
- * Modality is NOT decided here — `classifyDocument` in the harness's capability module answers
+ * Modality is NOT decided here — `classifyDocument` in `shared/ai-analysis-classify.ts` answers
  * that, and it is the only answer this file uses (see `main`). It walks rowOrder/rowMap rather than
  * the flat tileMap, so it skips section headers and tiles no row references, and it treats a
  * Question tile's first row as the authored prompt rather than as student work. A tally over

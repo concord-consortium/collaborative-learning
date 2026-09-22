@@ -11,7 +11,7 @@ import {
   Query, QueryDocumentSnapshot, getFirestore,
 } from "firebase-admin/firestore";
 
-import {TutorProvider} from "./provider";
+import {TurnResult, TutorProvider} from "./provider";
 
 // reclaim a lock whose owner crashed mid-drain, so a conversation can't wedge forever.
 // INVARIANT: STALE_LOCK_MS must exceed the function's configured timeout (default 60s, no
@@ -82,6 +82,25 @@ export function pickOwnerFields(data: DocumentData | undefined): Record<string, 
   return out;
 }
 
+// Takes the whole TurnResult rather than a backend's own reply type: the assistant doc is the
+// drain's to shape, and every field on it has to come through the provider seam to get here.
+//
+// `highlights` is omitted rather than written as an empty array: most replies point at nothing, a
+// backend that cannot produce them omits them entirely, and the client treats absent and empty the
+// same way.
+export function buildAssistantDoc(
+  result: TurnResult, ownerFields: Record<string, unknown>
+): Record<string, unknown> {
+  const doc: Record<string, unknown> = {
+    kind: "assistant",
+    userText: result.assistantText,
+    createdAt: FieldValue.serverTimestamp(),
+    ...ownerFields,
+  };
+  if (result.highlights?.length) doc.highlights = result.highlights;
+  return doc;
+}
+
 // The side effects of processing one message, for the caller to commit atomically with the
 // cursor advance.
 interface UnitResult {
@@ -103,17 +122,13 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   // Per-conversation state is read fresh each turn (no in-memory state). The lock serializes
   // turns, so a provider's seq increment can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
-  const {assistantText, parentUpdate} = await provider.processTurn(parent, data);
+  const turnResult = await provider.processTurn(parent, data);
+  const {parentUpdate} = turnResult;
   assertProviderOwnsFields(parentUpdate);
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
   // null-text assistant doc so the client's "awaiting" indicator clears.
-  const assistant = {
-    kind: "assistant",
-    userText: assistantText,
-    createdAt: FieldValue.serverTimestamp(),
-    ...ownerFields,
-  };
+  const assistant = buildAssistantDoc(turnResult, ownerFields);
 
   return {assistant, parentUpdate};
 }

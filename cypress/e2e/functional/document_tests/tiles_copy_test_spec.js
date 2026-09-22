@@ -327,7 +327,9 @@ context('Test copy tiles from one document to other document', function () {
     // For Copy to Workspace, if tiles are coming from a Problem tab,
     // they are copied below the section header for that tab in the Workspace
     cy.log('Copy to Workspace should place tiles below the section header for that tab.');
-    canvas.getCopyToWorkspaceButton().should('not.have.attr', 'disabled');
+    // Toolbar buttons report their disabled state via aria-disabled, so that is what has to be
+    // asserted here; a bare `disabled` attribute is never rendered and would always be absent.
+    canvas.getCopyToWorkspaceButton().should('not.have.attr', 'aria-disabled');
     canvas.getCopyToWorkspaceButton().click();
 
     // Confirm the Initial Challenge section header

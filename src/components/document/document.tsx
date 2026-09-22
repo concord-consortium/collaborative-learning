@@ -1,16 +1,22 @@
+import classNames from "classnames";
 import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
+import { nanoid } from "nanoid";
 import React from "react";
 import FileSaver from "file-saver";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
 import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
-import { CommentWithId } from "../../models/document/document-comments-manager";
+import { CommentWithId, kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
+import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -134,13 +140,14 @@ const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-const IdeasButton = ({ onClick }: { onClick: () => void }) => {
+const IdeasButton = ({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) => {
   return (
     <button
       title={"Request Idea"}
       onClick={onClick}
       className="ideas-button"
       data-test="ideas-button"
+      disabled={disabled}
     >
       <IdeaIcon/>
       Ideas?
@@ -273,7 +280,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
     return (
-      <div className={`titlebar ${docType}`}>
+      <div className={classNames("titlebar", docType)}>
         {!hideButtons &&
           <div className="actions left">
             <DocumentFileMenu document={document}
@@ -322,8 +329,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return this.renderGenericTitleBar({
       title,
       hideButtons,
-      // The kind is the stylesheet hook; documents predating the kind axis fall back to their type.
-      docType: document.kind ?? document.type,
+      // Styled by the concurrent axis, not by type or kind: group and class-wide documents share one
+      // appearance, and a kind is an arbitrary author string. Distinguishing them later is an owner
+      // question (hasGroupOwner / hasClassOwner), not a type one.
+      docType: "concurrent",
     });
   }
 
@@ -369,6 +378,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderIdeasButton() {
+    const { document } = this.props;
     const { documents, appConfig: { aiEvaluation, showIdeasButton } } = this.stores;
     // if showIdeasButton is explicitly set in the unit config, use that, otherwise
     // show the button if aiEvaluation is enabled or if there are exemplar documents
@@ -377,7 +387,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       : aiEvaluation || documents.invisibleExemplarDocuments.length > 0;
     if (showButton) {
       return (
-        <IdeasButton onClick={this.handleIdeasButtonClick} />
+        <IdeasButton
+          onClick={this.handleIdeasButtonClick}
+          disabled={!document.commentsManager?.canRequestIdeas}
+        />
       );
     }
   }
@@ -468,7 +481,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const hasDisplayId = !!displayId;
     const showShareToggle = this.shareButtonEnabled();
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={classNames("titlebar", type)}>
         <div className="actions">
           { !hideButtons &&
               <DocumentFileMenu document={document}
@@ -521,7 +534,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderSupportTitleBar(type: string) {
     const { document } = this.props;
     return (
-      <div className={`titlebar ${type}`}>
+      <div className={classNames("titlebar", type)}>
         <div className="title" data-test="document-title">
           {document.getProperty("caption")}
         </div>
@@ -535,43 +548,115 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   // based on rules defined in exemplar-controller-rules. So we just
   // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   // The AI evaluation is triggered by updating the last-edited timestamp.
+  //
+  // An empty document (no `documentHasStudentWork`) shows a nudge instead of requesting AI
+  // evaluation, and a failed or stalled request shows a failure message — but only when the unit
+  // has AI evaluation configured. A unit with none has nothing to skip or report, and either
+  // message would misattribute itself to Ada, who plays no part there; the click just logs
+  // normally, which is what lets the exemplar controller reveal an exemplar regardless.
+  // A populated document is gated by `canRequestIdeas` and carries a `requestId` to correlate the
+  // server's eventual completion status.
   private handleIdeasButtonClick = async () => {
     const { document } = this.props;
     const { db: { firebase }, user, ui, persistentUI, appConfig } = this.stores;
+    // Always present at runtime (created in the document model's afterCreate); this satisfies the
+    // optional type rather than guarding a real case.
+    const commentsManager = document.commentsManager;
+    if (!commentsManager || !commentsManager.canRequestIdeas) return;
 
-    await firebase.setLastEditedNow(user, document.key, document.uid);
+    commentsManager.clearStatusMessage();
+    const aiEnabled = !!appConfig.aiEvaluation;
+    const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
+    const skipEmptyDocument = isEmpty && aiEnabled;
+    const requestId = (!isEmpty && aiEnabled) ? nanoid() : null;
+    // Must be recorded before any await below, so a status for this click can never find a stale id.
+    commentsManager.setLatestIdeasRequestId(requestId);
 
     // Unselect all tiles, so that the whole-document comments are shown
     ui.clearSelectedTiles();
     persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
 
-    if (appConfig.aiEvaluation) {
-      if (document.commentsManager) {
-        // Use the comments manager to queue a pending AI comment.
-        // The manager will automatically check when new comments arrive
-        // and remove this pending item when AI analysis completes.
+    if (skipEmptyDocument) {
+      commentsManager.showStatusMessage(IDEAS_EMPTY_MESSAGE);
+      return;
+    }
+
+    commentsManager.setIdeasClickInProgress(true);
+
+    // setLastEditedNow/getLastEditedTimestamp have no timeout of their own, so a stalled
+    // connection could leave ideasClickInProgress (and the Ideas button) disabled forever.
+    // `attempt` races against a deadline below; on timeout we release the gate and show a failure
+    // message but let `attempt` keep running. The staleness check before queueing then keeps a
+    // late resolution (or a newer click superseding this one) from reviving the gate.
+    let timedOut = false;
+    const attempt = (async () => {
+      await waitForSaveSettled(document);
+      await firebase.setLastEditedNow(user, document.key, document.uid, undefined, requestId ?? undefined);
+
+      if (requestId) {
         const docLastEditedTime = await firebase.getLastEditedTimestamp(user, document.key);
         const effectiveLastEdited = docLastEditedTime || Date.now();
 
-        document.commentsManager.queueRemoteComment({
-          triggeredAt: effectiveLastEdited,
-          source: "ai",
-          checkCompleted: (comments: CommentWithId[]) => {
-            // Check if AI analysis is complete by finding an AI comment
-            // that was created after the document was last edited.
-            const lastAIComment = [...comments]
-              .reverse()
-              .find(comment => comment.uid === kAnalyzerUserParams.id);
+        const isStillCurrent = !timedOut && commentsManager.latestIdeasRequestId === requestId;
+        const statusPath = isStillCurrent &&
+          firebase.getEvaluationStatusPath(user, document.key, document.uid, requestId);
+        if (statusPath) {
+          const statusRef = firebase.ref(statusPath);
+          const onStatus = (snapshot: any) => commentsManager.applyEvaluationStatus(snapshot.val());
 
-            return !!(lastAIComment &&
-                     lastAIComment.createdAt.getTime() > effectiveLastEdited);
-          }
-        });
+          // Queued before the listener attaches, so a value Firebase delivers synchronously
+          // always finds its pending entry already in place.
+          commentsManager.queueRemoteComment({
+            triggeredAt: effectiveLastEdited,
+            source: "ai",
+            requestId,
+            checkCompleted: (comments: CommentWithId[]) => {
+              const lastAIComment = [...comments]
+                .reverse()
+                .find(comment => comment.uid === kAnalyzerUserParams.id);
+
+              return !!(lastAIComment &&
+                       lastAIComment.createdAt.getTime() > effectiveLastEdited);
+            },
+            dispose: () => statusRef.off("value", onStatus)
+          });
+          statusRef.on("value", onStatus);
+
+          // A fast comment can arrive before this entry existed to catch it; recheck now rather
+          // than wait for the 120s expiry above.
+          commentsManager.checkPendingComments();
+        }
       }
-    }
 
-    logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+      logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+    })();
+
+    // Never rejects, so a late failure (after the deadline below has already shown its own
+    // message) can't stomp on it.
+    const guardedAttempt = attempt.catch(error => {
+      console.error("Ideas request failed:", error);
+      if (aiEnabled && !timedOut && commentsManager.latestIdeasRequestId === requestId) {
+        commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      }
+    });
+    let resolveDeadline: (value: "timeout") => void;
+    const deadline = new Promise<"timeout">(resolve => { resolveDeadline = resolve; });
+    const deadlineTimer = setTimeout(() => {
+      timedOut = true;
+      resolveDeadline("timeout");
+    }, kIdeasRequestDeadlineMs);
+
+    try {
+      const result = await Promise.race([guardedAttempt.then(() => "done" as const), deadline]);
+      if (result === "timeout") {
+        if (aiEnabled) commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+      } else {
+        clearTimeout(deadlineTimer);
+      }
+    } finally {
+      commentsManager.setIdeasClickInProgress(false);
+    }
   };
 
   private handleToggleWorkspaceMode = () => {

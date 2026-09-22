@@ -60,6 +60,23 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    // The ForeverLearning backend projects the document server-side, so its messages carry the
+    // document itself rather than a summary of it. The whitelist is a hasOnly, so a field the
+    // client sends and the rules have not been told about fails the write outright.
+    it("allows an optional rightContent payload (the document, for a server-side projection)", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({
+        add: { rightContent: `{"rowOrder":[],"rowMap":{},"tileMap":{}}`, provider: "foreverlearning" }
+      }));
+    });
+
+    it("rejects a rightContent that is not a string", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({
+        add: { rightContent: { rowOrder: [] } }
+      }));
+    });
+
     it("allows optional promptReplace/promptAppend payloads (unit-authored prompt overrides)", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToSucceed(db, `${kParentPath}/messages/msg-replace`, specMessage({
@@ -83,10 +100,8 @@ describe("Firestore security rules: chat tutor", () => {
         specMessage({ add: { provider: "openai" } }));
     });
 
-    // The enum pin, not just the whitelist: once the trigger routes on this field, an arbitrary
-    // provider string would send a paid turn to whatever its fallback happens to be. The trigger
-    // builds an OpenAI backend unconditionally today, so the pin is guarding the routing that
-    // arrives with the second backend rather than anything the server reads now.
+    // The enum pin, not just the whitelist: the trigger routes on this field, so an arbitrary
+    // provider string would send a paid turn to whatever its fallback happens to be.
     it("rejects a provider outside the known set", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kMessagePath, specMessage({ add: { provider: "some-other-vendor" } }));
@@ -256,6 +271,24 @@ describe("Firestore security rules: chat tutor", () => {
     it("rejects an unauthenticated write", async () => {
       db = initFirestore(); // no auth
       await expectWriteToFail(db, kDemoMessage, demoMessage());
+    });
+
+    // demo/qa is where a new provider is exercised first, so this block's whitelist has to carry
+    // the same fields as the authed one. The whitelist is a hasOnly, so a field it does not know
+    // about rejects the write outright rather than being dropped.
+    it("allows a rightContent payload under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, kDemoMessage, demoMessage({
+        add: { rightContent: `{"rowOrder":[],"rowMap":{},"tileMap":{}}`,
+               provider: "foreverlearning" }
+      }));
+    });
+
+    it("rejects a non-string rightContent under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, kDemoMessage, demoMessage({
+        add: { rightContent: { rowOrder: [] } }
+      }));
     });
 
     // If the carve-out failed, the permissive catch-all would grant these and the writes would

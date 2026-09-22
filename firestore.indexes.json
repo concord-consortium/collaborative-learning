@@ -59,6 +59,14 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "root",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "space",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "unit",
           "order": "ASCENDING"
         },
@@ -68,6 +76,51 @@
         },
         {
           "fieldPath": "numAiAgreements",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "summaryEmbedding",
+          "vectorConfig": {
+            "dimension": 1536,
+            "flat": {}
+          }
+        }
+      ]
+    },
+    {
+      "collectionGroup": "summaries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "context_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "investigation",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "problem",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "root",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "space",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "unit",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "key",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "numAgreements",
           "order": "ASCENDING"
         },
         {

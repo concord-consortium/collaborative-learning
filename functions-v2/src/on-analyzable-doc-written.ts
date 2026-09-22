@@ -3,11 +3,13 @@ import {Change} from "firebase-functions/v2";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import {getAnalysisQueueFirestorePath} from "./utils";
+import {IEvaluationRequestContext, kPlaceholderUnitCode} from "../../shared/shared";
 
 // This is one of three functions for AI analysis of documents:
 // 1. (This function) watch for changes to the evaluation metadata field and write into the queue of docs to process
-// 2. Create screenshots of those documents
-// 3. Send those screenshots to the AI service for processing, and create document comments with the results
+// 2. Summarize and screenshot those documents
+// 3. Send what was produced to the AI service for processing, record the summary that was evaluated
+//    in `summaries/`, and create document comments with the results
 
 // We watch for changes in the Firebase metadata, but will eventually need to write results out to comments
 // on the document.
@@ -47,8 +49,7 @@ export interface AIPrompt {
   categories?: string[],
   keyIndicatorsPrompt?: string,
   discussionPrompt?: string,
-  systemPrompt: string,
-  summarizer?: string
+  systemPrompt: string
 }
 
 export interface AnalysisQueueDocument {
@@ -59,7 +60,59 @@ export interface AnalysisQueueDocument {
   evaluator: string;
   metadataPath: string;
   firestoreDocumentPath: string;
+  /** The unit and problem the student was running when the evaluation was requested. */
+  requestContext?: IEvaluationRequestContext;
+  /** Ideas click ids that landed on this queue document before it was picked up (keyed by docId,
+   * not request, so more than one can land); each gets its own completion status. Absent when only
+   * automatic routes (onDisconnect, sync-hook cleanup) ever wrote here. */
+  requestIds?: string[];
 }
+
+// The lengths cap what a client can write: a long enough value pushes the queue record past
+// Firestore's document limit, which fails the write and leaves the document unanalyzed.
+const kMaxUnitCodeLength = 40;
+const kMaxOfferingIdLength = 100;
+// A longer value is dropped rather than truncated, since a truncated id would never match.
+const kMaxRequestIdLength = 64;
+
+// The same shape `isRenderableUnit` accepts in on-analysis-document-pending.ts, since a unit that
+// cannot be rendered with is not worth storing either.
+const isUnitCode = (value: unknown): value is string =>
+  typeof value === "string" && value.length <= kMaxUnitCodeLength &&
+  /^[A-Za-z0-9_+-]+$/.test(value) && value !== kPlaceholderUnitCode;
+
+// Ordinals are small whole numbers written as strings, as the metadata records hold them. No
+// leading zeros: "01" would never match a stored "1".
+const isOrdinal = (value: unknown): value is string =>
+  typeof value === "string" && /^(0|[1-9]\d{0,2})$/.test(value);
+
+// Investigations can be numbered 0 (vibe, mods and sas all have a 0.1); problems are numbered from
+// 1, so 0 is the app's unresolved placeholder. The client refuses to send it, and so does this.
+const isProblemOrdinal = (value: unknown): value is string => isOrdinal(value) && value !== "0";
+
+// Real clients only ever send a nanoid() (alphabet A-Za-z0-9_-), but this value is interpolated
+// into a realtime database path (evaluation-status.ts): a "/" would nest the write instead of
+// writing one leaf, and ".", "#", "$", "[", "]" are illegal in a database key and would throw.
+const isRequestId = (value: unknown): value is string =>
+  typeof value === "string" && value.length > 0 && value.length <= kMaxRequestIdLength &&
+  /^[A-Za-z0-9_-]+$/.test(value);
+
+/**
+ * The value comes from the realtime database, where a class member can write anything under their
+ * class and the open realms let any signed-in user write anything, so nothing is passed on as it
+ * arrived. The lookup needs all three curriculum fields, so a context missing or malformed in any
+ * of them is dropped whole.
+ *
+ * @param {unknown} context the `context` field read off the evaluation request
+ * @return {IEvaluationRequestContext | undefined} the four fields, or nothing if any is unusable
+ */
+export const normalizeRequestContext = (context: unknown): IEvaluationRequestContext | undefined => {
+  if (!context || typeof context !== "object") return undefined;
+  const {unit, investigation, problem, offeringId} = context as Record<string, unknown>;
+  if (!isUnitCode(unit) || !isOrdinal(investigation) || !isProblemOrdinal(problem)) return undefined;
+  const usableOfferingId = typeof offeringId === "string" && offeringId.length <= kMaxOfferingIdLength;
+  return {unit, investigation, problem, offeringId: usableOfferingId ? offeringId : ""};
+};
 
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
   const content = event.data.after.val();
@@ -70,6 +123,8 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   // Check the type since it has changed from a timestamp to an object
   const timestamp = typeof content === "object" ? content.timestamp : content;
   const aiPrompt = (typeof content === "object" && content.aiPrompt) ? content.aiPrompt : null;
+  const requestContext = typeof content === "object" ? normalizeRequestContext(content.context) : undefined;
+  const requestId = typeof content === "object" && isRequestId(content.requestId) ? content.requestId : undefined;
   // onValueWritten will trigger on create, update, or delete. Ignore deletes.
 
   // Determine all the database paths that we are going to need
@@ -80,8 +135,9 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const firestoreDocumentPath = `${firestoreRoot}/documents/${docId}`;
 
   const firestore = admin.firestore();
+  const queueDocRef = firestore.doc(getAnalysisQueueFirestorePath("pending", docId));
 
-  // This should be safe in the event of duplicate calls; the second will just overwrite the first.
+  // Safe for duplicate calls: the second overwrites the first, except requestIds, which accumulates.
   const newDocument: AnalysisQueueDocument = {
     metadataPath,
     documentPath,
@@ -95,6 +151,20 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
     newDocument.aiPrompt = aiPrompt;
   }
 
-  await firestore.doc(getAnalysisQueueFirestorePath("pending", docId)).set(newDocument);
+  if (requestContext) {
+    newDocument.requestContext = requestContext;
+  }
+
+  // A transaction: a plain `.set()` would replace an existing document's requestIds outright
+  // instead of joining this write's id (if any) to them.
+  await firestore.runTransaction(async (transaction) => {
+    const existing = (await transaction.get(queueDocRef)).data() as AnalysisQueueDocument | undefined;
+    const priorRequestIds = Array.isArray(existing?.requestIds) ? existing.requestIds : [];
+    const requestIds = requestId ? [...priorRequestIds, requestId] : priorRequestIds;
+    if (requestIds.length > 0) {
+      newDocument.requestIds = requestIds;
+    }
+    transaction.set(queueDocRef, newDocument);
+  });
   logger.info(`Added document ${documentPath} to queue for ${evaluator} with aiPrompt ${JSON.stringify(aiPrompt)}`);
 };

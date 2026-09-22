@@ -56,6 +56,18 @@ export const DocEditorApp = observer(function DocEditorApp() {
   });
   const [aiSummary, setAiSummary] = useState<string>();
 
+  // Expose the editable document under the same name the CLUE app uses
+  // (use-document-sync-to-firebase.ts), which this route does not go through. Tests and console
+  // debugging need a handle on state that no UI can reach — volatile state especially, since it
+  // is absent from the document JSON and from any snapshot.
+  //
+  // An effect keyed on `document` rather than a one-time assignment: loadDocument REPLACES the
+  // model when the `document=` param resolves, and a handle on the superseded instance is worse
+  // than no handle at all — it reads and writes a tree nothing is rendering.
+  useEffect(() => {
+    (window as any).currentDocument = document;
+  }, [document]);
+
   const {
     showLocalReadOnly,
     showRemoteReadOnly,

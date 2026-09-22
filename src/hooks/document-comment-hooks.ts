@@ -145,7 +145,6 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
         createdAt: new Date(),
         tileId: comment.tileId,
         content: comment.content,
-        agreeWithAi: comment.agreeWithAi,
         tags: comment.tags
       };
       // optimistically add the new comment (https://react-query.tanstack.com/guides/optimistic-updates)

@@ -93,6 +93,7 @@
     "clean": "rimraf dist",
     "deploy:database:rules": "firebase deploy --only database",
     "deploy:firestore:rules": "firebase deploy --only firestore:rules",
+    "deploy:firestore:indexes": "firebase deploy --only firestore:indexes",
     "lint": "eslint \"./src/**/*.{js,json,jsx,ts,tsx}\" \"./shared/**/*.{js,json,jsx,ts,tsx}\" \"./cypress/**/*.{js,json,jsx,ts,tsx}\"",
     "lint:build:src": "eslint -c \".eslintrc.build.js\" \"./src/**/*.{js,json,jsx,ts,tsx}\"",
     "lint:build:shared": "eslint -c \".eslintrc.build.js\" \"./shared/**/*.{js,json,jsx,ts,tsx}\"",

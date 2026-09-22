@@ -89,6 +89,8 @@ const gTileRegistration: Record<string, () => void> = {
   ])
 };
 
+export const kAllTileTypeIds = Object.keys(gTileRegistration);
+
 export function registerTileTypes(tileTypeIds: string[]) {
   return Promise.all(tileTypeIds.map(id => gTileRegistration[id]?.()));
 }

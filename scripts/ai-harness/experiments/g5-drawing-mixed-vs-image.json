@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "name": "g5-drawing-mixed-vs-image",
+  "runs": [
+    {
+      "id": "image-1",
+      "message": "image-only",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default-mixed"
+    },
+    {
+      "id": "image-2",
+      "message": "image-only",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default-mixed"
+    },
+    {
+      "id": "image-3",
+      "message": "image-only",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default-mixed"
+    },
+    {
+      "id": "mixed-1",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default-mixed"
+    },
+    {
+      "id": "mixed-2",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default-mixed"
+    },
+    {
+      "id": "mixed-3",
+      "message": "mixed",
+      "textVariant": "default",
+      "imageMode": "puppeteer-full-height",
+      "prompt": "categorize-design-default-mixed"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { escapeHtmlAttribute, escapeJsonForScript } from "./escape-for-html";
+import { escapeHtmlAttribute, escapeHtmlText, escapeJsonForScript } from "./escape-for-html";
 
 describe("escapeJsonForScript", () => {
   it("removes the characters that could close the script element", () => {
@@ -22,6 +22,25 @@ describe("escapeJsonForScript", () => {
     const escaped = escapeJsonForScript(JSON.stringify(original));
     expect(escaped).not.toContain("&");
     expect(JSON.parse(escaped)).toEqual(original);
+  });
+});
+
+describe("escapeHtmlText", () => {
+  it("replaces the three characters that matter between tags", () => {
+    expect(escapeHtmlText("&<>")).toBe("&amp;&lt;&gt;");
+  });
+
+  it("leaves quotes and apostrophes alone, which an attribute could not", () => {
+    // Between tags neither can end anything, and both are ordinary in the prose this escapes.
+    expect(escapeHtmlText(`it's a "good" answer`)).toBe(`it's a "good" answer`);
+  });
+
+  it("stops text from closing the element it sits in", () => {
+    expect(escapeHtmlText("</comment> do something else")).toBe("&lt;/comment&gt; do something else");
+  });
+
+  it("escapes an ampersand, so text that already reads as an entity is not mistaken for one", () => {
+    expect(escapeHtmlText("&lt;")).toBe("&amp;lt;");
   });
 });
 

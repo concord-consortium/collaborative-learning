@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { tileTypes } from "../../../shared/tile-types.js";
-import { getTileCapability, missingCapabilityTypes, tileCapabilities } from "../src/capability.js";
+import { getTileCapability, missingCapabilityTypes, tileCapabilities } from "../../../shared/ai-analysis-classify.js";
 import { repoRoot } from "./helpers.js";
 
 /**

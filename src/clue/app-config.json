@@ -368,7 +368,12 @@
           ["data-set-link", "Graph"],
           "delete",
           "group",
-          "ungroup"
+          "ungroup",
+          "|",
+          "zoom-in",
+          "zoom-out",
+          "fit-all",
+          "pan"
         ]
       },
       "diagram": {

@@ -171,7 +171,6 @@ export const DrawingContentModel = NavigatableTileModel
   }))
   .views(self => tileContentAPIViews({
     get annotatableObjects(): IClueTileObject[] {
-      if (!self.objectMap) return [];
       const objects: IClueTileObject[] = [];
       Object.values(self.objectMap).forEach((object) => {
         if (object && !isGroupObject(object)) {
@@ -179,6 +178,24 @@ export const DrawingContentModel = NavigatableTileModel
             objectId: object.id,
             objectType: object.type,
           });
+        }
+      });
+      return objects;
+    },
+    /**
+     * Contributes this tile's variable chips as highlight targets, so a variable reference from
+     * elsewhere in the document (e.g. a text-tile chip) resolves to them. See docs/highlights.md.
+     *
+     * The type is matched as a string rather than against VariableChipObject: that model is
+     * registered INTO the drawing tile by the shared-variables plugin, so importing it here would
+     * invert the dependency. Unlike Dataflow, which matches a derived string, the binding is the
+     * stored variableId — so renaming a variable cannot break it.
+     */
+    getObjectsForVariable(variableId: string): IClueTileObject[] {
+      const objects: IClueTileObject[] = [];
+      Object.values(self.objectMap).forEach(object => {
+        if (object?.type === "variable" && (object as any).variableId === variableId) {
+          objects.push({ objectId: object.id, objectType: object.type });
         }
       });
       return objects;

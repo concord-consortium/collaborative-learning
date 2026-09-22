@@ -12,7 +12,9 @@
  */
 import { CaptureMode, RenderTarget } from "../schemas.js";
 import { readPngInfo } from "../png.js";
-import { generateRenderHtml, iframeUrlFor, isClueFrameUrl, kInitialFrameHeightPx } from "./render-html.js";
+import {
+  generateRenderHtml, iframeUrlFor, isClueFrameUrl, kInitialFrameHeightPx
+} from "../../../../shared/render-page.js";
 import {
   RenderBackend, RenderDiagnostics, RenderLimits, RenderOutcome, RenderRequest, checkCaptureSize,
   checkEncodedSize, kDefaultRenderLimits
@@ -401,7 +403,7 @@ export function expectedTileCount(content: unknown): number {
   return tileMap ? Object.keys(tileMap).length : 0;
 }
 
-/** Re-exported for the callers that reach for it here; defined in `render-html.ts`, which says why. */
+/** Re-exported for the callers that reach for it here; defined in `shared/render-page.ts`, which says why. */
 export { kInitialFrameHeightPx };
 
 /** Room for the document's own chrome — margins and the annotation layer — above the tile rows. */

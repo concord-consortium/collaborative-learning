@@ -1,0 +1,85 @@
+@import "../../../../components/vars";
+@import "../../../../components/mixins";
+
+$pan-button-size: 28px;
+
+.dataflow-toolbar {
+  .toolbar-button.pan {
+    position: relative;
+
+    .corner-triangle {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      fill: $workspace-teal;
+    }
+
+    .dataflow-pan-face {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+
+      svg {
+        height: 24px;
+        width: 24px;
+      }
+    }
+  }
+
+  // The scroll icon points down; each direction rotates it (tile-navigator.scss idiom), shared by
+  // the palette arrows and the pan button's face.
+  .dataflow-pan-button, .dataflow-pan-face {
+    &.up { transform: rotate(180deg); }
+    &.left { transform: rotate(90deg); }
+    &.right { transform: rotate(-90deg); }
+  }
+
+  // Positioned like drawing's palettes: absolute against the toolbar, horizontal static position
+  // (i.e. under the pan button, whose extraContent sibling slot the palette renders in).
+  .toolbar-palette.dataflow-pan-palette {
+    @include tile-toolbar;
+    padding: 5px;
+    top: $toolbar-button-height + 1px;
+
+    .palette-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, $pan-button-size);
+      grid-template-rows: repeat(3, $pan-button-size);
+    }
+
+    .dataflow-pan-button {
+      align-items: center;
+      border: solid 1px transparent;
+      border-radius: 50%;
+      box-sizing: border-box;
+      cursor: pointer;
+      display: flex;
+      height: $pan-button-size;
+      justify-content: center;
+      width: $pan-button-size;
+
+      @include focus-ring;
+
+      &:hover {
+        background: $workspace-teal-light-4;
+        border-color: $workspace-teal;
+        opacity: .5;
+      }
+      &:active {
+        background: $workspace-teal-light-4;
+        border-color: $workspace-teal;
+        opacity: 1;
+      }
+
+      &.up { grid-area: 1 / 2; }
+      &.left { grid-area: 2 / 1; }
+      &.right { grid-area: 2 / 3; }
+      &.down { grid-area: 3 / 2; }
+
+      svg {
+        height: 24px;
+        width: 24px;
+      }
+    }
+  }
+}

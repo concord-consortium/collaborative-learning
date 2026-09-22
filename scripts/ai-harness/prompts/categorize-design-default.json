@@ -15,7 +15,7 @@
     "systemPrompt": "You are a teaching assistant in an engineering design course."
   },
   "provenance": {
-    "source": "shared/ai-analysis-messages.ts: defaultAiPrompt (the built-in categorize-design prompt)",
+    "source": "shared/ai-analysis-messages.ts: defaultAiPrompt (the built-in categorize-design prompt), as it was when a request carried one representation. Superseded in production by categorize-design-default-mixed; kept unchanged so runs recorded against it stay comparable.",
     "retrievedAt": "2026-08-11",
     "aiPromptSha256": "ae7396d315ce62950d0aed29b177f2dd7a7edc3c22e69afe0bf816af2a6312f2"
   }

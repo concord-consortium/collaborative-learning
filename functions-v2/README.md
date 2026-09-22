@@ -12,11 +12,11 @@ the `deploy:` scripts target, so `getAiContent` is called as `getAiContent_v2`.
 |--------|-------|
 |_onUserDocWritten_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
 |_onAnalyzableTestDocWritten_, _onAnalyzableProdDocWritten_|Monitor Firestore user metadata for updates to documents that request AI analysis, and put them into the analysis queue. One each for the test and prod roots.|
-|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, and sends them to Shutterbug to create a screenshot of the document|
-|_onAnalysisDocumentImaged_|Sends new screenshots to ChatGPT for analysis and creates a comment on the original document|
+|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, summarizes their text, and sends them to Shutterbug to create a screenshot of the document|
+|_onAnalysisDocumentImaged_|Sends what the previous step produced to ChatGPT for analysis, records the summary it evaluated in `summaries/`, and creates a comment on the original document|
 |_atMidnight_|Clears old Firebase roots for dev and qa instances|
 |_onDocumentTagged_|Updates metadata documents with strategies as needed whenever a comment is made|
-|_onDocumentSummarized_|Updates document summaries whenever a comment is made that has an ai agreement set|
+|_onCommentRated_|Records what people said about a document's comments on that document's summary, whenever a comment's ratings change or a rated comment is deleted. Never creates or deletes a summary; the analysis pipeline owns those|
 |_postDocumentComment_|Posts a comment to a document in firestore, adding metadata for the document to firestore if necessary.|
 |_postExemplarComment_|Posts a comment to a document in firestore that is labeled as being from the "exemplar user" (Ivan Idea).|
 |_createFirestoreMetadataDocument_|Checks whether a specific commentable document exists in firestore and creates it if necessary.|
@@ -41,6 +41,19 @@ $ npm run build   # build the functions code (transpile TypeScript)
 
 There is also a script, `src/categorize-docs.ts`, that uses the same procedure as _onAnalysisDocumentImaged_ to categorize a directory full of screenshots using ChatGPT. In order to use this, you would need to set an environment variable with the API key, as described in the comment at the top of that script.
 
+## Runtime settings
+
+Some behavior is read from Firestore on every invocation rather than from a Firebase parameter,
+because parameters are read at deploy time and changing one means another `firebase deploy`.
+
+|Document|Field|Effect|
+|--------|-----|------|
+|`analysis/settings`|`imagesEnabled`|`false` stops _onAnalysisDocumentPending_ calling Shutterbug. Any other value, a missing field, or a missing document means screenshots are taken as usual — the switch only ever turns them off.|
+
+Flip it in the Firestore console; no deploy or redeploy is needed, and it takes effect on the next
+document analyzed. It is there for a Shutterbug that is failing or overloaded. Firestore rules deny
+clients everything under `analysis`, so only the functions can read or write it.
+
 ## Testing cloud functions
 
 ### Running tests locally (without running functions in the emulator)
@@ -58,9 +71,37 @@ The tutor also reads its model from an `OPENAI_MODEL` param, which every other f
 
 **Use `.env.local`, not `.env`.** The Firebase CLI reads `.env` at deploy time and applies its values to the deployed functions of whichever project is selected — so a local `OPENAI_MODEL` in `.env` would decide which model production calls. `.env.local` is the one Firebase reserves for emulation and never deploys.
 
+A per-project file — `.env.collaborative-learning-staging`, `.env.collaborative-learning-ec215` — is applied only when deploying to that project, which is how a setting can be true of staging and not of production.
+
+**`AI_PROMPT_TEXT_LOGGING` — for the emulator, and off everywhere else.** The analysis pipeline always logs how many agreement entries and peer comments each related summary contributed; those are counts, with no text and nobody's id, and they are on everywhere. This param additionally logs the related-summary text *as it was sent to OpenAI* — the stored summary, the agreement counts sentence and the fenced peer comments together — so that a person can confirm that rated human comments arrive intact and separate from the counts. It writes what people in the class wrote about each other's work, so:
+
+- Set it in `.env.local`, which the emulator reads and Firebase never deploys. **It must never appear in `.env` or in any `.env.collaborative-learning-*` file.** No deployed environment needs it: the emulator runs the whole read path, and the one thing the emulator cannot check — that a composite index exists — shows in the count-only log line, not in the text.
+- **It has no effect outside the functions emulator.** The code requires `FUNCTIONS_EMULATOR=true`, which the emulator sets itself, as well as the param. So setting the variable on a deployed project logs nothing; enabling it there would take a code change.
+- It is read as exactly `on`. Absent, `off`, `true`, `ON` and everything else leave the text out. An unset param reads back as `""` at runtime rather than as its declared default, so absent is off by construction.
+- Remove it from `.env.local` when the check is done, so the next emulator run is quiet.
+
 In this approach the functions are running inside of Jest and they connect to the emulated Firestore and Realtime database services.
 
 The tests use `firebase-functions-test`. This package does a little setup of environment variables so when the functions run they will connect to the emulator. This package also provides a way to mock some standard events and wraps the calls to the functions to emulate how they would be called in the cloud.  This is a simple and efficient way of testing the basic functionality without loading the function code into the emulator itself. The downside is that the functions are not responding to real events in Firestore or realtime database. If they are http functions they are not receiving the actual request event.
+
+### ForeverLearning tutor backend
+
+The tutor can route a conversation to ForeverLearning instead of OpenAI (`chatTutorProvider` in the
+unit config, or the `chatProvider` URL param). That path needs one secret and five params, none of
+which the OpenAI path reads:
+
+| Where | Name |
+|---|---|
+| `.secret.local` | `FL_CONCORDCLUE_API_KEY` |
+| `.env.local` | `FL_BASE_URL`, `FL_SOLUTION_ID`, `FL_CATALOG_COMMIT`, `FL_PROTECTION_CLASSES`, `FL_PROTECTION_PATTERN_REFS` |
+
+See `.env.example` for what each one means and a working set of values. An FL turn with them unset
+fails the turn rather than sending an unprotected packet — `buildEnvelope` refuses an empty
+answer-protection policy — so the failure is loud rather than silent. An OpenAI conversation is
+unaffected either way: the backends are built as factories, so only the one a conversation is routed
+to is constructed, and a missing FL key cannot break an OpenAI turn.
+
+Both secrets are declared in the trigger's `runWith({secrets: [...]})`, so a deploy provisions both.
 
 #### Notes
 
@@ -122,6 +163,42 @@ Then run:
 ```shell
 $ npm run deploy                        # deploy all functions
 ```
+
+### Deploy Firestore indexes before the functions that query them
+
+A query whose composite index is missing fails with `FAILED_PRECONDITION`. Callers here catch that
+and carry on — the related-summaries lookup, for one, returns nothing and logs a warning — so
+deploying in the wrong order does not break anything visibly. It quietly drops whatever the query
+was for, one log line per run.
+
+So when a change adds or alters an index in `firestore.indexes.json`, deploy the index first, wait
+for it to finish building, and only then deploy the functions:
+
+```shell
+$ npm run deploy:firestore:indexes      # from the repo root
+```
+
+Two things about that command:
+
+- **It deploys the whole file**, not the index you changed. Run
+  `npx firebase firestore:indexes --project [project]` first and compare, so you know whether it is
+  about to build an index over a large collection.
+- **It asks whether to delete indexes that exist in the project but not in the file, and the answer
+  is normally no.** One of them is usually the index serving the functions that are still deployed.
+  Deleting an index is quick; rebuilding one is not, and every query needing it fails meanwhile.
+  Never pass `--force` to it without first reading what it would remove.
+
+"deployed indexes successfully" means the request was accepted, not that the index is ready —
+creation is asynchronous and is logged only at debug level. Check the Firebase console, or run a
+query that needs it: while it builds, Firestore says so in the error text.
+
+**`summaries` currently carries two composite indexes on purpose.** They differ in one field: the
+older one ends `numAiAgreements`, the newer one `numAgreements`. The related-summaries lookup moved
+to `numAgreements` so a document can be found on ratings of human comments alone (CLUE-660), and the
+older index is kept only so the functions already deployed keep working until the new one has been
+built and the new functions verified. **Remove the `numAiAgreements` one in a follow-up, once that
+is done** — it is the case the second bullet above warns about, where the index the deployed
+functions depend on is the one the delete prompt offers to remove.
 
 ## Differences with functions-v1
 

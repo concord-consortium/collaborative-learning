@@ -22,6 +22,7 @@ import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode, kDemoSiteStorageKey } from "./store-types";
+import { kPlaceholderUnitCode } from "../../../shared/shared";
 import { SerialDevice } from "./serial";
 import { initWebSerialConnectionEvents } from "./web-serial-transport";
 import { IBaseStores, IGitInfo } from "./base-stores-types";
@@ -138,7 +139,7 @@ class Stores implements IStores{
     // Code that needs the real unit should wait on the `unitLoadedPromise`.
     // If the unit is passed in, then the unitLoadedPromise will resolve immediately,
     // this only happens in tests.
-    const defaultUnit = UnitModel.create({code: "NULL", title: "Null Unit"});
+    const defaultUnit = UnitModel.create({code: kPlaceholderUnitCode, title: "Null Unit"});
     this.unit = params?.unit || defaultUnit;
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });

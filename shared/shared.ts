@@ -162,6 +162,34 @@ export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;
 }
 
+/**
+ * The unit code the app holds before a unit loads, and keeps when one cannot be loaded. It has the
+ * shape of a unit code but names no unit, so the evaluation request and the screenshot renderer
+ * both refuse it.
+ */
+export const kPlaceholderUnitCode = "NULL";
+
+/**
+ * The unit and problem the student was running when an AI evaluation was requested, written beside
+ * the timestamp under `documentMetadata/{docId}/evaluation/{evaluator}`. A personal document is not
+ * tied to a problem, so this is the only record of the context it was evaluated in.
+ */
+export interface IEvaluationRequestContext {
+  unit: string;
+  // Ordinals as strings, as the metadata records hold them.
+  investigation: string;
+  problem: string;
+  offeringId: string;      // "" outside a portal
+}
+
+/**
+ * What became of an evaluation request, echoed back to the client under the sibling node
+ * `documentMetadata/{docId}/evaluationStatus/{evaluator}/{requestId}`. Shared so the writer
+ * (functions-v2/src/evaluation-status.ts) and the reader
+ * (src/models/document/document-comments-manager.ts) can't silently drift on what values exist.
+ */
+export type EvaluationOutcome = "skipped-empty" | "commented" | "failed";
+
 export interface ICurriculumMetadata {
   unit: string;         // unit code, e.g. "sas", "msa", etc.
   facet?: string;       // e.g. "guide" for teacher guide; undefined for regular curriculum
@@ -233,19 +261,24 @@ export interface IPublishSupportParams extends IFirebaseFunctionBaseParams {
 }
 export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFunctionWarmUpParams;
 
+export const kRatingValues = ["yes", "no", "notSure"] as const;
+
+export type RatingValue = typeof kRatingValues[number];
+
+/**
+ * The retired "do you agree with the AI?" flag. Nothing writes it any more; it describes comments
+ * already stored, which `onCommentRated` reads when such a comment is deleted.
+ */
 export interface IAgreeWithAi {
   version: 1;
-  value: "yes" | "no" | "notSure";
+  value: RatingValue;
 }
 
-export type AgreementValue = IAgreeWithAi["value"]
-export type RatingValue = "yes" | "no" | "notSure";
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text
   tags?: string[];    // list of tags to apply to the comment
   linkedDocumentKey?: string; // Key of the document that this comment should link to
-  agreeWithAi?: IAgreeWithAi; // Whether the comment agrees with the AI's suggestion
 }
 
 export interface IFirestoreMetadataDocumentParams extends IFirebaseFunctionBaseParams {

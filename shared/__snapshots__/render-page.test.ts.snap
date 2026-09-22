@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`the generated render page matches its snapshot 1`] = `
+"
+    <script>const initialValue={"rowOrder":["row-1"],"rowMap":{"row-1":{"id":"row-1","isSectionHeader":false,"tiles":[{"tileId":"text-tile"}]}},"tileMap":{"text-tile":{"id":"text-tile","content":{"type":"Text","format":"markdown","text":"\\u003c/script\\u003e\\u003cimg src=x onerror=alert(1)\\u003e \\"quoted\\" 'single' A \\u0026 B \\u003cb\\u003ebold\\u003c/b\\u003e line\\u2028separator paragraph\\u2029separator backslash \\\\u003c and \\\\ alone"}}}}</script>
+    <!-- height will be updated when iframe sends updateHeight message -->
+    <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
+      allow='serial'
+      src="http://localhost:8080/iframe.html?unit=harness-render&amp;unwrapped&amp;readOnly"
+    ></iframe>
+    <script>
+      const clueFrame = document.getElementById('clue-frame')
+      window.__clueRender = { initialValuePosted: false }
+      function sendInitialValueToEditor() {
+        if (!clueFrame.contentWindow) {
+          console.warn("iframe doesn't have contentWindow");
+          return;
+        }
+        window.addEventListener("message", (event) => {
+          // A height of 0, or anything that is not a positive number, would collapse the iframe
+          // and hide the document the picture is meant to show. Ignoring it leaves the iframe at
+          // its starting height.
+          if (event.data && event.data.type === "updateHeight") {
+            const height = Number(event.data.height);
+            if (!Number.isFinite(height) || height <= 0) return;
+            document.getElementById("clue-frame").height = height + "px";
+          }
+        })
+        clueFrame.contentWindow.postMessage(
+          { initialValue: JSON.stringify(initialValue) },
+          "*"
+        );
+        window.__clueRender.initialValuePosted = true;
+      }
+      clueFrame.addEventListener('load', sendInitialValueToEditor);
+    </script>
+  "
+`;

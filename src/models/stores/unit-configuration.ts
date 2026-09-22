@@ -40,6 +40,8 @@ export const AIPromptModel = types.model("AIPrompt", {
   keyIndicatorsPrompt: types.maybe(types.string),
   discussionPrompt: types.maybe(types.string),
   systemPrompt: types.string,
+  // The analysis pipeline ignores summarizer; it stays declared to describe unit JSON that
+  // still carries it.
   summarizer: types.maybe(types.string)
 });
 
@@ -55,7 +57,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // disable grouping of students (e.g. Dataflow)
   autoAssignStudentsToIndividualGroups: boolean;
   // type of user document to create/show by default
-  defaultDocumentType: "problem" | "personal";
+  defaultDocumentType: "problem" | "personal" | "group";
   // default title of personal documents (problem documents don't have user-assigned titles)
   defaultDocumentTitle: string;
   // following two properties used for displaying titles for documents
@@ -112,11 +114,10 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // server's built-in generic tutor prompt; appendToGenericPrompt is added after the
   // (possibly replaced) generic prompt
   chatTutorPrompts?: { replaceGenericPrompt?: string; appendToGenericPrompt?: string };
-  // which AI backend is selected for this unit's tutor turns. Only openai is implemented:
-  // the selection starts a separate conversation and is stamped on each message, but the
-  // server builds an OpenAI backend unconditionally, so setting anything else does not yet
-  // change which AI answers. Unset uses the default (openai); the chatProvider URL param
-  // overrides this so QA can flip a session without re-authoring.
+  // Selects which AI backend answers this unit's tutor turns. Both values are implemented. The
+  // choice is read from a conversation's first message and then held on the conversation, so a
+  // later message naming a different backend is ignored. Unset uses the default (openai); the
+  // chatProvider URL param overrides this so QA can flip a session without re-authoring.
   chatTutorProvider?: TutorProviderId;
   // if true, the AI chat tutor is enabled for students in this unit. The chatTutor URL param also
   // enables it (so authors can preview it). Like other config this merges bottom-up (problem, then
@@ -127,6 +128,12 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // never sent to the AI as context. Unset falls back to the built-in default; an empty string
   // suppresses the intro entirely.
   chatTutorIntro?: string;
+  // Whether the tutor may render buttons that highlight an object in the student's document.
+  // Separate from chatTutorEnabled: a unit can have the tutor without the pointing behavior.
+  // Turning it on is necessary but not sufficient: the tutor produces the references those
+  // buttons need when the unit's prompt asks it to, via chatTutorPrompts.appendToGenericPrompt.
+  // With the flag on and no such instruction, replies will rarely have anything to show.
+  chatTutorHighlights?: boolean;
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
   // if set it will be used to determine if the show ideas button is shown, otherwise

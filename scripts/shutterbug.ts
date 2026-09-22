@@ -11,7 +11,7 @@
 
 import fs from "fs";
 
-import { escapeHtmlAttribute, escapeJsonForScript } from "../shared/escape-for-html";
+import { generateRenderHtml } from "../shared/render-page";
 
 // The released CLUE build does not include a top-level iframe.html; the authoring-iframe entry
 // point is built from the same source. Branch and local builds have iframe.html directly.
@@ -23,46 +23,12 @@ const clueIframePage = "https://collaborative-learning.concord.org/authoring-ifr
 // const shutterbugServer = "http://localhost:4000";
 const shutterbugServer = "https://api.concord.org/shutterbug-staging";
 
-// This page is a near-copy of generateHtml in functions-v2/src/on-analysis-document-pending.ts,
-// which is the one the AI analysis pipeline actually uses. They are separate because this script
-// targets a different CLUE build and Shutterbug server and asks for a full-page capture. Keep
-// fixes to one in step with the other until they are unified.
+// The page is built by the same generator the AI analysis pipeline and the harness use, so there
+// is no copy here to drift. With the constants above left at their defaults it is production's
+// page; what this script does differently is the Shutterbug server and the full-page capture in
+// the request below.
 function generateHtml(clueDocument: any, unit: string) {
-  const source = escapeHtmlAttribute(
-    `${clueIframePage}?unit=${encodeURIComponent(unit)}&unwrapped&readOnly`);
-  return `
-    <script>const initialValue=${escapeJsonForScript(JSON.stringify(clueDocument))}</script>
-    <!-- height will be updated when iframe sends updateHeight message -->
-    <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
-      allow='serial'
-      src="${source}"
-    ></iframe>
-    <script>
-      const clueFrame = document.getElementById('clue-frame')
-      function sendInitialValueToEditor() {
-        if (!clueFrame.contentWindow) {
-          console.warn("iframe doesn't have contentWindow");
-          return;
-        }
-
-        window.addEventListener("message", (event) => {
-          if (event.data?.type === "updateHeight") {
-            // A height of 0, or anything that is not a positive number, would collapse the
-            // iframe and hide the document the screenshot is meant to show.
-            const height = event.data.height;
-            if (!Number.isFinite(height) || height <= 0) return;
-            document.getElementById("clue-frame").height = height + "px";
-          }
-        })
-
-        clueFrame.contentWindow.postMessage(
-          { initialValue: JSON.stringify(initialValue) },
-          "*"
-        );
-      }
-      clueFrame.addEventListener('load', sendInitialValueToEditor);
-    </script>
-  `;
+  return generateRenderHtml({ content: clueDocument, clueUrl: clueIframePage, unit });
 }
 
 export async function postToShutterbug(body: any) {

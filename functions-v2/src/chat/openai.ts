@@ -6,9 +6,11 @@
 // which is per-request and not carried across turns). Assistant replies are structured: text.format
 // json_schema/strict with a nullable `userText`.
 import OpenAI from "openai";
+import {TutorHighlight, isTutorHighlight} from "../../../shared/chat-tutor-highlight";
 
 export interface TutorReply {
   userText: string | null;
+  highlights: TutorHighlight[];
 }
 
 // A single input message for a turn. role:"user" for a typed student message; role:"developer" for
@@ -18,8 +20,10 @@ export interface TutorInputMessage {
   content: string;
 }
 
-// Structured-output contract: strict json_schema, userText nullable. Strict mode guarantees the SHAPE;
-// whether the model chooses userText:null is driven by the generic prompt.
+// Structured-output contract: strict json_schema, userText nullable. Strict mode requires every
+// property to be listed in `required` and forbids additional ones, so "nothing to point at" is an
+// empty array rather than an absent field — the same way userText:null expresses a silent reply.
+// Array length cannot be constrained in strict mode; restraint comes from the prompt.
 export const TUTOR_REPLY_FORMAT = {
   type: "json_schema" as const,
   name: "tutor_reply",
@@ -27,9 +31,27 @@ export const TUTOR_REPLY_FORMAT = {
   schema: {
     type: "object",
     additionalProperties: false,
-    required: ["userText"],
+    required: ["userText", "highlights"],
     properties: {
       userText: {type: ["string", "null"]},
+      highlights: {
+        type: "array",
+        // The description is load-bearing: every workspace summary carries object ids, including
+        // in units whose prompt says nothing about pointing at them. Without this the model sees a
+        // required field asking for ids it has, and nothing telling it to leave the list alone.
+        description: "Objects to offer the student a button for. Leave empty unless you are " +
+          "deliberately pointing at something; never invent an id.",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["tileId", "objectId", "label"],
+          properties: {
+            tileId: {type: "string"},
+            objectId: {type: "string"},
+            label: {type: "string"},
+          },
+        },
+      },
     },
   },
 };
@@ -71,9 +93,22 @@ export async function createTutorResponse(
   return parseTutorReply(res.output_text);
 }
 
-// Parse the model's structured output text into a TutorReply, defensively coercing a missing/non-string
-// userText to null (renders as nothing).
+// Parse the model's structured output into a TutorReply, defensively coercing a missing, non-string
+// or blank userText to null and dropping any highlight entry that is not fully formed.
+//
+// "Nothing to say" gets one representation on the wire. The client tests `userText == null` to decide
+// a reply is silent, so an empty string would slip past it and render an empty bubble.
+//
+// A silent reply carries no highlights either. Buttons label words the reply never said, and the
+// client drops the whole turn when userText is null, so anything left in the array is data nothing
+// can render.
 export function parseTutorReply(outputText: string): TutorReply {
   const parsed = JSON.parse(outputText);
-  return {userText: typeof parsed?.userText === "string" ? parsed.userText : null};
+  const rawText = parsed?.userText;
+  const userText = typeof rawText === "string" && rawText.trim() ? rawText : null;
+  const raw: unknown[] = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
+  const highlights: TutorHighlight[] = userText === null ? [] : raw
+    .filter(isTutorHighlight)
+    .map((h) => ({tileId: h.tileId, objectId: h.objectId, label: h.label}));
+  return {userText, highlights};
 }
