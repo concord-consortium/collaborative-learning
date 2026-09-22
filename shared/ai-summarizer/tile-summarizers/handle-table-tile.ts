@@ -33,10 +33,20 @@ export function handleTableTile({ tile, dataSets, options }: TileHandlerParams):
   );
   if (sharedDataSet) {
     // A dataset's `name` is authored, not guaranteed, so an unnamed one still gets a useful
-    // sentence rather than literally saying "undefined".
+    // sentence rather than literally saying "undefined". This part applies regardless of
+    // `dataSetTables` -- it is a plain bug fix, not a new capability.
     const nameClause = sharedDataSet.name
       ? ` which uses the "${sharedDataSet.name}" (${sharedDataSet.id}) data set`
       : ` which uses data set ${sharedDataSet.id}`;
+    // Unlike the document-level "Data Sets" summary (ai-summarizer.ts), where `dataSetTables`
+    // omitted means "full" because that IS what every caller got before the option existed, this
+    // tile's own pre-existing behavior never showed row (or even schema) data at all -- just this
+    // sentence. So here, omitted means neither: no dataSetTables value means stay silent about the
+    // data set's contents, and only an explicit "full" or "schema-only" shows them. Confirmed
+    // against a real `master` checkout (CLUE-685 checklist, step 2.7's "look back at step 2.1").
+    if (!options.dataSetTables) {
+      return `This tile contains a table${nameClause}.`;
+    }
     return `This tile contains a table${nameClause}.\n\n${summarizeDataSet(sharedDataSet, options)}`;
   }
 

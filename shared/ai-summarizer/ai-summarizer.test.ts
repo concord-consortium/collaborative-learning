@@ -632,11 +632,32 @@ describe('ai-summarizer', () => {
           }
         };
 
-        it('defaults to the full table, byte for byte what it produced before the option existed', () => {
-          // The option is new; every existing caller passes nothing. If these two ever differ, every
-          // stored summary and every cached analysis built from one is invalidated for no reason.
-          expect(documentSummarizer(withData, { dataSetTables: 'full' }))
-            .toBe(documentSummarizer(withData, {}));
+        // The document-level "Data Sets" summary (documentSummary in ai-summarizer.ts) and this
+        // tile's own per-tile rendering (handle-table-tile.ts) read the same option but do not
+        // share a default -- confirmed against a real `master` checkout (CLUE-685 checklist, step
+        // 2.7's "look back at step 2.1"): before dataSetTables existed, the document-level summary
+        // always showed every case's data, but a table TILE never showed row or schema data at
+        // all, just a one-line mention of the data set's name. So the default (no dataSetTables)
+        // must keep matching each of those separately, not collapse to one shared "full" behavior.
+        it('by default, describes the data set at the document level but says nothing about its ' +
+           'rows at the tile level', () => {
+          const result = documentSummarizer(withData, {});
+          expect(result).toContain('This tile contains a table which uses the "Sample Data"');
+          // Nothing about rows/cases appears before the document-level "Data Sets" section -- the
+          // tile-level mention is exactly one sentence, with no Markdown table of its own.
+          const tileLevelText = result.slice(0, result.indexOf('# Data Sets'));
+          expect(tileLevelText).not.toContain('Alice');
+          expect(tileLevelText).not.toContain('| Name |');
+          // The document-level summary is unaffected and still shows the real rows.
+          expect(result).toContain('Alice');
+          expect(result).toContain('| Name |');
+        });
+
+        it('an explicit "full" additionally shows the tile\'s own row data, unlike the default', () => {
+          const explicit = documentSummarizer(withData, { dataSetTables: 'full' });
+          const tileLevelText = explicit.slice(0, explicit.indexOf('# Data Sets'));
+          expect(tileLevelText).toContain('Alice');
+          expect(tileLevelText).toContain('| Name |');
         });
 
         it('keeps the schema and the case count but drops the case data', () => {

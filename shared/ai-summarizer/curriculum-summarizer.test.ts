@@ -13,7 +13,9 @@ function loadFixture(name: string): any {
 
 function summarize(fileData: any): string {
   const dataSets = normalizeCurriculumDataSets(fileData.content?.sharedModels);
-  return summarizeCurriculum(fileData.content, dataSets, 1, undefined, { imageFilenames: true });
+  // dataSetTables: "full" matches assemble-unit.ts's real call -- curriculum summarization wants
+  // a table's actual rows, which is not the tile-level default (see handle-table-tile.ts).
+  return summarizeCurriculum(fileData.content, dataSets, 1, undefined, { imageFilenames: true, dataSetTables: "full" });
 }
 
 describe("curriculum summarizer (real section shapes)", () => {

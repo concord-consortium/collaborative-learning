@@ -95,7 +95,11 @@ export async function assembleUnit(
         const section = await resolveSection(sections[i], ordinal, i, inventoryByPath, branch, unit, deps);
         const dataSets = normalizeCurriculumDataSets(section.content?.sharedModels);
         sectionMarkdowns.push(
-          summarizeCurriculum(section.content, dataSets, 1, undefined, {imageFilenames: true})
+          // dataSetTables: "full" is an explicit opt-in, not the default -- handle-table-tile.ts
+          // stays silent about a table's data set unless asked. Curriculum digests want the actual
+          // rows (subject to TABLE_MARKDOWN_ROW_CAP), same as the pre-existing document-level
+          // "Data Sets" summary already showed for runtime documents.
+          summarizeCurriculum(section.content, dataSets, 1, undefined, {imageFilenames: true, dataSetTables: "full"})
         );
       }
 
