@@ -101,13 +101,17 @@ export function getSpaceLabel(docPath: string): string {
 /**
  * Firebase rejects these characters in a Realtime Database path, so a document whose key contains one
  * can never be looked up — the failure is permanent, not transient. Curriculum-authored supports carry
- * human-readable keys like "2.2 Initial Challenge Support 1", which is how this arises.
+ * human-readable keys like "2.2 Initial Challenge Support 1", which is how this arises. The ASCII
+ * control characters, U+0000–U+001F and U+007F, are forbidden too.
  */
 const kRtdbIllegal = /[.#$[\]/]/;
 
+const hasControlCharacter = (segment: string) =>
+  [...segment].some((ch) => ch.charCodeAt(0) < 0x20 || ch.charCodeAt(0) === 0x7f);
+
 /** Whether every path segment the lookup would build from this document is legal in the RTDB. */
 export function isRtdbAddressable(contextId: string, uid: string, key: string): boolean {
-  return ![contextId, uid, key].some((segment) => kRtdbIllegal.test(segment));
+  return ![contextId, uid, key].some((segment) => kRtdbIllegal.test(segment) || hasControlCharacter(segment));
 }
 
 /** Every outcome a scanned document can be counted under. */
