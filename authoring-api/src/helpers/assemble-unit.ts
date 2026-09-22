@@ -4,10 +4,17 @@
 // docs/plans/CLUE-685-plan.md §2.2 for the design.
 
 import {normalizeCurriculumDataSets, summarizeCurriculum} from "../../../shared/ai-summarizer/ai-summarizer";
-import {SharedModelMapEntry} from "../../../shared/ai-summarizer/ai-summarizer-types";
+import {SharedModelMapEntry, TileHandler} from "../../../shared/ai-summarizer/ai-summarizer-types";
+import {defaultTileHandlers} from "../../../shared/ai-summarizer/ai-tile-summarizer";
 import {hashString} from "../../../shared/hash-string";
+import {handleDrawingTileLabels} from "../../../shared/ai-summarizer/tile-summarizers/handle-drawing-tile-labels";
 import {IUnitSummarySourceProblem} from "../../../shared/unit-summary-types";
 import {loadUnitFileInventory, readEffectiveContentText, UnitContentFile} from "./unit-content";
+
+// Same shape as documentSummarizerWithDrawings (ai-summarizer-with-drawings.ts): the curriculum-only
+// handler goes first so it wins for Drawing tiles, then every other tile type falls through to the
+// same defaults every other caller of documentSummarizer gets.
+const curriculumTileHandlers: TileHandler[] = [handleDrawingTileLabels, ...defaultTileHandlers];
 
 // The authored shapes read from a unit's root content.json and from a resolved section file.
 // Both are read as plain JSON (never loaded into MST), so these describe only the fields this
@@ -99,7 +106,11 @@ export async function assembleUnit(
           // stays silent about a table's data set unless asked. Curriculum digests want the actual
           // rows (subject to TABLE_MARKDOWN_ROW_CAP), same as the pre-existing document-level
           // "Data Sets" summary already showed for runtime documents.
-          summarizeCurriculum(section.content, dataSets, 1, undefined, {imageFilenames: true, dataSetTables: "full"})
+          // tileHandlers: curriculumTileHandlers swaps in the labels-only drawing handler; every
+          // other tile type still resolves through the same defaults every other caller gets.
+          summarizeCurriculum(section.content, dataSets, 1, undefined, {
+            imageFilenames: true, dataSetTables: "full", tileHandlers: curriculumTileHandlers,
+          })
         );
       }
 

@@ -206,4 +206,41 @@ describe("assembleUnit", () => {
     expect(result.problems[0].problemHash).toEqual(hashString(result.problems[0].markdown));
     expect(result.sourceHash).toEqual(hashString(result.problems.map((p) => p.markdown).join("\n\n")));
   });
+
+  it("summarizes a Drawing tile's text and image labels, without its geometry", async () => {
+    // Not routed through textSection() -- this needs a Drawing tile's own content shape, which
+    // TestSection's interface does not model.
+    const drawingSection = {
+      type: "section",
+      content: {
+        tiles: [{
+          id: "d1",
+          content: {
+            type: "Drawing",
+            objects: [
+              {id: "t1", type: "text", x: 0, y: 0, width: 50, height: 20, text: "Step 1: mix"},
+              {
+                id: "i1", type: "image", x: 0, y: 0, width: 100, height: 80,
+                url: "curriculum/images/beaker.png",
+              },
+              {id: "r1", type: "rectangle", x: 0, y: 0, width: 10, height: 10, fill: "#0069ff"},
+            ],
+          },
+        }],
+      },
+    };
+    const root = rootContent([
+      {
+        ordinal: 1, title: "Inv 1",
+        problems: [{ordinal: 1, title: "P1", sections: [drawingSection as unknown as TestSection]}],
+      },
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    const markdown = result.problems[0].markdown;
+    expect(markdown).toContain("Text in the drawing: \"Step 1: mix\"");
+    expect(markdown).toContain("Image in the drawing: beaker.png");
+    expect(markdown).not.toContain("r1");
+    expect(markdown).not.toContain("#0069ff");
+    expect(markdown).not.toContain("rx=");
+  });
 });

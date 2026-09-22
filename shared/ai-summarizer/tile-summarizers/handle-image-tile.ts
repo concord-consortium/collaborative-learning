@@ -13,7 +13,7 @@ export function handleImageTile({ tile, options }: TileHandlerParams): string|un
   return "";
 }
 
-function imageFilename(content: { url?: string; filename?: string }): string | undefined {
+export function imageFilename(content: { url?: string; filename?: string }): string | undefined {
   const source = content.filename || content.url;
   if (!source) { return undefined; }
   const withoutQuery = source.split(/[?#]/)[0];
