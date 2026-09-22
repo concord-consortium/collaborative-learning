@@ -82,6 +82,7 @@ export function generateRenderHtml(options: RenderHtmlOptions): string {
   const serialized = escapeJsonForScript(JSON.stringify(content));
   const source = escapeHtmlAttribute(iframeUrlFor(clueUrl, unit));
   return `
+    <style>body{margin:0}iframe{display:block}</style>
     <script>const initialValue=${serialized}</script>
     <!-- height will be updated when iframe sends updateHeight message -->
     <iframe id='clue-frame' width='100%' height='${initialHeightPx}px' style='border:0px'
