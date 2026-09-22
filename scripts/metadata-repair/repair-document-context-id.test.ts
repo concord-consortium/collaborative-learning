@@ -11,16 +11,21 @@ function fakeFirestore(docs: Record<string, any>, failCommitAfter?: number) {
   const firestore: any = {
     collection: (path: string) => ({
       select: () => ({
-        limit: () => {
+        // Pages the way Firestore does, so a test with more documents than pageSize crosses a page.
+        limit: (n: number) => {
+          let after: string | undefined;
           const query: any = {
-            startAfter: () => query,
-            get: async () => ({
-              empty: Object.keys(store).length === 0,
-              size: Object.keys(store).length,
-              docs: Object.entries(store).map(([id, data]) => ({
-                id, data: () => data, ref: { path: `${path}/${id}` }
-              }))
-            })
+            startAfter: (doc: any) => { after = doc.id; return query; },
+            get: async () => {
+              const ids = Object.keys(store).sort();
+              const start = after == null ? 0 : ids.indexOf(after) + 1;
+              const page = ids.slice(start, start + n);
+              return {
+                empty: page.length === 0,
+                size: page.length,
+                docs: page.map(id => ({ id, data: () => store[id], ref: { path: `${path}/${id}` } }))
+              };
+            }
           };
           return query;
         }
@@ -133,6 +138,23 @@ describe("repairDocumentContextId", () => {
     expect(result.repairs).toEqual([
       { key: "doc1", type: "problem", from: "wrongClass", to: "trueClass", uidMismatch: true }
     ]);
+  });
+
+  it.each([5, 4])("reads every page of a space (%i documents, pages of 2)", async (total) => {
+    // 4 is an exact multiple of the page size, so the last page is full and an empty one ends the scan.
+    const docs: Record<string, any> = {};
+    const index = new Map<string, IDocumentHome>();
+    for (let i = 0; i < total; i++) {
+      docs[`doc${i}`] = { key: `doc${i}`, context_id: "wrongClass", uid: "u1", type: "problem" };
+      index.set(`doc${i}`, home("trueClass", "u1"));
+    }
+    const { firestore, store } = fakeFirestore(docs);
+
+    const result = await repairDocumentContextId(firestore, "demo/S/documents", index,
+      { dryRun: false, log: silent, pageSize: 2 });
+
+    expect(result.counts.needsRepair).toBe(total);
+    expect(Object.values(store).every((d: any) => d.context_id === "trueClass")).toBe(true);
   });
 
   it("writes nothing on a dry run but counts what it would have repaired", async () => {

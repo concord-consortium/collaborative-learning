@@ -28,14 +28,21 @@ function fakeFirestore(existing: Record<string, any> = {}, appearDuringRun: stri
   const firestore: any = {
     collection: (path: string) => ({
       select: () => ({
-        limit: () => {
+        // Pages the way Firestore does, so a test with more documents than pageSize crosses a page.
+        limit: (n: number) => {
+          let after: string | undefined;
           const query: any = {
-            startAfter: () => query,
-            get: async () => ({
-              empty: Object.keys(existing).length === 0,
-              size: Object.keys(existing).length,
-              docs: Object.keys(existing).map(id => ({ id, data: () => existing[id] }))
-            })
+            startAfter: (doc: any) => { after = doc.id; return query; },
+            get: async () => {
+              const ids = Object.keys(existing).sort();
+              const start = after == null ? 0 : ids.indexOf(after) + 1;
+              const page = ids.slice(start, start + n);
+              return {
+                empty: page.length === 0,
+                size: page.length,
+                docs: page.map(id => ({ id, data: () => existing[id] }))
+              };
+            }
           };
           return query;
         }
@@ -98,6 +105,24 @@ describe("createMissingDocumentMetadata", () => {
       key: "k1", type: "learningLog", uid: "u1", context_id: "c1",
       createdAt: 1700000000000, title: "My Log", properties: {}
     });
+  });
+
+  it("reads every page of the existing metadata documents", async () => {
+    // The last existing document is on the second page, and it is both "already present" and the
+    // only sibling carrying the offering's curriculum position.
+    const { firestore, store } = fakeFirestore({
+      a: { type: "personal" },
+      b: { type: "personal" },
+      c: { type: "problem", offeringId: "off-1", unit: "msa", investigation: "1", problem: "2" }
+    });
+    const index = new Map([["a", home()], ["b", home()], ["c", home()], ["k1", home()]]);
+    const nodes = { k1: { type: "problem", createdAt: 1, offeringId: "off-1" } };
+
+    const result = await createMissingDocumentMetadata(firestore, kSpace, index,
+      { rtdbRoot: kRoot, readNode: nodeReaderFor(nodes) }, { dryRun: false, log: silent, pageSize: 2 });
+
+    expect(result.counts).toMatchObject({ alreadyPresent: 3, created: 1, unresolvedCurriculum: 0 });
+    expect(store.k1).toMatchObject({ unit: "msa", investigation: "1", problem: "2" });
   });
 
   it("leaves createdAt off rather than writing undefined, which Firestore rejects", async () => {
