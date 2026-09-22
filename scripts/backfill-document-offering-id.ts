@@ -166,6 +166,11 @@ export type IBucketCounts = Record<CountedBucket, number>;
 export interface IBackfillOfferingIdResult {
   scanned: number;
   written: number;
+  /**
+   * Resolved documents deleted between the scan and the commit, and so not written. Kept apart from
+   * the buckets, which classify what the scan found and sum to `scanned`.
+   */
+  deletedDuringRun: number;
   totals: IBucketCounts;
   byType: Record<string, IBucketCounts>;
   bySpace: Record<string, IBucketCounts>;
@@ -178,6 +183,9 @@ const kAllBuckets: CountedBucket[] = [
 
 const emptyCounts = (): IBucketCounts =>
   Object.fromEntries(kAllBuckets.map((b) => [b, 0])) as IBucketCounts;
+
+/** Firestore's NOT_FOUND, which `update` raises for a document that no longer exists. */
+const isNotFound = (err: any) => err?.code === 5;
 
 /**
  * Run `fn` over `items` a chunk at a time. Latency here is dominated by one small RTDB read per
@@ -262,7 +270,7 @@ export async function backfillDocumentOfferingId(
   } = {}
 ): Promise<IBackfillOfferingIdResult> {
   const result: IBackfillOfferingIdResult = {
-    scanned: 0, written: 0, totals: emptyCounts(), byType: {}, bySpace: {}
+    scanned: 0, written: 0, deletedDuringRun: 0, totals: emptyCounts(), byType: {}, bySpace: {}
   };
 
   const count = (type: string, spaceLabel: string, b: CountedBucket) => {
@@ -271,29 +279,52 @@ export async function backfillDocumentOfferingId(
     (result.bySpace[spaceLabel] ??= emptyCounts())[b] += 1;
   };
 
-  // Batched at Firestore's 400-write limit. `batch` stays undefined until there is something to write,
-  // so a run with no work commits nothing at all. `written` counts only committed writes, so a run that
-  // dies mid-flight cannot over-report what actually landed.
+  // Batched at Firestore's 400-write limit, and committed only when there is something to write, so a
+  // run with no work commits nothing at all. `written` counts only committed writes, so a run that dies
+  // mid-flight cannot over-report what actually landed. Held as data rather than queued onto a batch,
+  // so a batch that fails can be retried one document at a time.
   const kBatchSize = 400;
-  let batch: any;
-  let queuedInBatch = 0;
+  let pending: Array<{ ref: any; offeringId: string }> = [];
 
-  const commitBatch = async () => {
+  const commitOne = async (writes: typeof pending) => {
+    const batch = (db as any).batch();
+    // `update`, never `set` with merge: a document deleted since the scan would be recreated by `set`,
+    // holding nothing but an offeringId. `update` refuses a missing document on the server, at commit.
+    for (const w of writes) batch.update(w.ref, { offeringId: w.offeringId });
     await batch.commit();
-    result.written += queuedInBatch;
-    queuedInBatch = 0;
-    batch = undefined;
+    result.written += writes.length;
+  };
+
+  const commitPending = async () => {
+    if (!pending.length) return;
+    try {
+      await commitOne(pending);
+    } catch (err) {
+      if (!isNotFound(err)) throw err;
+      // A batch is all-or-nothing, so one deleted document failed every write in it. The rest did
+      // nothing wrong, so retry each alone.
+      for (const w of pending) {
+        try {
+          await commitOne([w]);
+        } catch (retryErr) {
+          if (!isNotFound(retryErr)) throw retryErr;
+          result.deletedDuringRun += 1;
+          log(`deleted during the run, not written: ${w.ref.path}`);
+        }
+      }
+    }
+    pending = [];
   };
 
   const queueWrite = async (ref: any, offeringId: string) => {
-    batch ??= (db as any).batch();
-    batch.set(ref, { offeringId }, { merge: true });
-    if (++queuedInBatch === kBatchSize) await commitBatch();
+    pending.push({ ref, offeringId });
+    if (pending.length === kBatchSize) await commitPending();
   };
 
   const report = () => {
     log(`scanned ${result.scanned}; ` +
         kAllBuckets.map((b) => `${b}: ${result.totals[b]}`).join(", "));
+    log(`written ${result.written}; deleted during the run ${result.deletedDuringRun}`);
     // Said out loud because a Firestore equality query on `type` cannot return a document that has no
     // `type` field, so such documents are invisible to this census rather than counted as clean.
     log("documents with no `type` field are not reachable by these queries and are not counted");
@@ -334,8 +365,8 @@ export async function backfillDocumentOfferingId(
         });
 
         // Fed sequentially, never from inside the concurrent callbacks above: `queueWrite` awaits a
-        // commit and then clears `batch`, so a concurrent caller could otherwise add a write to a batch
-        // that is already being committed.
+        // commit and then clears `pending`, so a concurrent caller could otherwise add a write that is
+        // dropped when the commit finishes.
         if (!dryRun) {
           for (const write of resolved) {
             if (write) await queueWrite(write.ref, write.offeringId);
@@ -347,7 +378,7 @@ export async function backfillDocumentOfferingId(
       log(`finished ${type}: ${JSON.stringify(result.byType[type] ?? {})}`);
     }
 
-    if (batch) await commitBatch();
+    await commitPending();
   } catch (err: any) {
     // The normal "done" output never runs after a failure, and an interrupted apply is exactly when
     // the operator needs `written` and the per-type and per-space counts. So print the whole result,

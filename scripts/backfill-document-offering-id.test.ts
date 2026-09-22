@@ -233,9 +233,13 @@ function makeRtdb(nodes: Record<string, any>, throwOn: string[] = []) {
 // `docsByType` supplies the canned result per queried type, so pagination can be exercised by handing
 // one type more documents than a page holds. `calls` records the query shape itself: a script that
 // queried the wrong type string would return an empty, confident census and pass every other test.
-function makeDb(docsByType: Record<string, any[]>, { failCommitAfter }: { failCommitAfter?: number } = {}) {
+//
+// `deleted` names document paths that were removed after the scan: a batch updating one fails with
+// NOT_FOUND and writes nothing, as a real batch does.
+function makeDb(docsByType: Record<string, any[]>,
+                { failCommitAfter, deleted = [] }: { failCommitAfter?: number; deleted?: string[] } = {}) {
   let commits = 0;
-  const batches: { writes: any[]; committed: boolean; set: any; commit: () => Promise<void> }[] = [];
+  const batches: { writes: any[]; committed: boolean; update: any; commit: () => Promise<void> }[] = [];
   const calls: { collectionGroup?: string; types: string[]; orderBy: string[] } =
     { types: [], orderBy: [] };
 
@@ -270,10 +274,13 @@ function makeDb(docsByType: Record<string, any[]>, { failCommitAfter }: { failCo
       const b = {
         writes,
         committed: false,
-        set: (ref: any, data: any, opts: any) => { writes.push({ ref, data, opts }); },
+        update: (ref: any, data: any) => { writes.push({ ref, data }); },
         commit: () => {
           if (failCommitAfter != null && ++commits > failCommitAfter) {
             return Promise.reject(new Error("commit exploded"));
+          }
+          if (writes.some((w) => deleted.includes(w.ref.path))) {
+            return Promise.reject(Object.assign(new Error("NOT_FOUND"), { code: 5 }));
           }
           b.committed = true;
           return Promise.resolve();
@@ -426,16 +433,29 @@ describe("backfillDocumentOfferingId — writing", () => {
     return nodes;
   };
 
-  it("merge-writes only the offeringId onto a resolved document", async () => {
+  it("updates only the offeringId on a resolved document", async () => {
     const db = makeDb({ problem: resolvedDocs(1) });
     const res = await run(db, makeRtdb(resolvedNodes(1)), { dryRun: false });
     expect(res.written).toBe(1);
     expect(db.writes).toEqual([{
       ref: { path: `${kSpace}/documents/d0` },
-      data: { offeringId: "2000" },
-      opts: { merge: true }
+      data: { offeringId: "2000" }
     }]);
     expect(db.committed.length).toBe(1);
+  });
+
+  it("writes the rest of a batch when one document was deleted since the scan", async () => {
+    // `update` refuses a missing document, so the deleted one is not recreated holding only an
+    // offeringId. Its failure fails the whole batch, so the others are retried one at a time.
+    const db = makeDb({ problem: resolvedDocs(3) }, { deleted: [`${kSpace}/documents/d1`] });
+    const res = await run(db, makeRtdb(resolvedNodes(3)), { dryRun: false });
+
+    expect(res.written).toBe(2);
+    expect(res.deletedDuringRun).toBe(1);
+    expect(db.committed.flatMap((b) => b.writes).map((w) => w.ref.path))
+      .toEqual([`${kSpace}/documents/d0`, `${kSpace}/documents/d2`]);
+    // Still counted as resolved: the buckets record what the scan found.
+    expect(res.totals.resolved).toBe(3);
   });
 
   it("reports the whole partial result when a commit fails, and carries it on the error", async () => {

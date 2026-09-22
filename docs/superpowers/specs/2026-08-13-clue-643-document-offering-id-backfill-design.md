@@ -324,8 +324,16 @@ four and a half minutes.
 
 ## Write policy
 
-`APPLY=1` writes only the `resolved` bucket, as `set({ offeringId }, { merge: true })`, batched at
-400 like the sibling.
+`APPLY=1` writes only the `resolved` bucket, as `update({ offeringId })`, batched at 400 like the
+sibling.
+
+`update` rather than `set` with merge, because the run spans minutes between scanning a document and
+committing its write. If the document is deleted in that window, `set` would recreate it holding
+nothing but an `offeringId`, while `update` refuses on the server. That refusal fails the whole batch,
+so the batch is retried one document at a time: the others are written, and the deleted one is
+counted as `deletedDuringRun` and logged. A transaction would add a read per document and protect
+against nothing more. Requiring the document to be unchanged since the scan would refuse documents
+that clients edit mid-run, whose `offeringId` is still correct.
 
 Every other bucket is reported and left untouched. That is the settled policy for documents that
 cannot be resolved (see the census above): 51 of 71,399 across real data, too few to justify another
