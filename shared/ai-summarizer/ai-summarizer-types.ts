@@ -34,7 +34,9 @@ export interface SharedModelMapEntry {
     // rather than throwing and losing the whole document's summary.
     dataSet?: {
       id: string;
-      name: string;
+      // Authored, not guaranteed -- a curriculum SharedDataSet entry can omit it (see
+      // NormalizedDataSet.name below, which carries the same optionality through).
+      name?: string;
       attributes?: SharedAttributeSnapshot[];
       cases?: unknown[];
     };

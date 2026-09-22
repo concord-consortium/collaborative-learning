@@ -1,5 +1,5 @@
 import { documentSummarizer, normalize } from './ai-summarizer';
-import { TileHandler, TileHandlerParams } from './ai-summarizer-types';
+import { SharedModelMapEntry, TileHandler, TileHandlerParams } from './ai-summarizer-types';
 import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
 import { defaultTileHandlers } from './ai-tile-summarizer';
 
@@ -1679,5 +1679,18 @@ describe('normalize tolerates a malformed shared model', () => {
       dataSet: { id: 'ds', name: 'D', attributes: [], cases: [] },
     }, ['t1']);
     expect(normalize(content as any).normalizedModel.dataSets[0].providerId).toBe('');
+  });
+
+  // SharedModelMapEntry.dataSet.name is optional -- an unnamed curriculum dataset is real (see
+  // curriculum-summarizer.test.ts) -- so a caller must be able to construct one typed as
+  // SharedModelMapEntry, with no name, and have it type-check rather than needing `as any` to
+  // route around a type that claims a name always exists.
+  it('accepts a SharedDataSet with no name, typed as SharedModelMapEntry rather than cast through any', () => {
+    const sharedModel: SharedModelMapEntry['sharedModel'] = {
+      type: 'SharedDataSet', id: 'sm-1', providerId: 't1',
+      dataSet: { id: 'ds', attributes: [], cases: [] },
+    };
+    const content = withSharedModel(sharedModel, ['t1']);
+    expect(normalize(content as any).normalizedModel.dataSets[0].name).toBeUndefined();
   });
 });
