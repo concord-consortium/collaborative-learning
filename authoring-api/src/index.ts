@@ -22,11 +22,15 @@ import renameImage from "./routes/rename-image";
 import getRawContent from "./routes/get-raw-content";
 import deleteUnit from "./routes/delete-unit";
 import pushUnit from "./routes/push-unit";
+import generateUnitSummary from "./routes/generate-unit-summary";
+import unitSummaryStatus from "./routes/unit-summary-status";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
 
-const adminOnlyPaths = ["/pullUnit"];
+// Generation is CC-staff-only for now: each call is a burst of OpenAI requests and there is no
+// rate limiting anywhere else in front of it.
+const adminOnlyPaths = ["/pullUnit", "/generateUnitSummary"];
 
 // the TypeScript type definition for DecodedIdToken does not include the name property,
 // even though it is present in the actual decoded token returned by Firebase Admin SDK
@@ -219,6 +223,9 @@ app.get("/getPulledFiles", getPulledFiles);
 
 // NOTE: app.use() is used here to allow for paths with slashes (i.e. /rawContent/:branch/:unit/*)
 app.use("/rawContent", getRawContent);
+
+app.post("/generateUnitSummary", generateUnitSummary);
+app.get("/unitSummaryStatus", unitSummaryStatus);
 
 // A single Express app serves every route above as one function, so this timeout, memory size,
 // and secret binding apply to all of them, not just the unit-summary generation route that needs
