@@ -9,7 +9,8 @@ type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" 
 export interface ILogHistory extends Record<string, any> {
   documentId: string;
   historyEventId?: string;  // The id of the history entry where the action took place. Used for start, stop and seek.
-  historyIndex?: number; // Index into history array. Used for start, stop, seek.
+  // History position (the count of applied entries), not an array index. Used for start, stop, seek.
+  historyIndex?: number;
   historyLength?: number; // Used for start, stop, seek
   action: HistoryAction;
 }

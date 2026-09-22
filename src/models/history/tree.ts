@@ -186,7 +186,7 @@ export const Tree = types.model("Tree", {
         if (!patch.path) {
           // Throw PatchApplicationError (with numApplied=0) so this
           // case flows through the playback-failure handling path in
-          // TreeManager.goToHistoryEntry, rather than escaping as an
+          // TreeManager.goToHistoryEntryPosition, rather than escaping as an
           // unhandled error that bypasses rollback and failure
           // recording.
           throw new PatchApplicationError(

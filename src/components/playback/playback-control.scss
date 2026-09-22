@@ -571,19 +571,11 @@ $border-radius-base: 6px;
   }
 }
 
+// The lower of the two playback alerts; the request error stacks above it.
 .playback-failure-warning {
-  position: absolute;
+  @include playback-alert;
   bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 12px;
   white-space: nowrap;
-  z-index: 10;
 }
 
 .time-info {
