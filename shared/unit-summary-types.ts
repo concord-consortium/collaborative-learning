@@ -77,7 +77,10 @@ export interface IUnitSummaryStatusResponse {
 // from 800 to 1000 on 2026-09-22 after a real gpt-5.5 digest (806 chars) missed the original
 // budget by a hair -- see authoring-api/src/helpers/unit-summary-length-limit.ts for the other
 // half of the fix (one shorten-and-retry chance before a still-over-length response fails).
-export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1000;
+// Raised again to 1200 the same day, per the vibe review's recommendation (step 2.7's recommended
+// changes): a digest now has to cover every section named in its problem's input, not just lead
+// with the first one, and needs the extra room to do that in roughly one or two sentences each.
+export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1200;
 // Raised from 1500 to 1800 on 2026-09-22: cumulative by design, so a later problem in a large
 // unit has the most material to compress into the same fixed budget -- the real near-miss that
 // prompted this (1502 on a real gpt-5.5 run, even after the shorten retry) was on problem 6.1 of
@@ -85,13 +88,14 @@ export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1000;
 // other half of the fix (truncate as a last resort after the shorten retry, rather than fail).
 export const UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS = 1800;
 export const UNIT_SUMMARY_OVERVIEW_MAX_CHARS = 1200;
-// Raised from 80,000 to 100,000 on 2026-09-22, alongside the per-field increases above. The
-// original 80,000 was explicitly sized for "a 30-problem unit at the per-field maxima" (see the
-// checklist decision table) -- `m2s`, the real largest unit, has 35, and at worst case (every
-// field maxed) 35 problems now needs ~99,200 (1200 overview + 35 * (1000 digest + 1800
-// priorKnowledge)). Real content rarely maxes out every field at once, so this is headroom for a
+// Raised from 80,000 to 100,000 on 2026-09-22 for the digest/priorKnowledge increases above, then
+// to 110,000 the same day for the digest step's second increase (1000 -> 1200). The original
+// 80,000 was explicitly sized for "a 30-problem unit at the per-field maxima" (see the checklist
+// decision table) -- `m2s`, the real largest unit, has 35, and at worst case (every field maxed)
+// 35 problems now needs ~106,200 (1200 overview + 35 * (1200 digest + 1800 priorKnowledge)). Real
+// content rarely maxes out every field at once, so this is headroom for a
 // worst case, not an expected total.
-export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 100000;
+export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 110000;
 
 export type UnitSummaryValidationResult =
   | { valid: true }

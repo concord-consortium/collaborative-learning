@@ -16,10 +16,12 @@ import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 const DIGEST_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given the content of ONE problem from " +
-  "the unit, converted to Markdown. Write a concise digest, in 3 to 5 sentences and no more than " +
-  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters, of what this problem covers and has ` +
-  "students do. Only use information in the provided content -- do not infer or reference " +
-  "anything else, including other problems in the unit.";
+  "the unit, converted to Markdown. The problem is divided into sections, each marked with a " +
+  "heading of the form \"# Section: <name>\" (for example \"# Section: Investigate\"). Write a " +
+  "concise digest of what this problem covers and has students do, covering EVERY section named " +
+  "in the input in roughly one or two sentences each -- do not stop after the first section. Stay " +
+  `within ${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters total. Only use information in the ` +
+  "provided content -- do not infer or reference anything else, including other problems in the unit.";
 
 // A problem can have no extractable text (an image-only section, a not-yet-authored placeholder,
 // etc.), which would otherwise send OpenAI an empty `input` and get back a 400. Skip the call and

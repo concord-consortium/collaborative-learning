@@ -23,6 +23,10 @@ interface RawSectionContent {
   sharedModels?: SharedModelMapEntry[];
 }
 interface RawSection {
+  // The key into the unit's own `sections` map (e.g. "intro", "labWork") -- present at the top
+  // level of both an inline section object and an external section file's JSON, so this one field
+  // covers both of resolveSection's cases identically.
+  type?: string;
   content?: RawSectionContent;
 }
 interface RawProblem {
@@ -36,6 +40,10 @@ interface RawInvestigation {
 }
 interface RawUnitContent {
   investigations?: RawInvestigation[];
+  // Unit-level, authored once and reused by every problem's sections: maps a section type key to
+  // its human-readable name ("intro" -> "Investigate", etc.). Same map curriculum-tabs.tsx reads
+  // client-side for the same names.
+  sections?: Record<string, {title?: string}>;
 }
 
 export interface AssembledProblem {
@@ -101,17 +109,33 @@ export async function assembleUnit(
       for (let i = 0; i < sections.length; i++) {
         const section = await resolveSection(sections[i], ordinal, i, inventoryByPath, branch, unit, deps);
         const dataSets = normalizeCurriculumDataSets(section.content?.sharedModels);
-        sectionMarkdowns.push(
+        const body = summarizeCurriculum(section.content, dataSets, 1, undefined, {
           // dataSetTables: "full" is an explicit opt-in, not the default -- handle-table-tile.ts
           // stays silent about a table's data set unless asked. Curriculum digests want the actual
           // rows (subject to TABLE_MARKDOWN_ROW_CAP), same as the pre-existing document-level
           // "Data Sets" summary already showed for runtime documents.
           // tileHandlers: curriculumTileHandlers swaps in the labels-only drawing handler; every
           // other tile type still resolves through the same defaults every other caller gets.
-          summarizeCurriculum(section.content, dataSets, 1, undefined, {
-            imageFilenames: true, dataSetTables: "full", tileHandlers: curriculumTileHandlers,
-          })
-        );
+          imageFilenames: true, dataSetTables: "full", tileHandlers: curriculumTileHandlers,
+        });
+        // A problem's sections were joined with nothing marking where one ends and the next
+        // begins, so the digest model had no signal that a problem has several distinct parts to
+        // cover -- a likely real contributor to a digest collapsing to just the first one (see
+        // docs/plans/CLUE-685-checklist.md step 2.7's vibe review). The heading is each section
+        // TYPE's own authored name (e.g. "intro" -> "Investigate"), the same map
+        // curriculum-tabs.tsx reads client-side; falls back to the raw type key, and then to a
+        // fixed placeholder, so a section with no registered title still gets a heading rather
+        // than silently losing its boundary.
+        //
+        // "# Section: " rather than a bare "## " heading: a section's own tile content can and
+        // does already contain "## "-level headings of its own regardless of heading level or the
+        // `minimal` option (tilesSummary's per-tile "## Tile 2 (...)" heading for a multi-tile row,
+        // e.g. inside a Question tile's response, is never suppressed). A marker distinguished only
+        // by heading level would be lost among those; "Section:" is a literal word nothing else in
+        // the summarizer ever emits, so it stays unambiguous regardless of what headings a
+        // section's own content happens to produce.
+        const title = (section.type && root.sections?.[section.type]?.title) || section.type || "Section";
+        sectionMarkdowns.push(`# Section: ${title}\n\n${body}`);
       }
 
       const markdown = sectionMarkdowns.join("\n\n");

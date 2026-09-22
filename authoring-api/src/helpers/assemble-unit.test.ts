@@ -22,6 +22,7 @@ interface TestInvestigation {
 interface TestRootContent {
   title: string;
   investigations: TestInvestigation[];
+  sections?: Record<string, {title?: string}>;
 }
 
 // Every fixture file below sets `updateText`, so readEffectiveContentText's first branch
@@ -34,12 +35,14 @@ function file(
   return {path, escapedPath: path, updateText: JSON.stringify(content), ...overrides};
 }
 
-function rootContent(investigations: TestInvestigation[]): TestRootContent {
-  return {title: "Test Unit", investigations};
+function rootContent(
+  investigations: TestInvestigation[], sections?: Record<string, {title?: string}>
+): TestRootContent {
+  return {title: "Test Unit", investigations, ...(sections ? {sections} : {})};
 }
 
-function textSection(text: string): TestSection {
-  return {type: "section", content: {tiles: [{id: "t1", content: {type: "Text", format: "markdown", text}}]}};
+function textSection(text: string, type = "section"): TestSection {
+  return {type, content: {tiles: [{id: "t1", content: {type: "Text", format: "markdown", text}}]}};
 }
 
 function depsFor(inventory: UnitContentFile[]): AssembleUnitDeps {
@@ -242,5 +245,30 @@ describe("assembleUnit", () => {
     expect(markdown).not.toContain("r1");
     expect(markdown).not.toContain("#0069ff");
     expect(markdown).not.toContain("rx=");
+  });
+
+  it("heads each section with its authored name, in order, so a digest can tell them apart", async () => {
+    const root = rootContent(
+      [{
+        ordinal: 1, title: "Inv 1",
+        problems: [{
+          ordinal: 1, title: "P1",
+          sections: [textSection("intro text", "intro"), textSection("design text", "programming")],
+        }],
+      }],
+      {intro: {title: "Investigate"}, programming: {title: "Design"}}
+    );
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    const markdown = result.problems[0].markdown;
+    expect(markdown.indexOf("# Section: Investigate")).toBeGreaterThanOrEqual(0);
+    expect(markdown.indexOf("# Section: Investigate")).toBeLessThan(markdown.indexOf("# Section: Design"));
+  });
+
+  it("falls back to the section's own type key when the unit has no title registered for it", async () => {
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [{ordinal: 1, title: "P1", sections: [textSection("text", "labWork")]}]},
+    ]); // no `sections` map at all -- nothing to look a title up in
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    expect(result.problems[0].markdown).toContain("# Section: labWork");
   });
 });
