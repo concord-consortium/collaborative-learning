@@ -72,6 +72,10 @@ describe("parseTypes", () => {
     expect(parseTypes(" problem , planning ")).toEqual(["problem", "planning"]);
   });
 
+  it("scans a type named twice only once", () => {
+    expect(parseTypes("problem,planning,problem")).toEqual(["problem", "planning"]);
+  });
+
   it("throws on an unknown type rather than scanning nothing", () => {
     // The failure this prevents is silent: an unrecognized type matches no document, so the run
     // reports a clean empty census that is indistinguishable from "this type has no problems".

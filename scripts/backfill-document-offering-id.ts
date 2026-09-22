@@ -226,7 +226,9 @@ export function parseTypes(raw: string | undefined): readonly string[] {
     throw new Error(`TYPES names unknown type(s): ${unknown.join(", ")}. ` +
       `Known types are: ${kOfferingContainedTypes.join(", ")}`);
   }
-  return requested;
+  // A type named twice would be scanned and counted twice, and in apply mode could queue the same
+  // document a second time.
+  return [...new Set(requested)];
 }
 
 /** The page size from `PAGE_SIZE`. Rejects anything that is not a positive integer. */
