@@ -324,8 +324,11 @@ Two things specific to it:
 - **Content is deleted before metadata.** An interrupted run then leaves a document the same report
   would classify the same way next time, rather than one that has changed category underneath it.
 - **Every document is re-checked against the live database immediately before removal** — Firestore for
-  a metadata document that has since appeared, the realtime database for a node already gone. A stale
-  report cannot cause a wrong deletion; it can only cause a skip, which the run reports.
+  a metadata document that has since appeared, the realtime database for a node already gone. That
+  check catches a document that was repaired or removed since the report. It cannot catch one that has
+  become *repairable* since, such as an offering the portal can now resolve, so a stale report can
+  still cause a wrong deletion. The script refuses a report older than `MAX_REPORT_AGE_HOURS` for
+  that reason.
 
 It never writes to Firestore, because by definition these documents have no Firestore metadata.
 

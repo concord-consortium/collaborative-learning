@@ -62,6 +62,10 @@ async function main() {
   // A stale report is the one input that can cause a wrong deletion, and its age is the only signal
   // available for that. Refuse rather than warn: this is the irreversible script.
   const maxReportAgeHours = Number(process.env.MAX_REPORT_AGE_HOURS ?? 24);
+  if (!Number.isFinite(maxReportAgeHours) || maxReportAgeHours < 0) {
+    throw new Error(`MAX_REPORT_AGE_HOURS must be a non-negative number, got ` +
+      `"${process.env.MAX_REPORT_AGE_HOURS}". An unreadable value would disable the staleness guard.`);
+  }
   if (!dryRun && reportAgeHours > maxReportAgeHours) {
     throw new Error(`The skip report is ${reportAgeHours.toFixed(1)}h old, over the ${maxReportAgeHours}h ` +
       `limit. Re-run create-missing-document-metadata.ts so the residue reflects the current data, ` +
