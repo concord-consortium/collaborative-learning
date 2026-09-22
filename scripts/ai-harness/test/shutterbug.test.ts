@@ -1,7 +1,7 @@
 import http from "node:http";
 import { AddressInfo } from "node:net";
 import {
-  kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
+  kDefaultCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
   kProductionViewportHeightPx, shutterbugAccurateHeight, shutterbugParameterized,
   shutterbugProductionCurrent, shutterbugRequestBody
 } from "../src/backends/shutterbug.js";
@@ -166,6 +166,35 @@ describe("the parameterized mode", () => {
     expect(body.height).toBe(4000);
     expect(body.content).toContain("http://localhost:8080/iframe.html");
     expect(backend.renderTarget.captureHeightPx).toBe(4000);
+  });
+
+  it("defaults the viewport to production's 500px with --full-page, not the other modes' 1500px",
+    async () => {
+      const calls: Call[] = [];
+      const backend = shutterbugParameterized({
+        fullPage: true, fetchImpl: fakeFetch({ calls }), sleep: noSleep
+      });
+      await backend.render({ docId: "doc", content: emptyDocument });
+      const body = JSON.parse(String(calls[0].init!.body));
+      expect(body.height).toBe(kProductionViewportHeightPx);
+    });
+
+  it("still defaults to 1500px without --full-page, where the viewport is the whole clip", async () => {
+    const calls: Call[] = [];
+    const backend = shutterbugParameterized({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
+    await backend.render({ docId: "doc", content: emptyDocument });
+    const body = JSON.parse(String(calls[0].init!.body));
+    expect(body.height).toBe(kDefaultCaptureHeightPx);
+  });
+
+  it("honors an explicit --capture-height with --full-page instead of the 500px default", async () => {
+    const calls: Call[] = [];
+    const backend = shutterbugParameterized({
+      fullPage: true, captureHeightPx: 800, fetchImpl: fakeFetch({ calls }), sleep: noSleep
+    });
+    await backend.render({ docId: "doc", content: emptyDocument });
+    const body = JSON.parse(String(calls[0].init!.body));
+    expect(body.height).toBe(800);
   });
 
   it("refuses a plaintext endpoint off loopback, which would post the document in the clear", () => {
@@ -483,7 +512,7 @@ describe("the accurate-height mode", () => {
     // picture was never taken at.
     expect(outcome.renderTarget?.captureHeightPx).toBe(640);
     expect(outcome.renderTarget?.captureMode).toBe("fixed-height");
-    expect(backend.renderTarget.captureHeightPx).toBe(kProductionCaptureHeightPx);
+    expect(backend.renderTarget.captureHeightPx).toBe(kDefaultCaptureHeightPx);
   });
 
   it("falls back to production's height for a document it was given none for", async () => {
@@ -491,7 +520,7 @@ describe("the accurate-height mode", () => {
     const calls: Call[] = [];
     const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
     const outcome = await backend.render({ docId: "doc", content: emptyDocument });
-    expect(heightIn(calls)).toBe(kProductionCaptureHeightPx);
+    expect(heightIn(calls)).toBe(kDefaultCaptureHeightPx);
     // And it says nothing special about its target, because nothing was special about it.
     expect(outcome.renderTarget).toBeUndefined();
   });
@@ -517,7 +546,7 @@ describe("the accurate-height mode", () => {
     const accurate: Call[] = [];
     const parameterized: Call[] = [];
     await shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls: accurate }), sleep: noSleep })
-      .render({ docId: "doc", content: emptyDocument, captureHeightPx: kProductionCaptureHeightPx });
+      .render({ docId: "doc", content: emptyDocument, captureHeightPx: kDefaultCaptureHeightPx });
     await shutterbugParameterized({ fetchImpl: fakeFetch({ calls: parameterized }), sleep: noSleep })
       .render({ docId: "doc", content: emptyDocument });
     expect(accurate[0].url).toBe(parameterized[0].url);

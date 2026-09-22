@@ -275,7 +275,7 @@ modes are named and separate, and an improvement never gets folded into the base
 |---|---|---|---|---|
 | `puppeteer-full-height` (default) | local | `--clue-url`, default `http://localhost:8080` | harness's own | full document, 960px wide |
 | `shutterbug-production-current` | yes | production's released `authoring-iframe/index.html` | `mods` (production's fallback) | `height: 500`, `fullPage: true`, clipped only by the page's own frame ceiling (`kMaxFrameHeightPx`) |
-| `shutterbug-parameterized` | yes | `--clue-url`, default production's released `authoring-iframe/index.html` | `--unit`, default `mods` | `--capture-height`, default 1500; `--shutterbug-url`, default **staging**; or `--full-page` (posts `fullPage: true`, clipped only by the page's own frame ceiling — `--max-frame-height`, default `kMaxFrameHeightPx`) |
+| `shutterbug-parameterized` | yes | `--clue-url`, default production's released `authoring-iframe/index.html` | `--unit`, default `mods` | `--capture-height`, default 1500 (500 with `--full-page`, matching production); `--shutterbug-url`, default **staging**; or `--full-page` (posts `fullPage: true`, clipped only by the page's own frame ceiling — `--max-frame-height`, default `kMaxFrameHeightPx`) |
 | `puppeteer-per-tile` | local | `--clue-url`, default `http://localhost:8080` | harness's own | one image per top-level tile |
 | `shutterbug-accurate-height` | yes | `--clue-url`, default production's released page | `--unit`, default `mods` | each document's **own measured height** — needs a `puppeteer-full-height` render of the same corpus first |
 
@@ -320,8 +320,8 @@ because it is a plain GET for a hosted image and the URL it lands on is checked 
 the same HTML, the same CLUE iframe entry point with `unwrapped&readOnly` (a local build's
 `iframe.html`; the released build's `authoring-iframe/index.html`, built from the same source), the
 same `initialValue` message. Only two things differ: who takes the picture, and that it captures the
-whole document rather than production's first 1500 pixels. The harness captures reality; production's clipping is a
-production concern.
+whole document rather than being capped at production's own ceiling (`kMaxFrameHeightPx`, 4000px by
+default). The harness captures reality; production's clamp is a production concern.
 
 Three details of *how* it does that were established by running it against a real CLUE server, and
 each one is load-bearing:

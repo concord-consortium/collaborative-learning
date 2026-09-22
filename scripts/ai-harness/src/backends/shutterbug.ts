@@ -34,10 +34,11 @@ export const kProductionClueUrl = "https://collaborative-learning.concord.org/au
 export const kProductionUnit = "mods";
 export const kProductionShutterbugUrl = "https://api.concord.org/shutterbug-production";
 /**
- * No longer what production sends (see `kProductionViewportHeightPx`) — kept as the other modes'
- * default, so `--capture-height`'s absence still means something on them.
+ * The default capture height for the modes that clip at a fixed height rather than go full-page.
+ * What production used to send — kept so `--capture-height`'s absence still means something on
+ * them, not because it matches production today; see `kProductionViewportHeightPx` for that.
  */
-export const kProductionCaptureHeightPx = 1500;
+export const kDefaultCaptureHeightPx = 1500;
 /** The viewport production's `fullPage: true` request sends. Only a viewport — the frame ceiling
  * in `shared/render-page.ts` is what actually bounds the capture. */
 export const kProductionViewportHeightPx = 500;
@@ -470,7 +471,13 @@ export function shutterbugParameterized(options: ParameterizedOptions = {}): Ren
     clueUrl: options.clueUrl ?? kProductionClueUrl,
     unit: options.unit ?? kProductionUnit,
     shutterbugUrl: options.shutterbugUrl ?? kStagingShutterbugUrl,
-    captureHeightPx: options.captureHeightPx ?? kProductionCaptureHeightPx,
+    // With --full-page, this is only the starting viewport, and production's is 500px, not
+    // kDefaultCaptureHeightPx (1500) — which is a fixed-height clip, meaningless once the page's
+    // own ceiling is what actually bounds a full-page capture. Left at 1500 here, every full-page
+    // capture under 1500px would come out padded to 1500px regardless of --capture-height being unset,
+    // up to 3x taller than the ~500px production would actually send.
+    captureHeightPx: options.captureHeightPx ??
+      (options.fullPage ? kProductionViewportHeightPx : kDefaultCaptureHeightPx),
     clueRevision: options.clueRevision ?? null,
     fetchImpl: options.fetchImpl,
     limits: options.limits,
@@ -483,11 +490,12 @@ export function shutterbugParameterized(options: ParameterizedOptions = {}): Ren
 /**
  * The same transport again, but each document is captured at *its own* measured height.
  *
- * This is the prototype for the production fix the spike proposes: production posts a hardcoded
- * `height: 1500` for every document, so a shorter one is padded and a longer one is silently
- * clipped. Sending the real height instead is a small change to
- * `on-analysis-document-pending.ts` — and the point of this mode is to measure what it buys before
- * anyone makes it.
+ * This is the prototype for a different fix than the one that shipped: each document at its own
+ * exact measured height, rather than a full-page capture bounded by a shared ceiling
+ * (`shutterbug-production-current`). Production used to post a hardcoded `height: 1500` for every
+ * document, so a shorter one was padded and a taller one silently clipped — that's what the
+ * ceiling approach fixed, not this one. This mode still measures what the exact-height
+ * alternative would have bought, in case it's ever worth revisiting.
  *
  * The height itself comes from a previous local `puppeteer-full-height` render, which is the only
  * thing that knows how tall a document actually is. `render` reads it and hands it over per
@@ -499,9 +507,10 @@ export function shutterbugAccurateHeight(options: ParameterizedOptions = {}): Re
     clueUrl: options.clueUrl ?? kProductionClueUrl,
     unit: options.unit ?? kProductionUnit,
     shutterbugUrl: options.shutterbugUrl ?? kStagingShutterbugUrl,
-    // Only a fallback: every render is handed the document's measured height. It is the production
-    // height so that a document with no measurement would be no worse than production, not better.
-    captureHeightPx: options.captureHeightPx ?? kProductionCaptureHeightPx,
+    // Only a fallback: every render is handed the document's measured height. Falls back to the
+    // height production used to clip at, so a document with no measurement is no worse off than
+    // that was, not better.
+    captureHeightPx: options.captureHeightPx ?? kDefaultCaptureHeightPx,
     clueRevision: options.clueRevision ?? null,
     fetchImpl: options.fetchImpl,
     limits: options.limits,

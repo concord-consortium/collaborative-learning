@@ -1,18 +1,19 @@
 /**
  * The three named render modes, and how `--mode` turns into a backend.
  *
- * They are named and separate on purpose. The three sources that already render CLUE documents
- * disagree about what a screenshot is — production clips at 1500px with `unit=mods`,
- * `scripts/shutterbug.ts` clips at 500px and adds `fullPage`, and `scripts/ai/document-screenshots.ts`
- * uses the standalone editor at a different URL entirely. Folding an improvement into the parity
- * baseline would quietly destroy the only thing it is for.
+ * They are named and separate on purpose. Production and `scripts/shutterbug.ts` post the same
+ * request envelope today — a 500px starting viewport, `fullPage: true`, and `unit=mods` — but
+ * `shutterbug-production-current` pins it as a frozen baseline regardless, so it cannot drift
+ * silently if either one changes again; `scripts/ai/document-screenshots.ts` uses the standalone
+ * editor at a different URL entirely. Folding an improvement into the parity baseline would
+ * quietly destroy the only thing it is for.
  */
 import { git } from "../files.js";
 import { RenderBackend } from "./types.js";
 import { kPuppeteerBackendVersion, puppeteerBackend } from "./puppeteer.js";
 import { kMaxFrameHeightPx } from "../../../../shared/render-page.js";
 import {
-  FetchLike, kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl,
+  FetchLike, kDefaultCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl,
   kProductionUnit, kProductionViewportHeightPx, kShutterbugBackendVersion, kStagingShutterbugUrl,
   shutterbugAccurateHeight, shutterbugParameterized, shutterbugProductionCurrent
 } from "./shutterbug.js";
@@ -198,7 +199,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     prerequisites: `network access to the Shutterbug endpoint (${kStagingShutterbugUrl} unless ` +
       `--shutterbug-url says otherwise) and the CLUE URL; no OpenAI key`,
     renderTargetSummary: `${kProductionClueUrl} (--clue-url), unit ${kProductionUnit} (--unit), via ` +
-      `${kStagingShutterbugUrl} (--shutterbug-url), clipped at ${kProductionCaptureHeightPx}px ` +
+      `${kStagingShutterbugUrl} (--shutterbug-url), clipped at ${kDefaultCaptureHeightPx}px ` +
       "(--capture-height); or, with --full-page, fullPage:true and clipped only by the page's own " +
       `frame ceiling, ${kMaxFrameHeightPx}px by default (--max-frame-height)`,
     defaultUnit: null,
