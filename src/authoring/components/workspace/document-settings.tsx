@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useCurriculum } from "../../hooks/use-curriculum";
-import { ISettings } from "../../types";
+import { ISettings, IUnitConfig } from "../../types";
 import { buildSectionDividerTemplate } from "../../utils/template-utils";
 
 interface DocumentSettingsFormInputs {
@@ -11,6 +11,8 @@ interface DocumentSettingsFormInputs {
   showTextTitles: boolean;
   documentTemplateEnabled: boolean;
   planningTemplateEnabled: boolean;
+  defaultDocumentType: NonNullable<IUnitConfig["defaultDocumentType"]>;
+  groupDocumentsEnabled: boolean;
 }
 
 const DocumentSettings: React.FC = () => {
@@ -19,6 +21,7 @@ const DocumentSettings: React.FC = () => {
 
   const hasDocumentTemplate = !!config?.defaultDocumentTemplate;
   const hasPlanningTemplate = !!config?.planningTemplate;
+  const groupDocDisabledByAutoAssign = !!config?.autoAssignStudentsToIndividualGroups;
 
   const formDefaults: DocumentSettingsFormInputs = useMemo(() => {
     return {
@@ -31,16 +34,30 @@ const DocumentSettings: React.FC = () => {
       // Default to on when a legacy template already exists (flag undefined → applied at runtime).
       documentTemplateEnabled: config?.defaultDocumentTemplateEnabled ?? hasDocumentTemplate,
       planningTemplateEnabled: config?.planningTemplateEnabled ?? hasPlanningTemplate,
+      defaultDocumentType: config?.defaultDocumentType ?? "problem",
+      // "group" implies group documents even without the explicit flag (mirrors documentTemplateEnabled
+      // above). Declarative so an external reset (e.g. switching units) can't show a stale unchecked box.
+      groupDocumentsEnabled: config?.defaultDocumentType === "group"
+        ? true
+        : (config?.groupDocumentsEnabled ?? false),
     };
   }, [config, hasDocumentTemplate, hasPlanningTemplate]);
 
-  const { handleSubmit, register, reset } = useForm<DocumentSettingsFormInputs>({
+  const { handleSubmit, register, reset, watch, setValue } = useForm<DocumentSettingsFormInputs>({
     defaultValues: formDefaults,
   });
 
   useEffect(() => {
     reset(formDefaults);
   }, [formDefaults, reset]);
+
+  const groupDocSelected = watch("defaultDocumentType") === "group";
+
+  // "Group doc" means group docs on: drive the checkbox so the display matches what Save will write,
+  // including visibly repairing a contradictory saved "group" + explicit false.
+  useEffect(() => {
+    if (groupDocSelected) setValue("groupDocumentsEnabled", true);
+  }, [groupDocSelected, setValue]);
 
   const onSubmit: SubmitHandler<DocumentSettingsFormInputs> = (data) => {
     setUnitConfig(draft => {
@@ -79,6 +96,19 @@ const DocumentSettings: React.FC = () => {
         draft.config.defaultDocumentTemplate = buildSectionDividerTemplate(Object.keys(draft.sections ?? {}));
       }
       draft.config.planningTemplateEnabled = data.planningTemplateEnabled;
+      // Omit-the-default: "problem" is implicit, so only persist the other two choices.
+      if (data.defaultDocumentType !== "problem") {
+        draft.config.defaultDocumentType = data.defaultDocumentType;
+      } else {
+        delete draft.config.defaultDocumentType;
+      }
+      // Omit-the-default. The `=== "group"` arm guards against submit racing the driving effect above:
+      // selecting "Group doc" always means group docs on.
+      if (data.defaultDocumentType === "group" || data.groupDocumentsEnabled) {
+        draft.config.groupDocumentsEnabled = true;
+      } else {
+        delete draft.config.groupDocumentsEnabled;
+      }
     });
   };
 
@@ -191,6 +221,38 @@ const DocumentSettings: React.FC = () => {
           Preloads the teacher planning document, one template per planning section.
           {hasPlanningTemplate &&
             <> <button type="button" className="danger" onClick={deletePlanningTemplate}>Delete</button></>}
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Starting Document</legend>
+        <select
+          aria-label="Starting document"
+          aria-describedby="default-document-type-description"
+          {...register("defaultDocumentType")}
+        >
+          <option value="problem">Problem doc</option>
+          <option value="personal">Personal doc</option>
+          <option value="group" disabled={groupDocDisabledByAutoAssign}>Group doc</option>
+        </select>
+        <p className="muted small" id="default-document-type-description">
+          Which document students start in. &quot;Group doc&quot; also enables group documents for
+          the unit (each group&apos;s document is auto-created and appears in Sort Work). When Group
+          doc is selected, teachers start in the problem document instead.
+          {groupDocDisabledByAutoAssign &&
+            " This unit auto-assigns students to individual groups, which disables group documents."}
+        </p>
+        <label className="horizontal middle">
+          <input
+            type="checkbox"
+            {...register("groupDocumentsEnabled")}
+            disabled={groupDocSelected || groupDocDisabledByAutoAssign}
+          />
+          <span>Enable group documents</span>
+        </label>
+        <p className="muted small">
+          Turn on group documents without changing which document students start in. Selecting
+          &quot;Group doc&quot; above enables them automatically.
         </p>
       </fieldset>
 

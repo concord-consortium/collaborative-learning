@@ -65,3 +65,17 @@ export function getCanonicalPointerPath(slot: ICanonicalSlot): string {
   segments.push(`slots/${label}`);
   return segments.join("/");
 }
+
+/**
+ * Thrown when the slot a resolve set out to fill is no longer the slot the stores describe: the owner
+ * moved while the resolve was in flight, which for a group document means the user changed groups.
+ * What a caller should do about it depends on the caller, which is why this carries its own type rather
+ * than a generic Error.
+ */
+export class CanonicalSlotOwnerChangedError extends Error {
+  constructor(public startedPath: string, public currentPath: string) {
+    super("cannot create the canonical document: the slot's owner changed while it was being " +
+      `resolved (started on ${startedPath}, now ${currentPath})`);
+    this.name = "CanonicalSlotOwnerChangedError";
+  }
+}

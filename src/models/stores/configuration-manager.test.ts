@@ -175,9 +175,9 @@ describe("ConfigurationManager", () => {
     expect(configManager.commentTags).toEqual({});
   });
 
-  it("should return undefined for groupDocumentsEnabled when not configured", () => {
+  it("should return false for groupDocumentsEnabled when not configured", () => {
     const configManager = new ConfigurationManager(defaults, []);
-    expect(configManager.groupDocumentsEnabled).toBeUndefined();
+    expect(configManager.groupDocumentsEnabled).toBe(false);
   });
 
   it("should return true for groupDocumentsEnabled when set in config", () => {
@@ -272,6 +272,61 @@ describe("ConfigurationManager", () => {
     const config = new ConfigurationManager(defaults, []);
     expect(config.fixedStartView).toBeUndefined();
     expect(config.fixedStartTab).toBeUndefined();
+  });
+
+  describe("groupDocumentsEnabled / startsInGroupDocument", () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it("is enabled explicitly, without changing the start document", () => {
+      const config = new ConfigurationManager({ ...defaults, groupDocumentsEnabled: true }, []);
+      expect(config.groupDocumentsEnabled).toBe(true);
+      expect(config.startsInGroupDocument).toBe(false);
+    });
+
+    it("starts in the group document when both keys are set", () => {
+      const config = new ConfigurationManager(
+        { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: true }, []);
+      expect(config.groupDocumentsEnabled).toBe(true);
+      expect(config.startsInGroupDocument).toBe(true);
+    });
+
+    // Not implied: a unit asking for a group start without enabling group documents falls back, so
+    // anything reading the unit JSON sees the same answer the app does.
+    it("is not implied by the start setting alone; it falls back with a warning", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const config = new ConfigurationManager({ ...defaults, defaultDocumentType: "group" }, []);
+      expect(config.groupDocumentsEnabled).toBe(false);
+      expect(config.startsInGroupDocument).toBe(false);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("not set"));
+      expect(config.startsInGroupDocument).toBe(false);
+      expect(warn).toHaveBeenCalledTimes(1);
+    });
+
+    it("autoAssignStudentsToIndividualGroups trumps both group settings", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const config = new ConfigurationManager(
+        { ...defaults, defaultDocumentType: "group", groupDocumentsEnabled: true,
+          autoAssignStudentsToIndividualGroups: true }, []);
+      expect(config.groupDocumentsEnabled).toBe(false);
+      expect(config.startsInGroupDocument).toBe(false);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("autoAssignStudentsToIndividualGroups"));
+    });
+
+    it("never affects classWideDocuments", () => {
+      const config = new ConfigurationManager(
+        { ...defaults, autoAssignStudentsToIndividualGroups: true,
+          classWideDocuments: [{ kind: "dqb", title: "DQB" }] }, []);
+      expect(config.classWideDocuments).toEqual([{ kind: "dqb", title: "DQB" }]);
+    });
+
+    it("is enabled and starts in the group document when set across override layers", () => {
+      const groupDocsOverride: Partial<UnitConfiguration> = { groupDocumentsEnabled: true };
+      const groupStartOverride: Partial<UnitConfiguration> = { defaultDocumentType: "group" };
+      const config = new ConfigurationManager(defaults, [groupDocsOverride, groupStartOverride]);
+      expect(config.groupDocumentsEnabled).toBe(true);
+      expect(config.startsInGroupDocument).toBe(true);
+    });
   });
 
 });
