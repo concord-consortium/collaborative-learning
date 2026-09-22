@@ -178,8 +178,10 @@ export function responseHighlights(
       // Their caption when there is one, because it names the block in the words the prose just
       // used, which our orderedDisplayName cannot do. Blank falls back rather than dropping the
       // highlight: their schema forbids an empty one, but losing a pointer we could have named
-      // ourselves is the worse failure.
-      const caption = typeof directive.label === "string" ? directive.label.trim() : "";
+      // ourselves is the worse failure. Read on highlight alone, since nothing here validates the
+      // directive against their schema.
+      const caption = directive.op === "highlight" && typeof directive.label === "string"
+        ? directive.label.trim() : "";
       const label = caption || sentName;
       const key = `${tileId}/${objectId}`;
       if (seen.has(key)) continue;

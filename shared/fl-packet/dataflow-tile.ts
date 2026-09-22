@@ -88,9 +88,10 @@ interface RawProgram {
   recentTicks?: string[];
 }
 
-// Their catalog caps a label at 60 characters; ours is not capped, so an over-long one would break
+// Their catalog caps a label at 60 code points; ours is not capped, so an over-long one would break
 // their shape. Truncating keeps a name the diagnostic can use, where dropping the label would
-// leave it a group it cannot name.
+// leave it a group it cannot name. It splits by code point, as their maxLength counts, so an emoji
+// is never cut in half.
 const kMaxGroupLabel = 60;
 
 // `collapsed` does not travel: it is whether the group is folded away in the editor, which says
@@ -110,7 +111,7 @@ function projectGroups(program: RawProgram): DataflowGroup[] {
       node_ids: Object.keys(raw.nodeIds ?? {}).filter(Boolean),
       group_ids: [],
     };
-    if (raw.label) group.label = raw.label.slice(0, kMaxGroupLabel);
+    if (raw.label) group.label = [...raw.label].slice(0, kMaxGroupLabel).join("");
     groups.push(group);
   }
   return groups;

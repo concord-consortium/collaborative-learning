@@ -266,4 +266,10 @@ describe("responseHighlights captions", () => {
     const packet = parseResponsePacket(aResponse([captioned("n-logic", "   ")]))!;
     expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
   });
+
+  it("ignores a caption on a focus directive, which their schema does not allow", () => {
+    const focus = { ...captioned("n-logic", "the comparison block"), op: "focus" };
+    const packet = parseResponsePacket(aResponse([focus]))!;
+    expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
+  });
 });

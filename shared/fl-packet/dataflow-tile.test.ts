@@ -217,6 +217,15 @@ describe("projectDataflowTile groups", () => {
     expect(tile.content.groups?.[0].label).toHaveLength(60);
   });
 
+  it("counts the 60 in code points, so an emoji is neither cut in half nor counted twice", () => {
+    const labelOf = (label: string) => projectDataflowTile(
+      { ...content, program: { ...program, groups: { g1: { id: "g1", label, nodeIds: {} } } } },
+      "tile-df-1").content.groups?.[0].label;
+    const fits = `${"x".repeat(59)}😀`;
+    expect(labelOf(fits)).toBe(fits);
+    expect(labelOf("😀".repeat(75))).toBe("😀".repeat(60));
+  });
+
   it("does not send the collapsed flag", () => {
     const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
     expect(JSON.stringify(tile.content.groups)).not.toContain("collapsed");
