@@ -312,9 +312,8 @@ export async function backfillDocumentOfferingId(
         }
 
         const candidates = classified.filter((x) => x.c.kind === "lookup");
-        // The lookups overlap, but each returns its resolution rather than writing. Writing from inside
-        // concurrent callbacks would let one callback add to a batch another callback is already
-        // committing, so the batch is fed sequentially from the results instead (see Task 4).
+        // The lookups overlap, but each returns its resolution rather than writing; see below for why
+        // the batch is fed sequentially.
         const resolved = await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
           try {
             const lookup = await getOfferingIdFromFirebaseMetadata(
