@@ -41,7 +41,7 @@ These properties are configurable at the application (built into the code) or th
 
 `autoAssignStudentsToIndividualGroups`: (boolean) disable grouping of students (e.g. Dataflow)
 
-`defaultDocumentType`: ("problem" | "personal") type of user document to create/show by default
+`defaultDocumentType`: ("problem" | "personal" | "group") which document a student starts in. "group" starts students in their group's shared document (teachers start in the problem document instead) and requires `groupDocumentsEnabled`. Applied on first visit; otherwise the last-opened document is restored. (Switching groups while a group document is open re-points it to the new group's document in any unit, independent of this setting.)
 
 `defaultDocumentTitle`: (string) default title of personal documents (problem documents don't have user-assigned titles)
 
@@ -118,7 +118,7 @@ An `aiPrompt` may still carry a `summarizer` property, written by older versions
 `showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
 which checks if the the aiEvaluation is set or if there are invisible exemplar documents.
 
-`groupDocumentsEnabled`: (boolean | undefined) If true, group documents are enabled for the unit. If groups are not permitted (`autoAssignStudentsToIndividualGroups` is true), this setting has no effect.
+`groupDocumentsEnabled`: (boolean | undefined) If true, group documents exist for the unit: the File > Group Doc menu item appears, and each group's document is auto-created as members' group membership resolves — so it is visible in Sort Work before anyone edits it. It is never inferred: a unit that sets `defaultDocumentType: "group"` must set this too, so anything reading the unit file sees the same answer the app does (students otherwise fall back to the problem document, with a console warning). If groups are not permitted (`autoAssignStudentsToIndividualGroups` is true), both settings have no effect. `classWideDocuments` is independent of both.
 
 `hide4up`: (boolean | undefined) If true, the button that switches to 4up view is always hidden.
 

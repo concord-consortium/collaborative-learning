@@ -7,6 +7,7 @@ export class ConfigurationManager implements UnitConfiguration {
 
   private defaults: UnitConfiguration;
   private configs: Array<Partial<UnitConfiguration>>;
+  private warnedGroupStartFallback = false;
 
   // input configs should be top-to-bottom, e.g. unit, investigation, problem
   constructor(defaults: UnitConfiguration, configs: Array<Partial<UnitConfiguration>>) {
@@ -239,8 +240,27 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["showIdeasButton"]>("showIdeasButton");
   }
 
-  get groupDocumentsEnabled() {
-    return this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
+  // Deliberately not implied by defaultDocumentType: "group" — a unit file states this itself so
+  // anything reading the JSON (researcher reports) sees the same answer the app does. The authoring
+  // form writes both keys. autoAssignStudentsToIndividualGroups (no real groups) overrides it.
+  get groupDocumentsEnabled(): boolean {
+    if (this.autoAssignStudentsToIndividualGroups) return false;
+    return !!this.getProp<UC["groupDocumentsEnabled"]>("groupDocumentsEnabled");
+  }
+
+  // The warn-once flag is per ConfigurationManager instance: this getter is read on every render, so
+  // an unguarded warn would spam the console for the whole session.
+  get startsInGroupDocument(): boolean {
+    const wantsGroup = this.defaultDocumentType === "group";
+    if (wantsGroup && !this.groupDocumentsEnabled && !this.warnedGroupStartFallback) {
+      this.warnedGroupStartFallback = true;
+      const cause = this.autoAssignStudentsToIndividualGroups
+        ? "autoAssignStudentsToIndividualGroups is set (no real groups)"
+        : "groupDocumentsEnabled is not set";
+      console.warn(`defaultDocumentType is "group" but ${cause}; ` +
+        "students will start in the problem document instead");
+    }
+    return wantsGroup && this.groupDocumentsEnabled;
   }
 
   get hide4up() {

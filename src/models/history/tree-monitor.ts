@@ -164,7 +164,7 @@ export class TreeMonitor {
           // recordAction is async
           self.recordAction(call, env);
         } else if (env.historyEntryId === FAKE_HISTORY_ENTRY_ID) {
-          // History playback (goToHistoryEntry / replayHistoryToTrees)
+          // History playback (goToHistoryEntryPosition / replayHistoryToTrees)
           // uses FAKE_HISTORY_ENTRY_ID to mark its own apply calls. It
           // handles partial-failure recovery itself and needs the
           // already-applied patches to remain, so skip the auto-revert.

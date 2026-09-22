@@ -7,7 +7,7 @@ import { HistoryEntrySnapshot } from "./history";
 import { PatchApplicationError } from "./tree";
 
 // These tests exercise the multi-tree code paths in TreeManager
-// (replayHistoryToTrees, goToHistoryEntry, addTreePatchRecord) without
+// (replayHistoryToTrees, goToHistoryEntryPosition, addTreePatchRecord) without
 // dragging in DocumentContentModel/tiles. A minimal TestTree implements
 // the TreeAPI surface directly so we can register multiple trees with a
 // single TreeManager and drive them with hand-crafted history entries.
@@ -38,7 +38,7 @@ jest.mock("firebase/app", () => ({
 // TreeManager calls. It mirrors the batched-applyPatch + onPatch
 // counting pattern from the real Tree model so that PatchApplicationError
 // is thrown with an accurate numApplied count — which is what the
-// goToHistoryEntry rollback logic depends on.
+// goToHistoryEntryPosition rollback logic depends on.
 const TestTree = types.model("TestTree", {
   myId: types.string,
   value: types.maybe(types.string),
@@ -50,7 +50,7 @@ const TestTree = types.model("TestTree", {
   finishCount: 0,
   // When set, the next applyPatchesFromManager call throws this error
   // instead of applying patches. Used to exercise the unexpected-error
-  // code path in goToHistoryEntry.
+  // code path in goToHistoryEntryPosition.
   unexpectedErrorOnNextApply: undefined as unknown,
 }))
 .views(self => ({
@@ -237,7 +237,7 @@ describe("TreeManager multi-tree support", () => {
     });
   });
 
-  describe("goToHistoryEntry", () => {
+  describe("goToHistoryEntryPosition", () => {
     it("scrubs forward across multiple trees", async () => {
       const { manager, treeA, treeB } = setupManager();
       const history = [
@@ -248,7 +248,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setChangeDocument({ history } as any);
       manager.setNumHistoryEntriesApplied(0);
 
-      await manager.goToHistoryEntry(3);
+      await manager.goToHistoryEntryPosition(3);
 
       expect(treeA.value).toBe("A2");
       expect(treeB.value).toBe("B1");
@@ -268,7 +268,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setChangeDocument({ history } as any);
       manager.setNumHistoryEntriesApplied(3);
 
-      await manager.goToHistoryEntry(0);
+      await manager.goToHistoryEntryPosition(0);
 
       expect(treeA.value).toBeUndefined();
       expect(treeB.value).toBeUndefined();
@@ -285,19 +285,19 @@ describe("TreeManager multi-tree support", () => {
       manager.setChangeDocument({ history } as any);
       manager.setNumHistoryEntriesApplied(0);
 
-      await manager.goToHistoryEntry(1);
+      await manager.goToHistoryEntryPosition(1);
       expect(treeA.value).toBe("A1");
       expect(treeB.value).toBeUndefined();
 
-      await manager.goToHistoryEntry(2);
+      await manager.goToHistoryEntryPosition(2);
       expect(treeA.value).toBe("A1");
       expect(treeB.value).toBe("B1");
 
-      await manager.goToHistoryEntry(3);
+      await manager.goToHistoryEntryPosition(3);
       expect(treeA.value).toBe("A2");
       expect(treeB.value).toBe("B1");
 
-      await manager.goToHistoryEntry(0);
+      await manager.goToHistoryEntryPosition(0);
       expect(treeA.value).toBeUndefined();
       expect(treeB.value).toBeUndefined();
     });
@@ -313,11 +313,11 @@ describe("TreeManager multi-tree support", () => {
       manager.setChangeDocument({ history } as any);
       manager.setNumHistoryEntriesApplied(0);
 
-      await manager.goToHistoryEntry(1);
+      await manager.goToHistoryEntryPosition(1);
       expect(treeA.value).toBe("A1");
       expect(treeB.value).toBe("B1");
 
-      await manager.goToHistoryEntry(0);
+      await manager.goToHistoryEntryPosition(0);
       expect(treeA.value).toBeUndefined();
       expect(treeB.value).toBeUndefined();
     });
@@ -332,7 +332,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("warn", async () => {
-        await manager.goToHistoryEntry(2);
+        await manager.goToHistoryEntryPosition(2);
       });
 
       // The failing entry is entry 1, so numHistoryEventsApplied stops at 1.
@@ -360,7 +360,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("warn", async () => {
-        await manager.goToHistoryEntry(1);
+        await manager.goToHistoryEntryPosition(1);
       });
 
       // Position stops at the failing entry.
@@ -390,7 +390,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("warn", async () => {
-        await manager.goToHistoryEntry(5);
+        await manager.goToHistoryEntryPosition(5);
       });
 
       // Scrub stops at the earliest failing entry (index 3).
@@ -425,7 +425,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(5);
 
       await jestSpyConsole("warn", async () => {
-        await manager.goToHistoryEntry(0);
+        await manager.goToHistoryEntryPosition(0);
       });
 
       // Scrub stops at position just-after the failing entry going
@@ -458,7 +458,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("warn", async () => {
-        await manager.goToHistoryEntry(6);
+        await manager.goToHistoryEntryPosition(6);
       });
 
       // Earliest (min) failing index forward is treeA's at 2.
@@ -496,7 +496,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(6);
 
       await jestSpyConsole("warn", async () => {
-        await manager.goToHistoryEntry(0);
+        await manager.goToHistoryEntryPosition(0);
       });
 
       // Latest (max) failing index backward is treeB's at 4;
@@ -539,7 +539,7 @@ describe("TreeManager multi-tree support", () => {
 
       // The await should resolve, not reject.
       await jestSpyConsole("error", async () => {
-        await manager.goToHistoryEntry(1);
+        await manager.goToHistoryEntryPosition(1);
       });
     });
 
@@ -554,7 +554,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("error", async () => {
-        await manager.goToHistoryEntry(2);
+        await manager.goToHistoryEntryPosition(2);
       });
 
       // Position stays where it started — we don't know how far the
@@ -575,7 +575,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("error", async () => {
-        await manager.goToHistoryEntry(1);
+        await manager.goToHistoryEntryPosition(1);
       });
 
       // Both trees should be un-stuck.
@@ -599,7 +599,7 @@ describe("TreeManager multi-tree support", () => {
       manager.setNumHistoryEntriesApplied(0);
 
       await jestSpyConsole("error", async () => {
-        await manager.goToHistoryEntry(2);
+        await manager.goToHistoryEntryPosition(2);
       });
 
       // treeA's successful apply of entry 0 must be rolled back so the
