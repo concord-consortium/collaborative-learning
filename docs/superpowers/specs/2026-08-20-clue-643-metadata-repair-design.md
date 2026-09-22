@@ -102,8 +102,13 @@ Drive this from the index, **not** from the legacy `contextId` field. Of the 35 
 the legacy field would fix 25 and silently leave 10 looking correct.
 
 Also compare `uid` against the indexed uid and **report** disagreements without fixing them. That axis
-was never analysed, and a wrong `uid` is a different bug with different consequences; surfacing it
+was never analyzed, and a wrong `uid` is a different bug with different consequences; surfacing it
 costs nothing and guessing at it could do harm.
+
+A document wrong on both axes still has its `context_id` rewritten. That moves it into the right
+class's Sort Work, which beats leaving it in the wrong teacher's. It still will not open, because the
+client builds the realtime-database path from the stored `uid`, so the repair is flagged `uidMismatch`
+rather than counted as a plain fix.
 
 ## Repair 2 — create the missing metadata documents
 

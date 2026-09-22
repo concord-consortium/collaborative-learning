@@ -101,7 +101,7 @@ describe("repairDocumentContextId", () => {
   });
 
   it("reports a uid disagreement without repairing it", async () => {
-    // The uid axis was never analysed. A wrong uid is a different bug with different consequences,
+    // The uid axis was never analyzed. A wrong uid is a different bug with different consequences,
     // so surface it and leave it; guessing could do harm.
     const { firestore, store } = fakeFirestore({
       doc1: { key: "doc1", context_id: "trueClass", uid: "wrongUid", type: "problem" }
@@ -114,6 +114,25 @@ describe("repairDocumentContextId", () => {
     expect(store.doc1.uid).toBe("wrongUid");
     expect(result.counts.uidMismatch).toBe(1);
     expect(result.uidMismatches).toEqual([{ key: "doc1", stored: "wrongUid", indexed: "trueUid" }]);
+  });
+
+  it("rewrites context_id when the uid is wrong too, and flags the repair as incomplete", async () => {
+    // The rewrite moves the document into the right class's Sort Work, which is better than leaving it
+    // in the wrong teacher's. It still will not open, because the client builds the path from the
+    // stored uid, so the repair says so rather than passing as a fix.
+    const { firestore, store } = fakeFirestore({
+      doc1: { key: "doc1", context_id: "wrongClass", uid: "wrongUid", type: "problem" }
+    });
+    const index = new Map([["doc1", home("trueClass", "trueUid")]]);
+
+    const result = await repairDocumentContextId(firestore, "demo/S/documents", index,
+      { dryRun: false, log: silent });
+
+    expect(store.doc1).toMatchObject({ context_id: "trueClass", uid: "wrongUid" });
+    expect(result.counts).toMatchObject({ needsRepair: 1, written: 1, uidMismatch: 1 });
+    expect(result.repairs).toEqual([
+      { key: "doc1", type: "problem", from: "wrongClass", to: "trueClass", uidMismatch: true }
+    ]);
   });
 
   it("writes nothing on a dry run but counts what it would have repaired", async () => {

@@ -37,6 +37,8 @@ export interface IContextIdRepair {
   type?: string;
   from?: string;
   to: string;
+  /** The uid is wrong too: this moves the document to the right class, but it will still not open. */
+  uidMismatch?: boolean;
 }
 
 export interface IUidMismatch {
@@ -111,9 +113,16 @@ export async function repairDocumentContextId(
           continue;
         }
 
-        // The uid axis was never analysed, and a wrong uid is a different bug with different
+        // The uid axis was never analyzed, and a wrong uid is a different bug with different
         // consequences. Surface it so it can be investigated; do not guess at a correction.
-        if (data.uid !== indexed.uid) {
+        //
+        // A document wrong on both axes still gets its context_id rewritten. The index says where the
+        // node physically is, so the rewrite moves it into the right class's Sort Work, where leaving it
+        // would keep it in the wrong teacher's. It still will not open: the client builds the
+        // realtime-database path from the viewer's class and the *stored* uid. So the repair is flagged
+        // rather than reported as a fix.
+        const uidMismatch = data.uid !== indexed.uid;
+        if (uidMismatch) {
           counts.uidMismatch++;
           uidMismatches.push({ key: doc.id, stored: data.uid, indexed: indexed.uid });
         }
@@ -124,7 +133,10 @@ export async function repairDocumentContextId(
         }
 
         counts.needsRepair++;
-        repairs.push({ key: doc.id, type: data.type, from: data.context_id, to: indexed.classHash });
+        repairs.push({
+          key: doc.id, type: data.type, from: data.context_id, to: indexed.classHash,
+          ...(uidMismatch && { uidMismatch: true })
+        });
 
         if (!dryRun) {
           batch.update(firestore.doc(`${spacePath}/${doc.id}`), { context_id: indexed.classHash });
@@ -198,7 +210,10 @@ async function main() {
       firestore, space.spacePath, index, { dryRun }
     );
     // Small enough to read in full, and the whole point of the run.
-    for (const r of repairs) console.log(`    ${r.key} [${r.type}] ${r.from} -> ${r.to}`);
+    for (const r of repairs) {
+      console.log(`    ${r.key} [${r.type}] ${r.from} -> ${r.to}` +
+        (r.uidMismatch ? "  (uid also wrong: moved, but will not open)" : ""));
+    }
     for (const m of uidMismatches) console.log(`    uid mismatch ${m.key}: ${m.stored} vs ${m.indexed}`);
     for (const bucket of Object.keys(totals) as Array<keyof typeof totals>) totals[bucket] += counts[bucket];
   }
