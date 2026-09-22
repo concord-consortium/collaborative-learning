@@ -3,15 +3,20 @@
 
 const kRtdbIllegal = /[.#$[\]/]/;
 
+const hasControlCharacter = (segment: string) =>
+  [...segment].some(ch => ch.charCodeAt(0) < 0x20 || ch.charCodeAt(0) === 0x7f);
+
 /**
  * Whether a document can be addressed in the realtime database at all.
  *
- * A path segment containing any of `.#$[]/` is rejected by the RTDB, so a lookup built from one throws
- * rather than returning nothing. Curriculum-authored supports use their caption as a key, which
- * contains dots. An empty segment is rejected too, since it would collapse the path onto its parent.
+ * A path segment containing any of `.#$[]/`, or an ASCII control character (U+0000–U+001F, U+007F),
+ * is rejected by the RTDB, so a read built from one fails on every retry and would end the run.
+ * Curriculum-authored supports use their caption as a key, which contains dots. An empty segment is
+ * rejected too, since it would collapse the path onto its parent.
  */
 export function isRtdbAddressable(classHash: string, uid: string, key: string): boolean {
-  return [classHash, uid, key].every(segment => !!segment && !kRtdbIllegal.test(segment));
+  return [classHash, uid, key].every(segment =>
+    !!segment && !kRtdbIllegal.test(segment) && !hasControlCharacter(segment));
 }
 
 /**

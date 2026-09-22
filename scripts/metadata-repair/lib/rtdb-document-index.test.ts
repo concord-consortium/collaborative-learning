@@ -65,7 +65,7 @@ describe("isRtdbAddressable", () => {
     // Curriculum-authored supports carry human-readable keys like this one; production had two, and a
     // lookup on such a key throws rather than returning nothing.
     expect(isRtdbAddressable("c1", "curriculum", "2.2 Initial Challenge Support 1")).toBe(false);
-    for (const bad of [".", "#", "$", "[", "]", "/"]) {
+    for (const bad of [".", "#", "$", "[", "]", "/", "\u0000", "\n", "\u001f", "\u007f"]) {
       expect(isRtdbAddressable("c1", "u1", `key${bad}x`)).toBe(false);
       expect(isRtdbAddressable(`ctx${bad}`, "u1", "k1")).toBe(false);
       expect(isRtdbAddressable("c1", `uid${bad}`, "k1")).toBe(false);

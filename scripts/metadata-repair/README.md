@@ -131,8 +131,8 @@ be turned off.
   `documentMetadata` lookup on them is meaningless.
 - **A key that appears under two homes.** "The class this document lives in" has no answer, so the key
   is dropped from the index rather than resolved to whichever home was seen first.
-- **A key containing `.`, `#`, `$`, `[`, `]` or `/`.** These cannot appear in a realtime-database path,
-  and a lookup on one throws.
+- **A key containing `.`, `#`, `$`, `[`, `]`, `/` or an ASCII control character.** These cannot
+  appear in a realtime-database path, and a lookup on one throws.
 - **A type on neither container allowlist** — `section`, `group`, `axes`, `drivingQuestionBoard`. See
   `kClassContainedTypes` in `create-missing-document-metadata.ts` for why each is refused.
 - **An offering-contained document whose unit, investigation and problem cannot all be established.**
