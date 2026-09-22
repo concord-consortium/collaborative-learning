@@ -16,6 +16,7 @@
 import type { Firestore } from "firebase-admin/firestore";
 import { isRtdbAddressable, type IDocumentHome } from "./lib/rtdb-document-index";
 import { toolsFromDocumentNode } from "./lib/document-tools";
+import type { ISkipReport } from "./lib/deletion-plan";
 
 /** Batched writes are capped well below Firestore's 500-operation limit. */
 const kBatchSize = 400;
@@ -565,7 +566,11 @@ async function main() {
   const reportPath = getScriptRootFilePath(
     filter ? kSkipReportFile.replace(/\.json$/, ".partial.json") : kSkipReportFile);
   nodeFs.mkdirSync(getScriptRootFilePath(kOutputDir), { recursive: true });
-  nodeFs.writeFileSync(reportPath, JSON.stringify(everySkipped, null, 2));
+  const report: ISkipReport = {
+    generatedAt: Date.now(), projectId: serviceAccount.project_id, databaseURL, dryRun,
+    spaces: filter ?? null, skipped: everySkipped
+  };
+  nodeFs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`skipped documents written to ${reportPath}`);
   if (filter) {
     console.log("This run was limited to named spaces, so the report covers only those. " +

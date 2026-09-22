@@ -54,8 +54,12 @@ not exist yet cannot be scanned at all.
 riskier in itself, but because a document lands in the residue for reasons that are not all
 deterministic: 330 of the ~573 unresolved documents get their curriculum position from a portal API
 call, so an outage, a rate limit or an expired token would bucket them as unresolvable. Deleting from a
-report produced after the repair actually ran means the residue is confirmed rather than predicted. The
-script refuses a report more than 24 hours old for the same reason.
+report produced after the repair actually ran means the residue is confirmed rather than predicted.
+
+The report records the run that wrote it, and the deletion script refuses a report that was written
+by an apply run, written against another project or database, or written more than 24 hours ago.
+The first refusal enforces step 3. If step 3 is run with `SPACES` still set, its report goes to the
+`.partial.json` path, and the file at the default path is still the one step 2's apply run wrote.
 
 ## Running them
 

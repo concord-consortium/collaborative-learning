@@ -42,6 +42,22 @@ export interface ISkippedRecord {
   createdAt?: number;
 }
 
+/**
+ * The file create-missing-document-metadata.ts writes: the documents it declined, and the run that
+ * declined them. The run's details are what let the deletion script tell a report it can act on from
+ * one written against another project, or by the apply run rather than the dry run that follows it.
+ */
+export interface ISkipReport {
+  /** When the run finished, in ms. The file's mtime would change if the file were copied. */
+  generatedAt: number;
+  projectId: string;
+  databaseURL: string;
+  dryRun: boolean;
+  /** The SPACES filter the run was limited to, or null when it covered every space. */
+  spaces: string[] | null;
+  skipped: ISkippedRecord[];
+}
+
 export interface IPlannedDeletion {
   key: string;
   space: string;

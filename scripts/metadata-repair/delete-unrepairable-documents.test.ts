@@ -1,5 +1,5 @@
-import { checkReportAge, parseDeletionSettings, runDeletions } from "./delete-unrepairable-documents";
-import type { IDeletionPlan, IPlannedDeletion } from "./lib/deletion-plan";
+import { checkSkipReport, parseDeletionSettings, runDeletions } from "./delete-unrepairable-documents";
+import type { IDeletionPlan, IPlannedDeletion, ISkipReport } from "./lib/deletion-plan";
 
 const kDayMs = 24 * 60 * 60 * 1000;
 
@@ -38,19 +38,53 @@ describe("parseDeletionSettings", () => {
   });
 });
 
-describe("checkReportAge", () => {
+describe("checkSkipReport", () => {
+  const kHourMs = 60 * 60 * 1000;
+  const now = 1_800_000_000_000;
+  const current = { projectId: "p", databaseURL: "https://p.firebaseio.com", now };
+  const record = { key: "k", classHash: "c", uid: "u", hasContent: false, hasMetadata: true,
+    reason: "skippedNoContent", space: "demo/S" };
+  const report = (overrides: Partial<ISkipReport> = {}): ISkipReport => ({
+    generatedAt: now - kHourMs, projectId: "p", databaseURL: "https://p.firebaseio.com",
+    dryRun: true, spaces: null, skipped: [record], ...overrides
+  });
   const apply = parseDeletionSettings({ APPLY: "1" });
+  const dryRun = parseDeletionSettings({});
 
-  it("refuses a report over the limit when applying", () => {
-    expect(() => checkReportAge(25, apply)).toThrow(/25\.0h old/);
+  it("returns the records of a fresh dry-run report for this project", () => {
+    expect(checkSkipReport(report(), current, apply)).toEqual([record]);
   });
 
-  it("accepts a report within the limit", () => {
-    expect(() => checkReportAge(23, apply)).not.toThrow();
+  it("accepts a filtered report, which can only under-delete", () => {
+    expect(checkSkipReport(report({ spaces: ["demo/S"] }), current, apply)).toEqual([record]);
+  });
+
+  it("refuses a report with no run details", () => {
+    expect(() => checkSkipReport([record] as any, current, dryRun)).toThrow(/which run wrote it/);
+  });
+
+  it("refuses a report written against another project or database", () => {
+    // Otherwise every record reads as already gone, and the run reports a clean no-op.
+    expect(() => checkSkipReport(report({ projectId: "other" }), current, dryRun)).toThrow(/other/);
+    expect(() => checkSkipReport(report({ databaseURL: "https://x" }), current, dryRun)).toThrow(/https:\/\/x/);
+  });
+
+  it("refuses a report written by an apply run", () => {
+    // The residue must be confirmed by the dry run after the repair, not predicted by the repair.
+    expect(() => checkSkipReport(report({ dryRun: false }), current, apply)).toThrow(/apply run/);
+  });
+
+  it("refuses a report over the age limit when applying", () => {
+    expect(() => checkSkipReport(report({ generatedAt: now - 25 * kHourMs }), current, apply))
+      .toThrow(/25\.0h old/);
+  });
+
+  it("refuses a report with no readable timestamp when applying", () => {
+    expect(() => checkSkipReport(report({ generatedAt: undefined as any }), current, apply)).toThrow(/old/);
   });
 
   it("allows a dry run to read an old report, since it removes nothing", () => {
-    expect(() => checkReportAge(1000, parseDeletionSettings({}))).not.toThrow();
+    expect(checkSkipReport(report({ generatedAt: now - 1000 * kHourMs }), current, dryRun)).toEqual([record]);
   });
 });
 

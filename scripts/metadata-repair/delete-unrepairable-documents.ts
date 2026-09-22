@@ -24,7 +24,9 @@
 //
 // Read ./README.md before running any of these: the order matters, and two of the three write.
 
-import { kDefaultRetentionMs, type IDeletionPlan, type IPlannedDeletion } from "./lib/deletion-plan";
+import {
+  kDefaultRetentionMs, type IDeletionPlan, type IPlannedDeletion, type ISkipReport, type ISkippedRecord
+} from "./lib/deletion-plan";
 
 export interface IDeletionSettings {
   dryRun: boolean;
@@ -60,18 +62,44 @@ export function parseDeletionSettings(env: Record<string, string | undefined>): 
 }
 
 /**
- * Refuse a report too old to apply.
+ * Refuse a report this run must not act on. Returns the report's records.
  *
- * A stale report is the one input that can cause a wrong deletion, and its age is the only signal
- * available for that. Refuse rather than warn: this is the irreversible script. A dry run is allowed
- * an old report, since it removes nothing.
+ * Refuse rather than warn: this is the irreversible script. Each check stands for a way the wrong
+ * report reaches this script without anything looking wrong:
+ *
+ * - **Another project or database.** Every record would read as "already gone", and the run would
+ *   report a clean no-op instead of an error.
+ * - **Written by an apply run.** The residue is meant to be confirmed by a dry run *after* the repair.
+ *   An apply run's report is still at the default path when that dry run was filtered with SPACES, and
+ *   is recent enough to pass the age check.
+ * - **Too old.** A stale report is the one input that can cause a wrong deletion: a document that has
+ *   become repairable since looks exactly like one that has not. A dry run may read an old report,
+ *   since it removes nothing.
  */
-export function checkReportAge(reportAgeHours: number, { dryRun, maxReportAgeHours }: IDeletionSettings) {
-  if (!dryRun && reportAgeHours > maxReportAgeHours) {
+export function checkSkipReport(
+  report: ISkipReport,
+  current: { projectId: string; databaseURL: string; now: number },
+  { dryRun, maxReportAgeHours }: IDeletionSettings
+): ISkippedRecord[] {
+  if (!report || Array.isArray(report) || !Array.isArray(report.skipped)) {
+    throw new Error("The skip report does not say which run wrote it. " +
+      "Regenerate it with a dry run of create-missing-document-metadata.ts.");
+  }
+  if (report.projectId !== current.projectId || report.databaseURL !== current.databaseURL) {
+    throw new Error(`The skip report was written against ${report.projectId} (${report.databaseURL}), ` +
+      `but this run is pointed at ${current.projectId} (${current.databaseURL}).`);
+  }
+  if (!report.dryRun) {
+    throw new Error("The skip report was written by an apply run. Delete only from the dry run that " +
+      "follows the repair: re-run create-missing-document-metadata.ts without APPLY.");
+  }
+  const reportAgeHours = (current.now - report.generatedAt) / 3600000;
+  if (!dryRun && !(reportAgeHours <= maxReportAgeHours)) {
     throw new Error(`The skip report is ${reportAgeHours.toFixed(1)}h old, over the ${maxReportAgeHours}h ` +
       `limit. Re-run create-missing-document-metadata.ts so the residue reflects the current data, ` +
       `or raise MAX_REPORT_AGE_HOURS if you are certain nothing has changed.`);
   }
+  return report.skipped;
 }
 
 export interface IDeletionDeps {
@@ -135,25 +163,27 @@ async function main() {
   const settings = parseDeletionSettings(process.env);
   const { dryRun, retentionMs } = settings;
   const reportPath = process.env.REPORT ?? getScriptRootFilePath(kSkipReportFile);
-  const records = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+  const report: ISkipReport = JSON.parse(fs.readFileSync(reportPath, "utf8"));
 
   const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
   const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
 
-  const reportAgeHours = (Date.now() - fs.statSync(reportPath).mtimeMs) / 3600000;
-
-  console.log(`- Report: ${reportPath} (${records.length} skipped documents, ` +
-    `${reportAgeHours.toFixed(1)}h old)`);
+  console.log(`- Report: ${reportPath}`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);
   console.log(`- Realtime Database URL: ${databaseURL}`);
   console.log(`- Protected spaces: ${kProtectedSpaces.join(", ")}`);
   console.log(`- Retention: ${Math.round(retentionMs / 86400000)} days`);
   console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will delete"}\n`);
 
-  checkReportAge(reportAgeHours, settings);
+  const now = Date.now();
+  const records = checkSkipReport(report, { projectId: serviceAccount.project_id, databaseURL, now }, settings);
+  console.log(`- Report written ${new Date(report.generatedAt).toISOString()} ` +
+    `(${((now - report.generatedAt) / 3600000).toFixed(1)}h ago), ${records.length} skipped documents`);
+  // A filtered report can only under-delete, so it is allowed, but the run should say it is partial.
+  if (report.spaces) console.log(`- Report covers only: ${report.spaces.join(", ")}`);
 
-  const plan = planDeletions(records, { now: Date.now(), retentionMs });
+  const plan = planDeletions(records, { now, retentionMs });
   console.log("plan", JSON.stringify(plan.summary, null, 2));
   for (const r of plan.refused) console.log(`  refused ${r.space} ${r.key}: ${r.reason}`);
 
