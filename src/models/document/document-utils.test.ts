@@ -518,17 +518,11 @@ describe("isDocumentAccessibleToUser — concurrent documents", () => {
   it("grants a student access to a concurrent document owned by someone else", () => {
     // Access reads the stored `concurrent` field, which is the permissions question: it is what says the
     // document is shared with the class, and it is what the Firestore rules key on for the same reason.
-    const groupDoc: any = { uid: groupUid, type: GroupDocument, key: "g1", concurrent: true };
+    const groupDoc: any = { uid: groupUid, type: AxesDocument, key: "g1", concurrent: true };
     expect(isDocumentAccessibleToUser({ documentMetadata: groupDoc, documents, user: student })).toBe(true);
 
-    const classWideDoc: any = { uid: classUid, type: GroupDocument, key: "c1", concurrent: true };
+    const classWideDoc: any = { uid: classUid, type: AxesDocument, key: "c1", concurrent: true };
     expect(isDocumentAccessibleToUser({ documentMetadata: classWideDoc, documents, user: student })).toBe(true);
-  });
-
-  it("reads the same for a document the sweep has already renamed", () => {
-    // The type is not read, so the same documents behave identically on either side of CLUE-604's sweep.
-    const swept: any = { uid: groupUid, type: AxesDocument, key: "g2", concurrent: true };
-    expect(isDocumentAccessibleToUser({ documentMetadata: swept, documents, user: student })).toBe(true);
   });
 
   it("denies a student access to a non-shared personal document owned by someone else", () => {
@@ -539,18 +533,15 @@ describe("isDocumentAccessibleToUser — concurrent documents", () => {
   it("does not grant access on the axis-native type alone", () => {
     // The reason this reads `concurrent` rather than the type: the axis-native type is a set the rename
     // exists to let grow, so a kind added later must state that it is class-shared rather than inherit it.
-    // The transitional branch below must not cover this — it accepts the pre-sweep literal only.
     const notConcurrent: any = { uid: "other", type: AxesDocument, key: "a1" };  // no concurrent
     expect(isDocumentAccessibleToUser({ documentMetadata: notConcurrent, documents, user: student })).toBe(false);
   });
 
-  it("TRANSITIONAL: grants access to a pre-sweep group document that stores no concurrent", () => {
-    // The shape every group document created before `concurrent` was stamped still has, and the reason
-    // the type cannot be dropped from this check yet. It is read from un-opened Firestore metadata, so
-    // db.ts's on-open backfill has not supplied the field and cannot: this check is what decides whether
-    // the thumbnail will accept the click that would open it. CLUE-604's sweep is what retires this case.
-    const legacy: any = { uid: groupUid, type: GroupDocument, key: "g3" };  // no concurrent
-    expect(isDocumentAccessibleToUser({ documentMetadata: legacy, documents, user: student })).toBe(true);
+  it("does not grant access on the pre-rename type alone", () => {
+    // Class read access is exactly the stored `concurrent` field — the same field the Firestore rules
+    // key on. Every group document stores it, so a type that says "group" grants nothing by itself.
+    const noConcurrent: any = { uid: groupUid, type: GroupDocument, key: "g3" };
+    expect(isDocumentAccessibleToUser({ documentMetadata: noConcurrent, documents, user: student })).toBe(false);
   });
 
   it("grants access to a concurrent document of any type", () => {
