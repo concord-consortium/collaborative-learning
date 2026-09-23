@@ -113,10 +113,14 @@ staging and production already have. Its header says how to add it to a new envi
 
 ### Reading the output
 
-**Judge a run by its per-space and per-type lines, not by the totals.** Each space prints one line per
-bucket and then a breakdown per document type. The per-type breakdown is what catches a type nobody
-expected — it is how the 108 deprecated `section` documents were found, which would otherwise have been
-written onto the wrong container axis.
+**Judge a run by its per-space and per-type lines, not by the totals.** Steps 1 and 2 print one line per
+space with a count for each bucket, and step 2 follows it with a breakdown per document type. The
+per-type breakdown is what catches a type nobody expected — it is how the 108 deprecated `section`
+documents were found, which would otherwise have been written onto the wrong container axis.
+
+The backfill (step 5) is organized the other way round. It prints a `finished <type>` line as each
+type completes, and its per-space counts are only in the JSON it prints at the end. If the run fails,
+that JSON comes out as the partial result instead.
 
 `create-missing-document-metadata.ts` writes every document it declined to
 `scripts/output/create-missing-skipped.json` (gitignored — it names real classes and users). That file
@@ -125,7 +129,8 @@ is the deletion script's input.
 Counts to read carefully:
 
 - **`written`** is incremented only after a commit resolves, so it understates rather than overstates
-  a crashed run. If a run dies, both repairs still print their counts and attach them to the error.
+  a crashed run. If a run dies, every script that writes still prints its counts and attaches them to
+  the error.
 - **`appearedDuringRun`** means a client created the metadata document while the sweep was running.
   Those are left alone, not overwritten.
 - **`deletedDuringRun`** (step 5) means a document was deleted between the scan and the write. It is
