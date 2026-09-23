@@ -5,22 +5,29 @@
 //
 // A group document created before 7.5.0 has no pointer at the path the app reads until a group member
 // opens it: `findLegacy` in src/lib/db.ts finds the document by query and claims the pointer then.
-// Documents from before 7.3.0 never had a pointer. Documents from 7.3.0 and 7.4.0 have one at a path
-// those releases used and the app no longer reads (`classes/<class>/offerings/<offering>/groups/<group>/
-// canonical/default` in 7.3.0, `canonical/v1/classes/<class>/offerings/<offering>/groups/<group>/slots/
-// default` in 7.4.0); the owner segment replaced the group segment in 7.5.0. This script makes the same
-// claim for every slot at once, so that `findLegacy` can be removed without handing an unopened group a
-// new, empty document. Pointers at the superseded paths are left where they are; nothing reads them.
+// 7.3.0 and 7.4.0 wrote pointers at paths the app no longer reads (see `legacyGroupPointerRelativePaths`).
+// This script makes the same claim for every slot at once, so that `findLegacy` can be removed without
+// handing an unopened group a new, empty document.
 //
 // For each slot — one class, offering and group — the winner is the document the pointer already names,
 // or, when there is no pointer yet, the one `findLegacy` would pick: the lowest document id, which is the
 // order Firestore returns an unordered query in. Every other group document in the slot is a leftover of
-// the creation race pointers were introduced to close. Nothing in the app opens one, so they are
-// deleted — each backed up first to scripts/output — from both the realtime database and Firestore.
+// the creation race pointers were introduced to close, and is deleted from both the realtime database and
+// Firestore. Every 7.3.0 and 7.4.0 pointer in the slot is deleted too, whichever document it names, so the
+// pointer at the current path is the only one left.
+//
+// The app can still open a leftover: Sort Work lists every group document in the class. Deleting them
+// anyway is acceptable because group documents have not yet been used by real classes, so a leftover
+// holds no work anyone needs. That includes one marked `canonical` by 7.3.0 or 7.4.0, which those
+// releases opened but 7.5.0 shows only in Sort Work; removing it, and the superseded pointers, keeps that
+// legacy state from confusing a later reader of the database. For the same reason each deletion is backed
+// up to scripts/output only as a convenience, not as a restore procedure. What does matter is that
+// nothing else is deleted: each document is re-read just before its removal, and the run stops unless it
+// is still a group document of the slot it was found in (`whyNotDeletable`).
 //
 // Anything this cannot confidently address is reported and left alone rather than guessed at: a slot
-// containing a document with the wrong owner uid, a pointer naming a document outside its slot, or a
-// losing document that is already marked canonical.
+// containing a document with the wrong owner uid, or a slot whose pointer names a document outside it or
+// has no document key.
 //
 // Covers `authed` and `demo` spaces. `qa` and `dev` have had their realtime-database side purged and
 // hold only test data, so they are not listed at all.
@@ -59,6 +66,22 @@ export function groupPointerRelativePath(
   return `canonical/v1/classes/${contextId}/offerings/${offeringId}/owners/${uid}/slots/${kGroupPointerLabel}`;
 }
 
+/**
+ * Where 7.3.0 and 7.4.0 kept a group slot's pointer, relative to its space root. 7.5.0 replaced the group
+ * segment with the owner segment, and the app reads neither of these.
+ */
+export function legacyGroupPointerRelativePaths(
+  { contextId, offeringId, groupId }: { contextId: string; offeringId: string; groupId: string }
+): string[] {
+  return [
+    `classes/${contextId}/offerings/${offeringId}/groups/${groupId}/canonical/${kGroupPointerLabel}`,
+    `canonical/v1/classes/${contextId}/offerings/${offeringId}/groups/${groupId}/slots/${kGroupPointerLabel}`
+  ];
+}
+
+/** A pointer document as stored, or undefined when there is none. */
+export type StoredPointer = { documentKey: unknown } | undefined;
+
 /** The fields of a group document's Firestore metadata this script reads. */
 export interface IGroupDocRecord {
   key: string;
@@ -66,7 +89,6 @@ export interface IGroupDocRecord {
   offeringId?: string;
   groupId?: string;
   uid?: string;
-  canonical?: string;
 }
 
 /**
@@ -76,14 +98,18 @@ export interface IGroupDocRecord {
  */
 export const kGroupDocumentTypes = ["group", "axes"];
 
-/** Every group-scoped document in one space's `documents` collection. */
+/**
+ * Every group-scoped document in one space's `documents` collection. `findLegacyGroupDocument` in
+ * src/lib/db.ts filters on `groupId` alone; the type filter here adds nothing so long as only group
+ * documents are ever given a `groupId`, and keeps anything else out if one ever is.
+ */
 export async function listGroupDocs(firestore: any, spacePath: string): Promise<IGroupDocRecord[]> {
   const snap = await firestore.collection(spacePath).where("type", "in", kGroupDocumentTypes).get();
   return snap.docs
     .filter((d: any) => !!d.get("groupId"))
     .map((d: any) => ({
       key: d.id, contextId: d.get("context_id"), offeringId: d.get("offeringId"),
-      groupId: d.get("groupId"), uid: d.get("uid"), canonical: d.get("canonical")
+      groupId: d.get("groupId"), uid: d.get("uid")
     }));
 }
 
@@ -158,48 +184,67 @@ export function groupIntoSlots(docs: IGroupDocRecord[]): { slots: ISlot[]; skipp
 }
 
 export type SlotDecision =
-  | { action: "claim" | "pointed"; winner: string; losers: IGroupDocRecord[]; kept: ISkippedDoc[] }
-  | { action: "dangling"; pointerKey: string };
+  | { action: "claim" | "pointed"; winner: string; losers: IGroupDocRecord[] }
+  | { action: "dangling"; pointerKey: string }
+  | { action: "invalid" };
 
-/** What to do with one slot, given the key its pointer names, if it has one. */
-export function decideSlot(slot: ISlot, pointerKey: string | undefined): SlotDecision {
+/** What to do with one slot, given its pointer, if it has one. */
+export function decideSlot(slot: ISlot, pointer: StoredPointer): SlotDecision {
+  if (pointer && (typeof pointer.documentKey !== "string" || !pointer.documentKey)) {
+    return { action: "invalid" };
+  }
+  const pointerKey = pointer?.documentKey as string | undefined;
   if (pointerKey !== undefined && !slot.docs.some(d => d.key === pointerKey)) {
     return { action: "dangling", pointerKey };
   }
   const winner = pointerKey ?? slot.docs[0].key;
-  const losers: IGroupDocRecord[] = [];
-  const kept: ISkippedDoc[] = [];
-  for (const doc of slot.docs) {
-    if (doc.key === winner) continue;
-    // Only a claim sets `canonical`, in the same commit as the pointer, so a loser carrying it means
-    // something happened this script does not understand.
-    if (doc.canonical) {
-      kept.push({ key: doc.key, reason: `marked canonical ("${doc.canonical}") but not named by its pointer` });
-    } else {
-      losers.push(doc);
-    }
-  }
-  return { action: pointerKey === undefined ? "claim" : "pointed", winner, losers, kept };
+  const losers = slot.docs.filter(doc => doc.key !== winner);
+  return { action: pointerKey === undefined ? "claim" : "pointed", winner, losers };
 }
 
-/** One losing document: everywhere it is stored. */
+/** One losing document: everywhere it is stored, and the slot it was found in. */
 export interface IDeletionTarget {
   key: string;
   firestorePath: string;
-  /** Content first, then metadata, so an interrupted run leaves metadata pointing at nothing. */
   rtdbPaths: string[];
+  slot: Pick<ISlot, "contextId" | "offeringId" | "groupId" | "uid">;
+}
+
+/**
+ * Why the document about to be deleted is not the group document `target` describes, or undefined when
+ * it is. `data` is its Firestore metadata, read just before the deletion. This is the last check before
+ * anything is removed, so it re-derives every path rather than trusting how the target was built.
+ */
+export function whyNotDeletable(data: Record<string, any> | undefined, target: IDeletionTarget): string | undefined {
+  const { key, slot } = target;
+  if (!data) return "it has no Firestore metadata";
+  if (!kGroupDocumentTypes.includes(data.type)) return `its type "${data.type}" is not a group document type`;
+  if (data.context_id !== slot.contextId || data.offeringId !== slot.offeringId || data.groupId !== slot.groupId) {
+    return "its class, offering or group is not the slot's";
+  }
+  if (slot.uid !== groupOwnerId(slot.offeringId, slot.groupId) || data.uid !== slot.uid) {
+    return `its uid "${data.uid}" is not the group owner`;
+  }
+  if (!target.firestorePath.endsWith(`/documents/${key}`)) return "its Firestore path does not name it";
+  const userPath = `/classes/${slot.contextId}/users/${slot.uid}`;
+  const expected = [`${userPath}/documents/${key}`, `${userPath}/documentMetadata/${key}`];
+  if (target.rtdbPaths.length !== expected.length || target.rtdbPaths.some((p, i) => !p.endsWith(expected[i]))) {
+    return "its realtime-database paths are not the group owner's copies of it";
+  }
+  return undefined;
 }
 
 export interface ISpaceDeps {
   /** Every group-scoped document in the space. */
   listGroupDocs: () => Promise<IGroupDocRecord[]>;
-  /** The document key a pointer names, or undefined when there is no pointer. */
-  readPointer: (path: string) => Promise<string | undefined>;
-  /** Claims the slot for `key` unless it is already claimed; returns the key the slot holds after. */
-  claim: (pointerPath: string, key: string) => Promise<string>;
+  readPointer: (path: string) => Promise<StoredPointer>;
+  /** Claims the slot for `key` unless it is already claimed; returns the pointer the slot holds after. */
+  claim: (pointerPath: string, key: string) => Promise<StoredPointer>;
   /** Saves the document's current contents. Must throw rather than return if it cannot. */
   backup: (target: IDeletionTarget) => Promise<void>;
+  /** Deletes the document everywhere. Must throw, deleting nothing, if it is not what `target` says. */
   remove: (target: IDeletionTarget) => Promise<void>;
+  removeLegacyPointer: (path: string) => Promise<void>;
   log?: (message: string) => void;
 }
 
@@ -209,6 +254,7 @@ export interface ISpaceResult {
   alreadyPointed: number;
   claimed: number;
   deleted: number;
+  legacyPointersDeleted: number;
   skipped: ISkippedDoc[];
 }
 
@@ -216,11 +262,12 @@ export interface ISpaceResult {
 export async function backfillSpace(
   space: ISelectedSpace, { dryRun }: { dryRun: boolean }, deps: ISpaceDeps
 ): Promise<ISpaceResult> {
-  const { readPointer, claim, backup, remove, log = console.log } = deps;
+  const { readPointer, claim, backup, remove, removeLegacyPointer, log = console.log } = deps;
   const spaceRoot = space.spacePath.replace(/\/documents$/, "");
   const { slots, skipped } = groupIntoSlots(await deps.listGroupDocs());
   const result: ISpaceResult = {
-    label: space.label, slots: slots.length, alreadyPointed: 0, claimed: 0, deleted: 0, skipped
+    label: space.label, slots: slots.length, alreadyPointed: 0, claimed: 0, deleted: 0, legacyPointersDeleted: 0,
+    skipped
   };
 
   for (const slot of slots) {
@@ -232,7 +279,13 @@ export async function backfillSpace(
       const holder = await claim(pointerPath, decision.winner);
       // A group member opened the document between the read and the claim, and findLegacy got there
       // first. Their choice stands; decide again around it.
-      if (holder !== decision.winner) decision = decideSlot(slot, holder);
+      if (holder?.documentKey !== decision.winner) decision = decideSlot(slot, holder);
+    }
+    if (decision.action === "invalid") {
+      skipped.push(...slot.docs.map(d => ({
+        key: d.key, reason: `the pointer for ${slotLabel} exists but has no document key`
+      })));
+      continue;
     }
     if (decision.action === "dangling") {
       skipped.push({
@@ -247,14 +300,14 @@ export async function backfillSpace(
     } else {
       result.alreadyPointed++;
     }
-    skipped.push(...decision.kept);
 
     for (const loser of decision.losers) {
       const userPath = `${space.rtdbRoot}/classes/${slot.contextId}/users/${slot.uid}`;
       const target: IDeletionTarget = {
         key: loser.key,
         firestorePath: `${space.spacePath}/${loser.key}`,
-        rtdbPaths: [`${userPath}/documents/${loser.key}`, `${userPath}/documentMetadata/${loser.key}`]
+        rtdbPaths: [`${userPath}/documents/${loser.key}`, `${userPath}/documentMetadata/${loser.key}`],
+        slot: { contextId: slot.contextId, offeringId: slot.offeringId, groupId: slot.groupId, uid: slot.uid }
       };
       if (!dryRun) {
         await backup(target);
@@ -263,9 +316,81 @@ export async function backfillSpace(
       result.deleted++;
       log(`  ${dryRun ? "would delete" : "deleted"} ${loser.key} (${slotLabel} keeps ${decision.winner})`);
     }
+
+    // The pointer at the current path is now the only one naming the winner. Removed after the losers,
+    // so an interrupted run still has something left in this slot to find next time.
+    for (const relativePath of legacyGroupPointerRelativePaths(slot)) {
+      const legacyPath = `${spaceRoot}/${relativePath}`;
+      const legacy = await readPointer(legacyPath);
+      if (!legacy) continue;
+      if (!dryRun) await removeLegacyPointer(legacyPath);
+      result.legacyPointersDeleted++;
+      log(`  ${dryRun ? "would delete" : "deleted"} legacy pointer ${legacyPath} ` +
+        `(named ${JSON.stringify(legacy.documentKey)})`);
+    }
   }
 
   return result;
+}
+
+/** What `createSpaceDeps` needs from Firebase and the file system. */
+export interface IFirebaseHandles {
+  firestore: any;
+  database: any;
+  reader: { readNode: (path: string) => Promise<unknown> };
+  serverTimestamp: () => unknown;
+  saveBackup: (space: ISelectedSpace, key: string, contents: unknown) => void;
+}
+
+/** The real reads and writes `backfillSpace` makes in one space. */
+export function createSpaceDeps(
+  { firestore, database, reader, serverTimestamp, saveBackup }: IFirebaseHandles, space: ISelectedSpace
+): ISpaceDeps {
+  return {
+    listGroupDocs: () => listGroupDocs(firestore, space.spacePath),
+    readPointer: async (pointerPath) => {
+      const snap = await firestore.doc(pointerPath).get();
+      return snap.exists ? { documentKey: snap.get("documentKey") } : undefined;
+    },
+    // The same transaction the app's legacy backfill runs (resolveCanonicalDocumentUncached in
+    // src/lib/db.ts), with this script recorded as the claimant.
+    claim: (pointerPath, key) => firestore.runTransaction(async (txn: any) => {
+      const pointerRef = firestore.doc(pointerPath);
+      const existing = await txn.get(pointerRef);
+      if (existing.exists) return { documentKey: existing.get("documentKey") };
+      txn.create(pointerRef, { documentKey: key, createdAt: serverTimestamp(), createdBy: kPointerCreatedBy });
+      txn.update(firestore.doc(`${space.spacePath}/${key}`), { canonical: kGroupPointerLabel });
+      return { documentKey: key };
+    }),
+    // The Firestore metadata document has `comments` and `history` subcollections, which the removal
+    // deletes with it, so they are saved too.
+    backup: async (target) => {
+      const docRef = firestore.doc(target.firestorePath);
+      const firestoreDoc = await docRef.get();
+      const subcollections: Record<string, Record<string, unknown>> = {};
+      for (const collection of await docRef.listCollections()) {
+        const entries: Record<string, unknown> = {};
+        for (const entry of (await collection.get()).docs) entries[entry.id] = entry.data();
+        subcollections[collection.id] = entries;
+      }
+      const rtdb: Record<string, unknown> = {};
+      for (const p of target.rtdbPaths) rtdb[p] = await reader.readNode(p);
+      saveBackup(space, target.key, {
+        target, firestore: firestoreDoc.exists ? firestoreDoc.data() : null, subcollections, rtdb
+      });
+    },
+    // Realtime database first and Firestore last: an interrupted run leaves the Firestore row, so the
+    // next run still finds the document and finishes removing it.
+    remove: async (target) => {
+      const docRef = firestore.doc(target.firestorePath);
+      const snap = await docRef.get();
+      const problem = whyNotDeletable(snap.exists ? snap.data() : undefined, target);
+      if (problem) throw new Error(`refusing to delete ${target.firestorePath}: ${problem}`);
+      for (const p of target.rtdbPaths) await database.ref(p).remove();
+      await firestore.recursiveDelete(docRef);
+    },
+    removeLegacyPointer: async (pointerPath) => { await firestore.doc(pointerPath).delete(); }
+  };
 }
 
 async function main() {
@@ -288,7 +413,7 @@ async function main() {
 
   console.log(`- Firebase project: ${serviceAccount.project_id}`);
   console.log(`- Realtime Database URL: ${databaseURL}`);
-  console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will claim pointers and delete duplicates"}`);
+  console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will claim pointers, delete duplicates and legacy pointers"}`);
   if (!dryRun) console.log(`- Backups: ${backupDir}`);
 
   const credential = admin.credential.cert(serviceAccountFile);
@@ -296,6 +421,12 @@ async function main() {
   const firestore = admin.firestore();
   const database = admin.database();
   const reader = createRtdbReader(databaseURL, () => (credential as any).getAccessToken());
+  const serverTimestamp = () => admin.firestore.FieldValue.serverTimestamp();
+  const saveBackup = (space: ISelectedSpace, key: string, contents: unknown) => {
+    const file = path.join(backupDir, space.label.replace(/\//g, "_"), `${key}.json`);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(contents, null, 2));
+  };
 
   const selection = selectSpaces(await listSpacePaths(firestore), parseSpacesFilter(process.env.SPACES));
   console.log(`- Spaces: ${selection.selected.length}` +
@@ -305,52 +436,9 @@ async function main() {
   for (const u of selection.unrecognized) console.log(`  unrecognized space path: ${u}`);
   console.log("");
 
-  const totals = { slots: 0, alreadyPointed: 0, claimed: 0, deleted: 0, skipped: 0 };
+  const totals = { slots: 0, alreadyPointed: 0, claimed: 0, deleted: 0, legacyPointersDeleted: 0, skipped: 0 };
   for (const space of selection.selected) {
-    const deps: ISpaceDeps = {
-      listGroupDocs: () => listGroupDocs(firestore, space.spacePath),
-      readPointer: async (pointerPath) => {
-        const snap = await firestore.doc(pointerPath).get();
-        return snap.exists ? snap.get("documentKey") : undefined;
-      },
-      // The same transaction the app's legacy backfill runs (resolveCanonicalDocumentUncached in
-      // src/lib/db.ts), with this script recorded as the claimant.
-      claim: (pointerPath, key) => firestore.runTransaction(async (txn) => {
-        const pointerRef = firestore.doc(pointerPath);
-        const existing = await txn.get(pointerRef);
-        if (existing.exists) return existing.get("documentKey") as string;
-        txn.create(pointerRef, {
-          documentKey: key, createdAt: admin.firestore.FieldValue.serverTimestamp(), createdBy: kPointerCreatedBy
-        });
-        txn.update(firestore.doc(`${space.spacePath}/${key}`), { canonical: kGroupPointerLabel });
-        return key;
-      }),
-      // The Firestore metadata document has `comments` and `history` subcollections, which the removal
-      // deletes with it, so they are saved too.
-      backup: async (target) => {
-        const docRef = firestore.doc(target.firestorePath);
-        const firestoreDoc = await docRef.get();
-        const subcollections: Record<string, Record<string, unknown>> = {};
-        for (const collection of await docRef.listCollections()) {
-          const entries: Record<string, unknown> = {};
-          for (const entry of (await collection.get()).docs) entries[entry.id] = entry.data();
-          subcollections[collection.id] = entries;
-        }
-        const rtdb: Record<string, unknown> = {};
-        for (const p of target.rtdbPaths) rtdb[p] = await reader.readNode(p);
-        const file = path.join(backupDir, space.label.replace(/\//g, "_"), `${target.key}.json`);
-        fs.mkdirSync(path.dirname(file), { recursive: true });
-        fs.writeFileSync(file, JSON.stringify({
-          target, firestore: firestoreDoc.exists ? firestoreDoc.data() : null, subcollections, rtdb
-        }, null, 2));
-      },
-      // Realtime database first and Firestore last: an interrupted run leaves the Firestore row, so the
-      // next run still finds the document and finishes removing it.
-      remove: async (target) => {
-        for (const p of target.rtdbPaths) await database.ref(p).remove();
-        await firestore.recursiveDelete(firestore.doc(target.firestorePath));
-      }
-    };
+    const deps = createSpaceDeps({ firestore, database, reader, serverTimestamp, saveBackup }, space);
 
     // Held back so each space's details print under its own summary line.
     const details: string[] = [];
@@ -358,7 +446,9 @@ async function main() {
     if (result.slots || result.skipped.length) {
       console.log(`${result.label}: ${result.slots} slots, ${result.alreadyPointed} already pointed, ` +
         `${result.claimed} ${dryRun ? "to claim" : "claimed"}, ` +
-        `${result.deleted} duplicates ${dryRun ? "to delete" : "deleted"}, ${result.skipped.length} skipped`);
+        `${result.deleted} duplicates ${dryRun ? "to delete" : "deleted"}, ` +
+        `${result.legacyPointersDeleted} legacy pointers ${dryRun ? "to delete" : "deleted"}, ` +
+        `${result.skipped.length} skipped`);
       for (const line of details) console.log(line);
       for (const s of result.skipped) console.log(`  skipped ${s.key}: ${s.reason}`);
     }
@@ -366,12 +456,14 @@ async function main() {
     totals.alreadyPointed += result.alreadyPointed;
     totals.claimed += result.claimed;
     totals.deleted += result.deleted;
+    totals.legacyPointersDeleted += result.legacyPointersDeleted;
     totals.skipped += result.skipped.length;
   }
 
   console.log(`\ntotal: ${totals.slots} slots, ${totals.alreadyPointed} already pointed, ` +
     `${totals.claimed} ${dryRun ? "to claim" : "claimed"}, ` +
-    `${totals.deleted} duplicates ${dryRun ? "to delete" : "deleted"}, ${totals.skipped} skipped`);
+    `${totals.deleted} duplicates ${dryRun ? "to delete" : "deleted"}, ` +
+    `${totals.legacyPointersDeleted} legacy pointers ${dryRun ? "to delete" : "deleted"}, ${totals.skipped} skipped`);
   if (dryRun) console.log("DRY RUN — set APPLY=1 to write");
   process.exit(0);
 }
