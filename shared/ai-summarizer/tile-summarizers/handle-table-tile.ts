@@ -1,11 +1,9 @@
 import { AiSummarizerOptions, NormalizedAttribute, NormalizedDataSet, TileHandlerParams } from "../ai-summarizer-types";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
-// After this many rows a table is truncated with a "...and N more rows" note. Large data sets
-// (sensor logs, simulation output) can run to hundreds of rows; a summary needs the shape of the
-// data, not all of it. Applies regardless of AiSummarizerOptions.dataSetTables -- that option's
-// "full" means uncapped for the document-level "Data Sets" summary (ai-summarizer.ts), but not
-// here: "full" only decides whether row data is shown at all, capped is not a separate mode.
+// After this many rows a table is truncated with a "...and N more rows" note. Applies regardless
+// of AiSummarizerOptions.dataSetTables -- unlike the document-level "Data Sets" summary, "full"
+// here only decides whether row data is shown at all, not whether it's capped.
 export const TABLE_MARKDOWN_ROW_CAP = 20;
 
 interface InlineTableColumn {
@@ -32,18 +30,13 @@ export function handleTableTile({ tile, dataSets, options }: TileHandlerParams):
     ds.tileIds.includes(tile.model.id) || ds.providerId === tile.model.id
   );
   if (sharedDataSet) {
-    // A dataset's `name` is authored, not guaranteed, so an unnamed one still gets a useful
-    // sentence rather than literally saying "undefined". This part applies regardless of
-    // `dataSetTables` -- it is a plain bug fix, not a new capability.
+    // dataSet.name can be missing -- see NormalizedDataSet.
     const nameClause = sharedDataSet.name
       ? ` which uses the "${sharedDataSet.name}" (${sharedDataSet.id}) data set`
       : ` which uses data set ${sharedDataSet.id}`;
-    // Unlike the document-level "Data Sets" summary (ai-summarizer.ts), where `dataSetTables`
-    // omitted means "full" because that IS what every caller got before the option existed, this
-    // tile's own pre-existing behavior never showed row (or even schema) data at all -- just this
-    // sentence. So here, omitted means neither: no dataSetTables value means stay silent about the
-    // data set's contents, and only an explicit "full" or "schema-only" shows them. Confirmed
-    // against a real `master` checkout (CLUE-685 checklist, step 2.7's "look back at step 2.1").
+    // Unlike the document-level "Data Sets" summary (ai-summarizer.ts), where an omitted
+    // `dataSetTables` means "full", this tile stays silent about the data set's contents unless
+    // `dataSetTables` is explicitly "full" or "schema-only".
     if (!options.dataSetTables) {
       return `This tile contains a table${nameClause}.`;
     }

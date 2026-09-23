@@ -1,15 +1,10 @@
 // Shared by the digest, prior-knowledge, and overview steps: generate text, validate it against a
-// field's character limit, give the model one extra chance to fix an over-length response, and
-// truncate as a last resort rather than fail. Without this, one call landing a few characters over
-// its limit fails the entire generation -- real cost on every other call already made -- over what
-// is usually a marginal, easily-corrected overshoot, not a sign the model ignored the task. Real
-// runs have shown the shorten retry alone is not quite reliable enough: a model cannot count
-// characters precisely as it writes, so some small overshoot survives even a second attempt (seen
-// on real generations for two different fields, 6 and then 2 characters over, each after already
-// being asked to shorten). Truncating only ever fires after that retry has already failed, and in
-// practice trims at most a trailing word or punctuation mark, given how small these overshoots are
-// in practice -- an empty response is a different kind of failure (nothing to shorten or truncate
-// into something usable) and is never retried or truncated here.
+// field's character limit, give the model one chance to fix an over-length response, and truncate
+// as a last resort rather than fail the whole generation over a marginal overshoot. A model can't
+// count characters precisely as it writes, so even the shorten retry can leave a small overshoot;
+// truncating only fires after that retry has already failed. An empty response is a different kind
+// of failure -- nothing to shorten or truncate into something usable -- and is never retried or
+// truncated here.
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 import {callWithRetry} from "./unit-summary-retry";
 

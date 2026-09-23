@@ -227,10 +227,9 @@ app.use("/rawContent", getRawContent);
 app.post("/generateUnitSummary", generateUnitSummary);
 app.get("/unitSummaryStatus", unitSummaryStatus);
 
-// A single Express app serves every route above as one function, so this timeout, memory size,
-// and secret binding apply to all of them, not just the unit-summary generation route that needs
-// them (the 60s/256MB 1st-gen defaults were plenty for git-content operations, but a generation
-// call chain can run for minutes). 540s is the 1st-gen ceiling.
+// One Express app serves every route above as one function, so this timeout, memory, and secret
+// binding apply to all of them, not just the generation route that needs them. 540s is the
+// 1st-gen ceiling.
 export const api = runWith({
   timeoutSeconds: 540,
   memory: "512MB",

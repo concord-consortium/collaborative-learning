@@ -2,19 +2,12 @@
  * A curriculum-only alternative to the default drawing handler (drawing-to-table.ts): text object
  * contents and image filenames, and nothing else -- no ids, coordinates, colors, or shape geometry.
  *
- * Curriculum problems can use a drawing tile as a labeled diagram (an annotated picture, a set of
- * callout boxes) where the geometry is presentation and the text is the actual content. Sent
- * through the default handler, that geometry -- one row per shape, several columns each -- can be
- * over half of a problem's assembled input by character count, burying the handful of sentences a
- * digest is trying to summarize. This handler exists so the curriculum assembler can ask for just
- * the part of a drawing worth summarizing, while every other caller of documentSummarizer keeps
- * getting the full geometry table unchanged (see handle-table-tile.ts's dataSetTables gate for the
- * same "new capability, not a new default" shape of fix).
- *
- * Deliberately not a replacement for drawing-to-table.ts: this throws away information a runtime
- * consumer (Ideas, the highlights feature citing an object by id) still needs, so it must never
- * become anyone's default. It is only ever reached by being placed ahead of the default handlers in
- * an explicit `tileHandlers` list a caller opts into (assemble-unit.ts).
+ * A drawing used as a labeled diagram (an annotated picture, a set of callout boxes) has geometry
+ * that's presentation, not content -- sent through the default handler's one-row-per-shape table,
+ * it can bury the handful of sentences a digest is trying to summarize. This drops that geometry,
+ * which a runtime consumer (Ideas, highlights citing an object by id) still needs, so it must
+ * never become anyone's default. It's only reached by an explicit `tileHandlers` list a caller
+ * opts into (assemble-unit.ts).
  */
 import { DrawingObjectSnapshot } from "../../drawing/drawing-object-snapshot";
 import { TileHandlerParams } from "../ai-summarizer-types";

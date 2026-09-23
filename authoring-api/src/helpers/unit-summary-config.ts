@@ -1,8 +1,7 @@
 // Generation budgets and runtime limits for the unit-summary pipeline, shared by the digest,
-// prior-knowledge, and overview steps. Starting values from docs/plans/CLUE-685-checklist.md's
-// decision table; the early (step 2.4) and release-gate (step 2.7) benchmarks may adjust them.
-// Character-based output limits (per field, and the total budget) live in
-// shared/unit-summary-types.ts, since Save-time validation in the authoring panel needs them too.
+// prior-knowledge, and overview steps. Character-based output limits (per field, and the total
+// budget) live in shared/unit-summary-types.ts, since Save-time validation in the authoring panel
+// needs them too.
 
 // Above this many characters, a problem's own Markdown is chunked and the chunk digests combined
 // in a further call. Expected to trigger rarely.
@@ -32,12 +31,9 @@ export const UNIT_SUMMARY_OVERALL_DEADLINE_MS = 420_000;
 // this many problems -- or an estimated prefix-mode aggregate input above the char limit -- the
 // prior-knowledge step switches to rolling mode (linear, but sequential).
 export const UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT = 40;
-// Raised from 800,000 to 1,000,000 on 2026-09-22, alongside UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS's
-// increase to 1200 (shared/unit-summary-types.ts): at the old value, 40 problems' worth of
-// prefix-mode input (40 * 39 / 2 * 1200 = 936,000 chars) already exceeded this threshold, so the
-// 40-problem count above could never be the thing that actually triggered rolling mode -- the
-// aggregate check would always fire first, at around 38 problems. Raised so 40 problems is the
-// real crossover again, matching the two thresholds' original intent as a pair.
+// Must stay above 40 problems' worth of prefix-mode input at UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS
+// (shared/unit-summary-types.ts) -- i.e. 40 * 39 / 2 * that cap -- or the aggregate check below
+// would always fire before the problem-count threshold above ever could.
 export const UNIT_SUMMARY_MODE_SWITCH_PREFIX_AGGREGATE_CHARS = 1_000_000;
 
 // Checked before any model call. A unit at or under this problem count and estimated aggregate

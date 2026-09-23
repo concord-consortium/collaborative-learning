@@ -39,15 +39,11 @@ export interface UnitContent {
 }
 
 // Load the files + pending updates maps and build one UnitContentFile record per path, of any
-// file type -- unlike getUnitContent below, this applies no content.json/images filter. A
-// section can reference a file under any name (see assemble-unit.ts), so a caller that needs to
-// resolve an arbitrary referenced path needs the whole inventory, not just the slice
-// computeImageUsages happens to care about.
+// file type -- unlike getUnitContent below, this applies no content.json/images filter, since a
+// section can reference a file under any name (see assemble-unit.ts).
 //
-// A path is included if it appears in EITHER map: most saved content ends up in both (putContent
-// always writes updates, and also creates a files entry when the content has a type or title),
-// but nothing guarantees that, so a brand-new, never-committed, update-only file must not be
-// silently dropped from the inventory.
+// A path is included if it appears in EITHER map: most saved content ends up in both, but nothing
+// guarantees that, so a brand-new, update-only file must not be silently dropped.
 export async function loadUnitFileInventory(branch: string, unit: string): Promise<UnitContentFile[]> {
   const db = getDb();
   const [filesSnap, updatesSnap] = await Promise.all([

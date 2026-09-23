@@ -634,11 +634,8 @@ describe('ai-summarizer', () => {
 
         // The document-level "Data Sets" summary (documentSummary in ai-summarizer.ts) and this
         // tile's own per-tile rendering (handle-table-tile.ts) read the same option but do not
-        // share a default -- confirmed against a real `master` checkout (CLUE-685 checklist, step
-        // 2.7's "look back at step 2.1"): before dataSetTables existed, the document-level summary
-        // always showed every case's data, but a table TILE never showed row or schema data at
-        // all, just a one-line mention of the data set's name. So the default (no dataSetTables)
-        // must keep matching each of those separately, not collapse to one shared "full" behavior.
+        // share a default: the document-level summary always shows every case's data, while a
+        // table tile shows nothing beyond a one-line mention of the data set's name.
         it('by default, describes the data set at the document level but says nothing about its ' +
            'rows at the tile level', () => {
           const result = documentSummarizer(withData, {});

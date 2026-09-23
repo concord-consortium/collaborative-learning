@@ -1,6 +1,5 @@
 // The prior-knowledge step: one OpenAI call per problem after the first, producing what a
-// student should already know by the time they reach that problem. See
-// docs/plans/CLUE-685-plan.md §2.1 ("first-problem prerequisites") and §2.3.
+// student should already know by the time they reach that problem.
 //
 // The input-visibility rule ("never digest i or anything later") is enforced by construction:
 // prefix mode's call i is built from digests.slice(0, i), and rolling mode's call i is built from
@@ -14,13 +13,11 @@ import {PriorKnowledgeMode} from "./unit-summary-limits";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT} from "./unit-summary-config";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 
-// Shared by both modes below. A narrative, sentence-by-sentence restatement of "what the student
-// now knows" is what made real prior-knowledge entries run long and repetitive (vibe review,
-// CLUE-685 checklist step 2.7): padded with soft-skill filler ("critical thinking," "teamwork,"
-// "hands-on experience," "reinforcing understanding") that names nothing, and re-explaining the
-// same underlying facts in fresh prose on every call. A compact list of the actual concepts and
-// skills is both more useful to a reader and structurally harder to pad, since there is no
-// sentence to pad -- just items to list once.
+// Shared by both modes below. A narrative restatement of "what the student now knows" tends to run
+// long and repetitive, padded with soft-skill filler ("critical thinking," "teamwork," "hands-on
+// experience") that names nothing specific. A compact list of the actual concepts and skills is
+// more useful to a reader and structurally harder to pad, since there's no sentence to pad -- just
+// items to list once.
 const LIST_FORMAT_INSTRUCTIONS =
   "Write this as a compact list of the specific concepts, terms, and skills a student now has -- " +
   "not narrative prose or full sentences. Separate items with semicolons. Name the actual concept " +
@@ -55,13 +52,10 @@ export interface PriorKnowledgeOptions {
   mode: PriorKnowledgeMode;
 }
 
-// priorKnowledge for entry 0, describing what a student brings INTO the unit. No real unit's
-// root content.json currently has a free-text field for this (checked against every unit in
-// clue-curriculum: the fields present are abbrevTitle, appName, code, config, defaultStamps,
-// investigations, navTabs, placeholderText, planningDocument, sections, settings, subtitle,
-// supports, title -- none states what a student should already know coming in). Generating
-// something from a bare title would be fabrication, which entry 0 must never do, so it is always
-// empty for now. If curriculum authoring adds such a field, generate from it here instead.
+// priorKnowledge for entry 0, describing what a student brings INTO the unit. No unit's root
+// content.json has a free-text field for this today, and generating something from a bare title
+// would be fabrication, so it's always empty for now. Generate from it here if authoring ever adds
+// such a field.
 function entryZeroPriorKnowledge(): string {
   return "";
 }

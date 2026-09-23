@@ -32,8 +32,7 @@ export function handleGraphTile({ dataSets, tile }: TileHandlerParams): string|u
       const dataSet = dataSets.find(ds => ds.id === config.dataset);
 
       if (dataSet) {
-        // A dataset's `name` is authored, not guaranteed (see NormalizedDataSet), so an unnamed
-        // one still gets a useful sentence rather than literally saying `"undefined"`.
+        // dataSet.name can be missing -- see NormalizedDataSet.
         const dataSetPhrase = dataSet.name
           ? `the "${dataSet.name}" (${dataSet.id}) data set`
           : `data set ${dataSet.id}`;

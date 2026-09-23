@@ -1,7 +1,6 @@
 // Walks a unit's authored structure (root content.json -> investigations -> problems ->
 // sections), in authored order, and turns it into per-problem Markdown plus the hashes and
-// manifest the unit-summary generation route and status route both need. See
-// docs/plans/CLUE-685-plan.md §2.2 for the design.
+// manifest the unit-summary generation and status routes both need.
 
 import {normalizeCurriculumDataSets, summarizeCurriculum} from "../../../shared/ai-summarizer/ai-summarizer";
 import {SharedModelMapEntry, TileHandler} from "../../../shared/ai-summarizer/ai-summarizer-types";
@@ -11,21 +10,18 @@ import {handleDrawingTileLabels} from "../../../shared/ai-summarizer/tile-summar
 import {IUnitSummarySourceProblem} from "../../../shared/unit-summary-types";
 import {loadUnitFileInventory, readEffectiveContentText, UnitContentFile} from "./unit-content";
 
-// Same shape as documentSummarizerWithDrawings (ai-summarizer-with-drawings.ts): the curriculum-only
-// handler goes first so it wins for Drawing tiles, then every other tile type falls through to the
-// same defaults every other caller of documentSummarizer gets.
+// Curriculum-only handler goes first so it wins for Drawing tiles; every other tile type falls
+// through to the same defaults every other caller of documentSummarizer gets.
 const curriculumTileHandlers: TileHandler[] = [handleDrawingTileLabels, ...defaultTileHandlers];
 
-// The authored shapes read from a unit's root content.json and from a resolved section file.
-// Both are read as plain JSON (never loaded into MST), so these describe only the fields this
-// walk actually reads -- not the full authored schema.
+// Read as plain JSON, never loaded into MST, so these interfaces cover only the fields this walk
+// actually reads -- not the full authored schema.
 interface RawSectionContent {
   sharedModels?: SharedModelMapEntry[];
 }
 interface RawSection {
-  // The key into the unit's own `sections` map (e.g. "intro", "labWork") -- present at the top
-  // level of both an inline section object and an external section file's JSON, so this one field
-  // covers both of resolveSection's cases identically.
+  // The key into the unit's own `sections` map (e.g. "intro", "labWork"); present at the top
+  // level in both the inline and external-file cases.
   type?: string;
   content?: RawSectionContent;
 }
@@ -40,14 +36,13 @@ interface RawInvestigation {
 }
 interface RawUnitContent {
   investigations?: RawInvestigation[];
-  // Unit-level, authored once and reused by every problem's sections: maps a section type key to
-  // its human-readable name ("intro" -> "Investigate", etc.). Same map curriculum-tabs.tsx reads
-  // client-side for the same names.
+  // Maps a section type key to its human-readable name ("intro" -> "Investigate", etc.), same as
+  // curriculum-tabs.tsx reads client-side.
   sections?: Record<string, {title?: string}>;
 }
 
 export interface AssembledProblem {
-  // "${investigation.ordinal}.${problem.ordinal}", from the AUTHORED values -- never from
+  // "${investigation.ordinal}.${problem.ordinal}" from the authored values, never from array
   // position. Matches Unit.getAllProblemOrdinals() (src/models/curriculum/unit.ts).
   ordinal: string;
   title: string;
@@ -64,9 +59,8 @@ export interface AssembledUnit {
   problems: AssembledProblem[];
 }
 
-// Injectable so tests can supply an in-memory inventory and file contents without touching the
-// Realtime Database or GitHub -- the same seam readEffectiveContentText's own updateText branch
-// already makes possible for free (it returns before touching either).
+// Injectable so tests can supply an in-memory inventory and file contents instead of touching the
+// Realtime Database or GitHub.
 export interface AssembleUnitDeps {
   loadInventory: (branch: string, unit: string) => Promise<UnitContentFile[]>;
   readText: (branch: string, unit: string, file: UnitContentFile) => Promise<string>;
@@ -94,10 +88,8 @@ export async function assembleUnit(
   const investigations = Array.isArray(root.investigations) ? root.investigations : [];
   const seenOrdinals = new Set<string>();
   const problems: AssembledProblem[] = [];
-  // Unit-wide, not per-problem: a curriculum can reuse the same section byte-for-byte across many
-  // problems (m2s's own review found a "help" section identical in 24 of 35 problems), and the
-  // point is to catch that reuse across the whole unit, not just within one problem. Maps a
-  // section's content hash to the ordinal of the first problem it appeared in.
+  // Unit-wide, not per-problem, so a section reused verbatim anywhere in the unit is caught, not
+  // just reuse within one problem. Maps a section's content hash to the first problem it appeared in.
   const firstSectionOccurrence = new Map<string, string>();
 
   for (const investigation of investigations) {
@@ -115,30 +107,14 @@ export async function assembleUnit(
         const section = await resolveSection(sections[i], ordinal, i, inventoryByPath, branch, unit, deps);
         const dataSets = normalizeCurriculumDataSets(section.content?.sharedModels);
         const body = summarizeCurriculum(section.content, dataSets, 1, undefined, {
-          // dataSetTables: "full" is an explicit opt-in, not the default -- handle-table-tile.ts
-          // stays silent about a table's data set unless asked. Curriculum digests want the actual
-          // rows (subject to TABLE_MARKDOWN_ROW_CAP), same as the pre-existing document-level
-          // "Data Sets" summary already showed for runtime documents.
-          // tileHandlers: curriculumTileHandlers swaps in the labels-only drawing handler; every
-          // other tile type still resolves through the same defaults every other caller gets.
+          // "full" is an explicit opt-in -- handle-table-tile.ts is silent about a table's data by
+          // default. curriculumTileHandlers swaps in the labels-only drawing handler.
           imageFilenames: true, dataSetTables: "full", tileHandlers: curriculumTileHandlers,
         });
-        // A problem's sections were joined with nothing marking where one ends and the next
-        // begins, so the digest model had no signal that a problem has several distinct parts to
-        // cover -- a likely real contributor to a digest collapsing to just the first one (see
-        // docs/plans/CLUE-685-checklist.md step 2.7's vibe review). The heading is each section
-        // TYPE's own authored name (e.g. "intro" -> "Investigate"), the same map
-        // curriculum-tabs.tsx reads client-side; falls back to the raw type key, and then to a
-        // fixed placeholder, so a section with no registered title still gets a heading rather
-        // than silently losing its boundary.
-        //
-        // "# Section: " rather than a bare "## " heading: a section's own tile content can and
-        // does already contain "## "-level headings of its own regardless of heading level or the
-        // `minimal` option (tilesSummary's per-tile "## Tile 2 (...)" heading for a multi-tile row,
-        // e.g. inside a Question tile's response, is never suppressed). A marker distinguished only
-        // by heading level would be lost among those; "Section:" is a literal word nothing else in
-        // the summarizer ever emits, so it stays unambiguous regardless of what headings a
-        // section's own content happens to produce.
+        // Each section gets its own heading so the digest model sees a problem's several parts as
+        // distinct rather than one blob. "# Section: " rather than a bare "## " heading: section
+        // content can already contain its own "##"-level headings (e.g. a multi-tile row's per-tile
+        // heading), so a heading-level alone wouldn't reliably mark a boundary.
         const title = (section.type && root.sections?.[section.type]?.title) || section.type || "Section";
         const dedupedBody = dedupedSectionBody(body, title, ordinal, firstSectionOccurrence);
         sectionMarkdowns.push(`# Section: ${title}\n\n${dedupedBody}`);
@@ -157,14 +133,11 @@ export async function assembleUnit(
   return {sourceHash, sourceManifest, problems};
 }
 
-// A section byte-identical to one already seen elsewhere in the unit (m2s's own review found a
-// "help" section identical in 24 of 35 problems) is replaced with a short pointer to the first
-// occurrence, so a digest stops spending a sentence re-describing boilerplate it has already
-// described for an earlier problem. Companion to generateProblemDigests's whole-problem dedupe
-// (unit-summary-digest.ts) -- that one catches a problem identical section-for-section to another;
-// this one catches the more common case, a shared section inside otherwise-different problems.
-// Empty content is left alone: nothing to point at usefully, and two blank sections matching each
-// other says nothing "(same content as problem X)" wouldn't already say more directly elsewhere.
+// A section byte-identical to one already seen elsewhere in the unit is replaced with a pointer to
+// the first occurrence, so a digest doesn't re-describe boilerplate already covered for an earlier
+// problem. Companion to the whole-problem dedupe in unit-summary-digest.ts, which catches an entire
+// problem duplicating another rather than just one shared section. Empty content is left alone --
+// there's nothing useful to point at.
 function dedupedSectionBody(
   body: string, title: string, ordinal: string, firstOccurrence: Map<string, string>
 ): string {
@@ -180,10 +153,9 @@ function dedupedSectionBody(
   return body;
 }
 
-// Mirrors problem.ts's loadSections: a section is either inline (an object, used as-is) or a
-// string path to an external file, resolved relative to the unit root exactly the way the
-// runtime resolves it with `new URL(section, unitUrl)`. Using URL resolution here too (rather
-// than hand-rolled path-joining) keeps "." / ".." segments handled identically to the runtime.
+// Mirrors problem.ts's loadSections: a section is either inline (used as-is) or a string path to
+// an external file, resolved the same way the runtime resolves it (`new URL(section, unitUrl)`),
+// so "." / ".." segments behave identically here.
 async function resolveSection(
   section: unknown, problemOrdinal: string, sectionIndex: number,
   inventoryByPath: Map<string, UnitContentFile>, branch: string, unit: string, deps: AssembleUnitDeps

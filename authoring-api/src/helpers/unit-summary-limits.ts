@@ -1,7 +1,7 @@
 // The up-front size check (run before any model call) and the prior-knowledge mode selection.
 // Both read only the assembler's per-problem sizes and the configured digest/prior-knowledge
 // limits -- never anything from a model response -- so both are decidable before spending
-// anything. See docs/plans/CLUE-685-plan.md §2.3 for the design.
+// anything.
 import {UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS}
   from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";

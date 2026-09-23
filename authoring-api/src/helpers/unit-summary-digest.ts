@@ -1,10 +1,6 @@
 // The digest step: one OpenAI call per problem, input = only that problem's own Markdown, output
-// = its problemDigest. This is the first of the three generation steps (digest, prior-knowledge,
-// overview -- see docs/plans/CLUE-685-plan.md §2.3); the other two are added in step 2.5.
-//
-// The input-visibility rule ("a digest must not see any other problem's content") is enforced by
-// construction here: each call's `input` is built from exactly one AssembledProblem, never a
-// collection of them, so there is no path by which another problem's text could reach a request.
+// = its problemDigest. A digest must never see another problem's content; that's enforced here by
+// construction, since each call's `input` is built from exactly one AssembledProblem.
 import {UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {mapWithConcurrency} from "./concurrency";
@@ -28,13 +24,9 @@ const DIGEST_INSTRUCTIONS =
 // use this fixed digest instead, so one thin problem doesn't block generating the rest of the unit.
 export const EMPTY_PROBLEM_DIGEST = "(No content provided for this problem.)";
 
-// Some curricula reuse the same section files across several problems verbatim (vibe's checklist
-// review found seven such problems -- e.g. a "PRIOR Lesson" variant referencing the same files as
-// the lesson it precedes). A byte-identical problem produces a byte-identical digest, so paying
-// for and storing a second, third, ... copy of the same text is pure waste. This does not lose
-// information for a later prior-knowledge call: the first occurrence's real digest is already
-// somewhere in that call's input, so pointing at it is enough for the model to know nothing new
-// happened here, without restating the content a second time.
+// A problem byte-identical to an earlier one produces a byte-identical digest, so generating and
+// storing a second copy is pure waste. No information is lost for a later prior-knowledge call --
+// the first occurrence's real digest is already in that call's input.
 export function duplicateProblemDigest(firstOrdinal: string): string {
   return `(same content as problem ${firstOrdinal})`;
 }
@@ -97,10 +89,9 @@ async function digestOneProblem(
       return await callDigest(problem.markdown, options);
     }
     const chunks = chunkMarkdown(problem.markdown, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
-    // Sequential, not Promise.all: the outer pool already allows up to UNIT_SUMMARY_CONCURRENCY_LIMIT
-    // problems in flight at once, so an unbounded fan-out here could push the total OpenAI calls in
-    // flight well past that limit if several concurrently-processed problems all need chunking.
-    // Doing one chunk call at a time keeps each pool worker's own contribution to exactly one call.
+    // Sequential, not Promise.all: the outer pool already allows UNIT_SUMMARY_CONCURRENCY_LIMIT
+    // problems in flight, so an unbounded fan-out here could push total in-flight calls well past
+    // that limit.
     const chunkDigests: string[] = [];
     for (const chunk of chunks) {
       chunkDigests.push(await callDigest(chunk, options));

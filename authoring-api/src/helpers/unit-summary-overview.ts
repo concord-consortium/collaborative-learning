@@ -1,7 +1,7 @@
-// The overview step: one OpenAI call over every digest, producing the unit-level `overview`
-// field. See docs/plans/CLUE-685-plan.md §2.3. This is the only generation call that sees the
-// whole unit (all digests at once), which is why `overview` is not automatically safe for a
-// student-facing consumer -- see shared/unit-summary-types.ts's IUnitSummary.overview comment.
+// The overview step: one OpenAI call over every digest, producing the unit-level `overview` field.
+// Unlike digest and priorKnowledge, this is the only call that sees the whole unit at once, so
+// `overview` may reference material from later in the unit and is not safe to show a student
+// working on an earlier problem.
 import {UNIT_SUMMARY_OVERVIEW_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {chunkMarkdown} from "./unit-summary-digest";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";

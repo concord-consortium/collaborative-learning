@@ -67,8 +67,7 @@ interface StalenessInfo {
   // hash differs).
   contentChanged: string[];
   // Human-readable notes about structural changes: a moved/renamed ordinal, or a problem count
-  // change. Deliberately a plain index-by-index comparison, not a smart diff -- see
-  // docs/plans/CLUE-685-plan.md §2.2 ("no diffing, no judging whether the change matters").
+  // change. Deliberately a plain index-by-index comparison, not a smart diff.
   structuralNotes: string[];
 }
 

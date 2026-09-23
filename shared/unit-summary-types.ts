@@ -71,42 +71,17 @@ export interface IUnitSummaryStatusResponse {
 
 // -- Validation --
 
-// Per-field and total-summary character limits. Counted as plain string length (no tokenizer),
-// server-side, at roughly 4 characters per token. Starting values from
-// docs/plans/CLUE-685-checklist.md's decision table; tune after the phase 2 benchmarks. Raised
-// from 800 to 1000 on 2026-09-22 after a real gpt-5.5 digest (806 chars) missed the original
-// budget by a hair -- see authoring-api/src/helpers/unit-summary-length-limit.ts for the other
-// half of the fix (one shorten-and-retry chance before a still-over-length response fails).
-// Raised again to 1200 the same day, per the vibe review's recommendation (step 2.7's recommended
-// changes): a digest now has to cover every section named in its problem's input, not just lead
-// with the first one, and needs the extra room to do that in roughly one or two sentences each.
+// Per-field and total-summary character limits, counted as plain string length (no tokenizer), at
+// roughly 4 characters per token.
 export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1200;
-// Raised from 1500 to 1800 on 2026-09-22: cumulative by design, so a later problem in a large
-// unit has the most material to compress into the same fixed budget -- the real near-miss that
-// prompted this (1502 on a real gpt-5.5 run, even after the shorten retry) was on problem 6.1 of
-// the 35-problem `m2s` unit, not an early or small one. See unit-summary-length-limit.ts for the
-// other half of the fix (truncate as a last resort after the shorten retry, rather than fail).
-//
-// Lowered to 800 the same day, per the vibe/m2s reviews (step 2.7's recommended changes): real
-// entries were long and repetitive because the format was narrative prose, not because they
-// needed the room -- m2s's own entries, already the "concrete skill list" style rather than
-// padded narrative, still ran to a median of 1,484 chars. unit-summary-prior-knowledge.ts's
-// instructions changed alongside this, to a genuinely compact semicolon-separated list of
-// concepts/skills rather than sentences, which is what actually earns the lower number: 1800 was
-// headroom for a format problem, not a real content-size limit. The shorten-retry and truncate
-// safety net (unit-summary-length-limit.ts) makes trying a tighter cap far lower-risk than it
-// would have been before that existed -- a miss degrades gracefully instead of failing the run.
+// Cumulative by design, but kept well below the digest cap: the required format is a compact
+// semicolon-separated list of concepts, not narrative sentences, so it stays bounded regardless of
+// how many problems precede it.
 export const UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS = 800;
 export const UNIT_SUMMARY_OVERVIEW_MAX_CHARS = 1200;
-// Raised from 80,000 to 100,000 on 2026-09-22 for the digest/priorKnowledge increases above, then
-// to 110,000 the same day for the digest step's second increase (1000 -> 1200). The original
-// 80,000 was explicitly sized for "a 30-problem unit at the per-field maxima" (see the checklist
-// decision table) -- `m2s`, the real largest unit, has 35. Left at 110,000 after
-// UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS's later drop to 800 (worst case is now ~71,200: 1200
-// overview + 35 * (1200 digest + 800 priorKnowledge)) rather than lowered to match -- this is a
-// ceiling meant to catch a real runaway total, and a generous one costs nothing since real content
-// rarely maxes out every field at once, unlike a per-field cap the model is actively steered
-// toward on every call.
+// A ceiling to catch a runaway total, set well above the worst realistic case (every problem at
+// both per-field maxima, for the largest known unit) since a generous ceiling costs nothing, unlike
+// a per-field cap the model is actively steered toward on every call.
 export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 110000;
 
 export type UnitSummaryValidationResult =

@@ -143,21 +143,14 @@ export interface AiSummarizerOptions {
   minimal?: boolean;      // If true, skip all boilerplate and headers and just return the text content
   tileHandlers?: TileHandler[];
   /**
-   * How much of each data set to write out, in the document-level "Data Sets" summary
-   * (documentSummary in ai-summarizer.ts) that lists every data set once at the end.
-   *
-   * `full` (the default, and what every caller got before this option existed) describes the data
-   * set and then prints every case as a markdown table, uncapped. `schema-only` keeps the heading,
-   * the attributes table, the formulas and the case count, and leaves the case data out — the
-   * shape of the data without the data itself. A large table can be most of a document's summary,
-   * and whether the model needs the rows to categorize a design is exactly the sort of thing worth
-   * measuring.
+   * How much of each data set to write out, in the document-level "Data Sets" summary at the end
+   * (documentSummary in ai-summarizer.ts). `full` (the default) prints every case as an uncapped
+   * markdown table; `schema-only` keeps the heading, attributes, and case count but leaves the case
+   * data out.
    *
    * A Table tile's own per-tile rendering (handle-table-tile.ts) reads this same option to decide
-   * whether to show row data at all (`schema-only` suppresses it there too), but "full" does not
-   * mean uncapped at the tile level the way it does here: row data is always capped at
-   * TABLE_MARKDOWN_ROW_CAP rows regardless of this option's value, so a single huge table cannot
-   * dominate either a curriculum digest or a document summary on its own.
+   * whether to show row data at all, but caps it at TABLE_MARKDOWN_ROW_CAP rows regardless of value
+   * -- "full" is only uncapped in the document-level summary above.
    */
   dataSetTables?: "full" | "schema-only";
   /**

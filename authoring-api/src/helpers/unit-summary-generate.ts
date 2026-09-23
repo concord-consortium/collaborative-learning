@@ -2,7 +2,6 @@
 // overview, then validate. Kept separate from routes/generate-unit-summary.ts (the thin Express
 // handler that resolves the real secret/params and calls this) so it is testable with a fake
 // assembler and a fake OpenAI client -- neither Firebase nor Express needs to exist for a test.
-// See docs/plans/CLUE-685-plan.md §2.3.
 import {IUnitSummary, IUnitSummaryEntry, validateUnitSummary} from "../../../shared/unit-summary-types";
 import {AssembledUnit} from "./assemble-unit";
 import {generateProblemDigests} from "./unit-summary-digest";
