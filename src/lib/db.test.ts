@@ -1108,67 +1108,36 @@ describe("db", () => {
       expect(stores.documents.all.filter(d => d.key === "pd1")).toHaveLength(1);
     });
 
-    it("backfills concurrent on a group-typed doc whose Firestore metadata lacks it", async () => {
-      const setCalls: any[] = [];
-      mockFirestore.mockImplementation(() => ({
-        doc: () => ({ set: (data: any, opts: any) => { setCalls.push({ data, opts }); return Promise.resolve(); } })
-      }));
+    it("takes concurrent and kind from stored metadata", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
       const firestoreMetadata = {
-        uid: "g", type: GroupDocument, key: "g1", context_id: "class-1"   // no concurrent/kind
+        uid: "g", type: AxesDocument, key: "g2", context_id: "class-1", concurrent: true, kind: "group"
       } as any;
-      const doc = await db.openDocument({
-        documentKey: "g1", type: GroupDocument, userId: "g", firestoreMetadata
-      } as any);
-      // model gets the registry-derived value immediately
+      const doc = await db.openDocument({ documentKey: "g2", type: AxesDocument, userId: "g", firestoreMetadata } as any);
       expect(doc.concurrent).toBe(true);
       expect(doc.kind).toBe("group");
-      // and a merge write-back was issued
-      expect(setCalls.some(c => c.data.concurrent === true && c.data.kind === "group" && c.opts?.merge === true))
-        .toBe(true);
     });
 
-    it("backfills concurrent on an axes-typed doc whose Firestore metadata lacks it", async () => {
-      const setCalls: any[] = [];
-      mockFirestore.mockImplementation(() => ({
-        doc: () => ({ set: (data: any, opts: any) => { setCalls.push({ data, opts }); return Promise.resolve(); } })
-      }));
+    it("derives kind from the registry for a type that stores none", async () => {
+      // Only axes-typed documents store `kind`; every other type is a registered kind of the same name.
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
-      const firestoreMetadata = {
-        uid: "g", type: AxesDocument, key: "g3", context_id: "class-1"   // no concurrent/kind
-      } as any;
-      const doc = await db.openDocument({
-        documentKey: "g3", type: AxesDocument, userId: "g", firestoreMetadata
-      } as any);
-      expect(doc.concurrent).toBe(true);
-      expect(doc.kind).toBe("group");
-      expect(setCalls.some(c => c.data.concurrent === true && c.data.kind === "group" && c.opts?.merge === true))
-        .toBe(true);
-    });
-
-    it("does NOT write back when concurrent is already true", async () => {
-      const setCalls: any[] = [];
-      mockFirestore.mockImplementation(() => ({
-        doc: () => ({ set: (data: any) => { setCalls.push(data); return Promise.resolve(); } })
-      }));
-      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
-      const firestoreMetadata = {
-        uid: "g", type: GroupDocument, key: "g2", context_id: "class-1", concurrent: true, kind: "group"
-      } as any;
-      await db.openDocument({ documentKey: "g2", type: GroupDocument, userId: "g", firestoreMetadata } as any);
-      expect(setCalls.length).toBe(0);
-    });
-
-    it("does NOT write back for a non-concurrent kind (personal doc)", async () => {
-      const setCalls: any[] = [];
-      mockFirestore.mockImplementation(() => ({
-        doc: () => ({ set: (data: any) => { setCalls.push(data); return Promise.resolve(); } })
-      }));
-      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
-      const firestoreMetadata = { uid: "u", type: "personal", key: "p1", context_id: "class-1" } as any;
-      const doc = await db.openDocument({ documentKey: "p1", type: "personal", userId: "u", firestoreMetadata } as any);
+      const firestoreMetadata = { uid: "u", type: "problem", key: "p2", context_id: "class-1" } as any;
+      const doc = await db.openDocument({ documentKey: "p2", type: "problem", userId: "u", firestoreMetadata } as any);
+      expect(doc.kind).toBe("problem");
       expect(doc.concurrent).toBeFalsy();
-      expect(setCalls.length).toBe(0);
+    });
+
+    it("does not supply or write concurrent for an axes document that lacks it", async () => {
+      // The stored field is the only authority: the Firestore rules key on it, so the model must agree.
+      const setSpy = jest.fn(() => Promise.resolve());
+      mockFirestore.mockImplementation(() => ({ doc: () => ({ set: setSpy }) }));
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = {
+        uid: "g", type: AxesDocument, key: "g3", context_id: "class-1", kind: "group"
+      } as any;
+      const doc = await db.openDocument({ documentKey: "g3", type: AxesDocument, userId: "g", firestoreMetadata } as any);
+      expect(doc.concurrent).toBeFalsy();
+      expect(setSpy).not.toHaveBeenCalled();
     });
   });
 

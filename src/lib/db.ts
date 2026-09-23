@@ -1366,37 +1366,13 @@ export class DB {
                         `at '${firebaseRefPath(metadataRef)}'`;
             throw new Error(msg);
           }
-          // MIGRATION (transitional — remove once the concurrent backfill script has run on production; see
-          // docs/superpowers/specs/2026-07-23-clue-550-stage-1-document-axes-design.md).
-          // Pre-existing group documents were created before `concurrent` was stamped, so their Firestore
-          // metadata lacks it. The kind registry is the source of truth for which kinds are concurrent: derive
-          // the value so the opened model's history manager runs in concurrent mode this session, and best-
-          // effort write it back so the stored field converges (the batch script covers never-opened docs).
-          // The kind registry has no "axes" entry, so every axes-typed document is looked up under the
-          // group kind here, whose `concurrent: true` is what every axes-typed document needs. A
-          // class-wide document's own stored `kind` still wins below (`kind ?? kindMetadataFields.kind`);
-          // a group document with no stored `kind` takes the group kind's from this lookup, and the
-          // write-back below sends these fields whole.
-          const kindMetadataFields = getDocumentKindMetadataFields(
-            isAxesType(firestoreMetadata.type) ? GroupDocument : firestoreMetadata.type
-          );
-          // Storage wins when it says true; otherwise fall back to the registry, treating any non-`true`
-          // stored value as missing so it matches the write-back gate below.
-          const concurrent =
-            firestoreMetadata.concurrent === true ? true : (kindMetadataFields.concurrent ?? undefined);
-          const kind = firestoreMetadata.kind ?? kindMetadataFields.kind ?? undefined;
-          // Explicitly restrict the write-back to axes-typed documents. Every kind is now registered, so in
-          // theory it'd be possible for someone to add a concurrent field to another document type and then
-          // we'd accidentally update the firestore metadata. Add a type here as it is converted to the axes,
-          // and drop the check once they all are — but note this write-back is made by the signed-in user, so
-          // an axis the security rules enforce can't be stamped from here at all. See "Which documents get
-          // stamped" in docs/document-axes/target-architecture.md.
-          if (isAxesType(firestoreMetadata.type)
-              && kindMetadataFields.concurrent && firestoreMetadata.concurrent !== true) {
-            this.firestore.doc(getSimpleDocumentPath(documentKey))
-              .set(kindMetadataFields, { merge: true })
-              .catch((err: any) => console.warn("group-doc concurrent backfill failed", documentKey, err));
-          }
+          // Every type is registered as a kind, but only axes-typed documents store theirs (see "Which
+          // documents get stamped" in docs/document-axes/target-architecture.md), so a document that stores
+          // none takes the kind its type names. `concurrent` is read from storage only: it is what the
+          // Firestore rules key on, and the model has to agree with them.
+          const kind =
+            firestoreMetadata.kind ?? getDocumentKindMetadataFields(firestoreMetadata.type).kind ?? undefined;
+          const concurrent = firestoreMetadata.concurrent === true ? true : undefined;
           if (!document) {
             // If we have metadata but no document content, we can return a valid empty document.
             // This has been seen to occur in the wild, presumably as a result of a prior bug.
