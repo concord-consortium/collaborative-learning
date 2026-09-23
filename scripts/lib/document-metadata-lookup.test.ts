@@ -1,25 +1,5 @@
-import {
-  getOfferingIdFromFirebaseMetadata, getUserDocumentMetadataPath, type IMetadataDatabase
-} from "./document-metadata-lookup";
-
-// Minimal RTDB stand-in. `nodes` maps a full path to the value stored there; a path absent from the
-// map reads back as a non-existent node. `throwOn` makes a path reject, so a transport failure can be
-// told apart from a missing node — the two mean different things to every caller.
-function makeRtdb(nodes: Record<string, any>, throwOn: string[] = []) {
-  const reads: string[] = [];
-  const db: IMetadataDatabase & { reads: string[] } = {
-    reads,
-    ref: (path: string) => ({
-      once: (_eventType: "value") => {
-        reads.push(path);
-        if (throwOn.includes(path)) return Promise.reject(new Error("rtdb unavailable"));
-        const value = nodes[path];
-        return Promise.resolve({ exists: () => value !== undefined, val: () => value });
-      }
-    })
-  };
-  return db;
-}
+import { getOfferingIdFromFirebaseMetadata, getUserDocumentMetadataPath } from "./document-metadata-lookup";
+import { makeRtdb } from "./document-metadata-lookup-test-helpers";
 
 const kBasePath = "/authed/portals/learn_concord_org/classes";
 const kPath = `${kBasePath}/class-1/users/user-1/documentMetadata/doc-1`;

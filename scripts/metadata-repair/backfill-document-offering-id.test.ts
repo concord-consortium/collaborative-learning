@@ -2,7 +2,7 @@ import {
   backfillDocumentOfferingId, classifyDocument, getSpaceFromFirestorePath, getSpaceLabel,
   kOfferingContainedTypes, parsePageSize, parseTypes, type IBucketCounts
 } from "./backfill-document-offering-id";
-import type { IMetadataDatabase } from "../lib/document-metadata-lookup";
+import { makeRtdb } from "../lib/document-metadata-lookup-test-helpers";
 import type { Firestore } from "firebase-admin/firestore";
 import {
   AxesDocument, GroupDocument, PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
@@ -198,26 +198,6 @@ describe("classifyDocument", () => {
     }
   });
 });
-
-// Minimal RTDB stand-in. `nodes` maps a full path to the value stored there; a path absent from the
-// map reads back as a non-existent node. `throwOn` makes a path reject, so a transport failure stays
-// distinguishable from a missing node. `reads` records every path read, which is how a test asserts
-// that a class-wide document was never looked up at all.
-function makeRtdb(nodes: Record<string, any>, throwOn: string[] = []) {
-  const reads: string[] = [];
-  const db: IMetadataDatabase & { reads: string[] } = {
-    reads,
-    ref: (path: string) => ({
-      once: (_eventType: "value") => {
-        reads.push(path);
-        if (throwOn.includes(path)) return Promise.reject(new Error("rtdb unavailable"));
-        const value = nodes[path];
-        return Promise.resolve({ exists: () => value !== undefined, val: () => value });
-      }
-    })
-  };
-  return db;
-}
 
 // Minimal Firestore-admin stand-in supporting the exact chain the script builds:
 //   collectionGroup("documents").where("type","==",t).orderBy("__name__")[.startAfter(d)].limit(n).get()
