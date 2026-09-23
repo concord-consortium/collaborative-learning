@@ -396,8 +396,9 @@ identity of a document.
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
 
-`type` is written once. Group and class-wide documents store the generic `"axes"`; the realtime database's
-copy of their metadata still says `"group"`, and is never read for the type.
+`type` is written once. Group and class-wide documents store the generic `"axes"`. The realtime database's
+copy of their metadata is a permanent mix — new documents are written there as `"axes"` too, but it was never
+swept, so older ones still say `"group"` — and it is never read for the type.
 
 ### `axisProfile`
 

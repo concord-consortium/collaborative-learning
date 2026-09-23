@@ -179,8 +179,8 @@ Every `type` is registered as a kind, so the registry can answer `kind → axis 
 those fields into stored metadata is deliberately narrower: the one stamp site — creation
 (`createFirestoreMetadataDocument`) — writes the kind axis fields only for the types converted so far, which
 today means the generic axes type (regular group documents and class-wide documents, which share it). Firestore
-stores that type as `"axes"`; the realtime database, which is never swept, still says `"group"` for the same
-documents, and nothing reads a type from there.
+stores that type as `"axes"`. The realtime database holds a permanent mix: new documents are written there as
+`"axes"` too, but it is never swept, so older ones still say `"group"`. Nothing reads a type from there.
 
 The gate is a stage in the progression, not a permanent rule:
 
