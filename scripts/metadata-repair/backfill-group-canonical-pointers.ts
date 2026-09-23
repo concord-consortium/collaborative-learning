@@ -69,6 +69,24 @@ export interface IGroupDocRecord {
   canonical?: string;
 }
 
+/**
+ * Both values the generic document type has stored: `"group"` before the 7.5.0 rename and `"axes"`
+ * since. A document still storing `"group"` is one `backfill-group-document-axes.ts` has not reached,
+ * and it needs a pointer as much as any other, so this script does not depend on that one having run.
+ */
+export const kGroupDocumentTypes = ["group", "axes"];
+
+/** Every group-scoped document in one space's `documents` collection. */
+export async function listGroupDocs(firestore: any, spacePath: string): Promise<IGroupDocRecord[]> {
+  const snap = await firestore.collection(spacePath).where("type", "in", kGroupDocumentTypes).get();
+  return snap.docs
+    .filter((d: any) => !!d.get("groupId"))
+    .map((d: any) => ({
+      key: d.id, contextId: d.get("context_id"), offeringId: d.get("offeringId"),
+      groupId: d.get("groupId"), uid: d.get("uid"), canonical: d.get("canonical")
+    }));
+}
+
 export interface ISlot {
   contextId: string;
   offeringId: string;
@@ -198,9 +216,9 @@ export interface ISpaceResult {
 export async function backfillSpace(
   space: ISelectedSpace, { dryRun }: { dryRun: boolean }, deps: ISpaceDeps
 ): Promise<ISpaceResult> {
-  const { listGroupDocs, readPointer, claim, backup, remove, log = console.log } = deps;
+  const { readPointer, claim, backup, remove, log = console.log } = deps;
   const spaceRoot = space.spacePath.replace(/\/documents$/, "");
-  const { slots, skipped } = groupIntoSlots(await listGroupDocs());
+  const { slots, skipped } = groupIntoSlots(await deps.listGroupDocs());
   const result: ISpaceResult = {
     label: space.label, slots: slots.length, alreadyPointed: 0, claimed: 0, deleted: 0, skipped
   };
@@ -290,15 +308,7 @@ async function main() {
   const totals = { slots: 0, alreadyPointed: 0, claimed: 0, deleted: 0, skipped: 0 };
   for (const space of selection.selected) {
     const deps: ISpaceDeps = {
-      listGroupDocs: async () => {
-        const snap = await firestore.collection(space.spacePath).where("type", "==", "axes").get();
-        return snap.docs
-          .filter(d => !!d.get("groupId"))
-          .map(d => ({
-            key: d.id, contextId: d.get("context_id"), offeringId: d.get("offeringId"),
-            groupId: d.get("groupId"), uid: d.get("uid"), canonical: d.get("canonical")
-          }));
-      },
+      listGroupDocs: () => listGroupDocs(firestore, space.spacePath),
       readPointer: async (pointerPath) => {
         const snap = await firestore.doc(pointerPath).get();
         return snap.exists ? snap.get("documentKey") : undefined;

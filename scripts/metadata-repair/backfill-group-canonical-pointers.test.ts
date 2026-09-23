@@ -2,7 +2,7 @@ import { getCanonicalPointerPath, kDefaultCanonicalDocumentLabel } from "../../s
 import { getGroupOwnerId } from "../../src/models/document/document-axes";
 import {
   backfillSpace, decideSlot, groupIntoSlots, groupOwnerId, groupPointerRelativePath, kGroupPointerLabel,
-  type IDeletionTarget, type IGroupDocRecord, type ISpaceDeps
+  listGroupDocs, type IDeletionTarget, type IGroupDocRecord, type ISpaceDeps
 } from "./backfill-group-canonical-pointers";
 
 const space = { label: "authed/p", spacePath: "authed/p/documents", rtdbRoot: "/authed/portals/p" };
@@ -45,6 +45,46 @@ describe("formulas kept in step with src", () => {
       .toBe(getCanonicalPointerPath({
         classHash: "c1", offeringId: "o1", owner: "group_o1_3", label: kDefaultCanonicalDocumentLabel
       }));
+  });
+});
+
+describe("listGroupDocs", () => {
+  // Records the query so the test pins its predicate, not just the mocked result.
+  function makeFirestore(docs: Array<{ id: string; data: Record<string, any> }>) {
+    const calls: { collection?: string; where?: [string, string, any] } = {};
+    const firestore = {
+      collection: (path: string) => {
+        calls.collection = path;
+        return {
+          where: (field: string, op: string, value: any) => {
+            calls.where = [field, op, value];
+            return { get: async () => ({
+              docs: docs.map(d => ({ id: d.id, get: (name: string) => d.data[name] }))
+            }) };
+          }
+        };
+      }
+    };
+    return { firestore, calls };
+  }
+
+  it("matches both the pre-rename and the current generic type", async () => {
+    // A group document still storing "group" is one the axes backfill has not reached. Leaving it out
+    // would leave its slot without a pointer, and removing findLegacy would then strand its work.
+    const { firestore, calls } = makeFirestore([]);
+    await listGroupDocs(firestore, "authed/p/documents");
+    expect(calls.collection).toBe("authed/p/documents");
+    expect(calls.where).toEqual(["type", "in", ["group", "axes"]]);
+  });
+
+  it("keeps only group-scoped documents and reads the fields a slot is built from", async () => {
+    const { firestore } = makeFirestore([
+      { id: "g", data: { type: "group", context_id: "c1", offeringId: "o1", groupId: "3", uid: "group_o1_3" } },
+      { id: "cw", data: { type: "axes", context_id: "c1", unit: "u", uid: "class_c1" } }
+    ]);
+    expect(await listGroupDocs(firestore, "authed/p/documents")).toEqual([{
+      key: "g", contextId: "c1", offeringId: "o1", groupId: "3", uid: "group_o1_3", canonical: undefined
+    }]);
   });
 });
 
