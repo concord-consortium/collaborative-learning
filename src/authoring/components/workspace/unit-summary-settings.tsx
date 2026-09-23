@@ -182,7 +182,7 @@ const UnitSummarySettings: React.FC = () => {
   const hasUnsavedEdits = !formStatesEqual(formState, savedFormState);
 
   const handleGenerate = async () => {
-    if (!branch || !unit) return;
+    if (!branch || !unit || unitConfigLoading) return;
     if (hasUnsavedEdits && !window.confirm(
       "Generating a new summary will replace your unsaved changes to the current one. Continue?"
     )) {
@@ -323,7 +323,7 @@ to table rows beyond the summarizer's row cap, are not detected."
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={generating || !branch || !unit}
+          disabled={generating || unitConfigLoading || !branch || !unit}
           aria-busy={generating}
         >
           {generating ? "Generating…" : "Generate Summary"}

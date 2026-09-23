@@ -214,6 +214,15 @@ describe("UnitSummarySettings", () => {
     expect(screen.getByRole("button", { name: "Generate Summary" })).not.toBeDisabled();
   });
 
+  it("disables the Generate button while the current unit's config is still loading", async () => {
+    mockCurriculumValue.unitConfigLoading = true;
+    render(<UnitSummarySettings />);
+    await flush();
+
+    expect(screen.getByRole("button", { name: "Generate Summary" })).toBeDisabled();
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
   it("confirms before generating over unsaved edits, and does nothing if declined", async () => {
     mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
     const user = userEvent.setup();
