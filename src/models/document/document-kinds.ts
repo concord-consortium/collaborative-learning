@@ -5,7 +5,7 @@ import {
   kProblemLikeProfile
 } from "./document-axis-profiles";
 import {
-  GroupDocument, isAxesType, LearningLogDocument, LearningLogPublication,
+  GroupDocument, LearningLogDocument, LearningLogPublication,
   PersonalDocument, PersonalPublication, PlanningDocument,
   ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
@@ -264,19 +264,8 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   // fallback, which names it from its stored fields instead.
   const info = getKindDefinitionFor(document);
   if (info?.title != null) return info.title;
-  // Keyed on `type` plus `groupId`, not `kind`: a group document may have no stored `kind` yet (we backfill
-  // the kind on open but need the title for the lists of documents before they are opened), so it cannot rely
-  // on the lookup above. Requiring `groupId` (not just an axes type) matters because a class-wide
-  // document is also axes-typed but carries no `groupId` — if its `kind` is unregistered in this
-  // session (e.g. it belongs to a unit that has not loaded), the lookup above misses and execution reaches
-  // here; without the `groupId` check it would render as "Group undefined Document" instead of falling
-  // through to `undefined`, which callers already handle.
-  //
-  // TRANSITIONAL: this reads `type` only because a group document may carry no `kind`. Once
-  // scripts/backfill-group-document-axes.ts has stamped `kind` on every group document in every
-  // environment, this becomes `document.kind === GroupDocument` and the `groupId` check goes away with it —
-  // a class-wide document has its own kind, so it can no longer reach this branch at all.
-  if (isAxesType(document.type ?? "") && document.groupId) return `Group ${document.groupId} Document`;
+  // The group kind registers no title, because the label interpolates the group's id.
+  if (document.kind === GroupDocument) return `Group ${document.groupId} Document`;
   return undefined;
 }
 
