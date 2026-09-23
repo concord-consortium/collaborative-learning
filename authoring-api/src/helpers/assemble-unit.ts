@@ -103,6 +103,9 @@ export async function assembleUnit(
 
       const sections = Array.isArray(problem.sections) ? problem.sections : [];
       const sectionMarkdowns: string[] = [];
+      // Raw (pre-section-dedup) section text, kept only to hash this problem's real content --
+      // never sent anywhere. See problemHash below for why.
+      const rawSectionMarkdowns: string[] = [];
       for (let i = 0; i < sections.length; i++) {
         const section = await resolveSection(sections[i], ordinal, i, inventoryByPath, branch, unit, deps);
         const dataSets = normalizeCurriculumDataSets(section.content?.sharedModels);
@@ -116,16 +119,32 @@ export async function assembleUnit(
         // content can already contain its own "##"-level headings (e.g. a multi-tile row's per-tile
         // heading), so a heading-level alone wouldn't reliably mark a boundary.
         const title = (section.type && root.sections?.[section.type]?.title) || section.type || "Section";
+        const heading = `# Section: ${title}\n\n`;
+        rawSectionMarkdowns.push(`${heading}${body}`);
         const dedupedBody = dedupedSectionBody(body, title, ordinal, firstSectionOccurrence);
-        sectionMarkdowns.push(`# Section: ${title}\n\n${dedupedBody}`);
+        sectionMarkdowns.push(`${heading}${dedupedBody}`);
       }
 
       const markdown = sectionMarkdowns.join("\n\n");
-      problems.push({ordinal, title: problem.title ?? "", markdown, problemHash: hashString(markdown)});
+      // Hashed from the raw sections, not from `markdown` -- dedupedSectionBody above can replace a
+      // later, byte-identical problem's sections with "(same content as problem X)" pointers, which
+      // would otherwise give two truly-identical problems different hashes (the first holds real
+      // content, the rest hold pointer text). That breaks whole-problem-duplicate detection
+      // (unit-summary-digest.ts) for exactly the case it exists to catch: the second occurrence
+      // stops matching the first's hash, so it gets a real digest call over pointer text instead of
+      // being skipped. Hashing the raw content keeps a problem's identity tied to what it actually
+      // says, independent of which pointer text section dedup happened to substitute for it.
+      const problemHash = hashString(rawSectionMarkdowns.join("\n\n"));
+      problems.push({ordinal, title: problem.title ?? "", markdown, problemHash});
     }
   }
 
-  const sourceHash = hashString(problems.map((p) => p.markdown).join("\n\n"));
+  // Derived from each problem's own hash, not from `markdown` directly, for the same reason
+  // problemHash is hashed from raw content above: an unrelated problem's edit shifting which one is
+  // the "first occurrence" of a shared section can change ANOTHER problem's deduped `markdown` even
+  // though that problem's own real content never changed, which would move sourceHash and falsely
+  // flag the whole unit as stale.
+  const sourceHash = hashString(problems.map((p) => p.problemHash).join("\n"));
   const sourceManifest: IUnitSummarySourceProblem[] = problems.map((p) => ({
     ordinal: p.ordinal, title: p.title, problemHash: p.problemHash,
   }));

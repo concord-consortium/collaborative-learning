@@ -206,8 +206,10 @@ describe("assembleUnit", () => {
       {ordinal: 1, title: "Inv 1", problems: [{ordinal: 1, title: "P1", sections: [textSection("content")]}]},
     ]);
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    // No dedup applies here (a single problem, single section), so the raw content problemHash is
+    // hashed from equals markdown -- see the interaction tests below for the case where it doesn't.
     expect(result.problems[0].problemHash).toEqual(hashString(result.problems[0].markdown));
-    expect(result.sourceHash).toEqual(hashString(result.problems.map((p) => p.markdown).join("\n\n")));
+    expect(result.sourceHash).toEqual(hashString(result.problems.map((p) => p.problemHash).join("\n")));
   });
 
   it("summarizes a Drawing tile's text and image labels, without its geometry", async () => {
@@ -296,6 +298,23 @@ describe("assembleUnit", () => {
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
     expect(result.problems[1].markdown).toContain("(same \"help\" content as problem 1.1)");
     expect(result.problems[2].markdown).toContain("(same \"help\" content as problem 1.1)");
+  });
+
+  it("gives byte-identical problems the same problemHash despite section dedup rewriting later ones", async () => {
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [textSection("shared help text", "help")]},
+        {ordinal: 2, title: "P2", sections: [textSection("shared help text", "help")]},
+        {ordinal: 3, title: "P3", sections: [textSection("shared help text", "help")]},
+      ]},
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    // 1.2 and 1.3's markdown is rewritten to "(same content as...)" pointers (see the test above),
+    // but all three problems' real content is byte-identical, so whole-problem dedup
+    // (unit-summary-digest.ts) needs their hashes to agree too -- otherwise the second problem gets
+    // a real, wasted digest call over pointer text instead of being skipped as a duplicate.
+    expect(result.problems[1].problemHash).toEqual(result.problems[0].problemHash);
+    expect(result.problems[2].problemHash).toEqual(result.problems[0].problemHash);
   });
 
   it("does not dedupe sections with different content, even with the same section type", async () => {
