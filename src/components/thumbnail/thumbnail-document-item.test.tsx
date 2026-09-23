@@ -320,9 +320,8 @@ describe("ThumbnailDocumentItem", () => {
       expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("concurrent");
     });
 
-    it("does not mark a group-typed document that is not concurrent", () => {
-      // The type alone is not sufficient: a group document gets the treatment only once the concurrent
-      // axis is stamped on it. Documents missing the axis are stamped by the backfill script.
+    it("does not mark an axes-typed document that is not concurrent", () => {
+      // The type alone is not sufficient: the treatment follows the stored `concurrent` axis.
       const { container } = renderItem({ documentProps: { type: AxesDocument } });
       expect(container.querySelector(".scaled-list-item-container")).not.toHaveClass("concurrent");
     });

@@ -488,8 +488,8 @@ describe("Firestore security rules", () => {
     });
 
     it("a class member can set concurrent:true on a classmate's group-typed document", async () => {
-      // The backfill paths (src/lib/db.ts on-open backfill, scripts/backfill-group-document-axes.ts)
-      // merge-update `concurrent` onto pre-existing group documents, so this must keep working.
+      // Clients from before 7.6.0 backfill `concurrent` onto group documents when opening them, so this
+      // must keep working until CLUE-612 makes the field creation-only.
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "group" }}));
       await expectUpdateToSucceed(db, kDocumentDocPath, { concurrent: true });

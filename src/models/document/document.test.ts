@@ -368,20 +368,14 @@ describe("DocumentModel concurrent/kind stored props", () => {
     expect(doc.concurrent).toBeFalsy();
   });
 
-  it("carries the group owner uid that hasGroupOwner reads, on either side of the sweep", () => {
+  it("carries the group owner uid that hasGroupOwner reads", () => {
     // The group-switch reaction in document-workspace asks hasGroupOwner(primary) directly; what the
-    // model owes it is the stored uid, unchanged by CLUE-604's rename of the type beside it.
-    const preSweep = DocumentModel.create({
-      uid: getGroupOwnerId("off-1", "3"), type: AxesDocument, key: "k-group", createdAt: 1,
-      concurrent: true, kind: "group", groupId: "3"
-    });
-    expect(hasGroupOwner(preSweep)).toBe(true);
-
-    const postSweep = DocumentModel.create({
+    // model owes it is the stored uid.
+    const groupDoc = DocumentModel.create({
       uid: getGroupOwnerId("off-1", "3"), type: AxesDocument, key: "k-axes", createdAt: 1,
       concurrent: true, kind: "group", groupId: "3"
     });
-    expect(hasGroupOwner(postSweep)).toBe(true);
+    expect(hasGroupOwner(groupDoc)).toBe(true);
   });
 
   it("does not present a class-wide document as group-owned", () => {

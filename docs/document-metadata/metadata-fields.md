@@ -391,11 +391,8 @@ identity of a document.
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
 
-`type` is the one exception to "written once", and only transitionally: group and class-wide documents share
-a generic type whose value is being renamed from `"group"` to `"axes"`, and
-`scripts/backfill-group-document-axes.ts` rewrites it on the documents that predate the rename. That script
-authenticates as a service account, so it writes past the rule that keeps the field read-only for clients —
-no client ever changes a `type`.
+`type` is written once. Group and class-wide documents store the generic `"axes"`; the realtime database's
+copy of their metadata still says `"group"`, and is never read for the type.
 
 ### `axisProfile`
 
