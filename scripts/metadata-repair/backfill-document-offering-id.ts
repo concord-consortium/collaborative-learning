@@ -37,6 +37,7 @@ import type { Firestore } from "firebase-admin/firestore";
 // either form, so running the script is unaffected.
 import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "../lib/document-metadata-lookup";
 import { isRtdbAddressable } from "./lib/rtdb-document-index";
+import { kBatchSize } from "./lib/firestore-batch";
 
 /**
  * The `type` values of documents kept in an offering, per the `containerType: "offering"` entries in
@@ -267,11 +268,10 @@ export async function backfillDocumentOfferingId(
     (result.bySpace[spaceLabel] ??= emptyCounts())[b] += 1;
   };
 
-  // Batched at Firestore's 400-write limit, and committed only when there is something to write, so a
-  // run with no work commits nothing at all. `written` counts only committed writes, so a run that dies
-  // mid-flight cannot over-report what actually landed. Held as data rather than queued onto a batch,
-  // so a batch that fails can be retried one document at a time.
-  const kBatchSize = 400;
+  // Batched at kBatchSize, and committed only when there is something to write, so a run with no work
+  // commits nothing at all. `written` counts only committed writes, so a run that dies mid-flight
+  // cannot over-report what actually landed. Held as data rather than queued onto a batch, so a batch
+  // that fails can be retried one document at a time.
   let pending: Array<{ ref: any; offeringId: string }> = [];
 
   const commitOne = async (writes: typeof pending) => {
