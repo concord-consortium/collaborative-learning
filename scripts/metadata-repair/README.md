@@ -159,6 +159,29 @@ be turned off.
 - **Deleting for any reason other than the three that mean "unreachable debris"**, and never in
   `authed/learn_concord_org`, and never a document created within the retention window.
 
+## Group canonical pointers
+
+`backfill-group-canonical-pointers.ts` is not part of the repair above and has no ordering relationship
+with it. It gives every group document's slot a canonical pointer at the path the app reads, which is
+what lets the app stop looking up older group documents by query (`findLegacy` in `src/lib/db.ts`).
+Group documents from before 7.3.0 have no pointer at all, and those from 7.3.0 and 7.4.0 have one at a
+path those releases used and the app no longer reads.
+
+For each slot (one class, offering and group) it keeps the document the pointer names, or when there is
+no pointer, claims the one `findLegacy` would pick: the lowest document id. Every other group document
+in the slot is deleted from both databases, including its `comments` and `history` subcollections. Each
+one is backed up first to `scripts/output/group-pointer-backfill/<run time>/`. It covers `authed` and
+`demo` spaces, including `authed/learn_concord_org`, and reports rather than touches a slot it cannot
+confidently address.
+
+```bash
+npx tsx scripts/metadata-repair/backfill-group-canonical-pointers.ts           # dry run
+APPLY=1 npx tsx scripts/metadata-repair/backfill-group-canonical-pointers.ts   # claim and delete
+```
+
+It accepts `SPACES=` and `DATABASE_URL=` with the same meaning as above. A second dry run after an
+apply run should report nothing to claim and nothing to delete.
+
 ## Design
 
 [docs/superpowers/specs/2026-08-20-clue-643-metadata-repair-design.md](../../docs/superpowers/specs/2026-08-20-clue-643-metadata-repair-design.md)
