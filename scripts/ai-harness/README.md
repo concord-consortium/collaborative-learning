@@ -283,7 +283,7 @@ modes are named and separate, and an improvement never gets folded into the base
 **`shutterbug-production-current` is the parity baseline.** It matches production's request envelope
 — the production endpoint, the released build's `authoring-iframe/index.html` page, `unit=mods`
 (production's fallback; production itself renders with each document's own unit), `height: 500`,
-`fullPage: true` (CLUE-666), and a bare string body with no `content-type`. A snapshot test pins what
+`fullPage: true`, and a bare string body with no `content-type`. A snapshot test pins what
 this mode posts so it cannot drift while the other modes evolve, and this envelope has been verified
 by hand against the real service, with the E1 tall probe document: a POST to
 `https://api.concord.org/shutterbug-production` came back **960×3668** (the hosted URL is not
@@ -291,8 +291,8 @@ reproduced here — see "Hosted URLs expire" below), matching the ~3668px the sa
 against staging, and well past the 500px viewport. Production really does grow a `fullPage` capture
 past its starting viewport, not just staging.
 
-**To reproduce the pre-CLUE-666 envelope's shape** (`height: 1500`, no `fullPage`) — what
-production sent before this change, for comparison: `shutterbug-parameterized --capture-height 1500
+**To reproduce the envelope's shape before this change** (`height: 1500`, no `fullPage`) — what
+production sent before, for comparison: `shutterbug-parameterized --capture-height 1500
 --shutterbug-url https://api.concord.org/shutterbug-production` with no `--full-page`. Not
 byte-for-byte, for the same reason `shutterbug-production-current` above is not: the generated
 page always carries a clamp now, and this mode renders with `mods` rather than each document's own
@@ -1053,13 +1053,13 @@ Things this milestone surfaced that are not the harness's to fix.
 
   *Since resolved.* Production now sends the same request — see the next entry — so this script and
   production match.
-- **Production now sends `fullPage: true` too (as of CLUE-666).** It posts a 500px viewport with
+- **Production now sends `fullPage: true` too.** It posts a 500px viewport with
   `fullPage: true`, and the page itself (`shared/render-page.ts`) caps the frame at
   `kMaxFrameHeightPx`, so a capture is scaled to content between that floor and ceiling instead of
   clipped to a fixed 1500px. `done` queue records may now carry `imageClipped` (a capture that
   reached the ceiling) or `imageOmittedReason: "image-too-large"` (a capture omitted for being over
   the encoded-byte limit). `shutterbug-production-current` was moved onto this same envelope rather
-  than frozen as a pre-CLUE-666 baseline.
+  than frozen as the old fixed-height baseline.
 
 ## DEVIATIONS
 
