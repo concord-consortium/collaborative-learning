@@ -288,6 +288,32 @@ describe("UnitSummarySettings", () => {
     expect(screen.queryByText("SHOULD NOT APPEAR")).not.toBeInTheDocument();
   });
 
+  it("shows the new unit's own summary once its config arrives, not the previous unit's", async () => {
+    // useCurriculum keeps the previous unit's config in place while the new one is still loading
+    // (see use-curriculum.tsx), so branch/unit update before unitConfig does.
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary({ overview: "Unit A overview." }) } };
+    const { rerender } = render(<UnitSummarySettings />);
+    await flush();
+    expect(screen.getByLabelText("Overview")).toHaveValue("Unit A overview.");
+
+    mockCurriculumValue.branch = "other-branch";
+    mockCurriculumValue.unit = "other-unit";
+    rerender(<UnitSummarySettings />);
+    await flush();
+    // The new unit's config hasn't arrived yet -- still showing unit A's, not blanked or crashed.
+    expect(screen.getByLabelText("Overview")).toHaveValue("Unit A overview.");
+
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary({ overview: "Unit B overview." }) } };
+    rerender(<UnitSummarySettings />);
+    await flush();
+    expect(screen.getByLabelText("Overview")).toHaveValue("Unit B overview.");
+
+    // Save now persists unit B's own summary -- not unit A's, which the form displayed moments ago.
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    const draft = lastSetUnitConfigDraft();
+    expect(draft.config.aiUnitSummary?.overview).toBe("Unit B overview.");
+  });
+
   it("names the changed problem when a problem's content hash differs (content changed)", async () => {
     mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
     mockGet.mockResolvedValue(buildStatus({

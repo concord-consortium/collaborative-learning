@@ -150,18 +150,27 @@ const UnitSummarySettings: React.FC = () => {
     }
   }, [api, branch, unit]);
 
-  // Load on mount and whenever the unit/branch changes. Also resets the in-progress form back to
-  // the newly-loaded unit's saved summary -- but only on navigation, not on every local Save
-  // (which also changes unitConfig.config.aiUnitSummary, and would otherwise clobber an author's
-  // freshly-generated-but-unsaved edits the moment they save something unrelated on this page).
+  // Load on mount and whenever the unit/branch changes. useCurriculum keeps the previous unit's
+  // config in place while the new one is still loading, so this must not touch formState -- doing
+  // so here would copy the OLD unit's summary into the form the instant navigation starts, with no
+  // later effect run to correct it once the real config arrives (see the formState effect below).
   useEffect(() => {
-    setFormState(savedSummary ? summaryToFormState(savedSummary) : undefined);
     setLiveStatus(undefined);
     setGenerationError(undefined);
     setSaveValidation(undefined);
     fetchStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branch, unit]);
+
+  // Resets the form to the loaded config's own saved summary. Keyed on savedSummary itself, not on
+  // branch/unit, so it fires exactly when the config that arrives actually belongs to the current
+  // unit -- not on every local Save (which also changes savedSummary, but leaves formState already
+  // equal to it) and not on an unrelated settings panel's save elsewhere in the same unit's config
+  // (which produces a new unitConfig but, via Immer's structural sharing, leaves aiUnitSummary's
+  // own reference untouched).
+  useEffect(() => {
+    setFormState(savedSummary ? summaryToFormState(savedSummary) : undefined);
+  }, [savedSummary]);
 
   useEffect(() => {
     return () => window.clearTimeout(copiedTimeoutRef.current);
