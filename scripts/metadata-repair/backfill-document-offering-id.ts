@@ -1,8 +1,9 @@
 // Adds the missing `offeringId` to the Firestore metadata of documents kept in an offering.
 //
-// `isInClassUnitContainer` (src/models/document/document-axes.ts) identifies the offering container by
-// the ABSENCE of `offeringId`, so an offering-contained document without one reads as belonging to the
-// class's copy of the unit — the wrong container. This script makes the data true so that guard can be
+// `isInClassUnitContainer` (src/models/document/document-axes.ts) treats a document with a `unit` and
+// no `offeringId` as class-unit-contained: `offeringId` is the only positive marker of the offering
+// container. So an offering-contained document without one reads as belonging to the class's copy of
+// the unit — the wrong container. This script makes the data true so that guard can be
 // relied on.
 //
 // The dry run is the deliverable that matters first: it buckets every candidate by why it landed

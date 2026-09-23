@@ -17,8 +17,9 @@ This matters because of how the container axis is read. `isInClassUnitContainer`
 return !!doc.unit && !doc.offeringId;
 ```
 
-It identifies the offering container by the **absence** of `offeringId`. A problem document that
-has a `unit` but no `offeringId` therefore reads as class-unit-contained — the wrong container.
+It treats the **absence** of `offeringId` as the mark of the class-unit container; `offeringId` is
+the only positive marker of the offering container. A problem document that has a `unit` but no
+`offeringId` therefore reads as class-unit-contained — the wrong container.
 
 Nothing is broken today. The guard's only caller is `canUserEditDocument`
 (`src/models/document/document-utils.ts`), which returns early on `if (!concurrent) return false`,
