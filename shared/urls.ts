@@ -1,11 +1,10 @@
 /**
- * Whether a hosted image URL is one the harness will read bytes from.
+ * Whether a hosted URL is safe to fetch bytes from: public and https.
  *
- * Both places that fetch a rendered image use `redirect: "follow"`, so the URL that was checked is
- * not necessarily the URL that answered: a hosted image can redirect to plain `http`, or to an
- * address on the machine running the harness. Asserting this against the *final* response URL is
- * what closes that — a silent downgrade or a landing on the private network fails instead of being
- * downloaded and stored as a student's document.
+ * A hosted URL can redirect to plain `http`, or to an address on the machine or network doing the
+ * fetching — Shutterbug's own image URLs among them. Checking this against the *final* response
+ * URL, not just the one that was requested, is what closes that: a silent downgrade or a landing
+ * on the private network fails instead of being fetched and treated as trusted content.
  *
  * A public hostname that resolves to a private address still passes; stopping that needs the
  * resolved address, which `fetch` does not expose. The check is on the URL, and says so.
@@ -24,24 +23,53 @@ export function isPublicHttpsUrl(value: string): boolean {
  * Why a redirect must not be followed, or `null` when it is fine.
  *
  * The rule is that a redirect may not land somewhere less safe than the URL that was asked for. A
- * request to a public https URL has to end at a public https URL; an operator who deliberately
- * points the harness at a local server is not downgraded by ending up there, so that case is left
- * alone. Stating it as "no downgrade" rather than "https only" is what lets a local Shutterbug and
- * the tests' loopback servers keep working while the case that matters — a hosted image quietly
- * redirecting to plain http, or to an address on this machine — still fails.
+ * request to a public https URL has to end at a public https URL; a caller who deliberately points
+ * at a local server is not downgraded by ending up there, so that case is left alone. Stating it as
+ * "no downgrade" rather than "https only" is what lets a local Shutterbug and loopback test servers
+ * keep working while the case that matters — a hosted URL quietly redirecting to plain http, or to
+ * an address on the machine making the request — still fails.
  *
  * This says nothing about a URL that was never public https to begin with, because there is no
  * downgrade in that case to describe. Whether such a URL should be fetched at all is a separate
- * question, settled where the URL is admitted rather than where it is followed — see
- * `asOptionalPublicHttpsUrl` in `schemas.ts`.
+ * question, settled where the URL is admitted rather than where it is followed.
  */
 export function redirectDowngradeReason(requestedUrl: string, finalUrl: string): string | null {
   if (!isPublicHttpsUrl(requestedUrl) || isPublicHttpsUrl(finalUrl)) return null;
   return `redirected to ${finalUrl}, which is not a public https URL`;
 }
 
+/**
+ * Whether a URL's hostname is one AWS owns.
+ *
+ * `isPublicHttpsUrl` only rules out a hostname that *looks* private; it says nothing about where a
+ * hostname actually resolves. A hostname an attacker controls DNS for passes it regardless, then
+ * can resolve to any address — including a private one — when it is actually fetched (DNS
+ * rebinding). The real fix is to resolve the hostname and pin the validated address before
+ * fetching; this is not that fix, only a stopgap against a compromised Shutterbug returning an
+ * arbitrary attacker-chosen domain.
+ *
+ * Not narrowed to Shutterbug's own S3 bucket, or even to S3: AWS hostname shapes change over time
+ * (virtual-hosted vs. path-style, access points, S3 Express, and others), and a check tied to
+ * today's shapes would need to be kept in sync with them or silently start rejecting real
+ * Shutterbug URLs. `*.amazonaws.com` is stable and still meaningful — an attacker who does not
+ * already control AWS infrastructure cannot get a host to match it.
+ */
+export function isShutterbugImageHost(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  const host = url.hostname.toLowerCase();
+  return host === "amazonaws.com" || host.endsWith(".amazonaws.com");
+}
+
 function isPrivateHost(hostname: string): boolean {
-  const host = hostname.toLowerCase();
+  // `URL` strips a trailing dot from an IPv4 literal but keeps one on a domain, so
+  // `https://localhost./x.png` would otherwise reach here as "localhost." and match neither
+  // check below.
+  const host = hostname.toLowerCase().replace(/\.$/, "");
   if (host === "localhost" || host.endsWith(".localhost")) return true;
   // `URL.hostname` returns IPv6 addresses bracketed.
   if (host.startsWith("[")) {

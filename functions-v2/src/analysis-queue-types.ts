@@ -10,10 +10,12 @@ import {type AnalysisQueueDocument} from "./on-analyzable-doc-written";
  *
  * `"empty-document"` is set on both summary and image together, for a document
  * `documentHasStudentWork` says has no student work at all. The other reasons are each about one
- * representation of an otherwise non-empty document.
+ * representation of an otherwise non-empty document. `"image-too-large"`: the picture was over
+ * the encoded-byte limit and was omitted; the summary still goes.
  */
 export type OmittedReason =
-  "no-student-work-in-summary" | "no-visual-content" | "images-disabled" | "empty-document";
+  "no-student-work-in-summary" | "no-visual-content" | "images-disabled" | "empty-document" |
+  "image-too-large";
 
 /** What the document holds, from walking its tiles. */
 export interface AnalysisClassification {
@@ -75,6 +77,11 @@ export interface AnalysisImagedQueueDocument extends AnalysisQueueDocument {
   sendImage: boolean;
   imageOmittedReason?: OmittedReason;
   imageError?: string;
+  /**
+   * Present only when the capture reached the ceiling. Records what was captured and its cap, not
+   * the document's true height — Shutterbug renders it, so the function never learns that.
+   */
+  imageClipped?: {capturedHeightPx: number; ceilingPx: number};
 }
 
 /** The mock evaluator carries nothing: no classification, no representations. */

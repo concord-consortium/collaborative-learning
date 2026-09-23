@@ -135,6 +135,16 @@ describe("the render target", () => {
       .toThrow(/captureHeightPx must be null when captureMode is "full-document"/);
   });
 
+  it("validates a full-page target", () => {
+    const fullPage = { ...renderTarget, captureMode: "full-page", captureHeightPx: 4000 };
+    expect(validateRenderTarget(fullPage, file, "renderTarget").captureHeightPx).toBe(4000);
+  });
+
+  it("requires a clip height (the ceiling) on a full-page capture", () => {
+    expect(() => validateRenderTarget({ ...renderTarget, captureMode: "full-page" }, file, "renderTarget"))
+      .toThrow(/captureHeightPx is required when captureMode is "full-page"/);
+  });
+
   it("allows an unknown revision, because a hosted build may not have one", () => {
     expect(validateRenderTarget({ ...renderTarget, clueRevision: null }, file, "renderTarget").clueRevision)
       .toBeNull();

@@ -88,7 +88,8 @@ npx tsx harness.ts represent --corpus synthetic-corpus --variants default,minima
 npx tsx harness.ts render    --corpus synthetic-corpus --mode <mode> \
                              [--clue-url <url>] [--unit <unit>] [--shutterbug-url <url>] \
                              [--capture-height <px>] [--refresh] \
-                             [--concurrency <n>] [--timeout-ms <n>]
+                             [--concurrency <n>] [--timeout-ms <n>] \
+                             [--full-page] [--max-frame-height <px>]  # shutterbug-parameterized only
 npx tsx harness.ts plan      --corpus synthetic-corpus --experiment experiments/image-vs-text.json
 npx tsx harness.ts run       --corpus synthetic-corpus --experiment experiments/text-baselines.json \
                              --max-cost 0.50 [--output <file>] [--no-cache | --refresh-cache]
@@ -274,17 +275,28 @@ modes are named and separate, and an improvement never gets folded into the base
 | Mode | Network | CLUE URL | unit | Capture |
 |---|---|---|---|---|
 | `puppeteer-full-height` (default) | local | `--clue-url`, default `http://localhost:8080` | harness's own | full document, 960px wide |
-| `shutterbug-production-current` | yes | production's released `authoring-iframe/index.html` | `mods` (production's fallback) | `height: 1500`, no `fullPage` |
-| `shutterbug-parameterized` | yes | `--clue-url`, default production's released `authoring-iframe/index.html` | `--unit`, default `mods` | `--capture-height`, default 1500; `--shutterbug-url`, default **staging** |
+| `shutterbug-production-current` | yes | production's released `authoring-iframe/index.html` | `mods` (production's fallback) | `height: 500`, `fullPage: true`, clipped only by the page's own frame ceiling (`kMaxFrameHeightPx`) |
+| `shutterbug-parameterized` | yes | `--clue-url`, default production's released `authoring-iframe/index.html` | `--unit`, default `mods` | `--capture-height`, default 1500 (500 with `--full-page`, matching production); `--shutterbug-url`, default **staging**; or `--full-page` (posts `fullPage: true`, clipped only by the page's own frame ceiling — `--max-frame-height`, default `kMaxFrameHeightPx`) |
 | `puppeteer-per-tile` | local | `--clue-url`, default `http://localhost:8080` | harness's own | one image per top-level tile |
 | `shutterbug-accurate-height` | yes | `--clue-url`, default production's released page | `--unit`, default `mods` | each document's **own measured height** — needs a `puppeteer-full-height` render of the same corpus first |
 
 **`shutterbug-production-current` is the parity baseline.** It matches production's request envelope
 — the production endpoint, the released build's `authoring-iframe/index.html` page, `unit=mods`
-(production's fallback; production itself renders with each document's own unit), `height: 1500`, no
-`fullPage`, and a bare string body with no `content-type`. A snapshot test pins what this mode posts
-so it cannot drift while the other modes evolve, and it has been verified by hand against the real
-service.
+(production's fallback; production itself renders with each document's own unit), `height: 500`,
+`fullPage: true`, and a bare string body with no `content-type`. A snapshot test pins what
+this mode posts so it cannot drift while the other modes evolve, and this envelope has been verified
+by hand against the real service, with the E1 tall probe document: a POST to
+`https://api.concord.org/shutterbug-production` came back **960×3668** (the hosted URL is not
+reproduced here — see "Hosted URLs expire" below), matching the ~3668px the same probe produced
+against staging, and well past the 500px viewport. Production really does grow a `fullPage` capture
+past its starting viewport, not just staging.
+
+**To reproduce the envelope's shape before this change** (`height: 1500`, no `fullPage`) — what
+production sent before, for comparison: `shutterbug-parameterized --capture-height 1500
+--shutterbug-url https://api.concord.org/shutterbug-production` with no `--full-page`. Not
+byte-for-byte, for the same reason `shutterbug-production-current` above is not: the generated
+page always carries a clamp now, and this mode renders with `mods` rather than each document's own
+unit.
 
 **The page body is production's page body.** Both are built by `shared/render-page.ts`, so the only
 things that differ between this mode and production are the arguments: the CLUE URL and the unit.
@@ -311,8 +323,8 @@ because it is a plain GET for a hosted image and the URL it lands on is checked 
 the same HTML, the same CLUE iframe entry point with `unwrapped&readOnly` (a local build's
 `iframe.html`; the released build's `authoring-iframe/index.html`, built from the same source), the
 same `initialValue` message. Only two things differ: who takes the picture, and that it captures the
-whole document rather than production's first 1500 pixels. The harness captures reality; production's clipping is a
-production concern.
+whole document rather than being capped at production's own ceiling (`kMaxFrameHeightPx`, 4000px by
+default). The harness captures reality; production's clamp is a production concern.
 
 Three details of *how* it does that were established by running it against a real CLUE server, and
 each one is load-bearing:
@@ -462,6 +474,15 @@ recorded as `captureMode: "full-document"`. The local backend checks the page be
 Shutterbug modes check the configured height before uploading and the decoded image's dimensions
 after downloading, because a tall flat screenshot compresses to almost nothing and the byte limit
 alone would never fire.
+
+In `shutterbug-parameterized --full-page` mode, the ceiling is enforced by the page — the iframe
+inside it never grows past `--max-frame-height` (`shared/render-page.ts`'s `kMaxFrameHeightPx` by
+default). A real capture still lands a few pixels past that ceiling — the outer page's own chrome,
+outside the clamped iframe — so the check allows up to 16px over it (`kFullPageOverflowTolerancePx`
+in `src/backends/shutterbug.ts`) before failing the document, exactly like any other render-mode
+limit: the harness measures what a candidate ceiling costs, so a clamp that did not hold must be
+visible, not silently tolerated. Production, by contrast, clips and carries on; the harness is a
+measurement tool and production is not.
 
 ### What the synthetic corpus cannot show you yet
 
@@ -1027,8 +1048,18 @@ Things this milestone surfaced that are not the harness's to fix.
   in `shared/render-page.ts`, which production, the harness and `scripts/shutterbug.ts` all call, so
   there is no copy left to drift.
 - **`scripts/shutterbug.ts` is not production parity**, despite the harness plan describing it that
-  way. It posts `height: 500, fullPage: true` against production's `height: 1500` and no `fullPage`.
-  It builds the same page as production now, so the difference is the request alone.
+  way. It posted `height: 500, fullPage: true` against production's `height: 1500` and no `fullPage`.
+  It built the same page as production, so the difference was the request alone.
+
+  *Since resolved.* Production now sends the same request — see the next entry — so this script and
+  production match.
+- **Production now sends `fullPage: true` too.** It posts a 500px viewport with
+  `fullPage: true`, and the page itself (`shared/render-page.ts`) caps the frame at
+  `kMaxFrameHeightPx`, so a capture is scaled to content between that floor and ceiling instead of
+  clipped to a fixed 1500px. `done` queue records may now carry `imageClipped` (a capture that
+  reached the ceiling) or `imageOmittedReason: "image-too-large"` (a capture omitted for being over
+  the encoded-byte limit). `shutterbug-production-current` was moved onto this same envelope rather
+  than frozen as the old fixed-height baseline.
 
 ## DEVIATIONS
 
