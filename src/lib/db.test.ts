@@ -596,21 +596,12 @@ describe("db", () => {
     await db.connect({ appMode: "test", stores, dontStartListeners: true });
     // context_id/groupId/offeringId come from the user via the kind's scope; owner→uid is passed directly.
     const content = db.buildFirestoreMetadataContent({
-      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3"
+      documentKey: "gk", type: AxesDocument, kind: GroupDocument, owner: "group_off-1_3"
     });
     expect(content).toMatchObject({
       context_id: "class-h", network: null, key: "gk", uid: "group_off-1_3", groupId: "3", offeringId: "off-1"
     });
     expect(content).not.toHaveProperty("contextId");
-  });
-
-  it("stamps kind and concurrent on a group document's metadata", async () => {
-    stores.user.setCurrentGroupId("3");   // group scope: the builder derives groupId from the stores
-    await db.connect({ appMode: "test", stores, dontStartListeners: true });
-    const content = db.buildFirestoreMetadataContent({
-      documentKey: "gk", type: GroupDocument, kind: GroupDocument, owner: "group_off-1_3"
-    });
-    expect(content).toMatchObject({ kind: "group", concurrent: true, axisProfile: "group" });
   });
 
   it("stamps the axis profile a class-wide document is created at, without reaching the runtime", async () => {
@@ -691,10 +682,10 @@ describe("db", () => {
       // The unit (from the kind's class scope) and context_id (the user's classHash) come from the stores; owner
       // is passed directly. No title is passed — a class-wide doc's title is resolved live by kind at display.
       const content: any = db.buildFirestoreMetadataContent({
-        documentKey: "dqb-1", type: GroupDocument, kind: "drivingQuestionBoard", owner: "class_class-1"
+        documentKey: "dqb-1", type: AxesDocument, kind: "drivingQuestionBoard", owner: "class_class-1"
       });
       expect(content).toMatchObject({
-        type: "group", context_id: "class-1", unit: "msu",
+        type: "axes", context_id: "class-1", unit: "msu",
         kind: "drivingQuestionBoard", concurrent: true, uid: "class_class-1"
       });
       expect(content.title).toBeUndefined();       // title is looked up by kind, never stored

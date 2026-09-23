@@ -190,7 +190,7 @@ describe("document utils", () => {
 
       test("a regular group document uses the group label", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: GroupDocument, uid: "g", key: "g1", groupId: "3"
+          type: AxesDocument, kind: GroupDocument, uid: "g", key: "g1", groupId: "3"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Group 3 Document");
       });
@@ -202,7 +202,7 @@ describe("document utils", () => {
         });
         const metadata = DocumentMetadataModel.create({
           // type stays "group"; the title comes from the kind, and no `title` is stored on the doc.
-          type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
+          type: AxesDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
@@ -224,7 +224,7 @@ describe("document utils", () => {
 
       test("names the document by its kind and the unit it came from", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
+          type: AxesDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
           unit: "other", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board (other)");
@@ -236,10 +236,10 @@ describe("document utils", () => {
           title: "Our Big Questions", unit: "test"
         });
         const ownUnitDoc = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
+          type: AxesDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
         });
         const otherUnitDoc = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
+          type: AxesDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
         });
         expect(getDocumentDisplayTitle(unit, ownUnitDoc, appConfig)).toBe("Our Big Questions");
         expect(getDocumentDisplayTitle(unit, otherUnitDoc, appConfig)).toBe("Test Shared Kind (other)");
@@ -247,7 +247,7 @@ describe("document utils", () => {
 
       test("falls back to the kind alone when the document has no unit", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
+          type: AxesDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
@@ -267,7 +267,7 @@ describe("document utils", () => {
     const researcher = UserModel.create({ id: "r1", type: "researcher", name: "Researcher", classHash: "class-1" });
 
     const metadata = (props: Record<string, any>) =>
-      DocumentMetadataModel.create({ uid: "someone-else", type: GroupDocument, key: "k", ...props });
+      DocumentMetadataModel.create({ uid: "someone-else", type: AxesDocument, key: "k", ...props });
 
     /**
      * A group document as the app actually stamps it: kept in an offering, so it carries an
@@ -421,7 +421,7 @@ describe("document utils", () => {
       // A groupmate's document syncs into the metadata before its content finishes loading; reading
       // the metadata per field is what makes the Edit button appear without a reload.
       const stillLoading = createDocumentModel({
-        uid: "", type: GroupDocument, key: "k", concurrent: true
+        uid: "", type: AxesDocument, key: "k", concurrent: true
       });
       expect(canUserEditDocument({
         document: stillLoading,
@@ -452,7 +452,7 @@ describe("document utils", () => {
     it("allows any member of the class to edit a class-wide document via the document-only path" +
        " (no metadata)", () => {
       const classWideDocument = createDocumentModel({
-        uid: "someone-else", type: GroupDocument, key: "k", concurrent: true,
+        uid: "someone-else", type: AxesDocument, key: "k", concurrent: true,
         unit: "sas", contextId: "class-1"
       });
       expect(canUserEditDocument({ document: classWideDocument, user: student })).toBe(true);
@@ -460,7 +460,7 @@ describe("document utils", () => {
 
     it("allows a group member to edit their group's document via the document-only path (no metadata)", () => {
       const groupDocument = createDocumentModel({
-        uid: groupOwner("3"), type: GroupDocument, key: "k", concurrent: true,
+        uid: groupOwner("3"), type: AxesDocument, key: "k", concurrent: true,
         unit: "sas", investigation: "1", offeringId: kOffering
       });
       expect(canUserEditDocument({ document: groupDocument, user: groupedStudent })).toBe(true);

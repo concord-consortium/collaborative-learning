@@ -14,17 +14,13 @@ describe("AxesDocument", () => {
 });
 
 describe("isAxesType", () => {
-  it("accepts the new value", () => {
+  it("accepts the axes type", () => {
     expect(isAxesType(AxesDocument)).toBe(true);
   });
 
-  // TRANSITIONAL: documents written before CLUE-604's sweep still store "group". Dropping this
-  // case is part of the post-sweep cleanup, not of this change.
-  it("accepts the pre-sweep value", () => {
-    expect(isAxesType(GroupDocument)).toBe(true);
-  });
-
-  it("rejects every other document type", () => {
+  it("rejects the pre-rename value and every other document type", () => {
+    // Firestore stores only "axes"; the realtime database still says "group", but no RTDB type reaches here.
+    expect(isAxesType(GroupDocument)).toBe(false);
     expect(isAxesType(PersonalDocument)).toBe(false);
     expect(isAxesType(ProblemDocument)).toBe(false);
     expect(isAxesType("")).toBe(false);
@@ -32,12 +28,18 @@ describe("isAxesType", () => {
 });
 
 describe("isSortableType", () => {
-  it("includes both the new and the pre-sweep axes values", () => {
+  it("includes the axes type but not the pre-rename value", () => {
     expect(isSortableType(AxesDocument)).toBe(true);
-    expect(isSortableType(GroupDocument)).toBe(true);
+    expect(isSortableType(GroupDocument)).toBe(false);
   });
 
   it("still excludes publications", () => {
     expect(isSortableType("publication")).toBe(false);
+  });
+});
+
+describe("isDocumentType", () => {
+  it("rejects the pre-rename value", () => {
+    expect(isDocumentType(GroupDocument)).toBe(false);
   });
 });
