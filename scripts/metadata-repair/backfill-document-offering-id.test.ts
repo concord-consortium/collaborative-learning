@@ -37,6 +37,18 @@ describe("getSpaceFromFirestorePath", () => {
     expect(getSpaceFromFirestorePath("nosuchroot/whatever/documents/abc")).toBeUndefined();
     expect(getSpaceFromFirestorePath("authed//documents/abc")).toBeUndefined();
     expect(getSpaceFromFirestorePath("authed/learn_concord_org/other/abc")).toBeUndefined();
+    expect(getSpaceFromFirestorePath("qa//documents/abc")).toBeUndefined();
+  });
+
+  it("derives qa and dev spaces, which the other repairs refuse", () => {
+    expect(getSpaceFromFirestorePath("qa/someuid/documents/abc"))
+      .toEqual({ label: "qa/someuid", firebaseBasePath: "/qa/someuid/portals/qa/classes" });
+    expect(getSpaceFromFirestorePath("dev/someuid/documents/abc"))
+      .toEqual({ label: "dev/someuid", firebaseBasePath: "/dev/someuid/portals/localhost/classes" });
+  });
+
+  it("reports a test space as unknown, since its portal cannot be derived", () => {
+    expect(getSpaceFromFirestorePath("test/someuid/documents/abc")).toBeUndefined();
   });
 });
 

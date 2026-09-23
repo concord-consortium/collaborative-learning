@@ -31,7 +31,7 @@
 
 import type { Firestore } from "firebase-admin/firestore";
 import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "../lib/document-metadata-lookup";
-import { isRtdbAddressable } from "./lib/rtdb-document-index";
+import { isRtdbAddressable, resolveSpace } from "./lib/rtdb-document-index";
 import { kBatchSize } from "./lib/firestore-batch";
 
 /**
@@ -61,31 +61,24 @@ export interface IFirestoreSpace {
  * named `documents` anywhere in the database, so an unrecognized root is a real possibility and gets
  * counted rather than guessed at.
  *
- * Both stores build their root from the same `getRootId` (src/lib/root-id.ts), so a Firestore root of
- * `<appMode>/<rootId>` corresponds to an RTDB root of `<appMode>/<rootId>/portals/<portal>` — except
- * for `authed`, which omits the rootId because the portal already identifies it.
- *
- * The portal segment is the catch: it is not in the Firestore path, and for the unsecured appModes it
- * comes from the user's portal rather than from the root. `dev` and `qa` are fixed in practice
- * (`localhost` and `qa`, confirmed against production), but `test` takes an arbitrary portal string
- * and so cannot be derived — a `test` document reports as an unknown space, which is the honest answer.
+ * `authed` and `demo` resolve through `resolveSpace`, which the other repairs use. That function
+ * refuses `qa` and `dev`, because nothing there is worth repairing. This census counts them anyway,
+ * since it writes only offeringIds it actually finds. Their portal segment is not in the Firestore
+ * path, but it is fixed in practice (`qa` and `localhost`, confirmed against production). `test` takes
+ * an arbitrary portal string and cannot be derived, so a `test` document reports as an unknown space.
  */
 export function getSpaceFromFirestorePath(docPath: string): IFirestoreSpace | undefined {
-  const [root, name, collection] = docPath.split("/");
-  if (!name || collection !== "documents") return undefined;
-  // The portal segment is already underscore-escaped in the Firestore path, so it is used as-is.
-  if (root === "authed") {
-    return { label: `authed/${name}`, firebaseBasePath: `/authed/portals/${name}/classes` };
-  }
-  if (root === "demo") {
-    return { label: `demo/${name}`, firebaseBasePath: `/demo/${name}/portals/demo/classes` };
+  const [appMode, name, collection] = docPath.split("/");
+  const resolution = resolveSpace(`${appMode}/${name}/${collection}`);
+  if (resolution.status === "ok") {
+    return { label: resolution.label, firebaseBasePath: `${resolution.rtdbRoot}/classes` };
   }
   // Keyed by an ephemeral per-session user id rather than by portal, so each root holds only a
   // handful of documents and many have had their RTDB side purged by delete-qa-user-data.ts — expect
   // a high noMetadataNode share here, and read the per-space lines rather than the totals.
-  const partitionPortal = { qa: "qa", dev: "localhost" }[root];
-  if (partitionPortal) {
-    return { label: `${root}/${name}`, firebaseBasePath: `/${root}/${name}/portals/${partitionPortal}/classes` };
+  const partitionPortal = { qa: "qa", dev: "localhost" }[appMode];
+  if (resolution.status === "refused" && partitionPortal) {
+    return { label: resolution.label, firebaseBasePath: `/${appMode}/${name}/portals/${partitionPortal}/classes` };
   }
   return undefined;
 }
