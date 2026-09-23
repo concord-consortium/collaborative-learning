@@ -43,15 +43,13 @@ The system stores `lastHistoryEntry` (index and id) in the document metadata to 
 
 Two users in the same group ended up working on completely separate group documents rather than a shared one. The suspicion was that two group documents got created — possibly due to a race during document provisioning — and each user opened a different one.
 
-Diagnosed and fixed on this branch, in `resolveCanonicalDocument`/`resolveCanonicalDocumentUncached` ([src/lib/db.ts](../../src/lib/db.ts)). The legacy-backfill path claimed the canonical pointer in a transaction but then returned its own local candidate's key unconditionally, so a client whose claim lost (or whose transaction failed) kept the pre-pointer duplicate its query happened to surface while the other client used the pointer's document — two clients, two documents, one group.
+Each group's document is now found through its canonical pointer, and every path converges on the key that pointer names (`resolveCanonicalDocument`/`resolveCanonicalDocumentUncached` in [src/lib/db.ts](../../src/lib/db.ts)):
 
-Now every path converges on the slot's key:
+- When a group has no pointer, a client creates a document and claims the slot in a transaction. A client whose claim loses, or whose transaction fails and a re-read finds another document in the slot, deletes the document it just created and uses the slot's document instead.
+- Divergence is logged (`console.warn`) with the slot and the keys involved.
+- Concurrent resolves of the same slot within one client share a single in-flight resolution, so the several call sites that can fire around login do not race each other into create-then-delete churn.
 
-- Both the backfill and the create-then-claim paths return the transaction's winning key, and a failed transaction re-reads the pointer rather than assuming the local candidate won.
-- Divergence is logged (`console.warn`) with the slot, the pointer's key, and the local candidate's key. A losing *legacy* duplicate is left in place because it may hold student work; a losing just-minted document is deleted as an orphan.
-- Concurrent resolves of the same slot within one client share a single in-flight resolution, so the several call sites that can fire around login no longer race each other into create-then-delete churn.
-
-Pre-existing duplicates are not migrated: once the slot names one of them, everyone converges on that one, and the other keeps whatever work it holds.
+Duplicates created before canonical pointers existed were resolved by a one-time script (`scripts/metadata-repair/backfill-group-canonical-pointers.ts`, CLUE-694), which claimed each group's slot for one document and deleted the rest after backing them up.
 
 # Implementation TODOs
 
