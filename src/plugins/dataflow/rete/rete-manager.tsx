@@ -1,3 +1,4 @@
+import { clamp } from "lodash";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { structures } from "rete-structures";
@@ -75,8 +76,15 @@ export interface GroupOutputSocket { nodeId: string; key: string; externals: Ext
 // Fallback node dimensions (CSS px) used for group-bounds math when a member element isn't
 // measurable (hidden while collapsed, or not yet laid out just after expanding). Node width is
 // fixed ($node-width = 176); height varies, so this is an estimate refined on the next layout pass.
-const kDefaultNodeWidth = 176;
-const kDefaultNodeHeight = 120;
+export const kDefaultNodeWidth = 176;
+export const kDefaultNodeHeight = 120;
+// Placement needs an upper bound, not an estimate: kDefaultNodeHeight above is what group-bounds
+// measurement falls back to when it cannot read a node, and real blocks exceed it — a Waves block
+// puts its output socket alone at 141px (dataflow-node.scss). Laying out against the estimate can
+// drop a taller block below the clipped canvas even though its top-left is in view. This covers the
+// tallest block as first added; a block whose plot is later opened grows past any constant, which is
+// why this bounds placement only.
+export const kTallestNodeHeight = 200;
 
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
@@ -1248,22 +1256,59 @@ export class ReteManager implements INodeServices {
     this.area.translate(id, {x: newPosition[0], y: newPosition[1]});
   }
 
-  getNewNodePosition() {
-    const kNodesPerColumn = 5;
-    const kNodesPerRow = 4;
+  /**
+   * Where a block added from the palette goes (a drag-drop add brings its own position). Node
+   * positions are world coordinates and the area transform maps them to the screen as
+   * `screen = world * k + (x, y)`, so the grid is anchored to the visible rect rather than to the
+   * world origin: fit-on-load pans the canvas by itself, and a grid pinned to the origin put new
+   * blocks outside the view, making the palette button look dead. How many slots the grid has is
+   * measured from the container for the same reason — a fixed 4x5 ran off the edge of a small tile.
+   */
+  getNewNodePosition(): [number, number] {
     const kColumnWidth = 200;
     const kRowHeight = 90;
     const kLeftMargin = 40;
     const kTopMargin = 5;
-    const kColumnOffset = 15;
+    const kPageOffset = 15;
+
+    // Both branches are screen-space extents divided into world units, so a zoomed canvas narrows
+    // the grid either way. The fallback stands in for a container that has not been laid out yet.
+    const kFallbackViewWidth = kColumnWidth * 4;
+    const kFallbackViewHeight = kRowHeight * 5;
+
+    const { k, x, y } = this.area.area.transform;
+    const dims = this.getContainerDimensions();
+    const viewWidth = (dims?.width ?? kFallbackViewWidth) / k;
+    const viewHeight = (dims?.height ?? kFallbackViewHeight) / k;
+
+    // Margins are screen-space gaps, so they shrink in world units as the canvas zooms in.
+    const originX = -x / k + kLeftMargin / k;
+    const originY = -y / k + kTopMargin / k;
+
+    // Slots whose whole block fits, not just its top-left corner.
+    const fits = (extent: number, margin: number, node: number, step: number) =>
+      Math.max(1, Math.floor((extent - margin / k - node) / step) + 1);
+    const columns = fits(viewWidth, kLeftMargin, kDefaultNodeWidth, kColumnWidth);
+    const rows = fits(viewHeight, kTopMargin, kTallestNodeHeight, kRowHeight);
 
     const numNodes = this.editor.getNodes().length;
-    const { k } = this.area.area.transform;
-    const nodePos: [number, number] =
-      [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
-        * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
-      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
-    return nodePos;
+    const slot = numNodes % (columns * rows);
+    const pass = Math.floor(numNodes / (columns * rows));
+
+    // Once the grid is full, later passes cascade so blocks do not land exactly on top of each
+    // other. The offset wraps within the room a slot actually has left rather than growing without
+    // bound: unbounded, every pass past the edge clamps to the same spot and the blocks stack.
+    const place = (base: number, min: number, max: number) => {
+      const slack = max - base;
+      return clamp(base + (slack > 0 ? (pass * kPageOffset) % slack : 0), min, max);
+    };
+
+    return [
+      place(originX + Math.floor(slot / rows) * kColumnWidth,
+        -x / k, -x / k + viewWidth - kDefaultNodeWidth),
+      place(originY + (slot % rows) * kRowHeight,
+        -y / k, -y / k + viewHeight - kTallestNodeHeight)
+    ];
   }
 
   public countSerialDataNodes(){
