@@ -219,9 +219,11 @@ function makeRtdb(nodes: Record<string, any>, throwOn: string[] = []) {
 // queried the wrong type string would return an empty, confident census and pass every other test.
 //
 // `deleted` names document paths that were removed after the scan: a batch updating one fails with
-// NOT_FOUND and writes nothing, as a real batch does.
+// NOT_FOUND and writes nothing, as a real batch does. `failing` names paths whose write fails for any
+// other reason, checked after `deleted`.
 function makeDb(docsByType: Record<string, any[]>,
-                { failCommitAfter, deleted = [] }: { failCommitAfter?: number; deleted?: string[] } = {}) {
+                { failCommitAfter, deleted = [], failing = [] }:
+                  { failCommitAfter?: number; deleted?: string[]; failing?: string[] } = {}) {
   let commits = 0;
   const batches: { writes: any[]; committed: boolean; update: any; commit: () => Promise<void> }[] = [];
   const calls: { collectionGroup?: string; types: string[]; orderBy: string[] } =
@@ -265,6 +267,9 @@ function makeDb(docsByType: Record<string, any[]>,
           }
           if (writes.some((w) => deleted.includes(w.ref.path))) {
             return Promise.reject(Object.assign(new Error("NOT_FOUND"), { code: 5 }));
+          }
+          if (writes.some((w) => failing.includes(w.ref.path))) {
+            return Promise.reject(Object.assign(new Error("PERMISSION_DENIED"), { code: 7 }));
           }
           b.committed = true;
           return Promise.resolve();
@@ -442,6 +447,19 @@ describe("backfillDocumentOfferingId — writing", () => {
     expect(res.totals.resolved).toBe(3);
   });
 
+  it("stops the run when a per-document retry fails for a reason other than NOT_FOUND", async () => {
+    // d1 was deleted, which sends the batch to the per-document retry. d2's own write then fails for
+    // another reason, which is a real fault rather than the expected race, so it must not be counted
+    // as deleted and skipped.
+    const db = makeDb({ problem: resolvedDocs(3) },
+      { deleted: [`${kSpace}/documents/d1`], failing: [`${kSpace}/documents/d2`] });
+    const err: any = await run(db, makeRtdb(resolvedNodes(3)), { dryRun: false }).catch((e) => e);
+
+    expect(err.message).toBe("PERMISSION_DENIED");
+    expect(err.result.written).toBe(1);
+    expect(err.result.deletedDuringRun).toBe(1);
+  });
+
   it("reports the whole partial result when a commit fails, and carries it on the error", async () => {
     // The run's normal output never prints after a failure, so this is the only record of which
     // writes landed and what the census had found by then.
@@ -453,6 +471,8 @@ describe("backfillDocumentOfferingId — writing", () => {
     expect(err.message).toBe("commit exploded");
     // The first batch of 400 committed; the final batch of 1 did not.
     expect(err.result.written).toBe(400);
+    // Only NOT_FOUND is retried per document. Any other failure ends the run at the failed batch.
+    expect(db.batches.length).toBe(2);
     expect(err.result.bySpace[kSpace].resolved).toBe(401);
     const partial = logs.find((m) => m.startsWith("run failed; partial result:"));
     expect(partial).toContain(`"written": 400`);
