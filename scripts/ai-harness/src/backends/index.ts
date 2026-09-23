@@ -1,19 +1,21 @@
 /**
  * The three named render modes, and how `--mode` turns into a backend.
  *
- * They are named and separate on purpose. The three sources that already render CLUE documents
- * disagree about what a screenshot is — production clips at 1500px with `unit=mods`,
- * `scripts/shutterbug.ts` clips at 500px and adds `fullPage`, and `scripts/ai/document-screenshots.ts`
- * uses the standalone editor at a different URL entirely. Folding an improvement into the parity
- * baseline would quietly destroy the only thing it is for.
+ * They are named and separate on purpose. Production and `scripts/shutterbug.ts` post the same
+ * request envelope today — a 500px starting viewport, `fullPage: true`, and `unit=mods` — but
+ * `shutterbug-production-current` pins it as a frozen baseline regardless, so it cannot drift
+ * silently if either one changes again; `scripts/ai/document-screenshots.ts` uses the standalone
+ * editor at a different URL entirely. Folding an improvement into the parity baseline would
+ * quietly destroy the only thing it is for.
  */
 import { git } from "../files.js";
 import { RenderBackend } from "./types.js";
 import { kPuppeteerBackendVersion, puppeteerBackend } from "./puppeteer.js";
+import { kMaxFrameHeightPx } from "../../../../shared/render-page.js";
 import {
-  FetchLike, kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl,
-  kProductionUnit, kShutterbugBackendVersion, kStagingShutterbugUrl, shutterbugAccurateHeight,
-  shutterbugParameterized, shutterbugProductionCurrent
+  FetchLike, kDefaultCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl,
+  kProductionUnit, kProductionViewportHeightPx, kShutterbugBackendVersion, kStagingShutterbugUrl,
+  shutterbugAccurateHeight, shutterbugParameterized, shutterbugProductionCurrent
 } from "./shutterbug.js";
 import { kHarnessRenderUnitId } from "./render-unit.js";
 
@@ -54,7 +56,7 @@ export interface RenderModeDescriptor {
    * the only way to send a true height to a service that cannot measure anything itself.
    */
   needsMeasuredHeight?: boolean;
-  /** Options this mode cannot honour, by the CLI flag a caller would have used. */
+  /** Options this mode cannot honor, by the CLI flag a caller would have used. */
   unusableFlags: (keyof RenderModeOptions)[];
   build(options: RenderModeOptions): RenderBackend;
 }
@@ -77,7 +79,9 @@ const kFlagNames: Partial<Record<keyof RenderModeOptions, string>> = {
   unit: "--unit",
   shutterbugUrl: "--shutterbug-url",
   captureHeightPx: "--capture-height",
-  timeoutMs: "--timeout-ms"
+  timeoutMs: "--timeout-ms",
+  fullPage: "--full-page",
+  maxFrameHeightPx: "--max-frame-height"
 };
 
 /**
@@ -110,6 +114,10 @@ export interface RenderModeOptions {
   pollIntervalMs?: number;
   /** The whole budget for one document: load, readiness and capture together. */
   timeoutMs?: number;
+  /** `shutterbug-parameterized` only: post `fullPage: true` instead of clipping at `captureHeightPx`. */
+  fullPage?: boolean;
+  /** `shutterbug-parameterized` only: the ceiling the page's frame is capped at, with `fullPage`. */
+  maxFrameHeightPx?: number;
 }
 
 export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
@@ -123,7 +131,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     needsUnitServer: true,
     // This mode always captures the whole document, so accepting a capture height and dropping it
     // would silently answer a different question from the one that was asked.
-    unusableFlags: ["shutterbugUrl", "captureHeightPx"],
+    unusableFlags: ["shutterbugUrl", "captureHeightPx", "fullPage", "maxFrameHeightPx"],
     build: (options) => puppeteerBackend({
       modeId: "puppeteer-full-height",
       clueUrl: options.clueUrl ?? kDefaultClueUrl,
@@ -152,7 +160,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       "captured one image per top-level tile",
     defaultUnit: kHarnessRenderUnitId,
     needsUnitServer: true,
-    unusableFlags: ["shutterbugUrl", "captureHeightPx"],
+    unusableFlags: ["shutterbugUrl", "captureHeightPx", "fullPage", "maxFrameHeightPx"],
     build: (options) => puppeteerBackend({
       modeId: "puppeteer-per-tile",
       clueUrl: options.clueUrl ?? kDefaultClueUrl,
@@ -171,11 +179,13 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     backendVersion: kShutterbugBackendVersion,
     prerequisites: `network access to ${kProductionShutterbugUrl} and ${kProductionClueUrl}; no OpenAI key`,
     renderTargetSummary: `${kProductionClueUrl}, unit ${kProductionUnit}, via ` +
-      `${kProductionShutterbugUrl}, clipped at ${kProductionCaptureHeightPx}px (none configurable)`,
+      `${kProductionShutterbugUrl}, fullPage:true (viewport ${kProductionViewportHeightPx}px), ` +
+      `clipped only by the page's own frame ceiling, ${kMaxFrameHeightPx}px (none configurable)`,
     defaultUnit: null,
     needsUnitServer: false,
     // Frozen by definition: this mode exists to match production's request envelope.
-    unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx", "timeoutMs"],
+    unusableFlags: ["clueUrl", "unit", "shutterbugUrl", "captureHeightPx", "timeoutMs",
+      "fullPage", "maxFrameHeightPx"],
     build: (options) => shutterbugProductionCurrent({
       clueRevision: options.clueRevision ?? null,
       fetchImpl: options.fetchImpl
@@ -189,8 +199,9 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     prerequisites: `network access to the Shutterbug endpoint (${kStagingShutterbugUrl} unless ` +
       `--shutterbug-url says otherwise) and the CLUE URL; no OpenAI key`,
     renderTargetSummary: `${kProductionClueUrl} (--clue-url), unit ${kProductionUnit} (--unit), via ` +
-      `${kStagingShutterbugUrl} (--shutterbug-url), clipped at ${kProductionCaptureHeightPx}px ` +
-      "(--capture-height)",
+      `${kStagingShutterbugUrl} (--shutterbug-url), clipped at ${kDefaultCaptureHeightPx}px ` +
+      "(--capture-height); or, with --full-page, fullPage:true and clipped only by the page's own " +
+      `frame ceiling, ${kMaxFrameHeightPx}px by default (--max-frame-height)`,
     defaultUnit: null,
     needsUnitServer: false,
     unusableFlags: ["timeoutMs"],
@@ -200,7 +211,9 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
       shutterbugUrl: options.shutterbugUrl,
       captureHeightPx: options.captureHeightPx,
       clueRevision: options.clueRevision ?? null,
-      fetchImpl: options.fetchImpl
+      fetchImpl: options.fetchImpl,
+      fullPage: options.fullPage,
+      maxFrameHeightPx: options.maxFrameHeightPx
     })
   },
   "shutterbug-accurate-height": {
@@ -215,7 +228,7 @@ export const renderModes: Record<RenderModeId, RenderModeDescriptor> = {
     needsUnitServer: false,
     needsMeasuredHeight: true,
     // The height is measured, not chosen, so accepting one would answer a different question.
-    unusableFlags: ["captureHeightPx", "timeoutMs"],
+    unusableFlags: ["captureHeightPx", "timeoutMs", "fullPage", "maxFrameHeightPx"],
     build: (options) => shutterbugAccurateHeight({
       clueUrl: options.clueUrl,
       unit: options.unit,
@@ -263,7 +276,7 @@ export function localClueRevision(): string | null {
 }
 
 /**
- * Refuses options a mode cannot honour, without building anything.
+ * Refuses options a mode cannot honor, without building anything.
  *
  * Separate from `getRenderBackend` so `render` can validate before it starts a unit server: building
  * the backend first meant an invalid flag left the server listening and hung the CLI.

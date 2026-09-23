@@ -7,6 +7,7 @@
  *   npx tsx harness.ts render    --corpus <name> --mode <mode> [--clue-url <url>] [--unit <unit>]
  *                                [--shutterbug-url <url>] [--capture-height <px>] [--refresh]
  *                                [--concurrency <n>] [--timeout-ms <n>]
+ *                                [--full-page] [--max-frame-height <px>] (shutterbug-parameterized only)
  *   npx tsx harness.ts plan      --corpus <name> --experiment <file>
  *   npx tsx harness.ts run       --corpus <name> --experiment <file> --max-cost <usd>
  *                                [--output <file>] [--no-cache | --refresh-cache]
@@ -96,7 +97,7 @@ export interface ParsedArgs {
 
 const kBooleanFlags = new Set([
   "prune", "no-cache", "refresh-cache", "refresh", "shareable", "blind", "reuse-key",
-  "production-data-approved"
+  "production-data-approved", "full-page"
 ]);
 
 /** Plain `--name value` pairs; a handful of flags are boolean. Unknown flags are errors. */
@@ -140,7 +141,7 @@ const kKnownFlags = {
   import: ["from", "corpus", "source", "prune", "production-data-approved"],
   represent: ["corpus", "variants"],
   render: ["corpus", "mode", "clue-url", "unit", "shutterbug-url", "capture-height", "refresh",
-    "concurrency", "timeout-ms"],
+    "concurrency", "timeout-ms", "full-page", "max-frame-height"],
   plan: ["corpus", "experiment"],
   run: ["corpus", "experiment", "max-cost", "output", "no-cache", "refresh-cache"],
   report: ["results"],
@@ -378,6 +379,7 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     return value;
   };
   const captureHeight = positiveInteger("capture-height", "pixels");
+  const maxFrameHeight = positiveInteger("max-frame-height", "pixels");
   // Both default to what they always were. They exist because a cold dev server times out the first
   // documents of a run — four pages at once against a server still compiling chunks — and until now
   // re-running was the only lever.
@@ -397,6 +399,8 @@ async function commandRender(flags: Record<string, string | true>, deps: Harness
     shutterbugUrl: typeof flags["shutterbug-url"] === "string" ? flags["shutterbug-url"] : undefined,
     captureHeightPx: captureHeight,
     ...(timeoutMs === undefined ? {} : { timeoutMs }),
+    ...(flags["full-page"] === true ? { fullPage: true } : {}),
+    ...(maxFrameHeight === undefined ? {} : { maxFrameHeightPx: maxFrameHeight }),
     ...(deps.renderModeOptions ?? {})
   };
   // Validated *before* anything is started. When this ran after the unit server was listening, an

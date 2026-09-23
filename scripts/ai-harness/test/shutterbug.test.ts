@@ -1,11 +1,13 @@
 import http from "node:http";
 import { AddressInfo } from "node:net";
 import {
-  kProductionCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
-  shutterbugAccurateHeight, shutterbugParameterized, shutterbugProductionCurrent, shutterbugRequestBody
+  kDefaultCaptureHeightPx, kProductionClueUrl, kProductionShutterbugUrl, kProductionUnit,
+  kProductionViewportHeightPx, shutterbugAccurateHeight, shutterbugParameterized,
+  shutterbugProductionCurrent, shutterbugRequestBody
 } from "../src/backends/shutterbug.js";
 import { getRenderBackend } from "../src/backends/index.js";
-import { RenderLimitExceeded } from "../src/backends/types.js";
+import { RenderLimitExceeded, kDefaultRenderLimits } from "../src/backends/types.js";
+import { kMaxFrameHeightPx } from "../../../shared/render-page.js";
 import { makeTestPng } from "./helpers.js";
 
 // Named to avoid shadowing the DOM `document` global in files that are about browser rendering.
@@ -57,7 +59,7 @@ function fakeFetch(options: {
         ok: true,
         status: 200,
         statusText: "OK",
-        body: streamingBody(Buffer.from(JSON.stringify({ url: "https://images.example.test/shot.png" }))),
+        body: streamingBody(Buffer.from(JSON.stringify({ url: "https://images.test.s3.amazonaws.com/shot.png" }))),
         ...next
       } as Response;
     }
@@ -65,7 +67,7 @@ function fakeFetch(options: {
       ok: true,
       status: 200,
       statusText: "OK",
-      url: "https://images.example.test/shot.png",
+      url: "https://images.test.s3.amazonaws.com/shot.png",
       headers: new Headers({ "content-type": "image/png" }),
       body: streamingBody(png, 4),
       ...options.download
@@ -80,18 +82,19 @@ const postBody = (text: string): Partial<Response> =>
 describe("production parity", () => {
   it("pins the request this mode posts", () => {
     // What this mode sends, held still so it cannot drift while the other modes evolve: production's
-    // CLUE URL, unit=mods, unwrapped and read-only, height 1500 — and no fullPage.
+    // CLUE URL, unit=mods, unwrapped and read-only, a 500px viewport, and fullPage: true.
     //
     // It pins the harness's own page, not production's. Parity with production's page is
     // *documented* (see "differences from production's HTML" in the README) rather than enforced:
     // nothing here reads functions-v2/src/on-analysis-document-pending.ts, so if production changed
     // tomorrow this test would still pass.
     const body = shutterbugRequestBody(emptyDocument, {
-      clueUrl: kProductionClueUrl, unit: kProductionUnit, captureHeightPx: kProductionCaptureHeightPx
+      clueUrl: kProductionClueUrl, unit: kProductionUnit, captureHeightPx: kProductionViewportHeightPx,
+      fullPage: true
     });
-    expect(Object.keys(body).sort()).toEqual(["content", "height"]);
-    expect(body.height).toBe(1500);
-    expect(body).not.toHaveProperty("fullPage");
+    expect(Object.keys(body).sort()).toEqual(["content", "fullPage", "height"]);
+    expect(body.height).toBe(500);
+    expect(body.fullPage).toBe(true);
     expect(body.content).toContain(
       "https://collaborative-learning.concord.org/authoring-iframe/index.html?unit=mods");
     expect(body.content).toContain("&amp;unwrapped&amp;readOnly");
@@ -100,6 +103,7 @@ describe("production parity", () => {
     // updated, with neither saying which one was the pin.
     expect(body.content).toContain(`<script>const initialValue=${JSON.stringify(emptyDocument)}</script>`);
     expect(body.content).toContain("height='500px'");
+    expect(body.content).toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
     expect(body.content).toContain("window.__clueRender = { initialValuePosted: false }");
   });
 
@@ -110,7 +114,8 @@ describe("production parity", () => {
     expect(calls[0].url).toBe(kProductionShutterbugUrl);
     expect(JSON.parse(String(calls[0].init!.body))).toEqual(
       shutterbugRequestBody(emptyDocument, {
-        clueUrl: kProductionClueUrl, unit: kProductionUnit, captureHeightPx: kProductionCaptureHeightPx
+        clueUrl: kProductionClueUrl, unit: kProductionUnit, captureHeightPx: kProductionViewportHeightPx,
+        fullPage: true
       }));
   });
 
@@ -127,9 +132,9 @@ describe("production parity", () => {
       });
   });
 
-  it("records a fixed-height capture, never a full-document one", () => {
-    // Shutterbug clips at the height it is given. Recording that as "full-document" would be a lie
-    // no freshness check could ever catch.
+  it("records a full-page capture, capped at the ceiling — never a fixed-height or full-document one", () => {
+    // See the captureMode comment in shutterbugParameterized: recording anything else here would
+    // misdescribe what was actually captured.
     const backend = shutterbugProductionCurrent({ fetchImpl: fakeFetch(), sleep: noSleep });
     expect(backend.renderTarget).toEqual({
       clueUrl: kProductionClueUrl,
@@ -137,8 +142,8 @@ describe("production parity", () => {
       clueRevision: null,
       shutterbugUrl: kProductionShutterbugUrl,
       viewportWidthPx: 1000,
-      captureMode: "fixed-height",
-      captureHeightPx: 1500
+      captureMode: "full-page",
+      captureHeightPx: kMaxFrameHeightPx
     });
   });
 });
@@ -162,6 +167,35 @@ describe("the parameterized mode", () => {
     expect(backend.renderTarget.captureHeightPx).toBe(4000);
   });
 
+  it("defaults the viewport to production's 500px with --full-page, not the other modes' 1500px",
+    async () => {
+      const calls: Call[] = [];
+      const backend = shutterbugParameterized({
+        fullPage: true, fetchImpl: fakeFetch({ calls }), sleep: noSleep
+      });
+      await backend.render({ docId: "doc", content: emptyDocument });
+      const body = JSON.parse(String(calls[0].init!.body));
+      expect(body.height).toBe(kProductionViewportHeightPx);
+    });
+
+  it("still defaults to 1500px without --full-page, where the viewport is the whole clip", async () => {
+    const calls: Call[] = [];
+    const backend = shutterbugParameterized({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
+    await backend.render({ docId: "doc", content: emptyDocument });
+    const body = JSON.parse(String(calls[0].init!.body));
+    expect(body.height).toBe(kDefaultCaptureHeightPx);
+  });
+
+  it("honors an explicit --capture-height with --full-page instead of the 500px default", async () => {
+    const calls: Call[] = [];
+    const backend = shutterbugParameterized({
+      fullPage: true, captureHeightPx: 800, fetchImpl: fakeFetch({ calls }), sleep: noSleep
+    });
+    await backend.render({ docId: "doc", content: emptyDocument });
+    const body = JSON.parse(String(calls[0].init!.body));
+    expect(body.height).toBe(800);
+  });
+
   it("refuses a plaintext endpoint off loopback, which would post the document in the clear", () => {
     expect(() => shutterbugParameterized({ shutterbugUrl: "shutterbug-staging" }))
       .toThrow(/must be an https URL/);
@@ -182,7 +216,7 @@ describe("the network contract", () => {
   it("returns the hosted URL alongside the downloaded bytes", async () => {
     const outcome = await backend({}).render({ docId: "doc", content: emptyDocument });
     expect(outcome.images).toHaveLength(1);
-    expect(outcome.images[0].url).toBe("https://images.example.test/shot.png");
+    expect(outcome.images[0].url).toBe("https://images.test.s3.amazonaws.com/shot.png");
     expect(outcome.images[0].bytes).toEqual(png);
     expect(outcome.images[0].purpose).toBe("full-document");
     // A hosted service renders somewhere else, so it can report nothing about the render itself.
@@ -313,12 +347,33 @@ describe("the network contract", () => {
       .rejects.toThrow(/loopback or private host/);
   });
 
+  it("refuses a public https image URL on a host other than Shutterbug's own", async () => {
+    // Public and https, so it passes isPublicHttpsUrl; refused only because the host is not
+    // Shutterbug's own — the stopgap this test is for.
+    await expect(backend({
+      postResponses: [postBody(JSON.stringify({ url: "https://images.example.test/shot.png" }))]
+    }).render({ docId: "doc", content: emptyDocument }))
+      .rejects.toThrow(/unexpected host/);
+  });
+
+  it("refuses a download that redirects to a public https host that isn't Shutterbug's own", async () => {
+    // Downloads follow redirects, so the URL that actually answers can differ from the one
+    // Shutterbug named. This one is still public and https, so redirectDowngradeReason passes it —
+    // only re-applying the host check to the landed-on URL catches it.
+    await expect(backend({ download: { url: "https://images.example.test/shot.png" } as Partial<Response> })
+      .render({ docId: "doc", content: emptyDocument }))
+      .rejects.toThrow(/unexpected host/);
+  });
+
   it("refuses a capture whose dimensions exceed the limits, even when the bytes are small", async () => {
     // A tall, flat screenshot compresses to almost nothing, so the encoded-byte limit never fires.
     // Only the decoded dimensions catch it — and a clipped or unreasonable capture must fail rather
     // than be committed.
+    //
+    // Not `backend()` (production-current): that mode sets `fullPage: true`, which tightens this
+    // check to the frame ceiling rather than the generic default this test means to exercise.
     const tall = makeTestPng(1000, 30_000);
-    const backendWithLimits = shutterbugProductionCurrent({
+    const backendWithLimits = shutterbugParameterized({
       fetchImpl: fakeFetch({ download: { body: streamingBody(tall, 3) } as any }),
       sleep: noSleep
     });
@@ -336,6 +391,44 @@ describe("the network contract", () => {
     expect(() => shutterbugParameterized({ captureHeightPx: 500_000 }))
       .toThrow(/exceeds the configured limits/);
     expect(() => shutterbugParameterized({ captureHeightPx: 500_000 })).toThrow(RenderLimitExceeded);
+  });
+
+  it("refuses a full-page viewport taller than its own ceiling before posting anything", async () => {
+    // See the construction check in shutterbugParameterized for why this must be caught here,
+    // before the document posts.
+    const build = () => shutterbugParameterized({ fullPage: true, captureHeightPx: 5000, maxFrameHeightPx: 4000 });
+    expect(build).toThrow(/--capture-height 5000 exceeds --max-frame-height 4000/);
+    expect(build).toThrow(RenderLimitExceeded);
+  });
+
+  it("refuses --max-frame-height without --full-page, rather than silently ignoring it", async () => {
+    expect(() => shutterbugParameterized({ maxFrameHeightPx: 4000 }))
+      .toThrow(/--max-frame-height requires --full-page/);
+  });
+
+  it("accepts a full-page capture that lands within the ceiling's overflow tolerance", async () => {
+    // A correctly clamped capture still comes back a little taller than the ceiling — the outer
+    // page's own chrome, not a failed clamp. This is the case the ceiling exists to handle: a
+    // document taller than it must succeed with a clipped capture, not fail every time.
+    const atTolerance = makeTestPng(1000, 4016); // ceiling (4000) + the 16px tolerance
+    const fullPageBackend = shutterbugParameterized({
+      fullPage: true, maxFrameHeightPx: 4000,
+      fetchImpl: fakeFetch({ download: { body: streamingBody(atTolerance, 3) } as any }),
+      sleep: noSleep
+    });
+    const outcome = await fullPageBackend.render({ docId: "doc", content: emptyDocument });
+    expect(outcome.images[0].bytes).toEqual(atTolerance);
+  });
+
+  it("still refuses a full-page capture well beyond the ceiling's overflow tolerance", async () => {
+    const wayOver = makeTestPng(1000, 4100);
+    const fullPageBackend = shutterbugParameterized({
+      fullPage: true, maxFrameHeightPx: 4000,
+      fetchImpl: fakeFetch({ download: { body: streamingBody(wayOver, 3) } as any }),
+      sleep: noSleep
+    });
+    await expect(fullPageBackend.render({ docId: "doc", content: emptyDocument }))
+      .rejects.toThrow(/4100px tall, over the 4016px limit/);
   });
 
   it("refuses a failed download", async () => {
@@ -407,6 +500,19 @@ describe("the accurate-height mode", () => {
     expect(heightIn(calls)).toBe(1180);
   });
 
+  it("does not cap the frame at the full-page ceiling for a document taller than it", async () => {
+    // This mode is not full-page: it relies on the frame growing to fill its own (measured)
+    // viewport, whatever that is, not the shared 4000px ceiling that only bounds full-page
+    // captures. Capped there anyway, a 6000px document would leave the bottom 2000px of the
+    // screenshot blank — the frame stopped growing at 4000 while the viewport stayed 6000.
+    const calls: Call[] = [];
+    const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
+    await backend.render({ docId: "doc", content: emptyDocument, captureHeightPx: 6000 });
+    const body = JSON.parse(String(calls[0].init!.body));
+    expect(body.content).not.toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
+    expect(body.content).toContain(`Math.min(height, ${kDefaultRenderLimits.maxHeightPx})`);
+  });
+
   it("records the height it actually used on that render, not the mode's nominal one", async () => {
     const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch(), sleep: noSleep });
     const outcome = await backend.render({ docId: "doc", content: emptyDocument, captureHeightPx: 640 });
@@ -414,7 +520,7 @@ describe("the accurate-height mode", () => {
     // picture was never taken at.
     expect(outcome.renderTarget?.captureHeightPx).toBe(640);
     expect(outcome.renderTarget?.captureMode).toBe("fixed-height");
-    expect(backend.renderTarget.captureHeightPx).toBe(kProductionCaptureHeightPx);
+    expect(backend.renderTarget.captureHeightPx).toBe(kDefaultCaptureHeightPx);
   });
 
   it("falls back to production's height for a document it was given none for", async () => {
@@ -422,7 +528,7 @@ describe("the accurate-height mode", () => {
     const calls: Call[] = [];
     const backend = shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls }), sleep: noSleep });
     const outcome = await backend.render({ docId: "doc", content: emptyDocument });
-    expect(heightIn(calls)).toBe(kProductionCaptureHeightPx);
+    expect(heightIn(calls)).toBe(kDefaultCaptureHeightPx);
     // And it says nothing special about its target, because nothing was special about it.
     expect(outcome.renderTarget).toBeUndefined();
   });
@@ -448,7 +554,7 @@ describe("the accurate-height mode", () => {
     const accurate: Call[] = [];
     const parameterized: Call[] = [];
     await shutterbugAccurateHeight({ fetchImpl: fakeFetch({ calls: accurate }), sleep: noSleep })
-      .render({ docId: "doc", content: emptyDocument, captureHeightPx: kProductionCaptureHeightPx });
+      .render({ docId: "doc", content: emptyDocument, captureHeightPx: kDefaultCaptureHeightPx });
     await shutterbugParameterized({ fetchImpl: fakeFetch({ calls: parameterized }), sleep: noSleep })
       .render({ docId: "doc", content: emptyDocument });
     expect(accurate[0].url).toBe(parameterized[0].url);

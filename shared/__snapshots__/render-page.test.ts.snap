@@ -2,6 +2,7 @@
 
 exports[`the generated render page matches its snapshot 1`] = `
 "
+    <style>body{margin:0}iframe{display:block}</style>
     <script>const initialValue={"rowOrder":["row-1"],"rowMap":{"row-1":{"id":"row-1","isSectionHeader":false,"tiles":[{"tileId":"text-tile"}]}},"tileMap":{"text-tile":{"id":"text-tile","content":{"type":"Text","format":"markdown","text":"\\u003c/script\\u003e\\u003cimg src=x onerror=alert(1)\\u003e \\"quoted\\" 'single' A \\u0026 B \\u003cb\\u003ebold\\u003c/b\\u003e line\\u2028separator paragraph\\u2029separator backslash \\\\u003c and \\\\ alone"}}}}</script>
     <!-- height will be updated when iframe sends updateHeight message -->
     <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
@@ -23,7 +24,8 @@ exports[`the generated render page matches its snapshot 1`] = `
           if (event.data && event.data.type === "updateHeight") {
             const height = Number(event.data.height);
             if (!Number.isFinite(height) || height <= 0) return;
-            document.getElementById("clue-frame").height = height + "px";
+            const clamped = Math.min(height, 4000);
+            document.getElementById("clue-frame").height = clamped + "px";
           }
         })
         clueFrame.contentWindow.postMessage(

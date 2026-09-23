@@ -8,12 +8,16 @@ import * as admin from "firebase-admin";
 import {FieldValue} from "firebase-admin/firestore";
 import {initialize, projectConfig} from "./initialize";
 import {
-  analysisSettingsPath, clueIframeURL, fallbackClueUnit, generateHtml, onAnalysisDocumentPending,
-  renderUnitFor,
+  analysisSettingsPath, clueIframeURL, fallbackClueUnit, generateHtml, maxImageBytes,
+  onAnalysisDocumentPending, readAtMost, renderUnitFor,
 } from "../src/on-analysis-document-pending";
 import * as classifier from "../../shared/ai-analysis-classify";
 import * as summarizer from "../../shared/ai-summarizer/ai-summarizer";
 import * as claimRequestIdsModule from "../src/claim-request-ids";
+import {kMaxFrameHeightPx} from "../../shared/render-page";
+import {pngHeaderBytes} from "../../shared/png-header-test-helpers";
+// fetch/Response are ambient globals here, but ReadableStream needs an explicit import.
+import {ReadableStream} from "node:stream/web";
 
 jest.mock("firebase-functions/logger");
 
@@ -103,6 +107,32 @@ describe("renderUnitFor", () => {
     expect(renderUnitFor("NULL")).toBe(fallbackClueUnit);
     expect(renderUnitFor("some/path")).toBe(fallbackClueUnit);
     expect(renderUnitFor(42)).toBe(fallbackClueUnit);
+  });
+});
+
+describe("readAtMost", () => {
+  // A real stream, not a `body: null` fake: only a real stream can show the reader was cancelled.
+  test("reads exactly the bound and cancels the reader, leaving the rest unread", async () => {
+    let cancelled = false;
+    // The 24-byte bound falls mid-third-chunk, so the fourth is left enqueued and unread.
+    const chunks = [0, 10, 20, 30].map((start) =>
+      new Uint8Array(Array.from({length: 10}, (_, i) => start + i)));
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of chunks) controller.enqueue(chunk);
+        controller.close();
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const response = new Response(stream);
+
+    const bytes = await readAtMost(response, 24);
+
+    expect(Array.from(bytes)).toEqual(Array.from({length: 24}, (_, i) => i));
+    // See readAtMost's doc comment for why this cancels via the reader, not the stream.
+    expect(cancelled).toBe(true);
   });
 });
 
@@ -196,23 +226,119 @@ const emptyDoc = docOf({
 });
 
 const kDocumentRoot = "demo/AI/portals/demo/classes/democlass1/users/1";
-const kImageUrl = "https://shutterbug.example/testdoc.png";
+const kImageUrl = "https://shutterbug-test.s3.amazonaws.com/testdoc.png";
 
 // A Shutterbug reply that a well-behaved service would send.
 function shutterbugOk(url = kImageUrl) {
   return {ok: true, status: 200, statusText: "OK", json: async () => ({url})} as Response;
 }
 
+// A well-behaved S3 image-check reply: 206, honoring `Range`, `Content-Range` naming the size.
+// `body: null` uses readAtMost's `arrayBuffer()` fallback. Every field is overridable.
+function imageCheckOk(options: {
+  widthPx?: number; heightPx?: number; status?: number; statusText?: string;
+  headers?: Record<string, string>; bytes?: Uint8Array;
+} = {}) {
+  const {
+    widthPx = 1000, heightPx = 1200, status = 206, statusText = "Partial Content",
+    headers = {"content-range": "bytes 0-23/48211"},
+  } = options;
+  const bytes = options.bytes ?? pngHeaderBytes(widthPx, heightPx);
+  return {
+    ok: true,
+    status,
+    statusText,
+    headers: new Headers(headers),
+    body: null,
+    arrayBuffer: async () => bytes.buffer,
+  } as unknown as Response;
+}
+
+// A real, chunked body of `totalBytes` zero bytes, prefixed with a genuine PNG header when asked.
+// `highWaterMark: 0` disables prefetch, so `bytesPulled` counts only what a reader actually
+// consumed, not a chunk produced ahead of it — otherwise a widened read bound could hide there.
+function bodyStreamOf(totalBytes: number, prefix: Uint8Array = new Uint8Array(0)) {
+  let sent = 0;
+  let cancelled = false;
+  let bytesPulled = 0;
+  const chunkSize = 1024 * 1024;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (sent < prefix.length) {
+        controller.enqueue(prefix);
+        sent += prefix.length;
+        bytesPulled += prefix.length;
+        return;
+      }
+      const remaining = totalBytes - sent;
+      if (remaining <= 0) {
+        controller.close();
+        return;
+      }
+      const take = Math.min(chunkSize, remaining);
+      controller.enqueue(new Uint8Array(take));
+      sent += take;
+      bytesPulled += take;
+    },
+    cancel() {
+      cancelled = true;
+    },
+  }, {highWaterMark: 0});
+  return {stream, wasCancelled: () => cancelled, bytesPulled: () => bytesPulled};
+}
+
+// A 200 that ignores `Range` and streams the whole picture back, the way a host that does not
+// honor it would.
+function imageCheckStreaming(options: {
+  widthPx?: number; heightPx?: number; extraBytes?: number;
+  headers?: Record<string, string>;
+} = {}) {
+  const {widthPx = 1000, heightPx = 1200, extraBytes = 10 * 1024 * 1024, headers} = options;
+  const header = pngHeaderBytes(widthPx, heightPx);
+  const {stream, wasCancelled, bytesPulled} = bodyStreamOf(extraBytes, header);
+  const response = {
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    headers: new Headers(headers ?? {"content-length": String(header.length + extraBytes)}),
+    body: stream,
+  } as unknown as Response;
+  return {response, wasCancelled, bytesPulled};
+}
+
+// A real streamed body of exactly `totalBytes` bytes, with no size header at all — what
+// bodyExceedsBytes's fallback GET has to measure by reading.
+function fallbackBodyOf(totalBytes: number) {
+  return {
+    ok: true, status: 200, statusText: "OK", headers: new Headers({}),
+    body: bodyStreamOf(totalBytes).stream,
+  } as unknown as Response;
+}
+
 // Stands in for the Shutterbug service. Pass a Response-like object to answer with, or an Error
-// to fail with. `postedPage` reads back the render page that was posted.
-function stubShutterbug(answer: Response | Error) {
+// to fail with. `postedPage` reads back the render page that was posted. `imageAnswer` answers
+// the image-check request that follows a successful post, defaulting to a 1000x1200 PNG.
+// `fallbackAnswer` answers the fallback GET that follows an image check with no usable size
+// header, defaulting to `imageAnswer` for call sites that don't exercise the fallback.
+function stubShutterbug(
+  answer: Response | Error,
+  imageAnswer: Response | Error = imageCheckOk(),
+  fallbackAnswer: Response | Error = imageAnswer,
+) {
   const spy = jest.spyOn(global, "fetch");
-  if (answer instanceof Error) spy.mockRejectedValue(answer);
-  else spy.mockResolvedValue(answer);
+  const queueOnce = (value: Response | Error) =>
+    value instanceof Error ? spy.mockRejectedValueOnce(value) : spy.mockResolvedValueOnce(value);
+  queueOnce(answer);
+  queueOnce(imageAnswer);
+  // Covers the fallback's bounded GET too, if the image check needs one.
+  if (fallbackAnswer instanceof Error) spy.mockRejectedValue(fallbackAnswer);
+  else spy.mockResolvedValue(fallbackAnswer);
   return {
     spy,
     postedPage: () => JSON.parse(spy.mock.calls[0][1]?.body as string).content as string,
     postedRequest: () => JSON.parse(spy.mock.calls[0][1]?.body as string),
+    imageCheckCall: () => spy.mock.calls[1],
+    fallbackCall: () => spy.mock.calls[2],
   };
 }
 
@@ -356,7 +482,10 @@ describe("functions", () => {
 
         // The page posted is the released build, rendered with the document's own unit.
         expect(shutterbug.postedPage()).toContain(`${clueIframeURL}?unit=vibe&amp;`);
-        expect(shutterbug.postedRequest()).toEqual({content: expect.any(String), height: 1500});
+        expect(shutterbug.postedRequest())
+          .toEqual({content: expect.any(String), height: 500, fullPage: true});
+        // The page itself is what bounds a fullPage capture; the viewport above does not.
+        expect(shutterbug.postedPage()).toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
       });
 
       test("a populated document's requestId rides through to the imaged record", async () => {
@@ -719,7 +848,8 @@ describe("functions", () => {
           summaryOmittedReason: "no-student-work-in-summary",
           sendImage: true,
         });
-        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
+        // post + the image check that follows every successful one
+        expect(shutterbug.spy).toHaveBeenCalledTimes(2);
       });
 
       test("a document with no metadata document renders with the fallback unit", async () => {
@@ -856,7 +986,8 @@ describe("functions", () => {
             needsImage: false, promptNeedsImage: true,
           },
         });
-        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
+        // post + the image check that follows every successful one
+        expect(shutterbug.spy).toHaveBeenCalledTimes(2);
         expectReasonsAreExclusive(record);
       });
 
@@ -915,7 +1046,15 @@ describe("functions", () => {
           "no image URL"],
         ["a plaintext url", {ok: true, status: 200, json: async () => ({url: "http://insecure.example/x.png"})} as unknown as Response,
           "non-https"],
+        ["a private-host url", {ok: true, status: 200, json: async () => ({url: "https://169.254.169.254/x.png"})} as unknown as Response,
+          "private or loopback host"],
+        ["a public https url on an unexpected host",
+          {ok: true, status: 200, json: async () => ({url: "https://images.example.test/x.png"})} as unknown as Response,
+          "unexpected host"],
         ["a request that times out", Object.assign(new Error("aborted"), {name: "TimeoutError"}), "did not answer within"],
+        ["a redirect from Shutterbug's own POST",
+          {ok: false, status: 307, statusText: "Temporary Redirect",
+            headers: new Headers({location: "https://evil.example/x"})} as unknown as Response, "307"],
       ];
 
       test.each(shutterbugFailures)(
@@ -953,13 +1092,16 @@ describe("functions", () => {
         });
       });
 
-      test("the request carries an abort signal, so a hung service cannot hang the function", async () => {
+      test("the request carries an abort signal and refuses to follow a redirect", async () => {
         await givenDocument("mixed3", mixedDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
         await runPending("mixed3");
 
         expect(shutterbug.spy.mock.calls[0][1]?.signal).toBeDefined();
+        // A followed redirect would resend the student's document to wherever it pointed, before
+        // this code ever saw a response to check.
+        expect(shutterbug.spy.mock.calls[0][1]?.redirect).toBe("manual");
       });
     });
 
@@ -999,7 +1141,8 @@ describe("functions", () => {
 
         const record = await imagedRecord("mixed7");
         expect(record).toMatchObject({sendSummary: true, sendImage: true});
-        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
+        // post + the image check that follows every successful one
+        expect(shutterbug.spy).toHaveBeenCalledTimes(2);
         expect(await countIn("failedImaging")).toEqual(0);
       });
 
@@ -1024,7 +1167,8 @@ describe("functions", () => {
         await runPending("mixed5");
 
         expect(await imagedRecord("mixed5")).toMatchObject({sendImage: true});
-        expect(shutterbug.spy).toHaveBeenCalledTimes(1);
+        // post + the image check that follows every successful one
+        expect(shutterbug.spy).toHaveBeenCalledTimes(2);
       });
 
       test("an empty drawing is skipped without ever reading the screenshot switch", async () => {
@@ -1041,6 +1185,300 @@ describe("functions", () => {
           imageOmittedReason: "empty-document",
         });
       });
+    });
+
+    describe("the image check", () => {
+      // Every case posts successfully to Shutterbug first, then asks what happens to the picture
+      // once its dimensions and size come back.
+      const documentPath = (docId: string) => `${kDocumentRoot}/documents/${docId}`;
+
+      test("happy path: the picture is sent, unclipped, with no warning", async () => {
+        await givenDocument("imgchk1", mixedDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("imgchk1");
+
+        const record = await imagedRecord("imgchk1");
+        expect(record).toMatchObject({sendImage: true, docImageUrl: kImageUrl});
+        expect(record?.imageClipped).toBeUndefined();
+        expect(record?.imageOmittedReason).toBeUndefined();
+        expect(record?.imageError).toBeUndefined();
+        expect(logger.warn).not.toHaveBeenCalled();
+        expectReasonsAreExclusive(record);
+      });
+
+      test("a capture just below the ceiling is sent unclipped", async () => {
+        await givenDocument("imgchk10a", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({heightPx: kMaxFrameHeightPx - 1}));
+
+        await runPending("imgchk10a");
+
+        const record = await imagedRecord("imgchk10a");
+        expect(record).toMatchObject({sendImage: true});
+        expect(record?.imageClipped).toBeUndefined();
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      test("a capture at the ceiling is sent, and the clip is recorded and logged once", async () => {
+        await givenDocument("imgchk2", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({heightPx: kMaxFrameHeightPx}));
+
+        await runPending("imgchk2");
+
+        const record = await imagedRecord("imgchk2");
+        expect(record).toMatchObject({
+          sendImage: true,
+          imageClipped: {capturedHeightPx: kMaxFrameHeightPx, ceilingPx: kMaxFrameHeightPx},
+        });
+        expect(record?.imageOmittedReason).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          `Screenshot of ${documentPath("imgchk2")} was clipped at ${kMaxFrameHeightPx}px ` +
+          `(captured ${kMaxFrameHeightPx}px)`);
+      });
+
+      // A real capture lands a little past the ceiling (the outer page's own chrome) — the case
+      // ">=" exists for.
+      test("a capture past the ceiling (the outer page's own chrome) is still a clip", async () => {
+        await givenDocument("imgchk10b", mixedDoc);
+        const capturedHeightPx = kMaxFrameHeightPx + 16;
+        stubShutterbug(shutterbugOk(), imageCheckOk({heightPx: capturedHeightPx}));
+
+        await runPending("imgchk10b");
+
+        const record = await imagedRecord("imgchk10b");
+        expect(record).toMatchObject({
+          sendImage: true,
+          imageClipped: {capturedHeightPx, ceilingPx: kMaxFrameHeightPx},
+        });
+        expect(logger.warn).toHaveBeenCalledWith(
+          `Screenshot of ${documentPath("imgchk10b")} was clipped at ${kMaxFrameHeightPx}px ` +
+          `(captured ${capturedHeightPx}px)`);
+      });
+
+      test("over the byte limit via Content-Range: the picture is omitted, not sent", async () => {
+        await givenDocument("imgchk3", mixedDoc);
+        const overLimit = 25 * 1024 * 1024;
+        stubShutterbug(shutterbugOk(), imageCheckOk({headers: {"content-range": `bytes 0-23/${overLimit}`}}));
+
+        await runPending("imgchk3");
+
+        const record = await imagedRecord("imgchk3");
+        expect(record).toMatchObject({
+          sendImage: false, imageOmittedReason: "image-too-large", docImageUrl: kImageUrl,
+          // The summary is untouched by an image omission.
+          sendSummary: true,
+        });
+        expect(record?.docSummary).toBeTruthy();
+        expect(record?.imageClipped).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(
+          `Screenshot of ${documentPath("imgchk3")} is ${overLimit} bytes, over the`));
+        expectReasonsAreExclusive(record);
+      });
+
+      test("a 200 with Content-Length over the limit is omitted the same way", async () => {
+        await givenDocument("imgchk4", mixedDoc);
+        const overLimit = 25 * 1024 * 1024;
+        stubShutterbug(shutterbugOk(), imageCheckOk({
+          status: 200, statusText: "OK", headers: {"content-length": String(overLimit)},
+        }));
+
+        await runPending("imgchk4");
+
+        expect(await imagedRecord("imgchk4")).toMatchObject({
+          sendImage: false, imageOmittedReason: "image-too-large", docImageUrl: kImageUrl,
+        });
+      });
+
+      test("no size header at all, and a body under the limit: the picture is sent", async () => {
+        await givenDocument("imgchk5", mixedDoc);
+        // No size header; falls back to a bounded GET, which finds a small body and proceeds.
+        const shutterbug = stubShutterbug(shutterbugOk(), imageCheckOk({headers: {}}));
+
+        await runPending("imgchk5");
+
+        expect(await imagedRecord("imgchk5")).toMatchObject({sendImage: true});
+        // The fallback GET, same as the range request: a redirect must not be followed either.
+        expect(shutterbug.spy.mock.calls[2]?.[1]?.redirect).toBe("manual");
+      });
+
+      test("a Content-Length present but empty is no size header, not a zero-byte one", async () => {
+        // Number("") is 0, not NaN — an unhandled empty header would read as "the file is 0
+        // bytes, definitely under the limit" and skip the fallback GET that actually measures it.
+        await givenDocument("imgchk10h", mixedDoc);
+        const shutterbug = stubShutterbug(shutterbugOk(),
+          imageCheckOk({status: 200, statusText: "OK", headers: {"content-length": ""}}));
+
+        await runPending("imgchk10h");
+
+        expect(await imagedRecord("imgchk10h")).toMatchObject({sendImage: true});
+        // Reaching the fallback GET at all is the proof: skipping straight to "0 bytes" would
+        // never call it, and this assertion would see an undefined third call instead.
+        expect(shutterbug.spy).toHaveBeenCalledTimes(3);
+        expect(shutterbug.spy.mock.calls[2]?.[1]?.redirect).toBe("manual");
+      });
+
+      // Exercises a real stream, unlike `imageCheckOk`'s `body: null` stand-in.
+      test("a 200 that ignores Range still reads only the header, from a real stream", async () => {
+        await givenDocument("imgchk10c", mixedDoc);
+        const {response, wasCancelled, bytesPulled} = imageCheckStreaming({widthPx: 1000, heightPx: 1200});
+        stubShutterbug(shutterbugOk(), response);
+
+        await runPending("imgchk10c");
+
+        expect(await imagedRecord("imgchk10c")).toMatchObject({sendImage: true});
+        expect(wasCancelled()).toBe(true);
+        // Not just cancelled eventually: exactly the 24-byte header, none of the 10 MiB behind it.
+        expect(bytesPulled()).toBe(24);
+      });
+
+      // Against the real `maxImageBytes` constant, not a duplicated number.
+      test("the fallback measures a body exactly at the byte limit as sendable", async () => {
+        await givenDocument("imgchk10d", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({headers: {}}), fallbackBodyOf(maxImageBytes));
+
+        await runPending("imgchk10d");
+
+        const record = await imagedRecord("imgchk10d");
+        expect(record).toMatchObject({sendImage: true, docImageUrl: kImageUrl});
+        expectReasonsAreExclusive(record);
+      });
+
+      test("the fallback measures a body one byte over the limit as too large", async () => {
+        await givenDocument("imgchk10e", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({headers: {}}), fallbackBodyOf(maxImageBytes + 1));
+
+        await runPending("imgchk10e");
+
+        const record = await imagedRecord("imgchk10e");
+        expect(record).toMatchObject({
+          sendImage: false, imageOmittedReason: "image-too-large", docImageUrl: kImageUrl,
+          sendSummary: true,
+        });
+        expect(record?.docSummary).toBeTruthy();
+        expectReasonsAreExclusive(record);
+      });
+
+      test("the fallback GET rejects: the picture is omitted, and the summary survives", async () => {
+        await givenDocument("imgchk10f", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({headers: {}}), new Error("connection reset"));
+
+        await runPending("imgchk10f");
+
+        const record = await imagedRecord("imgchk10f");
+        expect(record?.sendImage).toBe(false);
+        expect(record?.imageError).toMatch(/^Image check error:/);
+        expect(record?.sendSummary).toBe(true);
+        expect(record?.docSummary).toBeTruthy();
+        expectReasonsAreExclusive(record);
+      });
+
+      test("a redirect on the fallback GET is refused, not followed", async () => {
+        await givenDocument("imgchk10g", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({headers: {}}), {
+          ok: false, status: 302, statusText: "Found",
+          headers: new Headers({location: "https://169.254.169.254/x.png"}),
+          body: null,
+        } as unknown as Response);
+
+        await runPending("imgchk10g");
+
+        const record = await imagedRecord("imgchk10g");
+        expect(record?.sendImage).toBe(false);
+        expect(record?.imageError).toMatch(/^Image check error:/);
+        expect(record?.imageError).toContain("302");
+        expect(record?.sendSummary).toBe(true);
+        expectReasonsAreExclusive(record);
+      });
+
+      test("the range request rejects: the picture is omitted, not sent unverified", async () => {
+        await givenDocument("imgchk6", mixedDoc);
+        stubShutterbug(shutterbugOk(), new Error("connection reset"));
+
+        await runPending("imgchk6");
+
+        const record = await imagedRecord("imgchk6");
+        expect(record?.sendImage).toBe(false);
+        expect(record?.imageError).toMatch(/^Image check error:/);
+        expect(record?.docImageUrl).toEqual(kImageUrl);
+        expectReasonsAreExclusive(record);
+      });
+
+      test("bytes that are not a PNG (wrong signature): the picture is omitted", async () => {
+        await givenDocument("imgchk7", mixedDoc);
+        stubShutterbug(shutterbugOk(), imageCheckOk({bytes: new Uint8Array(24)}));
+
+        await runPending("imgchk7");
+
+        const record = await imagedRecord("imgchk7");
+        expect(record?.sendImage).toBe(false);
+        expect(record?.imageError).toMatch(/^Image check error:/);
+        expect(record?.imageError).toContain("PNG signature");
+      });
+
+      test("a redirect from the image host is refused, not followed", async () => {
+        // The fetch is `redirect: "manual"`, so a real redirect never gets a second request out to
+        // wherever it points — it comes back as this 3xx, which is rejected like any bad response.
+        await givenDocument("imgchk9", mixedDoc);
+        stubShutterbug(shutterbugOk(), {
+          ok: false, status: 302, statusText: "Found",
+          headers: new Headers({location: "https://169.254.169.254/x.png"}),
+          body: null,
+        } as unknown as Response);
+
+        await runPending("imgchk9");
+
+        const record = await imagedRecord("imgchk9");
+        expect(record?.sendImage).toBe(false);
+        expect(record?.imageError).toMatch(/^Image check error:/);
+        expect(record?.imageError).toContain("302");
+      });
+
+      test("the range GET carries the Range header and a timeout", async () => {
+        await givenDocument("imgchk8", mixedDoc);
+        const shutterbug = stubShutterbug(shutterbugOk());
+
+        await runPending("imgchk8");
+
+        const call = shutterbug.imageCheckCall();
+        expect(call?.[0]).toEqual(kImageUrl);
+        expect(call?.[1]?.headers).toEqual({Range: "bytes=0-23"});
+        expect(call?.[1]?.signal).toBeDefined();
+        // Not "follow" — a redirect must come back as itself, not be followed to a second request.
+        expect(call?.[1]?.redirect).toBe("manual");
+      });
+
+      // Unlike the check above, nothing here resolves the fetch itself: the record only appears
+      // once the real timeout fires and aborts it. Assertions run after `runPending` resolves,
+      // against plain captured variables — inside the `new Promise` executor a throw would just
+      // reject the promise, which the handler records the same way as the intended abort.
+      test("the range GET's timeout actually cuts off a stalled request, not just carries a signal",
+        async () => {
+          await givenDocument("imgchk11", mixedDoc);
+          const spy = jest.spyOn(global, "fetch");
+          spy.mockResolvedValueOnce(shutterbugOk());
+          let capturedSignal: AbortSignal | undefined;
+          let abortObserved = false;
+          spy.mockImplementationOnce((_url, init) => new Promise((_resolve, reject) => {
+            capturedSignal = init?.signal as AbortSignal;
+            capturedSignal.addEventListener("abort", () => {
+              abortObserved = true;
+              reject(Object.assign(new Error("The operation was aborted"), {name: "TimeoutError"}));
+            });
+          }));
+
+          const startedAt = Date.now();
+          await runPending("imgchk11");
+          const elapsedMs = Date.now() - startedAt;
+
+          expect(capturedSignal).toBeInstanceOf(AbortSignal);
+          expect(abortObserved).toBe(true);
+          // Rules out an already-aborted signal, which would finish in milliseconds.
+          expect(elapsedMs).toBeGreaterThanOrEqual(9_000);
+          const record = await imagedRecord("imgchk11");
+          expect(record?.sendImage).toBe(false);
+          expect(record?.imageError).toMatch(/^Image check error:/);
+        }, 15_000);
     });
 
     describe("a summary too large to store", () => {

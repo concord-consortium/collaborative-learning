@@ -4,8 +4,9 @@
  *
  * This renders through the *same* iframe pathway production's screenshots use — same HTML, same
  * `iframe.html?unwrapped&readOnly` entry point, same `initialValue` message. The only difference is
- * who takes the picture, and that the picture is the whole document rather than production's first
- * 1500 pixels. The harness captures reality; production's clipping is a production concern.
+ * who takes the picture, and that the picture is the whole document rather than being capped at
+ * production's own ceiling (`kMaxFrameHeightPx`, 4000px by default). The harness captures reality;
+ * production's clamp is a production concern.
  *
  * Puppeteer is imported lazily so that every other module here — and every test that does not drive
  * a browser — loads without it.
