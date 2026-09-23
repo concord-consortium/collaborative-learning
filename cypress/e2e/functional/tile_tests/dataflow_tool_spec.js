@@ -656,8 +656,20 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getCreateNodeButton(i % 2 ? "generator" : "number").click();
       }
 
-      cy.get(".primary-workspace .node").should("have.length", blockCount)
-        .each($node => cy.wrap($node).should("be.visible"));
+      // Containment against the clipping container, rather than "be.visible" as the single-block
+      // case above uses. What placement controls is that a block lands inside the canvas; whether
+      // page chrome (the sticky document title) happens to overlap the tile after Cypress scrolls
+      // to it is a separate concern, and a full grid reaches the top row where they collide.
+      cy.get(".primary-workspace .editor-graph-container").then($container => {
+        const view = $container[0].getBoundingClientRect();
+        cy.get(".primary-workspace .node").should("have.length", blockCount).each($node => {
+          const block = $node[0].getBoundingClientRect();
+          expect(block.left, "block left edge").to.be.at.least(view.left);
+          expect(block.top, "block top edge").to.be.at.least(view.top);
+          expect(block.right, "block right edge").to.be.at.most(view.right);
+          expect(block.bottom, "block bottom edge").to.be.at.most(view.bottom);
+        });
+      });
     });
   });
 });
