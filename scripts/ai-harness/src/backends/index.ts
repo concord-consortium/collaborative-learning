@@ -56,7 +56,7 @@ export interface RenderModeDescriptor {
    * the only way to send a true height to a service that cannot measure anything itself.
    */
   needsMeasuredHeight?: boolean;
-  /** Options this mode cannot honour, by the CLI flag a caller would have used. */
+  /** Options this mode cannot honor, by the CLI flag a caller would have used. */
   unusableFlags: (keyof RenderModeOptions)[];
   build(options: RenderModeOptions): RenderBackend;
 }
@@ -276,7 +276,7 @@ export function localClueRevision(): string | null {
 }
 
 /**
- * Refuses options a mode cannot honour, without building anything.
+ * Refuses options a mode cannot honor, without building anything.
  *
  * Separate from `getRenderBackend` so `render` can validate before it starts a unit server: building
  * the backend first meant an invalid flag left the server listening and hung the CLI.

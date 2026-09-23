@@ -234,7 +234,7 @@ function shutterbugOk(url = kImageUrl) {
   return {ok: true, status: 200, statusText: "OK", json: async () => ({url})} as Response;
 }
 
-// A well-behaved S3 image-check reply: 206, honouring `Range`, `Content-Range` naming the size.
+// A well-behaved S3 image-check reply: 206, honoring `Range`, `Content-Range` naming the size.
 // `body: null` uses readAtMost's `arrayBuffer()` fallback. Every field is overridable.
 function imageCheckOk(options: {
   widthPx?: number; heightPx?: number; status?: number; statusText?: string;
@@ -289,7 +289,7 @@ function bodyStreamOf(totalBytes: number, prefix: Uint8Array = new Uint8Array(0)
 }
 
 // A 200 that ignores `Range` and streams the whole picture back, the way a host that does not
-// honour it would.
+// honor it would.
 function imageCheckStreaming(options: {
   widthPx?: number; heightPx?: number; extraBytes?: number;
   headers?: Record<string, string>;

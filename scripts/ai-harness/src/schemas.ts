@@ -640,12 +640,12 @@ export function validateRepresentationEnvelope(value: unknown, file: string): Re
 /**
  * What a capture covers.
  *
- * `fixed-height` is the Shutterbug modes' clipped capture. `full-page` is the harness-only
- * counterpart: `fullPage: true` with the iframe capped at `captureHeightPx` (the ceiling), scaling
- * the capture to the document instead of clipping to a fixed viewport. `per-tile` produces one
- * image per top-level tile instead of one of the page, so
- * the set covers the document while no single image is the document — which is why it is a
- * capture mode of its own rather than a kind of full page.
+ * `fixed-height` is a Shutterbug mode's clipped capture. `full-page` scales the capture to the
+ * document instead: `fullPage: true`, with the iframe capped at the frame ceiling
+ * (`maxFrameHeightPx`) rather than a fixed height — not `captureHeightPx`, which in
+ * `ShutterbugOptions` names the starting viewport instead. `per-tile` produces one image per
+ * top-level tile instead of one of the page, so the set covers the document while no single image
+ * is the document — which is why it is a capture mode of its own rather than a kind of full page.
  */
 export const captureModes = ["full-document", "fixed-height", "per-tile", "full-page"] as const;
 export type CaptureMode = typeof captureModes[number];

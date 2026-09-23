@@ -44,7 +44,7 @@ describe("the iframe URL", () => {
   });
 });
 
-describe("recognising the CLUE frame", () => {
+describe("recognizing the CLUE frame", () => {
   it("matches both the build-root and the released iframe pages", () => {
     expect(isClueFrameUrl("http://localhost:8080/iframe.html?unit=qa&unwrapped&readOnly")).toBe(true);
     expect(isClueFrameUrl(

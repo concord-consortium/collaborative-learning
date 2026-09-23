@@ -88,7 +88,8 @@ npx tsx harness.ts represent --corpus synthetic-corpus --variants default,minima
 npx tsx harness.ts render    --corpus synthetic-corpus --mode <mode> \
                              [--clue-url <url>] [--unit <unit>] [--shutterbug-url <url>] \
                              [--capture-height <px>] [--refresh] \
-                             [--concurrency <n>] [--timeout-ms <n>]
+                             [--concurrency <n>] [--timeout-ms <n>] \
+                             [--full-page] [--max-frame-height <px>]  # shutterbug-parameterized only
 npx tsx harness.ts plan      --corpus synthetic-corpus --experiment experiments/image-vs-text.json
 npx tsx harness.ts run       --corpus synthetic-corpus --experiment experiments/text-baselines.json \
                              --max-cost 0.50 [--output <file>] [--no-cache | --refresh-cache]
@@ -290,10 +291,12 @@ reproduced here — see "Hosted URLs expire" below), matching the ~3668px the sa
 against staging, and well past the 500px viewport. Production really does grow a `fullPage` capture
 past its starting viewport, not just staging.
 
-**To reproduce the pre-CLUE-666 envelope** (`height: 1500`, no `fullPage`) — production's request
-before this change, if anyone needs the old baseline: `shutterbug-parameterized --capture-height 1500
---shutterbug-url https://api.concord.org/shutterbug-production` with no `--full-page`. It is
-byte-for-byte what production sent before.
+**To reproduce the pre-CLUE-666 envelope's shape** (`height: 1500`, no `fullPage`) — what
+production sent before this change, for comparison: `shutterbug-parameterized --capture-height 1500
+--shutterbug-url https://api.concord.org/shutterbug-production` with no `--full-page`. Not
+byte-for-byte, for the same reason `shutterbug-production-current` above is not: the generated
+page always carries a clamp now, and this mode renders with `mods` rather than each document's own
+unit.
 
 **The page body is production's page body.** Both are built by `shared/render-page.ts`, so the only
 things that differ between this mode and production are the arguments: the CLUE URL and the unit.

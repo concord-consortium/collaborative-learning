@@ -182,8 +182,7 @@ export async function readBodyWithin(
 }
 
 // Re-exported so the modules that reach for these through `backends/types.js` keep working; they
-// are defined in shared/urls.ts so that schemas.ts can use them without importing this module,
-// which imports schemas.ts itself.
+// are defined in shared/urls.ts because functions-v2 needs them too, not just the harness.
 export { isPublicHttpsUrl, isShutterbugImageHost, redirectDowngradeReason } from "../../../../shared/urls.js";
 
 export function checkEncodedSize(docId: string, bytes: Buffer, limits: RenderLimits): void {

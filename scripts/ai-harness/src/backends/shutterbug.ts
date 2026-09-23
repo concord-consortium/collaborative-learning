@@ -13,7 +13,8 @@
  * drift while the other modes evolve.
  *
  * It is a **baseline**, not a recommendation: improvements go into `shutterbug-parameterized`,
- * which is the shape the eventual production fix will take.
+ * which stays configurable so the ceiling and other constants can still be experimented with
+ * beyond what shipped.
  *
  * Note that `scripts/shutterbug.ts` is *not* a production baseline, whatever the harness plan says:
  * it targets staging by default, and nothing pins its request the way a snapshot test pins this
@@ -80,7 +81,7 @@ export interface ShutterbugOptions {
   retries?: number;
   sleep?: (ms: number) => Promise<void>;
   /**
-   * Post `fullPage: true`: Shutterbug captures the whole iframe instead of clipping it at
+   * Post `fullPage: true`: Shutterbug captures the whole outer page instead of clipping it at
    * `captureHeightPx`, which becomes only the starting viewport. The page itself then bounds the
    * capture, via `maxFrameHeightPx`.
    */
@@ -100,8 +101,8 @@ const kDefaultRetries = 2;
  * clamp bounds the iframe, but Shutterbug's own screenshot is of the whole outer page, chrome
  * included, and that chrome adds a small amount on top (observed a few pixels through the real
  * service; a raw unwrapped page can add more — up to Chromium's default 8px body margin on each
- * side). Without this, a document that lands exactly at the ceiling — the case the ceiling exists
- * to handle — fails every time instead of succeeding with a clipped capture.
+ * side). Without this, a document taller than the ceiling — the case the ceiling exists to
+ * handle — fails every time instead of succeeding with a clipped capture.
  */
 const kFullPageOverflowTolerancePx = 16;
 
@@ -152,7 +153,7 @@ async function withTimeout<T>(
  * the exact bytes without going anywhere near the network.
  *
  * `height` is only Puppeteer's starting viewport; with `fullPage: true` it captures the whole
- * iframe regardless, and the page itself bounds that capture via `maxHeightPx`.
+ * outer page regardless, and the page itself bounds that capture via `maxHeightPx`.
  */
 export function shutterbugRequestBody(
   content: unknown,
@@ -436,7 +437,8 @@ export interface ProductionParityOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
-/** The frozen baseline. Every value is a constant; nothing about it is configurable on purpose. */
+/** Every value is a constant; nothing about it is configurable on purpose — matching production's
+ * current envelope, not a historical snapshot of an old one. */
 export function shutterbugProductionCurrent(options: ProductionParityOptions = {}): RenderBackend {
   return shutterbugBackend({
     modeId: "shutterbug-production-current",

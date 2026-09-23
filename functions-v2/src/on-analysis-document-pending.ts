@@ -57,8 +57,9 @@ const shutterbugTimeoutMs = 45_000;
 // `fullPage` capture. shared/render-page.ts's frame cap is what actually bounds it.
 const shutterbugViewportHeightPx = 500;
 
-// Comfortably above shutterbugTimeoutMs, and above the 60s default, which the request alone could
-// have used up before the summarizer and two database reads are counted.
+// Comfortably above shutterbugTimeoutMs plus imageCheckTimeoutMs twice over — the range check and
+// its fallback GET each get their own budget — and above the 60s default, which the request alone
+// could have used up before the summarizer and two database reads are counted.
 const functionTimeoutSeconds = 120;
 
 // How much of a message from outside is kept. A service that has gone wrong can answer with a
@@ -75,7 +76,8 @@ const maxSummaryBytes = 200_000;
 // The provider's per-image allowance for a URL. A picture over this is omitted rather than sent.
 export const maxImageBytes = 20 * 1024 * 1024;
 
-// Budget for the 24-byte range request that checks the returned picture. Kept well inside
+// Budget for each of the two checks on the returned picture: the 24-byte range request, and the
+// fallback GET for when that request can't learn the size cheaply. Kept well inside
 // functionTimeoutSeconds alongside shutterbugTimeoutMs, the summarizer and two database reads.
 const imageCheckTimeoutMs = 10_000;
 
@@ -225,7 +227,7 @@ interface ImageInspection {
  * Checks the picture Shutterbug produced, without downloading it.
  *
  * A `Range: bytes=0-23` request returns the PNG header (for dimensions) and the file's total size
- * via `Content-Range`. S3 always honours `Range` and answers 206; the 200 branch covers a host
+ * via `Content-Range`. S3 always honors `Range` and answers 206; the 200 branch covers a host
  * that does not.
  *
  * @param {string} url the hosted picture to check

@@ -606,7 +606,8 @@ describe("--full-page and --max-frame-height, driven through the CLI", () => {
     expect(posted.length).toBe(order.length);
     for (const body of posted) {
       expect(body.fullPage).toBe(true);
-      // The nondefault ceiling reached the page itself, not only the request envelope.
+      // The nondefault ceiling reached the page itself — the request envelope's own fields
+      // (height, fullPage) never carry it at all.
       expect(body.content).toContain("Math.min(height, 1800)");
     }
     const envelope = readImageEnvelope(imageRepresentationPath(paths, "shutterbug-parameterized", order[0]));

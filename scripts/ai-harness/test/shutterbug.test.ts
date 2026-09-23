@@ -401,7 +401,7 @@ describe("the network contract", () => {
   it("accepts a full-page capture that lands within the ceiling's overflow tolerance", async () => {
     // A correctly clamped capture still comes back a little taller than the ceiling — the outer
     // page's own chrome, not a failed clamp. This is the case the ceiling exists to handle: a
-    // document landing right at it must succeed with a clipped capture, not fail every time.
+    // document taller than it must succeed with a clipped capture, not fail every time.
     const atTolerance = makeTestPng(1000, 4016); // ceiling (4000) + the 16px tolerance
     const fullPageBackend = shutterbugParameterized({
       fullPage: true, maxFrameHeightPx: 4000,
