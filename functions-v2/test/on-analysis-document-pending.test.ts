@@ -1297,6 +1297,22 @@ describe("functions", () => {
         expect(shutterbug.spy.mock.calls[2]?.[1]?.redirect).toBe("manual");
       });
 
+      test("a Content-Length present but empty is no size header, not a zero-byte one", async () => {
+        // Number("") is 0, not NaN — an unhandled empty header would read as "the file is 0
+        // bytes, definitely under the limit" and skip the fallback GET that actually measures it.
+        await givenDocument("imgchk10h", mixedDoc);
+        const shutterbug = stubShutterbug(shutterbugOk(),
+          imageCheckOk({status: 200, statusText: "OK", headers: {"content-length": ""}}));
+
+        await runPending("imgchk10h");
+
+        expect(await imagedRecord("imgchk10h")).toMatchObject({sendImage: true});
+        // Reaching the fallback GET at all is the proof: skipping straight to "0 bytes" would
+        // never call it, and this assertion would see an undefined third call instead.
+        expect(shutterbug.spy).toHaveBeenCalledTimes(3);
+        expect(shutterbug.spy.mock.calls[2]?.[1]?.redirect).toBe("manual");
+      });
+
       // Exercises a real stream, unlike `imageCheckOk`'s `body: null` stand-in.
       test("a 200 that ignores Range still reads only the header, from a real stream", async () => {
         await givenDocument("imgchk10c", mixedDoc);

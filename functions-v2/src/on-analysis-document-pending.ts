@@ -204,13 +204,17 @@ function totalBytesFromContentRange(header: string | null): number | null {
 }
 
 /**
- * A header's declared byte count, or `null` when it is missing or not a number.
+ * A header's declared byte count, or `null` when it is missing, empty, or not a number.
+ *
+ * `Number("")` and `Number("   ")` are both `0`, not `NaN`, so an empty value has to be checked
+ * for explicitly — otherwise a header present but empty reads as "the file is 0 bytes" instead of
+ * "the size was not declared," skipping the bounded fallback read that would actually measure it.
  *
  * @param {string | null} header the header value, e.g. `Content-Length`
  * @return {number | null} the byte count it declares, or `null`
  */
 function bytesFromHeader(header: string | null): number | null {
-  if (header === null) return null;
+  if (header === null || header.trim() === "") return null;
   const value = Number(header);
   return Number.isFinite(value) ? value : null;
 }
