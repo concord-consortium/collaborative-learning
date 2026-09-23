@@ -4,8 +4,7 @@ import express, {Request, Response, NextFunction} from "express";
 import cors from "cors";
 import {DecodedIdToken} from "firebase-admin/auth";
 import {Octokit} from "@octokit/rest";
-
-import {hashString} from "../../shared/hash-string";
+import {createHash} from "crypto";
 
 import pullUnit from "./routes/pull-unit";
 import getContent from "./routes/get-content";
@@ -27,10 +26,6 @@ import unitSummaryStatus from "./routes/unit-summary-status";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
-
-// Generation is CC-staff-only for now: each call is a burst of OpenAI requests and there is no
-// rate limiting anywhere else in front of it.
-const adminOnlyPaths = ["/pullUnit", "/generateUnitSummary"];
 
 // the TypeScript type definition for DecodedIdToken does not include the name property,
 // even though it is present in the actual decoded token returned by Firebase Admin SDK
@@ -57,7 +52,14 @@ const getCacheExpirationDate = () => {
 
 admin.initializeApp();
 
-const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitHubToken: string): Promise<boolean> => {
+// Doug's old zoopdoop.com email is what Firebase auth sets as the GitHub provider email in the
+// generated auth token even though it is not used on GitHub anymore. Leslie's mit.edu and Teale's
+// gmail addresses are what they each use for GitHub.
+const otherCCEmailAddresses = ["doug@zoopdoop.com", "lbond@alum.mit.edu", "fristoe@gmail.com"];
+const isCCEmail = (email: string): boolean =>
+  email.endsWith("@concord.org") || otherCCEmailAddresses.includes(email);
+
+const isUserAuthorized = async (decodedToken: DecodedIdToken, gitHubToken: string): Promise<boolean> => {
   const {email, firebase} = decodedToken;
 
   // make sure the user signed in using GitHub and has an email associated with their account
@@ -65,21 +67,9 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
     return false;
   }
 
-  // allow CC folks (with a concord.org email) access to everything and add a special exception
-  // for Doug's old zoopdoop.com email that Firebase auth is setting as the GitHub provider email
-  // in the generated auth token even though it is not used on GitHub anymore.
-  // Other exceptions:
-  // Leslie's mit.edu email which she uses for GitHub
-  // Teale's gmail address he uses for GitHub
-  const otherCCEmailAddresses = ["doug@zoopdoop.com", "lbond@alum.mit.edu", "fristoe@gmail.com"];
-  const isCCEmail = email.endsWith("@concord.org") || otherCCEmailAddresses.includes(email);
-  if (isCCEmail) {
+  // CC folks get access to everything
+  if (isCCEmail(email)) {
     return true;
-  }
-
-  // only allow CC folks to do admin-only operations
-  if (!isCCEmail && adminOnlyPaths.includes(path)) {
-    return false;
   }
 
   // clear out any expired cache entries to avoid unbounded growth
@@ -91,8 +81,10 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
   }
 
   // Keyed by a hash rather than the raw token, so the token itself isn't retained in memory
-  // (e.g. in a heap snapshot) any longer than the request that carried it needs.
-  const cacheKey = hashString(gitHubToken);
+  // (e.g. in a heap snapshot) any longer than the request that carried it needs. A cryptographic
+  // digest, not shared/hash-string.ts's cheap djb2 -- a cache hit skips the real GitHub check, so a
+  // collision here would let one token's cached result authorize a different one.
+  const cacheKey = createHash("sha256").update(gitHubToken).digest("hex");
 
   // if we have a cached token and it is still valid (since it wasn't cleared above),
   // use that to determine authorization based on whether the user is a collaborator
@@ -163,7 +155,7 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
     }
     (req as AuthorizedRequest).gitHubToken = gitHubToken;
 
-    if (await isUserAuthorized(req.path, decodedToken, gitHubToken)) {
+    if (await isUserAuthorized(decodedToken, gitHubToken)) {
       (req as AuthorizedRequest).decodedToken = decodedToken;
       return next();
     } else {
@@ -174,6 +166,17 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
     console.error("Authentication error:", error);
     return res.status(401).send("Unauthorized: Invalid or expired token.");
   }
+};
+
+// CC-staff-only. Applied directly to those routes below, not matched against req.path -- Express's
+// own router decides which routes this middleware chain runs for, so it can't be bypassed by a URL
+// variant (different case, a trailing slash) that still reaches the same handler.
+const requireCCAccess = (req: Request, res: Response, next: NextFunction) => {
+  const email = (req as AuthorizedRequest).decodedToken.email;
+  if (email && isCCEmail(email)) {
+    return next();
+  }
+  return res.status(403).send("Unauthorized: You don't have authoring permissions.");
 };
 
 const app = express();
@@ -201,7 +204,7 @@ app.use(authenticateAndAuthorize);
 // test endpoint to verify authentication is working
 app.get("/whoami", (req, res) => res.send((req as AuthorizedRequest).decodedToken));
 
-app.post("/pullUnit", pullUnit);
+app.post("/pullUnit", requireCCAccess, pullUnit);
 app.post("/pushUnit", pushUnit);
 
 app.post("/deleteUnit", deleteUnit);
@@ -224,7 +227,7 @@ app.get("/getPulledFiles", getPulledFiles);
 // NOTE: app.use() is used here to allow for paths with slashes (i.e. /rawContent/:branch/:unit/*)
 app.use("/rawContent", getRawContent);
 
-app.post("/generateUnitSummary", generateUnitSummary);
+app.post("/generateUnitSummary", requireCCAccess, generateUnitSummary);
 app.get("/unitSummaryStatus", unitSummaryStatus);
 
 // One Express app serves every route above as one function, so this timeout, memory, and secret
