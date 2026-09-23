@@ -106,6 +106,7 @@ async function postToShutterbug(html: string): Promise<string> {
     response = await fetch(shutterbugURL, {
       method: "POST",
       body: JSON.stringify({content: html, height: shutterbugViewportHeightPx, fullPage: true}),
+      redirect: "manual",
       signal: AbortSignal.timeout(shutterbugTimeoutMs),
     });
   } catch (err) {

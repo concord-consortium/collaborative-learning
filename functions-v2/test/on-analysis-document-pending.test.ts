@@ -1053,6 +1053,9 @@ describe("functions", () => {
           {ok: true, status: 200, json: async () => ({url: "https://images.example.test/x.png"})} as unknown as Response,
           "unexpected host"],
         ["a request that times out", Object.assign(new Error("aborted"), {name: "TimeoutError"}), "did not answer within"],
+        ["a redirect from Shutterbug's own POST",
+          {ok: false, status: 307, statusText: "Temporary Redirect",
+            headers: new Headers({location: "https://evil.example/x"})} as unknown as Response, "307"],
       ];
 
       test.each(shutterbugFailures)(
@@ -1090,13 +1093,16 @@ describe("functions", () => {
         });
       });
 
-      test("the request carries an abort signal, so a hung service cannot hang the function", async () => {
+      test("the request carries an abort signal and refuses to follow a redirect", async () => {
         await givenDocument("mixed3", mixedDoc);
         const shutterbug = stubShutterbug(shutterbugOk());
 
         await runPending("mixed3");
 
         expect(shutterbug.spy.mock.calls[0][1]?.signal).toBeDefined();
+        // A followed redirect would resend the student's document to wherever it pointed, before
+        // this code ever saw a response to check.
+        expect(shutterbug.spy.mock.calls[0][1]?.redirect).toBe("manual");
       });
     });
 
