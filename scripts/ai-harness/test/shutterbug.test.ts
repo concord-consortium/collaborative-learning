@@ -357,6 +357,15 @@ describe("the network contract", () => {
       .rejects.toThrow(/unexpected host/);
   });
 
+  it("refuses a download that redirects to a public https host that isn't Shutterbug's own", async () => {
+    // Downloads follow redirects, so the URL that actually answers can differ from the one
+    // Shutterbug named. This one is still public and https, so redirectDowngradeReason passes it —
+    // only re-applying the host check to the landed-on URL catches it.
+    await expect(backend({ download: { url: "https://images.example.test/shot.png" } as Partial<Response> })
+      .render({ docId: "doc", content: emptyDocument }))
+      .rejects.toThrow(/unexpected host/);
+  });
+
   it("refuses a capture whose dimensions exceed the limits, even when the bytes are small", async () => {
     // A tall, flat screenshot compresses to almost nothing, so the encoded-byte limit never fires.
     // Only the decoded dimensions catch it — and a clipped or unreasonable capture must fail rather

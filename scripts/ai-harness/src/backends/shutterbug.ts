@@ -344,10 +344,15 @@ export function shutterbugBackend(options: ShutterbugOptions): RenderBackend {
       throw new ShutterbugError(docId, `downloading ${url} answered ${response.status} ${response.statusText}`);
     }
     // Redirects are followed, so the URL that answered is not necessarily the one that was asked
-    // for: this is where a redirect to plain http, or to an address on this machine, is caught.
-    // `post` has already established that `url` itself is a public https URL.
-    const downgraded = redirectDowngradeReason(url, response.url || url);
+    // for: this is where a redirect to plain http, an address on this machine, or a host other
+    // than Shutterbug's own is caught. `post` has already established that `url` itself passes
+    // both checks; a landed-on URL that never redirected passes them here too, harmlessly.
+    const finalUrl = response.url || url;
+    const downgraded = redirectDowngradeReason(url, finalUrl);
     if (downgraded) throw new ShutterbugError(docId, `${url} ${downgraded}`);
+    if (!isShutterbugImageHost(finalUrl)) {
+      throw new ShutterbugError(docId, `${finalUrl} is on an unexpected host`);
+    }
     const contentType = response.headers?.get?.("content-type") ?? null;
     if (contentType && !contentType.toLowerCase().startsWith("image/png")) {
       throw new ShutterbugError(docId, `${url} served content-type "${contentType}", not image/png`);
