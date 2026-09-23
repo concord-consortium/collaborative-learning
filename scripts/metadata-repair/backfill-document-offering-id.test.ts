@@ -4,24 +4,20 @@ import {
 } from "./backfill-document-offering-id";
 import type { IMetadataDatabase } from "../lib/document-metadata-lookup";
 import type { Firestore } from "firebase-admin/firestore";
+import {
+  AxesDocument, GroupDocument, PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
+} from "../../src/models/document/document-types";
 
 describe("kOfferingContainedTypes", () => {
   it("lists exactly the offering-contained type values, including both generic axes values", () => {
-    // "publication" — not "problemPublication" — is the stored value for a problem publication;
-    // ProblemPublication in src/models/document/document-types.ts is the constant's name. A query on
-    // the wrong string returns nothing and the census reports a confident, wrong zero.
-    //
-    // Both "group" and "axes" appear so this script and backfill-group-document-axes.ts can run in
-    // either order during the sweep.
     expect(kOfferingContainedTypes).toEqual([
-      "problem", "planning", "publication", "supportPublication", "group", "axes"
+      ProblemDocument, PlanningDocument, ProblemPublication, SupportPublication, GroupDocument, AxesDocument
     ]);
   });
 });
 
 describe("getSpaceFromFirestorePath", () => {
   it("derives the RTDB base path for an authed portal", () => {
-    // The portal segment is already underscore-escaped in the Firestore path, so it is used as-is.
     expect(getSpaceFromFirestorePath("authed/learn_concord_org/documents/abc")).toEqual({
       label: "authed/learn_concord_org",
       firebaseBasePath: "/authed/portals/learn_concord_org/classes"
