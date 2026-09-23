@@ -108,12 +108,15 @@ export async function assembleUnit(
       const rawSectionMarkdowns: string[] = [];
       for (let i = 0; i < sections.length; i++) {
         const section = await resolveSection(sections[i], ordinal, i, inventoryByPath, branch, unit, deps);
+        // content is authored, not guaranteed -- a section can be a placeholder not yet filled in
+        // (e.g. just {"type": "labWork"}). summarizeCurriculum assumes a real content object and
+        // throws on undefined, so a missing one is treated as an empty section here instead.
         const dataSets = normalizeCurriculumDataSets(section.content?.sharedModels);
-        const body = summarizeCurriculum(section.content, dataSets, 1, undefined, {
+        const body = section.content ? summarizeCurriculum(section.content, dataSets, 1, undefined, {
           // "full" is an explicit opt-in -- handle-table-tile.ts is silent about a table's data by
           // default. curriculumTileHandlers swaps in the labels-only drawing handler.
           imageFilenames: true, dataSetTables: "full", tileHandlers: curriculumTileHandlers,
-        });
+        }) : "";
         // Each section gets its own heading so the digest model sees a problem's several parts as
         // distinct rather than one blob. "# Section: " rather than a bare "## " heading: section
         // content can already contain its own "##"-level headings (e.g. a multi-tile row's per-tile

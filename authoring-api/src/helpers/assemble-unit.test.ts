@@ -12,7 +12,7 @@ interface TestSection {
 interface TestProblem {
   ordinal: number;
   title: string;
-  sections: Array<TestSection | string | number>;
+  sections: Array<TestSection | string | number | {type: string}>;
 }
 interface TestInvestigation {
   ordinal: number;
@@ -43,6 +43,11 @@ function rootContent(
 
 function textSection(text: string, type = "section"): TestSection {
   return {type, content: {tiles: [{id: "t1", content: {type: "Text", format: "markdown", text}}]}};
+}
+
+// A section that's been added but not authored yet -- a real, valid shape: no `content` key at all.
+function placeholderSection(type = "section"): {type: string} {
+  return {type};
 }
 
 function depsFor(inventory: UnitContentFile[]): AssembleUnitDeps {
@@ -100,6 +105,17 @@ describe("assembleUnit", () => {
     const result = await assembleUnit("branch", "unit", depsFor(inventory));
     expect(result.problems[0].markdown).toContain("inline text");
     expect(result.problems[0].markdown).toContain("external text");
+  });
+
+  it("treats a section with no content yet as empty, rather than crashing the whole unit", async () => {
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [textSection("real content"), placeholderSection("labWork")]},
+      ]},
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    expect(result.problems[0].markdown).toContain("real content");
+    expect(result.problems[0].markdown).toContain("# Section: labWork");
   });
 
   it("resolves an external section reference under a nonstandard filename", async () => {
