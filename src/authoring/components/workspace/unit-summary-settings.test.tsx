@@ -12,12 +12,14 @@ const mockSetUnitConfig = jest.fn();
 
 const mockCurriculumValue: {
   unitConfig: { config: { aiUnitSummary?: IUnitSummary } } | undefined;
+  unitConfigLoading: boolean;
   setUnitConfig: jest.Mock;
   saveState: string | undefined;
   branch: string | undefined;
   unit: string | undefined;
 } = {
   unitConfig: { config: {} },
+  unitConfigLoading: false,
   setUnitConfig: mockSetUnitConfig,
   saveState: undefined,
   branch: "main",
@@ -76,6 +78,7 @@ describe("UnitSummarySettings", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCurriculumValue.unitConfig = { config: {} };
+    mockCurriculumValue.unitConfigLoading = false;
     mockCurriculumValue.saveState = undefined;
     mockCurriculumValue.branch = "main";
     mockCurriculumValue.unit = "test-unit";
@@ -300,8 +303,12 @@ describe("UnitSummarySettings", () => {
     mockCurriculumValue.unit = "other-unit";
     rerender(<UnitSummarySettings />);
     await flush();
-    // The new unit's config hasn't arrived yet -- still showing unit A's, not blanked or crashed.
-    expect(screen.getByLabelText("Overview")).toHaveValue("Unit A overview.");
+    // The new unit's config hasn't arrived yet. The form is cleared, not left showing unit A's data
+    // (which would otherwise stay on screen, and stay savable into unit B, indefinitely) -- see
+    // "does not carry a generated-but-unsaved summary..." below for why this can't wait for
+    // savedSummary to change instead.
+    expect(screen.queryByLabelText("Overview")).not.toBeInTheDocument();
+    expect(screen.getByText(/No summary yet/)).toBeInTheDocument();
 
     mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary({ overview: "Unit B overview." }) } };
     rerender(<UnitSummarySettings />);
@@ -312,6 +319,68 @@ describe("UnitSummarySettings", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     const draft = lastSetUnitConfigDraft();
     expect(draft.config.aiUnitSummary?.overview).toBe("Unit B overview.");
+  });
+
+  it("does not carry a generated-but-unsaved summary into another unit with no saved summary", async () => {
+    // Neither unit has a saved summary, so savedSummary is undefined before AND after navigation --
+    // an effect keyed only on savedSummary would never re-fire, since undefined to undefined is not
+    // a change React would notice.
+    mockCurriculumValue.unitConfig = { config: {} };
+    mockPost.mockResolvedValue({ success: true, summary: buildSummary({ overview: "Unit A generated overview." }) });
+    const { rerender } = render(<UnitSummarySettings />);
+    await flush();
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate Summary" }));
+    await waitFor(() => expect(screen.getByLabelText("Overview")).toHaveValue("Unit A generated overview."));
+
+    mockCurriculumValue.branch = "other-branch";
+    mockCurriculumValue.unit = "other-unit";
+    rerender(<UnitSummarySettings />);
+    await flush();
+
+    expect(screen.queryByText("Unit A generated overview.")).not.toBeInTheDocument();
+    expect(screen.getByText(/No summary yet/)).toBeInTheDocument();
+  });
+
+  it("does not enable Save for the new unit before its own config has loaded", async () => {
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary({ overview: "Unit A overview." }) } };
+    const { rerender } = render(<UnitSummarySettings />);
+    await flush();
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+
+    // Navigate: branch/unit change and the new unit's live status can arrive (fetchStatus is an
+    // independent, often-faster request) before useCurriculum's own config fetch does -- unitConfig
+    // here is left pointing at unit A throughout.
+    mockCurriculumValue.branch = "other-branch";
+    mockCurriculumValue.unit = "other-unit";
+    rerender(<UnitSummarySettings />);
+    await flush();
+
+    // The new unit's live status has arrived (fetchStatus resolved), but its config hasn't -- Save
+    // must not be clickable against a form that still belongs to unit A.
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+  });
+
+  it("does not restore the previous unit's summary when mounting already pointed at the new unit", async () => {
+    // Simulates switching from another settings panel in unit A straight to this one for unit B:
+    // this mounts already seeing branch/unit for B, while unitConfig hasn't caught up yet.
+    mockCurriculumValue.branch = "other-branch";
+    mockCurriculumValue.unit = "other-unit";
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary({ overview: "Unit A overview." }) } };
+    mockCurriculumValue.unitConfigLoading = true;
+    const { rerender } = render(<UnitSummarySettings />);
+    await flush();
+
+    expect(screen.queryByLabelText("Overview")).not.toBeInTheDocument();
+    expect(screen.getByText(/No summary yet/)).toBeInTheDocument();
+
+    // Unit B's own config arrives.
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary({ overview: "Unit B overview." }) } };
+    mockCurriculumValue.unitConfigLoading = false;
+    rerender(<UnitSummarySettings />);
+    await flush();
+
+    expect(screen.getByLabelText("Overview")).toHaveValue("Unit B overview.");
   });
 
   it("names the changed problem when a problem's content hash differs (content changed)", async () => {
