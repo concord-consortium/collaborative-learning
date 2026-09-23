@@ -616,7 +616,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.verifyRecordButtonIcon();
   });
 
-  // CLUE-689. A block created outside the viewport still exists, so the only symptom is that the
+  // A block created outside the viewport still exists, so the only symptom is that the
   // palette button looks dead. .editor-graph-container clips overflow, so "is it on screen" is a
   // real visibility question here rather than bounding-box arithmetic.
   context("new blocks land in view", function () {

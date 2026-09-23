@@ -1,3 +1,4 @@
+import { clamp } from "lodash";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { structures } from "rete-structures";
@@ -1270,11 +1271,15 @@ export class ReteManager implements INodeServices {
     const kTopMargin = 5;
     const kPageOffset = 15;
 
+    // Both branches are screen-space extents divided into world units, so a zoomed canvas narrows
+    // the grid either way. The fallback stands in for a container that has not been laid out yet.
+    const kFallbackViewWidth = kColumnWidth * 4;
+    const kFallbackViewHeight = kRowHeight * 5;
+
     const { k, x, y } = this.area.area.transform;
     const dims = this.getContainerDimensions();
-    // Fall back to the historical grid's extent when the container has not been laid out yet.
-    const viewWidth = dims ? dims.width / k : kColumnWidth * 4;
-    const viewHeight = dims ? dims.height / k : kRowHeight * 5;
+    const viewWidth = (dims?.width ?? kFallbackViewWidth) / k;
+    const viewHeight = (dims?.height ?? kFallbackViewHeight) / k;
 
     // Margins are screen-space gaps, so they shrink in world units as the canvas zooms in.
     const originX = -x / k + kLeftMargin / k;
@@ -1286,17 +1291,22 @@ export class ReteManager implements INodeServices {
     const columns = fits(viewWidth, kLeftMargin, kDefaultNodeWidth, kColumnWidth);
     const rows = fits(viewHeight, kTopMargin, kTallestNodeHeight, kRowHeight);
 
-    // Once the grid is full, each further pass cascades so blocks do not land exactly on top of
-    // each other; the clamp keeps that cascade from walking back out of the view.
     const numNodes = this.editor.getNodes().length;
     const slot = numNodes % (columns * rows);
     const pass = Math.floor(numNodes / (columns * rows));
-    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
+
+    // Once the grid is full, later passes cascade so blocks do not land exactly on top of each
+    // other. The offset wraps within the room a slot actually has left rather than growing without
+    // bound: unbounded, every pass past the edge clamps to the same spot and the blocks stack.
+    const place = (base: number, min: number, max: number) => {
+      const slack = max - base;
+      return clamp(base + (slack > 0 ? (pass * kPageOffset) % slack : 0), min, max);
+    };
 
     return [
-      clamp(originX + Math.floor(slot / rows) * kColumnWidth + pass * kPageOffset,
+      place(originX + Math.floor(slot / rows) * kColumnWidth,
         -x / k, -x / k + viewWidth - kDefaultNodeWidth),
-      clamp(originY + (slot % rows) * kRowHeight + pass * kPageOffset,
+      place(originY + (slot % rows) * kRowHeight,
         -y / k, -y / k + viewHeight - kTallestNodeHeight)
     ];
   }

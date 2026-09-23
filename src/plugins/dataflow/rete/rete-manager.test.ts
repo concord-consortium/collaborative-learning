@@ -310,6 +310,17 @@ describe("ReteManager.getNewNodePosition (CLUE-689)", () => {
     expect(second).not.toEqual(first);
   });
 
+  // Zoomed in, the visible world is small enough that the grid fills in four blocks and the cascade
+  // that offsets each later pass has only a few units of room to work in. That is the regime where
+  // an unbounded cascade lands every pass past the edge on the same clamped spot, so several blocks
+  // sit exactly on top of each other and read as one.
+  it("does not stack later blocks once the grid has filled and refilled", () => {
+    const transform = { k: 2, x: 0, y: 0 };
+    const positions = Array.from({ length: 16 }, (_, n) =>
+      makePositionStub(n, transform, container).getNewNodePosition().join(","));
+    expect(new Set(positions).size).toBe(positions.length);
+  });
+
   it("still returns a usable position before the container has been laid out", () => {
     const pos = makePositionStub(0, { k: 1, x: 0, y: 0 }, null).getNewNodePosition();
     expect(Number.isFinite(pos[0])).toBe(true);
