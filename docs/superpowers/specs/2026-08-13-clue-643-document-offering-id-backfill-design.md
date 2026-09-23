@@ -89,8 +89,8 @@ Two other sources exist and are **not** used:
 - **Matching the class's offerings against the document's own unit/investigation/problem** via the
   portal API. Fuzzy, and ambiguous when a class has two offerings for the same problem.
 
-Neither is built now. The census reports how many documents each would be needed for, and that
-number decides whether either is worth building.
+Neither is built. The production census settled that: across real data only 51 documents cannot be
+recovered from the node, too few to justify either source.
 
 ### Group documents get no special handling
 
@@ -106,9 +106,8 @@ the derivation is a two-line addition at that point.
 
 They are not exempt from the ordinary lookup, though — a group document whose RTDB node happens to
 carry an `offeringId` is repaired like any other. What is withheld is the *derivation from the uid*,
-not repair as such. In practice the RTDB lookup will answer for almost none of them, so their census
-line will read as `noMetadataNode` or `nodeWithoutOfferingId` by construction rather than because
-anything is wrong.
+not repair as such. In the event it was never needed: the census found every group document already
+carrying its `offeringId`.
 
 ## Architecture
 
@@ -132,9 +131,11 @@ Neither existing script is the right host:
 ### The shared lookup
 
 `getOfferingIdFromFirebaseMetadata` moves to `scripts/lib/`, and
-`find-documents-missing-metadata.ts` switches to the shared copy. Behavior is unchanged; the move is
-mechanical, except that the extracted function takes its `database` and base path as arguments
-rather than closing over module scope, so it can be tested and reused.
+`find-documents-missing-metadata.ts` switches to the shared copy. The extracted function takes its
+`database` and base path as arguments rather than closing over module scope, so it can be tested and
+reused. It also returns a status rather than the raw value, and treats an empty or non-string
+`offeringId` as absent. For `find-documents-missing-metadata.ts` the one visible change is that a
+numeric `offeringId`, which it used to pass on, is now skipped; an empty one was skipped before too.
 
 The new module must not use `import.meta`. `scripts/lib/script-utils.ts` does, which is why
 `backfill-group-document-axes.ts` imports it lazily inside `main()` — a Jest test cannot load it.
