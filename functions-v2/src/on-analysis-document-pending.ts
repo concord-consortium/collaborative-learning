@@ -53,8 +53,7 @@ export const analysisSettingsPath = "analysis/settings";
 // again — later edits only update that entry, so they do not re-trigger either.
 const shutterbugTimeoutMs = 45_000;
 
-// Only the viewport: Shutterbug applies `height` to Puppeteer's `setViewport`, not as a cap on a
-// `fullPage` capture. shared/render-page.ts's frame cap is what actually bounds it.
+// Only the viewport (see kMaxFrameHeightPx for what actually bounds a fullPage capture).
 const shutterbugViewportHeightPx = 500;
 
 // Comfortably above shutterbugTimeoutMs plus imageCheckTimeoutMs twice over — the range check and
@@ -143,10 +142,8 @@ async function postToShutterbug(html: string): Promise<string> {
   if (!isPublicHttpsUrl(url)) {
     throw new Error(`Shutterbug returned an image URL on a private or loopback host: ${bounded(url)}`);
   }
-  // A host that merely looks public can still resolve to a private address when it is actually
-  // fetched, which isPublicHttpsUrl cannot see (see its doc comment). Pinning the resolved
-  // address before fetching is the real fix for that and is not done here yet; this is a cheap
-  // stopgap that works only because Shutterbug's real host is known.
+  // A stopgap, not the real fix (resolving the hostname and pinning the address) — see its own
+  // doc comment for why.
   if (!isShutterbugImageHost(url)) {
     throw new Error(`Shutterbug returned an image URL on an unexpected host: ${bounded(url)}`);
   }
@@ -676,7 +673,7 @@ export const onAnalysisDocumentPending =
               } else {
                 accumulated.sendImage = true;
                 // >=, not >: a clipped capture can land a few pixels past the ceiling (the outer
-                // page's own margin, outside the clamped iframe), which is still a clip, not a bug.
+                // page's own chrome, outside the clamped iframe), which is still a clip, not a bug.
                 if (inspected.heightPx >= kMaxFrameHeightPx) {
                   accumulated.imageClipped = {capturedHeightPx: inspected.heightPx, ceilingPx: kMaxFrameHeightPx};
                   logger.warn(`Screenshot of ${documentPath} was clipped at ${kMaxFrameHeightPx}px ` +

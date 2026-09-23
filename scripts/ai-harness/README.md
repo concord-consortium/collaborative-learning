@@ -1059,8 +1059,7 @@ Things this milestone surfaced that are not the harness's to fix.
   clipped to a fixed 1500px. `done` queue records may now carry `imageClipped` (a capture that
   reached the ceiling) or `imageOmittedReason: "image-too-large"` (a capture omitted for being over
   the encoded-byte limit). `shutterbug-production-current` was moved onto this same envelope rather
-  than frozen as a pre-CLUE-666 baseline — see "The three render modes" above for the current shape
-  and its hand-verification against the real service.
+  than frozen as a pre-CLUE-666 baseline.
 
 ## DEVIATIONS
 

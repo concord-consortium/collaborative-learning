@@ -131,8 +131,7 @@ describe("readAtMost", () => {
     const bytes = await readAtMost(response, 24);
 
     expect(Array.from(bytes)).toEqual(Array.from({length: 24}, (_, i) => i));
-    // Via the reader, not the stream: `getReader()` locks the stream, so cancelling the stream
-    // itself would reject instead of running the underlying source's `cancel()`.
+    // See readAtMost's doc comment for why this cancels via the reader, not the stream.
     expect(cancelled).toBe(true);
   });
 });
@@ -1238,9 +1237,9 @@ describe("functions", () => {
           `(captured ${kMaxFrameHeightPx}px)`);
       });
 
-      // A real capture lands a little past the ceiling (the outer page's own margin) — the case
+      // A real capture lands a little past the ceiling (the outer page's own chrome) — the case
       // ">=" exists for.
-      test("a capture past the ceiling (the outer page's own margin) is still a clip", async () => {
+      test("a capture past the ceiling (the outer page's own chrome) is still a clip", async () => {
         await givenDocument("imgchk10b", mixedDoc);
         const capturedHeightPx = kMaxFrameHeightPx + 16;
         stubShutterbug(shutterbugOk(), imageCheckOk({heightPx: capturedHeightPx}));

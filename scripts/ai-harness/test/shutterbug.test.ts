@@ -133,9 +133,8 @@ describe("production parity", () => {
   });
 
   it("records a full-page capture, capped at the ceiling — never a fixed-height or full-document one", () => {
-    // Shutterbug grows past the viewport but never shrinks below it, and the page caps it at the
-    // ceiling. Recording that as "fixed-height" or "full-document" would both be lies no
-    // freshness check could ever catch.
+    // See the captureMode comment in shutterbugParameterized: recording anything else here would
+    // misdescribe what was actually captured.
     const backend = shutterbugProductionCurrent({ fetchImpl: fakeFetch(), sleep: noSleep });
     expect(backend.renderTarget).toEqual({
       clueUrl: kProductionClueUrl,
@@ -395,8 +394,8 @@ describe("the network contract", () => {
   });
 
   it("refuses a full-page viewport taller than its own ceiling before posting anything", async () => {
-    // A full-page capture floors at the viewport, so a viewport above the ceiling would defeat
-    // the ceiling silently — passing construction and only failing after the document posts.
+    // See the construction check in shutterbugParameterized for why this must be caught here,
+    // before the document posts.
     const build = () => shutterbugParameterized({ fullPage: true, captureHeightPx: 5000, maxFrameHeightPx: 4000 });
     expect(build).toThrow(/--capture-height 5000 exceeds --max-frame-height 4000/);
     expect(build).toThrow(RenderLimitExceeded);

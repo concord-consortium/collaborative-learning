@@ -24,6 +24,11 @@ export const kInitialFrameHeightPx = 500;
 /**
  * The ceiling: the iframe never grows past this. Bounds a full-page capture before Shutterbug
  * rasterizes anything. Shared so production and the harness agree on where it is.
+ *
+ * This is what actually bounds a full-page capture — not the starting height Shutterbug is given
+ * (called the viewport elsewhere in this codebase). With `fullPage: true`, that value only sets
+ * where the iframe starts; Shutterbug still captures the whole page regardless of it, up to this
+ * ceiling.
  */
 export const kMaxFrameHeightPx = 4000;
 
