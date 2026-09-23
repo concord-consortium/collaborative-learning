@@ -13,9 +13,7 @@
 //
 // Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
 // The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type`,
-// declared in firestore.indexes.json and deployed to staging and production on 2026-08-13. A new
-// environment would need it created before this script or backfill-group-document-axes.ts can run at
-// all — the first query fails outright without it. Deploy with
+// declared in firestore.indexes.json. Without it the first query fails outright. Deploy it with
 // `firebase deploy --only firestore:indexes --project <alias>`, or use the one-click link Firestore
 // prints in the error. Diff against the deployed indexes first: an environment may carry indexes
 // absent from the file, which a --force deploy would delete.
@@ -32,9 +30,6 @@
 // Read ./README.md before running this: it runs after the other repairs in this directory.
 
 import type { Firestore } from "firebase-admin/firestore";
-// Specified without the `.js` extension that the other scripts here use. This module is loaded by a
-// Jest test, and Jest resolves only the extensionless form to the sibling `.ts` file; tsx resolves
-// either form, so running the script is unaffected.
 import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "../lib/document-metadata-lookup";
 import { isRtdbAddressable } from "./lib/rtdb-document-index";
 import { kBatchSize } from "./lib/firestore-batch";
