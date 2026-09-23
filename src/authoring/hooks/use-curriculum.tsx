@@ -207,6 +207,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
       api
         .get("/getContent", { branch, unit, path: "content.json" })
         .then((contentResponse) => {
+          // lastUnitRef has moved on to a newer unit -- this response is stale, ignore it rather
+          // than overwrite the newer unit's already-correct state.
+          if (lastUnitRef.current !== unit) return;
           if (!contentResponse.success) {
             setError(contentResponse.error);
             _setUnitConfig(undefined);
@@ -217,10 +220,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           setUnitConfigUnit(unit);
         })
         .catch((err) => {
+          if (lastUnitRef.current !== unit) return;
           setError(err.message);
           _setUnitConfig(undefined);
-          // Not scoped to this fetch -- an older, abandoned fetch resolving late can mark a newer
-          // unit "loaded" incorrectly, the same pre-existing gap as _setUnitConfig above.
           setUnitConfigUnit(unit);
         });
 
@@ -228,6 +230,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
       api
         .get("/getContent", { branch, unit, path: "teacher-guide/content.json" })
         .then((contentResponse) => {
+          if (lastUnitRef.current !== unit) return;
           if (!contentResponse.success) {
             _setTeacherGuideConfig(undefined);
             return;
@@ -235,6 +238,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           _setTeacherGuideConfig(contentResponse.content);
         })
         .catch(() => {
+          if (lastUnitRef.current !== unit) return;
           _setTeacherGuideConfig(undefined);
         });
     }
