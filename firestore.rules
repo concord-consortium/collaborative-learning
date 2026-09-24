@@ -104,12 +104,11 @@ service cloud.firestore {
     // TRANSITIONAL: `concurrent` is an authorization input for the history rule below
     // (isConcurrentClassDocument), so letting any class member set it on any document would let them
     // grant themselves history access to a classmate's document. It stays writable on axes-typed
-    // documents only, and then only to `true`, because two backfill paths merge-update it onto
-    // pre-existing group documents that predate the field: the on-open backfill in src/lib/db.ts and the
-    // one-shot scripts/backfill-group-document-axes.ts. Both write only `true`, so clearing the field is
-    // nobody's legitimate operation, and permitting it would let a class member strip a group document's
-    // shared history and edit access. `type` itself is read-only (preservesReadOnlyDocumentFields),
-    // so it cannot be flipped first to unlock this.
+    // documents only, and then only to `true`, because older app bundles still merge-update it onto group
+    // documents that predate the field when they open them. That backfill writes only `true`, so clearing
+    // the field is nobody's legitimate operation, and permitting it would let a class member strip a group
+    // document's shared history and edit access. `type` itself is read-only
+    // (preservesReadOnlyDocumentFields), so it cannot be flipped first to unlock this.
     // Residual: a class member can still create an axes-typed document owned by themselves with no
     // `concurrent` field — both create rules permit that — and then any classmate can update it to
     // `concurrent: true`, because this function tests only the document's `type`, never its owner. That
@@ -117,11 +116,8 @@ service cloud.firestore {
     // anyone else's work: documentOwnerOk blocks creating under another user's `uid`, and `type` is
     // read-only after creation, so an existing personal document can never be turned into a group one this
     // way. Closing it needs `concurrent` to become unchangeable after creation, which can't ship until the
-    // backfill this function exists for has drained in every environment.
-    // Once both backfill paths have run against every environment, this function should be deleted and
-    // `concurrent` added to preservesReadOnlyDocumentFields's readOnlyFieldsSet, making it settable only at
-    // document creation — which is already constrained: isValidDocumentCreateRequest requires a synthetic
-    // owner for a concurrent create (concurrentCreateOk) and pins the owner itself (documentOwnerOk).
+    // bundles that make this backfill write are gone: this function is then deleted and `concurrent` made
+    // read-only. See docs/document-axes/planned-rules-tightening.md.
     // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
     // stored type has run in every environment: pre-sweep documents still store `"group"`, newly-created
     // ones already store `"axes"`. Neither branch below is dead code — dropping `"group"` here before that
@@ -526,7 +522,8 @@ service cloud.firestore {
         // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
         // stored type has run in every environment. Neither branch below is dead code — dropping `"group"`
         // here before that sweep has completed would leave the losing side of a race undeletable for every
-        // not-yet-swept document.
+        // not-yet-swept document. Dropping it afterwards is part of
+        // docs/document-axes/planned-rules-tightening.md.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
           && (resource.data.type == "group" || resource.data.type == "axes")

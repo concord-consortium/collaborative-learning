@@ -44,19 +44,10 @@
 // Apply (performs the writes):                cd scripts && APPLY=1 npx tsx backfill-group-document-axes.ts
 //
 // This script authenticates as a service account, so it writes past Firestore rules regardless of
-// what they allow. The client-side backfill in src/lib/db.ts does not: it merge-updates `concurrent`
-// as an ordinary authenticated user, which is why the Firestore rule (concurrentChangeOk in
-// firestore.rules) transitionally allows any class member to set `concurrent` on an axes-typed
-// document. Once this script has been run against every environment, tighten that rule so
-// `concurrent` is settable only at document creation, and delete concurrentChangeOk — and constrain
-// isValidDocumentCreateRequest in firestore.rules alongside it, since it constrains neither
-// `concurrent` nor `uid` today: a truthy `concurrent` at create should imply the document is
-// axes-typed, and/or the create should require userIsRequestUser(), or a class member can create a
-// new document stamped with a classmate's `uid` and `concurrent: true`.
-//
-// The concurrent pass also unblocks a second cleanup: getDocumentTitle (src/models/document/document-kinds.ts)
-// selects the group-document title on the axes type plus a groupId, because a group document may carry
-// no `kind`. Once every group document has one, that check becomes `kind == "group"`.
+// what they allow. Older app bundles instead backfilled `concurrent` when a document was opened, as the
+// signed-in user, which is why concurrentChangeOk in firestore.rules still lets a class member set it on
+// an axes-typed document. Making `concurrent` creation-only once those bundles are gone is described in
+// docs/document-axes/planned-rules-tightening.md.
 
 import type { Firestore } from "firebase-admin/firestore";
 
