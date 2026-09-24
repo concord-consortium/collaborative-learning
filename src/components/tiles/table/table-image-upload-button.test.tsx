@@ -47,6 +47,8 @@ const renderButton = (withSelection: boolean, overrides: Partial<ITableToolbarCo
   return context;
 };
 
+const getInput = () => document.querySelector("input.upload-button-input") as HTMLInputElement;
+
 describe("TableImageUploadButton", () => {
   it("is disabled when no cell is selected", () => {
     renderButton(false);
@@ -60,17 +62,35 @@ describe("TableImageUploadButton", () => {
       .not.toHaveAttribute("aria-disabled");
   });
 
-  it("makes the file input inert when no cell is selected", () => {
-    renderButton(false);
-    expect(document.querySelector("input[type=file]")).toBeDisabled();
-  });
-
   it("calls uploadImage with the chosen file", async () => {
     const uploadImage = jest.fn();
     renderButton(true, { uploadImage });
     const file = new File(["x"], "photo.png", { type: "image/png" });
-    const input = document.querySelector("input[type=file]") as HTMLInputElement;
+    const input = getInput();
     await userEvent.upload(input, file);
     expect(uploadImage).toHaveBeenCalledWith(file);
+  });
+
+  it("does not open the file picker when clicked while disabled", async () => {
+    const uploadImage = jest.fn();
+    renderButton(false, { uploadImage });
+    const input = getInput();
+    const clickSpy = jest.spyOn(input, "click");
+    await userEvent.click(screen.getByRole("button", { name: /upload image/i }));
+    expect(clickSpy).not.toHaveBeenCalled();
+    expect(uploadImage).not.toHaveBeenCalled();
+  });
+
+  it("resets the input value so the same file can be uploaded again", async () => {
+    const uploadImage = jest.fn();
+    renderButton(true, { uploadImage });
+    const file = new File(["x"], "photo.png", { type: "image/png" });
+    const input = getInput();
+    await userEvent.upload(input, file);
+    expect(input.value).toBe("");
+    await userEvent.upload(input, file);
+    expect(uploadImage).toHaveBeenCalledTimes(2);
+    expect(uploadImage).toHaveBeenNthCalledWith(1, file);
+    expect(uploadImage).toHaveBeenNthCalledWith(2, file);
   });
 });

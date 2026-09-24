@@ -32,6 +32,8 @@ export const UploadButton =
     if (files?.length) {
       onUpload(files[0]);
     }
+    // Reset so choosing the same file again still fires a change event.
+    e.currentTarget.value = "";
   };
 
   const input =

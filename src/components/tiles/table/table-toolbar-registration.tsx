@@ -11,13 +11,14 @@ import { kGraphTileType } from "../../../plugins/graph/graph-defs";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
 import { DataSetViewButton } from "../../toolbar/data-set-view-button";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
-import { ImageUploadButton } from "../image/image-toolbar";
+import { UploadButton } from "../../toolbar/upload-button";
 
 import DeleteSelectedIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIcon from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import ImportDataIcon from "../../../clue/assets/icons/table/import-data-icon.svg";
+import UploadImageIcon from "../../../assets/icons/upload-image/upload-image-icon.svg";
 const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
 
@@ -160,9 +161,15 @@ export const TableImageUploadButton = observer(function TableImageUploadButton(
   const disabled = !dataSet?.isAnyCellSelected;
 
   return (
-    <TileToolbarButton name={name} title="Upload image" disabled={disabled}>
-      <ImageUploadButton disabled={disabled} onUploadImageFile={file => toolbarContext?.uploadImage(file)} />
-    </TileToolbarButton>
+    <UploadButton
+      name={name}
+      title="Upload image"
+      disabled={disabled}
+      accept="image/png, image/jpeg"
+      onUpload={file => toolbarContext?.uploadImage(file)}
+    >
+      <UploadImageIcon />
+    </UploadButton>
   );
 });
 
