@@ -4,6 +4,7 @@ import { getParentOfType, getSnapshot, isAlive } from "mobx-state-tree";
 import React, { useEffect, useRef, useState } from "react";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
+import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
@@ -14,6 +15,7 @@ import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
 
@@ -94,7 +96,22 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           previousTextRef.current = content.text;
           content.setText("");
           const summary = documentSummarizer(document.content, {});
-          let dynamicContentPrompt = summary
+          // document's own curriculum stamp, not stores.problemOrdinal (the displayed problem,
+          // which can diverge from the document's -- four-up view, a teacher inspecting a
+          // student's document, history scrubbing). Proceeds only when the document belongs to
+          // the unit actually loaded in memory; a personal document has none of these fields.
+          const unitSlice = document.unit && document.investigation && document.problem &&
+            document.unit === unit.code
+              ? unitSummarySlice(
+                  unit.config?.aiUnitSummary, liveProblemsFromUnit(unit),
+                  `${document.investigation}.${document.problem}`
+                )
+              : undefined;
+          const unitContext = unitSlice && formatUnitSummarySlice(unitSlice);
+          let dynamicContentPrompt = unitContext
+            ? `This is a summary of the unit's current and nearby problems:\n\n${unitContext}\n\n\n`
+            : "";
+          dynamicContentPrompt += summary
             ? `This is a summary of the current document:\n\n${summary}\n\n\n`
             : `No information about the current document could be found.\n\n\n`;
           dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
@@ -137,7 +154,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
-    readOnly, userContext, unit.code, systemPrompt
+    readOnly, userContext, unit, systemPrompt
   ]);
 
   // Track the prompt's value at focus time so we can log once on blur, and only when it changed —

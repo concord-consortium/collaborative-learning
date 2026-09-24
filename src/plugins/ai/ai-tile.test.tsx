@@ -1,6 +1,14 @@
 // Mock the useStores hook to provide unit.code and appConfig
 const mockStores = {
-  unit: { code: "test-unit" },
+  unit: {
+    code: "test-unit",
+    // Shaped like a real UnitModelType's investigations/problems tree -- liveProblemsFromUnit
+    // only reads .ordinal/.problems/.title, so a plain object tree is enough.
+    investigations: [
+      { ordinal: 1, problems: [{ ordinal: 1, title: "Problem 1.1" }, { ordinal: 2, title: "Problem 1.2" }] }
+    ],
+    config: undefined as { aiUnitSummary?: unknown } | undefined,
+  },
   appConfig: {
     getSetting: jest.fn((key: string, category: string) => {
       if (key === "systemPrompt" && category === "ai") {
@@ -171,8 +179,11 @@ describe("AIComponent", () => {
       }
     } as any);
 
-    function documentWith(docContent: unknown) {
-      return { key: "test-doc-1", content: docContent };
+    function documentWith(
+      docContent: unknown,
+      curriculum?: { unit?: string; investigation?: string; problem?: string }
+    ) {
+      return { key: "test-doc-1", content: docContent, ...curriculum };
     }
 
     beforeEach(() => {
@@ -186,6 +197,7 @@ describe("AIComponent", () => {
       mockStores.networkDocuments.getDocument.mockReset();
       mockStores.networkDocuments.getDocument.mockReturnValue(undefined);
       mockGetAiContent.mockClear();
+      mockStores.unit.config = undefined;
     });
 
     // AI tiles also sit in authored curriculum sections, with no documentId — the tile must stay
@@ -317,6 +329,91 @@ describe("AIComponent", () => {
       expect(request.dynamicContentPrompt).toContain("The student's answer.");
       expect(request.dynamicContentPrompt).toContain("What do you think?");
       expect(aiContent.text).toBe("Mocked customized content");
+    });
+
+    describe("the unit-summary slice", () => {
+      // Matches mockStores.unit's investigations tree (ordinals "1.1"/"1.2", the same titles).
+      function unitSummaryWithDigest(digest: string) {
+        return {
+          generatedAt: "2026-01-01T00:00:00.000Z", sourceHash: "h", overview: "o",
+          sourceManifest: [
+            { ordinal: "1.1", title: "Problem 1.1", problemHash: "h1" },
+            { ordinal: "1.2", title: "Problem 1.2", problemHash: "h2" },
+          ],
+          entries: [
+            { ordinal: "1.1", priorKnowledge: "", problemDigest: digest },
+            { ordinal: "1.2", priorKnowledge: "knows things", problemDigest: "digest two" },
+          ],
+        };
+      }
+      const unitContextHeading = "This is a summary of the unit's current and nearby problems:";
+
+      it("in a curriculum document of the loaded unit, prepends the slice ahead of the document " +
+         "summary", async () => {
+        mockStores.unit.config = { aiUnitSummary: unitSummaryWithDigest("digest one") };
+        mockStores.documents.getDocument.mockReturnValue(
+          documentWith(populatedDocContent(), { unit: "test-unit", investigation: "1", problem: "1" })
+        );
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        const [request] = mockGetAiContent.mock.calls[0];
+        expect(request.dynamicContentPrompt).toContain(unitContextHeading);
+        expect(request.dynamicContentPrompt).toContain("digest one");
+        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+        // The unit context comes first, ahead of the document summary.
+        expect(request.dynamicContentPrompt.indexOf(unitContextHeading))
+          .toBeLessThan(request.dynamicContentPrompt.indexOf("The student's answer."));
+      });
+
+      it("in a personal document (no curriculum fields), sends no unit-summary slice", async () => {
+        mockStores.unit.config = { aiUnitSummary: unitSummaryWithDigest("digest one") };
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        const [request] = mockGetAiContent.mock.calls[0];
+        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
+        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+      });
+
+      it("in a document from a different unit than the one loaded, sends no unit-summary slice", async () => {
+        mockStores.unit.config = { aiUnitSummary: unitSummaryWithDigest("digest one") };
+        mockStores.documents.getDocument.mockReturnValue(
+          documentWith(populatedDocContent(), { unit: "other-unit", investigation: "1", problem: "1" })
+        );
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        const [request] = mockGetAiContent.mock.calls[0];
+        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
+        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+      });
+
+      it("for a unit with no aiUnitSummary authored, sends no unit-summary slice even for a " +
+         "matching document", async () => {
+        mockStores.documents.getDocument.mockReturnValue(
+          documentWith(populatedDocContent(), { unit: "test-unit", investigation: "1", problem: "1" })
+        );
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        const [request] = mockGetAiContent.mock.calls[0];
+        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
+        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+      });
     });
 
     // A read-only rendering (e.g. a teacher's 4-up view of another student's document) hides the

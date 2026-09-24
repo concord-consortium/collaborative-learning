@@ -6,7 +6,8 @@ import { getParent } from "mobx-state-tree";
 import { InvestigationModelType } from "../../models/curriculum/investigation";
 import { ProblemModelType } from "../../models/curriculum/problem";
 import { UnitModelType } from "../../models/curriculum/unit";
-import { formatUnitSummarySlice, ILiveProblem, unitSummarySlice } from "../../../shared/unit-summary-slice";
+import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
+import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
 
 // The same ordinal string Unit.getAllProblemOrdinals() produces --
 // "${investigation.ordinal}.${problem.ordinal}". getParent is called twice because a problem's
@@ -15,15 +16,6 @@ import { formatUnitSummarySlice, ILiveProblem, unitSummarySlice } from "../../..
 export function currentProblemOrdinal(problem: ProblemModelType): string {
   const investigation = getParent(getParent(problem)) as InvestigationModelType;
   return `${investigation.ordinal}.${problem.ordinal}`;
-}
-
-function liveProblemsFromUnit(unit: UnitModelType): ILiveProblem[] {
-  return unit.investigations.reduce<ILiveProblem[]>((acc, investigation) => {
-    investigation.problems.forEach(problem => {
-      acc.push({ ordinal: `${investigation.ordinal}.${problem.ordinal}`, title: problem.title });
-    });
-    return acc;
-  }, []);
 }
 
 function arraysEqual(a: string[], b: string[]): boolean {
