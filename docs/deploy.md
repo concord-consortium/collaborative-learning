@@ -14,6 +14,47 @@ See [deploy-setup.md in starter-projects](https://github.com/concord-consortium/
 
 `release.yml` is a reusable workflow, so `release-production.yml` and `release-staging.yml` must each grant `id-token: write`. A called workflow can never have more token permissions than its caller, and GitHub does not grant `id-token: write` by default.
 
+## Deploy timing
+
+The Firebase functions, the Firestore and Realtime Database rules, and the Firestore indexes are
+deployed separately from the CLUE client, and usually not at the same moment. So every PR that
+changes one of them says in its description when each part can be deployed, and why, in a
+callout like this:
+
+```markdown
+> [!IMPORTANT]
+> **Deploy timing**
+> - **functions: with** — the released client waits for a comment that the new empty-document
+>   skip never posts, so Ideas on an empty document would look frozen until the client ships.
+> - **rules: before** — only widens what chat messages may contain; the released client never
+>   writes the new fields.
+```
+
+| Part | Files that count |
+|---|---|
+| functions | `functions-v1/`, `functions-v2/`, `authoring-api/`, and any `shared/` file a function compiles |
+| rules | `firestore.rules`, `database.rules.json` |
+| indexes | `firestore.indexes.json` |
+
+- **before**: safe to deploy as soon as it merges. The currently released client keeps working with it.
+- **with**: deploy just before or just after the client release, but not long before it.
+- **after**: needs the new client released first.
+
+The reason is required: it is what a release manager reads when planning the deploys. Judge both
+directions: the new client running against the currently deployed part, and the **currently
+released client running against the new part**. The second is the easy one to miss — a change can
+break nothing and still look broken, like the frozen Ideas button above. Parts can differ: the rules
+can go out early so the PR is easier to test while the functions wait for the release. Put anything
+more specific — ordering, secrets, index build time — elsewhere in the description.
+
+The callout must be a GitHub alert (`[!IMPORTANT]` is the usual choice; `[!WARNING]` suits an
+`after`) whose first line is `**Deploy timing**`, so it stands out to reviewers. Entries anywhere
+else in the description are not read. Tests and docs in these folders don't need an entry.
+
+The [`Deploy Timing`](../.github/workflows/deploy-timing.yml) check fails until each part the PR
+touches has exactly one entry with a reason, and re-runs when the description is edited. To run it
+locally: `npx tsx scripts/check-deploy-timing.ts --base origin/master --body-file <description.md>`.
+
 ## Where to find builds
 
 - **branch builds**: when a developer pushes a branch, GitHub actions will build and deploy it to `https://collaborative-learning.concord.org/branch/[branch-name]/`. An issue-tracker prefix or suffix is stripped off and not included in the folder name, so the deployed name is often not the branch's git name. `concord-consortium/s3-deploy-action` (`src/deploy-props.ts`) strips the first of these that matches:
