@@ -18,7 +18,7 @@ describe("isAxesType", () => {
     expect(isAxesType(AxesDocument)).toBe(true);
   });
 
-  it("rejects the pre-rename value and every other document type", () => {
+  it("rejects the pre-sweep value and every other document type", () => {
     // Firestore stores only "axes"; the realtime database still says "group", but no RTDB type reaches here.
     expect(isAxesType(GroupDocument)).toBe(false);
     expect(isAxesType(PersonalDocument)).toBe(false);
@@ -28,7 +28,7 @@ describe("isAxesType", () => {
 });
 
 describe("isSortableType", () => {
-  it("includes the axes type but not the pre-rename value", () => {
+  it("includes the axes type but not the pre-sweep value", () => {
     expect(isSortableType(AxesDocument)).toBe(true);
     expect(isSortableType(GroupDocument)).toBe(false);
   });
@@ -39,7 +39,7 @@ describe("isSortableType", () => {
 });
 
 describe("isDocumentType", () => {
-  it("rejects the pre-rename value", () => {
+  it("rejects the pre-sweep value", () => {
     expect(isDocumentType(GroupDocument)).toBe(false);
   });
 });

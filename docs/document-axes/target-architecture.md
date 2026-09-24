@@ -196,13 +196,11 @@ The gate is a stage in the progression, not a permanent rule:
 Nothing is lost while a type waits: an unconverted document's axis values are still derived from the registry at
 runtime, they are simply not persisted onto that document yet.
 
-Converting a type's existing documents is where the security question above bites. A client-side stamp made
-when a document is opened writes as the signed-in user, so it can only ever stamp values a client is allowed to
-write — and an axis the rules *police* must not stay client-writable, since a client could then hand itself the
-value. A converted type whose axis feeds a rule therefore needs its existing documents stamped by an admin
-script or a Cloud Function, and its rule tightened to reject after-the-fact changes. `concurrent` went this
-way: it is stored so that rules can enforce it, so its backfill ran as an admin sweep, and the rule allowing a
-client to set it after creation is tightened to creation-only once no client still makes that write.
+Converting a type's existing documents is where the security question above bites: a converted type whose axis
+feeds a rule needs its existing documents stamped by an admin script or a Cloud Function, and its rule tightened
+to reject after-the-fact changes. `concurrent` went this way. Its backfill ran as the axes sweep, and the rule
+that lets a client set it after creation is made creation-only once no client still makes that write (see
+[planned-rules-tightening.md](./planned-rules-tightening.md)).
 
 ## The boundary — metadata getters on the model, behaviors outside
 

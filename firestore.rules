@@ -118,11 +118,8 @@ service cloud.firestore {
     // way. Closing it needs `concurrent` to become unchangeable after creation, which can't ship until the
     // bundles that make this backfill write are gone: this function is then deleted and `concurrent` made
     // read-only. See docs/document-axes/planned-rules-tightening.md.
-    // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
-    // stored type has run in every environment: pre-sweep documents still store `"group"`, newly-created
-    // ones already store `"axes"`. Neither branch below is dead code — dropping `"group"` here before that
-    // sweep has completed would deny every not-yet-swept document the `concurrent` write this function
-    // exists to allow.
+    // `"group"` is the pre-sweep type value. It stays accepted, alongside `"axes"`, until the tightening in
+    // docs/document-axes/planned-rules-tightening.md.
     function concurrentChangeOk() {
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       let docType = resource.data.get("type", "");
@@ -519,11 +516,8 @@ service cloud.firestore {
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
-        // Both `"group"` and `"axes"` are live document values until the one-time sweep that rewrites the
-        // stored type has run in every environment. Neither branch below is dead code — dropping `"group"`
-        // here before that sweep has completed would leave the losing side of a race undeletable for every
-        // not-yet-swept document. Dropping it afterwards is part of
-        // docs/document-axes/planned-rules-tightening.md.
+        // `"group"` is the pre-sweep type value. It stays accepted, alongside `"axes"`, until the tightening
+        // in docs/document-axes/planned-rules-tightening.md.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
           && (resource.data.type == "group" || resource.data.type == "axes")

@@ -119,7 +119,7 @@ interface IGetOrCreateCanonicalDocumentOpts {
   // The pointer slot's label. It is the path's final segment and is written to the winning document's
   // `canonical` field.
   canonicalLabel: string;
-  // The document's stored `type` (transitional) and its `kind` axis. A group document's kind is GroupDocument
+  // The document's stored `type` and its `kind` axis. A group document's kind is GroupDocument
   // while a class-wide document's is the declared kind; both are axes-typed. The kind also drives the owner
   // uid (createDocument derives it via the kind registry).
   type: DBDocumentType;
@@ -1301,10 +1301,11 @@ export class DB {
                         `at '${firebaseRefPath(metadataRef)}'`;
             throw new Error(msg);
           }
-          // Every type is registered as a kind, but only axes-typed documents store theirs (see "Which
-          // documents get stamped" in docs/document-axes/target-architecture.md), so a document that stores
-          // none takes the kind its type names. `concurrent` is read from storage only: it is what the
-          // Firestore rules key on, and the model has to agree with them.
+          // Only axes-typed documents store a kind (see "Which documents get stamped" in
+          // docs/document-axes/target-architecture.md). Every other type is registered as a kind of the same
+          // name, so a problem, personal or publication document takes the kind its type names. `"axes"` is
+          // not a kind, so an axes document relies on the kind stamped at creation. `concurrent` is read from
+          // storage only: it is what the Firestore rules key on, and the model has to agree with them.
           const kind =
             firestoreMetadata.kind ?? getDocumentKindMetadataFields(firestoreMetadata.type).kind ?? undefined;
           const concurrent = firestoreMetadata.concurrent === true ? true : undefined;

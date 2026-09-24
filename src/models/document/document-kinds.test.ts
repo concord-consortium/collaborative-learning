@@ -233,10 +233,14 @@ describe("document kinds registry", () => {
     });
 
     it("titles a group document from its kind and groupId", () => {
-      // Every group document stores kind "group" (the axes backfill stamped the ones that predated it),
-      // and the group kind registers no title, so the label is built here.
+      // Every group document stores kind "group", and the group kind registers no title, so the label is
+      // built here.
       expect(getDocumentTitle({ kind: GroupDocument, type: AxesDocument, groupId: "3" }))
         .toBe("Group 3 Document");
+    });
+
+    it("does not title a group-kind document that has no groupId", () => {
+      expect(getDocumentTitle({ kind: GroupDocument, type: AxesDocument })).toBeUndefined();
     });
 
     it("does not title a document by its type", () => {

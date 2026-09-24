@@ -46,10 +46,10 @@ Two users in the same group ended up working on completely separate group docume
 Each group's document is now found through its canonical pointer, and every path converges on the key that pointer names (`resolveCanonicalDocument`/`resolveCanonicalDocumentUncached` in [src/lib/db.ts](../../src/lib/db.ts)):
 
 - When a group has no pointer, a client creates a document and claims the slot in a transaction. A client whose claim loses, or whose transaction fails and a re-read finds another document in the slot, deletes the document it just created and uses the slot's document instead.
-- Divergence is logged (`console.warn`) with the slot and the keys involved.
+- If the claim transaction itself fails, the client re-reads the slot and logs a `console.warn` with the slot and the key it created. Losing an ordinary race logs nothing.
 - Concurrent resolves of the same slot within one client share a single in-flight resolution, so the several call sites that can fire around login do not race each other into create-then-delete churn.
 
-Duplicates created before canonical pointers existed were resolved by a one-time script (`scripts/metadata-repair/backfill-group-canonical-pointers.ts`, CLUE-694), which claimed each group's slot for one document and deleted the rest after backing them up.
+Duplicates created before canonical pointers existed were resolved by a one-time script (`scripts/metadata-repair/backfill-group-canonical-pointers.ts`), which claimed each group's slot for one document and deleted the rest after backing them up.
 
 # Implementation TODOs
 

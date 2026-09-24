@@ -54,8 +54,7 @@ export function isPublishedType(type: string) {
           .indexOf(type) >= 0;
 }
 // Sort Work *membership*, asked of the type, so every axis-native kind added later is listed by default.
-// An axis-native kind that should not be listed should change this mechanism to check the axis fields that
-// determine it should not be listed instead of just checking the type or kind.
+// To exclude one, test its axis fields here rather than its type or kind.
 export function isSortableType(type: string){
   return [
     ProblemDocument,

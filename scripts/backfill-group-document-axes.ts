@@ -1,4 +1,4 @@
-// Normalize the stored axes of documents that still carry the pre-rename type `"group"` — both regular
+// Normalize the stored axes of documents that still carry the old type `"group"` — both regular
 // group documents and class-wide collaborative documents, which share the generic axes type.
 //
 // Three scope-selected passes plus the type rename, committed as ONE merged write per document. Scope
@@ -44,9 +44,7 @@
 // Apply (performs the writes):                cd scripts && APPLY=1 npx tsx backfill-group-document-axes.ts
 //
 // This script authenticates as a service account, so it writes past Firestore rules regardless of
-// what they allow. Older app bundles instead backfilled `concurrent` when a document was opened, as the
-// signed-in user, which is why concurrentChangeOk in firestore.rules still lets a class member set it on
-// an axes-typed document. Making `concurrent` creation-only once those bundles are gone is described in
+// what they allow. For the client-side write the rules still permit, see
 // docs/document-axes/planned-rules-tightening.md.
 
 import type { Firestore } from "firebase-admin/firestore";

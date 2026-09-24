@@ -1045,6 +1045,19 @@ describe("db", () => {
       expect(doc.concurrent).toBeFalsy();
     });
 
+    it("leaves kind unset for an axes document that stores none", async () => {
+      // `"axes"` is not a registered kind, so the registry has nothing to supply: an axes document's kind
+      // comes only from the value stamped at creation.
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      const firestoreMetadata = {
+        uid: "g", type: AxesDocument, key: "g4", context_id: "class-1", concurrent: true
+      } as any;
+      const doc = await db.openDocument({
+        documentKey: "g4", type: AxesDocument, userId: "g", firestoreMetadata
+      } as any);
+      expect(doc.kind).toBeUndefined();
+    });
+
     it("does not supply or write concurrent for an axes document that lacks it", async () => {
       // The stored field is the only authority: the Firestore rules key on it, so the model must agree.
       const setSpy = jest.fn(() => Promise.resolve());

@@ -537,7 +537,7 @@ describe("isDocumentAccessibleToUser — concurrent documents", () => {
     expect(isDocumentAccessibleToUser({ documentMetadata: notConcurrent, documents, user: student })).toBe(false);
   });
 
-  it("does not grant access on the pre-rename type alone", () => {
+  it("does not grant access on the pre-sweep type alone", () => {
     // Class read access is exactly the stored `concurrent` field — the same field the Firestore rules
     // key on. Every group document stores it, so a type that says "group" grants nothing by itself.
     const noConcurrent: any = { uid: groupUid, type: GroupDocument, key: "g3" };

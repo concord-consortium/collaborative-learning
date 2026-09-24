@@ -41,8 +41,8 @@ so this table doubles as a migration-progress view.
 | `tools` | Firestore | all editable | `DocumentMetadataModel.tools` | Yes, class-wide |
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
-| `canonical` | Firestore | group | not surfaced | No |
-| `axisProfile` | Firestore | group | not surfaced — deliberately | No |
+| `canonical` | Firestore | group, class-wide | not surfaced | No |
+| `axisProfile` | Firestore | group, class-wide | not surfaced — deliberately | No |
 | `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
 | `groupId` | Firestore | group (the **owning** group) | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | No — immutable |
 
@@ -397,7 +397,7 @@ identity of a document.
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
 
 `type` is written once. Group and class-wide documents store the generic `"axes"`. The realtime database's
-copy of their metadata is a permanent mix — new documents are written there as `"axes"` too, but it was never
+copy of their metadata is a permanent mix — new documents are written there as `"axes"` too, but it is never
 swept, so older ones still say `"group"` — and it is never read for the type.
 
 ### `axisProfile`

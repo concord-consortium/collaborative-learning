@@ -265,7 +265,7 @@ export function getDocumentTitle(document: IDocumentTitleFields): string | undef
   const info = getKindDefinitionFor(document);
   if (info?.title != null) return info.title;
   // The group kind registers no title, because the label interpolates the group's id.
-  if (document.kind === GroupDocument) return `Group ${document.groupId} Document`;
+  if (document.kind === GroupDocument && document.groupId) return `Group ${document.groupId} Document`;
   return undefined;
 }
 
