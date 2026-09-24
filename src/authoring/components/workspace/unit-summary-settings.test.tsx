@@ -149,6 +149,40 @@ describe("UnitSummarySettings", () => {
     expect(screen.getByLabelText("Overview")).toHaveValue("In-progress edit.");
   });
 
+  it("does not show a status-check failure from a unit navigated away from, over the current unit", async () => {
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+    const pendingGets: Array<{ params: unknown; reject: (err: unknown) => void; resolve: (v: unknown) => void }> = [];
+    mockGet.mockImplementation((_endpoint: string, params: unknown) => new Promise((resolve, reject) => {
+      pendingGets.push({ params, reject, resolve });
+    }));
+
+    const { rerender } = render(<UnitSummarySettings />);
+    await flush();
+    // The status check for "main"/"test-unit" is now pending.
+
+    mockCurriculumValue.branch = "other-branch";
+    mockCurriculumValue.unit = "other-unit";
+    rerender(<UnitSummarySettings />);
+    await flush();
+    // The status check for "other-branch"/"other-unit" is now pending too.
+
+    expect(pendingGets).toHaveLength(2);
+
+    // The current unit's own check succeeds first.
+    await act(async () => {
+      pendingGets[1].resolve(buildStatus());
+      await Promise.resolve();
+    });
+
+    // The unit navigated away from fails, arriving late.
+    await act(async () => {
+      pendingGets[0].reject(new Error("stale unit network error"));
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByText(/stale unit network error/)).not.toBeInTheDocument();
+  });
+
   it("does not persist a generated result until Save is clicked", async () => {
     mockPost.mockResolvedValue({ success: true, summary: buildSummary({ overview: "Generated overview." }) });
     render(<UnitSummarySettings />);

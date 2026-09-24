@@ -148,6 +148,9 @@ const UnitSummarySettings: React.FC = () => {
         setStatusError(response.error);
       }
     } catch (err) {
+      // Same staleness check as the success path above: a slow, failed request for a unit the
+      // author has since navigated away from should not show its error over the current unit.
+      if (branchUnitRef.current.branch !== branch || branchUnitRef.current.unit !== unit) return;
       setStatusError(err instanceof Error ? err.message : String(err));
     }
   }, [api, branch, unit]);
@@ -161,6 +164,7 @@ const UnitSummarySettings: React.FC = () => {
   useEffect(() => {
     setFormState(undefined);
     setLiveStatus(undefined);
+    setStatusError(undefined);
     setGenerationError(undefined);
     setSaveValidation(undefined);
   }, [branch, unit]);
