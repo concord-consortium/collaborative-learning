@@ -20,7 +20,7 @@ export function handlePlaceholderTile({ tile }: TileHandlerParams): string|undef
 // added here. Emitted even though the prompt is summarized minimally: a drawing used as a prompt
 // gives every object an id, and those are unusable without the tile's id to go with them.
 function questionPromptSummary({
-  dataSets, tileMap, headingLevel, options, promptTile
+  dataSets, tileMap, headingLevel, promptTile
 }: TileHandlerBaseParams & { promptTile: any }): string {
   if (!promptTile?.content) { return ""; }
   return heading(headingLevel, "Question Prompt") +
@@ -30,7 +30,7 @@ function questionPromptSummary({
       tile: { model: promptTile, number: 0 },
       tileMap,
       headingLevel,
-      options: { ...options, minimal: true }
+      options: { minimal: true }
     }) +
     "\n\n";
 }

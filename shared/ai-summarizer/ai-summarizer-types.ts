@@ -148,9 +148,10 @@ export interface AiSummarizerOptions {
    * markdown table; `schema-only` keeps the heading, attributes, and case count but leaves the case
    * data out.
    *
-   * A Table tile's own per-tile rendering (handle-table-tile.ts) reads this same option to decide
-   * whether to show row data at all, but caps it at TABLE_MARKDOWN_ROW_CAP rows regardless of value
-   * -- "full" is only uncapped in the document-level summary above.
+   * A Table tile backed by a shared data set (the modern, runtime shape) shows row data (capped at
+   * TABLE_MARKDOWN_ROW_CAP) only when this is explicitly "full" -- unset or "schema-only" both
+   * leave it silent, unlike the document-level summary above. A legacy, curriculum-authored table
+   * (columns stored directly on the tile) reads this option differently; see handle-table-tile.ts.
    */
   dataSetTables?: "full" | "schema-only";
   /**

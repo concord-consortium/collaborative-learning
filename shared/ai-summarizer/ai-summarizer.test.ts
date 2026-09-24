@@ -657,6 +657,14 @@ describe('ai-summarizer', () => {
           expect(tileLevelText).toContain('| Name |');
         });
 
+        it('"schema-only" leaves the tile-level mention exactly as bare as the default, not full', () => {
+          const schemaOnly = documentSummarizer(withData, { dataSetTables: 'schema-only' });
+          const tileLevelText = schemaOnly.slice(0, schemaOnly.indexOf('# Data Sets'));
+          expect(tileLevelText).toContain('This tile contains a table which uses the "Sample Data"');
+          expect(tileLevelText).not.toContain('It has');
+          expect(tileLevelText).not.toContain('| Name |');
+        });
+
         it('keeps the schema and the case count but drops the case data', () => {
           const schemaOnly = documentSummarizer(withData, { dataSetTables: 'schema-only' });
           // The shape of the data survives: heading, attributes table, and how many cases there are.
@@ -1414,6 +1422,44 @@ describe('documentSummarizerWithDrawings', () => {
       // Should use custom handler instead of enhanced drawing handler
       expect(result).toContain('Custom drawing description');
       expect(result).not.toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
+    });
+
+    it('does not apply a custom tile handler to a question tile\'s own prompt', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: { row1: { tiles: [{ tileId: 'q1' }], isSectionHeader: false } },
+        tileMap: {
+          q1: {
+            id: 'q1',
+            content: {
+              type: 'Question',
+              rowOrder: ['promptRow'],
+              rowMap: { promptRow: { tiles: [{ tileId: 'prompt' }] } }
+            }
+          },
+          prompt: {
+            id: 'prompt',
+            content: {
+              type: 'Drawing',
+              objects: [{ id: 'r1', type: 'rectangle', x: 0, y: 0, width: 10, height: 5 }]
+            }
+          }
+        }
+      };
+
+      const customDrawingHandler: TileHandler = ({ tile }: TileHandlerParams) => {
+        if (tile.model.content.type !== 'Drawing') return undefined;
+        return 'Custom drawing description';
+      };
+
+      const result = documentSummarizerWithDrawings(content, {
+        tileHandlers: [customDrawingHandler, ...defaultTileHandlers]
+      });
+
+      // A question's prompt is always summarized the plain default way, regardless of what tile
+      // handlers the caller asked for elsewhere in the document.
+      expect(result).not.toContain('Custom drawing description');
+      expect(result).toContain('| r1 | rectangle |');
     });
 
     it('should handle complex document structures with drawings', () => {

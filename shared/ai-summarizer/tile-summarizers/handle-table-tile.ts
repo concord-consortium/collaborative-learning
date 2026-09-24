@@ -36,11 +36,11 @@ export function handleTableTile({ tile, dataSets, options }: TileHandlerParams):
       : ` which uses data set ${sharedDataSet.id}`;
     // Unlike the document-level "Data Sets" summary (ai-summarizer.ts), where an omitted
     // `dataSetTables` means "full", this tile stays silent about the data set's contents unless
-    // `dataSetTables` is explicitly "full" or "schema-only".
-    if (!options.dataSetTables) {
+    // `dataSetTables` is explicitly "full".
+    if (options.dataSetTables !== "full") {
       return `This tile contains a table${nameClause}.`;
     }
-    return `This tile contains a table${nameClause}.\n\n${summarizeDataSet(sharedDataSet, options)}`;
+    return `This tile contains a table${nameClause}.\n\n${summarizeDataSet(sharedDataSet)}`;
   }
 
   return "This tile contains a table";
@@ -61,11 +61,8 @@ function summarizeInlineColumns(columns: InlineTableColumn[], options: AiSummari
   return renderCappedTable(headers, rows);
 }
 
-function summarizeDataSet(dataSet: NormalizedDataSet, options: AiSummarizerOptions): string {
+function summarizeDataSet(dataSet: NormalizedDataSet): string {
   const headers = dataSet.attributes.map((attr: NormalizedAttribute) => attr.name);
-  if (options.dataSetTables === "schema-only") {
-    return schemaSummary(headers, dataSet.numCases);
-  }
   return renderCappedTable(headers, dataSet.data);
 }
 
