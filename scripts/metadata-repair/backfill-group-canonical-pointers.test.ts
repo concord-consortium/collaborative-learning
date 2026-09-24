@@ -266,6 +266,16 @@ describe("backfillSpace", () => {
     expect(res).toMatchObject({ slots: 0, legacyPointersDeleted: 1 });
   });
 
+  it("keeps a legacy pointer naming a document skipped for a missing slot field", async () => {
+    // "z" has no offeringId, so it is skipped on its own and belongs to no slot; its 7.3.0 pointer's path
+    // still names a complete slot. Deleting the pointer would leave "z" with nothing pointing at it.
+    const { deps, calls } = makeDeps([mkDoc("z", { offeringId: undefined })], {},
+      { legacy: [mkLegacy(legacyPointerPaths[0], "z")] });
+    const res = await backfillSpace(space, { dryRun: false }, deps);
+    expect(calls).toEqual(["list", "list legacy"]);
+    expect(res).toMatchObject({ legacyPointersDeleted: 0, skipped: [{ key: "z" }] });
+  });
+
   it("keeps the legacy pointers of a slot it skipped for a bad document", async () => {
     // Group 3 is skipped for a wrong uid; group 4 is fine.
     const group4Legacy = "authed/p/classes/c1/offerings/o1/groups/4/canonical/default";

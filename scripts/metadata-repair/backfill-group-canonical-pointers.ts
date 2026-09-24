@@ -421,8 +421,13 @@ export async function backfillSpace(
     }
   }
 
+  // A document skipped on its own for a missing slot field has no slot key to match its pointer's path
+  // against, so its legacy pointers are also kept by the key they name. Deleting them would leave the
+  // document behind with nothing pointing at it.
+  const skippedDocKeys = new Set(skipped.map(d => d.key));
   for (const legacy of await deps.listLegacyPointers()) {
     if (skippedSlots.has(slotKey(legacy))) continue;
+    if (typeof legacy.documentKey === "string" && skippedDocKeys.has(legacy.documentKey)) continue;
     if (!dryRun) await removeLegacyPointer(legacy.path);
     result.legacyPointersDeleted++;
     log(`  ${dryRun ? "would delete" : "deleted"} legacy pointer ${legacy.path} ` +
