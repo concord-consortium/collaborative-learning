@@ -1,5 +1,6 @@
 import {UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
+import {labelDigest} from "./unit-summary-digest";
 import {generatePriorKnowledge} from "./unit-summary-prior-knowledge";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
 
@@ -67,6 +68,18 @@ describe("generatePriorKnowledge", () => {
       expect(forEntry2!.input).not.toContain("digest three");
     });
 
+    it("labels each digest with its problem number and title, so a duplicate-content reference " +
+      "can be resolved back to the labeled problem", async () => {
+      const generateText = jest.fn().mockResolvedValue("pk");
+      await generatePriorKnowledge(
+        problems, digests, {client: fakeClient(generateText), model: "m", mode: "prefix"}
+      );
+      const requests = calls(generateText);
+      const forEntry2 = requests.find((r) => r.input.includes("digest one") && r.input.includes("digest two"));
+      expect(forEntry2!.input).toContain(labelDigest(problems[0], "digest one"));
+      expect(forEntry2!.input).toContain(labelDigest(problems[1], "digest two"));
+    });
+
     it("runs prefix-mode calls concurrently (does not wait for entry i before starting entry i+1)", async () => {
       const started: number[] = [];
       const generateText = jest.fn().mockImplementation(async ({input}: GenerateTextParams) => {
@@ -96,8 +109,8 @@ describe("generatePriorKnowledge", () => {
       expect(generateText).toHaveBeenCalledTimes(2);
       const requests = calls(generateText);
 
-      // Call for entry 1: only digest one (priorKnowledge(0) is "").
-      expect(requests[0].input).toBe("digest one");
+      // Call for entry 1: only digest one, labeled with its problem (priorKnowledge(0) is "").
+      expect(requests[0].input).toBe(labelDigest(problems[0], "digest one"));
 
       // Call for entry 2: the previous call's own output plus digest two, never digest three.
       expect(requests[1].input).toContain("cumulative after problem one");

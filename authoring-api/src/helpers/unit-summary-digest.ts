@@ -31,6 +31,14 @@ export function duplicateProblemDigest(firstOrdinal: string): string {
   return `(same content as problem ${firstOrdinal})`;
 }
 
+// Labels a digest with the problem it belongs to. A later call given several digests together
+// (prior-knowledge, overview) needs this to resolve a duplicateProblemDigest reference like
+// "same content as problem 1.2" back to the one block of text actually labeled "Problem 1.2".
+export function labelDigest(problem: AssembledProblem, digest: string): string {
+  const titleSuffix = problem.title ? ` (${problem.title})` : "";
+  return `Problem ${problem.ordinal}${titleSuffix}: ${digest}`;
+}
+
 const COMBINE_DIGESTS_INSTRUCTIONS =
   "You are given several partial digests describing different parts of the SAME curriculum " +
   "problem (it was split into parts only because its content was too long for one request). " +

@@ -65,7 +65,7 @@ async function generateSteps(
 
   const digests = await generateProblemDigests(assembled.problems, {client, model: digestModel});
   const priorKnowledge = await generatePriorKnowledge(assembled.problems, digests, {client, model: summaryModel, mode});
-  const overview = await generateOverview(digests, {client, model: summaryModel});
+  const overview = await generateOverview(assembled.problems, digests, {client, model: summaryModel});
 
   const entries: IUnitSummaryEntry[] = assembled.problems.map((problem, i) => ({
     ordinal: problem.ordinal,

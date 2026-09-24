@@ -3,7 +3,8 @@
 // `overview` may reference material from later in the unit and is not safe to show a student
 // working on an earlier problem.
 import {UNIT_SUMMARY_OVERVIEW_MAX_CHARS} from "../../../shared/unit-summary-types";
-import {chunkMarkdown} from "./unit-summary-digest";
+import {AssembledProblem} from "./assemble-unit";
+import {chunkMarkdown, labelDigest} from "./unit-summary-digest";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
 import {generateWithLengthLimit} from "./unit-summary-length-limit";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
@@ -11,7 +12,8 @@ import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 const OVERVIEW_INSTRUCTIONS =
   "You are helping build a compact reference summary of a curriculum unit, for other AI " +
   "features to use as background context. You will be given a digest of every problem in the " +
-  "unit, in order. Write a single paragraph, in 3 to 5 sentences and no more than " +
+  "unit, in order, each labeled with its problem number and title (e.g. \"Problem 1.2 " +
+  "(Measuring Photos): ...\"). Write a single paragraph, in 3 to 5 sentences and no more than " +
   `${UNIT_SUMMARY_OVERVIEW_MAX_CHARS} characters, describing what the unit as a whole is about. ` +
   "Only use information in the provided digests -- do not infer or invent anything else.";
 
@@ -27,9 +29,11 @@ export interface OverviewOptions {
   model: string;
 }
 
-export async function generateOverview(digests: string[], options: OverviewOptions): Promise<string> {
+export async function generateOverview(
+  problems: AssembledProblem[], digests: string[], options: OverviewOptions
+): Promise<string> {
   try {
-    const allDigestsText = digests.join("\n\n");
+    const allDigestsText = problems.map((p, i) => labelDigest(p, digests[i])).join("\n\n");
     if (allDigestsText.length <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS) {
       return await callOverview(allDigestsText, options);
     }
