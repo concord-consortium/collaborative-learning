@@ -3,15 +3,14 @@
 > **Status:** Architecture design (structure and boundaries, not concrete implementation). Target end-state
 > under the "ideal world" framing.
 > **Depends on:** the axis definitions in [axes.md](axes.md) (the *what*: which axes exist and what each
-> means) and the current-state evidence in the findings doc (research background, on the
-> `document-type-decomposition` branch).
+> means).
 > This document is the *how it lives in code*.
 
 ## Goal and the problem it solves
 
 The refactor's purpose is **understandability**: to make it easy to see what a document type means. Today the
-document `type` field is switched on in ~90 scattered places across the client, rules, and functions
-(findings doc). Decomposing `type` into explicit axes only helps if we do **not** re-scatter the same
+document `type` field is switched on in ~90 scattered places across the client, rules, and functions.
+Decomposing `type` into explicit axes only helps if we do **not** re-scatter the same
 knowledge as `kind → axis` mappings spread across the code. The architecture below is organized to *prevent*
 that scatter.
 
@@ -82,6 +81,26 @@ So the `permissions` getter resolves the document's policy and merges its rules 
 grants. The existing `visibility` field folds in here as one stored per-doc read grant — it is not a separate
 axis.
 
+**Stored per-doc grants are a grant list on the document, checked by the rules.** Each grant is a
+(principal, permission) pair, and a principal may be a user, a group, or a class. The document carries its own
+list, and the security rules decide on write who may add which grant. Two existing pieces set the pattern:
+
+- Multi-class supports (`mcsupports`) already keep such a list: a `classes[]` array, which the
+  `classInResourceClasses()` rule in `firestore.rules` checks the reader's class against. The per-doc grants
+  generalize it from class principals to users and groups.
+- `canonicalFieldOk()` / `isCanonicalValue()` show a rule validating a stored axis field and pinning it; a
+  `grantsOk()` in the same mold gates who may add which grant — for example, a student may grant their class
+  read access only on a document they own.
+
+That covers support targeting and the `visibility` toggle directly. Exemplar visibility is the same relation
+stored the other way round: one shared curriculum document read by many students, so each student keeps their
+own flag (`users/{uid}/exemplars/{id}/visible` in the realtime database) rather than the document holding a
+list. It can stay stored that way while being read as part of `permissions`.
+
+A general relationship store in the style of Google's Zanzibar would express all of these, including the
+per-student case, but it is a separate subsystem to run — more machinery than CLUE needs. The grants only pay
+off once the rules enforce them; see "Enforcing `permissions` on document content" under Non-goals.
+
 **Where a policy's rules live — two coordinated copies.** A policy is code, not stored data, and its rules are
 written in *two* places keyed by the same policy name: once on the client/runtime (to compute
 `doc.permissions`) and once in `firestore.rules` (to enforce them). A document stores only the policy *name*,
@@ -121,8 +140,8 @@ model — keeping the model un-entangled (see boundary).
 Creating a document is where `kind` is turned into axis values for a *new* document: the factory reads
 `registry.defaults(kind)` and stamps `canonical`/`owner`/`scope`/`permissions`/`concurrent` onto the new
 `DocumentModel`. Copy and publish are the same shape with different templates (`registry.copyTemplate` /
-`registry.publishTemplate`) — a copy/publish is "make a new document from a template," per-axis
-(findings "Deriving new documents"). After creation, the document carries its own axis values; runtime
+`registry.publishTemplate`) — a copy/publish is "make a new document from a template," per-axis.
+After creation, the document carries its own axis values; runtime
 behavior never re-derives them from `kind` — only a migration restamps them (next section).
 
 ## The core rule — `kind` is read in exactly three places
@@ -336,6 +355,5 @@ deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This s
 ## References
 
 - Axis definitions: [axes.md](axes.md)
-- Current-state evidence: the findings doc (research background, on the `document-type-decomposition` branch)
 - Existing models: `src/models/document/document.ts` (`DocumentModel`),
   `src/models/document/document-content.ts` (`DocumentContentModel`)
