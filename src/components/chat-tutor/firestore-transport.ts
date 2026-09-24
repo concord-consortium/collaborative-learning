@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { TutorProviderId } from "../../../shared/chat-tutor-providers";
+import { providerInstallsProblem, TutorProviderId } from "../../../shared/chat-tutor-providers";
 import { utf8ByteLength } from "../../../shared/utf8-byte-length";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
@@ -175,7 +175,7 @@ export class FirestoreTransport implements ChatTransport {
     // parent's problemInstalled flag. The ForeverLearning provider reads neither, so its flag
     // never flips — without this, every FL message would carry the whole problem JSON and every
     // byte of it would be discarded on arrival.
-    const backendInstallsProblem = provider !== "foreverlearning";
+    const backendInstallsProblem = providerInstallsProblem(provider);
     const decision = decideContext({
       leftAlreadyInstalled: this.problemInstalled || !backendInstallsProblem,
       currentRightHash: right?.hash ?? "",

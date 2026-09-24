@@ -18,3 +18,12 @@ export type TutorProviderId = typeof kTutorProviders[number];
 // The provider a conversation uses when nothing selects one. It is deliberately never stamped
 // on a message doc or mixed into a conversation id — see nonDefaultTutorProvider.
 export const kDefaultTutorProvider: TutorProviderId = "openai";
+
+// Whether a provider installs LEFT (the problem), THE UNIT (the summary slice), and prompt
+// overrides. ForeverLearning reads none of these -- it projects the document and curriculum
+// server-side through its own catalog. undefined is the default provider, which does install them.
+// Shared so firestore-transport.ts (what to attach) and chat-sidebar.tsx (what forks the
+// conversation id) stay in agreement.
+export function providerInstallsProblem(provider: TutorProviderId | undefined): boolean {
+  return provider !== "foreverlearning";
+}

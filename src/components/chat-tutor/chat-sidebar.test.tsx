@@ -85,6 +85,7 @@ const mockStores = {
     chatTutorHighlights: true,
     chatTutorPrompts: undefined,
     chatTutorIntro: undefined,
+    chatTutorProvider: undefined as string | undefined,
   },
   db: { firestore: {} },
   user: { id: "1", network: undefined, classHash: "class-hash" },
@@ -343,6 +344,7 @@ describe("ChatTutorSidebar as a highlight source", () => {
 
     afterEach(() => {
       mockStores.unit = makeUnit();
+      mockStores.appConfig.chatTutorProvider = undefined;
     });
 
     it("uses the same conversation id across renders when neither unit has a summary", () => {
@@ -363,6 +365,19 @@ describe("ChatTutorSidebar as a highlight source", () => {
       mockStores.unit = makeUnit(summaryWithDigest("digest two"));
       rerender(sidebarWithUnit(mockStores.unit, makeContent()));
       expect(lastConversationId()).not.toBe(firstId);
+    });
+
+    // ForeverLearning never attaches unitContext (see firestore-transport.test.ts), so its
+    // conversation id must not fork on a summary change either.
+    it("uses the same conversation id across a summary change under ForeverLearning", () => {
+      mockStores.appConfig.chatTutorProvider = "foreverlearning";
+      mockStores.unit = makeUnit(summaryWithDigest("digest one"));
+      const { rerender } = render(sidebarWithUnit(mockStores.unit, makeContent()));
+      const firstId = lastConversationId();
+
+      mockStores.unit = makeUnit(summaryWithDigest("digest two"));
+      rerender(sidebarWithUnit(mockStores.unit, makeContent()));
+      expect(lastConversationId()).toBe(firstId);
     });
   });
 });

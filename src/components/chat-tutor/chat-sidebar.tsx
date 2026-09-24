@@ -15,6 +15,7 @@ import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { buildUnitContext } from "./unit-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
+import { providerInstallsProblem } from "../../../shared/chat-tutor-providers";
 import { serializeRight } from "./right-context";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
@@ -71,13 +72,11 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     // Resolved once per transport. Undefined for the default provider, which is what keeps it
     // out of both the conversation id and the message docs.
     const provider = sessionTutorProvider(urlParams.chatProvider, appConfig.chatTutorProvider);
-    // Keyed on the formatted slice text this transport will actually install, not the raw
-    // aiUnitSummary: every way the installed context can change -- an author editing or
-    // regenerating the summary, a curriculum edit that makes the prefix check fail or pass again --
-    // changes this text, so keying on it forks the conversation exactly when what gets installed
-    // changes. A unit with no summary (or no usable slice) contributes no suffix, so its existing
-    // conversations keep their id.
-    const unitContext = getUnitContext();
+    // Keyed on the formatted slice text, not the raw aiUnitSummary, so any change to what gets
+    // installed -- an edit, a regeneration, the prefix check flipping -- forks the conversation.
+    // Gated on providerInstallsProblem: ForeverLearning never attaches unitContext, so it must
+    // never fork on it either.
+    const unitContext = providerInstallsProblem(provider) ? getUnitContext() : undefined;
     const unitKey = unitContext ? hashString(unitContext) : undefined;
     return new FirestoreTransport({
       firestore: db.firestore,
