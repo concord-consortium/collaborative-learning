@@ -66,7 +66,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     event.preventDefault();
 
     const contents = await getClipboardContent(clipboardData);
-    const source = contents.image ?? contents.text ?? undefined;
+    const source = contents.image ?? (isImageUrlText ? contents.text : undefined);
     if (!source) return;
 
     const contentUrl = await ingestImage(source);
