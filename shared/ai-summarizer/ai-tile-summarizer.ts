@@ -19,14 +19,15 @@ export function handlePlaceholderTile({ tile }: TileHandlerParams): string|undef
 // The prompt is summarized directly rather than through tilesSummary, so it needs its id line
 // added here. Emitted even though the prompt is summarized minimally: a drawing used as a prompt
 // gives every object an id, and those are unusable without the tile's id to go with them.
-// Always minimal, and never the caller's own tileHandlers (a custom handler changes how a tile
-// gets described, e.g. rendering full SVG for a drawing -- the prompt always uses the plain
-// default instead). imageFilenames is different: it doesn't change how anything is described, only
-// whether an image tile names its file instead of going silent, so it's passed through as the
-// caller set it.
+// Always minimal. imageFilenames is always forwarded: it doesn't change how anything is described,
+// only whether an image tile names its file instead of going silent. tileHandlers is forwarded
+// only when the caller says to (forwardTileHandlers) -- a custom handler changes how a tile gets
+// described, e.g. rendering full SVG for a drawing, which is a real risk for a runtime document
+// (documentSummarizerWithDrawings's own SVG handler) but not for questionBodyFromInlineTiles below,
+// whose only caller is the curriculum summarizer.
 function questionPromptSummary({
-  dataSets, tileMap, headingLevel, options, promptTile
-}: TileHandlerBaseParams & { promptTile: any }): string {
+  dataSets, tileMap, headingLevel, options, promptTile, forwardTileHandlers
+}: TileHandlerBaseParams & { promptTile: any; forwardTileHandlers?: boolean }): string {
   if (!promptTile?.content) { return ""; }
   return heading(headingLevel, "Question Prompt") +
     tileIdLine({ model: promptTile, number: 0 } as INormalizedTile) +
@@ -35,7 +36,11 @@ function questionPromptSummary({
       tile: { model: promptTile, number: 0 },
       tileMap,
       headingLevel,
-      options: { minimal: true, imageFilenames: options.imageFilenames }
+      options: {
+        minimal: true,
+        imageFilenames: options.imageFilenames,
+        ...(forwardTileHandlers ? { tileHandlers: options.tileHandlers } : {})
+      }
     }) +
     "\n\n";
 }
@@ -54,7 +59,7 @@ function questionBodyFromInlineTiles(
   const promptTile = Array.isArray(promptItem) ? promptItem[0] : promptItem;
 
   let result = responseItems.length === 0 ? "This question does not contain any response tiles.\n\n" : "";
-  result += questionPromptSummary({ dataSets, tileMap, headingLevel, options, promptTile });
+  result += questionPromptSummary({ dataSets, tileMap, headingLevel, options, promptTile, forwardTileHandlers: true });
 
   if (responseItems.length === 0) {
     return result;

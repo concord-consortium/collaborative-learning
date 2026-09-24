@@ -265,6 +265,49 @@ describe("assembleUnit", () => {
     expect(markdown).not.toContain("rx=");
   });
 
+  it("summarizes a curriculum question's own Drawing prompt without geometry too, the same as " +
+     "every other drawing in the unit", async () => {
+    // The question's own prompt is summarized directly (questionPromptSummary in
+    // ai-tile-summarizer.ts), not through the same path as a drawing elsewhere in a section, so it
+    // needs its own coverage that curriculumTileHandlers' labels-only drawing handler still applies.
+    const questionSection = {
+      type: "section",
+      content: {
+        tiles: [{
+          id: "q1",
+          content: {
+            type: "Question",
+            questionId: "q1-id",
+            tiles: [
+              {
+                id: "prompt-drawing",
+                content: {
+                  type: "Drawing",
+                  objects: [
+                    {id: "t1", type: "text", x: 0, y: 0, width: 50, height: 20, text: "Sketch the setup"},
+                    {id: "r1", type: "rectangle", x: 0, y: 0, width: 10, height: 10, fill: "#0069ff"},
+                  ],
+                },
+              },
+              {id: "response-text", content: {type: "Text", format: "markdown", text: "Explain your answer"}},
+            ],
+          },
+        }],
+      },
+    };
+    const root = rootContent([
+      {
+        ordinal: 1, title: "Inv 1",
+        problems: [{ordinal: 1, title: "P1", sections: [questionSection as unknown as TestSection]}],
+      },
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    const markdown = result.problems[0].markdown;
+    expect(markdown).toContain("Text in the drawing: \"Sketch the setup\"");
+    expect(markdown).not.toContain("r1");
+    expect(markdown).not.toContain("#0069ff");
+  });
+
   it("heads each section with its authored name, in order, so a digest can tell them apart", async () => {
     const root = rootContent(
       [{
