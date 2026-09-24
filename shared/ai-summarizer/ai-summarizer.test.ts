@@ -1462,6 +1462,37 @@ describe('documentSummarizerWithDrawings', () => {
       expect(result).toContain('| r1 | rectangle |');
     });
 
+    it('still passes the caller\'s imageFilenames option through to a question tile\'s own prompt', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: { row1: { tiles: [{ tileId: 'q1' }], isSectionHeader: false } },
+        tileMap: {
+          q1: {
+            id: 'q1',
+            content: {
+              type: 'Question',
+              rowOrder: ['promptRow'],
+              rowMap: { promptRow: { tiles: [{ tileId: 'prompt' }] } }
+            }
+          },
+          prompt: {
+            id: 'prompt',
+            content: {
+              type: 'Image',
+              url: 'https://example.com/images/diagram.png'
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, { imageFilenames: true });
+
+      // Unlike tileHandlers above, imageFilenames doesn't change how a tile is described -- it
+      // only decides whether an image tile names its file instead of going silent -- so it should
+      // still reach the prompt even though tileHandlers does not.
+      expect(result).toContain('(image: diagram.png)');
+    });
+
     it('should handle complex document structures with drawings', () => {
       const content = {
         rowOrder: ['header1', 'row1', 'row2'],

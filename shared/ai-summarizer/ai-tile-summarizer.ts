@@ -19,8 +19,13 @@ export function handlePlaceholderTile({ tile }: TileHandlerParams): string|undef
 // The prompt is summarized directly rather than through tilesSummary, so it needs its id line
 // added here. Emitted even though the prompt is summarized minimally: a drawing used as a prompt
 // gives every object an id, and those are unusable without the tile's id to go with them.
+// Always minimal, and never the caller's own tileHandlers (a custom handler changes how a tile
+// gets described, e.g. rendering full SVG for a drawing -- the prompt always uses the plain
+// default instead). imageFilenames is different: it doesn't change how anything is described, only
+// whether an image tile names its file instead of going silent, so it's passed through as the
+// caller set it.
 function questionPromptSummary({
-  dataSets, tileMap, headingLevel, promptTile
+  dataSets, tileMap, headingLevel, options, promptTile
 }: TileHandlerBaseParams & { promptTile: any }): string {
   if (!promptTile?.content) { return ""; }
   return heading(headingLevel, "Question Prompt") +
@@ -30,7 +35,7 @@ function questionPromptSummary({
       tile: { model: promptTile, number: 0 },
       tileMap,
       headingLevel,
-      options: { minimal: true }
+      options: { minimal: true, imageFilenames: options.imageFilenames }
     }) +
     "\n\n";
 }
