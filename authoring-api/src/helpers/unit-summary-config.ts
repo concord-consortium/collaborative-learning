@@ -28,13 +28,8 @@ export const UNIT_SUMMARY_RETRY_COUNT = UNIT_SUMMARY_RETRY_BACKOFF_MS.length;
 export const UNIT_SUMMARY_OVERALL_DEADLINE_MS = 420_000;
 
 // Prefix-mode prior knowledge is quadratic in problem count (call i reads i digests), so above
-// this many problems -- or an estimated prefix-mode aggregate input above the char limit -- the
-// prior-knowledge step switches to rolling mode (linear, but sequential).
+// this many problems the prior-knowledge step switches to rolling mode (linear, but sequential).
 export const UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT = 40;
-// Must stay above 40 problems' worth of prefix-mode input at UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS
-// (shared/unit-summary-types.ts) -- i.e. 40 * 39 / 2 * that cap -- or the aggregate check below
-// would always fire before the problem-count threshold above ever could.
-export const UNIT_SUMMARY_MODE_SWITCH_PREFIX_AGGREGATE_CHARS = 1_000_000;
 
 // Checked before any model call. A unit at or under this problem count and estimated aggregate
 // input is guaranteed to fit even in the cheaper rolling mode; above either, generation is

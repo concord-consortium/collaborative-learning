@@ -7,7 +7,7 @@ import {UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_DIGEST_MAX_
 import {AssembledProblem} from "./assemble-unit";
 import {
   UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
-  UNIT_SUMMARY_MODE_SWITCH_PREFIX_AGGREGATE_CHARS, UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT,
+  UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT,
 } from "./unit-summary-config";
 
 export type PriorKnowledgeMode = "prefix" | "rolling";
@@ -16,11 +16,7 @@ export type PriorKnowledgeMode = "prefix" | "rolling";
 // count, but the calls are independent and can run concurrently). Above it: rolling mode, where
 // call i sees only priorKnowledge(i-1) and digest(i-1) (linear, but sequential by definition).
 export function selectPriorKnowledgeMode(problemCount: number): PriorKnowledgeMode {
-  const prefixModeAggregateChars =
-    (problemCount * (problemCount - 1) / 2) * UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS;
-  const overThreshold = problemCount > UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT ||
-    prefixModeAggregateChars > UNIT_SUMMARY_MODE_SWITCH_PREFIX_AGGREGATE_CHARS;
-  return overThreshold ? "rolling" : "prefix";
+  return problemCount > UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT ? "rolling" : "prefix";
 }
 
 export interface UnitSizeCheck {
