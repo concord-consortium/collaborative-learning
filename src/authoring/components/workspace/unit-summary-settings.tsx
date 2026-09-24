@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { useAuthoringApi } from "../../hooks/use-authoring-api";
+import { useAuth } from "../../hooks/use-auth";
 import {
   IUnitSummary, IUnitSummaryStatusResponse, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, UnitSummaryValidationResult,
   validateUnitSummary
@@ -111,6 +112,7 @@ function computeStaleness(
 
 const UnitSummarySettings: React.FC = () => {
   const { unitConfig, unitConfigLoading, setUnitConfig, saveState, branch, unit } = useCurriculum();
+  const { isAdminUser } = useAuth();
   const api = useAuthoringApi();
 
   const savedSummary = unitConfig?.config?.aiUnitSummary;
@@ -323,7 +325,7 @@ to table rows beyond the summarizer's row cap, are not detected."
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={generating || unitConfigLoading || !branch || !unit}
+          disabled={generating || unitConfigLoading || !branch || !unit || !isAdminUser}
           aria-busy={generating}
         >
           {generating ? "Generating…" : "Generate Summary"}

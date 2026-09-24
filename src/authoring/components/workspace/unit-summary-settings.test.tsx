@@ -33,6 +33,11 @@ jest.mock("../../hooks/use-authoring-api", () => ({
   useAuthoringApi: () => mockApi
 }));
 
+const mockAuthValue: { isAdminUser: boolean } = { isAdminUser: true };
+jest.mock("../../hooks/use-auth", () => ({
+  useAuth: () => mockAuthValue
+}));
+
 function buildSummary(overrides: Partial<IUnitSummary> = {}): IUnitSummary {
   return {
     generatedAt: "2026-01-01T00:00:00.000Z",
@@ -82,6 +87,7 @@ describe("UnitSummarySettings", () => {
     mockCurriculumValue.saveState = undefined;
     mockCurriculumValue.branch = "main";
     mockCurriculumValue.unit = "test-unit";
+    mockAuthValue.isAdminUser = true;
     mockGet.mockResolvedValue(buildStatus());
   });
 
@@ -216,6 +222,15 @@ describe("UnitSummarySettings", () => {
 
   it("disables the Generate button while the current unit's config is still loading", async () => {
     mockCurriculumValue.unitConfigLoading = true;
+    render(<UnitSummarySettings />);
+    await flush();
+
+    expect(screen.getByRole("button", { name: "Generate Summary" })).toBeDisabled();
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it("disables the Generate button for a user who is not CC staff", async () => {
+    mockAuthValue.isAdminUser = false;
     render(<UnitSummarySettings />);
     await flush();
 

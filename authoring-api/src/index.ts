@@ -26,6 +26,7 @@ import unitSummaryStatus from "./routes/unit-summary-status";
 
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
+import {isCCEmail, requireCCAccess} from "./helpers/require-cc-access";
 
 // the TypeScript type definition for DecodedIdToken does not include the name property,
 // even though it is present in the actual decoded token returned by Firebase Admin SDK
@@ -51,13 +52,6 @@ const getCacheExpirationDate = () => {
 };
 
 admin.initializeApp();
-
-// Doug's old zoopdoop.com email is what Firebase auth sets as the GitHub provider email in the
-// generated auth token even though it is not used on GitHub anymore. Leslie's mit.edu and Teale's
-// gmail addresses are what they each use for GitHub.
-const otherCCEmailAddresses = ["doug@zoopdoop.com", "lbond@alum.mit.edu", "fristoe@gmail.com"];
-const isCCEmail = (email: string): boolean =>
-  email.endsWith("@concord.org") || otherCCEmailAddresses.includes(email);
 
 const isUserAuthorized = async (decodedToken: DecodedIdToken, gitHubToken: string): Promise<boolean> => {
   const {email, firebase} = decodedToken;
@@ -166,15 +160,6 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
     console.error("Authentication error:", error);
     return res.status(401).send("Unauthorized: Invalid or expired token.");
   }
-};
-
-// CC-staff-only; attach per route.
-const requireCCAccess = (req: Request, res: Response, next: NextFunction) => {
-  const email = (req as AuthorizedRequest).decodedToken.email;
-  if (email && isCCEmail(email)) {
-    return next();
-  }
-  return res.status(403).send("Unauthorized: You don't have authoring permissions.");
 };
 
 const app = express();
