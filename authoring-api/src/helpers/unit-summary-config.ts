@@ -34,5 +34,12 @@ export const UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT = 40;
 // Checked before any model call. A unit at or under this problem count and estimated aggregate
 // input is guaranteed to fit even in the cheaper rolling mode; above either, generation is
 // rejected up front with a clear error instead of spending anything.
-export const UNIT_SUMMARY_HARD_MAX_PROBLEMS = 60;
+//
+// Must stay low enough that a worst-case unit -- every digest, priorKnowledge, and the overview
+// all at their own per-field maximum (shared/unit-summary-types.ts) -- still fits under
+// UNIT_SUMMARY_TOTAL_BUDGET_CHARS there, or that separate, later check could reject a summary
+// after every model call for it has already run (see unit-summary-config.test.ts). 54 is the
+// largest count that still fits; the largest unit found in a check of real curriculum content had
+// 35 problems.
+export const UNIT_SUMMARY_HARD_MAX_PROBLEMS = 54;
 export const UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS = 3_000_000;
