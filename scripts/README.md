@@ -18,6 +18,22 @@ documents:
 - **`scripts/local/`** is for one-off investigation scripts you don't mean to commit, and whatever they
   write. Put a throwaway script here rather than giving it a special name elsewhere.
 
+## Checking which version is deployed
+
+`deployed-version.ts` reports which CLUE version production (`index.html`) and staging
+(`staging.html`) are serving. It needs no credentials:
+
+```shell
+npx tsx deployed-version.ts           # text report
+npx tsx deployed-version.ts --json    # machine-readable report
+```
+
+For each page a release deploys (the app, `editor/`, `authoring/` and `authoring-iframe/`) it
+compares three things that should agree: the `version/<tag>/` folder the page loads from, the
+`appVersion` compiled into the bundle (the "CLUE v…" shown in the app), and the git sha and tag
+compiled into the bundle from `version.json`. It also checks that sha against what the tag points
+to in your local repo, so run `git fetch --tags` first. It exits non-zero if anything disagrees.
+
 ## Running scripts that connect with the portal
 
 You need to first get the portal admin api token.
