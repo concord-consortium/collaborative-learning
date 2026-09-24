@@ -1,7 +1,7 @@
 import { getCanonicalPointerPath, kDefaultCanonicalDocumentLabel } from "../../src/lib/scoped-document-pointers";
 import { getGroupOwnerId } from "../../src/models/document/document-axes";
 import {
-  backfillSpace, createSpaceDeps, decideSlot, groupIntoSlots, groupOwnerId, groupPointerRelativePath,
+  backfillSpace, createSpaceDeps, decideSlot, deletionPaths, groupIntoSlots, groupOwnerId, groupPointerRelativePath,
   kGroupPointerLabel, kPointerCreatedBy, legacyGroupPointerRelativePaths, listGroupDocs, listLegacyGroupPointers,
   parseLegacyGroupPointerPath, whyNotDeletable, type IDeletionTarget, type IGroupDocRecord, type ILegacyGroupPointer,
   type ISpaceDeps
@@ -333,21 +333,21 @@ describe("backfillSpace", () => {
       ]);
     });
 
-  it("hands the deletion a target that passes whyNotDeletable for the loser's own metadata", async () => {
+  it("hands the deletion the loser, its space and its slot, and no paths of its own", async () => {
     const targets: IDeletionTarget[] = [];
     const { deps } = makeDeps([mkDoc("a"), mkDoc("b")]);
     deps.remove = async (t) => { targets.push(t); };
     await backfillSpace(space, { dryRun: false }, deps);
-    expect(targets).toEqual([{
-      key: "b",
-      firestorePath: "authed/p/documents/b",
-      rtdbPaths: [
-        "/authed/portals/p/classes/c1/users/group_o1_3/documents/b",
-        "/authed/portals/p/classes/c1/users/group_o1_3/documentMetadata/b"
-      ],
-      slot: { contextId: "c1", offeringId: "o1", groupId: "3", uid: "group_o1_3" }
-    }]);
-    expect(whyNotDeletable(groupDocData(), targets[0])).toBeUndefined();
+    expect(targets).toEqual([target]);
+  });
+
+  it("deletes nothing when a claim reports no pointer at all", async () => {
+    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")]);
+    deps.claim = async (path, key) => { calls.push(`claim ${path} ${key}`); return undefined as any; };
+    const res = await backfillSpace(space, { dryRun: false }, deps);
+    expect(calls.filter(c => c.startsWith("backup") || c.startsWith("remove"))).toEqual([]);
+    expect(res).toMatchObject({ claimed: 0, deleted: 0 });
+    expect(res.skipped.map(s => s.key)).toEqual(["a", "b"]);
   });
 
   it("stops before removing a document whose backup failed", async () => {
@@ -371,19 +371,28 @@ const groupDocData = (fields: Record<string, unknown> = {}) => ({
 });
 
 const target: IDeletionTarget = {
-  key: "b",
-  firestorePath: "authed/p/documents/b",
-  rtdbPaths: [
-    "/authed/portals/p/classes/c1/users/group_o1_3/documents/b",
-    "/authed/portals/p/classes/c1/users/group_o1_3/documentMetadata/b"
-  ],
+  key: "b", spacePath: "authed/p/documents", rtdbRoot: "/authed/portals/p",
   slot: { contextId: "c1", offeringId: "o1", groupId: "3", uid: "group_o1_3" }
 };
+const rtdbPaths = [
+  "/authed/portals/p/classes/c1/users/group_o1_3/documents/b",
+  "/authed/portals/p/classes/c1/users/group_o1_3/documentMetadata/b"
+];
+
+describe("deletionPaths", () => {
+  it("builds every path from the target's key, space and slot", () => {
+    expect(deletionPaths(target)).toEqual({
+      firestorePath: "authed/p/documents/b", rtdbPaths, pointerPath: slotPointerPath
+    });
+  });
+});
 
 describe("whyNotDeletable", () => {
-  it("accepts a group document under either generic type", () => {
-    expect(whyNotDeletable(groupDocData(), target)).toBeUndefined();
-    expect(whyNotDeletable(groupDocData({ type: "group" }), target)).toBeUndefined();
+  const winnerIsA = { documentKey: "a" };
+
+  it("accepts a group document under either generic type whose slot's pointer names another", () => {
+    expect(whyNotDeletable(groupDocData(), winnerIsA, target)).toBeUndefined();
+    expect(whyNotDeletable(groupDocData({ type: "group" }), winnerIsA, target)).toBeUndefined();
   });
 
   it.each([
@@ -396,26 +405,24 @@ describe("whyNotDeletable", () => {
     ["another class's document", groupDocData({ context_id: "c2" })],
     ["a student-owned document", groupDocData({ uid: "student1" })]
   ])("refuses %s", (_label, data) => {
-    expect(whyNotDeletable(data, target)).toEqual(expect.any(String));
+    expect(whyNotDeletable(data, winnerIsA, target)).toEqual(expect.any(String));
+  });
+
+  it("refuses a slot uid that is not the group owner, even when the document agrees", () => {
+    const studentSlot = { ...target, slot: { ...target.slot, uid: "student1" } };
+    expect(whyNotDeletable(groupDocData({ uid: "student1" }), winnerIsA, studentSlot)).toMatch(/group owner/);
+  });
+
+  it("refuses the document its slot's pointer names", () => {
+    expect(whyNotDeletable(groupDocData(), { documentKey: "b" }, target)).toMatch(/pointer names it/);
   });
 
   it.each([
-    ["a Firestore path naming another document", { firestorePath: "authed/p/documents/a" }],
-    ["a realtime-database path under a student", { rtdbPaths: [
-      "/authed/portals/p/classes/c1/users/student1/documents/b",
-      "/authed/portals/p/classes/c1/users/group_o1_3/documentMetadata/b"
-    ] }],
-    ["a realtime-database path naming a whole user", { rtdbPaths: [
-      "/authed/portals/p/classes/c1/users/group_o1_3",
-      "/authed/portals/p/classes/c1/users/group_o1_3/documentMetadata/b"
-    ] }],
-    ["an extra realtime-database path", { rtdbPaths: [...target.rtdbPaths, "/authed/portals/p/classes/c1"] }],
-    ["a slot uid that is not the group owner", {
-      slot: { ...target.slot, uid: "student1" }
-    }]
-  ])("refuses a target with %s", (_label, change) => {
-    const data = groupDocData(change.slot ? { uid: change.slot.uid } : {});
-    expect(whyNotDeletable(data, { ...target, ...change })).toEqual(expect.any(String));
+    ["no pointer", undefined],
+    ["a pointer with no documentKey", { documentKey: undefined }],
+    ["a pointer with an empty documentKey", { documentKey: "" }]
+  ])("refuses when its slot has %s", (_label, pointer) => {
+    expect(whyNotDeletable(groupDocData(), pointer, target)).toMatch(/does not name a document/);
   });
 });
 
@@ -464,24 +471,50 @@ describe("createSpaceDeps", () => {
     expect(writes).toEqual([]);
   });
 
-  it("removes the realtime-database copies before the Firestore document", async () => {
-    const { deps, writes } = makeHandles({ [target.firestorePath]: groupDocData() });
-    await deps.remove(target);
-    expect(writes).toEqual([
-      `rtdb remove ${target.rtdbPaths[0]}`, `rtdb remove ${target.rtdbPaths[1]}`,
-      `firestore recursiveDelete ${target.firestorePath}`
-    ]);
-  });
-
-  it("deletes nothing when the document is not a group document of the slot", async () => {
-    const { deps, writes } = makeHandles({ [target.firestorePath]: groupDocData({ type: "personal" }) });
-    await expect(deps.remove(target)).rejects.toThrow(/refusing to delete/);
+  it("returns an existing pointer with no documentKey as such, without writing", async () => {
+    const { deps, writes } = makeHandles({ [slotPointerPath]: {} });
+    expect(await deps.claim(slotPointerPath, "a")).toEqual({ documentKey: undefined });
     expect(writes).toEqual([]);
   });
 
-  it("deletes nothing when the document is already gone", async () => {
+  it("reads a stored pointer with no documentKey as a pointer, not as no pointer", async () => {
+    const { deps } = makeHandles({ [slotPointerPath]: {} });
+    expect(await deps.readPointer(slotPointerPath)).toEqual({ documentKey: undefined });
+  });
+
+  it("reads a missing pointer as undefined", async () => {
+    const { deps } = makeHandles({});
+    expect(await deps.readPointer(slotPointerPath)).toBeUndefined();
+  });
+
+  it("removes a legacy pointer by deleting exactly its path", async () => {
     const { deps, writes } = makeHandles({});
-    await expect(deps.remove(target)).rejects.toThrow(/no Firestore metadata/);
+    await deps.removeLegacyPointer(legacyPointerPaths[1]);
+    expect(writes).toEqual([`firestore delete ${legacyPointerPaths[1]}`]);
+  });
+
+  it("removes the realtime-database copies before the Firestore document", async () => {
+    const { deps, writes } = makeHandles({
+      "authed/p/documents/b": groupDocData(), [slotPointerPath]: { documentKey: "a" }
+    });
+    await deps.remove(target);
+    expect(writes).toEqual([
+      `rtdb remove ${rtdbPaths[0]}`, `rtdb remove ${rtdbPaths[1]}`, "firestore recursiveDelete authed/p/documents/b"
+    ]);
+  });
+
+  it.each([
+    ["the document is not a group document of the slot", {
+      "authed/p/documents/b": groupDocData({ type: "personal" }), [slotPointerPath]: { documentKey: "a" }
+    }, /is not a group document type/],
+    ["the document is already gone", { [slotPointerPath]: { documentKey: "a" } }, /no Firestore metadata/],
+    ["the slot's pointer names the document", {
+      "authed/p/documents/b": groupDocData(), [slotPointerPath]: { documentKey: "b" }
+    }, /pointer names it/],
+    ["the slot has no pointer", { "authed/p/documents/b": groupDocData() }, /does not name a document/]
+  ])("deletes nothing when %s", async (_label, docs, reason) => {
+    const { deps, writes } = makeHandles(docs);
+    await expect(deps.remove(target)).rejects.toThrow(reason);
     expect(writes).toEqual([]);
   });
 });

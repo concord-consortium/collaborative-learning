@@ -1069,11 +1069,10 @@ export class DB {
     // by owner query — the only query anywhere that filters on an owner, see "Locating" in
     // docs/document-axes/axes.md — and backfills its pointer the first time someone opens it.
     //
-    // Removal is not gated on scripts/backfill-group-document-axes.ts alone: that script stamps axis fields
-    // and writes no pointers. A pre-pointer group document nobody has opened therefore still has no slot, and
-    // dropping this step would converge its group onto a freshly minted empty document while the real one,
-    // holding their work, became unreachable. Remove it once either the script has grown a pointer-backfill
-    // pass that has run in every environment, or no pre-pointer group documents remain in one that matters.
+    // A pre-pointer group document nobody has opened has no slot until something claims one, and dropping
+    // this step would converge its group onto a freshly minted empty document while the real one, holding
+    // their work, became unreachable. scripts/metadata-repair/backfill-group-canonical-pointers.ts claims
+    // every such slot at once; remove this step once that script has been applied in every environment.
     // findLegacyGroupDocument, the findLegacy option, and the provisional flag all go with it.
     if (findLegacy) {
       const legacy = await findLegacy();

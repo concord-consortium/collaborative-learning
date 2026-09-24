@@ -22,12 +22,14 @@
 // releases opened but 7.5.0 shows only in Sort Work; removing it, and the superseded pointers, keeps that
 // legacy state from confusing a later reader of the database. For the same reason each deletion is backed
 // up to scripts/output only as a convenience, not as a restore procedure. What does matter is that
-// nothing else is deleted: each document is re-read just before its removal, and the run stops unless it
-// is still a group document of the slot it was found in (`whyNotDeletable`).
+// nothing else is deleted: each document and its slot's pointer are re-read just before the removal, and
+// the run stops unless it is still a group document of the slot it was found in and the pointer names a
+// different document (`whyNotDeletable`).
 //
 // Anything this cannot confidently address is reported and left alone rather than guessed at, legacy
-// pointers included: a slot containing a document with the wrong owner uid or with no realtime-database
-// content under the slot's class (a wrong `context_id`), or a slot whose pointer names a document outside
+// pointers included: a slot containing a document with the wrong owner uid, with a key that cannot be used
+// in a realtime-database path, or with no realtime-database content under the slot's class (a wrong
+// `context_id`), or a slot whose pointer names a document outside
 // it or has no document key. A document with no `offeringId` is skipped too; the app's query cannot find
 // it either. So this can run before or after the `context_id` and `offeringId` repairs; a run after them
 // picks up whatever they fix.
@@ -257,21 +259,36 @@ export function decideSlot(slot: ISlot, pointer: StoredPointer): SlotDecision {
   return { action: pointerKey === undefined ? "claim" : "pointed", winner, losers };
 }
 
-/** One losing document: everywhere it is stored, and the slot it was found in. */
+/**
+ * One losing document: its key, its space, and the slot it was found in. It carries no paths; every path
+ * the deletion touches comes from `deletionPaths`, so none can name something other than this document.
+ */
 export interface IDeletionTarget {
   key: string;
-  firestorePath: string;
-  rtdbPaths: string[];
+  /** The space's Firestore `documents` collection. */
+  spacePath: string;
+  rtdbRoot: string;
   slot: Pick<ISlot, "contextId" | "offeringId" | "groupId" | "uid">;
 }
 
+/** Everywhere a losing document is stored, and the slot pointer that must name another document. */
+export function deletionPaths({ key, spacePath, rtdbRoot, slot }: IDeletionTarget) {
+  const userPath = `${rtdbRoot}/classes/${slot.contextId}/users/${slot.uid}`;
+  return {
+    firestorePath: `${spacePath}/${key}`,
+    rtdbPaths: [`${userPath}/documents/${key}`, `${userPath}/documentMetadata/${key}`],
+    pointerPath: `${spacePath.replace(/\/documents$/, "")}/${groupPointerRelativePath(slot)}`
+  };
+}
+
 /**
- * Why the document about to be deleted is not the group document `target` describes, or undefined when
- * it is. `data` is its Firestore metadata, read just before the deletion. This is the last check before
- * anything is removed, so it re-derives every path rather than trusting how the target was built.
+ * Why the document about to be deleted must not be, or undefined when it may. `data` is its Firestore
+ * metadata and `pointer` its slot's pointer, both read just before the deletion: this is the last check
+ * before anything is removed, so it trusts neither the listing nor the decision that chose the document.
  */
-export function whyNotDeletable(data: Record<string, any> | undefined, target: IDeletionTarget): string | undefined {
-  const { key, slot } = target;
+export function whyNotDeletable(
+  data: Record<string, any> | undefined, pointer: StoredPointer, { key, slot }: IDeletionTarget
+): string | undefined {
   if (!data) return "it has no Firestore metadata";
   if (!kGroupDocumentTypes.includes(data.type)) return `its type "${data.type}" is not a group document type`;
   if (data.context_id !== slot.contextId || data.offeringId !== slot.offeringId || data.groupId !== slot.groupId) {
@@ -280,12 +297,10 @@ export function whyNotDeletable(data: Record<string, any> | undefined, target: I
   if (slot.uid !== groupOwnerId(slot.offeringId, slot.groupId) || data.uid !== slot.uid) {
     return `its uid "${data.uid}" is not the group owner`;
   }
-  if (!target.firestorePath.endsWith(`/documents/${key}`)) return "its Firestore path does not name it";
-  const userPath = `/classes/${slot.contextId}/users/${slot.uid}`;
-  const expected = [`${userPath}/documents/${key}`, `${userPath}/documentMetadata/${key}`];
-  if (target.rtdbPaths.length !== expected.length || target.rtdbPaths.some((p, i) => !p.endsWith(expected[i]))) {
-    return "its realtime-database paths are not the group owner's copies of it";
+  if (!pointer || typeof pointer.documentKey !== "string" || !pointer.documentKey) {
+    return "its slot's pointer does not name a document";
   }
+  if (pointer.documentKey === key) return "its slot's pointer names it";
   return undefined;
 }
 
@@ -296,8 +311,11 @@ export interface ISpaceDeps {
   readRtdbChildKeys: (path: string) => Promise<string[]>;
   readPointer: (path: string) => Promise<StoredPointer>;
   /** Claims the slot for `key` unless it is already claimed; returns the pointer the slot holds after. */
-  claim: (pointerPath: string, key: string) => Promise<StoredPointer>;
-  /** Saves the document's current contents. Must throw rather than return if it cannot. */
+  claim: (pointerPath: string, key: string) => Promise<{ documentKey: unknown }>;
+  /**
+   * Copies the document's current contents, as a convenience rather than a restore procedure: what is
+   * missing is recorded as null. Throwing stops the run before `remove`.
+   */
   backup: (target: IDeletionTarget) => Promise<void>;
   /** Deletes the document everywhere. Must throw, deleting nothing, if it is not what `target` says. */
   remove: (target: IDeletionTarget) => Promise<void>;
@@ -364,7 +382,9 @@ export async function backfillSpace(
       const holder = await claim(pointerPath, decision.winner);
       // A group member opened the document between the read and the claim, and findLegacy got there
       // first. Their choice stands; decide again around it.
-      if (holder?.documentKey !== decision.winner) decision = decideSlot(slot, holder);
+      // A claim always reports the pointer it left; should one report none, it is treated as a pointer
+      // with no key, which skips the slot, rather than as no pointer, which would claim and delete again.
+      if (holder?.documentKey !== decision.winner) decision = decideSlot(slot, holder ?? { documentKey: undefined });
     }
     if (decision.action === "invalid" || decision.action === "dangling") skippedSlots.add(slotKey(slot));
     if (decision.action === "invalid") {
@@ -389,9 +409,7 @@ export async function backfillSpace(
 
     for (const loser of decision.losers) {
       const target: IDeletionTarget = {
-        key: loser.key,
-        firestorePath: `${space.spacePath}/${loser.key}`,
-        rtdbPaths: [`${userPath}/documents/${loser.key}`, `${userPath}/documentMetadata/${loser.key}`],
+        key: loser.key, spacePath: space.spacePath, rtdbRoot: space.rtdbRoot,
         slot: { contextId: slot.contextId, offeringId: slot.offeringId, groupId: slot.groupId, uid: slot.uid }
       };
       if (!dryRun) {
@@ -403,8 +421,6 @@ export async function backfillSpace(
     }
   }
 
-  // Every slot's current pointer is now the only one it needs, including a slot whose documents are all
-  // gone. Removed after the losers, so an interrupted run still has something left to find next time.
   for (const legacy of await deps.listLegacyPointers()) {
     if (skippedSlots.has(slotKey(legacy))) continue;
     if (!dryRun) await removeLegacyPointer(legacy.path);
@@ -453,7 +469,8 @@ export function createSpaceDeps(
     // The Firestore metadata document has `comments` and `history` subcollections, which the removal
     // deletes with it, so they are saved too.
     backup: async (target) => {
-      const docRef = firestore.doc(target.firestorePath);
+      const { firestorePath, rtdbPaths } = deletionPaths(target);
+      const docRef = firestore.doc(firestorePath);
       const firestoreDoc = await docRef.get();
       const subcollections: Record<string, Record<string, unknown>> = {};
       for (const collection of await docRef.listCollections()) {
@@ -462,19 +479,22 @@ export function createSpaceDeps(
         subcollections[collection.id] = entries;
       }
       const rtdb: Record<string, unknown> = {};
-      for (const p of target.rtdbPaths) rtdb[p] = await reader.readNode(p);
+      for (const p of rtdbPaths) rtdb[p] = await reader.readNode(p);
       saveBackup(space, target.key, {
-        target, firestore: firestoreDoc.exists ? firestoreDoc.data() : null, subcollections, rtdb
+        target, firestorePath, firestore: firestoreDoc.exists ? firestoreDoc.data() : null, subcollections, rtdb
       });
     },
     // Realtime database first and Firestore last: an interrupted run leaves the Firestore row, so the
     // next run still finds the document and finishes removing it.
     remove: async (target) => {
-      const docRef = firestore.doc(target.firestorePath);
+      const { firestorePath, rtdbPaths, pointerPath } = deletionPaths(target);
+      const docRef = firestore.doc(firestorePath);
       const snap = await docRef.get();
-      const problem = whyNotDeletable(snap.exists ? snap.data() : undefined, target);
-      if (problem) throw new Error(`refusing to delete ${target.firestorePath}: ${problem}`);
-      for (const p of target.rtdbPaths) await database.ref(p).remove();
+      const pointerSnap = await firestore.doc(pointerPath).get();
+      const pointer = pointerSnap.exists ? { documentKey: pointerSnap.get("documentKey") } : undefined;
+      const problem = whyNotDeletable(snap.exists ? snap.data() : undefined, pointer, target);
+      if (problem) throw new Error(`refusing to delete ${firestorePath}: ${problem}`);
+      for (const p of rtdbPaths) await database.ref(p).remove();
       await firestore.recursiveDelete(docRef);
     },
     removeLegacyPointer: async (pointerPath) => { await firestore.doc(pointerPath).delete(); }

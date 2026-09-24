@@ -172,8 +172,13 @@ be turned off.
   `kClassContainedTypes` in `create-missing-document-metadata.ts` for why each is refused.
 - **An offering-contained document whose unit, investigation and problem cannot all be established.**
   Partial positions are not written.
-- **Deleting for any reason other than the three that mean "unreachable debris"**, and never in
-  `authed/learn_concord_org`, and never a document created within the retention window.
+- **Deleting, in `delete-unrepairable-documents.ts`, for any reason other than the three that mean
+  "unreachable debris"**, and never in `authed/learn_concord_org`, and never a document created within
+  the retention window.
+- **Deleting, in `backfill-group-canonical-pointers.ts`, anything but a duplicate group document or a
+  7.3.0 or 7.4.0 group pointer.** This one does delete in `authed/learn_concord_org`, since group
+  documents have not yet been used by real classes. Before each document goes, it is re-read, and the run
+  stops unless it is still a group document of its slot and the slot's pointer names another document.
 
 ## Group canonical pointers
 
@@ -187,8 +192,8 @@ no pointer, claims the one `findLegacy` would pick: the lowest document id. Ever
 in the slot is deleted from both databases, including its `comments` and `history` subcollections.
 Every 7.3.0 and 7.4.0 group pointer in the space is deleted too, found by collection-group query so
 that one whose slot has no documents left is included; only a slot the run skips keeps its old
-pointers. Before deleting a document it re-reads it, and stops the run unless it is still a group
-document of that slot.
+pointers. Before deleting a document it re-reads it and its slot's pointer, and stops the run unless it
+is still a group document of that slot and the pointer names a different document.
 Group documents have not yet been used by real classes, so this deletes leftovers the app could still
 open from Sort Work; the script's header gives the reasoning. Each one is copied first to
 `scripts/output/group-pointer-backfill/<run time>/`, as a convenience rather than a restore procedure.
