@@ -152,18 +152,24 @@ const UnitSummarySettings: React.FC = () => {
     }
   }, [api, branch, unit]);
 
-  // Load on mount and on navigation. Clears formState unconditionally -- useCurriculum keeps the
+  // Starts fresh on navigation. Clears formState unconditionally -- useCurriculum keeps the
   // previous unit's config in place while the new one loads, so a stale or unsaved summary could
   // otherwise sit on screen, savable into the new unit, until (or unless) the real config arrives.
-  // Also keeps Save from enabling early if the status fetch below beats the config fetch.
+  // Also keeps Save from enabling early if the status fetch below beats the config fetch. Kept
+  // separate from the fetchStatus effect below so a login-token refresh (which rebuilds api, and
+  // so fetchStatus) can re-run that fetch without also wiping out an edit in progress here.
   useEffect(() => {
     setFormState(undefined);
     setLiveStatus(undefined);
     setGenerationError(undefined);
     setSaveValidation(undefined);
-    fetchStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branch, unit]);
+
+  // Loads the live status on mount, on navigation, and after a login-token refresh rebuilds api
+  // (and so fetchStatus) -- that extra call just re-reads status, so it's harmless.
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
 
   // Loads the form once unitConfig is confirmed to belong to the current unit. Keying on
   // unitConfigLoading (not just savedSummary changing) matters on a fresh mount already pointed at

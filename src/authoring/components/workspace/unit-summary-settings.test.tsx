@@ -7,7 +7,9 @@ import { IUnitSummary, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "../../../../sh
 
 const mockGet = jest.fn();
 const mockPost = jest.fn();
-const mockApi = { get: mockGet, post: mockPost };
+// let, not const: one test reassigns this to a new object to simulate a login-token refresh
+// rebuilding the api value, without branch/unit changing.
+let mockApi = { get: mockGet, post: mockPost };
 const mockSetUnitConfig = jest.fn();
 
 const mockCurriculumValue: {
@@ -88,6 +90,7 @@ describe("UnitSummarySettings", () => {
     mockCurriculumValue.branch = "main";
     mockCurriculumValue.unit = "test-unit";
     mockAuthValue.isAdminUser = true;
+    mockApi = { get: mockGet, post: mockPost };
     mockGet.mockResolvedValue(buildStatus());
   });
 
@@ -124,6 +127,26 @@ describe("UnitSummarySettings", () => {
     expect(overview).toHaveValue("Updated overview.");
     // Not persisted merely by editing.
     expect(mockSetUnitConfig).not.toHaveBeenCalled();
+  });
+
+  it("re-checks status after a login-token refresh rebuilds api, without clearing an edit in progress", async () => {
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+    const user = userEvent.setup();
+    const { rerender } = render(<UnitSummarySettings />);
+    await flush();
+
+    const overview = screen.getByLabelText("Overview");
+    await user.clear(overview);
+    await user.type(overview, "In-progress edit.");
+
+    mockGet.mockClear();
+    // Simulates a login-token refresh: a new api object, same branch and unit.
+    mockApi = { get: mockGet, post: mockPost };
+    rerender(<UnitSummarySettings />);
+    await flush();
+
+    expect(mockGet).toHaveBeenCalledWith("/unitSummaryStatus", { branch: "main", unit: "test-unit" });
+    expect(screen.getByLabelText("Overview")).toHaveValue("In-progress edit.");
   });
 
   it("does not persist a generated result until Save is clicked", async () => {
