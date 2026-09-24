@@ -4,9 +4,7 @@ import { RenderEditCellProps } from "react-data-grid";
 import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
 import { TableContext } from "../hooks/table-context";
-import { gImageMap } from "../../../models/image-map";
-import { getClipboardContent } from "../../../utilities/clipboard-utils";
-import { ingestImage } from "../../../utilities/image-ingest";
+import { clipboardHasImage, ingestClipboardImage } from "../../../utilities/image-ingest";
 
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
@@ -56,20 +54,12 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
 
   const handlePaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const clipboardData = event.clipboardData;
-    const hasImage = Array.from(clipboardData.items).some(item => item.type === "image/png");
-    const text = clipboardData.getData("text/plain");
-    const isImageUrlText = !hasImage && !!text && gImageMap.isImageUrl(text);
-    if (!hasImage && !isImageUrlText) return;
+    if (!clipboardHasImage(clipboardData)) return;
 
-    // Must happen synchronously, before any await: by the time ingestImage() resolves the
-    // browser will already have performed its default paste if we didn't suppress it here.
+    // Suppress the default paste synchronously; after the await it is too late.
     event.preventDefault();
 
-    const contents = await getClipboardContent(clipboardData);
-    const source = contents.image ?? (isImageUrlText ? contents.text : undefined);
-    if (!source) return;
-
-    const contentUrl = await ingestImage(source);
+    const contentUrl = await ingestClipboardImage(clipboardData);
     if (contentUrl) updateValue(contentUrl);
   };
 

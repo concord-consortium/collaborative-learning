@@ -1,4 +1,5 @@
 import { EntryStatus, gImageMap } from "../models/image-map";
+import { getClipboardContent } from "./clipboard-utils";
 
 /**
  * The single sanctioned path from a user-supplied image to a value safe to persist in a
@@ -26,4 +27,38 @@ export async function ingestImage(source: File | string): Promise<string | undef
     console.warn(`ingestImage: failed to store image: ${error instanceof Error ? error.message : String(error)}`);
     return undefined;
   }
+}
+
+// Shared by clipboardHasImage() and ingestClipboardImage() so the "is this an image url"
+// check is computed by one piece of logic, not duplicated between them.
+function analyzeClipboard(clipboardData: DataTransfer) {
+  const hasImage = Array.from(clipboardData.items).some(item => item.type === "image/png");
+  const text = clipboardData.getData("text/plain");
+  const isImageUrlText = !hasImage && !!text && gImageMap.isImageUrl(text);
+  return { hasImage, isImageUrlText };
+}
+
+/**
+ * True when a paste event carries an image, decided synchronously so the caller can
+ * suppress the browser's default paste before awaiting the ingest.
+ */
+export function clipboardHasImage(clipboardData: DataTransfer): boolean {
+  const { hasImage, isImageUrlText } = analyzeClipboard(clipboardData);
+  return hasImage || isImageUrlText;
+}
+
+/**
+ * Stores the image a paste event carries and resolves to a value safe to persist,
+ * or undefined if there was none or it could not be stored.
+ * Callers should check clipboardHasImage() first and call preventDefault() synchronously.
+ */
+export async function ingestClipboardImage(clipboardData: DataTransfer): Promise<string | undefined> {
+  const { hasImage, isImageUrlText } = analyzeClipboard(clipboardData);
+  if (!hasImage && !isImageUrlText) return undefined;
+
+  const contents = await getClipboardContent(clipboardData);
+  const source = contents.image ?? (isImageUrlText ? contents.text : undefined);
+  if (!source) return undefined;
+
+  return ingestImage(source);
 }

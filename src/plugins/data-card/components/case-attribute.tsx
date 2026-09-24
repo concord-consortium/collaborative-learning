@@ -15,7 +15,7 @@ import { RemoveIconButton } from "./add-remove-icons";
 import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
-import { getClipboardContent } from "../../../utilities/clipboard-utils";
+import { clipboardHasImage, ingestClipboardImage } from "../../../utilities/image-ingest";
 import { isImageUrl } from "../../../models/data/data-types";
 import { useAttributeClassNames } from "../use-case-attribute-class-names";
 import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
@@ -232,26 +232,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const handlePasteImage = (imageFile: File, targetElement: HTMLElement) => {
-    gImageMap.addFileImage(imageFile).then(image => {
-      if (image.contentUrl) {
-        setValueCandidate(image.contentUrl);
-        targetElement.blur();
-      }
-    });
-  };
-
   const handleValuePaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    // If the clipboard contains an image element, process the image so it can be saved
-    // and rendered. If the clipboard contains a text element, check if it is an image URL.
-    // If it is, immediately set the value to the URL. Otherwise, simply let the default
-    // paste action occur without any special handling.
+    const clipboardData = event.clipboardData;
+    if (!clipboardHasImage(clipboardData)) return;
+
+    event.preventDefault();
     const targetElement = event.currentTarget;
-    const clipboardContents = await getClipboardContent(event.clipboardData);
-    if (clipboardContents.image) {
-      handlePasteImage(clipboardContents.image, targetElement);
-    } else if (clipboardContents.text && gImageMap.isImageUrl(clipboardContents.text)) {
-      setValue(clipboardContents.text);
+
+    const contentUrl = await ingestClipboardImage(clipboardData);
+    if (contentUrl) {
+      setValueCandidate(contentUrl);
+      targetElement.blur();
     }
   };
 
@@ -267,12 +258,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const handleCompleteValue = () => {
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
-    }
-  };
-
-  const setValue = (value: string) => {
-    if (value !== getValue()) {
-      caseId && content.setAttValue(caseId, attrKey, value);
     }
   };
 
