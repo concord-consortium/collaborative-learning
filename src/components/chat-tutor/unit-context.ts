@@ -1,9 +1,12 @@
 // A slice of the unit's authored aiUnitSummary, installed alongside LEFT so the tutor has
-// cumulative unit context for the current problem without sending the whole unit's content.
+// cumulative unit context for the current problem without sending the whole unit's content. The
+// filtering and formatting rules live in shared/unit-summary-slice.ts, shared with every other AI
+// consumer; this module's job is only to build the live problem list from the loaded unit model.
 import { getParent } from "mobx-state-tree";
 import { InvestigationModelType } from "../../models/curriculum/investigation";
 import { ProblemModelType } from "../../models/curriculum/problem";
 import { UnitModelType } from "../../models/curriculum/unit";
+import { formatUnitSummarySlice, ILiveProblem, unitSummarySlice } from "../../../shared/unit-summary-slice";
 
 // The same ordinal string Unit.getAllProblemOrdinals() produces --
 // "${investigation.ordinal}.${problem.ordinal}". getParent is called twice because a problem's
@@ -14,38 +17,26 @@ export function currentProblemOrdinal(problem: ProblemModelType): string {
   return `${investigation.ordinal}.${problem.ordinal}`;
 }
 
-// priorKnowledge(N) is already cumulative -- everything before problem N -- so problemDigest only
-// adds N and N+1 here, not the whole 0..N+1 range: sending every digest as well would duplicate
-// what priorKnowledge already carries. Ordinal matching is exact-string only, never numeric or
-// positional: getAllProblemOrdinals() is authored order, not sorted order ("1.10" sorts before
-// "1.2" lexicographically), so ordinal components must never be compared as numbers.
-//
-// Returns undefined (send nothing) rather than a broken or empty slice: no aiUnitSummary authored,
-// the current problem's ordinal isn't found in the live structure at all, or the summary has no
-// entry for it.
+function liveProblemsFromUnit(unit: UnitModelType): ILiveProblem[] {
+  return unit.investigations.reduce<ILiveProblem[]>((acc, investigation) => {
+    investigation.problems.forEach(problem => {
+      acc.push({ ordinal: `${investigation.ordinal}.${problem.ordinal}`, title: problem.title });
+    });
+    return acc;
+  }, []);
+}
+
+function arraysEqual(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 export function buildUnitContext(unit: UnitModelType, problem: ProblemModelType): string | undefined {
-  const summary = unit.config?.aiUnitSummary;
-  if (!summary) return undefined;
+  const liveProblems = liveProblemsFromUnit(unit);
 
-  const liveOrdinals = unit.getAllProblemOrdinals();
-  const ordinal = currentProblemOrdinal(problem);
-  const currentIndex = liveOrdinals.indexOf(ordinal);
-  if (currentIndex === -1) return undefined;
+  // getAllProblemOrdinals() is the canonical order; if this walk disagrees with it, something about the walk
+  // itself is wrong, so fail closed rather than risk building a slice against the wrong problem order.
+  if (!arraysEqual(liveProblems.map(p => p.ordinal), unit.getAllProblemOrdinals())) return undefined;
 
-  const entryByOrdinal = new Map(summary.entries.map((entry) => [entry.ordinal, entry]));
-  const currentEntry = entryByOrdinal.get(ordinal);
-  if (!currentEntry) return undefined;
-
-  const nextOrdinal = liveOrdinals[currentIndex + 1];
-  const nextEntry = nextOrdinal ? entryByOrdinal.get(nextOrdinal) : undefined;
-
-  const priorKnowledge = currentEntry.priorKnowledge || "(nothing recorded)";
-  const lines = [
-    `What the student should already know entering this problem: ${priorKnowledge}`,
-    `This problem (${ordinal}): ${currentEntry.problemDigest}`,
-  ];
-  if (nextEntry) {
-    lines.push(`The next problem (${nextOrdinal}): ${nextEntry.problemDigest}`);
-  }
-  return lines.join("\n\n");
+  const slice = unitSummarySlice(unit.config?.aiUnitSummary, liveProblems, currentProblemOrdinal(problem));
+  return slice && formatUnitSummarySlice(slice);
 }

@@ -2,6 +2,10 @@ import { UnitModel } from "../../models/curriculum/unit";
 import { IUnitSummary } from "../../../shared/unit-summary-types";
 import { buildUnitContext, currentProblemOrdinal } from "./unit-context";
 
+// Everything case-by-case about filtering and formatting lives in
+// shared/unit-summary-slice.test.ts; these are integration-level checks that this module wires
+// the live unit model into that shared helper correctly.
+
 function makeUnit(aiUnitSummary?: IUnitSummary) {
   return UnitModel.create({
     code: "u1",
@@ -19,8 +23,24 @@ function makeUnit(aiUnitSummary?: IUnitSummary) {
   });
 }
 
-function summary(entries: IUnitSummary["entries"]): IUnitSummary {
-  return { generatedAt: "2026-01-01T00:00:00.000Z", sourceHash: "h", sourceManifest: [], overview: "o", entries };
+// sourceManifest mirrors the unit's live problems exactly (ordinal + title), so the prefix check
+// in unitSummarySlice passes as-is; individual tests break it deliberately.
+function matchingSummary(): IUnitSummary {
+  return {
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    sourceHash: "h",
+    overview: "o",
+    sourceManifest: [
+      { ordinal: "1.1", title: "Problem 1.1", problemHash: "h1" },
+      { ordinal: "1.2", title: "Problem 1.2", problemHash: "h2" },
+      { ordinal: "2.1", title: "Problem 2.1", problemHash: "h3" },
+    ],
+    entries: [
+      { ordinal: "1.1", priorKnowledge: "", problemDigest: "digest one" },
+      { ordinal: "1.2", priorKnowledge: "knows dataflow basics", problemDigest: "digest two" },
+      { ordinal: "2.1", priorKnowledge: "knows dataflow and EMG", problemDigest: "digest three" },
+    ],
+  };
 }
 
 describe("currentProblemOrdinal", () => {
@@ -39,48 +59,33 @@ describe("buildUnitContext", () => {
     expect(buildUnitContext(unit, problem)).toBeUndefined();
   });
 
-  it("includes priorKnowledge for the current problem and digests for current + next", () => {
-    const unit = makeUnit(summary([
-      { ordinal: "1.1", priorKnowledge: "", problemDigest: "digest one" },
-      { ordinal: "1.2", priorKnowledge: "knows dataflow basics", problemDigest: "digest two" },
-      { ordinal: "2.1", priorKnowledge: "knows dataflow and EMG", problemDigest: "digest three" },
-    ]));
+  it("returns the formatted slice text for a unit with a matching summary", () => {
+    const unit = makeUnit(matchingSummary());
     const problem = unit.investigations[0].problems[1]; // 1.2
     const result = buildUnitContext(unit, problem);
-    expect(result).toContain("knows dataflow basics");
-    expect(result).toContain("This problem (1.2): digest two");
-    expect(result).toContain("The next problem (2.1): digest three");
-    // Only current + next digest, never a digest from before the current problem -- priorKnowledge
-    // already covers that ground, and repeating it would be redundant (see unit-context.ts).
-    expect(result).not.toContain("digest one");
+    expect(result).toBe(
+      "What the student should already know entering this problem: knows dataflow basics\n\n" +
+      "This problem (1.2): digest two\n\n" +
+      "The next problem (2.1): digest three"
+    );
   });
 
-  it("omits the next-problem line for the unit's last problem", () => {
-    const unit = makeUnit(summary([
-      { ordinal: "1.1", priorKnowledge: "", problemDigest: "digest one" },
-      { ordinal: "1.2", priorKnowledge: "pk", problemDigest: "digest two" },
-      { ordinal: "2.1", priorKnowledge: "pk2", problemDigest: "digest three" },
-    ]));
-    const problem = unit.investigations[1].problems[0]; // 2.1, the last problem
-    const result = buildUnitContext(unit, problem);
-    expect(result).toContain("This problem (2.1): digest three");
-    expect(result).not.toContain("The next problem");
+  it("returns undefined when a title before the current problem disagrees with the manifest", () => {
+    const summary = matchingSummary();
+    summary.sourceManifest[0].title = "A renamed problem";
+    const unit = makeUnit(summary);
+    const problem = unit.investigations[0].problems[1]; // 1.2 -- 1.1 is before it
+    expect(buildUnitContext(unit, problem)).toBeUndefined();
   });
 
-  it("shows a fallback for an empty priorKnowledge (the unit's first problem)", () => {
-    const unit = makeUnit(summary([
-      { ordinal: "1.1", priorKnowledge: "", problemDigest: "digest one" },
-    ]));
-    const problem = unit.investigations[0].problems[0];
-    const result = buildUnitContext(unit, problem);
-    expect(result).toContain("(nothing recorded)");
-  });
-
-  it("returns undefined when the summary has no entry for the current problem", () => {
-    const unit = makeUnit(summary([
-      { ordinal: "1.1", priorKnowledge: "pk", problemDigest: "digest one" },
-    ]));
-    const problem = unit.investigations[0].problems[1]; // 1.2 -- not in the summary above
+  it("fails closed when the walk disagrees with getAllProblemOrdinals", () => {
+    // liveProblemsFromUnit's own walk uses the same ordinal formula as getAllProblemOrdinals(), so
+    // they cannot disagree for any unit this module can actually build -- the guard exists for
+    // defense against future drift between the two. Force that disagreement here to prove the
+    // guard fires rather than silently building a slice against the wrong problem order.
+    const unit = makeUnit(matchingSummary());
+    const problem = unit.investigations[0].problems[1];
+    jest.spyOn(unit, "getAllProblemOrdinals").mockReturnValue(["9.9"]);
     expect(buildUnitContext(unit, problem)).toBeUndefined();
   });
 });
