@@ -204,6 +204,38 @@ curriculum-only restriction appears deliberate. Folding them into `ingestImage` 
 behavior in three mature tiles and rewrite `clipboard-utils.test.ts:49-105`. **Follow-up ticket,
 not this one.**
 
+## Cross-tile sharing and selection (verified unaffected)
+
+This change writes an ordinary string into an existing cell through the existing change
+handler. It introduces no new value type: `ccimg://` strings already flow through the shared
+`DataSet` from Data Cards, and the data layer already models them as first class. Verified
+against each sharing path:
+
+| Path | Mechanism | Effect of this change |
+|---|---|---|
+| TableIt! / DataCardIt! / BarGraphIt! | `DataSetViewButton` links the existing `SharedDataSet` to a new tile (`data-set-view-button.tsx:36-41`); never reads cell values | None |
+| Attribute typing | `Attribute.typeCounts` already counts an `"image"` type, and `includesAnyImages` exists (`attribute.ts:115`, `:126`) | None — a `ccimg://` value types identically whichever tile wrote it |
+| Bar graph | Skips image attributes when choosing a primary attribute (`bar-graph-content.ts:267`) | None |
+| XY graph | Filters image values out of plotted data (`graph-layer-model.ts:111`); axis hooks render image categories as `<image>` (`use-axis.ts:72`, `use-sub-axis.ts:210`, `:379`) | None |
+| Row highlight from a linked view | `ReactDataGrid selectedRows={selectedCaseIds}` (`table-tile.tsx:497`), keyed by case id | None — content-agnostic |
+| Cell highlight | `dataSet.isCellSelected(cell)` adds `highlighted` to `baseClasses`, which image cells receive (`cell-formatter.tsx:62`) | None functionally — but see below |
+| Linked-column shading | `cellClasses` applies `linked` / `selected-column` per attribute (`use-columns-from-data-set.ts:41-52`) | None |
+
+### One real UX gap found
+
+Image cells *do* receive the `highlighted` class, so selection state is correct. But the
+highlight is a `background-color` (`cell-formatter.scss:7-13`) in pale tints —
+`$highlight-linked-cell: #cffae8`, `$highlight-unlinked-cell: #c4defc` — while `.image-cell`
+centers an `<img>` at `max-width/max-height: 100%` with only `padding: 6px`. The highlight is
+therefore visible only as a ~6px pale frame around the image, and is effectively invisible on a
+cell whose image fills the box.
+
+This is pre-existing (any image reaching a table cell via a shared Data Card hits it today), but
+it lands squarely on the requirement that cells highlight when a related view is selected, so it
+is fixed here: image cells get a visible selection treatment — an inset outline in the same
+highlight color rather than relying on background bleed. Covered by a Cypress assertion that a
+linked-view selection produces a visibly distinct image cell.
+
 ## Logging
 
 No new logging code. `setAttributeValue` routes to `TableContentModel.setCanonicalCaseValues`,
@@ -237,10 +269,28 @@ Cypress:
 - Add the new spec to the `test` choice list in `.github/workflows/manual-regression.yml` in the
   same change (per CLAUDE.md, a spec absent from that list cannot be dispatched).
 
-## Known limitation (recorded, not addressed)
+## Known limitation (out of scope — see follow-up ticket)
 
-Images live as base64 in the Realtime Database rather than a storage bucket, so each one costs
-roughly its resized size in the class's RTDB. A table invites many more images than a data card
-does, so a heavily-imaged table is correspondingly heavier. This is existing platform behavior
-that CLUE-260 does not change, but it is worth knowing before a unit is authored around
-image-per-row tables.
+**Document size is not affected.** A cell holds only `ccimg://fbrtdb.concord.org/{classHash}/{imageKey}`,
+roughly 60 characters. What grows is the class-wide `images` node in RTDB.
+
+Two properties of the existing pipeline make each image costly:
+
+- **Re-encoded as PNG.** `canvas.toDataURL()` is called with no arguments (`image-utils.ts:149`),
+  so it defaults to `image/png` — lossless, and the worst choice for photographs. A 512x512 photo
+  that arrived as a 60KB JPEG leaves as a 400-600KB PNG, plus ~33% base64 inflation. One pasted
+  photo is roughly 0.5-0.8MB in RTDB regardless of the original file size.
+- **One RTDB round trip per image, uncached across reloads.** `db.getImage` issues
+  `imageRef.once("value")` per key (`db.ts:1480-1491`). `gImageMap` dedupes within a session via
+  its observable map and `storingPromises`, but that cache is in-memory only.
+
+The per-image cost is identical in Data Cards. What differs is how many are on screen at once: a
+data card shows one case, so one image loads; a 30-row table with an image column fetches 30 on
+first render — very roughly 15MB and 30 round trips before the table looks right, on every load.
+
+Neither the encoding nor the lazy-loading belongs in CLUE-260 — both are changes to shared code
+affecting every tile that stores images. Tracked separately.
+
+There is also no deletion path anywhere in the codebase (no `removeImage`/`deleteImage`), so
+clearing an image cell drops the reference while the blob remains in the class node. Pre-existing
+across all tiles; noted, not addressed.
