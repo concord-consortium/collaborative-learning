@@ -501,6 +501,21 @@ describe("UnitSummarySettings", () => {
     expect(screen.queryByText(/Possibly stale/)).not.toBeInTheDocument();
   });
 
+  it("shows the detection-limits caveat as visible text", async () => {
+    mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+    mockGet.mockResolvedValue(buildStatus({
+      sourceHash: "hash-b",
+      sourceManifest: [
+        { ordinal: "1.1", title: "First", problemHash: "CHANGED-HASH" },
+        { ordinal: "1.2", title: "Second", problemHash: "p2-hash" },
+      ],
+    }));
+    render(<UnitSummarySettings />);
+    await flush();
+
+    expect(screen.getByText(/Changes to image files/)).toBeInTheDocument();
+  });
+
   it("shows the badge already lit if the source changed during a successful generation", async () => {
     mockPost.mockResolvedValue({ success: true, summary: buildSummary() });
     // After generation, the panel re-checks status; simulate the source having changed by then.

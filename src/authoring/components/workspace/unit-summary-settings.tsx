@@ -309,11 +309,7 @@ const UnitSummarySettings: React.FC = () => {
       {statusError && <p className="form-error">Could not check whether this summary is up to date: {statusError}</p>}
 
       {staleness.stale && (
-        <div
-          className="staleness-badge"
-          title="Detected from a hash of each problem's Markdown export. Changes to image files, or
-to table rows beyond the summarizer's row cap, are not detected."
-        >
+        <div className="staleness-badge">
           <strong>Possibly stale</strong> — curriculum content or structure has changed since this
           summary was generated.
           <ul>
@@ -324,6 +320,10 @@ to table rows beyond the summarizer's row cap, are not detected."
               <li key={note}>{note}</li>
             ))}
           </ul>
+          <p className="muted small">
+            Detected from a hash of each problem&apos;s Markdown export. Changes to image files,
+            or to table rows beyond the summarizer&apos;s row cap, are not detected.
+          </p>
         </div>
       )}
 
