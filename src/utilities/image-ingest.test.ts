@@ -26,8 +26,9 @@ describe("ingestImage", () => {
 
   it("stores a File via addFileImage and returns the ccimg:// contentUrl", async () => {
     const spy = jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(readyEntry(kCcImgUrl));
-    const result = await ingestImage(mockFile());
-    expect(spy).toHaveBeenCalled();
+    const file = mockFile();
+    const result = await ingestImage(file);
+    expect(spy).toHaveBeenCalledWith(file);
     expect(result).toBe(kCcImgUrl);
   });
 
@@ -35,7 +36,6 @@ describe("ingestImage", () => {
     jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(readyEntry(kCcImgUrl));
     const result = await ingestImage(mockFile());
     expect(result).not.toMatch(/^blob:/);
-    expect(result).not.toMatch(/^data:/);
   });
 
   it("ingests an external image URL via getImage and returns the ccimg:// contentUrl", async () => {
@@ -64,5 +64,17 @@ describe("ingestImage", () => {
     const result = await ingestImage(externalUrl);
     expect(result).toBe(externalUrl);
     expect(warn).toHaveBeenCalled();
+  });
+
+  it("returns undefined when storing throws", async () => {
+    jest.spyOn(gImageMap, "addFileImage").mockRejectedValue(new Error("Error loading image: bad.png"));
+    jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    expect(await ingestImage(mockFile())).toBeUndefined();
+  });
+
+  it("returns undefined for a string no handler can resolve", async () => {
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(
+      ImageMapEntry.create({ displayUrl: "", retries: 0, status: EntryStatus.Ready }));
+    expect(await ingestImage("not a url")).toBeUndefined();
   });
 });
