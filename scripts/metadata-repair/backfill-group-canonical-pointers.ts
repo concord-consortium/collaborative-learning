@@ -13,8 +13,8 @@
 // or, when there is no pointer yet, the one `findLegacy` would pick: the lowest document id, which is the
 // order Firestore returns an unordered query in. Every other group document in the slot is a leftover of
 // the creation race pointers were introduced to close, and is deleted from both the realtime database and
-// Firestore. Every 7.3.0 and 7.4.0 pointer in the slot is deleted too, whichever document it names, so the
-// pointer at the current path is the only one left.
+// Firestore. Every 7.3.0 and 7.4.0 group pointer in the space is deleted too, whichever document it names
+// and whether or not its slot still has any documents, so a current pointer is the only kind left.
 //
 // The app can still open a leftover: Sort Work lists every group document in the class. Deleting them
 // anyway is acceptable because group documents have not yet been used by real classes, so a leftover
@@ -25,9 +25,12 @@
 // nothing else is deleted: each document is re-read just before its removal, and the run stops unless it
 // is still a group document of the slot it was found in (`whyNotDeletable`).
 //
-// Anything this cannot confidently address is reported and left alone rather than guessed at: a slot
-// containing a document with the wrong owner uid, or a slot whose pointer names a document outside it or
-// has no document key.
+// Anything this cannot confidently address is reported and left alone rather than guessed at, legacy
+// pointers included: a slot containing a document with the wrong owner uid or with no realtime-database
+// content under the slot's class (a wrong `context_id`), or a slot whose pointer names a document outside
+// it or has no document key. A document with no `offeringId` is skipped too; the app's query cannot find
+// it either. So this can run before or after the `context_id` and `offeringId` repairs; a run after them
+// picks up whatever they fix.
 //
 // Covers `authed` and `demo` spaces. `qa` and `dev` have had their realtime-database side purged and
 // hold only test data, so they are not listed at all.
@@ -77,6 +80,58 @@ export function legacyGroupPointerRelativePaths(
     `classes/${contextId}/offerings/${offeringId}/groups/${groupId}/canonical/${kGroupPointerLabel}`,
     `canonical/v1/classes/${contextId}/offerings/${offeringId}/groups/${groupId}/slots/${kGroupPointerLabel}`
   ];
+}
+
+/** A 7.3.0 or 7.4.0 group pointer, found by its path. */
+export interface ILegacyGroupPointer {
+  path: string;
+  contextId: string;
+  offeringId: string;
+  groupId: string;
+  documentKey: unknown;
+}
+
+/**
+ * The two shapes `legacyGroupPointerRelativePaths` builds, under a two-segment space root, with any label:
+ * builds before the "default" label keyed the slot by document type instead.
+ */
+const kLegacyGroupPointerPatterns = [
+  /^([^/]+\/[^/]+)\/classes\/([^/]+)\/offerings\/([^/]+)\/groups\/([^/]+)\/canonical\/[^/]+$/,
+  /^([^/]+\/[^/]+)\/canonical\/v1\/classes\/([^/]+)\/offerings\/([^/]+)\/groups\/([^/]+)\/slots\/[^/]+$/
+];
+
+/** The space root and slot of a 7.3.0 or 7.4.0 group pointer path, or undefined for any other path. */
+export function parseLegacyGroupPointerPath(
+  path: string
+): { spaceRoot: string; contextId: string; offeringId: string; groupId: string } | undefined {
+  for (const pattern of kLegacyGroupPointerPatterns) {
+    const match = pattern.exec(path);
+    if (match) {
+      const [, spaceRoot, contextId, offeringId, groupId] = match;
+      return { spaceRoot, contextId, offeringId, groupId };
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Every 7.3.0 and 7.4.0 group pointer in the database, keyed by space root. A pointer lives in a
+ * `canonical` (7.3.0) or `slots` (7.4.0) collection; both names are shared with other paths, current
+ * pointers among them, so each match is kept only if its whole path has a legacy group shape.
+ */
+export async function listLegacyGroupPointers(firestore: any): Promise<Map<string, ILegacyGroupPointer[]>> {
+  const bySpace = new Map<string, ILegacyGroupPointer[]>();
+  for (const collectionId of ["canonical", "slots"]) {
+    for (const doc of (await firestore.collectionGroup(collectionId).get()).docs) {
+      const parsed = parseLegacyGroupPointerPath(doc.ref.path);
+      if (!parsed) continue;
+      const { spaceRoot, ...slot } = parsed;
+      const list = bySpace.get(spaceRoot) ?? [];
+      list.push({ path: doc.ref.path, ...slot, documentKey: doc.get("documentKey") });
+      bySpace.set(spaceRoot, list);
+    }
+  }
+  return bySpace;
 }
 
 /** A pointer document as stored, or undefined when there is none. */
@@ -237,6 +292,8 @@ export function whyNotDeletable(data: Record<string, any> | undefined, target: I
 export interface ISpaceDeps {
   /** Every group-scoped document in the space. */
   listGroupDocs: () => Promise<IGroupDocRecord[]>;
+  /** The child keys of a realtime-database node; empty when it is absent. */
+  readRtdbChildKeys: (path: string) => Promise<string[]>;
   readPointer: (path: string) => Promise<StoredPointer>;
   /** Claims the slot for `key` unless it is already claimed; returns the pointer the slot holds after. */
   claim: (pointerPath: string, key: string) => Promise<StoredPointer>;
@@ -244,6 +301,8 @@ export interface ISpaceDeps {
   backup: (target: IDeletionTarget) => Promise<void>;
   /** Deletes the document everywhere. Must throw, deleting nothing, if it is not what `target` says. */
   remove: (target: IDeletionTarget) => Promise<void>;
+  /** Every 7.3.0 and 7.4.0 group pointer in the space, whether or not its slot still has documents. */
+  listLegacyPointers: () => Promise<ILegacyGroupPointer[]>;
   removeLegacyPointer: (path: string) => Promise<void>;
   log?: (message: string) => void;
 }
@@ -258,13 +317,21 @@ export interface ISpaceResult {
   skipped: ISkippedDoc[];
 }
 
+const spaceRootOf = (space: ISelectedSpace) => space.spacePath.replace(/\/documents$/, "");
+
 /** Claim and clean up every group slot in one space, or on a dry run count what would be done. */
 export async function backfillSpace(
   space: ISelectedSpace, { dryRun }: { dryRun: boolean }, deps: ISpaceDeps
 ): Promise<ISpaceResult> {
   const { readPointer, claim, backup, remove, removeLegacyPointer, log = console.log } = deps;
-  const spaceRoot = space.spacePath.replace(/\/documents$/, "");
-  const { slots, skipped } = groupIntoSlots(await deps.listGroupDocs());
+  const spaceRoot = spaceRootOf(space);
+  const docs = await deps.listGroupDocs();
+  const { slots, skipped } = groupIntoSlots(docs);
+  const slotKey = (s: { contextId?: string; offeringId?: string; groupId?: string }) =>
+    JSON.stringify([s.contextId, s.offeringId, s.groupId]);
+  // Slots this run leaves alone for someone to look at keep their legacy pointers as evidence.
+  const skippedKeys = new Set(skipped.map(d => d.key));
+  const skippedSlots = new Set(docs.filter(d => skippedKeys.has(d.key)).map(slotKey));
   const result: ISpaceResult = {
     label: space.label, slots: slots.length, alreadyPointed: 0, claimed: 0, deleted: 0, legacyPointersDeleted: 0,
     skipped
@@ -273,6 +340,24 @@ export async function backfillSpace(
   for (const slot of slots) {
     const pointerPath = `${spaceRoot}/${groupPointerRelativePath(slot)}`;
     const slotLabel = `class ${slot.contextId} offering ${slot.offeringId} group ${slot.groupId}`;
+    const userPath = `${space.rtdbRoot}/classes/${slot.contextId}/users/${slot.uid}`;
+
+    // A document whose content is not under the slot's class has a wrong `context_id`: claiming for it
+    // would write a pointer the app never reads, and deleting it would miss its content. The whole slot
+    // is skipped, as for a wrong uid; once `context_id` is repaired, a later run places it correctly.
+    const contentKeys = new Set(await deps.readRtdbChildKeys(`${userPath}/documents`));
+    const misplaced = slot.docs.filter(d => !contentKeys.has(d.key));
+    if (misplaced.length) {
+      skippedSlots.add(slotKey(slot));
+      skipped.push(...slot.docs.map(d => ({
+        key: d.key,
+        reason: misplaced.includes(d)
+          ? `no realtime-database content under class ${slot.contextId}; its context_id may be wrong`
+          : "another document in its slot was skipped"
+      })));
+      continue;
+    }
+
     let decision = decideSlot(slot, await readPointer(pointerPath));
 
     if (decision.action === "claim" && !dryRun) {
@@ -281,6 +366,7 @@ export async function backfillSpace(
       // first. Their choice stands; decide again around it.
       if (holder?.documentKey !== decision.winner) decision = decideSlot(slot, holder);
     }
+    if (decision.action === "invalid" || decision.action === "dangling") skippedSlots.add(slotKey(slot));
     if (decision.action === "invalid") {
       skipped.push(...slot.docs.map(d => ({
         key: d.key, reason: `the pointer for ${slotLabel} exists but has no document key`
@@ -302,7 +388,6 @@ export async function backfillSpace(
     }
 
     for (const loser of decision.losers) {
-      const userPath = `${space.rtdbRoot}/classes/${slot.contextId}/users/${slot.uid}`;
       const target: IDeletionTarget = {
         key: loser.key,
         firestorePath: `${space.spacePath}/${loser.key}`,
@@ -316,18 +401,16 @@ export async function backfillSpace(
       result.deleted++;
       log(`  ${dryRun ? "would delete" : "deleted"} ${loser.key} (${slotLabel} keeps ${decision.winner})`);
     }
+  }
 
-    // The pointer at the current path is now the only one naming the winner. Removed after the losers,
-    // so an interrupted run still has something left in this slot to find next time.
-    for (const relativePath of legacyGroupPointerRelativePaths(slot)) {
-      const legacyPath = `${spaceRoot}/${relativePath}`;
-      const legacy = await readPointer(legacyPath);
-      if (!legacy) continue;
-      if (!dryRun) await removeLegacyPointer(legacyPath);
-      result.legacyPointersDeleted++;
-      log(`  ${dryRun ? "would delete" : "deleted"} legacy pointer ${legacyPath} ` +
-        `(named ${JSON.stringify(legacy.documentKey)})`);
-    }
+  // Every slot's current pointer is now the only one it needs, including a slot whose documents are all
+  // gone. Removed after the losers, so an interrupted run still has something left to find next time.
+  for (const legacy of await deps.listLegacyPointers()) {
+    if (skippedSlots.has(slotKey(legacy))) continue;
+    if (!dryRun) await removeLegacyPointer(legacy.path);
+    result.legacyPointersDeleted++;
+    log(`  ${dryRun ? "would delete" : "deleted"} legacy pointer ${legacy.path} ` +
+      `(named ${JSON.stringify(legacy.documentKey)})`);
   }
 
   return result;
@@ -337,17 +420,22 @@ export async function backfillSpace(
 export interface IFirebaseHandles {
   firestore: any;
   database: any;
-  reader: { readNode: (path: string) => Promise<unknown> };
+  reader: { readChildKeys: (path: string) => Promise<string[]>; readNode: (path: string) => Promise<unknown> };
   serverTimestamp: () => unknown;
+  /** From `listLegacyGroupPointers`, read once for every space. */
+  legacyPointers: Map<string, ILegacyGroupPointer[]>;
   saveBackup: (space: ISelectedSpace, key: string, contents: unknown) => void;
 }
 
 /** The real reads and writes `backfillSpace` makes in one space. */
 export function createSpaceDeps(
-  { firestore, database, reader, serverTimestamp, saveBackup }: IFirebaseHandles, space: ISelectedSpace
+  { firestore, database, reader, serverTimestamp, legacyPointers, saveBackup }: IFirebaseHandles,
+  space: ISelectedSpace
 ): ISpaceDeps {
   return {
     listGroupDocs: () => listGroupDocs(firestore, space.spacePath),
+    readRtdbChildKeys: (path) => reader.readChildKeys(path),
+    listLegacyPointers: async () => legacyPointers.get(spaceRootOf(space)) ?? [],
     readPointer: async (pointerPath) => {
       const snap = await firestore.doc(pointerPath).get();
       return snap.exists ? { documentKey: snap.get("documentKey") } : undefined;
@@ -436,14 +524,15 @@ async function main() {
   for (const u of selection.unrecognized) console.log(`  unrecognized space path: ${u}`);
   console.log("");
 
+  const legacyPointers = await listLegacyGroupPointers(firestore);
   const totals = { slots: 0, alreadyPointed: 0, claimed: 0, deleted: 0, legacyPointersDeleted: 0, skipped: 0 };
   for (const space of selection.selected) {
-    const deps = createSpaceDeps({ firestore, database, reader, serverTimestamp, saveBackup }, space);
+    const deps = createSpaceDeps({ firestore, database, reader, serverTimestamp, legacyPointers, saveBackup }, space);
 
     // Held back so each space's details print under its own summary line.
     const details: string[] = [];
     const result = await backfillSpace(space, { dryRun }, { ...deps, log: (message) => details.push(message) });
-    if (result.slots || result.skipped.length) {
+    if (result.slots || result.skipped.length || result.legacyPointersDeleted) {
       console.log(`${result.label}: ${result.slots} slots, ${result.alreadyPointed} already pointed, ` +
         `${result.claimed} ${dryRun ? "to claim" : "claimed"}, ` +
         `${result.deleted} duplicates ${dryRun ? "to delete" : "deleted"}, ` +

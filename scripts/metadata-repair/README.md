@@ -51,7 +51,7 @@ This matters, and it is not the order the scripts are listed in.
 3. re-run 2 as a dry run                 regenerates the skip report
 4. delete-unrepairable-documents.ts      reads that report
 5. backfill-document-offering-id.ts      needs 1 and 2; independent of 3 and 4
-6. backfill-group-canonical-pointers.ts  needs 1 and 5
+6. backfill-group-canonical-pointers.ts  any time; re-run after 1 or 5
 ```
 
 **1 and 2 are independent** and may run in either order.
@@ -61,10 +61,12 @@ node through its `context_id` — a wrong one makes the document look unrecovera
 not exist yet cannot be scanned at all. It does not depend on the deletion, which only removes
 documents that have no Firestore metadata for it to scan.
 
-**Step 6 needs 1 and 5.** `backfill-group-canonical-pointers.ts` trusts each group document's
-`context_id`, both to place it in a slot and to find the realtime-database copy it deletes, and skips
-a document with no `offeringId`. Either repair can therefore change which documents it sees, which one
-wins a slot, and what it deletes. It does not depend on 2–4.
+**Step 6 can run at any time.** `backfill-group-canonical-pointers.ts` places each group document by its
+`context_id` and `offeringId`, but it does not trust them blindly. It skips a document with no
+`offeringId`, which the app's own query cannot find either. It also skips any slot where a document's
+realtime-database content is not under the class its `context_id` names. Both kinds of skip are
+reported. If step 1 or 5 later repairs one of those documents, re-run step 6 to pick it up. It does not
+depend on 2–4.
 
 **The deletion runs against a report regenerated after the repair.** Not because the deletion is
 riskier in itself, but because a document lands in the residue for reasons that are not all
@@ -182,17 +184,19 @@ longer reads.
 
 For each slot (one class, offering and group) it keeps the document the pointer names, or when there is
 no pointer, claims the one `findLegacy` would pick: the lowest document id. Every other group document
-in the slot is deleted from both databases, including its `comments` and `history` subcollections, and
-so is every 7.3.0 or 7.4.0 pointer in the slot, leaving the current pointer as the only one. Before
-deleting a document it re-reads it, and stops the run unless it is still a group document of that slot.
+in the slot is deleted from both databases, including its `comments` and `history` subcollections.
+Every 7.3.0 and 7.4.0 group pointer in the space is deleted too, found by collection-group query so
+that one whose slot has no documents left is included; only a slot the run skips keeps its old
+pointers. Before deleting a document it re-reads it, and stops the run unless it is still a group
+document of that slot.
 Group documents have not yet been used by real classes, so this deletes leftovers the app could still
 open from Sort Work; the script's header gives the reasoning. Each one is copied first to
 `scripts/output/group-pointer-backfill/<run time>/`, as a convenience rather than a restore procedure.
 It covers `authed` and `demo` spaces, including `authed/learn_concord_org`, and reports rather than
 touches a slot it cannot confidently address.
 
-Its dry run should report no document skipped for a missing `context_id`, `offeringId` or `groupId`
-before it is applied. A second dry run after an apply run should report nothing to claim, no duplicates
+Read the skipped lines of its dry run before applying it: each names a slot the run will leave
+without a pointer until the cause is fixed. A second dry run after an apply run should report nothing to claim, no duplicates
 and no legacy pointers to delete.
 
 ## Design

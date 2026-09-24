@@ -2,8 +2,9 @@ import { getCanonicalPointerPath, kDefaultCanonicalDocumentLabel } from "../../s
 import { getGroupOwnerId } from "../../src/models/document/document-axes";
 import {
   backfillSpace, createSpaceDeps, decideSlot, groupIntoSlots, groupOwnerId, groupPointerRelativePath,
-  kGroupPointerLabel, kPointerCreatedBy, legacyGroupPointerRelativePaths, listGroupDocs, whyNotDeletable,
-  type IDeletionTarget, type IGroupDocRecord, type ISpaceDeps
+  kGroupPointerLabel, kPointerCreatedBy, legacyGroupPointerRelativePaths, listGroupDocs, listLegacyGroupPointers,
+  parseLegacyGroupPointerPath, whyNotDeletable, type IDeletionTarget, type IGroupDocRecord, type ILegacyGroupPointer,
+  type ISpaceDeps
 } from "./backfill-group-canonical-pointers";
 
 const space = { label: "authed/p", spacePath: "authed/p/documents", rtdbRoot: "/authed/portals/p" };
@@ -18,17 +19,22 @@ const legacyPointerPaths = [
   "authed/p/classes/c1/offerings/o1/groups/3/canonical/default",
   "authed/p/canonical/v1/classes/c1/offerings/o1/groups/3/slots/default"
 ];
-const readLegacy = legacyPointerPaths.map(p => `read ${p}`);
+// A 7.3.0 or 7.4.0 pointer for group `groupId` of offering "o1" in class "c1", naming `documentKey`.
+const mkLegacy = (path: string, documentKey: unknown, groupId = "3"): ILegacyGroupPointer => ({
+  path, contextId: "c1", offeringId: "o1", groupId, documentKey
+});
 
 /**
  * Deps that record every call in one ordered log, so a test can assert both what happened and in which
  * order — the backup-before-delete guarantee is an ordering property.
  */
 function makeDeps(docs: IGroupDocRecord[], pointers: Record<string, unknown> = {},
-  { claimResult }: { claimResult?: unknown } = {}) {
+  { claimResult, legacy = [] }: { claimResult?: unknown; legacy?: ILegacyGroupPointer[] } = {}) {
   const calls: string[] = [];
   const deps: ISpaceDeps = {
     listGroupDocs: async () => { calls.push("list"); return docs; },
+    // Every document's content is where its metadata says, unless a test says otherwise.
+    readRtdbChildKeys: async () => docs.map(d => d.key),
     readPointer: async (path) => {
       calls.push(`read ${path}`);
       return path in pointers ? { documentKey: pointers[path] } : undefined;
@@ -39,6 +45,7 @@ function makeDeps(docs: IGroupDocRecord[], pointers: Record<string, unknown> = {
     },
     backup: async (t: IDeletionTarget) => { calls.push(`backup ${t.key}`); },
     remove: async (t: IDeletionTarget) => { calls.push(`remove ${t.key}`); },
+    listLegacyPointers: async () => { calls.push("list legacy"); return legacy; },
     removeLegacyPointer: async (path) => { calls.push(`remove pointer ${path}`); },
     log: () => undefined
   };
@@ -63,6 +70,50 @@ describe("formulas kept in step with src", () => {
   it("builds the 7.3.0 and 7.4.0 pointer paths", () => {
     expect(legacyGroupPointerRelativePaths({ contextId: "c1", offeringId: "o1", groupId: "3" }))
       .toEqual(legacyPointerPaths.map(p => p.replace(/^authed\/p\//, "")));
+  });
+});
+
+describe("legacy group pointers", () => {
+  it("parses both legacy shapes back into their space root and slot", () => {
+    for (const path of legacyPointerPaths) {
+      expect(parseLegacyGroupPointerPath(path))
+        .toEqual({ spaceRoot: "authed/p", contextId: "c1", offeringId: "o1", groupId: "3" });
+    }
+  });
+
+  it("parses a legacy pointer keyed by document type rather than the default label", () => {
+    expect(parseLegacyGroupPointerPath("demo/X/classes/c1/offerings/o1/groups/3/canonical/group"))
+      .toEqual({ spaceRoot: "demo/X", contextId: "c1", offeringId: "o1", groupId: "3" });
+  });
+
+  it.each([
+    ["the current group pointer", slotPointerPath],
+    ["a current class-wide pointer", "authed/p/canonical/v1/classes/c1/units/u/owners/class_c1/slots/dqb"],
+    ["a 7.4.0 class-wide pointer", "authed/p/canonical/v1/classes/c1/units/u/slots/dqb"],
+    ["a pointer under a deeper root", "a/b/c/d/classes/c1/offerings/o1/groups/3/canonical/default"]
+  ])("does not parse %s", (_label, path) => {
+    expect(parseLegacyGroupPointerPath(path)).toBeUndefined();
+  });
+
+  it("lists legacy pointers from both collection groups by space, ignoring every other path", async () => {
+    const byGroup: Record<string, Array<{ path: string; documentKey: unknown }>> = {
+      canonical: [{ path: legacyPointerPaths[0], documentKey: "a" }],
+      slots: [
+        { path: legacyPointerPaths[1], documentKey: "b" },
+        { path: slotPointerPath, documentKey: "a" },
+        { path: "demo/X/canonical/v1/classes/c1/offerings/o1/groups/3/slots/default", documentKey: "c" }
+      ]
+    };
+    const firestore = {
+      collectionGroup: (id: string) => ({ get: async () => ({
+        docs: byGroup[id].map(d => ({ ref: { path: d.path }, get: () => d.documentKey }))
+      }) })
+    };
+    const bySpace = await listLegacyGroupPointers(firestore);
+    expect([...bySpace.keys()]).toEqual(["authed/p", "demo/X"]);
+    expect(bySpace.get("authed/p")).toEqual([
+      mkLegacy(legacyPointerPaths[0], "a"), mkLegacy(legacyPointerPaths[1], "b")
+    ]);
   });
 });
 
@@ -171,9 +222,10 @@ describe("decideSlot", () => {
 
 describe("backfillSpace", () => {
   it("dry run reads pointers but claims, backs up and removes nothing", async () => {
-    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], { [legacyPointerPaths[0]]: "a" });
+    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], {},
+      { legacy: [mkLegacy(legacyPointerPaths[0], "a")] });
     const res = await backfillSpace(space, { dryRun: true }, deps);
-    expect(calls).toEqual(["list", `read ${slotPointerPath}`, ...readLegacy]);
+    expect(calls).toEqual(["list", `read ${slotPointerPath}`, "list legacy"]);
     expect(res).toMatchObject({ slots: 1, alreadyPointed: 0, claimed: 1, deleted: 1, legacyPointersDeleted: 1 });
   });
 
@@ -182,7 +234,7 @@ describe("backfillSpace", () => {
     const res = await backfillSpace(space, { dryRun: false }, deps);
     expect(calls).toEqual([
       "list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`,
-      "backup b", "remove b", "backup c", "remove c", ...readLegacy
+      "backup b", "remove b", "backup c", "remove c", "list legacy"
     ]);
     expect(res).toMatchObject({ slots: 1, alreadyPointed: 0, claimed: 1, deleted: 2 });
   });
@@ -190,30 +242,39 @@ describe("backfillSpace", () => {
   it("deletes duplicates in a slot that already has a pointer, without claiming", async () => {
     const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], { [slotPointerPath]: "b" });
     const res = await backfillSpace(space, { dryRun: false }, deps);
-    expect(calls).toEqual(["list", `read ${slotPointerPath}`, "backup a", "remove a", ...readLegacy]);
+    expect(calls).toEqual(["list", `read ${slotPointerPath}`, "backup a", "remove a", "list legacy"]);
     expect(res).toMatchObject({ alreadyPointed: 1, claimed: 0, deleted: 1 });
   });
 
-  it("deletes every 7.3.0 and 7.4.0 pointer in the slot, whichever document it names", async () => {
+  it("deletes every 7.3.0 and 7.4.0 pointer, whichever document it names, after the duplicates", async () => {
     // 7.3.0 claimed the winner, 7.4.0 a loser. Only the pointer at the current path should remain.
-    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")],
-      { [slotPointerPath]: "a", [legacyPointerPaths[0]]: "a", [legacyPointerPaths[1]]: "b" });
+    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], { [slotPointerPath]: "a" },
+      { legacy: [mkLegacy(legacyPointerPaths[0], "a"), mkLegacy(legacyPointerPaths[1], "b")] });
     const res = await backfillSpace(space, { dryRun: false }, deps);
     expect(calls).toEqual([
-      "list", `read ${slotPointerPath}`, "backup b", "remove b",
-      readLegacy[0], `remove pointer ${legacyPointerPaths[0]}`,
-      readLegacy[1], `remove pointer ${legacyPointerPaths[1]}`
+      "list", `read ${slotPointerPath}`, "backup b", "remove b", "list legacy",
+      `remove pointer ${legacyPointerPaths[0]}`, `remove pointer ${legacyPointerPaths[1]}`
     ]);
     expect(res).toMatchObject({ deleted: 1, legacyPointersDeleted: 2, skipped: [] });
   });
 
-  it("deletes legacy pointers in a slot with a single document", async () => {
-    const { deps, calls } = makeDeps([mkDoc("a")], { [slotPointerPath]: "a", [legacyPointerPaths[1]]: "a" });
+  it("deletes a legacy pointer whose slot has no group documents left", async () => {
+    const orphan = "authed/p/classes/c1/offerings/o1/groups/9/canonical/default";
+    const { deps, calls } = makeDeps([], {}, { legacy: [mkLegacy(orphan, "gone", "9")] });
     const res = await backfillSpace(space, { dryRun: false }, deps);
-    expect(calls).toEqual([
-      "list", `read ${slotPointerPath}`, ...readLegacy, `remove pointer ${legacyPointerPaths[1]}`
-    ]);
-    expect(res).toMatchObject({ alreadyPointed: 1, deleted: 0, legacyPointersDeleted: 1 });
+    expect(calls).toEqual(["list", "list legacy", `remove pointer ${orphan}`]);
+    expect(res).toMatchObject({ slots: 0, legacyPointersDeleted: 1 });
+  });
+
+  it("keeps the legacy pointers of a slot it skipped for a bad document", async () => {
+    // Group 3 is skipped for a wrong uid; group 4 is fine.
+    const group4Legacy = "authed/p/classes/c1/offerings/o1/groups/4/canonical/default";
+    const { deps, calls } = makeDeps(
+      [mkDoc("a"), mkDoc("b", { uid: "student1" }), mkDoc("x", { groupId: "4", uid: "group_o1_4" })], {},
+      { legacy: [mkLegacy(legacyPointerPaths[0], "a"), mkLegacy(group4Legacy, "x", "4")] });
+    const res = await backfillSpace(space, { dryRun: false }, deps);
+    expect(calls.filter(c => c.startsWith("remove pointer"))).toEqual([`remove pointer ${group4Legacy}`]);
+    expect(res.legacyPointersDeleted).toBe(1);
   });
 
   it("converges on the document a client claimed mid-run instead of deleting it", async () => {
@@ -221,25 +282,25 @@ describe("backfillSpace", () => {
     const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], {}, { claimResult: "b" });
     const res = await backfillSpace(space, { dryRun: false }, deps);
     expect(calls).toEqual([
-      "list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`, "backup a", "remove a", ...readLegacy
+      "list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`, "backup a", "remove a", "list legacy"
     ]);
     expect(res).toMatchObject({ claimed: 0, alreadyPointed: 1, deleted: 1 });
   });
 
   it("touches nothing more when a mid-run claim names a document outside the slot", async () => {
-    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], { [legacyPointerPaths[0]]: "a" },
-      { claimResult: "zzz" });
+    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], {},
+      { claimResult: "zzz", legacy: [mkLegacy(legacyPointerPaths[0], "a")] });
     const res = await backfillSpace(space, { dryRun: false }, deps);
-    expect(calls).toEqual(["list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`]);
+    expect(calls).toEqual(["list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`, "list legacy"]);
     expect(res).toMatchObject({ deleted: 0, legacyPointersDeleted: 0 });
     expect(res.skipped).toEqual([{ key: "zzz", reason: expect.stringMatching(/not in the slot/) }]);
   });
 
   it("skips the whole slot, claiming and deleting nothing, when its pointer has no documentKey", async () => {
-    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")],
-      { [slotPointerPath]: undefined, [legacyPointerPaths[0]]: "a" });
+    const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], { [slotPointerPath]: undefined },
+      { legacy: [mkLegacy(legacyPointerPaths[0], "a")] });
     const res = await backfillSpace(space, { dryRun: false }, deps);
-    expect(calls).toEqual(["list", `read ${slotPointerPath}`]);
+    expect(calls).toEqual(["list", `read ${slotPointerPath}`, "list legacy"]);
     expect(res).toMatchObject({ claimed: 0, alreadyPointed: 0, deleted: 0, legacyPointersDeleted: 0 });
     expect(res.skipped).toEqual([
       { key: "a", reason: expect.stringMatching(/no document key/) },
@@ -250,10 +311,27 @@ describe("backfillSpace", () => {
   it("skips the slot when a mid-run claim finds a pointer with no documentKey", async () => {
     const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], {}, { claimResult: "" });
     const res = await backfillSpace(space, { dryRun: false }, deps);
-    expect(calls).toEqual(["list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`]);
+    expect(calls).toEqual(["list", `read ${slotPointerPath}`, `claim ${slotPointerPath} a`, "list legacy"]);
     expect(res).toMatchObject({ claimed: 0, deleted: 0 });
     expect(res.skipped.map(s => s.key)).toEqual(["a", "b"]);
   });
+
+  it("skips the whole slot, legacy pointers included, when a document's content is not under its class",
+    async () => {
+      // "b" has a wrong context_id: its metadata says class c1, but its content lives under another class.
+      const { deps, calls } = makeDeps([mkDoc("a"), mkDoc("b")], {},
+        { legacy: [mkLegacy(legacyPointerPaths[0], "a")] });
+      const paths: string[] = [];
+      deps.readRtdbChildKeys = async (path) => { paths.push(path); return ["a"]; };
+      const res = await backfillSpace(space, { dryRun: false }, deps);
+      expect(paths).toEqual(["/authed/portals/p/classes/c1/users/group_o1_3/documents"]);
+      expect(calls).toEqual(["list", "list legacy"]);
+      expect(res).toMatchObject({ claimed: 0, alreadyPointed: 0, deleted: 0, legacyPointersDeleted: 0 });
+      expect(res.skipped).toEqual([
+        { key: "a", reason: "another document in its slot was skipped" },
+        { key: "b", reason: expect.stringMatching(/context_id may be wrong/) }
+      ]);
+    });
 
   it("hands the deletion a target that passes whyNotDeletable for the loser's own metadata", async () => {
     const targets: IDeletionTarget[] = [];
@@ -282,7 +360,7 @@ describe("backfillSpace", () => {
   it("does nothing to a slot with a single, already pointed document and no legacy pointers", async () => {
     const { deps, calls } = makeDeps([mkDoc("a")], { [slotPointerPath]: "a" });
     const res = await backfillSpace(space, { dryRun: false }, deps);
-    expect(calls).toEqual(["list", `read ${slotPointerPath}`, ...readLegacy]);
+    expect(calls).toEqual(["list", `read ${slotPointerPath}`, "list legacy"]);
     expect(res).toMatchObject({ slots: 1, alreadyPointed: 1, claimed: 0, deleted: 0, legacyPointersDeleted: 0 });
   });
 });
@@ -364,8 +442,8 @@ describe("createSpaceDeps", () => {
     };
     const database = { ref: (p: string) => ({ remove: async () => { writes.push(`rtdb remove ${p}`); } }) };
     const handles = {
-      firestore, database, reader: { readNode: async () => null },
-      serverTimestamp: () => "NOW", saveBackup: () => undefined
+      firestore, database, reader: { readChildKeys: async () => [], readNode: async () => null },
+      serverTimestamp: () => "NOW", legacyPointers: new Map(), saveBackup: () => undefined
     };
     return { deps: createSpaceDeps(handles, space), writes };
   }
