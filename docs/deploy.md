@@ -55,6 +55,10 @@ The [`Deploy Timing`](../.github/workflows/deploy-timing.yml) check fails until 
 touches has exactly one entry with a reason, and re-runs when the description is edited. To run it
 locally: `npx tsx scripts/check-deploy-timing.ts --base origin/master --body-file <description.md>`.
 
+When preparing a release, `scripts/release-deploy-report.ts` reads the callouts of every PR in the
+release and reports, per part, the strictest timing given (a part can deploy no earlier than that)
+and the PRs that have no entry, grouped by author. See the script's header for how to run it.
+
 ## Where to find builds
 
 - **branch builds**: when a developer pushes a branch, GitHub actions will build and deploy it to `https://collaborative-learning.concord.org/branch/[branch-name]/`. An issue-tracker prefix or suffix is stripped off and not included in the folder name, so the deployed name is often not the branch's git name. `concord-consortium/s3-deploy-action` (`src/deploy-props.ts`) strips the first of these that matches:

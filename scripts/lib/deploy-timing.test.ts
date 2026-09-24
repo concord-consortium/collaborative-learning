@@ -1,5 +1,6 @@
 import {
-  cannotTouchFunctions, checkDeployTiming, deployablesTouched, deployTimingPasses, isNotDeployed, parseDeployTiming
+  cannotTouchFunctions, checkDeployTiming, deployablesTouched, deployTimingPasses, isNotDeployed, parseDeployTiming,
+  rollupDeployTiming
 } from "./deploy-timing";
 
 const kFunctionsSources = new Set([
@@ -146,5 +147,43 @@ describe("checkDeployTiming", () => {
     const extra = checkDeployTiming(["functions"], parseDeployTiming(kBody));
     expect(extra.unneeded).toEqual(["rules"]);
     expect(deployTimingPasses(extra)).toBe(true);
+  });
+});
+
+describe("rollupDeployTiming", () => {
+  const callout = (...entries: string[]) =>
+    parseDeployTiming(["> [!IMPORTANT]", "> **Deploy timing**", ...entries.map(e => `> - ${e}`)].join("\n"));
+
+  it("takes the strictest timing per part and lists PRs without an entry", () => {
+    const rollup = rollupDeployTiming([
+      { number: 1, author: "a", title: "one", touched: ["functions", "rules"],
+        timing: callout("**functions: before** — safe", "**rules: before** — widens only") },
+      { number: 2, author: "b", title: "two", touched: ["functions"],
+        timing: callout("**functions: with** — released client looks frozen") },
+      { number: 3, author: "c", title: "three", touched: ["functions"], timing: callout() }
+    ]);
+    expect(rollup).toEqual([
+      {
+        deployable: "functions", timing: "with",
+        entries: [
+          { number: 1, author: "a", timing: "before", rationale: "safe" },
+          { number: 2, author: "b", timing: "with", rationale: "released client looks frozen" }
+        ],
+        missing: [{ number: 3, author: "c", title: "three" }]
+      },
+      {
+        deployable: "rules", timing: "before",
+        entries: [{ number: 1, author: "a", timing: "before", rationale: "widens only" }],
+        missing: []
+      }
+    ]);
+  });
+  it("leaves the timing undecided when no PR gave one, and omits untouched parts", () => {
+    const rollup = rollupDeployTiming([
+      { number: 4, author: "d", title: "four", touched: ["indexes"], timing: callout() }
+    ]);
+    expect(rollup).toEqual([
+      { deployable: "indexes", entries: [], missing: [{ number: 4, author: "d", title: "four" }] }
+    ]);
   });
 });

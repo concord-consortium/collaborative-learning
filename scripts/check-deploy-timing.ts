@@ -16,16 +16,13 @@
 
 import { execFileSync } from "child_process";
 import fs from "fs";
-import path from "path";
 import {
-  cannotTouchFunctions, checkDeployTiming, deployablesTouched, deployTimingPasses, kFunctionsCodebases,
-  parseDeployTiming
+  cannotTouchFunctions, checkDeployTiming, deployablesTouched, deployTimingPasses, parseDeployTiming
 } from "./lib/deploy-timing.js";
+import { listFunctionsSources } from "./lib/functions-sources.js";
 
 const kDocsUrl =
   "https://github.com/concord-consortium/collaborative-learning/blob/master/docs/deploy.md#deploy-timing";
-/** Pinned so the listing doesn't depend on which codebase's node_modules happen to be installed. */
-const kTypeScript = "typescript@5.9";
 
 function parseArgs(argv: string[]) {
   const options = { base: "", bodyFile: "", json: false };
@@ -46,28 +43,6 @@ function parseArgs(argv: string[]) {
 
 function git(...args: string[]) {
   return execFileSync("git", args, { encoding: "utf8" });
-}
-
-/** Every repository file the functions deploy builds compile, as repo-relative paths. */
-function listFunctionsSources(repoRoot: string) {
-  const sources = new Set<string>();
-  for (const { tsconfig } of kFunctionsCodebases) {
-    let output: string;
-    try {
-      output = execFileSync("npx", ["-y", "-p", kTypeScript, "tsc", "-p", tsconfig, "--listFilesOnly"],
-        { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-    } catch (error: any) {
-      // Type errors (e.g. missing @types when nothing is installed) make tsc exit non-zero but
-      // don't stop it listing files, which is all this needs.
-      output = error.stdout ?? "";
-    }
-    for (const line of output.split("\n")) {
-      // tsc also prints diagnostics on stdout; file paths are the absolute lines.
-      if (!line.startsWith(repoRoot + path.sep) || line.includes("/node_modules/")) continue;
-      sources.add(path.relative(repoRoot, line));
-    }
-  }
-  return sources;
 }
 
 function main() {

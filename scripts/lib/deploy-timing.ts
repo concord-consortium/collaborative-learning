@@ -144,6 +144,45 @@ export function checkDeployTiming(touched: Deployable[], timing: IDeployTiming):
   return result;
 }
 
+export interface IPullRequestTiming {
+  number: number;
+  author: string;
+  title: string;
+  touched: Deployable[];
+  timing: IDeployTiming;
+}
+
+export interface IDeployableRollup {
+  deployable: Deployable;
+  /** The strictest timing any PR gives this part; the part can deploy no earlier than that. */
+  timing?: Timing;
+  /** PRs that gave a timing for this part, with their reasons. */
+  entries: { number: number, author: string, timing: Timing, rationale: string }[];
+  /** PRs that touch this part without saying when it can be deployed. */
+  missing: { number: number, author: string, title: string }[];
+}
+
+/**
+ * Combine the Deploy timing of every PR in a release, part by part. A part can deploy no earlier
+ * than its strictest PR allows, and is undecided while any PR touching it has no entry.
+ */
+export function rollupDeployTiming(prs: IPullRequestTiming[]): IDeployableRollup[] {
+  return kDeployables.map(deployable => {
+    const rollup: IDeployableRollup = { deployable, entries: [], missing: [] };
+    for (const pr of prs.filter(p => p.touched.includes(deployable))) {
+      const entry = pr.timing.entries.find(e => e.deployable === deployable);
+      if (entry) {
+        rollup.entries.push({ number: pr.number, author: pr.author, timing: entry.timing, rationale: entry.rationale });
+      } else {
+        rollup.missing.push({ number: pr.number, author: pr.author, title: pr.title });
+      }
+    }
+    const timings = rollup.entries.map(entry => kTimings.indexOf(entry.timing));
+    if (timings.length) rollup.timing = kTimings[Math.max(...timings)];
+    return rollup;
+  }).filter(rollup => rollup.entries.length || rollup.missing.length);
+}
+
 export function deployTimingPasses(check: IDeployTimingCheck) {
   if (check.touched.length === 0) return true;
   return check.found && !check.missing.length && !check.noRationale.length &&
