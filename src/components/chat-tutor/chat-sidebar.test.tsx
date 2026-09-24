@@ -1,9 +1,11 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { ProblemModel } from "../../models/curriculum/problem";
+import { UnitModel, UnitModelType } from "../../models/curriculum/unit";
+import { IUnitSummary } from "../../../shared/unit-summary-types";
 import { ChatTutorSidebar } from "./chat-sidebar";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
+import { FirestoreTransport } from "./firestore-transport";
 
 // The sidebar builds its transport (FirestoreTransport) inside a useMemo, so the only way to hand it
 // scripted turns is to replace that module. This fake immediately delivers one assistant turn with two
@@ -43,10 +45,41 @@ jest.mock("./use-tutor-drawer-trap", () => ({
   useTutorDrawerTrap: () => undefined
 }));
 
+// A unit with one investigation/problem, optionally carrying an aiUnitSummary. buildUnitContext
+// (unit-context.ts) walks from the given problem up through getParent(getParent(problem)), so the
+// problem used anywhere in this file must be a node nested in a real unit tree, not a standalone
+// ProblemModel.create(...) -- that dereference used to be safely unreachable (only inside a
+// closure the fake transport never calls), but the sidebar now calls it eagerly to build the
+// conversation id's unit-context suffix.
+function makeUnit(aiUnitSummary?: IUnitSummary): UnitModelType {
+  return UnitModel.create({
+    code: "u1",
+    title: "Unit 1",
+    config: aiUnitSummary ? { aiUnitSummary } : undefined,
+    investigations: [
+      { ordinal: 1, title: "Investigation 1", problems: [
+        { ordinal: 1, title: "Test Problem" },
+      ] },
+    ],
+  });
+}
+
+function summaryWithDigest(digest: string): IUnitSummary {
+  return {
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    sourceHash: "h",
+    overview: "o",
+    sourceManifest: [{ ordinal: "1.1", title: "Test Problem", problemHash: "h1" }],
+    entries: [{ ordinal: "1.1", priorKnowledge: "", problemDigest: digest }],
+  };
+}
+
 // One frozen stores object, not a fresh literal per call. The sidebar memoizes its transport on
-// [.., appConfig, db, user], so returning new identities each render would invalidate that memo
-// every render, re-subscribe, deliver turns, set state, and render again — an infinite loop rather
-// than a test failure. The real useStores hands back the same object from context every time.
+// [.., appConfig, db, user, unit], so returning new identities each render would invalidate that
+// memo every render, re-subscribe, deliver turns, set state, and render again — an infinite loop
+// rather than a test failure. The real useStores hands back the same object from context every
+// time; the unit-context tests below reassign mockStores.unit deliberately, to simulate the reload
+// that is the only way a unit's config actually changes.
 const mockStores = {
   appConfig: {
     chatTutorHighlights: true,
@@ -55,6 +88,7 @@ const mockStores = {
   },
   db: { firestore: {} },
   user: { id: "1", network: undefined, classHash: "class-hash" },
+  unit: makeUnit(),
 };
 jest.mock("../../hooks/use-stores", () => ({ useStores: () => mockStores }));
 
@@ -66,9 +100,9 @@ describe("ChatTutorSidebar as a highlight source", () => {
   // the turn cites don't need to exist as real tiles.
   const makeContent = () => DocumentContentModel.create({});
 
-  // problem is only dereferenced inside a closure the fake transport never calls (getLeftContext),
-  // but it's cheap to build for real rather than cast a stub through the prop type.
-  const problem = ProblemModel.create({ ordinal: 1, title: "Test Problem" });
+  // Nested inside mockStores.unit (see the comment above makeUnit) rather than a standalone
+  // ProblemModel.create(...).
+  const problem = mockStores.unit.investigations[0].problems[0];
 
   const sidebar = (content: ReturnType<typeof makeContent>, documentKey = "doc-1") => (
     <ChatTutorSidebar
@@ -278,5 +312,57 @@ describe("ChatTutorSidebar as a highlight source", () => {
     renderSidebar(makeContent());
     expect(screen.queryByTestId("chat-highlights")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /the first block/ })).not.toBeInTheDocument();
+  });
+
+  // FirestoreTransport is mocked, so the only way to see what conversation id the sidebar built is
+  // to read the constructor call it made -- there is no real Firestore write to inspect. A reload
+  // is the only way a unit's config actually changes (see chat-sidebar.tsx's own comment), so each
+  // render below swaps in a freshly built unit/problem pair rather than mutating one in place: MST
+  // nodes belong to exactly one tree, so a changed unit means a new problem instance too, matching
+  // what a real reload would produce.
+  describe("conversation id forking on the unit's summary", () => {
+    // A dedicated builder rather than the outer sidebar() helper: that one always passes the
+    // describe block's original fixed problem, which would silently mismatch a freshly built unit
+    // below (harmless here, since ordinals happen to coincide by construction, but not what a real
+    // reload produces). This derives problem from whichever unit is under test, same as production.
+    const sidebarWithUnit = (unit: UnitModelType, content: ReturnType<typeof makeContent>) => (
+      <ChatTutorSidebar
+        documentKey="doc-1"
+        documentTitle="Test Document"
+        problemPath="unit/1/1"
+        problem={unit.investigations[0].problems[0]}
+        content={content}
+        onClose={jest.fn()}
+      />
+    );
+
+    const lastConversationId = () => {
+      const calls = (FirestoreTransport as unknown as jest.Mock).mock.calls;
+      return calls[calls.length - 1][0].conversationId;
+    };
+
+    afterEach(() => {
+      mockStores.unit = makeUnit();
+    });
+
+    it("uses the same conversation id across renders when neither unit has a summary", () => {
+      mockStores.unit = makeUnit();
+      const { rerender } = render(sidebarWithUnit(mockStores.unit, makeContent()));
+      const firstId = lastConversationId();
+
+      mockStores.unit = makeUnit(); // a different instance, still no summary
+      rerender(sidebarWithUnit(mockStores.unit, makeContent()));
+      expect(lastConversationId()).toBe(firstId);
+    });
+
+    it("uses a different conversation id when the unit's summary changes between renders", () => {
+      mockStores.unit = makeUnit(summaryWithDigest("digest one"));
+      const { rerender } = render(sidebarWithUnit(mockStores.unit, makeContent()));
+      const firstId = lastConversationId();
+
+      mockStores.unit = makeUnit(summaryWithDigest("digest two"));
+      rerender(sidebarWithUnit(mockStores.unit, makeContent()));
+      expect(lastConversationId()).not.toBe(firstId);
+    });
   });
 });

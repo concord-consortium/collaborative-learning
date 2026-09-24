@@ -19,6 +19,7 @@ import { serializeRight } from "./right-context";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
+import { hashString } from "../../../shared/hash-string";
 
 import "./chat-sidebar.scss";
 
@@ -54,8 +55,8 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
 
   // chatDebug selects the backend-free debug transport; otherwise the live Firestore
   // path. Rebuilding on documentKey/problemPath change is the hard conversation swap;
-  // the unit's authored prompt overrides are mixed into the conversation id so a
-  // prompt edit (config can only change with a reload) also starts a fresh conversation.
+  // the unit's authored prompt overrides and the effective unit-summary slice are both
+  // mixed into the conversation id so a change to either starts a fresh conversation.
   const transport: ChatTransport = useMemo(() => {
     const getLeftContext = () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined;
     // Rides the same install-eligible sends as LEFT (see unit-context.ts). Computed fresh per
@@ -70,9 +71,19 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     // Resolved once per transport. Undefined for the default provider, which is what keeps it
     // out of both the conversation id and the message docs.
     const provider = sessionTutorProvider(urlParams.chatProvider, appConfig.chatTutorProvider);
+    // Keyed on the formatted slice text this transport will actually install, not the raw
+    // aiUnitSummary: every way the installed context can change -- an author editing or
+    // regenerating the summary, a curriculum edit that makes the prefix check fail or pass again --
+    // changes this text, so keying on it forks the conversation exactly when what gets installed
+    // changes. A unit with no summary (or no usable slice) contributes no suffix, so its existing
+    // conversations keep their id.
+    const unitContext = getUnitContext();
+    const unitKey = unitContext ? hashString(unitContext) : undefined;
     return new FirestoreTransport({
       firestore: db.firestore,
-      conversationId: conversationDocId(user.id, documentKey, user.network, problemPath, promptsKey, provider),
+      conversationId: conversationDocId(
+        user.id, documentKey, user.network, problemPath, promptsKey, provider, unitKey
+      ),
       uid: user.id,
       contextId: user.classHash,
       problemPath,
