@@ -57,12 +57,21 @@ describe("ingestImage", () => {
     expect(await ingestImage(mockFile())).toBeUndefined();
   });
 
-  it("warns but still returns the value when CORS forced a fallback to the original url", async () => {
+  it("warns but still returns the value when CORS forced a fallback to the original http(s) url", async () => {
     const externalUrl = "https://example.com/photo.png";
     jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry(externalUrl));
     const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     const result = await ingestImage(externalUrl);
     expect(result).toBe(externalUrl);
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("warns and returns undefined when storage was unavailable and the fallback is a data: url", async () => {
+    const dataUri = "data:image/png;base64,iVBORw0KGgo=";
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry(dataUri));
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const result = await ingestImage(dataUri);
+    expect(result).toBeUndefined();
     expect(warn).toHaveBeenCalled();
   });
 

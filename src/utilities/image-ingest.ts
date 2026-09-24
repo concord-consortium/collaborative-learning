@@ -6,6 +6,11 @@ import { getClipboardContent } from "./clipboard-utils";
  * document. Never returns the entry's `displayUrl`, which is a session-local blob URL that
  * would be dead for every other user.
  *
+ * The result is usually a durable `ccimg://` reference. But when storage is unavailable
+ * (CORS failure, or no logged-in user), the external-url handler falls back to returning
+ * the original url: an http(s) url is small and still renders, so it is passed through with
+ * a warning; a `data:` url is neither small nor a durable reference, so it is discarded.
+ *
  * Returns undefined if the image could not be stored.
  */
 export async function ingestImage(source: File | string): Promise<string | undefined> {
@@ -17,9 +22,11 @@ export async function ingestImage(source: File | string): Promise<string | undef
     if (entry.status === EntryStatus.Error) return undefined;
 
     const { contentUrl } = entry;
-    if (contentUrl && /^(https?:|data:)/.test(contentUrl)) {
-      // The external-url handler falls back to the original url when it cannot fetch the
-      // image (usually CORS). The value still works, but it stays outside our storage.
+    if (contentUrl && /^data:/.test(contentUrl)) {
+      console.warn(`ingestImage: dropping unstored data: url (${contentUrl.length} chars) to avoid a bloated document`);
+      return undefined;
+    }
+    if (contentUrl && /^https?:/.test(contentUrl)) {
       console.warn(`ingestImage: image was not stored in CLUE, using original url: ${contentUrl}`);
     }
     return contentUrl;

@@ -21,11 +21,14 @@ const makeClipboardData = (opts: { image?: File; text?: string }) => {
   };
 };
 
-const renderEditor = (onRowChange: (row: any, commit?: boolean) => void = jest.fn()) => {
+const renderEditor = (
+  onRowChange: (row: any, commit?: boolean) => void = jest.fn(),
+  onClose: (commitChanges?: boolean, shouldFocusCell?: boolean) => void = jest.fn()
+) => {
   const row = { __id__: "case1", attr1: "" } as any;
   const column = { key: "attr1", width: 100, appData: {} } as any;
   render(
-    <CellTextEditor row={row} column={column} onRowChange={onRowChange} onClose={jest.fn()} />
+    <CellTextEditor row={row} column={column} onRowChange={onRowChange} onClose={onClose} />
   );
   return onRowChange;
 };
@@ -46,9 +49,10 @@ const pasteAndFlush = async (clipboardData: unknown) => {
 describe("CellTextEditor paste handling", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  it("ingests a pasted image file and stores the ccimg:// url as the cell value", async () => {
+  it("ingests a pasted image file, stores the ccimg:// url as the cell value, and commits", async () => {
     const ingest = jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
-    const onRowChange = renderEditor();
+    const onClose = jest.fn();
+    const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ image: mockFile() });
 
     await pasteAndFlush(clipboardData);
@@ -58,11 +62,13 @@ describe("CellTextEditor paste handling", () => {
       expect.objectContaining({ attr1: kCcImgUrl }),
       false
     );
+    expect(onClose).toHaveBeenCalledWith(true);
   });
 
-  it("ingests a pasted image url and stores the ccimg:// url, not the raw url, as the cell value", async () => {
+  it("ingests a pasted image url, stores the ccimg:// url (not the raw url), and commits", async () => {
     const ingest = jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
-    const onRowChange = renderEditor();
+    const onClose = jest.fn();
+    const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ text: kImageUrlText });
 
     await pasteAndFlush(clipboardData);
@@ -76,11 +82,13 @@ describe("CellTextEditor paste handling", () => {
       expect.objectContaining({ attr1: kImageUrlText }),
       false
     );
+    expect(onClose).toHaveBeenCalledWith(true);
   });
 
   it("leaves plain text pastes alone: no ingestClipboardImage call, default paste not suppressed", async () => {
     const ingest = jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
-    const onRowChange = renderEditor();
+    const onClose = jest.fn();
+    const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ text: "just some plain text" });
 
     const notPrevented = await pasteAndFlush(clipboardData);
@@ -88,16 +96,19 @@ describe("CellTextEditor paste handling", () => {
     expect(notPrevented).toBe(true);
     expect(ingest).not.toHaveBeenCalled();
     expect(onRowChange).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("does not change the cell value when ingestClipboardImage fails to store the image", async () => {
+  it("does not change the cell value or commit when ingestClipboardImage fails to store the image", async () => {
     const ingest = jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(undefined);
-    const onRowChange = renderEditor();
+    const onClose = jest.fn();
+    const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ image: mockFile() });
 
     await pasteAndFlush(clipboardData);
 
     expect(ingest).toHaveBeenCalled();
     expect(onRowChange).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

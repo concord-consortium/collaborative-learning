@@ -60,7 +60,12 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     event.preventDefault();
 
     const contentUrl = await ingestClipboardImage(clipboardData);
-    if (contentUrl) updateValue(contentUrl);
+    if (contentUrl) {
+      updateValue(contentUrl);
+      // Commit immediately, as Data Cards does on a successful image paste, instead of
+      // leaving the editor open showing the raw storage url.
+      finishAndSave(true);
+    }
   };
 
   useEffect(() => {

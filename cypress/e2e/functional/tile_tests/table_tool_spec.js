@@ -610,7 +610,7 @@ context('Table Tool Tile', function () {
     clueCanvas.toolbarButtonIsEnabled('table', 'image-upload');
 
     cy.log('will upload an image into the selected cell');
-    cy.get('.toolbar-button.image-upload input[type=file]')
+    cy.get('.table-toolbar .upload-button-input')
       .selectFile('cypress/fixtures/image.png', { force: true });
     cy.get('.image-cell img', { timeout: 15000 }).should('exist');
 

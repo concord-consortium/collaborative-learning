@@ -418,6 +418,11 @@ Common toolbar framework; default toolbar buttons:
 - `["data-set-view", "DataCard"]`
 - `delete`
 
+Additional buttons available not in default set:
+
+- `image-upload` (upload an image into the selected cell). Not enabled by default; add it to the
+  unit's `settings.table.tools` to opt in.
+
 #### Text
 
 Common toolbar framework; default buttons:
