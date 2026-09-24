@@ -114,17 +114,11 @@ take to lift it — they bound today's choices without being requirements in the
    stored group id, so it resolves nothing and works for a document from any offering.
 9. **Resolve a user owner to their name in the class** — for the "Last, First" section label.
 
-**Locating**
-
-10. **Find a group's document from before canonical pointers existed**, by class, offering, and group.
-    This is the only query anywhere that filters on an owner, and it is transitional — it retires with
-    the canonical-pointer migration.
-
 #### Not required today
 
 **No query filters documents by owner.** Sort Work fetches by class and by curriculum position (unit,
 investigation, problem), then sections what it receives. Neither the owner type nor the owner id is
-ever a query term, apart from the transitional case above.
+ever a query term.
 
 Worth stating explicitly, because it means the owner representation does **not** have to be queryable
 by type today. If that changes, it becomes the strongest argument for a stored owner type.

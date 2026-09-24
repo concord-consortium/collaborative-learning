@@ -313,8 +313,9 @@ describe("the related-summaries lookup", () => {
       })).toEqual({metadata: demoMetadata});
     });
 
-    // A group document is tied to an offering, so its record carries the full context. Both
-    // spellings are in use: CLUE-604's sweep rewrites "group" to "axes".
+    // A group document is tied to an offering, so its record carries the full context. The generic type is
+    // stored as "axes"; the axes sweep rewrote the pre-sweep "group" value. The type is not read, so both
+    // values are covered.
     it.each([["group"], ["axes"]])("reads a group document's own context, stored as %s", async (type) => {
       await writeMetadataDocument({
         key: "thisdoc", type, context_id: "class1", unit: "vibe", investigation: "1",

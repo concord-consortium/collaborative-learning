@@ -1,4 +1,4 @@
-// Normalize the stored axes of documents that still carry the pre-rename type `"group"` — both regular
+// Normalize the stored axes of documents that still carry the old type `"group"` — both regular
 // group documents and class-wide collaborative documents, which share the generic axes type.
 //
 // Three scope-selected passes plus the type rename, committed as ONE merged write per document. Scope
@@ -44,19 +44,8 @@
 // Apply (performs the writes):                cd scripts && APPLY=1 npx tsx backfill-group-document-axes.ts
 //
 // This script authenticates as a service account, so it writes past Firestore rules regardless of
-// what they allow. The client-side backfill in src/lib/db.ts does not: it merge-updates `concurrent`
-// as an ordinary authenticated user, which is why the Firestore rule (concurrentChangeOk in
-// firestore.rules) transitionally allows any class member to set `concurrent` on an axes-typed
-// document. Once this script has been run against every environment, tighten that rule so
-// `concurrent` is settable only at document creation, and delete concurrentChangeOk — and constrain
-// isValidDocumentCreateRequest in firestore.rules alongside it, since it constrains neither
-// `concurrent` nor `uid` today: a truthy `concurrent` at create should imply the document is
-// axes-typed, and/or the create should require userIsRequestUser(), or a class member can create a
-// new document stamped with a classmate's `uid` and `concurrent: true`.
-//
-// The concurrent pass also unblocks a second cleanup: getDocumentTitle (src/models/document/document-kinds.ts)
-// selects the group-document title on the axes type plus a groupId, because a group document may carry
-// no `kind`. Once every group document has one, that check becomes `kind == "group"`.
+// what they allow. For the client-side write the rules still permit, see
+// docs/document-axes/planned-rules-tightening.md.
 
 import type { Firestore } from "firebase-admin/firestore";
 
