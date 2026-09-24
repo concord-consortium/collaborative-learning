@@ -17,9 +17,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { isRtdbAddressable, type IDocumentHome } from "./lib/rtdb-document-index";
 import { toolsFromDocumentNode } from "./lib/document-tools";
 import type { ISkipReport } from "./lib/deletion-plan";
-
-/** Batched writes are capped well below Firestore's 500-operation limit. */
-const kBatchSize = 400;
+import { kBatchSize } from "./lib/firestore-batch";
 
 /**
  * The types kept in an offering rather than in the class. Each needs `offeringId` plus a curriculum

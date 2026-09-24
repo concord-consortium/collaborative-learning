@@ -615,4 +615,61 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.verifyRecordButtonText();
     dataflowToolTile.verifyRecordButtonIcon();
   });
+
+  // A block created outside the viewport still exists, so the only symptom is that the
+  // palette button looks dead. .editor-graph-container clips overflow, so "is it on screen" is a
+  // real visibility question here rather than bounding-box arithmetic.
+  context("new blocks land in view", function () {
+    function addDataflowTile() {
+      cy.visit("/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=qa&noStorage");
+      cy.waitForLoad();
+      clueCanvas.addTile("dataflow");
+      dataflowToolTile.getDataflowTile().should("exist");
+    }
+
+    it("keeps a new block in view after the canvas has been panned away from the origin", () => {
+      addDataflowTile();
+
+      // Arrow-key panning needs the canvas active; Shift+Arrow moves 120px a press, so this leaves
+      // the world origin — where the grid used to be anchored — well off the left edge.
+      dataflowToolTile.getDataflowTile().click();
+      for (let i = 0; i < 8; i++) {
+        cy.realPress(["Shift", "ArrowRight"]);
+      }
+
+      // Waves is the tallest block (its output socket alone sits at 141px), so it is the one a
+      // placement bound that assumed an average height would drop below the clipped canvas.
+      dataflowToolTile.getCreateNodeButton("generator").click();
+
+      // Length and visibility together: the block was created (the button did fire) AND it is
+      // somewhere the student can see.
+      dataflowToolTile.getNode("generator").should("have.length", 1).and("be.visible");
+    });
+
+    it("keeps every block of a full grid in view", () => {
+      addDataflowTile();
+
+      // Alternating types so the grid is filled with blocks of different heights, which is what the
+      // row capacity has to hold for.
+      const blockCount = 12;
+      for (let i = 0; i < blockCount; i++) {
+        dataflowToolTile.getCreateNodeButton(i % 2 ? "generator" : "number").click();
+      }
+
+      // Containment against the clipping container, rather than "be.visible" as the single-block
+      // case above uses. What placement controls is that a block lands inside the canvas; whether
+      // page chrome (the sticky document title) happens to overlap the tile after Cypress scrolls
+      // to it is a separate concern, and a full grid reaches the top row where they collide.
+      cy.get(".primary-workspace .editor-graph-container").then($container => {
+        const view = $container[0].getBoundingClientRect();
+        cy.get(".primary-workspace .node").should("have.length", blockCount).each($node => {
+          const block = $node[0].getBoundingClientRect();
+          expect(block.left, "block left edge").to.be.at.least(view.left);
+          expect(block.top, "block top edge").to.be.at.least(view.top);
+          expect(block.right, "block right edge").to.be.at.most(view.right);
+          expect(block.bottom, "block bottom edge").to.be.at.most(view.bottom);
+        });
+      });
+    });
+  });
 });
