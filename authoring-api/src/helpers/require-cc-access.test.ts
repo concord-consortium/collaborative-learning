@@ -1,6 +1,6 @@
 import {Response} from "express";
 import {AuthorizedRequest} from "./express";
-import {isCCEmail, requireCCAccess} from "./require-cc-access";
+import {requireCCAccess} from "./require-cc-access";
 
 function mockResponse(): Response {
   const res: Partial<Response> = {};
@@ -14,20 +14,8 @@ function requestWithEmail(email?: string): AuthorizedRequest {
   return {decodedToken: {email}} as AuthorizedRequest;
 }
 
-describe("isCCEmail", () => {
-  it("accepts any concord.org address", () => {
-    expect(isCCEmail("someone@concord.org")).toBe(true);
-  });
-
-  it("accepts the other listed CC addresses", () => {
-    expect(isCCEmail("doug@zoopdoop.com")).toBe(true);
-  });
-
-  it("rejects an unrelated address", () => {
-    expect(isCCEmail("someone@example.com")).toBe(false);
-  });
-});
-
+// isCCEmail itself (the check requireCCAccess is built on) is tested directly in
+// shared/cc-email.test.ts, since it's shared with the frontend's isAdminUser gate.
 describe("requireCCAccess", () => {
   it("lets a CC email through", () => {
     const res = mockResponse();

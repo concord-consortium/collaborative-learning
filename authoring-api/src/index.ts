@@ -24,9 +24,10 @@ import pushUnit from "./routes/push-unit";
 import generateUnitSummary from "./routes/generate-unit-summary";
 import unitSummaryStatus from "./routes/unit-summary-status";
 
+import {isCCEmail} from "../../shared/cc-email";
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
-import {isCCEmail, requireCCAccess} from "./helpers/require-cc-access";
+import {requireCCAccess} from "./helpers/require-cc-access";
 
 // the TypeScript type definition for DecodedIdToken does not include the name property,
 // even though it is present in the actual decoded token returned by Firebase Admin SDK
