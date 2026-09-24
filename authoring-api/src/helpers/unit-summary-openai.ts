@@ -16,10 +16,7 @@ export interface UnitSummaryOpenAIClient {
   generateText(params: GenerateTextParams): Promise<string>;
 }
 
-// maxRetries is 0 here because the unit-summary pipeline implements its own retry loop (2
-// retries, 2s/8s backoff -- see unit-summary-config.ts and unit-summary-retry.ts), so the SDK's
-// own retrying (different defaults, and no way to distinguish "retry" from "validation failure")
-// never runs alongside it and double-retries.
+// SDK retries off; callWithRetry owns retrying.
 export function createUnitSummaryOpenAIClient(apiKey: string): UnitSummaryOpenAIClient {
   const client = new OpenAI({apiKey, maxRetries: 0});
   return {

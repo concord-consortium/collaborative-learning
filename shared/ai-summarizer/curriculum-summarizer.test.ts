@@ -3,9 +3,11 @@ import path from "path";
 import { normalizeCurriculumDataSets, summarizeCurriculum } from "./ai-summarizer";
 import { TABLE_MARKDOWN_ROW_CAP } from "./tile-summarizers/handle-table-tile";
 
-// These fixtures are copied from real curriculum content (see the comments on each JSON file's
-// source), not read directly from src/public/, so a change to the demo units elsewhere in the repo
-// cannot silently change what this test covers.
+// text-and-image.json is copied from the QA demo unit's Stretching and Shrinking content
+// (src/public/demo/units/qa/investigation-1/problem-1/initialChallenge/content.json), not read
+// directly from src/public/, so a change to the demo units elsewhere in the repo cannot silently
+// change what this test covers. tables.json and question.json are hand-written to exercise
+// specific table and question shapes and are not copied from anywhere.
 function loadFixture(name: string): any {
   const filePath = path.join(__dirname, "curriculum-fixtures", name);
   return JSON.parse(fs.readFileSync(filePath, "utf8"));

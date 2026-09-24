@@ -12,12 +12,12 @@ function problems(count: number, markdownLength = 100): AssembledProblem[] {
 }
 
 describe("selectPriorKnowledgeMode", () => {
-  it("selects prefix mode below the problem-count threshold", () => {
+  it("selects prefix mode at and below the problem-count threshold", () => {
     expect(selectPriorKnowledgeMode(UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT)).toBe("prefix");
     expect(selectPriorKnowledgeMode(2)).toBe("prefix");
   });
 
-  it("selects rolling mode at and above the problem-count threshold", () => {
+  it("selects rolling mode above the problem-count threshold", () => {
     expect(selectPriorKnowledgeMode(UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT + 1)).toBe("rolling");
     expect(selectPriorKnowledgeMode(100)).toBe("rolling");
   });

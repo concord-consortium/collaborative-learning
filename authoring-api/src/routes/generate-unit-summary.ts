@@ -12,7 +12,7 @@ const openaiUnitSummaryKey = defineSecret("OPENAI_UNIT_SUMMARY_API_KEY");
 const digestModel = defineString("UNIT_SUMMARY_DIGEST_MODEL");
 const summaryModel = defineString("UNIT_SUMMARY_MODEL");
 
-// POST /generateUnitSummary?unit=...&branch=... -- admin-only (see adminOnlyPaths in index.ts).
+// POST /generateUnitSummary?unit=...&branch=... -- CC-staff-only (see requireCCAccess in index.ts).
 // Assembles the unit, runs the digest / prior-knowledge / overview steps, validates the result,
 // and returns it. The frontend never round-trips the unit text; the OpenAI key stays server-side.
 const generateUnitSummary = async (req: Request, res: Response) => {

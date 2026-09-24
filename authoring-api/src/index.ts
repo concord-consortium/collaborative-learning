@@ -168,9 +168,7 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
   }
 };
 
-// CC-staff-only. Applied directly to those routes below, not matched against req.path -- Express's
-// own router decides which routes this middleware chain runs for, so it can't be bypassed by a URL
-// variant (different case, a trailing slash) that still reaches the same handler.
+// CC-staff-only; attach per route.
 const requireCCAccess = (req: Request, res: Response, next: NextFunction) => {
   const email = (req as AuthorizedRequest).decodedToken.email;
   if (email && isCCEmail(email)) {

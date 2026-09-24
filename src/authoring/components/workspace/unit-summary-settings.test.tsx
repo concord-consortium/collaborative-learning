@@ -99,11 +99,11 @@ describe("UnitSummarySettings", () => {
     expect(screen.getByLabelText("Digest for problem 1.1")).toHaveValue("Digest one");
   });
 
-  it("shows an 'author should fill this in' note for an empty entry-0 priorKnowledge", async () => {
+  it("shows an 'author should fill it in' note for an empty entry-0 priorKnowledge", async () => {
     mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
     render(<UnitSummarySettings />);
     await flush();
-    expect(screen.getByText(/author should fill this in/)).toBeInTheDocument();
+    expect(screen.getByText(/author should fill it in/)).toBeInTheDocument();
   });
 
   it("edits a field in local state", async () => {

@@ -371,8 +371,7 @@ to table rows beyond the summarizer's row cap, are not detected."
                     />
                     {i === 0 && !row.priorKnowledge && (
                       <p className="muted small">
-                        No unit-level introduction was found to generate this from — author should
-                        fill this in.
+                        This first entry is left blank on purpose — author should fill it in.
                       </p>
                     )}
                   </td>
