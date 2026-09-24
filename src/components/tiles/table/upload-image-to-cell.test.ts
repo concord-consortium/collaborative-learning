@@ -1,6 +1,6 @@
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
 import * as imageIngest from "../../../utilities/image-ingest";
-import { uploadImageToCell } from "./upload-image-to-cell";
+import { uploadImageToCell, writeCellValue } from "./upload-image-to-cell";
 
 const kCcImgUrl = "ccimg://fbrtdb.concord.org/classhash123/imagekey456";
 const mockFile = () => new File(["x"], "photo.png", { type: "image/png" });
@@ -68,5 +68,31 @@ describe("uploadImageToCell", () => {
     await uploadImageToCell(dataSet, onUpdateRow, mockFile());
 
     expect(onUpdateRow).not.toHaveBeenCalled();
+  });
+});
+
+describe("writeCellValue", () => {
+  it("creates a case when the target is the input row", () => {
+    const onAddRows = jest.fn();
+    const onUpdateRow = jest.fn();
+    const caseValues = { __id__: "input-row-id", attr1: "value" };
+
+    const created = writeCellValue(caseValues, "input-row-id", { onAddRows, onUpdateRow });
+
+    expect(onAddRows).toHaveBeenCalledWith([caseValues]);
+    expect(onUpdateRow).not.toHaveBeenCalled();
+    expect(created).toBe(true);
+  });
+
+  it("updates an existing case when the target is not the input row", () => {
+    const onAddRows = jest.fn();
+    const onUpdateRow = jest.fn();
+    const caseValues = { __id__: "case1", attr1: "value" };
+
+    const created = writeCellValue(caseValues, "input-row-id", { onAddRows, onUpdateRow });
+
+    expect(onUpdateRow).toHaveBeenCalledWith(caseValues);
+    expect(onAddRows).not.toHaveBeenCalled();
+    expect(created).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import { ICase, IDataSet } from "../../../models/data/data-set";
+import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { ingestImage } from "../../../utilities/image-ingest";
 
 /**
@@ -20,4 +20,27 @@ export async function uploadImageToCell(
   if (contentUrl) {
     onUpdateRow({ __id__: cell.caseId, [cell.attributeId]: contentUrl });
   }
+}
+
+export interface ICellWriteHandlers {
+  onAddRows: (cases: ICaseCreation[]) => void;
+  onUpdateRow: (caseValues: ICase) => void;
+}
+
+/**
+ * Writes values into a case, creating the case first when the target is the grid's synthetic
+ * input row — the placeholder at the bottom of the table that is not yet a real case. Mirrors
+ * what typing into that row does (use-data-set.ts onRowsChange).
+ *
+ * Returns true when a new case was created, so the caller can rotate the input row id.
+ */
+export function writeCellValue(
+  caseValues: ICase, inputRowId: string, handlers: ICellWriteHandlers
+): boolean {
+  if (caseValues.__id__ === inputRowId) {
+    handlers.onAddRows([caseValues]);
+    return true;
+  }
+  handlers.onUpdateRow(caseValues);
+  return false;
 }

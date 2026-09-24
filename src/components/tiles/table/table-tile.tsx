@@ -27,6 +27,7 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { useContainerContext } from "../../document/container-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { uniqueId } from "../../../utilities/js-utils";
 import { userSelectTile } from "../../../models/stores/ui";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { TSortDirection, addCasesToDataSet } from "../../../models/data/data-set";
@@ -37,7 +38,7 @@ import { TableToolbarContext } from "./table-toolbar-context";
 import { ITableContext, TableContext } from "../hooks/table-context";
 import { useUIStore } from "../../../hooks/use-stores";
 import { RowDragOverlay } from "./row-drag-overlay";
-import { uploadImageToCell } from "./upload-image-to-cell";
+import { uploadImageToCell, writeCellValue } from "./upload-image-to-cell";
 import { TRow } from "./table-types";
 import { useFormulaModal } from "./use-formula-modal";
 import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
@@ -463,8 +464,12 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // the internal state of the component would be a better way to factor
   // all of the use* calls above.
   const uploadImage = useCallback((file: File) => {
-    uploadImageToCell(dataSet, changeHandlers.onUpdateRow, file);
-  }, [dataSet, changeHandlers]);
+    uploadImageToCell(dataSet, caseValues => {
+      if (writeCellValue(caseValues, inputRowId.current, changeHandlers)) {
+        inputRowId.current = uniqueId();
+      }
+    }, file);
+  }, [dataSet, changeHandlers, inputRowId]);
 
   const toolbarContext = {
     showExpressionsDialog: handleToolbarShowExpressionsDialog,
