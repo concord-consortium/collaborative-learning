@@ -102,16 +102,22 @@ const kMaxGroupLabel = 60;
 // without one is unreferenceable as well as outside their shape. Their packet schema leaves tile
 // content open, so such a group would not be rejected; it would be carried as a group nothing
 // could point at.
-function projectGroups(program: RawProgram): DataflowGroup[] {
+//
+// Nothing here can assume the program passed through the MST model: the server parses the
+// document's JSON directly. So the id and label are type-checked before use, and members are
+// limited to nodes this tile actually sends, so no group points at a node the reader cannot find.
+function projectGroups(program: RawProgram, nodeIds: Set<string>): DataflowGroup[] {
   const groups: DataflowGroup[] = [];
   for (const raw of Object.values(program.groups ?? {})) {
-    if (!raw.id) continue;
+    if (typeof raw.id !== "string" || !raw.id) continue;
     const group: DataflowGroup = {
       id: raw.id,
-      node_ids: Object.keys(raw.nodeIds ?? {}).filter(Boolean),
+      node_ids: Object.keys(raw.nodeIds ?? {}).filter(id => nodeIds.has(id)),
       group_ids: [],
     };
-    if (raw.label) group.label = [...raw.label].slice(0, kMaxGroupLabel).join("");
+    if (typeof raw.label === "string" && raw.label) {
+      group.label = [...raw.label].slice(0, kMaxGroupLabel).join("");
+    }
     groups.push(group);
   }
   return groups;
@@ -174,7 +180,7 @@ export function projectDataflowTile(
     },
   };
   // Their catalog asks for the key to be omitted when there are no groups.
-  const groups = projectGroups(program);
+  const groups = projectGroups(program, new Set(nodes.map(node => node.id).filter(Boolean)));
   if (groups.length) tile.content.groups = groups;
   if (title !== undefined) tile.title = title;
   return tile;

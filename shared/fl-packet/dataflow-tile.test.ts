@@ -253,4 +253,33 @@ describe("projectDataflowTile group ids", () => {
       "tile-df-1");
     expect(tile.content.groups?.[0].node_ids).toEqual(["n-sensor"]);
   });
+
+  it("drops a group whose id is not a string rather than sending it or coercing it", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "g-num": { id: 42, label: "numeric id", nodeIds: { "n-sensor": "n-sensor" } },
+        "g-ok": { id: "g-ok", nodeIds: { "n-logic": "n-logic" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups?.map(g => g.id)).toEqual(["g-ok"]);
+  });
+});
+
+describe("projectDataflowTile groups from JSON the model never checked", () => {
+  it("drops members that are not among the tile's nodes", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "g1": { id: "g1", nodeIds: { "n-sensor": "n-sensor", "n-deleted": "n-deleted" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups?.[0].node_ids).toEqual(["n-sensor"]);
+  });
+
+  it("omits a label that is not a string rather than throwing", () => {
+    const groupsWith = (label: unknown) => projectDataflowTile(
+      { ...content, program: { ...program, groups: { g1: { id: "g1", label, nodeIds: {} } } } },
+      "tile-df-1").content.groups;
+    expect(groupsWith(42)).toEqual([{ id: "g1", node_ids: [], group_ids: [] }]);
+    expect(groupsWith({ text: "x" })).toEqual([{ id: "g1", node_ids: [], group_ids: [] }]);
+  });
 });

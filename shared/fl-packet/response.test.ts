@@ -272,4 +272,28 @@ describe("responseHighlights captions", () => {
     const packet = parseResponsePacket(aResponse([focus]))!;
     expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
   });
+
+  it("keeps the caption when another directive for the same node lacks one, in either order", () => {
+    const focus = { ...nodeDirective("n-logic"), op: "focus" };
+    const highlight = captioned("n-logic", "the comparison block");
+    const expected = [{ tileId: "tile-df-1", objectId: "n-logic", label: "the comparison block" }];
+    for (const directives of [[focus, highlight], [highlight, focus]]) {
+      const packet = parseResponsePacket(aResponse(directives))!;
+      expect(responseHighlights(packet, sentPacket)).toEqual(expected);
+    }
+  });
+
+  it("keeps the first caption when two directives for the same node both carry one", () => {
+    const packet = parseResponsePacket(aResponse([
+      captioned("n-logic", "the comparison block"), captioned("n-logic", "the logic block"),
+    ]))!;
+    expect(responseHighlights(packet, sentPacket).map(h => h.label)).toEqual(["the comparison block"]);
+  });
+
+  it("keeps a target where it first appeared when a later directive supplies its caption", () => {
+    const packet = parseResponsePacket(aResponse([
+      nodeDirective("n-logic"), nodeDirective("n-sensor"), captioned("n-logic", "the comparison block"),
+    ]))!;
+    expect(responseHighlights(packet, sentPacket).map(h => h.objectId)).toEqual(["n-logic", "n-sensor"]);
+  });
 });

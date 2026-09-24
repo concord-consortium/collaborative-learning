@@ -155,8 +155,10 @@ export function responseHighlights(
   packet: ResponsePacket, sent: ContextPacket
 ): TutorHighlight[] {
   const names = nodeNamesOf(sent);
-  const highlights: TutorHighlight[] = [];
-  const seen = new Set<string>();
+  // One highlight per target, in the order targets first appear. A later directive for the same
+  // target replaces an earlier one only to supply a caption the earlier one lacked, so whether the
+  // button uses their words does not depend on which directive happened to come first.
+  const byTarget = new Map<string, { highlight: TutorHighlight; captioned: boolean }>();
   // Shape-checked rather than trusted. This is whatever arrived on the wire, so `components` or
   // `directives` can be an object, and an entry can be null — each of which throws when iterated
   // or dereferenced, out of processTurn and into status:"error". That would cost the student the
@@ -182,15 +184,15 @@ export function responseHighlights(
       // directive against their schema.
       const caption = directive.op === "highlight" && typeof directive.label === "string"
         ? directive.label.trim() : "";
-      const label = caption || sentName;
-      const key = `${tileId}/${objectId}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const highlight = { tileId, objectId, label };
+      const highlight = { tileId, objectId, label: caption || sentName };
       // Both sides of the wire apply this check; applying it here too means a highlight we build
       // wrong is dropped at the point it was built rather than silently ignored by the client.
-      if (isTutorHighlight(highlight)) highlights.push(highlight);
+      if (!isTutorHighlight(highlight)) continue;
+      const key = `${tileId}/${objectId}`;
+      const existing = byTarget.get(key);
+      if (existing && (existing.captioned || !caption)) continue;
+      byTarget.set(key, { highlight, captioned: !!caption });
     }
   }
-  return highlights;
+  return [...byTarget.values()].map(entry => entry.highlight);
 }
