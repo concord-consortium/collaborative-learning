@@ -27,6 +27,7 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { useContainerContext } from "../../document/container-context";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { ingestImage } from "../../../utilities/image-ingest";
 import { userSelectTile } from "../../../models/stores/ui";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { TSortDirection, addCasesToDataSet } from "../../../models/data/data-set";
@@ -461,10 +462,23 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // here would not help the situation. I think an object that is managing
   // the internal state of the component would be a better way to factor
   // all of the use* calls above.
+  // The target cell is captured here rather than read inside the promise, because ingesting
+  // an image is async and the selection can move while it is in flight.
+  const uploadImage = useCallback((file: File) => {
+    const cell = dataSet.firstSelectedCell;
+    if (!cell) return;
+    ingestImage(file).then(contentUrl => {
+      if (contentUrl) {
+        changeHandlers.onUpdateRow({ __id__: cell.caseId, [cell.attributeId]: contentUrl });
+      }
+    });
+  }, [dataSet, changeHandlers]);
+
   const toolbarContext = {
     showExpressionsDialog: handleToolbarShowExpressionsDialog,
     deleteSelected,
-    importData
+    importData,
+    uploadImage
   };
 
   const classes = classNames("tile-content", "table-tool", {
