@@ -71,7 +71,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const [teacherGuideConfig, _setTeacherGuideConfig] = useImmer<IUnit | undefined>(undefined);
   const [files, setFiles] = useImmer<IUnitFiles | undefined>(undefined);
   const [error, setError] = useImmer<string | undefined>(undefined);
-  const lastUnitRef = useRef<string | undefined>(undefined);
+  // Set to `${branch}/${unit}` the instant a fetch for that pair starts, so a stale response can
+  // tell it's stale even when the unit name alone matches a later fetch for a different branch.
+  const lastFetchKeyRef = useRef<string | undefined>(undefined);
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
   const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
   const [branchMetadata, setBranchMetadata] = useImmer<BranchMetadata>({});
@@ -86,7 +88,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     _setUnit(undefined);
     _setUnitConfig(undefined);
     setUnitConfigUnit(undefined);
-    lastUnitRef.current = undefined;
+    lastFetchKeyRef.current = undefined;
   }, [_setBranch, _setUnit, setError, _setUnitConfig, setUnitConfigUnit]);
 
   // externally when setUnitConfig is called, we want to update the state
@@ -192,8 +194,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     };
 
     // prevent unnecessary fetches
-    if (branch && unit && (!lastUnitRef.current || lastUnitRef.current !== unit)) {
-      lastUnitRef.current = unit;
+    const fetchKey = `${branch}/${unit}`;
+    if (branch && unit && lastFetchKeyRef.current !== fetchKey) {
+      lastFetchKeyRef.current = fetchKey;
 
       // Setup a Firebase listener for the unit file metadata changes so that we get real-time updates.
       // We only do direct reads - writes to unit file metadata changes go through the API.
@@ -207,9 +210,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
       api
         .get("/getContent", { branch, unit, path: "content.json" })
         .then((contentResponse) => {
-          // lastUnitRef has moved on to a newer unit -- this response is stale, ignore it rather
-          // than overwrite the newer unit's already-correct state.
-          if (lastUnitRef.current !== unit) return;
+          // lastFetchKeyRef has moved on to a different branch/unit pair -- this response is stale,
+          // ignore it rather than overwrite the newer pair's already-correct state.
+          if (lastFetchKeyRef.current !== fetchKey) return;
           if (!contentResponse.success) {
             setError(contentResponse.error);
             _setUnitConfig(undefined);
@@ -220,7 +223,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           setUnitConfigUnit(unit);
         })
         .catch((err) => {
-          if (lastUnitRef.current !== unit) return;
+          if (lastFetchKeyRef.current !== fetchKey) return;
           setError(err.message);
           _setUnitConfig(undefined);
           setUnitConfigUnit(unit);
@@ -230,7 +233,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
       api
         .get("/getContent", { branch, unit, path: "teacher-guide/content.json" })
         .then((contentResponse) => {
-          if (lastUnitRef.current !== unit) return;
+          if (lastFetchKeyRef.current !== fetchKey) return;
           if (!contentResponse.success) {
             _setTeacherGuideConfig(undefined);
             return;
@@ -238,7 +241,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           _setTeacherGuideConfig(contentResponse.content);
         })
         .catch(() => {
-          if (lastUnitRef.current !== unit) return;
+          if (lastFetchKeyRef.current !== fetchKey) return;
           _setTeacherGuideConfig(undefined);
         });
     }
