@@ -156,8 +156,8 @@ prop, which keeps the button keyboard-focusable and announces on disabled click
 ### Table — change handler
 
 `ITableToolbarContext` (`table-toolbar-context.ts`) gains one method, `uploadImage(file: File)`.
-It calls `ingestImage`, then writes the result through the existing `setAttributeValue` handler
-(`use-content-change-handlers.ts:103`). The toolbar button stays presentational; the write lives
+It calls `ingestImage`, then writes the result through the existing `onUpdateRow` handler
+(`use-content-change-handlers.ts:101-107`). The toolbar button stays presentational; the write lives
 with the other change handlers.
 
 ### Table — paste
@@ -238,7 +238,7 @@ linked-view selection produces a visibly distinct image cell.
 
 ## Logging
 
-No new logging code. `setAttributeValue` routes to `TableContentModel.setCanonicalCaseValues`,
+No new logging code. `onUpdateRow` routes to `TableContentModel.setCanonicalCaseValues`,
 which already emits `logTileChangeEvent(LogEventName.TABLE_TOOL_CHANGE, …)` with
 `action: "update", target: "rows"` and the new value in `props` (`table-content.ts:272-281`).
 The `ccimg://` value is identifiable in the log payload. Undo/redo comes along the same path.
