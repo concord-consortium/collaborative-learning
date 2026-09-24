@@ -158,9 +158,7 @@ const UnitSummarySettings: React.FC = () => {
   // Starts fresh on navigation. Clears formState unconditionally -- useCurriculum keeps the
   // previous unit's config in place while the new one loads, so a stale or unsaved summary could
   // otherwise sit on screen, savable into the new unit, until (or unless) the real config arrives.
-  // Also keeps Save from enabling early if the status fetch below beats the config fetch. Kept
-  // separate from the fetchStatus effect below so a login-token refresh (which rebuilds api, and
-  // so fetchStatus) can re-run that fetch without also wiping out an edit in progress here.
+  // Also keeps Save from enabling early if the status fetch below beats the config fetch.
   useEffect(() => {
     setFormState(undefined);
     setLiveStatus(undefined);

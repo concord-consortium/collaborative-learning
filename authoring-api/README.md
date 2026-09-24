@@ -12,4 +12,4 @@ Set the API key as a Firebase secret, once per project:
 firebase functions:secrets:set OPENAI_UNIT_SUMMARY_API_KEY
 ```
 
-Set the two model names as plain (non-secret) config values. See `.env.example` for the variable names (`UNIT_SUMMARY_DIGEST_MODEL`, `UNIT_SUMMARY_MODEL`) and where to put them for local emulator runs versus a deployed project.
+Set the two model names as plain (non-secret) config values. See `.env.example` for the variable names (`UNIT_SUMMARY_DIGEST_MODEL`, `UNIT_SUMMARY_MODEL`) and for local emulator runs, which use `.env.local`. A deployed project's values live in its own `.env.<projectId>` file (e.g. `.env.collaborative-learning-ec215`), gitignored like the rest of this directory's `.env.*` files.
