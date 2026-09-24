@@ -58,9 +58,9 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   // prompt edit (config can only change with a reload) also starts a fresh conversation.
   const transport: ChatTransport = useMemo(() => {
     const getLeftContext = () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined;
-    // CLUE-685-adachat-spike: rides the same install-eligible sends as LEFT (see unit-context.ts).
-    // Computed fresh per transport, same as getLeftContext -- unit.config is authored data, not
-    // expected to change without a reload.
+    // Rides the same install-eligible sends as LEFT (see unit-context.ts). Computed fresh per
+    // transport, same as getLeftContext -- unit.config is authored data, not expected to change
+    // without a reload.
     const getUnitContext = () => buildUnitContext(unit, problem);
     const tutorPrompts = normalizeTutorPrompts(appConfig.chatTutorPrompts);
     if (urlParams.chatDebug) {

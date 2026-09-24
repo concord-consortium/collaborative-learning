@@ -742,9 +742,9 @@ service cloud.firestore {
             return isStudentClaim() &&
               userIsRequestUser() &&
               classIsRequestContextId() &&
-              // 'unitContext' is CLUE-685-adachat-spike only (checklist Phase 3, not merged) — a
-              // slice of the unit's authored aiUnitSummary, installed alongside leftContext. Not
-              // part of the real CLUE-678 schema.
+              // 'unitContext' carries a filtered slice of the unit's authored aiUnitSummary,
+              // installed alongside leftContext. Optional: a unit with no summary authored, or
+              // whose summary fails the live-structure check, sends none.
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                    'problemPath', 'leftContext', 'unitContext', 'rightContext',
                                    'rightContent', 'promptReplace', 'promptAppend', 'provider']) &&
@@ -842,8 +842,6 @@ service cloud.firestore {
       function demoChatMessageCreate() {
         let data = request.resource.data;
         return isAuthed() &&
-          // 'unitContext' is CLUE-685-adachat-spike only (checklist Phase 3, not merged) — kept in
-          // lockstep with the authed block's chatMessageCreate, same as everything else here.
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                'problemPath', 'leftContext', 'unitContext', 'rightContext',
                                'rightContent', 'promptReplace', 'promptAppend', 'provider']) &&

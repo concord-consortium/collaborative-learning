@@ -30,9 +30,8 @@ export interface FirestoreTransportOptions {
   problemPath: string;
   // LEFT problem JSON; undefined until the problem's sections have loaded
   getLeftContext: () => string | undefined;
-  // CLUE-685-adachat-spike: a slice of the unit's authored aiUnitSummary, undefined if the unit
-  // has none or the current problem isn't found in it. Rides the same install-eligible sends as
-  // LEFT. See unit-context.ts; not present on the real (CLUE-678) message-doc schema yet.
+  // A slice of the unit's authored aiUnitSummary, undefined if the unit has none or the current
+  // problem isn't found in it. Rides the same install-eligible sends as LEFT. See unit-context.ts.
   getUnitContext?: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
@@ -191,8 +190,8 @@ export class FirestoreTransport implements ChatTransport {
         throw new Error("The problem is still loading. Please try again in a moment.");
       }
     }
-    // CLUE-685-adachat-spike: unlike LEFT, a missing unit summary is a normal, expected case (most
-    // units have none authored yet), not a loading error -- so this never blocks the send.
+    // Unlike LEFT, a missing unit summary is a normal, expected case (most units have none
+    // authored yet), not a loading error -- so this never blocks the send.
     const unitContext = decision.attachLeft ? getUnitContext?.() : undefined;
 
     // Field names must match the rules' create whitelist exactly. context_id and

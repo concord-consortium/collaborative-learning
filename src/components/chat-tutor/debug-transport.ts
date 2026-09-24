@@ -5,9 +5,8 @@ import { TutorPrompts } from "./tutor-prompts";
 export interface DebugTransportOptions {
   // LEFT problem JSON; undefined until the problem's sections have loaded.
   getLeftContext: () => string | undefined;
-  // CLUE-685-adachat-spike: a slice of the unit's authored aiUnitSummary, undefined if the unit
-  // has none or the current problem isn't found in it. Rides the same install-eligible sends as
-  // LEFT. See unit-context.ts.
+  // A slice of the unit's authored aiUnitSummary, undefined if the unit has none or the current
+  // problem isn't found in it. Rides the same install-eligible sends as LEFT. See unit-context.ts.
   getUnitContext?: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded.
   getRightSummary: () => RightSummary | undefined;
@@ -85,7 +84,7 @@ export class DebugTransport implements ChatTransport {
       left !== undefined
         ? { kind: "payload" as const, text: left }
         : { kind: "note" as const, text: "(problem sections not loaded yet — LEFT unavailable)" },
-      { kind: "note", text: "── THE UNIT · spike-only unit summary slice (sent once, with LEFT) ──" },
+      { kind: "note", text: "── THE UNIT · unit summary slice (sent once, with LEFT) ──" },
       unitContext !== undefined
         ? { kind: "payload" as const, text: unitContext }
         : { kind: "note" as const, text: "(no aiUnitSummary for this unit/problem — THE UNIT unavailable)" },
@@ -146,12 +145,12 @@ export class DebugTransport implements ChatTransport {
       segments.push({ kind: "payload", text: left });
       this.leftInstalled = true;
     }
-    // CLUE-685-adachat-spike: rides the same install-eligible sends as LEFT.
+    // Rides the same install-eligible sends as LEFT.
     if (decision.attachLeft) {
       if (unitContext === undefined) {
         segments.push({ kind: "note", text: "── THE UNIT not attached (no aiUnitSummary available) ──" });
       } else {
-        segments.push({ kind: "note", text: "── THE UNIT attached (spike-only unit summary slice) ──" });
+        segments.push({ kind: "note", text: "── THE UNIT attached (unit summary slice) ──" });
         segments.push({ kind: "payload", text: unitContext });
       }
     }
