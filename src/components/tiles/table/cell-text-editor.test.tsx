@@ -33,6 +33,16 @@ const renderEditor = (onRowChange: (row: any, commit?: boolean) => void = jest.f
 // Lets the microtasks chained inside the (async) paste handler settle before we assert.
 const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
 
+// Returns fireEvent.paste's result: false only if the handler called preventDefault().
+const pasteAndFlush = async (clipboardData: unknown) => {
+  let notPrevented = false;
+  await act(async () => {
+    notPrevented = fireEvent.paste(screen.getByRole("textbox"), { clipboardData });
+    await flushPromises();
+  });
+  return notPrevented;
+};
+
 describe("CellTextEditor paste handling", () => {
   afterEach(() => jest.restoreAllMocks());
 
@@ -41,10 +51,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor();
     const clipboardData = makeClipboardData({ image: mockFile() });
 
-    await act(async () => {
-      fireEvent.paste(screen.getByRole("textbox"), { clipboardData });
-      await flushPromises();
-    });
+    await pasteAndFlush(clipboardData);
 
     expect(ingest).toHaveBeenCalledWith(expect.any(File));
     expect(onRowChange).toHaveBeenCalledWith(
@@ -58,10 +65,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor();
     const clipboardData = makeClipboardData({ text: kImageUrlText });
 
-    await act(async () => {
-      fireEvent.paste(screen.getByRole("textbox"), { clipboardData });
-      await flushPromises();
-    });
+    await pasteAndFlush(clipboardData);
 
     expect(ingest).toHaveBeenCalledWith(kImageUrlText);
     expect(onRowChange).toHaveBeenCalledWith(
@@ -79,13 +83,9 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor();
     const clipboardData = makeClipboardData({ text: "just some plain text" });
 
-    let notPrevented = false;
-    await act(async () => {
-      notPrevented = fireEvent.paste(screen.getByRole("textbox"), { clipboardData });
-      await flushPromises();
-    });
+    const notPrevented = await pasteAndFlush(clipboardData);
 
-    expect(notPrevented).toBe(true); // dispatchEvent returns false only if preventDefault() ran
+    expect(notPrevented).toBe(true);
     expect(ingest).not.toHaveBeenCalled();
     expect(onRowChange).not.toHaveBeenCalled();
   });
@@ -95,10 +95,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor();
     const clipboardData = makeClipboardData({ image: mockFile() });
 
-    await act(async () => {
-      fireEvent.paste(screen.getByRole("textbox"), { clipboardData });
-      await flushPromises();
-    });
+    await pasteAndFlush(clipboardData);
 
     expect(ingest).toHaveBeenCalled();
     expect(onRowChange).not.toHaveBeenCalled();
