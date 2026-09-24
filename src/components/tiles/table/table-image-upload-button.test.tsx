@@ -60,6 +60,11 @@ describe("TableImageUploadButton", () => {
       .not.toHaveAttribute("aria-disabled");
   });
 
+  it("makes the file input inert when no cell is selected", () => {
+    renderButton(false);
+    expect(document.querySelector("input[type=file]")).toBeDisabled();
+  });
+
   it("calls uploadImage with the chosen file", async () => {
     const uploadImage = jest.fn();
     renderButton(true, { uploadImage });

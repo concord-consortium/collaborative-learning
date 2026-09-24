@@ -15,9 +15,10 @@ interface IImageUploadButtonProps {
   tooltipOffset?: { x?: number, y?: number };
   onUploadImageFile?: (file: File) => void;
   extraClasses?: string;
+  disabled?: boolean;
 }
 export const ImageUploadButton: React.FC<IImageUploadButtonProps> =
-  ({ tooltipOffset, onUploadImageFile, extraClasses }) => {
+  ({ tooltipOffset, onUploadImageFile, extraClasses, disabled }) => {
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file
   // Next, we hide the <input> element — we do this because file inputs tend to be ugly, difficult
   // to style, and inconsistent in their design across browsers. Opacity is used to hide the file
@@ -46,6 +47,7 @@ export const ImageUploadButton: React.FC<IImageUploadButtonProps> =
           title=""
           onChange={handleFileInputChange}
           className="input-for-upload"
+          disabled={disabled}
         />
       </div>
     </Tooltip>

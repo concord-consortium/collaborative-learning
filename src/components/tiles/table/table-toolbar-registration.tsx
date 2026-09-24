@@ -160,8 +160,8 @@ export const TableImageUploadButton = observer(function TableImageUploadButton(
   const disabled = !dataSet?.isAnyCellSelected;
 
   return (
-    <TileToolbarButton name={name} title="Upload image" disabled={disabled} onClick={() => undefined}>
-      <ImageUploadButton onUploadImageFile={file => toolbarContext?.uploadImage(file)} />
+    <TileToolbarButton name={name} title="Upload image" disabled={disabled}>
+      <ImageUploadButton disabled={disabled} onUploadImageFile={file => toolbarContext?.uploadImage(file)} />
     </TileToolbarButton>
   );
 });
