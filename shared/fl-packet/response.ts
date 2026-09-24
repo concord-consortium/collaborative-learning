@@ -3,16 +3,16 @@
 // The packet arrives on the SSE `display` part. Its prose is duplicated on the `conversation`
 // part, but the directives are here and nowhere else, so this is the copy that matters.
 //
-// The gap this module exists to close: a highlight directive carries no label. op_highlight is
-// additionalProperties:false with no field for one — the diagnostic names a node by id and says
-// nothing about what to call it. CLUE renders a highlight as a button, isTutorHighlight rejects an
-// empty label, and a button with no words on it is worse than no button.
+// CLUE renders a highlight as a button, and isTutorHighlight rejects an empty label, so every
+// highlight needs words. A highlight directive may carry its own `label`, a caption naming the
+// block as the prose just named it; when it does not, the name comes from our side, out of the
+// context packet we sent — the node's orderedDisplayName, which is the name the student sees on
+// it. "Caption" below always means that `label`, never the one we end up rendering.
 //
-// So the label comes from our side, out of the context packet we sent: the node's
-// orderedDisplayName, which is the name the student sees on it. That has a second effect worth
-// more than the first. Resolving against what we sent means an id we cannot match is dropped
-// rather than rendered — a tile that has since gone, or a node the diagnostic invented, produces
-// no button instead of a dead one. Ids fail closed here by construction.
+// The id is resolved against what we sent either way, and that is the property worth more than the
+// caption. An id we cannot match is dropped rather than rendered, so a tile that has since gone,
+// or a node the diagnostic invented, produces no button instead of a dead one. Ids fail closed
+// here by construction, and a caption does not change that.
 
 import { isTutorHighlight, TutorHighlight } from "../chat-tutor-highlight";
 import { ContextPacket } from "./packet";
@@ -42,6 +42,13 @@ export interface ResponseDirective {
   op: string;
   basis_revision?: string;
   target?: ResponseTarget;
+  /**
+   * The caption naming the block, on `highlight` only.
+   *
+   * `focus` and `annotate` are additionalProperties:false and reject it, so a focus directive has
+   * no caption to read and always falls back to the name we sent.
+   */
+  label?: string;
 }
 
 export interface ResponseComponent {
@@ -148,8 +155,10 @@ export function responseHighlights(
   packet: ResponsePacket, sent: ContextPacket
 ): TutorHighlight[] {
   const names = nodeNamesOf(sent);
-  const highlights: TutorHighlight[] = [];
-  const seen = new Set<string>();
+  // One highlight per target, in the order targets first appear. A later directive for the same
+  // target replaces an earlier one only to supply a caption the earlier one lacked, so whether the
+  // button uses their words does not depend on which directive happened to come first.
+  const byTarget = new Map<string, { highlight: TutorHighlight; captioned: boolean }>();
   // Shape-checked rather than trusted. This is whatever arrived on the wire, so `components` or
   // `directives` can be an object, and an entry can be null — each of which throws when iterated
   // or dereferenced, out of processTurn and into status:"error". That would cost the student the
@@ -164,17 +173,26 @@ export function responseHighlights(
       if (target?.kind !== "node") continue;
       const { tile_id: tileId, id: objectId } = target;
       if (!tileId || !objectId) continue;
-      const label = names.get(tileId)?.get(objectId);
-      // No label means we never sent that node, so there is nothing to point at.
-      if (!label) continue;
-      const key = `${tileId}/${objectId}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const highlight = { tileId, objectId, label };
+      const sentName = names.get(tileId)?.get(objectId);
+      // Checked before the caption: no name means we never sent that node, and a caption does not
+      // change that (see the file header).
+      if (!sentName) continue;
+      // Their caption when there is one, because it names the block in the words the prose just
+      // used, which our orderedDisplayName cannot do. Blank falls back rather than dropping the
+      // highlight: their schema forbids an empty one, but losing a pointer we could have named
+      // ourselves is the worse failure. Read on highlight alone, since nothing here validates the
+      // directive against their schema.
+      const caption = directive.op === "highlight" && typeof directive.label === "string"
+        ? directive.label.trim() : "";
+      const highlight = { tileId, objectId, label: caption || sentName };
       // Both sides of the wire apply this check; applying it here too means a highlight we build
       // wrong is dropped at the point it was built rather than silently ignored by the client.
-      if (isTutorHighlight(highlight)) highlights.push(highlight);
+      if (!isTutorHighlight(highlight)) continue;
+      const key = `${tileId}/${objectId}`;
+      const existing = byTarget.get(key);
+      if (existing && (existing.captioned || !caption)) continue;
+      byTarget.set(key, { highlight, captioned: !!caption });
     }
   }
-  return highlights;
+  return [...byTarget.values()].map(entry => entry.highlight);
 }

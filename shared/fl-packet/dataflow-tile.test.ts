@@ -173,3 +173,113 @@ describe("projectDataflowTile names legacy nodes by display name", () => {
     expect(tile.content.nodes[0].orderedDisplayName).toBe("");
   });
 });
+
+// Grouping, in the shape real documents hold it: a map keyed by group id, members as a map whose
+// keys and values are both the node id, and a `collapsed` flag that is presentation state.
+const grouped = {
+  ...program,
+  groups: {
+    "g-emg": {
+      id: "g-emg", collapsed: false, label: "Gripper Control Based on EMG",
+      nodeIds: { "n-sensor": "n-sensor", "n-logic": "n-logic" },
+    },
+    "g-out": {
+      id: "g-out", collapsed: true, label: "Temperature Threshold",
+      nodeIds: { "n-out": "n-out" },
+    },
+  },
+};
+
+describe("projectDataflowTile groups", () => {
+  it("projects each group's members as a node_ids array", () => {
+    const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
+    expect(tile.content.groups).toEqual([
+      { id: "g-emg", label: "Gripper Control Based on EMG", node_ids: ["n-sensor", "n-logic"], group_ids: [] },
+      { id: "g-out", label: "Temperature Threshold", node_ids: ["n-out"], group_ids: [] },
+    ]);
+  });
+
+  it("omits groups entirely when the program has none", () => {
+    const tile = projectDataflowTile(content, "tile-df-1");
+    expect(tile.content.groups).toBeUndefined();
+  });
+
+  it("always sends group_ids empty, because CLUE groups do not nest", () => {
+    const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
+    expect(tile.content.groups?.every(g => g.group_ids.length === 0)).toBe(true);
+  });
+
+  it("truncates a label longer than the 60 characters their schema allows", () => {
+    const longLabel = "x".repeat(75);
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: { g1: { id: "g1", label: longLabel, nodeIds: {} } } } },
+      "tile-df-1");
+    expect(tile.content.groups?.[0].label).toHaveLength(60);
+  });
+
+  it("counts the 60 in code points, so an emoji is neither cut in half nor counted twice", () => {
+    const labelOf = (label: string) => projectDataflowTile(
+      { ...content, program: { ...program, groups: { g1: { id: "g1", label, nodeIds: {} } } } },
+      "tile-df-1").content.groups?.[0].label;
+    const fits = `${"x".repeat(59)}😀`;
+    expect(labelOf(fits)).toBe(fits);
+    expect(labelOf("😀".repeat(75))).toBe("😀".repeat(60));
+  });
+
+  it("does not send the collapsed flag", () => {
+    const tile = projectDataflowTile({ ...content, program: grouped }, "tile-df-1");
+    expect(JSON.stringify(tile.content.groups)).not.toContain("collapsed");
+  });
+});
+
+describe("projectDataflowTile group ids", () => {
+  it("drops a group carrying no id rather than sending an empty one", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "": { label: "no id here", nodeIds: { "n-sensor": "n-sensor" } },
+        "g-ok": { id: "g-ok", label: "fine", nodeIds: { "n-logic": "n-logic" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups).toEqual([
+      { id: "g-ok", label: "fine", node_ids: ["n-logic"], group_ids: [] },
+    ]);
+  });
+
+  it("drops empty member ids, which their catalog also forbids", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "g1": { id: "g1", nodeIds: { "": "", "n-sensor": "n-sensor" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups?.[0].node_ids).toEqual(["n-sensor"]);
+  });
+
+  it("drops a group whose id is not a string rather than sending it or coercing it", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "g-num": { id: 42, label: "numeric id", nodeIds: { "n-sensor": "n-sensor" } },
+        "g-ok": { id: "g-ok", nodeIds: { "n-logic": "n-logic" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups?.map(g => g.id)).toEqual(["g-ok"]);
+  });
+});
+
+describe("projectDataflowTile groups from JSON the model never checked", () => {
+  it("drops members that are not among the tile's nodes", () => {
+    const tile = projectDataflowTile(
+      { ...content, program: { ...program, groups: {
+        "g1": { id: "g1", nodeIds: { "n-sensor": "n-sensor", "n-deleted": "n-deleted" } },
+      } } },
+      "tile-df-1");
+    expect(tile.content.groups?.[0].node_ids).toEqual(["n-sensor"]);
+  });
+
+  it("omits a label that is not a string rather than throwing", () => {
+    const groupsWith = (label: unknown) => projectDataflowTile(
+      { ...content, program: { ...program, groups: { g1: { id: "g1", label, nodeIds: {} } } } },
+      "tile-df-1").content.groups;
+    expect(groupsWith(42)).toEqual([{ id: "g1", node_ids: [], group_ids: [] }]);
+    expect(groupsWith({ text: "x" })).toEqual([{ id: "g1", node_ids: [], group_ids: [] }]);
+  });
+});

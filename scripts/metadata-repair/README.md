@@ -1,10 +1,10 @@
 # Firestore document metadata repair
 
-Four one-off scripts that reconcile Firestore document metadata with the realtime database, plus the
-modules they share.
+Five one-off scripts that repair Firestore document metadata, plus the modules they share. The first
+four reconcile it with the realtime database; the fifth gives group documents canonical pointers.
 
-Three defects motivated them. None is still being produced by the client, so these are a repair
-rather than something that runs on a schedule:
+Three defects motivated the first four. None is still being produced by the client, so these are a
+repair rather than something that runs on a schedule:
 
 1. **`context_id` names the wrong class** on some metadata documents — 35 in production.
 2. **The metadata document is missing entirely** for realtime-database documents that have one —
@@ -14,12 +14,16 @@ rather than something that runs on a schedule:
    `isInClassUnitContainer` reads the field's absence as "class-contained", so the data has to be
    true before anything relies on that guard.
 
+The fifth exists so the app can stop finding older group documents by query; see
+[Group canonical pointers](#group-canonical-pointers).
+
 | script | what it does | writes to |
 |---|---|---|
 | `repair-document-context-id.ts` | rewrites `context_id` to the class the document actually lives in | Firestore |
 | `create-missing-document-metadata.ts` | creates the missing metadata documents | Firestore |
 | `delete-unrepairable-documents.ts` | removes the residue the repair cannot fix | realtime database |
 | `backfill-document-offering-id.ts` | copies `offeringId` from the realtime-database metadata node | Firestore |
+| `backfill-group-canonical-pointers.ts` | claims each group slot's canonical pointer and deletes duplicate group documents and legacy pointers | Firestore, realtime database |
 
 ## Before you start
 
@@ -47,6 +51,7 @@ This matters, and it is not the order the scripts are listed in.
 3. re-run 2 as a dry run                 regenerates the skip report
 4. delete-unrepairable-documents.ts      reads that report
 5. backfill-document-offering-id.ts      needs 1 and 2; independent of 3 and 4
+6. backfill-group-canonical-pointers.ts  any time; re-run after 1 or 5
 ```
 
 **1 and 2 are independent** and may run in either order.
@@ -56,7 +61,14 @@ node through its `context_id` — a wrong one makes the document look unrecovera
 not exist yet cannot be scanned at all. It does not depend on the deletion, which only removes
 documents that have no Firestore metadata for it to scan.
 
-**The deletion runs last, against a report regenerated after the repair.** Not because the deletion is
+**Step 6 can run at any time.** `backfill-group-canonical-pointers.ts` places each group document by its
+`context_id` and `offeringId`, but it does not trust them blindly. It skips a document with no
+`offeringId`, which the app's own query cannot find either. It also skips any slot where a document's
+realtime-database content is not under the class its `context_id` names. Both kinds of skip are
+reported. If step 1 or 5 later repairs one of those documents, re-run step 6 to pick it up. It does not
+depend on 2–4.
+
+**The deletion runs against a report regenerated after the repair.** Not because the deletion is
 riskier in itself, but because a document lands in the residue for reasons that are not all
 deterministic: 330 of the ~573 unresolved documents get their curriculum position from a portal API
 call, so an outage, a rate limit or an expired token would bucket them as unresolvable. Deleting from a
@@ -91,6 +103,10 @@ APPLY=1 npx tsx scripts/metadata-repair/delete-unrepairable-documents.ts
 # 5. Backfill offeringId. The dry run takes about 4.5 minutes; TYPES=planning samples one type first.
 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
 APPLY=1 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+
+# 6. Claim group canonical pointers and delete duplicate group documents.
+npx tsx scripts/metadata-repair/backfill-group-canonical-pointers.ts
+APPLY=1 npx tsx scripts/metadata-repair/backfill-group-canonical-pointers.ts
 ```
 
 `backfill-document-offering-id.ts` needs the `documents` collection-group index on `type`, which
@@ -101,7 +117,7 @@ staging and production already have. Its header says how to add it to a new envi
 | variable | applies to | meaning |
 |---|---|---|
 | `APPLY=1` | all | perform the writes or deletions. Absent means dry run. |
-| `SPACES=` | 1, 2 | comma-separated space labels, e.g. `demo/CLUE,authed/learn_concord_org`. Use it to do production alone, or one demo space first. A filter narrows the runnable set but cannot widen it — naming a refused space still refuses it. A filtered run writes its skip report to `…create-missing-skipped.partial.json`, so it cannot be mistaken for the full one the deletion script reads. |
+| `SPACES=` | 1, 2, 6 | comma-separated space labels, e.g. `demo/CLUE,authed/learn_concord_org`. Use it to do production alone, or one demo space first. A filter narrows the runnable set but cannot widen it — naming a refused space still refuses it. A filtered run writes its skip report to `…create-missing-skipped.partial.json`, so it cannot be mistaken for the full one the deletion script reads. |
 | `CURRICULUM_ROOT=` | 2 | root of a `clue-curriculum` checkout, used to validate demo curriculum positions. Default `~/Development/clue-curriculum`. |
 | `PORTAL=` | 2 | portal consulted for an `authed/` offering's curriculum position when no sibling document has it. Default `https://learn.concord.org`. |
 | `DATABASE_URL=` | all | override the realtime-database URL chosen from the credential's project. |
@@ -161,8 +177,37 @@ be turned off.
   `kClassContainedTypes` in `create-missing-document-metadata.ts` for why each is refused.
 - **An offering-contained document whose unit, investigation and problem cannot all be established.**
   Partial positions are not written.
-- **Deleting for any reason other than the three that mean "unreachable debris"**, and never in
-  `authed/learn_concord_org`, and never a document created within the retention window.
+- **Deleting, in `delete-unrepairable-documents.ts`, for any reason other than the three that mean
+  "unreachable debris"**, and never in `authed/learn_concord_org`, and never a document created within
+  the retention window.
+- **Deleting, in `backfill-group-canonical-pointers.ts`, anything but a duplicate group document or a
+  7.3.0 or 7.4.0 group pointer.** This one does delete in `authed/learn_concord_org`, since group
+  documents have not yet been used by real classes. Before each document goes, it is re-read, and the run
+  stops unless it is still a group document of its slot and the slot's pointer names another document.
+
+## Group canonical pointers
+
+`backfill-group-canonical-pointers.ts` (step 6) gives every group document's slot a canonical pointer at the path the app reads, which is what lets the app stop looking up older
+group documents by query (`findLegacy` in `src/lib/db.ts`). Group documents from before 7.3.0 have no
+pointer at all, and those from 7.3.0 and 7.4.0 have one at a path those releases used and the app no
+longer reads.
+
+For each slot (one class, offering and group) it keeps the document the pointer names, or when there is
+no pointer, claims the one `findLegacy` would pick: the lowest document id. Every other group document
+in the slot is deleted from both databases, including its `comments` and `history` subcollections.
+Every 7.3.0 and 7.4.0 group pointer in the space is deleted too, found by collection-group query so
+that one whose slot has no documents left is included; only a slot the run skips keeps its old
+pointers. Before deleting a document it re-reads it and its slot's pointer, and stops the run unless it
+is still a group document of that slot and the pointer names a different document.
+Group documents have not yet been used by real classes, so this deletes leftovers the app could still
+open from Sort Work; the script's header gives the reasoning. Each one is copied first to
+`scripts/output/group-pointer-backfill/<run time>/`, as a convenience rather than a restore procedure.
+It covers `authed` and `demo` spaces, including `authed/learn_concord_org`, and reports rather than
+touches a slot it cannot confidently address.
+
+Read the skipped lines of its dry run before applying it: each names a slot the run will leave
+without a pointer until the cause is fixed. A second dry run after an apply run should report nothing to claim, no duplicates
+and no legacy pointers to delete.
 
 ## Design
 
