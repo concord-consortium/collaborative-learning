@@ -1,25 +1,10 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import * as imageIngest from "../../../utilities/image-ingest";
+import {
+  kCcImgUrl, kImageUrlText, makeClipboardData, mockFile, pasteAndFlush
+} from "../../../test/clipboard-image-test-utils";
 import CellTextEditor from "./cell-text-editor";
-
-const kCcImgUrl = "ccimg://fbrtdb.concord.org/classhash123/imagekey456";
-const kImageUrlText = "https://example.com/photo.png";
-
-const mockFile = () => new File(["x"], "photo.png", { type: "image/png" });
-
-// A minimal fake of the DataTransfer shape read by clipboardHasImage()'s synchronous checks.
-// ingestClipboardImage() itself is mocked below, so its own clipboardData reads never run.
-const makeClipboardData = (opts: { image?: File; text?: string }) => {
-  const items: Array<{ type: string; getAsFile: () => File | null }> = [];
-  if (opts.image) items.push({ type: "image/png", getAsFile: () => opts.image! });
-  if (opts.text !== undefined) items.push({ type: "text/plain", getAsFile: () => null });
-  return {
-    items,
-    types: items.map(item => item.type),
-    getData: (format: string) => (format === "text/plain" ? opts.text ?? "" : "")
-  };
-};
 
 const renderEditor = (
   onRowChange: (row: any, commit?: boolean) => void = jest.fn(),
@@ -33,18 +18,7 @@ const renderEditor = (
   return onRowChange;
 };
 
-// Lets the microtasks chained inside the (async) paste handler settle before we assert.
-const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
-
-// Returns fireEvent.paste's result: false only if the handler called preventDefault().
-const pasteAndFlush = async (clipboardData: unknown) => {
-  let notPrevented = false;
-  await act(async () => {
-    notPrevented = fireEvent.paste(screen.getByRole("textbox"), { clipboardData });
-    await flushPromises();
-  });
-  return notPrevented;
-};
+const pasteTextbox = (clipboardData: unknown) => pasteAndFlush(screen.getByRole("textbox"), clipboardData);
 
 describe("CellTextEditor paste handling", () => {
   afterEach(() => jest.restoreAllMocks());
@@ -55,7 +29,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ image: mockFile() });
 
-    await pasteAndFlush(clipboardData);
+    await pasteTextbox(clipboardData);
 
     expect(ingest).toHaveBeenCalledWith(clipboardData);
     expect(onRowChange).toHaveBeenCalledWith(
@@ -71,7 +45,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ text: kImageUrlText });
 
-    await pasteAndFlush(clipboardData);
+    await pasteTextbox(clipboardData);
 
     expect(ingest).toHaveBeenCalledWith(clipboardData);
     expect(onRowChange).toHaveBeenCalledWith(
@@ -91,7 +65,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ text: "just some plain text" });
 
-    const notPrevented = await pasteAndFlush(clipboardData);
+    const notPrevented = await pasteTextbox(clipboardData);
 
     expect(notPrevented).toBe(true);
     expect(ingest).not.toHaveBeenCalled();
@@ -105,7 +79,7 @@ describe("CellTextEditor paste handling", () => {
     const onRowChange = renderEditor(jest.fn(), onClose);
     const clipboardData = makeClipboardData({ image: mockFile() });
 
-    await pasteAndFlush(clipboardData);
+    await pasteTextbox(clipboardData);
 
     expect(ingest).toHaveBeenCalled();
     expect(onRowChange).not.toHaveBeenCalled();
