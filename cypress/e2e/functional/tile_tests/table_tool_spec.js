@@ -588,4 +588,36 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTile().click();
     clueCanvas.deleteTile('table');
   });
+
+  it('should support uploading an image into a table cell', function() {
+    // This test needs the "image-upload" table toolbar button, which is opted in
+    // for the `qa` unit (src/public/demo/units/qa/content.json) but not for the
+    // `qa-no-nav-panel` unit that beforeTest() above visits. Visit the `qa` unit
+    // directly instead of reusing beforeTest().
+    cy.visit(`${Cypress.config("qaUnitStudent5")}`);
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+
+    cy.log('will add a table to canvas');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+
+    cy.log('verify image-upload button is disabled with no cell selected');
+    clueCanvas.toolbarButtonIsDisabled('table', 'image-upload');
+
+    cy.log('verify selecting a cell enables the image-upload button');
+    tableToolTile.getTableCellXY(0, 0).click();
+    clueCanvas.toolbarButtonIsEnabled('table', 'image-upload');
+
+    cy.log('will upload an image into the selected cell');
+    cy.get('.toolbar-button.image-upload input[type=file]')
+      .selectFile('cypress/fixtures/image.png', { force: true });
+    cy.get('.image-cell img', { timeout: 15000 }).should('exist');
+
+    cy.log('verify the image cell shows a visible selection treatment');
+    cy.get('.image-cell.highlighted').should('exist');
+    cy.get('.image-cell.highlighted')
+      .should('have.css', 'box-shadow')
+      .and('not.eq', 'none');
+  });
 });
