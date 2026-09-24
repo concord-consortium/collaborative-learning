@@ -58,13 +58,13 @@ export async function generateProblemDigests(
 }
 
 // Maps a duplicate problem's ordinal to the ordinal of the first problem with the same
-// problemHash. Empty problems are excluded on both sides: they already get the more specific
-// EMPTY_PROBLEM_DIGEST message, which says more than "same content as an equally empty problem."
+// problemHash. Two empty problems can share a problemHash too, but digestOneProblem checks for
+// blank content before it ever looks at this map, so an empty problem never actually reaches the
+// "same content as problem X" message this produces.
 function findDuplicates(problems: AssembledProblem[]): Map<string, string> {
   const firstOrdinalByHash = new Map<string, string>();
   const duplicateOfByOrdinal = new Map<string, string>();
   for (const problem of problems) {
-    if (!problem.markdown.trim()) continue;
     const firstOrdinal = firstOrdinalByHash.get(problem.problemHash);
     if (firstOrdinal) {
       duplicateOfByOrdinal.set(problem.ordinal, firstOrdinal);

@@ -192,10 +192,11 @@ describe("generateProblemDigests", () => {
     expect(generateText).toHaveBeenCalledTimes(1);
   });
 
-  it("does not treat two independently-empty problems as duplicates of each other", async () => {
-    // Two empty problems could share a problemHash (both hash the same empty string), but each
-    // gets its own more specific EMPTY_PROBLEM_DIGEST rather than pointing at "an equally empty
-    // problem", which would say less.
+  it("gives two independently-empty problems their own EMPTY_PROBLEM_DIGEST, not 'same content as'", async () => {
+    // Two empty problems can share a problemHash (both hash the same empty string), which would
+    // make findDuplicates record the second as a duplicate of the first. digestOneProblem checks
+    // for blank content before it ever looks at that, though, so each still gets its own more
+    // specific EMPTY_PROBLEM_DIGEST rather than "(same content as problem 1.1)".
     const problems = [problem("1.1", "", "empty-hash"), problem("1.2", "", "empty-hash")];
     const generateText = jest.fn().mockResolvedValue("digest");
     const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
@@ -203,10 +204,7 @@ describe("generateProblemDigests", () => {
     expect(generateText).not.toHaveBeenCalled();
   });
 
-  it("digests a problem normally when its content only coincidentally matches after an empty one", async () => {
-    // Guards against the empty-exclusion in findDuplicates ever being implemented the other way
-    // around: an empty problem must never be recorded as "the first occurrence" that a later,
-    // actually-empty-looking-but-real problem could get pointed at.
+  it("digests a later, differently-hashed problem normally after an empty one", async () => {
     const problems = [problem("1.1", "", "hash-a"), problem("1.2", "real content", "hash-b")];
     const generateText = jest.fn().mockResolvedValue("a real digest");
     const digests = await generateProblemDigests(problems, {client: fakeClient(generateText), model: "m"});
