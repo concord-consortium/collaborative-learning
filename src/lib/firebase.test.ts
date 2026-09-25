@@ -1,4 +1,4 @@
-import { GroupDocument } from "../models/document/document-types";
+import { AxesDocument } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
 import { DocumentModelType } from "../models/document/document";
 import { DB } from "./db";
@@ -222,7 +222,7 @@ describe("Firebase class", () => {
 
     it("should handle group document", () => {
       const mockDocument = {
-        type: GroupDocument,
+        type: AxesDocument,
         key: "{doc-key}",
         uid: "group_{offering-id}_{group-id}",
         groupId: "{group-id}"

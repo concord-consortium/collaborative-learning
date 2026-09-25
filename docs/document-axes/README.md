@@ -9,6 +9,7 @@ place, with `type`/`kind` dereferenced only inside a kind registry, a creation f
 - **Concepts — what the axes are, read out of current CLUE behavior:** [axes.md](./axes.md)
 - **Target — how the axes live in code (layers and boundaries):** [target-architecture.md](./target-architecture.md)
 - **Current state — what a consumer can read off a document today, and what the rules enforce:** [axes-current-state.md](./axes-current-state.md)
+- **Planned — the Firestore rules tightening that waits on older clients draining:** [planned-rules-tightening.md](./planned-rules-tightening.md)
 - **Research background (current-state evidence):** the findings doc, on the `document-type-decomposition`
   branch (~49KB; left there rather than imported).
 
@@ -35,7 +36,7 @@ flips the rows it delivers **in the same PR**, and names the stage/ticket under 
 | `permissions` (composed grant set) | permission-policy grants (referenced policy) + stored per-doc grants | not started | Consumers are spread widely and each composes the answer by hand; the edit gate `canUserEditDocument` is called out as a worked example, including its `type` branch for published documents. See "Not covered yet" in [axes-current-state.md](./axes-current-state.md) for what a named policy would replace |
 | kind registry (by-kind view) | `register`/`get` map keyed on `kind`; `fn(doc)` API | done | CLUE-550 Stage 1; CLUE-610 moved the axis values off each kind and onto a named **axis profile** it registers against (`document-axis-profiles.ts`), so the set of axis combinations is enumerable in one file and a unit config can join one but not invent one |
 | axis profiles (named axis-value bundles) | code-defined profiles; each document stores the name of the one it was created from (`axisProfile`), read by migrations only | done | CLUE-610 — see "Axis profiles" in [axes.md](./axes.md). Deliberately absent from every runtime type, so behavior is still decided by the axis guards |
-| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; read-access + rules-delete on group type, interim until the permissions axis); CLUE-550 Stage 3a (collaborative thumbnail treatment reads `concurrent`); CLUE-610 (edit gate `canUserEditDocument` and the collaborative title bar read `concurrent`) |
+| behavior modules (by-behavior view) | `fn(doc)` reading axis getters / registry; never branch on `kind` | in progress | CLUE-550 Stage 1 (history + write-sync on concurrent; rules-delete on the axes type, interim until the permissions axis); CLUE-550 Stage 3a (collaborative thumbnail treatment reads `concurrent`); CLUE-610 (edit gate `canUserEditDocument` and the collaborative title bar read `concurrent`); CLUE-604 (read access `isDocumentAccessibleToUser` reads `concurrent`) |
 | creation factory (the one `kind → axis` bridge) | reads the profile the kind registers, stamps its axis values and its name on a new doc | in progress | CLUE-550 Stage 2 (per-slot class-wide canonical creation; owner and location fields stamped from the kind's `ownerType`/`containerType`) |
 
 Status values: `not started` / `in progress` / `done`.

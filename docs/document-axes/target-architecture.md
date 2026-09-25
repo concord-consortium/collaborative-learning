@@ -151,9 +151,8 @@ Migrations take a few forms, all deriving their values from the **same registry 
 uses — so a kind's defaults are still written down once:
 
 - **At runtime in the client** — when a document is loaded, CLUE notices a missing axis value and stamps it
-  from the kind's defaults (the lazy-backfill pattern already used for scoped pointer slots). Cheapest: no
-  infrastructure and no downtime. But it only reaches documents someone actually opens, **and only works for
-  axes a client is allowed to write.**
+  from the kind's defaults. Cheapest: no infrastructure and no downtime. But it only reaches documents someone
+  actually opens, **and only works for axes a client is allowed to write.**
 - **At runtime in a Cloud Function** — the same lazy, on-demand stamping, done in a trusted context. This is
   what an axis needs when a client must not be able to set it.
 - **As admin scripts sweeping all the Firestore document metadata** — applies the cohort rule to every document
@@ -177,12 +176,11 @@ permission policy's rules all live in code, so changing them changes every docum
 ### Which documents get stamped — a gate that narrows as types are converted
 
 Every `type` is registered as a kind, so the registry can answer `kind → axis fields` for any document. Writing
-those fields into stored metadata is deliberately narrower: both stamp sites — creation
-(`createFirestoreMetadataDocument`) and the client-side lazy backfill when a document is opened (`db.ts`) —
-write the kind axis fields only for the types converted so far, which today means the generic axes type
-(regular group documents and class-wide documents, which share it). Two values of that type are live at once:
-documents created since CLUE-610's rename store `"axes"`, ones predating it still store `"group"`, and the gate
-(`isAxesType`) accepts either until CLUE-604's sweep has rewritten the stragglers in every environment.
+those fields into stored metadata is deliberately narrower: the one stamp site — creation
+(`createFirestoreMetadataDocument`) — writes the kind axis fields only for the types converted so far, which
+today means the generic axes type (regular group documents and class-wide documents, which share it). Firestore
+stores that type as `"axes"`. The realtime database holds a permanent mix: new documents are written there as
+`"axes"` too, but it is never swept, so older ones still say `"group"`. Nothing reads a type from there.
 
 The gate is a stage in the progression, not a permanent rule:
 
@@ -190,23 +188,19 @@ The gate is a stage in the progression, not a permanent rule:
   — at which point `type` is just the generic tag. The publication kinds are the clearest not-yet-settled case:
   they may be folded into the kinds they publish, and a `kind` stamped before that decision is a value we would
   have to migrate afterwards.
-- As each type is converted, **add it to the gate at both stamp sites**, so its documents begin carrying their
-  kind's axis fields.
-- Once every type has been converted the gate always passes, so it can be deleted and both sites stamp
+- As each type is converted, **add it to the gate at the stamp site**, so its new documents begin carrying their
+  kind's axis fields. Its existing documents need a migration (see above).
+- Once every type has been converted the gate always passes, so it can be deleted and creation stamps
   unconditionally.
 
 Nothing is lost while a type waits: an unconverted document's axis values are still derived from the registry at
 runtime, they are simply not persisted onto that document yet.
 
-Widening the gate is not always enough by itself. The open-time backfill writes as the signed-in user, so it can
-only ever stamp values a client is allowed to write — and per "Which axes a client may stamp is a security
-question" above, an axis the rules *police* must not stay client-writable, since a client could then hand itself
-the value. A converted type whose axis feeds a rule therefore needs its stamp to come from creation, a Cloud
-Function, or an admin script rather than from the client-side backfill, and its rule tightened to reject
-after-the-fact changes. No stamp has had to move for this reason yet, but `concurrent` is the obvious candidate:
-it is stored so that rules *can* enforce it, so once a rule reads it, letting a client set it after creation
-would hand the client the value the rule is meant to police — the client-side backfill then has to be replaced
-by an admin sweep and the rule tightened to creation-only.
+Converting a type's existing documents is where the security question above bites: a converted type whose axis
+feeds a rule needs its existing documents stamped by an admin script or a Cloud Function, and its rule tightened
+to reject after-the-fact changes. `concurrent` went this way. Its backfill ran as the axes sweep, and the rule
+that lets a client set it after creation is made creation-only once no client still makes that write (see
+[planned-rules-tightening.md](./planned-rules-tightening.md)).
 
 ## The boundary — metadata getters on the model, behaviors outside
 
