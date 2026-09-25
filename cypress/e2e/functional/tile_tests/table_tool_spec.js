@@ -619,5 +619,16 @@ context('Table Tool Tile', function () {
     cy.get('.image-cell.highlighted')
       .should('have.css', 'box-shadow')
       .and('not.eq', 'none');
+
+    // The cell must hold the durable ccimg:// reference, not the session-local blob: url
+    // the image map hands back for display. Both render an <img> in this session, so the
+    // only way to tell them apart is to reload: a blob: url is dead in a new page.
+    cy.log('verify the image survives a reload');
+    // Give the debounced document sync time to flush before reloading.
+    cy.wait(5000);
+    cy.reload();
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+    cy.get('.image-cell img', { timeout: 30000 }).should('exist');
   });
 });
