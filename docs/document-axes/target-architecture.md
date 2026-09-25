@@ -83,14 +83,15 @@ axis.
 
 **Stored per-doc grants are a grant list on the document, checked by the rules.** Each grant is a
 (principal, permission) pair, and a principal may be a user, a group, or a class. The document carries its own
-list, and the security rules decide on write who may add which grant. Two existing pieces set the pattern:
+list, and the security rules decide on write who may add which grant. Both halves have a precedent in the
+code:
 
 - Multi-class supports (`mcsupports`) already keep such a list: a `classes[]` array, which the
   `classInResourceClasses()` rule in `firestore.rules` checks the reader's class against. The per-doc grants
   generalize it from class principals to users and groups.
-- `canonicalFieldOk()` / `isCanonicalValue()` show a rule validating a stored axis field and pinning it; a
-  `grantsOk()` in the same mold gates who may add which grant — for example, a student may grant their class
-  read access only on a document they own.
+- Enforcement goes in the update rule, which compares the grant list before and after the write and allows
+  only changes the writer may make — for example, a student may add a class read grant only on a document
+  they own. `canonicalFieldOk()` in `firestore.rules` already checks the `canonical` field this way.
 
 That covers support targeting and the `visibility` toggle directly. Exemplar visibility is the same relation
 stored the other way round: one shared curriculum document read by many students, so each student keeps their
