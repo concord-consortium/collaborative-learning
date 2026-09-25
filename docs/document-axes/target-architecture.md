@@ -77,30 +77,32 @@ refactor removes; they are replaced by axis getters and by external behaviors.
 - **Stored per-doc grants** are only the parts that genuinely vary per document: the `visibility` share
   toggle (a user-controlled class-read grant), a support's target audience, exemplar per-student visibility.
 
-So the `permissions` getter resolves the document's policy and merges its rules with the document's own stored
+So the `permissions` getter resolves the document's policy and merges its rules with the document's stored
 grants. The existing `visibility` field folds in here as one stored per-doc read grant — it is not a separate
 axis.
 
-**Stored per-doc grants are a grant list on the document, checked by the rules.** Each grant is a
-(principal, permission) pair, and a principal may be a user, a group, or a class. The document carries its own
-list, and the security rules decide on write who may add which grant. Both halves have a precedent in the
-code:
+**Stored per-doc grants are kept in one of two places.** Each grant is a (principal, permission) pair, and a
+principal may be a user, a group, or a class. Where a grant is stored depends on which side has many entries;
+either way it is read as part of `permissions`.
 
-- Multi-class supports (`mcsupports`) already keep such a list: a `classes[]` array, which the
-  `classInResourceClasses()` rule in `firestore.rules` checks the reader's class against. The per-doc grants
-  generalize it from class principals to users and groups.
-- Enforcement goes in the update rule, which compares the grant list before and after the write and allows
-  only changes the writer may make — for example, a student may add a class read grant only on a document
-  they own. `canonicalFieldOk()` in `firestore.rules` already checks the `canonical` field this way.
+- **On the document** — the `visibility` toggle and a support's audience. The document carries a list of
+  grants, and the security rules decide on write who may add which grant. Both halves have a precedent in
+  the code:
+  - Multi-class supports (`mcsupports`) already keep such a list: a `classes[]` array, which the
+    `classInResourceClasses()` rule in `firestore.rules` checks the reader's class against. The per-doc
+    grants generalize it from class principals to users and groups.
+  - Enforcement goes in the update rule, which compares the grant list before and after the write and
+    allows only changes the writer may make — for example, a student may add a class read grant only on a
+    document they own. `canonicalFieldOk()` in `firestore.rules` already checks the `canonical` field this
+    way.
+- **With each student** — exemplar visibility. An exemplar is one shared curriculum document read by many
+  students, so rather than the document holding a list, each student keeps their own flag
+  (`classes/{classHash}/users/{uid}/exemplars/{id}/visible` in the realtime database). It can stay stored
+  that way.
 
-That covers support targeting and the `visibility` toggle directly. Exemplar visibility is the same relation
-stored the other way round: one shared curriculum document read by many students, so each student keeps their
-own flag (`classes/{classHash}/users/{uid}/exemplars/{id}/visible` in the realtime database) rather than the document holding a
-list. It can stay stored that way while being read as part of `permissions`.
-
-A general relationship store in the style of Google's Zanzibar would express all of these, including the
-per-student case, but it is a separate subsystem to run — more machinery than CLUE needs. The grants only pay
-off once the rules enforce them; see "Enforcing `permissions` on document content" under Non-goals.
+A general relationship store in the style of Google's Zanzibar would express both in one place, but it is a
+separate subsystem to run — more machinery than CLUE needs. The grants only pay off once the rules enforce
+them; see "Enforcing `permissions` on document content" under Non-goals.
 
 **Where a policy's rules live — two coordinated copies.** A policy is code, not stored data, and its rules are
 written in *two* places keyed by the same policy name: once on the client/runtime (to compute
