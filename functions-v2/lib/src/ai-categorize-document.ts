@@ -9,6 +9,7 @@ import {
   VectorQuery
 } from "@google-cloud/firestore";
 import { AiAgreement, AiAgreementV2, isAiAgreement } from "../../src/summary-types";
+import { getUnitSummary } from "../../src/get-unit-summary";
 import { IEvaluationRequestContext, kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
@@ -21,6 +22,7 @@ import {
   categorizationResponseFormat,
   defaultAiPrompt
 } from "../../../shared/ai-analysis-messages";
+import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
 
 /**
  * The fields `mapRelatedSummaries` reads off a document returned by the related-summaries search.
@@ -469,6 +471,7 @@ export interface CategorizeDeps {
   readDocumentMetadata: typeof readDocumentMetadata;
   getEmbeddings: typeof getEmbeddings;
   findRelatedSummaries: typeof findRelatedSummaries;
+  getUnitSummary: typeof getUnitSummary;
   createOpenAI: (apiKey: string) => OpenAI;
 }
 
@@ -476,6 +479,7 @@ const defaultCategorizeDeps: CategorizeDeps = {
   readDocumentMetadata,
   getEmbeddings,
   findRelatedSummaries,
+  getUnitSummary,
   createOpenAI: (apiKey: string) => new OpenAI({apiKey}),
 };
 
@@ -534,6 +538,7 @@ export async function categorizeRepresentations(
   let metadataGap: MetadataGap | undefined;
   let summaryEmbedding: number[] | undefined;
   let relatedSummaries: RelatedSummary[] = [];
+  let unitContext: string | undefined;
 
   try {
     const responseSchema = buildZodResponseSchema(aiPrompt);
@@ -541,14 +546,37 @@ export async function categorizeRepresentations(
       throw new Error("aiPrompt must specify at least one response field for the schema.");
     }
 
-    // Only when a summary is being sent, so a document that receives agreement counts is always one
-    // that can contribute them. Related summaries are enrichment: their absence costs the
-    // evaluation nothing.
-    if (summary !== null) {
+    // Resolved once, unconditionally -- before and independent of the summary check below -- so
+    // both the related-summaries lookup and the unit-context slice (every shape, including
+    // image-only) share this one metadata read rather than two.
+    try {
+      ({metadata: documentMetadata, gap: metadataGap} =
+        await deps.readDocumentMetadata(firestoreDocumentPath, requestContext));
+    } catch (error) {
+      logger.warn("document metadata unavailable, continuing without related summaries or unit context", error);
+    }
+
+    if (documentMetadata) {
+      // unit/investigation/problem are guaranteed non-empty here: readDocumentMetadata returns a
+      // gap, not metadata, whenever any of the three is missing.
       try {
-        ({metadata: documentMetadata, gap: metadataGap} =
-          await deps.readDocumentMetadata(firestoreDocumentPath, requestContext));
-        if (documentMetadata) {
+        const unitSummaryResult = await deps.getUnitSummary(documentMetadata.unit);
+        if (unitSummaryResult) {
+          const {investigation, problem} = documentMetadata;
+          const slice = unitSummarySlice(
+            unitSummaryResult.summary, unitSummaryResult.liveProblems, `${investigation}.${problem}`
+          );
+          unitContext = slice && formatUnitSummarySlice(slice);
+        }
+      } catch (error) {
+        logger.warn("unit summary unavailable, continuing without it", error);
+      }
+
+      // Only when a summary is being sent, so a document that receives agreement counts is always
+      // one that can contribute them. Related summaries are enrichment: their absence costs the
+      // evaluation nothing.
+      if (summary !== null) {
+        try {
           // getEmbeddings resolves undefined on any OpenAI error, and neither use may see it: a
           // query vector of undefined throws from findNearest, and a stored one would persist as a
           // zero-dimension vector no search can find.
@@ -559,9 +587,9 @@ export async function categorizeRepresentations(
             summaryEmbedding = undefined;
             logger.warn("no embedding for this summary, continuing without related summaries");
           }
+        } catch (error) {
+          logger.warn("related summaries unavailable, continuing without them", error);
         }
-      } catch (error) {
-        logger.warn("related summaries unavailable, continuing without them", error);
       }
     }
 
@@ -569,11 +597,11 @@ export async function categorizeRepresentations(
     const buildMessages = () => {
       switch (request.shape) {
       case "mixed":
-        return buildMixedMessages(aiPrompt, request.summary, relatedSummaries, request.imageUrl);
+        return buildMixedMessages(aiPrompt, request.summary, relatedSummaries, request.imageUrl, {}, unitContext);
       case "summary-only":
-        return buildSummaryMessages(aiPrompt, request.summary, relatedSummaries);
+        return buildSummaryMessages(aiPrompt, request.summary, relatedSummaries, unitContext);
       case "image-only":
-        return buildMixedMessages(aiPrompt, null, [], request.imageUrl);
+        return buildMixedMessages(aiPrompt, null, [], request.imageUrl, {}, unitContext);
       }
     };
     const messages = buildMessages();

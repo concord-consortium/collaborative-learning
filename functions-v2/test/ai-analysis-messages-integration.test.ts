@@ -16,6 +16,8 @@ import {
 import * as categorizeDocumentModule from "../lib/src/ai-categorize-document";
 import {CategorizeDeps, DocumentMetadata, categorizeRepresentations} from "../lib/src/ai-categorize-document";
 import {IEvaluationRequestContext} from "../../shared/shared";
+import {ILiveProblem, formatUnitSummarySlice, unitSummarySlice} from "../../shared/unit-summary-slice";
+import {IUnitSummary} from "../../shared/unit-summary-types";
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -109,6 +111,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         readDocumentMetadata: jest.fn().mockResolvedValue({metadata: documentMetadata}),
         getEmbeddings: jest.fn().mockResolvedValue(defaultEmbedding),
         findRelatedSummaries: jest.fn().mockResolvedValue([relatedSummary]),
+        getUnitSummary: jest.fn().mockResolvedValue(undefined),
         createOpenAI: () => ({
           chat: {
             completions: {
@@ -173,19 +176,21 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       expect(related).toContain("Other users agreed with this summary as follows: yes: 1");
     });
 
-    test("related summaries are looked up only when a summary is being sent", async () => {
+    test("embedding and the related-summaries lookup happen only when a summary is being sent, " +
+         "but metadata is read for every shape", async () => {
       const {deps} = recordingDeps();
 
       const result = await categorizeRepresentations(
         {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
-      // An image-only run pays for no embedding and reads no metadata, so it also reports nothing
-      // for the caller to write a summary record from.
+      // An image-only run pays for no embedding, so it reports nothing for the caller to write a
+      // summary record from -- but metadata is now read regardless of shape, since an image-only
+      // document can still carry a unit-context slice.
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
-      expect(deps.readDocumentMetadata).not.toHaveBeenCalled();
+      expect(deps.readDocumentMetadata).toHaveBeenCalledTimes(1);
       expect(result.summaryEmbedding).toBeUndefined();
-      expect(result.documentMetadata).toBeUndefined();
+      expect(result.documentMetadata).toEqual(documentMetadata);
     });
 
     test("the summary is embedded once, and the vector is both searched with and reported", async () => {
@@ -321,6 +326,124 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         {summary: null, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps))
         .rejects.toThrow("no representation to send");
       expect(sent).toHaveLength(0);
+    });
+  });
+
+  describe("the unit-context slice reaches every shape", () => {
+    const summary = "A summary of the student's work.";
+    const imageUrl = "https://example.com/image.png";
+    const documentMetadata: DocumentMetadata = {
+      root: "demo", space: "AI", key: "testdoc1", context_id: "class1",
+      unit: "vibe", investigation: "1", problem: "1", offeringId: "1234", contextSource: "document",
+    };
+    const liveProblems: ILiveProblem[] = [
+      {ordinal: "1.1", title: "Problem 1.1"},
+      {ordinal: "1.2", title: "Problem 1.2"},
+    ];
+    function unitSummaryFixture(): IUnitSummary {
+      return {
+        generatedAt: "2026-01-01T00:00:00.000Z", sourceHash: "h", overview: "o",
+        sourceManifest: [
+          {ordinal: "1.1", title: "Problem 1.1", problemHash: "h1"},
+          {ordinal: "1.2", title: "Problem 1.2", problemHash: "h2"},
+        ],
+        entries: [
+          {ordinal: "1.1", priorKnowledge: "", problemDigest: "digest one"},
+          {ordinal: "1.2", priorKnowledge: "knows things", problemDigest: "digest two"},
+        ],
+      };
+    }
+    const expectedUnitContext =
+      formatUnitSummarySlice(unitSummarySlice(unitSummaryFixture(), liveProblems, "1.1")!);
+
+    function recordingDeps(overrides: Partial<CategorizeDeps> = {}) {
+      const sent: Record<string, any>[] = [];
+      const deps: CategorizeDeps = {
+        readDocumentMetadata: jest.fn().mockResolvedValue({metadata: documentMetadata}),
+        getEmbeddings: jest.fn().mockResolvedValue(undefined),
+        findRelatedSummaries: jest.fn().mockResolvedValue([]),
+        getUnitSummary: jest.fn().mockResolvedValue({summary: unitSummaryFixture(), liveProblems}),
+        createOpenAI: () => ({
+          chat: {
+            completions: {
+              parse: async (request: Record<string, any>) => {
+                sent.push(request);
+                return {choices: [{message: {parsed: {discussion: "ok"}}}], usage: {}};
+              },
+            },
+          },
+        }) as any,
+        ...overrides,
+      };
+      return {deps, sent};
+    }
+
+    test("a mixed request carries the slice", async () => {
+      const {deps, sent} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(sent[0].messages).toEqual(
+        buildMixedMessages(fullPrompt, summary, [], imageUrl, {}, expectedUnitContext));
+    });
+
+    test("a summary-only request carries the slice", async () => {
+      const {deps, sent} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(sent[0].messages).toEqual(
+        buildSummaryMessages(fullPrompt, summary, [], expectedUnitContext));
+    });
+
+    // The case the original design missed: image-only never reached readDocumentMetadata at all,
+    // so it never had a chance to carry a unit-context slice either. It does now.
+    test("an image-only request carries the slice", async () => {
+      const {deps, sent} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary: null, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(sent[0].messages).toEqual(
+        buildMixedMessages(fullPrompt, null, [], imageUrl, {}, expectedUnitContext));
+    });
+
+    test("a personal document (metadata filled from the request context) also carries the slice", async () => {
+      const personalMetadata: DocumentMetadata = {
+        ...documentMetadata, contextSource: "request",
+      };
+      const {deps, sent} = recordingDeps({
+        readDocumentMetadata: jest.fn().mockResolvedValue({metadata: personalMetadata}),
+      });
+
+      await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(sent[0].messages).toEqual(
+        buildMixedMessages(fullPrompt, summary, [], imageUrl, {}, expectedUnitContext));
+    });
+
+    test("getUnitSummary returning undefined proceeds with no slice, and the evaluation still " +
+         "completes", async () => {
+      const {deps, sent} = recordingDeps({getUnitSummary: jest.fn().mockResolvedValue(undefined)});
+
+      const result = await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(result.completion).toBeDefined();
+      expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+    });
+
+    test("readDocumentMetadata is called exactly once, serving both the unit-context slice and " +
+         "the related-summaries lookup", async () => {
+      const {deps} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(deps.readDocumentMetadata).toHaveBeenCalledTimes(1);
     });
   });
 
