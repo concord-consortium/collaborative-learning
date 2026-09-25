@@ -103,6 +103,23 @@ describe("getUnitSummary", () => {
     expect(second).toEqual(first);
   });
 
+  it("shares one fetch across calls for the same unit that start before it resolves", async () => {
+    let resolveFetch: (response: Response) => void;
+    const fetchSpy = jest.spyOn(global, "fetch").mockReturnValue(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+
+    const first = getUnitSummary("concurrent-unit");
+    const second = getUnitSummary("concurrent-unit");
+    resolveFetch!(jsonResponse(contentJsonFixture()));
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(secondResult).toEqual(firstResult);
+  });
+
   it("resolves a unitCodeMap alias to its canonical code in the fetched URL", async () => {
     const [alias, canonical] = Object.entries(curriculumConfig.unitCodeMap)[0];
     const fetchSpy = jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(contentJsonFixture()));

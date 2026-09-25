@@ -35,6 +35,10 @@ interface ICacheEntry {
 }
 
 const cache = new Map<string, ICacheEntry>();
+// A container running with concurrency > 1 can receive several calls for the same unit before the
+// first fetch resolves (e.g. a burst of Ideas evaluations for one class). Without this, each of
+// those calls would see nothing in `cache` yet and independently re-fetch the same content.json.
+const inflight = new Map<string, Promise<IUnitSummaryFetchResult | undefined>>();
 
 function cacheEntryIsFresh(entry: ICacheEntry): boolean {
   const ttl = entry.result === undefined ? kFailureTtlMs : kResultTtlMs;
@@ -98,7 +102,13 @@ export async function getUnitSummary(unit: string): Promise<IUnitSummaryFetchRes
   if (cached && cacheEntryIsFresh(cached)) {
     return cached.result;
   }
-  const result = await fetchUnitSummary(unit);
-  cache.set(unit, {result, cachedAt: Date.now()});
-  return result;
+  let pending = inflight.get(unit);
+  if (!pending) {
+    pending = fetchUnitSummary(unit).then((result) => {
+      cache.set(unit, {result, cachedAt: Date.now()});
+      return result;
+    }).finally(() => inflight.delete(unit));
+    inflight.set(unit, pending);
+  }
+  return pending;
 }
