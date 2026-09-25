@@ -55,7 +55,9 @@ jobs:
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: chrome
-          spec: cypress/e2e/functional/**
+          # Portal specs are listed one by one: each launches CLUE from a real portal assignment,
+          # so a workflow runs it on purpose. See cypress/e2e/portal/README.md.
+          spec: cypress/e2e/functional/**,cypress/e2e/portal/teacher_chat_spec.js
           # We can't use index-staging.html for several reasons:
           # - visiting the doc-editor won't work with that baseUrl
           # - loading the qa units won't work without additional changes because

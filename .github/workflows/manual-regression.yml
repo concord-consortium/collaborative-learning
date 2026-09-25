@@ -28,7 +28,6 @@ on:
           - functional/document_tests/nav_panel_test_spec.js
           - functional/document_tests/student_test_spec.js
           - functional/document_tests/workspace_test_spec.js
-          - functional/portal_user_tests/teacher_chat_spec.js
           - functional/teacher_tests/history_playback_spec.js
           - functional/teacher_tests/teacher_chat_spec.js
           - functional/teacher_tests/teacher_curation_spec.js
@@ -61,6 +60,7 @@ on:
           - functional/tile_tests/text_tool_spec.js
           - functional/tile_tests/xy_plot_tool_spec.js
           - functional/standalone_tests/standalone_load_spec.js
+          - portal/teacher_chat_spec.js
           - smoke/single_student_canvas_test.js
 jobs:
   all-tests:
@@ -117,7 +117,9 @@ jobs:
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: ${{ env.BROWSER }}
-          spec: cypress/e2e/functional/**
+          # Portal specs are listed one by one: each launches CLUE from a real portal assignment,
+          # so a workflow runs it on purpose. See cypress/e2e/portal/README.md.
+          spec: cypress/e2e/functional/**,cypress/e2e/portal/teacher_chat_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
