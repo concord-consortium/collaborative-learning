@@ -437,7 +437,7 @@ async function main() {
   // run still works; those documents are reported as unresolved instead of written half-populated.
   const portal = process.env.PORTAL ?? "https://learn.concord.org";
   const curriculumConfig = JSON.parse(
-    nodeFs.readFileSync(getScriptRootFilePath("../src/clue/curriculum-config.json"), "utf8"));
+    nodeFs.readFileSync(getScriptRootFilePath("../shared/curriculum-config.json"), "utf8"));
 
   console.log(`- Service account: ${serviceAccount.client_email}`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);

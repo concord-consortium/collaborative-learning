@@ -10,6 +10,9 @@
     "target": "es2020",
     "lib": ["es2020"],
     "skipLibCheck": true,
+    // Lets shared/unit-url.ts import shared/curriculum-config.json directly, so
+    // curriculumSiteUrl/unitCodeMap can't drift out of sync with what src/ builds use.
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     // This prevents typescript from trying to include @types from the parent folders.
     // The types in the parent folders conflict so they break the build.

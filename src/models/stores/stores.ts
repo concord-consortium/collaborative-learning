@@ -36,7 +36,7 @@ import { problemLoaded } from "../../lib/misc";
 import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
 import { urlParams } from "../../utilities/url-params";
 import { createAndLoadExemplarDocs } from "./create-exemplar-docs";
-import curriculumConfigJson from "../../clue/curriculum-config.json";
+import curriculumConfigJson from "../../../shared/curriculum-config.json";
 import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
