@@ -94,7 +94,7 @@ list, and the security rules decide on write who may add which grant. Two existi
 
 That covers support targeting and the `visibility` toggle directly. Exemplar visibility is the same relation
 stored the other way round: one shared curriculum document read by many students, so each student keeps their
-own flag (`users/{uid}/exemplars/{id}/visible` in the realtime database) rather than the document holding a
+own flag (`classes/{classHash}/users/{uid}/exemplars/{id}/visible` in the realtime database) rather than the document holding a
 list. It can stay stored that way while being read as part of `permissions`.
 
 A general relationship store in the style of Google's Zanzibar would express all of these, including the
