@@ -40,7 +40,7 @@ npm run deploy:database:rules    # Deploy realtime database rules
 ## Architecture
 
 ### Technology Stack
-- **React 17** with **TypeScript 4.9**
+- **React 18** with **TypeScript 4.9**
 - **MobX State Tree (MST)** for state management (using Concord's custom fork `@concord-consortium/mobx-state-tree`)
 - **Firebase 8** for realtime database and Firestore
 - **Webpack 5** for bundling with code splitting
@@ -115,7 +115,11 @@ Set `debug` in localStorage to enable features:
 ## Dependency Notes
 
 Some dependencies are locked to specific versions:
-- **React 17**: Upgrading to 18 requires updating several other dependencies (see dependencies-notes.md)
+- **React 18**: mounted with `createRoot` (`src/index.tsx`), so **automatic batching is in effect**.
+  A state update followed by a synchronous DOM call that re-enters an already-attached handler — the
+  classic case is `setSomething(x)` then `element.blur()` in the same tick — runs that handler against
+  the pre-update closure. Commit paths that must see the new value should read a ref, not state.
+  See `cell-text-editor.tsx` (`valueRef`) and `case-attribute.tsx` (`valueCandidateRef`).
 - **Firebase 8**: v9 requires substantial migration work
 - **mobx-state-tree**: Uses Concord's custom fork with bug fixes
 - **nanoid 3**: v4 is ESM-only and breaks dependencies
