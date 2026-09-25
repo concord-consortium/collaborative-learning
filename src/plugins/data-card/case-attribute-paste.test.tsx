@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { addAttributeToDataSet, addCasesToDataSet } from "../../models/data/data-set";
 import { TileModel } from "../../models/tiles/tile-model";
@@ -42,41 +42,42 @@ function renderValueEditor() {
   return { content, dataSet, attrKey, caseId };
 }
 
+// jsdom's real Element#blur() (as opposed to RTL's fireEvent.blur) only dispatches a blur
+// event when the element is the current activeElement, so tests that rely on the paste
+// handler's own targetElement.blur() to drive the commit must focus it first.
+function getFocusedValueTextarea() {
+  const textarea = screen.getByRole("combobox", { name: /value for/i });
+  act(() => textarea.focus());
+  return textarea;
+}
+
 describe("CaseAttribute value paste (Data Cards)", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  it("ingests a pasted image, suppresses the default paste, and calls blur() itself to commit", async () => {
+  it("ingests a pasted image, suppresses the default paste, and commits via its own blur() alone", async () => {
     const ingest = jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
     const { content, caseId, attrKey } = renderValueEditor();
-    const textarea = screen.getByRole("combobox", { name: /value for/i });
-    const blurSpy = jest.spyOn(textarea, "blur");
+    const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ image: mockFile() });
 
     const notPrevented = await pasteAndFlush(textarea, clipboardData);
 
     expect(notPrevented).toBe(false);
     expect(ingest).toHaveBeenCalledWith(clipboardData);
-    // handleValuePaste calls targetElement.blur() itself on success; React 18 batches the
-    // setValueCandidate() update from this async callback, so that first blur's own onBlur
-    // handler still closes over the pre-paste value. Re-firing blur (as focus loss naturally
-    // would) now that the component has re-rendered is what actually commits it.
-    expect(blurSpy).toHaveBeenCalled();
-    act(() => { fireEvent.blur(textarea); });
+    // No fireEvent.blur here: handleValuePaste's own targetElement.blur() call must be
+    // sufficient to commit the pasted value.
     expect(content.dataSet.getValue(caseId, attrKey)).toBe(kCcImgUrl);
   });
 
   it("stores the ccimg:// url for a pasted image url, never the raw external url", async () => {
     jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
     const { content, caseId, attrKey } = renderValueEditor();
-    const textarea = screen.getByRole("combobox", { name: /value for/i });
-    const blurSpy = jest.spyOn(textarea, "blur");
+    const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ text: kImageUrlText });
 
     const notPrevented = await pasteAndFlush(textarea, clipboardData);
 
     expect(notPrevented).toBe(false);
-    expect(blurSpy).toHaveBeenCalled();
-    act(() => { fireEvent.blur(textarea); });
     const storedValue = content.dataSet.getValue(caseId, attrKey);
     expect(storedValue).toBe(kCcImgUrl);
     expect(storedValue).not.toBe(kImageUrlText);
@@ -85,7 +86,7 @@ describe("CaseAttribute value paste (Data Cards)", () => {
   it("does not ingest plain text pastes, and does not suppress the default paste", async () => {
     const ingest = jest.spyOn(imageIngest, "ingestClipboardImage");
     const { content, caseId, attrKey } = renderValueEditor();
-    const textarea = screen.getByRole("combobox", { name: /value for/i });
+    const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ text: "just some plain text" });
 
     const notPrevented = await pasteAndFlush(textarea, clipboardData);
@@ -98,7 +99,7 @@ describe("CaseAttribute value paste (Data Cards)", () => {
   it("suppresses the default paste but leaves the value unset when ingestion fails to store the image", async () => {
     jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(undefined);
     const { content, caseId, attrKey } = renderValueEditor();
-    const textarea = screen.getByRole("combobox", { name: /value for/i });
+    const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ image: mockFile() });
 
     const notPrevented = await pasteAndFlush(textarea, clipboardData);

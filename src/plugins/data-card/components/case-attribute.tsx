@@ -78,6 +78,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueStr = getValue();
   const [nameCandidate, setNameCandidate] = useState(() => getName());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
+  // handleValuePaste sets valueCandidate and synchronously blurs in the same tick; under React 18
+  // automatic batching the blur's onBlur handler still closes over the pre-update state, so the
+  // commit path reads this ref (always current) instead of the possibly-stale valueCandidate.
+  const valueCandidateRef = useRef(valueCandidate);
+  valueCandidateRef.current = valueCandidate;
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState<string[]>([]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
@@ -241,6 +246,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
     const contentUrl = await ingestClipboardImage(clipboardData);
     if (contentUrl) {
+      valueCandidateRef.current = contentUrl;
       setValueCandidate(contentUrl);
       targetElement.blur();
     }
@@ -256,8 +262,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   });
 
   const handleCompleteValue = () => {
-    if (valueCandidate !== getValue()) {
-      caseId && content.setAttValue(caseId, attrKey, valueCandidate);
+    const currentValueCandidate = valueCandidateRef.current;
+    if (currentValueCandidate !== getValue()) {
+      caseId && content.setAttValue(caseId, attrKey, currentValueCandidate);
     }
   };
 
