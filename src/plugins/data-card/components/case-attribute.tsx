@@ -165,10 +165,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setInputValue(valueStr);
   }, [setInputValue, valueStr]);
 
-  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
-    .then((image)=>{
-      setImageUrl(image.displayUrl || "");
+  // Keyed on the value, not run per render: a state update from the render body schedules
+  // another render, and React renders once more before bailing out on an unchanged value, so
+  // the component never settles and the tab locks up.
+  useEffect(() => {
+    if (!gImageMap.isImageUrl(valueStr)) {
+      setImageUrl("");
+      return;
+    }
+    let cancelled = false;
+    gImageMap.getImage(valueStr).then(image => {
+      if (!cancelled) setImageUrl(image.displayUrl || "");
     });
+    return () => { cancelled = true; };
+  }, [valueStr]);
 
   const handleNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     editingName && setNameCandidate(event.target.value);

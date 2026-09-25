@@ -83,6 +83,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
           return <DataCardMergeInButton key={toolName} />;
         case "image-upload":
           return <ImageUploadButton key={toolName} onUploadImageFile={file => uploadImage(file)}
+            disabled={valueActionsDisabled}
             extraClasses={valueActionsDisabled ? "disabled" : ""}/>;
         case "delete-attribute":
           return <DeleteAttrButton key={toolName} />;
