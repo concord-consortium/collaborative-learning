@@ -1,5 +1,5 @@
 import curriculumConfig from "../../shared/curriculum-config.json";
-import {getUnitSummary} from "../src/get-unit-summary";
+import {getUnitSummary} from "../../shared/get-unit-summary";
 import {IUnitSummary} from "../../shared/unit-summary-types";
 
 function summaryFixture(): IUnitSummary {

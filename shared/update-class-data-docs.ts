@@ -1,6 +1,8 @@
 import { getDatabase } from "firebase-admin/database";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { documentSummarizer } from "./ai-summarizer/ai-summarizer";
+import { documentHasStudentWork } from "./ai-analysis-classify";
+import { getUnitSummary } from "./get-unit-summary";
 
 // Finds classes that have updated documents for selected units,
 // and uses an LLM to create a summary of all the student work in Firestore.
@@ -33,7 +35,9 @@ interface IClassData {
   userCount: number;
   userIds: Set<string>;
   documentCount: number;
-  documents: Set<{ uid: string, key: string, isTeacherDocument: boolean }>;
+  documents: Set<{
+    uid: string, key: string, isTeacherDocument: boolean, investigation?: string, problem?: string
+  }>;
   lastEditedAt: number;
 }
 
@@ -59,7 +63,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
   let documentQuery = getFirestore()
     .collection(documentsPath)
     .where("unit", "==", unit)
-    .select("context_id", "uid", "key");
+    .select("context_id", "uid", "key", "investigation", "problem");
   if (onlyContextId) {
     documentQuery = documentQuery.where("context_id", "==", onlyContextId);
   }
@@ -71,6 +75,8 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const contextId = data.context_id;
       const uid = data.uid;
       const key = data.key;
+      const investigation = data.investigation as string | undefined;
+      const problem = data.problem as string | undefined;
 
       if (!(contextId in classTeachers)) {
         classTeachers[contextId] = await getClassTeachers(portal, demo, contextId, logger);
@@ -90,7 +96,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const record = classData[contextId];
       record.userIds.add(uid);
       record.documentCount++;
-      record.documents.add({ uid, key, isTeacherDocument });
+      record.documents.add({ uid, key, isTeacherDocument, investigation, problem });
       if (lastEdited && lastEdited > record.lastEditedAt) {
         record.lastEditedAt = lastEdited;
       }
@@ -139,12 +145,30 @@ async function retrieveDocumentFromFirebase(portal: string|undefined, demo: stri
 }
 
 async function retrieveAndSummarizeDocument(portal: string|undefined, demo: string|undefined, contextId: string,
-    uid: string, key: string, logger: Logger): Promise<string> {
+    uid: string, key: string, logger: Logger): Promise<{ summary: string, content: any }> {
   const document = await retrieveDocumentFromFirebase(portal, demo, contextId, uid, key);
   if (document.error) {
     logger.info(`Error retrieving document (${contextId}/${uid}/${key}) from Firebase: ${document.error}`);
   }
-  return documentSummarizer(document.content, { includeModel: false, minimal: true });
+  const summary = documentSummarizer(document.content, { includeModel: false, minimal: true });
+  return { summary, content: document.content };
+}
+
+// The furthest-along ordinal (in authored order, never sorted as strings) among the given
+// problem ordinals, or undefined if none of them appear in the unit's live problem list or the
+// list itself is unavailable. "Furthest along" is the upper bound of what any student in the
+// class has encountered -- see shared/get-unit-summary.ts and the plan's Teacher Summary section.
+async function determineCurrentProblemOrdinal(unit: string, qualifyingOrdinals: string[]): Promise<string | undefined> {
+  if (qualifyingOrdinals.length === 0) return undefined;
+  const unitSummaryResult = await getUnitSummary(unit);
+  if (!unitSummaryResult) return undefined;
+  const { liveProblems } = unitSummaryResult;
+  let furthestIndex = -1;
+  for (const ordinal of qualifyingOrdinals) {
+    const index = liveProblems.findIndex((p) => p.ordinal === ordinal);
+    if (index > furthestIndex) furthestIndex = index;
+  }
+  return furthestIndex === -1 ? undefined : liveProblems[furthestIndex].ordinal;
 }
 
 // Check if our data document under /exemplars is older than the latest document saved in the class.
@@ -166,14 +190,25 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
   // Retrieve and summarize the documents
   const teacherDocs = Array.from(data.documents).filter(({isTeacherDocument}) => isTeacherDocument);
   const studentDocs = Array.from(data.documents).filter(({isTeacherDocument}) => !isTeacherDocument);
-  const teacherSummaries = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
+  const teacherResults = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
     return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
-  const studentSummaries = await Promise.all(studentDocs.map(async ({uid, key}) =>  {
+  const studentResults = await Promise.all(studentDocs.map(async ({uid, key}) =>  {
     return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
-  const teacherContent = teacherSummaries.join("\n\n");
-  const studentContent = studentSummaries.join("\n\n");
+  const teacherContent = teacherResults.map(({summary}) => summary).join("\n\n");
+  const studentContent = studentResults.map(({summary}) => summary).join("\n\n");
+
+  // A student document counts toward the class's current problem when it has curriculum fields
+  // (a personal document has none) and its content has actual student work -- not merely
+  // lastEditedAt, which is written only on disconnect and can lag behind saved work in a newly
+  // opened problem. Teacher documents are excluded: teachers may preview ahead of the class.
+  const qualifyingOrdinals = studentDocs
+    .map(({investigation, problem}, i) => ({investigation, problem, content: studentResults[i].content}))
+    .filter(({investigation, problem, content}) =>
+      !!investigation && !!problem && documentHasStudentWork(content))
+    .map(({investigation, problem}) => `${investigation}.${problem}`);
+  const currentProblemOrdinal = await determineCurrentProblemOrdinal(unit, qualifyingOrdinals);
 
   return getClassDataDoc(portal, demo, unit, contextId).set({
     lastEditedAt: data.lastEditedAt,
@@ -181,7 +216,8 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
     documentCount: data.documentCount,
     teacherContent,
     studentContent,
-    summary: null
+    summary: null,
+    ...(currentProblemOrdinal ? {currentProblemOrdinal} : {})
   });
 }
 

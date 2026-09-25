@@ -9,10 +9,9 @@
 // from the same (main) fetch, so the check only proves internal consistency, not that main is the
 // curriculum the student's class actually loaded. Accepted for v1: production classes run on
 // main; branch previews are development/QA use. See docs/unit-configuration.md.
-import {logger} from "firebase-functions/v2";
-import {mainBranchUnitJsonUrl} from "../../shared/unit-url";
-import {ILiveProblem} from "../../shared/unit-summary-slice";
-import {IUnitSummary} from "../../shared/unit-summary-types";
+import {mainBranchUnitJsonUrl} from "./unit-url";
+import {ILiveProblem} from "./unit-summary-slice";
+import {IUnitSummary} from "./unit-summary-types";
 
 export interface IUnitSummaryFetchResult {
   summary?: IUnitSummary;
@@ -52,11 +51,11 @@ async function fetchUnitSummary(unit: string): Promise<IUnitSummaryFetchResult |
   try {
     response = await fetch(url, {signal: AbortSignal.timeout(kFetchTimeoutMs)});
   } catch (error) {
-    logger.error(`getUnitSummary: failed to fetch ${url}`, error);
+    console.error(`getUnitSummary: failed to fetch ${url}`, error);
     return undefined;
   }
   if (!response.ok) {
-    logger.error(`getUnitSummary: ${url} returned ${response.status}`);
+    console.error(`getUnitSummary: ${url} returned ${response.status}`);
     return undefined;
   }
 
@@ -64,11 +63,11 @@ async function fetchUnitSummary(unit: string): Promise<IUnitSummaryFetchResult |
   try {
     content = await response.json() as typeof content;
   } catch (error) {
-    logger.error(`getUnitSummary: ${url} did not return valid JSON`, error);
+    console.error(`getUnitSummary: ${url} did not return valid JSON`, error);
     return undefined;
   }
   if (!Array.isArray(content.investigations)) {
-    logger.error(`getUnitSummary: ${url} is missing investigations`);
+    console.error(`getUnitSummary: ${url} is missing investigations`);
     return undefined;
   }
 

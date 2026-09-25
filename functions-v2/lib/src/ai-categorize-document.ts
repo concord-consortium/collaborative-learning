@@ -9,7 +9,7 @@ import {
   VectorQuery
 } from "@google-cloud/firestore";
 import { AiAgreement, AiAgreementV2, isAiAgreement } from "../../src/summary-types";
-import { getUnitSummary } from "../../src/get-unit-summary";
+import { getUnitSummary } from "../../../shared/get-unit-summary";
 import { IEvaluationRequestContext, kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
