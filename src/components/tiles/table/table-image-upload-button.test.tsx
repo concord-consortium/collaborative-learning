@@ -93,4 +93,16 @@ describe("TableImageUploadButton", () => {
     expect(uploadImage).toHaveBeenNthCalledWith(1, file);
     expect(uploadImage).toHaveBeenNthCalledWith(2, file);
   });
+
+  it("makes the file input inert when no cell is selected", () => {
+    renderButton(false);
+    // The outer button stays focusable so its disabled state is announced, so the input itself
+    // has to be inert or a keyboard user can still reach and activate it.
+    expect(document.querySelector("input[type=file]")).toBeDisabled();
+  });
+
+  it("leaves the file input operable when a cell is selected", () => {
+    renderButton(true);
+    expect(document.querySelector("input[type=file]")).not.toBeDisabled();
+  });
 });

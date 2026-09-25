@@ -24,9 +24,9 @@ export const errorEntry = () => ImageMapEntry.create({
 
 // A minimal fake of the DataTransfer shape read by clipboardHasImage()'s synchronous checks
 // and ingestClipboardImage()'s async ones.
-export const makeClipboardData = (opts: { image?: File; text?: string }) => {
+export const makeClipboardData = (opts: { image?: File; text?: string; imageType?: string }) => {
   const items: Array<{ type: string; getAsFile: () => File | null }> = [];
-  if (opts.image) items.push({ type: "image/png", getAsFile: () => opts.image! });
+  if (opts.image) items.push({ type: opts.imageType ?? "image/png", getAsFile: () => opts.image! });
   if (opts.text !== undefined) items.push({ type: "text/plain", getAsFile: () => null });
   return {
     items,

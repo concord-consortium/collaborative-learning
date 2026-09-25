@@ -612,12 +612,14 @@ context('Table Tool Tile', function () {
     cy.log('will upload an image into the selected cell');
     cy.get('.table-toolbar .upload-button-input')
       .selectFile('cypress/fixtures/image.png', { force: true });
-    cy.get('.image-cell img', { timeout: 15000 }).should('exist');
+    // Scoped to this table: qaUnitStudent5 is shared, so an unscoped .image-cell could be
+    // satisfied by a tile another spec or an earlier run left behind.
+    tableToolTile.getTableTile().find('.image-cell img', { timeout: 15000 }).should('exist');
 
     cy.log('verify the image cell shows a visible selection treatment');
-    cy.get('.image-cell.highlighted').should('exist');
-    cy.get('.image-cell.highlighted')
-      .should('have.css', 'box-shadow')
+    tableToolTile.getTableTile().find('.image-cell.highlighted')
+      .should('exist')
+      .and('have.css', 'box-shadow')
       .and('not.eq', 'none');
 
     // The cell must hold the durable ccimg:// reference, not the session-local blob: url
@@ -628,6 +630,10 @@ context('Table Tool Tile', function () {
     cy.reload();
     cy.waitForLoad();
     cy.showOnlyDocumentWorkspace();
-    cy.get('.image-cell img', { timeout: 30000 }).should('exist');
+    tableToolTile.getTableTile().find('.image-cell img', { timeout: 30000 }).should('exist');
+
+    // Leave the shared document as we found it, as the other tests in this spec do.
+    tableToolTile.getTableTile().click();
+    clueCanvas.deleteTile('table');
   });
 });

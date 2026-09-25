@@ -6,7 +6,7 @@
 
 **Architecture:** A new shared helper, `ingestImage`, wraps `gImageMap` and returns a persistable `ccimg://` reference. The table's toolbar button and cell-editor paste handler both call it and write the result through the existing `onUpdateRow` change handler, which already logs and supports undo. Data Cards' paste path is switched to the same helper, replacing a branch that stored raw external URLs. The table tile already renders image cells and sizes rows for them, so no rendering work is needed beyond making the selection highlight visible on image cells.
 
-**Tech Stack:** TypeScript, React 17, MobX State Tree, react-data-grid, Jest + @testing-library/react, Cypress.
+**Tech Stack:** TypeScript, React 18, MobX State Tree, react-data-grid, Jest + @testing-library/react, Cypress.
 
 **Spec:** `docs/superpowers/specs/2026-09-24-clue-260-table-cell-images-design.md`
 

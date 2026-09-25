@@ -38,7 +38,7 @@ export async function ingestImage(source: File | string): Promise<string | undef
 }
 
 function analyzeClipboard(clipboardData: DataTransfer) {
-  const hasImage = Array.from(clipboardData.items).some(item => item.type === "image/png");
+  const hasImage = Array.from(clipboardData.items).some(item => item.type.startsWith("image/"));
   const text = clipboardData.getData("text/plain");
   const isImageUrlText = !hasImage && !!text && gImageMap.isImageUrl(text);
   return { hasImage, isImageUrlText };

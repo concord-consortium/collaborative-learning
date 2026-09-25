@@ -40,6 +40,9 @@ export const UploadButton =
       <input
         ref={inputRef}
         type="file"
+        // The outer button stays focusable so assistive tech announces the disabled state, but
+        // the input must be inert too or it can still be reached and activated by keyboard.
+        disabled={disabled}
         style={hideFileInputStyle}
         accept={accept || "image/png, image/jpeg"}
         title={title}
