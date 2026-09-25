@@ -68,6 +68,21 @@ endpoints that answer "the current user's own things" — `GET /api/v1/classes/m
 instance — return 403. That is the token working correctly, not a broken token. Fetch classes
 by id instead.
 
+### Pointing a portal at a new release
+
+`update-portal-release.ts` moves a portal's CLUE settings to a release. It adds the release's
+`version/<tag>/` and `branch/<vX.Y.x>/` folders to the redirect URIs of the `clue` OAuth client,
+then moves each external report and external activity you name from whatever release it points
+at to this one, rewriting the version and release-branch names in its URL and name:
+
+```shell
+npx tsx update-portal-release.ts --tag v7.6.0 --dry-run
+npx tsx update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77 --activity-id 594
+```
+
+It targets the staging portal unless `--portal` says otherwise, and refuses to move a record whose
+URL names no release (e.g. `branch/master/`). Re-running is safe.
+
 ## Running on Google Cloud Virtual Machine
 
 It can be useful to offload the running of scripts to a virtual machine in Google Cloud. They will usually run faster there.
