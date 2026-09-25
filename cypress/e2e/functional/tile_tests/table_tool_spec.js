@@ -624,8 +624,7 @@ context('Table Tool Tile', function () {
     // the image map hands back for display. Both render an <img> in this session, so the
     // only way to tell them apart is to reload: a blob: url is dead in a new page.
     cy.log('verify the image survives a reload');
-    // Give the debounced document sync time to flush before reloading.
-    cy.wait(5000);
+    cy.waitForSave();
     cy.reload();
     cy.waitForLoad();
     cy.showOnlyDocumentWorkspace();
