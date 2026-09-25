@@ -15,7 +15,7 @@ import { RemoveIconButton } from "./add-remove-icons";
 import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
-import { clipboardHasImage, ingestClipboardImage } from "../../../utilities/image-ingest";
+import { imagePasteHandler } from "../../../utilities/image-ingest";
 import { isImageUrl } from "../../../models/data/data-types";
 import { useAttributeClassNames } from "../use-case-attribute-class-names";
 import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
@@ -237,20 +237,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const handleValuePaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const clipboardData = event.clipboardData;
-    if (!clipboardHasImage(clipboardData)) return;
-
-    event.preventDefault();
-    const targetElement = event.currentTarget;
-
-    const contentUrl = await ingestClipboardImage(clipboardData);
-    if (contentUrl) {
-      valueCandidateRef.current = contentUrl;
-      setValueCandidate(contentUrl);
-      targetElement.blur();
-    }
-  };
+  const handleValuePaste = imagePasteHandler((contentUrl, target) => {
+    valueCandidateRef.current = contentUrl;
+    setValueCandidate(contentUrl);
+    target.blur();
+  });
 
   const RequireUniqueAlert = () => {
     return <p>Each field should have a unique name.  Enter a name that is not already in use in this collection.</p>;

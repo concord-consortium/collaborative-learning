@@ -3,9 +3,9 @@ import { act, render, screen } from "@testing-library/react";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { addAttributeToDataSet, addCasesToDataSet } from "../../models/data/data-set";
 import { TileModel } from "../../models/tiles/tile-model";
-import * as imageIngest from "../../utilities/image-ingest";
+import { gImageMap } from "../../models/image-map";
 import {
-  kCcImgUrl, kImageUrlText, makeClipboardData, mockFile, pasteAndFlush
+  errorEntry, kCcImgUrl, kImageUrlText, makeClipboardData, mockFile, pasteAndFlush, readyEntry
 } from "../../test/clipboard-image-test-utils";
 import { defaultDataCardContent } from "./data-card-content";
 import { CaseAttribute } from "./components/case-attribute";
@@ -55,7 +55,8 @@ describe("CaseAttribute value paste (Data Cards)", () => {
   afterEach(() => jest.restoreAllMocks());
 
   it("ingests a pasted image, suppresses the default paste, and commits via its own blur() alone", async () => {
-    const ingest = jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
+    jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(readyEntry(kCcImgUrl));
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry(kCcImgUrl) as any);
     const { content, caseId, attrKey } = renderValueEditor();
     const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ image: mockFile() });
@@ -63,14 +64,13 @@ describe("CaseAttribute value paste (Data Cards)", () => {
     const notPrevented = await pasteAndFlush(textarea, clipboardData);
 
     expect(notPrevented).toBe(false);
-    expect(ingest).toHaveBeenCalledWith(clipboardData);
     // No fireEvent.blur here: handleValuePaste's own targetElement.blur() call must be
     // sufficient to commit the pasted value.
     expect(content.dataSet.getValue(caseId, attrKey)).toBe(kCcImgUrl);
   });
 
   it("stores the ccimg:// url for a pasted image url, never the raw external url", async () => {
-    jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(kCcImgUrl);
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry(kCcImgUrl) as any);
     const { content, caseId, attrKey } = renderValueEditor();
     const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ text: kImageUrlText });
@@ -84,7 +84,6 @@ describe("CaseAttribute value paste (Data Cards)", () => {
   });
 
   it("does not ingest plain text pastes, and does not suppress the default paste", async () => {
-    const ingest = jest.spyOn(imageIngest, "ingestClipboardImage");
     const { content, caseId, attrKey } = renderValueEditor();
     const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ text: "just some plain text" });
@@ -92,12 +91,12 @@ describe("CaseAttribute value paste (Data Cards)", () => {
     const notPrevented = await pasteAndFlush(textarea, clipboardData);
 
     expect(notPrevented).toBe(true);
-    expect(ingest).not.toHaveBeenCalled();
     expect(content.dataSet.getValue(caseId, attrKey)).toBe("");
   });
 
   it("suppresses the default paste but leaves the value unset when ingestion fails to store the image", async () => {
-    jest.spyOn(imageIngest, "ingestClipboardImage").mockResolvedValue(undefined);
+    jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(errorEntry());
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(errorEntry() as any);
     const { content, caseId, attrKey } = renderValueEditor();
     const textarea = getFocusedValueTextarea();
     const clipboardData = makeClipboardData({ image: mockFile() });

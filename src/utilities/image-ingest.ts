@@ -1,3 +1,4 @@
+import React from "react";
 import { EntryStatus, gImageMap } from "../models/image-map";
 import { getClipboardContent } from "./clipboard-utils";
 
@@ -36,8 +37,6 @@ export async function ingestImage(source: File | string): Promise<string | undef
   }
 }
 
-// Shared by clipboardHasImage() and ingestClipboardImage() so the "is this an image url"
-// check is computed by one piece of logic, not duplicated between them.
 function analyzeClipboard(clipboardData: DataTransfer) {
   const hasImage = Array.from(clipboardData.items).some(item => item.type === "image/png");
   const text = clipboardData.getData("text/plain");
@@ -68,4 +67,26 @@ export async function ingestClipboardImage(clipboardData: DataTransfer): Promise
   if (!source) return undefined;
 
   return ingestImage(source);
+}
+
+/**
+ * Builds a paste handler that ingests an image from the clipboard.
+ *
+ * The ordering is the subtle part: whether to suppress the browser's default paste has to be
+ * decided synchronously, before the ingest is awaited, or the default paste has already
+ * happened. Both data tiles paste through here so neither can drift from that.
+ */
+export function imagePasteHandler(
+  onImage: (contentUrl: string, target: HTMLTextAreaElement) => void
+) {
+  return async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const clipboardData = event.clipboardData;
+    if (!clipboardHasImage(clipboardData)) return;
+
+    event.preventDefault();
+    const target = event.currentTarget;
+
+    const contentUrl = await ingestClipboardImage(clipboardData);
+    if (contentUrl) onImage(contentUrl, target);
+  };
 }

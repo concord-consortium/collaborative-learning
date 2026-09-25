@@ -11,7 +11,7 @@ import { defaultTableContent } from "../../../models/tiles/table/table-content";
 import "../../../models/tiles/table/table-registration";
 
 // getTileDataSet walks the tile's shared models via the shared model manager. Stubbing it is
-// far cheaper here than standing up a full container; table-content.test.ts:44-95 shows the
+// far cheaper here than standing up a full container; table-content.test.ts shows the
 // full-fidelity version if this ever needs to be more realistic.
 let mockDataSet: any;
 jest.mock("../../../models/shared/shared-data-utils", () => ({

@@ -112,7 +112,4 @@ describe("ingestClipboardImage", () => {
     expect(addFileImage).not.toHaveBeenCalled();
     expect(getImage).not.toHaveBeenCalled();
   });
-
-  // The store-failure branch is exercised once, in ingestImage's own tests above;
-  // ingestClipboardImage's delegation to it is already covered by the two success cases.
 });
