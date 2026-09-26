@@ -80,25 +80,47 @@ Cypress.Commands.add("logout", (baseUrl) => {
       });
 });
 
-// Launch a local report, this uses cy.request to first launch the portal report
-// this returns a redirect to a released version of CLUE
-// the URL is modified to strip off the domain and path
-// this way the same url parameters are passed to the localhost CLUE server
-// The portal was not visited with cy.visit, so cypress will allow us to visit a different
-// second level domain (localhost)
+// Launch a teacher report from the portal. See launchFromPortal.
 Cypress.Commands.add("launchReport", (reportUrl) => {
+    cy.launchFromPortal(reportUrl);
+});
+
+// Launch anything the portal redirects to CLUE — a teacher report, or a student's assignment
+// (`/portal/offerings/<id>.run_resource_html`).
+//
+// The portal is only ever reached with cy.request (here, and in cy.login/cy.logout), never
+// cy.visit. Cypress won't let a test visit a second origin without wrapping it in cy.origin, so
+// keeping the browser on CLUE alone is what makes this work. The requests still share the
+// browser's cookie jar, so the portal session from cy.login carries over. The redirect is fetched
+// with followRedirect off, and then only CLUE is visited.
+//
+// By default only the query string of the portal's redirect is kept, so the CLUE build under
+// test is the one at the baseUrl; the version in the portal resource's URL is ignored. With
+// `{ keepClueUrl: true }` the redirect is visited as is, which tests the portal's resource and
+// report settings themselves.
+//
+// Yields the redirect URL without its token, e.g. for comparing a student's launch with the
+// teacher's.
+Cypress.Commands.add("launchFromPortal", (portalLaunchUrl, { keepClueUrl = false } = {}) => {
     cy.request({
-        url: reportUrl,
+        url: portalLaunchUrl,
         method: "GET",
         followRedirect: false
     })
     .then((resp) => {
         expect(resp.status).to.eq(302);
-        expect(resp.redirectedToUrl).to.match(/^https:\/\/collaborative-learning\.concord\.org/);
-        const realReportUrl = resp.redirectedToUrl;
-        const localReportUrl = new URL(realReportUrl).search;
-        // cy.visit resolves urls relative to the baseUrl
-        cy.visit(localReportUrl);
+        const redirect = new URL(resp.redirectedToUrl);
+        // Assert on the origin only: the full URL carries the user's portal token, and
+        // assertion messages end up in CI logs.
+        // We are requiring the portal resource url to point at the CLUE domain. baseUrl can override
+        // this so what is actually loaded is some other URL such as localhost.
+        expect(redirect.origin, "portal redirects to CLUE").to.eq("https://collaborative-learning.concord.org");
+        // When resolving against the baseUrl, pass cy.visit a full URL rather than the bare
+        // query: a student launch has an unencoded `domain=https://...` in it, and cy.visit
+        // takes any string containing "://" for an absolute URL and fails to parse it.
+        cy.visit(keepClueUrl ? redirect.href : new URL(redirect.search, Cypress.config("baseUrl")).href);
+        redirect.searchParams.delete("token");
+        return cy.wrap(redirect, { log: false });
     });
 });
 Cypress.Commands.add("waitForLoad", () => {
