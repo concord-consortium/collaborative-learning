@@ -18,6 +18,22 @@ documents:
 - **`scripts/local/`** is for one-off investigation scripts you don't mean to commit, and whatever they
   write. Put a throwaway script here rather than giving it a special name elsewhere.
 
+## Checking which version is deployed
+
+`deployed-version.ts` reports which CLUE version production (`index.html`) and staging
+(`staging.html`) are serving. It needs no credentials:
+
+```shell
+npx tsx deployed-version.ts           # text report
+npx tsx deployed-version.ts --json    # machine-readable report
+```
+
+For each page a release deploys (the app, `editor/`, `authoring/` and `authoring-iframe/`) it
+compares three things that should agree: the `version/<tag>/` folder the page loads from, the
+`appVersion` compiled into the bundle (the "CLUE v…" shown in the app), and the git sha and tag
+compiled into the bundle from `version.json`. It also checks that sha against what the tag points
+to in your local repo, so run `git fetch --tags` first. It exits non-zero if anything disagrees.
+
 ## Running scripts that connect with the portal
 
 You need to first get the portal admin api token.
@@ -51,6 +67,21 @@ Note this admin api user is not your own portal account. It is not a teacher or 
 endpoints that answer "the current user's own things" — `GET /api/v1/classes/mine`, for
 instance — return 403. That is the token working correctly, not a broken token. Fetch classes
 by id instead.
+
+### Pointing a portal at a new release
+
+`update-portal-release.ts` moves a portal's CLUE settings to a release. It adds the release's
+`version/<tag>/` and `branch/<vX.Y.x>/` folders to the redirect URIs of the `clue` OAuth client,
+then moves each external report and external activity you name from whatever release it points
+at to this one, rewriting the version and release-branch names in its URL and name:
+
+```shell
+npx tsx update-portal-release.ts --tag v7.6.0 --dry-run
+npx tsx update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77 --activity-id 594
+```
+
+It targets the staging portal unless `--portal` says otherwise, and refuses to move a record whose
+URL names no release (e.g. `branch/master/`). Re-running is safe.
 
 ## Running on Google Cloud Virtual Machine
 

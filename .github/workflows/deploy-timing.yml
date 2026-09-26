@@ -1,0 +1,28 @@
+name: Deploy Timing
+# Functions, rules and indexes are deployed separately from the CLUE client. A PR that changes
+# one of them must say in a Deploy timing callout in its description whether each part can be
+# deployed before, with, or after the client release, and why. See "Deploy timing" in
+# docs/deploy.md.
+on:
+  pull_request:
+    # `edited` re-runs the check when the description changes.
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+permissions:
+  contents: read
+jobs:
+  deploy-timing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check the Deploy timing callout
+        env:
+          # Passed through the environment rather than interpolated into the script, since the
+          # description is user-controlled text.
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.base_ref }}
+        run: npx -y tsx scripts/check-deploy-timing.ts --base "origin/$BASE_REF"

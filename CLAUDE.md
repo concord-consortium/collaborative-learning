@@ -93,6 +93,18 @@ See [tiles.md](tiles.md) for detailed tile documentation.
 
 **Authoring configuration docs**: The unit `config` options (the `UnitConfiguration` interface in [src/models/stores/unit-configuration.ts](src/models/stores/unit-configuration.ts)) are documented for curriculum authors in [docs/unit-configuration.md](docs/unit-configuration.md). Whenever you add, remove, or change an authorable `config` property (or other authorable unit setting), update that doc in the same change to keep it in sync.
 
+**Deploy timing**: A PR that changes the Firebase functions (`functions-v1/`, `functions-v2/`,
+`authoring-api/`, or a `shared/` file they compile), the rules (`firestore.rules`,
+`database.rules.json`) or the indexes (`firestore.indexes.json`) needs a Deploy timing callout in
+its description: for each part it touches, `before`, `with` or `after` the client release, and
+why. The `Deploy Timing` check enforces it; the format is in "Deploy timing" in
+[docs/deploy.md](docs/deploy.md). **Never decide the timing yourself — ask the developer.** Whether
+a deploy is safe ahead of the client often depends on things the diff doesn't show. Give a
+recommendation for each part with your reasoning, covering both directions: the new client against
+the currently deployed part, and the currently released client against the new part (e.g. functions
+that stop replying in a case where the released client waits for a reply). Then write the callout
+with the timing the developer picks and their reasoning.
+
 ### URL Parameters for Testing
 
 | Parameter | Values | Purpose |
