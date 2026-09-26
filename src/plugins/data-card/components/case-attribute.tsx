@@ -15,7 +15,7 @@ import { RemoveIconButton } from "./add-remove-icons";
 import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
-import { getClipboardContent } from "../../../utilities/clipboard-utils";
+import { imagePasteHandler } from "../../../utilities/image-ingest";
 import { isImageUrl } from "../../../models/data/data-types";
 import { useAttributeClassNames } from "../use-case-attribute-class-names";
 import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
@@ -78,6 +78,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueStr = getValue();
   const [nameCandidate, setNameCandidate] = useState(() => getName());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
+  // handleValuePaste sets valueCandidate and synchronously blurs in the same tick; under React 18
+  // automatic batching the blur's onBlur handler still closes over the pre-update state, so the
+  // commit path reads this ref (always current) instead of the possibly-stale valueCandidate.
+  const valueCandidateRef = useRef(valueCandidate);
+  valueCandidateRef.current = valueCandidate;
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState<string[]>([]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
@@ -232,28 +237,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const handlePasteImage = (imageFile: File, targetElement: HTMLElement) => {
-    gImageMap.addFileImage(imageFile).then(image => {
-      if (image.contentUrl) {
-        setValueCandidate(image.contentUrl);
-        targetElement.blur();
-      }
-    });
-  };
-
-  const handleValuePaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    // If the clipboard contains an image element, process the image so it can be saved
-    // and rendered. If the clipboard contains a text element, check if it is an image URL.
-    // If it is, immediately set the value to the URL. Otherwise, simply let the default
-    // paste action occur without any special handling.
-    const targetElement = event.currentTarget;
-    const clipboardContents = await getClipboardContent(event.clipboardData);
-    if (clipboardContents.image) {
-      handlePasteImage(clipboardContents.image, targetElement);
-    } else if (clipboardContents.text && gImageMap.isImageUrl(clipboardContents.text)) {
-      setValue(clipboardContents.text);
-    }
-  };
+  const handleValuePaste = imagePasteHandler((contentUrl, target) => {
+    valueCandidateRef.current = contentUrl;
+    setValueCandidate(contentUrl);
+    target.blur();
+  });
 
   const RequireUniqueAlert = () => {
     return <p>Each field should have a unique name.  Enter a name that is not already in use in this collection.</p>;
@@ -265,14 +253,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   });
 
   const handleCompleteValue = () => {
-    if (valueCandidate !== getValue()) {
-      caseId && content.setAttValue(caseId, attrKey, valueCandidate);
-    }
-  };
-
-  const setValue = (value: string) => {
-    if (value !== getValue()) {
-      caseId && content.setAttValue(caseId, attrKey, value);
+    const currentValueCandidate = valueCandidateRef.current;
+    if (currentValueCandidate !== getValue()) {
+      caseId && content.setAttValue(caseId, attrKey, currentValueCandidate);
     }
   };
 

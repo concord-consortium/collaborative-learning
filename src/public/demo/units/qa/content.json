@@ -14,7 +14,20 @@
     ],
     "annotations": "all",
     "settings": {
-      "table": { "numFormat": ".2~f" },
+      "table": {
+        "numFormat": ".2~f",
+        "tools": [
+          "import-data",
+          "|",
+          "set-expression",
+          "link-tile",
+          "link-graph",
+          "merge-in",
+          ["data-set-view", "DataCard"],
+          "image-upload",
+          "delete"
+        ]
+      },
       "datacard": {
         "tools": [
           "duplicate",

@@ -32,12 +32,17 @@ export const UploadButton =
     if (files?.length) {
       onUpload(files[0]);
     }
+    // Reset so choosing the same file again still fires a change event.
+    e.currentTarget.value = "";
   };
 
   const input =
       <input
         ref={inputRef}
         type="file"
+        // The outer button stays focusable so assistive tech announces the disabled state, but
+        // the input must be inert too or it can still be reached and activated by keyboard.
+        disabled={disabled}
         style={hideFileInputStyle}
         accept={accept || "image/png, image/jpeg"}
         title={title}

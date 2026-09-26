@@ -588,4 +588,52 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTile().click();
     clueCanvas.deleteTile('table');
   });
+
+  it('should support uploading an image into a table cell', function() {
+    // This test needs the "image-upload" table toolbar button, which is opted in
+    // for the `qa` unit (src/public/demo/units/qa/content.json) but not for the
+    // `qa-no-nav-panel` unit that beforeTest() above visits. Visit the `qa` unit
+    // directly instead of reusing beforeTest().
+    cy.visit(`${Cypress.config("qaUnitStudent5")}`);
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+
+    cy.log('will add a table to canvas');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+
+    cy.log('verify image-upload button is disabled with no cell selected');
+    clueCanvas.toolbarButtonIsDisabled('table', 'image-upload');
+
+    cy.log('verify selecting a cell enables the image-upload button');
+    tableToolTile.getTableCellXY(0, 0).click();
+    clueCanvas.toolbarButtonIsEnabled('table', 'image-upload');
+
+    cy.log('will upload an image into the selected cell');
+    cy.get('.table-toolbar .upload-button-input')
+      .selectFile('cypress/fixtures/image.png', { force: true });
+    // Scoped to this table: qaUnitStudent5 is shared, so an unscoped .image-cell could be
+    // satisfied by a tile another spec or an earlier run left behind.
+    tableToolTile.getTableTile().find('.image-cell img', { timeout: 15000 }).should('exist');
+
+    cy.log('verify the image cell shows a visible selection treatment');
+    tableToolTile.getTableTile().find('.image-cell.highlighted')
+      .should('exist')
+      .and('have.css', 'box-shadow')
+      .and('not.eq', 'none');
+
+    // The cell must hold the durable ccimg:// reference, not the session-local blob: url
+    // the image map hands back for display. Both render an <img> in this session, so the
+    // only way to tell them apart is to reload: a blob: url is dead in a new page.
+    cy.log('verify the image survives a reload');
+    cy.waitForSave();
+    cy.reload();
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+    tableToolTile.getTableTile().find('.image-cell img', { timeout: 30000 }).should('exist');
+
+    // Leave the shared document as we found it, as the other tests in this spec do.
+    tableToolTile.getTableTile().click();
+    clueCanvas.deleteTile('table');
+  });
 });

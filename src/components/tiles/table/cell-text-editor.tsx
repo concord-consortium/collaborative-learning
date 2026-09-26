@@ -4,6 +4,7 @@ import { RenderEditCellProps } from "react-data-grid";
 import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
 import { TableContext } from "../hooks/table-context";
+import { imagePasteHandler } from "../../../utilities/image-ingest";
 
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
@@ -51,6 +52,13 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     updateValue(event.target.value);
   };
 
+  const handlePaste = imagePasteHandler(contentUrl => {
+    updateValue(contentUrl);
+    // Commit immediately, as Data Cards does on a successful image paste, instead of
+    // leaving the editor open showing the raw storage url.
+    finishAndSave(true);
+  });
+
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
@@ -70,6 +78,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         }}
         autoFocus={true}
         onChange={handleChange}
+        onPaste={handlePaste}
         onFocus={event => {
           event.target.select();
         }}
