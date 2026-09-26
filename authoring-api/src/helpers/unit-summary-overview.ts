@@ -1,0 +1,72 @@
+// The overview step: one OpenAI call over every digest, producing the unit-level `overview` field.
+// Unlike digest and priorKnowledge, this is the only call that sees the whole unit at once, so
+// `overview` may reference material from later in the unit and is not safe to show a student
+// working on an earlier problem.
+import {UNIT_SUMMARY_OVERVIEW_MAX_CHARS} from "../../../shared/unit-summary-types";
+import {AssembledProblem} from "./assemble-unit";
+import {chunkMarkdown, labelDigest} from "./unit-summary-digest";
+import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
+import {generateWithLengthLimit} from "./unit-summary-length-limit";
+import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
+
+const OVERVIEW_INSTRUCTIONS =
+  "You are helping build a compact reference summary of a curriculum unit, for other AI " +
+  "features to use as background context. You will be given a digest of every problem in the " +
+  "unit, in order, each labeled with its problem number and title (e.g. \"Problem 1.2 " +
+  "(Measuring Photos): ...\"). Write a single paragraph, in 3 to 5 sentences and no more than " +
+  `${UNIT_SUMMARY_OVERVIEW_MAX_CHARS} characters, describing what the unit as a whole is about. ` +
+  "Only use information in the provided digests -- do not infer or invent anything else.";
+
+const COMBINE_OVERVIEWS_INSTRUCTIONS =
+  "You are given several partial overviews, each describing part of the SAME curriculum unit " +
+  "(the full set of problem digests was split into parts only because it was too long for one " +
+  "request). Combine them into a single overview paragraph, in 3 to 5 sentences and no more " +
+  `than ${UNIT_SUMMARY_OVERVIEW_MAX_CHARS} characters, describing what the unit as a whole is ` +
+  "about. Do not mention that it was split into parts.";
+
+export interface OverviewOptions {
+  client: UnitSummaryOpenAIClient;
+  model: string;
+}
+
+export async function generateOverview(
+  problems: AssembledProblem[], digests: string[], options: OverviewOptions
+): Promise<string> {
+  try {
+    const allDigestsText = problems.map((p, i) => labelDigest(p, digests[i])).join("\n\n");
+    if (allDigestsText.length <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS) {
+      return await callOverview(allDigestsText, options);
+    }
+
+    // Sequential, not concurrent: the overview call only ever runs once per generation (never
+    // alongside another oversized overview), so there is no shared concurrency budget to protect
+    // here the way there is for per-problem digests -- but keeping it simple and sequential costs
+    // nothing, since this path is rare (only very large units trigger it).
+    const chunks = chunkMarkdown(allDigestsText, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
+    const chunkOverviews: string[] = [];
+    for (const chunk of chunks) {
+      chunkOverviews.push(await callOverview(chunk, options));
+    }
+    return await callCombineOverviews(chunkOverviews, options);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`overview failed: ${message}`);
+  }
+}
+
+function callOverview(input: string, {client, model}: OverviewOptions): Promise<string> {
+  return generateWithLengthLimit({
+    client, model, instructions: OVERVIEW_INSTRUCTIONS, input,
+    timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
+    fieldName: "overview",
+  });
+}
+
+function callCombineOverviews(chunkOverviews: string[], {client, model}: OverviewOptions): Promise<string> {
+  const input = chunkOverviews.map((overview, i) => `Part ${i + 1}: ${overview}`).join("\n\n");
+  return generateWithLengthLimit({
+    client, model, instructions: COMBINE_OVERVIEWS_INSTRUCTIONS, input,
+    timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
+    fieldName: "overview",
+  });
+}

@@ -34,7 +34,9 @@ export interface SharedModelMapEntry {
     // rather than throwing and losing the whole document's summary.
     dataSet?: {
       id: string;
-      name: string;
+      // Authored, not guaranteed -- a curriculum SharedDataSet entry can omit it (see
+      // NormalizedDataSet.name below, which carries the same optionality through).
+      name?: string;
       attributes?: SharedAttributeSnapshot[];
       cases?: unknown[];
     };
@@ -70,7 +72,8 @@ export interface NormalizedAttribute {
 export interface NormalizedDataSet {
   id: string;
   providerId: string;
-  name: string;
+  // Authored, not guaranteed -- a curriculum SharedDataSet entry can omit it.
+  name?: string;
   tileIds: string[];
   attributes: NormalizedAttribute[];
   numCases: number;
@@ -140,13 +143,21 @@ export interface AiSummarizerOptions {
   minimal?: boolean;      // If true, skip all boilerplate and headers and just return the text content
   tileHandlers?: TileHandler[];
   /**
-   * How much of each data set to write out.
+   * How much of each data set to write out, in the document-level "Data Sets" summary at the end
+   * (documentSummary in ai-summarizer.ts). `full` (the default) prints every case as an uncapped
+   * markdown table; `schema-only` keeps the heading, attributes, and case count but leaves the case
+   * data out.
    *
-   * `full` (the default, and what every caller got before this existed) describes the data set and
-   * then prints every case as a markdown table. `schema-only` keeps the heading, the attributes
-   * table, the formulas and the case count, and leaves the case data out — the shape of the data
-   * without the data itself. A large table can be most of a document's summary, and whether the
-   * model needs the rows to categorize a design is exactly the sort of thing worth measuring.
+   * A Table tile backed by a shared data set (the modern, runtime shape) shows row data (capped at
+   * TABLE_MARKDOWN_ROW_CAP) only when this is explicitly "full" -- unset or "schema-only" both
+   * leave it silent, unlike the document-level summary above. A legacy, curriculum-authored table
+   * (columns stored directly on the tile) reads this option differently; see handle-table-tile.ts.
    */
   dataSetTables?: "full" | "schema-only";
+  /**
+   * If true, an image tile in `minimal` mode is summarized as `(image: filename.png)` instead of
+   * the empty string, so a reader can see where a section relied on a picture the summarizer
+   * cannot otherwise describe. Off by default so existing student-document summaries are unchanged.
+   */
+  imageFilenames?: boolean;
 }

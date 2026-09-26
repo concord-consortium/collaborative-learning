@@ -1,5 +1,5 @@
 import { documentSummarizer, normalize } from './ai-summarizer';
-import { TileHandler, TileHandlerParams } from './ai-summarizer-types';
+import { SharedModelMapEntry, TileHandler, TileHandlerParams } from './ai-summarizer-types';
 import documentSummarizerWithDrawings from './ai-summarizer-with-drawings';
 import { defaultTileHandlers } from './ai-tile-summarizer';
 
@@ -577,6 +577,34 @@ describe('ai-summarizer', () => {
         expect(result).toContain('1 data set');
       });
 
+      // `name` is authored, not guaranteed (curriculum content can omit it), so the "Data Sets"
+      // heading must not literally read "undefined" when it is missing.
+      it('names an unnamed data set by id in the Data Sets heading instead of saying "undefined"', () => {
+        const content = {
+          rowOrder: ['row1'],
+          rowMap: { row1: { tiles: [{ tileId: 'tile1' }], isSectionHeader: false } },
+          tileMap: { tile1: { id: 'tile1', content: { type: 'Table' } } },
+          sharedModelMap: {
+            dataSet1: {
+              sharedModel: {
+                type: 'SharedDataSet',
+                providerId: 'provider1',
+                dataSet: {
+                  id: 'ds1',
+                  attributes: [{ name: 'Name', values: ['Alice'] }],
+                  cases: [{ Name: 'Alice' }]
+                }
+              },
+              tiles: ['tile1']
+            }
+          }
+        };
+
+        const result = documentSummarizer(content, {});
+        expect(result).toContain('Data set ds1');
+        expect(result).not.toContain('undefined');
+      });
+
       describe('the dataSetTables option', () => {
         const withData = {
           rowOrder: ['row1'],
@@ -604,11 +632,37 @@ describe('ai-summarizer', () => {
           }
         };
 
-        it('defaults to the full table, byte for byte what it produced before the option existed', () => {
-          // The option is new; every existing caller passes nothing. If these two ever differ, every
-          // stored summary and every cached analysis built from one is invalidated for no reason.
-          expect(documentSummarizer(withData, { dataSetTables: 'full' }))
-            .toBe(documentSummarizer(withData, {}));
+        // The document-level "Data Sets" summary (documentSummary in ai-summarizer.ts) and this
+        // tile's own per-tile rendering (handle-table-tile.ts) read the same option but do not
+        // share a default: the document-level summary always shows every case's data, while a
+        // table tile shows nothing beyond a one-line mention of the data set's name.
+        it('by default, describes the data set at the document level but says nothing about its ' +
+           'rows at the tile level', () => {
+          const result = documentSummarizer(withData, {});
+          expect(result).toContain('This tile contains a table which uses the "Sample Data"');
+          // Nothing about rows/cases appears before the document-level "Data Sets" section -- the
+          // tile-level mention is exactly one sentence, with no Markdown table of its own.
+          const tileLevelText = result.slice(0, result.indexOf('# Data Sets'));
+          expect(tileLevelText).not.toContain('Alice');
+          expect(tileLevelText).not.toContain('| Name |');
+          // The document-level summary is unaffected and still shows the real rows.
+          expect(result).toContain('Alice');
+          expect(result).toContain('| Name |');
+        });
+
+        it('an explicit "full" additionally shows the tile\'s own row data, unlike the default', () => {
+          const explicit = documentSummarizer(withData, { dataSetTables: 'full' });
+          const tileLevelText = explicit.slice(0, explicit.indexOf('# Data Sets'));
+          expect(tileLevelText).toContain('Alice');
+          expect(tileLevelText).toContain('| Name |');
+        });
+
+        it('"schema-only" leaves the tile-level mention exactly as bare as the default, not full', () => {
+          const schemaOnly = documentSummarizer(withData, { dataSetTables: 'schema-only' });
+          const tileLevelText = schemaOnly.slice(0, schemaOnly.indexOf('# Data Sets'));
+          expect(tileLevelText).toContain('This tile contains a table which uses the "Sample Data"');
+          expect(tileLevelText).not.toContain('It has');
+          expect(tileLevelText).not.toContain('| Name |');
         });
 
         it('keeps the schema and the case count but drops the case data', () => {
@@ -1370,6 +1424,75 @@ describe('documentSummarizerWithDrawings', () => {
       expect(result).not.toContain('This tile contains a drawing. The drawing is rendered below in an svg code fence:');
     });
 
+    it('does not apply a custom tile handler to a question tile\'s own prompt', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: { row1: { tiles: [{ tileId: 'q1' }], isSectionHeader: false } },
+        tileMap: {
+          q1: {
+            id: 'q1',
+            content: {
+              type: 'Question',
+              rowOrder: ['promptRow'],
+              rowMap: { promptRow: { tiles: [{ tileId: 'prompt' }] } }
+            }
+          },
+          prompt: {
+            id: 'prompt',
+            content: {
+              type: 'Drawing',
+              objects: [{ id: 'r1', type: 'rectangle', x: 0, y: 0, width: 10, height: 5 }]
+            }
+          }
+        }
+      };
+
+      const customDrawingHandler: TileHandler = ({ tile }: TileHandlerParams) => {
+        if (tile.model.content.type !== 'Drawing') return undefined;
+        return 'Custom drawing description';
+      };
+
+      const result = documentSummarizerWithDrawings(content, {
+        tileHandlers: [customDrawingHandler, ...defaultTileHandlers]
+      });
+
+      // A question's prompt is always summarized the plain default way, regardless of what tile
+      // handlers the caller asked for elsewhere in the document.
+      expect(result).not.toContain('Custom drawing description');
+      expect(result).toContain('| r1 | rectangle |');
+    });
+
+    it('still passes the caller\'s imageFilenames option through to a question tile\'s own prompt', () => {
+      const content = {
+        rowOrder: ['row1'],
+        rowMap: { row1: { tiles: [{ tileId: 'q1' }], isSectionHeader: false } },
+        tileMap: {
+          q1: {
+            id: 'q1',
+            content: {
+              type: 'Question',
+              rowOrder: ['promptRow'],
+              rowMap: { promptRow: { tiles: [{ tileId: 'prompt' }] } }
+            }
+          },
+          prompt: {
+            id: 'prompt',
+            content: {
+              type: 'Image',
+              url: 'https://example.com/images/diagram.png'
+            }
+          }
+        }
+      };
+
+      const result = documentSummarizerWithDrawings(content, { imageFilenames: true });
+
+      // Unlike tileHandlers above, imageFilenames doesn't change how a tile is described -- it
+      // only decides whether an image tile names its file instead of going silent -- so it should
+      // still reach the prompt even though tileHandlers does not.
+      expect(result).toContain('(image: diagram.png)');
+    });
+
     it('should handle complex document structures with drawings', () => {
       const content = {
         rowOrder: ['header1', 'row1', 'row2'],
@@ -1651,5 +1774,18 @@ describe('normalize tolerates a malformed shared model', () => {
       dataSet: { id: 'ds', name: 'D', attributes: [], cases: [] },
     }, ['t1']);
     expect(normalize(content as any).normalizedModel.dataSets[0].providerId).toBe('');
+  });
+
+  // SharedModelMapEntry.dataSet.name is optional -- an unnamed curriculum dataset is real (see
+  // curriculum-summarizer.test.ts) -- so a caller must be able to construct one typed as
+  // SharedModelMapEntry, with no name, and have it type-check rather than needing `as any` to
+  // route around a type that claims a name always exists.
+  it('accepts a SharedDataSet with no name, typed as SharedModelMapEntry rather than cast through any', () => {
+    const sharedModel: SharedModelMapEntry['sharedModel'] = {
+      type: 'SharedDataSet', id: 'sm-1', providerId: 't1',
+      dataSet: { id: 'ds', attributes: [], cases: [] },
+    };
+    const content = withSharedModel(sharedModel, ['t1']);
+    expect(normalize(content as any).normalizedModel.dataSets[0].name).toBeUndefined();
   });
 });
