@@ -18,9 +18,9 @@ CLUE acts rather than in what it stores. This doc reads each axis *out of* that 
 refactoring tracked in this folder then makes the axes explicit; see
 [target-architecture.md](./target-architecture.md).
 
-> This doc is the plain-language definition of the axes, grounded in current behavior. The current-state
-> evidence (per code site) that backs it lives in the findings doc on the `document-type-decomposition`
-> branch.
+> This doc is the plain-language definition of the axes, grounded in current behavior. The reasoning
+> behind this set of axes, and what was ruled out, is recorded in
+> [the planning doc](../superpowers/specs/2026-07-21-document-axes-planning.md).
 
 ## The seven axes
 

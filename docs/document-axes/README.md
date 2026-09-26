@@ -10,8 +10,7 @@ place, with `type`/`kind` dereferenced only inside a kind registry, a creation f
 - **Target — how the axes live in code (layers and boundaries):** [target-architecture.md](./target-architecture.md)
 - **Current state — what a consumer can read off a document today, and what the rules enforce:** [axes-current-state.md](./axes-current-state.md)
 - **Planned — the Firestore rules tightening that waits on older clients draining:** [planned-rules-tightening.md](./planned-rules-tightening.md)
-- **Research background (current-state evidence):** the findings doc, on the `document-type-decomposition`
-  branch (~49KB; left there rather than imported).
+- **Decision record — why these axes and not others:** [2026-07-21-document-axes-planning.md](../superpowers/specs/2026-07-21-document-axes-planning.md)
 
 ### Related existing docs this roadmap evolves toward
 
