@@ -96,4 +96,26 @@ describe("useLazyImage", () => {
     await waitFor(() => expect(getImage).toHaveBeenCalledWith(kCcImgUrl));
     await waitFor(() => expect(screen.getByTestId("holder")).toHaveTextContent(kBlobUrl));
   });
+
+  it("clears the previous image when the url changes to another image", async () => {
+    const callbacks = installObserver();
+    const first = ImageMapEntry.create({
+      contentUrl: kCcImgUrl, displayUrl: "blob:http://localhost/first",
+      retries: 0, status: EntryStatus.Ready
+    });
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(first);
+
+    const { rerender } = render(<Consumer url={kCcImgUrl} />);
+    scrollIntoView(callbacks);
+    await waitFor(() =>
+      expect(screen.getByTestId("holder")).toHaveTextContent("blob:http://localhost/first"));
+
+    // Cards are keyed by caseId, so the same mounted card can be handed a new image url. If it
+    // is off screen the new observer never fires, and without clearing, it would keep showing
+    // the previous image under the new url indefinitely.
+    rerender(<Consumer url="ccimg://fbrtdb.concord.org/classhash123/a-different-key" />);
+
+    await waitFor(() => expect(screen.getByTestId("holder")).toHaveTextContent(""));
+    expect(screen.getByTestId("holder")).not.toHaveTextContent("blob:http://localhost/first");
+  });
 });

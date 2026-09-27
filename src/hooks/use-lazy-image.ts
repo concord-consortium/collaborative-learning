@@ -21,10 +21,12 @@ export function useLazyImage(url: string) {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!gImageMap.isImageUrl(url)) {
-      setDisplayUrl("");
-      return;
-    }
+    // Cleared unconditionally: a card keeps its identity across value changes, so switching
+    // from one image to another would otherwise keep showing the previous one until the new
+    // fetch resolves -- and off screen that fetch waits for the element to scroll back into
+    // view, which may never happen.
+    setDisplayUrl("");
+    if (!gImageMap.isImageUrl(url)) return;
 
     let cancelled = false;
     const fetchImage = () => {
