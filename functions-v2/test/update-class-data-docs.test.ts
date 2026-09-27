@@ -273,4 +273,17 @@ describe("currentProblemOrdinal", () => {
     expect(doc.data()?.currentProblemOrdinal).toBeUndefined();
     expect(doc.data()?.studentContent).toContain("CLUE Document Summary");
   });
+
+  test("getUnitSummary rejecting leaves the field absent but still writes the rest", async () => {
+    mockGetUnitSummary.mockRejectedValue(new Error("unexpected failure"));
+    await setupTestDocuments({
+      documentId: "worked-doc", investigation: "1", problem: "1", tiles: [kTextTile("student work")],
+    });
+
+    await updateSingleClassDataDoc(undefined, "AITEST", "qa-config-subtabs", kClassHash, logger);
+    const doc = await getFirestore().doc(dataDocPath).get();
+    expect(doc.exists).toBe(true);
+    expect(doc.data()?.currentProblemOrdinal).toBeUndefined();
+    expect(doc.data()?.studentContent).toContain("CLUE Document Summary");
+  });
 });

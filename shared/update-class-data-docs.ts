@@ -29,6 +29,7 @@ function firestoreBasePath(portal: string|undefined, demo: string|undefined): st
 
 interface Logger {
   info(...args: any[]): void;
+  warn(...args: any[]): void;
 }
 
 interface IClassData {
@@ -183,9 +184,21 @@ function documentHasStudentEdits(
 // problem ordinals, or undefined if none of them appear in the unit's live problem list or the
 // list itself is unavailable. "Furthest along" is the upper bound of what any student in the
 // class has encountered -- see shared/get-unit-summary.ts and the plan's Teacher Summary section.
-async function determineCurrentProblemOrdinal(unit: string, qualifyingOrdinals: string[]): Promise<string | undefined> {
+async function determineCurrentProblemOrdinal(
+  unit: string, qualifyingOrdinals: string[], logger: Logger
+): Promise<string | undefined> {
   if (qualifyingOrdinals.length === 0) return undefined;
-  const unitSummaryResult = await getUnitSummary(unit);
+  // getUnitSummary should never reject -- it fails closed to undefined internally -- but this
+  // guards against any doubt the same way the Ideas and Teacher Summary call sites already do,
+  // so an unexpected failure here writes the class data doc without currentProblemOrdinal rather
+  // than aborting the rest of the realm's nightly pass (review).
+  let unitSummaryResult;
+  try {
+    unitSummaryResult = await getUnitSummary(unit);
+  } catch (error) {
+    logger.warn("unit summary unavailable, continuing without it", error);
+    return undefined;
+  }
   if (!unitSummaryResult) return undefined;
   const { liveProblems } = unitSummaryResult;
   let furthestIndex = -1;
@@ -239,7 +252,7 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
       documentHasStudentWork(content) &&
       documentHasStudentEdits({changeCount, lastEditedAt}))
     .map(({investigation, problem}) => `${investigation}.${problem}`);
-  const currentProblemOrdinal = await determineCurrentProblemOrdinal(unit, qualifyingOrdinals);
+  const currentProblemOrdinal = await determineCurrentProblemOrdinal(unit, qualifyingOrdinals, logger);
 
   return getClassDataDoc(portal, demo, unit, contextId).set({
     lastEditedAt: data.lastEditedAt,

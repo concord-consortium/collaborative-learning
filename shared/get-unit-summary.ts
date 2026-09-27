@@ -59,32 +59,60 @@ async function fetchUnitSummary(unit: string): Promise<IUnitSummaryFetchResult |
     return undefined;
   }
 
-  let content: {investigations?: unknown; config?: {aiUnitSummary?: IUnitSummary}};
+  let content: unknown;
   try {
-    content = await response.json() as typeof content;
+    content = await response.json();
   } catch (error) {
     console.error(`getUnitSummary: ${url} did not return valid JSON`, error);
     return undefined;
   }
-  if (!Array.isArray(content.investigations)) {
-    console.error(`getUnitSummary: ${url} is missing investigations`);
+
+  // A remote, published payload, read one field at a time: any shape we didn't anticipate (a
+  // null entry, a field of the wrong type) throws from parseContent rather than out of this
+  // function, so it logs and fails closed the same way every check above does, instead of
+  // escaping past getUnitSummary's own cache/coalescing (review).
+  try {
+    return parseContent(content);
+  } catch (error) {
+    console.error(`getUnitSummary: ${url} does not match the expected unit shape`, error);
     return undefined;
   }
+}
 
-  const liveProblems: ILiveProblem[] = content.investigations.reduce(
-    (acc: ILiveProblem[], investigation: {ordinal: unknown; problems?: {ordinal: unknown; title: unknown}[]}) => {
-      for (const problem of investigation.problems ?? []) {
-        // Matches the assembler's own problem.title ?? "" (assemble-unit.ts): a missing title
-        // must walk to "", not the string "undefined", or a problem with no authored title would
-        // disagree with the manifest and fail the prefix check closed for no real reason.
-        acc.push({ordinal: `${investigation.ordinal}.${problem.ordinal}`, title: String(problem.title ?? "")});
-      }
-      return acc;
-    },
-    []
-  );
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return (typeof value === "object" && value !== null) ? value as Record<string, unknown> : undefined;
+}
 
-  return {summary: content.config?.aiUnitSummary, liveProblems};
+function parseContent(content: unknown): IUnitSummaryFetchResult {
+  const record = asRecord(content);
+  if (!record) throw new Error("top-level content is not an object");
+
+  const investigations = record.investigations;
+  if (!Array.isArray(investigations)) throw new Error("investigations is not an array");
+
+  const liveProblems: ILiveProblem[] = [];
+  for (const investigation of investigations) {
+    const investigationRecord = asRecord(investigation);
+    if (!investigationRecord) throw new Error("an investigation is not an object");
+
+    const problems = investigationRecord.problems ?? [];
+    if (!Array.isArray(problems)) throw new Error("an investigation's problems is not an array");
+
+    for (const problem of problems) {
+      const problemRecord = asRecord(problem);
+      if (!problemRecord) throw new Error("a problem is not an object");
+      // Matches the assembler's own problem.title ?? "" (assemble-unit.ts): a missing title
+      // must walk to "", not the string "undefined", or a problem with no authored title would
+      // disagree with the manifest and fail the prefix check closed for no real reason.
+      liveProblems.push({
+        ordinal: `${investigationRecord.ordinal}.${problemRecord.ordinal}`,
+        title: String(problemRecord.title ?? ""),
+      });
+    }
+  }
+
+  const config = asRecord(record.config);
+  return {summary: config?.aiUnitSummary as IUnitSummary | undefined, liveProblems};
 }
 
 /**
@@ -103,10 +131,20 @@ export async function getUnitSummary(unit: string): Promise<IUnitSummaryFetchRes
   }
   let pending = inflight.get(unit);
   if (!pending) {
-    pending = fetchUnitSummary(unit).then((result) => {
-      cache.set(unit, {result, cachedAt: Date.now()});
-      return result;
-    }).finally(() => inflight.delete(unit));
+    pending = fetchUnitSummary(unit)
+      // fetchUnitSummary should never reject -- every failure inside it is caught and resolved
+      // to undefined -- but this is the one place a slip there (or any other unanticipated
+      // throw) would otherwise turn into a rejected promise no caller here awaits with a
+      // try/catch, bypassing the cache entirely instead of being remembered as a failure like
+      // every other one (review).
+      .catch((error) => {
+        console.error(`getUnitSummary: unexpected failure fetching ${unit}`, error);
+        return undefined;
+      })
+      .then((result) => {
+        cache.set(unit, {result, cachedAt: Date.now()});
+        return result;
+      }).finally(() => inflight.delete(unit));
     inflight.set(unit, pending);
   }
   return pending;

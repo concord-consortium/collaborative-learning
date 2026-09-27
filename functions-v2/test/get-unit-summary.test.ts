@@ -130,4 +130,39 @@ describe("getUnitSummary", () => {
     expect(requestedUrl).toBe(`${curriculumConfig.curriculumSiteUrl}/branch/main/${canonical}/content.json`);
     expect(requestedUrl).not.toContain(alias);
   });
+
+  // These would previously have thrown out of fetchUnitSummary and past getUnitSummary's own
+  // cache/coalescing instead of resolving undefined like every other malformed-content case
+  // (review).
+  it("resolves undefined, without throwing, for a null entry in investigations", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse({investigations: [null], config: {}}));
+
+    await expect(getUnitSummary("null-investigation-unit")).resolves.toBeUndefined();
+  });
+
+  it("resolves undefined, without throwing, for a top-level null response body", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(null));
+
+    await expect(getUnitSummary("null-content-unit")).resolves.toBeUndefined();
+  });
+
+  it("resolves undefined, without throwing, when an investigation's problems is not an array", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValue(
+      jsonResponse({investigations: [{ordinal: 1, problems: "x"}], config: {}})
+    );
+
+    await expect(getUnitSummary("non-array-problems-unit")).resolves.toBeUndefined();
+  });
+
+  it("resolves undefined when fetch itself rejects, and caches that as a failure", async () => {
+    const fetchSpy = jest.spyOn(global, "fetch").mockReturnValue(Promise.reject(new Error("network down")));
+
+    const first = await getUnitSummary("fetch-rejects-unit");
+    const second = await getUnitSummary("fetch-rejects-unit");
+
+    expect(first).toBeUndefined();
+    expect(second).toBeUndefined();
+    // Served from the failure-TTL cache on the second call, not fetched again.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
 });
