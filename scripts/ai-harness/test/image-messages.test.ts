@@ -268,10 +268,9 @@ describe("a run configured the way it was before these dimensions existed keeps 
   // requests there — so they pin the key against what actually shipped rather than against whatever
   // this branch happens to produce.
   //
-  // Re-pinned at commit 8875474a7: shared/ai-analysis-messages.ts started prepending
-  // UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION to every system message unconditionally, which is part of
-  // every request key exactly as the prompt is -- so this moved the key legitimately, the same way
-  // a reworded built-in prompt would, and the two values below are what that commit actually built.
+  // UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION is prepended unconditionally to every system message and
+  // is part of every request key exactly as the prompt is, so the two pinned values below reflect
+  // that, the same way they reflect a reworded built-in prompt.
   //
   // The prompt comes from the committed file rather than from `defaultAiPrompt`, which is the
   // built-in one and has since been reworded. A prompt is part of every request key, so a reworded

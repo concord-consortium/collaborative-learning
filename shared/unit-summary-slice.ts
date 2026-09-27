@@ -1,7 +1,7 @@
 // Filters an authored IUnitSummary (shared/unit-summary-types.ts) down to what a single AI
 // consumer may see for a given current problem: everything up to and including the next problem,
-// never further ahead (CLUE-678). Every consumer -- AdaChat, the AI Tile, Ideas, and Teacher
-// Summary -- goes through this one module so the no-look-ahead rule lives in one place.
+// never further ahead. Every consumer -- AdaChat, the AI Tile, Ideas, and Teacher Summary --
+// goes through this one module so the no-look-ahead rule lives in one place.
 //
 // v1 limitation: the compatibility check below compares ordinal and title only, not a content
 // hash (no v1 consumer has the full assembled-Markdown hash available). That means the check

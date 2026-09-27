@@ -1,14 +1,11 @@
-// Reproduces the "main" branch, canonical-code slice of getUnitUrl/curriculumBaseUrl in
-// src/models/stores/curriculum-config.ts, for server-side (functions-v2) consumers that have no
-// urlParams/env to build an MST CurriculumConfig from. curriculumSiteUrl and unitCodeMap are
-// authored once, in the co-located curriculum-config.json, and imported directly here rather than
-// copied, so this can't drift from what the client actually uses. It lives here rather than under
-// src/ because shared/ is loaded by Cloud Functions, which cannot depend on anything under src/.
+// Reproduces the "main"-branch, canonical-code slice of getUnitUrl/curriculumBaseUrl
+// (src/models/stores/curriculum-config.ts) for server-side consumers with no CurriculumConfig to
+// build from. Imports curriculum-config.json directly rather than duplicating it, so this can't
+// drift from the client. Lives in shared/, not src/, because Cloud Functions can't load src/.
 //
-// v1 limitation: this always builds the "main" branch URL. A class running on a branch-preview
-// deploy whose curriculum differs from main still resolves to main's content.json here -- there
-// is no branch on document metadata for a server-side consumer to read instead. See
-// get-unit-summary.ts and docs/unit-configuration.md.
+// v1 limitation: always resolves "main". A class on a branch-preview deploy running different
+// curriculum still gets main's content.json here -- server-side has no branch on document
+// metadata to read instead. See get-unit-summary.ts and docs/unit-configuration.md.
 import curriculumConfigJson from "./curriculum-config.json";
 
 interface ICurriculumConfigJson {

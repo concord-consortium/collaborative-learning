@@ -38,9 +38,9 @@ interface IClassData {
   documentCount: number;
   documents: Set<{
     uid: string, key: string, isTeacherDocument: boolean, investigation?: string, problem?: string,
-    // The same per-document RTDB value the class-level lastEditedAt below is maxed from -- kept
-    // here too since determining whether one specific document has ever been edited needs its own
-    // value, not the class-wide max. null when the field has never been written for this document.
+    // Same RTDB value the class-level lastEditedAt below is maxed from, kept per-document too
+    // since documentHasStudentEdits needs one document's own value, not the class-wide max. null
+    // when never written.
     lastEditedAt: number | null
   }>;
   lastEditedAt: number;
@@ -131,9 +131,9 @@ async function retrieveDocumentFromFirebase(portal: string|undefined, demo: stri
     if (!documentData) {
       return({ content: null, changeCount: null, error: `No document found at path: ${documentPath}` });
     }
-    // createDocument (src/lib/db.ts) never writes this field; only a real content sync
-    // (use-document-sync-to-firebase.ts) does, starting at 1 on the first one. Read here
-    // regardless of whether content itself parses, so a parse failure doesn't also lose it.
+    // createDocument (src/lib/db.ts) never writes this; only a real content sync
+    // (use-document-sync-to-firebase.ts) does, starting at 1. Read regardless of whether
+    // content parses, so a parse failure doesn't also lose it.
     const changeCount = typeof documentData.changeCount === "number" ? documentData.changeCount : null;
 
     let parsedContent: any = null;
@@ -163,17 +163,14 @@ async function retrieveAndSummarizeDocument(portal: string|undefined, demo: stri
   return { summary, content: document.content, changeCount: document.changeCount };
 }
 
-// Whether a document has been edited since it was created, as opposed to still holding only
-// whatever createDocument wrote at creation time (including an authored defaultDocumentTemplate,
-// which createDocument can populate `content` with directly). createDocument never writes
-// `changeCount`; only a real content sync does, via document.incChangeCount(), which returns 1 on
-// its first call. `lastEditedAt` is registered no earlier than that same first sync (it is set up
-// as an onDisconnect handler inside the sync mutation, then only written -- on disconnect or
-// unmount -- once that handler exists), so it is kept here too for a document saved before
-// changeCount existed. Either one being present is sufficient; documentHasStudentWork alone cannot
-// tell a pre-authored template's content (a welcome message, a worked example, an empty Table --
-// which counts unconditionally, see tileCountsAsStudentWork) apart from a student's own work, since
-// both look identical the instant the document is auto-created (CLUE-678 PR review).
+// Whether a document has been edited since creation, not just holding whatever createDocument
+// wrote then (including an authored defaultDocumentTemplate). createDocument never writes
+// `changeCount`; only a real content sync does (document.incChangeCount(), returning 1 on its
+// first call). `lastEditedAt` is set up no earlier than that same first sync, so it's checked too
+// for documents saved before `changeCount` existed. Either is sufficient: documentHasStudentWork
+// alone can't tell a pre-authored template (a welcome message, an empty Table, which counts
+// unconditionally) from a student's own work, since both look identical the instant the document
+// is auto-created.
 function documentHasStudentEdits(
   { changeCount, lastEditedAt }: { changeCount: number | null, lastEditedAt: number | null }
 ): boolean {
@@ -181,17 +178,16 @@ function documentHasStudentEdits(
 }
 
 // The furthest-along ordinal (in authored order, never sorted as strings) among the given
-// problem ordinals, or undefined if none of them appear in the unit's live problem list or the
-// list itself is unavailable. "Furthest along" is the upper bound of what any student in the
-// class has encountered -- see shared/get-unit-summary.ts and the plan's Teacher Summary section.
+// problem ordinals, or undefined if none appear in the unit's live problem list or the list is
+// unavailable. "Furthest along" is the upper bound of what any student in the class has
+// encountered.
 async function determineCurrentProblemOrdinal(
   unit: string, qualifyingOrdinals: string[], logger: Logger
 ): Promise<string | undefined> {
   if (qualifyingOrdinals.length === 0) return undefined;
-  // getUnitSummary should never reject -- it fails closed to undefined internally -- but this
-  // guards against any doubt the same way the Ideas and Teacher Summary call sites already do,
-  // so an unexpected failure here writes the class data doc without currentProblemOrdinal rather
-  // than aborting the rest of the realm's nightly pass (review).
+  // Backstop: getUnitSummary fails closed internally, but this guards the same way the Ideas and
+  // Teacher Summary call sites do, so an unexpected failure here still writes the class data doc,
+  // just without currentProblemOrdinal.
   let unitSummaryResult;
   try {
     unitSummaryResult = await getUnitSummary(unit);
@@ -238,11 +234,9 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
   const studentContent = studentResults.map(({summary}) => summary).join("\n\n");
 
   // A student document counts toward the class's current problem when it has curriculum fields
-  // (a personal document has none), its content has student work, and it has actually been
-  // edited since it was created (documentHasStudentEdits) -- content alone cannot tell a
-  // student's own work apart from whatever createDocument wrote at creation time, including an
-  // authored defaultDocumentTemplate. Teacher documents are excluded: teachers may preview ahead
-  // of the class.
+  // (a personal document has none), its content has student work, and it's been edited since
+  // creation (documentHasStudentEdits). Teacher documents are excluded: teachers may preview
+  // ahead of the class.
   const qualifyingOrdinals = studentDocs
     .map(({investigation, problem, lastEditedAt}, i) =>
       ({investigation, problem, content: studentResults[i].content, changeCount: studentResults[i].changeCount,

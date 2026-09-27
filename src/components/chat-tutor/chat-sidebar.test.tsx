@@ -48,9 +48,8 @@ jest.mock("./use-tutor-drawer-trap", () => ({
 // A unit with one investigation/problem, optionally carrying an aiUnitSummary. buildUnitContext
 // (unit-context.ts) walks from the given problem up through getParent(getParent(problem)), so the
 // problem used anywhere in this file must be a node nested in a real unit tree, not a standalone
-// ProblemModel.create(...) -- that dereference used to be safely unreachable (only inside a
-// closure the fake transport never calls), but the sidebar now calls it eagerly to build the
-// conversation id's unit-context suffix.
+// ProblemModel.create(...): the sidebar calls this eagerly to build the conversation id's
+// unit-context suffix.
 function makeUnit(aiUnitSummary?: IUnitSummary): UnitModelType {
   return UnitModel.create({
     code: "u1",

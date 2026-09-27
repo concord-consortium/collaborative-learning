@@ -185,8 +185,8 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
 
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
       // An image-only run pays for no embedding, so it reports nothing for the caller to write a
-      // summary record from -- but metadata is now read regardless of shape, since an image-only
-      // document can still carry a unit-context slice.
+      // summary record from. Metadata is read regardless of shape, since an image-only document
+      // can still carry a unit-context slice.
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
       expect(deps.readDocumentMetadata).toHaveBeenCalledTimes(1);
       expect(result.summaryEmbedding).toBeUndefined();
@@ -398,8 +398,6 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         buildSummaryMessages(fullPrompt, summary, [], expectedUnitContext));
     });
 
-    // The case the original design missed: image-only never reached readDocumentMetadata at all,
-    // so it never had a chance to carry a unit-context slice either. It does now.
     test("an image-only request carries the slice", async () => {
       const {deps, sent} = recordingDeps();
 

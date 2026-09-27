@@ -279,10 +279,10 @@ export const setupTestDocuments = async (options: {
 
   const firebaseDocPath =
     `${firebaseBase}/classes/${classId}/users/${uid}/documents/${documentId}`;
-  // specDocumentContent already returns a JSON string (the shape retrieveDocumentFromFirebase's
-  // JSON.parse expects); wrapping it in another JSON.stringify here would double-encode it, so a
-  // real document's tiles would come back as a string rather than a parsed object everywhere the
-  // parsed content is inspected instead of just re-serialized (documentHasStudentWork, in particular).
+  // specDocumentContent already returns a JSON string; wrapping it in JSON.stringify here would
+  // double-encode it, so document content would come back as a string rather than a parsed
+  // object wherever it's inspected instead of just re-serialized (documentHasStudentWork, in
+  // particular).
   await getDatabase().ref(firebaseDocPath).set({
     content: specDocumentContent(tiles),
     ...(changeCount !== undefined ? {changeCount} : {}),

@@ -67,10 +67,8 @@ async function fetchUnitSummary(unit: string): Promise<IUnitSummaryFetchResult |
     return undefined;
   }
 
-  // A remote, published payload, read one field at a time: any shape we didn't anticipate (a
-  // null entry, a field of the wrong type) throws from parseContent rather than out of this
-  // function, so it logs and fails closed the same way every check above does, instead of
-  // escaping past getUnitSummary's own cache/coalescing (review).
+  // content is a remote payload; parseContent throws on any shape we didn't anticipate (a null
+  // entry, a wrong-typed field), caught here so it fails closed like every check above.
   try {
     return parseContent(content);
   } catch (error) {
@@ -101,9 +99,9 @@ function parseContent(content: unknown): IUnitSummaryFetchResult {
     for (const problem of problems) {
       const problemRecord = asRecord(problem);
       if (!problemRecord) throw new Error("a problem is not an object");
-      // Matches the assembler's own problem.title ?? "" (assemble-unit.ts): a missing title
-      // must walk to "", not the string "undefined", or a problem with no authored title would
-      // disagree with the manifest and fail the prefix check closed for no real reason.
+      // Matches the assembler's problem.title ?? "" (assemble-unit.ts): a missing title must
+      // become "", not the string "undefined", or an untitled problem would disagree with the
+      // manifest and fail the prefix check for no reason.
       liveProblems.push({
         ordinal: `${investigationRecord.ordinal}.${problemRecord.ordinal}`,
         title: String(problemRecord.title ?? ""),
@@ -132,11 +130,8 @@ export async function getUnitSummary(unit: string): Promise<IUnitSummaryFetchRes
   let pending = inflight.get(unit);
   if (!pending) {
     pending = fetchUnitSummary(unit)
-      // fetchUnitSummary should never reject -- every failure inside it is caught and resolved
-      // to undefined -- but this is the one place a slip there (or any other unanticipated
-      // throw) would otherwise turn into a rejected promise no caller here awaits with a
-      // try/catch, bypassing the cache entirely instead of being remembered as a failure like
-      // every other one (review).
+      // Backstop: fetchUnitSummary should never reject, but if it did, this keeps the failure
+      // cached like any other rather than rejecting past callers that don't try/catch it.
       .catch((error) => {
         console.error(`getUnitSummary: unexpected failure fetching ${unit}`, error);
         return undefined;

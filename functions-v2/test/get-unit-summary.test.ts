@@ -62,10 +62,9 @@ describe("getUnitSummary", () => {
     ]);
   });
 
-  // The CLUE-685 assembler walks a missing title as problem.title ?? "" when building the
-  // manifest it later checks against; if the live walk here disagreed by producing the string
-  // "undefined" instead, a problem with no authored title would fail the prefix check for no real
-  // reason.
+  // The assembler walks a missing title as problem.title ?? "" when building the manifest it
+  // later checks against; if the live walk here disagreed by producing the string "undefined"
+  // instead, a problem with no authored title would fail the prefix check for no real reason.
   it("walks a problem with no title to an empty string, not the string \"undefined\"", async () => {
     jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse({
       investigations: [{ordinal: 1, problems: [{ordinal: 1}]}],
@@ -131,9 +130,6 @@ describe("getUnitSummary", () => {
     expect(requestedUrl).not.toContain(alias);
   });
 
-  // These would previously have thrown out of fetchUnitSummary and past getUnitSummary's own
-  // cache/coalescing instead of resolving undefined like every other malformed-content case
-  // (review).
   it("resolves undefined, without throwing, for a null entry in investigations", async () => {
     jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse({investigations: [null], config: {}}));
 
