@@ -111,6 +111,36 @@ export function storeImage(db: DB, url: string, name?: string, cors?: boolean): 
 }
 
 // Image size functions
+// Photographic content is an order of magnitude smaller as JPEG than as lossless PNG, and
+// these images are stored base64 in the realtime database, where that size is paid per class.
+const kJpegQuality = 0.85;
+
+/**
+ * Encodes a canvas as a data url, preferring JPEG.
+ *
+ * JPEG has no alpha channel, so anything transparent would composite to black. Only fully
+ * opaque images are encoded that way; everything else keeps PNG. A canvas tainted by a
+ * cross-origin source cannot be inspected at all, so it also keeps PNG — and `toDataURL`
+ * will throw on it either way, which the caller already handles.
+ */
+export function toCompactDataUrl(canvas: HTMLCanvasElement) {
+  return hasTransparency(canvas) ? canvas.toDataURL() : canvas.toDataURL("image/jpeg", kJpegQuality);
+}
+
+function hasTransparency(canvas: HTMLCanvasElement) {
+  try {
+    const context = canvas.getContext("2d");
+    if (!context) return true;
+    const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] < 255) return true;
+    }
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number, cors?: boolean): Promise<string> {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -146,8 +176,7 @@ function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number, cors
       context!.drawImage(image, 0, 0, newWidth, newHeight);
       // Return Base64 string of image
       try {
-        const dataUrl = canvas.toDataURL();
-        resolve(dataUrl);
+        resolve(toCompactDataUrl(canvas));
       }
       catch (e) {
         reject(new Error(`Error converting image: ${imageUrl}`));
