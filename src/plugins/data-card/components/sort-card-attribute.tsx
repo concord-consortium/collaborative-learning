@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -25,9 +25,20 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
   const attributeHighlighted = dataSet.isAttributeSelected(attr.id);
   const caseHighlighted = dataSet.isCaseSelected(caseId);
 
-  isImage && gImageMap.getImage(value).then((image)=>{
-    setImageUrl(image.displayUrl || "");
-  });
+  // Same trap as CaseAttribute: resolving from the render body schedules a state update every
+  // render, and React renders once more before bailing out on an unchanged value, so the
+  // component never settles. Key it on the value instead.
+  useEffect(() => {
+    if (!isImage) {
+      setImageUrl("");
+      return;
+    }
+    let cancelled = false;
+    gImageMap.getImage(value).then(image => {
+      if (!cancelled) setImageUrl(image.displayUrl || "");
+    });
+    return () => { cancelled = true; };
+  }, [isImage, value]);
 
   function handleAttributeClick() {
     dataSet.setSelectedAttributes([attr.id]);
