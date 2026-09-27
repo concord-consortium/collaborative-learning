@@ -118,7 +118,13 @@ Cypress.Commands.add("launchFromPortal", (portalLaunchUrl, { keepClueUrl = false
         // When resolving against the baseUrl, pass cy.visit a full URL rather than the bare
         // query: a student launch has an unencoded `domain=https://...` in it, and cy.visit
         // takes any string containing "://" for an absolute URL and fails to parse it.
-        cy.visit(keepClueUrl ? redirect.href : new URL(redirect.search, Cypress.config("baseUrl")).href);
+        const visitUrl = new URL(keepClueUrl ? redirect.href : new URL(redirect.search, Cypress.config("baseUrl")).href);
+        // The visit URL carries the token, and Cypress logs a visit's URL, so log a copy
+        // without it instead.
+        const loggedUrl = new URL(visitUrl.href);
+        loggedUrl.searchParams.delete("token");
+        cy.log(`visit ${loggedUrl.href}`);
+        cy.visit(visitUrl.href, { log: false });
         redirect.searchParams.delete("token");
         return cy.wrap(redirect, { log: false });
     });

@@ -14,10 +14,16 @@ add it to a workflow.** To dispatch one alone, also add it to the `test` choices
 
 ## `student_teacher_launch_spec.js`
 
-A student launches an assignment, adds text to their problem document, launches again and finds
-it; the teacher launches the assignment's report and finds it on the dashboard; the student then
-removes it. Every run writes text unique to itself and checks only for that, so leftovers from a
-failed run, or another run at the same time, do not affect the result.
+A student launches an assignment, adds a text tile to their problem document, launches again and
+finds it; the teacher launches the assignment's report and finds it on the dashboard; the student
+then removes it. The tile holds a marker with the run's start time, and the spec works only with
+that tile, by id.
+
+Runs using the same student and assignment can't overlap: they edit the same document, and each
+session saves the whole document. A run that finds another run's marker from the last 15 minutes
+stops at once and says so. Older markers are left by runs that failed before their cleanup, and are
+deleted. Retries of the same run share its start time, so a retry deletes its earlier attempt's
+marker. To run the spec in more than one place at a time, give each its own assignment.
 
 `PORTAL_LAUNCH_TARGET` chooses what a launch runs:
 
