@@ -612,12 +612,13 @@ context('Table Tool Tile', function () {
     cy.log('will upload an image into the selected cell');
     cy.get('.table-toolbar .upload-button-input')
       .selectFile('cypress/fixtures/image.png', { force: true });
-    // Scoped to this table: qaUnitStudent5 is shared, so an unscoped .image-cell could be
-    // satisfied by a tile another spec or an earlier run left behind.
-    tableToolTile.getTableTile().find('.image-cell img', { timeout: 15000 }).should('exist');
+    // .last() genuinely scopes to the table this test just added. getTableTile() matches every
+    // .table-tool in the workspace, and qaUnitStudent5 is shared, so a tile left behind by an
+    // interrupted run would otherwise satisfy these checks or make the click ambiguous.
+    tableToolTile.getTableTile().last().find('.image-cell img', { timeout: 15000 }).should('exist');
 
     cy.log('verify the image cell shows a visible selection treatment');
-    tableToolTile.getTableTile().find('.image-cell.highlighted')
+    tableToolTile.getTableTile().last().find('.image-cell.highlighted')
       .should('exist')
       .and('have.css', 'box-shadow')
       .and('not.eq', 'none');
@@ -630,10 +631,18 @@ context('Table Tool Tile', function () {
     cy.reload();
     cy.waitForLoad();
     cy.showOnlyDocumentWorkspace();
-    tableToolTile.getTableTile().find('.image-cell img', { timeout: 30000 }).should('exist');
+    // 'exists' is not enough: when the stored image cannot be fetched the tile falls back to a
+    // bundled placeholder, which is itself a perfectly valid loaded <img>. A real stored image
+    // resolves through createObjectURL, so its src is a blob: url and the placeholder's is not.
+    tableToolTile.getTableTile().last().find('.image-cell img', { timeout: 30000 })
+      .should('exist')
+      .and($img => {
+        expect($img[0].naturalWidth, 'image finished loading').to.be.greaterThan(0);
+        expect($img.attr('src'), 'real stored image, not the placeholder').to.match(/^blob:/);
+      });
 
     // Leave the shared document as we found it, as the other tests in this spec do.
-    tableToolTile.getTableTile().click();
+    tableToolTile.getTableTile().last().click();
     clueCanvas.deleteTile('table');
   });
 });

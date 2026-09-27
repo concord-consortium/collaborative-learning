@@ -86,6 +86,20 @@ describe("clipboardHasImage", () => {
   it("is false for an empty clipboard", () => {
     expect(clipboardHasImage(makeClipboardData({}))).toBe(false);
   });
+  it("recognizes a pasted jpeg", () => {
+    const clipboardData = makeClipboardData({ image: mockFile(), imageType: "image/jpeg" });
+    expect(clipboardHasImage(clipboardData)).toBe(true);
+  });
+
+  it("recognizes a pasted webp", () => {
+    const clipboardData = makeClipboardData({ image: mockFile(), imageType: "image/webp" });
+    expect(clipboardHasImage(clipboardData)).toBe(true);
+  });
+
+  it("still ignores non-image clipboard content", () => {
+    expect(clipboardHasImage(makeClipboardData({ text: "plain text" }))).toBe(false);
+  });
+
 });
 
 describe("ingestClipboardImage", () => {
@@ -113,19 +127,4 @@ describe("ingestClipboardImage", () => {
     expect(getImage).not.toHaveBeenCalled();
   });
 
-describe("clipboardHasImage with non-png images", () => {
-  it("recognizes a pasted jpeg", () => {
-    const clipboardData = makeClipboardData({ image: mockFile(), imageType: "image/jpeg" });
-    expect(clipboardHasImage(clipboardData)).toBe(true);
-  });
-
-  it("recognizes a pasted webp", () => {
-    const clipboardData = makeClipboardData({ image: mockFile(), imageType: "image/webp" });
-    expect(clipboardHasImage(clipboardData)).toBe(true);
-  });
-
-  it("still ignores non-image clipboard content", () => {
-    expect(clipboardHasImage(makeClipboardData({ text: "plain text" }))).toBe(false);
-  });
-});
 });

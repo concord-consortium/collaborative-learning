@@ -31,11 +31,13 @@ describe("CellTextEditor paste handling", () => {
     const clipboardData = makeClipboardData({ image: mockFile() });
 
     await pasteTextbox(clipboardData);
+    // Committed in one call. Splitting it into onRowChange(row, false) + onClose(true) is what
+    // dropped the pasted value: rdg's onClose delegates to onRowChange with the row it already
+    // holds, which is still the pre-paste row within a single tick.
     expect(onRowChange).toHaveBeenCalledWith(
       expect.objectContaining({ attr1: kCcImgUrl }),
-      false
+      true
     );
-    expect(onClose).toHaveBeenCalledWith(true);
   });
 
   it("ingests a pasted image url, stores the ccimg:// url (not the raw url), and commits", async () => {
@@ -48,13 +50,12 @@ describe("CellTextEditor paste handling", () => {
     await pasteTextbox(clipboardData);
     expect(onRowChange).toHaveBeenCalledWith(
       expect.objectContaining({ attr1: kCcImgUrl }),
-      false
+      true
     );
     expect(onRowChange).not.toHaveBeenCalledWith(
       expect.objectContaining({ attr1: kImageUrlText }),
-      false
+      expect.anything()
     );
-    expect(onClose).toHaveBeenCalledWith(true);
   });
 
   it("leaves plain text pastes alone: no ingestClipboardImage call, default paste not suppressed", async () => {
