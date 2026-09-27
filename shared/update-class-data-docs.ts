@@ -36,7 +36,11 @@ interface IClassData {
   userIds: Set<string>;
   documentCount: number;
   documents: Set<{
-    uid: string, key: string, isTeacherDocument: boolean, investigation?: string, problem?: string
+    uid: string, key: string, isTeacherDocument: boolean, investigation?: string, problem?: string,
+    // The same per-document RTDB value the class-level lastEditedAt below is maxed from -- kept
+    // here too since determining whether one specific document has ever been edited needs its own
+    // value, not the class-wide max. null when the field has never been written for this document.
+    lastEditedAt: number | null
   }>;
   lastEditedAt: number;
 }
@@ -96,7 +100,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const record = classData[contextId];
       record.userIds.add(uid);
       record.documentCount++;
-      record.documents.add({ uid, key, isTeacherDocument, investigation, problem });
+      record.documents.add({ uid, key, isTeacherDocument, investigation, problem, lastEditedAt: lastEdited });
       if (lastEdited && lastEdited > record.lastEditedAt) {
         record.lastEditedAt = lastEdited;
       }
@@ -117,41 +121,62 @@ function getClassDataDoc(portal: string|undefined, demo: string|undefined, unit:
 
 // Retrieve document content from Firebase Realtime Database
 async function retrieveDocumentFromFirebase(portal: string|undefined, demo: string|undefined, contextId: string,
-    uid: string, key: string): Promise<{ content: any | null, error: string | null }> {
+    uid: string, key: string): Promise<{ content: any | null, changeCount: number | null, error: string | null }> {
   try {
     const documentPath = `${firebaseBasePath(portal, demo)}/classes/${contextId}/users/${uid}/documents/${key}`;
     const documentSnapshot = await getDatabase().ref(documentPath).once("value");
     const documentData = documentSnapshot.val();
 
     if (!documentData) {
-      return({ content: null, error: `No document found at path: ${documentPath}` });
+      return({ content: null, changeCount: null, error: `No document found at path: ${documentPath}` });
     }
+    // createDocument (src/lib/db.ts) never writes this field; only a real content sync
+    // (use-document-sync-to-firebase.ts) does, starting at 1 on the first one. Read here
+    // regardless of whether content itself parses, so a parse failure doesn't also lose it.
+    const changeCount = typeof documentData.changeCount === "number" ? documentData.changeCount : null;
 
     let parsedContent: any = null;
     if (documentData.content) {
       try {
         parsedContent = JSON.parse(documentData.content);
-        return({ content: parsedContent, error: null });
+        return({ content: parsedContent, changeCount, error: null });
       } catch (parseError) {
-        return({ content: null, error: `Failed to parse document content: ${parseError}` });
+        return({ content: null, changeCount, error: `Failed to parse document content: ${parseError}` });
       }
     } else {
-      return({ content: null, error: "Document has no content field" });
+      return({ content: null, changeCount, error: "Document has no content field" });
     }
 
   } catch (error) {
-    return({ content: null, error: `Error retrieving document from Firebase: ${error}` });
+    return({ content: null, changeCount: null, error: `Error retrieving document from Firebase: ${error}` });
   }
 }
 
 async function retrieveAndSummarizeDocument(portal: string|undefined, demo: string|undefined, contextId: string,
-    uid: string, key: string, logger: Logger): Promise<{ summary: string, content: any }> {
+    uid: string, key: string, logger: Logger): Promise<{ summary: string, content: any, changeCount: number | null }> {
   const document = await retrieveDocumentFromFirebase(portal, demo, contextId, uid, key);
   if (document.error) {
     logger.info(`Error retrieving document (${contextId}/${uid}/${key}) from Firebase: ${document.error}`);
   }
   const summary = documentSummarizer(document.content, { includeModel: false, minimal: true });
-  return { summary, content: document.content };
+  return { summary, content: document.content, changeCount: document.changeCount };
+}
+
+// Whether a document has been edited since it was created, as opposed to still holding only
+// whatever createDocument wrote at creation time (including an authored defaultDocumentTemplate,
+// which createDocument can populate `content` with directly). createDocument never writes
+// `changeCount`; only a real content sync does, via document.incChangeCount(), which returns 1 on
+// its first call. `lastEditedAt` is registered no earlier than that same first sync (it is set up
+// as an onDisconnect handler inside the sync mutation, then only written -- on disconnect or
+// unmount -- once that handler exists), so it is kept here too for a document saved before
+// changeCount existed. Either one being present is sufficient; documentHasStudentWork alone cannot
+// tell a pre-authored template's content (a welcome message, a worked example, an empty Table --
+// which counts unconditionally, see tileCountsAsStudentWork) apart from a student's own work, since
+// both look identical the instant the document is auto-created (CLUE-678 PR review).
+function documentHasStudentEdits(
+  { changeCount, lastEditedAt }: { changeCount: number | null, lastEditedAt: number | null }
+): boolean {
+  return (changeCount != null && changeCount >= 1) || lastEditedAt != null;
 }
 
 // The furthest-along ordinal (in authored order, never sorted as strings) among the given
@@ -200,13 +225,19 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
   const studentContent = studentResults.map(({summary}) => summary).join("\n\n");
 
   // A student document counts toward the class's current problem when it has curriculum fields
-  // (a personal document has none) and its content has actual student work -- not merely
-  // lastEditedAt, which is written only on disconnect and can lag behind saved work in a newly
-  // opened problem. Teacher documents are excluded: teachers may preview ahead of the class.
+  // (a personal document has none), its content has student work, and it has actually been
+  // edited since it was created (documentHasStudentEdits) -- content alone cannot tell a
+  // student's own work apart from whatever createDocument wrote at creation time, including an
+  // authored defaultDocumentTemplate. Teacher documents are excluded: teachers may preview ahead
+  // of the class.
   const qualifyingOrdinals = studentDocs
-    .map(({investigation, problem}, i) => ({investigation, problem, content: studentResults[i].content}))
-    .filter(({investigation, problem, content}) =>
-      !!investigation && !!problem && documentHasStudentWork(content))
+    .map(({investigation, problem, lastEditedAt}, i) =>
+      ({investigation, problem, content: studentResults[i].content, changeCount: studentResults[i].changeCount,
+        lastEditedAt}))
+    .filter(({investigation, problem, content, changeCount, lastEditedAt}) =>
+      !!investigation && !!problem &&
+      documentHasStudentWork(content) &&
+      documentHasStudentEdits({changeCount, lastEditedAt}))
     .map(({investigation, problem}) => `${investigation}.${problem}`);
   const currentProblemOrdinal = await determineCurrentProblemOrdinal(unit, qualifyingOrdinals);
 

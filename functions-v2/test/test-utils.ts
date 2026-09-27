@@ -232,6 +232,10 @@ export const setupTestDocuments = async (options: {
   investigation?: string;
   problem?: string;
   tiles?: ITileSpec[];
+  // Omitted (not written at all) by default, matching an untouched document: createDocument
+  // never writes this field, only a real content sync does (starting at 1). See
+  // documentHasStudentEdits (update-class-data-docs.ts).
+  changeCount?: number;
 }) => {
   const {
     portal,
@@ -242,6 +246,7 @@ export const setupTestDocuments = async (options: {
     investigation,
     problem,
     tiles = [],
+    changeCount,
   } = options;
   const lastEditedAt = options.lastEditedAt === null ? null : options.lastEditedAt ?? new Date().getDate();
   // Demo realm is the default; callers opt into authed by passing `portal`.
@@ -280,6 +285,7 @@ export const setupTestDocuments = async (options: {
   // parsed content is inspected instead of just re-serialized (documentHasStudentWork, in particular).
   await getDatabase().ref(firebaseDocPath).set({
     content: specDocumentContent(tiles),
+    ...(changeCount !== undefined ? {changeCount} : {}),
   });
 
   return {

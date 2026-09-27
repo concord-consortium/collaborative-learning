@@ -26,6 +26,11 @@ function unitSummaryResult(ordinals: string[]): IUnitSummaryFetchResult {
 }
 
 const kTextTile = (text: string) => ({type: "Text", text});
+// Table counts unconditionally in documentHasStudentWork (no per-instance check), which is
+// exactly why an untouched Table is the sharpest fixture for documentHasStudentEdits: without the
+// edit check, a document holding only this tile would already read as "has student work" the
+// instant it is auto-created from a unit's authored template.
+const kEmptyTableTile = {type: "Table"};
 
 afterAll(async () => {
   await cleanup();
@@ -168,14 +173,55 @@ describe("currentProblemOrdinal", () => {
     expect(await currentProblemOrdinal()).toBe("1.2");
   });
 
-  test("a document with work but no lastEditedAt still counts", async () => {
+  test("a document with work, no lastEditedAt, but a changeCount still counts " +
+      "(still connected, not yet disconnected)", async () => {
     mockGetUnitSummary.mockResolvedValue(unitSummaryResult(["1.1"]));
     await setupTestDocuments({
-      documentId: "connected-doc", investigation: "1", problem: "1", lastEditedAt: null,
+      documentId: "connected-doc", investigation: "1", problem: "1", lastEditedAt: null, changeCount: 1,
       tiles: [kTextTile("still connected, not yet disconnected")],
     });
 
     expect(await currentProblemOrdinal()).toBe("1.1");
+  });
+
+  test("an older record (lastEditedAt set, no changeCount field) still counts", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult(["1.1"]));
+    await setupTestDocuments({
+      // lastEditedAt defaults to a real timestamp; changeCount is deliberately left unset,
+      // matching a document saved before that field existed.
+      documentId: "legacy-doc", investigation: "1", problem: "1", tiles: [kTextTile("student work")],
+    });
+
+    expect(await currentProblemOrdinal()).toBe("1.1");
+  });
+
+  test("an untouched document (an empty Table tile, no changeCount, no lastEditedAt) " +
+      "does not advance the class", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult(["1.1", "1.2"]));
+    await setupTestDocuments({
+      documentId: "worked-doc", investigation: "1", problem: "1", tiles: [kTextTile("student work")],
+    });
+    // Table counts unconditionally in documentHasStudentWork alone -- if documentHasStudentEdits
+    // were not also required, this document's later ordinal (1.2) would incorrectly win.
+    await setupTestDocuments({
+      documentId: "untouched-doc", uid: kOtherUserId, investigation: "1", problem: "2", lastEditedAt: null,
+      tiles: [kEmptyTableTile],
+    });
+
+    expect(await currentProblemOrdinal()).toBe("1.1");
+  });
+
+  test("the same untouched-looking document, once it has a changeCount, does advance the class", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult(["1.1", "1.2"]));
+    await setupTestDocuments({
+      documentId: "worked-doc", investigation: "1", problem: "1", tiles: [kTextTile("student work")],
+    });
+    await setupTestDocuments({
+      documentId: "edited-doc", uid: kOtherUserId, investigation: "1", problem: "2", lastEditedAt: null,
+      changeCount: 1, tiles: [kEmptyTableTile],
+    });
+
+    expect(await currentProblemOrdinal()).toBe("1.2");
   });
 
   test("work in 2.1 and 1.3 resolves to 2.1", async () => {
