@@ -40,7 +40,7 @@ npm run deploy:database:rules    # Deploy realtime database rules
 ## Architecture
 
 ### Technology Stack
-- **React 18** with **TypeScript 4.9**
+- **React 18** with **TypeScript 5.8**
 - **MobX State Tree (MST)** for state management (using Concord's custom fork `@concord-consortium/mobx-state-tree`)
 - **Firebase 8** for realtime database and Firestore
 - **Webpack 5** for bundling with code splitting
