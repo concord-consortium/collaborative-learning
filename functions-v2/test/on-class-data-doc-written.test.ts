@@ -7,7 +7,10 @@ import {getFirestore} from "firebase-admin/firestore";
 import {initialize, projectConfig} from "./initialize";
 import {onClassDataDocWritten} from "../src/on-class-data-doc-written";
 import {getUnitSummary, IUnitSummaryFetchResult} from "../../shared/get-unit-summary";
-import {IUnitSummary, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION} from "../../shared/unit-summary-types";
+import {
+  IUnitSummary, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION,
+} from "../../shared/unit-summary-types";
 
 jest.mock("firebase-functions/logger");
 jest.mock("../../shared/get-unit-summary");
@@ -110,6 +113,8 @@ describe("onClassDataDocWritten", () => {
     expect(mockInvoke).toHaveBeenCalledTimes(2);
     for (const callIndex of [0, 1]) {
       expect(systemMessageOf(callIndex)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+      expect(systemMessageOf(callIndex)).toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
+      expect(systemMessageOf(callIndex)).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
       expect(humanMessageOf(callIndex)).toContain("digest one");
       expect(humanMessageOf(callIndex)).toContain("digest two");
       expect(humanMessageOf(callIndex)).toContain("<curriculum-context>");
@@ -130,11 +135,13 @@ describe("onClassDataDocWritten", () => {
     expect(mockInvoke.mock.calls.length).toBeGreaterThan(1);
     const lastCall = mockInvoke.mock.calls.length - 1;
     expect(systemMessageOf(lastCall)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(systemMessageOf(lastCall)).toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
+    expect(systemMessageOf(lastCall)).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(humanMessageOf(lastCall)).toContain("<curriculum-context>");
     expect(humanMessageOf(lastCall)).toContain("digest one");
   });
 
-  test("no currentProblemOrdinal: instruction is present, but there is no slice", async () => {
+  test("no currentProblemOrdinal: both instructions are present, but there is no slice", async () => {
     mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
 
     await writeAndTrigger({
@@ -144,6 +151,8 @@ describe("onClassDataDocWritten", () => {
     expect(mockGetUnitSummary).not.toHaveBeenCalled();
     expect(mockInvoke).toHaveBeenCalledTimes(1);
     expect(systemMessageOf(0)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(systemMessageOf(0)).toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
+    expect(systemMessageOf(0)).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(humanMessageOf(0)).not.toContain("<curriculum-context>");
   });
 
@@ -170,6 +179,7 @@ describe("onClassDataDocWritten", () => {
       expect(mockInvoke).toHaveBeenCalledTimes(2);
       for (const callIndex of [0, 1]) {
         expect(systemMessageOf(callIndex)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+        expect(systemMessageOf(callIndex)).toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
         expect(humanMessageOf(callIndex)).not.toContain("<curriculum-context>");
       }
     });

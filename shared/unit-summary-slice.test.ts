@@ -1,7 +1,10 @@
-import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, IUnitSummary } from "./unit-summary-types";
+import {
+  IUnitSummary, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "./unit-summary-types";
 import {
   fencedUnitContext, formatUnitSummarySlice, ILiveProblem, IUnitSummarySlice, unitSummarySlice,
-  withLookaheadInstruction,
+  withCurriculumInstructions,
 } from "./unit-summary-slice";
 
 const liveProblems: ILiveProblem[] = [
@@ -226,15 +229,32 @@ describe("formatUnitSummarySlice", () => {
     expect(text).not.toMatch(/nothing recorded/i);
   });
 
-  it("never includes the lookahead instruction text", () => {
+  it("never includes either code-level instruction's text", () => {
     const text = formatUnitSummarySlice(middleSlice);
     expect(text).not.toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(text).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
   });
 });
 
-describe("withLookaheadInstruction", () => {
-  it("prefixes the instruction ahead of the given systemPrompt, separated by a blank line", () => {
-    expect(withLookaheadInstruction("x")).toBe(`${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\nx`);
+describe("withCurriculumInstructions", () => {
+  it("prefixes both instructions ahead of the given systemPrompt, separated by blank lines", () => {
+    expect(withCurriculumInstructions("x", "the student")).toBe(
+      `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION}\n\nx`
+    );
+  });
+
+  it("keeps both instructions when the systemPrompt is empty", () => {
+    expect(withCurriculumInstructions("", "the student")).toBe(
+      `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION}\n\n`
+    );
+  });
+
+  it("uses the class wording for \"the class\", and the same look-ahead instruction", () => {
+    const text = withCurriculumInstructions("x", "the class");
+    expect(text).toBe(
+      `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION_CLASS}\n\nx`
+    );
+    expect(text).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
   });
 });
 

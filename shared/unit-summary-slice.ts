@@ -6,7 +6,10 @@
 // The compatibility check below compares ordinal and title only, not content -- see
 // docs/unit-summary-consumers.md for what that misses.
 import { escapeHtmlText } from "./escape-for-html";
-import { IUnitSummary, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "./unit-summary-types";
+import {
+  IUnitSummary, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "./unit-summary-types";
 
 export interface ILiveProblem {
   ordinal: string;
@@ -77,9 +80,9 @@ export function unitSummarySlice(
 }
 
 /**
- * The prompt text every AI consumer sends for a slice. One place, one wording. Does not
- * include UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION -- each consumer installs that separately, so it is
- * present even on turns where no slice applies.
+ * The prompt text every AI consumer sends for a slice. One place, one wording. Does not include
+ * the code-level instructions -- each consumer installs those separately, so they are present
+ * even on turns where no slice applies.
  */
 export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
   const lines: string[] = [];
@@ -94,11 +97,17 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
 }
 
 /**
- * The code-level instruction prefixed to every system message, unconditionally, so an
- * author-configured systemPrompt cannot omit it. Shared across consumers so they cannot drift.
+ * The code-level instructions prefixed to every system message, unconditionally, so an
+ * author-configured systemPrompt cannot omit them. Shared across consumers so they cannot drift.
+ * The look-ahead instruction is the same for every subject; the approach instruction is worded
+ * for a single student or for a whole class, matching the same subject fencedUnitContext takes.
  */
-export function withLookaheadInstruction(systemPrompt: string): string {
-  return `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${systemPrompt}`;
+export function withCurriculumInstructions(
+  systemPrompt: string, subject: "the student" | "the class"
+): string {
+  const approachInstruction =
+    subject === "the class" ? PROBLEM_APPROACH_INSTRUCTION_CLASS : PROBLEM_APPROACH_INSTRUCTION;
+  return `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${approachInstruction}\n\n${systemPrompt}`;
 }
 
 /**

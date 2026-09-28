@@ -8,7 +8,7 @@ import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {getUnitSummary} from "../../shared/get-unit-summary";
 import {
-  fencedUnitContext, formatUnitSummarySlice, unitSummarySlice, withLookaheadInstruction,
+  fencedUnitContext, formatUnitSummarySlice, unitSummarySlice, withCurriculumInstructions,
 } from "../../shared/unit-summary-slice";
 
 // When the scheduled task updates a document under /aicontent with new class content,
@@ -61,7 +61,7 @@ async function summarizeChunk(
   const capRole = role.charAt(0).toUpperCase() + role.slice(1);
   const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
   const messages = [
-    new SystemMessage(withLookaheadInstruction(systemPrompt)),
+    new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
     new HumanMessage(`${contextPrefix}${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
      ${chunk}\n
      ${role === "teacher" ? summarizeTeacherContentPrompt : summarizeStudentContentPrompt}`),
@@ -88,7 +88,7 @@ async function combineSummaries(
   const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
 
   const messages = [
-    new SystemMessage(withLookaheadInstruction(systemPrompt)),
+    new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
     new HumanMessage(contextPrefix +
       combineSummariesPrompt +
       summariesText +
@@ -135,8 +135,8 @@ export const onClassDataDocWritten = onDocumentWritten(
 
       // Fail closed: any doubt (no currentProblemOrdinal, no fetched summary, no slice for this
       // ordinal) leaves unitContext undefined, and every call below still runs -- just without
-      // curriculum context. The instruction itself is unconditional (withLookaheadInstruction), so
-      // its absence never depends on this succeeding.
+      // curriculum context. The instructions themselves are unconditional
+      // (withCurriculumInstructions), so their absence never depends on this succeeding.
       let unitContext: string | undefined;
       if (content.currentProblemOrdinal) {
         try {

@@ -207,3 +207,32 @@ export const UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION =
   "Do not reference or rely on information from any curriculum problem more than one problem " +
   "ahead of the student's current problem. You may use earlier problems, the student's current " +
   "problem, and the next problem; treat anything further ahead as unknown.";
+
+// -- Problem-approach instruction text --
+
+// Shared wording, installed alongside the look-ahead instruction everywhere: follow the way the
+// current problem asks students to work, and never suggest the opposite. It applies to every unit,
+// including units with no aiUnitSummary, because it needs no summary to be useful.
+export const PROBLEM_APPROACH_INSTRUCTION =
+  "Follow the way the student's current problem asks them to work, and never suggest the " +
+  "opposite. If the problem asks students to try many different ideas, do not push them to " +
+  "settle on one. If it asks them to choose one idea and develop it, do not suggest starting " +
+  "over or trying many alternatives; help them improve the one they chose. A problem can change " +
+  "approach between its parts -- for example, brainstorming first and then choosing one idea to " +
+  "build. Follow the part the student is working on, and support a change of approach when the " +
+  "problem itself asks for it. If you cannot tell which part the student is working on, do not " +
+  "push them either way: respond to what they are doing, or ask which part they are on. Do not " +
+  "contradict the problem's instructions.";
+
+// Teacher Summary describes a whole class's work to a teacher rather than talking to one student,
+// so "the student's current problem" does not fit. Its output is forwarded into the AI Tile's
+// prompt, so it still must not push the opposite approach.
+export const PROBLEM_APPROACH_INSTRUCTION_CLASS =
+  "Follow the way the class's current problem asks students to work, and never suggest the " +
+  "opposite. If the problem asks students to try many different ideas, do not push them to " +
+  "settle on one. If it asks them to choose one idea and develop it, do not suggest starting " +
+  "over or trying many alternatives. A problem can change approach between its parts -- for " +
+  "example, brainstorming first and then choosing one idea to build. Follow the part the " +
+  "students' work shows they are on, and do not recommend a direction that part does not ask " +
+  "for. If you cannot tell, do not push the class either way. Do not contradict the problem's " +
+  "instructions.";

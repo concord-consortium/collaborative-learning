@@ -1,7 +1,9 @@
 import { ChatStatus, ChatTransport, ChatTurn, DebugSegment } from "./transport";
 import { decideContext, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
-import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "../../../shared/unit-summary-types";
+import {
+  PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "../../../shared/unit-summary-types";
 
 export interface DebugTransportOptions {
   // LEFT problem JSON; undefined until the problem's sections have loaded.
@@ -81,12 +83,14 @@ export class DebugTransport implements ChatTransport {
       ].join("\n") },
       ...genericSegments,
       ...appendSegments,
-      // Unlike the generic prompt, this constant lives in shared/ and is bundled client-side, so
-      // it is shown verbatim rather than as a placeholder. Installed unconditionally on the first
-      // message, same as the generic prompt -- present even when LEFT is empty this turn and even
-      // when the unit has no aiUnitSummary at all.
+      // Unlike the generic prompt, these constants live in shared/ and are bundled client-side, so
+      // they are shown verbatim rather than as placeholders. Installed unconditionally on the
+      // first message, same as the generic prompt -- present even when LEFT is empty this turn and
+      // even when the unit has no aiUnitSummary at all.
       { kind: "note", text: "── no-look-ahead instruction · installed with the generic prompt ──" },
       { kind: "payload", text: UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION },
+      { kind: "note", text: "── problem-approach instruction · installed with the generic prompt ──" },
+      { kind: "payload", text: PROBLEM_APPROACH_INSTRUCTION },
       { kind: "note", text: "── LEFT · the problem (JSON, sent once on the first message) ──" },
       left !== undefined
         ? { kind: "payload" as const, text: left }
@@ -144,10 +148,12 @@ export class DebugTransport implements ChatTransport {
       { kind: "note", text: "Your message would be written as a `user` doc with these context payloads:" },
     ];
     // Installed unconditionally on the same turn LEFT is attempted -- present whether or not LEFT
-    // itself is available yet this turn.
+    // itself is available yet this turn. Both instructions go together, as they do in production.
     if (decision.attachLeft) {
       segments.push({ kind: "note", text: "── no-look-ahead instruction attached ──" });
       segments.push({ kind: "payload", text: UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION });
+      segments.push({ kind: "note", text: "── problem-approach instruction attached ──" });
+      segments.push({ kind: "payload", text: PROBLEM_APPROACH_INSTRUCTION });
     }
     if (!decision.attachLeft) {
       segments.push({ kind: "note", text: "── LEFT not attached (already installed) ──" });
