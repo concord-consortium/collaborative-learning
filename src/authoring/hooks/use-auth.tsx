@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import firebase from "firebase/app";
 import "firebase/auth";
 
+import { isCCEmail } from "../../../shared/cc-email";
 import { initializeApp } from "../../lib/firebase-config";
 
 export interface Auth {
@@ -29,6 +30,8 @@ const fakeAuthUser = {
 } as unknown as firebase.User;
 const fakeFirebaseToken = "fakeFirebaseToken";
 const fakeGitHubToken = "fakeGitHubToken";
+
+export const isAdminEmail = (email: string): boolean => isCCEmail(email) || email === fakeAuthUser.email;
 
 const AuthContext = createContext<Auth | undefined>(undefined);
 
@@ -153,11 +156,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   };
 
   const isAdminUser = useMemo(() => {
-    if (!user?.email) return false;
-    const otherCCEmailAddresses = ["doug@zoopdoop.com", "lbond@alum.mit.edu"];
-    return user.email.endsWith("@concord.org")
-      || user.email === fakeAuthUser.email
-      || otherCCEmailAddresses.includes(user.email);
+    return !!user?.email && isAdminEmail(user.email);
   }, [user?.email]);
 
   const value: Auth = {

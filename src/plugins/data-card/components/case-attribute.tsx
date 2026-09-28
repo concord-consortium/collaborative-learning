@@ -7,6 +7,7 @@ import { uniq } from "lodash";
 import { VisuallyHidden } from "@chakra-ui/react";
 import classNames from "classnames";
 import { gImageMap } from "../../../models/image-map";
+import { useLazyImage } from "../../../hooks/use-lazy-image";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultName, EditFacet,
@@ -78,7 +79,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueStr = getValue();
   const [nameCandidate, setNameCandidate] = useState(() => getName());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
-  const [imageUrl, setImageUrl] = useState("");
+  const { ref: imageRef, displayUrl: imageUrl } = useLazyImage(valueStr);
   const [inputItems, setInputItems] = useState<string[]>([]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
   const editingName = currEditFacet === "name" && currEditAttrId === attrKey;
@@ -164,21 +165,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setValueCandidate(valueStr);
     setInputValue(valueStr);
   }, [setInputValue, valueStr]);
-
-  // Keyed on the value, not run per render: a state update from the render body schedules
-  // another render, and React renders once more before bailing out on an unchanged value, so
-  // the component never settles and the tab locks up.
-  useEffect(() => {
-    if (!gImageMap.isImageUrl(valueStr)) {
-      setImageUrl("");
-      return;
-    }
-    let cancelled = false;
-    gImageMap.getImage(valueStr).then(image => {
-      if (!cancelled) setImageUrl(image.displayUrl || "");
-    });
-    return () => { cancelled = true; };
-  }, [valueStr]);
 
   const handleNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     editingName && setNameCandidate(event.target.value);
@@ -383,7 +369,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      <div className={valueAreaClasses} onClick={handleValueClick}>
+      <div className={valueAreaClasses} onClick={handleValueClick} ref={imageRef}>
         <VisuallyHidden>
           <label {...getLabelProps()} className="">
             Value for {nameCandidate}

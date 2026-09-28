@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { useIsLinked } from "../use-is-linked";
 import { gImageMap } from "../../../models/image-map";
+import { useLazyImage } from "../../../hooks/use-lazy-image";
 import { IAttribute } from "../../../models/data/attribute";
 
 interface IProps {
@@ -20,25 +21,10 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
   const cell = { attributeId: attr.id, caseId };
   const isLinked = useIsLinked();
   const isImage = gImageMap.isImageUrl(value);
-  const [imageUrl, setImageUrl] = useState("");
+  const { ref: imageRef, displayUrl: imageUrl } = useLazyImage(value);
 
   const attributeHighlighted = dataSet.isAttributeSelected(attr.id);
   const caseHighlighted = dataSet.isCaseSelected(caseId);
-
-  // Same trap as CaseAttribute: resolving from the render body schedules a state update every
-  // render, and React renders once more before bailing out on an unchanged value, so the
-  // component never settles. Key it on the value instead.
-  useEffect(() => {
-    if (!isImage) {
-      setImageUrl("");
-      return;
-    }
-    let cancelled = false;
-    gImageMap.getImage(value).then(image => {
-      if (!cancelled) setImageUrl(image.displayUrl || "");
-    });
-    return () => { cancelled = true; };
-  }, [isImage, value]);
 
   function handleAttributeClick() {
     dataSet.setSelectedAttributes([attr.id]);
@@ -74,7 +60,7 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
       <div className={attributeClassNames} onClick={handleAttributeClick}>
         {truncatedForSortView(attr.name)}
       </div>
-      <div className={valueClassNames} onClick={handleValueClick}>
+      <div className={valueClassNames} onClick={handleValueClick} ref={imageRef}>
         { !isImage && truncatedForSortView(value) }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>

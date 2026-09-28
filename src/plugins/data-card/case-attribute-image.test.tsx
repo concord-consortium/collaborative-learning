@@ -44,9 +44,9 @@ function renderImageAttribute() {
 describe("CaseAttribute image lookup", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  // Resolving the image from the render body schedules a state update on every render, and
-  // React renders once more before bailing out on an unchanged value — so the component spins
-  // forever. The lookup has to be keyed on the value, not run per render.
+  // The lookup is keyed on the value. One that ran per render would schedule a state update
+  // each time, and React renders once more before bailing out on an unchanged value, so the
+  // component would never settle.
   it("looks the image up once, not once per render", async () => {
     const getImage = jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry());
 

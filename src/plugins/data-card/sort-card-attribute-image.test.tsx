@@ -30,8 +30,8 @@ function renderSortedImageAttribute() {
 describe("SortCardAttribute image lookup", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  // The sort view renders every case at once, so a per-render lookup here is the same
-  // tab-locking loop CaseAttribute had, multiplied by the number of cards on screen.
+  // The sort view renders every case at once, so a lookup keyed on render rather than on the
+  // value would spin once per card on screen.
   it("looks the image up once, not once per render", async () => {
     const getImage = jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry());
 

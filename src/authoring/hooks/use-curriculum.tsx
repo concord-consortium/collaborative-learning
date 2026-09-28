@@ -32,6 +32,11 @@ export type CurriculumContextValue = {
   setUnit: (newUnit?: string, updateHash?: boolean) => void;
   unitConfig: IUnit | undefined;
   setUnitConfig: Updater<IUnit | undefined>;
+  // True until unitConfig has been confirmed to belong to the current unit -- unitConfig itself
+  // still shows the previous unit's value until the fetch resolves. Derived during render, not via
+  // an effect: an effect here would run after a freshly-mounted consumer's own effects (children
+  // run before ancestors), too late if unit and panel change together in one navigation.
+  unitConfigLoading: boolean;
   teacherGuideConfig: IUnit | undefined;
   setTeacherGuideConfig: Updater<IUnit | undefined>;
   error: string | undefined;
@@ -60,10 +65,15 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
   const [unit, _setUnit] = useImmer<string | undefined>(undefined);
   const [path, setPath] = useImmer<string | undefined>(undefined);
   const [unitConfig, _setUnitConfig] = useImmer<IUnit | undefined>(undefined);
+  // Which unit unitConfig was actually fetched for, set alongside _setUnitConfig either way --
+  // unitConfigLoading below derives from comparing this to the current unit.
+  const [unitConfigUnit, setUnitConfigUnit] = useImmer<string | undefined>(undefined);
   const [teacherGuideConfig, _setTeacherGuideConfig] = useImmer<IUnit | undefined>(undefined);
   const [files, setFiles] = useImmer<IUnitFiles | undefined>(undefined);
   const [error, setError] = useImmer<string | undefined>(undefined);
-  const lastUnitRef = useRef<string | undefined>(undefined);
+  // Set to `${branch}/${unit}` the instant a fetch for that pair starts, so a stale response can
+  // tell it's stale even when the unit name alone matches a later fetch for a different branch.
+  const lastFetchKeyRef = useRef<string | undefined>(undefined);
   const filesRef = useRef<firebase.database.Reference | undefined>(undefined);
   const [saveState, setSaveState] = useImmer<SaveState | undefined>(undefined);
   const [branchMetadata, setBranchMetadata] = useImmer<BranchMetadata>({});
@@ -77,8 +87,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     _setBranch(undefined);
     _setUnit(undefined);
     _setUnitConfig(undefined);
-    lastUnitRef.current = undefined;
-  }, [_setBranch, _setUnit, setError, _setUnitConfig]);
+    setUnitConfigUnit(undefined);
+    lastFetchKeyRef.current = undefined;
+  }, [_setBranch, _setUnit, setError, _setUnitConfig, setUnitConfigUnit]);
 
   // externally when setUnitConfig is called, we want to update the state
   // and also call the api to save the changes
@@ -183,8 +194,9 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     };
 
     // prevent unnecessary fetches
-    if (branch && unit && (!lastUnitRef.current || lastUnitRef.current !== unit)) {
-      lastUnitRef.current = unit;
+    const fetchKey = `${branch}/${unit}`;
+    if (branch && unit && lastFetchKeyRef.current !== fetchKey) {
+      lastFetchKeyRef.current = fetchKey;
 
       // Setup a Firebase listener for the unit file metadata changes so that we get real-time updates.
       // We only do direct reads - writes to unit file metadata changes go through the API.
@@ -198,22 +210,30 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
       api
         .get("/getContent", { branch, unit, path: "content.json" })
         .then((contentResponse) => {
+          // lastFetchKeyRef has moved on to a different branch/unit pair -- this response is stale,
+          // ignore it rather than overwrite the newer pair's already-correct state.
+          if (lastFetchKeyRef.current !== fetchKey) return;
           if (!contentResponse.success) {
             setError(contentResponse.error);
             _setUnitConfig(undefined);
+            setUnitConfigUnit(unit);
             return;
           }
           _setUnitConfig(contentResponse.content);
+          setUnitConfigUnit(unit);
         })
         .catch((err) => {
+          if (lastFetchKeyRef.current !== fetchKey) return;
           setError(err.message);
           _setUnitConfig(undefined);
+          setUnitConfigUnit(unit);
         });
 
       // maybe fetch teacher guide content (it might not exist so we don't treat failure as an error)
       api
         .get("/getContent", { branch, unit, path: "teacher-guide/content.json" })
         .then((contentResponse) => {
+          if (lastFetchKeyRef.current !== fetchKey) return;
           if (!contentResponse.success) {
             _setTeacherGuideConfig(undefined);
             return;
@@ -221,6 +241,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
           _setTeacherGuideConfig(contentResponse.content);
         })
         .catch(() => {
+          if (lastFetchKeyRef.current !== fetchKey) return;
           _setTeacherGuideConfig(undefined);
         });
     }
@@ -228,7 +249,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     // Note: we don't have a cleanup function to turn off the listener
     // because we want to keep listening for changes until branch or unit changes.
     // The filesRef.current?.off() above is what turns off the previous listener.
-  }, [api, branch, setError, setFiles, _setUnitConfig, _setTeacherGuideConfig, unit]);
+  }, [api, branch, setError, setFiles, _setUnitConfig, setUnitConfigUnit, _setTeacherGuideConfig, unit]);
 
   const saveContent = useCallback(async (contentPath: string, updatedContent: any) => {
     if (!branch || !unit) {
@@ -296,6 +317,8 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     setExemplarFiles(newExemplarFiles);
   }, [files, setExemplarFiles]);
 
+  const unitConfigLoading = !!unit && unit !== unitConfigUnit;
+
   const value: CurriculumContextValue = {
     branch,
     setBranch,
@@ -303,6 +326,7 @@ export const CurriculumProvider: React.FC<{children: React.ReactNode}> = ({ chil
     setUnit,
     unitConfig,
     setUnitConfig,
+    unitConfigLoading,
     teacherGuideConfig,
     setTeacherGuideConfig,
     error,

@@ -16,7 +16,7 @@
 
 import fs from "fs";
 import path from "path";
-import { summarizeCurriculum } from "./ai-summarizer";
+import { normalizeCurriculumDataSets, summarizeCurriculum } from "./ai-summarizer";
 
 // Allow passing a file path as a CLI argument.
 const argPath = process.argv[2];
@@ -31,5 +31,9 @@ if (!fs.existsSync(resolvedFile)) {
 const fileContent = fs.readFileSync(resolvedFile, "utf8");
 const fileData = JSON.parse(fileContent);
 
+// Mirrors how the unit-summary assembler calls summarizeCurriculum: shared data sets built from
+// this section's own sharedModels, and image tiles named rather than dropped.
+const dataSets = normalizeCurriculumDataSets(fileData.content?.sharedModels);
+
 console.log(`*** Summarizing Curriculum Document: ${resolvedFile} ***`);
-console.log(summarizeCurriculum(fileData.content));
+console.log(summarizeCurriculum(fileData.content, dataSets, 1, undefined, { imageFilenames: true }));
