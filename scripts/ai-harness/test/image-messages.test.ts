@@ -6,6 +6,7 @@ import { dataUrlFor } from "../src/represent-image.js";
 import {
   buildImageMessages, buildMixedMessages, defaultAiPrompt
 } from "../../../shared/ai-analysis-messages.js";
+import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "../../../shared/unit-summary-types.js";
 import { makeImageRequest, makeTestPng, promptFromFile, testPricing } from "./helpers.js";
 
 const bytes = makeTestPng(960, 1420);
@@ -41,7 +42,10 @@ describe("image requests are built by the shared production builder", () => {
 
   it("sends the system prompt and the main prompt production sends", () => {
     const messages = build(hostedUrl).apiRequest.messages;
-    expect(messages[0]).toEqual({ role: "system", content: defaultAiPrompt.systemPrompt });
+    expect(messages[0]).toEqual({
+      role: "system",
+      content: `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${defaultAiPrompt.systemPrompt}`
+    });
     expect((messages[1].content as any[])[0]).toEqual({ type: "text", text: defaultAiPrompt.mainPrompt });
   });
 
@@ -264,6 +268,10 @@ describe("a run configured the way it was before these dimensions existed keeps 
   // requests there — so they pin the key against what actually shipped rather than against whatever
   // this branch happens to produce.
   //
+  // UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION is prepended unconditionally to every system message and
+  // is part of every request key exactly as the prompt is, so the two pinned values below reflect
+  // that, the same way they reflect a reworded built-in prompt.
+  //
   // The prompt comes from the committed file rather than from `defaultAiPrompt`, which is the
   // built-in one and has since been reworded. A prompt is part of every request key, so a reworded
   // built-in moves these keys legitimately and would leave the pins measuring nothing.
@@ -276,13 +284,13 @@ describe("a run configured the way it was before these dimensions existed keeps 
       generationSettings: { max_completion_tokens: 1024 }
     });
     expect(requestKeyFor(request))
-      .toBe("997fbcf6dd3b2481da739b499d5094109a5e66fbf69700d96415e7067585f7af");
+      .toBe("5ee12654ed366f4519b5ada4ac709d0f41d2e8aac0aa50310bf28fd4d49e3adf");
   });
 
   it("an image-only request's key does not move", () => {
     const request = build("https://images.example.test/shot.png",
       { aiPrompt: promptFromFile("categorize-design-default") });
     expect(requestKeyFor(request))
-      .toBe("cf5465f23060eb90c645bd14edb5695404905ffb7c29681562f87a65cafbeb88");
+      .toBe("1c2d487e8c5fa4172a3c0cbd796acd095ea6afdbc5455daf56ffa5ae71b5c284");
   });
 });

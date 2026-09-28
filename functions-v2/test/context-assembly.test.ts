@@ -1,6 +1,7 @@
 import {
   assembleTurnContext, buildRightEnvelope, effectiveGenericText, isEmptyLeft,
 } from "../src/chat/context-assembly";
+import {UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION} from "../../shared/unit-summary-types";
 
 const genericText = "generic tutor prompt";
 const left = JSON.stringify({sections: [{type: "introduction", content: {tiles: []}}]});
@@ -43,46 +44,68 @@ describe("effectiveGenericText", () => {
 });
 
 describe("assembleTurnContext", () => {
-  it("first turn installs generic prompt + LEFT and marks the flag", () => {
+  it("first turn installs generic prompt + instruction + LEFT and marks the flag", () => {
     const turn = assembleTurnContext({
       genericText, problemInstalled: false, parentSeq: undefined,
       message: {text: "hi", leftContext: left},
     });
-    expect(turn.installItems).toHaveLength(2);
+    expect(turn.installItems).toHaveLength(3);
     expect(turn.installItems[0]).toBe(genericText);
-    expect(turn.installItems[1]).toContain(left);
+    expect(turn.installItems[1]).toBe(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(turn.installItems[2]).toContain(left);
     expect(turn.markProblemInstalled).toBe(true);
     expect(turn.input).toEqual([{role: "user", content: "hi"}]);
   });
 
-  it("an empty LEFT installs the generic prompt only and leaves the flag unset", () => {
+  it("an empty LEFT installs the generic prompt and the instruction, and leaves the flag unset", () => {
     const turn = assembleTurnContext({
       genericText, problemInstalled: false, parentSeq: undefined,
       message: {text: "hi", leftContext: JSON.stringify({sections: []})},
     });
-    expect(turn.installItems).toEqual([genericText]);
+    expect(turn.installItems).toEqual([genericText, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION]);
     expect(turn.markProblemInstalled).toBe(false);
   });
 
-  it("installs the replaced/appended generic text when overrides ride the first message", () => {
+  it("installs the replaced/appended generic text when overrides ride the first message, and the " +
+    "instruction still installs as its own item", () => {
     const turn = assembleTurnContext({
       genericText, problemInstalled: false, parentSeq: undefined,
       message: {text: "hi", leftContext: left, promptReplace: "You are a tutor.", promptAppend: "Be brief."},
     });
     expect(turn.installItems[0]).toBe("You are a tutor.\n\nBe brief.");
+    expect(turn.installItems[1]).toBe(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
     expect(turn.markProblemInstalled).toBe(true);
   });
 
-  it("an empty LEFT with a replacement installs exactly the replaced text, flag unset", () => {
+  it("an empty LEFT with a replacement installs the replaced text and the instruction, flag unset", () => {
     const turn = assembleTurnContext({
       genericText, problemInstalled: false, parentSeq: undefined,
       message: {text: "hi", leftContext: JSON.stringify({sections: []}), promptReplace: "You are a tutor."},
     });
-    expect(turn.installItems).toEqual(["You are a tutor."]);
+    expect(turn.installItems).toEqual(["You are a tutor.", UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION]);
     expect(turn.markProblemInstalled).toBe(false);
   });
 
-  it("later turns skip the install entirely", () => {
+  it("with no unitContext, the instruction installs but no THE UNIT item does", () => {
+    const turn = assembleTurnContext({
+      genericText, problemInstalled: false, parentSeq: undefined,
+      message: {text: "hi", leftContext: left},
+    });
+    expect(turn.installItems).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(turn.installItems.some((item) => item.startsWith("THE UNIT"))).toBe(false);
+  });
+
+  it("with unitContext present, both the instruction and THE UNIT install", () => {
+    const turn = assembleTurnContext({
+      genericText, problemInstalled: false, parentSeq: undefined,
+      message: {text: "hi", leftContext: left, unitContext: "prior knowledge and digests"},
+    });
+    expect(turn.installItems).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    const unitItem = turn.installItems.find((item) => item.startsWith("THE UNIT"));
+    expect(unitItem).toContain("prior knowledge and digests");
+  });
+
+  it("later turns skip the install entirely, including the instruction", () => {
     const turn = assembleTurnContext({
       genericText, problemInstalled: true, parentSeq: 3,
       message: {text: "hi", leftContext: left},

@@ -3,6 +3,9 @@ import {
   Agreements, IAiPrompt, PeerComment, RelatedSummary, buildImageMessages, buildMixedMessages,
   buildSummaryMessages, buildZodResponseSchema, defaultAiPrompt
 } from "./ai-analysis-messages";
+import { fencedUnitContext, withLookaheadInstruction } from "./unit-summary-slice";
+
+const kSystemMessage = withLookaheadInstruction("You are a master teacher.");
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -74,7 +77,7 @@ describe("ai-analysis-messages", () => {
       expect(buildImageMessages(fullPrompt, "https://example.com/image.png")).toEqual([
         {
           role: "system",
-          content: "You are a master teacher."
+          content: kSystemMessage
         },
         {
           role: "user",
@@ -101,7 +104,7 @@ describe("ai-analysis-messages", () => {
       expect(buildSummaryMessages(fullPrompt, "The student drew a box.", [])).toEqual([
         {
           role: "system",
-          content: "You are a master teacher."
+          content: kSystemMessage
         },
         {
           role: "user",
@@ -400,10 +403,11 @@ describe("ai-analysis-messages", () => {
 
   describe("buildImageMessages with the new optional arguments", () => {
     it("sends the same message for a bare URL as it did before they existed", () => {
-      // The production call site passes two arguments and nothing else. Its message has to be what
-      // it always was, or every cached analysis is invalidated for no reason.
+      // The production call site passes two arguments and nothing else. Its user message has to be
+      // what it always was, or every cached analysis is invalidated for no reason -- the system
+      // message differs only by the unconditional instruction every caller now gets.
       expect(buildImageMessages(fullPrompt, "https://example.com/image.png")).toEqual([
-        { role: "system", content: "You are a master teacher." },
+        { role: "system", content: kSystemMessage },
         {
           role: "user",
           content: [
@@ -493,6 +497,86 @@ describe("ai-analysis-messages", () => {
         "Evaluate and categorize this.",
         "This is the AI generated summary:\nA summary."
       ]);
+    });
+  });
+
+  // Every builder: the instruction is present whether or not unitContext is given (it's
+  // unconditional, code-level), and when unitContext is given it's the last part -- fenced, after
+  // whatever student content (summary, images) the message already carries.
+  describe("unitContext", () => {
+    const unitContext = "This problem (1.1): digest one.";
+
+    it("buildImageMessages: no unitContext given, no curriculum-context part", () => {
+      const messages = buildImageMessages(fullPrompt, "https://example.com/image.png");
+      expect(messages[0].content).toBe(kSystemMessage);
+      const content = messages[1].content as any[];
+      expect(content.some((part: any) => part.text?.includes("<curriculum-context>"))).toBe(false);
+    });
+
+    it("buildImageMessages: unitContext given, fenced after the image parts", () => {
+      const messages = buildImageMessages(fullPrompt, "https://example.com/image.png", {}, unitContext);
+      expect(messages[0].content).toBe(kSystemMessage);
+      const content = messages[1].content as any[];
+      expect(content[content.length - 2].type).toBe("image_url");
+      expect(content[content.length - 1]).toEqual({
+        type: "text",
+        text: fencedUnitContext(unitContext, "the student")
+      });
+    });
+
+    it("buildSummaryMessages: no unitContext given, no curriculum-context part", () => {
+      const messages = buildSummaryMessages(fullPrompt, "The student drew a box.", []);
+      expect(messages[0].content).toBe(kSystemMessage);
+      const content = messages[1].content as any[];
+      expect(content.some((part: any) => part.text?.includes("<curriculum-context>"))).toBe(false);
+    });
+
+    it("buildSummaryMessages: unitContext given, fenced after the summary", () => {
+      const messages = buildSummaryMessages(fullPrompt, "The student drew a box.", [], unitContext);
+      expect(messages[0].content).toBe(kSystemMessage);
+      const content = messages[1].content as any[];
+      expect(content[content.length - 2].text).toContain("The student drew a box.");
+      expect(content[content.length - 1]).toEqual({
+        type: "text",
+        text: fencedUnitContext(unitContext, "the student")
+      });
+    });
+
+    it("buildMixedMessages: no unitContext given, no curriculum-context part", () => {
+      const messages = buildMixedMessages(
+        fullPrompt, "The student drew a box.", [], "https://example.com/doc.png");
+      expect(messages[0].content).toBe(kSystemMessage);
+      const content = messages[1].content as any[];
+      expect(content.some((part: any) => part.text?.includes("<curriculum-context>"))).toBe(false);
+    });
+
+    it("buildMixedMessages: unitContext given, fenced after both the summary and the images", () => {
+      const messages = buildMixedMessages(
+        fullPrompt, "The student drew a box.", [], "https://example.com/doc.png", {}, unitContext);
+      expect(messages[0].content).toBe(kSystemMessage);
+      const content = messages[1].content as any[];
+      expect(content[content.length - 2].type).toBe("image_url");
+      expect(content[content.length - 1]).toEqual({
+        type: "text",
+        text: fencedUnitContext(unitContext, "the student")
+      });
+    });
+
+    it("escapes <, >, and & in the unitContext text, for every builder", () => {
+      const unsafeContext = "x < y & z > w";
+      const escaped = "x &lt; y &amp; z &gt; w";
+
+      const image = buildImageMessages(fullPrompt, "https://example.com/image.png", {}, unsafeContext);
+      const summary = buildSummaryMessages(fullPrompt, "The student drew a box.", [], unsafeContext);
+      const mixed = buildMixedMessages(
+        fullPrompt, "The student drew a box.", [], "https://example.com/doc.png", {}, unsafeContext);
+
+      for (const messages of [image, summary, mixed]) {
+        const content = messages[1].content as any[];
+        const fenced = content[content.length - 1].text as string;
+        expect(fenced).toContain(escaped);
+        expect(fenced).not.toContain(unsafeContext);
+      }
     });
   });
 

@@ -5,6 +5,8 @@ emulator-data/*
 # Compiled JavaScript files
 lib/**/*.js
 lib/**/*.js.map
+# resolveJsonModule copies an imported .json file's source into lib/ too, at the same relative path
+lib/**/*.json
 
 # TypeScript v1 declaration files
 typings/

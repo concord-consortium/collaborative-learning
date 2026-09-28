@@ -6,6 +6,10 @@ import {defineSecret} from "firebase-functions/params";
 import {MarkdownTextSplitter} from "@langchain/textsplitters";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
+import {getUnitSummary} from "../../shared/get-unit-summary";
+import {
+  fencedUnitContext, formatUnitSummarySlice, unitSummarySlice, withLookaheadInstruction,
+} from "../../shared/unit-summary-slice";
 
 // When the scheduled task updates a document under /aicontent with new class content,
 // this function will use an LLM to summarize the content.
@@ -35,6 +39,11 @@ const summarizeTeacherContentPrompt =
   "in and any important themes and topics that will help with providing relevant examples later. " +
   "Do not describe the structure of the documents, just the content.\n" +
   "Summary:";
+
+function unitContextSection(unitContext: string): string {
+  return fencedUnitContext(unitContext, "the class");
+}
+
 interface SummarizeResult {
   chunkIndex: number;
   summary: string;
@@ -46,12 +55,14 @@ async function summarizeChunk(
   chunk: string,
   chunkIndex: number,
   totalChunks: number,
-  role: "student" | "teacher"
+  role: "student" | "teacher",
+  unitContext: string | undefined
 ): Promise<SummarizeResult> {
   const capRole = role.charAt(0).toUpperCase() + role.slice(1);
+  const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
   const messages = [
-    new SystemMessage(systemPrompt),
-    new HumanMessage(`${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
+    new SystemMessage(withLookaheadInstruction(systemPrompt)),
+    new HumanMessage(`${contextPrefix}${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
      ${chunk}\n
      ${role === "teacher" ? summarizeTeacherContentPrompt : summarizeStudentContentPrompt}`),
   ];
@@ -68,15 +79,18 @@ async function summarizeChunk(
 
 async function combineSummaries(
   openai: ChatOpenAI,
-  chunkSummaries: SummarizeResult[]
+  chunkSummaries: SummarizeResult[],
+  unitContext: string | undefined
 ): Promise<SummarizeResult> {
   const summariesText = chunkSummaries
     .map((cs, index) => `## Section ${index + 1}:\n\n${cs.summary}`)
     .join("\n\n");
+  const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
 
   const messages = [
-    new SystemMessage(systemPrompt),
-    new HumanMessage(combineSummariesPrompt +
+    new SystemMessage(withLookaheadInstruction(systemPrompt)),
+    new HumanMessage(contextPrefix +
+      combineSummariesPrompt +
       summariesText +
       "\n\nSummary:"),
   ];
@@ -119,21 +133,40 @@ export const onClassDataDocWritten = onDocumentWritten(
         apiKey: openaiApiKey.value(),
       });
 
+      // Fail closed: any doubt (no currentProblemOrdinal, no fetched summary, no slice for this
+      // ordinal) leaves unitContext undefined, and every call below still runs -- just without
+      // curriculum context. The instruction itself is unconditional (withLookaheadInstruction), so
+      // its absence never depends on this succeeding.
+      let unitContext: string | undefined;
+      if (content.currentProblemOrdinal) {
+        try {
+          const unitSummaryResult = await getUnitSummary(event.params.unit);
+          if (unitSummaryResult) {
+            const slice = unitSummarySlice(
+              unitSummaryResult.summary, unitSummaryResult.liveProblems, content.currentProblemOrdinal
+            );
+            unitContext = slice && formatUnitSummarySlice(slice);
+          }
+        } catch (error) {
+          logger.warn("unit summary unavailable, continuing without it", error);
+        }
+      }
+
       const splitter = new MarkdownTextSplitter({chunkSize, chunkOverlap: 0});
       const chunks = await splitter.splitText(content.studentContent);
       const studentSummaries = await Promise.all(chunks.map(
-        (chunk, index) => summarizeChunk(openai, chunk, index, chunks.length, "student")));
+        (chunk, index) => summarizeChunk(openai, chunk, index, chunks.length, "student", unitContext)));
 
       let studentSummary: SummarizeResult;
       if (studentSummaries.length > 1) {
-        studentSummary = await combineSummaries(openai, studentSummaries);
+        studentSummary = await combineSummaries(openai, studentSummaries, unitContext);
       } else {
         studentSummary = studentSummaries[0];
       }
 
       let teacherSummary: SummarizeResult;
       if (content.teacherContent && !content.teacherSummary) {
-        teacherSummary = await summarizeChunk(openai, content.teacherContent, 0, 1, "teacher");
+        teacherSummary = await summarizeChunk(openai, content.teacherContent, 0, 1, "teacher", unitContext);
       } else {
         teacherSummary = {
           chunkIndex: 0,

@@ -1,7 +1,7 @@
 import { ModelListEntry } from "../../../shared/seismic/models/model-metadata";
 import { StationConfig } from "../../../shared/seismic/seismic-types";
 import appConfig from "../../clue/app-config.json";
-import curriculumConfigJson from "../../clue/curriculum-config.json";
+import curriculumConfigJson from "../../../shared/curriculum-config.json";
 import { getUnitJson } from "../../models/curriculum/unit-utils";
 import { CurriculumConfig } from "../../models/stores/curriculum-config";
 import { urlParams } from "../../utilities/url-params";

@@ -60,6 +60,23 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
+    // unitContext is optional (most units have no aiUnitSummary authored, or the current problem
+    // fails the live-structure check) and, when present, must be the formatted slice text -- never
+    // the raw summary object.
+    it("allows an optional unitContext payload", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToSucceed(db, kMessagePath, specMessage({
+        add: { unitContext: "This problem (1.1): covers introductions." }
+      }));
+    });
+
+    it("rejects a unitContext that is not a string", async () => {
+      db = initFirestore(learnerAuth);
+      await expectWriteToFail(db, kMessagePath, specMessage({
+        add: { unitContext: { currentDigest: "covers introductions." } }
+      }));
+    });
+
     // The ForeverLearning backend projects the document server-side, so its messages carry the
     // document itself rather than a summary of it. The whitelist is a hasOnly, so a field the
     // client sends and the rules have not been told about fails the write outright.
@@ -288,6 +305,21 @@ describe("Firestore security rules: chat tutor", () => {
       db = initFirestore(genericAuth);
       await expectWriteToFail(db, kDemoMessage, demoMessage({
         add: { rightContent: { rowOrder: [] } }
+      }));
+    });
+
+    // Same optional-string field and accept/reject pair as the authed block above.
+    it("allows a unitContext payload under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-unit-context`, demoMessage({
+        add: { unitContext: "This problem (1.1): covers introductions." }
+      }));
+    });
+
+    it("rejects a non-string unitContext under the demo root", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, `${kDemoParent}/messages/msg-bad-unit-context`, demoMessage({
+        add: { unitContext: { currentDigest: "covers introductions." } }
       }));
     });
 

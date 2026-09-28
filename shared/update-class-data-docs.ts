@@ -1,6 +1,8 @@
 import { getDatabase } from "firebase-admin/database";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { documentSummarizer } from "./ai-summarizer/ai-summarizer";
+import { documentHasStudentWork } from "./ai-analysis-classify";
+import { getUnitSummary } from "./get-unit-summary";
 
 // Finds classes that have updated documents for selected units,
 // and uses an LLM to create a summary of all the student work in Firestore.
@@ -27,13 +29,20 @@ function firestoreBasePath(portal: string|undefined, demo: string|undefined): st
 
 interface Logger {
   info(...args: any[]): void;
+  warn(...args: any[]): void;
 }
 
 interface IClassData {
   userCount: number;
   userIds: Set<string>;
   documentCount: number;
-  documents: Set<{ uid: string, key: string, isTeacherDocument: boolean }>;
+  documents: Set<{
+    uid: string, key: string, isTeacherDocument: boolean, investigation?: string, problem?: string,
+    // Same RTDB value the class-level lastEditedAt below is maxed from, kept per-document too
+    // since documentHasStudentEdits needs one document's own value, not the class-wide max. null
+    // when never written.
+    lastEditedAt: number | null
+  }>;
   lastEditedAt: number;
 }
 
@@ -59,7 +68,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
   let documentQuery = getFirestore()
     .collection(documentsPath)
     .where("unit", "==", unit)
-    .select("context_id", "uid", "key");
+    .select("context_id", "uid", "key", "investigation", "problem");
   if (onlyContextId) {
     documentQuery = documentQuery.where("context_id", "==", onlyContextId);
   }
@@ -71,6 +80,8 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const contextId = data.context_id;
       const uid = data.uid;
       const key = data.key;
+      const investigation = data.investigation as string | undefined;
+      const problem = data.problem as string | undefined;
 
       if (!(contextId in classTeachers)) {
         classTeachers[contextId] = await getClassTeachers(portal, demo, contextId, logger);
@@ -90,7 +101,7 @@ async function getClassDocumentData(portal: string|undefined, demo: string|undef
       const record = classData[contextId];
       record.userIds.add(uid);
       record.documentCount++;
-      record.documents.add({ uid, key, isTeacherDocument });
+      record.documents.add({ uid, key, isTeacherDocument, investigation, problem, lastEditedAt: lastEdited });
       if (lastEdited && lastEdited > record.lastEditedAt) {
         record.lastEditedAt = lastEdited;
       }
@@ -111,40 +122,83 @@ function getClassDataDoc(portal: string|undefined, demo: string|undefined, unit:
 
 // Retrieve document content from Firebase Realtime Database
 async function retrieveDocumentFromFirebase(portal: string|undefined, demo: string|undefined, contextId: string,
-    uid: string, key: string): Promise<{ content: any | null, error: string | null }> {
+    uid: string, key: string): Promise<{ content: any | null, changeCount: number | null, error: string | null }> {
   try {
     const documentPath = `${firebaseBasePath(portal, demo)}/classes/${contextId}/users/${uid}/documents/${key}`;
     const documentSnapshot = await getDatabase().ref(documentPath).once("value");
     const documentData = documentSnapshot.val();
 
     if (!documentData) {
-      return({ content: null, error: `No document found at path: ${documentPath}` });
+      return({ content: null, changeCount: null, error: `No document found at path: ${documentPath}` });
     }
+    // createDocument (src/lib/db.ts) never writes this; only a real content sync
+    // (use-document-sync-to-firebase.ts) does, starting at 1. Read regardless of whether
+    // content parses, so a parse failure doesn't also lose it.
+    const changeCount = typeof documentData.changeCount === "number" ? documentData.changeCount : null;
 
     let parsedContent: any = null;
     if (documentData.content) {
       try {
         parsedContent = JSON.parse(documentData.content);
-        return({ content: parsedContent, error: null });
+        return({ content: parsedContent, changeCount, error: null });
       } catch (parseError) {
-        return({ content: null, error: `Failed to parse document content: ${parseError}` });
+        return({ content: null, changeCount, error: `Failed to parse document content: ${parseError}` });
       }
     } else {
-      return({ content: null, error: "Document has no content field" });
+      return({ content: null, changeCount, error: "Document has no content field" });
     }
 
   } catch (error) {
-    return({ content: null, error: `Error retrieving document from Firebase: ${error}` });
+    return({ content: null, changeCount: null, error: `Error retrieving document from Firebase: ${error}` });
   }
 }
 
 async function retrieveAndSummarizeDocument(portal: string|undefined, demo: string|undefined, contextId: string,
-    uid: string, key: string, logger: Logger): Promise<string> {
+    uid: string, key: string, logger: Logger): Promise<{ summary: string, content: any, changeCount: number | null }> {
   const document = await retrieveDocumentFromFirebase(portal, demo, contextId, uid, key);
   if (document.error) {
     logger.info(`Error retrieving document (${contextId}/${uid}/${key}) from Firebase: ${document.error}`);
   }
-  return documentSummarizer(document.content, { includeModel: false, minimal: true });
+  const summary = documentSummarizer(document.content, { includeModel: false, minimal: true });
+  return { summary, content: document.content, changeCount: document.changeCount };
+}
+
+// Whether a document has been edited since creation -- documentHasStudentWork alone can't tell a
+// pre-authored template from a student's real work, since both look identical when auto-created.
+// `changeCount` is authoritative when present; `lastEditedAt` is a fallback for older records
+// only, since an Ideas click also writes it regardless of whether the student edited anything.
+function documentHasStudentEdits(
+  { changeCount, lastEditedAt }: { changeCount: number | null, lastEditedAt: number | null }
+): boolean {
+  return changeCount != null ? changeCount >= 1 : lastEditedAt != null;
+}
+
+// The furthest-along ordinal (in authored order, never sorted as strings) among the given
+// problem ordinals, or undefined if none appear in the unit's live problem list or the list is
+// unavailable. "Furthest along" is the upper bound of what any student in the class has
+// encountered.
+async function determineCurrentProblemOrdinal(
+  unit: string, qualifyingOrdinals: string[], logger: Logger
+): Promise<string | undefined> {
+  if (qualifyingOrdinals.length === 0) return undefined;
+  // Backstop: getUnitSummary fails closed internally, but this guards the same way the Ideas and
+  // Teacher Summary call sites do, so an unexpected failure here still writes the class data doc,
+  // just without currentProblemOrdinal.
+  let unitSummaryResult;
+  try {
+    unitSummaryResult = await getUnitSummary(unit);
+  } catch (error) {
+    logger.warn("unit summary unavailable, continuing without it", error);
+    return undefined;
+  }
+  if (!unitSummaryResult) return undefined;
+  const { liveProblems } = unitSummaryResult;
+  let furthestIndex = -1;
+  for (const ordinal of qualifyingOrdinals) {
+    const index = liveProblems.findIndex((p) => p.ordinal === ordinal);
+    if (index > furthestIndex) furthestIndex = index;
+  }
+  return furthestIndex === -1 ? undefined : liveProblems[furthestIndex].ordinal;
 }
 
 // Check if our data document under /exemplars is older than the latest document saved in the class.
@@ -166,14 +220,29 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
   // Retrieve and summarize the documents
   const teacherDocs = Array.from(data.documents).filter(({isTeacherDocument}) => isTeacherDocument);
   const studentDocs = Array.from(data.documents).filter(({isTeacherDocument}) => !isTeacherDocument);
-  const teacherSummaries = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
+  const teacherResults = await Promise.all(teacherDocs.map(async ({uid, key}) =>  {
     return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
-  const studentSummaries = await Promise.all(studentDocs.map(async ({uid, key}) =>  {
+  const studentResults = await Promise.all(studentDocs.map(async ({uid, key}) =>  {
     return await retrieveAndSummarizeDocument(portal, demo, contextId, uid, key, logger);
   }));
-  const teacherContent = teacherSummaries.join("\n\n");
-  const studentContent = studentSummaries.join("\n\n");
+  const teacherContent = teacherResults.map(({summary}) => summary).join("\n\n");
+  const studentContent = studentResults.map(({summary}) => summary).join("\n\n");
+
+  // A student document counts toward the class's current problem when it has curriculum fields
+  // (a personal document has none), its content has student work, and it's been edited since
+  // creation (documentHasStudentEdits). Teacher documents are excluded: teachers may preview
+  // ahead of the class.
+  const qualifyingOrdinals = studentDocs
+    .map(({investigation, problem, lastEditedAt}, i) =>
+      ({investigation, problem, content: studentResults[i].content, changeCount: studentResults[i].changeCount,
+        lastEditedAt}))
+    .filter(({investigation, problem, content, changeCount, lastEditedAt}) =>
+      !!investigation && !!problem &&
+      documentHasStudentWork(content) &&
+      documentHasStudentEdits({changeCount, lastEditedAt}))
+    .map(({investigation, problem}) => `${investigation}.${problem}`);
+  const currentProblemOrdinal = await determineCurrentProblemOrdinal(unit, qualifyingOrdinals, logger);
 
   return getClassDataDoc(portal, demo, unit, contextId).set({
     lastEditedAt: data.lastEditedAt,
@@ -181,7 +250,8 @@ async function updateClassDataDoc(portal: string|undefined, demo: string|undefin
     documentCount: data.documentCount,
     teacherContent,
     studentContent,
-    summary: null
+    summary: null,
+    ...(currentProblemOrdinal ? {currentProblemOrdinal} : {})
   });
 }
 
