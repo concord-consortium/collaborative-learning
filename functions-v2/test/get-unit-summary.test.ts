@@ -150,6 +150,18 @@ describe("getUnitSummary", () => {
     await expect(getUnitSummary("non-array-problems-unit")).resolves.toBeUndefined();
   });
 
+  // A missing `problems` field defaults to no problems (allowed), but an explicit null is
+  // malformed data, not a missing field. The parser should reject the latter rather than silently
+  // treating it as the former.
+  it("resolves undefined, without throwing, when an investigation's problems is explicitly null",
+    async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(
+        jsonResponse({investigations: [{ordinal: 1, problems: null}], config: {}})
+      );
+
+      await expect(getUnitSummary("null-problems-unit")).resolves.toBeUndefined();
+    });
+
   it("resolves undefined when fetch itself rejects, and caches that as a failure", async () => {
     const fetchSpy = jest.spyOn(global, "fetch").mockReturnValue(Promise.reject(new Error("network down")));
 

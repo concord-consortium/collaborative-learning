@@ -93,10 +93,12 @@ function parseContent(content: unknown): IUnitSummaryFetchResult {
     const investigationRecord = asRecord(investigation);
     if (!investigationRecord) throw new Error("an investigation is not an object");
 
-    const problems = investigationRecord.problems ?? [];
-    if (!Array.isArray(problems)) throw new Error("an investigation's problems is not an array");
+    const problems = investigationRecord.problems;
+    if (problems !== undefined && !Array.isArray(problems)) {
+      throw new Error("an investigation's problems is not an array");
+    }
 
-    for (const problem of problems) {
+    for (const problem of problems ?? []) {
       const problemRecord = asRecord(problem);
       if (!problemRecord) throw new Error("a problem is not an object");
       // Matches the assembler's problem.title ?? "" (assemble-unit.ts): a missing title must
