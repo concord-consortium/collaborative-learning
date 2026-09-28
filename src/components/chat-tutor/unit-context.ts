@@ -9,10 +9,8 @@ import { UnitModelType } from "../../models/curriculum/unit";
 import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
 import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
 
-// The same ordinal string Unit.getAllProblemOrdinals() produces --
-// "${investigation.ordinal}.${problem.ordinal}". getParent is called twice because a problem's
-// direct MST parent is the investigation's `problems` array, not the investigation itself --
-// same walk getSectionPath uses (unit.ts).
+// getParent twice: a problem's direct MST parent is the investigation's `problems` array, not
+// the investigation itself.
 export function currentProblemOrdinal(problem: ProblemModelType): string {
   const investigation = getParent(getParent(problem)) as InvestigationModelType;
   return `${investigation.ordinal}.${problem.ordinal}`;

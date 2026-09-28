@@ -3,12 +3,8 @@
 // never further ahead. Every consumer -- AdaChat, the AI Tile, Ideas, and Teacher Summary --
 // goes through this one module so the no-look-ahead rule lives in one place.
 //
-// v1 limitation: the compatibility check below compares ordinal and title only, not a content
-// hash (no v1 consumer has the full assembled-Markdown hash available). That means the check
-// catches a problem being moved, renamed, inserted, or removed, but not an author's edit to a
-// problem's own content under an unchanged title. The authoring panel's staleness badge, which
-// does compare hashes, is the only thing that flags that case, and it depends on the author
-// re-running generation.
+// The compatibility check below compares ordinal and title only, not content -- see
+// docs/unit-summary-consumers.md for what that misses.
 import { escapeHtmlText } from "./escape-for-html";
 import { IUnitSummary, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "./unit-summary-types";
 

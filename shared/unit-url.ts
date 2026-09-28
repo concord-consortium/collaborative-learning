@@ -3,9 +3,7 @@
 // build from. Imports curriculum-config.json directly rather than duplicating it, so this can't
 // drift from the client. Lives in shared/, not src/, because Cloud Functions can't load src/.
 //
-// v1 limitation: always resolves "main". A class on a branch-preview deploy running different
-// curriculum still gets main's content.json here -- server-side has no branch on document
-// metadata to read instead. See get-unit-summary.ts and docs/unit-configuration.md.
+// Always resolves "main" -- see docs/unit-summary-consumers.md for why that's accepted.
 import curriculumConfigJson from "./curriculum-config.json";
 
 interface ICurriculumConfigJson {

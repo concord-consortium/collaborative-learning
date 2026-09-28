@@ -163,15 +163,10 @@ async function retrieveAndSummarizeDocument(portal: string|undefined, demo: stri
   return { summary, content: document.content, changeCount: document.changeCount };
 }
 
-// Whether a document has been edited since creation, not just holding whatever createDocument
-// wrote then (including an authored defaultDocumentTemplate) -- documentHasStudentWork alone
-// can't tell a pre-authored template (a welcome message, an empty Table, which counts
-// unconditionally) from a student's own work, since both look identical the instant the document
-// is auto-created. `changeCount` is authoritative when present: createDocument never writes it,
-// only a real content sync does (document.incChangeCount(), returning 1 on its first call).
-// `lastEditedAt` is a weaker signal, used only as a fallback for records saved before
-// `changeCount` existed: it is also written by an Ideas click regardless of whether the student
-// edited anything, so a `changeCount` of 0 must not be overridden by a non-null `lastEditedAt`.
+// Whether a document has been edited since creation -- documentHasStudentWork alone can't tell a
+// pre-authored template from a student's real work, since both look identical when auto-created.
+// `changeCount` is authoritative when present; `lastEditedAt` is a fallback for older records
+// only, since an Ideas click also writes it regardless of whether the student edited anything.
 function documentHasStudentEdits(
   { changeCount, lastEditedAt }: { changeCount: number | null, lastEditedAt: number | null }
 ): boolean {

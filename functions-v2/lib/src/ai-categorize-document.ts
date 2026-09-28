@@ -546,9 +546,7 @@ export async function categorizeRepresentations(
       throw new Error("aiPrompt must specify at least one response field for the schema.");
     }
 
-    // Resolved once, unconditionally -- before and independent of the summary check below -- so
-    // both the related-summaries lookup and the unit-context slice (every shape, including
-    // image-only) share this one metadata read rather than two.
+    // Unconditional: even an image-only request needs metadata for the unit-context slice.
     try {
       ({metadata: documentMetadata, gap: metadataGap} =
         await deps.readDocumentMetadata(firestoreDocumentPath, requestContext));

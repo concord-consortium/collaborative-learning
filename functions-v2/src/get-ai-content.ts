@@ -57,10 +57,7 @@ export function isCachedContentUpToDate(prompt: string,
   if (!contentData.lastUpdated) return false;
   if (contentData.promptPolicyVersion !== PROMPT_POLICY_VERSION) return false;
   if (contentData.prompt !== prompt) return false;
-  // summaryCreatedAt is the field on-class-data-doc-written.ts actually writes, updated whenever
-  // the class's studentSummary/teacherSummary text changes. lastUpdated (what this compared
-  // against before) is never written on the class doc, so that check was always inert. An absent
-  // summaryCreatedAt means no class summary has been generated yet, not staleness.
+  // summaryCreatedAt is absent until a class summary is first generated; absence is not staleness.
   const summaryCreatedAt = classInfo.data()?.summaryCreatedAt;
   if (summaryCreatedAt && contentData.lastUpdated.toMillis() < summaryCreatedAt.toMillis()) return false;
   return true;

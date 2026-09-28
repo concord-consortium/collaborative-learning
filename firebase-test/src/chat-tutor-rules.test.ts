@@ -308,8 +308,7 @@ describe("Firestore security rules: chat tutor", () => {
       }));
     });
 
-    // Same optional-string field as the authed block above, carrying the identical unitContext
-    // pin -- demo/qa is where this is exercised first, so it needs the identical accept/reject pair.
+    // Same optional-string field and accept/reject pair as the authed block above.
     it("allows a unitContext payload under the demo root", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToSucceed(db, `${kDemoParent}/messages/msg-unit-context`, demoMessage({

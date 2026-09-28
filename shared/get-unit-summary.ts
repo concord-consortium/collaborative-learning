@@ -1,14 +1,9 @@
-// Fetches a unit's published content.json (always the main branch -- see the v1 limitation below)
-// and returns its authored aiUnitSummary alongside the live problem list walked from that same
-// fetch, so a server-side AI consumer (Ideas, Teacher Summary) can run the same unitSummarySlice
-// prefix check the client-side consumers do.
+// Fetches a unit's published content.json and returns its authored aiUnitSummary alongside the
+// live problem list walked from that same fetch, so a server-side AI consumer (Ideas, Teacher
+// Summary) can run the same unitSummarySlice prefix check the client-side consumers do.
 //
-// v1 limitation: this always fetches main. A class running on a branch-preview deploy whose
-// curriculum differs from main still resolves to main's content.json here, and the prefix check
-// cannot detect that mismatch -- both the summary and the structure it's checked against come
-// from the same (main) fetch, so the check only proves internal consistency, not that main is the
-// curriculum the student's class actually loaded. Accepted for v1: production classes run on
-// main; branch previews are development/QA use. See docs/unit-configuration.md.
+// Always fetches the main branch, even for a class on a branch-preview deploy -- see
+// docs/unit-summary-consumers.md for why that's accepted.
 import {mainBranchUnitJsonUrl} from "./unit-url";
 import {ILiveProblem} from "./unit-summary-slice";
 import {IUnitSummary} from "./unit-summary-types";
