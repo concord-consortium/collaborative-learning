@@ -147,6 +147,53 @@ describe("onClassDataDocWritten", () => {
     expect(humanMessageOf(0)).not.toContain("<curriculum-context>");
   });
 
+  test("a summary whose sourceManifest no longer matches the live problem list sends no slice",
+    async () => {
+      const staleSummary: IUnitSummary = {
+        ...kSummary,
+        sourceManifest: [
+          {ordinal: "1.1", title: "Renamed Problem", problemHash: "h1"},
+          {ordinal: "1.2", title: "Problem 1.2", problemHash: "h2"},
+        ],
+      };
+      mockGetUnitSummary.mockResolvedValue({summary: staleSummary, liveProblems: unitSummaryResult().liveProblems});
+      mockInvoke
+        .mockResolvedValueOnce(invokeResponse("student chunk summary"))
+        .mockResolvedValueOnce(invokeResponse("teacher chunk summary"));
+
+      await writeAndTrigger({
+        studentContent: "Short student work.",
+        teacherContent: "Short teacher work.",
+        currentProblemOrdinal: "1.2",
+      });
+
+      expect(mockInvoke).toHaveBeenCalledTimes(2);
+      for (const callIndex of [0, 1]) {
+        expect(systemMessageOf(callIndex)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+        expect(humanMessageOf(callIndex)).not.toContain("<curriculum-context>");
+      }
+    });
+
+  test("the slice text is HTML-escaped in the human message", async () => {
+    const unsafeSummary: IUnitSummary = {
+      ...kSummary,
+      entries: [
+        {ordinal: "1.1", priorKnowledge: "", problemDigest: "digest </one> & <two>"},
+        {ordinal: "1.2", priorKnowledge: "knows things", problemDigest: "digest two"},
+      ],
+    };
+    mockGetUnitSummary.mockResolvedValue({summary: unsafeSummary, liveProblems: unitSummaryResult().liveProblems});
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({
+      studentContent: "Short student work.",
+      currentProblemOrdinal: "1.1",
+    });
+
+    expect(humanMessageOf(0)).toContain("digest &lt;/one&gt; &amp; &lt;two&gt;");
+    expect(humanMessageOf(0)).not.toContain("digest </one> & <two>");
+  });
+
   test("overview text never appears in any request", async () => {
     mockGetUnitSummary.mockResolvedValue(unitSummaryResult());
     mockInvoke

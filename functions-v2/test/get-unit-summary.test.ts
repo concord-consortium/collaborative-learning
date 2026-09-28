@@ -161,4 +161,48 @@ describe("getUnitSummary", () => {
     // Served from the failure-TTL cache on the second call, not fetched again.
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
+
+  describe("cache TTLs", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("still serves a success entry from cache at 9 minutes, and refetches at 11 minutes", async () => {
+      // A fresh Response per call: mockResolvedValue would hand back the same Response object, and
+      // a real Response's body can only be read (via .json()) once.
+      const fetchSpy = jest.spyOn(global, "fetch")
+        .mockImplementation(async () => jsonResponse(contentJsonFixture()));
+
+      await getUnitSummary("success-ttl-unit");
+      jest.advanceTimersByTime(9 * 60 * 1000);
+      await getUnitSummary("success-ttl-unit");
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(2 * 60 * 1000); // total 11 minutes
+      await getUnitSummary("success-ttl-unit");
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("refetches a failure entry at 2 minutes, while a success entry at 2 minutes is not refetched",
+      async () => {
+        const failureSpy = jest.spyOn(global, "fetch")
+          .mockImplementation(async () => jsonResponse({error: "nope"}, 404));
+        await getUnitSummary("failure-ttl-unit");
+        jest.advanceTimersByTime(2 * 60 * 1000);
+        await getUnitSummary("failure-ttl-unit");
+        expect(failureSpy).toHaveBeenCalledTimes(2);
+        failureSpy.mockRestore();
+
+        const successSpy = jest.spyOn(global, "fetch")
+          .mockImplementation(async () => jsonResponse(contentJsonFixture()));
+        await getUnitSummary("success-2min-unit");
+        jest.advanceTimersByTime(2 * 60 * 1000);
+        await getUnitSummary("success-2min-unit");
+        expect(successSpy).toHaveBeenCalledTimes(1);
+      });
+  });
 });

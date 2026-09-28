@@ -561,6 +561,23 @@ describe("ai-analysis-messages", () => {
         text: expect.stringContaining(`<curriculum-context>\n${unitContext}\n</curriculum-context>`)
       });
     });
+
+    it("escapes <, >, and & in the unitContext text, for every builder", () => {
+      const unsafeContext = "x < y & z > w";
+      const escaped = "x &lt; y &amp; z &gt; w";
+
+      const image = buildImageMessages(fullPrompt, "https://example.com/image.png", {}, unsafeContext);
+      const summary = buildSummaryMessages(fullPrompt, "The student drew a box.", [], unsafeContext);
+      const mixed = buildMixedMessages(
+        fullPrompt, "The student drew a box.", [], "https://example.com/doc.png", {}, unsafeContext);
+
+      for (const messages of [image, summary, mixed]) {
+        const content = messages[1].content as any[];
+        const fenced = content[content.length - 1].text as string;
+        expect(fenced).toContain(escaped);
+        expect(fenced).not.toContain(unsafeContext);
+      }
+    });
   });
 
   describe("defaultAiPrompt", () => {

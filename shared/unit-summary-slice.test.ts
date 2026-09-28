@@ -71,10 +71,13 @@ describe("unitSummarySlice", () => {
   });
 
   it("follows authored (array) order for multi-digit ordinals, not string sort", () => {
-    // Lexicographic string sort would reorder this fixture as ["1.10", "1.2", "1.9"]: comparing
-    // character by character, "1.10" < "1.2" < "1.9". Authored order here is the reverse of that,
-    // so if the helper ever sorted `liveProblems` instead of trusting its given order, the first
-    // assertion below would see "1.9" sorted to the end (no next problem) instead of "1.10".
+    // Authored order here is "1.9", "1.10", "1.2". A lexicographic string sort compares character
+    // by character and would put "1.9" last ("1.10" < "1.2" < "1.9"), so the first assertion below
+    // would see no next problem after "1.9" instead of "1.10" if the helper sorted that way. A
+    // helper that instead sorted numerically by the part after the dot would put "1.10" last
+    // (2, 9, 10), so the second assertion would see no next problem after "1.10" instead of "1.2"
+    // if the helper sorted that way. Together the two assertions only pass if the helper trusts the
+    // given array order rather than re-deriving one, by either method.
     const problems: ILiveProblem[] = [
       { ordinal: "1.9", title: "Problem 1.9" },
       { ordinal: "1.10", title: "Problem 1.10" },

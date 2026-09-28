@@ -414,6 +414,28 @@ describe("AIComponent", () => {
         expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
         expect(request.dynamicContentPrompt).toContain("The student's answer.");
       });
+
+      it("when the summary's sourceManifest no longer matches the unit's live problems, sends no " +
+         "unit-summary slice", async () => {
+        const staleSummary = unitSummaryWithDigest("digest one");
+        staleSummary.sourceManifest = [
+          { ordinal: "1.1", title: "Renamed Problem", problemHash: "h1" },
+          { ordinal: "1.2", title: "Problem 1.2", problemHash: "h2" },
+        ];
+        mockStores.unit.config = { aiUnitSummary: staleSummary };
+        mockStores.documents.getDocument.mockReturnValue(
+          documentWith(populatedDocContent(), { unit: "test-unit", investigation: "1", problem: "1" })
+        );
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        const [request] = mockGetAiContent.mock.calls[0];
+        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
+        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+      });
     });
 
     // A read-only rendering (e.g. a teacher's 4-up view of another student's document) hides the

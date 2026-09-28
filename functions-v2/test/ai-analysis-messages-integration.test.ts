@@ -255,6 +255,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
 
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
       expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+      expect(deps.getUnitSummary).not.toHaveBeenCalled();
       expect(result.documentMetadata).toBeUndefined();
       expect(result.metadataGap).toBe("no-metadata");
       expect(result.summaryEmbedding).toBeUndefined();
@@ -273,6 +274,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
 
       expect(deps.getEmbeddings).not.toHaveBeenCalled();
+      expect(deps.getUnitSummary).not.toHaveBeenCalled();
       expect(result.documentMetadata).toBeUndefined();
       expect(result.metadataGap).toBe("no-context");
       expect(result.completion).toBeDefined();
@@ -408,7 +410,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         buildMixedMessages(fullPrompt, null, [], imageUrl, {}, expectedUnitContext));
     });
 
-    test("a personal document (metadata filled from the request context) also carries the slice", async () => {
+    test("metadata with contextSource \"request\" still yields the slice", async () => {
       const personalMetadata: DocumentMetadata = {
         ...documentMetadata, contextSource: "request",
       };
@@ -433,6 +435,38 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       expect(result.completion).toBeDefined();
       expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
     });
+
+    test("getUnitSummary rejecting proceeds with no slice, and the evaluation still completes",
+      async () => {
+        const {deps, sent} = recordingDeps({
+          getUnitSummary: jest.fn().mockRejectedValue(new Error("curriculum site unavailable")),
+        });
+
+        const result = await categorizeRepresentations(
+          {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+        expect(result.completion).toBeDefined();
+        expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+      });
+
+    test("a summary whose sourceManifest no longer matches the live problem list sends no slice",
+      async () => {
+        const staleSummary: IUnitSummary = {
+          ...unitSummaryFixture(),
+          sourceManifest: [
+            {ordinal: "1.1", title: "Renamed Problem", problemHash: "h1"},
+            {ordinal: "1.2", title: "Problem 1.2", problemHash: "h2"},
+          ],
+        };
+        const {deps, sent} = recordingDeps({
+          getUnitSummary: jest.fn().mockResolvedValue({summary: staleSummary, liveProblems}),
+        });
+
+        await categorizeRepresentations(
+          {summary, imageUrl}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+        expect(sent[0].messages).toEqual(buildMixedMessages(fullPrompt, summary, [], imageUrl));
+      });
 
     test("readDocumentMetadata is called exactly once, serving both the unit-context slice and " +
          "the related-summaries lookup", async () => {
