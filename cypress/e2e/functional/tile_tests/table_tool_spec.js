@@ -588,4 +588,61 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTile().click();
     clueCanvas.deleteTile('table');
   });
+
+  it('should support uploading an image into a table cell', function() {
+    // This test needs the "image-upload" table toolbar button, which is opted in
+    // for the `qa` unit (src/public/demo/units/qa/content.json) but not for the
+    // `qa-no-nav-panel` unit that beforeTest() above visits. Visit the `qa` unit
+    // directly instead of reusing beforeTest().
+    cy.visit(`${Cypress.config("qaUnitStudent5")}`);
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+
+    cy.log('will add a table to canvas');
+    clueCanvas.addTile('table');
+    tableToolTile.getTableTile().should('be.visible');
+
+    cy.log('verify image-upload button is disabled with no cell selected');
+    clueCanvas.toolbarButtonIsDisabled('table', 'image-upload');
+
+    cy.log('verify selecting a cell enables the image-upload button');
+    tableToolTile.getTableCellXY(0, 0).click();
+    clueCanvas.toolbarButtonIsEnabled('table', 'image-upload');
+
+    cy.log('will upload an image into the selected cell');
+    cy.get('.table-toolbar .upload-button-input')
+      .selectFile('cypress/fixtures/image.png', { force: true });
+    // .last() genuinely scopes to the table this test just added. getTableTile() matches every
+    // .table-tool in the workspace, and qaUnitStudent5 is shared, so a tile left behind by an
+    // interrupted run would otherwise satisfy these checks or make the click ambiguous.
+    tableToolTile.getTableTile().last().find('.image-cell img', { timeout: 15000 }).should('exist');
+
+    cy.log('verify the image cell shows a visible selection treatment');
+    tableToolTile.getTableTile().last().find('.image-cell.highlighted')
+      .should('exist')
+      .and('have.css', 'box-shadow')
+      .and('not.eq', 'none');
+
+    // The cell must hold the durable ccimg:// reference, not the session-local blob: url
+    // the image map hands back for display. Both render an <img> in this session, so the
+    // only way to tell them apart is to reload: a blob: url is dead in a new page.
+    cy.log('verify the image survives a reload');
+    cy.waitForSave();
+    cy.reload();
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+    // 'exists' is not enough: when the stored image cannot be fetched the tile falls back to a
+    // bundled placeholder, which is itself a perfectly valid loaded <img>. A real stored image
+    // resolves through createObjectURL, so its src is a blob: url and the placeholder's is not.
+    tableToolTile.getTableTile().last().find('.image-cell img', { timeout: 30000 })
+      .should('exist')
+      .and($img => {
+        expect($img[0].naturalWidth, 'image finished loading').to.be.greaterThan(0);
+        expect($img.attr('src'), 'real stored image, not the placeholder').to.match(/^blob:/);
+      });
+
+    // Leave the shared document as we found it, as the other tests in this spec do.
+    tableToolTile.getTableTile().last().click();
+    clueCanvas.deleteTile('table');
+  });
 });

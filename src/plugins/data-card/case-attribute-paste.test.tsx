@@ -1,0 +1,109 @@
+import React from "react";
+import { act, render, screen } from "@testing-library/react";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
+import { addAttributeToDataSet, addCasesToDataSet } from "../../models/data/data-set";
+import { TileModel } from "../../models/tiles/tile-model";
+import { gImageMap } from "../../models/image-map";
+import {
+  errorEntry, kCcImgUrl, kImageUrlText, makeClipboardData, mockFile, pasteAndFlush, readyEntry
+} from "../../test/clipboard-image-test-utils";
+import { defaultDataCardContent } from "./data-card-content";
+import { CaseAttribute } from "./components/case-attribute";
+
+// Needed so TileModel.create recognizes the data card content type.
+import "./data-card-registration";
+
+// Builds a CaseAttribute already in edit mode for its value field, with a real (unattached)
+// dataset so getValue/setAttValue and friends all work without a full document tree.
+function renderValueEditor() {
+  const content = defaultDataCardContent();
+  const dataSet = content.dataSet;
+  addAttributeToDataSet(dataSet, { name: "value" });
+  addCasesToDataSet(dataSet, [{ value: "" }]);
+  const attrKey = dataSet.attrFromName("value")!.id;
+  const caseId = dataSet.caseIDFromIndex(0)!;
+  const model = TileModel.create({ content });
+
+  render(
+    <ModalProvider>
+      <CaseAttribute
+        model={model}
+        caseId={caseId}
+        attrKey={attrKey}
+        currEditAttrId={attrKey}
+        currEditFacet="value"
+        setImageUrlToAdd={() => undefined}
+        setCurrEditAttrId={() => undefined}
+        setCurrEditFacet={() => undefined}
+      />
+    </ModalProvider>
+  );
+
+  return { content, dataSet, attrKey, caseId };
+}
+
+// jsdom's real Element#blur() (as opposed to RTL's fireEvent.blur) only dispatches a blur
+// event when the element is the current activeElement, so tests that rely on the paste
+// handler's own targetElement.blur() to drive the commit must focus it first.
+function getFocusedValueTextarea() {
+  const textarea = screen.getByRole("combobox", { name: /value for/i });
+  act(() => textarea.focus());
+  return textarea;
+}
+
+describe("CaseAttribute value paste (Data Cards)", () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it("ingests a pasted image, suppresses the default paste, and commits via its own blur() alone", async () => {
+    jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(readyEntry(kCcImgUrl));
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry(kCcImgUrl) as any);
+    const { content, caseId, attrKey } = renderValueEditor();
+    const textarea = getFocusedValueTextarea();
+    const clipboardData = makeClipboardData({ image: mockFile() });
+
+    const notPrevented = await pasteAndFlush(textarea, clipboardData);
+
+    expect(notPrevented).toBe(false);
+    // No fireEvent.blur here: handleValuePaste's own targetElement.blur() call must be
+    // sufficient to commit the pasted value.
+    expect(content.dataSet.getValue(caseId, attrKey)).toBe(kCcImgUrl);
+  });
+
+  it("stores the ccimg:// url for a pasted image url, never the raw external url", async () => {
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(readyEntry(kCcImgUrl) as any);
+    const { content, caseId, attrKey } = renderValueEditor();
+    const textarea = getFocusedValueTextarea();
+    const clipboardData = makeClipboardData({ text: kImageUrlText });
+
+    const notPrevented = await pasteAndFlush(textarea, clipboardData);
+
+    expect(notPrevented).toBe(false);
+    const storedValue = content.dataSet.getValue(caseId, attrKey);
+    expect(storedValue).toBe(kCcImgUrl);
+    expect(storedValue).not.toBe(kImageUrlText);
+  });
+
+  it("does not ingest plain text pastes, and does not suppress the default paste", async () => {
+    const { content, caseId, attrKey } = renderValueEditor();
+    const textarea = getFocusedValueTextarea();
+    const clipboardData = makeClipboardData({ text: "just some plain text" });
+
+    const notPrevented = await pasteAndFlush(textarea, clipboardData);
+
+    expect(notPrevented).toBe(true);
+    expect(content.dataSet.getValue(caseId, attrKey)).toBe("");
+  });
+
+  it("suppresses the default paste but leaves the value unset when ingestion fails to store the image", async () => {
+    jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(errorEntry());
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(errorEntry() as any);
+    const { content, caseId, attrKey } = renderValueEditor();
+    const textarea = getFocusedValueTextarea();
+    const clipboardData = makeClipboardData({ image: mockFile() });
+
+    const notPrevented = await pasteAndFlush(textarea, clipboardData);
+
+    expect(notPrevented).toBe(false);
+    expect(content.dataSet.getValue(caseId, attrKey)).toBe("");
+  });
+});
