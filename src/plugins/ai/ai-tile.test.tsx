@@ -346,7 +346,7 @@ describe("AIComponent", () => {
           ],
         };
       }
-      const unitContextHeading = "This is a summary of the unit's current and nearby problems:";
+      const unitContextHeading = "This is a summary of the unit's current and nearby problems.";
 
       it("in a curriculum document of the loaded unit, prepends the slice ahead of the document " +
          "summary", async () => {

@@ -3,9 +3,9 @@ import {
   Agreements, IAiPrompt, PeerComment, RelatedSummary, buildImageMessages, buildMixedMessages,
   buildSummaryMessages, buildZodResponseSchema, defaultAiPrompt
 } from "./ai-analysis-messages";
-import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "./unit-summary-types";
+import { fencedUnitContext, withLookaheadInstruction } from "./unit-summary-slice";
 
-const kSystemMessage = `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\nYou are a master teacher.`;
+const kSystemMessage = withLookaheadInstruction("You are a master teacher.");
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -520,7 +520,7 @@ describe("ai-analysis-messages", () => {
       expect(content[content.length - 2].type).toBe("image_url");
       expect(content[content.length - 1]).toEqual({
         type: "text",
-        text: expect.stringContaining(`<curriculum-context>\n${unitContext}\n</curriculum-context>`)
+        text: fencedUnitContext(unitContext, "the student")
       });
     });
 
@@ -538,7 +538,7 @@ describe("ai-analysis-messages", () => {
       expect(content[content.length - 2].text).toContain("The student drew a box.");
       expect(content[content.length - 1]).toEqual({
         type: "text",
-        text: expect.stringContaining(`<curriculum-context>\n${unitContext}\n</curriculum-context>`)
+        text: fencedUnitContext(unitContext, "the student")
       });
     });
 
@@ -558,7 +558,7 @@ describe("ai-analysis-messages", () => {
       expect(content[content.length - 2].type).toBe("image_url");
       expect(content[content.length - 1]).toEqual({
         type: "text",
-        text: expect.stringContaining(`<curriculum-context>\n${unitContext}\n</curriculum-context>`)
+        text: fencedUnitContext(unitContext, "the student")
       });
     });
 

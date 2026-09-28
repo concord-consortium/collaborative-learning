@@ -7,7 +7,7 @@ import {DocumentSnapshot} from "firebase-functions/v2/firestore";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
-import {UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION} from "../../shared/unit-summary-types";
+import {withLookaheadInstruction} from "../../shared/unit-summary-slice";
 import {validateUserContext} from "./user-context";
 
 // This function generates and returns tile content from an LLM.
@@ -31,7 +31,7 @@ const lockTimeout = 60 * 1000; // 1 minute
 export const PROMPT_POLICY_VERSION = 1;
 
 export function buildSystemMessageText(systemPrompt: string | undefined): string {
-  return `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${systemPrompt || "You are a helpful, collaborative student."}`;
+  return withLookaheadInstruction(systemPrompt || "You are a helpful, collaborative student.");
 }
 
 function getClassInfoPath(firestoreRoot: string, unit: string, classHash: string): string {
