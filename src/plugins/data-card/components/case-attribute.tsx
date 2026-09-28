@@ -7,6 +7,7 @@ import { uniq } from "lodash";
 import { VisuallyHidden } from "@chakra-ui/react";
 import classNames from "classnames";
 import { gImageMap } from "../../../models/image-map";
+import { useLazyImage } from "../../../hooks/use-lazy-image";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultName, EditFacet,
@@ -83,7 +84,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   // commit path reads this ref (always current) instead of the possibly-stale valueCandidate.
   const valueCandidateRef = useRef(valueCandidate);
   valueCandidateRef.current = valueCandidate;
-  const [imageUrl, setImageUrl] = useState("");
+  const { ref: imageRef, displayUrl: imageUrl } = useLazyImage(valueStr);
   const [inputItems, setInputItems] = useState<string[]>([]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
   const editingName = currEditFacet === "name" && currEditAttrId === attrKey;
@@ -169,11 +170,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setValueCandidate(valueStr);
     setInputValue(valueStr);
   }, [setInputValue, valueStr]);
-
-  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
-    .then((image)=>{
-      setImageUrl(image.displayUrl || "");
-    });
 
   const handleNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     editingName && setNameCandidate(event.target.value);
@@ -356,7 +352,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      <div className={valueAreaClasses} onClick={handleValueClick}>
+      <div className={valueAreaClasses} onClick={handleValueClick} ref={imageRef}>
         <VisuallyHidden>
           <label {...getLabelProps()} className="">
             Value for {nameCandidate}
