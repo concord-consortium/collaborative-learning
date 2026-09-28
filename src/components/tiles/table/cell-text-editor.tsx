@@ -4,6 +4,7 @@ import { RenderEditCellProps } from "react-data-grid";
 import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
 import { TableContext } from "../hooks/table-context";
+import { imagePasteHandler } from "../../../utilities/image-ingest";
 
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
@@ -14,6 +15,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const origValueRef = useRef(row[column.key as keyof TRow] as unknown as string);
   const valueRef = useRef(origValueRef.current);
   const [value, setValue] = useState(origValueRef.current);
+  const isEditingRef = useRef(true);
   const tableContext = useContext(TableContext);
   const linked = tableContext?.linked;
 
@@ -51,9 +53,24 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     updateValue(event.target.value);
   };
 
+  const handlePaste = imagePasteHandler(contentUrl => {
+    // Ingesting is async, so this can resolve after the user has moved on. Acting then would
+    // commit into -- and close -- whatever cell is selected now, discarding its edit.
+    if (!isEditingRef.current) return;
+
+    valueRef.current = contentUrl;
+    setValue(contentUrl);
+    // Committed in one call rather than updateValue() + finishAndSave(). rdg's onClose(commit)
+    // delegates to onRowChange with the row *it* currently holds, and no render happens between
+    // the two within a single tick, so the pasted value would be dropped.
+    onRowChange({ ...row, [column.key]: contentUrl }, true);
+    _column.appData?.onEndBodyCellEdit?.(contentUrl);
+  });
+
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
+      isEditingRef.current = false;
       finishAndSave(false);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -70,6 +87,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         }}
         autoFocus={true}
         onChange={handleChange}
+        onPaste={handlePaste}
         onFocus={event => {
           event.target.select();
         }}

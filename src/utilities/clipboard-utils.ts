@@ -39,7 +39,9 @@ export const getClipboardContent = async (clipboardData?: DataTransfer) => {
 
   if (clipboardData) {
     for (const item of clipboardData.items) {
-      if (item.type === "image/png") {
+      // Any image type, not just png: pasting a file from the OS keeps its own mime type, and
+      // uploads already accept jpeg.
+      if (item.type.startsWith("image/")) {
         clipboardContent.image = item.getAsFile();
       }
       if (item.type === "text/plain") {
@@ -51,10 +53,11 @@ export const getClipboardContent = async (clipboardData?: DataTransfer) => {
       const clipboardContents = await navigator.clipboard.read();
       for (const item of clipboardContents) {
         clipboardContent.types.push(...item.types);
-        if (item.types.includes("image/png")) {
-          const imageBlob = await item.getType("image/png");
-          const blobToFile = new File([imageBlob], "clipboard-image.png");
-          clipboardContent.image = blobToFile;
+        const imageType = item.types.find(type => type.startsWith("image/"));
+        if (imageType) {
+          const imageBlob = await item.getType(imageType);
+          const extension = imageType.split("/")[1] || "png";
+          clipboardContent.image = new File([imageBlob], `clipboard-image.${extension}`);
         }
         if (item.types.includes("text/plain")) {
           const textBlob = await item.getType("text/plain");

@@ -4,6 +4,7 @@ export interface ITableToolbarContext {
   showExpressionsDialog: () => void;
   deleteSelected: () => void;
   importData: (file: File) => void;
+  uploadImage: (file: File) => void;
 }
 
 export const TableToolbarContext = createContext<ITableToolbarContext | null>(null);

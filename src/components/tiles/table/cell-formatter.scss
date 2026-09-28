@@ -32,5 +32,15 @@
       max-width: 100%;
       padding: 6px;
     }
+
+    // The image covers all but the 6px padding, so a background-color highlight is
+    // effectively invisible here. Use an inset outline in the same color instead.
+    &.highlighted {
+      box-shadow: inset 0 0 0 3px vars.$highlight-unlinked-cell;
+
+      &.linked {
+        box-shadow: inset 0 0 0 3px vars.$highlight-linked-cell;
+      }
+    }
   }
 }
