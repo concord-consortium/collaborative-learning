@@ -2,6 +2,14 @@
 // It lives in shared/ because both authoring-api (generation) and src/ (the unit config type,
 // the authoring panel, and Save-time validation) need the same shapes and rules.
 
+// How a problem asks students to work. The one place this set is defined: the type, validation,
+// the approach-step prompt, and the authoring panel's select are all built from it.
+// "divergent" asks students to generate or try many ideas; "convergent" asks them to choose one
+// and develop it; "mixed" means different sections ask for different things; "unclear" means the
+// problem asks for neither, which is safer to record than a forced guess.
+export const UNIT_SUMMARY_PROBLEM_APPROACHES = ["divergent", "convergent", "mixed", "unclear"] as const;
+export type UnitSummaryProblemApproach = typeof UNIT_SUMMARY_PROBLEM_APPROACHES[number];
+
 // One problem's slice of the summary. `ordinal` is the same `${investigation.ordinal}.${problem.ordinal}`
 // string Unit.getAllProblemOrdinals() produces (src/models/curriculum/unit.ts).
 export interface IUnitSummaryEntry {
@@ -14,6 +22,15 @@ export interface IUnitSummaryEntry {
   // A short digest of what THIS problem itself covers/has students do. Generated with visibility
   // into only this problem's own content.
   problemDigest: string;
+  // How this problem asks students to work, judged from this problem's own content only.
+  // Optional: summaries generated before approach labels existed do not have it, and a missing
+  // label means "say nothing about approach", not an error.
+  approach?: UnitSummaryProblemApproach;
+  // One or two sentences, in plain words, saying what the problem asks students to do and what an
+  // AI should not suggest instead. Example: "Students pick one gripper design and improve it
+  // across the Initial Challenge and What If sections. Do not suggest starting over with a new
+  // design." Optional for the same reason as `approach`.
+  approachGuidance?: string;
 }
 
 // One row of the summary's compatibility manifest: the live curriculum structure the summary was
@@ -79,10 +96,14 @@ export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1200;
 // how many problems precede it.
 export const UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS = 800;
 export const UNIT_SUMMARY_OVERVIEW_MAX_CHARS = 1200;
+// One or two sentences. Small because the guidance is sent on every consumer request that has a
+// slice, alongside the digest it accompanies.
+export const UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS = 300;
 // A ceiling to catch a runaway total, set well above the worst realistic case (every problem at
-// both per-field maxima, for the largest known unit) since a generous ceiling costs nothing, unlike
-// a per-field cap the model is actively steered toward on every call.
-export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 110000;
+// every per-field maximum, for the largest known unit) since a generous ceiling costs nothing,
+// unlike a per-field cap the model is actively steered toward on every call. Kept ahead of the
+// worst case by unit-summary-config.test.ts, which fails if the two ever meet.
+export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 130000;
 
 export type UnitSummaryValidationResult =
   | { valid: true }
@@ -152,6 +173,35 @@ export function validateUnitSummary(
         `${UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} characters`
       );
     }
+    // Both approach fields are optional, so only a present value is checked. Guidance without a
+    // label is rejected rather than ignored: it is confusing to edit and nothing consumes it.
+    if (entry.approach !== undefined &&
+        !(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly string[]).includes(entry.approach)) {
+      errors.push(
+        `entries[${i}] (${entry.ordinal}) approach ("${entry.approach}") is not one of ` +
+        UNIT_SUMMARY_PROBLEM_APPROACHES.join(", ")
+      );
+    }
+    // Typed as string | undefined, but this also runs over a hand-edited content.json, where the
+    // value can be anything JSON allows -- and reading .length off a null would throw.
+    const approachGuidance: unknown = entry.approachGuidance;
+    if (approachGuidance !== undefined) {
+      if (typeof approachGuidance !== "string") {
+        errors.push(`entries[${i}] (${entry.ordinal}) approachGuidance must be a string`);
+      } else {
+        if (approachGuidance.length > UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS) {
+          errors.push(
+            `entries[${i}] (${entry.ordinal}) approachGuidance exceeds ` +
+            `${UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS} characters`
+          );
+        }
+        if (entry.approach === undefined) {
+          errors.push(
+            `entries[${i}] (${entry.ordinal}) has approachGuidance but no approach`
+          );
+        }
+      }
+    }
   });
 
   summary.sourceManifest.forEach((p, i) => {
@@ -173,7 +223,8 @@ export function validateUnitSummary(
   if (!summary.sourceHash) errors.push("sourceHash is missing");
 
   const totalChars = (summary.overview || "").length + summary.entries.reduce(
-    (sum, e) => sum + (e.problemDigest || "").length + (e.priorKnowledge || "").length, 0
+    (sum, e) => sum + (e.problemDigest || "").length + (e.priorKnowledge || "").length +
+      (e.approach || "").length + (e.approachGuidance || "").length, 0
   );
   if (totalChars > UNIT_SUMMARY_TOTAL_BUDGET_CHARS) {
     errors.push(

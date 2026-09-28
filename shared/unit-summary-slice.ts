@@ -7,8 +7,9 @@
 // docs/unit-summary-consumers.md for what that misses.
 import { escapeHtmlText } from "./escape-for-html";
 import {
-  IUnitSummary, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
-  UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+  IUnitSummary, IUnitSummaryEntry, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION,
+  UNIT_SUMMARY_PROBLEM_APPROACHES, UnitSummaryProblemApproach
 } from "./unit-summary-types";
 
 export interface ILiveProblem {
@@ -26,6 +27,10 @@ export interface IUnitSummarySlice {
   currentDigest: string;  // entry N
   nextOrdinal?: string;   // undefined on the unit's last problem
   nextDigest?: string;
+  // Entry N's approach only, never N+1's: a consumer that saw the next problem's approach could
+  // apply it early, which is the contradiction this is meant to prevent.
+  currentApproach?: UnitSummaryProblemApproach;
+  currentApproachGuidance?: string;
 }
 
 /**
@@ -70,13 +75,39 @@ export function unitSummarySlice(
   const currentEntry = summary.entries[currentIndex];
   const hasNext = currentIndex + 1 <= lastCheckedIndex;
 
+  const { approach, approachGuidance } = checkedApproach(currentEntry);
+
   return {
     currentOrdinal,
     priorKnowledge: currentEntry.priorKnowledge,
     currentDigest: currentEntry.problemDigest,
     nextOrdinal: hasNext ? liveProblems[currentIndex + 1].ordinal : undefined,
     nextDigest: hasNext ? summary.entries[currentIndex + 1].problemDigest : undefined,
+    currentApproach: approach,
+    currentApproachGuidance: approachGuidance,
   };
+}
+
+/**
+ * validateUnitSummary runs at Save time in the authoring panel, but a hand-edited content.json in
+ * the curriculum repo never goes through it -- and the approach fields end up in the prompt as
+ * prose, so an unchecked value ("Convergent", an invented label, an over-long guidance) would be
+ * sent verbatim to every AI feature. Anything that would not have passed validation is dropped
+ * here, which costs only the approach line; the rest of the slice is unaffected.
+ */
+function checkedApproach(entry: IUnitSummaryEntry): {
+  approach?: UnitSummaryProblemApproach;
+  approachGuidance?: string;
+} {
+  const approach = entry.approach;
+  if (!(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly unknown[]).includes(approach)) return {};
+
+  // Guidance is kept only alongside a good label, matching validateUnitSummary's rule that
+  // guidance without a label is an error.
+  const guidance = entry.approachGuidance;
+  const guidanceOk = typeof guidance === "string" &&
+    guidance.length <= UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS;
+  return { approach, approachGuidance: guidanceOk ? guidance : undefined };
 }
 
 /**
@@ -90,6 +121,15 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
     lines.push(`What the student should already know entering this problem: ${slice.priorKnowledge}`);
   }
   lines.push(`This problem (${slice.currentOrdinal}): ${slice.currentDigest}`);
+  // "unclear" says nothing rather than saying "unclear": the model then falls back to the standing
+  // rule and whatever problem text it has, which is better than being told the problem is vague.
+  if (slice.currentApproach && slice.currentApproach !== "unclear") {
+    const guidance = slice.currentApproachGuidance ? ` ${slice.currentApproachGuidance}` : "";
+    lines.push(
+      `How this problem asks students to work (${slice.currentOrdinal}): ` +
+      `${slice.currentApproach}.${guidance}`
+    );
+  }
   if (slice.nextOrdinal !== undefined && slice.nextDigest !== undefined) {
     lines.push(`The next problem (${slice.nextOrdinal}): ${slice.nextDigest}`);
   }
