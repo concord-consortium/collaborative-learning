@@ -1712,7 +1712,22 @@ export class ReteManager implements INodeServices {
   };
 
   private async setZoom(zoom: number) {
+    // Pivot on the middle of the visible area. area.zoom() leaves transform.x/y alone unless it
+    // is given an origin, which pins world (0,0) to the screen instead: content then slides by
+    // its own distance from that origin every time the scale changes, so nodes authored far from
+    // it walk off stage. Translating afterwards keeps whatever is centred, centred.
+    const dims = this.getContainerDimensions();
+    const { k, x, y } = this.area.area.transform;
+
     await this.area.area.zoom(zoom);
+
+    if (dims && k > 0) {
+      const ratio = zoom / k;
+      const centerX = dims.width / 2;
+      const centerY = dims.height / 2;
+      await this.area.area.translate(centerX - (centerX - x) * ratio, centerY - (centerY - y) * ratio);
+    }
+
     const { transform } = this.area.area;
     // Redundant with the "zoomed" pipe in setup(): area.zoom() emits "zoomed", which writes this same
     // transform. Kept so this path doesn't depend on pipe wiring; safe to drop if that's verified.
