@@ -195,6 +195,22 @@ describe("currentProblemOrdinal", () => {
     expect(await currentProblemOrdinal()).toBe("1.1");
   });
 
+  test("a changeCount of 0 is authoritative even with a non-null lastEditedAt (an Ideas click, " +
+      "no actual edit)", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult(["1.1", "1.2"]));
+    await setupTestDocuments({
+      documentId: "worked-doc", investigation: "1", problem: "1", tiles: [kTextTile("student work")],
+    });
+    // lastEditedAt (its default here is a real timestamp) is also written on an Ideas click,
+    // regardless of whether the student edited anything, so a changeCount of 0 must win.
+    await setupTestDocuments({
+      documentId: "ideas-clicked-doc", uid: kOtherUserId, investigation: "1", problem: "2",
+      changeCount: 0, tiles: [kEmptyTableTile],
+    });
+
+    expect(await currentProblemOrdinal()).toBe("1.1");
+  });
+
   test("an untouched document (an empty Table tile, no changeCount, no lastEditedAt) " +
       "does not advance the class", async () => {
     mockGetUnitSummary.mockResolvedValue(unitSummaryResult(["1.1", "1.2"]));

@@ -109,9 +109,46 @@ describe("unitSummarySlice", () => {
     expect(slice?.nextOrdinal).toBe("1.3");
   });
 
+  it("returns undefined on a title mismatch exactly at N", () => {
+    const summary = summaryFor(liveProblems);
+    // Current problem is 1.2 (index 1, N). A `<` instead of `<=` loop bound would still check
+    // this index, but an off-by-one elsewhere could skip it -- pin it directly.
+    summary.sourceManifest[1].title = "A different title";
+    expect(unitSummarySlice(summary, liveProblems, "1.2")).toBeUndefined();
+  });
+
+  it("returns undefined on a title mismatch exactly at N+1", () => {
+    const summary = summaryFor(liveProblems);
+    // Current problem is 1.2 (index 1); N+1 is index 2 (1.3). A `<` instead of `<=` loop bound
+    // would stop one index short and let this mismatch through, leaking a stale next-problem digest.
+    summary.sourceManifest[2].title = "A different title";
+    expect(unitSummarySlice(summary, liveProblems, "1.2")).toBeUndefined();
+  });
+
+  it("returns undefined when N+1 exists live but the manifest is one problem shorter", () => {
+    // entries and sourceManifest cover only 1.1..1.2 (the manifest's last problem is N);
+    // liveProblems has one more (1.3), so N+1 exists live but has no matching manifest/entries
+    // index to check against.
+    const shortProblems = liveProblems.slice(0, 2);
+    const summary = summaryFor(shortProblems);
+    expect(unitSummarySlice(summary, liveProblems, "1.2")).toBeUndefined();
+  });
+
   it("returns undefined when entries and sourceManifest have different lengths", () => {
     const summary = summaryFor(liveProblems);
     summary.entries.pop();
+    expect(unitSummarySlice(summary, liveProblems, "1.1")).toBeUndefined();
+  });
+
+  it("returns undefined, without throwing, when entries is missing", () => {
+    const summary = summaryFor(liveProblems);
+    delete (summary as { entries?: unknown }).entries;
+    expect(unitSummarySlice(summary, liveProblems, "1.1")).toBeUndefined();
+  });
+
+  it("returns undefined, without throwing, when sourceManifest is not an array", () => {
+    const summary = summaryFor(liveProblems);
+    (summary as unknown as { sourceManifest: unknown }).sourceManifest = "not an array";
     expect(unitSummarySlice(summary, liveProblems, "1.1")).toBeUndefined();
   });
 

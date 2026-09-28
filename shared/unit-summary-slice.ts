@@ -40,6 +40,10 @@ export function unitSummarySlice(
   currentOrdinal: string
 ): IUnitSummarySlice | undefined {
   if (!summary) return undefined;
+  // content.json can be hand-edited in the curriculum repo, bypassing CLUE's authoring-time
+  // validation, and this runs inside a render-time useMemo with no try/catch (chat-sidebar.tsx) --
+  // a missing or malformed field must not throw.
+  if (!Array.isArray(summary.entries) || !Array.isArray(summary.sourceManifest)) return undefined;
   if (summary.entries.length !== summary.sourceManifest.length) return undefined;
 
   const currentIndex = liveProblems.findIndex(p => p.ordinal === currentOrdinal);
