@@ -183,10 +183,22 @@ export function parseApproachAnswer(text: string): ParsedApproachAnswer | undefi
   const label = cleanLabel(approachMatch[1].split("\n", 1)[0]);
   if (!(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly string[]).includes(label)) return undefined;
 
-  // Everything after the GUIDANCE marker, so guidance that runs onto a second line survives.
+  // Everything after the GUIDANCE marker, so guidance that runs onto a second line survives --
+  // but stopping at an APPROACH marker, in case the model wrote the two the other way round.
+  // Without the cut, reversing them puts "APPROACH: convergent" inside the guidance, and that
+  // text goes on to every consumer.
   const guidanceMatch = markerPattern("GUIDANCE").exec(text);
-  const guidance = guidanceMatch ?
-    guidanceMatch[1].trim().replace(/^[*_`"']+|[*_`"']+$/g, "").trim() :
-    "";
+  const guidance = guidanceMatch ? cleanGuidance(cutAtMarker(guidanceMatch[1], "APPROACH")) : "";
   return {approach: label as UnitSummaryProblemApproach, guidance};
+}
+
+// Trims a captured value where a later marker begins. The marker has to start a line, so a
+// sentence that merely uses the word ("do not suggest a different approach") is left alone.
+function cutAtMarker(value: string, marker: string): string {
+  const match = markerPattern(marker).exec(value);
+  return match ? value.slice(0, match.index) : value;
+}
+
+function cleanGuidance(value: string): string {
+  return value.trim().replace(/^[*_`"']+|[*_`"']+$/g, "").trim();
 }

@@ -74,6 +74,24 @@ describe("parseApproachAnswer", () => {
     expect(parseApproachAnswer("APPROACH: divergent\nTry many things.")?.approach).toBe("divergent");
   });
 
+  // A model can put the two markers the other way round. Without a cut, the guidance capture runs
+  // to the end of the answer and swallows the APPROACH line, which then reaches every consumer.
+  it("does not let the guidance swallow an APPROACH line that follows it", () => {
+    expect(parseApproachAnswer("GUIDANCE: Pick one design and improve it.\nAPPROACH: convergent"))
+      .toEqual({approach: "convergent", guidance: "Pick one design and improve it."});
+  });
+
+  it("keeps multi-line guidance that comes before the label", () => {
+    expect(parseApproachAnswer("GUIDANCE: First line.\nSecond line.\nAPPROACH: mixed"))
+      .toEqual({approach: "mixed", guidance: "First line.\nSecond line."});
+  });
+
+  // The cut looks for a marker at the start of a line, so ordinary prose survives.
+  it("leaves guidance alone when it merely uses the word approach", () => {
+    expect(parseApproachAnswer("APPROACH: divergent\nGUIDANCE: Do not suggest a different approach: keep going.")
+      ?.guidance).toBe("Do not suggest a different approach: keep going.");
+  });
+
   it("rejects an unknown label, a missing label, and prose with no format at all", () => {
     expect(parseApproachAnswer("APPROACH: exploratory\nGUIDANCE: x")).toBeUndefined();
     expect(parseApproachAnswer("GUIDANCE: x")).toBeUndefined();
