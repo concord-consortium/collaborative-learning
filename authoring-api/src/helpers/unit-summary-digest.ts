@@ -4,7 +4,10 @@
 import {UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {mapWithConcurrency} from "./concurrency";
-import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS}
+import {
+  fitsOneCall, UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT,
+  UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS,
+}
   from "./unit-summary-config";
 import {generateWithLengthLimit} from "./unit-summary-length-limit";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
@@ -16,8 +19,12 @@ const DIGEST_INSTRUCTIONS =
   "heading of the form \"# Section: <name>\" (for example \"# Section: Investigate\"). Write a " +
   "concise digest of what this problem covers and has students do, covering EVERY section named " +
   "in the input in roughly one or two sentences each -- do not stop after the first section. For " +
-  "each section, say in a few words whether it asks students to try or make many different " +
-  "things or just one. Stay " +
+  "each section, say in a few words whether it asks students for several DIFFERENT ideas, " +
+  "designs, methods or versions of the same thing, or for a single idea, design or answer. " +
+  "Working through several steps, answering several questions, or producing several separate " +
+  "pieces of work counts as a single idea, not as several -- what matters is whether students " +
+  "are asked to come up with alternatives. If a section only supplies tools, reference material " +
+  "or instructions and asks students for nothing, say that it sets no task. Stay " +
   `within ${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters total. Only use information in the ` +
   "provided content -- do not infer or reference anything else, including other problems in the unit.";
 
@@ -25,8 +32,8 @@ const DIGEST_INSTRUCTIONS =
 // only what the digest kept. Shortening a digest is otherwise free to drop exactly that, so every
 // call that produces a digest passes this note along with the length limit.
 const DIGEST_PRESERVE_NOTE =
-  "Keep every section name, and keep whether each section asks students to try or make many " +
-  "different things or just one.";
+  "Keep every section name, and keep whether each section asks students for several different " +
+  "ideas or versions of the same thing, for a single idea, or for nothing at all.";
 
 // A problem can have no extractable text (an image-only section, a not-yet-authored placeholder,
 // etc.), which would otherwise send OpenAI an empty `input` and get back a 400. Skip the call and
@@ -55,9 +62,9 @@ const COMBINE_DIGESTS_INSTRUCTIONS =
   "as you can while still covering every section, and no more than " +
   `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters. ` +
   "Keep every section named in the parts, and keep what each part said about " +
-  "whether a section asks students to try or make many different things or just one -- do not " +
-  "merge sections that ask for different things into one general statement. Do not mention that " +
-  "it was split into parts.";
+  "whether a section asks students for several different ideas or versions of the same thing, " +
+  "for a single idea, or for nothing at all -- do not merge sections that ask for different " +
+  "things into one general statement. Do not mention that it was split into parts.";
 
 export interface DigestOptions {
   client: UnitSummaryOpenAIClient;
@@ -106,7 +113,7 @@ async function digestOneProblem(
     if (duplicateOfOrdinal) {
       return duplicateProblemDigest(duplicateOfOrdinal);
     }
-    if (problem.markdown.length <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS) {
+    if (fitsOneCall(problem.markdown.length)) {
       return await callDigest(problem.markdown, options);
     }
     const chunks = chunkMarkdown(problem.markdown, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);

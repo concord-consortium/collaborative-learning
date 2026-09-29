@@ -1,11 +1,18 @@
 import {AssembledProblem, AssembledUnit} from "./assemble-unit";
 import {
-  UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS,
+  UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS,
+  UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS,
   UNIT_SUMMARY_HARD_MAX_PROBLEMS, UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT,
   UNIT_SUMMARY_OVERALL_DEADLINE_MS,
 } from "./unit-summary-config";
 import {GenerateUnitSummaryDeps, runUnitSummaryGeneration} from "./unit-summary-generate";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
+
+// Matches the approach step by the reply format it demands, which is unique to that prompt and
+// survives rewording of the prompt's description of its input.
+function isApproachPrompt(params: GenerateTextParams): boolean {
+  return params.instructions.includes("APPROACH:");
+}
 
 function problem(ordinal: string, markdown = "content"): AssembledProblem {
   return {ordinal, title: `Problem ${ordinal}`, markdown, problemHash: `hash-${ordinal}`};
@@ -50,7 +57,7 @@ describe("runUnitSummaryGeneration", () => {
   it("writes each problem's approach and guidance onto its entry", async () => {
     const problems = [problem("1.1"), problem("1.2")];
     const generateText = jest.fn(async (params: GenerateTextParams) =>
-      params.instructions.includes("digest of ONE") ?
+      isApproachPrompt(params) ?
         "APPROACH: convergent\nGUIDANCE: Improve one design." :
         "a short response");
     const summary = await runUnitSummaryGeneration(
@@ -67,13 +74,37 @@ describe("runUnitSummaryGeneration", () => {
   it("leaves approachGuidance off the entry when the model gave a label and no guidance", async () => {
     const problems = [problem("1.1"), problem("1.2")];
     const generateText = jest.fn(async (params: GenerateTextParams) =>
-      params.instructions.includes("digest of ONE") ? "APPROACH: divergent\nGUIDANCE:" : "a short response");
+      isApproachPrompt(params) ? "APPROACH: divergent\nGUIDANCE:" : "a short response");
     const summary = await runUnitSummaryGeneration(
       "branch", "unit", baseDeps(generateText, assembledUnit(problems))
     );
     summary.entries.forEach((entry) => {
       expect(entry.approach).toBe("divergent");
       expect(entry).not.toHaveProperty("approachGuidance");
+    });
+  });
+
+  // The two steps turn on one answer (fitsOneCall): a problem the digest step split into parts is
+  // exactly the problem the approach step cannot send whole. If they ever disagreed, the approach
+  // call for a split problem would exceed a single call's input budget.
+  it("gives the approach step the combined digest for a problem the digest step had to split", async () => {
+    const long = problem("1.1", "p ".repeat(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS));
+    const short = problem("1.2", "short problem text");
+    const generateText = jest.fn(async (params: GenerateTextParams) =>
+      params.instructions.includes("partial digests") ? "THE COMBINED DIGEST" : "a short response");
+    await runUnitSummaryGeneration(
+      "branch", "unit", baseDeps(generateText, assembledUnit([long, short]))
+    );
+
+    const approachInputs = generateText.mock.calls
+      .map(([p]: [GenerateTextParams]) => p)
+      .filter(isApproachPrompt)
+      .map((p) => p.input);
+    // The split problem is classified from its combined digest; the short one from its own text.
+    expect(approachInputs).toContain("THE COMBINED DIGEST");
+    expect(approachInputs).toContain("short problem text");
+    approachInputs.forEach((input) => {
+      expect(input.length).toBeLessThanOrEqual(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
     });
   });
 
@@ -86,7 +117,7 @@ describe("runUnitSummaryGeneration", () => {
     // The two per-problem steps share the digest model; the two unit-level steps share the
     // summary model. Approach is per-problem, so it belongs with the digests.
     const isPerProblem = (c: GenerateTextParams) =>
-      c.instructions.includes("content of ONE problem") || c.instructions.includes("digest of ONE");
+      c.instructions.includes("content of ONE problem") || isApproachPrompt(c);
     expect(new Set(calls.filter(isPerProblem).map((c) => c.model))).toEqual(new Set(["digest-model"]));
     expect(new Set(calls.filter((c) => !isPerProblem(c)).map((c) => c.model)))
       .toEqual(new Set(["summary-model"]));
@@ -210,7 +241,7 @@ describe("runUnitSummaryGeneration", () => {
 // the thing these tests exist to prevent.
 describe("scheduling after the digest step", () => {
   const isDigestCall = (c: GenerateTextParams) => c.instructions.includes("content of ONE problem");
-  const isApproachCall = (c: GenerateTextParams) => c.instructions.includes("digest of ONE");
+  const isApproachCall = isApproachPrompt;
 
   // Records every call's start and end order alongside a peak in-flight count, with each call
   // taking a tick of real time so overlap is actually possible.

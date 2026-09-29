@@ -257,7 +257,10 @@ describe("a chunked problem whose sections ask for different things", () => {
     const generateText = jest.fn().mockResolvedValue("a digest");
     await runDigest(generateText);
     const [firstChunk] = calls(generateText);
-    expect(firstChunk.instructions).toMatch(/try or make many different things or just one/);
+    expect(firstChunk.instructions).toMatch(/several DIFFERENT ideas, designs, methods or versions/);
+    // The distinction that matters: a list of steps or questions is not several ideas.
+    expect(firstChunk.instructions).toMatch(/counts as a single idea, not as several/);
+    expect(firstChunk.instructions).toMatch(/asks students for nothing, say that it sets no task/);
   });
 
   it("tells the combine call to keep each section's one-versus-many statement", async () => {
@@ -265,7 +268,7 @@ describe("a chunked problem whose sections ask for different things", () => {
     await runDigest(generateText);
     const combine = calls(generateText).at(-1)!;
     expect(combine.instructions).toMatch(/Keep every section named in the parts/);
-    expect(combine.instructions).toMatch(/many different things or just one/);
+    expect(combine.instructions).toMatch(/several different ideas or versions of the same thing/);
     expect(combine.instructions).toMatch(/do not merge sections that ask for different things/);
   });
 
@@ -283,7 +286,7 @@ describe("a chunked problem whose sections ask for different things", () => {
     const shorten = calls(generateText)[1];
     expect(shorten.instructions).toMatch(/too long for where it will be used/);
     expect(shorten.instructions).toMatch(/Keep every section name/);
-    expect(shorten.instructions).toMatch(/many different things or just one/);
+    expect(shorten.instructions).toMatch(/several different ideas or versions of the same thing/);
   });
 });
 

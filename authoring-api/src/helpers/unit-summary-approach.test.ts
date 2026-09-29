@@ -2,6 +2,7 @@ import {
   UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_APPROACHES,
 } from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
+import {UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
 import {generateProblemApproaches, parseApproachAnswer} from "./unit-summary-approach";
 import {InternalServerError, RateLimitError} from "openai";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
@@ -100,20 +101,27 @@ describe("parseApproachAnswer", () => {
 });
 
 describe("generateProblemApproaches", () => {
-  it("sends each call only its own problem's digest, and uses the digest model", async () => {
+  it("sends each call its own problem's Markdown, and uses the digest model", async () => {
     const problems = [problem("1.1"), problem("1.2")];
     const generateText = jest.fn().mockResolvedValue(answer("divergent"));
     await run(problems, ["digest one", "digest two"], generateText);
 
     const requests = calls(generateText);
     expect(requests).toHaveLength(2);
-    expect(requests.map((r) => r.input).sort()).toEqual(["digest one", "digest two"]);
+    expect(requests.map((r) => r.input).sort()).toEqual(["content 1.1", "content 1.2"]);
     requests.forEach((r) => expect(r.model).toBe("digest-model"));
-    // Never the problem's raw Markdown, and never another problem's digest in the same call.
-    requests.forEach((r) => {
-      expect(r.input).not.toContain("content 1.1");
-      expect(r.input.match(/digest/g)).toHaveLength(1);
-    });
+    // One problem per call, and never another problem's material in it.
+    requests.forEach((r) => expect(r.input.match(/content/g)).toHaveLength(1));
+  });
+
+  // The digest is the fallback for a problem too long to send whole.
+  it("sends the digest instead for a problem over the single-call input budget", async () => {
+    const long = problem("1.1", "x".repeat(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS + 1));
+    const short = problem("1.2");
+    const generateText = jest.fn().mockResolvedValue(answer("convergent"));
+    await run([long, short], ["its digest", "digest two"], generateText);
+
+    expect(calls(generateText).map((r) => r.input).sort()).toEqual(["content 1.2", "its digest"]);
   });
 
   it("returns one result per problem, in the problems' order", async () => {
@@ -207,7 +215,7 @@ describe("generateProblemApproaches", () => {
     const results = await run([problem("1.1", "   "), problem("1.2")], ["", "d2"], generateText);
     expect(results[0]).toEqual({approach: "unclear"});
     expect(generateText).toHaveBeenCalledTimes(1);
-    expect(calls(generateText)[0].input).toBe("d2");
+    expect(calls(generateText)[0].input).toBe("content 1.2");
   });
 
   it("copies the first occurrence's result to a duplicate problem, with no second call", async () => {
@@ -218,7 +226,9 @@ describe("generateProblemApproaches", () => {
     ];
     const generateText = jest.fn()
       .mockImplementation(({input}: GenerateTextParams) =>
-        Promise.resolve(input === "d1" ? answer("divergent", "Try many.") : answer("convergent", "Pick one.")));
+        Promise.resolve(input === "same content" ?
+          answer("divergent", "Try many.") :
+          answer("convergent", "Pick one.")));
     const results = await run(problems, ["d1", "d2", "d3"], generateText);
 
     expect(generateText).toHaveBeenCalledTimes(2);

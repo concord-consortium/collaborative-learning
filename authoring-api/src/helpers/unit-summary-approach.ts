@@ -8,24 +8,34 @@ import {
 } from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {ConcurrencyLimiter, mapWithConcurrency} from "./concurrency";
-import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT} from "./unit-summary-config";
+import {
+  fitsOneCall, UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT,
+} from "./unit-summary-config";
 import {findDuplicates} from "./unit-summary-digest";
 import {fitToLength} from "./unit-summary-length-limit";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 import {callWithRetry, isTransportError} from "./unit-summary-retry";
 
+// Deliberately does NOT carry the digest prompt's two extra clauses -- that several steps count as
+// one idea, and that Help/Resources sections set no task. Both earn their place there, where the
+// input is a compressed summary. Measured here on 49 real problems they made this classifier
+// worse: `mixed` fell from 15 to 9 and `unclear` from 16 to 11, with every shift running toward a
+// more confident label. Fewer `mixed` is the fault we moved off the digest to avoid, and fewer
+// `unclear` trades a safe abstention for a confident guess.
 const APPROACH_INSTRUCTIONS =
-  "You will be given a digest of ONE curriculum problem, describing each of its sections. Decide " +
-  "how the problem asks students to work. divergent: it asks students to generate or try many " +
-  "different ideas, options, or versions. convergent: it asks students to choose one idea or " +
-  "design and develop, refine, or elaborate on it. mixed: different sections ask for different " +
-  "approaches. unclear: the problem does not ask for either (for example, it is only reading or " +
-  "data collection). Base this only on what the digest says the problem asks students to do. " +
-  "Then write one or two plain sentences saying what the problem asks students to do and what an " +
-  "assistant should not suggest instead. For mixed, name the sections in order and say what each " +
-  "one asks for, so a reader can tell which stage a student is in. Reply in exactly this form, " +
-  "with nothing else:\nAPPROACH: <one of divergent, convergent, mixed, unclear>\nGUIDANCE: <your " +
-  "one or two sentences>";
+  "You will be given ONE curriculum problem: usually its full content as Markdown, divided into " +
+  "sections headed \"# Section: <name>\"; for a very long problem, a digest describing each " +
+  "section instead. Decide how the problem asks students to work. divergent: it asks students to " +
+  "generate or try many different ideas, options, or versions. convergent: it asks students to " +
+  "choose one idea or design and develop, refine, or elaborate on it. mixed: different sections " +
+  "ask for different approaches. unclear: the problem does not ask for either (for example, it " +
+  "is only reading or data collection). " +
+  "Base this only on what the problem itself asks students to do. Then write one or two plain " +
+  "sentences saying what the problem asks students to do and what an assistant should not " +
+  "suggest instead. For mixed, name the sections in order and say what each one asks for, so a " +
+  "reader can tell which stage a student is in. Reply in exactly this form, with nothing else:" +
+  "\nAPPROACH: <one of divergent, convergent, mixed, unclear>\nGUIDANCE: <your one or two " +
+  "sentences>";
 
 // Shortening rewrites the guidance knowing only a character budget, so it is told what the
 // guidance is for; without this it can drop the "do not suggest" half, which is the part a
@@ -49,11 +59,16 @@ export interface ApproachOptions {
   limiter?: ConcurrencyLimiter;
 }
 
-// What one approach call reads. Its own function because the choice between the finished digest
-// and the problem's raw Markdown is a gate that stays open until the accuracy comparison runs:
-// switching to the fallback should be a change here and nowhere else.
-export function approachInput(_problem: AssembledProblem, digest: string): string {
-  return digest;
+// What one approach call reads: the problem's own Markdown where it fits in a single call, and
+// its digest only for the rare problem too long for that.
+//
+// Classifying from the digest was measured against classifying from the full text over 49 real
+// problems. The digest was the weaker input, and in a way that matters here: it compresses a
+// multi-section problem into one label, so it misses problems that change what they ask for
+// partway through -- the case `mixed` exists for. The extra cost is well under a dollar on the
+// largest real unit, on a run a staff member starts by hand.
+export function approachInput(problem: AssembledProblem, digest: string): string {
+  return fitsOneCall(problem.markdown.length) ? problem.markdown : digest;
 }
 
 // One ApproachResult per problem, in the same order as `problems`. `digests` must be the finished
