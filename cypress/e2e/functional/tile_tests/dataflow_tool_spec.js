@@ -11,6 +11,18 @@ function loadEditor(useBrowserStorage) {
   const withStorageParam = useBrowserStorage ? url : `${url}&noStorage`;
   cy.visit(withStorageParam);
 }
+
+// rete keeps the pan/zoom transform on the single child of .flow-tool, which is also the element
+// DataflowToolTile's verifyZoomIn/verifyZoomOut read.
+function readFlowTransform() {
+  return dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(style => {
+    const m = /translate\(\s*([-\d.]+)px[, ]+([-\d.]+)px\s*\)\s*scale\(\s*([-\d.]+)\s*\)/
+      .exec(style || "");
+    expect(m, `found a rete transform in "${style}"`).to.not.equal(null);
+    return { x: +m[1], y: +m[2], k: +m[3] };
+  });
+}
+
 context('Dataflow Tool Tile', function () {
   it("Dataflow Tool and Number Node", () => {
     loadEditor(false);
@@ -668,6 +680,33 @@ context('Dataflow Tool Tile', function () {
           expect(block.top, "block top edge").to.be.at.least(view.top);
           expect(block.right, "block right edge").to.be.at.most(view.right);
           expect(block.bottom, "block bottom edge").to.be.at.most(view.bottom);
+        });
+      });
+    });
+  });
+  it('zooms about the middle of the view rather than the world origin', function () {
+    loadEditor(false);
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getCreateNodeButton("number").click();
+    dataflowToolTile.getNode("number").should("exist");
+
+    readFlowTransform().then(before => {
+      dataflowToolTile.getZoomOutButton().click({ force: true });
+
+      readFlowTransform().then(after => {
+        dataflowToolTile.getDataflowTile().then($tile => {
+          const tileWidth = $tile[0].getBoundingClientRect().width;
+          const ratio = after.k / before.k;
+          // Recover the point the zoom pivoted around, from x' = P - (P - x) * ratio.
+          const pivotX = (after.x - before.x * ratio) / (1 - ratio);
+
+          expect(after.k, 'scale changed').to.be.lessThan(before.k);
+          // Zooming about world origin leaves transform.x alone, putting the pivot at the left
+          // edge, so nodes slide off stage a little further on every step. The tolerance is
+          // wide because the measured container is not the tile element, but nowhere near wide
+          // enough to admit the left edge.
+          expect(pivotX, 'pivot is near the middle of the view, not the left edge')
+            .to.be.closeTo(tileWidth / 2, tileWidth / 4);
         });
       });
     });

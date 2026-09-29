@@ -130,7 +130,7 @@ type FakeArea = Pick<AreaPlugin<Schemes, AreaExtra>["area"], "transform" | "zoom
 
 /** Stub with just the surface zoomIn/zoomOut/pan/setZoom touch: the rete area transform + zoom/translate,
  *  and the MST content that receives the live transform. */
-function makeTransformStub(k = 1, x = 0, y = 0) {
+function makeTransformStub(k = 1, x = 0, y = 0, containerSize?: { width: number; height: number }) {
   const calls = { zoom: [] as number[], translate: [] as Array<[number, number]> };
   const area: FakeArea = {
     transform: { k, x, y },
@@ -144,7 +144,12 @@ function makeTransformStub(k = 1, x = 0, y = 0) {
   };
   const setLiveProgramZoom = jest.fn();
   const stub = Object.create(ReteManager.prototype) as ReteManager;
-  (stub as unknown as { area: { area: FakeArea } }).area = { area };
+  const container = containerSize && {
+    getBoundingClientRect: () => ({ width: containerSize.width, height: containerSize.height }),
+    closest: () => null,
+    parentElement: null
+  };
+  (stub as unknown as { area: { area: FakeArea, container?: unknown } }).area = { area, container };
   (stub as unknown as { mstContent: { setLiveProgramZoom: jest.Mock } }).mstContent = { setLiveProgramZoom };
   return { stub, calls, setLiveProgramZoom };
 }
@@ -186,6 +191,31 @@ describe("ReteManager zoom/pan (CLUE-573)", () => {
     const { stub, calls } = makeTransformStub(1, 10, 20);
     await stub.pan(40, -40);
     expect(calls.translate).toEqual([[50, -20]]);
+  });
+  // area.zoom() leaves transform.x/y untouched, which pins world (0,0) to the screen. Content
+  // then slides by its own distance from that origin on every scale change, so nodes authored
+  // far from it walk off stage. The zoom has to pivot on the middle of the view.
+  it("keeps the point at the center of the view fixed while zooming out", async () => {
+    const width = 800, height = 600;
+    // Scale 2, panned so that world x=400 sits under the center of the view.
+    const { stub, calls } = makeTransformStub(2, -400, -200, { width, height });
+
+    const centerX = width / 2, centerY = height / 2;
+    const worldAtCenterBefore = { x: (centerX - (-400)) / 2, y: (centerY - (-200)) / 2 };
+
+    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1);
+
+    expect(calls.translate).toHaveLength(1);
+    const [tx, ty] = calls.translate[0];
+    const worldAtCenterAfter = { x: (centerX - tx) / 1, y: (centerY - ty) / 1 };
+    expect(worldAtCenterAfter.x).toBeCloseTo(worldAtCenterBefore.x, 6);
+    expect(worldAtCenterAfter.y).toBeCloseTo(worldAtCenterBefore.y, 6);
+  });
+
+  it("does not translate when the container has no measurable size", async () => {
+    const { stub, calls } = makeTransformStub(2, -400, -200);
+    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1);
+    expect(calls.translate).toHaveLength(0);
   });
 });
 
@@ -390,4 +420,5 @@ describe("ReteManager.getContainerDimensions (CLUE-689)", () => {
   it("returns null without a container element at all", () => {
     expect(makeContainerStub(null).getContainerDimensions()).toBeNull();
   });
+
 });
