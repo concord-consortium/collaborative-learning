@@ -1,13 +1,17 @@
-// Orchestrates the full unit-summary generation: assemble, size-check, digest, prior-knowledge,
-// overview, then validate. Kept separate from routes/generate-unit-summary.ts (the thin Express
-// handler that resolves the real secret/params and calls this) so it is testable with a fake
-// assembler and a fake OpenAI client -- neither Firebase nor Express needs to exist for a test.
+// Orchestrates the full unit-summary generation: assemble, size-check, digest, then the approach
+// step running alongside prior-knowledge and the overview, then validate. Kept separate from
+// routes/generate-unit-summary.ts (the thin Express handler that resolves the real secret/params
+// and calls this) so it is testable with a fake assembler and a fake OpenAI client -- neither
+// Firebase nor Express needs to exist for a test.
 import {IUnitSummary, IUnitSummaryEntry, validateUnitSummary} from "../../../shared/unit-summary-types";
 import {AssembledUnit} from "./assemble-unit";
+import {createConcurrencyLimiter} from "./concurrency";
+import {generateProblemApproaches} from "./unit-summary-approach";
 import {generateProblemDigests} from "./unit-summary-digest";
 import {checkUnitSize, selectPriorKnowledgeMode} from "./unit-summary-limits";
 import {
-  UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS, UNIT_SUMMARY_OVERALL_DEADLINE_MS,
+  UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
+  UNIT_SUMMARY_OVERALL_DEADLINE_MS,
 } from "./unit-summary-config";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 import {generateOverview} from "./unit-summary-overview";
@@ -63,14 +67,41 @@ async function generateSteps(
 ): Promise<IUnitSummary> {
   const {client, digestModel, summaryModel} = deps;
 
+  // The digest step keeps its own pool and finishes first: everything below reads its output.
   const digests = await generateProblemDigests(assembled.problems, {client, model: digestModel});
-  const priorKnowledge = await generatePriorKnowledge(assembled.problems, digests, {client, model: summaryModel, mode});
-  const overview = await generateOverview(assembled.problems, digests, {client, model: summaryModel});
+
+  // One limiter for everything after the digests, so the approach step and the prior-knowledge /
+  // overview chain cannot exceed today's total between them. They run side by side rather than
+  // one after the other because in rolling mode prior knowledge is a chain of calls that each
+  // wait for the one before -- it holds a single slot and is the slowest part of a large unit, so
+  // the approach calls mostly fill slots that chain leaves idle. Running them before or after
+  // would instead add roughly ceil(N / 8) rounds to the part nearest the deadline. The approach
+  // step asks for one worker fewer than the limit so that chain never queues behind it.
+  const limiter = createConcurrencyLimiter(UNIT_SUMMARY_CONCURRENCY_LIMIT);
+  const summarySteps = async () => {
+    // The overview reads the digests, not the prior knowledge, but it stays behind it in one
+    // chain so that the side-by-side pair is "approach" and "everything else".
+    const priorKnowledge = await generatePriorKnowledge(
+      assembled.problems, digests, {client, model: summaryModel, mode, limiter}
+    );
+    const overview = await generateOverview(
+      assembled.problems, digests, {client, model: summaryModel, limiter}
+    );
+    return {priorKnowledge, overview};
+  };
+  const [approaches, {priorKnowledge, overview}] = await Promise.all([
+    generateProblemApproaches(assembled.problems, digests, {client, model: digestModel, limiter}),
+    summarySteps(),
+  ]);
 
   const entries: IUnitSummaryEntry[] = assembled.problems.map((problem, i) => ({
     ordinal: problem.ordinal,
     priorKnowledge: priorKnowledge[i],
     problemDigest: digests[i],
+    approach: approaches[i].approach,
+    // Left off entirely when there is none, rather than written as "": validation rejects an
+    // empty-but-present guidance's own absent label, and the slice treats absent as "say nothing".
+    ...(approaches[i].approachGuidance ? {approachGuidance: approaches[i].approachGuidance} : {}),
   }));
 
   const summary: IUnitSummary = {

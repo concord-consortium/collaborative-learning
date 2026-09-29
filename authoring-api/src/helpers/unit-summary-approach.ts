@@ -7,7 +7,7 @@ import {
   UnitSummaryProblemApproach,
 } from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
-import {mapWithConcurrency} from "./concurrency";
+import {ConcurrencyLimiter, mapWithConcurrency} from "./concurrency";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT} from "./unit-summary-config";
 import {findDuplicates} from "./unit-summary-digest";
 import {fitToLength} from "./unit-summary-length-limit";
@@ -44,6 +44,9 @@ export interface ApproachOptions {
   // UNIT_SUMMARY_DIGEST_MODEL: this is a short classification of a short digest, so it belongs on
   // whichever model the per-problem calls use rather than the one the unit-level steps use.
   model: string;
+  // This step runs beside prior knowledge and the overview, so it must not hold a pool of its
+  // own: two pools of 8 would put 16 calls in flight. Optional so a test can drive it alone.
+  limiter?: ConcurrencyLimiter;
 }
 
 // What one approach call reads. Its own function because the choice between the finished digest
@@ -67,9 +70,14 @@ export async function generateProblemApproaches(
   const needsCall = problems
     .map((problem, i) => ({problem, digest: digests[i]}))
     .filter(({problem}) => !duplicateOfByOrdinal.has(problem.ordinal) && !!problem.markdown.trim());
+  // One worker fewer than the shared limit, so a step running beside this one always has a slot.
+  // It matters for the rolling prior-knowledge chain, which is a single call at a time: with a
+  // full complement of workers here, that chain queues behind an approach call at the start and
+  // finishes a little later for no gain. The approach calls still use every other slot.
   const computed = await mapWithConcurrency(
-    needsCall, UNIT_SUMMARY_CONCURRENCY_LIMIT,
-    ({problem, digest}) => approachForProblem(problem, digest, options)
+    needsCall, Math.max(1, UNIT_SUMMARY_CONCURRENCY_LIMIT - 1),
+    ({problem, digest}) => approachForProblem(problem, digest, options),
+    options.limiter
   );
   const resultByOrdinal = new Map<string, ApproachResult>();
   needsCall.forEach(({problem}, i) => resultByOrdinal.set(problem.ordinal, computed[i]));
@@ -127,6 +135,8 @@ async function fitGuidance(
   guidance: string, {client, model}: ApproachOptions
 ): Promise<{approachGuidance?: string}> {
   try {
+    // Not wrapped in the limiter: this runs inside a slot the approach call already holds, and
+    // waiting on the same limiter from inside it would deadlock once every slot is taken.
     return {approachGuidance: await fitToLength(guidance, {
       client, model, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS,
       maxChars: UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS,

@@ -30,14 +30,18 @@ export interface UnitSizeCheck {
 // digest step's total input is bounded by the assembled Markdown itself (chunking splits a large
 // problem across more calls; it does not reduce how much of that problem's text is sent overall).
 // The overview call sees every digest once. Rolling-mode prior knowledge is linear: each call
-// sees one prior priorKnowledge plus one digest.
+// sees one prior priorKnowledge plus one digest. The approach step reads one digest per problem.
+// Like the rest of the estimate this counts one attempt per call and leaves out the instructions,
+// so a retried or shortened call is not represented -- it is a floor, not a worst case.
 export function checkUnitSize(problems: AssembledProblem[]): UnitSizeCheck {
   const problemCount = problems.length;
   const totalMarkdownChars = problems.reduce((sum, p) => sum + p.markdown.length, 0);
   const overviewInputChars = problemCount * UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS;
+  const approachInputChars = problemCount * UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS;
   const rollingPriorKnowledgeInputChars =
     problemCount * (UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS + UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS);
-  const estimatedAggregateInputChars = totalMarkdownChars + overviewInputChars + rollingPriorKnowledgeInputChars;
+  const estimatedAggregateInputChars =
+    totalMarkdownChars + overviewInputChars + approachInputChars + rollingPriorKnowledgeInputChars;
 
   const ok = problemCount <= UNIT_SUMMARY_HARD_MAX_PROBLEMS &&
     estimatedAggregateInputChars <= UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS;

@@ -4,6 +4,7 @@
 // working on an earlier problem.
 import {UNIT_SUMMARY_OVERVIEW_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
+import {ConcurrencyLimiter} from "./concurrency";
 import {chunkMarkdown, labelDigest} from "./unit-summary-digest";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
 import {generateWithLengthLimit} from "./unit-summary-length-limit";
@@ -27,6 +28,9 @@ const COMBINE_OVERVIEWS_INSTRUCTIONS =
 export interface OverviewOptions {
   client: UnitSummaryOpenAIClient;
   model: string;
+  // See PriorKnowledgeOptions: the overview runs at the end of the same chain, so it draws from
+  // the same budget as whatever is running beside it.
+  limiter?: ConcurrencyLimiter;
 }
 
 export async function generateOverview(
@@ -54,19 +58,23 @@ export async function generateOverview(
   }
 }
 
-function callOverview(input: string, {client, model}: OverviewOptions): Promise<string> {
-  return generateWithLengthLimit({
+function callOverview(input: string, {client, model, limiter}: OverviewOptions): Promise<string> {
+  const call = () => generateWithLengthLimit({
     client, model, instructions: OVERVIEW_INSTRUCTIONS, input,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
     fieldName: "overview",
   });
+  return limiter ? limiter.run(call) : call();
 }
 
-function callCombineOverviews(chunkOverviews: string[], {client, model}: OverviewOptions): Promise<string> {
+function callCombineOverviews(
+  chunkOverviews: string[], {client, model, limiter}: OverviewOptions
+): Promise<string> {
   const input = chunkOverviews.map((overview, i) => `Part ${i + 1}: ${overview}`).join("\n\n");
-  return generateWithLengthLimit({
+  const call = () => generateWithLengthLimit({
     client, model, instructions: COMBINE_OVERVIEWS_INSTRUCTIONS, input,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
     fieldName: "overview",
   });
+  return limiter ? limiter.run(call) : call();
 }

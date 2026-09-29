@@ -3,6 +3,9 @@ import {
   UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
   UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT,
 } from "./unit-summary-config";
+import {
+  UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
+} from "../../../shared/unit-summary-types";
 import {checkUnitSize, selectPriorKnowledgeMode} from "./unit-summary-limits";
 
 function problems(count: number, markdownLength = 100): AssembledProblem[] {
@@ -39,6 +42,19 @@ describe("checkUnitSize", () => {
   it("accepts a unit exactly at the hard maximum problem count (with modest per-problem sizes)", () => {
     const result = checkUnitSize(problems(UNIT_SUMMARY_HARD_MAX_PROBLEMS, 100));
     expect(result.ok).toBe(true);
+  });
+
+  it("counts one digest per problem for the approach step", () => {
+    // Two units identical but for problem count: the per-problem increase must include the
+    // approach step's digest alongside the overview's and rolling prior knowledge's.
+    const one = checkUnitSize(problems(1, 0)).estimatedAggregateInputChars;
+    const two = checkUnitSize(problems(2, 0)).estimatedAggregateInputChars;
+    const perProblem = two - one;
+    // One digest for the overview, one for the approach step, and one plus a priorKnowledge for
+    // the rolling prior-knowledge call.
+    expect(perProblem).toBe(
+      3 * UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS
+    );
   });
 
   it("rejects a unit within the problem-count limit but over the aggregate input budget", () => {
