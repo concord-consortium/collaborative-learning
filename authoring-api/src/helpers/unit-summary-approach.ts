@@ -16,7 +16,15 @@ import {fitToLength} from "./unit-summary-length-limit";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 import {callWithRetry, isTransportError} from "./unit-summary-retry";
 
-// Deliberately does NOT carry the digest prompt's two extra clauses -- that several steps count as
+// Deliberately does NOT tell the model to prefer `unclear` when unsure, though a wrong label IS
+// worse than a missing one -- that was tried and measured. It moved `unclear` from a stable 15-16
+// to 20 across 49 real problems, but three of the five problems it newly abstained on were ones
+// every earlier run had labelled identically, against only two it had been unsure about. Losing
+// three confident labels to prevent roughly one wrong one is not the trade the preference asks
+// for. The panel is the better instrument: an author can clear a label to "(not set)", which
+// reaches the same outcome for the cases that deserve it.
+//
+// It also does NOT carry the digest prompt's two extra clauses -- that several steps count as
 // one idea, and that Help/Resources sections set no task. Both earn their place there, where the
 // input is a compressed summary. Measured here on 49 real problems they made this classifier
 // worse: `mixed` fell from 15 to 9 and `unclear` from 16 to 11, with every shift running toward a
