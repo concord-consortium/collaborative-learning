@@ -1715,7 +1715,7 @@ export class ReteManager implements INodeServices {
     // Pivot on the middle of the visible area. area.zoom() leaves transform.x/y alone unless it
     // is given an origin, which pins world (0,0) to the screen instead: content then slides by
     // its own distance from that origin every time the scale changes, so nodes authored far from
-    // it walk off stage. Translating afterwards keeps whatever is centred, centred.
+    // it walk off stage. Translating afterwards keeps whatever is centered, centered.
     const dims = this.getContainerDimensions();
     const { k, x, y } = this.area.area.transform;
 

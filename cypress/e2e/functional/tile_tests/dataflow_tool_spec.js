@@ -12,13 +12,14 @@ function loadEditor(useBrowserStorage) {
   cy.visit(withStorageParam);
 }
 
-// Reads rete's transform off whichever child element carries it.
+// rete keeps the pan/zoom transform on the single child of .flow-tool, which is also the element
+// DataflowToolTile's verifyZoomIn/verifyZoomOut read.
 function readFlowTransform() {
-  return cy.get('.primary-workspace .dataflow-tool-tile').then($tile => {
-    const el = $tile[0].querySelector('[style*="transform"]');
-    const m = el && /translate\(\s*([-\d.]+)px[, ]+([-\d.]+)px\s*\)\s*scale\(\s*([-\d.]+)\s*\)/
-      .exec(el.style.transform);
-    return m ? { x: +m[1], y: +m[2], k: +m[3] } : null;
+  return dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(style => {
+    const m = /translate\(\s*([-\d.]+)px[, ]+([-\d.]+)px\s*\)\s*scale\(\s*([-\d.]+)\s*\)/
+      .exec(style || "");
+    expect(m, `found a rete transform in "${style}"`).to.not.equal(null);
+    return { x: +m[1], y: +m[2], k: +m[3] };
   });
 }
 
@@ -690,7 +691,6 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode("number").should("exist");
 
     readFlowTransform().then(before => {
-      expect(before, 'found the rete transform').to.not.equal(null);
       dataflowToolTile.getZoomOutButton().click({ force: true });
 
       readFlowTransform().then(after => {

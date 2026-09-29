@@ -192,6 +192,31 @@ describe("ReteManager zoom/pan (CLUE-573)", () => {
     await stub.pan(40, -40);
     expect(calls.translate).toEqual([[50, -20]]);
   });
+  // area.zoom() leaves transform.x/y untouched, which pins world (0,0) to the screen. Content
+  // then slides by its own distance from that origin on every scale change, so nodes authored
+  // far from it walk off stage. The zoom has to pivot on the middle of the view.
+  it("keeps the point at the center of the view fixed while zooming out", async () => {
+    const width = 800, height = 600;
+    // Scale 2, panned so that world x=400 sits under the center of the view.
+    const { stub, calls } = makeTransformStub(2, -400, -200, { width, height });
+
+    const centerX = width / 2, centerY = height / 2;
+    const worldAtCenterBefore = { x: (centerX - (-400)) / 2, y: (centerY - (-200)) / 2 };
+
+    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1);
+
+    expect(calls.translate).toHaveLength(1);
+    const [tx, ty] = calls.translate[0];
+    const worldAtCenterAfter = { x: (centerX - tx) / 1, y: (centerY - ty) / 1 };
+    expect(worldAtCenterAfter.x).toBeCloseTo(worldAtCenterBefore.x, 6);
+    expect(worldAtCenterAfter.y).toBeCloseTo(worldAtCenterBefore.y, 6);
+  });
+
+  it("does not translate when the container has no measurable size", async () => {
+    const { stub, calls } = makeTransformStub(2, -400, -200);
+    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1);
+    expect(calls.translate).toHaveLength(0);
+  });
 });
 
 /**
@@ -396,29 +421,4 @@ describe("ReteManager.getContainerDimensions (CLUE-689)", () => {
     expect(makeContainerStub(null).getContainerDimensions()).toBeNull();
   });
 
-  // CLUE-706: area.zoom() leaves transform.x/y untouched, which pins world (0,0) to the screen.
-  // Content then slides by its own distance from that origin on every scale change, so nodes
-  // authored far from it walk off stage. The zoom has to pivot on the middle of the view.
-  it("keeps the point at the centre of the view fixed while zooming out", async () => {
-    const width = 800, height = 600;
-    // Scale 2, panned so that world x=400 sits under the centre of the view.
-    const { stub, calls } = makeTransformStub(2, -400, -200, { width, height });
-
-    const centerX = width / 2, centerY = height / 2;
-    const worldAtCentreBefore = { x: (centerX - (-400)) / 2, y: (centerY - (-200)) / 2 };
-
-    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1);
-
-    expect(calls.translate).toHaveLength(1);
-    const [tx, ty] = calls.translate[0];
-    const worldAtCentreAfter = { x: (centerX - tx) / 1, y: (centerY - ty) / 1 };
-    expect(worldAtCentreAfter.x).toBeCloseTo(worldAtCentreBefore.x, 6);
-    expect(worldAtCentreAfter.y).toBeCloseTo(worldAtCentreBefore.y, 6);
-  });
-
-  it("does not translate when the container has no measurable size", async () => {
-    const { stub, calls } = makeTransformStub(2, -400, -200);
-    await (stub as unknown as { setZoom(zoom: number): Promise<void> }).setZoom(1);
-    expect(calls.translate).toHaveLength(0);
-  });
 });
