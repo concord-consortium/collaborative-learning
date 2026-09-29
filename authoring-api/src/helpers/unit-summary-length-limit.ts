@@ -13,28 +13,45 @@ const SHORTEN_INSTRUCTIONS =
   "given character limit, keeping its meaning and its important details. Do not add any " +
   "information that was not already there.";
 
-export interface LengthLimitedCallOptions {
+export interface FitToLengthOptions {
   client: UnitSummaryOpenAIClient;
   model: string;
-  instructions: string;
-  input: string;
   timeoutMs: number;
   maxChars: number;
   // Used only in error messages, e.g. "digest", "priorKnowledge", "overview".
   fieldName: string;
+  // What this field's shortening must not drop, appended to the shorten instructions. Shortening
+  // is otherwise free to cut whatever it likes, which can remove the very thing a later step
+  // reads. Omitted by fields with nothing in particular to protect.
+  preserve?: string;
+}
+
+export interface LengthLimitedCallOptions extends FitToLengthOptions {
+  instructions: string;
+  input: string;
 }
 
 export async function generateWithLengthLimit(options: LengthLimitedCallOptions): Promise<string> {
-  const {client, model, instructions, input, timeoutMs, maxChars, fieldName} = options;
+  const {client, model, instructions, input, timeoutMs, fieldName} = options;
   const text = await callWithRetry(() => client.generateText({model, instructions, input, timeoutMs}));
+  return fitToLength(requireNonEmpty(text, fieldName), options);
+}
+
+// Brings already-generated text within `maxChars`: one shorten call, then a word-boundary
+// truncation if that still overshoots. Separate from generateWithLengthLimit so a step that
+// produced its text some other way -- parsed out of a larger answer, say -- can reuse the same
+// two-stage behavior without making the first call again.
+export async function fitToLength(text: string, options: FitToLengthOptions): Promise<string> {
+  const {client, model, timeoutMs, maxChars, fieldName, preserve} = options;
   const trimmed = requireNonEmpty(text, fieldName);
   if (trimmed.length <= maxChars) {
     return trimmed;
   }
 
+  const instructions = preserve ? `${SHORTEN_INSTRUCTIONS} ${preserve}` : SHORTEN_INSTRUCTIONS;
   const shortenInput = `Character limit: ${maxChars}\n\nText to shorten:\n\n${trimmed}`;
   const shortened = await callWithRetry(() => client.generateText({
-    model, instructions: SHORTEN_INSTRUCTIONS, input: shortenInput, timeoutMs,
+    model, instructions, input: shortenInput, timeoutMs,
   }));
   const shortenedTrimmed = requireNonEmpty(shortened, fieldName);
   if (shortenedTrimmed.length <= maxChars) {

@@ -15,9 +15,18 @@ const DIGEST_INSTRUCTIONS =
   "the unit, converted to Markdown. The problem is divided into sections, each marked with a " +
   "heading of the form \"# Section: <name>\" (for example \"# Section: Investigate\"). Write a " +
   "concise digest of what this problem covers and has students do, covering EVERY section named " +
-  "in the input in roughly one or two sentences each -- do not stop after the first section. Stay " +
+  "in the input in roughly one or two sentences each -- do not stop after the first section. For " +
+  "each section, say in a few words whether it asks students to try or make many different " +
+  "things or just one. Stay " +
   `within ${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters total. Only use information in the ` +
   "provided content -- do not infer or reference anything else, including other problems in the unit.";
+
+// A later step reads each digest to decide how its problem asks students to work, and it sees
+// only what the digest kept. Shortening a digest is otherwise free to drop exactly that, so every
+// call that produces a digest passes this note along with the length limit.
+const DIGEST_PRESERVE_NOTE =
+  "Keep every section name, and keep whether each section asks students to try or make many " +
+  "different things or just one.";
 
 // A problem can have no extractable text (an image-only section, a not-yet-authored placeholder,
 // etc.), which would otherwise send OpenAI an empty `input` and get back a 400. Skip the call and
@@ -42,9 +51,13 @@ export function labelDigest(problem: AssembledProblem, digest: string): string {
 const COMBINE_DIGESTS_INSTRUCTIONS =
   "You are given several partial digests describing different parts of the SAME curriculum " +
   "problem (it was split into parts only because its content was too long for one request). " +
-  "Combine them into a single digest, in 3 to 5 sentences and no more than " +
-  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters, of what this problem covers and has ` +
-  "students do. Do not mention that it was split into parts.";
+  "Combine them into a single digest of what this problem covers and has students do, as briefly " +
+  "as you can while still covering every section, and no more than " +
+  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters. ` +
+  "Keep every section named in the parts, and keep what each part said about " +
+  "whether a section asks students to try or make many different things or just one -- do not " +
+  "merge sections that ask for different things into one general statement. Do not mention that " +
+  "it was split into parts.";
 
 export interface DigestOptions {
   client: UnitSummaryOpenAIClient;
@@ -115,7 +128,7 @@ function callDigest(markdown: string, {client, model}: DigestOptions): Promise<s
   return generateWithLengthLimit({
     client, model, instructions: DIGEST_INSTRUCTIONS, input: markdown,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
-    fieldName: "digest",
+    fieldName: "digest", preserve: DIGEST_PRESERVE_NOTE,
   });
 }
 
@@ -124,7 +137,7 @@ function callCombineDigests(chunkDigests: string[], {client, model}: DigestOptio
   return generateWithLengthLimit({
     client, model, instructions: COMBINE_DIGESTS_INSTRUCTIONS, input,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
-    fieldName: "digest",
+    fieldName: "digest", preserve: DIGEST_PRESERVE_NOTE,
   });
 }
 
