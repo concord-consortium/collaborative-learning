@@ -82,7 +82,7 @@ export async function generateProblemDigests(
 // problemHash. Two empty problems can share a problemHash too, but digestOneProblem checks for
 // blank content before it ever looks at this map, so an empty problem never actually reaches the
 // "same content as problem X" message this produces.
-function findDuplicates(problems: AssembledProblem[]): Map<string, string> {
+export function findDuplicates(problems: AssembledProblem[]): Map<string, string> {
   const firstOrdinalByHash = new Map<string, string>();
   const duplicateOfByOrdinal = new Map<string, string>();
   for (const problem of problems) {
