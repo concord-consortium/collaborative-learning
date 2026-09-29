@@ -107,8 +107,7 @@ describe("the preserve note", () => {
       "details. Do not add any information that was not already there.");
   });
 
-  // The note rides the shorten call only. It is not an instruction for producing the text in the
-  // first place, and a within-limit response never reaches a shorten call at all.
+  // The note goes on the shorten call only; a within-limit response never reaches one.
   it("never reaches the first call, and costs no call when the text already fits", async () => {
     const generateText = jest.fn().mockResolvedValue("short");
     await generateWithLengthLimit({

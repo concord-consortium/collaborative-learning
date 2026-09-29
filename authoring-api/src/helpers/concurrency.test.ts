@@ -38,8 +38,7 @@ describe("createConcurrencyLimiter", () => {
     expect(await limiter.run(async () => "after")).toBe("after");
   });
 
-  // The point of the limiter: two steps that each hold their own pool of 8 put 16 calls in
-  // flight, which is what it exists to prevent.
+  // Two steps each holding their own pool of 8 would put 16 calls in flight.
   it("bounds two maps sharing it, where two separate pools would not", async () => {
     const shared = tracker();
     const limiter = createConcurrencyLimiter(8);

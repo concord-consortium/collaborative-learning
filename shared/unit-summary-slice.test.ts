@@ -295,8 +295,8 @@ describe("the current problem's approach", () => {
     expect(slice?.currentApproachGuidance).toBe("Students improve one design.");
   });
 
-  // The whole point of the field: a consumer that could see the next problem's approach might
-  // apply it early, which is the contradiction the story is about.
+  // A consumer that could see the next problem's approach might apply it early, which is the
+  // contradiction this prevents.
   it("never copies entry N+1's approach, even though N+1's digest is in the slice", () => {
     const slice = unitSummarySlice(summaryWithApproaches(), liveProblems, "1.2");
     expect(slice?.nextDigest).toBe("digest for 1.3");
@@ -310,8 +310,8 @@ describe("the current problem's approach", () => {
     expect(slice?.currentApproachGuidance).toBeUndefined();
   });
 
-  // A hand-edited content.json never goes through validateUnitSummary, and these values end up in
-  // the prompt as prose, so the slice re-checks them. Each bad value costs only the approach line.
+  // A hand-edited content.json never goes through validateUnitSummary, and these values reach the
+  // model as prose, so the slice re-checks them. Each bad value costs only the approach line.
   describe("values a hand-edited content.json could contain", () => {
     function sliceWithEntry(overrides: Record<string, unknown>) {
       const summary = summaryFor(liveProblems);
@@ -402,8 +402,8 @@ describe("formatUnitSummarySlice: the approach line", () => {
     expect(text).toContain(`How this problem asks students to work (1.2): ${approach}. Some guidance.`);
   });
 
-  // "unclear" would tell the model the problem is vague, which is worse than saying nothing and
-  // letting the standing rule and the problem text do the work.
+  // Saying nothing leaves the standing rule and the problem text to do the work, rather than
+  // telling the model the problem is vague.
   it("says nothing at all for unclear", () => {
     const text = formatUnitSummarySlice(sliceWith("unclear", "Cannot tell."));
     expect(text).not.toMatch(/asks students to work/);

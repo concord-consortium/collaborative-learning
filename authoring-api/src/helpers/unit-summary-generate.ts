@@ -1,8 +1,7 @@
 // Orchestrates the full unit-summary generation: assemble, size-check, digest, then the approach
-// step running alongside prior-knowledge and the overview, then validate. Kept separate from
-// routes/generate-unit-summary.ts (the thin Express handler that resolves the real secret/params
-// and calls this) so it is testable with a fake assembler and a fake OpenAI client -- neither
-// Firebase nor Express needs to exist for a test.
+// step running alongside prior knowledge and the overview, then validate. Kept separate from
+// routes/generate-unit-summary.ts so it is testable with a fake assembler and a fake OpenAI
+// client, with no Firebase or Express.
 import {IUnitSummary, IUnitSummaryEntry, validateUnitSummary} from "../../../shared/unit-summary-types";
 import {AssembledUnit} from "./assemble-unit";
 import {createConcurrencyLimiter} from "./concurrency";
@@ -71,16 +70,13 @@ async function generateSteps(
   const digests = await generateProblemDigests(assembled.problems, {client, model: digestModel});
 
   // One limiter for everything after the digests, so the approach step and the prior-knowledge /
-  // overview chain cannot exceed today's total between them. They run side by side rather than
-  // one after the other because in rolling mode prior knowledge is a chain of calls that each
-  // wait for the one before -- it holds a single slot and is the slowest part of a large unit, so
-  // the approach calls mostly fill slots that chain leaves idle. Running them before or after
-  // would instead add roughly ceil(N / 8) rounds to the part nearest the deadline. The approach
-  // step asks for one worker fewer than the limit so that chain never queues behind it.
+  // overview chain cannot exceed the total between them. They run side by side because in rolling
+  // mode prior knowledge is a chain of single calls, and the approach calls fill the slots that
+  // chain leaves idle.
   const limiter = createConcurrencyLimiter(UNIT_SUMMARY_CONCURRENCY_LIMIT);
   const summarySteps = async () => {
-    // The overview reads the digests, not the prior knowledge, but it stays behind it in one
-    // chain so that the side-by-side pair is "approach" and "everything else".
+    // The overview reads the digests, not the prior knowledge, but stays behind it in one chain
+    // so the side-by-side pair is the approach step and everything else.
     const priorKnowledge = await generatePriorKnowledge(
       assembled.problems, digests, {client, model: summaryModel, mode, limiter}
     );
@@ -99,8 +95,7 @@ async function generateSteps(
     priorKnowledge: priorKnowledge[i],
     problemDigest: digests[i],
     approach: approaches[i].approach,
-    // Left off entirely when there is none, rather than written as "": validation rejects an
-    // empty-but-present guidance's own absent label, and the slice treats absent as "say nothing".
+    // Omitted rather than written as "", which validation rejects.
     ...(approaches[i].approachGuidance ? {approachGuidance: approaches[i].approachGuidance} : {}),
   }));
 

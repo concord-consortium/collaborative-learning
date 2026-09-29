@@ -41,13 +41,9 @@ export const UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT = 40;
 export const UNIT_SUMMARY_HARD_MAX_PROBLEMS = 54;
 export const UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS = 3_000_000;
 
-// Whether a problem's content fits in a single model call. Three steps turn on this same answer,
-// and they have to agree: the digest step sends the problem whole or splits it into parts; the
-// approach step reads the problem itself or falls back to its digest, which only exists in the
-// split case; and the size estimate counts whichever of the two each problem will send. Written
-// once so they cannot drift -- a split problem the approach step still tried to send whole would
-// exceed the call's input budget. Takes a length rather than an AssembledProblem so this file
-// stays free of imports.
+// Whether a problem's content fits in a single model call. The digest step, the approach step and
+// the size estimate all branch on this and have to agree, so it is written once. Takes a length
+// rather than an AssembledProblem to keep this file free of imports.
 export function fitsOneCall(markdownLength: number): boolean {
   return markdownLength <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS;
 }

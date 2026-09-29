@@ -51,8 +51,8 @@ describe("parseApproachAnswer", () => {
     expect(parseApproachAnswer("APPROACH: divergent\nGUIDANCE:")).toEqual({approach: "divergent", guidance: ""});
   });
 
-  // A model dresses up short answers on its own. Every one of these used to fail, which cost two
-  // attempts and then recorded a perfectly clear problem as "unclear".
+  // A model dresses up short answers on its own. Failing to read one costs two attempts and then
+  // records a clear problem as "unclear".
   it.each([
     ["bold around the marker and colon", "**APPROACH:** convergent"],
     ["bold around the marker only", "**APPROACH**: convergent"],
@@ -75,8 +75,8 @@ describe("parseApproachAnswer", () => {
     expect(parseApproachAnswer("APPROACH: divergent\nTry many things.")?.approach).toBe("divergent");
   });
 
-  // A model can put the two markers the other way round. Without a cut, the guidance capture runs
-  // to the end of the answer and swallows the APPROACH line, which then reaches every consumer.
+  // A model can put the two markers the other way round. Without the cut, the guidance capture
+  // swallows the APPROACH line, which then reaches every consumer.
   it("does not let the guidance swallow an APPROACH line that follows it", () => {
     expect(parseApproachAnswer("GUIDANCE: Pick one design and improve it.\nAPPROACH: convergent"))
       .toEqual({approach: "convergent", guidance: "Pick one design and improve it."});
@@ -180,8 +180,8 @@ describe("generateProblemApproaches", () => {
     expect(shorten.instructions).toMatch(/what an assistant should not suggest instead/);
   });
 
-  // Decided item 3: only a network or server failure fails a generation. A shorten call is a
-  // model call like any other, so an unusable answer from it must not take the run down with it.
+  // Only a network or server failure fails a generation. A shorten call is a model call like any
+  // other, so an unusable answer from it must not take the run down.
   it("keeps the label and drops the guidance when the shorten call comes back blank", async () => {
     const tooLong = "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS + 50);
     const generateText = jest.fn()

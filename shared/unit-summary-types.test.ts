@@ -215,7 +215,7 @@ describe("validateUnitSummary: approach fields", () => {
     return (result as any).errors.join(" ");
   }
 
-  // The fields are optional, so a summary saved before they existed must still validate.
+  // The fields are optional, so a summary without them must still validate.
   it("accepts a summary with neither approach field on any entry", () => {
     expect(validateUnitSummary(validSummary(), liveProblems)).toEqual({ valid: true });
   });
@@ -254,8 +254,8 @@ describe("validateUnitSummary: approach fields", () => {
   });
 
   // validateUnitSummary also runs over a hand-edited content.json, so the value can be anything
-  // JSON allows. Reading .length off a null used to throw instead of reporting an error, and a
-  // number used to validate while unitSummarySlice dropped it -- the two disagreeing.
+  // JSON allows. It must report an error rather than throwing, and must agree with what
+  // unitSummarySlice accepts.
   it.each([
     ["null", null],
     ["a number", 42],
@@ -283,8 +283,8 @@ describe("validateUnitSummary: approach fields", () => {
 
   it("counts the label and the guidance toward the total budget", () => {
     const summary = validSummary();
-    // Each entry's digest and priorKnowledge alone stay inside the budget; the guidance is what
-    // pushes the total over, so a pass here would mean the two fields are not being counted.
+    // Digest and priorKnowledge alone stay inside the budget, so only counting the guidance
+    // pushes the total over.
     const guidance = "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS);
     const perEntryChars = UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS + "convergent".length;
     const entryCount = Math.ceil(UNIT_SUMMARY_TOTAL_BUDGET_CHARS / perEntryChars) + 1;

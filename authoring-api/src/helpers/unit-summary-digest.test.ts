@@ -213,12 +213,10 @@ describe("generateProblemDigests", () => {
   });
 });
 
-// A long problem is digested chunk by chunk and then combined, so a section that asks students
-// to try many things and a section that asks them to build one can land in different chunks. The
-// approach step later reads only the combined digest, so what it can see depends on this wiring
-// keeping each section's one-versus-many statement alive through both stages. A fake client can
-// only check the wiring; whether a real model honors the instructions is the accuracy comparison
-// in the plan's §6.2.
+// A long problem is digested chunk by chunk and then combined, so a section asking students to
+// try many things and one asking them to build a single thing can land in different chunks. The
+// approach step reads only the combined digest, so each section's one-versus-many statement has
+// to survive both stages. A fake client checks the wiring, not whether a real model obeys.
 describe("a chunked problem whose sections ask for different things", () => {
   // Each part fits a chunk on its own, and the two together do not, so the split falls between
   // them -- one section per chunk, which is the case the combine step has to survive.
@@ -272,8 +270,8 @@ describe("a chunked problem whose sections ask for different things", () => {
     expect(combine.instructions).toMatch(/do not merge sections that ask for different things/);
   });
 
-  // The shorten call is where the evidence is most likely to be lost: it rewrites a whole digest
-  // with only a character budget to go on unless it is told what to protect.
+  // The shorten call rewrites a whole digest with only a character budget to go on unless it is
+  // told what to protect.
   it("carries the preserve note into a forced shorten call", async () => {
     const overLong = "y".repeat(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + 50);
     const generateText = jest.fn()

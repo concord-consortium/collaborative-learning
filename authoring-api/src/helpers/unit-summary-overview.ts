@@ -28,8 +28,7 @@ const COMBINE_OVERVIEWS_INSTRUCTIONS =
 export interface OverviewOptions {
   client: UnitSummaryOpenAIClient;
   model: string;
-  // See PriorKnowledgeOptions: the overview runs at the end of the same chain, so it draws from
-  // the same budget as whatever is running beside it.
+  // The overview runs at the end of the prior-knowledge chain, so it shares that budget.
   limiter?: ConcurrencyLimiter;
 }
 

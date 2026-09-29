@@ -20,9 +20,8 @@ export interface FitToLengthOptions {
   maxChars: number;
   // Used only in error messages, e.g. "digest", "priorKnowledge", "overview".
   fieldName: string;
-  // What this field's shortening must not drop, appended to the shorten instructions. Shortening
-  // is otherwise free to cut whatever it likes, which can remove the very thing a later step
-  // reads. Omitted by fields with nothing in particular to protect.
+  // Appended to the shorten instructions: what this field's shortening must not drop. Omitted by
+  // fields with nothing in particular to protect.
   preserve?: string;
 }
 
@@ -38,9 +37,8 @@ export async function generateWithLengthLimit(options: LengthLimitedCallOptions)
 }
 
 // Brings already-generated text within `maxChars`: one shorten call, then a word-boundary
-// truncation if that still overshoots. Separate from generateWithLengthLimit so a step that
-// produced its text some other way -- parsed out of a larger answer, say -- can reuse the same
-// two-stage behavior without making the first call again.
+// truncation if that still overshoots. Separate from generateWithLengthLimit so a step whose text
+// came from somewhere else can reuse it without making the first call again.
 export async function fitToLength(text: string, options: FitToLengthOptions): Promise<string> {
   const {client, model, timeoutMs, maxChars, fieldName, preserve} = options;
   const trimmed = requireNonEmpty(text, fieldName);

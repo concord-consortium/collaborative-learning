@@ -32,8 +32,8 @@ export interface UnitSizeCheck {
 // The overview call sees every digest once. Rolling-mode prior knowledge is linear: each call
 // sees one prior priorKnowledge plus one digest. The approach step reads each problem's own
 // Markdown, or its digest where the problem is too long to send in one call.
-// Like the rest of the estimate this counts one attempt per call and leaves out the instructions,
-// so a retried or shortened call is not represented -- it is a floor, not a worst case.
+// Like the rest of the estimate, this counts one attempt per call and leaves out the
+// instructions, so it is a floor rather than a worst case.
 export function checkUnitSize(problems: AssembledProblem[]): UnitSizeCheck {
   const problemCount = problems.length;
   const totalMarkdownChars = problems.reduce((sum, p) => sum + p.markdown.length, 0);

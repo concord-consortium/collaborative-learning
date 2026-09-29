@@ -3,9 +3,8 @@
 // dependency like p-limit because the unit-summary pipeline is the only caller so far and the
 // need is this one primitive.
 //
-// Given a `limiter`, that is the real bound and `limit` is only how many workers this one map
-// may contribute. Two maps running side by side each with limit 8 put 16 calls in flight; the
-// same two sharing a limiter of 8 put 8.
+// With a `limiter`, that is the real bound and `limit` is only how many workers this map may
+// contribute. Two maps of limit 8 put 16 calls in flight; sharing a limiter of 8 they put 8.
 export async function mapWithConcurrency<T, R>(
   items: T[], limit: number, fn: (item: T, index: number) => Promise<R>, limiter?: ConcurrencyLimiter
 ): Promise<R[]> {
@@ -25,8 +24,7 @@ export async function mapWithConcurrency<T, R>(
   return results;
 }
 
-// A bound shared by callers that would otherwise each hold their own pool. A step's own limit
-// says how much of the budget it may ask for; the limiter is what the budget actually is.
+// A bound shared by callers that would otherwise each hold their own pool.
 export interface ConcurrencyLimiter {
   run<T>(fn: () => Promise<T>): Promise<T>;
 }
@@ -37,8 +35,8 @@ export function createConcurrencyLimiter(limit: number): ConcurrencyLimiter {
 
   return {
     async run<T>(fn: () => Promise<T>): Promise<T> {
-      // A loop, not a single wait: a woken caller re-checks rather than assuming the slot it was
-      // woken for is still free, since another caller can take it first.
+      // A loop, not a single wait: another caller can take the slot before a woken one reaches
+      // it, so it has to re-check.
       while (active >= limit) {
         await new Promise<void>((resolve) => waiting.push(resolve));
       }

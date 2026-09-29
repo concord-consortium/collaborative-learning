@@ -271,10 +271,8 @@ describe("a run configured the way it was before these dimensions existed keeps 
   // requests there — so they pin the key against what actually shipped rather than against whatever
   // this branch happens to produce.
   //
-  // UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION and PROBLEM_APPROACH_INSTRUCTION are prepended
-  // unconditionally to every system message and are part of every request key exactly as the
-  // prompt is, so the two pinned values below reflect them, the same way they reflect a reworded
-  // built-in prompt.
+  // Both instructions are prepended unconditionally to every system message and are part of every
+  // request key, so the pinned values below include them, as they would a reworded prompt.
   //
   // The prompt comes from the committed file rather than from `defaultAiPrompt`, which is the
   // built-in one and has since been reworded. A prompt is part of every request key, so a reworded

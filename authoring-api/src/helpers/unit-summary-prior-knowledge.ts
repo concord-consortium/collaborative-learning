@@ -54,8 +54,7 @@ export interface PriorKnowledgeOptions {
   client: UnitSummaryOpenAIClient;
   model: string;
   mode: PriorKnowledgeMode;
-  // Shared with whatever else runs beside this step, so the two cannot exceed the budget between
-  // them. Optional so a test can drive the step on its own.
+  // Shared with whatever runs beside this step. Optional so a test can drive it alone.
   limiter?: ConcurrencyLimiter;
 }
 
@@ -89,9 +88,8 @@ async function generatePrefix(
   problems: AssembledProblem[], digests: string[], options: PriorKnowledgeOptions
 ): Promise<string[]> {
   const targetIndices = problems.map((_, i) => i).slice(1);
-  // No limiter passed here: callPriorKnowledge takes a slot itself, and taking one here too would
-  // mean each call holds a slot while waiting for a second one -- a deadlock as soon as the outer
-  // waiters fill the pool. mapWithConcurrency's own limit still caps how many this step asks for.
+  // No limiter here: callPriorKnowledge takes a slot itself, and taking one at both levels means
+  // each call holds a slot while waiting for a second -- a deadlock once the pool is full.
   return mapWithConcurrency(targetIndices, UNIT_SUMMARY_CONCURRENCY_LIMIT, (i) => {
     const labeledDigests = problems.slice(0, i).map((p, idx) => labelDigest(p, digests[idx])).join("\n\n");
     return callPriorKnowledge(labeledDigests, problems[i], PREFIX_INSTRUCTIONS, options);
@@ -119,7 +117,7 @@ async function callPriorKnowledge(
 ): Promise<string> {
   try {
     // The rolling loop calls this directly rather than through mapWithConcurrency, so the limiter
-    // is applied here -- one place that covers both modes.
+    // is applied here, covering both modes.
     const call = () => generateWithLengthLimit({
       client, model, instructions, input, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS,
       maxChars: UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, fieldName: "priorKnowledge",

@@ -7,9 +7,8 @@ import {APIConnectionTimeoutError, InternalServerError, RateLimitError} from "op
 import {UNIT_SUMMARY_RETRY_BACKOFF_MS, UNIT_SUMMARY_RETRY_COUNT} from "./unit-summary-config";
 
 // A failure of the connection or of OpenAI itself, as opposed to a usable response we then
-// rejected. Exported because a caller that degrades gracefully on a bad answer still has to let
-// an outage through: recording "unclear" because the network was down would be a lie about the
-// curriculum.
+// rejected. Exported because a caller that degrades gracefully on a bad answer must still let an
+// outage through, rather than recording a label the curriculum did not produce.
 export function isTransportError(error: unknown): boolean {
   return error instanceof RateLimitError ||
     error instanceof InternalServerError ||

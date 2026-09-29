@@ -31,8 +31,8 @@ describe("isCachedContentUpToDate", () => {
     expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
   });
 
-  // The literal 1, not PROMPT_POLICY_VERSION - 1: the relative form only ever checks one version
-  // back, so it stops covering version 1 as soon as the version advances again.
+  // The literal 1, not PROMPT_POLICY_VERSION - 1, which would stop covering version 1 as soon as
+  // the version advances again.
   it("regenerates a cache written under policy version 1", () => {
     const classInfo = fakeSnapshot(true, {});
     const content = contentSnapshot({promptPolicyVersion: 1});

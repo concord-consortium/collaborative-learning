@@ -9,7 +9,7 @@ import {GenerateUnitSummaryDeps, runUnitSummaryGeneration} from "./unit-summary-
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
 
 // Matches the approach step by the reply format it demands, which is unique to that prompt and
-// survives rewording of the prompt's description of its input.
+// survives a rewording of it.
 function isApproachPrompt(params: GenerateTextParams): boolean {
   return params.instructions.includes("APPROACH:");
 }
@@ -69,8 +69,8 @@ describe("runUnitSummaryGeneration", () => {
     });
   });
 
-  // The entry must not carry an empty-string guidance: validation rejects guidance without a
-  // label, and the slice reads "absent" as "say nothing about approach".
+  // Not an empty string: validation rejects guidance without a label, and the slice reads absent
+  // as "say nothing about approach".
   it("leaves approachGuidance off the entry when the model gave a label and no guidance", async () => {
     const problems = [problem("1.1"), problem("1.2")];
     const generateText = jest.fn(async (params: GenerateTextParams) =>
@@ -84,9 +84,8 @@ describe("runUnitSummaryGeneration", () => {
     });
   });
 
-  // The two steps turn on one answer (fitsOneCall): a problem the digest step split into parts is
-  // exactly the problem the approach step cannot send whole. If they ever disagreed, the approach
-  // call for a split problem would exceed a single call's input budget.
+  // Both steps turn on fitsOneCall. If they disagreed, the approach call for a problem the digest
+  // step had split would exceed a single call's input budget.
   it("gives the approach step the combined digest for a problem the digest step had to split", async () => {
     const long = problem("1.1", "p ".repeat(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS));
     const short = problem("1.2", "short problem text");
@@ -114,8 +113,7 @@ describe("runUnitSummaryGeneration", () => {
     await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
 
     const calls: GenerateTextParams[] = generateText.mock.calls.map(([params]: [GenerateTextParams]) => params);
-    // The two per-problem steps share the digest model; the two unit-level steps share the
-    // summary model. Approach is per-problem, so it belongs with the digests.
+    // Approach is a per-problem step, so it uses the digest model rather than the summary one.
     const isPerProblem = (c: GenerateTextParams) =>
       c.instructions.includes("content of ONE problem") || isApproachPrompt(c);
     expect(new Set(calls.filter(isPerProblem).map((c) => c.model))).toEqual(new Set(["digest-model"]));
@@ -236,21 +234,19 @@ describe("runUnitSummaryGeneration", () => {
   });
 });
 
-// The approach step runs beside prior knowledge and the overview, drawing from one shared budget.
-// Two pools of UNIT_SUMMARY_CONCURRENCY_LIMIT would put twice that many calls in flight, which is
-// the thing these tests exist to prevent.
+// The approach step runs beside prior knowledge and the overview on one shared budget. Two pools
+// of UNIT_SUMMARY_CONCURRENCY_LIMIT would put twice that many calls in flight, which is what these
+// tests exist to prevent.
 describe("scheduling after the digest step", () => {
   const isDigestCall = (c: GenerateTextParams) => c.instructions.includes("content of ONE problem");
   const isApproachCall = isApproachPrompt;
 
-  // Records every call's start and end order alongside a peak in-flight count, with each call
-  // taking a tick of real time so overlap is actually possible.
+  // Each call takes a tick of real time, so overlap is possible and can be observed.
   function instrumentedClient(delayMs = 1) {
     let inFlight = 0;
-    // `rounds` is the length of the longest chain of calls that had to wait for each other: a
-    // call that starts after some other call ended is at least one round deeper than that one.
-    // It counts the schedule's shape rather than this machine's speed, so it does not go flaky
-    // when the build host is busy.
+    // `rounds` is the longest chain of calls that had to wait for each other: a call starting
+    // after another ended is at least one round deeper. It measures the schedule's shape rather
+    // than this machine's speed, so a busy build host does not make it flaky.
     let deepestFinished = 0;
     const observed = {peakInFlight: 0, rounds: 0, order: [] as string[]};
     const generateText = jest.fn(async (params: GenerateTextParams) => {
@@ -297,13 +293,9 @@ describe("scheduling after the digest step", () => {
     expect(firstSummaryStart).toBeLessThan(lastApproachEnd);
   });
 
-  // The slowest shape the pipeline supports: rolling mode is a chain of calls that each wait for
-  // the one before, and it is the part closest to the deadline.
-  //
-  // What a round costs in real seconds is NOT tested here -- a fake client cannot know that. The
-  // deadline is only really checked by the timed run on the largest real unit (plan §6.3). This
-  // assumption exists so the count below means something; if real calls turn out slower, the
-  // schedule is fine and the assumption is what was wrong.
+  // Rolling mode is the slowest shape the pipeline supports and the part closest to the deadline.
+  // What a round costs in real seconds is not tested here, since a fake client cannot know it: if
+  // real calls turn out slower, this assumption is what is wrong, not the schedule.
   const ASSUMED_CALL_MS = 2_000;
 
   it("keeps a full rolling-mode unit within the deadline at an assumed call time", async () => {
@@ -317,9 +309,9 @@ describe("scheduling after the digest step", () => {
     expect(observed.rounds * ASSUMED_CALL_MS).toBeLessThan(UNIT_SUMMARY_OVERALL_DEADLINE_MS);
   });
 
-  // The whole reason the approach step runs beside the summary steps instead of after them. The
-  // chain of rolling prior-knowledge calls is what sets the depth; approach calls fill slots that
-  // chain leaves idle, so they should add almost nothing to it.
+  // The reason the approach step runs beside the summary steps rather than after them: the
+  // rolling prior-knowledge chain sets the depth, and approach calls fill the slots it leaves
+  // idle.
   it("adds almost no rounds for the approach step's calls", async () => {
     const problems = Array.from({length: UNIT_SUMMARY_HARD_MAX_PROBLEMS}, (_, i) => problem(`1.${i + 1}`));
     const {generateText, observed} = instrumentedClient(2);

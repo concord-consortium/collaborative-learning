@@ -28,9 +28,8 @@ const DIGEST_INSTRUCTIONS =
   `within ${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters total. Only use information in the ` +
   "provided content -- do not infer or reference anything else, including other problems in the unit.";
 
-// A later step reads each digest to decide how its problem asks students to work, and it sees
-// only what the digest kept. Shortening a digest is otherwise free to drop exactly that, so every
-// call that produces a digest passes this note along with the length limit.
+// The approach step reads a digest to decide how its problem asks students to work, so shortening
+// must not drop that. Passed with the length limit by every call that produces a digest.
 const DIGEST_PRESERVE_NOTE =
   "Keep every section name, and keep whether each section asks students for several different " +
   "ideas or versions of the same thing, for a single idea, or for nothing at all.";

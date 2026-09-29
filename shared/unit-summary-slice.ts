@@ -28,7 +28,7 @@ export interface IUnitSummarySlice {
   nextOrdinal?: string;   // undefined on the unit's last problem
   nextDigest?: string;
   // Entry N's approach only, never N+1's: a consumer that saw the next problem's approach could
-  // apply it early, which is the contradiction this is meant to prevent.
+  // apply it early, which is the contradiction this exists to prevent.
   currentApproach?: UnitSummaryProblemApproach;
   currentApproachGuidance?: string;
 }
@@ -89,11 +89,9 @@ export function unitSummarySlice(
 }
 
 /**
- * validateUnitSummary runs at Save time in the authoring panel, but a hand-edited content.json in
- * the curriculum repo never goes through it -- and the approach fields end up in the prompt as
- * prose, so an unchecked value ("Convergent", an invented label, an over-long guidance) would be
- * sent verbatim to every AI feature. Anything that would not have passed validation is dropped
- * here, which costs only the approach line; the rest of the slice is unaffected.
+ * A hand-edited content.json never goes through validateUnitSummary, and these fields reach the
+ * model as prose, so an unchecked value would be sent verbatim. Anything that would fail
+ * validation is dropped here, costing only the approach line.
  */
 function checkedApproach(entry: IUnitSummaryEntry): {
   approach?: UnitSummaryProblemApproach;
@@ -102,8 +100,6 @@ function checkedApproach(entry: IUnitSummaryEntry): {
   const approach = entry.approach;
   if (!(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly unknown[]).includes(approach)) return {};
 
-  // Guidance is kept only alongside a good label, matching validateUnitSummary's rule that
-  // guidance without a label is an error.
   const guidance = entry.approachGuidance;
   const guidanceOk = typeof guidance === "string" &&
     guidance.length <= UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS;
@@ -121,8 +117,8 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
     lines.push(`What the student should already know entering this problem: ${slice.priorKnowledge}`);
   }
   lines.push(`This problem (${slice.currentOrdinal}): ${slice.currentDigest}`);
-  // "unclear" says nothing rather than saying "unclear": the model then falls back to the standing
-  // rule and whatever problem text it has, which is better than being told the problem is vague.
+  // "unclear" sends no line at all, so the model falls back to the standing rule and the problem
+  // text rather than being told the problem is vague.
   if (slice.currentApproach && slice.currentApproach !== "unclear") {
     const guidance = slice.currentApproachGuidance ? ` ${slice.currentApproachGuidance}` : "";
     lines.push(
@@ -137,10 +133,9 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
 }
 
 /**
- * The code-level instructions prefixed to every system message, unconditionally, so an
- * author-configured systemPrompt cannot omit them. Shared across consumers so they cannot drift.
- * The look-ahead instruction is the same for every subject; the approach instruction is worded
- * for a single student or for a whole class, matching the same subject fencedUnitContext takes.
+ * Prefixed to every system message, unconditionally, so an author-configured systemPrompt cannot
+ * omit them. The look-ahead instruction is the same for every subject; the approach instruction is
+ * worded for a single student or a whole class.
  */
 export function withCurriculumInstructions(
   systemPrompt: string, subject: "the student" | "the class"

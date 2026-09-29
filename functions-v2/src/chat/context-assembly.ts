@@ -83,9 +83,8 @@ export function assembleTurnContext(args: {
   if (!problemInstalled) {
     installItems.push(effectiveGenericText(genericText, message));
     // Each its own item, not folded into effectiveGenericText: a unit's promptReplace can swap
-    // out the generic text entirely, and these rules must survive that. Installed unconditionally
-    // -- even with an empty LEFT this turn, and even when the unit has no aiUnitSummary at all --
-    // so the model is held to them regardless of what else it happens to know.
+    // out the generic text entirely, and these rules must survive that. Installed unconditionally,
+    // including when LEFT is empty or the unit has no aiUnitSummary.
     installItems.push(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
     installItems.push(PROBLEM_APPROACH_INSTRUCTION);
     if (!isEmptyLeft(message.leftContext)) {

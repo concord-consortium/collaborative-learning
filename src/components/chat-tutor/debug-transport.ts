@@ -83,10 +83,9 @@ export class DebugTransport implements ChatTransport {
       ].join("\n") },
       ...genericSegments,
       ...appendSegments,
-      // Unlike the generic prompt, these constants live in shared/ and are bundled client-side, so
-      // they are shown verbatim rather than as placeholders. Installed unconditionally on the
-      // first message, same as the generic prompt -- present even when LEFT is empty this turn and
-      // even when the unit has no aiUnitSummary at all.
+      // Unlike the generic prompt, these constants live in shared/ and are bundled client-side,
+      // so they are shown verbatim rather than as placeholders. Installed unconditionally on the
+      // first message, including when LEFT is empty or the unit has no aiUnitSummary.
       { kind: "note", text: "── no-look-ahead instruction · installed with the generic prompt ──" },
       { kind: "payload", text: UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION },
       { kind: "note", text: "── problem-approach instruction · installed with the generic prompt ──" },

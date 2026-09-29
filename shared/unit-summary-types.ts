@@ -2,11 +2,10 @@
 // It lives in shared/ because both authoring-api (generation) and src/ (the unit config type,
 // the authoring panel, and Save-time validation) need the same shapes and rules.
 
-// How a problem asks students to work. The one place this set is defined: the type, validation,
-// the approach-step prompt, and the authoring panel's select are all built from it.
-// "divergent" asks students to generate or try many ideas; "convergent" asks them to choose one
-// and develop it; "mixed" means different sections ask for different things; "unclear" means the
-// problem asks for neither, which is safer to record than a forced guess.
+// How a problem asks students to work. The type, validation, the approach-step prompt and the
+// authoring panel's select are all built from this one list.
+// divergent: generate or try many ideas. convergent: choose one and develop it. mixed: different
+// sections ask for different things. unclear: neither.
 export const UNIT_SUMMARY_PROBLEM_APPROACHES = ["divergent", "convergent", "mixed", "unclear"] as const;
 export type UnitSummaryProblemApproach = typeof UNIT_SUMMARY_PROBLEM_APPROACHES[number];
 
@@ -22,14 +21,11 @@ export interface IUnitSummaryEntry {
   // A short digest of what THIS problem itself covers/has students do. Generated with visibility
   // into only this problem's own content.
   problemDigest: string;
-  // How this problem asks students to work, judged from this problem's own content only.
-  // Optional: summaries generated before approach labels existed do not have it, and a missing
-  // label means "say nothing about approach", not an error.
+  // Judged from this problem's own content only. A missing label means "say nothing about
+  // approach", not an error.
   approach?: UnitSummaryProblemApproach;
-  // One or two sentences, in plain words, saying what the problem asks students to do and what an
-  // AI should not suggest instead. Example: "Students pick one gripper design and improve it
-  // across the Initial Challenge and What If sections. Do not suggest starting over with a new
-  // design." Optional for the same reason as `approach`.
+  // One or two sentences saying what the problem asks students to do and what an AI should not
+  // suggest instead.
   approachGuidance?: string;
 }
 
@@ -96,13 +92,11 @@ export const UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS = 1200;
 // how many problems precede it.
 export const UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS = 800;
 export const UNIT_SUMMARY_OVERVIEW_MAX_CHARS = 1200;
-// One or two sentences. Small because the guidance is sent on every consumer request that has a
-// slice, alongside the digest it accompanies.
+// One or two sentences. Sent on every consumer request that has a slice.
 export const UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS = 300;
 // A ceiling to catch a runaway total, set well above the worst realistic case (every problem at
-// every per-field maximum, for the largest known unit) since a generous ceiling costs nothing,
-// unlike a per-field cap the model is actively steered toward on every call. Kept ahead of the
-// worst case by unit-summary-config.test.ts, which fails if the two ever meet.
+// every per-field maximum, for the largest known unit). unit-summary-config.test.ts fails if the
+// two ever meet.
 export const UNIT_SUMMARY_TOTAL_BUDGET_CHARS = 130000;
 
 export type UnitSummaryValidationResult =
@@ -173,8 +167,7 @@ export function validateUnitSummary(
         `${UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} characters`
       );
     }
-    // Both approach fields are optional, so only a present value is checked. Guidance without a
-    // label is rejected rather than ignored: it is confusing to edit and nothing consumes it.
+    // Guidance without a label is rejected rather than ignored: nothing consumes it.
     if (entry.approach !== undefined &&
         !(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly string[]).includes(entry.approach)) {
       errors.push(
@@ -182,8 +175,8 @@ export function validateUnitSummary(
         UNIT_SUMMARY_PROBLEM_APPROACHES.join(", ")
       );
     }
-    // Typed as string | undefined, but this also runs over a hand-edited content.json, where the
-    // value can be anything JSON allows -- and reading .length off a null would throw.
+    // Also runs over a hand-edited content.json, where the value can be anything JSON allows, so
+    // the type is not a guarantee and reading .length off a null would throw.
     const approachGuidance: unknown = entry.approachGuidance;
     if (approachGuidance !== undefined) {
       if (typeof approachGuidance !== "string") {
@@ -261,9 +254,8 @@ export const UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION =
 
 // -- Problem-approach instruction text --
 
-// Shared wording, installed alongside the look-ahead instruction everywhere: follow the way the
-// current problem asks students to work, and never suggest the opposite. It applies to every unit,
-// including units with no aiUnitSummary, because it needs no summary to be useful.
+// Installed alongside the look-ahead instruction on every request, including units with no
+// aiUnitSummary: it needs no summary to be useful.
 export const PROBLEM_APPROACH_INSTRUCTION =
   "Follow the way the student's current problem asks them to work, and never suggest the " +
   "opposite. If the problem asks students to try many different ideas, do not push them to " +
@@ -275,9 +267,9 @@ export const PROBLEM_APPROACH_INSTRUCTION =
   "push them either way: respond to what they are doing, or ask which part they are on. Do not " +
   "contradict the problem's instructions.";
 
-// Teacher Summary describes a whole class's work to a teacher rather than talking to one student,
-// so "the student's current problem" does not fit. Its output is forwarded into the AI Tile's
-// prompt, so it still must not push the opposite approach.
+// Teacher Summary describes a class's work to a teacher rather than talking to one student, so
+// "the student's current problem" does not fit. Its output reaches a student through the AI
+// Tile's prompt, so it still must not push the opposite approach.
 export const PROBLEM_APPROACH_INSTRUCTION_CLASS =
   "Follow the way the class's current problem asks students to work, and never suggest the " +
   "opposite. If the problem asks students to try many different ideas, do not push them to " +

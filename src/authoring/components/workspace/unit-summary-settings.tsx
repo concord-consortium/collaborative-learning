@@ -16,8 +16,7 @@ interface EntryFormRow {
   title: string;
   problemDigest: string;
   priorKnowledge: string;
-  // "" is the form's spelling of "not set", so the select always has a value to show. Both
-  // approach fields leave the saved entry when it is "" -- see formStateToSummary.
+  // "" is the form's spelling of "not set", so the select always has a value to show.
   approach: UnitSummaryProblemApproach | "";
   approachGuidance: string;
 }
@@ -59,9 +58,8 @@ function formStateToSummary(form: SummaryFormState): IUnitSummary {
       ordinal: row.ordinal,
       priorKnowledge: row.priorKnowledge,
       problemDigest: row.problemDigest,
-      // Both fields are omitted rather than written empty when the approach is "not set", so an
-      // author can clear them: validation rejects guidance without a label, and an empty label
-      // is not one of the known values.
+      // Omitted rather than written empty when the approach is "not set", so an author can clear
+      // them: validation rejects both an empty label and guidance without a label.
       ...(row.approach ? { approach: row.approach } : {}),
       ...(row.approach && row.approachGuidance ? { approachGuidance: row.approachGuidance } : {}),
     })),
