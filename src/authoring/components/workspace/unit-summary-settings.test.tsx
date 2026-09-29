@@ -3,7 +3,10 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 
 import UnitSummarySettings from "./unit-summary-settings";
-import { IUnitSummary, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "../../../../shared/unit-summary-types";
+import {
+  IUnitSummary, PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION,
+  UNIT_SUMMARY_PROBLEM_APPROACHES
+} from "../../../../shared/unit-summary-types";
 
 const mockGet = jest.fn();
 const mockPost = jest.fn();
@@ -577,6 +580,115 @@ describe("UnitSummarySettings", () => {
     expect(exportText).toContain("Digest two");
     expect(exportText).toContain("Knows one.");
     expect(exportText).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(exportText).toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(screen.getByText(/manual step outside this tool/)).toBeInTheDocument();
+  });
+
+  describe("the approach fields", () => {
+    function summaryWithApproach(): IUnitSummary {
+      const summary = buildSummary();
+      summary.entries[0].approach = "divergent";
+      summary.entries[0].approachGuidance = "Try many ideas.";
+      return summary;
+    }
+
+    it("loads a saved approach and guidance into the row's controls", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: summaryWithApproach() } };
+      render(<UnitSummarySettings />);
+      await flush();
+
+      expect(screen.getByLabelText("Approach for problem 1.1")).toHaveValue("divergent");
+      expect(screen.getByLabelText("Approach guidance for problem 1.1")).toHaveValue("Try many ideas.");
+    });
+
+    it("shows '(not set)' for an entry with no approach", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+      render(<UnitSummarySettings />);
+      await flush();
+
+      expect(screen.getByLabelText("Approach for problem 1.2")).toHaveValue("");
+      expect(screen.getByLabelText("Approach guidance for problem 1.2")).toHaveValue("");
+    });
+
+    it("offers every known label plus '(not set)'", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+      render(<UnitSummarySettings />);
+      await flush();
+
+      const options = Array.from(
+        screen.getByLabelText("Approach for problem 1.1").querySelectorAll("option")
+      ).map(o => (o as HTMLOptionElement).value);
+      expect(options).toEqual(["", ...UNIT_SUMMARY_PROBLEM_APPROACHES]);
+    });
+
+    it("saves an approach and guidance chosen in the form", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+      const user = userEvent.setup();
+      render(<UnitSummarySettings />);
+      await flush();
+
+      await user.selectOptions(screen.getByLabelText("Approach for problem 1.2"), "convergent");
+      await user.type(
+        screen.getByLabelText("Approach guidance for problem 1.2"), "Improve one design."
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      const entry = lastSetUnitConfigDraft().config.aiUnitSummary?.entries[1];
+      expect(entry?.approach).toBe("convergent");
+      expect(entry?.approachGuidance).toBe("Improve one design.");
+    });
+
+    // Both fields leave the entry, rather than being saved empty: validation rejects guidance
+    // with no label, and "" is not one of the known labels.
+    it("drops both fields from the saved entry when the approach is set back to '(not set)'", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: summaryWithApproach() } };
+      const user = userEvent.setup();
+      render(<UnitSummarySettings />);
+      await flush();
+
+      await user.selectOptions(screen.getByLabelText("Approach for problem 1.1"), "");
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      const entry = lastSetUnitConfigDraft().config.aiUnitSummary?.entries[0];
+      expect(entry).not.toHaveProperty("approach");
+      expect(entry).not.toHaveProperty("approachGuidance");
+      // The rest of the entry is untouched.
+      expect(entry?.problemDigest).toBe("Digest one");
+    });
+
+    it("leaves guidance off a saved entry that has no approach", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+      const user = userEvent.setup();
+      render(<UnitSummarySettings />);
+      await flush();
+
+      await user.type(screen.getByLabelText("Approach guidance for problem 1.2"), "Orphan text.");
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      const entry = lastSetUnitConfigDraft().config.aiUnitSummary?.entries[1];
+      expect(entry).not.toHaveProperty("approachGuidance");
+    });
+
+    it("warns in the row when guidance is typed with no approach set", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+      const user = userEvent.setup();
+      render(<UnitSummarySettings />);
+      await flush();
+
+      expect(screen.queryByText(/only saved with an approach/)).not.toBeInTheDocument();
+      await user.type(screen.getByLabelText("Approach guidance for problem 1.2"), "Orphan text.");
+      expect(screen.getByText(/only saved with an approach/)).toBeInTheDocument();
+    });
+
+    it("puts each problem's approach in the export, and omits it where unset", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: summaryWithApproach() } };
+      const { container } = render(<UnitSummarySettings />);
+      await flush();
+
+      const exportText = container.querySelector(".export-view pre")?.textContent ?? "";
+      expect(exportText).toContain("How this problem wants students to work: divergent — Try many ideas.");
+      // Entry 1.2 has no approach, so the export has exactly one such line.
+      expect(exportText.match(/How this problem wants students to work/g)).toHaveLength(1);
+    });
   });
 });

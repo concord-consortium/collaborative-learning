@@ -3,8 +3,9 @@ import { useCurriculum } from "../../hooks/use-curriculum";
 import { useAuthoringApi } from "../../hooks/use-authoring-api";
 import { useAuth } from "../../hooks/use-auth";
 import {
-  IUnitSummary, IUnitSummaryStatusResponse, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, UnitSummaryValidationResult,
-  validateUnitSummary
+  IUnitSummary, IUnitSummaryStatusResponse, PROBLEM_APPROACH_INSTRUCTION,
+  UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, UNIT_SUMMARY_PROBLEM_APPROACHES, UnitSummaryProblemApproach,
+  UnitSummaryValidationResult, validateUnitSummary
 } from "../../../../shared/unit-summary-types";
 import "./unit-summary-settings.scss";
 
@@ -15,6 +16,10 @@ interface EntryFormRow {
   title: string;
   problemDigest: string;
   priorKnowledge: string;
+  // "" is the form's spelling of "not set", so the select always has a value to show. Both
+  // approach fields leave the saved entry when it is "" -- see formStateToSummary.
+  approach: UnitSummaryProblemApproach | "";
+  approachGuidance: string;
 }
 
 // The local, unsaved editing state. generatedAt/sourceHash/sourceManifest are carried through
@@ -38,6 +43,8 @@ function summaryToFormState(summary: IUnitSummary): SummaryFormState {
       title: summary.sourceManifest[i]?.title ?? entry.ordinal,
       problemDigest: entry.problemDigest,
       priorKnowledge: entry.priorKnowledge,
+      approach: entry.approach ?? "",
+      approachGuidance: entry.approachGuidance ?? "",
     })),
   };
 }
@@ -52,6 +59,11 @@ function formStateToSummary(form: SummaryFormState): IUnitSummary {
       ordinal: row.ordinal,
       priorKnowledge: row.priorKnowledge,
       problemDigest: row.problemDigest,
+      // Both fields are omitted rather than written empty when the approach is "not set", so an
+      // author can clear them: validation rejects guidance without a label, and an empty label
+      // is not one of the known values.
+      ...(row.approach ? { approach: row.approach } : {}),
+      ...(row.approach && row.approachGuidance ? { approachGuidance: row.approachGuidance } : {}),
     })),
   };
 }
@@ -258,7 +270,10 @@ const UnitSummarySettings: React.FC = () => {
     setFormState(prev => prev ? { ...prev, overview } : prev);
   };
 
-  const updateRow = (index: number, field: "problemDigest" | "priorKnowledge", value: string) => {
+  const updateRow = (
+    index: number, field: "problemDigest" | "priorKnowledge" | "approach" | "approachGuidance",
+    value: string
+  ) => {
     setFormState(prev => {
       if (!prev) return prev;
       const rows = prev.rows.slice();
@@ -279,10 +294,16 @@ const UnitSummarySettings: React.FC = () => {
       lines.push(`--- Problem ${row.ordinal}: ${row.title} ---`);
       lines.push(`What a student should know before this problem: ${row.priorKnowledge || "(not recorded)"}`);
       lines.push(`What this problem covers: ${row.problemDigest}`);
+      if (row.approach) {
+        const guidance = row.approachGuidance ? ` — ${row.approachGuidance}` : "";
+        lines.push(`How this problem wants students to work: ${row.approach}${guidance}`);
+      }
     });
     lines.push("");
-    lines.push("Instruction for the AI configuration (paste alongside the summary above):");
+    lines.push("Instructions for the AI configuration (paste alongside the summary above):");
     lines.push(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    lines.push("");
+    lines.push(PROBLEM_APPROACH_INSTRUCTION);
     return lines.join("\n");
   }, [formState, branch, unit]);
 
@@ -366,6 +387,7 @@ const UnitSummarySettings: React.FC = () => {
                 <th>Problem</th>
                 <th>Prior knowledge (before this problem)</th>
                 <th>This problem</th>
+                <th>How this problem asks students to work</th>
               </tr>
             </thead>
             <tbody>
@@ -392,6 +414,30 @@ const UnitSummarySettings: React.FC = () => {
                       value={row.problemDigest}
                       onChange={e => updateRow(i, "problemDigest", e.target.value)}
                     />
+                  </td>
+                  <td className="approach-cell">
+                    <select
+                      aria-label={`Approach for problem ${row.ordinal}`}
+                      value={row.approach}
+                      onChange={e => updateRow(i, "approach", e.target.value)}
+                    >
+                      <option value="">(not set)</option>
+                      {UNIT_SUMMARY_PROBLEM_APPROACHES.map(approach => (
+                        <option key={approach} value={approach}>{approach}</option>
+                      ))}
+                    </select>
+                    <textarea
+                      aria-label={`Approach guidance for problem ${row.ordinal}`}
+                      rows={3}
+                      placeholder="What the problem asks students to do, and what not to suggest instead."
+                      value={row.approachGuidance}
+                      onChange={e => updateRow(i, "approachGuidance", e.target.value)}
+                    />
+                    {!row.approach && row.approachGuidance && (
+                      <p className="muted small">
+                        Guidance is only saved with an approach — set one, or clear this text.
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))}
