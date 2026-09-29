@@ -335,6 +335,29 @@ describe("document model", () => {
     expect(document.content?.rowCount).toBe(2);
   });
 
+  it("puts the new tile directly below the target, not at the end of the document", () => {
+    const first = document.addTile("text");
+    const second = document.addTile("text");
+    const third = document.addTile("text");
+    assertIsDefined(first);
+    assertIsDefined(second);
+    assertIsDefined(third);
+    const target = document.content?.getTile(first.tileId);
+    assertIsDefined(target);
+
+    document.content?.addTileAfter("text", target, []);
+
+    // Three rows is the smallest document where "below the target" and "at the end" differ.
+    const order = document.content?.getTilesInDocumentOrder();
+    expect(order?.length).toBe(4);
+    expect(order?.[0]).toBe(first.tileId);
+    expect(order?.[2]).toBe(second.tileId);
+    expect(order?.[3]).toBe(third.tileId);
+    // The new tile is whatever is not one of the three originals.
+    const originals = [first.tileId, second.tileId, third.tileId];
+    expect(originals).not.toContain(order?.[1]);
+  });
+
   it("Sets default tile titles", () => {
     document.addTile("text");
     document.addTile("geometry");

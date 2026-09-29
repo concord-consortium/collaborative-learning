@@ -144,4 +144,25 @@ context('Shared Dataset', function () {
       tableTile.getTableCellContent(2).should("have.class", "highlighted");
     });
   });
+  describe("Spawned tile placement", () => {
+    it("puts a tile made by another tile directly below it, not at the end of the document", () => {
+      beforeTest(queryParams);
+
+      // Three rows is the smallest document where "below the parent" and "at the end" differ.
+      clueCanvas.addTile('table');
+      tableTile.getTableTile().should('be.visible');
+      clueCanvas.addTile('text');
+      clueCanvas.addTile('text');
+
+      tableTile.getTableTile().first().click();
+      cy.get('.table-toolbar .toolbar-button.data-set-view').first().click();
+
+      cy.get('.primary-workspace .canvas .tile-row').then($rows => {
+        const rows = [...$rows];
+        const tableRow = rows.findIndex(r => r.querySelector('.table-tool'));
+        const cardRow = rows.findIndex(r => r.querySelector('.data-card-tool-tile'));
+        expect(cardRow, 'spawned tile sits directly below its parent').to.equal(tableRow + 1);
+      });
+    });
+  });
 });
