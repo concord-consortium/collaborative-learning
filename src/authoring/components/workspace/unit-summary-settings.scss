@@ -38,9 +38,9 @@
   .unit-summary-table {
     border-collapse: collapse;
     margin-bottom: 16px;
-    // Fixed layout so the columns divide the available width evenly. Without it each cell's
-    // textarea contributes its own intrinsic width, and the four columns together are wider than
-    // the panel, pushing the last one off the edge.
+    // Fixed layout so the columns take the widths set below. Without it each cell's textarea
+    // contributes its own intrinsic width, and the four columns together are wider than the
+    // panel, pushing the last one off the edge.
     table-layout: fixed;
     width: 100%;
 
@@ -48,11 +48,31 @@
       padding: 8px 12px;
       text-align: left;
       vertical-align: top;
+      // The config panel's generic table rule sets nowrap, for the small key/value tables in the
+      // other settings panels. This table holds prose in every column, so its headers, problem
+      // titles and hint text must wrap -- without this they run across the neighbouring columns
+      // and the whole form scrolls sideways.
+      white-space: normal;
     }
 
     th {
       border-bottom: 1px solid #ddd;
       font-weight: 600;
+    }
+
+    // The Problem column holds only an ordinal and a title, so an equal quarter is more than it
+    // needs; the other three hold prose and use everything they are given. Widths go on the header
+    // cells because table-layout: fixed takes the column widths from the first row.
+    th:first-child {
+      width: 16%;
+    }
+
+    th:not(:first-child) {
+      width: 28%;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #999;
     }
 
     td textarea {
