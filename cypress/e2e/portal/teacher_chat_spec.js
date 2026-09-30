@@ -1,4 +1,4 @@
-import ChatPanel from "../../../support/elements/common/ChatPanel";
+import ChatPanel from "../../support/elements/common/ChatPanel";
 
 let chatPanel = new ChatPanel;
 
