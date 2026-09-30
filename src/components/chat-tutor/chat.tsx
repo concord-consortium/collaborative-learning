@@ -363,14 +363,14 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       {error && <div className="chat-error" role="alert" data-testid="chat-error">{error}</div>}
 
       <form className="chat-composer" onSubmit={onSubmit} data-testid="chat-composer">
-        <label htmlFor={inputId} className="visually-hidden">Message the tutor</label>
+        <label htmlFor={inputId} className="visually-hidden">Message Ada</label>
         <input
           id={inputId}
           ref={inputRef}
           className="chat-input"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Message the tutor…"
+          placeholder="Message Ada…"
           disabled={sending}
           autoComplete="off"
           data-testid="chat-input"
