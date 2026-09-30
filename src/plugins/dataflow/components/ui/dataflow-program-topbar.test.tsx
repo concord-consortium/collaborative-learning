@@ -39,9 +39,8 @@ function renderTopbar(readOnly: boolean) {
   );
 }
 
-// These controls take their disabled state from the read-only context rather than a prop, so a
-// missing provider or a child that stops reading the context would silently leave them live in a
-// read-only document.
+// The failure this pins is silent: a control that stops reading the context stays live in a
+// read-only document and looks entirely normal.
 describe("DataflowProgramTopbar read-only state", () => {
   it("disables its controls when the document is read-only", () => {
     renderTopbar(true);

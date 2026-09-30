@@ -11,7 +11,7 @@ import { ReadOnlyContext } from "../../../../components/document/read-only-conte
 import "../../dataflow-registration";
 
 interface IRenderOptions {
-  disabled?: boolean;
+  readOnly?: boolean;
   isTesting?: boolean;
 }
 
@@ -29,7 +29,7 @@ function renderToolbar(opts: IRenderOptions = {}): IRenderResult {
   const onClearClick = jest.fn();
   const utils = render(
     <Provider stores={stores}>
-      <ReadOnlyContext.Provider value={opts.disabled ?? false}>
+      <ReadOnlyContext.Provider value={opts.readOnly ?? false}>
         <DataflowProgramToolbar
           isTesting={opts.isTesting ?? false}
           onClearClick={onClearClick}
@@ -124,7 +124,7 @@ describe("DataflowProgramToolbar activation (CLUE-455)", () => {
   });
 
   it("does not call onNodeCreateClick when the toolbar is disabled", () => {
-    const { buttons, onNodeCreateClick } = renderToolbar({ disabled: true });
+    const { buttons, onNodeCreateClick } = renderToolbar({ readOnly: true });
     fireEvent.click(buttons[0]);
     expect(onNodeCreateClick).not.toHaveBeenCalled();
   });

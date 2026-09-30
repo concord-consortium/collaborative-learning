@@ -105,7 +105,7 @@ interface IProps {
   tileId: string;
 }
 export const DataflowProgramToolbar = ({ isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
-  const disabled = useReadOnlyContext();
+  const readOnly = useReadOnlyContext();
   const ui = useUIStore();
   const containerRef = useRef<HTMLElement>(null);
   const { handleKeyDown } = useRovingTabindex(containerRef, "vertical");
@@ -154,7 +154,7 @@ export const DataflowProgramToolbar = ({ isTesting, onClearClick, onNodeCreateCl
     >
       { NodeTypes.map((nt: NodeType, i: number) => (
         <AddNodeButton
-          disabled={disabled}
+          disabled={readOnly}
           i={i}
           key={nt.name}
           nodeType={nt.name}
