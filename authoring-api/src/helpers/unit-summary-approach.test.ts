@@ -2,7 +2,9 @@ import {
   UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_APPROACHES,
 } from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
-import {UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
+import {
+  UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS, UNIT_SUMMARY_RETRY_COUNT,
+} from "./unit-summary-config";
 import {generateProblemApproaches, parseApproachAnswer} from "./unit-summary-approach";
 import {InternalServerError, RateLimitError} from "openai";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
@@ -153,10 +155,14 @@ describe("generateProblemApproaches", () => {
   });
 
   // An outage is not a judgment that the problem is unclear, so it must not be recorded as one.
-  it("fails the step with the problem's ordinal when the transport gives up", async () => {
-    const generateText = jest.fn().mockRejectedValue(new Error("openai 500"));
+  it("fails the step with the problem's ordinal once the transport has given up retrying", async () => {
+    const outage = new InternalServerError(500, {}, "openai is down", new Headers());
+    const generateText = jest.fn().mockRejectedValue(outage);
+    // The ordinal, not the vendor's own wording, which the SDK formats from the status and body.
     await expect(run([problem("2.3")], ["d1"], generateText))
-      .rejects.toThrow(/Problem 2\.3: approach failed: .*openai 500/);
+      .rejects.toThrow(/Problem 2\.3: approach failed/);
+    // The first attempt and every retry: only a transport error is retried at all.
+    expect(generateText).toHaveBeenCalledTimes(1 + UNIT_SUMMARY_RETRY_COUNT);
   });
 
   it("keeps a label whose guidance came back blank, without calling fitToLength", async () => {
