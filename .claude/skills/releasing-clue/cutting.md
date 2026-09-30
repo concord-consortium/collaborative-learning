@@ -49,7 +49,7 @@ v<X.Y.Z>`, then `gh run watch <id> --exit-status`. Both must pass before Release
 ## GitHub release [approve]
 
 ```bash
-npm --prefix ~/Development/dev-templates/scripts run -s release-notes-jira CLUE <X.Y.Z> > <scratchpad>/notes.md
+npm --prefix <dev-templates>/scripts run -s release-notes-jira CLUE <X.Y.Z> > <scratchpad>/notes.md
 gh release create v<X.Y.Z> --title <X.Y.Z> --notes-file <scratchpad>/notes.md \
   --prerelease --latest=false
 ```

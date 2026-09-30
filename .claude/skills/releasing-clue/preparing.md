@@ -14,13 +14,28 @@ Agree on these with the developer first and put them at the top of the release r
 | Jira release story | "Release 7.6.0", issue type `Release` |
 | Release branch | `v7.6.x` |
 | Target release day and time | from the developer |
+| dev-templates checkout | `~/Development/dev-templates` (see Preflight) |
 
 ## Preflight
 
-- **dev-templates scripts:** the features this skill uses (`--details`, `--json`, the `gh` token
-  fallback, epic subheadings, `slack` output without a quote prefix) are on dev-templates PR #22
-  (branch `DEV-192-unlinked-prs-release-review`). Until it merges, check out that branch in
-  `~/Development/dev-templates`; once it has merged, use master there.
+- **dev-templates checkout:** the triage and release-notes scripts live in the developer's
+  checkout of https://github.com/concord-consortium/dev-templates; `<dev-templates>` below is its
+  path. Ask where it is, and record it. If they don't have one, offer to set it up:
+  1. Clone it where they want it: `git clone https://github.com/concord-consortium/dev-templates.git
+     <dev-templates>`.
+  2. Check out the right branch. The features this skill uses (`--details`, `--json`, the `gh`
+     token fallback, epic subheadings, `slack` output without a quote prefix) are on dev-templates
+     PR #22 (branch `DEV-192-unlinked-prs-release-review`). Until it merges, use that branch; once
+     it has merged, use master. An existing checkout needs the same check, and a `git pull`.
+  3. Install: `npm --prefix <dev-templates>/scripts ci`.
+  4. The `.env`: the scripts read `JIRA_USER` (the developer's Atlassian email) and `JIRA_TOKEN`
+     (an Atlassian API token, made at
+     https://id.atlassian.com/manage-profile/security/api-tokens) from
+     `<dev-templates>/scripts/.env`. The developer writes that file themselves; never read it or
+     ask for the token. To check it without reading values, list its key names:
+     `grep -o '^[A-Z_]*=' <dev-templates>/scripts/.env`. No GitHub token is needed (see below).
+  5. Confirm it works by running the triage report below; the scripts check the Jira token when
+     they start. Atlassian tokens expire, so an existing setup may need a new token.
 - **Release scripts:** `npm --prefix scripts ci` in each checkout that runs `scripts/` (this one,
   and later the release worktree). The scripts import packages from `scripts/node_modules`.
 - **Release story and next version:** check that Jira has the release story for this version, and
@@ -32,12 +47,8 @@ Agree on these with the developer first and put them at the top of the release r
 - **Previous version:** check it's marked released in Jira; if not, include it in the wrap-up.
 - **Deployed versions:** `npx --prefix scripts tsx scripts/deployed-version.ts` after
   `git fetch --tags`. It checks every page a release deploys, on production and staging.
-- **Jira token:** the dev-templates scripts (`~/Development/dev-templates/scripts`) use
-  `JIRA_USER` and `JIRA_TOKEN` in their `.env`, and check the token when they start. Atlassian
-  tokens expire; the developer renews theirs at
-  https://id.atlassian.com/manage-profile/security/api-tokens.
-- **GitHub token:** run those scripts with `GITHUB_TOKEN=` blanked, so they fall back to
-  `gh auth token`. The `.env` token is often stale.
+- **GitHub token:** run the dev-templates scripts with `GITHUB_TOKEN=` blanked, so they fall back
+  to `gh auth token`. A `GITHUB_TOKEN` in their `.env` is often stale.
 - **Other logins:** `gh auth status`; `gcloud auth print-access-token` (for reading deployed rules;
   `gcloud auth login` if it fails); `npx firebase projects:list`; the Atlassian and Slack
   connections in this session. If a connection drops, it takes a new session or `/mcp`.
@@ -49,7 +60,7 @@ Agree on these with the developer first and put them at the top of the release r
 Run the combined Jira and PR report from the dev-templates scripts:
 
 ```bash
-GITHUB_TOKEN= npm --prefix ~/Development/dev-templates/scripts run -s unlinked-prs -- \
+GITHUB_TOKEN= npm --prefix <dev-templates>/scripts run -s unlinked-prs -- \
   CLUE <version> collaborative-learning <previous tag> master --details
 ```
 
@@ -155,7 +166,7 @@ that turn the feature on.
 ## Release notes
 
 ```bash
-npm --prefix ~/Development/dev-templates/scripts run -s release-notes-jira CLUE <version>
+npm --prefix <dev-templates>/scripts run -s release-notes-jira CLUE <version>
 ```
 
 Add `slack` for the Slack form, which already writes keys as links. Sections: Story → Features,

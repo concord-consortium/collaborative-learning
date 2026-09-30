@@ -9,7 +9,7 @@
  * The PR list normally comes from dev-templates' unlinked-prs script, which already works out
  * which PRs are in a release (squash merges, stacked branches, sub-PRs):
  *
- *   npm --prefix ~/Development/dev-templates/scripts run -s unlinked-prs -- \
+ *   npm --prefix <dev-templates>/scripts run -s unlinked-prs -- \
  *     CLUE 7.6.0 collaborative-learning v7.5.0 master --json > unlinked-prs.json
  *   npx --prefix scripts tsx scripts/release-deploy-report.ts --unlinked-prs unlinked-prs.json
  *
