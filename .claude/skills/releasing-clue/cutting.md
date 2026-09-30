@@ -113,14 +113,22 @@ checks the edit persists, and checks the teacher sees it:
 
 ```bash
 npx cypress run --spec cypress/e2e/portal/student_teacher_launch_spec.js \
-  --config baseUrl=https://collaborative-learning.concord.org/ \
+  --config baseUrl=https://collaborative-learning.concord.org/,retries=0 \
   --env PORTAL_LAUNCH_TARGET=portal,PORTAL_LAUNCH_OFFERING_ID=<offering>,PORTAL_LAUNCH_REPORT_ID=<report>,PORTAL_LAUNCH_EXPECTED_VERSION=<X.Y.Z>
 ```
+
+The run must report `Tests: 1, Passing: 1`. `retries=0` turns off the retries CI uses, so a failure
+that only happens sometimes still fails the check. Treat any failure as a finding, not a flake to
+rerun past. A failed run leaves its marker tile behind, and a new run stops on a marker from the
+last 15 minutes, so rerun after a fix with `PORTAL_LAUNCH_DELETE_RECENT_MARKERS=true` added to
+`--env`.
 
 Credentials come from `cypress.env.json`; in a worktree, symlink the main checkout's file. See
 `cypress/e2e/portal/README.md`. `PORTAL_LAUNCH_TARGET=portal` launches the portal's own URLs, so it
 also checks the resource and report setup. If there's no assignment for the release yet, use the
-setting-up-portal-assignments skill; creating one is a portal write **[approve]**.
+setting-up-portal-assignments skill; creating one is a portal write **[approve]**. Before the
+first run on a new assignment, launch it once as the student, joining a group, and once as the
+teacher.
 
 The console shows a couple of Firestore `permission-denied` snapshot-listener errors around each
 launch and document switch. They were there in 7.5.0 too; compare with the previous version before
