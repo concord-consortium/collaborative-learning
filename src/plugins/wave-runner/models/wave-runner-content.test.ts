@@ -74,6 +74,45 @@ describe("WaveRunnerContent", () => {
     return docContent.tileMap.get("tile1")!.content as any;
   }
 
+  it("can be created in a document through the tile registry", () => {
+    const docContent = DocumentContentModel.create({});
+    const result = docContent.addTile(kWaveRunnerTileType);
+    const tile = result?.tileId ? docContent.getTile(result.tileId) : undefined;
+
+    expect(tile).toBeDefined();
+    expect(tile!.content.type).toBe(kWaveRunnerTileType);
+    // The default content has to be usable straight away: the tile renders date pickers from
+    // these before the student has touched anything.
+    const content = tile!.content as any;
+    expect(content.startDate).toBeTruthy();
+    expect(content.endDate).toBeTruthy();
+    expect(content.station).toBeUndefined();
+  });
+
+  it("reaches the seismogram data it displays through the shared model", async () => {
+    const content = setupTileInDocument();
+    expect(content.sharedSeismogram).toBeUndefined();
+    expect(content.hasStationData).toBe(false);
+
+    content.setStation({
+      network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport"
+    });
+    await content.loadData();
+
+    // loadData attaches a SharedSeismogram and hands it the station and the tile's date range,
+    // which is what the waveform display reads from.
+    const shared = content.sharedSeismogram;
+    expect(shared).toBeDefined();
+    expect(content.hasStationData).toBe(true);
+    expect(shared.station.station).toBe("K204");
+    expect(shared.station.network).toBe("AK");
+    // Compared as instants: the shared model normalizes to millisecond precision.
+    expect(new Date(shared.startTime).toISOString())
+      .toBe(new Date(`${content.startDate}T00:00:00Z`).toISOString());
+    expect(new Date(shared.endTime).toISOString())
+      .toBe(new Date(`${content.endDate}T00:00:00Z`).toISOString());
+  });
+
   it("is always user resizable", () => {
     const content = WaveRunnerContentModel.create();
     expect(content.isUserResizable).toBe(true);
