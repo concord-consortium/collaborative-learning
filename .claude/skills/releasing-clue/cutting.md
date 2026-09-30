@@ -25,9 +25,14 @@ creates the annotated tag `v<X.Y.Z>`. Only release branches get the version; mas
 `package.json` stays behind.
 
 Pushing the tag starts CI Base, which builds and deploys to `version/v<X.Y.Z>/`, along with CI
-Functions v2 and CI Regression. The branch push starts its own CI Base run; watch **the tag's**:
-find it with `gh run list --workflow ci.yml --branch v<X.Y.Z>`, then `gh run watch <id>
---exit-status`. Confirm `https://collaborative-learning.concord.org/version/v<X.Y.Z>/` loads.
+Functions v2 and CI Regression. The branch push starts its own runs; watch **the tag's**. For each
+of `ci.yml` and `functions-v2.yml`, find the run with `gh run list --workflow <file> --branch
+v<X.Y.Z>`, then `gh run watch <id> --exit-status`. Both must pass before Release Staging. Confirm
+`https://collaborative-learning.concord.org/version/v<X.Y.Z>/` loads.
+
+On a tag, CI Regression skips its Cypress jobs (they run only on master or with the `run
+regression` label). The regression signal is master's CI Regression run for the commit the branch
+was cut from: check it passed (`gh run list --workflow ci-regression.yml --branch master`).
 
 ## GitHub release [approve]
 
@@ -67,8 +72,8 @@ Which resources to move:
   private and draft resources, and keep URLs containing `/version/` or `/branch/`, other than
   `branch/master`. Archived resources aren't returned.
 - **Move without asking which:** the previous release's smoke-test resources ("(vX.Y.Z, staging
-  FB)", created by the admin API user); the project team's test resources (Leslie's); and the
-  developer's own pins.
+  FB)", created by the admin API user); the project team tester's resources; and the developer's
+  own pins.
 - **List and ask about:** anyone else's old pins. Leave feature-branch resources alone.
 
 **Staging Firebase.** A resource without `firebaseEnv=staging` uses production Firebase, where the
@@ -89,31 +94,75 @@ until the developer allows them.
 ## Staging Firebase [approve]
 
 Deploy what the deploy-timing decisions call for, in the recorded order, from the release worktree
-at the tag, the same way production will be deployed. For functions-v2:
+at the tag, the same way production will be deployed. Each part below is its own **[approve]**.
+Parts marked `after` deploy here too, so the project team can test them, but staging.html keeps
+serving the previous release against them until Release Staging; tell the developer so they can
+decide whether that matters.
+
+Every command takes `--project <project>` and `--config <worktree>/firebase.json`. The `npm run
+deploy:*` scripts pass neither and `.firebaserc` has no default project, so don't use them. Use
+firebase-tools 15 or later through `npx firebase` (check `npx firebase --version`), not the copy
+in `functions-v2/node_modules` or `authoring-api/node_modules`: those packages pin firebase-tools
+13. Below, `<project>` is `collaborative-learning-staging` here and `collaborative-learning-ec215`
+in shipping.md.
+
+**Indexes:**
+`npx firebase deploy --only firestore:indexes --project <project> --config <worktree>/firebase.json`.
+Leave off `--non-interactive` and `--force`: the CLI asks before deleting indexes that aren't in
+the file, and the answer is no unless the developer decides otherwise. Wait until the new indexes
+show Enabled (`npx firebase firestore:indexes --project <project>`, or the console) before the
+next part.
+
+**Firestore rules:**
+`npx firebase deploy --only firestore:rules --project <project> --config <worktree>/firebase.json --non-interactive`.
+Then read the deployed rules back (preparing.md) and compare them with the tag's `firestore.rules`.
+
+**RTDB rules:** only when the developer has decided to, after comparing the deployed rules with the
+file (preparing.md):
+`npx firebase deploy --only database --project <project> --config <worktree>/firebase.json --non-interactive`.
+
+**functions-v2:**
 
 1. **Build and compare params:** keep `functions-v2/.env` in the developer's checkout (gitignored).
    If it's missing, build it from a deployed function's non-secret values (`functions:list --json`
    → `environmentVariables`; `chatTutorOnWrite` carries all of them). Find every param the tag
    declares by grepping for `defineString`, `defineInt` and `defineBoolean` in `functions-v2/src`
-   **and** `functions-v2/lib/src` (committed source lives there too). Every one needs a value, even
-   one with a default, or a non-interactive deploy fails. Compare the file with each project's
-   deployed values. Don't create `.env.<projectId>` files: they aren't gitignored, the Firebase
-   CLI loads them too, and committing them is its own story (CLUE-659).
+   **and** `functions-v2/lib/src` (committed source lives there too). A param with a non-empty
+   default needs a value in the file, or a non-interactive deploy fails; one with an empty default
+   deploys as empty when the file leaves it out. Compare the file with each project's deployed
+   values. Don't create `.env.<projectId>` files: they aren't gitignored, the Firebase CLI loads
+   them too, and committing them needs its own change first.
 2. **Install:** `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/functions-v2 ci`.
 3. **Deploy:** copy `functions-v2/.env` into the worktree, then run
-   `npx firebase deploy --only functions:functions-v2 --project collaborative-learning-staging --config <worktree>/firebase.json --non-interactive`.
+   `npx firebase deploy --only functions:functions-v2 --project <project> --config <worktree>/firebase.json --non-interactive`.
 4. **Clean up and check:** delete the copied `.env`, and check the functions' deploy times and
    params.
 
-Deploy all of functions-v2, not a subset. Each function keeps the params it was deployed with, and
-string params default to empty, so a deploy without the ForeverLearning values would wipe them from
-`chatTutorOnWrite`. Use firebase-tools 15 or later through `npx firebase` (check `npx firebase
---version`); the copy inside `functions-v2/node_modules` has been a broken install.
+Deploy all of functions-v2, not a subset. Each function keeps the params it was deployed with, so
+the empty-default ForeverLearning params would be wiped from `chatTutorOnWrite` by a deploy whose
+`.env` leaves them out.
+
+**authoring-api:** the same four steps as functions-v2, with `authoring-api/.env` (it declares
+string params with no default, so the file must set them; `authoring-api/.env.example` lists
+them), `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/authoring-api ci`, and
+`--only functions:authoring-api`.
+
+**functions-v1:** stop and ask. Production's 1st-gen functions are in codebase `default` on
+nodejs16 while staging's are in `functions-v1` (preparing.md), so a `--only
+functions:functions-v1` deploy doesn't do the same thing on both projects. Work out the commands
+with the developer and record them.
+
+After each deploy, check what's deployed matches the tag (preparing.md, "What's deployed").
 
 ## Smoke test
 
 Run the portal launch spec against a release assignment on staging. It launches as a student,
-checks the edit persists, and checks the teacher sees it:
+checks the edit persists, and checks the teacher sees it.
+
+First check the assignment's resource URL includes `firebaseEnv=staging` (the resource's edit
+page, or the portal API). The spec writes to whichever Firebase the resource launches into, so
+without it the run writes test data to production. In that case, stop and ask: running it is then
+**[approve]**.
 
 ```bash
 npx cypress run --spec cypress/e2e/portal/student_teacher_launch_spec.js \
@@ -140,7 +189,7 @@ calling one a regression.
 
 ## Hand over to the project team [approve]
 
-Tell the tester (Leslie) in #clue-dev that the release is ready on the staging portal. Write the
+Tell the project team's tester in #clue-dev that the release is ready on the staging portal. Write the
 draft to a temporary Markdown file for the developer to edit, then post it. Include:
 - the version URL and the release notes link;
 - which of their resources changed, and that staging Firebase starts without their old work;
@@ -151,10 +200,16 @@ Keep a testing checklist out of the post unless the developer wants one.
 ## Release Staging [approve]
 
 ```bash
+date -u +%Y-%m-%dT%H:%M:%SZ                                        # <dispatched>, before the run
 gh workflow run release-staging.yml --ref master -f version=v<X.Y.Z>
-gh run list --workflow release-staging.yml --limit 1     # the run id
+gh run list --workflow release-staging.yml --event workflow_dispatch \
+  --json databaseId,createdAt --jq '.[] | select(.createdAt >= "<dispatched>") | .databaseId'
 gh run watch <id> --exit-status
 ```
+
+`gh workflow run` returns before the run exists, and the newest run until then is the previous
+release's, which already succeeded, so watching it would report a false pass. Repeat the `gh run
+list` until it prints an id; take only a run created after `<dispatched>`.
 
 The log should show "Assuming role with OIDC" and four `copy:` lines, to `staging.html`, `editor/`,
 `authoring/` and `authoring-iframe/`. Then check with `deployed-version.ts`. The staging page is

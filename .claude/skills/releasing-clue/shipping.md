@@ -8,23 +8,35 @@ Read the tester's replies in the handover thread. Report to the developer what t
 they found, and anything they asked. Bugs they found become stories for the next version, unless
 the developer decides otherwise. The developer confirms the release goes ahead.
 
+A show-stopper means a patch release (`X.Y.1` cut from the release branch), which this skill
+doesn't cover yet (SKILL.md). Leave this version's tag and pre-release as they are, work out the
+patch with the developer, and record the steps.
+
 ## Production Firebase [approve]
 
-Deploy what the deploy-timing decisions call for, with the same steps as staging (cutting.md) and
-`--project collaborative-learning-ec215`. Compare production's deployed params with the `.env`
-first; production and staging can differ.
+Deploy what the deploy-timing decisions call for, with the same commands as staging (cutting.md)
+and `--project collaborative-learning-ec215`. Compare production's deployed params with each
+`.env` first; production and staging can differ.
 
-Order matters when a part is `with` the client. Deploy it immediately before Release Production
-and start the release right after, so the released client and the new part overlap as briefly as
-possible.
+Follow the recorded order:
+- **`before`:** deploy now, before Release Production.
+- **`with`:** deploy immediately before Release Production and start the release right after, so
+  the released client and the new part overlap as briefly as possible.
+- **`after`:** don't deploy yet. Deploy it once Release Production has succeeded and
+  `deployed-version.ts` shows production serving the tag.
 
 ## Release Production [approve]
 
 ```bash
+date -u +%Y-%m-%dT%H:%M:%SZ                                        # <dispatched>, before the run
 gh workflow run release-production.yml --ref master -f version=v<X.Y.Z>
-gh run list --workflow release-production.yml --limit 1  # the run id
+gh run list --workflow release-production.yml --event workflow_dispatch \
+  --json databaseId,createdAt --jq '.[] | select(.createdAt >= "<dispatched>") | .databaseId'
 gh run watch <id> --exit-status
 ```
+
+Find the run id as for Release Staging (cutting.md): repeat the `gh run list` until it prints an
+id created after `<dispatched>`, never the newest run from before it.
 
 Check the log as for staging: OIDC, and four `copy:` lines, to `index.html`, `editor/index.html`,
 `authoring/index.html` and `authoring-iframe/index.html`. Then
@@ -59,7 +71,8 @@ Check the release list shows it as Latest, with no Pre-release badge.
   the `slack` release notes converted to standard markdown (as in preparing.md's pre-announcement).
   Every CLUE release is announced here, separately from #clue.
 - **Open stories:** nudge the owners of stories still open on the version, in the latest
-  release-status post's thread. A scheduled message works for someone in another timezone.
+  release-status post's thread. A scheduled message works for someone in another timezone; it is
+  gated like any other message.
 
 ## Follow-ups and the record
 
@@ -77,7 +90,7 @@ Check each of these before calling the release finished, and report any that are
 
 - [ ] Production and staging serve the tag (`deployed-version.ts`)
 - [ ] GitHub release promoted: Latest, not a pre-release
-- [ ] Production Firebase has what the deploy-timing decisions called for
+- [ ] Production Firebase has what the deploy-timing decisions called for, `after` parts included
 - [ ] Release story Done; Jira version (and the previous one) released
 - [ ] #clue: "now live" reply in the pre-announcement's thread
 - [ ] #releases: announcement with the GitHub release link and notes

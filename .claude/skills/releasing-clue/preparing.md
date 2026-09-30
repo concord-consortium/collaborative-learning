@@ -4,7 +4,7 @@ Gated actions are marked **[approve]**; see "Approval gates" in SKILL.md.
 
 ## Parameters
 
-Agree these with the developer first and put them at the top of the release record:
+Agree on these with the developer first and put them at the top of the release record:
 
 | | Example |
 |---|---|
@@ -20,10 +20,15 @@ Agree these with the developer first and put them at the top of the release reco
 - **dev-templates scripts:** the features this skill uses (`--details`, `--json`, the `gh` token
   fallback, epic subheadings, `slack` output without a quote prefix) are on dev-templates PR #22
   (branch `DEV-192-unlinked-prs-release-review`). Until it merges, check out that branch in
-  `~/Development/dev-templates`.
+  `~/Development/dev-templates`; once it has merged, use master there.
+- **Release scripts:** `npm --prefix scripts ci` in each checkout that runs `scripts/` (this one,
+  and later the release worktree). The scripts import packages from `scripts/node_modules`.
 - **Release story and next version:** check that Jira has the release story for this version, and
-  a fix version for the next one to move stories into. Propose creating what's missing
-  **[approve]**.
+  a fix version for the next one to move stories into. The Atlassian connection has no version
+  tools, and a JQL `fixVersion` query can't tell a missing version from one with no issues yet,
+  so list versions with REST (`GET /rest/api/3/project/CLUE/versions`, see "Jira REST" below).
+  The developer creates a missing version in the Jira UI; propose creating a missing release
+  story **[approve]**.
 - **Previous version:** check it's marked released in Jira; if not, include it in the wrap-up.
 - **Deployed versions:** `npx --prefix scripts tsx scripts/deployed-version.ts` after
   `git fetch --tags`. It checks every page a release deploys, on production and staging.
@@ -32,7 +37,7 @@ Agree these with the developer first and put them at the top of the release reco
   tokens expire; the developer renews theirs at
   https://id.atlassian.com/manage-profile/security/api-tokens.
 - **GitHub token:** run those scripts with `GITHUB_TOKEN=` blanked, so they fall back to
-  `gh auth token`. The `.env` value has gone stale before.
+  `gh auth token`. The `.env` token is often stale.
 - **Other logins:** `gh auth status`; `gcloud auth print-access-token` (for reading deployed rules;
   `gcloud auth login` if it fails); `npx firebase projects:list`; the Atlassian and Slack
   connections in this session. If a connection drops, it takes a new session or `/mcp`.
@@ -96,9 +101,11 @@ npx --prefix scripts tsx scripts/release-deploy-report.ts --unlinked-prs <scratc
 ```
 
 Run it from a checkout of the commit being released (master before the cut, the release worktree
-after): which `shared/` files count as functions code comes from the current checkout. It gives the strictest timing per part (`before`, `with` or `after` the client) and a "to ask"
-list of PR authors missing a callout. Ask them **[approve]** for Slack or PR comments; never fill in
-a timing yourself.
+after): which `shared/` files count as functions code comes from the current checkout. It gives
+the strictest timing per part (`before`, `with` or `after` the client), flags a part whose PRs
+disagree, and gives a "to ask" list of PR authors missing a usable callout. When a part is mixed,
+read each PR's reason before planning. Ask the authors **[approve]** for Slack or PR comments;
+never fill in a timing yourself.
 
 ## Firebase deployables
 
@@ -121,9 +128,8 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   A diff with only comment changes doesn't need a deploy.
 - **RTDB rules:** `https://<instance>.firebaseio.com/.settings/rules.json`, with instances
   `collaborative-learning-staging-default-rtdb` (staging) and `collaborative-learning-ec215`
-  (production). Both projects have had
-  console-only rules that aren't in `database.rules.json`, so deploying from the repo would
-  silently delete them. Compare first, and don't deploy RTDB rules unless the developer decides to.
+  (production). Deployed RTDB rules can include console-only rules that aren't in
+  `database.rules.json`, so deploying from the repo would silently delete them. Compare first, and don't deploy RTDB rules unless the developer decides to.
 - **Secrets:** `npx firebase functions:secrets:get <NAME> --project <project>` shows metadata only.
 
 Per part, work out: must it deploy, has it already, and when relative to the client. Check both
@@ -132,8 +138,9 @@ part. Decisions come from the PR authors and the developer. An index deploy prom
 extra indexes, so never pass `--force`.
 
 Also record the deploy **order**. The default is indexes (wait until they show Enabled), then
-rules, then functions, then the client. Read each touching PR for its own order (one release had
-a PR asking for one function to deploy before the rest).
+rules, then functions, then the client, and a part marked `after` deploys only once Release
+Production has succeeded. Read each touching PR for its own order (a PR can ask for one function
+to deploy before the rest).
 
 ## External dependencies
 
@@ -154,11 +161,18 @@ npm --prefix ~/Development/dev-templates/scripts run -s release-notes-jira CLUE 
 Add `slack` for the Slack form, which already writes keys as links. Sections: Story → Features,
 Bug → Bug Fixes, Chore/Task or label `under-the-hood` → Under the Hood.
 
-Review for jargon titles (`SPIKE:`, code identifiers), near-duplicates, internal stories that
-belong under the hood, and stories not yet Done. Propose fixes:
+Show the developer the full notes first and ask what they'd change, so every item gets a human
+look, not just the ones you flag. Then review for jargon titles (`SPIKE:`, code identifiers),
+near-duplicates, items in the wrong section, internal stories that belong under the hood, and
+stories not yet Done. Propose fixes:
 - **A blurb:** a `Blurb: …` paragraph at the top of the description replaces the title in the
   notes. A bug's blurb describes the fix; a story's describes the new capability.
 - **The `under-the-hood` label.**
+- **The issue type:** the section comes from the type, so moving an item between Features and Bug
+  Fixes means changing its type in Jira (a story logged as a bug, or the reverse).
+
+The only way to leave an item out of the notes is to remove its fix version, which also changes
+Jira's record of what shipped. Say so if the developer wants an item left out.
 
 Apply the ones the developer approves **[approve]**, and read each one back. To add a blurb
 without disturbing the description, use REST: get the description (ADF), prepend a paragraph, put

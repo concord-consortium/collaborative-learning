@@ -7,8 +7,15 @@ description: Use when preparing, cutting, testing or shipping a CLUE release —
 
 A CLUE release runs over several days: triage the Jira version until it is ready, cut the branch
 and tag, set up and smoke test staging, wait for the project team's approval, then release to
-production. This skill is new and has been used once, so it is deliberately conservative: **every
-action that changes something other people see waits for the developer's explicit approval.**
+production. This skill is new, so it is deliberately conservative: **every action that changes
+something other people see waits for the developer's explicit approval.**
+
+It covers minor releases (`X.Y.0`, cut from master onto a new `vX.Y.x` branch). A patch release
+(`X.Y.Z`, cut from an existing release branch) isn't covered yet: work it out with the developer
+from these steps, record what differed, and add the patch path to this skill afterward.
+
+**Resuming:** a release spans several sessions. If `releases/<version>.md` already exists, read
+it first and continue from its last completed step rather than starting over.
 
 ## Approval gates
 
@@ -16,7 +23,7 @@ These actions are gated, marked **[approve]** in the phase files:
 
 | Kind | Gated actions |
 |---|---|
-| Slack | sending, scheduling, replying in a thread |
+| Slack | sending, scheduling or replying anywhere other than the developer's own self-DM |
 | Jira | creating or editing issues, transitions, links, labels, fix versions, releasing a version |
 | git | creating branches or tags, `npm version`, commits, pushes |
 | GitHub | releases, workflow runs, PR titles, bodies or comments, merging |
@@ -40,9 +47,11 @@ more trouble than it's worth. When unsure whether something is gated, it is.
 Not gated:
 - Reading: Jira and GitHub queries, `gh run watch`, `firebase functions:list`, dry runs,
   `deployed-version.ts`, reading Slack threads.
-- Previews sent to the developer's own self-DM, which only they see. The preview is how they
-  approve the real post.
-- The smoke test spec, which writes test data to staging Firebase as the test users and removes it.
+- Messages sent or scheduled in the developer's own self-DM, which only they see: previews (the
+  preview is how they approve the real post) and reminders.
+- The smoke test spec, which writes test data to staging Firebase as the test users and removes it,
+  once you've checked the assignment's resource URL has `firebaseEnv=staging` (cutting.md).
+  Without it the spec writes to production Firebase, so it is gated.
 
 ## The release record
 
@@ -69,7 +78,7 @@ is ready.
 
 - Read `.env` files that hold keys (`scripts/.env`, `dev-templates/scripts/.env`, `cypress.env.json`).
   Scripts read them; you print key names at most.
-- Decide a deploy timing yourself. Ask the PR's author (see CLAUDE.md "Deploy timing").
+- Decide a deploy timing yourself. Ask the PR's author (see "Deploy timing" in `docs/deploy.md`).
 - Deploy RTDB rules, or run `firebase deploy` with `--force`, without checking what's deployed
   (see preparing.md).
 - Write bare Jira keys in Slack. The Jira bot posts a preview card for each one; write
