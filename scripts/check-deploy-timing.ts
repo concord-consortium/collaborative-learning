@@ -8,7 +8,7 @@
  *
  * Usage (from the repository root):
  *
- *   npx tsx scripts/check-deploy-timing.ts --base origin/master --body-file pr-body.md
+ *   npx --prefix scripts tsx scripts/check-deploy-timing.ts --base origin/master --body-file pr-body.md
  *
  * The description is read from PR_BODY when --body-file is omitted. Add --json for a
  * machine-readable result. Exits non-zero when the callout is missing or incomplete.

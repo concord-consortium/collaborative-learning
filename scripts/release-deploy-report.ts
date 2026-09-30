@@ -11,11 +11,12 @@
  *
  *   npm --prefix ~/Development/dev-templates/scripts run -s unlinked-prs -- \
  *     CLUE 7.6.0 collaborative-learning v7.5.0 master --json > unlinked-prs.json
- *   npx tsx scripts/release-deploy-report.ts --unlinked-prs unlinked-prs.json
+ *   npx --prefix scripts tsx scripts/release-deploy-report.ts --unlinked-prs unlinked-prs.json
  *
- * or pass PR numbers directly with --prs 2977,2980. Open PRs linked to the release's Jira issues
- * are included too, since they are expected to merge before the release. Add --json for a
- * machine-readable report. Run from the repository root; it needs the GitHub CLI (`gh`).
+ * or pass PR numbers directly with --prs 2977,2980. With --unlinked-prs, open PRs linked to the
+ * release's Jira issues are included too, since they are expected to merge before the release.
+ * Add --json for a machine-readable report. Run from the repository root; it needs the GitHub CLI
+ * (`gh`).
  *
  * Which shared/ files count as functions code is decided from the current checkout, so run it on
  * the commit being released.
@@ -36,7 +37,7 @@ const kConcurrency = 6;
 function usage(message?: string): never {
   if (message) console.error(`\nError: ${message}\n`);
   console.error(`
-Usage: npx tsx scripts/release-deploy-report.ts (--unlinked-prs <file> | --prs <n,n,...>) [--json]
+Usage: npx --prefix scripts tsx scripts/release-deploy-report.ts (--unlinked-prs <file> | --prs <n,n,...>) [--json]
 `);
   process.exit(message ? 1 : 0);
 }
@@ -70,15 +71,23 @@ function parsePrNumbers(list: string) {
   });
 }
 
-/** Merged PRs in the release, plus open PRs of this repo linked to the release's issues. */
+/**
+ * Merged PRs in the release, plus open PRs of this repo linked to the release's issues. A file that
+ * isn't the expected shape, or names no PRs, stops the report: an empty report would read as
+ * "nothing to deploy".
+ */
 function prsFromUnlinkedPrs(file: string) {
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
-  const numbers = new Set<number>((report.mergedPRs ?? []).map((pr: any) => pr.number));
-  for (const issue of report.issues ?? []) {
+  if (!Array.isArray(report?.mergedPRs) || !Array.isArray(report?.issues)) {
+    usage(`${file} isn't unlinked-prs --json output: it needs mergedPRs and issues arrays`);
+  }
+  const numbers = new Set<number>(report.mergedPRs.map((pr: any) => pr.number));
+  for (const issue of report.issues) {
     for (const pr of issue.prs ?? []) {
       if (pr.repo === kRepo && pr.state === "not merged") numbers.add(pr.number);
     }
   }
+  if (!numbers.size) usage(`${file} names no PRs`);
   return [...numbers];
 }
 
@@ -149,8 +158,11 @@ async function main() {
   console.log(`Checked ${prs.length} PRs; ${touchingCount} change functions, rules or indexes.\n`);
   if (!rollup.length) console.log("Nothing to deploy besides the client.");
   for (const part of rollup) {
-    const decided = part.missing.length ? " (undecided: some PRs have no usable entry)" : "";
-    console.log(`${part.deployable}: ${part.timing ?? "unknown"}${decided}`);
+    const notes = [
+      ...(part.missing.length ? ["undecided: some PRs have no usable entry"] : []),
+      ...(part.mixed ? ["mixed: read each reason"] : [])
+    ];
+    console.log(`${part.deployable}: ${part.timing ?? "unknown"}${notes.length ? ` (${notes.join("; ")})` : ""}`);
     for (const entry of part.entries) {
       console.log(`  #${entry.number} ${entry.timing} (${entry.author}) — ${entry.rationale}`);
     }
@@ -166,4 +178,7 @@ async function main() {
   }
 }
 
-main();
+main().catch(error => {
+  console.error(error);
+  process.exit(1);
+});

@@ -2,8 +2,11 @@ import { execFileSync } from "child_process";
 import path from "path";
 import { kFunctionsCodebases } from "./deploy-timing.js";
 
-/** Pinned so the listing doesn't depend on which codebase's node_modules happen to be installed. */
-const kTypeScript = "typescript@5.9";
+/**
+ * Pinned so the listing doesn't depend on which codebase's node_modules happen to be installed,
+ * and to an exact version so the check doesn't change under a PR. It matches functions-v2's lockfile.
+ */
+const kTypeScript = "typescript@5.9.2";
 
 /**
  * Every repository file the functions deploy builds compile, as repo-relative paths. This is how a

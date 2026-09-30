@@ -94,7 +94,7 @@ See [tiles.md](tiles.md) for detailed tile documentation.
 **Authoring configuration docs**: The unit `config` options (the `UnitConfiguration` interface in [src/models/stores/unit-configuration.ts](src/models/stores/unit-configuration.ts)) are documented for curriculum authors in [docs/unit-configuration.md](docs/unit-configuration.md). Whenever you add, remove, or change an authorable `config` property (or other authorable unit setting), update that doc in the same change to keep it in sync.
 
 **Deploy timing**: A PR that changes the Firebase functions (`functions-v1/`, `functions-v2/`,
-`authoring-api/`, or a `shared/` file they compile), the rules (`firestore.rules`,
+`authoring-api/`, a `shared/` file they compile, or `shared/`'s package files), the rules (`firestore.rules`,
 `database.rules.json`) or the indexes (`firestore.indexes.json`) needs a Deploy timing callout in
 its description: for each part it touches, `before`, `with` or `after` the client release, and
 why. The `Deploy Timing` check enforces it; the format is in "Deploy timing" in

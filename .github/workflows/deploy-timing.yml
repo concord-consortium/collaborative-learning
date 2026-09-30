@@ -25,4 +25,5 @@ jobs:
           # description is user-controlled text.
           PR_BODY: ${{ github.event.pull_request.body }}
           BASE_REF: ${{ github.base_ref }}
-        run: npx -y tsx scripts/check-deploy-timing.ts --base "origin/$BASE_REF"
+        # tsx is pinned to the version in scripts/package-lock.json.
+        run: npx -y tsx@4.16.2 scripts/check-deploy-timing.ts --base "origin/$BASE_REF"

@@ -32,7 +32,7 @@ callout like this:
 
 | Part | Files that count |
 |---|---|
-| functions | `functions-v1/`, `functions-v2/`, `authoring-api/`, and any `shared/` file a function compiles |
+| functions | `functions-v1/`, `functions-v2/`, `authoring-api/`, any `shared/` file a function compiles, and `shared/package.json` and `shared/package-lock.json` |
 | rules | `firestore.rules`, `database.rules.json` |
 | indexes | `firestore.indexes.json` |
 
@@ -52,12 +52,17 @@ The callout must be a GitHub alert (`[!IMPORTANT]` is the usual choice; `[!WARNI
 else in the description are not read. Tests and docs in these folders don't need an entry.
 
 The [`Deploy Timing`](../.github/workflows/deploy-timing.yml) check fails until each part the PR
-touches has exactly one entry with a reason, and re-runs when the description is edited. To run it
-locally: `npx tsx scripts/check-deploy-timing.ts --base origin/master --body-file <description.md>`.
+touches has exactly one entry with a reason and no entry in the callout is unreadable (an unknown
+part or timing, or a bold list item it can't parse). It re-runs when the description is edited; a
+manual re-run of an old run uses the description as it was then, so edit the description or push
+instead. To run it
+locally: `npx --prefix scripts tsx scripts/check-deploy-timing.ts --base origin/master --body-file <description.md>`.
 
 When preparing a release, `scripts/release-deploy-report.ts` reads the callouts of every PR in the
 release and reports, per part, the strictest timing given (a part can deploy no earlier than that)
-and the PRs without a usable entry (none, more than one, or one with no reason), grouped by author. See the script's header for how to run it.
+and the PRs without a usable entry (none, more than one, one with no reason, or an unreadable
+entry in the callout), grouped by author. It flags a part whose PRs give different timings, since
+the strictest one hides the others' reasons. See the script's header for how to run it.
 
 ## Where to find builds
 

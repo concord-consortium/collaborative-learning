@@ -110,6 +110,11 @@ describe("parseDeployTiming", () => {
       invalid: ["> - **rules before** — typo"]
     });
   });
+  it("reports a numbered or + list item it can't read", () => {
+    const body = "> [!IMPORTANT]\n> **Deploy timing**\n> - **functions: with** — why\n" +
+      "> 1. **rules before** — a\n> + **indexes** — b";
+    expect(parseDeployTiming(body).invalid).toEqual(["> 1. **rules before** — a", "> + **indexes** — b"]);
+  });
   it("records an entry with no rationale", () => {
     const body = "> [!IMPORTANT]\n> **Deploy timing**\n> - **rules: before**";
     expect(parseDeployTiming(body).entries).toEqual([{ deployable: "rules", timing: "before", rationale: "" }]);
@@ -177,12 +182,14 @@ describe("rollupDeployTiming", () => {
           { number: 1, author: "a", timing: "before", rationale: "safe" },
           { number: 2, author: "b", timing: "with", rationale: "released client looks frozen" }
         ],
-        missing: [{ number: 3, author: "c", title: "three", problem: "no entry" }]
+        missing: [{ number: 3, author: "c", title: "three", problem: "no entry" }],
+        mixed: true
       },
       {
         deployable: "rules", timing: "before",
         entries: [{ number: 1, author: "a", timing: "before", rationale: "widens only" }],
-        missing: []
+        missing: [],
+        mixed: false
       }
     ]);
   });
@@ -191,7 +198,10 @@ describe("rollupDeployTiming", () => {
       { number: 4, author: "d", title: "four", touched: ["indexes"], timing: callout() }
     ]);
     expect(rollup).toEqual([
-      { deployable: "indexes", entries: [], missing: [{ number: 4, author: "d", title: "four", problem: "no entry" }] }
+      {
+        deployable: "indexes", entries: [], mixed: false,
+        missing: [{ number: 4, author: "d", title: "four", problem: "no entry" }]
+      }
     ]);
   });
   it("leaves a part undecided for a PR whose entries the check would reject", () => {
@@ -201,8 +211,28 @@ describe("rollupDeployTiming", () => {
     ]);
     const pr = { number: 5, author: "e", title: "five" };
     expect(rollup).toEqual([
-      { deployable: "rules", entries: [], missing: [{ ...pr, problem: "duplicate entries" }] },
-      { deployable: "indexes", entries: [], missing: [{ ...pr, problem: "no reason given" }] }
+      { deployable: "rules", entries: [], missing: [{ ...pr, problem: "duplicate entries" }], mixed: false },
+      { deployable: "indexes", entries: [], missing: [{ ...pr, problem: "no reason given" }], mixed: false }
+    ]);
+  });
+  it("lets after win over with and before", () => {
+    const rollup = rollupDeployTiming([
+      { number: 6, author: "f", title: "six", touched: ["functions"], timing: callout("**functions: after** — a") },
+      { number: 7, author: "g", title: "seven", touched: ["functions"], timing: callout("**functions: with** — b") },
+      { number: 8, author: "h", title: "eight", touched: ["functions"], timing: callout("**functions: before** — c") }
+    ]);
+    expect(rollup[0]).toMatchObject({ deployable: "functions", timing: "after", mixed: true });
+  });
+  it("doesn't count a PR whose callout also has an unreadable entry", () => {
+    const rollup = rollupDeployTiming([
+      { number: 9, author: "i", title: "nine", touched: ["functions"],
+        timing: callout("**functions: before** — a", "**rules befor** — typo") }
+    ]);
+    expect(rollup).toEqual([
+      {
+        deployable: "functions", entries: [], mixed: false,
+        missing: [{ number: 9, author: "i", title: "nine", problem: "unreadable entry" }]
+      }
     ]);
   });
 });

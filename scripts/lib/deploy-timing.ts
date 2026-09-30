@@ -71,8 +71,11 @@ export interface IDeployTiming {
 const kAlertStart = /^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i;
 const kHeading = /^>\s*\*\*Deploy timing\*\*\s*$/i;
 const kEntry = /^>\s*[-*]\s+\*\*([^:*]+):\s*([^*]+)\*\*\s*(?:[—–:-]\s*)?(.*)$/;
-/** A list item opening with bold text: meant as an entry, whether or not kEntry can read it. */
-const kEntryLike = /^>\s*[-*]\s+\*\*/;
+/**
+ * A list item opening with bold text: meant as an entry, whether or not kEntry can read it. Any
+ * list marker counts, so a numbered or `+` item is reported rather than read as rationale.
+ */
+const kEntryLike = /^>\s*(?:[-*+]|\d+[.)])\s+\*\*/;
 
 /**
  * Read the Deploy timing callout from a PR description:
@@ -167,23 +170,28 @@ export interface IDeployableRollup {
   entries: { number: number, author: string, timing: Timing, rationale: string }[];
   /** PRs that touch this part without a usable entry saying when it can be deployed. */
   missing: { number: number, author: string, title: string, problem: MissingTimingProblem }[];
+  /** The PRs' timings differ, so the strictest one hides the others' reasons. */
+  mixed: boolean;
 }
 
-export type MissingTimingProblem = "no entry" | "duplicate entries" | "no reason given";
+export type MissingTimingProblem = "no entry" | "duplicate entries" | "no reason given" | "unreadable entry";
 
 /**
- * Combine the Deploy timing of every PR in a release, part by part. A part can deploy no earlier
- * than its strictest PR allows, and is undecided while any PR touching it lacks one entry with a
- * reason, the same test checkDeployTiming applies.
+ * Combine the Deploy timing of every PR in a release, part by part. `timing` is the strictest
+ * timing the usable entries give; a part can deploy no earlier than that. A PR touching the part
+ * that fails checkDeployTiming's test (one entry with a reason, and no unreadable entries in the
+ * callout, which could be meant for any part) is listed in `missing` instead, and the part isn't
+ * settled until it is resolved.
  */
 export function rollupDeployTiming(prs: IPullRequestTiming[]): IDeployableRollup[] {
   return kDeployables.map(deployable => {
-    const rollup: IDeployableRollup = { deployable, entries: [], missing: [] };
+    const rollup: IDeployableRollup = { deployable, entries: [], missing: [], mixed: false };
     for (const pr of prs.filter(p => p.touched.includes(deployable))) {
       const entries = pr.timing.entries.filter(e => e.deployable === deployable);
       const problem: MissingTimingProblem | undefined = entries.length === 0 ? "no entry"
         : entries.length > 1 ? "duplicate entries"
         : !entries[0].rationale ? "no reason given"
+        : pr.timing.invalid.length ? "unreadable entry"
         : undefined;
       if (problem) {
         rollup.missing.push({ number: pr.number, author: pr.author, title: pr.title, problem });
@@ -194,6 +202,7 @@ export function rollupDeployTiming(prs: IPullRequestTiming[]): IDeployableRollup
     }
     const timings = rollup.entries.map(entry => kTimings.indexOf(entry.timing));
     if (timings.length) rollup.timing = kTimings[Math.max(...timings)];
+    rollup.mixed = new Set(timings).size > 1;
     return rollup;
   }).filter(rollup => rollup.entries.length || rollup.missing.length);
 }
