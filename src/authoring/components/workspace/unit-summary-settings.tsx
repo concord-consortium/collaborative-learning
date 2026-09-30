@@ -7,6 +7,7 @@ import {
   UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, UNIT_SUMMARY_PROBLEM_APPROACHES, UnitSummaryProblemApproach,
   UnitSummaryValidationResult, validateUnitSummary
 } from "../../../../shared/unit-summary-types";
+import { approachLine } from "../../../../shared/unit-summary-slice";
 import "./unit-summary-settings.scss";
 
 // One editable row, joining a saved entry's own fields with its title (which lives on
@@ -292,9 +293,11 @@ const UnitSummarySettings: React.FC = () => {
       lines.push(`--- Problem ${row.ordinal}: ${row.title} ---`);
       lines.push(`What a student should know before this problem: ${row.priorKnowledge || "(not recorded)"}`);
       lines.push(`What this problem covers: ${row.problemDigest}`);
-      if (row.approach) {
-        const guidance = row.approachGuidance ? ` — ${row.approachGuidance}` : "";
-        lines.push(`How this problem wants students to work: ${row.approach}${guidance}`);
+      // Built by the same helper the slice uses, so what is pasted into Forever Learning matches
+      // what the other consumers are sent, down to omitting the line for "unclear".
+      const approach = approachLine(row.ordinal, row.approach || undefined, row.approachGuidance);
+      if (approach) {
+        lines.push(approach);
       }
     });
     lines.push("");

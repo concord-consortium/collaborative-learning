@@ -686,9 +686,27 @@ describe("UnitSummarySettings", () => {
       await flush();
 
       const exportText = container.querySelector(".export-view pre")?.textContent ?? "";
-      expect(exportText).toContain("How this problem wants students to work: divergent — Try many ideas.");
+      // The same wording the slice sends, from the same helper, so a reader of the export and a
+      // model sent the slice are told the same thing.
+      expect(exportText).toContain(
+        "How this problem asks students to work (1.1): divergent. Try many ideas."
+      );
       // Entry 1.2 has no approach, so the export has exactly one such line.
-      expect(exportText.match(/How this problem wants students to work/g)).toHaveLength(1);
+      expect(exportText.match(/How this problem asks students to work/g)).toHaveLength(1);
+    });
+
+    it("leaves an 'unclear' problem out of the export, as the slice leaves it out of the prompt", async () => {
+      const summary = summaryWithApproach();
+      summary.entries[1].approach = "unclear";
+      summary.entries[1].approachGuidance = "Neither, it is a reading.";
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: summary } };
+      const { container } = render(<UnitSummarySettings />);
+      await flush();
+
+      const exportText = container.querySelector(".export-view pre")?.textContent ?? "";
+      expect(exportText.match(/How this problem asks students to work/g)).toHaveLength(1);
+      expect(exportText).not.toContain("unclear");
+      expect(exportText).not.toContain("Neither, it is a reading.");
     });
   });
 });

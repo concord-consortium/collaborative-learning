@@ -117,19 +117,33 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
     lines.push(`What the student should already know entering this problem: ${slice.priorKnowledge}`);
   }
   lines.push(`This problem (${slice.currentOrdinal}): ${slice.currentDigest}`);
-  // "unclear" sends no line at all, so the model falls back to the standing rule and the problem
-  // text rather than being told the problem is vague.
-  if (slice.currentApproach && slice.currentApproach !== "unclear") {
-    const guidance = slice.currentApproachGuidance ? ` ${slice.currentApproachGuidance}` : "";
-    lines.push(
-      `How this problem asks students to work (${slice.currentOrdinal}): ` +
-      `${slice.currentApproach}.${guidance}`
-    );
+  const approach = approachLine(
+    slice.currentOrdinal, slice.currentApproach, slice.currentApproachGuidance
+  );
+  if (approach) {
+    lines.push(approach);
   }
   if (slice.nextOrdinal !== undefined && slice.nextDigest !== undefined) {
     lines.push(`The next problem (${slice.nextOrdinal}): ${slice.nextDigest}`);
   }
   return lines.join("\n\n");
+}
+
+/**
+ * The one wording of the approach line, shared by the slice every AI consumer sends and by the
+ * authoring panel's Forever Learning export, which reaches a model the same way by hand.
+ *
+ * "unclear" produces no line. The model then falls back to the standing rule and the problem text,
+ * rather than being told the problem is vague.
+ */
+export function approachLine(
+  ordinal: string, approach: UnitSummaryProblemApproach | undefined, guidance: string | undefined
+): string | undefined {
+  if (!approach || approach === "unclear") {
+    return undefined;
+  }
+  const suffix = guidance ? ` ${guidance}` : "";
+  return `How this problem asks students to work (${ordinal}): ${approach}.${suffix}`;
 }
 
 /**
