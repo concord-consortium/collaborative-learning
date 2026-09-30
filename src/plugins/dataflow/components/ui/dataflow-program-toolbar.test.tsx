@@ -4,6 +4,7 @@ import { Provider } from "mobx-react";
 import { specStores } from "../../../../models/stores/spec-stores";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { NodeTypes } from "../../model/utilities/node";
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 
 // Required so the dataflow tile is registered before any rendering pulls in
 // dataflow-types side effects.
@@ -28,13 +29,14 @@ function renderToolbar(opts: IRenderOptions = {}): IRenderResult {
   const onClearClick = jest.fn();
   const utils = render(
     <Provider stores={stores}>
-      <DataflowProgramToolbar
-        disabled={opts.disabled ?? false}
-        isTesting={opts.isTesting ?? false}
-        onClearClick={onClearClick}
-        onNodeCreateClick={onNodeCreateClick}
-        tileId="test-tile"
-      />
+      <ReadOnlyContext.Provider value={opts.disabled ?? false}>
+        <DataflowProgramToolbar
+          isTesting={opts.isTesting ?? false}
+          onClearClick={onClearClick}
+          onNodeCreateClick={onNodeCreateClick}
+          tileId="test-tile"
+        />
+      </ReadOnlyContext.Provider>
     </Provider>
   );
   const toolbar = utils.container.querySelector('[role="toolbar"]') as HTMLElement;

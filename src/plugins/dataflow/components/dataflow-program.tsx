@@ -95,7 +95,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, tileContent, programDataRate } = this.props;
+    const { tileContent, programDataRate } = this.props;
     const { playBackIndex, isPlaying } = this.state;
     const programMode = this.determineProgramMode();
 
@@ -122,7 +122,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           programDataRates={ProgramDataRates}
           dataRate={programDataRate}
           onRateSelectClick={this.handleRateSelectClick}
-          readOnly={!!readOnly}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
@@ -139,7 +138,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               addNode={this.addNode}
               className="editor-graph-container"
               reteManager={this.reteManager}
-              readOnly={readOnly}
               style={this.getEditorStyle}
               tileId={this.tileId}
             >
@@ -175,7 +173,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             </div>
           </div>
           { showProgramToolbar && <DataflowProgramToolbar
-            disabled={!!readOnly}
             isTesting={isTesting}
             onClearClick={this.clearProgram}
             onNodeCreateClick={this.addNode}

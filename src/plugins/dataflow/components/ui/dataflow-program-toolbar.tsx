@@ -5,6 +5,7 @@ import { NodeType, NodeTypes } from "../../model/utilities/node";
 import { useUIStore } from "../../../../hooks/use-stores";
 import { useRovingTabindex } from "../../../../hooks/use-roving-tabindex";
 import { getNodeLetter } from "../../nodes/utilities/view-utilities";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./dataflow-program-toolbar.scss";
 
@@ -98,13 +99,13 @@ const AddNodeButton = ({
 };
 
 interface IProps {
-  disabled: boolean;
   isTesting: boolean;
   onClearClick: () => void;
   onNodeCreateClick: (type: string) => void;
   tileId: string;
 }
-export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
+export const DataflowProgramToolbar = ({ isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
+  const disabled = useReadOnlyContext();
   const ui = useUIStore();
   const containerRef = useRef<HTMLElement>(null);
   const { handleKeyDown } = useRovingTabindex(containerRef, "vertical");
