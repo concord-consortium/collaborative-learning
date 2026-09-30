@@ -70,6 +70,12 @@
       border-bottom: 1px solid #999;
     }
 
+    // The warning stays in the DOM so its live region exists before there is a message to
+    // announce. With no message it would still take a line's height, so collapse it.
+    p.approach-warning:empty {
+      display: none;
+    }
+
     td textarea {
       // box-sizing so the padding stays inside the column fixed layout assigned.
       box-sizing: border-box;

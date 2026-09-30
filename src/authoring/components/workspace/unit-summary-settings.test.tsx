@@ -680,6 +680,21 @@ describe("UnitSummarySettings", () => {
       expect(screen.getByText(/only saved with an approach/)).toBeInTheDocument();
     });
 
+    it("points the guidance box at the warning, and announces it, only while it applies", async () => {
+      mockCurriculumValue.unitConfig = { config: { aiUnitSummary: buildSummary() } };
+      const user = userEvent.setup();
+      render(<UnitSummarySettings />);
+      await flush();
+
+      const guidance = screen.getByLabelText("Approach guidance for problem 1.2");
+      expect(guidance).not.toHaveAttribute("aria-describedby");
+
+      await user.type(guidance, "Orphan text.");
+      expect(guidance).toHaveAttribute("aria-describedby", "approach-warning-1.2");
+      // A screen reader is told when the message appears, not only when the box is next read.
+      expect(document.getElementById("approach-warning-1.2")).toHaveAttribute("role", "status");
+    });
+
     it("puts each problem's approach in the export, and omits it where unset", async () => {
       mockCurriculumValue.unitConfig = { config: { aiUnitSummary: summaryWithApproach() } };
       const { container } = render(<UnitSummarySettings />);

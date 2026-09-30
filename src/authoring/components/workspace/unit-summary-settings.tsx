@@ -22,6 +22,11 @@ interface EntryFormRow {
   approachGuidance: string;
 }
 
+// Guidance an author has typed with no approach chosen. Save drops it, so the row says so.
+function orphanGuidance(row: EntryFormRow): boolean {
+  return !row.approach && !!row.approachGuidance;
+}
+
 // The local, unsaved editing state. generatedAt/sourceHash/sourceManifest are carried through
 // unedited (the author edits text, never these) so Save can rebuild a complete IUnitSummary.
 interface SummaryFormState {
@@ -433,12 +438,17 @@ const UnitSummarySettings: React.FC = () => {
                       placeholder="What the problem asks students to do, and what not to suggest instead."
                       value={row.approachGuidance}
                       onChange={e => updateRow(i, "approachGuidance", e.target.value)}
+                      aria-describedby={
+                        orphanGuidance(row) ? `approach-warning-${row.ordinal}` : undefined
+                      }
                     />
-                    {!row.approach && row.approachGuidance && (
-                      <p className="muted small">
-                        Guidance is only saved with an approach — set one, or clear this text.
-                      </p>
-                    )}
+                    {/* Always rendered, so the live region exists before there is anything to
+                        announce; it collapses while empty. */}
+                    <p className="muted small approach-warning" id={`approach-warning-${row.ordinal}`} role="status">
+                      {orphanGuidance(row)
+                        ? "Guidance is only saved with an approach — set one, or clear this text."
+                        : ""}
+                    </p>
                   </td>
                 </tr>
               ))}
