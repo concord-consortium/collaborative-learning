@@ -101,8 +101,9 @@ either way it is read as part of `permissions`.
   that way.
 
 A general relationship store in the style of Google's Zanzibar would express both in one place, but it is a
-separate subsystem to run — more machinery than CLUE needs. The grants only pay off once the rules enforce
-them; see "Enforcing `permissions` on document content" under Non-goals.
+separate subsystem to run — more machinery than CLUE needs. Additionally this couldn't be used by the
+Firestore rule system, so we'd have to have two systems or replace part of the backend. The grants only pay
+off once the rules enforce them; see "Enforcing `permissions` on document content" under Non-goals.
 
 **Where a policy's rules live — two coordinated copies.** A policy is code, not stored data, and its rules are
 written in *two* places keyed by the same policy name: once on the client/runtime (to compute
