@@ -16,20 +16,41 @@ const kDefaultPortalUrl = "https://learn.portal.staging.concord.org";
  */
 const kTargets = ["baseUrl", "portal"];
 
-const kRequiredKeys = [
+const kCredentialKeys = [
   "PORTAL_LAUNCH_STUDENT_USERNAME", "PORTAL_LAUNCH_STUDENT_PASSWORD",
-  "PORTAL_LAUNCH_TEACHER_USERNAME", "PORTAL_LAUNCH_TEACHER_PASSWORD",
-  "PORTAL_LAUNCH_OFFERING_ID", "PORTAL_LAUNCH_REPORT_ID"
+  "PORTAL_LAUNCH_TEACHER_USERNAME", "PORTAL_LAUNCH_TEACHER_PASSWORD"
+];
+const kIdKeys = ["PORTAL_LAUNCH_OFFERING_ID", "PORTAL_LAUNCH_REPORT_ID"];
+const kRequiredKeys = [...kCredentialKeys, ...kIdKeys];
+/**
+ * Setting any of these asks for a portal launch run. The credentials don't, since
+ * cypress.env.json holds them for every run.
+ */
+const kRunKeys = [
+  ...kIdKeys, "PORTAL_LAUNCH_TARGET", "PORTAL_LAUNCH_PORTAL_URL", "PORTAL_LAUNCH_EXPECTED_VERSION",
+  "PORTAL_LAUNCH_DELETE_RECENT_MARKERS"
 ];
 
+const env = key => Cypress.env(key);
+const isSet = key => env(key) !== undefined && env(key) !== "";
+
 /**
- * The portal launch settings, or null when any required one is missing. Callers check for null
- * at the top of the spec and declare no tests at all rather than skipping them, so a run
- * without these settings adds nothing to the recorded test count.
+ * The required settings a run is missing, when it asks for a portal launch run; otherwise none.
+ * A spec declares a failing test for these, so a misconfigured release check can't pass by
+ * running nothing.
+ */
+export function missingPortalLaunchKeys() {
+  if (!kRunKeys.some(isSet)) return [];
+  return kRequiredKeys.filter(key => !isSet(key));
+}
+
+/**
+ * The portal launch settings, or null when any required one is missing. With none of them, a
+ * spec declares no tests at all rather than skipping them, so a run without these settings adds
+ * nothing to the recorded test count.
  */
 export function portalLaunchConfig() {
-  const env = key => Cypress.env(key);
-  if (kRequiredKeys.some(key => env(key) === undefined || env(key) === "")) return null;
+  if (!kRequiredKeys.every(isSet)) return null;
 
   // Cypress turns numeric-looking values into numbers.
   const offeringId = String(env("PORTAL_LAUNCH_OFFERING_ID"));
@@ -54,6 +75,7 @@ export function portalLaunchConfig() {
     reportId,
     keepClueUrl: target === "portal",
     expectedVersion: expectedVersion === undefined ? undefined : String(expectedVersion).replace(/^v/, ""),
+    deleteRecentMarkers: String(env("PORTAL_LAUNCH_DELETE_RECENT_MARKERS")) === "true",
     studentLaunchUrl: `${portalUrl}/portal/offerings/${offeringId}.run_resource_html`,
     teacherLaunchUrl: `${portalUrl}/portal/offerings/${offeringId}/external_report/${reportId}`
   };

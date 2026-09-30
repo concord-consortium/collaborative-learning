@@ -117,8 +117,7 @@ jobs:
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: ${{ env.BROWSER }}
-          # Portal specs are listed one by one: each launches CLUE from a real portal assignment,
-          # so a workflow runs it on purpose. See cypress/e2e/portal/README.md.
+          # Portal specs are opted in one by one; see cypress/e2e/portal/README.md.
           spec: cypress/e2e/functional/**,cypress/e2e/portal/teacher_chat_spec.js
         env:
           # pass the Dashboard record key as an environment variable

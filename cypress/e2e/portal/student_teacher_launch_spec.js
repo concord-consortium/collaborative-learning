@@ -1,4 +1,4 @@
-import { portalLaunchConfig } from "../../support/portal-launch";
+import { missingPortalLaunchKeys, portalLaunchConfig } from "../../support/portal-launch";
 import ClueCanvas from "../../support/elements/common/cCanvas";
 import TextToolTile from "../../support/elements/tile/TextToolTile";
 import TeacherDashboard from "../../support/elements/common/TeacherDashboard";
@@ -16,6 +16,7 @@ const dashboard = new TeacherDashboard();
 // if it finds a recent marker from another run, and deletes older ones, which are left behind by
 // runs that failed before their cleanup.
 const config = portalLaunchConfig();
+const missingKeys = missingPortalLaunchKeys();
 
 const kMarkerPrefix = "Portal launch check ";
 // "Portal launch check <run start> attempt <n>". The run start is set when the spec file loads,
@@ -26,6 +27,8 @@ const kRunStart = new Date().toISOString();
 /** A marker younger than this is taken to belong to a run that's still going. */
 const kRunInProgressMinutes = 15;
 const kCanvas = ".primary-workspace .canvas-area";
+// Saves to a deployed Firebase can take a while, especially after a "Retrying..." status.
+const kSaveTimeout = 20000;
 
 function launch(portalLaunchUrl) {
   return cy.launchFromPortal(portalLaunchUrl, { keepClueUrl: config.keepClueUrl });
@@ -43,15 +46,27 @@ function checkVersion() {
 // hidden. The list does not say which document is the problem one, so ask CLUE for the one it
 // loaded for this offering.
 function openProblemDocument() {
-  cy.window().its("stores.documents.requiredDocuments.problem.promise").then(promise => {
-    cy.wrap(promise).then(problemDoc => {
-      expect(problemDoc, "the student's problem document for this offering").to.exist;
-      cy.get("[data-test=document-file-menu-header]").click();
-      cy.get("[data-test=list-item-icon-open-workspace]").click();
-      cy.get(`.primary-workspace .list-item[data-document-key="${problemDoc.key}"]`).click();
-      cy.window().its("stores.persistentUI.problemWorkspace.primaryDocumentKey").should("eq", problemDoc.key);
-    });
+  problemDocumentKey().then(key => {
+    cy.get("[data-test=document-file-menu-header]").click();
+    cy.get("[data-test=list-item-icon-open-workspace]").click();
+    cy.get(`.primary-workspace .list-item[data-document-key="${key}"]`).click();
+    cy.window().its("stores.persistentUI.problemWorkspace.primaryDocumentKey").should("eq", key);
   });
+}
+
+// On a student's first launch of an offering, CLUE resolves the problem document promise with
+// null, creates the document, and then replaces the promise with one for the new document. So
+// read the promise again until it yields a document.
+function problemDocumentKey(attemptsLeft = 20) {
+  return cy.window().its("stores.documents.requiredDocuments.problem.promise")
+    .then(promise => cy.wrap(promise, { log: false }))
+    .then(problemDoc => {
+      if (problemDoc) return problemDoc.key;
+      expect(attemptsLeft, "attempts left to find the student's problem document for this offering")
+        .to.be.greaterThan(0);
+      cy.wait(500, { log: false });
+      return problemDocumentKey(attemptsLeft - 1);
+    });
 }
 
 function tileSelector(tileId) {
@@ -73,11 +88,13 @@ function clearEarlierMarkers() {
       .filter(({ match }) => match);
     for (const { id, match } of earlier) {
       const minutesAgo = (Date.now() - Date.parse(match[1])) / 60000;
-      if (match[1] !== kRunStart && minutesAgo < kRunInProgressMinutes) {
+      if (match[1] !== kRunStart && minutesAgo < kRunInProgressMinutes && !config.deleteRecentMarkers) {
         throw new Error(
-          `Another run of this spec added a marker ${Math.round(minutesAgo)} minutes ago (${match[1]}), ` +
-          `so it is probably still running against the same student and assignment. Runs can't ` +
-          `share a document safely: wait for it to finish, or use a different assignment.`
+          `Another run of this spec added a marker ${Math.round(minutesAgo)} minutes ago (${match[1]}). ` +
+          `If that run failed, the marker is its leftover: rerun with ` +
+          `PORTAL_LAUNCH_DELETE_RECENT_MARKERS=true to delete it. Otherwise that run is probably still ` +
+          `going against the same student and assignment, and runs can't share a document safely: ` +
+          `wait for it to finish, or use a different assignment.`
         );
       }
       cy.log(`deleting a leftover marker from ${match[1] === kRunStart ? "an earlier attempt" : match[1]}`);
@@ -118,6 +135,15 @@ if (config) {
     it("student work persists across launches and is visible to the teacher", () => {
       const marker = `${kMarkerPrefix}${kRunStart} attempt ${Cypress.currentRetry + 1}`;
 
+      // The spec switches users by logging out and in with cy.request, while the previous user's
+      // CLUE page is still open. The portal stores a user its API authenticates by bearer token
+      // in the cookie session, so a CLUE request still in flight during the switch can sign the
+      // previous user back in, and the next login runs as them. CLUE authenticates to the portal
+      // by token and never needs these cookies, so drop them from the browser's own requests.
+      cy.intercept({ hostname: new URL(config.portalUrl).hostname }, req => {
+        req.on("response", res => { delete res.headers["set-cookie"]; });
+      });
+
       cy.log("launch as the student and add text");
       cy.login(config.portalUrl, config.student);
       launch(config.studentLaunchUrl).as("studentClueUrl");
@@ -126,7 +152,7 @@ if (config) {
       openProblemDocument();
       clearEarlierMarkers();
       addMarkerTile(marker).as("markerTileId");
-      cy.waitForSave();
+      cy.waitForSave({ timeout: kSaveTimeout });
 
       cy.log("launch again as the student and find the text");
       // A fresh launch, as after closing the window: nothing carried over in the browser.
@@ -166,12 +192,18 @@ if (config) {
       launch(config.studentLaunchUrl);
       cy.waitForLoad();
       cy.get("@markerTileId").then(tileId => deleteTile(tileId));
-      cy.waitForSave();
+      cy.waitForSave({ timeout: kSaveTimeout });
+    });
+  });
+} else if (missingKeys.length > 0) {
+  context("Launching CLUE from a portal assignment", () => {
+    it("has the settings it needs", () => {
+      throw new Error(`This run sets some PORTAL_LAUNCH_* settings but is missing ${missingKeys.join(", ")}. ` +
+        `See cypress/e2e/portal/README.md.`);
     });
   });
 } else {
-  // Declaring no tests, rather than skipping one, keeps a run without these settings out of
-  // the recorded test count. See cypress/support/portal-launch.js.
+  // See cypress/support/portal-launch.js.
   // eslint-disable-next-line no-console
   console.log("portal launch spec: PORTAL_LAUNCH_* settings missing, so no tests are declared");
 }

@@ -101,26 +101,30 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
 //
 // Yields the redirect URL without its token, e.g. for comparing a student's launch with the
 // teacher's.
+//
+// The redirect carries the user's portal token, so the steps that would record it — the request's
+// response, the visit, assertions — are kept out of the logs. A step that fails can still expose
+// it: a failed cy.visit puts its URL in the error, and a failure screenshot can show it in the
+// address bar.
 Cypress.Commands.add("launchFromPortal", (portalLaunchUrl, { keepClueUrl = false } = {}) => {
     cy.request({
         url: portalLaunchUrl,
         method: "GET",
-        followRedirect: false
+        followRedirect: false,
+        // cypress-terminal-report records a logged request's response body, which for a redirect
+        // holds its URL.
+        log: false
     })
     .then((resp) => {
         expect(resp.status).to.eq(302);
         const redirect = new URL(resp.redirectedToUrl);
-        // Assert on the origin only: the full URL carries the user's portal token, and
-        // assertion messages end up in CI logs.
-        // We are requiring the portal resource url to point at the CLUE domain. baseUrl can override
-        // this so what is actually loaded is some other URL such as localhost.
+        // The portal must redirect to the CLUE site. Assert on the origin only: the full URL
+        // carries the token.
         expect(redirect.origin, "portal redirects to CLUE").to.eq("https://collaborative-learning.concord.org");
         // When resolving against the baseUrl, pass cy.visit a full URL rather than the bare
         // query: a student launch has an unencoded `domain=https://...` in it, and cy.visit
         // takes any string containing "://" for an absolute URL and fails to parse it.
         const visitUrl = new URL(keepClueUrl ? redirect.href : new URL(redirect.search, Cypress.config("baseUrl")).href);
-        // The visit URL carries the token, and Cypress logs a visit's URL, so log a copy
-        // without it instead.
         const loggedUrl = new URL(visitUrl.href);
         loggedUrl.searchParams.delete("token");
         cy.log(`visit ${loggedUrl.href}`);
@@ -139,8 +143,9 @@ Cypress.Commands.add("waitForLoad", () => {
 // Wait for the current document's save indicator to show "Saved", meaning all
 // recent content changes have been persisted to Firebase. Use this before
 // navigating away (cy.visit, cy.reload, switching users) instead of cy.wait().
-Cypress.Commands.add("waitForSave", () => {
-  cy.get('[data-testid="save-indicator"]', { timeout: 5000 }).should('contain', 'Saved');
+// Pass a longer timeout against a deployed Firebase, where saves can take longer.
+Cypress.Commands.add("waitForSave", ({ timeout = 5000 } = {}) => {
+  cy.get('[data-testid="save-indicator"]', { timeout }).should('contain', 'Saved');
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
@@ -302,11 +307,6 @@ Cypress.Commands.add('portalLogin', (options = {}) => {
     return false; // We want to handle all uncaught exceptions during login
   });
 
-  // Debug logs in parent scope
-  cy.log('DEBUG parent Cypress.env: ' + JSON.stringify(Cypress.env()));
-  cy.log('DEBUG parent username: ' + username);
-  cy.log('DEBUG parent password: ' + password);
-
   cy.origin('https://learn.portal.staging.concord.org', { args: { username, password } }, ({ username: originUsername, password: originPassword }) => {
     cy.on('uncaught:exception', () => {
       return false;
@@ -314,17 +314,13 @@ Cypress.Commands.add('portalLogin', (options = {}) => {
 
     cy.visit('/users/sign_in');
 
-    // Debug log to help diagnose CI credential issues
-    // eslint-disable-next-line no-console
-    console.log('DEBUG Cypress.env:', Cypress.env());
-
     if (!originUsername || !originPassword) {
       throw new Error('Portal credentials not found. Set PORTAL_USERNAME and PORTAL_PASSWORD in cypress.env.json or CI environment variables.');
     }
 
     // Fill in the login form
     cy.get('#user_login', { timeout: 30000 }).type(originUsername);
-    cy.get('#user_password').type(originPassword);
+    cy.get('#user_password').type(originPassword, { log: false });
 
     // Submit the form
     cy.get('input[type="submit"]').click();
