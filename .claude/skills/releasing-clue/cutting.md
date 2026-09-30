@@ -9,13 +9,29 @@ Gated actions are marked **[approve]**; see "Approval gates" in SKILL.md.
 - **Checks:** `git fetch --tags`. Look for merges since the last triage, and read what each one
   changes. Master's CI is green (`gh run list --branch master`). Neither the branch nor the tag
   exists on origin yet.
+- **Regression tests:** CI Regression skips its Cypress jobs on a tag (they run only on master or
+  with the `run regression` label), so the tag's run means nothing. The signal is master's CI
+  Regression run for the exact commit you'll cut from:
+
+  ```bash
+  gh run list --workflow ci-regression.yml --branch master --commit <sha> \
+    --json databaseId,status,conclusion,url
+  ```
+
+  If that run passed, carry on. If it failed, is still running, or doesn't exist (master's runs
+  cancel each other when merges land close together), stop and tell the developer what you
+  found. They choose how to proceed, for example: wait for a run in progress; re-run all its jobs
+  **[approve]** (`gh run rerun <id>`, never `--failed`, since Cypress Cloud splits the specs
+  across the jobs); cut from an earlier master commit with a green run; or go ahead anyway.
+  Record the choice.
 
 ## Branch, version and tag
 
-Work in a separate worktree, so the developer's checkout isn't touched:
+Work in a separate worktree, so the developer's checkout isn't touched. `<sha>` is the master
+commit whose regression run you checked:
 
 ```bash
-git worktree add -b v<X.Y>.x ../v<X.Y>.x origin/master                     # [approve]
+git worktree add -b v<X.Y>.x ../v<X.Y>.x <sha>                             # [approve]
 npm --prefix ../v<X.Y>.x version <X.Y.Z>                                    # [approve]
 git -C ../v<X.Y>.x push origin v<X.Y>.x v<X.Y.Z>                            # [approve]
 ```
@@ -29,10 +45,6 @@ Functions v2 and CI Regression. The branch push starts its own runs; watch **the
 of `ci.yml` and `functions-v2.yml`, find the run with `gh run list --workflow <file> --branch
 v<X.Y.Z>`, then `gh run watch <id> --exit-status`. Both must pass before Release Staging. Confirm
 `https://collaborative-learning.concord.org/version/v<X.Y.Z>/` loads.
-
-On a tag, CI Regression skips its Cypress jobs (they run only on master or with the `run
-regression` label). The regression signal is master's CI Regression run for the commit the branch
-was cut from: check it passed (`gh run list --workflow ci-regression.yml --branch master`).
 
 ## GitHub release [approve]
 
