@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 import { CellSelectArgs } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
-import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
+import { writeCellValue } from "./write-cell-value";
 import { TColumn, TPosition, TRow } from "./table-types";
 import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useNumberFormat } from "./use-number-format";
@@ -137,13 +137,7 @@ export const useDataSet = ({
           __id__: selectedCellCaseId,
           [selectedCellAttributeKey]: updatedRow[selectedCellAttributeKey]
         };
-        const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
-        if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-          onAddRows([{ ...updatedCaseValues, __id__: inputRowId.current }]);
-          inputRowId.current = uniqueId();
-        } else {
-          onUpdateRow(updatedCaseValues);
-        }
+        writeCellValue(updatedCaseValues, inputRowId, { onAddRows, onUpdateRow });
       }
     }
   };

@@ -36,13 +36,9 @@ export function isSupportType(type: string) {
 export function isExemplarType(type: string) {
   return type === ExemplarDocument;
 }
-// TRANSITIONAL: accepts the pre-sweep value too. Documents created before this change store
-// "group", and CLUE-604's one-time sweep rewrites them to "axes". Once that sweep has run against
-// every environment, drop GroupDocument from this predicate — that is the single edit that closes
-// the transitional window for every call site.
 // Declared as a type guard so callers that build a discriminated union off `type` still narrow.
-export function isAxesType(type: string): type is typeof AxesDocument | typeof GroupDocument {
-  return type === AxesDocument || type === GroupDocument;
+export function isAxesType(type: string): type is typeof AxesDocument {
+  return type === AxesDocument;
 }
 // is this type of document associated with the offering (i.e. with a particular problem)
 export function isOfferingType(type: string) {
@@ -57,18 +53,14 @@ export function isPublishedType(type: string) {
   return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
           .indexOf(type) >= 0;
 }
-// TRANSITIONAL in the same way isAxesType is: `GroupDocument` here is the pre-sweep spelling of
-// `AxesDocument`, and CLUE-604's cleanup drops it. Note that this is Sort Work *membership*, and it is
-// asked of the type, so every axis-native kind added later is listed by default. An axis-native kind
-// that should not be listed should change this mechanism to check the axis fields that determine it
-// should not be listed instead of just checking the type or kind.
+// Sort Work *membership*, asked of the type, so every axis-native kind added later is listed by default.
+// To exclude one, test its axis fields here rather than its type or kind.
 export function isSortableType(type: string){
   return [
     ProblemDocument,
     PersonalDocument,
     LearningLogDocument,
     ExemplarDocument,
-    GroupDocument,
     AxesDocument
   ].indexOf(type) >= 0;
 }
@@ -83,7 +75,7 @@ export function isCurriculumDocument(documentId?: string) {
 const DocumentTypeEnumValues = [SectionDocumentDEPRECATED,
                 ProblemDocument, PersonalDocument, PlanningDocument, LearningLogDocument, ExemplarDocument,
                 ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication,
-                GroupDocument, AxesDocument];
+                AxesDocument];
 export const DocumentTypeEnum = types.enumeration("type", DocumentTypeEnumValues);
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
 export function isDocumentType(value: string): value is DocumentType {

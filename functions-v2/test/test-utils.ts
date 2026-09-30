@@ -225,7 +225,17 @@ export const setupTestDocuments = async (options: {
   documentId?: string;
   classId?: string;
   uid?: string;
-  lastEditedAt?: number;
+  // null omits the Realtime Database lastEditedAt field entirely, rather than writing one --
+  // for exercising the "connected student, not yet disconnected" case (update-class-data-docs
+  // tests): a document can hold real, saved work with no lastEditedAt yet.
+  lastEditedAt?: number | null;
+  investigation?: string;
+  problem?: string;
+  tiles?: ITileSpec[];
+  // Omitted (not written at all) by default, matching an untouched document: createDocument
+  // never writes this field, only a real content sync does (starting at 1). See
+  // documentHasStudentEdits (update-class-data-docs.ts).
+  changeCount?: number;
 }) => {
   const {
     portal,
@@ -233,8 +243,12 @@ export const setupTestDocuments = async (options: {
     documentId = kDocumentKey,
     classId = kClassHash,
     uid = kUserId,
-    lastEditedAt = new Date().getDate(),
+    investigation,
+    problem,
+    tiles = [],
+    changeCount,
   } = options;
+  const lastEditedAt = options.lastEditedAt === null ? null : options.lastEditedAt ?? new Date().getDate();
   // Demo realm is the default; callers opt into authed by passing `portal`.
   const demo = portal ? undefined : options.demo ?? "AITEST";
   const canonicalPortal = portal ? portal.replace(/\./g, "_") : undefined;
@@ -250,19 +264,28 @@ export const setupTestDocuments = async (options: {
     context_id: classId,
     uid,
     key: documentId,
+    ...(investigation !== undefined ? {investigation} : {}),
+    ...(problem !== undefined ? {problem} : {}),
   });
 
   // Set up Firebase Realtime Database document metadata
   const firebaseMetadataPath =
     `${firebaseBase}/classes/${classId}/users/${uid}/documentMetadata/${documentId}`;
-  await getDatabase().ref(firebaseMetadataPath).set({
-    lastEditedAt,
-  });
+  if (lastEditedAt !== null) {
+    await getDatabase().ref(firebaseMetadataPath).set({
+      lastEditedAt,
+    });
+  }
 
   const firebaseDocPath =
     `${firebaseBase}/classes/${classId}/users/${uid}/documents/${documentId}`;
+  // specDocumentContent already returns a JSON string; wrapping it in JSON.stringify here would
+  // double-encode it, so document content would come back as a string rather than a parsed
+  // object wherever it's inspected instead of just re-serialized (documentHasStudentWork, in
+  // particular).
   await getDatabase().ref(firebaseDocPath).set({
-    content: JSON.stringify(specDocumentContent()),
+    content: specDocumentContent(tiles),
+    ...(changeCount !== undefined ? {changeCount} : {}),
   });
 
   return {
@@ -275,4 +298,19 @@ export const setupTestDocuments = async (options: {
     studentDocMetadataPath: firestoreMetadataPath,
     studentDocPath: firebaseMetadataPath,
   };
+};
+
+// Marks the given uids as teachers of the class, for update-class-data-docs tests that need a
+// document excluded as a teacher's rather than counted as student work.
+export const setupClassTeachers = async (options: {
+  demo?: string;
+  portal?: string;
+  classId?: string;
+  teacherUids: string[];
+}) => {
+  const {portal, classId = kClassHash, teacherUids} = options;
+  const demo = portal ? undefined : options.demo ?? "AITEST";
+  const canonicalPortal = portal ? portal.replace(/\./g, "_") : undefined;
+  const firestoreBase = portal ? `authed/${canonicalPortal}` : `demo/${demo}`;
+  await getFirestore().doc(`${firestoreBase}/classes/${classId}`).set({teachers: teacherUids});
 };

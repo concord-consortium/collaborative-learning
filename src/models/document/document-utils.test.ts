@@ -190,7 +190,7 @@ describe("document utils", () => {
 
       test("a regular group document uses the group label", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: GroupDocument, uid: "g", key: "g1", groupId: "3"
+          type: AxesDocument, kind: GroupDocument, uid: "g", key: "g1", groupId: "3"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Group 3 Document");
       });
@@ -202,7 +202,7 @@ describe("document utils", () => {
         });
         const metadata = DocumentMetadataModel.create({
           // type stays "group"; the title comes from the kind, and no `title` is stored on the doc.
-          type: GroupDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
+          type: AxesDocument, kind: "testClassWideTitle", uid: "class_c1", key: "dqb-1"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
@@ -224,7 +224,7 @@ describe("document utils", () => {
 
       test("names the document by its kind and the unit it came from", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
+          type: AxesDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-other",
           unit: "other", investigation: null, problem: null
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board (other)");
@@ -236,10 +236,10 @@ describe("document utils", () => {
           title: "Our Big Questions", unit: "test"
         });
         const ownUnitDoc = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
+          type: AxesDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-own", unit: "test"
         });
         const otherUnitDoc = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
+          type: AxesDocument, kind: "testSharedKind", uid: "class_c1", key: "dqb-other", unit: "other"
         });
         expect(getDocumentDisplayTitle(unit, ownUnitDoc, appConfig)).toBe("Our Big Questions");
         expect(getDocumentDisplayTitle(unit, otherUnitDoc, appConfig)).toBe("Test Shared Kind (other)");
@@ -247,7 +247,7 @@ describe("document utils", () => {
 
       test("falls back to the kind alone when the document has no unit", () => {
         const metadata = DocumentMetadataModel.create({
-          type: GroupDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
+          type: AxesDocument, kind: "drivingQuestionBoard", uid: "class_c1", key: "dqb-no-unit"
         });
         expect(getDocumentDisplayTitle(unit, metadata, appConfig)).toBe("Driving Question Board");
       });
@@ -267,7 +267,7 @@ describe("document utils", () => {
     const researcher = UserModel.create({ id: "r1", type: "researcher", name: "Researcher", classHash: "class-1" });
 
     const metadata = (props: Record<string, any>) =>
-      DocumentMetadataModel.create({ uid: "someone-else", type: GroupDocument, key: "k", ...props });
+      DocumentMetadataModel.create({ uid: "someone-else", type: AxesDocument, key: "k", ...props });
 
     /**
      * A group document as the app actually stamps it: kept in an offering, so it carries an
@@ -421,7 +421,7 @@ describe("document utils", () => {
       // A groupmate's document syncs into the metadata before its content finishes loading; reading
       // the metadata per field is what makes the Edit button appear without a reload.
       const stillLoading = createDocumentModel({
-        uid: "", type: GroupDocument, key: "k", concurrent: true
+        uid: "", type: AxesDocument, key: "k", concurrent: true
       });
       expect(canUserEditDocument({
         document: stillLoading,
@@ -452,7 +452,7 @@ describe("document utils", () => {
     it("allows any member of the class to edit a class-wide document via the document-only path" +
        " (no metadata)", () => {
       const classWideDocument = createDocumentModel({
-        uid: "someone-else", type: GroupDocument, key: "k", concurrent: true,
+        uid: "someone-else", type: AxesDocument, key: "k", concurrent: true,
         unit: "sas", contextId: "class-1"
       });
       expect(canUserEditDocument({ document: classWideDocument, user: student })).toBe(true);
@@ -460,7 +460,7 @@ describe("document utils", () => {
 
     it("allows a group member to edit their group's document via the document-only path (no metadata)", () => {
       const groupDocument = createDocumentModel({
-        uid: groupOwner("3"), type: GroupDocument, key: "k", concurrent: true,
+        uid: groupOwner("3"), type: AxesDocument, key: "k", concurrent: true,
         unit: "sas", investigation: "1", offeringId: kOffering
       });
       expect(canUserEditDocument({ document: groupDocument, user: groupedStudent })).toBe(true);
@@ -518,17 +518,11 @@ describe("isDocumentAccessibleToUser — concurrent documents", () => {
   it("grants a student access to a concurrent document owned by someone else", () => {
     // Access reads the stored `concurrent` field, which is the permissions question: it is what says the
     // document is shared with the class, and it is what the Firestore rules key on for the same reason.
-    const groupDoc: any = { uid: groupUid, type: GroupDocument, key: "g1", concurrent: true };
+    const groupDoc: any = { uid: groupUid, type: AxesDocument, key: "g1", concurrent: true };
     expect(isDocumentAccessibleToUser({ documentMetadata: groupDoc, documents, user: student })).toBe(true);
 
-    const classWideDoc: any = { uid: classUid, type: GroupDocument, key: "c1", concurrent: true };
+    const classWideDoc: any = { uid: classUid, type: AxesDocument, key: "c1", concurrent: true };
     expect(isDocumentAccessibleToUser({ documentMetadata: classWideDoc, documents, user: student })).toBe(true);
-  });
-
-  it("reads the same for a document the sweep has already renamed", () => {
-    // The type is not read, so the same documents behave identically on either side of CLUE-604's sweep.
-    const swept: any = { uid: groupUid, type: AxesDocument, key: "g2", concurrent: true };
-    expect(isDocumentAccessibleToUser({ documentMetadata: swept, documents, user: student })).toBe(true);
   });
 
   it("denies a student access to a non-shared personal document owned by someone else", () => {
@@ -539,18 +533,15 @@ describe("isDocumentAccessibleToUser — concurrent documents", () => {
   it("does not grant access on the axis-native type alone", () => {
     // The reason this reads `concurrent` rather than the type: the axis-native type is a set the rename
     // exists to let grow, so a kind added later must state that it is class-shared rather than inherit it.
-    // The transitional branch below must not cover this — it accepts the pre-sweep literal only.
     const notConcurrent: any = { uid: "other", type: AxesDocument, key: "a1" };  // no concurrent
     expect(isDocumentAccessibleToUser({ documentMetadata: notConcurrent, documents, user: student })).toBe(false);
   });
 
-  it("TRANSITIONAL: grants access to a pre-sweep group document that stores no concurrent", () => {
-    // The shape every group document created before `concurrent` was stamped still has, and the reason
-    // the type cannot be dropped from this check yet. It is read from un-opened Firestore metadata, so
-    // db.ts's on-open backfill has not supplied the field and cannot: this check is what decides whether
-    // the thumbnail will accept the click that would open it. CLUE-604's sweep is what retires this case.
-    const legacy: any = { uid: groupUid, type: GroupDocument, key: "g3" };  // no concurrent
-    expect(isDocumentAccessibleToUser({ documentMetadata: legacy, documents, user: student })).toBe(true);
+  it("does not grant access on the pre-sweep type alone", () => {
+    // Class read access is exactly the stored `concurrent` field — the same field the Firestore rules
+    // key on. Every group document stores it, so a type that says "group" grants nothing by itself.
+    const noConcurrent: any = { uid: groupUid, type: GroupDocument, key: "g3" };
+    expect(isDocumentAccessibleToUser({ documentMetadata: noConcurrent, documents, user: student })).toBe(false);
   });
 
   it("grants access to a concurrent document of any type", () => {

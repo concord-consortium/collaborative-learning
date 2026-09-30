@@ -4,6 +4,7 @@ import { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/re
 import {z} from "zod";
 import { escapeHtmlAttribute, escapeHtmlText } from "./escape-for-html";
 import { RatingValue } from "./shared";
+import { fencedUnitContext, withLookaheadInstruction } from "./unit-summary-slice";
 
 export interface IAiPrompt {
   systemPrompt: string;
@@ -201,6 +202,17 @@ function peerCommentSection(peerComments: PeerComment[]): string {
 }
 
 /**
+ * The unit-summary slice as one more message part, fenced and escaped the same way a peer comment
+ * is (`fencePeerComment`), so it reads as data rather than as part of the prompt.
+ */
+function unitContextPart(unitContext: string): ChatCompletionContentPart {
+  return {
+    type: "text",
+    text: fencedUnitContext(unitContext, "the student"),
+  };
+}
+
+/**
  * The summary part, plus one part per related summary.
  *
  * Shared by `buildSummaryMessages` and `buildMixedMessages` so the two cannot drift: a mixed message
@@ -251,12 +263,13 @@ function summaryContentParts(
 export function buildImageMessages(
   aiPrompt: IAiPrompt,
   images: string | ImageInput[],
-  options: ImageMessageOptions = {}
+  options: ImageMessageOptions = {},
+  unitContext?: string
 ): ChatCompletionMessageParam[] {
   return [
     {
       role: "system",
-      content: aiPrompt.systemPrompt,
+      content: withLookaheadInstruction(aiPrompt.systemPrompt),
     },
     {
       role: "user",
@@ -266,16 +279,19 @@ export function buildImageMessages(
           text: aiPrompt.mainPrompt,
         },
         ...imageContentParts(images, options),
+        ...(unitContext ? [unitContextPart(unitContext)] : []),
       ],
     },
   ];
 }
 
-export function buildSummaryMessages(aiPrompt: IAiPrompt, summary: string, relatedSummaries: RelatedSummary[]): ChatCompletionMessageParam[] {
+export function buildSummaryMessages(
+  aiPrompt: IAiPrompt, summary: string, relatedSummaries: RelatedSummary[], unitContext?: string
+): ChatCompletionMessageParam[] {
   return [
     {
       role: "system",
-      content: aiPrompt.systemPrompt,
+      content: withLookaheadInstruction(aiPrompt.systemPrompt),
     },
     {
       role: "user",
@@ -285,6 +301,7 @@ export function buildSummaryMessages(aiPrompt: IAiPrompt, summary: string, relat
           text: aiPrompt.mainPrompt,
         },
         ...summaryContentParts(summary, relatedSummaries),
+        ...(unitContext ? [unitContextPart(unitContext)] : []),
       ],
     },
   ];
@@ -306,12 +323,13 @@ export function buildMixedMessages(
   summary: string | null,
   relatedSummaries: RelatedSummary[],
   images: string | ImageInput[],
-  options: ImageMessageOptions = {}
+  options: ImageMessageOptions = {},
+  unitContext?: string
 ): ChatCompletionMessageParam[] {
   return [
     {
       role: "system",
-      content: aiPrompt.systemPrompt,
+      content: withLookaheadInstruction(aiPrompt.systemPrompt),
     },
     {
       role: "user",
@@ -322,6 +340,7 @@ export function buildMixedMessages(
         },
         ...(summary === null ? [] : summaryContentParts(summary, relatedSummaries)),
         ...imageContentParts(images, options),
+        ...(unitContext ? [unitContextPart(unitContext)] : []),
       ],
     },
   ];

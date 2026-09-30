@@ -76,8 +76,7 @@ That leaves the `uid` as the single authority on who a document belongs to — i
 canonical slot is addressed by and what the Firestore rules read — so what remains of the stored
 `groupId` is worth knowing, because it has been shrinking. It no longer answers *whether* a document is
 group-owned, and it no longer resolves a group document to its members. What remains is Sort Work's group
-labels, the transitional group-document title, and the two queries that retire with the canonical-pointer
-migration — a Firestore query needs a stored field, which a uid grammar cannot provide.
+labels and the group-document title, which interpolates it.
 
 ## What each stored shape looks like
 

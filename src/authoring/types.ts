@@ -1,4 +1,5 @@
 import { TutorProviderId } from "../../shared/chat-tutor-providers";
+import { IUnitSummary } from "../../shared/unit-summary-types";
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
 import { PanelLayout } from "../models/stores/problem-configuration";
 import { DocFilterType, SortTypeIds, type SortTypeId } from "../models/stores/ui-types";
@@ -73,6 +74,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   defaultDocumentType?: "problem" | "personal" | "group";
   groupDocumentsEnabled?: boolean;
   autoAssignStudentsToIndividualGroups?: boolean;
+  aiUnitSummary?: IUnitSummary;
 }
 
 export interface IAuthorTool {

@@ -12,12 +12,15 @@ import { conversationDocId } from "./conversation-key";
 import { DebugTransport } from "./debug-transport";
 import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
+import { buildUnitContext } from "./unit-context";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
+import { providerInstallsProblem } from "../../../shared/chat-tutor-providers";
 import { serializeRight } from "./right-context";
 import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
+import { hashString } from "../../../shared/hash-string";
 
 import "./chat-sidebar.scss";
 
@@ -43,7 +46,7 @@ interface IProps {
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
-  const { appConfig, db, user } = useStores();
+  const { appConfig, db, user, unit } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -53,25 +56,38 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
 
   // chatDebug selects the backend-free debug transport; otherwise the live Firestore
   // path. Rebuilding on documentKey/problemPath change is the hard conversation swap;
-  // the unit's authored prompt overrides are mixed into the conversation id so a
-  // prompt edit (config can only change with a reload) also starts a fresh conversation.
+  // the unit's authored prompt overrides and the effective unit-summary slice are both
+  // mixed into the conversation id so a change to either starts a fresh conversation.
   const transport: ChatTransport = useMemo(() => {
     const getLeftContext = () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined;
+    // Rides the same install-eligible sends as LEFT (see unit-context.ts). Computed fresh per
+    // transport, same as getLeftContext -- unit.config is authored data, not expected to change
+    // without a reload.
+    const getUnitContext = () => buildUnitContext(unit, problem);
     const tutorPrompts = normalizeTutorPrompts(appConfig.chatTutorPrompts);
     if (urlParams.chatDebug) {
-      return new DebugTransport({ getLeftContext, getRightSummary, tutorPrompts });
+      return new DebugTransport({ getLeftContext, getUnitContext, getRightSummary, tutorPrompts });
     }
     const promptsKey = tutorPrompts && tutorPromptsKey(tutorPrompts);
     // Resolved once per transport. Undefined for the default provider, which is what keeps it
     // out of both the conversation id and the message docs.
     const provider = sessionTutorProvider(urlParams.chatProvider, appConfig.chatTutorProvider);
+    // Keyed on the formatted slice text, not the raw aiUnitSummary, so any change to what gets
+    // installed -- an edit, a regeneration, the prefix check flipping -- forks the conversation.
+    // Gated on providerInstallsProblem: ForeverLearning never attaches unitContext, so it must
+    // never fork on it either.
+    const unitContext = providerInstallsProblem(provider) ? getUnitContext() : undefined;
+    const unitKey = unitContext ? hashString(unitContext) : undefined;
     return new FirestoreTransport({
       firestore: db.firestore,
-      conversationId: conversationDocId(user.id, documentKey, user.network, problemPath, promptsKey, provider),
+      conversationId: conversationDocId(
+        user.id, documentKey, user.network, problemPath, promptsKey, provider, unitKey
+      ),
       uid: user.id,
       contextId: user.classHash,
       problemPath,
       getLeftContext,
+      getUnitContext,
       getRightSummary,
       // Read only for a backend that projects the document server-side. No dirty-tracking
       // around it the way there is around the summary: serializing a snapshot is cheap, and
@@ -80,7 +96,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       tutorPrompts,
       provider,
     });
-  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user]);
+  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
 
   // The drawer header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.

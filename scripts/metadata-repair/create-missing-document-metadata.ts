@@ -17,9 +17,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { isRtdbAddressable, type IDocumentHome } from "./lib/rtdb-document-index";
 import { toolsFromDocumentNode } from "./lib/document-tools";
 import type { ISkipReport } from "./lib/deletion-plan";
-
-/** Batched writes are capped well below Firestore's 500-operation limit. */
-const kBatchSize = 400;
+import { kBatchSize } from "./lib/firestore-batch";
 
 /**
  * The types kept in an offering rather than in the class. Each needs `offeringId` plus a curriculum
@@ -439,7 +437,7 @@ async function main() {
   // run still works; those documents are reported as unresolved instead of written half-populated.
   const portal = process.env.PORTAL ?? "https://learn.concord.org";
   const curriculumConfig = JSON.parse(
-    nodeFs.readFileSync(getScriptRootFilePath("../src/clue/curriculum-config.json"), "utf8"));
+    nodeFs.readFileSync(getScriptRootFilePath("../shared/curriculum-config.json"), "utf8"));
 
   console.log(`- Service account: ${serviceAccount.client_email}`);
   console.log(`- Firebase project: ${serviceAccount.project_id}`);

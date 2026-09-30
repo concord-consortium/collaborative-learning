@@ -278,7 +278,7 @@ describe("SortedDocuments.watchFirestoreMetaDataDocs", () => {
   let sortedDocuments: SortedDocuments;
 
   const classWideMetadata = {
-    uid: "class_mock", type: "group", key: "Class Wide Doc", createdAt: 7,
+    uid: "class_mock", type: "axes", key: "Class Wide Doc", createdAt: 7,
     unit: "sas", investigation: null, problem: null, kind: "drivingQuestionBoard", concurrent: true
   };
 

@@ -7,7 +7,7 @@ import { clearTermOverrides, setTermOverrides } from "../../utilities/translatio
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
 import { getGroupOwnerId } from "../document/document-axes";
-import { GroupDocument, ProblemDocument } from "../document/document-types";
+import { AxesDocument, ProblemDocument } from "../document/document-types";
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
 import { MetadataDocMapModel } from "../document/document-metadata-model";
@@ -41,15 +41,15 @@ const mockDocumentsData: DocumentModelSnapshotType[] = [
     content: { tiles: [] } as DocumentContentSnapshotType
   },
   { uid: getGroupOwnerId(kOffering, "3"), // owned by the group, not by whoever created it
-    type: GroupDocument, key:"Group 3 Group Doc", groupId: "3", createdAt: 5,
+    type: AxesDocument, key:"Group 3 Group Doc", groupId: "3", createdAt: 5,
     content: { tiles: [] } as DocumentContentSnapshotType
   },
   { uid: getGroupOwnerId(kOffering, "5"),
-    type: GroupDocument, key:"Group 5 Group Doc", groupId: "5", createdAt: 6,
+    type: AxesDocument, key:"Group 5 Group Doc", groupId: "5", createdAt: 6,
     content: { tiles: [] } as DocumentContentSnapshotType
   },
   { uid: "class_mock", // the class-wide synthetic owner
-    type: GroupDocument, key:"Class Wide Doc", createdAt: 7, unit: "sas",
+    type: AxesDocument, key:"Class Wide Doc", createdAt: 7, unit: "sas",
     content: { tiles: [] } as DocumentContentSnapshotType
   }
 ];
@@ -89,7 +89,7 @@ const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
   },
   "Group 3 Group Doc": {
     uid: getGroupOwnerId(kOffering, "3"),   // the synthetic group owner, as the app stamps it
-    type: GroupDocument, key:"Group 3 Group Doc", createdAt: 5,
+    type: AxesDocument, key:"Group 3 Group Doc", createdAt: 5,
     tools: [],
     groupId: "3",
     offeringId: kOffering,
@@ -98,7 +98,7 @@ const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
   },
   "Group 5 Group Doc": {
     uid: getGroupOwnerId(kOffering, "5"),
-    type: GroupDocument, key:"Group 5 Group Doc", createdAt: 6,
+    type: AxesDocument, key:"Group 5 Group Doc", createdAt: 6,
     tools: [],
     groupId: "5",
     offeringId: kOffering,
@@ -107,7 +107,7 @@ const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
   },
   "Class Wide Doc": {
     uid: "class_mock",
-    type: GroupDocument, key: "Class Wide Doc", createdAt: 7,
+    type: AxesDocument, key: "Class Wide Doc", createdAt: 7,
     tools: [],
     unit: "sas",
     investigation: null,
@@ -462,7 +462,7 @@ describe('DocumentGroup Model', () => {
           ...mockMetadataDocuments,
           "Old Group 3 Doc": {
             uid: getGroupOwnerId("other-offering", "3"),
-            type: GroupDocument, key: "Old Group 3 Doc", createdAt: 8,
+            type: AxesDocument, key: "Old Group 3 Doc", createdAt: 8,
             tools: [], groupId: "3", offeringId: "other-offering",
             unit: "sas", investigation: "2", problem: "4"
           }
@@ -487,7 +487,7 @@ describe('DocumentGroup Model', () => {
           ...mockMetadataDocuments,
           "Old Group 7 Doc": {
             uid: getGroupOwnerId("other-offering", "7"),
-            type: GroupDocument, key: "Old Group 7 Doc", createdAt: 9,
+            type: AxesDocument, key: "Old Group 7 Doc", createdAt: 9,
             tools: [], groupId: "7", offeringId: "other-offering",
             unit: "sas", investigation: "2", problem: "4"
           }

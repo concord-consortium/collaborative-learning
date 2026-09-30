@@ -1,5 +1,6 @@
 import { SnapshotIn, types } from "mobx-state-tree";
 import { TutorProviderId } from "../../../shared/chat-tutor-providers";
+import { IUnitSummary } from "../../../shared/unit-summary-types";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ProblemConfiguration } from "./problem-configuration";
 import { ISortWorkConfig } from "./sort-work-config";
@@ -156,4 +157,8 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // Class-wide collaborative documents for this unit. Each becomes one auto-created,
   // concurrently-edited document per class per unit.
   classWideDocuments?: Array<{ kind: string; title: string }>;
+  // AI-generated, author-reviewed synopsis of this unit's curriculum content, intended as compact
+  // context for AI features instead of full unit/problem JSON. Regenerated from the authoring UI's
+  // "Generate Summary" button; author edits are preserved until regenerated again.
+  aiUnitSummary?: IUnitSummary;
 }

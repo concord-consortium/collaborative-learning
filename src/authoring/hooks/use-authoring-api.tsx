@@ -10,7 +10,8 @@ export type GetEndPoint =
   | "/getPulledBranches"
   | "/getPulledUnits"
   | "/getPulledFiles"
-  | "/getImageUsages";
+  | "/getImageUsages"
+  | "/unitSummaryStatus";
 
 export type PostEndPoint =
   | "/pullUnit"
@@ -19,7 +20,8 @@ export type PostEndPoint =
   | "/putImage"
   | "/deleteImage"
   | "/renameImage"
-  | "/deleteUnit";
+  | "/deleteUnit"
+  | "/generateUnitSummary";
 
 export type EndPoint = GetEndPoint | PostEndPoint;
 

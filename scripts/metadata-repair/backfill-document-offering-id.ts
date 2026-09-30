@@ -1,0 +1,410 @@
+// Adds the missing `offeringId` to the Firestore metadata of documents kept in an offering.
+//
+// `isInClassUnitContainer` (src/models/document/document-axes.ts) treats a document with a `unit` and
+// no `offeringId` as class-unit-contained: `offeringId` is the only positive marker of the offering
+// container. So an offering-contained document without one reads as belonging to the class's copy of
+// the unit — the wrong container. This script makes the data true so that guard can be
+// relied on.
+//
+// The dry run is the deliverable that matters first: it buckets every candidate by why it landed
+// there, per type and per space, and those counts decide what to do about the documents this script
+// cannot resolve. APPLY=1 writes only the documents it resolved; every other bucket is reported and
+// left untouched.
+//
+// Requires a Firebase service account key at scripts/serviceAccountKey.json (see scripts/README.md).
+// The `documents` collection-group queries need the single-field COLLECTION_GROUP index on `type`,
+// declared in firestore.indexes.json. Without it the first query fails outright. Deploy it with
+// `firebase deploy --only firestore:indexes --project <alias>`, or use the one-click link Firestore
+// prints in the error. Diff against the deployed indexes first: an environment may carry indexes
+// absent from the file, which a --force deploy would delete.
+//
+// Dry run (reports counts, writes nothing):   npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+// Apply (performs the writes):                APPLY=1 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+//
+// TYPES limits the scan to a comma-separated subset of the types below, for sampling a large
+// environment before committing to a full sweep. PAGE_SIZE tunes the query page (default 300).
+// DATABASE_URL overrides the Realtime Database URL chosen from the credential's project.
+//
+//   TYPES=planning PAGE_SIZE=1000 npx tsx scripts/metadata-repair/backfill-document-offering-id.ts
+//
+// Read ./README.md before running this: it runs after the other repairs in this directory.
+
+import type { Firestore } from "firebase-admin/firestore";
+import { getOfferingIdFromFirebaseMetadata, type IMetadataDatabase } from "../lib/document-metadata-lookup";
+import { isRtdbAddressable, resolveSpace } from "./lib/rtdb-document-index";
+import { kBatchSize } from "./lib/firestore-batch";
+
+/**
+ * The `type` values of documents kept in an offering, per the `containerType: "offering"` entries in
+ * src/models/document/document-kinds.ts. Queried one at a time.
+ *
+ * "publication" is the problem publication's stored value; ProblemPublication in
+ * src/models/document/document-types.ts is the constant's name, not its value.
+ *
+ * Both "group" and "axes" appear because the generic axes type is mid-rename: which value a document
+ * stores depends on whether scripts/backfill-group-document-axes.ts has already run. Accepting both
+ * is what lets the two sweep scripts run in either order.
+ */
+export const kOfferingContainedTypes = [
+  "problem", "planning", "publication", "supportPublication", "group", "axes"
+] as const;
+
+/** A Firestore root and the Realtime Database path its classes hang off. */
+export interface IFirestoreSpace {
+  /** Identifies the space in the report, e.g. "authed/learn_concord_org" or "demo/CLUE". */
+  label: string;
+  firebaseBasePath: string;
+}
+
+/**
+ * Derive a document's space from its Firestore path. A collection-group query reaches every collection
+ * named `documents` anywhere in the database, so an unrecognized root is a real possibility and gets
+ * counted rather than guessed at.
+ *
+ * `authed` and `demo` resolve through `resolveSpace`, which the other repairs use. That function
+ * refuses `qa` and `dev`, because nothing there is worth repairing. This census counts them anyway,
+ * since it writes only offeringIds it actually finds. Their portal segment is not in the Firestore
+ * path, but it is fixed in practice (`qa` and `localhost`, confirmed against production). `test` takes
+ * an arbitrary portal string and cannot be derived, so a `test` document reports as an unknown space.
+ */
+export function getSpaceFromFirestorePath(docPath: string): IFirestoreSpace | undefined {
+  const [appMode, name, collection] = docPath.split("/");
+  const resolution = resolveSpace(`${appMode}/${name}/${collection}`);
+  if (resolution.status === "ok") {
+    return { label: resolution.label, firebaseBasePath: `${resolution.rtdbRoot}/classes` };
+  }
+  // Keyed by an ephemeral per-session user id rather than by portal, so each root holds only a
+  // handful of documents and many have had their RTDB side purged by delete-qa-user-data.ts — expect
+  // a high noMetadataNode share here, and read the per-space lines rather than the totals.
+  const partitionPortal = { qa: "qa", dev: "localhost" }[appMode];
+  if (resolution.status === "refused" && partitionPortal) {
+    return { label: resolution.label, firebaseBasePath: `/${appMode}/${name}/portals/${partitionPortal}/classes` };
+  }
+  return undefined;
+}
+
+/** A document whose root matches nothing known still needs a label to be counted under. */
+export const kUnknownSpaceLabel = "unknown";
+
+/** How a scanned document is reported in the per-space tallies. */
+export function getSpaceLabel(docPath: string): string {
+  return getSpaceFromFirestorePath(docPath)?.label ?? kUnknownSpaceLabel;
+}
+
+/** Every outcome a scanned document can be counted under. */
+export type CountedBucket =
+  | "resolved"
+  | "alreadySet"
+  | "noMetadataNode"
+  | "nodeWithoutOfferingId"
+  | "unusableDocument"
+  | "unknownSpace"
+  | "keyNotRtdbSafe"
+  | "skippedClassWide"
+  | "lookupError";
+
+// `spaceLabel` travels with the classification so the path is parsed once, and so a counted document
+// can never be labelled with a different space than the one its classification was decided from.
+export type Classification =
+  | { kind: "counted"; bucket: CountedBucket; spaceLabel: string }
+  | { kind: "lookup"; space: IFirestoreSpace; contextId: string; uid: string; key: string };
+
+const isGenericAxesType = (type: unknown) => type === "group" || type === "axes";
+
+/**
+ * Decide what to do with one scanned document, without doing any I/O.
+ *
+ * The class-wide test comes first, ahead of the `alreadySet` test, on purpose: a class-wide document
+ * carrying an `offeringId` should not exist, and reporting it as `alreadySet` would file an anomaly
+ * under a bucket that reads like success.
+ */
+export function classifyDocument(data: any, docPath: string): Classification {
+  const spaceLabel = getSpaceLabel(docPath);
+  const counted = (bucket: CountedBucket): Classification => ({ kind: "counted", bucket, spaceLabel });
+  // A generic axes document with no groupId is class-wide: class-unit-contained, correctly without an
+  // offering. Writing one would corrupt the guard this script exists to make safe.
+  if (isGenericAxesType(data?.type) && !data?.groupId) return counted("skippedClassWide");
+  if (data?.offeringId) return counted("alreadySet");
+  const space = getSpaceFromFirestorePath(docPath);
+  if (!space) return counted("unknownSpace");
+  const contextId = data?.context_id;
+  const uid = data?.uid;
+  const key = data?.key;
+  if (!contextId || !uid || !key) return counted("unusableDocument");
+  // Decided here rather than left to the lookup, so a permanently unaddressable document is reported
+  // as such instead of as a lookupError, which reads as transient and retryable.
+  if (!isRtdbAddressable(contextId, uid, key)) return counted("keyNotRtdbSafe");
+  return { kind: "lookup", space, contextId, uid, key };
+}
+
+/** One tally per outcome. Kept as a flat record so totals, per-type, and per-space all share a shape. */
+export type IBucketCounts = Record<CountedBucket, number>;
+
+export interface IBackfillOfferingIdResult {
+  scanned: number;
+  written: number;
+  /**
+   * Resolved documents deleted between the scan and the commit, and so not written. Kept apart from
+   * the buckets, which classify what the scan found and sum to `scanned`.
+   */
+  deletedDuringRun: number;
+  totals: IBucketCounts;
+  byType: Record<string, IBucketCounts>;
+  bySpace: Record<string, IBucketCounts>;
+}
+
+const kAllBuckets: CountedBucket[] = [
+  "resolved", "alreadySet", "noMetadataNode", "nodeWithoutOfferingId",
+  "unusableDocument", "unknownSpace", "keyNotRtdbSafe", "skippedClassWide", "lookupError"
+];
+
+const emptyCounts = (): IBucketCounts =>
+  Object.fromEntries(kAllBuckets.map((b) => [b, 0])) as IBucketCounts;
+
+/** Firestore's NOT_FOUND, which `update` raises for a document that no longer exists. */
+const isNotFound = (err: any) => err?.code === 5;
+
+/**
+ * Run `fn` over `items` a chunk at a time. Latency here is dominated by one small RTDB read per
+ * document, so the reads are overlapped; the chunking is what keeps the number in flight fixed
+ * regardless of page size.
+ */
+async function mapInChunks<T, R>(items: T[], size: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += size) {
+    results.push(...await Promise.all(items.slice(i, i + size).map(fn)));
+  }
+  return results;
+}
+
+/**
+ * Yield each page of one type's documents, ordered by document id.
+ *
+ * Paginated rather than fetched whole: this query's result set is every document of that type in every
+ * space, which will not fit in memory. Ordered by document id because that is the one total order
+ * available without a composite collection-group index.
+ */
+async function* iterateDocuments(db: Firestore, type: string, pageSize: number) {
+  let cursor: any;
+  for (;;) {
+    const base = db.collectionGroup("documents").where("type", "==", type).orderBy("__name__");
+    const query = cursor ? (base as any).startAfter(cursor) : base;
+    const snapshot = await (query as any).limit(pageSize).get();
+    const docs = snapshot.docs;
+    if (docs.length === 0) return;
+    yield docs;
+    if (docs.length < pageSize) return;
+    cursor = docs[docs.length - 1];
+  }
+}
+
+/**
+ * The types a run should scan, from a comma-separated `TYPES`. Every name is checked against the known
+ * set and an unknown one throws: a typo would otherwise scan nothing and report a confident, empty
+ * census, which is indistinguishable from "this type is clean".
+ */
+export function parseTypes(raw: string | undefined): readonly string[] {
+  const requested = (raw ?? "").split(",").map((t) => t.trim()).filter(Boolean);
+  if (requested.length === 0) return kOfferingContainedTypes;
+  const unknown = requested.filter((t) => !kOfferingContainedTypes.includes(t as any));
+  if (unknown.length > 0) {
+    throw new Error(`TYPES names unknown type(s): ${unknown.join(", ")}. ` +
+      `Known types are: ${kOfferingContainedTypes.join(", ")}`);
+  }
+  // A type named twice would be scanned and counted twice, and in apply mode could queue the same
+  // document a second time.
+  return [...new Set(requested)];
+}
+
+/** The page size from `PAGE_SIZE`. Rejects anything that is not a positive integer. */
+export function parsePageSize(raw: string | undefined, fallback: number): number {
+  if (!raw) return fallback;
+  const size = Number(raw);
+  if (!Number.isInteger(size) || size < 1) {
+    throw new Error(`PAGE_SIZE must be a positive integer, got "${raw}"`);
+  }
+  return size;
+}
+
+/**
+ * Census, and optionally repair, the `offeringId` of every offering-contained document.
+ *
+ * Idempotency works differently here than in scripts/backfill-group-document-axes.ts, whose whole
+ * design rests on the field it writes being the field it queries. Firestore cannot query for a missing
+ * field, so candidates are found by `type` and filtered in memory on the absence of `offeringId`. A
+ * re-run therefore rescans everything; it is still a no-op for anything already repaired, because a
+ * repaired document now fails that in-memory filter.
+ *
+ * Pure of admin initialization so it can be unit tested with a mock Firestore and a mock database.
+ */
+export async function backfillDocumentOfferingId(
+  db: Firestore,
+  database: IMetadataDatabase,
+  { dryRun = true, log = console.log, pageSize = 300, concurrency = 25,
+    types = kOfferingContainedTypes }: {
+    dryRun?: boolean; log?: (message: string) => void; pageSize?: number; concurrency?: number;
+    types?: readonly string[];
+  } = {}
+): Promise<IBackfillOfferingIdResult> {
+  const result: IBackfillOfferingIdResult = {
+    scanned: 0, written: 0, deletedDuringRun: 0, totals: emptyCounts(), byType: {}, bySpace: {}
+  };
+
+  const count = (type: string, spaceLabel: string, b: CountedBucket) => {
+    result.totals[b] += 1;
+    (result.byType[type] ??= emptyCounts())[b] += 1;
+    (result.bySpace[spaceLabel] ??= emptyCounts())[b] += 1;
+  };
+
+  // Batched at kBatchSize, and committed only when there is something to write, so a run with no work
+  // commits nothing at all. `written` counts only committed writes, so a run that dies mid-flight
+  // cannot over-report what actually landed. Held as data rather than queued onto a batch, so a batch
+  // that fails can be retried one document at a time.
+  let pending: Array<{ ref: any; offeringId: string }> = [];
+
+  const commitOne = async (writes: typeof pending) => {
+    const batch = (db as any).batch();
+    // `update`, never `set` with merge: a document deleted since the scan would be recreated by `set`,
+    // holding nothing but an offeringId. `update` refuses a missing document on the server, at commit.
+    for (const w of writes) batch.update(w.ref, { offeringId: w.offeringId });
+    await batch.commit();
+    result.written += writes.length;
+  };
+
+  const commitPending = async () => {
+    if (!pending.length) return;
+    try {
+      await commitOne(pending);
+    } catch (err) {
+      if (!isNotFound(err)) throw err;
+      // A batch is all-or-nothing, so one deleted document failed every write in it. The rest did
+      // nothing wrong, so retry each alone.
+      for (const w of pending) {
+        try {
+          await commitOne([w]);
+        } catch (retryErr) {
+          if (!isNotFound(retryErr)) throw retryErr;
+          result.deletedDuringRun += 1;
+          log(`deleted during the run, not written: ${w.ref.path}`);
+        }
+      }
+    }
+    pending = [];
+  };
+
+  const queueWrite = async (ref: any, offeringId: string) => {
+    pending.push({ ref, offeringId });
+    if (pending.length === kBatchSize) await commitPending();
+  };
+
+  const report = () => {
+    log(`scanned ${result.scanned}; ` +
+        kAllBuckets.map((b) => `${b}: ${result.totals[b]}`).join(", "));
+    log(`written ${result.written}; deleted during the run ${result.deletedDuringRun}`);
+    // Said out loud because a Firestore equality query on `type` cannot return a document that has no
+    // `type` field, so such documents are invisible to this census rather than counted as clean.
+    log("documents with no `type` field are not reachable by these queries and are not counted");
+    if (dryRun) log("DRY RUN — set APPLY=1 to write");
+  };
+
+  try {
+    for (const type of types) {
+      for await (const docs of iterateDocuments(db, type, pageSize)) {
+        result.scanned += docs.length;
+        const classified = docs.map((doc: any) => ({ doc, c: classifyDocument(doc.data(), doc.ref.path) }));
+
+        for (const { c } of classified) {
+          if (c.kind !== "counted") continue;
+          count(type, c.spaceLabel, c.bucket);
+        }
+
+        const candidates = classified.filter((x) => x.c.kind === "lookup");
+        // The lookups overlap, but each returns its resolution rather than writing; see below for why
+        // the batch is fed sequentially.
+        const resolved = await mapInChunks(candidates, concurrency, async ({ doc, c }: any) => {
+          try {
+            const lookup = await getOfferingIdFromFirebaseMetadata(
+              database, c.space.firebaseBasePath, c.contextId, c.uid, c.key
+            );
+            if (lookup.status !== "found") {
+              // The two non-found statuses are named identically to their buckets, so they count themselves.
+              count(type, c.space.label, lookup.status);
+              return undefined;
+            }
+            count(type, c.space.label, "resolved");
+            return { ref: doc.ref, offeringId: lookup.offeringId };
+          } catch (error) {
+            count(type, c.space.label, "lookupError");
+            log(`lookup failed for ${doc.ref.path}: ${error}`);
+            return undefined;
+          }
+        });
+
+        // Fed sequentially, never from inside the concurrent callbacks above: `queueWrite` awaits a
+        // commit and then clears `pending`, so a concurrent caller could otherwise add a write that is
+        // dropped when the commit finishes.
+        if (!dryRun) {
+          for (const write of resolved) {
+            if (write) await queueWrite(write.ref, write.offeringId);
+          }
+        }
+      }
+      // Emitted per type so a run that dies partway still shows how far it got. A re-run is safe but
+      // starts over from the first type, so this is the only record of what a failed run covered.
+      log(`finished ${type}: ${JSON.stringify(result.byType[type] ?? {})}`);
+    }
+
+    await commitPending();
+  } catch (err: any) {
+    // The normal "done" output never runs after a failure, and an interrupted apply is exactly when
+    // the operator needs `written` and the per-type and per-space counts. So print the whole result,
+    // and carry it out with the error for a caller.
+    log(`run failed; partial result: ${JSON.stringify(result, null, 2)}`);
+    err.result = result;
+    throw err;
+  } finally {
+    report();
+  }
+
+  return result;
+}
+
+async function main() {
+  // Imported lazily so the Jest test can import backfillDocumentOfferingId without loading
+  // firebase-admin or the import.meta-using script-utils module.
+  const admin = (await import("firebase-admin")).default;
+  const fs = (await import("fs")).default;
+  const { getScriptRootFilePath } = await import("../lib/script-utils.js");
+  const { resolveDatabaseUrl } = await import("./lib/repair-cli");
+  const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+  const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountFile, "utf8"));
+  // Taken from the credential's project rather than hardcoded, because this script reads offeringIds
+  // from the Realtime Database and writes them to Firestore. A URL naming a different project than
+  // the credential would copy one environment's offerings onto another environment's documents, and
+  // the census would report it as a clean success.
+  const databaseURL = resolveDatabaseUrl(serviceAccount.project_id, process.env.DATABASE_URL);
+  // Parsed before anything connects, so a bad value costs nothing.
+  const types = parseTypes(process.env.TYPES);
+  const pageSize = parsePageSize(process.env.PAGE_SIZE, 300);
+  const dryRun = process.env.APPLY !== "1";
+  console.log(`- Service account: ${serviceAccount.client_email}`);
+  console.log(`- Firebase project: ${serviceAccount.project_id}`);
+  console.log(`- Realtime Database URL: ${databaseURL}`);
+  console.log(`- Types: ${types.join(", ")}`);
+  console.log(`- Page size: ${pageSize}`);
+  console.log(`- Mode: ${dryRun ? "DRY RUN" : "APPLY — will write"}`);
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccountFile), databaseURL });
+  const result = await backfillDocumentOfferingId(
+    admin.firestore(), admin.database(), { dryRun, types, pageSize }
+  );
+  console.log("done", JSON.stringify(result, null, 2));
+  process.exit(0);
+}
+
+// Run only when invoked directly (via tsx), never when imported by the Jest test.
+if (!process.env.JEST_WORKER_ID) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

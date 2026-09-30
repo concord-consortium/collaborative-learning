@@ -240,3 +240,60 @@ describe("responseHighlights survives a malformed display part", () => {
     ]);
   });
 });
+
+// op_highlight may carry a caption (1-60 characters) naming the block in the words the prose just
+// used. See ResponseDirective.label for why only highlight can.
+const captioned = (id: string, label: string) => ({ ...nodeDirective(id), label });
+
+describe("responseHighlights captions", () => {
+  it("prefers the caption ForeverLearning sent over the name we synthesized", () => {
+    const packet = parseResponsePacket(aResponse([captioned("n-logic", "the comparison block")]))!;
+    expect(responseHighlights(packet, sentPacket))
+      .toEqual([{ tileId: "tile-df-1", objectId: "n-logic", label: "the comparison block" }]);
+  });
+
+  it("falls back to the name we sent when the directive carries no caption", () => {
+    const packet = parseResponsePacket(aResponse([nodeDirective("n-logic")]))!;
+    expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
+  });
+
+  it("still drops a captioned highlight whose node we never sent", () => {
+    const packet = parseResponsePacket(aResponse([captioned("n-invented", "the timer block")]))!;
+    expect(responseHighlights(packet, sentPacket)).toEqual([]);
+  });
+
+  it("falls back to our name when the caption is blank", () => {
+    const packet = parseResponsePacket(aResponse([captioned("n-logic", "   ")]))!;
+    expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
+  });
+
+  it("ignores a caption on a focus directive, which their schema does not allow", () => {
+    const focus = { ...captioned("n-logic", "the comparison block"), op: "focus" };
+    const packet = parseResponsePacket(aResponse([focus]))!;
+    expect(responseHighlights(packet, sentPacket)[0].label).toBe("Compare 1");
+  });
+
+  it("keeps the caption when another directive for the same node lacks one, in either order", () => {
+    const focus = { ...nodeDirective("n-logic"), op: "focus" };
+    const highlight = captioned("n-logic", "the comparison block");
+    const expected = [{ tileId: "tile-df-1", objectId: "n-logic", label: "the comparison block" }];
+    for (const directives of [[focus, highlight], [highlight, focus]]) {
+      const packet = parseResponsePacket(aResponse(directives))!;
+      expect(responseHighlights(packet, sentPacket)).toEqual(expected);
+    }
+  });
+
+  it("keeps the first caption when two directives for the same node both carry one", () => {
+    const packet = parseResponsePacket(aResponse([
+      captioned("n-logic", "the comparison block"), captioned("n-logic", "the logic block"),
+    ]))!;
+    expect(responseHighlights(packet, sentPacket).map(h => h.label)).toEqual(["the comparison block"]);
+  });
+
+  it("keeps a target where it first appeared when a later directive supplies its caption", () => {
+    const packet = parseResponsePacket(aResponse([
+      nodeDirective("n-logic"), nodeDirective("n-sensor"), captioned("n-logic", "the comparison block"),
+    ]))!;
+    expect(responseHighlights(packet, sentPacket).map(h => h.objectId)).toEqual(["n-logic", "n-sensor"]);
+  });
+});

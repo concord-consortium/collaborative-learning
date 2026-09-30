@@ -229,18 +229,23 @@ describe("document kinds registry", () => {
         profile: kClassWideProfile,
         title: "Driving Question Board"
       });
-      expect(getDocumentTitle({ kind: "testDqbTitle", type: GroupDocument })).toBe("Driving Question Board");
+      expect(getDocumentTitle({ kind: "testDqbTitle", type: AxesDocument })).toBe("Driving Question Board");
     });
 
-    it("returns the group-document label for a type:group doc with no registered title", () => {
-      // Regular group docs (kind "group", which registers no title) and legacy group docs (no kind).
-      expect(getDocumentTitle({ kind: GroupDocument, type: GroupDocument, groupId: "3" }))
+    it("titles a group document from its kind and groupId", () => {
+      // Every group document stores kind "group", and the group kind registers no title, so the label is
+      // built here.
+      expect(getDocumentTitle({ kind: GroupDocument, type: AxesDocument, groupId: "3" }))
         .toBe("Group 3 Document");
-      expect(getDocumentTitle({ type: GroupDocument, groupId: "4" })).toBe("Group 4 Document");
     });
 
-    it("titles an axes-typed group document from its groupId", () => {
-      expect(getDocumentTitle({ type: AxesDocument, groupId: "4" })).toBe("Group 4 Document");
+    it("does not title a group-kind document that has no groupId", () => {
+      expect(getDocumentTitle({ kind: GroupDocument, type: AxesDocument })).toBeUndefined();
+    });
+
+    it("does not title a document by its type", () => {
+      // A document with no kind is not a group document, whatever its type says.
+      expect(getDocumentTitle({ type: AxesDocument, groupId: "4" })).toBeUndefined();
     });
 
     it("does not title an axes-typed class-wide document as a group document", () => {
@@ -255,10 +260,9 @@ describe("document kinds registry", () => {
     });
 
     it("does not mislabel a class-wide document with an unregistered kind as a group document", () => {
-      // A class-wide document also stores type:"group" but carries no groupId. If its kind belongs to a
-      // unit that has not loaded this session, the registry lookup above misses and this must not fall
-      // through to the group-document label (which would read "Group undefined Document").
-      expect(getDocumentTitle({ kind: "unregisteredClassWideKind", type: GroupDocument })).toBeUndefined();
+      // A class-wide document is also axes-typed. If its kind belongs to a unit that has not loaded this
+      // session, the registry lookup misses, and it must not be labelled as a group document.
+      expect(getDocumentTitle({ kind: "unregisteredClassWideKind", type: AxesDocument })).toBeUndefined();
     });
 
     describe("a title declared by a unit config", () => {
@@ -271,7 +275,7 @@ describe("document kinds registry", () => {
       });
 
       it("names a document from the unit that declared it", () => {
-        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: GroupDocument, unit: "sas" }))
+        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: AxesDocument, unit: "sas" }))
           .toBe("Driving Question Board");
       });
 
@@ -279,7 +283,7 @@ describe("document kinds registry", () => {
         // Only the current unit's config is loaded, and another unit may word the same kind
         // differently, so its document falls through to the caller's fallback rather than borrowing
         // this title.
-        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: GroupDocument, unit: "msa" }))
+        expect(getDocumentTitle({ kind: "testUnitDeclaredKind", type: AxesDocument, unit: "msa" }))
           .toBeUndefined();
       });
     });

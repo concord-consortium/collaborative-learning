@@ -35,9 +35,9 @@ describe("document axis profiles", () => {
     // read it and cannot come to depend on it. DocumentMetadataStore validates raw Firestore data against
     // this model, so the field has to survive validation while staying undeclared.
     expect(() => typecheck(DocumentMetadataModel, {
-      uid: "class_c1", type: "group", key: "dqb-1", axisProfile: "classWide"
+      uid: "class_c1", type: "axes", key: "dqb-1", axisProfile: "classWide"
     } as any)).not.toThrow();
-    expect(DocumentMetadataModel.create({ uid: "class_c1", type: "group", key: "dqb-1" }))
+    expect(DocumentMetadataModel.create({ uid: "class_c1", type: "axes", key: "dqb-1" }))
       .not.toHaveProperty("axisProfile");
   });
 });

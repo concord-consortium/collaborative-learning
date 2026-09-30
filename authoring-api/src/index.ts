@@ -1,9 +1,10 @@
-import {https} from "firebase-functions";
+import {runWith} from "firebase-functions";
 import admin from "firebase-admin";
 import express, {Request, Response, NextFunction} from "express";
 import cors from "cors";
 import {DecodedIdToken} from "firebase-admin/auth";
 import {Octokit} from "@octokit/rest";
+import {createHash} from "crypto";
 
 import pullUnit from "./routes/pull-unit";
 import getContent from "./routes/get-content";
@@ -20,11 +21,13 @@ import renameImage from "./routes/rename-image";
 import getRawContent from "./routes/get-raw-content";
 import deleteUnit from "./routes/delete-unit";
 import pushUnit from "./routes/push-unit";
+import generateUnitSummary from "./routes/generate-unit-summary";
+import unitSummaryStatus from "./routes/unit-summary-status";
 
+import {isCCEmail} from "../../shared/cc-email";
 import {AuthorizedRequest} from "./helpers/express";
 import {owner, repo} from "./helpers/github";
-
-const adminOnlyPaths = ["/pullUnit"];
+import {requireCCAccess} from "./helpers/require-cc-access";
 
 // the TypeScript type definition for DecodedIdToken does not include the name property,
 // even though it is present in the actual decoded token returned by Firebase Admin SDK
@@ -51,7 +54,7 @@ const getCacheExpirationDate = () => {
 
 admin.initializeApp();
 
-const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitHubToken: string): Promise<boolean> => {
+const isUserAuthorized = async (decodedToken: DecodedIdToken, gitHubToken: string): Promise<boolean> => {
   const {email, firebase} = decodedToken;
 
   // make sure the user signed in using GitHub and has an email associated with their account
@@ -59,34 +62,28 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
     return false;
   }
 
-  // allow CC folks (with a concord.org email) access to everything and add a special exception
-  // for Doug's old zoopdoop.com email that Firebase auth is setting as the GitHub provider email
-  // in the generated auth token even though it is not used on GitHub anymore.
-  // Other exceptions:
-  // Leslie's mit.edu email which she uses for GitHub
-  // Teale's gmail address he uses for GitHub
-  const otherCCEmailAddresses = ["doug@zoopdoop.com", "lbond@alum.mit.edu", "fristoe@gmail.com"];
-  const isCCEmail = email.endsWith("@concord.org") || otherCCEmailAddresses.includes(email);
-  if (isCCEmail) {
+  // CC folks get access to everything
+  if (isCCEmail(email)) {
     return true;
-  }
-
-  // only allow CC folks to do admin-only operations
-  if (!isCCEmail && adminOnlyPaths.includes(path)) {
-    return false;
   }
 
   // clear out any expired cache entries to avoid unbounded growth
   const now = new Date();
-  for (const [token, entry] of tokenCache) {
+  for (const [tokenHash, entry] of tokenCache) {
     if (entry.expires <= now) {
-      tokenCache.delete(token);
+      tokenCache.delete(tokenHash);
     }
   }
 
+  // Keyed by a hash rather than the raw token, so the token itself isn't retained in memory
+  // (e.g. in a heap snapshot) any longer than the request that carried it needs. A cryptographic
+  // digest, not shared/hash-string.ts's cheap djb2 -- a cache hit skips the real GitHub check, so a
+  // collision here would let one token's cached result authorize a different one.
+  const cacheKey = createHash("sha256").update(gitHubToken).digest("hex");
+
   // if we have a cached token and it is still valid (since it wasn't cleared above),
   // use that to determine authorization based on whether the user is a collaborator
-  const entry = tokenCache.get(gitHubToken);
+  const entry = tokenCache.get(cacheKey);
   if (entry) {
     return entry.isCollaborator;
   }
@@ -115,7 +112,7 @@ const isUserAuthorized = async (path: string, decodedToken: DecodedIdToken, gitH
     isCollaborator = false;
   }
 
-  tokenCache.set(gitHubToken, {
+  tokenCache.set(cacheKey, {
     isCollaborator,
     expires: getCacheExpirationDate(),
   });
@@ -153,7 +150,7 @@ export const authenticateAndAuthorize = async (req: Request, res: Response, next
     }
     (req as AuthorizedRequest).gitHubToken = gitHubToken;
 
-    if (await isUserAuthorized(req.path, decodedToken, gitHubToken)) {
+    if (await isUserAuthorized(decodedToken, gitHubToken)) {
       (req as AuthorizedRequest).decodedToken = decodedToken;
       return next();
     } else {
@@ -191,7 +188,7 @@ app.use(authenticateAndAuthorize);
 // test endpoint to verify authentication is working
 app.get("/whoami", (req, res) => res.send((req as AuthorizedRequest).decodedToken));
 
-app.post("/pullUnit", pullUnit);
+app.post("/pullUnit", requireCCAccess, pullUnit);
 app.post("/pushUnit", pushUnit);
 
 app.post("/deleteUnit", deleteUnit);
@@ -214,4 +211,14 @@ app.get("/getPulledFiles", getPulledFiles);
 // NOTE: app.use() is used here to allow for paths with slashes (i.e. /rawContent/:branch/:unit/*)
 app.use("/rawContent", getRawContent);
 
-export const api = https.onRequest(app);
+app.post("/generateUnitSummary", requireCCAccess, generateUnitSummary);
+app.get("/unitSummaryStatus", unitSummaryStatus);
+
+// One Express app serves every route above as one function, so this timeout, memory, and secret
+// binding apply to all of them, not just the generation route that needs them. 540s is the
+// 1st-gen ceiling.
+export const api = runWith({
+  timeoutSeconds: 540,
+  memory: "512MB",
+  secrets: ["OPENAI_UNIT_SUMMARY_API_KEY"],
+}).https.onRequest(app);

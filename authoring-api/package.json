@@ -13,13 +13,14 @@
   "engines": {
     "node": "20"
   },
-  "main": "lib/index.js",
+  "main": "lib/authoring-api/src/index.js",
   "dependencies": {
     "@octokit/rest": "^20.1.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "firebase-admin": "^12.1.0",
-    "firebase-functions": "^5.1.1"
+    "firebase-functions": "^5.1.1",
+    "openai": "^6.45.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -13,6 +13,7 @@ import {onAnalysisDocumentImaged, representationsOf} from "../src/on-analysis-do
 import {onCommentRated} from "../src/on-comment-rated";
 import {getSummaryPath} from "../src/utils";
 import {buildZodResponseSchema, buildImageMessages} from "../lib/src/ai-categorize-document";
+import {UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION} from "../../shared/unit-summary-types";
 import {ZodArray, ZodEnum, ZodString} from "zod";
 
 jest.mock("firebase-functions/logger");
@@ -205,7 +206,7 @@ describe("functions", () => {
       expect(messages).toEqual([
         {
           role: "system",
-          content: "You are a master teacher.",
+          content: `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\nYou are a master teacher.`,
         },
         {
           role: "user",

@@ -126,6 +126,34 @@ which checks if the the aiEvaluation is set or if there are invisible exemplar d
 
 `classWideDocuments`: (array | undefined) Class-wide collaborative documents for the unit. Each entry is `{ kind, title }` and becomes one auto-created, concurrently-edited document shared by the whole class, one per class per unit (e.g. a Driving Question Board). `kind` is a label so multiple class wide documents can be added. This label has to be unique across all document types not just class wide documents. It must be a camelCase identifier — a lowercase letter followed by letters or digits, with no spaces, hyphens, or other special characters (e.g. `drivingQuestionBoard`); entries with an invalid `kind` are ignored. `title` is the fixed document title. Units that omit this array create no class-wide documents.
 
+`aiUnitSummary`: (object | undefined) An AI-generated, author-reviewed synopsis of the unit's curriculum content, produced and edited from the curriculum authoring UI's "Unit Summary" panel. It exists to give AI features (AdaChat, Teacher Summary, AI Tile, Ideas) compact context instead of full unit/problem JSON. Shape:
+
+```json
+"aiUnitSummary": {
+  "generatedAt": "2026-09-21T12:00:00.000Z",
+  "sourceHash": "1a2b3c",
+  "sourceManifest": [
+    { "ordinal": "1.1", "title": "Introduction", "problemHash": "4d5e6f" }
+  ],
+  "overview": "One paragraph describing the whole unit.",
+  "entries": [
+    { "ordinal": "1.1", "priorKnowledge": "What a student should know before this problem.", "problemDigest": "What this problem covers." }
+  ]
+}
+```
+
+Each entry in `entries` describes one problem, keyed by the same `"investigation.problem"` ordinal string used elsewhere (`Unit.getAllProblemOrdinals()`). `priorKnowledge` is cumulative — what a student should already know by the time they reach this problem, from every earlier problem in the unit, not just a restatement of this one. `problemDigest` is a short summary of this problem's own content.
+
+`sourceManifest` and `sourceHash` describe the curriculum content the summary was generated from, not the summary text itself. `sourceHash` is a hash of all problems' assembled Markdown, in authored order; each `sourceManifest` entry's `problemHash` is a hash of that one problem's assembled Markdown. Both hashes cover only what that Markdown conversion captures — not image bytes, not table rows past its row cap, and nothing an unhandled tile type drops — so an identical hash does not guarantee identical content for anything outside what the Markdown covers. `sourceHash` is not a "has the summary text changed" key: editing `overview` or `entries` by hand does not change it, and regenerating from identical curriculum content can produce different summary text under the same hash. The authoring panel uses `sourceManifest` and `sourceHash` only to warn that the curriculum may have changed since the summary was generated (comparing ordinals, titles, and hashes against the unit's current structure); it does not stop a stale summary from being saved or used.
+
+**How the four AI consumers use it.** AdaChat, the AI Tile, Ideas, and Teacher Summary each receive a filtered *slice* of the summary, never the whole thing: the current problem's cumulative `priorKnowledge`, that problem's own `problemDigest`, and the *next* problem's `problemDigest` — never `overview`, and never a digest more than one problem ahead. This bounds every consumer to the current problem and at most one problem ahead of it — never the whole unit — with one exception: Teacher Summary's "current problem" is the class's, not an individual student's, so a student behind the rest of the class can see context from further ahead than that (see below). See `docs/unit-summary-consumers.md` for exactly where each consumer's "current problem" comes from, where the no-look-ahead instruction is installed, and how each handles a missing or unusable summary.
+
+Before sending a slice, every consumer checks the summary's `sourceManifest` against the unit's live problem list, from the first problem through one past the current one, comparing ordinal and title in authored order (never sorted). Any mismatch in that range — a problem moved, renamed, inserted, or removed — sends nothing for that turn rather than a possibly-stale slice. This check has a known gap: it compares ordinal and title only, not a content hash, because no consumer has the current problem's assembled-Markdown hash available to compare against (client-side consumers only load the current problem's sections; server-side consumers would need to assemble Markdown themselves). So an author's edit to a problem's own content, with its title left unchanged, is not caught — a summary describing that problem's previous content can still pass the check and be sent.
+
+Ideas and Teacher Summary run server-side, with no browser session and no branch recorded on document metadata. Both always fetch the unit's `main` branch `content.json` for `aiUnitSummary` and the live problem list, regardless of which branch the class is actually running on. For a branch-preview deploy whose curriculum differs from `main`, the prefix check above cannot detect that mismatch, since both sides of the check — the summary and the structure it is checked against — come from the same `main` fetch. Accepted for v1: production classes run on `main`; a branch preview is development/QA use.
+
+Teacher Summary's "current problem" is the one exception to "the student's current problem": it uses the *class's* current problem instead — the furthest-along problem, in authored order, that any student in the class has done real work on (requiring both `documentHasStudentWork(content)` and evidence of an edit since creation: `changeCount`, when present, is authoritative — `changeCount >= 1` — and `lastEditedAt` is used only as a fallback for older records that predate `changeCount`). Untouched templates have neither edit marker and do not advance the class; `changeCount` counts saved edits even before a student disconnects. `lastEditedAt` is a weaker signal than `changeCount` — it is also written by an Ideas click whether or not the student edited anything — so it is only trusted when `changeCount` is absent; one accepted residual: a legacy record with no `changeCount` whose `lastEditedAt` came only from an Ideas click still qualifies. A student who is behind the rest of the class can therefore see, through the class summary the AI Tile forwards, curriculum context from a problem ahead of where they personally are. Also unlike the other three consumers, a class summary is not regenerated just because its unit's `aiUnitSummary` changes: regeneration is still triggered by student work changing, so a newly generated or edited summary reaches an existing class summary the next time that class's work changes (the nightly pass, or an on-demand regeneration), not immediately.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
@@ -417,6 +445,11 @@ Common toolbar framework; default toolbar buttons:
 - `merge-in`
 - `["data-set-view", "DataCard"]`
 - `delete`
+
+Additional buttons available not in default set:
+
+- `image-upload` (upload an image into the selected cell). Not enabled by default; add it to the
+  unit's `settings.table.tools` to opt in.
 
 #### Text
 

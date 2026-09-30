@@ -7,6 +7,7 @@ import {DocumentSnapshot} from "firebase-functions/v2/firestore";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
+import {withLookaheadInstruction} from "../../shared/unit-summary-slice";
 import {validateUserContext} from "./user-context";
 
 // This function generates and returns tile content from an LLM.
@@ -23,6 +24,16 @@ const version = "1.0.0";
 
 const lockTimeout = 60 * 1000; // 1 minute
 
+// Bump whenever the code-level system message changes (the instruction below, or the default
+// systemPrompt fallback) so a cached response generated under the old wording is regenerated
+// rather than reused. Written onto the cached content doc alongside prompt; compared in
+// isCachedContentUpToDate.
+export const PROMPT_POLICY_VERSION = 1;
+
+export function buildSystemMessageText(systemPrompt: string | undefined): string {
+  return withLookaheadInstruction(systemPrompt || "You are a helpful, collaborative student.");
+}
+
 function getClassInfoPath(firestoreRoot: string, unit: string, classHash: string): string {
   return `${firestoreRoot}/aicontent/${unit}/classes/${classHash}`;
 }
@@ -38,14 +49,17 @@ function getLockPath(firestoreRoot: string, unit: string, classHash: string, doc
   return getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId) + "-LOCK";
 }
 
-function isCachedContentUpToDate(prompt: string,
+export function isCachedContentUpToDate(prompt: string,
   classInfo: DocumentSnapshot, contentSnapshot: DocumentSnapshot): boolean {
   if (!contentSnapshot.exists) return false;
   const contentData = contentSnapshot.data();
   if (!contentData) return false;
   if (!contentData.lastUpdated) return false;
-  if (contentData.lastUpdated < classInfo.data()?.lastUpdated) return false;
+  if (contentData.promptPolicyVersion !== PROMPT_POLICY_VERSION) return false;
   if (contentData.prompt !== prompt) return false;
+  // summaryCreatedAt is absent until a class summary is first generated; absence is not staleness.
+  const summaryCreatedAt = classInfo.data()?.summaryCreatedAt;
+  if (summaryCreatedAt && contentData.lastUpdated.toMillis() < summaryCreatedAt.toMillis()) return false;
   return true;
 }
 
@@ -120,7 +134,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   const teacherMessage =
     teacherSummary ? `Here is a summary of the teacher work in this class:\n\n ${teacherSummary}\n\n` : "";
   const messages = [
-    new SystemMessage(systemPrompt || "You are a helpful, collaborative student."),
+    new SystemMessage(buildSystemMessageText(systemPrompt)),
     new HumanMessage(`${tilePrompt}\n\n${teacherMessage}${studentMessage}`),
   ];
 
@@ -139,6 +153,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   await getFirestore().doc(aiContentPath).set({
     content,
     prompt: tilePrompt,
+    promptPolicyVersion: PROMPT_POLICY_VERSION,
     lastUpdated,
   });
 

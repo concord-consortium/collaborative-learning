@@ -37,6 +37,8 @@ import { TableToolbarContext } from "./table-toolbar-context";
 import { ITableContext, TableContext } from "../hooks/table-context";
 import { useUIStore } from "../../../hooks/use-stores";
 import { RowDragOverlay } from "./row-drag-overlay";
+import { uploadImageToCell } from "./upload-image-to-cell";
+import { writeCellValue } from "./write-cell-value";
 import { TRow } from "./table-types";
 import { useFormulaModal } from "./use-formula-modal";
 import { useClueAccessibility } from "../../../hooks/use-clue-accessibility";
@@ -461,10 +463,17 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // here would not help the situation. I think an object that is managing
   // the internal state of the component would be a better way to factor
   // all of the use* calls above.
+  const uploadImage = useCallback((file: File) => {
+    uploadImageToCell(dataSet, caseValues => {
+      writeCellValue(caseValues, inputRowId, changeHandlers);
+    }, file);
+  }, [dataSet, changeHandlers, inputRowId]);
+
   const toolbarContext = {
     showExpressionsDialog: handleToolbarShowExpressionsDialog,
     deleteSelected,
-    importData
+    importData,
+    uploadImage
   };
 
   const classes = classNames("tile-content", "table-tool", {

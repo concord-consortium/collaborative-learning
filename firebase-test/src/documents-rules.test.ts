@@ -488,16 +488,16 @@ describe("Firestore security rules", () => {
     });
 
     it("a class member can set concurrent:true on a classmate's group-typed document", async () => {
-      // The backfill paths (src/lib/db.ts on-open backfill, scripts/backfill-group-document-axes.ts)
-      // merge-update `concurrent` onto pre-existing group documents, so this must keep working.
+      // Older app bundles backfill `concurrent` onto group documents when opening them, so this must keep
+      // working until the field is made creation-only (docs/document-axes/planned-rules-tightening.md).
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "group" }}));
       await expectUpdateToSucceed(db, kDocumentDocPath, { concurrent: true });
     });
 
     it("a class member cannot clear concurrent on a group document", async () => {
-      // Only the backfills write this field and both write `true`, so clearing it is nobody's
-      // legitimate operation. Allowing it would let any class member strip a group document's shared
+      // Older app bundles' open-time backfill is the only client write to this field, and it writes only
+      // `true`, so clearing it is nobody's legitimate operation. Allowing it would let any class member strip a group document's shared
       // history access and its members' Edit button.
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({

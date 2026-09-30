@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { TutorProviderId } from "../../../shared/chat-tutor-providers";
+import { providerInstallsProblem, TutorProviderId } from "../../../shared/chat-tutor-providers";
 import { utf8ByteLength } from "../../../shared/utf8-byte-length";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
@@ -30,6 +30,9 @@ export interface FirestoreTransportOptions {
   problemPath: string;
   // LEFT problem JSON; undefined until the problem's sections have loaded
   getLeftContext: () => string | undefined;
+  // A slice of the unit's authored aiUnitSummary, undefined if the unit has none or the current
+  // problem isn't found in it. Rides the same install-eligible sends as LEFT. See unit-context.ts.
+  getUnitContext?: () => string | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
   // The workspace document itself, for a backend that projects it server-side; undefined until
@@ -166,13 +169,13 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
-    const { uid, contextId, problemPath, getLeftContext, tutorPrompts, provider } = this.opts;
+    const { uid, contextId, problemPath, getLeftContext, getUnitContext, tutorPrompts, provider } = this.opts;
     const right = this.workspacePayload();
     // LEFT is an OpenAI-path concept: that provider installs the problem once and flips the
     // parent's problemInstalled flag. The ForeverLearning provider reads neither, so its flag
     // never flips — without this, every FL message would carry the whole problem JSON and every
     // byte of it would be discarded on arrival.
-    const backendInstallsProblem = provider !== "foreverlearning";
+    const backendInstallsProblem = providerInstallsProblem(provider);
     const decision = decideContext({
       leftAlreadyInstalled: this.problemInstalled || !backendInstallsProblem,
       currentRightHash: right?.hash ?? "",
@@ -187,6 +190,9 @@ export class FirestoreTransport implements ChatTransport {
         throw new Error("The problem is still loading. Please try again in a moment.");
       }
     }
+    // Unlike LEFT, a missing unit summary is a normal, expected case (most units have none
+    // authored yet), not a loading error -- so this never blocks the send.
+    const unitContext = decision.attachLeft ? getUnitContext?.() : undefined;
 
     // Field names must match the rules' create whitelist exactly. context_id and
     // problemPath ride on every message because the server stamps the parent doc's
@@ -203,6 +209,9 @@ export class FirestoreTransport implements ChatTransport {
     };
     if (leftContext !== undefined) {
       message.leftContext = leftContext;
+    }
+    if (unitContext !== undefined) {
+      message.unitContext = unitContext;
     }
     // Stamped on every message rather than only install-eligible ones, so the trigger can read it
     // off whichever message it happens to be draining. Routing must persist it from the first

@@ -32,7 +32,11 @@ export function handleGraphTile({ dataSets, tile }: TileHandlerParams): string|u
       const dataSet = dataSets.find(ds => ds.id === config.dataset);
 
       if (dataSet) {
-        result += `${oneDatasetWord} is the "${dataSet.name}" (${dataSet.id}) data set.`;
+        // dataSet.name can be missing -- see NormalizedDataSet.
+        const dataSetPhrase = dataSet.name
+          ? `the "${dataSet.name}" (${dataSet.id}) data set`
+          : `data set ${dataSet.id}`;
+        result += `${oneDatasetWord} is ${dataSetPhrase}.`;
         if (editable) result += ` This dataset contains manually entered data points.`;
 
         const xAttributeID = config._attributeDescriptions?.x?.attributeID;

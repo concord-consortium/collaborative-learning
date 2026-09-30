@@ -44,7 +44,7 @@ nodes — and an operator will want to run and judge them separately.
 The two repairs are independent of each other and may run in either order. Both must run **before**
 `backfill-document-offering-id.ts`, which resolves a document's `offeringId` through its `context_id`
 and therefore mis-reports documents whose `context_id` is wrong or whose metadata document is
-absent. The deletion runs last of all — see **Order** under the deletion section.
+absent. The deletion runs after both repairs — see **Order** under the deletion section.
 
 ## The index
 
@@ -243,10 +243,10 @@ never had a realtime-database node, so a `documentMetadata` lookup on them is me
 **Content with no metadata anywhere (`A--`) — out of scope.** 6 documents in the whole database. A
 script indexing from `documentMetadata` cannot see them, and six is small enough to handle by hand.
 
-**Keys that are not realtime-database-addressable.** A key containing `.`, `#`, `$`, `[`, `]`, or `/`
-cannot appear in an RTDB path and any lookup on it throws. `isRtdbAddressable` in
-`backfill-document-offering-id.ts` already encodes this; lift it into the shared lib rather than
-duplicating it.
+**Keys that are not realtime-database-addressable.** A key containing `.`, `#`, `$`, `[`, `]`, `/`
+or an ASCII control character cannot appear in an RTDB path and any lookup on it throws.
+`isRtdbAddressable` in `lib/rtdb-document-index.ts` encodes this, and the `offeringId` backfill uses
+the same function.
 
 ## Safety and reporting
 
@@ -365,7 +365,7 @@ outside a protected space; an unaddressable key refused; an entry naming neither
 ## Testing
 
 Unit tests against a mock Firestore and a mock realtime database, as
-`scripts/backfill-document-offering-id.test.ts` does. The cases that matter:
+`scripts/metadata-repair/backfill-document-offering-id.test.ts` does. The cases that matter:
 
 - a mismatch driven by the index where the legacy `contextId` says something different
 - a mismatch where the legacy `contextId` is `"ignored"`

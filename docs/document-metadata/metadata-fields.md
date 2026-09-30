@@ -41,8 +41,8 @@ so this table doubles as a migration-progress view.
 | `tools` | Firestore | all editable | `DocumentMetadataModel.tools` | Yes, class-wide |
 | `strategies` | Firestore | commented docs | `DocumentMetadataModel.strategies` | Yes, class-wide |
 | `lastHistoryEntry` | Firestore | concurrent-history docs | not surfaced | No |
-| `canonical` | Firestore | group | not surfaced | No |
-| `axisProfile` | Firestore | group | not surfaced — deliberately | No |
+| `canonical` | Firestore | group, class-wide | not surfaced | No |
+| `axisProfile` | Firestore | group, class-wide | not surfaced — deliberately | No |
 | `offeringId` | Firestore + RTDB | problem family | `DocumentModel.offeringId`, `DocumentMetadataModel.offeringId` | No — immutable |
 | `groupId` | Firestore | group (the **owning** group) | `DocumentModel.groupId`, `DocumentMetadataModel.groupId` | No — immutable |
 
@@ -101,16 +101,16 @@ here so a reader looking for the stored field does not go hunting for one that d
 - **Stores:** Firestore only
 - **Location:** `documents/{key}.context_id`
 - **Applies to:** all document types
-- **Runtime:** `DocumentModel.contextId` ([document.ts:81](../../src/models/document/document.ts#L81));
+- **Runtime:** `DocumentModel.contextId` ([`document.ts`](../../src/models/document/document.ts));
   `DocumentMetadataModel.context_id`
-- **Updated by:** nothing — written once at creation from `self.classHash`
-  ([db.ts:587](../../src/lib/db.ts#L587)) and enforced read-only by
+- **Updated by:** nothing — written once at creation from `user.classHash`
+  (`buildFirestoreMetadataContent` in [`db.ts`](../../src/lib/db.ts)) and enforced read-only by
   [firestore.rules](../../firestore.rules) `preservesReadOnlyDocumentFields`
 - **Reactive:** No. Immutable, so there is nothing to react to.
 
 The document's authoritative owning class. Note the case difference: Firestore stores snake_case
-`context_id`; the model prop is camelCase `contextId`. It is read at `openDocument`
-([db.ts:980](../../src/lib/db.ts#L980)) from the point-read Firestore metadata.
+`context_id`; the model prop is camelCase `contextId`. It is read in `openDocument`
+([`db.ts`](../../src/lib/db.ts)), where the model is created, from the point-read Firestore metadata.
 
 Also the query key for essentially every Firestore metadata read — both the `DocumentMetadataStore` point
 read and the Sort Work watches filter on `where("context_id", "==", user.classHash)`.
@@ -125,7 +125,7 @@ CLUE-524 and is not written today.
 - **Applies to:** all; `null` for student and group documents
 - **Runtime:** `DocumentMetadataModel.network` (no `DocumentModel` prop)
 - **Updated by:** nothing — written once at creation from `userContext.network`
-  ([db.ts:588](../../src/lib/db.ts#L588))
+  (`buildFirestoreMetadataContent` in [`db.ts`](../../src/lib/db.ts))
 - **Reactive:** No
 
 Not a document property in any real sense — it records the creating user's single "primary" network name,
@@ -147,8 +147,9 @@ should be aware the field can be stale.
 - **Applies to:** all editable types
 - **Runtime:** `DocumentMetadataModel.tools`. No `DocumentModel` prop — it is derived from content.
 - **Updated by:** the content sync hook, which recomputes it from `content.tileTypes` (plus `"Sparrow"`
-  when an arrow annotation exists) and calls `updateFirestoreDocumentProp("tools", tools)`
-  ([use-document-sync-to-firebase.ts:298](../../src/hooks/use-document-sync-to-firebase.ts#L298))
+  when an arrow annotation exists) and calls `updateFirestoreDocumentProp("tools", tools)` in the
+  content-save mutation of `useDocumentSyncToFirebase`
+  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts))
 - **Reactive:** Yes, class-wide, via the Sort Work `onSnapshot`.
 
 Used to filter documents by the tile types they contain.
@@ -173,8 +174,9 @@ snapshot, so the runtime value is a union rather than a straight read.
 - **Location:** `documents/{key}.lastHistoryEntry` — `{ id, index }`
 - **Applies to:** documents using the concurrent history manager
 - **Runtime:** `DocumentMetadataModel.lastHistoryEntry`; not on `DocumentModel`
-- **Updated by:** the concurrent history manager, inside its history-upload transaction
-  ([firestore-history-manager-concurrent.ts:357](../../src/models/history/firestore-history-manager-concurrent.ts#L357))
+- **Updated by:** the concurrent history manager, inside the history-upload transaction in
+  `uploadQueuedHistoryEntries`
+  ([`firestore-history-manager-concurrent.ts`](../../src/models/history/firestore-history-manager-concurrent.ts))
 - **Reactive:** No — read transactionally for fork detection, not observed by the UI.
 
 Distinct from the RTDB `lastHistoryEntryId` (below). This one is the *head of the Firestore history
@@ -185,13 +187,14 @@ questions and are written by different code.
 
 - **Stores:** Firestore only
 - **Location:** `documents/{key}.canonical`
-- **Applies to:** group documents
+- **Applies to:** the one document in each canonical slot — a group's document (label `"default"`) and each
+  class-wide document (label = its kind); set only on the document that won the slot
 - **Runtime:** not surfaced
-- **Updated by:** the canonical-pointer transactions in `db.ts`
-  ([db.ts:746](../../src/lib/db.ts#L746), [db.ts:766](../../src/lib/db.ts#L766))
+- **Updated by:** the canonical-pointer claim transaction in `resolveCanonicalDocumentUncached`
+  ([`db.ts`](../../src/lib/db.ts)), which sets it alongside the pointer once the document is created
 - **Reactive:** No
 
-Claims a canonical label for a group document so concurrent creators converge on one document. The rules
+Claims a canonical label for a document so concurrent creators converge on one document. The rules
 forbid setting it on create and permit a single one-time set on update, and only when the pointer for
 this document's own slot already names it. That slot is a container plus an owner plus a label, and the
 rules locate it by building the path from the document's own fields — including its `uid` as the owner —
@@ -230,8 +233,8 @@ as class-wide, and the class check would let any classmate edit another group's 
   and group documents have no stored title — theirs is generated from curriculum.
 - **Runtime:** `DocumentModel.title`, `DocumentMetadataModel.title`
 - **Updated by:** `setTitle` → `useSyncMstPropToFirebase` writes the **type-specific** RTDB record, with
-  `updateFirestoreDocumentProp` mirroring to Firestore
-  ([use-document-sync-to-firebase.ts:162](../../src/hooks/use-document-sync-to-firebase.ts#L162))
+  `updateFirestoreDocumentProp` mirroring to Firestore — the title sync in `useDocumentSyncToFirebase`
+  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts))
 - **Reactive:** **Own documents only.**
 
 This is the clearest example of the read-side asymmetry the roadmap describes, and worth spelling out
@@ -241,8 +244,8 @@ because the write side looks symmetric:
 - `DocumentMetadataModel.title` *is* updated live by the Sort Work `onSnapshot`, class-wide.
 - But nothing renders it. The thumbnail caption comes from `useDocumentCaption(document)` →
   `DocumentModel.title`, which is RTDB-sourced.
-- The only listener that calls `setTitle` is
-  [db-other-docs-listener.ts:109](../../src/lib/db-listeners/db-other-docs-listener.ts#L109), subscribed
+- The only listener that calls `setTitle` is `handleDocumentChanged` in
+  [`db-other-docs-listener.ts`](../../src/lib/db-listeners/db-other-docs-listener.ts), subscribed
   to *your own* user node. The peer-document listener registers `child_added` only, so peer renames never
   arrive.
 
@@ -266,16 +269,17 @@ rather than user-visible.
 - **Applies to:** problem, planning, personal, learningLog. Publications are implicitly public; group
   documents are group-scoped.
 - **Runtime:** `DocumentModel.visibility`, `DocumentMetadataModel.visibility`
-- **Updated by:** `setVisibility` / `toggleVisibility` → two separate sync hooks, one per type group
-  ([use-document-sync-to-firebase.ts:132](../../src/hooks/use-document-sync-to-firebase.ts#L132) and
-  [:147](../../src/hooks/use-document-sync-to-firebase.ts#L147)), both mirroring to Firestore
+- **Updated by:** `setVisibility` / `toggleVisibility` → two separate visibility syncs in
+  `useDocumentSyncToFirebase`, one per type group
+  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts)), both mirroring
+  to Firestore
 - **Reactive:** Class-wide for problem documents, via
   [db-problem-documents-listener.ts](../../src/lib/db-listeners/db-problem-documents-listener.ts)
   (`getOfferingUsersPath` — both teachers and students listen to all problem documents) →
   `updateDocumentFromProblemDocument` → `setVisibility`. Also class-wide from Firestore for the Sort Work
-  thumbnails, which deliberately prefer the metadata value: see
-  [document-utils.ts:105](../../src/models/document/document-utils.ts#L105) — *"It's prefered because
-  it's reactive to remote changes."*
+  thumbnails, which deliberately prefer the metadata value: see `isDocumentAccessibleToUser` in
+  [`document-utils.ts`](../../src/models/document/document-utils.ts) — *"It's prefered because it's
+  reactive to remote changes."*
 
 This is the one dual-stored field with a working reactive Firestore read today, which is why the roadmap
 cites it as the model for moving the others.
@@ -283,17 +287,17 @@ cites it as the model for moving the others.
 **Personal and learning-log visibility does not round-trip.** The two sync hooks write different kinds of
 path: the problem hook writes `typedMetadata`, but the personal/learningLog hook writes `metadata` — the
 *generic* record. Meanwhile `createOtherDocument` writes `visibility` into the *type-specific*
-`DBOtherDocument` ([db.ts:1081](../../src/lib/db.ts#L1081)), and `db-other-docs-listener` reads it back
-from that same type-specific record
-([db-other-docs-listener.ts:110](../../src/lib/db-listeners/db-other-docs-listener.ts#L110)). So a
+`DBOtherDocument` ([`db.ts`](../../src/lib/db.ts)), and `db-other-docs-listener` reads it back from that
+same type-specific record (`handleDocumentChanged` in
+[`db-other-docs-listener.ts`](../../src/lib/db-listeners/db-other-docs-listener.ts)). So a
 visibility toggle on a personal document writes a location nothing reads, and the type-specific value
 stays frozen at its creation default. The Firestore mirror *is* written, so Sort Work's thumbnail
 accessibility check still sees the change; the RTDB copy is what goes stale. Flagged as an observation —
 whether the generic path was deliberate is not determinable from the code.
 
 **Planning documents never sync visibility at all.** They appear in none of the `enabled` lists, so their
-`visibility` is frozen at the `"private"` set at creation
-([db.ts:531](../../src/lib/db.ts#L531)).
+`visibility` is frozen at the `"private"` set at creation (`createProblemOrPlanningDocument` in
+[`db.ts`](../../src/lib/db.ts), where the type-specific record is built).
 
 ### `properties`
 
@@ -303,9 +307,9 @@ whether the generic path was deliberate is not determinable from the code.
   `DBOtherDocument` and `DBOtherPublication` records at creation
 - **Applies to:** problem, personal, learningLog, and the published types
 - **Runtime:** `DocumentModel.properties` (MST map), `DocumentMetadataModel.properties`
-- **Updated by:** `setProperty` / `setNumericProperty` → `useSyncMstNodeToFirebase`
-  ([use-document-sync-to-firebase.ts:177](../../src/hooks/use-document-sync-to-firebase.ts#L177) and
-  [:192](../../src/hooks/use-document-sync-to-firebase.ts#L192)) — **RTDB only**
+- **Updated by:** `setProperty` / `setNumericProperty` → `useSyncMstNodeToFirebase`, via the two
+  properties syncs in `useDocumentSyncToFirebase`
+  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts)) — **RTDB only**
 - **Reactive:** **No.** No listener applies property changes to a document model. A peer marking a
   document deleted will not update in your session.
 
@@ -346,8 +350,8 @@ holds.
 - **Runtime:** `DocumentModel.groupIdOfUserOwner`. No `DocumentMetadataModel` prop and no Firestore field.
 - **Filled by:** `groups.groupIdForUser(uid)` for problem, personal, and learning-log documents and their
   publications; `DBPublication.groupId` for a problem publication, frozen at publish time
-- **Updated by:** `db-docs-content-listener` inside a MobX `autorun`, from the local groups store
-  ([db-docs-content-listener.ts:66](../../src/lib/db-listeners/db-docs-content-listener.ts#L66))
+- **Updated by:** `db-docs-content-listener` inside the MobX `autorun` in its `start`, from the local
+  groups store ([`db-docs-content-listener.ts`](../../src/lib/db-listeners/db-docs-content-listener.ts))
 - **Reactive:** Yes, to group membership changes — not to document changes
 
 The group the **user who owns** the document belongs to. Set only where the owner is a user (`ownerType:
@@ -367,10 +371,11 @@ stale. The four-up view (`getProblemDocumentsForGroup`), Student Work routing, a
 - **Updated by:** nothing — creation only. RTDB uses the server timestamp sentinel, read back and
   resolved before the Firestore write. Read-only per the rules.
 - **Reactive:** No. Local documents read it once from RTDB metadata at open. Remote documents fill it in
-  later, when content is fetched ([document.ts:272](../../src/models/document/document.ts#L272)).
+  later, when content is fetched (`fetchRemoteContent` in
+  [`document.ts`](../../src/models/document/document.ts)).
 
-`openDocumentFromFirestoreMetadata` deliberately does *not* pass `createdAt` — see the note at
-[db.ts:1034](../../src/lib/db.ts#L1034) ("not passed here because it hasn't been included in the past"),
+`openDocumentFromFirestoreMetadata` deliberately does *not* pass `createdAt` — see the note in that method in
+[`db.ts`](../../src/lib/db.ts) ("not passed here because it hasn't been included in the past"),
 so documents opened through that path keep the default `0`. Sort Work sorts on the metadata model's
 value, not the document model's, so this does not affect sorting.
 
@@ -391,11 +396,9 @@ identity of a document.
 `key` is also the document's `treeId` for the history system. For group documents `uid` is a synthetic
 value derived from the group (`group_{offeringId}_{groupId}`) rather than a real user id.
 
-`type` is the one exception to "written once", and only transitionally: group and class-wide documents share
-a generic type whose value is being renamed from `"group"` to `"axes"`, and
-`scripts/backfill-group-document-axes.ts` rewrites it on the documents that predate the rename. That script
-authenticates as a service account, so it writes past the rule that keeps the field read-only for clients —
-no client ever changes a `type`.
+`type` is written once. Group and class-wide documents store the generic `"axes"`. The realtime database's
+copy of their metadata is a permanent mix — new documents are written there as `"axes"` too, but it is never
+swept, so older ones still say `"group"` — and it is never read for the type.
 
 ### `axisProfile`
 
@@ -442,7 +445,7 @@ ignores undeclared properties (see the note under the summary tables).
 - **Reactive:** No
 
 At creation these come from the *current* unit/investigation/problem stores via `currentProblemInfo`
-([db.ts:605](../../src/lib/db.ts#L605)), not from the document — so they record where the user was when
+([`db.ts`](../../src/lib/db.ts)), not from the document — so they record where the user was when
 the document was made.
 
 Two wrinkles worth knowing:
@@ -482,8 +485,8 @@ for the Firestore sourcing work.
 - **Stores:** RTDB only
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/content` — a JSON **string**, not a tree
 - **Runtime:** `DocumentModel.content` (a `DocumentContentModel` tree)
-- **Updated by:** the content sync `onSnapshot`
-  ([use-document-sync-to-firebase.ts:308](../../src/hooks/use-document-sync-to-firebase.ts#L308))
+- **Updated by:** the content sync `onSnapshot` in `useDocumentSyncToFirebase`
+  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts))
 - **Reactive:** Yes — `db-docs-content-listener` applies remote content to the model for the user's own
   documents and, for students, their group's problem documents; teachers monitor all problem documents.
 
@@ -534,9 +537,9 @@ captions.
 - **Reactive:** No
 
 Records which group members were connected at publish time. `createDocumentFromPublication` reads the
-record, converts it back into a map, and passes it to `openDocument`
-([db.ts:1186](../../src/lib/db.ts#L1186)) — but `openDocument` does not destructure
-`groupUserConnections` from its options ([db.ts:917](../../src/lib/db.ts#L917)) and neither
+record, converts it back into a map, and passes it to `openDocument` (both in
+[`db.ts`](../../src/lib/db.ts)) — but `openDocument` does not destructure `groupUserConnections` from
+its options and neither
 `createDocumentModel` call passes it on. So the map is computed and dropped, and the model prop is always
 empty. No reader of `document.groupUserConnections` exists in `src/`.
 
@@ -549,7 +552,8 @@ if not, the prop and the publish-time write are both dead.
 - **Location:** `/{classPath}/users/{uid}/documentMetadata/{key}/lastEditedAt`
 - **Applies to:** all editable types
 - **Runtime:** not surfaced on any model
-- **Updated by:** set on disconnect and on unmount ([firebase.ts:212](../../src/lib/firebase.ts#L212))
+- **Updated by:** set on disconnect and on unmount (`setLastEditedOnDisconnect` and `setLastEditedNow` in
+  [`firebase.ts`](../../src/lib/firebase.ts))
 - **Reactive:** No
 
 Not declared in `DBBaseDocumentMetadata` — an undeclared child of the metadata record.
@@ -567,7 +571,8 @@ Not declared in `DBBaseDocumentMetadata` — an undeclared child of the metadata
   is written at all. The pipeline uses it only for personal documents, whose own metadata record
   names no problem; see [firestore-schema.md](../firestore-schema.md#summaries).
 - **Runtime:** not surfaced on any model
-- **Updated by:** [firebase.ts:198](../../src/lib/firebase.ts#L198)
+- **Updated by:** `updateEvaluation` in [`firebase.ts`](../../src/lib/firebase.ts), called from
+  `setLastEditedOnDisconnect` and `setLastEditedNow`
 - **Reactive:** No — consumed server-side by the `on-analyzable-doc-written` cloud function trigger.
 
 Also undeclared in `DBBaseDocumentMetadata`.

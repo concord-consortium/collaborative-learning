@@ -182,6 +182,49 @@ describe("FirestoreTransport problem context by backend", () => {
   });
 });
 
+// unitContext rides the same install-eligible gate as LEFT (decision.attachLeft): both are
+// installed once, alongside the problem, so there is no reason for one to attach without the
+// other. Unlike LEFT, a missing unit summary is a normal, expected case rather than a loading
+// error, so it must never block a send the way an unloaded LEFT does.
+describe("FirestoreTransport unit context", () => {
+  function transportFor(provider: TutorProviderId | undefined, getUnitContext?: () => string | undefined) {
+    const { added, firestore } = fakeFirestore();
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => '{"sections":[{"type":"intro"}]}',
+      getRightSummary: () => undefined,
+      getUnitContext,
+      provider,
+    });
+    return { added, transport };
+  }
+
+  it("attaches for the default backend, which installs LEFT", async () => {
+    const { added, transport } = transportFor(undefined, () => "unit summary slice");
+    await transport.sendUserMessage("hello");
+    expect(added[0].unitContext).toBe("unit summary slice");
+  });
+
+  it("never attaches for ForeverLearning, which never installs LEFT either", async () => {
+    const { added, transport } = transportFor("foreverlearning", () => "unit summary slice");
+    await transport.sendUserMessage("hello");
+    expect(added[0]).not.toHaveProperty("unitContext");
+  });
+
+  it("does not block a send when getUnitContext returns nothing", async () => {
+    const { added, transport } = transportFor(undefined, () => undefined);
+    await expect(transport.sendUserMessage("hello")).resolves.toBeUndefined();
+    expect(added).toHaveLength(1);
+    expect(added[0]).not.toHaveProperty("unitContext");
+  });
+
+  it("does not block a send when no getUnitContext is given at all", async () => {
+    const { added, transport } = transportFor(undefined, undefined);
+    await expect(transport.sendUserMessage("hello")).resolves.toBeUndefined();
+    expect(added[0]).not.toHaveProperty("unitContext");
+  });
+});
+
 // rightContent is the whole document snapshot in one Firestore message doc, and a Firestore
 // document is capped at 1 MiB. A CLUE dataset can grow without bound — a long recorded Dataflow
 // run writes a row per tick — so a valid workspace can exceed the cap and make the write itself

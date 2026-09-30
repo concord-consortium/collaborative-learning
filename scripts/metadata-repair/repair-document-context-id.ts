@@ -19,9 +19,7 @@
 
 import type { Firestore } from "firebase-admin/firestore";
 import type { IDocumentHome } from "./lib/rtdb-document-index";
-
-/** Batched writes are capped well below Firestore's 500-operation limit. */
-const kBatchSize = 400;
+import { kBatchSize } from "./lib/firestore-batch";
 
 /**
  * `needsRepair` counts documents found to disagree; `written` counts only those whose commit resolved.

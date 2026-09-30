@@ -39,6 +39,7 @@ function deps(overrides: Partial<CategorizeDeps> = {}): CategorizeDeps {
     readDocumentMetadata: jest.fn().mockResolvedValue({metadata: documentMetadata}),
     getEmbeddings: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
     findRelatedSummaries: jest.fn().mockResolvedValue([relatedSummary]),
+    getUnitSummary: jest.fn().mockResolvedValue(undefined),
     createOpenAI: () => ({
       chat: {
         completions: {

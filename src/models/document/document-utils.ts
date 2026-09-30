@@ -13,7 +13,7 @@ import { DocumentContentModelType } from "./document-content";
 import { getCurriculumLabel, isInClassUnitContainer } from "./document-axes";
 import { getDocumentKindLabel, getDocumentTitle } from "./document-kinds";
 import { getDocumentIdentityParams } from "./log-document-event";
-import { GroupDocument, isExemplarType, isPlanningType, isProblemType,
+import { isExemplarType, isPlanningType, isProblemType,
   isPublishedType, isSupportType } from "./document-types";
 
 function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
@@ -160,13 +160,7 @@ export function isDocumentAccessibleToUser ({
   const isPublished = isPublishedType(metadata.type);
   // A concurrent document is readable by anyone in the class. The class or group owner is not used because
   // in the future we might have class or group owned documents which are not readable by all members.
-  //
-  // TRANSITIONAL: `GroupDocument` stands in for a missing `concurrent`. Group documents created before
-  // that field was stamped store neither it nor the new type, and this function is run on Firestore metadata
-  // for documents that have not been opened. So in this case the concurrent field is not set on these legacy
-  // metadata. Once all Group documents have been migrated to have the type "axes" and have the concurrent
-  // field the `metadata.type === GroupDocument` should be removed.
-  const isConcurrentDoc = !!metadata.concurrent || metadata.type === GroupDocument;
+  const isConcurrentDoc = !!metadata.concurrent;
   if (user.isTeacherOrResearcher) return true;
   if (user.isStudent) {
     return ownDocument || isShared || isPublished || isConcurrentDoc

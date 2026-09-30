@@ -1,0 +1,35 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>One of Daphne’s photos looks like the picture below. Daphne has a copy of the P.I. Monthly magazine shown in the picture. The P.I. Monthly magazine is 10 inches high. She thinks the photo might be helpful in determining the height of the mystery teacher.</p>"
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220932",
+        "title": "Daphne’s photo of the mystery teacher by a magazine rack",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_1_1_06_magazine_rack_500w.png"
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Is Daphne&#x27;s claim correct? Is it possible to use the magazine and the picture to estimate the teacher&#x27;s height? Explain.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

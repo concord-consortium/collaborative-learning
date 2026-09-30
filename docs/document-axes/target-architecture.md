@@ -3,15 +3,14 @@
 > **Status:** Architecture design (structure and boundaries, not concrete implementation). Target end-state
 > under the "ideal world" framing.
 > **Depends on:** the axis definitions in [axes.md](axes.md) (the *what*: which axes exist and what each
-> means) and the current-state evidence in the findings doc (research background, on the
-> `document-type-decomposition` branch).
+> means).
 > This document is the *how it lives in code*.
 
 ## Goal and the problem it solves
 
 The refactor's purpose is **understandability**: to make it easy to see what a document type means. Today the
-document `type` field is switched on in ~90 scattered places across the client, rules, and functions
-(findings doc). Decomposing `type` into explicit axes only helps if we do **not** re-scatter the same
+document `type` field is switched on in ~90 scattered places across the client, rules, and functions.
+Decomposing `type` into explicit axes only helps if we do **not** re-scatter the same
 knowledge as `kind → axis` mappings spread across the code. The architecture below is organized to *prevent*
 that scatter.
 
@@ -78,9 +77,33 @@ refactor removes; they are replaced by axis getters and by external behaviors.
 - **Stored per-doc grants** are only the parts that genuinely vary per document: the `visibility` share
   toggle (a user-controlled class-read grant), a support's target audience, exemplar per-student visibility.
 
-So the `permissions` getter resolves the document's policy and merges its rules with the document's own stored
+So the `permissions` getter resolves the document's policy and merges its rules with the document's stored
 grants. The existing `visibility` field folds in here as one stored per-doc read grant — it is not a separate
 axis.
+
+**Stored per-doc grants are kept in one of two places.** Each grant is a (principal, permission) pair, and a
+principal may be a user, a group, or a class. Where a grant is stored depends on which side has many entries;
+either way it is read as part of `permissions`.
+
+- **On the document** — the `visibility` toggle and a support's audience. The document carries a list of
+  grants, and the security rules decide on write who may add which grant. Both halves have a precedent in
+  the code:
+  - Multi-class supports (`mcsupports`) already keep such a list: a `classes[]` array, which the
+    `classInResourceClasses()` rule in `firestore.rules` checks the reader's class against. The per-doc
+    grants generalize it from class principals to users and groups.
+  - Enforcement goes in the update rule, which compares the grant list before and after the write and
+    allows only changes the writer may make — for example, a student may add a class read grant only on a
+    document they own. `canonicalFieldOk()` in `firestore.rules` already checks the `canonical` field this
+    way.
+- **With each student** — exemplar visibility. An exemplar is one shared curriculum document read by many
+  students, so rather than the document holding a list, each student keeps their own flag
+  (`classes/{classHash}/users/{uid}/exemplars/{id}/visible` in the realtime database). It can stay stored
+  that way.
+
+A general relationship store in the style of Google's Zanzibar would express both in one place, but it is a
+separate subsystem to run — more machinery than CLUE needs. Additionally this couldn't be used by the
+Firestore rule system, so we'd have to have two systems or replace part of the backend. The grants only pay
+off once the rules enforce them; see "Enforcing `permissions` on document content" under Non-goals.
 
 **Where a policy's rules live — two coordinated copies.** A policy is code, not stored data, and its rules are
 written in *two* places keyed by the same policy name: once on the client/runtime (to compute
@@ -121,8 +144,8 @@ model — keeping the model un-entangled (see boundary).
 Creating a document is where `kind` is turned into axis values for a *new* document: the factory reads
 `registry.defaults(kind)` and stamps `canonical`/`owner`/`scope`/`permissions`/`concurrent` onto the new
 `DocumentModel`. Copy and publish are the same shape with different templates (`registry.copyTemplate` /
-`registry.publishTemplate`) — a copy/publish is "make a new document from a template," per-axis
-(findings "Deriving new documents"). After creation, the document carries its own axis values; runtime
+`registry.publishTemplate`) — a copy/publish is "make a new document from a template," per-axis.
+After creation, the document carries its own axis values; runtime
 behavior never re-derives them from `kind` — only a migration restamps them (next section).
 
 ## The core rule — `kind` is read in exactly three places
@@ -151,9 +174,8 @@ Migrations take a few forms, all deriving their values from the **same registry 
 uses — so a kind's defaults are still written down once:
 
 - **At runtime in the client** — when a document is loaded, CLUE notices a missing axis value and stamps it
-  from the kind's defaults (the lazy-backfill pattern already used for scoped pointer slots). Cheapest: no
-  infrastructure and no downtime. But it only reaches documents someone actually opens, **and only works for
-  axes a client is allowed to write.**
+  from the kind's defaults. Cheapest: no infrastructure and no downtime. But it only reaches documents someone
+  actually opens, **and only works for axes a client is allowed to write.**
 - **At runtime in a Cloud Function** — the same lazy, on-demand stamping, done in a trusted context. This is
   what an axis needs when a client must not be able to set it.
 - **As admin scripts sweeping all the Firestore document metadata** — applies the cohort rule to every document
@@ -177,12 +199,11 @@ permission policy's rules all live in code, so changing them changes every docum
 ### Which documents get stamped — a gate that narrows as types are converted
 
 Every `type` is registered as a kind, so the registry can answer `kind → axis fields` for any document. Writing
-those fields into stored metadata is deliberately narrower: both stamp sites — creation
-(`createFirestoreMetadataDocument`) and the client-side lazy backfill when a document is opened (`db.ts`) —
-write the kind axis fields only for the types converted so far, which today means the generic axes type
-(regular group documents and class-wide documents, which share it). Two values of that type are live at once:
-documents created since CLUE-610's rename store `"axes"`, ones predating it still store `"group"`, and the gate
-(`isAxesType`) accepts either until CLUE-604's sweep has rewritten the stragglers in every environment.
+those fields into stored metadata is deliberately narrower: the one stamp site — creation
+(`createFirestoreMetadataDocument`) — writes the kind axis fields only for the types converted so far, which
+today means the generic axes type (regular group documents and class-wide documents, which share it). Firestore
+stores that type as `"axes"`. The realtime database holds a permanent mix: new documents are written there as
+`"axes"` too, but it is never swept, so older ones still say `"group"`. Nothing reads a type from there.
 
 The gate is a stage in the progression, not a permanent rule:
 
@@ -190,23 +211,19 @@ The gate is a stage in the progression, not a permanent rule:
   — at which point `type` is just the generic tag. The publication kinds are the clearest not-yet-settled case:
   they may be folded into the kinds they publish, and a `kind` stamped before that decision is a value we would
   have to migrate afterwards.
-- As each type is converted, **add it to the gate at both stamp sites**, so its documents begin carrying their
-  kind's axis fields.
-- Once every type has been converted the gate always passes, so it can be deleted and both sites stamp
+- As each type is converted, **add it to the gate at the stamp site**, so its new documents begin carrying their
+  kind's axis fields. Its existing documents need a migration (see above).
+- Once every type has been converted the gate always passes, so it can be deleted and creation stamps
   unconditionally.
 
 Nothing is lost while a type waits: an unconverted document's axis values are still derived from the registry at
 runtime, they are simply not persisted onto that document yet.
 
-Widening the gate is not always enough by itself. The open-time backfill writes as the signed-in user, so it can
-only ever stamp values a client is allowed to write — and per "Which axes a client may stamp is a security
-question" above, an axis the rules *police* must not stay client-writable, since a client could then hand itself
-the value. A converted type whose axis feeds a rule therefore needs its stamp to come from creation, a Cloud
-Function, or an admin script rather than from the client-side backfill, and its rule tightened to reject
-after-the-fact changes. No stamp has had to move for this reason yet, but `concurrent` is the obvious candidate:
-it is stored so that rules *can* enforce it, so once a rule reads it, letting a client set it after creation
-would hand the client the value the rule is meant to police — the client-side backfill then has to be replaced
-by an admin sweep and the rule tightened to creation-only.
+Converting a type's existing documents is where the security question above bites: a converted type whose axis
+feeds a rule needs its existing documents stamped by an admin script or a Cloud Function, and its rule tightened
+to reject after-the-fact changes. `concurrent` went this way. Its backfill ran as the axes sweep, and the rule
+that lets a client set it after creation is made creation-only once no client still makes that write (see
+[planned-rules-tightening.md](./planned-rules-tightening.md)).
 
 ## The boundary — metadata getters on the model, behaviors outside
 
@@ -342,6 +359,5 @@ deferred under Non-goals (the `scope`/`permissions`/`canonical` schemas). This s
 ## References
 
 - Axis definitions: [axes.md](axes.md)
-- Current-state evidence: the findings doc (research background, on the `document-type-decomposition` branch)
 - Existing models: `src/models/document/document.ts` (`DocumentModel`),
   `src/models/document/document-content.ts` (`DocumentContentModel`)
