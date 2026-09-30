@@ -333,7 +333,7 @@ describe("assembleUnit", () => {
     expect(result.problems[0].markdown).toContain("# Section: labWork");
   });
 
-  it("points a section byte-identical to an earlier problem's at that first occurrence", async () => {
+  it("keeps a section's content in full even when an earlier problem has the same section", async () => {
     const root = rootContent([
       {ordinal: 1, title: "Inv 1", problems: [
         {ordinal: 1, title: "P1", sections: [textSection("shared help text", "help")]},
@@ -341,12 +341,31 @@ describe("assembleUnit", () => {
       ]},
     ]);
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    // Every step that reads `markdown` is asking a model what the problem says. A pointer to
+    // another problem answers nothing, and the model reports the content as missing.
     expect(result.problems[0].markdown).toContain("shared help text");
-    expect(result.problems[1].markdown).not.toContain("shared help text");
-    expect(result.problems[1].markdown).toContain("(same \"help\" content as problem 1.1)");
+    expect(result.problems[1].markdown).toContain("shared help text");
+    expect(result.problems[1].markdown).not.toContain("(same");
   });
 
-  it("points every later duplicate section at the true first occurrence, not the previous duplicate", async () => {
+  it("keeps shared sections in full for a problem that shares only some of them", async () => {
+    // The case whole-problem duplicate detection cannot help with: 1.2's sections all appear in
+    // 1.1, but 1.1 has one more, so the two hashes differ and 1.2 gets a call of its own.
+    const root = rootContent([
+      {ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [
+          textSection("shared investigate text", "intro"),
+          textSection("only in the first problem", "programming"),
+        ]},
+        {ordinal: 2, title: "P2", sections: [textSection("shared investigate text", "intro")]},
+      ]},
+    ]);
+    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
+    expect(result.problems[1].markdown).toContain("shared investigate text");
+    expect(result.problems[1].problemHash).not.toEqual(result.problems[0].problemHash);
+  });
+
+  it("gives byte-identical problems the same problemHash", async () => {
     const root = rootContent([
       {ordinal: 1, title: "Inv 1", problems: [
         {ordinal: 1, title: "P1", sections: [textSection("shared help text", "help")]},
@@ -355,28 +374,13 @@ describe("assembleUnit", () => {
       ]},
     ]);
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
-    expect(result.problems[1].markdown).toContain("(same \"help\" content as problem 1.1)");
-    expect(result.problems[2].markdown).toContain("(same \"help\" content as problem 1.1)");
-  });
-
-  it("gives byte-identical problems the same problemHash despite section dedup rewriting later ones", async () => {
-    const root = rootContent([
-      {ordinal: 1, title: "Inv 1", problems: [
-        {ordinal: 1, title: "P1", sections: [textSection("shared help text", "help")]},
-        {ordinal: 2, title: "P2", sections: [textSection("shared help text", "help")]},
-        {ordinal: 3, title: "P3", sections: [textSection("shared help text", "help")]},
-      ]},
-    ]);
-    const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
-    // 1.2 and 1.3's markdown is rewritten to "(same content as...)" pointers (see the test above),
-    // but all three problems' real content is byte-identical, so whole-problem dedup
-    // (unit-summary-digest.ts) needs their hashes to agree too -- otherwise the second problem gets
-    // a real, wasted digest call over pointer text instead of being skipped as a duplicate.
+    // Whole-problem dedup in unit-summary-digest.ts skips a repeated problem's call entirely, so
+    // the hashes have to agree.
     expect(result.problems[1].problemHash).toEqual(result.problems[0].problemHash);
     expect(result.problems[2].problemHash).toEqual(result.problems[0].problemHash);
   });
 
-  it("does not dedupe sections with different content, even with the same section type", async () => {
+  it("keeps each problem's own text when two problems share a section type but not its content", async () => {
     const root = rootContent([
       {ordinal: 1, title: "Inv 1", problems: [
         {ordinal: 1, title: "P1", sections: [textSection("first problem's own text", "help")]},

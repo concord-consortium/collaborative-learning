@@ -1,4 +1,4 @@
-import {AssembledProblem, AssembledUnit} from "./assemble-unit";
+import {assembleUnit, AssembledProblem, AssembledUnit} from "./assemble-unit";
 import {
   UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS,
   UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS,
@@ -7,6 +7,7 @@ import {
 } from "./unit-summary-config";
 import {GenerateUnitSummaryDeps, runUnitSummaryGeneration} from "./unit-summary-generate";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
+import {readEffectiveContentText} from "./unit-content";
 
 // Matches the approach step by the reply format it demands, which is unique to that prompt and
 // survives a rewording of it.
@@ -82,6 +83,48 @@ describe("runUnitSummaryGeneration", () => {
       expect(entry.approach).toBe("divergent");
       expect(entry).not.toHaveProperty("approachGuidance");
     });
+  });
+
+  // Runs the real assembler rather than a preassembled fixture, because the failure this guards
+  // against lives there: a section repeated from an earlier problem used to be replaced with a
+  // pointer to it, and both steps below send `markdown` to the model. 1.2's only section is one of
+  // 1.1's, but 1.1 has a second, so the hashes differ and 1.2 is not skipped as a duplicate -- it
+  // gets a digest call and an approach call over text that named no task at all.
+  it("sends the real text of a shared section, for every step, through the real assembler", async () => {
+    const shared = "Design three different grippers and compare them.";
+    const onlyFirst = "Only in the first problem.";
+    const section = (text: string, type: string) => ({
+      type, content: {tiles: [{id: "t1", content: {type: "Text", format: "markdown", text}}]},
+    });
+    const root = {
+      title: "Test Unit",
+      investigations: [{ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [section(shared, "intro"), section(onlyFirst, "programming")]},
+        {ordinal: 2, title: "P2", sections: [section(shared, "intro")]},
+      ]}],
+    };
+    const inventory = [{
+      path: "content.json", escapedPath: "content.json", updateText: JSON.stringify(root),
+    }];
+    const assembled = await assembleUnit("branch", "unit", {
+      loadInventory: async () => inventory, readText: readEffectiveContentText,
+    });
+
+    const generateText = jest.fn().mockResolvedValue("APPROACH: divergent\nGUIDANCE: Try several.");
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembled));
+
+    // The calls that carry a problem's own Markdown: the digest step's and the approach step's.
+    const withProblemText = generateText.mock.calls
+      .map(([params]: [GenerateTextParams]) => params)
+      .filter((params: GenerateTextParams) => params.input.includes("# Section:"));
+    expect(withProblemText.some((params: GenerateTextParams) => params.input.includes("(same")))
+      .toBe(false);
+
+    // 1.2's own calls -- they hold the shared section and not 1.1's extra one.
+    const forSecondProblem = withProblemText.filter((params: GenerateTextParams) =>
+      params.input.includes(shared) && !params.input.includes(onlyFirst));
+    expect(forSecondProblem).toHaveLength(2);
+    expect(forSecondProblem.filter(isApproachPrompt)).toHaveLength(1);
   });
 
   // Both steps turn on fitsOneCall. If they disagreed, the approach call for a problem the digest
