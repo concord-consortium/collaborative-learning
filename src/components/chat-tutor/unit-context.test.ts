@@ -70,6 +70,26 @@ describe("buildUnitContext", () => {
     );
   });
 
+  it("sends the current problem's approach and not the next problem's", () => {
+    // buildUnitContext resolves which entry to read by walking the problem model to its
+    // investigation, so this checks that walk lands on the right entry's approach. The next
+    // problem's digest is sent, its approach never is.
+    const summary = matchingSummary();
+    summary.entries[1].approach = "convergent";
+    summary.entries[1].approachGuidance = "Improve the design you have.";
+    summary.entries[2].approach = "divergent";
+    summary.entries[2].approachGuidance = "Try several designs.";
+    const unit = makeUnit(summary);
+    const problem = unit.investigations[0].problems[1]; // 1.2
+    const result = buildUnitContext(unit, problem);
+    expect(result).toContain(
+      "How this problem asks students to work (1.2): convergent. Improve the design you have."
+    );
+    expect(result).toContain("The next problem (2.1): digest three");
+    expect(result).not.toContain("divergent");
+    expect(result).not.toContain("Try several designs.");
+  });
+
   it("returns undefined when a title before the current problem disagrees with the manifest", () => {
     const summary = matchingSummary();
     summary.sourceManifest[0].title = "A renamed problem";

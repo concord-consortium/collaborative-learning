@@ -336,12 +336,30 @@ describe("scheduling after the digest step", () => {
     expect(firstSummaryStart).toBeLessThan(lastApproachEnd);
   });
 
-  // Rolling mode is the slowest shape the pipeline supports and the part closest to the deadline.
-  // What a round costs in real seconds is not tested here, since a fake client cannot know it: if
-  // real calls turn out slower, this assumption is what is wrong, not the schedule.
-  const ASSUMED_CALL_MS = 2_000;
+  // How long one call takes against the live model, timed over a full generation. A fake client
+  // cannot know this, so the figure is carried here and multiplied by the round count.
+  const MEASURED_CALL_MS = 15_600;
 
-  it("keeps a full rolling-mode unit within the deadline at an assumed call time", async () => {
+  // Prefix mode is what every authored unit runs in, so this is the deadline claim that describes
+  // production. The largest such unit is the one right at the mode-switch threshold.
+  it("keeps the largest prefix-mode unit within the deadline at measured call times", async () => {
+    const problems = Array.from(
+      {length: UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT}, (_, i) => problem(`1.${i + 1}`)
+    );
+
+    const {generateText, observed} = instrumentedClient(2);
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+
+    expect(observed.peakInFlight).toBeLessThanOrEqual(UNIT_SUMMARY_CONCURRENCY_LIMIT);
+    expect(observed.rounds * MEASURED_CALL_MS).toBeLessThan(UNIT_SUMMARY_OVERALL_DEADLINE_MS);
+  });
+
+  // Rolling mode's prior-knowledge calls each wait for the one before, so its depth grows with the
+  // problem count and at measured call times a full unit does not fit the deadline. Nothing reaches
+  // it: the mode switches above UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT and no authored unit is that
+  // large. Raising that threshold, or authoring a unit past it, needs the deadline revisited --
+  // which is what the second assertion is here to make visible.
+  it("bounds a full rolling-mode unit's calls, whose depth the deadline does not cover", async () => {
     const problems = Array.from({length: UNIT_SUMMARY_HARD_MAX_PROBLEMS}, (_, i) => problem(`1.${i + 1}`));
     expect(problems.length).toBeGreaterThan(UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT);
 
@@ -349,7 +367,7 @@ describe("scheduling after the digest step", () => {
     await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
 
     expect(observed.peakInFlight).toBeLessThanOrEqual(UNIT_SUMMARY_CONCURRENCY_LIMIT);
-    expect(observed.rounds * ASSUMED_CALL_MS).toBeLessThan(UNIT_SUMMARY_OVERALL_DEADLINE_MS);
+    expect(observed.rounds * MEASURED_CALL_MS).toBeGreaterThan(UNIT_SUMMARY_OVERALL_DEADLINE_MS);
   });
 
   // The reason the approach step runs beside the summary steps rather than after them: the
