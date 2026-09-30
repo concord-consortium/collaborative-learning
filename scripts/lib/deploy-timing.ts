@@ -87,12 +87,20 @@ const kEntryLike = /^>\s*(?:[-*+]|\d+[.)])\s+\*\*/;
  * Only a GitHub alert whose first line is the **Deploy timing** heading counts, so a line that
  * happens to look like an entry elsewhere in the description is never read as one. An entry's
  * rationale may continue on following quoted lines.
+ *
+ * HTML comments and fenced code blocks don't render, so a callout inside one (a template, or an
+ * example) is ignored. A second callout is reported as invalid rather than skipped, since either
+ * one could be the one the author meant.
  */
 export function parseDeployTiming(body: string): IDeployTiming {
   const result: IDeployTiming = { found: false, entries: [], invalid: [] };
-  const lines = body.replace(/\r\n?/g, "\n").split("\n").map(line => line.trimEnd());
+  const lines = renderedLines(body);
   for (let i = 0; i < lines.length - 1; i++) {
     if (!kAlertStart.test(lines[i].trim()) || !kHeading.test(lines[i + 1].trim())) continue;
+    if (result.found) {
+      result.invalid.push(`a second Deploy timing callout: ${lines[i + 1].trim()}`);
+      continue;
+    }
     result.found = true;
     let current: IDeployTimingEntry | undefined;
     for (let j = i + 2; j < lines.length && lines[j].trim().startsWith(">"); j++) {
@@ -118,9 +126,30 @@ export function parseDeployTiming(body: string): IDeployTiming {
         if (continuation) current.rationale = `${current.rationale} ${continuation}`.trim();
       }
     }
-    break;
   }
   return result;
+}
+
+/**
+ * The description's lines with HTML comments and fenced code blocks blanked out. Blank lines keep
+ * the rest in place and end any callout the removed text interrupted.
+ */
+function renderedLines(body: string) {
+  const withoutComments = body.replace(/\r\n?/g, "\n")
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, comment => comment.replace(/[^\n]/g, ""));
+  let fence: string | undefined;
+  return withoutComments.split("\n").map(line => {
+    const marker = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
+    if (fence) {
+      if (marker && marker[0] === fence[0] && marker.length >= fence.length) fence = undefined;
+      return "";
+    }
+    if (marker) {
+      fence = marker;
+      return "";
+    }
+    return line.trimEnd();
+  });
 }
 
 export interface IDeployTimingCheck {

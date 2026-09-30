@@ -1,7 +1,22 @@
+import fs from "fs";
+import path from "path";
 import {
-  cannotTouchFunctions, checkDeployTiming, deployablesTouched, deployTimingPasses, isNotDeployed, parseDeployTiming,
-  rollupDeployTiming
+  cannotTouchFunctions, checkDeployTiming, deployablesTouched, deployTimingPasses, isNotDeployed, kFunctionsCodebases,
+  parseDeployTiming, rollupDeployTiming
 } from "./deploy-timing";
+
+const kRepoRoot = path.resolve(__dirname, "../..");
+
+describe("kFunctionsCodebases", () => {
+  it("lists every functions codebase firebase.json deploys, with a tsconfig that exists", () => {
+    const firebase = JSON.parse(fs.readFileSync(path.join(kRepoRoot, "firebase.json"), "utf8"));
+    const deployed = firebase.functions.map((codebase: { source: string }) => codebase.source).sort();
+    expect(kFunctionsCodebases.map(({ dir }) => dir).sort()).toEqual(deployed);
+    for (const { tsconfig } of kFunctionsCodebases) {
+      expect(fs.existsSync(path.join(kRepoRoot, tsconfig))).toBe(true);
+    }
+  });
+});
 
 const kFunctionsSources = new Set([
   "functions-v2/src/index.ts",
@@ -114,6 +129,19 @@ describe("parseDeployTiming", () => {
     const body = "> [!IMPORTANT]\n> **Deploy timing**\n> - **functions: with** — why\n" +
       "> 1. **rules before** — a\n> + **indexes** — b";
     expect(parseDeployTiming(body).invalid).toEqual(["> 1. **rules before** — a", "> + **indexes** — b"]);
+  });
+  it("ignores a callout inside an HTML comment or a code fence", () => {
+    const callout = "> [!IMPORTANT]\n> **Deploy timing**\n> - **rules: before** — example";
+    expect(parseDeployTiming(`<!--\n${callout}\n-->`)).toEqual({ found: false, entries: [], invalid: [] });
+    expect(parseDeployTiming(`\`\`\`markdown\n${callout}\n\`\`\``)).toEqual({ found: false, entries: [], invalid: [] });
+    expect(parseDeployTiming(`~~~\n${callout}\n~~~\n\n${callout.replace("example", "real")}`).entries)
+      .toEqual([{ deployable: "rules", timing: "before", rationale: "real" }]);
+  });
+  it("reports a second callout instead of skipping it", () => {
+    const callout = "> [!IMPORTANT]\n> **Deploy timing**\n> - **rules: before** — why";
+    const timing = parseDeployTiming(`${callout}\n\n${callout.replace("before", "after")}`);
+    expect(timing.entries).toEqual([{ deployable: "rules", timing: "before", rationale: "why" }]);
+    expect(timing.invalid).toEqual(["a second Deploy timing callout: > **Deploy timing**"]);
   });
   it("records an entry with no rationale", () => {
     const body = "> [!IMPORTANT]\n> **Deploy timing**\n> - **rules: before**";

@@ -49,7 +49,8 @@ more specific — ordering, secrets, index build time — elsewhere in the descr
 
 The callout must be a GitHub alert (`[!IMPORTANT]` is the usual choice; `[!WARNING]` suits an
 `after`) whose first line is `**Deploy timing**`, so it stands out to reviewers. Entries anywhere
-else in the description are not read. Tests and docs in these folders don't need an entry.
+else in the description are not read, and neither is a callout inside an HTML comment or a code
+block. Give one callout; a second one fails the check. Tests and docs in these folders don't need an entry.
 
 The [`Deploy Timing`](../.github/workflows/deploy-timing.yml) check fails until each part the PR
 touches has exactly one entry with a reason and no entry in the callout is unreadable (an unknown
