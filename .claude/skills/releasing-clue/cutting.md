@@ -33,10 +33,14 @@ find it with `gh run list --workflow ci.yml --branch v<X.Y.Z>`, then `gh run wat
 
 ```bash
 npm --prefix ~/Development/dev-templates/scripts run -s release-notes-jira CLUE <X.Y.Z> > <scratchpad>/notes.md
-gh release create v<X.Y.Z> --title <X.Y.Z> --notes-file <scratchpad>/notes.md
+gh release create v<X.Y.Z> --title <X.Y.Z> --notes-file <scratchpad>/notes.md \
+  --prerelease --latest=false
 ```
 
-The title is the bare version. The notes include the epic subheadings. Check GitHub marks it Latest.
+The title is the bare version. The notes include the epic subheadings. The release is a
+pre-release until it reaches production, so the release list's Latest badge always marks what
+production serves; shipping.md promotes it. If this version never ships (a show-stopper leads to
+a new patch), it stays a pre-release and keeps its notes, since tags are never moved.
 
 ## Staging portal
 

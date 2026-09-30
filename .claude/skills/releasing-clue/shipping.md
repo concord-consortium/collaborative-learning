@@ -30,6 +30,16 @@ Check the log as for staging: OIDC, and four `copy:` lines, to `index.html`, `ed
 `authoring/index.html` and `authoring-iframe/index.html`. Then
 `deployed-version.ts`: production and staging should both show the tag's commit.
 
+## GitHub release [approve]
+
+Promote the release now that production serves it:
+
+```bash
+gh release edit v<X.Y.Z> --prerelease=false --latest
+```
+
+Check the release list shows it as Latest, with no Pre-release badge.
+
 ## Jira [approve]
 
 - **Close the release story:** transition it to Done.
@@ -66,6 +76,7 @@ Check the log as for staging: OIDC, and four `copy:` lines, to `index.html`, `ed
 Check each of these before calling the release finished, and report any that aren't done:
 
 - [ ] Production and staging serve the tag (`deployed-version.ts`)
+- [ ] GitHub release promoted: Latest, not a pre-release
 - [ ] Production Firebase has what the deploy-timing decisions called for
 - [ ] Release story Done; Jira version (and the previous one) released
 - [ ] #clue: "now live" reply in the pre-announcement's thread

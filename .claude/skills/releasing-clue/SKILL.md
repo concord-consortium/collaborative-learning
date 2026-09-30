@@ -59,11 +59,11 @@ is ready.
 
 1. [preparing.md](preparing.md): preflight, Jira and PR triage, status posts, deploy timing,
    Firebase and external dependencies, release notes, the pre-announcement.
-2. [cutting.md](cutting.md): branch and tag, GitHub release, staging portal, staging Firebase,
+2. [cutting.md](cutting.md): branch and tag, GitHub pre-release, staging portal, staging Firebase,
    smoke test, handing over to the project team, Release Staging.
-3. [shipping.md](shipping.md): approval, production Firebase, Release Production, Jira wrap-up,
-   announcements, and the record. It ends with a "Done when" checklist; go through it before
-   calling the release finished.
+3. [shipping.md](shipping.md): approval, production Firebase, Release Production, promoting the
+   GitHub release, Jira wrap-up, announcements, and the record. It ends with a "Done when"
+   checklist; go through it before calling the release finished.
 
 ## Never
 
