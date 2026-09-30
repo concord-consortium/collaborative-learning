@@ -95,7 +95,6 @@ async function generateSteps(
     priorKnowledge: priorKnowledge[i],
     problemDigest: digests[i],
     approach: approaches[i].approach,
-    // Omitted rather than written as "", which validation rejects.
     ...(approaches[i].approachGuidance ? {approachGuidance: approaches[i].approachGuidance} : {}),
   }));
 

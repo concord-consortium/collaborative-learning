@@ -45,8 +45,6 @@ describe("checkUnitSize", () => {
   });
 
   it("counts each problem's own Markdown for the approach step", () => {
-    // The approach step reads the problem itself, so its Markdown counts twice: once for the
-    // digest call and once for the approach call.
     const len = 500;
     const one = checkUnitSize(problems(1, len)).estimatedAggregateInputChars;
     const two = checkUnitSize(problems(2, len)).estimatedAggregateInputChars;

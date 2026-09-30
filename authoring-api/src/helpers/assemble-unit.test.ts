@@ -222,8 +222,6 @@ describe("assembleUnit", () => {
       {ordinal: 1, title: "Inv 1", problems: [{ordinal: 1, title: "P1", sections: [textSection("content")]}]},
     ]);
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
-    // No dedup applies here (a single problem, single section), so the raw content problemHash is
-    // hashed from equals markdown -- see the interaction tests below for the case where it doesn't.
     expect(result.problems[0].problemHash).toEqual(hashString(result.problems[0].markdown));
     expect(result.sourceHash).toEqual(hashString(result.problems.map((p) => p.problemHash).join("\n")));
   });
@@ -341,8 +339,8 @@ describe("assembleUnit", () => {
       ]},
     ]);
     const result = await assembleUnit("branch", "unit", depsFor([file("content.json", root)]));
-    // Every step that reads `markdown` is asking a model what the problem says. A pointer to
-    // another problem answers nothing, and the model reports the content as missing.
+    // Every step that reads `markdown` is asking a model what the problem says, so a shared
+    // section has to arrive in full.
     expect(result.problems[0].markdown).toContain("shared help text");
     expect(result.problems[1].markdown).toContain("shared help text");
     expect(result.problems[1].markdown).not.toContain("(same");

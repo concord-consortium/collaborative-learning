@@ -1,5 +1,5 @@
 // Generation budgets and runtime limits for the unit-summary pipeline, shared by the digest,
-// prior-knowledge, and overview steps. Character-based output limits (per field, and the total
+// prior-knowledge, approach, and overview steps. Character-based output limits (per field, and the total
 // budget) live in shared/unit-summary-types.ts, since Save-time validation in the authoring panel
 // needs them too.
 
@@ -7,8 +7,9 @@
 // in a further call. Expected to trigger rarely.
 export const UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS = 40_000;
 
-// Applies to digest calls and to prefix-mode prior-knowledge calls (rolling mode is sequential by
-// definition, so this does not apply there).
+// The most calls in flight at once. The digest step applies it to its own pool; every step after
+// it -- approach, prior knowledge in either mode, and the overview -- shares one limiter set to
+// this, so the steps running side by side cannot exceed it between them.
 export const UNIT_SUMMARY_CONCURRENCY_LIMIT = 8;
 
 // Per-call deadline, passed to the OpenAI client's own per-request timeout so an actual hung

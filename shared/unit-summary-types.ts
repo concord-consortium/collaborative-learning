@@ -167,7 +167,6 @@ export function validateUnitSummary(
         `${UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} characters`
       );
     }
-    // Guidance without a label is rejected rather than ignored: nothing consumes it.
     if (entry.approach !== undefined &&
         !(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly string[]).includes(entry.approach)) {
       errors.push(
@@ -188,6 +187,7 @@ export function validateUnitSummary(
             `${UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS} characters`
           );
         }
+        // Rejected rather than ignored: nothing consumes guidance with no label.
         if (entry.approach === undefined) {
           errors.push(
             `entries[${i}] (${entry.ordinal}) has approachGuidance but no approach`

@@ -38,8 +38,6 @@ export function checkUnitSize(problems: AssembledProblem[]): UnitSizeCheck {
   const problemCount = problems.length;
   const totalMarkdownChars = problems.reduce((sum, p) => sum + p.markdown.length, 0);
   const overviewInputChars = problemCount * UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS;
-  // The approach step reads each problem's own Markdown, falling back to its digest only for a
-  // problem too long to send in one call.
   const approachInputChars = problems.reduce(
     (sum, p) => sum + (fitsOneCall(p.markdown.length) ?
       p.markdown.length :

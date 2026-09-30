@@ -41,10 +41,8 @@ export async function generateOverview(
       return await callOverview(allDigestsText, options);
     }
 
-    // Sequential, not concurrent: the overview call only ever runs once per generation (never
-    // alongside another oversized overview), so there is no shared concurrency budget to protect
-    // here the way there is for per-problem digests -- but keeping it simple and sequential costs
-    // nothing, since this path is rare (only very large units trigger it).
+    // Sequential rather than concurrent: only very large units reach this path, so the simpler
+    // loop costs nothing.
     const chunks = chunkMarkdown(allDigestsText, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
     const chunkOverviews: string[] = [];
     for (const chunk of chunks) {

@@ -1,7 +1,6 @@
 // A small worker-pool map: runs `fn` over `items` with at most `limit` calls in flight at once,
 // preserving each result at its original index regardless of completion order. Used instead of a
-// dependency like p-limit because the unit-summary pipeline is the only caller so far and the
-// need is this one primitive.
+// dependency like p-limit because the unit-summary pipeline is its only caller.
 //
 // With a `limiter`, that is the real bound and `limit` is only how many workers this map may
 // contribute. Two maps of limit 8 put 16 calls in flight; sharing a limiter of 8 they put 8.

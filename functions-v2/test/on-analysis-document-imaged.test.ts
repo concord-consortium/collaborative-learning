@@ -15,12 +15,12 @@ import {getSummaryPath} from "../src/utils";
 import {buildZodResponseSchema, buildImageMessages} from "../lib/src/ai-categorize-document";
 import {PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}
   from "../../shared/unit-summary-types";
+import {ZodArray, ZodEnum, ZodString} from "zod";
 
-// The two code-level instructions every consumer prepends, in the order production
-// installs them.
+// The two code-level instructions, in the order the system-message consumers prepend them.
+// AdaChat installs the same two as separate conversation items instead.
 const kCurriculumInstructions =
   `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION}`;
-import {ZodArray, ZodEnum, ZodString} from "zod";
 
 jest.mock("firebase-functions/logger");
 

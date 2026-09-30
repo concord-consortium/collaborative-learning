@@ -70,8 +70,7 @@ describe("runUnitSummaryGeneration", () => {
     });
   });
 
-  // Not an empty string: validation rejects guidance without a label, and the slice reads absent
-  // as "say nothing about approach".
+  // Absent rather than "", so the slice sends no guidance line for it.
   it("leaves approachGuidance off the entry when the model gave a label and no guidance", async () => {
     const problems = [problem("1.1"), problem("1.2")];
     const generateText = jest.fn(async (params: GenerateTextParams) =>
@@ -85,11 +84,9 @@ describe("runUnitSummaryGeneration", () => {
     });
   });
 
-  // Runs the real assembler rather than a preassembled fixture, because the failure this guards
-  // against lives there: a section repeated from an earlier problem used to be replaced with a
-  // pointer to it, and both steps below send `markdown` to the model. 1.2's only section is one of
-  // 1.1's, but 1.1 has a second, so the hashes differ and 1.2 is not skipped as a duplicate -- it
-  // gets a digest call and an approach call over text that named no task at all.
+  // Runs the real assembler rather than a preassembled fixture, because what this guards against
+  // lives there. 1.2's only section also appears in 1.1, which has one more, so 1.2 is not a
+  // whole-problem duplicate and gets a digest call and an approach call of its own.
   it("sends the real text of a shared section, for every step, through the real assembler", async () => {
     const shared = "Design three different grippers and compare them.";
     const onlyFirst = "Only in the first problem.";

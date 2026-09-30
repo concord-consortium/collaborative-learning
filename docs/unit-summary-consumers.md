@@ -25,7 +25,7 @@ Three things about it:
 
 - **Only the current problem's approach is sent, never the next problem's**, even though the next problem's digest is. A consumer that could see the next problem's approach might apply it early — pushing a student to converge in a divergent problem because the next one is convergent, which is exactly the contradiction this exists to prevent.
 - **`unclear` sends nothing.** No line at all, rather than a line saying the problem is vague. The model then falls back to the standing instruction and whatever problem text it has.
-- **The slice re-checks both fields before sending them.** `validateUnitSummary` runs when the authoring panel saves, but a `content.json` edited by hand in the curriculum repo never goes through it — and these fields reach the model as prose. So `unitSummarySlice` drops an unrecognised label (including a miscased `"Convergent"`), a guidance that is not text, or one over its length cap. Dropping costs only the approach line; the rest of the slice is sent as usual.
+- **The slice re-checks both fields before sending them.** `validateUnitSummary` runs when the authoring panel saves, but a `content.json` edited by hand in the curriculum repo never goes through it — and these fields reach the model as prose. So `unitSummarySlice` drops an unrecognized label (including a miscased `"Convergent"`), a guidance that is not text, or one over its length cap. Dropping costs only the approach line; the rest of the slice is sent as usual.
 
 ## AdaChat (the AI chat tutor)
 
