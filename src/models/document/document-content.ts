@@ -545,7 +545,14 @@ export const DocumentContentModel = DocumentContentModelWithHighlights.named("Do
       return;
     }
     const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
-    const newOptions = {...options, insertRowInfo:{rowInsertIndex}};
+    // rowDropId and rowDropLocation are both required: addTile() appends the new row at the end
+    // and then relies on moveTile() to relocate it, and moveTile only acts on a drop id with a
+    // left/right location, or on a top/bottom location. Given neither it silently does nothing
+    // and the tile is left at the bottom of the document.
+    const newOptions = {
+      ...options,
+      insertRowInfo: { rowDropId: targetRowId, rowDropLocation: "bottom" as const, rowInsertIndex }
+    };
     // If no title is provided, and this tile should have one, then set the default
     if (!newOptions.title) {
       // No tile title is provided. Will the tile inherit one?
