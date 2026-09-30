@@ -1,4 +1,4 @@
-import { isReleaseUrl, releaseBranch, releasePaths, retargetText, retargetUrl } from "./release-portal";
+import { isMoveBackward, isReleaseUrl, releaseBranch, releasePaths, retargetText, retargetUrl } from "./release-portal";
 
 const kBase = "https://collaborative-learning.concord.org";
 
@@ -62,5 +62,20 @@ describe("isReleaseUrl", () => {
     expect(isReleaseUrl(`${kBase}/branch/v7-feature/`, kBase)).toBe(false);
     expect(isReleaseUrl(`${kBase}/version/v7.5/`, kBase)).toBe(false);
     expect(isReleaseUrl(`${kBase}/branch/master/`, kBase)).toBe(false);
+  });
+});
+
+describe("isMoveBackward", () => {
+  it("is true only when the record points at a newer release than the tag", () => {
+    expect(isMoveBackward(`${kBase}/version/v7.6.0/`, "v7.5.0")).toBe(true);
+    expect(isMoveBackward(`${kBase}/version/v7.6.1/?firebaseEnv=staging`, "v7.6.0")).toBe(true);
+    expect(isMoveBackward(`${kBase}/version/v7.5.0/`, "v7.6.0")).toBe(false);
+    expect(isMoveBackward(`${kBase}/version/v7.6.0/`, "v7.6.0")).toBe(false);
+    expect(isMoveBackward(`${kBase}/version/v7.10.0/`, "v7.9.0")).toBe(true);
+  });
+  it("compares a release branch on its major and minor version", () => {
+    expect(isMoveBackward(`${kBase}/branch/v7.6.x/`, "v7.5.3")).toBe(true);
+    expect(isMoveBackward(`${kBase}/branch/v7.6.x/`, "v7.6.0")).toBe(false);
+    expect(isMoveBackward(`${kBase}/branch/v7.5.x/`, "v7.6.0")).toBe(false);
   });
 });

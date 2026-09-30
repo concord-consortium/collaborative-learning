@@ -7,7 +7,10 @@ For most scripts here you'll need Firebase credentials. You can get this by goin
 
 From that page if you click "Generate a new private key", it will download a json file. You should rename this file `serviceAccountKey.json` and move it to the the scripts folder.
 
-Most scripts can be run using `npx tsx <script filename>`
+Install the scripts' dependencies first with `npm ci` in this directory (or
+`npm --prefix scripts ci` from the repository root). Most scripts can be run from this directory
+using `npx tsx <script filename>`. The release scripts below are run from the repository root as
+`npx --prefix scripts tsx scripts/<script filename>`, which is how the release skill runs them.
 
 ## Where script output and throwaway scripts go
 
@@ -24,8 +27,8 @@ documents:
 (`staging.html`) are serving. It needs no credentials:
 
 ```shell
-npx tsx deployed-version.ts           # text report
-npx tsx deployed-version.ts --json    # machine-readable report
+npx --prefix scripts tsx scripts/deployed-version.ts           # text report
+npx --prefix scripts tsx scripts/deployed-version.ts --json    # machine-readable report
 ```
 
 For each page a release deploys (the app, `editor/`, `authoring/` and `authoring-iframe/`) it
@@ -33,6 +36,12 @@ compares three things that should agree: the `version/<tag>/` folder the page lo
 `appVersion` compiled into the bundle (the "CLUE v…" shown in the app), and the git sha and tag
 compiled into the bundle from `version.json`. It also checks that sha against what the tag points
 to in your local repo, so run `git fetch --tags` first. It exits non-zero if anything disagrees.
+
+## Deploy timing
+
+`check-deploy-timing.ts` is the `Deploy Timing` PR check, and `release-deploy-report.ts` rolls up
+the Deploy timing callouts of every PR in a release. See "Deploy timing" in
+[docs/deploy.md](../docs/deploy.md) for what they read, and each script's header for its options.
 
 ## Running scripts that connect with the portal
 
@@ -76,13 +85,15 @@ then moves each external report and external activity you name from whatever rel
 at to this one, rewriting the version and release-branch names in its URL and name:
 
 ```shell
-npx tsx update-portal-release.ts --tag v7.6.0 --dry-run
-npx tsx update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77 --activity-id 594
+npx --prefix scripts tsx scripts/update-portal-release.ts --tag v7.6.0 --dry-run
+npx --prefix scripts tsx scripts/update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77 --activity-id 594
 ```
 
-It targets the staging portal unless `--portal` says otherwise, and refuses to move a record whose
-URL isn't a CLUE release on the `--clue-base` site (e.g. `branch/master/`, or another product's
-`version/` URL). Re-running is safe.
+It targets the staging portal unless `--portal` says otherwise. On staging, when no `--report-id`
+or `--activity-id` is given, it moves report 10 ("CLUE (test)"), so the first example above
+includes it. It reads and checks every record before writing anything, and refuses to move a record
+whose URL isn't a CLUE release on the `--clue-base` site, or to move one back to an older release.
+Re-running is safe.
 
 ## Running on Google Cloud Virtual Machine
 

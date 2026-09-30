@@ -12,10 +12,10 @@
  * - the git sha and tag compiled into the bundle (version.json, scripts/write-version.js),
  * and checks them against each other and against what the tag points to in the local git repo.
  *
- * Usage (from the scripts directory):
+ * Usage (from the repository root):
  *
- *   npx tsx deployed-version.ts           # text report
- *   npx tsx deployed-version.ts --json    # machine-readable report
+ *   npx --prefix scripts tsx scripts/deployed-version.ts           # text report
+ *   npx --prefix scripts tsx scripts/deployed-version.ts --json    # machine-readable report
  *
  * Exits non-zero when any page is inconsistent or could not be read.
  */
@@ -36,7 +36,7 @@ const kEnvironments = [
 function usage(message?: string): never {
   if (message) console.error(`\nError: ${message}\n`);
   console.error(`
-Usage: npx tsx deployed-version.ts [--json] [--clue-base <url>]
+Usage: npx --prefix scripts tsx scripts/deployed-version.ts [--json] [--clue-base <url>]
 
   --json              Print a JSON report instead of text.
   --clue-base <url>   Site to check (default ${kDefaultClueBase}).
@@ -63,14 +63,20 @@ function parseArgs(argv: string[]) {
   return options;
 }
 
+const kFetchTimeoutMs = 30_000;
+
 async function fetchText(url: string) {
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(kFetchTimeoutMs) });
   if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
   return response.text();
 }
 
-/** What a git tag points to locally, or undefined when the tag isn't known here. */
+/**
+ * What a git tag points to locally, or undefined when the tag isn't known here. The tag comes from
+ * the deployed page, so anything that isn't shaped like a release tag is never passed to git.
+ */
 function localTagSha(tag: string) {
+  if (!/^v\d+\.\d+\.\d+$/.test(tag)) return undefined;
   try {
     return execFileSync("git", ["rev-parse", "--verify", "--quiet", `${tag}^{commit}`], { encoding: "utf8" }).trim();
   } catch {

@@ -29,6 +29,24 @@ export function isReleaseUrl(url: string, clueBase: string) {
 }
 
 /**
+ * Whether moving a release URL to `tag` would move it to an older release than it points at now.
+ * A `branch/vX.Y.x/` URL is compared on X.Y only.
+ */
+export function isMoveBackward(url: string, tag: string) {
+  const [major, minor, patch] = tag.match(kTagPattern)?.slice(1).map(Number) ?? [];
+  if (major === undefined) throw new Error(`"${tag}" is not a release tag like v7.6.0`);
+  const version = url.match(/\/version\/v(\d+)\.(\d+)\.(\d+)\//);
+  const branch = url.match(/\/branch\/v(\d+)\.(\d+)\.x\//);
+  const current = (version ?? branch)?.slice(1).map(Number);
+  if (!current) return false;
+  const target = version ? [major, minor, patch] : [major, minor];
+  for (let i = 0; i < target.length; i++) {
+    if (current[i] !== target[i]) return current[i] > target[i];
+  }
+  return false;
+}
+
+/**
  * Point a CLUE URL at another release: `version/v7.5.0/` becomes `version/v7.6.0/` and
  * `branch/v7.5.x/` becomes `branch/v7.6.x/`. Everything else, including a query such as
  * `?firebaseEnv=staging`, is kept. A URL naming neither is returned unchanged.

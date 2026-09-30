@@ -44,9 +44,8 @@ export async function verifyOAuthClientId(portal: PortalSession, clientId: numbe
 }
 
 /**
- * Add a redirect URI to an OAuth client if it isn't there already. The list is shared by every
- * CLUE deployment and stored as one field, so this only ever appends, and verifies afterwards
- * that nothing else was dropped.
+ * Add a redirect URI to an OAuth client if it isn't there already, and verify afterward that
+ * nothing else was dropped.
  */
 export async function ensureRedirectUri(
   portal: PortalSession, clientId: number, redirectUri: string, dryRun: boolean

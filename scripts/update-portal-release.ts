@@ -10,16 +10,20 @@
  *   any version or release-branch name in the name (and a report's launch text), is rewritten.
  *   Everything else — including a `?firebaseEnv=` query — is kept.
  *
+ * Every record is read and checked before anything is written, so a bad id stops the run before
+ * the OAuth client or any other record changes.
+ *
  * Every write is read back to confirm it took. Fields that must survive the update (a report's
  * type and OAuth client, an activity's attached reports and auth-token setting) are compared
  * before and after, and a change is reported as an error. Re-running is safe: anything already
  * pointing at the release is left alone.
  *
- * Usage (from the scripts directory):
+ * Usage (from the repository root):
  *
- *   npx tsx update-portal-release.ts --tag v7.6.0 --dry-run
- *   npx tsx update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77
- *   npx tsx update-portal-release.ts --tag v7.6.0 --report-id 10 --activity-id 594 --activity-id 595
+ *   npx --prefix scripts tsx scripts/update-portal-release.ts --tag v7.6.0 --dry-run
+ *   npx --prefix scripts tsx scripts/update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77
+ *   npx --prefix scripts tsx scripts/update-portal-release.ts --tag v7.6.0 --report-id 10 \
+ *     --activity-id 594 --activity-id 595
  *
  * See scripts/README.md for the token setup. setup-portal-assignment.ts is the companion for
  * creating a smoke-test assignment of a release.
@@ -30,11 +34,14 @@ import {
   readCheckedValues
 } from "./lib/portal-api.js";
 import { kClueOAuthAppId, findOAuthClientId, verifyOAuthClientId, ensureRedirectUri } from "./lib/portal-oauth.js";
-import { isReleaseUrl, releasePaths, retargetText, retargetUrl } from "./lib/release-portal.js";
+import { isMoveBackward, isReleaseUrl, releasePaths, retargetText, retargetUrl } from "./lib/release-portal.js";
 
 const kDefaultClueBase = "https://collaborative-learning.concord.org";
-/** The staging portal's long-standing "CLUE (test)" report, moved to each release. */
-const kDefaultReportIds = [10];
+/**
+ * The staging portal's long-standing "CLUE (test)" report, moved to each release when no report or
+ * activity is named. Only on staging: the id means something else on other portals.
+ */
+const kDefaultStagingReportIds = [10];
 
 interface IOptions {
   tag: string;
@@ -49,14 +56,15 @@ interface IOptions {
 function usage(message?: string): never {
   if (message) console.error(`\nError: ${message}\n`);
   console.error(`
-Usage: npx tsx update-portal-release.ts --tag <vX.Y.Z> [options]
+Usage: npx --prefix scripts tsx scripts/update-portal-release.ts --tag <vX.Y.Z> [options]
 
   --tag <tag>          Release tag, e.g. v7.6.0.
   --portal <name>      ${portalNames.join(" | ")} (default staging).
   --report-id <id>     External report to move to this release. Repeat for several.
-                       Default: ${kDefaultReportIds.join(", ")}.
+                       Default on staging, when no --report-id or --activity-id is
+                       given: ${kDefaultStagingReportIds.join(", ")}.
   --activity-id <id>   External activity (resource) to move to this release. Repeat for several.
-  --clue-base <url>    CLUE site (default ${kDefaultClueBase}).
+  --clue-base <url>    CLUE site, an https://*.concord.org URL (default ${kDefaultClueBase}).
   --oauth-client-id <id>
                        Portal OAuth client to add the redirect URIs to. Must have app_id
                        "${kClueOAuthAppId}". Default: found by searching the portal's clients.
@@ -92,10 +100,10 @@ function parseOptions(argv: string[]): IOptions {
       options.activityIds.push(id);
     } else if (arg === "--clue-base") {
       options.clueBase = value().replace(/\/$/, "");
-      // Written into the OAuth client's shared redirect list, which ensureRedirectUri refuses to
-      // touch once any entry isn't a URL, so a typo here would block every later run.
-      if (!/^https?:\/\/[^\s/]+/.test(options.clueBase)) {
-        usage(`--clue-base must be an http:// or https:// URL, got "${options.clueBase}"`);
+      // Written into the OAuth client's shared redirect list, which every CLUE deployment logs in
+      // through, so only a Concord site may go there.
+      if (!/^https:\/\/([a-z0-9-]+\.)*concord\.org$/.test(options.clueBase)) {
+        usage(`--clue-base must be an https://*.concord.org site with no path, got "${options.clueBase}"`);
       }
     } else if (arg === "--oauth-client-id") {
       const id = Number(value());
@@ -110,7 +118,9 @@ function parseOptions(argv: string[]): IOptions {
     }
   }
   if (!/^v\d+\.\d+\.\d+$/.test(options.tag)) usage("--tag must be a release tag like v7.6.0");
-  if (!options.reportIds.length) options.reportIds = kDefaultReportIds;
+  if (options.portal === "staging" && !options.reportIds.length && !options.activityIds.length) {
+    options.reportIds = kDefaultStagingReportIds;
+  }
   return options;
 }
 
@@ -164,19 +174,38 @@ const kExternalActivity: IRecordKind = {
   nameField: "external_activity[name]"
 };
 
-async function moveRecord(portal: PortalSession, options: IOptions, kind: IRecordKind, id: number) {
+interface IRecordPlan {
+  kind: IRecordKind;
+  id: number;
+  name: string;
+  url: string;
+  beforePage: string;
+  changes: { field: string, from: string | undefined, to: string | undefined }[];
+}
+
+/** Read a record and work out its move, without writing. Throws on anything that should stop the run. */
+async function planRecord(
+  portal: PortalSession, options: IOptions, kind: IRecordKind, id: number
+): Promise<IRecordPlan> {
   const beforePage = await portal.getText(kind.editPath(id));
   const before = kind.retargeted(beforePage);
   const beforeUrl = before[kind.urlField];
-  if (beforeUrl === undefined || before[kind.nameField] === undefined) {
+  const name = before[kind.nameField];
+  if (beforeUrl === undefined || name === undefined) {
     throw new Error(`Could not read ${kind.label.toLowerCase()} ${id}'s url and name from its edit page`);
   }
   // A mistyped id can name another product's record, and some of those use the same
   // version/ and branch/ paths, so require the CLUE site as well as a whole release path.
   if (!isReleaseUrl(beforeUrl, options.clueBase)) {
     throw new Error(
-      `${kind.label} ${id} (${before[kind.nameField]}) points at ${beforeUrl}, which isn't a CLUE release ` +
+      `${kind.label} ${id} (${name}) points at ${beforeUrl}, which isn't a CLUE release ` +
       `under ${options.clueBase}/ (version/vX.Y.Z/ or branch/vX.Y.x/). Refusing to change it.`
+    );
+  }
+  if (isMoveBackward(beforeUrl, options.tag)) {
+    throw new Error(
+      `${kind.label} ${id} (${name}) points at ${beforeUrl}, a newer release than ${options.tag}. ` +
+      `Refusing to move it back.`
     );
   }
   const target: Record<string, string | undefined> = {};
@@ -187,8 +216,21 @@ async function moveRecord(portal: PortalSession, options: IOptions, kind: IRecor
   const changes = Object.keys(before)
     .filter(field => target[field] !== before[field])
     .map(field => ({ field, from: before[field], to: target[field] }));
-  if (!changes.length || options.dryRun) return { name: before[kind.nameField], url: beforeUrl, changes };
+  if (changes.length) {
+    // A field the page doesn't show would compare equal before and after, so the check after the
+    // write would pass without checking anything.
+    const unread = Object.entries(kind.preserved(beforePage)).filter(([, value]) => value === undefined);
+    if (unread.length) {
+      throw new Error(
+        `Could not read ${kind.label.toLowerCase()} ${id}'s ${unread.map(([key]) => key).join(", ")} ` +
+        `from its edit page, so its update couldn't be checked. Refusing to change it.`
+      );
+    }
+  }
+  return { kind, id, name, url: beforeUrl, beforePage, changes };
+}
 
+async function applyRecord(portal: PortalSession, { kind, id, beforePage, changes }: IRecordPlan) {
   // Only the fields being moved are sent; the update leaves the others as they are, which the
   // read-back below confirms for the ones that matter most.
   const fields: Record<string, string> = {};
@@ -213,7 +255,6 @@ async function moveRecord(portal: PortalSession, options: IOptions, kind: IRecor
       `. Check it by hand.`
     );
   }
-  return { name: before[kind.nameField], url: beforeUrl, changes };
 }
 
 async function main() {
@@ -227,9 +268,17 @@ async function main() {
   console.log(`Portal:  ${portal.baseUrl}${options.dryRun ? "  (DRY RUN — nothing will be written)" : ""}`);
   console.log(`Release: ${options.tag}\n`);
 
+  // Everything is read and checked first, so nothing is written unless every step can go ahead.
   const clientId = options.oauthClientId
     ? await verifyOAuthClientId(portal, options.oauthClientId, kClueOAuthAppId)
     : await findOAuthClientId(portal, kClueOAuthAppId);
+  const records = [
+    ...options.reportIds.map(id => ({ kind: kExternalReport, id })),
+    ...options.activityIds.map(id => ({ kind: kExternalActivity, id }))
+  ];
+  const plans: IRecordPlan[] = [];
+  for (const { kind, id } of records) plans.push(await planRecord(portal, options, kind, id));
+
   console.log(`OAuth client ${clientId} (app_id "${kClueOAuthAppId}") redirect URIs:`);
   for (const path of releasePaths(options.tag)) {
     const uri = `${options.clueBase}/${path}`;
@@ -237,18 +286,14 @@ async function main() {
     console.log(`  ${result.changed ? would("added", "would add") : "already present"}: ${uri}`);
   }
 
-  const records = [
-    ...options.reportIds.map(id => ({ kind: kExternalReport, id })),
-    ...options.activityIds.map(id => ({ kind: kExternalActivity, id }))
-  ];
-  for (const { kind, id } of records) {
-    const { name, url, changes } = await moveRecord(portal, options, kind, id);
-    const status = changes.length ? would("updated", "would update") : "already on this release";
-    console.log(`\n${kind.label} ${id}: ${status}`);
-    if (changes.length) {
-      for (const { field, from, to } of changes) console.log(`  ${field}: ${from}  ->  ${to}`);
+  for (const plan of plans) {
+    if (plan.changes.length && !options.dryRun) await applyRecord(portal, plan);
+    const status = plan.changes.length ? would("updated", "would update") : "already on this release";
+    console.log(`\n${plan.kind.label} ${plan.id}: ${status}`);
+    if (plan.changes.length) {
+      for (const { field, from, to } of plan.changes) console.log(`  ${field}: ${from}  ->  ${to}`);
     } else {
-      console.log(`  ${name}: ${url}`);
+      console.log(`  ${plan.name}: ${plan.url}`);
     }
   }
 
