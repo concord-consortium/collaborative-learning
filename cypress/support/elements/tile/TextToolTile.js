@@ -25,6 +25,15 @@ class TextToolTile {
         // In the meantime a short wait is added to decrease the chances this might happen
         cy.wait(300);
     }
+    // Type into one particular text tile, given a selector for its tile element.
+    enterTextInTile(tileSelector, text){
+        // Same workaround as enterText: the editor isn't reachable right after the tile renders.
+        cy.wait(500);
+        cy.get(tileSelector).focus();
+        cy.get(`${tileSelector} .text-tool-editor`).click();
+        this._dispatchKeystrokes(text);
+        cy.wait(300);
+    }
     enterAdditionalText(text){
         this.getTextTile().last().focus();
         this._dispatchKeystrokes('{moveToEnd}' + text);

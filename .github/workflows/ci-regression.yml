@@ -89,7 +89,8 @@ jobs:
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: chrome
-          spec: cypress/e2e/functional/**
+          # Portal specs are opted in one by one; see cypress/e2e/portal/README.md.
+          spec: cypress/e2e/functional/**,cypress/e2e/portal/teacher_chat_spec.js
           group: 'Regression tests'
         env:
           # pass the Dashboard record key as an environment variable
