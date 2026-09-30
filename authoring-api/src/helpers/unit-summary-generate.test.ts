@@ -330,10 +330,14 @@ describe("scheduling after the digest step", () => {
     const {generateText, observed} = instrumentedClient();
     await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
 
-    // Some summary call starts before the last approach call ends: the two overlap.
+    // Both directions, because either one alone is satisfied by the steps running back to back.
+    // Together they say the two spans overlap: neither finished before the other started.
+    const firstApproachStart = observed.order.indexOf("start:approach");
     const lastApproachEnd = observed.order.lastIndexOf("end:approach");
     const firstSummaryStart = observed.order.indexOf("start:summary");
+    const lastSummaryEnd = observed.order.lastIndexOf("end:summary");
     expect(firstSummaryStart).toBeLessThan(lastApproachEnd);
+    expect(firstApproachStart).toBeLessThan(lastSummaryEnd);
   });
 
   // How long one call takes against the live model, timed over a full generation. A fake client
