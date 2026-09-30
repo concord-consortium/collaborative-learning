@@ -51,6 +51,11 @@ export async function verifyOAuthClientId(portal: PortalSession, clientId: numbe
 export async function ensureRedirectUri(
   portal: PortalSession, clientId: number, redirectUri: string, dryRun: boolean
 ) {
+  // Every entry must pass the URL test below, which refuses to touch the list otherwise, so a
+  // bad entry written here would block every later run until the list was fixed by hand.
+  if (!/^https?:\/\/\S+$/.test(redirectUri)) {
+    throw new Error(`Refusing to add "${redirectUri}" to the OAuth client's redirect URIs: it isn't an http(s) URL`);
+  }
   const editPage = await portal.getText(`/admin/clients/${clientId}/edit`);
   const current = readFormField(editPage, "client_redirect_uris");
   // "field not found" and "field is empty" must not collapse into each other. They differ by

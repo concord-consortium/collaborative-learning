@@ -57,7 +57,7 @@ locally: `npx tsx scripts/check-deploy-timing.ts --base origin/master --body-fil
 
 When preparing a release, `scripts/release-deploy-report.ts` reads the callouts of every PR in the
 release and reports, per part, the strictest timing given (a part can deploy no earlier than that)
-and the PRs that have no entry, grouped by author. See the script's header for how to run it.
+and the PRs without a usable entry (none, more than one, or one with no reason), grouped by author. See the script's header for how to run it.
 
 ## Where to find builds
 

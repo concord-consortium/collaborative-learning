@@ -11,7 +11,7 @@ const kTypeScript = "typescript@5.9";
  */
 export function listFunctionsSources(repoRoot: string) {
   const sources = new Set<string>();
-  for (const { tsconfig } of kFunctionsCodebases) {
+  for (const { dir, tsconfig } of kFunctionsCodebases) {
     let output: string;
     try {
       output = execFileSync("npx", ["-y", "-p", kTypeScript, "tsc", "-p", tsconfig, "--listFilesOnly"],
@@ -21,10 +21,18 @@ export function listFunctionsSources(repoRoot: string) {
       // don't stop it listing files, which is all this needs.
       output = error.stdout ?? "";
     }
+    let ownFiles = 0;
     for (const line of output.split("\n")) {
       // tsc also prints diagnostics on stdout; file paths are the absolute lines.
       if (!line.startsWith(repoRoot + path.sep) || line.includes("/node_modules/")) continue;
-      sources.add(path.relative(repoRoot, line));
+      const file = path.relative(repoRoot, line);
+      sources.add(file);
+      if (file.startsWith(`${dir}/`)) ownFiles++;
+    }
+    // With no listing at all (npx or tsc couldn't run), every shared/ file would look like client
+    // code, and a change to one the functions import would pass as needing no deploy timing.
+    if (!ownFiles) {
+      throw new Error(`tsc listed no files from ${dir}/ for ${tsconfig}, so the functions' sources are unknown`);
     }
   }
   return sources;

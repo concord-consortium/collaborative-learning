@@ -71,6 +71,8 @@ export interface IDeployTiming {
 const kAlertStart = /^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i;
 const kHeading = /^>\s*\*\*Deploy timing\*\*\s*$/i;
 const kEntry = /^>\s*[-*]\s+\*\*([^:*]+):\s*([^*]+)\*\*\s*(?:[—–:-]\s*)?(.*)$/;
+/** A list item opening with bold text: meant as an entry, whether or not kEntry can read it. */
+const kEntryLike = /^>\s*[-*]\s+\*\*/;
 
 /**
  * Read the Deploy timing callout from a PR description:
@@ -103,6 +105,11 @@ export function parseDeployTiming(body: string): IDeployTiming {
           current = undefined;
           result.invalid.push(line);
         }
+      } else if (kEntryLike.test(line)) {
+        // A misspelled entry, e.g. a missing colon. Taken as a rationale continuation, it would
+        // hide inside the entry above and the check would pass.
+        current = undefined;
+        result.invalid.push(line);
       } else if (current) {
         const continuation = line.replace(/^>\s*/, "");
         if (continuation) current.rationale = `${current.rationale} ${continuation}`.trim();
@@ -158,23 +165,31 @@ export interface IDeployableRollup {
   timing?: Timing;
   /** PRs that gave a timing for this part, with their reasons. */
   entries: { number: number, author: string, timing: Timing, rationale: string }[];
-  /** PRs that touch this part without saying when it can be deployed. */
-  missing: { number: number, author: string, title: string }[];
+  /** PRs that touch this part without a usable entry saying when it can be deployed. */
+  missing: { number: number, author: string, title: string, problem: MissingTimingProblem }[];
 }
+
+export type MissingTimingProblem = "no entry" | "duplicate entries" | "no reason given";
 
 /**
  * Combine the Deploy timing of every PR in a release, part by part. A part can deploy no earlier
- * than its strictest PR allows, and is undecided while any PR touching it has no entry.
+ * than its strictest PR allows, and is undecided while any PR touching it lacks one entry with a
+ * reason, the same test checkDeployTiming applies.
  */
 export function rollupDeployTiming(prs: IPullRequestTiming[]): IDeployableRollup[] {
   return kDeployables.map(deployable => {
     const rollup: IDeployableRollup = { deployable, entries: [], missing: [] };
     for (const pr of prs.filter(p => p.touched.includes(deployable))) {
-      const entry = pr.timing.entries.find(e => e.deployable === deployable);
-      if (entry) {
-        rollup.entries.push({ number: pr.number, author: pr.author, timing: entry.timing, rationale: entry.rationale });
+      const entries = pr.timing.entries.filter(e => e.deployable === deployable);
+      const problem: MissingTimingProblem | undefined = entries.length === 0 ? "no entry"
+        : entries.length > 1 ? "duplicate entries"
+        : !entries[0].rationale ? "no reason given"
+        : undefined;
+      if (problem) {
+        rollup.missing.push({ number: pr.number, author: pr.author, title: pr.title, problem });
       } else {
-        rollup.missing.push({ number: pr.number, author: pr.author, title: pr.title });
+        const [entry] = entries;
+        rollup.entries.push({ number: pr.number, author: pr.author, timing: entry.timing, rationale: entry.rationale });
       }
     }
     const timings = rollup.entries.map(entry => kTimings.indexOf(entry.timing));

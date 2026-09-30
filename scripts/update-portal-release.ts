@@ -29,8 +29,8 @@ import {
   PortalSession, isPortalName, portalNames, PortalName, readFormField, readFormSelect, readFormCheckbox,
   readCheckedValues
 } from "./lib/portal-api.js";
-import { kClueOAuthAppId, findOAuthClientId, ensureRedirectUri } from "./lib/portal-oauth.js";
-import { releasePaths, retargetText, retargetUrl } from "./lib/release-portal.js";
+import { kClueOAuthAppId, findOAuthClientId, verifyOAuthClientId, ensureRedirectUri } from "./lib/portal-oauth.js";
+import { isReleaseUrl, releasePaths, retargetText, retargetUrl } from "./lib/release-portal.js";
 
 const kDefaultClueBase = "https://collaborative-learning.concord.org";
 /** The staging portal's long-standing "CLUE (test)" report, moved to each release. */
@@ -42,6 +42,7 @@ interface IOptions {
   clueBase: string;
   reportIds: number[];
   activityIds: number[];
+  oauthClientId?: number;
   dryRun: boolean;
 }
 
@@ -56,6 +57,9 @@ Usage: npx tsx update-portal-release.ts --tag <vX.Y.Z> [options]
                        Default: ${kDefaultReportIds.join(", ")}.
   --activity-id <id>   External activity (resource) to move to this release. Repeat for several.
   --clue-base <url>    CLUE site (default ${kDefaultClueBase}).
+  --oauth-client-id <id>
+                       Portal OAuth client to add the redirect URIs to. Must have app_id
+                       "${kClueOAuthAppId}". Default: found by searching the portal's clients.
   --dry-run            Show what would change without writing anything.
 `);
   process.exit(message ? 1 : 0);
@@ -88,6 +92,15 @@ function parseOptions(argv: string[]): IOptions {
       options.activityIds.push(id);
     } else if (arg === "--clue-base") {
       options.clueBase = value().replace(/\/$/, "");
+      // Written into the OAuth client's shared redirect list, which ensureRedirectUri refuses to
+      // touch once any entry isn't a URL, so a typo here would block every later run.
+      if (!/^https?:\/\/[^\s/]+/.test(options.clueBase)) {
+        usage(`--clue-base must be an http:// or https:// URL, got "${options.clueBase}"`);
+      }
+    } else if (arg === "--oauth-client-id") {
+      const id = Number(value());
+      if (!Number.isInteger(id) || id <= 0) usage(`--oauth-client-id must be a positive integer`);
+      options.oauthClientId = id;
     } else if (arg === "--dry-run") {
       options.dryRun = true;
     } else if (arg === "--help") {
@@ -158,10 +171,12 @@ async function moveRecord(portal: PortalSession, options: IOptions, kind: IRecor
   if (beforeUrl === undefined || before[kind.nameField] === undefined) {
     throw new Error(`Could not read ${kind.label.toLowerCase()} ${id}'s url and name from its edit page`);
   }
-  if (!/\/(version|branch)\/v\d/.test(beforeUrl)) {
+  // A mistyped id can name another product's record, and some of those use the same
+  // version/ and branch/ paths, so require the CLUE site as well as a whole release path.
+  if (!isReleaseUrl(beforeUrl, options.clueBase)) {
     throw new Error(
-      `${kind.label} ${id} (${before[kind.nameField]}) points at ${beforeUrl}, which names no release ` +
-      `to move. Refusing to guess.`
+      `${kind.label} ${id} (${before[kind.nameField]}) points at ${beforeUrl}, which isn't a CLUE release ` +
+      `under ${options.clueBase}/ (version/vX.Y.Z/ or branch/vX.Y.x/). Refusing to change it.`
     );
   }
   const target: Record<string, string | undefined> = {};
@@ -212,7 +227,9 @@ async function main() {
   console.log(`Portal:  ${portal.baseUrl}${options.dryRun ? "  (DRY RUN — nothing will be written)" : ""}`);
   console.log(`Release: ${options.tag}\n`);
 
-  const clientId = await findOAuthClientId(portal, kClueOAuthAppId);
+  const clientId = options.oauthClientId
+    ? await verifyOAuthClientId(portal, options.oauthClientId, kClueOAuthAppId)
+    : await findOAuthClientId(portal, kClueOAuthAppId);
   console.log(`OAuth client ${clientId} (app_id "${kClueOAuthAppId}") redirect URIs:`);
   for (const path of releasePaths(options.tag)) {
     const uri = `${options.clueBase}/${path}`;

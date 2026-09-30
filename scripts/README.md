@@ -81,7 +81,8 @@ npx tsx update-portal-release.ts --tag v7.6.0 --report-id 10 --report-id 77 --ac
 ```
 
 It targets the staging portal unless `--portal` says otherwise, and refuses to move a record whose
-URL names no release (e.g. `branch/master/`). Re-running is safe.
+URL isn't a CLUE release on the `--clue-base` site (e.g. `branch/master/`, or another product's
+`version/` URL). Re-running is safe.
 
 ## Running on Google Cloud Virtual Machine
 

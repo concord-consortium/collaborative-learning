@@ -60,6 +60,16 @@ function parseArgs(argv: string[]) {
   return options;
 }
 
+/** "2977, 2980" -> [2977, 2980]. Any other token stops the report rather than quietly skipping a PR. */
+function parsePrNumbers(list: string) {
+  const tokens = list.split(",").map(token => token.trim()).filter(Boolean);
+  if (!tokens.length) usage("--prs names no PRs");
+  return tokens.map(token => {
+    if (!/^[1-9]\d*$/.test(token)) usage(`--prs takes PR numbers separated by commas; "${token}" isn't one`);
+    return Number(token);
+  });
+}
+
 /** Merged PRs in the release, plus open PRs of this repo linked to the release's issues. */
 function prsFromUnlinkedPrs(file: string) {
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -107,9 +117,7 @@ async function mapLimited<T, R>(items: T[], limit: number, fn: (item: T) => Prom
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const numbers = options.unlinkedPrs
-    ? prsFromUnlinkedPrs(options.unlinkedPrs)
-    : options.prs.split(",").map(n => parseInt(n.trim(), 10)).filter(Boolean);
+  const numbers = options.unlinkedPrs ? prsFromUnlinkedPrs(options.unlinkedPrs) : parsePrNumbers(options.prs);
 
   const repoRoot = execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim();
   const functionsSources = listFunctionsSources(repoRoot);
@@ -141,13 +149,13 @@ async function main() {
   console.log(`Checked ${prs.length} PRs; ${touchingCount} change functions, rules or indexes.\n`);
   if (!rollup.length) console.log("Nothing to deploy besides the client.");
   for (const part of rollup) {
-    const decided = part.missing.length ? " (undecided: some PRs have no entry)" : "";
+    const decided = part.missing.length ? " (undecided: some PRs have no usable entry)" : "";
     console.log(`${part.deployable}: ${part.timing ?? "unknown"}${decided}`);
     for (const entry of part.entries) {
       console.log(`  #${entry.number} ${entry.timing} (${entry.author}) — ${entry.rationale}`);
     }
     for (const pr of part.missing) {
-      console.log(`  #${pr.number} no entry (${pr.author}) — ${pr.title}`);
+      console.log(`  #${pr.number} ${pr.problem} (${pr.author}) — ${pr.title}`);
     }
   }
   if (toAsk.size) {

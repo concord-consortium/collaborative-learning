@@ -19,6 +19,16 @@ export function releasePaths(tag: string) {
 }
 
 /**
+ * Whether a URL is a CLUE release on this CLUE site: `<clueBase>/version/vX.Y.Z/` or
+ * `<clueBase>/branch/vX.Y.x/`, the paths retargetUrl moves. Other products use the same path
+ * shapes, so the site matters as much as the path.
+ */
+export function isReleaseUrl(url: string, clueBase: string) {
+  if (!url.startsWith(`${clueBase}/`)) return false;
+  return /^\/(version\/v\d+\.\d+\.\d+|branch\/v\d+\.\d+\.x)\//.test(url.slice(clueBase.length));
+}
+
+/**
  * Point a CLUE URL at another release: `version/v7.5.0/` becomes `version/v7.6.0/` and
  * `branch/v7.5.x/` becomes `branch/v7.6.x/`. Everything else, including a query such as
  * `?firebaseEnv=staging`, is kept. A URL naming neither is returned unchanged.

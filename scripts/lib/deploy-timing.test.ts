@@ -102,6 +102,14 @@ describe("parseDeployTiming", () => {
       found: true, entries: [], invalid: ["> - **function: soon** — typo"]
     });
   });
+  it("reports an entry-like line it can't read instead of adding it to the rationale above", () => {
+    const body = "> [!IMPORTANT]\n> **Deploy timing**\n> - **functions: with** — why\n> - **rules before** — typo";
+    expect(parseDeployTiming(body)).toEqual({
+      found: true,
+      entries: [{ deployable: "functions", timing: "with", rationale: "why" }],
+      invalid: ["> - **rules before** — typo"]
+    });
+  });
   it("records an entry with no rationale", () => {
     const body = "> [!IMPORTANT]\n> **Deploy timing**\n> - **rules: before**";
     expect(parseDeployTiming(body).entries).toEqual([{ deployable: "rules", timing: "before", rationale: "" }]);
@@ -169,7 +177,7 @@ describe("rollupDeployTiming", () => {
           { number: 1, author: "a", timing: "before", rationale: "safe" },
           { number: 2, author: "b", timing: "with", rationale: "released client looks frozen" }
         ],
-        missing: [{ number: 3, author: "c", title: "three" }]
+        missing: [{ number: 3, author: "c", title: "three", problem: "no entry" }]
       },
       {
         deployable: "rules", timing: "before",
@@ -183,7 +191,18 @@ describe("rollupDeployTiming", () => {
       { number: 4, author: "d", title: "four", touched: ["indexes"], timing: callout() }
     ]);
     expect(rollup).toEqual([
-      { deployable: "indexes", entries: [], missing: [{ number: 4, author: "d", title: "four" }] }
+      { deployable: "indexes", entries: [], missing: [{ number: 4, author: "d", title: "four", problem: "no entry" }] }
+    ]);
+  });
+  it("leaves a part undecided for a PR whose entries the check would reject", () => {
+    const rollup = rollupDeployTiming([
+      { number: 5, author: "e", title: "five", touched: ["rules", "indexes"],
+        timing: callout("**rules: before** — a", "**rules: after** — b", "**indexes: before**") }
+    ]);
+    const pr = { number: 5, author: "e", title: "five" };
+    expect(rollup).toEqual([
+      { deployable: "rules", entries: [], missing: [{ ...pr, problem: "duplicate entries" }] },
+      { deployable: "indexes", entries: [], missing: [{ ...pr, problem: "no reason given" }] }
     ]);
   });
 });
