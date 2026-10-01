@@ -43,6 +43,9 @@ interface IProps {
   tileId?: string;
   program?: DataflowProgramModelType;
   programDataRate: number;
+  // Not read from ReadOnlyContext: this class already claims contextType for
+  // DocumentContextReact, and readOnly is needed outside render (componentDidMount,
+  // setDataRate, tick) where a Consumer would not reach.
   readOnly?: boolean;
   tileHeight?: number;
   tileContent: DataflowContentModelType;
