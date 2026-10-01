@@ -1,10 +1,19 @@
-import {AssembledProblem, AssembledUnit} from "./assemble-unit";
+import {assembleUnit, AssembledProblem, AssembledUnit} from "./assemble-unit";
 import {
-  UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
-  UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT, UNIT_SUMMARY_OVERALL_DEADLINE_MS,
+  UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS,
+  UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS,
+  UNIT_SUMMARY_HARD_MAX_PROBLEMS, UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT,
+  UNIT_SUMMARY_OVERALL_DEADLINE_MS,
 } from "./unit-summary-config";
 import {GenerateUnitSummaryDeps, runUnitSummaryGeneration} from "./unit-summary-generate";
 import {GenerateTextParams, UnitSummaryOpenAIClient} from "./unit-summary-openai";
+import {readEffectiveContentText} from "./unit-content";
+
+// Matches the approach step by the reply format it demands, which is unique to that prompt and
+// survives a rewording of it.
+function isApproachPrompt(params: GenerateTextParams): boolean {
+  return params.instructions.includes("APPROACH:");
+}
 
 function problem(ordinal: string, markdown = "content"): AssembledProblem {
   return {ordinal, title: `Problem ${ordinal}`, markdown, problemHash: `hash-${ordinal}`};
@@ -46,20 +55,110 @@ describe("runUnitSummaryGeneration", () => {
     expect(new Date(summary.generatedAt).toISOString()).toBe(summary.generatedAt);
   });
 
+  it("writes each problem's approach and guidance onto its entry", async () => {
+    const problems = [problem("1.1"), problem("1.2")];
+    const generateText = jest.fn(async (params: GenerateTextParams) =>
+      isApproachPrompt(params) ?
+        "APPROACH: convergent\nGUIDANCE: Improve one design." :
+        "a short response");
+    const summary = await runUnitSummaryGeneration(
+      "branch", "unit", baseDeps(generateText, assembledUnit(problems))
+    );
+    summary.entries.forEach((entry) => {
+      expect(entry.approach).toBe("convergent");
+      expect(entry.approachGuidance).toBe("Improve one design.");
+    });
+  });
+
+  // Absent rather than "", so the slice sends no guidance line for it.
+  it("leaves approachGuidance off the entry when the model gave a label and no guidance", async () => {
+    const problems = [problem("1.1"), problem("1.2")];
+    const generateText = jest.fn(async (params: GenerateTextParams) =>
+      isApproachPrompt(params) ? "APPROACH: divergent\nGUIDANCE:" : "a short response");
+    const summary = await runUnitSummaryGeneration(
+      "branch", "unit", baseDeps(generateText, assembledUnit(problems))
+    );
+    summary.entries.forEach((entry) => {
+      expect(entry.approach).toBe("divergent");
+      expect(entry).not.toHaveProperty("approachGuidance");
+    });
+  });
+
+  // Runs the real assembler rather than a preassembled fixture, because what this guards against
+  // lives there. 1.2's only section also appears in 1.1, which has one more, so 1.2 is not a
+  // whole-problem duplicate and gets a digest call and an approach call of its own.
+  it("sends the real text of a shared section, for every step, through the real assembler", async () => {
+    const shared = "Design three different grippers and compare them.";
+    const onlyFirst = "Only in the first problem.";
+    const section = (text: string, type: string) => ({
+      type, content: {tiles: [{id: "t1", content: {type: "Text", format: "markdown", text}}]},
+    });
+    const root = {
+      title: "Test Unit",
+      investigations: [{ordinal: 1, title: "Inv 1", problems: [
+        {ordinal: 1, title: "P1", sections: [section(shared, "intro"), section(onlyFirst, "programming")]},
+        {ordinal: 2, title: "P2", sections: [section(shared, "intro")]},
+      ]}],
+    };
+    const inventory = [{
+      path: "content.json", escapedPath: "content.json", updateText: JSON.stringify(root),
+    }];
+    const assembled = await assembleUnit("branch", "unit", {
+      loadInventory: async () => inventory, readText: readEffectiveContentText,
+    });
+
+    const generateText = jest.fn().mockResolvedValue("APPROACH: divergent\nGUIDANCE: Try several.");
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembled));
+
+    // The calls that carry a problem's own Markdown: the digest step's and the approach step's.
+    const withProblemText = generateText.mock.calls
+      .map(([params]: [GenerateTextParams]) => params)
+      .filter((params: GenerateTextParams) => params.input.includes("# Section:"));
+    expect(withProblemText.some((params: GenerateTextParams) => params.input.includes("(same")))
+      .toBe(false);
+
+    // 1.2's own calls -- they hold the shared section and not 1.1's extra one.
+    const forSecondProblem = withProblemText.filter((params: GenerateTextParams) =>
+      params.input.includes(shared) && !params.input.includes(onlyFirst));
+    expect(forSecondProblem).toHaveLength(2);
+    expect(forSecondProblem.filter(isApproachPrompt)).toHaveLength(1);
+  });
+
+  // Both steps turn on fitsOneCall. If they disagreed, the approach call for a problem the digest
+  // step had split would exceed a single call's input budget.
+  it("gives the approach step the combined digest for a problem the digest step had to split", async () => {
+    const long = problem("1.1", "p ".repeat(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS));
+    const short = problem("1.2", "short problem text");
+    const generateText = jest.fn(async (params: GenerateTextParams) =>
+      params.instructions.includes("partial digests") ? "THE COMBINED DIGEST" : "a short response");
+    await runUnitSummaryGeneration(
+      "branch", "unit", baseDeps(generateText, assembledUnit([long, short]))
+    );
+
+    const approachInputs = generateText.mock.calls
+      .map(([p]: [GenerateTextParams]) => p)
+      .filter(isApproachPrompt)
+      .map((p) => p.input);
+    // The split problem is classified from its combined digest; the short one from its own text.
+    expect(approachInputs).toContain("THE COMBINED DIGEST");
+    expect(approachInputs).toContain("short problem text");
+    approachInputs.forEach((input) => {
+      expect(input.length).toBeLessThanOrEqual(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
+    });
+  });
+
   it("uses the given digest and summary models for the right calls", async () => {
     const problems = [problem("1.1"), problem("1.2")];
     const generateText = jest.fn().mockResolvedValue("response");
     await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
 
     const calls: GenerateTextParams[] = generateText.mock.calls.map(([params]: [GenerateTextParams]) => params);
-    const digestModels = new Set(
-      calls.filter((c) => c.instructions.includes("content of ONE problem")).map((c) => c.model)
-    );
-    expect(digestModels).toEqual(new Set(["digest-model"]));
-    const nonDigestModels = new Set(
-      calls.filter((c) => !c.instructions.includes("content of ONE problem")).map((c) => c.model)
-    );
-    expect(nonDigestModels).toEqual(new Set(["summary-model"]));
+    // Approach is a per-problem step, so it uses the digest model rather than the summary one.
+    const isPerProblem = (c: GenerateTextParams) =>
+      c.instructions.includes("content of ONE problem") || isApproachPrompt(c);
+    expect(new Set(calls.filter(isPerProblem).map((c) => c.model))).toEqual(new Set(["digest-model"]));
+    expect(new Set(calls.filter((c) => !isPerProblem(c)).map((c) => c.model)))
+      .toEqual(new Set(["summary-model"]));
   });
 
   it("rejects a unit with no problems with zero model calls, instead of sending OpenAI an " +
@@ -172,5 +271,117 @@ describe("runUnitSummaryGeneration", () => {
     await expect(
       runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)))
     ).rejects.toThrow(/digest failed/);
+  });
+});
+
+// The approach step runs beside prior knowledge and the overview on one shared budget. Two pools
+// of UNIT_SUMMARY_CONCURRENCY_LIMIT would put twice that many calls in flight, which is what these
+// tests exist to prevent.
+describe("scheduling after the digest step", () => {
+  const isDigestCall = (c: GenerateTextParams) => c.instructions.includes("content of ONE problem");
+  const isApproachCall = isApproachPrompt;
+
+  // Each call takes a tick of real time, so overlap is possible and can be observed.
+  function instrumentedClient(delayMs = 1) {
+    let inFlight = 0;
+    // `rounds` is the longest chain of calls that had to wait for each other: a call starting
+    // after another ended is at least one round deeper. It measures the schedule's shape rather
+    // than this machine's speed, so a busy build host does not make it flaky.
+    let deepestFinished = 0;
+    const observed = {peakInFlight: 0, rounds: 0, order: [] as string[]};
+    const generateText = jest.fn(async (params: GenerateTextParams) => {
+      const kind = isDigestCall(params) ? "digest" : isApproachCall(params) ? "approach" : "summary";
+      inFlight++;
+      const round = deepestFinished + 1;
+      observed.peakInFlight = Math.max(observed.peakInFlight, inFlight);
+      observed.rounds = Math.max(observed.rounds, round);
+      observed.order.push(`start:${kind}`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      inFlight--;
+      deepestFinished = Math.max(deepestFinished, round);
+      observed.order.push(`end:${kind}`);
+      return "a short response";
+    });
+    return {generateText, observed};
+  }
+
+  it("never has more calls in flight than the shared limit, with enough problems to exceed it", async () => {
+    const problems = Array.from({length: UNIT_SUMMARY_CONCURRENCY_LIMIT * 3}, (_, i) => problem(`1.${i + 1}`));
+    const {generateText, observed} = instrumentedClient();
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+    expect(observed.peakInFlight).toBeLessThanOrEqual(UNIT_SUMMARY_CONCURRENCY_LIMIT);
+  });
+
+  it("starts no approach call until every digest has finished", async () => {
+    const problems = Array.from({length: UNIT_SUMMARY_CONCURRENCY_LIMIT * 2}, (_, i) => problem(`1.${i + 1}`));
+    const {generateText, observed} = instrumentedClient();
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+
+    const lastDigestEnd = observed.order.lastIndexOf("end:digest");
+    const firstApproachStart = observed.order.indexOf("start:approach");
+    expect(firstApproachStart).toBeGreaterThan(lastDigestEnd);
+  });
+
+  it("runs the approach step beside the summary steps rather than after them", async () => {
+    const problems = Array.from({length: UNIT_SUMMARY_CONCURRENCY_LIMIT * 2}, (_, i) => problem(`1.${i + 1}`));
+    const {generateText, observed} = instrumentedClient();
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+
+    // Both directions, because either one alone is satisfied by the steps running back to back.
+    // Together they say the two spans overlap: neither finished before the other started.
+    const firstApproachStart = observed.order.indexOf("start:approach");
+    const lastApproachEnd = observed.order.lastIndexOf("end:approach");
+    const firstSummaryStart = observed.order.indexOf("start:summary");
+    const lastSummaryEnd = observed.order.lastIndexOf("end:summary");
+    expect(firstSummaryStart).toBeLessThan(lastApproachEnd);
+    expect(firstApproachStart).toBeLessThan(lastSummaryEnd);
+  });
+
+  // How long one call takes against the live model, timed over a full generation. A fake client
+  // cannot know this, so the figure is carried here and multiplied by the round count.
+  const MEASURED_CALL_MS = 15_600;
+
+  // Prefix mode is what every authored unit runs in, so this is the deadline claim that describes
+  // production. The largest such unit is the one right at the mode-switch threshold.
+  it("keeps the largest prefix-mode unit within the deadline at measured call times", async () => {
+    const problems = Array.from(
+      {length: UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT}, (_, i) => problem(`1.${i + 1}`)
+    );
+
+    const {generateText, observed} = instrumentedClient(2);
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+
+    expect(observed.peakInFlight).toBeLessThanOrEqual(UNIT_SUMMARY_CONCURRENCY_LIMIT);
+    expect(observed.rounds * MEASURED_CALL_MS).toBeLessThan(UNIT_SUMMARY_OVERALL_DEADLINE_MS);
+  });
+
+  // Rolling mode's prior-knowledge calls each wait for the one before, so its depth grows with the
+  // problem count and at measured call times a full unit does not fit the deadline. Nothing reaches
+  // it: the mode switches above UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT and no authored unit is that
+  // large. Raising that threshold, or authoring a unit past it, needs the deadline revisited --
+  // which is what the second assertion is here to make visible.
+  it("bounds a full rolling-mode unit's calls, whose depth the deadline does not cover", async () => {
+    const problems = Array.from({length: UNIT_SUMMARY_HARD_MAX_PROBLEMS}, (_, i) => problem(`1.${i + 1}`));
+    expect(problems.length).toBeGreaterThan(UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT);
+
+    const {generateText, observed} = instrumentedClient(2);
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+
+    expect(observed.peakInFlight).toBeLessThanOrEqual(UNIT_SUMMARY_CONCURRENCY_LIMIT);
+    expect(observed.rounds * MEASURED_CALL_MS).toBeGreaterThan(UNIT_SUMMARY_OVERALL_DEADLINE_MS);
+  });
+
+  // The reason the approach step runs beside the summary steps rather than after them: the
+  // rolling prior-knowledge chain sets the depth, and approach calls fill the slots it leaves
+  // idle.
+  it("adds almost no rounds for the approach step's calls", async () => {
+    const problems = Array.from({length: UNIT_SUMMARY_HARD_MAX_PROBLEMS}, (_, i) => problem(`1.${i + 1}`));
+    const {generateText, observed} = instrumentedClient(2);
+    await runUnitSummaryGeneration("branch", "unit", baseDeps(generateText, assembledUnit(problems)));
+
+    // Digest rounds, then one prior-knowledge call per problem after the first, then the overview.
+    const digestRounds = Math.ceil(problems.length / UNIT_SUMMARY_CONCURRENCY_LIMIT);
+    const withoutApproach = digestRounds + (problems.length - 1) + 1;
+    expect(observed.rounds).toBeLessThanOrEqual(withoutApproach + 2);
   });
 });

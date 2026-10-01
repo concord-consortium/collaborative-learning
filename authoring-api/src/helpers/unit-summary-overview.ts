@@ -4,6 +4,7 @@
 // working on an earlier problem.
 import {UNIT_SUMMARY_OVERVIEW_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
+import {ConcurrencyLimiter} from "./concurrency";
 import {chunkMarkdown, labelDigest} from "./unit-summary-digest";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS} from "./unit-summary-config";
 import {generateWithLengthLimit} from "./unit-summary-length-limit";
@@ -27,6 +28,8 @@ const COMBINE_OVERVIEWS_INSTRUCTIONS =
 export interface OverviewOptions {
   client: UnitSummaryOpenAIClient;
   model: string;
+  // The overview runs at the end of the prior-knowledge chain, so it shares that budget.
+  limiter?: ConcurrencyLimiter;
 }
 
 export async function generateOverview(
@@ -38,10 +41,8 @@ export async function generateOverview(
       return await callOverview(allDigestsText, options);
     }
 
-    // Sequential, not concurrent: the overview call only ever runs once per generation (never
-    // alongside another oversized overview), so there is no shared concurrency budget to protect
-    // here the way there is for per-problem digests -- but keeping it simple and sequential costs
-    // nothing, since this path is rare (only very large units trigger it).
+    // Sequential rather than concurrent: only very large units reach this path, so the simpler
+    // loop costs nothing.
     const chunks = chunkMarkdown(allDigestsText, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
     const chunkOverviews: string[] = [];
     for (const chunk of chunks) {
@@ -54,19 +55,23 @@ export async function generateOverview(
   }
 }
 
-function callOverview(input: string, {client, model}: OverviewOptions): Promise<string> {
-  return generateWithLengthLimit({
+function callOverview(input: string, {client, model, limiter}: OverviewOptions): Promise<string> {
+  const call = () => generateWithLengthLimit({
     client, model, instructions: OVERVIEW_INSTRUCTIONS, input,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
     fieldName: "overview",
   });
+  return limiter ? limiter.run(call) : call();
 }
 
-function callCombineOverviews(chunkOverviews: string[], {client, model}: OverviewOptions): Promise<string> {
+function callCombineOverviews(
+  chunkOverviews: string[], {client, model, limiter}: OverviewOptions
+): Promise<string> {
   const input = chunkOverviews.map((overview, i) => `Part ${i + 1}: ${overview}`).join("\n\n");
-  return generateWithLengthLimit({
+  const call = () => generateWithLengthLimit({
     client, model, instructions: COMBINE_OVERVIEWS_INSTRUCTIONS, input,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
     fieldName: "overview",
   });
+  return limiter ? limiter.run(call) : call();
 }

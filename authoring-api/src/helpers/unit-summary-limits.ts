@@ -6,7 +6,7 @@ import {UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_DIGEST_MAX_
   from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {
-  UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
+  fitsOneCall, UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
   UNIT_SUMMARY_MODE_SWITCH_PROBLEM_COUNT,
 } from "./unit-summary-config";
 
@@ -30,14 +30,23 @@ export interface UnitSizeCheck {
 // digest step's total input is bounded by the assembled Markdown itself (chunking splits a large
 // problem across more calls; it does not reduce how much of that problem's text is sent overall).
 // The overview call sees every digest once. Rolling-mode prior knowledge is linear: each call
-// sees one prior priorKnowledge plus one digest.
+// sees one prior priorKnowledge plus one digest. The approach step reads each problem's own
+// Markdown, or its digest where the problem is too long to send in one call.
+// Like the rest of the estimate, this counts one attempt per call and leaves out the
+// instructions, so it is a floor rather than a worst case.
 export function checkUnitSize(problems: AssembledProblem[]): UnitSizeCheck {
   const problemCount = problems.length;
   const totalMarkdownChars = problems.reduce((sum, p) => sum + p.markdown.length, 0);
   const overviewInputChars = problemCount * UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS;
+  const approachInputChars = problems.reduce(
+    (sum, p) => sum + (fitsOneCall(p.markdown.length) ?
+      p.markdown.length :
+      UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS), 0
+  );
   const rollingPriorKnowledgeInputChars =
     problemCount * (UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS + UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS);
-  const estimatedAggregateInputChars = totalMarkdownChars + overviewInputChars + rollingPriorKnowledgeInputChars;
+  const estimatedAggregateInputChars =
+    totalMarkdownChars + overviewInputChars + approachInputChars + rollingPriorKnowledgeInputChars;
 
   const ok = problemCount <= UNIT_SUMMARY_HARD_MAX_PROBLEMS &&
     estimatedAggregateInputChars <= UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS;

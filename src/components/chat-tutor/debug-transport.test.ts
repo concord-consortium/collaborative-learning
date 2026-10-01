@@ -1,6 +1,8 @@
 import { DebugTransport } from "./debug-transport";
 import { ChatTurn } from "./transport";
-import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "../../../shared/unit-summary-types";
+import {
+  PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "../../../shared/unit-summary-types";
 
 function makeTransport(getUnitContext?: () => string | undefined) {
   const transport = new DebugTransport({
@@ -18,35 +20,39 @@ function segmentTexts(turn: ChatTurn, kind: "note" | "payload"): string[] {
 }
 
 describe("DebugTransport unit-context segments", () => {
-  it("with a unit context available, the opening dry run and the first send both attach the " +
-     "instruction and a THE UNIT payload", async () => {
+  it("with a unit context available, the opening dry run and the first send both attach both " +
+     "instructions and a THE UNIT payload", async () => {
     const { transport, turns } = makeTransport(() => "This problem (1.1): digest one.");
 
     const openingTurn = turns()[0];
     expect(segmentTexts(openingTurn, "payload")).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(segmentTexts(openingTurn, "payload")).toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(segmentTexts(openingTurn, "payload")).toContain("This problem (1.1): digest one.");
 
     await transport.sendUserMessage("hi");
     const sendTurn = turns().at(-1)!;
     expect(segmentTexts(sendTurn, "payload")).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(segmentTexts(sendTurn, "payload")).toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(segmentTexts(sendTurn, "payload")).toContain("This problem (1.1): digest one.");
   });
 
-  it("with no unit context, the instruction is still present but THE UNIT is the unavailable note",
+  it("with no unit context, both instructions are still present but THE UNIT is the unavailable note",
     async () => {
       const { transport, turns } = makeTransport(() => undefined);
 
       const openingTurn = turns()[0];
       expect(segmentTexts(openingTurn, "payload")).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+      expect(segmentTexts(openingTurn, "payload")).toContain(PROBLEM_APPROACH_INSTRUCTION);
       expect(segmentTexts(openingTurn, "note").some(t => t.includes("THE UNIT unavailable"))).toBe(true);
 
       await transport.sendUserMessage("hi");
       const sendTurn = turns().at(-1)!;
       expect(segmentTexts(sendTurn, "payload")).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+      expect(segmentTexts(sendTurn, "payload")).toContain(PROBLEM_APPROACH_INSTRUCTION);
       expect(segmentTexts(sendTurn, "note").some(t => t.includes("THE UNIT not attached"))).toBe(true);
     });
 
-  it("after LEFT is installed, a later send attaches neither the instruction nor THE UNIT", async () => {
+  it("after LEFT is installed, a later send attaches neither instruction nor THE UNIT", async () => {
     const { transport, turns } = makeTransport(() => "digest");
 
     await transport.sendUserMessage("first message installs LEFT");
@@ -54,6 +60,7 @@ describe("DebugTransport unit-context segments", () => {
 
     const secondSendTurn = turns().at(-1)!;
     expect(segmentTexts(secondSendTurn, "payload")).not.toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(segmentTexts(secondSendTurn, "payload")).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(segmentTexts(secondSendTurn, "payload")).not.toContain("digest");
     expect(secondSendTurn.text).not.toContain("THE UNIT");
   });

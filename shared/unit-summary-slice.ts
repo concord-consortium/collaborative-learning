@@ -6,7 +6,11 @@
 // The compatibility check below compares ordinal and title only, not content -- see
 // docs/unit-summary-consumers.md for what that misses.
 import { escapeHtmlText } from "./escape-for-html";
-import { IUnitSummary, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "./unit-summary-types";
+import {
+  IUnitSummary, IUnitSummaryEntry, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION,
+  UNIT_SUMMARY_PROBLEM_APPROACHES, UnitSummaryProblemApproach
+} from "./unit-summary-types";
 
 export interface ILiveProblem {
   ordinal: string;
@@ -23,6 +27,10 @@ export interface IUnitSummarySlice {
   currentDigest: string;  // entry N
   nextOrdinal?: string;   // undefined on the unit's last problem
   nextDigest?: string;
+  // Entry N's approach only, never N+1's: a consumer that saw the next problem's approach could
+  // apply it early, which is the contradiction this exists to prevent.
+  currentApproach?: UnitSummaryProblemApproach;
+  currentApproachGuidance?: string;
 }
 
 /**
@@ -67,19 +75,41 @@ export function unitSummarySlice(
   const currentEntry = summary.entries[currentIndex];
   const hasNext = currentIndex + 1 <= lastCheckedIndex;
 
+  const { approach, approachGuidance } = checkedApproach(currentEntry);
+
   return {
     currentOrdinal,
     priorKnowledge: currentEntry.priorKnowledge,
     currentDigest: currentEntry.problemDigest,
     nextOrdinal: hasNext ? liveProblems[currentIndex + 1].ordinal : undefined,
     nextDigest: hasNext ? summary.entries[currentIndex + 1].problemDigest : undefined,
+    currentApproach: approach,
+    currentApproachGuidance: approachGuidance,
   };
 }
 
 /**
- * The prompt text every AI consumer sends for a slice. One place, one wording. Does not
- * include UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION -- each consumer installs that separately, so it is
- * present even on turns where no slice applies.
+ * A hand-edited content.json never goes through validateUnitSummary, and these fields reach the
+ * model as prose, so an unchecked value would be sent verbatim. Anything that would fail
+ * validation is dropped here, costing only the approach line.
+ */
+function checkedApproach(entry: IUnitSummaryEntry): {
+  approach?: UnitSummaryProblemApproach;
+  approachGuidance?: string;
+} {
+  const approach = entry.approach;
+  if (!(UNIT_SUMMARY_PROBLEM_APPROACHES as readonly unknown[]).includes(approach)) return {};
+
+  const guidance = entry.approachGuidance;
+  const guidanceOk = typeof guidance === "string" &&
+    guidance.length <= UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS;
+  return { approach, approachGuidance: guidanceOk ? guidance : undefined };
+}
+
+/**
+ * The prompt text every AI consumer sends for a slice. One place, one wording. Does not include
+ * the code-level instructions -- each consumer installs those separately, so they are present
+ * even on turns where no slice applies.
  */
 export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
   const lines: string[] = [];
@@ -87,6 +117,12 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
     lines.push(`What the student should already know entering this problem: ${slice.priorKnowledge}`);
   }
   lines.push(`This problem (${slice.currentOrdinal}): ${slice.currentDigest}`);
+  const approach = approachLine(
+    slice.currentOrdinal, slice.currentApproach, slice.currentApproachGuidance
+  );
+  if (approach) {
+    lines.push(approach);
+  }
   if (slice.nextOrdinal !== undefined && slice.nextDigest !== undefined) {
     lines.push(`The next problem (${slice.nextOrdinal}): ${slice.nextDigest}`);
   }
@@ -94,11 +130,33 @@ export function formatUnitSummarySlice(slice: IUnitSummarySlice): string {
 }
 
 /**
- * The code-level instruction prefixed to every system message, unconditionally, so an
- * author-configured systemPrompt cannot omit it. Shared across consumers so they cannot drift.
+ * The one wording of the approach line, shared by the slice every AI consumer sends and by the
+ * authoring panel's Forever Learning export, which reaches a model the same way by hand.
+ *
+ * "unclear" produces no line. The model then falls back to the standing rule and the problem text,
+ * rather than being told the problem is vague.
  */
-export function withLookaheadInstruction(systemPrompt: string): string {
-  return `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${systemPrompt}`;
+export function approachLine(
+  ordinal: string, approach: UnitSummaryProblemApproach | undefined, guidance: string | undefined
+): string | undefined {
+  if (!approach || approach === "unclear") {
+    return undefined;
+  }
+  const suffix = guidance ? ` ${guidance}` : "";
+  return `How this problem asks students to work (${ordinal}): ${approach}.${suffix}`;
+}
+
+/**
+ * Prefixed to every system message, unconditionally, so an author-configured systemPrompt cannot
+ * omit them. The look-ahead instruction is the same for every subject; the approach instruction is
+ * worded for a single student or a whole class.
+ */
+export function withCurriculumInstructions(
+  systemPrompt: string, subject: "the student" | "the class"
+): string {
+  const approachInstruction =
+    subject === "the class" ? PROBLEM_APPROACH_INSTRUCTION_CLASS : PROBLEM_APPROACH_INSTRUCTION;
+  return `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${approachInstruction}\n\n${systemPrompt}`;
 }
 
 /**

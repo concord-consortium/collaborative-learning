@@ -38,12 +38,18 @@
   .unit-summary-table {
     border-collapse: collapse;
     margin-bottom: 16px;
+    // Without fixed layout each cell's textarea contributes its own intrinsic width, and the
+    // four columns together are wider than the panel.
+    table-layout: fixed;
     width: 100%;
 
     th, td {
       padding: 8px 12px;
       text-align: left;
       vertical-align: top;
+      // Overrides the config panel's generic table rule, which sets nowrap for its small
+      // key/value tables. This table holds prose in every column and must wrap.
+      white-space: normal;
     }
 
     th {
@@ -51,8 +57,37 @@
       font-weight: 600;
     }
 
+    // On the header cells because table-layout: fixed takes the column widths from the first row.
+    th:first-child {
+      width: 16%;
+    }
+
+    th:not(:first-child) {
+      width: 28%;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #999;
+    }
+
+    // The warning stays in the DOM so its live region exists before there is a message to
+    // announce. With no message it would still take a line's height, so collapse it.
+    p.approach-warning:empty {
+      display: none;
+    }
+
     td textarea {
+      // box-sizing so the padding stays inside the column fixed layout assigned.
+      box-sizing: border-box;
       width: 100%;
+    }
+
+    td.approach-cell {
+      select {
+        box-sizing: border-box;
+        margin-bottom: 4px;
+        width: 100%;
+      }
     }
   }
 

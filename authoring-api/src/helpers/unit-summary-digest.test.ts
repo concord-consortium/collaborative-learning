@@ -213,6 +213,81 @@ describe("generateProblemDigests", () => {
   });
 });
 
+// A long problem is digested chunk by chunk and then combined, so a section asking students to
+// try many things and one asking them to build a single thing can land in different chunks. The
+// approach step reads only the combined digest, so each section's one-versus-many statement has
+// to survive both stages. A fake client checks the wiring, not whether a real model obeys.
+describe("a chunked problem whose sections ask for different things", () => {
+  // Each part fits a chunk on its own, and the two together do not, so the split falls between
+  // them -- one section per chunk, which is the case the combine step has to survive.
+  const filler = "x".repeat(Math.floor(UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS * 0.6));
+  const divergentPart = `Section: Initial Challenge. Sketch as many gripper designs as you can. ${filler}`;
+  const convergentPart = `Section: What If. Pick one design and improve it. ${filler}`;
+  const mixedMarkdown = `${divergentPart}\n\n${convergentPart}`;
+
+  function runDigest(generateText: jest.Mock) {
+    return generateProblemDigests(
+      [problem("1.1", mixedMarkdown)], {client: fakeClient(generateText), model: "test-model"}
+    );
+  }
+
+  it("digests each chunk separately and feeds every chunk digest to one combine call", async () => {
+    const generateText = jest.fn()
+      .mockResolvedValueOnce("chunk digest: many designs")
+      .mockResolvedValueOnce("chunk digest: one design")
+      .mockResolvedValueOnce("combined digest");
+    const [digest] = await runDigest(generateText);
+
+    const requests = calls(generateText);
+    expect(requests).toHaveLength(3);
+    // The two chunks are split between calls; neither sees the whole problem.
+    expect(requests[0].input).toContain("Sketch as many gripper designs");
+    expect(requests[0].input).not.toContain("Pick one design");
+    expect(requests[1].input).toContain("Pick one design");
+    expect(requests[1].input).not.toContain("Sketch as many gripper designs");
+    // The combine call sees both chunk digests and nothing else.
+    expect(requests[2].input).toContain("chunk digest: many designs");
+    expect(requests[2].input).toContain("chunk digest: one design");
+    expect(digest).toBe("combined digest");
+  });
+
+  it("tells each digest call to record whether a section asks for one thing or many", async () => {
+    const generateText = jest.fn().mockResolvedValue("a digest");
+    await runDigest(generateText);
+    const [firstChunk] = calls(generateText);
+    expect(firstChunk.instructions).toMatch(/several DIFFERENT ideas, designs, methods or versions/);
+    // The distinction that matters: a list of steps or questions is not several ideas.
+    expect(firstChunk.instructions).toMatch(/counts as a single idea, not as several/);
+    expect(firstChunk.instructions).toMatch(/asks students for nothing, say that it sets no task/);
+  });
+
+  it("tells the combine call to keep each section's one-versus-many statement", async () => {
+    const generateText = jest.fn().mockResolvedValue("a digest");
+    await runDigest(generateText);
+    const combine = calls(generateText).at(-1)!;
+    expect(combine.instructions).toMatch(/Keep every section named in the parts/);
+    expect(combine.instructions).toMatch(/several different ideas or versions of the same thing/);
+    expect(combine.instructions).toMatch(/do not merge sections that ask for different things/);
+  });
+
+  // The shorten call rewrites a whole digest with only a character budget to go on unless it is
+  // told what to protect.
+  it("carries the preserve note into a forced shorten call", async () => {
+    const overLong = "y".repeat(UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS + 50);
+    const generateText = jest.fn()
+      // chunk 1 comes back too long, then its shorten call, then chunk 2 and the combine call.
+      .mockResolvedValueOnce(overLong)
+      .mockResolvedValueOnce("shortened")
+      .mockResolvedValue("a digest");
+    await runDigest(generateText);
+
+    const shorten = calls(generateText)[1];
+    expect(shorten.instructions).toMatch(/too long for where it will be used/);
+    expect(shorten.instructions).toMatch(/Keep every section name/);
+    expect(shorten.instructions).toMatch(/several different ideas or versions of the same thing/);
+  });
+});
+
 describe("chunkMarkdown", () => {
   it("keeps a chunk boundary between paragraphs where possible", () => {
     const chunks = chunkMarkdown(`${"A".repeat(10)}\n\n${"B".repeat(10)}`, 15);

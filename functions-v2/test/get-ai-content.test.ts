@@ -1,7 +1,8 @@
 import {Timestamp} from "firebase-admin/firestore";
 import {DocumentSnapshot} from "firebase-functions/v2/firestore";
 import {buildSystemMessageText, isCachedContentUpToDate, PROMPT_POLICY_VERSION} from "../src/get-ai-content";
-import {UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION} from "../../shared/unit-summary-types";
+import {PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}
+  from "../../shared/unit-summary-types";
 
 // isCachedContentUpToDate and buildSystemMessageText are pure functions over plain data, so these
 // are mocked-Firestore tests: fake DocumentSnapshot-shaped objects, no emulator involved.
@@ -27,6 +28,14 @@ describe("isCachedContentUpToDate", () => {
   it("regenerates when the cached promptPolicyVersion is older than the current one", () => {
     const classInfo = fakeSnapshot(true, {});
     const content = contentSnapshot({promptPolicyVersion: PROMPT_POLICY_VERSION - 1});
+    expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
+  });
+
+  // The literal 1, not PROMPT_POLICY_VERSION - 1, which would stop covering version 1 as soon as
+  // the version advances again.
+  it("regenerates a cache written under policy version 1", () => {
+    const classInfo = fakeSnapshot(true, {});
+    const content = contentSnapshot({promptPolicyVersion: 1});
     expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
   });
 
@@ -63,13 +72,22 @@ describe("buildSystemMessageText", () => {
     expect(buildSystemMessageText("").startsWith(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION)).toBe(true);
   });
 
+  it("carries the student-worded approach instruction regardless of systemPrompt", () => {
+    expect(buildSystemMessageText("You are a pirate.")).toContain(PROBLEM_APPROACH_INSTRUCTION);
+    expect(buildSystemMessageText(undefined)).toContain(PROBLEM_APPROACH_INSTRUCTION);
+    expect(buildSystemMessageText("")).toContain(PROBLEM_APPROACH_INSTRUCTION);
+  });
+
   it("falls back to the default persona when no systemPrompt is given", () => {
     expect(buildSystemMessageText(undefined)).toContain("You are a helpful, collaborative student.");
   });
 
-  it("uses the author's systemPrompt when given, after the instruction", () => {
+  it("uses the author's systemPrompt when given, after both instructions", () => {
     const text = buildSystemMessageText("You are a pirate.");
     expect(text).toContain("You are a pirate.");
     expect(text.indexOf(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION)).toBeLessThan(text.indexOf("You are a pirate."));
+    expect(text.indexOf(PROBLEM_APPROACH_INSTRUCTION)).toBeLessThan(text.indexOf("You are a pirate."));
+    expect(text.indexOf(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION))
+      .toBeLessThan(text.indexOf(PROBLEM_APPROACH_INSTRUCTION));
   });
 });

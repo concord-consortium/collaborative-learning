@@ -4,7 +4,10 @@
 import {UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
 import {mapWithConcurrency} from "./concurrency";
-import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS}
+import {
+  fitsOneCall, UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT,
+  UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS,
+}
   from "./unit-summary-config";
 import {generateWithLengthLimit} from "./unit-summary-length-limit";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
@@ -15,9 +18,21 @@ const DIGEST_INSTRUCTIONS =
   "the unit, converted to Markdown. The problem is divided into sections, each marked with a " +
   "heading of the form \"# Section: <name>\" (for example \"# Section: Investigate\"). Write a " +
   "concise digest of what this problem covers and has students do, covering EVERY section named " +
-  "in the input in roughly one or two sentences each -- do not stop after the first section. Stay " +
+  "in the input in roughly one or two sentences each -- do not stop after the first section. For " +
+  "each section, say in a few words whether it asks students for several DIFFERENT ideas, " +
+  "designs, methods or versions of the same thing, or for a single idea, design or answer. " +
+  "Working through several steps, answering several questions, or producing several separate " +
+  "pieces of work counts as a single idea, not as several -- what matters is whether students " +
+  "are asked to come up with alternatives. If a section only supplies tools, reference material " +
+  "or instructions and asks students for nothing, say that it sets no task. Stay " +
   `within ${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters total. Only use information in the ` +
   "provided content -- do not infer or reference anything else, including other problems in the unit.";
+
+// The approach step reads a digest to decide how its problem asks students to work, so shortening
+// must not drop that. Passed with the length limit by every call that produces a digest.
+const DIGEST_PRESERVE_NOTE =
+  "Keep every section name, and keep whether each section asks students for several different " +
+  "ideas or versions of the same thing, for a single idea, or for nothing at all.";
 
 // A problem can have no extractable text (an image-only section, a not-yet-authored placeholder,
 // etc.), which would otherwise send OpenAI an empty `input` and get back a 400. Skip the call and
@@ -42,9 +57,13 @@ export function labelDigest(problem: AssembledProblem, digest: string): string {
 const COMBINE_DIGESTS_INSTRUCTIONS =
   "You are given several partial digests describing different parts of the SAME curriculum " +
   "problem (it was split into parts only because its content was too long for one request). " +
-  "Combine them into a single digest, in 3 to 5 sentences and no more than " +
-  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters, of what this problem covers and has ` +
-  "students do. Do not mention that it was split into parts.";
+  "Combine them into a single digest of what this problem covers and has students do, as briefly " +
+  "as you can while still covering every section, and no more than " +
+  `${UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS} characters. ` +
+  "Keep every section named in the parts, and keep what each part said about " +
+  "whether a section asks students for several different ideas or versions of the same thing, " +
+  "for a single idea, or for nothing at all -- do not merge sections that ask for different " +
+  "things into one general statement. Do not mention that it was split into parts.";
 
 export interface DigestOptions {
   client: UnitSummaryOpenAIClient;
@@ -69,7 +88,7 @@ export async function generateProblemDigests(
 // problemHash. Two empty problems can share a problemHash too, but digestOneProblem checks for
 // blank content before it ever looks at this map, so an empty problem never actually reaches the
 // "same content as problem X" message this produces.
-function findDuplicates(problems: AssembledProblem[]): Map<string, string> {
+export function findDuplicates(problems: AssembledProblem[]): Map<string, string> {
   const firstOrdinalByHash = new Map<string, string>();
   const duplicateOfByOrdinal = new Map<string, string>();
   for (const problem of problems) {
@@ -93,7 +112,7 @@ async function digestOneProblem(
     if (duplicateOfOrdinal) {
       return duplicateProblemDigest(duplicateOfOrdinal);
     }
-    if (problem.markdown.length <= UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS) {
+    if (fitsOneCall(problem.markdown.length)) {
       return await callDigest(problem.markdown, options);
     }
     const chunks = chunkMarkdown(problem.markdown, UNIT_SUMMARY_DIGEST_INPUT_BUDGET_CHARS);
@@ -115,7 +134,7 @@ function callDigest(markdown: string, {client, model}: DigestOptions): Promise<s
   return generateWithLengthLimit({
     client, model, instructions: DIGEST_INSTRUCTIONS, input: markdown,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
-    fieldName: "digest",
+    fieldName: "digest", preserve: DIGEST_PRESERVE_NOTE,
   });
 }
 
@@ -124,7 +143,7 @@ function callCombineDigests(chunkDigests: string[], {client, model}: DigestOptio
   return generateWithLengthLimit({
     client, model, instructions: COMBINE_DIGESTS_INSTRUCTIONS, input,
     timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS, maxChars: UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS,
-    fieldName: "digest",
+    fieldName: "digest", preserve: DIGEST_PRESERVE_NOTE,
   });
 }
 

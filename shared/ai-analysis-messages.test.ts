@@ -3,9 +3,13 @@ import {
   Agreements, IAiPrompt, PeerComment, RelatedSummary, buildImageMessages, buildMixedMessages,
   buildSummaryMessages, buildZodResponseSchema, defaultAiPrompt
 } from "./ai-analysis-messages";
-import { fencedUnitContext, withLookaheadInstruction } from "./unit-summary-slice";
+import { fencedUnitContext, withCurriculumInstructions } from "./unit-summary-slice";
+import {
+  PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "./unit-summary-types";
 
-const kSystemMessage = withLookaheadInstruction("You are a master teacher.");
+const kSystemMessage = withCurriculumInstructions("You are a master teacher.", "the student");
 
 const fullPrompt: IAiPrompt = {
   systemPrompt: "You are a master teacher.",
@@ -500,11 +504,23 @@ describe("ai-analysis-messages", () => {
     });
   });
 
-  // Every builder: the instruction is present whether or not unitContext is given (it's
+  // Every builder: the instructions are present whether or not unitContext is given (they're
   // unconditional, code-level), and when unitContext is given it's the last part -- fenced, after
   // whatever student content (summary, images) the message already carries.
   describe("unitContext", () => {
     const unitContext = "This problem (1.1): digest one.";
+
+    it.each([
+      ["buildImageMessages", () => buildImageMessages(fullPrompt, "https://example.com/image.png")],
+      ["buildSummaryMessages", () => buildSummaryMessages(fullPrompt, "The student drew a box.", [])],
+      ["buildMixedMessages", () => buildMixedMessages(
+        fullPrompt, "The student drew a box.", [], "https://example.com/doc.png")],
+    ])("%s: the system message carries the student wording, not the class wording", (_name, build) => {
+      const systemMessage = build()[0].content as string;
+      expect(systemMessage).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+      expect(systemMessage).toContain(PROBLEM_APPROACH_INSTRUCTION);
+      expect(systemMessage).not.toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
+    });
 
     it("buildImageMessages: no unitContext given, no curriculum-context part", () => {
       const messages = buildImageMessages(fullPrompt, "https://example.com/image.png");

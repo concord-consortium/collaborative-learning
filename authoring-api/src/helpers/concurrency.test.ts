@@ -1,94 +1,74 @@
-import {mapWithConcurrency} from "./concurrency";
+import {createConcurrencyLimiter, mapWithConcurrency} from "./concurrency";
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((r) => {
-    resolve = r;
-  });
-  return {promise, resolve};
+function tick(ms = 1): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-describe("mapWithConcurrency", () => {
-  it("preserves each result at its original index regardless of completion order", async () => {
-    const order = [30, 10, 20];
-    const result = await mapWithConcurrency(order, 3, async (ms) => {
-      await new Promise((resolve) => setTimeout(resolve, ms));
-      return ms;
-    });
-    expect(result).toEqual([30, 10, 20]);
+// Counts how many of `fn` are running at once across everything sharing the tracker.
+function tracker() {
+  const state = {inFlight: 0, peak: 0, completed: 0};
+  return {
+    state,
+    work: async () => {
+      state.inFlight++;
+      state.peak = Math.max(state.peak, state.inFlight);
+      await tick();
+      state.inFlight--;
+      state.completed++;
+      return state.completed;
+    },
+  };
+}
+
+describe("createConcurrencyLimiter", () => {
+  it("holds everything it is given to the limit, and completes all of it", async () => {
+    const limiter = createConcurrencyLimiter(3);
+    const {state, work} = tracker();
+    await Promise.all(Array.from({length: 20}, () => limiter.run(work)));
+    expect(state.peak).toBe(3);
+    expect(state.completed).toBe(20);
   });
 
-  it("never runs more than `limit` calls at once", async () => {
-    const items = [1, 2, 3, 4, 5, 6];
-    let inFlight = 0;
-    let maxInFlight = 0;
-    await mapWithConcurrency(items, 2, async (item) => {
-      inFlight++;
-      maxInFlight = Math.max(maxInFlight, inFlight);
-      await new Promise((resolve) => setTimeout(resolve, 5));
-      inFlight--;
-      return item;
-    });
-    expect(maxInFlight).toBeLessThanOrEqual(2);
-  });
-
-  it("runs every item even when the limit exceeds the item count", async () => {
-    const items = [1, 2];
-    const result = await mapWithConcurrency(items, 10, async (item) => item * 2);
-    expect(result).toEqual([2, 4]);
-  });
-
-  it("rejects if any call rejects", async () => {
-    const items = [1, 2, 3];
-    await expect(mapWithConcurrency(items, 2, async (item) => {
-      if (item === 2) throw new Error("boom");
-      return item;
+  it("frees the slot when a call throws, rather than losing it", async () => {
+    const limiter = createConcurrencyLimiter(1);
+    await expect(limiter.run(async () => {
+      throw new Error("boom");
     })).rejects.toThrow("boom");
+    // A lost slot would leave this waiting forever.
+    expect(await limiter.run(async () => "after")).toBe("after");
   });
 
-  it("starts a new item as soon as a slot frees up, not only when the whole current batch finishes", async () => {
-    // A batching (rather than pooled) implementation would wait for BOTH of the first two items
-    // before starting a third. Proven here with deferred promises rather than real timers, so it
-    // can't flake under a busy event loop: item 3 must start while item 1 is still pending, driven
-    // purely by item 2 finishing.
-    const started: number[] = [];
-    const slow = deferred<void>();
-    const fast = deferred<void>();
-    const p = mapWithConcurrency([1, 2, 3], 2, async (item) => {
-      started.push(item);
-      if (item === 1) await slow.promise;
-      if (item === 2) await fast.promise;
-    });
-
-    // Let the pool start both items 1 and 2 -- both slots are now held.
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(started).toEqual([1, 2]);
-
-    // Freeing item 2's slot starts item 3, even though item 1 (from the same "batch" as item 2)
-    // is still pending.
-    fast.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(started).toEqual([1, 2, 3]);
-
-    slow.resolve();
-    await p;
+  // Two steps each holding their own pool of 8 would put 16 calls in flight.
+  it("bounds two maps sharing it, where two separate pools would not", async () => {
+    const shared = tracker();
+    const limiter = createConcurrencyLimiter(8);
+    const items = Array.from({length: 24}, (_, i) => i);
+    await Promise.all([
+      mapWithConcurrency(items, 8, shared.work, limiter),
+      mapWithConcurrency(items, 8, shared.work, limiter),
+    ]);
+    expect(shared.state.peak).toBeLessThanOrEqual(8);
+    expect(shared.state.completed).toBe(48);
   });
 
-  it("does not start work eagerly beyond the limit while a slot is unavailable", async () => {
-    const started: number[] = [];
-    const first = deferred<void>();
-    const p = mapWithConcurrency([1, 2, 3], 1, async (item) => {
-      started.push(item);
-      if (item === 1) await first.promise;
+  it("without a limiter, the same two maps do exceed one pool's worth", async () => {
+    const shared = tracker();
+    const items = Array.from({length: 24}, (_, i) => i);
+    await Promise.all([
+      mapWithConcurrency(items, 8, shared.work),
+      mapWithConcurrency(items, 8, shared.work),
+    ]);
+    expect(shared.state.peak).toBeGreaterThan(8);
+  });
+});
+
+describe("mapWithConcurrency", () => {
+  it("keeps each result at its own index regardless of completion order", async () => {
+    const delays = [5, 1, 3];
+    const results = await mapWithConcurrency(delays, 3, async (ms, i) => {
+      await tick(ms);
+      return `item ${i}`;
     });
-    // Only the first item should have started while the single slot is held.
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(started).toEqual([1]);
-    first.resolve();
-    await p;
-    expect(started).toEqual([1, 2, 3]);
+    expect(results).toEqual(["item 0", "item 1", "item 2"]);
   });
 });

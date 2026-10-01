@@ -1,13 +1,16 @@
-// Orchestrates the full unit-summary generation: assemble, size-check, digest, prior-knowledge,
-// overview, then validate. Kept separate from routes/generate-unit-summary.ts (the thin Express
-// handler that resolves the real secret/params and calls this) so it is testable with a fake
-// assembler and a fake OpenAI client -- neither Firebase nor Express needs to exist for a test.
+// Orchestrates the full unit-summary generation: assemble, size-check, digest, then the approach
+// step running alongside prior knowledge and the overview, then validate. Kept separate from
+// routes/generate-unit-summary.ts so it is testable with a fake assembler and a fake OpenAI
+// client, with no Firebase or Express.
 import {IUnitSummary, IUnitSummaryEntry, validateUnitSummary} from "../../../shared/unit-summary-types";
 import {AssembledUnit} from "./assemble-unit";
+import {createConcurrencyLimiter} from "./concurrency";
+import {generateProblemApproaches} from "./unit-summary-approach";
 import {generateProblemDigests} from "./unit-summary-digest";
 import {checkUnitSize, selectPriorKnowledgeMode} from "./unit-summary-limits";
 import {
-  UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS, UNIT_SUMMARY_OVERALL_DEADLINE_MS,
+  UNIT_SUMMARY_CONCURRENCY_LIMIT, UNIT_SUMMARY_HARD_MAX_AGGREGATE_INPUT_CHARS, UNIT_SUMMARY_HARD_MAX_PROBLEMS,
+  UNIT_SUMMARY_OVERALL_DEADLINE_MS,
 } from "./unit-summary-config";
 import {UnitSummaryOpenAIClient} from "./unit-summary-openai";
 import {generateOverview} from "./unit-summary-overview";
@@ -63,14 +66,36 @@ async function generateSteps(
 ): Promise<IUnitSummary> {
   const {client, digestModel, summaryModel} = deps;
 
+  // The digest step keeps its own pool and finishes first: everything below reads its output.
   const digests = await generateProblemDigests(assembled.problems, {client, model: digestModel});
-  const priorKnowledge = await generatePriorKnowledge(assembled.problems, digests, {client, model: summaryModel, mode});
-  const overview = await generateOverview(assembled.problems, digests, {client, model: summaryModel});
+
+  // One limiter for everything after the digests, so the approach step and the prior-knowledge /
+  // overview chain cannot exceed the total between them. They run side by side because in rolling
+  // mode prior knowledge is a chain of single calls, and the approach calls fill the slots that
+  // chain leaves idle.
+  const limiter = createConcurrencyLimiter(UNIT_SUMMARY_CONCURRENCY_LIMIT);
+  const summarySteps = async () => {
+    // The overview reads the digests, not the prior knowledge, but stays behind it in one chain
+    // so the side-by-side pair is the approach step and everything else.
+    const priorKnowledge = await generatePriorKnowledge(
+      assembled.problems, digests, {client, model: summaryModel, mode, limiter}
+    );
+    const overview = await generateOverview(
+      assembled.problems, digests, {client, model: summaryModel, limiter}
+    );
+    return {priorKnowledge, overview};
+  };
+  const [approaches, {priorKnowledge, overview}] = await Promise.all([
+    generateProblemApproaches(assembled.problems, digests, {client, model: digestModel, limiter}),
+    summarySteps(),
+  ]);
 
   const entries: IUnitSummaryEntry[] = assembled.problems.map((problem, i) => ({
     ordinal: problem.ordinal,
     priorKnowledge: priorKnowledge[i],
     problemDigest: digests[i],
+    approach: approaches[i].approach,
+    ...(approaches[i].approachGuidance ? {approachGuidance: approaches[i].approachGuidance} : {}),
   }));
 
   const summary: IUnitSummary = {

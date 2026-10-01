@@ -7,7 +7,7 @@ import {DocumentSnapshot} from "firebase-functions/v2/firestore";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
-import {withLookaheadInstruction} from "../../shared/unit-summary-slice";
+import {withCurriculumInstructions} from "../../shared/unit-summary-slice";
 import {validateUserContext} from "./user-context";
 
 // This function generates and returns tile content from an LLM.
@@ -24,14 +24,14 @@ const version = "1.0.0";
 
 const lockTimeout = 60 * 1000; // 1 minute
 
-// Bump whenever the code-level system message changes (the instruction below, or the default
+// Bump whenever the code-level system message changes (either instruction below, or the default
 // systemPrompt fallback) so a cached response generated under the old wording is regenerated
 // rather than reused. Written onto the cached content doc alongside prompt; compared in
 // isCachedContentUpToDate.
-export const PROMPT_POLICY_VERSION = 1;
+export const PROMPT_POLICY_VERSION = 2;
 
 export function buildSystemMessageText(systemPrompt: string | undefined): string {
-  return withLookaheadInstruction(systemPrompt || "You are a helpful, collaborative student.");
+  return withCurriculumInstructions(systemPrompt || "You are a helpful, collaborative student.", "the student");
 }
 
 function getClassInfoPath(firestoreRoot: string, unit: string, classHash: string): string {

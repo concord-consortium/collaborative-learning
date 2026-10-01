@@ -6,7 +6,10 @@
 import {APIConnectionTimeoutError, InternalServerError, RateLimitError} from "openai";
 import {UNIT_SUMMARY_RETRY_BACKOFF_MS, UNIT_SUMMARY_RETRY_COUNT} from "./unit-summary-config";
 
-function isRetryableError(error: unknown): boolean {
+// A failure of the connection or of OpenAI itself, as opposed to a usable response we then
+// rejected. Exported because a caller that degrades gracefully on a bad answer must still let an
+// outage through, rather than recording a label the curriculum did not produce.
+export function isTransportError(error: unknown): boolean {
   return error instanceof RateLimitError ||
     error instanceof InternalServerError ||
     error instanceof APIConnectionTimeoutError;
@@ -22,7 +25,7 @@ export async function callWithRetry<T>(call: () => Promise<T>): Promise<T> {
       return await call();
     } catch (error) {
       const attemptsLeft = attempt < UNIT_SUMMARY_RETRY_COUNT;
-      if (!isRetryableError(error) || !attemptsLeft) {
+      if (!isTransportError(error) || !attemptsLeft) {
         throw error;
       }
       await sleep(UNIT_SUMMARY_RETRY_BACKOFF_MS[attempt]);

@@ -4,7 +4,7 @@ import { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/re
 import {z} from "zod";
 import { escapeHtmlAttribute, escapeHtmlText } from "./escape-for-html";
 import { RatingValue } from "./shared";
-import { fencedUnitContext, withLookaheadInstruction } from "./unit-summary-slice";
+import { fencedUnitContext, withCurriculumInstructions } from "./unit-summary-slice";
 
 export interface IAiPrompt {
   systemPrompt: string;
@@ -269,7 +269,7 @@ export function buildImageMessages(
   return [
     {
       role: "system",
-      content: withLookaheadInstruction(aiPrompt.systemPrompt),
+      content: withCurriculumInstructions(aiPrompt.systemPrompt, "the student"),
     },
     {
       role: "user",
@@ -291,7 +291,7 @@ export function buildSummaryMessages(
   return [
     {
       role: "system",
-      content: withLookaheadInstruction(aiPrompt.systemPrompt),
+      content: withCurriculumInstructions(aiPrompt.systemPrompt, "the student"),
     },
     {
       role: "user",
@@ -329,7 +329,7 @@ export function buildMixedMessages(
   return [
     {
       role: "system",
-      content: withLookaheadInstruction(aiPrompt.systemPrompt),
+      content: withCurriculumInstructions(aiPrompt.systemPrompt, "the student"),
     },
     {
       role: "user",

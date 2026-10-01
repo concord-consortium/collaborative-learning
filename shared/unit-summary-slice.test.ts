@@ -1,7 +1,10 @@
-import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, IUnitSummary } from "./unit-summary-types";
+import {
+  IUnitSummary, PROBLEM_APPROACH_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION_CLASS,
+  UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "./unit-summary-types";
 import {
   fencedUnitContext, formatUnitSummarySlice, ILiveProblem, IUnitSummarySlice, unitSummarySlice,
-  withLookaheadInstruction,
+  withCurriculumInstructions,
 } from "./unit-summary-slice";
 
 const liveProblems: ILiveProblem[] = [
@@ -226,15 +229,32 @@ describe("formatUnitSummarySlice", () => {
     expect(text).not.toMatch(/nothing recorded/i);
   });
 
-  it("never includes the lookahead instruction text", () => {
+  it("never includes either code-level instruction's text", () => {
     const text = formatUnitSummarySlice(middleSlice);
     expect(text).not.toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
+    expect(text).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
   });
 });
 
-describe("withLookaheadInstruction", () => {
-  it("prefixes the instruction ahead of the given systemPrompt, separated by a blank line", () => {
-    expect(withLookaheadInstruction("x")).toBe(`${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\nx`);
+describe("withCurriculumInstructions", () => {
+  it("prefixes both instructions ahead of the given systemPrompt, separated by blank lines", () => {
+    expect(withCurriculumInstructions("x", "the student")).toBe(
+      `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION}\n\nx`
+    );
+  });
+
+  it("keeps both instructions when the systemPrompt is empty", () => {
+    expect(withCurriculumInstructions("", "the student")).toBe(
+      `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION}\n\n`
+    );
+  });
+
+  it("uses the class wording for \"the class\", and the same look-ahead instruction", () => {
+    const text = withCurriculumInstructions("x", "the class");
+    expect(text).toBe(
+      `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION_CLASS}\n\nx`
+    );
+    expect(text).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
   });
 });
 
@@ -256,5 +276,150 @@ describe("fencedUnitContext", () => {
     expect(text.slice(fenceStart)).toBe("<curriculum-context>\na &lt; b &amp; c\n</curriculum-context>");
     expect(text.endsWith("\n</curriculum-context>")).toBe(true);
     expect(text).not.toContain("a < b & c");
+  });
+});
+
+describe("the current problem's approach", () => {
+  function summaryWithApproaches(): IUnitSummary {
+    const summary = summaryFor(liveProblems);
+    summary.entries[1].approach = "convergent";
+    summary.entries[1].approachGuidance = "Students improve one design.";
+    summary.entries[2].approach = "divergent";
+    summary.entries[2].approachGuidance = "Students try many ideas.";
+    return summary;
+  }
+
+  it("copies entry N's approach into the slice", () => {
+    const slice = unitSummarySlice(summaryWithApproaches(), liveProblems, "1.2");
+    expect(slice?.currentApproach).toBe("convergent");
+    expect(slice?.currentApproachGuidance).toBe("Students improve one design.");
+  });
+
+  // A consumer that could see the next problem's approach might apply it early, which is the
+  // contradiction this prevents.
+  it("never copies entry N+1's approach, even though N+1's digest is in the slice", () => {
+    const slice = unitSummarySlice(summaryWithApproaches(), liveProblems, "1.2");
+    expect(slice?.nextDigest).toBe("digest for 1.3");
+    expect(slice?.currentApproach).not.toBe("divergent");
+    expect(slice?.currentApproachGuidance).not.toContain("many ideas");
+  });
+
+  it("leaves both fields undefined when entry N has no approach", () => {
+    const slice = unitSummarySlice(summaryFor(liveProblems), liveProblems, "1.2");
+    expect(slice?.currentApproach).toBeUndefined();
+    expect(slice?.currentApproachGuidance).toBeUndefined();
+  });
+
+  // A hand-edited content.json never goes through validateUnitSummary, and these values reach the
+  // model as prose, so the slice re-checks them. Each bad value costs only the approach line.
+  describe("values a hand-edited content.json could contain", () => {
+    function sliceWithEntry(overrides: Record<string, unknown>) {
+      const summary = summaryFor(liveProblems);
+      Object.assign(summary.entries[1], overrides);
+      return unitSummarySlice(summary, liveProblems, "1.2");
+    }
+
+    it("drops a label that is not one of the known four, including a miscased one", () => {
+      for (const bad of ["Convergent", "CONVERGENT", "exploratory", "", 7, null, {}]) {
+        const slice = sliceWithEntry({ approach: bad, approachGuidance: "Improve one design." });
+        expect(slice?.currentApproach).toBeUndefined();
+        expect(slice?.currentApproachGuidance).toBeUndefined();
+        // Only the approach is dropped; the rest of the slice still arrives.
+        expect(slice?.currentDigest).toBe("digest for 1.2");
+        expect(slice?.nextDigest).toBe("digest for 1.3");
+      }
+    });
+
+    it("drops guidance that is not text, but keeps a good label", () => {
+      for (const bad of [42, true, null, ["a"], { text: "a" }]) {
+        const slice = sliceWithEntry({ approach: "convergent", approachGuidance: bad });
+        expect(slice?.currentApproach).toBe("convergent");
+        expect(slice?.currentApproachGuidance).toBeUndefined();
+      }
+    });
+
+    it("drops guidance over the character limit, but keeps a good label", () => {
+      const slice = sliceWithEntry({
+        approach: "divergent",
+        approachGuidance: "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS + 1),
+      });
+      expect(slice?.currentApproach).toBe("divergent");
+      expect(slice?.currentApproachGuidance).toBeUndefined();
+    });
+
+    it("keeps guidance exactly at the limit", () => {
+      const guidance = "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS);
+      const slice = sliceWithEntry({ approach: "divergent", approachGuidance: guidance });
+      expect(slice?.currentApproachGuidance).toBe(guidance);
+    });
+
+    it("sends nothing about approach when the label was dropped", () => {
+      const slice = sliceWithEntry({ approach: "Convergent", approachGuidance: "Improve one." });
+      const text = formatUnitSummarySlice(slice!);
+      expect(text).not.toMatch(/asks students to work/);
+      expect(text).not.toContain("Convergent");
+      expect(text).not.toContain("Improve one.");
+    });
+  });
+
+  // An approach on an entry outside the checked prefix must not rescue an otherwise bad slice,
+  // and an approach anywhere must not break one.
+  it("does not change whether a slice is returned at all", () => {
+    const renamed = [...liveProblems];
+    renamed[0] = { ordinal: "1.1", title: "Renamed" };
+    expect(unitSummarySlice(summaryWithApproaches(), renamed, "1.2")).toBeUndefined();
+    expect(unitSummarySlice(summaryWithApproaches(), liveProblems, "1.2")).toBeDefined();
+  });
+});
+
+describe("formatUnitSummarySlice: the approach line", () => {
+  function sliceWith(
+    approach: IUnitSummarySlice["currentApproach"], guidance?: string
+  ): IUnitSummarySlice {
+    return {
+      currentOrdinal: "1.2",
+      priorKnowledge: "knows the basics",
+      currentDigest: "covers the middle topic",
+      nextOrdinal: "1.3",
+      nextDigest: "covers the next topic",
+      currentApproach: approach,
+      currentApproachGuidance: guidance,
+    };
+  }
+
+  it("puts the approach line after the current digest and before the next problem", () => {
+    const text = formatUnitSummarySlice(sliceWith("convergent", "Students improve one design."));
+    expect(text).toBe(
+      "What the student should already know entering this problem: knows the basics\n\n" +
+      "This problem (1.2): covers the middle topic\n\n" +
+      "How this problem asks students to work (1.2): convergent. Students improve one design.\n\n" +
+      "The next problem (1.3): covers the next topic"
+    );
+  });
+
+  it.each(["divergent", "convergent", "mixed"] as const)("names the label %s", (approach) => {
+    const text = formatUnitSummarySlice(sliceWith(approach, "Some guidance."));
+    expect(text).toContain(`How this problem asks students to work (1.2): ${approach}. Some guidance.`);
+  });
+
+  // Saying nothing leaves the standing rule and the problem text to do the work, rather than
+  // telling the model the problem is vague.
+  it("says nothing at all for unclear", () => {
+    const text = formatUnitSummarySlice(sliceWith("unclear", "Cannot tell."));
+    expect(text).not.toMatch(/asks students to work/);
+    expect(text).not.toContain("unclear");
+    expect(text).not.toContain("Cannot tell.");
+  });
+
+  it("says nothing when there is no approach, even if guidance somehow survived", () => {
+    expect(formatUnitSummarySlice(sliceWith(undefined))).not.toMatch(/asks students to work/);
+    expect(formatUnitSummarySlice(sliceWith(undefined, "Orphan guidance.")))
+      .not.toMatch(/asks students to work|Orphan guidance/);
+  });
+
+  it("writes the label alone when there is no guidance", () => {
+    const text = formatUnitSummarySlice(sliceWith("divergent"));
+    expect(text).toContain("How this problem asks students to work (1.2): divergent.");
+    expect(text).not.toContain("divergent. ");
   });
 });

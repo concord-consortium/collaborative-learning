@@ -6,7 +6,9 @@ import { dataUrlFor } from "../src/represent-image.js";
 import {
   buildImageMessages, buildMixedMessages, defaultAiPrompt
 } from "../../../shared/ai-analysis-messages.js";
-import { UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION } from "../../../shared/unit-summary-types.js";
+import {
+  PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION
+} from "../../../shared/unit-summary-types.js";
 import { makeImageRequest, makeTestPng, promptFromFile, testPricing } from "./helpers.js";
 
 const bytes = makeTestPng(960, 1420);
@@ -42,9 +44,10 @@ describe("image requests are built by the shared production builder", () => {
 
   it("sends the system prompt and the main prompt production sends", () => {
     const messages = build(hostedUrl).apiRequest.messages;
+    const instructions = `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${PROBLEM_APPROACH_INSTRUCTION}`;
     expect(messages[0]).toEqual({
       role: "system",
-      content: `${UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}\n\n${defaultAiPrompt.systemPrompt}`
+      content: `${instructions}\n\n${defaultAiPrompt.systemPrompt}`
     });
     expect((messages[1].content as any[])[0]).toEqual({ type: "text", text: defaultAiPrompt.mainPrompt });
   });
@@ -268,9 +271,8 @@ describe("a run configured the way it was before these dimensions existed keeps 
   // requests there — so they pin the key against what actually shipped rather than against whatever
   // this branch happens to produce.
   //
-  // UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION is prepended unconditionally to every system message and
-  // is part of every request key exactly as the prompt is, so the two pinned values below reflect
-  // that, the same way they reflect a reworded built-in prompt.
+  // Both instructions are prepended unconditionally to every system message and are part of every
+  // request key, so the pinned values below include them, as they would a reworded prompt.
   //
   // The prompt comes from the committed file rather than from `defaultAiPrompt`, which is the
   // built-in one and has since been reworded. A prompt is part of every request key, so a reworded
@@ -284,13 +286,13 @@ describe("a run configured the way it was before these dimensions existed keeps 
       generationSettings: { max_completion_tokens: 1024 }
     });
     expect(requestKeyFor(request))
-      .toBe("5ee12654ed366f4519b5ada4ac709d0f41d2e8aac0aa50310bf28fd4d49e3adf");
+      .toBe("de153c8a715fa445a5f8d8e8f7641195d8f8988ea481000e29d5349d6e39c6c9");
   });
 
   it("an image-only request's key does not move", () => {
     const request = build("https://images.example.test/shot.png",
       { aiPrompt: promptFromFile("categorize-design-default") });
     expect(requestKeyFor(request))
-      .toBe("1c2d487e8c5fa4172a3c0cbd796acd095ea6afdbc5455daf56ffa5ae71b5c284");
+      .toBe("5bfece79c72e10691d8c3a3e778f86ac51c2cc21f20723d54c2ad60ff68172b1");
   });
 });

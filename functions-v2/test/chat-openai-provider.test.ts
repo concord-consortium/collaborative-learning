@@ -7,7 +7,8 @@
 // provider is supposed to make.
 import {createOpenAIProvider} from "../src/chat/openai-provider";
 import * as openai from "../src/chat/openai";
-import {UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION} from "../../shared/unit-summary-types";
+import {PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}
+  from "../../shared/unit-summary-types";
 
 jest.mock("../src/chat/openai");
 
@@ -41,10 +42,11 @@ describe("createOpenAIProvider", () => {
     expect(result.assistantText).toBe("What do you notice about the sensor?");
     expect(result.parentUpdate.conversationId).toBe("conv_new");
     expect(result.parentUpdate.problemInstalled).toBe(true);
-    expect(installedItems()).toHaveLength(3);
+    expect(installedItems()).toHaveLength(4);
     expect(installedItems()[0]).toBe(kGeneric);
     expect(installedItems()[1]).toBe(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
-    expect(installedItems()[2]).toContain(kLeft);
+    expect(installedItems()[2]).toBe(PROBLEM_APPROACH_INSTRUCTION);
+    expect(installedItems()[3]).toContain(kLeft);
   });
 
   it("reuses the parent's conversation and skips the install once the problem is flagged", async () => {
@@ -68,9 +70,11 @@ describe("createOpenAIProvider", () => {
   it("leaves problemInstalled unset when LEFT is empty, keeping the recovery path open", async () => {
     const result = await provider().processTurn({}, {text: "hi", leftContext: JSON.stringify({sections: []})});
 
-    // the generic prompt and instruction still install; the problem does not, so a later turn
-    // re-attaches LEFT
-    expect(installedItems()).toEqual([kGeneric, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION]);
+    // the generic prompt and both instructions still install; the problem does not, so a later
+    // turn re-attaches LEFT
+    expect(installedItems()).toEqual([
+      kGeneric, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION, PROBLEM_APPROACH_INSTRUCTION,
+    ]);
     expect(result.parentUpdate.problemInstalled).toBeUndefined();
     expect(result.parentUpdate.conversationId).toBe("conv_new");
   });

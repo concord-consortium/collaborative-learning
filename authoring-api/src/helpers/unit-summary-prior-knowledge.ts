@@ -7,7 +7,7 @@
 // neither is ever given one.
 import {UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS} from "../../../shared/unit-summary-types";
 import {AssembledProblem} from "./assemble-unit";
-import {mapWithConcurrency} from "./concurrency";
+import {ConcurrencyLimiter, mapWithConcurrency} from "./concurrency";
 import {generateWithLengthLimit} from "./unit-summary-length-limit";
 import {PriorKnowledgeMode} from "./unit-summary-limits";
 import {UNIT_SUMMARY_CALL_TIMEOUT_MS, UNIT_SUMMARY_CONCURRENCY_LIMIT} from "./unit-summary-config";
@@ -54,6 +54,8 @@ export interface PriorKnowledgeOptions {
   client: UnitSummaryOpenAIClient;
   model: string;
   mode: PriorKnowledgeMode;
+  // Shared with whatever runs beside this step. Optional so a test can drive it alone.
+  limiter?: ConcurrencyLimiter;
 }
 
 // priorKnowledge for entry 0, describing what a student brings INTO the unit. No unit's root
@@ -86,6 +88,8 @@ async function generatePrefix(
   problems: AssembledProblem[], digests: string[], options: PriorKnowledgeOptions
 ): Promise<string[]> {
   const targetIndices = problems.map((_, i) => i).slice(1);
+  // No limiter here: callPriorKnowledge takes a slot itself, and taking one at both levels means
+  // each call holds a slot while waiting for a second -- a deadlock once the pool is full.
   return mapWithConcurrency(targetIndices, UNIT_SUMMARY_CONCURRENCY_LIMIT, (i) => {
     const labeledDigests = problems.slice(0, i).map((p, idx) => labelDigest(p, digests[idx])).join("\n\n");
     return callPriorKnowledge(labeledDigests, problems[i], PREFIX_INSTRUCTIONS, options);
@@ -108,13 +112,17 @@ async function generateRolling(
 }
 
 async function callPriorKnowledge(
-  input: string, problem: AssembledProblem, instructions: string, {client, model}: PriorKnowledgeOptions
+  input: string, problem: AssembledProblem, instructions: string,
+  {client, model, limiter}: PriorKnowledgeOptions
 ): Promise<string> {
   try {
-    return await generateWithLengthLimit({
+    // The rolling loop calls this directly rather than through mapWithConcurrency, so the limiter
+    // is applied here, covering both modes.
+    const call = () => generateWithLengthLimit({
       client, model, instructions, input, timeoutMs: UNIT_SUMMARY_CALL_TIMEOUT_MS,
       maxChars: UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, fieldName: "priorKnowledge",
     });
+    return await (limiter ? limiter.run(call) : call());
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Problem ${problem.ordinal}: priorKnowledge failed: ${message}`);

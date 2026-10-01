@@ -1,5 +1,6 @@
 import {
-  IUnitSummary, UNIT_SUMMARY_OVERVIEW_MAX_CHARS, UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS,
+  IUnitSummary, UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS, UNIT_SUMMARY_OVERVIEW_MAX_CHARS,
+  UNIT_SUMMARY_PRIOR_KNOWLEDGE_MAX_CHARS, UNIT_SUMMARY_PROBLEM_APPROACHES,
   UNIT_SUMMARY_PROBLEM_DIGEST_MAX_CHARS, UNIT_SUMMARY_TOTAL_BUDGET_CHARS, validateUnitSummary
 } from "./unit-summary-types";
 
@@ -202,6 +203,107 @@ describe("validateUnitSummary", () => {
       entries: manyEntries
     };
     const result = validateUnitSummary(bigSummary, manyLiveProblems);
+    expect(result.valid).toBe(false);
+    expect((result as any).errors.join(" ")).toMatch(/exceeds the .* character budget/);
+  });
+});
+
+describe("validateUnitSummary: approach fields", () => {
+  function errorsOf(summary: IUnitSummary): string {
+    const result = validateUnitSummary(summary, liveProblems);
+    expect(result.valid).toBe(false);
+    return (result as any).errors.join(" ");
+  }
+
+  // The fields are optional, so a summary without them must still validate.
+  it("accepts a summary with neither approach field on any entry", () => {
+    expect(validateUnitSummary(validSummary(), liveProblems)).toEqual({ valid: true });
+  });
+
+  it.each(UNIT_SUMMARY_PROBLEM_APPROACHES)("accepts the label %s", (approach) => {
+    const summary = validSummary();
+    summary.entries[0].approach = approach;
+    summary.entries[0].approachGuidance = "Students try many ideas.";
+    expect(validateUnitSummary(summary, liveProblems)).toEqual({ valid: true });
+  });
+
+  it("accepts an approach with no guidance", () => {
+    const summary = validSummary();
+    summary.entries[0].approach = "convergent";
+    expect(validateUnitSummary(summary, liveProblems)).toEqual({ valid: true });
+  });
+
+  it("rejects a label that is not in the known set", () => {
+    const summary = validSummary();
+    (summary.entries[0] as any).approach = "exploratory";
+    expect(errorsOf(summary)).toMatch(/approach \("exploratory"\) is not one of/);
+  });
+
+  it("rejects guidance longer than the cap", () => {
+    const summary = validSummary();
+    summary.entries[1].approach = "divergent";
+    summary.entries[1].approachGuidance = "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS + 1);
+    expect(errorsOf(summary)).toMatch(/approachGuidance exceeds/);
+  });
+
+  it("accepts guidance exactly at the cap", () => {
+    const summary = validSummary();
+    summary.entries[1].approach = "divergent";
+    summary.entries[1].approachGuidance = "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS);
+    expect(validateUnitSummary(summary, liveProblems)).toEqual({ valid: true });
+  });
+
+  // validateUnitSummary also runs over a hand-edited content.json, so the value can be anything
+  // JSON allows. It must report an error rather than throwing, and must agree with what
+  // unitSummarySlice accepts.
+  it.each([
+    ["null", null],
+    ["a number", 42],
+    ["a boolean", true],
+    ["an array", ["a"]],
+    ["an object", { text: "a" }],
+  ])("rejects guidance that is %s, without throwing", (_name, bad) => {
+    const summary = validSummary();
+    summary.entries[0].approach = "convergent";
+    (summary.entries[0] as any).approachGuidance = bad;
+    expect(errorsOf(summary)).toMatch(/approachGuidance must be a string/);
+  });
+
+  it("rejects guidance with no label", () => {
+    const summary = validSummary();
+    summary.entries[0].approachGuidance = "Students pick one design.";
+    expect(errorsOf(summary)).toMatch(/has approachGuidance but no approach/);
+  });
+
+  it("names the offending entry by index and ordinal", () => {
+    const summary = validSummary();
+    summary.entries[1].approachGuidance = "Students pick one design.";
+    expect(errorsOf(summary)).toMatch(/entries\[1\] \(1\.2\)/);
+  });
+
+  it("counts the label and the guidance toward the total budget", () => {
+    const summary = validSummary();
+    // Digest and priorKnowledge alone stay inside the budget, so only counting the guidance
+    // pushes the total over.
+    const guidance = "x".repeat(UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS);
+    const perEntryChars = UNIT_SUMMARY_APPROACH_GUIDANCE_MAX_CHARS + "convergent".length;
+    const entryCount = Math.ceil(UNIT_SUMMARY_TOTAL_BUDGET_CHARS / perEntryChars) + 1;
+    summary.entries = [];
+    summary.sourceManifest = [];
+    const ordinals: string[] = [];
+    for (let i = 0; i < entryCount; i++) {
+      const ordinal = `1.${i + 1}`;
+      ordinals.push(ordinal);
+      summary.sourceManifest.push({ ordinal, title: `Problem ${i + 1}`, problemHash: `hash${i}` });
+      summary.entries.push({
+        ordinal,
+        priorKnowledge: i === 0 ? "" : "prior",
+        problemDigest: "digest",
+        approach: "convergent",
+        approachGuidance: guidance
+      });
+    }
+    const result = validateUnitSummary(summary, ordinals);
     expect(result.valid).toBe(false);
     expect((result as any).errors.join(" ")).toMatch(/exceeds the .* character budget/);
   });
