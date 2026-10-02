@@ -303,11 +303,14 @@ export const CustomDataflowNode = observer(
             }
           </div>
       ))}
-      <DataflowNodePlot
-        display={showPlot}
-        model={model}
-        recordedTicks={reteManager.recordedTicks}
-      />
+      {/* Mounted only while open: the plot stops pointerdown so rete does not drag the node
+          out from under its zoom buttons, and that listener is attached from a ref read on
+          the first render. Kept mounted and hidden, it would guard nothing. */}
+      {showPlot &&
+        <DataflowNodePlot
+          model={model}
+          recordedTicks={reteManager.recordedTicks}
+        />}
 
     </div>
   );

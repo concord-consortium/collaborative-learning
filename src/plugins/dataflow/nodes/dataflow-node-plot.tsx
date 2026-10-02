@@ -10,7 +10,6 @@ import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./controls/custom-hooks";
 
 interface INodePlotProps {
-  display: boolean;
   model: IBaseNodeModel;
   recordedTicks: string[];
 }
@@ -32,13 +31,11 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({display, model, recordedTicks})
+  function DataflowNodePlot({model, recordedTicks})
 {
   const divRef = useRef<HTMLDivElement>(null);
   useStopEventPropagation(divRef, "pointerdown");
   useStopEventPropagation(divRef, "dblclick");
-
-  if (!display) return null;
 
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(model);
