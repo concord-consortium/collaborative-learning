@@ -41,12 +41,12 @@ const isSameHighlightId = (id: IHighlightId | undefined, turnId: string, index: 
 // Debug dry-run turns and empty turns are excluded; message bodies are copied verbatim.
 export const buildChatTranscript = (turns: ChatTurn[], title?: string): string => {
   const lines: string[] = [];
-  if (title) lines.push(`### Tutor chat — ${title}`, "");
+  if (title) lines.push(`### Ada chat — ${title}`, "");
   for (const turn of turns) {
     if (turn.variant === "debug") continue;
     const text = turn.text.trim();
     if (!text) continue;
-    lines.push(`**${turn.sender === "user" ? "You" : "Tutor"}:** ${text}`, "");
+    lines.push(`**${turn.sender === "user" ? "You" : "Ada"}:** ${text}`, "");
   }
   return lines.join("\n").trimEnd();
 };
@@ -54,7 +54,7 @@ export const buildChatTranscript = (turns: ChatTurn[], title?: string): string =
 // A DebugTransport dry-run turn: rendered as a distinct diagnostic panel whose (often
 // long) body is collapsed by default behind a toggle. The title bar also carries a
 // copy-to-clipboard control (copies the full body even while collapsed). Labeled for AT
-// rather than given "Tutor said:" attribution.
+// rather than given "Ada said:" attribution.
 const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -277,14 +277,14 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
         {introText &&
           <div className="chat-intro" data-testid="chat-intro">{introText}</div>}
         {turns.length === 0 && !introText &&
-          <div className="chat-empty" data-testid="chat-empty">Ask the tutor about your work.</div>}
+          <div className="chat-empty" data-testid="chat-empty">Ask Ada about your work.</div>}
         {turns.map(turn => (
           turn.variant === "debug"
             ? <DebugTurn key={turn.id} turn={turn} />
             : <div key={turn.id} className={classNames("chat-row", turn.sender)}
                    data-testid={`chat-row-${turn.sender}`}>
                 {/* per-turn sender attribution in the DOM (sender is otherwise conveyed by position+color only) */}
-                <span className="visually-hidden">{turn.sender === "user" ? "You said:" : "Tutor said:"}</span>
+                <span className="visually-hidden">{turn.sender === "user" ? "You said:" : "Ada said:"}</span>
                 <div className={classNames("chat-bubble", { pending: turn.pending })}>{turn.text}</div>
                 {enableHighlights && turn.highlights?.length
                   ? <div className="chat-highlights" data-testid="chat-highlights">
@@ -325,7 +325,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
         ))}
         {(pending || sending) &&
           <div className="chat-row assistant" data-testid="chat-row-typing">
-            <div className="chat-bubble typing" role="status" aria-label="Tutor is typing"
+            <div className="chat-bubble typing" role="status" aria-label="Ada is typing"
                  data-testid="chat-typing">
               <span className="chat-typing-dots" aria-hidden="true">
                 <span className="chat-typing-dot" />
@@ -338,7 +338,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
 
       {/* single polite live region announcing the completed assistant reply */}
       <div className="visually-hidden" aria-live="polite" data-testid="chat-live">
-        {!pending && lastAssistantText ? `Tutor said: ${lastAssistantText}` : ""}
+        {!pending && lastAssistantText ? `Ada said: ${lastAssistantText}` : ""}
       </div>
 
       {/* Pinning a highlight moves a ring onto an object elsewhere in the document, where nothing
@@ -363,14 +363,14 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       {error && <div className="chat-error" role="alert" data-testid="chat-error">{error}</div>}
 
       <form className="chat-composer" onSubmit={onSubmit} data-testid="chat-composer">
-        <label htmlFor={inputId} className="visually-hidden">Message the tutor</label>
+        <label htmlFor={inputId} className="visually-hidden">Message Ada</label>
         <input
           id={inputId}
           ref={inputRef}
           className="chat-input"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Message the tutor…"
+          placeholder="Message Ada…"
           disabled={sending}
           autoComplete="off"
           data-testid="chat-input"

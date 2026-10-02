@@ -4,13 +4,14 @@ import { Provider } from "mobx-react";
 import { specStores } from "../../../../models/stores/spec-stores";
 import { DataflowProgramToolbar } from "./dataflow-program-toolbar";
 import { NodeTypes } from "../../model/utilities/node";
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 
 // Required so the dataflow tile is registered before any rendering pulls in
 // dataflow-types side effects.
 import "../../dataflow-registration";
 
 interface IRenderOptions {
-  disabled?: boolean;
+  readOnly?: boolean;
   isTesting?: boolean;
 }
 
@@ -28,13 +29,14 @@ function renderToolbar(opts: IRenderOptions = {}): IRenderResult {
   const onClearClick = jest.fn();
   const utils = render(
     <Provider stores={stores}>
-      <DataflowProgramToolbar
-        disabled={opts.disabled ?? false}
-        isTesting={opts.isTesting ?? false}
-        onClearClick={onClearClick}
-        onNodeCreateClick={onNodeCreateClick}
-        tileId="test-tile"
-      />
+      <ReadOnlyContext.Provider value={opts.readOnly ?? false}>
+        <DataflowProgramToolbar
+          isTesting={opts.isTesting ?? false}
+          onClearClick={onClearClick}
+          onNodeCreateClick={onNodeCreateClick}
+          tileId="test-tile"
+        />
+      </ReadOnlyContext.Provider>
     </Provider>
   );
   const toolbar = utils.container.querySelector('[role="toolbar"]') as HTMLElement;
@@ -122,7 +124,7 @@ describe("DataflowProgramToolbar activation (CLUE-455)", () => {
   });
 
   it("does not call onNodeCreateClick when the toolbar is disabled", () => {
-    const { buttons, onNodeCreateClick } = renderToolbar({ disabled: true });
+    const { buttons, onNodeCreateClick } = renderToolbar({ readOnly: true });
     fireEvent.click(buttons[0]);
     expect(onNodeCreateClick).not.toHaveBeenCalled();
   });

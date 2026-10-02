@@ -11,6 +11,7 @@ import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import { ProgramMode } from "../types/dataflow-tile-types";
 import { useCautionAlert } from "../../../../components/utilities/use-caution-alert";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./dataflow-program-topbar.scss";
 
@@ -19,7 +20,6 @@ interface TopbarProps {
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
-  readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
@@ -32,15 +32,15 @@ interface TopbarProps {
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  const { onConnectDevice, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
+  const { onConnectDevice, serialDevice, programDataRates, dataRate, onRateSelectClick,
           handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
           handleChangeIsPlaying, tileContent} = props;
+  const readOnly = useReadOnlyContext();
 
   return (
     <div className="program-editor-topbar">
         <DataflowSerialConnectButton
           onConnectDevice={onConnectDevice}
-          readOnly={readOnly}
           serialDevice={serialDevice}
         />
         <div className="topbar-center-container">
@@ -58,7 +58,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             rateOptions={programDataRates}
             dataRate={dataRate}
             onRateSelectClick={onRateSelectClick}
-            readOnly={readOnly}
             programMode={programMode}
             playBackIndex={playBackIndex}
             tileContent={tileContent}

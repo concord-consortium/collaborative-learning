@@ -35,7 +35,7 @@ export function useChat({ transport, header }: UseChatOptions): UseChatResult {
   // Surface an authoritative `status:"error"` as a visible error (never an infinite spinner).
   useEffect(() => {
     if (status === "error") {
-      setError("The tutor is currently unavailable. Please try again.");
+      setError("Ada is currently unavailable. Please try again.");
     }
   }, [status]);
 
