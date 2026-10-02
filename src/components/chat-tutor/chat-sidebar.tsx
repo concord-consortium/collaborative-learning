@@ -174,11 +174,11 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       id="chat-tutor-sidebar"
       className="chat-tutor-sidebar"
       role="complementary"
-      aria-label={`Tutor chat: ${header}`}
+      aria-label={`Ada chat: ${header}`}
       data-testid="chat-tutor-sidebar"
     >
       <div ref={bodyRef} className="chat-tutor-sidebar-body">
-        <Chat chat={chat} onClose={onClose} closeLabel="Close tutor chat" transcriptTitle={header}
+        <Chat chat={chat} onClose={onClose} closeLabel="Close Ada chat" transcriptTitle={header}
               introText={introText}
               onHighlightHover={handleHighlightHover}
               onHighlightToggle={handleHighlightToggle}
