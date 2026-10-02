@@ -3,10 +3,8 @@ import { fireEvent, render } from "@testing-library/react";
 
 import { useStopEventPropagation } from "./custom-hooks";
 
-// The hook reads the ref once, in an effect whose dependencies never change. Anything it guards has
-// to be in the DOM on the first render — a component that renders the element later (after a toggle,
-// say) gets no listener at all, which is how the minigraph's zoom buttons became unusable with the
-// mouse (CLUE-711).
+// Pins the first-render requirement documented on the hook. The minigraph was mounted and hidden,
+// so its zoom buttons were guarded by nothing and the mouse could not reach them (CLUE-711).
 describe("useStopEventPropagation", () => {
   function Guarded({ render: renderTarget }: { render: boolean }) {
     const ref = useRef<HTMLDivElement>(null);

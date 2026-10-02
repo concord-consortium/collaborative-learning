@@ -22,12 +22,11 @@ function makeFakeControl(units: string[]): INumberUnitsControl {
   };
 }
 
-// rete starts a node drag from any pointerdown that reaches the node element, which takes the press
-// away from the control under it. Every interactive control inside a node has to stop pointerdown
-// before it gets there; the units dropdown did not, so it could not be opened with the mouse
-// (CLUE-711).
+// The units dropdown had no guard, so it could not be opened with the mouse (CLUE-711).
 describe("NumberUnitsControl keeps pointer presses away from the node drag handler", () => {
-  function pressOn(selector: string, units: string[]) {
+  const kUnits = ["sec", "min", "hr"];
+
+  function pressOn(selector: string, units = kUnits) {
     const onNodePointerDown = jest.fn();
     const { container } = render(
       <div onPointerDown={onNodePointerDown}>
@@ -41,14 +40,14 @@ describe("NumberUnitsControl keeps pointer presses away from the node drag handl
   }
 
   it("stops a press on the units dropdown", () => {
-    expect(pressOn(".type-options-back", ["sec", "min", "hr"])).not.toHaveBeenCalled();
+    expect(pressOn(".type-options-back")).not.toHaveBeenCalled();
   });
 
   it("stops a press on the number input", () => {
-    expect(pressOn("input.number-input", ["sec", "min", "hr"])).not.toHaveBeenCalled();
+    expect(pressOn("input.number-input")).not.toHaveBeenCalled();
   });
 
   it("leaves the rest of the control draggable", () => {
-    expect(pressOn(".number-label", ["sec", "min", "hr"])).toHaveBeenCalled();
+    expect(pressOn(".number-label")).toHaveBeenCalled();
   });
 });

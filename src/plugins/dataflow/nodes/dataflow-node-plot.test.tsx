@@ -8,19 +8,21 @@ import { DataflowNodePlot } from "./dataflow-node-plot";
 // chart draws.
 jest.mock("react-chartjs-2", () => ({ Line: () => <div data-testid="line-chart" /> }));
 
-const model = {
-  type: "Generator",
-  watchedValues: {},
-  getTickEntries: () => [],
-  dsMax: 1, dsMin: 0, tickMax: 1, tickMin: 0,
-  setDsMax: jest.fn(), setDsMin: jest.fn(),
-  setTickMax: jest.fn(), setTickMin: jest.fn()
-} as unknown as IBaseNodeModel;
+// Fresh spies per test: every case asserts on setTickMax/setTickMin.
+function makeModel(bounds: Partial<IBaseNodeModel> = {}) {
+  return {
+    type: "Generator",
+    watchedValues: {},
+    getTickEntries: () => [],
+    dsMax: 1, dsMin: 0, tickMax: 1, tickMin: 0,
+    setDsMax: jest.fn(), setDsMin: jest.fn(),
+    setTickMax: jest.fn(), setTickMin: jest.fn(),
+    ...bounds
+  } as unknown as IBaseNodeModel;
+}
 
-// The plot is mounted only while it is open. That is what this test guards: the stopper below is
-// attached by an effect that reads the ref once, so a plot kept mounted and hidden would attach
-// nothing and leave the zoom buttons unusable once it was opened (CLUE-711).
-function OpenablePlot({ onNodePointerDown }: { onNodePointerDown: () => void }) {
+function OpenablePlot({ model, onNodePointerDown }:
+                      { model: IBaseNodeModel; onNodePointerDown: () => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div onPointerDown={onNodePointerDown}>
@@ -30,10 +32,12 @@ function OpenablePlot({ onNodePointerDown }: { onNodePointerDown: () => void }) 
   );
 }
 
-describe("DataflowNodePlot keeps pointer presses away from the node drag handler", () => {
-  it("stops a press on the zoom buttons after the plot is opened", () => {
+describe("DataflowNodePlot", () => {
+  // Opening the plot, rather than rendering it open, is the case that used to fail: the guard is
+  // attached from a ref read on the first render, so a plot kept mounted and hidden guarded nothing.
+  it("keeps a press on the zoom buttons away from the node drag handler", () => {
     const onNodePointerDown = jest.fn();
-    render(<OpenablePlot onNodePointerDown={onNodePointerDown} />);
+    render(<OpenablePlot model={makeModel()} onNodePointerDown={onNodePointerDown} />);
     fireEvent.click(screen.getByText("open plot"));
 
     fireEvent.pointerDown(screen.getByText("+"), { bubbles: true });
@@ -41,11 +45,19 @@ describe("DataflowNodePlot keeps pointer presses away from the node drag handler
     expect(onNodePointerDown).not.toHaveBeenCalled();
   });
 
+  it("zooms in and out from the scale buttons", () => {
+    const model = makeModel();
+    render(<OpenablePlot model={model} onNodePointerDown={jest.fn()} />);
+    fireEvent.click(screen.getByText("open plot"));
+
+    fireEvent.mouseDown(screen.getByText("+"));
+    expect(model.setTickMax).toHaveBeenCalledWith(0.9);
+    fireEvent.mouseDown(screen.getByText("-"));
+    expect(model.setTickMin).toHaveBeenCalledWith(-0.125);
+  });
+
   it("zooms a block whose value never moves, instead of leaving it stuck", () => {
-    // An unconnected device plots a flat line, so there is no range to scale. Scaling it anyway
-    // was a permanent no-op: the student pressed the buttons and nothing ever happened.
-    const flat = { ...model, dsMax: 0, dsMin: 0, tickMax: 0, tickMin: 0,
-                   setTickMax: jest.fn(), setTickMin: jest.fn() } as unknown as IBaseNodeModel;
+    const flat = makeModel({ dsMax: 0, dsMin: 0, tickMax: 0, tickMin: 0 });
     render(<div><DataflowNodePlot model={flat} recordedTicks={[]} /></div>);
 
     fireEvent.mouseDown(screen.getByText("-"));
@@ -54,25 +66,12 @@ describe("DataflowNodePlot keeps pointer presses away from the node drag handler
   });
 
   it("zooms a block that has no plotted values yet", () => {
-    // Before anything is plotted the bounds are still their -Infinity/Infinity defaults, which
-    // produced NaN axis bounds.
-    const empty = { ...model, dsMax: -Infinity, dsMin: Infinity, tickMax: undefined,
-                    tickMin: undefined, setTickMax: jest.fn(), setTickMin: jest.fn()
-                  } as unknown as IBaseNodeModel;
+    const empty = makeModel({ dsMax: -Infinity, dsMin: Infinity,
+                              tickMax: undefined, tickMin: undefined });
     render(<div><DataflowNodePlot model={empty} recordedTicks={[]} /></div>);
 
     fireEvent.mouseDown(screen.getByText("+"));
     expect(empty.setTickMax).toHaveBeenCalledWith(0.4);
     expect(empty.setTickMin).toHaveBeenCalledWith(-0.4);
-  });
-
-  it("zooms in and out from the scale buttons", () => {
-    render(<OpenablePlot onNodePointerDown={jest.fn()} />);
-    fireEvent.click(screen.getByText("open plot"));
-
-    fireEvent.mouseDown(screen.getByText("+"));
-    expect(model.setTickMax).toHaveBeenCalled();
-    fireEvent.mouseDown(screen.getByText("-"));
-    expect(model.setTickMin).toHaveBeenCalled();
   });
 });

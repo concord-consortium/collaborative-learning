@@ -303,9 +303,8 @@ export const CustomDataflowNode = observer(
             }
           </div>
       ))}
-      {/* Mounted only while open: the plot stops pointerdown so rete does not drag the node
-          out from under its zoom buttons, and that listener is attached from a ref read on
-          the first render. Kept mounted and hidden, it would guard nothing. */}
+      {/* Mounted only while open: kept mounted and hidden, its pointerdown guard would never
+          attach. See useStopEventPropagation. */}
       {showPlot &&
         <DataflowNodePlot
           model={model}

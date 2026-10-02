@@ -44,10 +44,9 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(model);
     const min = minY(model);
-    // A block whose value never moves - an unconnected device, or one holding a single state -
-    // plots a zero-width range, and before an axis exists at all the bounds are still +/-Infinity.
-    // Scaling either one leaves it exactly where it was, so the buttons would do nothing forever.
-    // Fall back to a span the student can then zoom from.
+    // A block whose value never moves plots a zero-width range, and before anything is plotted
+    // the bounds are still +/-Infinity. Scaling either leaves it exactly where it was, so the
+    // buttons would do nothing forever; fall back to a span the student can zoom from.
     const haveRange = isFinite(max) && isFinite(min);
     const midpoint = haveRange ? (max + min) / 2 : 0;
     const distanceFromMidpoint = haveRange ? Math.abs(max - min) / 2 : 0;
