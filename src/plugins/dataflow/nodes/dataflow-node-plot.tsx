@@ -16,6 +16,10 @@ interface INodePlotProps {
 
 let stepY = 5;
 
+// Half-height of the axis a zoom falls back to when the plotted values give it nothing to
+// scale. One unit of total span suits the 0-1 devices that hit this most often.
+const kMinZoomHalfSpan = 0.5;
+
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
 function maxY(model: IBaseNodeModel) {
   return model.tickMax ?? model.dsMax;
@@ -40,11 +44,16 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(model);
     const min = minY(model);
-    const difference = Math.abs(max - min);
-    const midpoint = (max + min)/2;
-    const distanceFromMidpoint = difference / 2;
+    // A block whose value never moves - an unconnected device, or one holding a single state -
+    // plots a zero-width range, and before an axis exists at all the bounds are still +/-Infinity.
+    // Scaling either one leaves it exactly where it was, so the buttons would do nothing forever.
+    // Fall back to a span the student can then zoom from.
+    const haveRange = isFinite(max) && isFinite(min);
+    const midpoint = haveRange ? (max + min) / 2 : 0;
+    const distanceFromMidpoint = haveRange ? Math.abs(max - min) / 2 : 0;
     const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
-    const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
+    const newDistanceFromMidpoint =
+      scalar * (distanceFromMidpoint > 0 ? distanceFromMidpoint : kMinZoomHalfSpan);
     model.setTickMax(midpoint + newDistanceFromMidpoint);
     model.setTickMin(midpoint - newDistanceFromMidpoint);
   };
