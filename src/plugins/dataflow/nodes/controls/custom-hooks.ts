@@ -2,6 +2,10 @@ import { RefObject, useEffect } from "react";
 
 const stopEventPropagation = (e: Event) => e.stopPropagation();
 
+// Keeps a press inside a node control from reaching rete, which would otherwise start dragging
+// the node out from under it. The guarded element must exist on the first render: the ref is
+// read once, in an effect whose dependencies never change, so an element that appears later is
+// never guarded at all.
 export function useStopEventPropagation<T extends HTMLElement, K extends keyof HTMLElementEventMap>(
                   domRef: RefObject<T>, event: K): void {
   useEffect(() => {

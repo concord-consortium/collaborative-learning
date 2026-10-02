@@ -10,12 +10,15 @@ import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./controls/custom-hooks";
 
 interface INodePlotProps {
-  display: boolean;
   model: IBaseNodeModel;
   recordedTicks: string[];
 }
 
 let stepY = 5;
+
+// Half-height of the axis a zoom falls back to when the plotted values give it nothing to
+// scale. One unit of total span suits the 0-1 devices that hit this most often.
+const kMinZoomHalfSpan = 0.5;
 
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
 function maxY(model: IBaseNodeModel) {
@@ -32,22 +35,24 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({display, model, recordedTicks})
+  function DataflowNodePlot({model, recordedTicks})
 {
   const divRef = useRef<HTMLDivElement>(null);
   useStopEventPropagation(divRef, "pointerdown");
   useStopEventPropagation(divRef, "dblclick");
 
-  if (!display) return null;
-
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(model);
     const min = minY(model);
-    const difference = Math.abs(max - min);
-    const midpoint = (max + min)/2;
-    const distanceFromMidpoint = difference / 2;
+    // A block whose value never moves plots a zero-width range, and before anything is plotted
+    // the bounds are still +/-Infinity. Scaling either leaves it exactly where it was, so the
+    // buttons would do nothing forever; fall back to a span the student can zoom from.
+    const haveRange = isFinite(max) && isFinite(min);
+    const midpoint = haveRange ? (max + min) / 2 : 0;
+    const distanceFromMidpoint = haveRange ? Math.abs(max - min) / 2 : 0;
     const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
-    const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
+    const newDistanceFromMidpoint =
+      scalar * (distanceFromMidpoint > 0 ? distanceFromMidpoint : kMinZoomHalfSpan);
     model.setTickMax(midpoint + newDistanceFromMidpoint);
     model.setTickMin(midpoint - newDistanceFromMidpoint);
   };
