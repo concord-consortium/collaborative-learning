@@ -31,7 +31,7 @@ Here are the basic development operations you can do after you cd into the `func
 
 ```shell
 $ cd functions-v2
-$ nvm use 20      # Recent version of node is required for these functions
+$ nvm use 22      # Recent version of node is required for these functions
 $ npm install     # install local dependencies
 $ npm --prefix ../shared ci   # ../shared has its own openai/zod; the build needs them
 $ npm run lint    # lint the functions code
