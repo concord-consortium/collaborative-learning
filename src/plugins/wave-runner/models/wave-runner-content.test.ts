@@ -15,6 +15,7 @@ import {
 import { SeismicModelRunner } from "../../../../shared/seismic/models/seismic-model-runner";
 import { SECONDS_PER_DAY } from "../../../../shared/seismic/seismic-day";
 import { makeFakeDownloadService } from "../../../models/stores/seismic/seismic-coverage-test-fakes";
+import { getSnapshot } from "mobx-state-tree";
 
 jest.mock("../../../models/stores/seismic/seismic-download-service", () => ({
   ...jest.requireActual("../../../models/stores/seismic/seismic-download-service"),
@@ -39,6 +40,20 @@ registerTileContentInfo({
   displayName: "Wave Runner",
   modelClass: WaveRunnerContentModel,
   defaultContent: defaultWaveRunnerContent,
+});
+
+describe("default date range", () => {
+  it("starts a new tile at 2026-09-01 through 2026-10-01", () => {
+    const content = defaultWaveRunnerContent();
+    expect(content.startDate).toBe("2026-09-01");
+    expect(content.endDate).toBe("2026-10-01");
+  });
+
+  it("serializes the defaults into the document snapshot", () => {
+    const snapshot = getSnapshot(defaultWaveRunnerContent()) as Record<string, unknown>;
+    expect(snapshot.startDate).toBe("2026-09-01");
+    expect(snapshot.endDate).toBe("2026-10-01");
+  });
 });
 
 const mockCompactMetadata = {
@@ -120,8 +135,8 @@ describe("WaveRunnerContent", () => {
 
   it("has default start and end dates covering the mock data range", () => {
     const content = WaveRunnerContentModel.create();
-    expect(content.startDate).toBe("2025-01-01");
-    expect(content.endDate).toBe("2025-12-31");
+    expect(content.startDate).toBe("2026-09-01");
+    expect(content.endDate).toBe("2026-10-01");
   });
 
   it("allows setting start and end dates", () => {

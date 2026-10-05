@@ -42,8 +42,8 @@ export const WaveRunnerContentModel = TileContentModel
   .named("WaveRunnerTool")
   .props({
     type: types.optional(types.literal(kWaveRunnerTileType), kWaveRunnerTileType),
-    startDate: types.optional(types.string, "2025-01-01"),
-    endDate: types.optional(types.string, "2025-12-31"),
+    startDate: types.optional(types.string, "2026-09-01"),
+    endDate: types.optional(types.string, "2026-10-01"),
     station: types.maybe(StationModel),
     selectedModelUrl: types.maybe(types.string),
   })
