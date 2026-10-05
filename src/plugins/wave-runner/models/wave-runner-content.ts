@@ -230,8 +230,9 @@ export const WaveRunnerContentModel = TileContentModel
         const startMs = startDate.getTime();
         const endMs = endDate.getTime();
 
-        if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) {
-          self.runError = "Invalid date range. End date must be after start date.";
+        // endDate is inclusive, so start == end is a valid single-day range, matching loadData.
+        if (isNaN(startMs) || isNaN(endMs) || endMs < startMs) {
+          self.runError = "Invalid date range. End date must not be before start date.";
           self.isRunning = false;
           return;
         }

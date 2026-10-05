@@ -56,6 +56,18 @@ describe("default date range", () => {
   });
 });
 
+describe("single-day range", () => {
+  it("does not set a run error when start and end are the same day", () => {
+    const content = defaultWaveRunnerContent();
+    content.setStartDate("2026-09-15");
+    content.setEndDate("2026-09-15");
+    expect(content.startDate).toBe(content.endDate);
+    // endDate is inclusive, so one day is a legitimate range and must not be rejected
+    // on the grounds that end is not strictly after start.
+    expect(content.runError).toBeNull();
+  });
+});
+
 const mockCompactMetadata = {
   $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   id: "compact-v1",
