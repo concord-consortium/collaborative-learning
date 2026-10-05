@@ -137,10 +137,10 @@ describe("WaveRunnerComponent", () => {
 
   it("renders date pickers with default values", () => {
     renderWithStores();
-    const startInput = screen.getByLabelText("Start Date and Time") as HTMLInputElement;
-    const endInput = screen.getByLabelText("End Date and Time") as HTMLInputElement;
-    expect(startInput.value).toBe("2026-09-01T00:00");
-    expect(endInput.value).toBe("2026-10-01T00:00");
+    const startGroup = screen.getByRole("group", { name: "Start Date and Time" });
+    const endGroup = screen.getByRole("group", { name: "End Date and Time" });
+    expect(startGroup).toHaveTextContent("9/1/2026");
+    expect(endGroup).toHaveTextContent("10/1/2026");
   });
 
   it("renders station dropdown with options from config", () => {

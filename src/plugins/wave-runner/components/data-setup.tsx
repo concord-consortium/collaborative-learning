@@ -5,6 +5,8 @@ import { StationConfig } from "../../../../shared/seismic/seismic-types";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { stationId } from "../../shared-seismogram/station-model";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
+import { kDefaultEndDate, kDefaultStartDate } from "../models/wave-runner-content";
+import { DateField } from "./date-field";
 import "./data-setup.scss";
 
 export const DataSetup: React.FC = observer(function DataSetup() {
@@ -125,25 +127,25 @@ export const DataSetup: React.FC = observer(function DataSetup() {
       </div>
       <div className="field-row">
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-start-date">Start Date and Time</label>
-          <input
+          <DateField
             id="wave-runner-start-date"
-            className="datetime"
-            type="datetime-local"
-            value={`${content.startDate}T00:00`}
-            onChange={e => content.setStartDate(e.target.value.split("T")[0])}
-            disabled={content.isRunning || content.isLoadingData}
+            label="Start Date and Time"
+            value={content.startDate}
+            defaultValue={kDefaultStartDate}
+            maxValue={content.endDate}
+            onChange={date => content.setStartDate(date)}
+            isDisabled={content.isRunning || content.isLoadingData}
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-end-date">End Date and Time</label>
-          <input
+          <DateField
             id="wave-runner-end-date"
-            className="datetime"
-            type="datetime-local"
-            value={`${content.endDate}T00:00`}
-            onChange={e => content.setEndDate(e.target.value.split("T")[0])}
-            disabled={content.isRunning || content.isLoadingData}
+            label="End Date and Time"
+            value={content.endDate}
+            defaultValue={kDefaultEndDate}
+            minValue={content.startDate}
+            onChange={date => content.setEndDate(date)}
+            isDisabled={content.isRunning || content.isLoadingData}
           />
         </div>
       </div>

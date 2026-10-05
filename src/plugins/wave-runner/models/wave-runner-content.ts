@@ -22,6 +22,10 @@ import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 
+// Exported so the date pickers' Clear can reset to the same dates the model defaults to.
+export const kDefaultStartDate = "2026-09-01";
+export const kDefaultEndDate = "2026-10-01";
+
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
 }
@@ -42,8 +46,8 @@ export const WaveRunnerContentModel = TileContentModel
   .named("WaveRunnerTool")
   .props({
     type: types.optional(types.literal(kWaveRunnerTileType), kWaveRunnerTileType),
-    startDate: types.optional(types.string, "2026-09-01"),
-    endDate: types.optional(types.string, "2026-10-01"),
+    startDate: types.optional(types.string, kDefaultStartDate),
+    endDate: types.optional(types.string, kDefaultEndDate),
     station: types.maybe(StationModel),
     selectedModelUrl: types.maybe(types.string),
   })
