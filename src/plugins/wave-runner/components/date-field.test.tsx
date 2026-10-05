@@ -112,3 +112,25 @@ describe("DateField buffering", () => {
     expect(onChange).toHaveBeenCalledWith("2026-09-01");
   });
 });
+
+// The acceptance criterion is prevention, not an error after the fact: an out-of-order range must
+// not be selectable in the calendar at all.
+describe("DateField range limits", () => {
+  it("disables days before minValue", () => {
+    renderField({ id: "end", label: "End Date and Time", value: "2026-09-20", minValue: "2026-09-15" });
+    openCalendar();
+    expect(screen.getByRole("button", { name: /September 10, 2026/ }))
+      .toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /September 20, 2026/ }))
+      .not.toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("disables days after maxValue", () => {
+    renderField({ value: "2026-09-01", maxValue: "2026-09-10" });
+    openCalendar();
+    expect(screen.getByRole("button", { name: /September 20, 2026/ }))
+      .toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /September 1, 2026/ }))
+      .not.toHaveAttribute("aria-disabled", "true");
+  });
+});
