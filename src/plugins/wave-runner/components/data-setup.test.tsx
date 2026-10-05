@@ -64,17 +64,31 @@ describe("DataSetup date fields", () => {
 
   // The acceptance criterion: an out-of-order range must be unselectable, which is achieved by
   // handing each picker the other's date as its bound.
-  it("bounds the end picker by the start date and vice versa", () => {
-    const { content } = renderSetup();
-    expect(content.startDate).toBe("2026-09-01");
-    expect(content.endDate).toBe("2026-10-01");
+  // Both bounds are asserted on days INSIDE the focused month. React Aria disables adjacent-month
+  // days regardless of any bound, so a trailing October day would read as disabled even if the
+  // bound were never wired at all - such a test would pass against a broken component.
+  it("bounds the start picker by the end date", () => {
+    const content = defaultWaveRunnerContent();
+    content.setEndDate("2026-09-20");
+    renderSetup(content);
 
-    const triggers = screen.getAllByRole("button", { name: /Choose date/ });
-    // The start picker's calendar must not offer a day after the end date. The calendar opens on
-    // September (the start date's month), so the only visible days after the end date (2026-10-01)
-    // are the trailing October days that fill out September's last week.
-    fireEvent.click(triggers[0]);
-    expect(screen.getByRole("button", { name: /October 2, 2026/ }))
+    fireEvent.click(screen.getAllByRole("button", { name: /Choose date/ })[0]);
+    expect(screen.getByRole("button", { name: /September 25, 2026/ }))
       .toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /September 10, 2026/ }))
+      .not.toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("bounds the end picker by the start date", () => {
+    const content = defaultWaveRunnerContent();
+    content.setStartDate("2026-10-10");
+    content.setEndDate("2026-10-20");
+    renderSetup(content);
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Choose date/ })[1]);
+    expect(screen.getByRole("button", { name: /October 5, 2026/ }))
+      .toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /October 25, 2026/ }))
+      .not.toHaveAttribute("aria-disabled", "true");
   });
 });
