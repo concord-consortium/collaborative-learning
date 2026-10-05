@@ -32,7 +32,13 @@ markup we own. That is the bulk of the work; the CSS is the easy half.
   dropdown, prev/next navigation, Clear / Cancel / OK footer.
 - End-before-start made unselectable, with the existing error checks retained as a backstop.
 - Field displays a time of `12:00 AM`.
-- `run` accepts a single-day range, matching `loadData`.
+
+**Deliberate behavior changes.** This is otherwise a styling story, so the three places it changes
+behavior are called out here rather than discovered in review:
+
+1. `run` accepts a single-day range, matching `loadData`.
+2. A new tile's dates default to today, embedded at creation, instead of the hardcoded 2025 range.
+3. Clear restores today rather than emptying the field.
 
 **Out**
 
@@ -84,6 +90,26 @@ interface IDateFieldProps {
 }
 ```
 
+### Default dates
+
+A new tile's dates are today's date, written into the document when the tile is created, so the
+value is serialized rather than recomputed on each load.
+
+`defaultWaveRunnerContent()` in `wave-runner-content.ts` is the tile-creation hook and currently
+calls `WaveRunnerContentModel.create()` with no arguments, falling through to the hardcoded
+`2025-01-01` / `2025-12-31`. It instead passes today for both `startDate` and `endDate`.
+
+The static `types.optional` defaults stay as they are. They are the fallback for a stored document
+that omits the fields, and making them dynamic would mean a snapshot whose value depends on the day
+it was loaded — which would also make tests non-deterministic.
+
+**Stated assumption:** a new tile starts with `startDate == endDate == today`, a single-day range.
+That is the literal reading of "today as a default", and it is valid now that `run` accepts equal
+dates. The alternative — today plus some span, mirroring the old year-long default — would need a
+span to be chosen, so it is not assumed here.
+
+Existing documents are unaffected; they carry their own stored dates.
+
 ### Value conversion
 
 `@internationalized/date`'s `CalendarDate` carries no timezone. `parseDate("2025-01-01")` in and
@@ -103,10 +129,9 @@ Clear empties the field.
 This differs from stock React Aria, which commits on selection, so the buffering is implemented in
 `date-field.tsx` as local state seeded from `value` when the popover opens.
 
-**Open question for Michael, not blocking:** the model always holds a date, so an empty field is
-currently unreachable. Clear would be the only way to produce one. Either Clear restores the
-default date, or the model must tolerate an empty string. Until this is settled, Clear restores
-the default and does not empty the field.
+**Clear restores today.** The model always holds a date, so an empty field is unreachable and the
+model is not made to tolerate an empty string. Clear therefore resets the field to today, which is
+also what a new tile starts with.
 
 ## Validation
 
@@ -158,8 +183,8 @@ ramp. Spacing, type sizes and the exact step of each teal are proposed, not meas
 CSS arrives before implementation, exact values replace the proposed steps; the token names should
 not change.
 
-**Note for Michael:** the weekday header in the design reads `Thr`. The usual abbreviation is
-`Thu`. Implemented as drawn unless he says otherwise.
+**Weekday abbreviations** are the standard three-letter forms — `Sun Mon Tue Wed Thu Fri Sat`. The
+design image reads `Thr`; that is treated as a slip in the mock, not a requirement.
 
 ## Testing
 
@@ -171,6 +196,8 @@ Unit tests, in `date-field.test.tsx` and alongside the existing WaveRunner tests
 - The field renders `12:00 AM` and no time column appears in the popover.
 - Both dropdowns and both date fields are disabled while running or loading.
 - `run` accepts `start == end`.
+- `defaultWaveRunnerContent()` embeds today in the created document, and the value is serialized.
+- Clear resets the field to today.
 
 **Caveat, as with CLUE-711:** jsdom and Cypress both synthesize pointer events, so these tests
 cover structure and wiring, not how the control feels under a real mouse. The states in the design
