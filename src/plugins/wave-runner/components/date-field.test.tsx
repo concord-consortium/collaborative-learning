@@ -134,3 +134,35 @@ describe("DateField range limits", () => {
       .not.toHaveAttribute("aria-disabled", "true");
   });
 });
+
+describe("DateField month navigation", () => {
+  it("offers a month-and-year dropdown showing the focused month", () => {
+    renderField();
+    openCalendar();
+    expect(screen.getByRole("combobox", { name: "Month and year" })).toHaveValue("2026-09");
+  });
+
+  it("moves the calendar to the chosen month", () => {
+    renderField();
+    openCalendar();
+    fireEvent.change(screen.getByRole("combobox", { name: "Month and year" }), {
+      target: { value: "2026-11" }
+    });
+
+    expect(screen.getByRole("combobox", { name: "Month and year" })).toHaveValue("2026-11");
+    expect(screen.getByRole("button", { name: /November 15, 2026/ })).toBeInTheDocument();
+  });
+
+  // Changing the month must not disturb the popover's open/close state machine, which the
+  // Clear/Cancel/OK footer depends on.
+  it("keeps the popover open and the pending selection intact when the month changes", () => {
+    const onChange = renderField();
+    openCalendar();
+    fireEvent.change(screen.getByRole("combobox", { name: "Month and year" }), {
+      target: { value: "2026-11" }
+    });
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
