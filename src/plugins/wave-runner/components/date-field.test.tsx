@@ -66,3 +66,49 @@ describe("DateField", () => {
     expect(screen.getByRole("button", { name: "Choose date End Date and Time" })).toBeInTheDocument();
   });
 });
+
+describe("DateField buffering", () => {
+  it("does not commit a day until OK is pressed", () => {
+    const onChange = renderField();
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: /September 15, 2026/ }));
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(onChange).toHaveBeenCalledWith("2026-09-15");
+  });
+
+  it("discards the pending day on Cancel and closes", () => {
+    const onChange = renderField();
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: /September 15, 2026/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  // The model always holds a date, so Clear resets to the field's default rather than emptying it.
+  // Starting from a value that differs from the default is what makes this test able to fail.
+  it("resets to defaultValue on Clear rather than to the current value", () => {
+    const onChange = renderField({ value: "2026-09-20", defaultValue: "2026-09-01" });
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: /September 15, 2026/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+
+    expect(onChange).toHaveBeenCalledWith("2026-09-01");
+  });
+
+  // A cancelled edit must not linger into the next opening.
+  it("reseeds the pending day from value each time it opens", () => {
+    const onChange = renderField();
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: /September 15, 2026/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(onChange).toHaveBeenCalledWith("2026-09-01");
+  });
+});

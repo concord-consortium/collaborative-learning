@@ -1,5 +1,5 @@
 import { CalendarDate } from "@internationalized/date";
-import React from "react";
+import React, { useState } from "react";
 import {
   Button, Calendar, CalendarCell, CalendarGrid, DateInput, DatePicker,
   DateSegment, Dialog, Group, Heading, Label, Popover
@@ -16,23 +16,47 @@ export interface IDateFieldProps {
   /** "YYYY-MM-DD", exactly as the model stores it. */
   value: string;
   onChange: (value: string) => void;
+  /** What Clear resets to. The model always holds a date, so Clear cannot empty the field. */
+  defaultValue?: string;
   minValue?: string;
   maxValue?: string;
   isDisabled?: boolean;
 }
 
 export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
-  const { id, label, value, onChange, minValue, maxValue, isDisabled } = props;
+  const { id, label, value, onChange, defaultValue, minValue, maxValue, isDisabled } = props;
 
-  const handleChange = (date: CalendarDate | null) => {
-    if (date) onChange(toDateString(date));
+  const [isOpen, setIsOpen] = useState(false);
+  // The design's OK/Cancel footer means a day click is pending, not committed. `value` stays
+  // authoritative until OK.
+  const [pending, setPending] = useState<CalendarDate | null>(null);
+
+  const handleOpenChange = (open: boolean) => {
+    // Reseed from the committed value every time the popover opens, so a cancelled edit does not
+    // linger into the next one.
+    if (open) setPending(fromDateString(value) ?? null);
+    setIsOpen(open);
   };
+
+  const commit = () => {
+    if (pending) onChange(toDateString(pending));
+    setIsOpen(false);
+  };
+
+  const cancel = () => setIsOpen(false);
+
+  const clear = () => setPending(fromDateString(defaultValue ?? value) ?? null);
 
   return (
     <DatePicker
       className="wave-runner-date-field"
-      value={fromDateString(value) ?? null}
-      onChange={handleChange}
+      value={pending ?? fromDateString(value) ?? null}
+      onChange={setPending}
+      isOpen={isOpen}
+      onOpenChange={handleOpenChange}
+      // The footer's OK button is what should close the popover on selection, not the library's
+      // own post-select auto-close.
+      shouldCloseOnSelect={false}
       minValue={minValue ? fromDateString(minValue) : undefined}
       maxValue={maxValue ? fromDateString(maxValue) : undefined}
       isDisabled={isDisabled}
@@ -64,6 +88,11 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
               {date => <CalendarCell date={date} className="calendar-cell" />}
             </CalendarGrid>
           </Calendar>
+          <footer className="date-field-footer">
+            <button type="button" className="footer-button clear" onClick={clear}>Clear</button>
+            <button type="button" className="footer-button cancel" onClick={cancel}>Cancel</button>
+            <button type="button" className="footer-button ok" onClick={commit}>OK</button>
+          </footer>
         </Dialog>
       </Popover>
     </DatePicker>
