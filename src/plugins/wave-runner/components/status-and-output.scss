@@ -18,16 +18,23 @@
     text-align: center;
   }
 
+  // Everything directly under the graph reads as one running commentary, so it keeps a single
+  // treatment even though the message changes as loading and running progress.
+  .download-status-container,
+  .estimated-time {
+    font-style: italic;
+    font-size: 14px;
+    margin: 10px 4px 0 0;
+    padding: 8px 14.3px 10px;
+  }
+
   .download-status-container {
-    height: 12px;
     width: 100%;
     background-color: white;
   }
 
   .estimated-time {
     text-align: center;
-    font-size: 13px;
-    margin-top: 5px;
   }
 
   .status-counts-row {
