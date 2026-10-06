@@ -71,14 +71,14 @@ The tutor also reads its model from an `OPENAI_MODEL` param, which every other f
 
 **Use `.env.local`, not `.env`.** The Firebase CLI reads `.env` at deploy time and applies its values to the deployed functions of whichever project is selected — so a local `OPENAI_MODEL` in `.env` would decide which model production calls. `.env.local` is the one Firebase reserves for emulation and never deploys.
 
-A per-project file — `.env.collaborative-learning-staging`, `.env.collaborative-learning-ec215` — is applied only when deploying to that project, which is how a setting can be true of staging and not of production.
+A per-project file — `.env.collaborative-learning-staging`, `.env.collaborative-learning-ec215` — is applied only when deploying to that project, which is how a setting can be true of staging and not of production. Those two files are committed; see [Deploy-time params](#deploy-time-params).
 
 **`AI_PROMPT_TEXT_LOGGING` — for the emulator, and off everywhere else.** The analysis pipeline always logs how many agreement entries and peer comments each related summary contributed; those are counts, with no text and nobody's id, and they are on everywhere. This param additionally logs the related-summary text *as it was sent to OpenAI* — the stored summary, the agreement counts sentence and the fenced peer comments together — so that a person can confirm that rated human comments arrive intact and separate from the counts. It writes what people in the class wrote about each other's work, so:
 
-- Set it in `.env.local`, which the emulator reads and Firebase never deploys. **It must never appear in `.env` or in any `.env.collaborative-learning-*` file.** No deployed environment needs it: the emulator runs the whole read path, and the one thing the emulator cannot check — that a composite index exists — shows in the count-only log line, not in the text.
+- Turn it `on` in `.env.local`, which the emulator reads and Firebase never deploys. **It must never be `on` in `.env` or in any `.env.collaborative-learning-*` file.** The project files set it to `off` only because the Firebase CLI asks for any param they leave out (see [Deploy-time params](#deploy-time-params)). No deployed environment needs it: the emulator runs the whole read path, and the one thing the emulator cannot check — that a composite index exists — shows in the count-only log line, not in the text.
 - **It has no effect outside the functions emulator.** The code requires `FUNCTIONS_EMULATOR=true`, which the emulator sets itself, as well as the param. So setting the variable on a deployed project logs nothing; enabling it there would take a code change.
 - It is read as exactly `on`. Absent, `off`, `true`, `ON` and everything else leave the text out. An unset param reads back as `""` at runtime rather than as its declared default, so absent is off by construction.
-- Remove it from `.env.local` when the check is done, so the next emulator run is quiet.
+- Set it back to `off` in `.env.local` when the check is done, so the next emulator run is quiet.
 
 In this approach the functions are running inside of Jest and they connect to the emulated Firestore and Realtime database services.
 
@@ -163,6 +163,37 @@ Then run:
 ```shell
 $ npm run deploy                        # deploy all functions
 ```
+
+### Deploy-time params
+
+A `defineString` param (such as `OPENAI_MODEL`) gets its value when the functions are deployed, not
+when they run. The Firebase CLI reads it from the `.env` files in this folder:
+
+|File|Committed|Read by|
+|----|---------|-------|
+|`.env.collaborative-learning-ec215`|yes|deploys to production|
+|`.env.collaborative-learning-staging`|yes|deploys to staging|
+|`.env.local`|no (`*.local`)|the emulator only; never deployed|
+|`.env`|no|every deploy, to any project — do not create it|
+
+The two project files are the record of what each project runs. To find out which model the tutor
+uses in production, read `.env.collaborative-learning-ec215`. The project ids come from
+`.firebaserc`.
+
+The rules:
+
+- A new deploy-time param goes into **both** project files, in the same commit as the code that
+  reads it. Then a deploy never depends on what the developer has on their machine. If a file
+  leaves a param out, the Firebase CLI asks for a value during the deploy, even when the param has
+  a default; a non-interactive deploy fails instead. The CLI then writes the answer into the
+  project file. Pressing Enter accepts the default, which for the `FL_*` params is `""` and breaks
+  ForeverLearning turns.
+- To change a deployed value, edit the project file, commit it, and deploy from that commit.
+- Secrets never go in these files. They use `defineSecret` and Secret Manager (`.secret.local` for
+  the emulator).
+- What each param means is documented once, in `.env.example`. The project files carry only
+  values.
+- `AI_PROMPT_TEXT_LOGGING` is `off` in both project files. Turn it `on` only in `.env.local`.
 
 ### Deploy Firestore indexes before the functions that query them
 
