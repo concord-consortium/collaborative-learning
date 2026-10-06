@@ -9,6 +9,11 @@
     gap: 8px;
     margin: 0 12px;
     border: solid 1.5px white;
+    // The graph area keeps its shape before a model has been run, showing as an empty grey box
+    // rather than collapsing to nothing. A rendered waveform draws over it.
+    flex: 1;
+    min-height: 0;
+    background-color: $charcoal-light-4;
   }
 
   .waveform-loading,
