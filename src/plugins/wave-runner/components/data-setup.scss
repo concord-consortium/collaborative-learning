@@ -45,6 +45,12 @@
         background-color: $workspace-teal-light-6;
       }
 
+      // The house component flattens the open header's bottom corners so it fuses with the list
+      // below. The design keeps the two as separate rounded cards.
+      &.show-list {
+        border-radius: 5px;
+      }
+
       // The house component hides the chevron when disabled; the design keeps it visible and
       // greyed, with the label itself staying at full opacity.
       &.disabled .arrow {
@@ -76,6 +82,11 @@
       // The design's open list is wider than the closed field, sized by its longest label.
       width: max-content;
       min-width: 100%;
+      border-radius: 5px;
+    }
+
+    .list-item:last-child {
+      border-radius: 0 0 5px 5px;
     }
 
     .list-item {
