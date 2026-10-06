@@ -4,4 +4,187 @@
 .wave-runner-date-field {
   display: flex;
   flex-direction: column;
+
+  .field-label {
+    margin-left: 8px;
+    margin-bottom: 5px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 40px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: solid 1.5px $charcoal-light-1;
+    background-color: white;
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    padding: 0 8px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $workspace-teal-light-5;
+    }
+
+    &[data-focus-within] {
+      background-color: $workspace-teal-light-5;
+      border-color: $workspace-teal;
+    }
+
+    @include focus-ring;
+  }
+
+  .static-time {
+    color: $charcoal-dark-2;
+  }
+
+  .calendar-trigger {
+    margin-left: auto;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+
+    @include focus-ring;
+  }
+
+  // The copied icon's group carries fill="none", so a fill on the svg root does not reach the
+  // shapes - target them directly.
+  .calendar-glyph {
+    display: block;
+    width: 20px;
+    height: 20px;
+
+    path, rect {
+      fill: $workspace-teal-dark-1;
+    }
+  }
+
+  &[data-disabled] .field-group {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+.date-field-popover {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+  z-index: 11;
+
+  .date-field-dialog {
+    padding: 12px;
+    outline: none;
+  }
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  .nav-button,
+  .calendar-heading {
+    height: 32px;
+    border-radius: 5px;
+    border: solid 1.5px $workspace-teal;
+    background-color: white;
+    color: $charcoal-dark-2;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $workspace-teal-light-5;
+    }
+
+    @include focus-ring;
+  }
+
+  .nav-button {
+    width: 32px;
+  }
+
+  .calendar-heading {
+    flex-grow: 1;
+    padding: 0 8px;
+  }
+
+  .calendar-grid {
+    border-collapse: collapse;
+
+    th {
+      font-size: 13px;
+      color: $charcoal-dark-2;
+      font-weight: normal;
+      padding: 4px;
+    }
+  }
+
+  .calendar-cell {
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 5px;
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    cursor: pointer;
+
+    &[data-outside-month] {
+      color: $charcoal-light-1;
+    }
+
+    &[data-today] {
+      border: solid 1.5px $workspace-teal;
+    }
+
+    &[data-selected] {
+      background-color: $workspace-teal-dark-1;
+      color: white;
+    }
+
+    &[data-disabled] {
+      color: $charcoal-light-2;
+      cursor: default;
+    }
+
+    &:hover:not([data-disabled]):not([data-selected]) {
+      background-color: $workspace-teal-light-3;
+    }
+
+    @include focus-ring;
+  }
+
+  .date-field-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .footer-button {
+    height: 32px;
+    min-width: 72px;
+    border-radius: 5px;
+    border: solid 1.5px $charcoal-light-1;
+    background-color: white;
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $workspace-teal-light-5;
+    }
+
+    &.ok {
+      background-color: $workspace-teal-light-4;
+      border-color: $workspace-teal;
+    }
+
+    @include focus-ring;
+  }
 }

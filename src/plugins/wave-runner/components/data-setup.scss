@@ -21,8 +21,17 @@
     margin-bottom: 5px;
   }
 
-  .dropdown,
-  .datetime {
+  .wave-runner-dropdown {
     width: 100%;
+
+    .header {
+      min-width: 0;
+      max-width: none;
+      width: 100%;
+    }
+
+    .list {
+      width: 100%;
+    }
   }
 }
