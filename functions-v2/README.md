@@ -69,9 +69,9 @@ The chat tutor (`chatTutorOnWrite`) uses its own `OPENAI_TUTOR_API_KEY` secret �
 
 The tutor also reads its model from an `OPENAI_MODEL` param, which every other function hard-codes instead. It is a `defineString` with **no default**, so if you don't supply one the function sends `model: ""`, OpenAI rejects the request, and the conversation document ends up with `status: "error"`. Copy `.env.example` to `functions-v2/.env.local` and set a model there. It is config rather than a secret, so it is separate from `.secret.local`; both are gitignored by the `*.local` rule.
 
-**Use `.env.local`, not `.env`.** The Firebase CLI reads `.env` at deploy time and applies its values to the deployed functions of whichever project is selected — so a local `OPENAI_MODEL` in `.env` would decide which model production calls. `.env.local` is the one Firebase reserves for emulation and never deploys.
+**Use `.env.local`, not `.env`.** `.env.local` is the one Firebase reserves for emulation and never deploys. The Firebase CLI also reads `.env` at deploy time, for whichever project is selected. The committed project file overrides it key by key, but any key that only `.env` sets is still deployed, to every function.
 
-A per-project file — `.env.collaborative-learning-staging`, `.env.collaborative-learning-ec215` — is applied only when deploying to that project, which is how a setting can be true of staging and not of production. Those two files are committed; see [Deploy-time params](#deploy-time-params).
+The deployed values are in the committed per-project files; see [Deploy-time params](#deploy-time-params).
 
 **`AI_PROMPT_TEXT_LOGGING` — for the emulator, and off everywhere else.** The analysis pipeline always logs how many agreement entries and peer comments each related summary contributed; those are counts, with no text and nobody's id, and they are on everywhere. This param additionally logs the related-summary text *as it was sent to OpenAI* — the stored summary, the agreement counts sentence and the fenced peer comments together — so that a person can confirm that rated human comments arrive intact and separate from the counts. It writes what people in the class wrote about each other's work, so:
 
@@ -93,7 +93,7 @@ which the OpenAI path reads:
 | Where | Name |
 |---|---|
 | `.secret.local` | `FL_CONCORDCLUE_API_KEY` |
-| `.env.local` | `FL_BASE_URL`, `FL_SOLUTION_ID`, `FL_CATALOG_COMMIT`, `FL_PROTECTION_CLASSES`, `FL_PROTECTION_PATTERN_REFS` |
+| `.env.local` (emulator), the per-project files (deployed) | `FL_BASE_URL`, `FL_SOLUTION_ID`, `FL_CATALOG_COMMIT`, `FL_PROTECTION_CLASSES`, `FL_PROTECTION_PATTERN_REFS` |
 
 See `.env.example` for what each one means and a working set of values. An FL turn with them unset
 fails the turn rather than sending an unprotected packet — `buildEnvelope` refuses an empty
@@ -156,13 +156,27 @@ The trade-off is the one the `demo-test` note above describes: on the real proje
 
 ## To deploy firebase functions
 
-Run `npx firebase use [project]` to select which firebase project to deploy the functions to.
-There are two project aliases configured in `.firebaserc`: `production` and `staging`.
+For a release, follow the `releasing-clue` skill (`.claude/skills/releasing-clue/`). It deploys
+from a worktree at the release tag, which has the committed env files and nothing else.
+
+To deploy from your own checkout, run `npx firebase use [project]` to select which firebase project
+to deploy the functions to. There are two project aliases configured in `.firebaserc`: `production`
+and `staging`.
 
 Then run:
 ```shell
 $ npm run deploy                        # deploy all functions
 ```
+
+Before you deploy from your own checkout, make sure `functions-v2/` has neither of these:
+
+- **`.env`.** The CLI loads it as well as the project file, so any key that only `.env` sets is
+  deployed to every function.
+- **An alias file such as `.env.staging` or `.env.production`.** The CLI refuses to deploy when both
+  `.env.<projectId>` and `.env.<alias>` exist.
+
+Deploy all of `functions-v2`, not a subset. Each function keeps the values it was last deployed
+with, so a subset deploy leaves the other functions on older values.
 
 ### Deploy-time params
 
@@ -176,6 +190,10 @@ when they run. The Firebase CLI reads it from the `.env` files in this folder:
 |`.env.local`|no (`*.local`)|the emulator only; never deployed|
 |`.env`|no|every deploy, to any project — do not create it|
 
+The emulator also loads the project file for the `--project` it runs under. Under
+`--project collaborative-learning-ec215` (see "Driving the functions from a browser"), production's
+values apply unless `.env.local` overrides them. Under `demo-test`, no project file is loaded.
+
 The two project files are the record of what each project runs. To find out which model the tutor
 uses in production, read `.env.collaborative-learning-ec215`. The project ids come from
 `.firebaserc`.
@@ -183,7 +201,7 @@ uses in production, read `.env.collaborative-learning-ec215`. The project ids co
 The rules:
 
 - A new deploy-time param goes into **both** project files, in the same commit as the code that
-  reads it. Then a deploy never depends on what the developer has on their machine. If a file
+  reads it. `test/deploy-env-files.test.ts` fails until it does. Then a deploy never depends on what the developer has on their machine. If a file
   leaves a param out, the Firebase CLI asks for a value during the deploy, even when the param has
   a default; a non-interactive deploy fails instead. The CLI then writes the answer into the
   project file. Pressing Enter accepts the default, which for the `FL_*` params is `""` and breaks
@@ -192,8 +210,9 @@ The rules:
 - Secrets never go in these files. They use `defineSecret` and Secret Manager (`.secret.local` for
   the emulator).
 - What each param means is documented once, in `.env.example`. The project files carry only
-  values.
-- `AI_PROMPT_TEXT_LOGGING` is `off` in both project files. Turn it `on` only in `.env.local`.
+  values. The test also checks that `.env.example` lists every param.
+- `AI_PROMPT_TEXT_LOGGING` is `off` in both project files, which the test checks. Turn it `on` only
+  in `.env.local`.
 
 ### Deploy Firestore indexes before the functions that query them
 
