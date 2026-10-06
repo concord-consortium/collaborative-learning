@@ -36,6 +36,14 @@
       .section + .section {
         border-left: 1px solid $workspace-teal-dark-1;
       }
+
+      // Side by side the sections share space from a zero basis, so Data Setup is floored only by
+      // its own min-content and narrows as soon as a short station name is chosen. Give it a real
+      // basis and forbid shrinking. Scoped to horizontal: flex-basis follows the main axis, so in
+      // the stacked layout this would set a height instead.
+      .section.data-setup {
+        flex: 1 0 426px;
+      }
     }
   }
 
