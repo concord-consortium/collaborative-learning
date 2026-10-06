@@ -40,6 +40,11 @@
         text-overflow: ellipsis;
       }
 
+      &:hover:not(.show-list),
+      &:focus-visible:not(.show-list) {
+        background-color: $workspace-teal-light-6;
+      }
+
       // The house component hides the chevron when disabled; the design keeps it visible and
       // greyed, with the label itself staying at full opacity.
       &.disabled .arrow {
@@ -81,8 +86,18 @@
         white-space: nowrap;
       }
 
-      &.selected .item {
-        font-weight: bold;
+      &:hover,
+      &:focus-visible {
+        background-color: $workspace-teal-light-6;
+      }
+
+      // Ordered after the rollover so a hovered selection keeps the selected fill.
+      &.selected {
+        background-color: $workspace-teal-light-4;
+
+        .item {
+          font-weight: bold;
+        }
       }
     }
   }
