@@ -87,8 +87,8 @@
     gap: 8px;
   }
 
-  .nav-button,
-  .calendar-heading {
+  .nav-button {
+    width: 32px;
     height: 32px;
     border-radius: 5px;
     border: solid 1.5px $workspace-teal;
@@ -98,19 +98,30 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $workspace-teal-light-5;
+      background-color: $workspace-teal-light-6;
     }
 
     @include focus-ring;
   }
 
-  .nav-button {
-    width: 32px;
-  }
-
+  // Matches the station dropdown's closed control. Its option list is browser chrome and cannot
+  // be styled to match - that would mean replacing it with CustomSelect as the station field was.
   .calendar-heading {
     flex-grow: 1;
-    padding: 0 8px;
+    height: 26px;
+    padding-left: 8px;
+    border-radius: 5px;
+    border: solid 1.5px $charcoal-light-1;
+    background-color: white;
+    color: $charcoal-dark-2;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $workspace-teal-light-6;
+    }
+
+    @include focus-ring;
   }
 
   .calendar-grid {

@@ -60,6 +60,11 @@
 
     &.status-and-output {
       background-color: $workspace-teal-light-6;
+      // The waveform measures this panel and writes the result onto the chart as an explicit
+      // pixel width, which then becomes the panel's min-content. Without this the panel is floored
+      // by that width and each measurement grows the next, so the graph runs away.
+      min-width: 0;
+      overflow: hidden;
     }
   }
 

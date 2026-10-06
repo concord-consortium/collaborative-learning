@@ -1,4 +1,4 @@
-import { CalendarDate, parseDate } from "@internationalized/date";
+import { CalendarDate, parseDate, today } from "@internationalized/date";
 
 /**
  * The model stores dates as "YYYY-MM-DD" strings. CalendarDate carries no timezone, so this
@@ -19,4 +19,13 @@ export function toDateString(date: CalendarDate): string {
   const month = String(date.month).padStart(2, "0");
   const day = String(date.day).padStart(2, "0");
   return `${date.year}-${month}-${day}`;
+}
+
+/**
+ * Today as a stored date string. UTC rather than the local zone because the model's dates are UTC
+ * days and the seismic data they request is in UTC - using the local zone would let a student east
+ * of UTC pick a day the archive has no data for yet.
+ */
+export function todayDateString(): string {
+  return toDateString(today("UTC"));
 }

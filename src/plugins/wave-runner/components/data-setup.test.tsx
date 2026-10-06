@@ -50,6 +50,10 @@ function renderSetup(content: WaveRunnerContentModelType = defaultWaveRunnerCont
 }
 
 describe("DataSetup date fields", () => {
+  // Pinned so the bounds assertions do not depend on the day the suite happens to run.
+  beforeEach(() => jest.useFakeTimers().setSystemTime(new Date("2026-10-06T12:00:00Z")));
+  afterEach(() => jest.useRealTimers());
+
   it("renders a picker for each date", () => {
     renderSetup();
     expect(screen.getByText("Start Date and Time")).toBeInTheDocument();
@@ -79,16 +83,18 @@ describe("DataSetup date fields", () => {
       .not.toHaveAttribute("aria-disabled", "true");
   });
 
+  // Dates sit in September so they stay in the past relative to the pinned clock; a day after
+  // today is disabled whatever the other field says.
   it("bounds the end picker by the start date", () => {
     const content = defaultWaveRunnerContent();
-    content.setStartDate("2026-10-10");
-    content.setEndDate("2026-10-20");
+    content.setStartDate("2026-09-10");
+    content.setEndDate("2026-09-20");
     renderSetup(content);
 
     fireEvent.click(screen.getAllByRole("button", { name: /Choose date/ })[1]);
-    expect(screen.getByRole("button", { name: /October 5, 2026/ }))
+    expect(screen.getByRole("button", { name: /September 5, 2026/ }))
       .toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: /October 25, 2026/ }))
+    expect(screen.getByRole("button", { name: /September 25, 2026/ }))
       .not.toHaveAttribute("aria-disabled", "true");
   });
 });
@@ -132,5 +138,23 @@ describe("DataSetup dropdowns", () => {
   it("renders no native select for station or model", () => {
     const { container } = renderSetup();
     expect(container.querySelectorAll("select.dropdown")).toHaveLength(0);
+  });
+});
+
+describe("DataSetup future dates", () => {
+  beforeEach(() => jest.useFakeTimers().setSystemTime(new Date("2026-10-06T12:00:00Z")));
+  afterEach(() => jest.useRealTimers());
+
+  it("does not offer a day after today", () => {
+    const content = defaultWaveRunnerContent();
+    content.setStartDate("2026-10-01");
+    content.setEndDate("2026-10-05");
+    renderSetup(content);
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Choose date/ })[1]);
+    expect(screen.getByRole("button", { name: /October 7, 2026/ }))
+      .toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /October 6, 2026/ }))
+      .not.toHaveAttribute("aria-disabled", "true");
   });
 });

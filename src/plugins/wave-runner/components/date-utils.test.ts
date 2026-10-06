@@ -1,5 +1,5 @@
 import { CalendarDate } from "@internationalized/date";
-import { fromDateString, toDateString } from "./date-utils";
+import { fromDateString, todayDateString, toDateString } from "./date-utils";
 
 describe("date-utils", () => {
   it("parses a stored date string", () => {
@@ -20,5 +20,16 @@ describe("date-utils", () => {
     expect(fromDateString("")).toBeUndefined();
     expect(fromDateString("not-a-date")).toBeUndefined();
     expect(fromDateString("2026-13-45")).toBeUndefined();
+  });
+});
+
+describe("todayDateString", () => {
+  afterEach(() => jest.useRealTimers());
+
+  // UTC, not the local zone: a student east of UTC would otherwise be offered a day the seismic
+  // archive has no data for yet.
+  it("reports today in UTC regardless of the local zone", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-10-06T23:30:00Z"));
+    expect(todayDateString()).toBe("2026-10-06");
   });
 });

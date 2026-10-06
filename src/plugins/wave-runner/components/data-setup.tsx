@@ -8,6 +8,7 @@ import { useSettingFromStores } from "../../../hooks/use-stores";
 import { stationId } from "../../shared-seismogram/station-model";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
 import { kDefaultEndDate, kDefaultStartDate } from "../models/wave-runner-content";
+import { todayDateString } from "./date-utils";
 import { DateField } from "./date-field";
 import "./data-setup.scss";
 
@@ -73,6 +74,11 @@ export const DataSetup: React.FC = observer(function DataSetup() {
 
   const hasStations = dropdownOptions.length > 0;
 
+  // There is no data for a day that has not happened yet, so neither field may reach past today.
+  // The start field is additionally capped by the end date, whichever comes first.
+  const latestSelectableDate = todayDateString();
+  const latestStartDate = content.endDate < latestSelectableDate ? content.endDate : latestSelectableDate;
+
   // CustomSelect resolves its header as `title || selectedItem.text`, so a non-empty title would
   // permanently mask the chosen station or model. Supply one only while nothing is selected.
   const stationPlaceholder = !hasStations
@@ -134,7 +140,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             label="Start Date and Time"
             value={content.startDate}
             defaultValue={kDefaultStartDate}
-            maxValue={content.endDate}
+            maxValue={latestStartDate}
             onChange={date => content.setStartDate(date)}
             isDisabled={content.isRunning || content.isLoadingData}
           />
@@ -146,6 +152,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             value={content.endDate}
             defaultValue={kDefaultEndDate}
             minValue={content.startDate}
+            maxValue={latestSelectableDate}
             onChange={date => content.setEndDate(date)}
             isDisabled={content.isRunning || content.isLoadingData}
           />
