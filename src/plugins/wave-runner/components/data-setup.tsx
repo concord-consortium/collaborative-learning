@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useMemo } from "react";
 import { ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
 import { StationConfig } from "../../../../shared/seismic/seismic-types";
+import { CustomSelect, ICustomDropdownItem } from "../../../clue/components/custom-select";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { stationId } from "../../shared-seismogram/station-model";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
@@ -69,60 +70,49 @@ export const DataSetup: React.FC = observer(function DataSetup() {
     }
   }, [content, modelConfigs, defaultModelIndex]);
 
-  const handleStationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
-    const match = dropdownOptions.find(opt => opt.id === selectedId);
-    if (match) {
-      const { network, station, channel, label } = match.config;
-      const location = match.config.location ?? "";
+  const hasStations = dropdownOptions.length > 0;
+
+  const stationItems: ICustomDropdownItem[] = dropdownOptions.map(opt => ({
+    id: opt.id,
+    text: opt.config.label ?? opt.id,
+    selected: opt.id === currentStationId,
+    onClick: () => {
+      const { network, station, channel, label } = opt.config;
+      const location = opt.config.location ?? "";
       content.setStation({ network, station, location, channel, label });
     }
-  };
+  }));
 
-  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const url = e.target.value;
-    if (url) {
-      content.ensureModelMetadata(url);
-    }
-  };
-
-  const hasStations = dropdownOptions.length > 0;
+  const modelItems: ICustomDropdownItem[] = (modelConfigs ?? []).map(model => ({
+    id: model.metadataUrl,
+    text: model.label,
+    selected: model.metadataUrl === content.selectedModelUrl,
+    onClick: () => content.ensureModelMetadata(model.metadataUrl)
+  }));
 
   return (
     <div className="section data-setup">
       <div className="section-title">Data Setup</div>
       <div className="field-row">
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-station">Station</label>
-          <select
-            id="wave-runner-station"
-            className="dropdown"
-            value={currentStationId ?? ""}
-            onChange={handleStationChange}
-            disabled={!hasStations || content.isRunning || content.isLoadingData}
-          >
-            {!hasStations && <option value="">No stations configured</option>}
-            {hasStations && !currentStationId && <option value="">Choose a station</option>}
-            {dropdownOptions.map(opt => (
-              <option key={opt.id} value={opt.id}>{opt.config.label}</option>
-            ))}
-          </select>
+          <label className="field-label">Station</label>
+          <CustomSelect
+            className="wave-runner-dropdown"
+            dataTestId="wave-runner-station"
+            items={stationItems}
+            title={hasStations ? "Choose a station" : "No stations configured"}
+            isDisabled={!hasStations || content.isRunning || content.isLoadingData}
+          />
         </div>
         <div className="field">
           <label className="field-label">Model</label>
-          <select
-            className="dropdown"
-            value={content.selectedModelUrl ?? ""}
-            onChange={handleModelChange}
-            disabled={content.isRunning}
-          >
-            <option value="">Choose a model</option>
-            {(modelConfigs ?? []).map(model => (
-              <option key={model.metadataUrl} value={model.metadataUrl}>
-                {model.label}
-              </option>
-            ))}
-          </select>
+          <CustomSelect
+            className="wave-runner-dropdown"
+            dataTestId="wave-runner-model"
+            items={modelItems}
+            title="Choose a model"
+            isDisabled={content.isRunning}
+          />
         </div>
       </div>
       <div className="field-row">

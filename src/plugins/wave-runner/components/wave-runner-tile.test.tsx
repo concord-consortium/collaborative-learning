@@ -144,12 +144,10 @@ describe("WaveRunnerComponent", () => {
   });
 
   it("renders station dropdown with options from config", () => {
-    renderWithStores();
-    const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    const stationOptions = Array.from(stationSelect.options).filter(o => o.value !== "");
-    expect(stationOptions).toHaveLength(2);
-    expect(stationOptions[0].text).toBe("Anchorage Airport");
-    expect(stationOptions[1].text).toBe("Dexter Display Mine");
+    const { container } = renderWithStores();
+    const stationItems = container.querySelectorAll('[data-testid="wave-runner-station-list"] .list-item .item');
+    const labels = Array.from(stationItems).map(el => el.textContent);
+    expect(labels).toEqual(["Anchorage Airport", "Dexter Display Mine"]);
   });
 
   it("auto-selects the default station on mount", () => {

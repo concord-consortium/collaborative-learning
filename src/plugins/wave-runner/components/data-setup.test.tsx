@@ -92,3 +92,30 @@ describe("DataSetup date fields", () => {
       .not.toHaveAttribute("aria-disabled", "true");
   });
 });
+
+describe("DataSetup dropdowns", () => {
+  it("lists the configured stations", () => {
+    renderSetup();
+    expect(screen.getByText("Anchorage Airport")).toBeInTheDocument();
+    expect(screen.getByText("Dexter Display Mine")).toBeInTheDocument();
+  });
+
+  it("sets the station when one is chosen", () => {
+    const { content } = renderSetup();
+    fireEvent.click(screen.getByText("Dexter Display Mine"));
+    expect(content.station?.station).toBe("DDM");
+  });
+
+  it("lists the configured models", () => {
+    renderSetup();
+    expect(screen.getByText("Compact Model")).toBeInTheDocument();
+  });
+
+  // A native <select>'s option popup is OS chrome and cannot be styled, which is the whole reason
+  // these moved to the house dropdown. The month-and-year select inside each date picker is a
+  // native select and is expected; the station and model dropdowns must not be.
+  it("renders no native select for station or model", () => {
+    const { container } = renderSetup();
+    expect(container.querySelectorAll("select.dropdown")).toHaveLength(0);
+  });
+});
