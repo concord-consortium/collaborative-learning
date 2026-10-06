@@ -9,11 +9,14 @@
     gap: 8px;
     margin: 0 12px;
     border: solid 1.5px white;
-    // The graph area keeps its shape before a model has been run, showing as an empty grey box
-    // rather than collapsing to nothing. A rendered waveform draws over it.
-    flex: 1;
-    min-height: 0;
+    // The graph space is always a rectangle, whatever state it is in. 60px is the waveform
+    // panel's own height, so an empty box matches a drawn one.
+    min-height: 60px;
     background-color: $charcoal-light-4;
+
+    &.configured {
+      background-color: black;
+    }
   }
 
   .waveform-loading,

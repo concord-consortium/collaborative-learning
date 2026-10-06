@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 import { observer } from "mobx-react";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
@@ -11,10 +12,14 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
     eventsDataSet, runError, loadDataError
   } = model;
 
+  // The graph space is always a rectangle: grey until a station and model are chosen, black once
+  // they are, and a waveform once there is data to draw.
+  const isConfigured = !!model.station && !!model.selectedModelUrl;
+
   return (
     <div className="section status-and-output">
       <div className="section-title">Status and Output</div>
-      <div className="waveform-container">
+      <div className={classNames("waveform-container", { configured: isConfigured })}>
         {sharedSeismogram && hasStationData && (
           <WaveformPanel
             key={`${model.startDate}-${model.endDate}`}
