@@ -46,8 +46,23 @@
       }
     }
 
-    &.is-placeholder .header .item {
-      font-style: italic;
+    &.is-placeholder {
+      .header .item {
+        font-style: italic;
+      }
+
+      // Until a choice is made CustomSelect still treats its first row as selected, which would
+      // tick and embolden a station the student has not picked. The design shows no tick and no
+      // bold on any row in this state.
+      .list-item.selected {
+        .check {
+          background-image: url("../../../assets/icons/check/check.svg");
+        }
+
+        .item {
+          font-weight: normal;
+        }
+      }
     }
 
     .list {
