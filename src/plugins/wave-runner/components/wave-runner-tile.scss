@@ -37,12 +37,12 @@
         border-left: 1px solid $workspace-teal-dark-1;
       }
 
-      // Side by side the sections share space from a zero basis, so Data Setup is floored only by
-      // its own min-content and narrows as soon as a short station name is chosen. Give it a real
-      // basis and forbid shrinking. Scoped to horizontal: flex-basis follows the main axis, so in
-      // the stacked layout this would set a height instead.
+      // Data Setup holds 426px and neither grows nor shrinks: the surplus belongs to the graph,
+      // which uses the width, and a zero basis left this panel floored only by its own min-content
+      // so it narrowed as soon as a short station name was chosen. Scoped to horizontal, since
+      // flex-basis follows the main axis and would set a height in the stacked layout.
       .section.data-setup {
-        flex: 1 0 426px;
+        flex: 0 0 426px;
       }
     }
   }
