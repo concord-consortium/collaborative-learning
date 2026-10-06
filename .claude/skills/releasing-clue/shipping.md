@@ -15,8 +15,9 @@ patch with the developer, and record the steps.
 ## Production Firebase [approve]
 
 Deploy what the deploy-timing decisions call for, with the same commands as staging (cutting.md)
-and `--project collaborative-learning-ec215`. Compare production's deployed params with each
-`.env` first; production and staging can differ.
+and `--project collaborative-learning-ec215`. Compare production's deployed params first:
+`functions-v2`'s with the tag's `functions-v2/.env.collaborative-learning-ec215`, and
+`authoring-api`'s with `authoring-api/.env`. Production and staging can differ.
 
 Follow the recorded order:
 - **`before`:** deploy now, before Release Production.
