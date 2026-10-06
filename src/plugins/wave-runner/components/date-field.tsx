@@ -133,7 +133,13 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
               <Button slot="next" className="nav-button" aria-label="Next month">›</Button>
             </header>
             <CalendarGrid className="calendar-grid" weekdayStyle="short">
-              {date => <CalendarCell date={date} className="calendar-cell" />}
+              {date => (
+                <CalendarCell date={date} className="calendar-cell">
+                  {/* A selected day is an outlined cell around a filled swatch, so the number
+                      needs its own element to carry the fill. */}
+                  {({ formattedDate }) => <span className="cell-fill">{formattedDate}</span>}
+                </CalendarCell>
+              )}
             </CalendarGrid>
           </Calendar>
           <footer className="date-field-footer">

@@ -142,13 +142,31 @@
       color: $charcoal-light-1;
     }
 
-    &[data-today] {
-      border-color: $workspace-teal;
+    &[data-today] .cell-fill {
+      border-color: $charcoal-dark-1;
+      background-color: $charcoal-light-4;
+    }
+
+    .cell-fill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      // Reserved so the swatch does not resize when a day becomes selected.
+      border: solid 1px transparent;
     }
 
     &[data-selected] {
       background-color: white;
       border-color: $workspace-teal-dark-1;
+
+      .cell-fill {
+        border-color: $workspace-teal-dark-1;
+        background-color: $workspace-teal-dark-1;
+        color: white;
+      }
     }
 
     &[data-disabled] {
@@ -157,7 +175,7 @@
     }
 
     &:hover:not([data-disabled]):not([data-selected]) {
-      background-color: $workspace-teal-light-3;
+      background-color: $workspace-teal-light-6;
     }
 
     @include focus-ring;
