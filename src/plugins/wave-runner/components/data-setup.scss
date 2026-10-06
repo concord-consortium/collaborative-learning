@@ -14,6 +14,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    // Without this a flex item is floored by its own min-content, so choosing a long station name
+    // widens one field and both controls resize. The label ellipsises instead.
+    min-width: 0;
   }
 
   .field-label {

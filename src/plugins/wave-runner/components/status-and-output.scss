@@ -24,6 +24,7 @@
   .estimated-time {
     font-style: italic;
     font-size: 14px;
+    text-align: center;
     margin: 10px 4px 0 0;
     padding: 8px 14.3px 10px;
   }
@@ -36,9 +37,7 @@
     }
   }
 
-  .estimated-time {
-    text-align: center;
-  }
+
 
   .status-counts-row {
     display: flex;
