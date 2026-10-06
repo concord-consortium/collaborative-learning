@@ -45,9 +45,15 @@
         background-color: $workspace-teal-light-6;
       }
 
-      // The house component flattens the open header's bottom corners so it fuses with the list
-      // below. The design keeps the two as separate rounded cards.
-      &.show-list {
+      // The open state is restated in full rather than inherited from the house component: the
+      // white resting fill above matches `.custom-select .header.show-list` on specificity, so
+      // whichever stylesheet loaded last would win. The house also flattens the bottom corners to
+      // fuse header and list; the design keeps them as separate rounded cards.
+      &.show-list,
+      &:active {
+        background-color: $workspace-teal-dark-1;
+        color: white;
+        border-color: white;
         border-radius: 5px;
       }
 
