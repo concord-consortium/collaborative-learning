@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useMemo } from "react";
 import { ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
@@ -105,8 +106,10 @@ export const DataSetup: React.FC = observer(function DataSetup() {
       <div className="field-row">
         <div className="field">
           <label className="field-label">Station</label>
+          {/* The placeholder is italic and a chosen label is not, which CSS alone cannot tell
+              apart - the header markup is identical either way. */}
           <CustomSelect
-            className="wave-runner-dropdown"
+            className={classNames("wave-runner-dropdown", { "is-placeholder": !currentStationId })}
             dataTestId="wave-runner-station"
             items={stationItems}
             title={stationPlaceholder}
@@ -116,7 +119,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
         <div className="field">
           <label className="field-label">Model</label>
           <CustomSelect
-            className="wave-runner-dropdown"
+            className={classNames("wave-runner-dropdown", { "is-placeholder": !content.selectedModelUrl })}
             dataTestId="wave-runner-model"
             items={modelItems}
             title={modelPlaceholder}
