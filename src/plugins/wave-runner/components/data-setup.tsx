@@ -72,6 +72,15 @@ export const DataSetup: React.FC = observer(function DataSetup() {
 
   const hasStations = dropdownOptions.length > 0;
 
+  // CustomSelect resolves its header as `title || selectedItem.text`, so a non-empty title would
+  // permanently mask the chosen station or model. Supply one only while nothing is selected.
+  const stationPlaceholder = !hasStations
+    ? "No stations configured"
+    : (currentStationId ? undefined : "Choose a station");
+  const modelPlaceholder = (modelConfigs ?? []).length === 0
+    ? "No models configured"
+    : (content.selectedModelUrl ? undefined : "Choose a model");
+
   const stationItems: ICustomDropdownItem[] = dropdownOptions.map(opt => ({
     id: opt.id,
     text: opt.config.label ?? opt.id,
@@ -100,7 +109,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="wave-runner-dropdown"
             dataTestId="wave-runner-station"
             items={stationItems}
-            title={hasStations ? "Choose a station" : "No stations configured"}
+            title={stationPlaceholder}
             isDisabled={!hasStations || content.isRunning || content.isLoadingData}
           />
         </div>
@@ -110,7 +119,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             className="wave-runner-dropdown"
             dataTestId="wave-runner-model"
             items={modelItems}
-            title="Choose a model"
+            title={modelPlaceholder}
             isDisabled={content.isRunning}
           />
         </div>

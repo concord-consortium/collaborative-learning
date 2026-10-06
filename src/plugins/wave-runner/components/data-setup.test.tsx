@@ -94,10 +94,25 @@ describe("DataSetup date fields", () => {
 });
 
 describe("DataSetup dropdowns", () => {
+  function listLabels(container: HTMLElement, testId: string) {
+    return Array.from(container.querySelectorAll(`[data-testid="${testId}-list"] .list-item .item`))
+      .map(el => el.textContent);
+  }
+
   it("lists the configured stations", () => {
-    renderSetup();
-    expect(screen.getByText("Anchorage Airport")).toBeInTheDocument();
-    expect(screen.getByText("Dexter Display Mine")).toBeInTheDocument();
+    const { container } = renderSetup();
+    expect(listLabels(container, "wave-runner-station"))
+      .toEqual(["Anchorage Airport", "Dexter Display Mine"]);
+  });
+
+  // CustomSelect shows `title || selectedItem.text`, so a placeholder passed unconditionally would
+  // mask the student's choice: the control would still read "Choose a station" after they picked
+  // one, with only the tick inside the open list to show otherwise.
+  it("shows the chosen station in the closed control", () => {
+    const { container } = renderSetup();
+    fireEvent.click(screen.getByText("Dexter Display Mine"));
+    expect(container.querySelector('[data-testid="wave-runner-station-header"]'))
+      .toHaveTextContent("Dexter Display Mine");
   });
 
   it("sets the station when one is chosen", () => {
@@ -107,8 +122,8 @@ describe("DataSetup dropdowns", () => {
   });
 
   it("lists the configured models", () => {
-    renderSetup();
-    expect(screen.getByText("Compact Model")).toBeInTheDocument();
+    const { container } = renderSetup();
+    expect(listLabels(container, "wave-runner-model")).toEqual(["Compact Model"]);
   });
 
   // A native <select>'s option popup is OS chrome and cannot be styled, which is the whole reason
