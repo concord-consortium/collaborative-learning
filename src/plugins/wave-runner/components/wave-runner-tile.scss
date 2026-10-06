@@ -11,6 +11,8 @@
     width: 100%;
     height: 100%;
     padding: 4px;
+    display: flex;
+    flex-direction: column;
   }
 
   .title-background {
@@ -21,6 +23,10 @@
 
   .sections {
     display: flex;
+    // Fill the tile rather than stopping at content height, which left the tile's own white
+    // showing below the panels.
+    flex: 1;
+    min-height: 0;
 
     &.vertical {
       flex-direction: column;
