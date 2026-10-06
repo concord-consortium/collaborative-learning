@@ -6,6 +6,7 @@ import {
 } from "react-aria-components";
 
 import CalendarIcon from "../assets/calendar-icon.svg";
+import { CustomSelect, ICustomDropdownItem } from "../../../clue/components/custom-select";
 import { fromDateString, toDateString } from "./date-utils";
 
 import "./date-field.scss";
@@ -36,6 +37,22 @@ function monthOptions(focused: CalendarDate) {
     });
   }
   return options;
+}
+
+// No static `title` is passed to CustomSelect: it would permanently mask the focused month per
+// `titleText = title || selectedItem?.text`. The trigger's visible label is the focused month
+// itself, which also doubles as its accessible name - the same pattern the Station and Model
+// fields already rely on in this tile, since CustomSelect has no separate aria-label prop.
+function monthDropdownItems(
+  focused: CalendarDate, setFocused: (date: CalendarDate) => void
+): ICustomDropdownItem[] {
+  const focusedValue = `${focused.year}-${String(focused.month).padStart(2, "0")}`;
+  return monthOptions(focused).map(option => ({
+    id: option.value,
+    text: option.label,
+    selected: option.value === focusedValue,
+    onClick: () => setFocused(parseDate(`${option.value}-01`))
+  }));
 }
 
 export interface IDateFieldProps {
@@ -127,16 +144,11 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
           >
             <header className="calendar-header">
               <Button slot="previous" className="nav-button" aria-label="Previous month">‹</Button>
-              <select
-                className="calendar-heading"
-                aria-label="Month and year"
-                value={`${focused.year}-${String(focused.month).padStart(2, "0")}`}
-                onChange={e => setFocused(parseDate(`${e.target.value}-01`))}
-              >
-                {monthOptions(focused).map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
+              <CustomSelect
+                className="month-dropdown"
+                dataTestId="date-field-month"
+                items={monthDropdownItems(focused, setFocused)}
+              />
               <Button slot="next" className="nav-button" aria-label="Next month">›</Button>
             </header>
             <CalendarGrid className="calendar-grid" weekdayStyle="short">

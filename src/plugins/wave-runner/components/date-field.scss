@@ -1,5 +1,6 @@
 @import "../../../components/vars";
 @import "../../../components/mixins";
+@import "./dropdown-appearance";
 
 .wave-runner-date-field {
   display: flex;
@@ -104,24 +105,12 @@
     @include focus-ring;
   }
 
-  // Matches the station dropdown's closed control. Its option list is browser chrome and cannot
-  // be styled to match - that would mean replacing it with CustomSelect as the station field was.
-  .calendar-heading {
+  // CustomSelect, same as the station/model dropdowns, so its open list is no longer unstylable
+  // OS chrome. The shared look lives in a mixin so this and the data-setup fields cannot drift.
+  .month-dropdown {
     flex-grow: 1;
-    height: 26px;
-    padding-left: 8px;
-    border-radius: 5px;
-    border: solid 1.5px $charcoal-light-1;
-    background-color: white;
-    color: $charcoal-dark-2;
-    font-size: 13px;
-    cursor: pointer;
 
-    &:hover {
-      background-color: $workspace-teal-light-6;
-    }
-
-    @include focus-ring;
+    @include wave-runner-dropdown-appearance;
   }
 
   .calendar-grid {

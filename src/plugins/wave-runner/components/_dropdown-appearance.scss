@@ -1,0 +1,80 @@
+@import "../../../components/vars";
+
+// The look CustomSelect takes on in WaveRunner: the station/model fields and the date field's
+// month chooser must stay pixel-identical, so both import this instead of keeping their own copy.
+@mixin wave-runner-dropdown-appearance {
+  .header {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    height: 26px;
+    background-color: white;
+
+    .item {
+      // The house component indents its header text by 2px; the design asks for 8px.
+      margin-left: 8px;
+      max-height: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &:hover:not(.show-list),
+    &:focus-visible:not(.show-list) {
+      background-color: $workspace-teal-light-6;
+    }
+
+    // The open state is restated in full rather than inherited from the house component: the
+    // white resting fill above matches `.custom-select .header.show-list` on specificity, so
+    // whichever stylesheet loaded last would win. The house also flattens the bottom corners to
+    // fuse header and list; the design keeps them as separate rounded cards.
+    &.show-list,
+    &:active {
+      background-color: $workspace-teal-dark-1;
+      color: white;
+      border-color: white;
+      border-radius: 5px;
+    }
+
+    // The house component hides the chevron when disabled; the design keeps it visible and
+    // greyed, with the label itself staying at full opacity.
+    &.disabled .arrow {
+      display: block;
+      fill: $charcoal-light-1;
+    }
+  }
+
+  .list {
+    // The design's open list is wider than the closed field, sized by its longest label.
+    width: max-content;
+    min-width: 100%;
+    border-radius: 5px;
+  }
+
+  .list-item:last-child {
+    border-radius: 0 0 5px 5px;
+  }
+
+  .list-item {
+    height: 32px;
+    padding-right: 10px;
+
+    .item {
+      white-space: nowrap;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: $workspace-teal-light-6;
+    }
+
+    // Ordered after the rollover so a hovered selection keeps the selected fill.
+    &.selected {
+      background-color: $workspace-teal-light-4;
+
+      .item {
+        font-weight: bold;
+      }
+    }
+  }
+}

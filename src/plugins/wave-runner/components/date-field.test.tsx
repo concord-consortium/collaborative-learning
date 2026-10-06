@@ -1,5 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { DateField } from "./date-field";
 
@@ -143,31 +144,36 @@ describe("DateField range limits", () => {
 });
 
 describe("DateField month navigation", () => {
-  it("offers a month-and-year dropdown showing the focused month", () => {
+  // CustomSelect is not a native select: its trigger is a role="button" div whose text content
+  // is the focused month, since a static `title` would permanently mask it (see date-field.tsx).
+  it("offers a month dropdown showing the focused month", () => {
     renderField();
     openCalendar();
-    expect(screen.getByRole("combobox", { name: "Month and year" })).toHaveValue("2026-09");
+    expect(screen.getByRole("button", { name: "September 2026" })).toBeInTheDocument();
   });
 
-  it("moves the calendar to the chosen month", () => {
+  // A real click sequence (not a bare change event) is what would expose CustomSelect's own
+  // outside-click handling fighting with React Aria's popover dismissal, since both watch pointer
+  // events rather than "change".
+  it("moves the calendar to the chosen month", async () => {
+    const user = userEvent.setup();
     renderField();
     openCalendar();
-    fireEvent.change(screen.getByRole("combobox", { name: "Month and year" }), {
-      target: { value: "2026-11" }
-    });
+    await user.click(screen.getByRole("button", { name: "September 2026" }));
+    await user.click(screen.getByRole("option", { name: "November 2026" }));
 
-    expect(screen.getByRole("combobox", { name: "Month and year" })).toHaveValue("2026-11");
+    expect(screen.getByRole("button", { name: "November 2026" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /November 15, 2026/ })).toBeInTheDocument();
   });
 
   // Changing the month must not disturb the popover's open/close state machine, which the
-  // Clear/Cancel/OK footer depends on.
-  it("keeps the popover open and the pending selection intact when the month changes", () => {
+  // Clear/Cancel/OK footer depends on - this is the proof that the two dropdowns do not fight.
+  it("keeps the popover open and the pending selection intact when the month changes", async () => {
+    const user = userEvent.setup();
     const onChange = renderField();
     openCalendar();
-    fireEvent.change(screen.getByRole("combobox", { name: "Month and year" }), {
-      target: { value: "2026-11" }
-    });
+    await user.click(screen.getByRole("button", { name: "September 2026" }));
+    await user.click(screen.getByRole("option", { name: "November 2026" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
