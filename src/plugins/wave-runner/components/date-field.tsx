@@ -10,6 +10,14 @@ import { fromDateString, toDateString } from "./date-utils";
 
 import "./date-field.scss";
 
+// Month and day render unpadded, so the field's width shifts as the date changes. Padding them
+// holds it steady and matches the mm/dd placeholder.
+function paddedSegmentText(segment: { type: string; text: string }) {
+  return segment.type === "month" || segment.type === "day"
+    ? segment.text.padStart(2, "0")
+    : segment.text;
+}
+
 const kMonthNames = ["January", "February", "March", "April", "May", "June",
                      "July", "August", "September", "October", "November", "December"];
 
@@ -91,17 +99,17 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
     >
       <Label className="field-label" htmlFor={id}>{label}</Label>
       <Group id={id} className="field-group">
-        <DateInput className="date-input">
-          {segment => <DateSegment segment={segment} />}
-        </DateInput>
-        {/* Display only. The model stores a date, so there is no time to set; rendering this as
-            text rather than an editable segment is what keeps it unsettable. */}
-        <span className="static-time">, 12:00 AM</span>
         <Button className="calendar-trigger" aria-label="Choose date">
           {/* The copied icon's group carries fill="none", so a fill set on the svg root will not
               reach the shapes; the stylesheet has to target the paths directly. */}
           <CalendarIcon className="calendar-glyph" />
         </Button>
+        <DateInput className="date-input">
+          {segment => <DateSegment segment={segment}>{paddedSegmentText(segment)}</DateSegment>}
+        </DateInput>
+        {/* Display only. The model stores a date, so there is no time to set; rendering this as
+            text rather than an editable segment is what keeps it unsettable. */}
+        <span className="static-time">, 12:00 AM</span>
       </Group>
       <Popover className="date-field-popover">
         <Dialog className="date-field-dialog">

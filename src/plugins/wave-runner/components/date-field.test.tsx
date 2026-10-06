@@ -38,6 +38,13 @@ describe("DateField", () => {
     expect(time).not.toHaveAttribute("contenteditable");
   });
 
+  // Unpadded month and day change the field's width as the date changes, which jitters the row.
+  it("pads month and day to two digits", () => {
+    renderField({ value: "2026-09-01" });
+    expect(screen.getByRole("group", { name: "Start Date and Time" }))
+      .toHaveTextContent("09/01/2026");
+  });
+
   it("opens the calendar popover from the trigger", () => {
     renderField();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

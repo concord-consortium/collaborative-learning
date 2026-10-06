@@ -45,6 +45,9 @@
 
     &.data-setup {
       background-color: $workspace-teal-light-7;
+      // The sections share space with flex-basis 0, so each is floored by its own min-content.
+      // Without this the panel narrows whenever a short station name is chosen.
+      min-width: 426px;
     }
 
     &.status-and-output {

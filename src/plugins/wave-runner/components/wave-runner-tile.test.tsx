@@ -139,8 +139,8 @@ describe("WaveRunnerComponent", () => {
     renderWithStores();
     const startGroup = screen.getByRole("group", { name: "Start Date and Time" });
     const endGroup = screen.getByRole("group", { name: "End Date and Time" });
-    expect(startGroup).toHaveTextContent("9/1/2026");
-    expect(endGroup).toHaveTextContent("10/1/2026");
+    expect(startGroup).toHaveTextContent("09/01/2026");
+    expect(endGroup).toHaveTextContent("10/01/2026");
   });
 
   it("renders station dropdown with options from config", () => {

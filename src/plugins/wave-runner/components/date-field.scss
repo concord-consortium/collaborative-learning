@@ -41,7 +41,7 @@
   }
 
   .calendar-trigger {
-    margin-left: auto;
+    margin-right: 8px;
     border: none;
     background: none;
     cursor: pointer;
@@ -57,7 +57,7 @@
     width: 20px;
     height: 20px;
 
-    path, rect {
+    path {
       fill: $workspace-teal-dark-1;
     }
   }
@@ -125,26 +125,30 @@
   }
 
   .calendar-cell {
-    width: 32px;
+    width: 41px;
     height: 32px;
+    padding: 4px;
+    box-sizing: border-box;
     text-align: center;
     vertical-align: middle;
-    border-radius: 5px;
+    border-radius: 8px;
     font-size: 13px;
     color: $charcoal-dark-2;
     cursor: pointer;
+    // Every cell reserves the selected cell's border so selecting one does not shift the grid.
+    border: solid 2px transparent;
 
     &[data-outside-month] {
       color: $charcoal-light-1;
     }
 
     &[data-today] {
-      border: solid 1.5px $workspace-teal;
+      border-color: $workspace-teal;
     }
 
     &[data-selected] {
-      background-color: $workspace-teal-dark-1;
-      color: white;
+      background-color: white;
+      border-color: $workspace-teal-dark-1;
     }
 
     &[data-disabled] {
