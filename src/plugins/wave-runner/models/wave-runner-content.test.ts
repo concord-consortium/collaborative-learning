@@ -56,18 +56,6 @@ describe("default date range", () => {
   });
 });
 
-describe("single-day range", () => {
-  it("does not set a run error when start and end are the same day", () => {
-    const content = defaultWaveRunnerContent();
-    content.setStartDate("2026-09-15");
-    content.setEndDate("2026-09-15");
-    expect(content.startDate).toBe(content.endDate);
-    // endDate is inclusive, so one day is a legitimate range and must not be rejected
-    // on the grounds that end is not strictly after start.
-    expect(content.runError).toBeNull();
-  });
-});
-
 const mockCompactMetadata = {
   $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   id: "compact-v1",
@@ -79,27 +67,29 @@ const mockCompactMetadata = {
   weightsUrl: "./weights.json"
 };
 
+// Shared across describe blocks below: a real shared model manager (via a document, not a bare
+// WaveRunnerContentModel.create()) is needed for loadData/loadEnvelopeData/runModel.
+function setupTileInDocument() {
+  const docContent = DocumentContentModel.create({
+    tileMap: {
+      "tile1": {
+        id: "tile1",
+        content: { type: kWaveRunnerTileType },
+      }
+    }
+  });
+  const docModel = createDocumentModel({
+    uid: "1", type: ProblemDocument, key: "test", content: docContent as any
+  });
+  docModel.treeMonitor!.enableMonitoring();
+
+  return docContent.tileMap.get("tile1")!.content as any;
+}
+
 describe("WaveRunnerContent", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-
-  function setupTileInDocument() {
-    const docContent = DocumentContentModel.create({
-      tileMap: {
-        "tile1": {
-          id: "tile1",
-          content: { type: kWaveRunnerTileType },
-        }
-      }
-    });
-    const docModel = createDocumentModel({
-      uid: "1", type: ProblemDocument, key: "test", content: docContent as any
-    });
-    docModel.treeMonitor!.enableMonitoring();
-
-    return docContent.tileMap.get("tile1")!.content as any;
-  }
 
   it("can be created in a document through the tile registry", () => {
     const docContent = DocumentContentModel.create({});
@@ -362,6 +352,35 @@ describe("WaveRunnerContent", () => {
       expect(content.isRunning).toBe(false);
     });
 
+    // The endMs < startMs comparison (vs. the old endMs <= startMs) only lives in this one
+    // branch of runModel, reached after the model/metadata/station guards pass. A test that
+    // never calls runModel - as the previous version of this test did - passes unconditionally,
+    // since runError starts out null anyway.
+    it("treats start === end as one valid day, not an invalid range, when running the model", async () => {
+      const singleDaySec = Date.UTC(2026, 8, 15) / 1000; // 2026-09-15
+      const singleDay = singleDaySec / SECONDS_PER_DAY;
+      const fakeService = makeFakeDownloadService([singleDay]);
+      (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
+      jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+      const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+      const content = setupTileInDocument();
+      content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+      content.setStartDate("2026-09-15");
+      content.setEndDate("2026-09-15");
+      await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+      await content.runModel();
+
+      // The old `<=` comparison rejected this with "Invalid date range..."; proof the single
+      // day was actually processed (not just that runError happens to be null) is that the
+      // model ran on it.
+      expect(content.runError).not.toBe("Invalid date range. End date must not be before start date.");
+      expect(content.runError).toBeNull();
+      expect(fakeService.readDay).toHaveBeenCalledTimes(1);
+      expect(processChunk).toHaveBeenCalledTimes(1);
+    });
+
     describe("event database integration", () => {
       // startDate 2026-02-01, endDate 2026-02-03 inclusive: three full UTC days (Feb 1–3)
       const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
@@ -537,6 +556,57 @@ describe("WaveRunnerContent", () => {
         expect(warn).toHaveBeenCalled();
       });
     });
+  });
+});
+
+// runModel and loadEnvelopeData are independent operations, but status-and-output.tsx shows a
+// single status line with errors first in priority. Neither action cleared the other's error, so
+// a failed load left its message on screen straight through a later successful run (and vice versa).
+describe("cross-operation error clearing", () => {
+  const testStation = { network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" };
+
+  it("clears a stale loadDataError once a run starts", async () => {
+    const content = setupTileInDocument();
+    content.setStation(testStation);
+    content.setStartDate("2026-02-01");
+    content.setEndDate("2026-02-01");
+
+    await content.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+    expect(content.loadDataError).toContain("offline");
+
+    jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+    jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+    const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
+    const feb1Day = feb1Sec / SECONDS_PER_DAY;
+    (SeismicDownloadService as jest.Mock).mockImplementation(() => makeFakeDownloadService([feb1Day]));
+    await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+    await content.runModel();
+
+    expect(content.runError).toBeNull();
+    expect(content.loadDataError).toBeNull();
+  });
+
+  it("clears a stale runError once loadEnvelopeData starts", async () => {
+    const content = setupTileInDocument();
+    await content.runModel();
+    expect(content.runError).toBe("No model selected");
+
+    content.setStation(testStation);
+    const processEnvelopes = jest.fn().mockResolvedValue(
+      { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
+    await content.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes,
+    });
+
+    expect(content.loadDataError).toBeNull();
+    expect(content.runError).toBeNull();
   });
 });
 

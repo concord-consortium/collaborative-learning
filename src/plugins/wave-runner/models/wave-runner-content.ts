@@ -222,7 +222,11 @@ export const WaveRunnerContentModel = TileContentModel
       const station = self.station;
 
       self.clearEventsDataSet();
+      // loadData and run are independent operations with independent errors, but the tile shows
+      // only one status line (see status-and-output.tsx) with errors first in priority - leaving
+      // the other operation's error in place would let a stale load failure mask a successful run.
       self.runError = null;
+      self.loadDataError = null;
       self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
@@ -301,7 +305,10 @@ export const WaveRunnerContentModel = TileContentModel
       }
       const range: TimeRange = { start: startMs / 1000, end: endMs / 1000 + SECONDS_PER_DAY };
 
+      // See the matching comment in runModel: the two operations' errors must not outlive
+      // each other, since the status line shows whichever is set with no way to tell it is stale.
       self.loadDataError = null;
+      self.runError = null;
       self.isLoadingData = true;
       self.loadDaysDone = 0;
       self.loadDaysTotal = 0;
