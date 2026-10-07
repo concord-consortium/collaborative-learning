@@ -13,7 +13,8 @@
     border: solid 1.5px white;
     // The graph space is always a rectangle, whatever state it is in. 60px is the waveform
     // panel's own height, so an empty box matches a drawn one.
-    min-height: 60px;
+    height: $wave-runner-graph-height;
+    box-sizing: border-box;
     background-color: $charcoal-light-4;
 
     &.configured {
@@ -37,8 +38,8 @@
     font-style: italic;
     font-size: 14px;
     text-align: center;
-    margin: 10px 4px 0 0;
-    padding: 8px 14.3px 10px;
+    margin: $wave-runner-row-gap 0 0;
+    padding: 0;
   }
 
   // Holds its line whether or not there is a message, so the panel does not reflow as loading
@@ -55,7 +56,7 @@
     display: flex;
     gap: 20px;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: $wave-runner-row-gap;
     height: $wave-runner-counts-row-height;
 
     .status-count {

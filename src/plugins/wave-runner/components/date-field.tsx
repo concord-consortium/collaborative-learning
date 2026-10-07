@@ -94,6 +94,17 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
     setIsOpen(open);
   };
 
+  // Only the calendar's selections are staged. A change with the popover closed can only have come
+  // from typing in the field, and those commit directly - there is no OK button to reach from the
+  // keyboard once the calendar is shut.
+  const handlePickerChange = (date: CalendarDate | null) => {
+    if (isOpen) {
+      setPending(date);
+    } else if (date) {
+      onChange(toDateString(date));
+    }
+  };
+
   const commit = () => {
     if (pending) onChange(toDateString(pending));
     setIsOpen(false);
@@ -101,10 +112,12 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
 
   const cancel = () => setIsOpen(false);
 
-  // The whole field opens the calendar, not just the glyph. Presses on the trigger are left alone
-  // so its own toggle still closes an open popover.
+  // Pressing the field opens the calendar, except on the date text itself: those segments are
+  // typed into, and opening the popover would take the focus away before a key could land. The
+  // trigger is left alone too, so its own toggle still closes an open popover.
   const handleFieldClick = (e: React.MouseEvent) => {
-    if ((e.target as Element).closest(".calendar-trigger")) return;
+    const target = e.target as Element;
+    if (target.closest(".calendar-trigger") || target.closest(".date-input")) return;
     setIsOpen(true);
   };
 
@@ -113,8 +126,8 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
   return (
     <DatePicker
       className="wave-runner-date-field"
-      value={pending ?? fromDateString(value) ?? null}
-      onChange={setPending}
+      value={(isOpen ? pending : undefined) ?? fromDateString(value) ?? null}
+      onChange={handlePickerChange}
       isOpen={isOpen}
       onOpenChange={handleOpenChange}
       // The footer's OK button is what should close the popover on selection, not the library's

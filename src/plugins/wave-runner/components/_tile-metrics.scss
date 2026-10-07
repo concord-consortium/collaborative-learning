@@ -1,14 +1,18 @@
 // The tile's height is a known number, not something measured at runtime. Every vertical step in
 // the Status and Output panel is pinned here so the total is arithmetic, and the tile asks for
 // exactly that height - twice over when the panels stack.
+//
+//   title   18 + 10 gap
+//   graph   60 + 10 gap   (border-box, so the white border is inside the 60)
+//   status  22 + 10 gap
+//   counts  26
+//   ----------------
+//           156
+//
+// The section carries no vertical padding of its own; the gaps above are the whole rhythm.
 
 $wave-runner-section-title-height: 18px;
-$wave-runner-section-title-margin: 8px;
+$wave-runner-row-gap: 10px;
 $wave-runner-graph-height: 60px;
-$wave-runner-graph-border: 1.5px;
-$wave-runner-status-line-height: 35px;
-$wave-runner-status-line-margin: 10px;
+$wave-runner-status-line-height: 22px;
 $wave-runner-counts-row-height: 26px;
-$wave-runner-counts-row-margin: 10px;
-$wave-runner-section-padding-top: 8px;
-$wave-runner-section-padding-bottom: 10px;

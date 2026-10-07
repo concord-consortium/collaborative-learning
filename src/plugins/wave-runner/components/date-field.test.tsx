@@ -46,6 +46,19 @@ describe("DateField", () => {
       .toHaveTextContent("09/01/2026");
   });
 
+  // The segments are typed into, so a press on them must not open the calendar and steal focus.
+  it("types into a date segment rather than opening the calendar", async () => {
+    const user = userEvent.setup();
+    const onChange = renderField({ value: "2026-09-01" });
+    const month = screen.getAllByRole("spinbutton")[0];
+
+    await user.click(month);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await user.keyboard("11");
+    expect(onChange).toHaveBeenCalledWith("2026-11-01");
+  });
+
   it("opens the calendar popover from the trigger", () => {
     renderField();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
