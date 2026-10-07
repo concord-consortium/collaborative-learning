@@ -26,10 +26,14 @@ const kMonthNames = ["January", "February", "March", "April", "May", "June",
  * Twelve months either side of the focused month. A fixed window keeps the list short; the prev
  * and next buttons still reach anything outside it.
  */
-function monthOptions(focused: CalendarDate) {
+function monthOptions(focused: CalendarDate, latest?: CalendarDate) {
   const options: { value: string; label: string }[] = [];
   for (let offset = -12; offset <= 12; offset++) {
     const date = focused.add({ months: offset });
+    // A month entirely past the last selectable date holds nothing that can be chosen, so it is
+    // left out rather than offered and then refused.
+    if (latest && (date.year > latest.year
+        || (date.year === latest.year && date.month > latest.month))) break;
     const month = String(date.month).padStart(2, "0");
     options.push({
       value: `${date.year}-${month}`,
@@ -44,10 +48,10 @@ function monthOptions(focused: CalendarDate) {
 // itself, which also doubles as its accessible name - the same pattern the Station and Model
 // fields already rely on in this tile, since CustomSelect has no separate aria-label prop.
 function monthDropdownItems(
-  focused: CalendarDate, setFocused: (date: CalendarDate) => void
+  focused: CalendarDate, setFocused: (date: CalendarDate) => void, latest?: CalendarDate
 ): ICustomDropdownItem[] {
   const focusedValue = `${focused.year}-${String(focused.month).padStart(2, "0")}`;
-  return monthOptions(focused).map(option => ({
+  return monthOptions(focused, latest).map(option => ({
     id: option.value,
     text: option.label,
     selected: option.value === focusedValue,
@@ -147,7 +151,7 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
               <CustomSelect
                 className="month-dropdown"
                 dataTestId="date-field-month"
-                items={monthDropdownItems(focused, setFocused)}
+                items={monthDropdownItems(focused, setFocused, maxValue ? fromDateString(maxValue) : undefined)}
               />
               <Button slot="next" className="nav-button" aria-label="Next month">›</Button>
             </header>

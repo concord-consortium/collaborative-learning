@@ -155,6 +155,17 @@ describe("DateField month navigation", () => {
   // A real click sequence (not a bare change event) is what would expose CustomSelect's own
   // outside-click handling fighting with React Aria's popover dismissal, since both watch pointer
   // events rather than "change".
+  // There is no data for a month that has not happened, so it is not offered at all.
+  it("offers no month beyond the last selectable date", async () => {
+    const user = userEvent.setup();
+    renderField({ value: "2026-09-01", maxValue: "2026-10-06" });
+    openCalendar();
+    await user.click(screen.getByRole("button", { name: "September 2026" }));
+
+    expect(screen.getByRole("option", { name: "October 2026" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "November 2026" })).not.toBeInTheDocument();
+  });
+
   it("moves the calendar to the chosen month", async () => {
     const user = userEvent.setup();
     renderField();
