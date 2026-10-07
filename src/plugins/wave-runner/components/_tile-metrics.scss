@@ -1,0 +1,14 @@
+// The tile's height is a known number, not something measured at runtime. Every vertical step in
+// the Status and Output panel is pinned here so the total is arithmetic, and the tile asks for
+// exactly that height - twice over when the panels stack.
+
+$wave-runner-section-title-height: 18px;
+$wave-runner-section-title-margin: 8px;
+$wave-runner-graph-height: 60px;
+$wave-runner-graph-border: 1.5px;
+$wave-runner-status-line-height: 35px;
+$wave-runner-status-line-margin: 10px;
+$wave-runner-counts-row-height: 26px;
+$wave-runner-counts-row-margin: 10px;
+$wave-runner-section-padding-top: 8px;
+$wave-runner-section-padding-bottom: 10px;

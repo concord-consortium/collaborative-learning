@@ -16,6 +16,7 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
 import { defaultWaveRunnerContent } from "../models/wave-runner-content";
+import { kWaveRunnerDefaultHeight, kWaveRunnerStackedHeight } from "../wave-runner-types";
 import { WaveRunnerComponent } from "./wave-runner-tile";
 
 // The wave-runner tile needs to be registered so the TileModel.create
@@ -39,7 +40,7 @@ describe("WaveRunnerComponent", () => {
     isUserResizable: true,
     onResizeRow: () => { throw new Error("Function not implemented."); },
     onSetCanAcceptDrop: () => { throw new Error("Function not implemented."); },
-    onRequestRowHeight: () => { throw new Error("Function not implemented."); },
+    onRequestRowHeight: jest.fn(),
     onRegisterTileApi: () => { throw new Error("Function not implemented."); },
     onUnregisterTileApi: () => { throw new Error("Function not implemented."); }
   };
@@ -66,19 +67,20 @@ describe("WaveRunnerComponent", () => {
     })
   });
 
-  function renderModel(model2: ReturnType<typeof TileModel.create>) {
+  function renderModel(model2: ReturnType<typeof TileModel.create>,
+                      overrides: Partial<typeof defaultProps> = {}) {
     stores.ui.setSelectedTileId(model2.id);
     return render(
       <Provider stores={stores}>
         <TileModelContext.Provider value={model2}>
-          <WaveRunnerComponent {...defaultProps} {...{model: model2}} />
+          <WaveRunnerComponent {...defaultProps} {...overrides} {...{model: model2}} />
         </TileModelContext.Provider>
       </Provider>
     );
   }
 
-  function renderWithStores() {
-    return renderModel(model);
+  function renderWithStores(overrides: Partial<typeof defaultProps> = {}) {
+    return renderModel(model, overrides);
   }
 
   beforeEach(() => {
@@ -117,6 +119,22 @@ describe("WaveRunnerComponent", () => {
     const sections = container.querySelector(".sections");
     expect(sections).toHaveClass("vertical");
     expect(sections).not.toHaveClass("horizontal");
+  });
+
+  // The tile asks for a height it knows rather than measuring: one panel's worth side by side,
+  // two when the panels stack.
+  it("asks for the stacked height when the panels stack", () => {
+    mockWidth = 650;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight });
+    expect(onRequestRowHeight).toHaveBeenCalledWith(expect.any(String), kWaveRunnerStackedHeight);
+  });
+
+  it("asks for the single-panel height when the panels sit side by side", () => {
+    mockWidth = 900;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight });
+    expect(onRequestRowHeight).toHaveBeenCalledWith(expect.any(String), kWaveRunnerDefaultHeight);
   });
 
   it("stacks sections vertically when width is less than 450", () => {
