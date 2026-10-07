@@ -112,15 +112,6 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
 
   const cancel = () => setIsOpen(false);
 
-  // Pressing the field opens the calendar, except on the date text itself: those segments are
-  // typed into, and opening the popover would take the focus away before a key could land. The
-  // trigger is left alone too, so its own toggle still closes an open popover.
-  const handleFieldClick = (e: React.MouseEvent) => {
-    const target = e.target as Element;
-    if (target.closest(".calendar-trigger") || target.closest(".date-input")) return;
-    setIsOpen(true);
-  };
-
   const clear = () => setPending(fromDateString(defaultValue ?? value) ?? null);
 
   return (
@@ -139,7 +130,9 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
       granularity="day"
     >
       <Label className="field-label" htmlFor={id}>{label}</Label>
-      <Group id={id} className="field-group" onClick={handleFieldClick}>
+      {/* The field itself is for typing; only the glyph opens the calendar. Opening it from the
+          whole field moved focus into the popover before a key could land. */}
+      <Group id={id} className="field-group">
         <Button className="calendar-trigger" aria-label="Choose date">
           {/* The copied icon's group carries fill="none", so a fill set on the svg root will not
               reach the shapes; the stylesheet has to target the paths directly. */}

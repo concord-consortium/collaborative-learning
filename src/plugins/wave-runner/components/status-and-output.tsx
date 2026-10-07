@@ -27,7 +27,9 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
         : eventsDataSet
           ? "Run complete."
-          : "Estimated time to complete run:";
+          : isConfigured
+            ? "Estimated time to complete run:"
+            : "Set up data then run the model.";
 
   return (
     <div className="section status-and-output">

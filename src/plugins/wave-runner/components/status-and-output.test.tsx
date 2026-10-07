@@ -3,7 +3,7 @@ jest.mock("uplot", () => jest.fn().mockImplementation(() => ({
 })));
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 
 import { specStores } from "../../../models/stores/spec-stores";
@@ -38,6 +38,11 @@ describe("StatusAndOutput graph area", () => {
     const content = defaultWaveRunnerContent();
     content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage" });
     expect(renderStatus(content)).not.toHaveClass("configured");
+  });
+
+  it("tells the student what to do before anything is set up", () => {
+    renderStatus(defaultWaveRunnerContent());
+    expect(screen.getByText("Set up data then run the model.")).toBeInTheDocument();
   });
 
   it("turns black once both are chosen", () => {
