@@ -16,6 +16,19 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   // they are, and a waveform once there is data to draw.
   const isConfigured = !!model.station && !!model.selectedModelUrl;
 
+  // One line carries whatever the tile has to say. Reserving a row for each possible message left
+  // an empty one sitting between the graph and the text that was actually showing.
+  const error = loadDataError || runError;
+  const statusMessage = error
+    ? error
+    : isLoadingData
+      ? `Loading data: day ${model.loadDaysDone + 1} of ${model.loadDaysTotal || "?"}...`
+      : isRunning
+        ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
+        : eventsDataSet
+          ? "Run complete."
+          : "Estimated time to complete run:";
+
   return (
     <div className="section status-and-output">
       <div className="section-title">Status and Output</div>
@@ -29,18 +42,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
           />
         )}
       </div>
-      <div className="download-status-container">
-        {isLoadingData && <div>Loading data: day {model.loadDaysDone + 1} of {model.loadDaysTotal || "?"}...</div>}
-        {loadDataError && <div className="waveform-error">{loadDataError}</div>}
-        {runError && <div className="waveform-error">{runError}</div>}
-      </div>
-      <div className="estimated-time">
-        {isRunning
-          ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
-          : eventsDataSet
-            ? "Run complete."
-            : "Estimated time to complete run:"}
-      </div>
+      <div className={classNames("status-line", { "waveform-error": !!error })}>{statusMessage}</div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>

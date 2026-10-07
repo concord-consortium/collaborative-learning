@@ -32,10 +32,8 @@
     text-align: center;
   }
 
-  // Everything directly under the graph reads as one running commentary, so it keeps a single
-  // treatment even though the message changes as loading and running progress.
-  .download-status-container,
-  .estimated-time {
+  // One line, whatever it happens to be saying.
+  .status-line {
     height: $wave-runner-status-line-height;
     box-sizing: border-box;
     font-style: italic;
@@ -43,14 +41,6 @@
     text-align: center;
     margin: $wave-runner-row-gap 0 0;
     padding: 0;
-  }
-
-  // Holds its line whether or not there is a message, so the panel does not reflow as loading
-  // and running messages come and go.
-  .download-status-container {
-    width: 100%;
-    height: $wave-runner-status-line-height;
-    box-sizing: border-box;
   }
 
 

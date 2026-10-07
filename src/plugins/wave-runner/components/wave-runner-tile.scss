@@ -55,9 +55,7 @@
   }
 
   .section {
-    // No vertical padding: the panel's rhythm is the row gaps in _tile-metrics, and padding here
-    // would put the total beyond the height the tile asks for.
-    padding: 0 8px;
+    padding: $wave-runner-panel-top 8px 0;
     flex: 1;
 
     &.data-setup {

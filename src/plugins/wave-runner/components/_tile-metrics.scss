@@ -2,16 +2,18 @@
 // the Status and Output panel is pinned here so the total is arithmetic, and the tile asks for
 // exactly that height - twice over when the panels stack.
 //
+//   top      8
 //   title   18 + 10 gap
 //   graph   63 + 10 gap   (border-box: 60 of content, which is the waveform panel's own fixed
 //                          height, plus its 1.5px border either side)
-//   status  19 + 10 gap
+//   status  19 + 10 gap   (one line, whatever it is saying)
 //   counts  26
 //   ----------------
-//           156
+//           164
 //
 // The section carries no vertical padding of its own; the gaps above are the whole rhythm.
 
+$wave-runner-panel-top: 8px;
 $wave-runner-section-title-height: 18px;
 $wave-runner-row-gap: 10px;
 $wave-runner-graph-height: 63px;
