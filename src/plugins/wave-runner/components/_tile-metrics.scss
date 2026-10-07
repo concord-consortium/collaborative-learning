@@ -16,3 +16,7 @@ $wave-runner-row-gap: 10px;
 $wave-runner-graph-height: 60px;
 $wave-runner-status-line-height: 22px;
 $wave-runner-counts-row-height: 26px;
+
+// The tile clips its own overflow, so a long station list would be cut off at the bottom edge.
+// The flyout scrolls instead.
+$wave-runner-flyout-max-height: 140px;
