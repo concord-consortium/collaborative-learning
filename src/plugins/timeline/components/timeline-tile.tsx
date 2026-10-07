@@ -26,7 +26,10 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
   useEffect(() => {
     if (!tileElt) return;
     const handlePointerDown = (e: MouseEvent | TouchEvent) => {
-      const onPlot = e.target instanceof Element && !!e.target.closest(".timeline-plot");
+      const target = e.target instanceof Element ? e.target : null;
+      // The drag handle selects the tile itself, on click.
+      if (target?.closest(".tool-tile-drag-handle-wrapper")) return;
+      const onPlot = !!target?.closest(".timeline-plot");
       userSelectTile(ui, model, { readOnly, append: !onPlot && hasSelectionModifier(e), container });
     };
     const options = { capture: true, passive: true };

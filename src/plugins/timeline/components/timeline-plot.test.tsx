@@ -302,6 +302,14 @@ describe("TimelinePlot", () => {
       expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
     });
 
+    it("announces a drag that doesn't pan without blaming an edge", () => {
+      const { container, plot } = renderPlot(day(1), day(2));
+      fireEvent.pointerDown(plot, { button: 0, clientX: 500, clientY: 10 });
+      fireEvent.pointerMove(plot, { button: 0, clientX: 500, clientY: 90 });
+      fireEvent.pointerUp(plot, { button: 0, clientX: 500, clientY: 90 });
+      expect(announced(container)).toMatch(/^View unchanged\./);
+    });
+
     it("announces when a shift-click can't zoom out any further", () => {
       const { container, content, plot } = renderPlot(dataStart, dataEnd);
       click(plot, 500, true);

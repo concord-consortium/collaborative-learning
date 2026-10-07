@@ -132,7 +132,9 @@ describe("TimelineComponent", () => {
       const plot = document.createElement("div");
       plot.className = "timeline-plot";
       const title = document.createElement("div");
-      tileElt.append(plot, title);
+      const dragHandle = document.createElement("div");
+      dragHandle.className = "tool-tile-drag-handle-wrapper";
+      tileElt.append(plot, title, dragHandle);
       document.body.append(tileElt);
       stores.ui.setSelectedTileId(selectedTileId);
       render(
@@ -142,8 +144,14 @@ describe("TimelineComponent", () => {
           </TileModelContext.Provider>
         </Provider>
       );
-      return { plot, title };
+      return { plot, title, dragHandle };
     }
+
+    it("leaves a press on the drag handle to the handle's own selection", () => {
+      const { dragHandle } = renderInTile();
+      fireEvent.mouseDown(dragHandle, { shiftKey: true });
+      expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
+    });
 
     it("becomes the only selected tile on a Shift-click on the graph", () => {
       const { plot } = renderInTile("other-tile");

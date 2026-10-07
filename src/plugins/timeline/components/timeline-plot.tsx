@@ -120,8 +120,14 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     if (!drag || drag.pointerId !== e.pointerId) return;
     endDrag(e);
     if (drag.moved) {
-      const panned = content.viewStartMs !== drag.startViewStartMs;
-      announce(`${panned ? "Panned." : "Already at the edge of the data."} ${describeView()}`);
+      const dx = e.clientX - drag.startX;
+      let result = "View unchanged.";
+      if (content.viewStartMs !== drag.startViewStartMs) {
+        result = "Panned.";
+      } else if ((dx > 0 && !content.canPanLeft) || (dx < 0 && !content.canPanRight)) {
+        result = "Already at the edge of the data.";
+      }
+      announce(`${result} ${describeView()}`);
       return;
     }
     const time = timeAtClientX(e);
