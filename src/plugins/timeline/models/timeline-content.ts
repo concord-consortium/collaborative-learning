@@ -145,6 +145,12 @@ export const TimelineContentModel = TileContentModel
       const range = self.viewRangeSeconds;
       return range !== undefined && range > kMinViewRangeSeconds;
     },
+    get canPanLeft() {
+      return !!self.viewStartTime && !!self.dataStartTime && self.viewStartTime > self.dataStartTime;
+    },
+    get canPanRight() {
+      return !!self.viewEndTime && !!self.dataEndTime && self.viewEndTime < self.dataEndTime;
+    },
     get visibleEvents(): TimelineEvent[] {
       if (!self.viewStartTime || !self.viewEndTime) return [];
       return self.events.filter(e =>
@@ -211,13 +217,17 @@ export const TimelineContentModel = TileContentModel
         self.setViewRange(self.dataStartTime, self.dataEndTime);
       }
     },
-    zoom(factor: number) {
+    /**
+     * Scale the view range by `factor`, centered on `center` (default: the center of the view).
+     * The view is shifted as needed to stay within the data.
+     */
+    zoom(factor: number, center?: DateTime) {
       if (!self.viewStartTime || self.viewRangeSeconds == null) return;
       if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
 
       // Clamp to [kMinViewRangeSeconds, self.dataRangeSeconds]
       const newRange = Math.max(Math.min(self.viewRangeSeconds * factor, self.dataRangeSeconds), kMinViewRangeSeconds);
-      const center = self.viewStartTime.plus({ seconds: self.viewRangeSeconds / 2 });
+      center ??= self.viewStartTime.plus({ seconds: self.viewRangeSeconds / 2 });
       let newStart = center.minus({ seconds: newRange / 2 });
       let newEnd = center.plus({ seconds: newRange / 2 });
 
@@ -233,25 +243,18 @@ export const TimelineContentModel = TileContentModel
 
       self.setViewRange(newStart, newEnd);
     },
-    panLeft() {
+    /** Shift the view by `seconds` (negative is left), stopping at the edges of the data. */
+    panBy(seconds: number) {
       if (!self.viewStartTime || self.viewRangeSeconds == null) return;
-      if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
+      if (!self.dataStartTime || !self.dataEndTime) return;
 
-      let newStartTime = self.viewStartTime.minus({ seconds: self.viewRangeSeconds / 4 });
-      if (newStartTime < self.dataStartTime) newStartTime = self.dataStartTime;
-      const newEndTime = newStartTime.plus({ seconds: self.viewRangeSeconds });
+      const range = self.viewRangeSeconds;
+      let newStart = self.viewStartTime.plus({ seconds });
+      const latestStart = self.dataEndTime.minus({ seconds: range });
+      if (newStart > latestStart) newStart = latestStart;
+      if (newStart < self.dataStartTime) newStart = self.dataStartTime;
 
-      self.setViewRange(newStartTime, newEndTime);
-    },
-    panRight() {
-      if (!self.viewStartTime || !self.viewEndTime || self.viewRangeSeconds == null) return;
-      if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
-
-      let newEndTime = self.viewEndTime.plus({ seconds: self.viewRangeSeconds / 4 });
-      if (newEndTime > self.dataEndTime) newEndTime = self.dataEndTime;
-      const newStartTime = newEndTime.minus({ seconds: self.viewRangeSeconds });
-
-      self.setViewRange(newStartTime, newEndTime);
+      self.setViewRange(newStart, newStart.plus({ seconds: range }));
     },
     focusEvent() {
       const event = self.selectedEvent;
@@ -272,6 +275,12 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    panLeft() {
+      if (self.viewRangeSeconds != null) self.panBy(-self.viewRangeSeconds / 4);
+    },
+    panRight() {
+      if (self.viewRangeSeconds != null) self.panBy(self.viewRangeSeconds / 4);
+    },
     selectEvent(index: number) {
       const events = self.events;
       if (events.length === 0) return;

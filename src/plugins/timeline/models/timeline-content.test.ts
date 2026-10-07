@@ -193,6 +193,131 @@ describe("zoom functionality", () => {
     expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
     expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
   });
+
+  it("zoom(0.5, time) centers the halved range on the given time", () => {
+    content.fitToData();
+    content.zoom(0.5, dataStart.plus({ days: 2 }));
+    // 3.5 days centered on day 2
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.plus({ hours: 6 }).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 3, hours: 18 }).toISO());
+  });
+
+  it("zoom(2, time) centers the doubled range on the given time", () => {
+    content.setViewRange(dataStart.plus({ days: 1 }), dataStart.plus({ days: 2 }));
+    content.zoom(2, dataStart.plus({ days: 4 }));
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.plus({ days: 3 }).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 5 }).toISO());
+  });
+
+  it("zoom(0.5, time) near an edge keeps the view within the data", () => {
+    content.fitToData();
+    content.zoom(0.5, dataStart.plus({ hours: 12 }));
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 3, hours: 12 }).toISO());
+  });
+
+  it("zoom(0.5, time) at the minimum range re-centers on the given time", () => {
+    content.setViewRange(dataStart.plus({ days: 1 }), dataStart.plus({ days: 1, seconds: kMinViewRangeSeconds }));
+    content.zoom(0.5, dataStart.plus({ days: 3 }));
+    expect(content.viewRangeSeconds).toBeCloseTo(kMinViewRangeSeconds, 3);
+    expect(content.viewStartTime?.toISO())
+      .toBe(dataStart.plus({ days: 3, seconds: -kMinViewRangeSeconds / 2 }).toISO());
+  });
+});
+
+describe("pan functionality", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        return [];
+      },
+    } as any);
+
+    content = TimelineContentModel.create();
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("panBy shifts the view by the given number of seconds", () => {
+    content.setViewRange(dataStart.plus({ days: 2 }), dataStart.plus({ days: 3 }));
+    content.panBy(-3600);
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.plus({ days: 2, hours: -1 }).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 3, hours: -1 }).toISO());
+  });
+
+  it("panBy stops at the start of the data without shrinking the view", () => {
+    content.setViewRange(dataStart.plus({ hours: 1 }), dataStart.plus({ days: 1, hours: 1 }));
+    content.panBy(-5 * 3600);
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 1 }).toISO());
+  });
+
+  it("panBy stops at the end of the data without shrinking the view", () => {
+    content.setViewRange(dataEnd.minus({ days: 1, hours: 1 }), dataEnd.minus({ hours: 1 }));
+    content.panBy(5 * 3600);
+    expect(content.viewStartTime?.toISO()).toBe(dataEnd.minus({ days: 1 }).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
+  });
+
+  it("panLeft moves the view left by a quarter of its range", () => {
+    content.setViewRange(dataStart.plus({ days: 2 }), dataStart.plus({ days: 3 }));
+    content.panLeft();
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.plus({ days: 1, hours: 18 }).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 2, hours: 18 }).toISO());
+  });
+
+  it("panRight moves the view right by a quarter of its range", () => {
+    content.setViewRange(dataStart.plus({ days: 2 }), dataStart.plus({ days: 3 }));
+    content.panRight();
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.plus({ days: 2, hours: 6 }).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ days: 3, hours: 6 }).toISO());
+  });
+
+  it("canPanLeft and canPanRight are false when there is no view", () => {
+    expect(content.canPanLeft).toBe(false);
+    expect(content.canPanRight).toBe(false);
+  });
+
+  it("canPanLeft and canPanRight are false at full range", () => {
+    content.fitToData();
+    expect(content.canPanLeft).toBe(false);
+    expect(content.canPanRight).toBe(false);
+  });
+
+  it("canPanLeft is false at the start of the data and canPanRight is true", () => {
+    content.setViewRange(dataStart, dataStart.plus({ days: 1 }));
+    expect(content.canPanLeft).toBe(false);
+    expect(content.canPanRight).toBe(true);
+  });
+
+  it("canPanRight is false at the end of the data and canPanLeft is true", () => {
+    content.setViewRange(dataEnd.minus({ days: 1 }), dataEnd);
+    expect(content.canPanLeft).toBe(true);
+    expect(content.canPanRight).toBe(false);
+  });
+
+  it("canPanLeft and canPanRight are false once panning reaches each edge", () => {
+    content.setViewRange(dataStart.plus({ days: 2 }), dataStart.plus({ days: 3 }));
+    content.panBy(-10 * 24 * 3600);
+    expect(content.canPanLeft).toBe(false);
+    content.panBy(10 * 24 * 3600);
+    expect(content.canPanRight).toBe(false);
+  });
 });
 
 describe("event views", () => {
