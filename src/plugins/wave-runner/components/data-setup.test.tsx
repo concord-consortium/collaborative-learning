@@ -126,6 +126,26 @@ describe("DataSetup dropdowns", () => {
     expect(content.station?.station).toBe("DDM");
   });
 
+  // CustomSelect's accessible name falls back to `title`, which this tile supplies only while
+  // nothing is selected - without an explicit aria-label, a screen reader loses the field's
+  // purpose the moment a station is chosen and announces just the station name. The control must
+  // stay findable by "Station" even once it reads "Dexter Display Mine" to a sighted user.
+  it("keeps a programmatic label on the station dropdown after a selection is made", () => {
+    renderSetup();
+    fireEvent.click(screen.getByText("Dexter Display Mine"));
+    expect(screen.getByRole("button", { name: "Station" })).toHaveTextContent("Dexter Display Mine");
+  });
+
+  // Same bug, same fix, for the model dropdown. The only configured model is auto-selected on
+  // mount, so its text already appears in both the closed control and the (hidden but present)
+  // list option - scope the click to the list so it is unambiguous.
+  it("keeps a programmatic label on the model dropdown after a selection is made", () => {
+    const { container } = renderSetup();
+    const option = container.querySelector('[data-testid="wave-runner-model-list"] .list-item')!;
+    fireEvent.click(option);
+    expect(screen.getByRole("button", { name: "Model" })).toHaveTextContent("Compact Model");
+  });
+
   it("lists the configured models", () => {
     const { container } = renderSetup();
     expect(listLabels(container, "wave-runner-model")).toEqual(["Compact Model"]);

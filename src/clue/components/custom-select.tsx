@@ -30,13 +30,17 @@ interface IProps {
   titlePrefix?: string;
   titleIcon?: ReactNode;
   titleVisuallyHidden?: boolean;
+  /** The control's purpose for assistive tech, e.g. "Station". `title` only names the control
+   *  while nothing is selected, so once an item is chosen the visible text is just that value -
+   *  ariaLabel is what keeps the field's purpose announced regardless of selection state. */
+  ariaLabel?: string;
 }
 
 export const CustomSelect: React.FC<IProps> = (props) => {
   const {
     className, isDisabled, items, showItemChecks, showItemIcons,
     title, titlePrefix, titleIcon, titleVisuallyHidden,
-    dataTest, dataTestId,
+    dataTest, dataTestId, ariaLabel,
   } = props;
 
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -67,7 +71,7 @@ export const CustomSelect: React.FC<IProps> = (props) => {
     itemSelector: ".list-item",
     onSelect: handleSelect,
     disabled: isDisabled || items.length === 0,
-    label: title || titlePrefix,
+    label: ariaLabel || title || titlePrefix,
   });
 
   const getDataTest = (suffix?: string) => {
@@ -102,6 +106,7 @@ export const CustomSelect: React.FC<IProps> = (props) => {
         className={`header ${showListClass} ${disabledClass}`}
         data-test={getDataTest("header")}
         data-testid={getDataTestIdValue("header")}
+        aria-label={ariaLabel}
         {...(dropdown?.triggerProps ?? {})}
       >
         {titleIcon && <div className="title-icon">{titleIcon}</div>}

@@ -119,6 +119,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             dataTestId="wave-runner-station"
             items={stationItems}
             title={stationPlaceholder}
+            ariaLabel="Station"
             isDisabled={!hasStations || content.isRunning || content.isLoadingData}
           />
         </div>
@@ -129,6 +130,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             dataTestId="wave-runner-model"
             items={modelItems}
             title={modelPlaceholder}
+            ariaLabel="Model"
             isDisabled={content.isRunning}
           />
         </div>
