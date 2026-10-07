@@ -1,0 +1,17 @@
+.timeline-plot {
+  // Keep a drag from selecting text or scrolling the page on touch devices.
+  touch-action: pan-y;
+  user-select: none;
+
+  &.zoom-in {
+    cursor: zoom-in;
+  }
+
+  &.zoom-out {
+    cursor: zoom-out;
+  }
+
+  &.grabbing {
+    cursor: grabbing;
+  }
+}

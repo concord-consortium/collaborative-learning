@@ -7,6 +7,7 @@ import { useTimelineContent } from "../hooks/use-timeline-content";
 import { EventOverlay } from "./event-overlay";
 import { TimeLabel } from "./time-label";
 import { TimeMarkerOverlay } from "./time-marker-overlay";
+import { TimelinePlot } from "./timeline-plot";
 import { TimelineScrollbar } from "./timeline-scrollbar";
 
 import "./timeline.scss";
@@ -50,42 +51,20 @@ export const Timeline = observer(function Timeline() {
     });
   }, [seismicQueryService, stationData, viewStartSeconds]);
 
-  const timeFromMouseEvent = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!viewStartTime || !viewEndTime) return undefined;
-    const rect = e.currentTarget.getBoundingClientRect();
-    if (rect.width <= 0) return undefined;
-    const fraction = (e.clientX - rect.left) / rect.width;
-    const rangeMs = viewEndTime.toMillis() - viewStartTime.toMillis();
-    return viewStartTime.plus({ milliseconds: fraction * rangeMs });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const time = timeFromMouseEvent(e);
-    if (time) content.setHoverTime(time);
-  };
-
-  const handleMouseLeave = () => content.clearHoverTime();
-
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const time = timeFromMouseEvent(e);
-    if (time) content.setPinnedTime(time);
-  };
-
   return (
     <div className="timeline-area">
       {sharedSeismogram && isValidDateTime(viewStartTime) && isValidDateTime(viewEndTime) ? (
         <>
           <div className="waveform-wrapper">
             <div className="scale-unit">{scaleUnits}</div>
-            <WaveformPanel
-              mode="timeline"
-              sharedSeismogram={sharedSeismogram}
-              startTime={viewStartTime}
-              endTime={viewEndTime}
-              onClick={handleClick}
-              onMouseLeave={handleMouseLeave}
-              onMouseMove={handleMouseMove}
-            />
+            <TimelinePlot>
+              <WaveformPanel
+                mode="timeline"
+                sharedSeismogram={sharedSeismogram}
+                startTime={viewStartTime}
+                endTime={viewEndTime}
+              />
+            </TimelinePlot>
             <EventOverlay />
             <TimeMarkerOverlay />
           </div>
