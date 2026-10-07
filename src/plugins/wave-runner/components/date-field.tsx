@@ -1,5 +1,5 @@
 import { CalendarDate, parseDate } from "@internationalized/date";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button, Calendar, CalendarCell, CalendarGrid, DateInput, DatePicker,
   DateSegment, Dialog, Group, Label, Popover
@@ -82,6 +82,14 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
   const [focused, setFocused] = useState<CalendarDate>(
     () => fromDateString(value) ?? new CalendarDate(2026, 9, 1)
   );
+  // What the field is showing while it is being typed into. Handing the picker only the committed
+  // date meant a half-typed entry had nowhere to live, so the segments the student had not touched
+  // fell back to their mm/dd placeholders.
+  const [draft, setDraft] = useState<CalendarDate | null>(() => fromDateString(value) ?? null);
+
+  useEffect(() => {
+    setDraft(fromDateString(value) ?? null);
+  }, [value]);
 
   const handleOpenChange = (open: boolean) => {
     // Reseed from the committed value every time the popover opens, so a cancelled edit does not
@@ -94,15 +102,16 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
     setIsOpen(open);
   };
 
-  // Only the calendar's selections are staged. A change with the popover closed can only have come
-  // from typing in the field, and those commit directly - there is no OK button to reach from the
-  // keyboard once the calendar is shut.
+  // Only the calendar's selections are staged for OK. A change with the popover closed can only
+  // have come from typing, and there is no OK button to reach once the calendar is shut, so it
+  // shows immediately and commits as soon as it is a whole date.
   const handlePickerChange = (date: CalendarDate | null) => {
     if (isOpen) {
       setPending(date);
-    } else if (date) {
-      onChange(toDateString(date));
+      return;
     }
+    setDraft(date);
+    if (date) onChange(toDateString(date));
   };
 
   const commit = () => {
@@ -117,7 +126,7 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
   return (
     <DatePicker
       className="wave-runner-date-field"
-      value={(isOpen ? pending : undefined) ?? fromDateString(value) ?? null}
+      value={isOpen ? (pending ?? fromDateString(value) ?? null) : draft}
       onChange={handlePickerChange}
       isOpen={isOpen}
       onOpenChange={handleOpenChange}

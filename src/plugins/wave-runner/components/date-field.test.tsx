@@ -59,6 +59,20 @@ describe("DateField", () => {
     expect(onChange).toHaveBeenCalledWith("2026-11-01");
   });
 
+  // Typing one segment must not reset the others to their placeholders.
+  it("keeps the untouched segments while one is being typed", async () => {
+    const user = userEvent.setup();
+    renderField({ value: "2026-09-15", maxValue: "2026-12-31" });
+    const [month, day, year] = screen.getAllByRole("spinbutton");
+
+    await user.click(year);
+    await user.keyboard("2024");
+
+    expect(month).toHaveTextContent("09");
+    expect(day).toHaveTextContent("15");
+    expect(year).toHaveTextContent("2024");
+  });
+
   it("opens the calendar popover from the trigger", () => {
     renderField();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
