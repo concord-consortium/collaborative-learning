@@ -43,10 +43,9 @@ function monthOptions(focused: CalendarDate, latest?: CalendarDate) {
   return options;
 }
 
-// No static `title` is passed to CustomSelect: it would permanently mask the focused month per
-// `titleText = title || selectedItem?.text`. The trigger's visible label is the focused month
-// itself, which also doubles as its accessible name - the same pattern the Station and Model
-// fields already rely on in this tile, since CustomSelect has no separate aria-label prop.
+// No static `title`: it would mask the focused month the same way it would mask a chosen station
+// or model (see data-setup.tsx). The focused month is both the visible label and, since
+// CustomSelect has no aria-label prop, the accessible name.
 function monthDropdownItems(
   focused: CalendarDate, setFocused: (date: CalendarDate) => void, latest?: CalendarDate
 ): ICustomDropdownItem[] {
@@ -143,8 +142,6 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
           whole field moved focus into the popover before a key could land. */}
       <Group id={id} className="field-group">
         <Button className="calendar-trigger" aria-label="Choose date">
-          {/* The copied icon's group carries fill="none", so a fill set on the svg root will not
-              reach the shapes; the stylesheet has to target the paths directly. */}
           <CalendarIcon className="calendar-glyph" />
         </Button>
         <DateInput className="date-input">

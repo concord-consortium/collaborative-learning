@@ -20,6 +20,6 @@ $wave-runner-graph-height: 63px;
 $wave-runner-status-line-height: 19px;
 $wave-runner-counts-row-height: 26px;
 
-// The tile clips its own overflow, so a long station list would be cut off at the bottom edge.
-// The flyout scrolls instead.
+// Caps the dropdown flyout's height; see dropdown-appearance.scss .list for why it scrolls
+// instead of growing past it.
 $wave-runner-flyout-max-height: 140px;

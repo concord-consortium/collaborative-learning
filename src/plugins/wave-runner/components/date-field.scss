@@ -65,8 +65,8 @@
     }
   }
 
-  // The field is one line: the date, the fixed time and the glyph. Nothing here wraps - the two
-  // fields share the panel evenly, so there is no room to spill onto a second line.
+  // Nothing in the field wraps - the two date fields share the panel evenly, so there is no room
+  // to spill onto a second line.
   .static-time {
     white-space: nowrap;
     flex-shrink: 0;
@@ -102,6 +102,9 @@
   }
 }
 
+// Top-level, not nested under .wave-runner-tile: React Aria renders the Popover into a portal at
+// the document body, outside the tile's DOM subtree, so a selector scoped to the tile would never
+// match it and the tile's own overflow: auto cannot clip it either.
 .date-field-popover {
   background-color: white;
   border-radius: 5px;

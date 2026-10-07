@@ -16,8 +16,8 @@
     justify-content: center;
     margin: 0 12px;
     border: solid 1.5px white;
-    // The graph space is always a rectangle, whatever state it is in. 60px is the waveform
-    // panel's own height, so an empty box matches a drawn one.
+    // The graph space is always a rectangle, whatever state it is in, so an empty box matches a
+    // drawn one; see _tile-metrics.scss for how this height is built up.
     height: $wave-runner-graph-height;
     box-sizing: border-box;
     background-color: $charcoal-light-4;

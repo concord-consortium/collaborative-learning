@@ -1,9 +1,8 @@
 export const kWaveRunnerTileType = "WaveRunner";
 
-// The tile's height is known, not measured. These come from the Status and Output panel's own
-// vertical rhythm, which is pinned in components/_tile-metrics.scss: its title, the graph box, the
-// single status line and the counts row, with a 10px gap between each and 8px above the header, total 164px. On top of that sit
-// the tile's title bar, the teal title background and the content padding.
+// The tile's height is known, not measured. kWaveRunnerPanelHeight is the Status and Output
+// panel's own height; see components/_tile-metrics.scss for that arithmetic. chromeHeight adds the
+// tile's title bar, teal title background and content padding on top of it.
 //
 // Side by side, the tile holds one panel's worth. Stacked, the panels sit one above the other, so
 // it holds two.

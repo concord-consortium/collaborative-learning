@@ -111,9 +111,8 @@ describe("DataSetup dropdowns", () => {
       .toEqual(["Anchorage Airport", "Dexter Display Mine"]);
   });
 
-  // CustomSelect shows `title || selectedItem.text`, so a placeholder passed unconditionally would
-  // mask the student's choice: the control would still read "Choose a station" after they picked
-  // one, with only the tick inside the open list to show otherwise.
+  // Guards the placeholder-masking bug described in data-setup.tsx: picking a station must update
+  // the closed control's text, not just the open list's tick.
   it("shows the chosen station in the closed control", () => {
     const { container } = renderSetup();
     fireEvent.click(screen.getByText("Dexter Display Mine"));
