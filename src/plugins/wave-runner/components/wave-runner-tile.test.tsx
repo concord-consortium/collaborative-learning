@@ -38,6 +38,7 @@ describe("WaveRunnerComponent", () => {
     docId: "",
     documentContent: null,
     isUserResizable: true,
+    readOnly: false,
     onResizeRow: () => { throw new Error("Function not implemented."); },
     onSetCanAcceptDrop: () => { throw new Error("Function not implemented."); },
     onRequestRowHeight: jest.fn(),
@@ -135,6 +136,16 @@ describe("WaveRunnerComponent", () => {
     const onRequestRowHeight = jest.fn();
     renderWithStores({ onRequestRowHeight });
     expect(onRequestRowHeight).toHaveBeenCalledWith(expect.any(String), kWaveRunnerDefaultHeight);
+  });
+
+  // The same document can render editable and read-only at different widths at once (four-up,
+  // published documents); onRequestRowHeight mutates the shared row model, so a read-only instance
+  // must not fight the editable one over the row's height.
+  it("does not request a row height in a read-only rendering", () => {
+    mockWidth = 900;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight, readOnly: true });
+    expect(onRequestRowHeight).not.toHaveBeenCalled();
   });
 
   it("stacks sections vertically when width is less than 450", () => {

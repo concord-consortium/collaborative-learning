@@ -18,9 +18,13 @@ export const WaveRunnerComponent: React.FC<ITileProps> = observer(
 
   // Ask for the height the layout needs. Safe from feedback: the choice depends on the tile's
   // WIDTH, so a new height cannot change which layout is in use and ask again.
+  // Skipped when read-only: the same document can render editable and read-only (four-up,
+  // published view) at different widths at once, and onRequestRowHeight mutates the shared row
+  // model, so a read-only instance would otherwise overwrite the height the editable one set.
   useEffect(() => {
+    if (readOnly) return;
     onRequestRowHeight(model.id, vertical ? kWaveRunnerStackedHeight : kWaveRunnerDefaultHeight);
-  }, [vertical, model.id, onRequestRowHeight]);
+  }, [vertical, model.id, onRequestRowHeight, readOnly]);
 
   return (
     <div className="tile-content wave-runner-tile">
