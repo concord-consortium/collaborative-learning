@@ -5,7 +5,8 @@ export const kAnnounceDelayMs = 150;
 
 /**
  * Drives an `aria-live` region. Each announcement clears the region and sets the text after a
- * short delay, so an identical message repeated back to back is still read aloud.
+ * short delay, so an identical message repeated back to back is still read aloud. (`useAnnounce`
+ * in src/utilities renders the message from state instead, so a repeat before it clears isn't read.)
  * Attach `announcerRef` to the live region element.
  */
 export function useLiveAnnouncer() {

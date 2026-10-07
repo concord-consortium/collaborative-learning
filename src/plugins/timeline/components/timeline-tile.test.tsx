@@ -7,13 +7,14 @@ jest.mock("uplot", () => {
   }));
 });
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import React from "react";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
+import { userSelectTile } from "../../../models/stores/ui";
 import "../../../models/tiles/table/table-registration";
 import "../../bar-graph/bar-graph-registration";
 import "../../data-card/data-card-registration";
@@ -120,5 +121,40 @@ describe("TimelineComponent", () => {
     expect(toolbar).toContainHTML("View All");
     expect(toolbar).toContainHTML("Pan Left");
     expect(toolbar).toContainHTML("Pan Right");
+  });
+
+  describe("tile selection", () => {
+    // userSelectTile is debounced, so a call right after the previous test's would be dropped.
+    afterEach(() => userSelectTile.cancel());
+
+    function renderInTile(selectedTileId = model.id) {
+      const tileElt = document.createElement("div");
+      const plot = document.createElement("div");
+      plot.className = "timeline-plot";
+      const title = document.createElement("div");
+      tileElt.append(plot, title);
+      document.body.append(tileElt);
+      stores.ui.setSelectedTileId(selectedTileId);
+      render(
+        <Provider stores={stores}>
+          <TileModelContext.Provider value={model}>
+            <TimelineComponent {...defaultProps} {...{model, tileElt}} />
+          </TileModelContext.Provider>
+        </Provider>
+      );
+      return { plot, title };
+    }
+
+    it("becomes the only selected tile on a Shift-click on the graph", () => {
+      const { plot } = renderInTile("other-tile");
+      fireEvent.mouseDown(plot, { shiftKey: true });
+      expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
+    });
+
+    it("toggles out of the selection on a Shift-click elsewhere in the tile", () => {
+      const { title } = renderInTile();
+      fireEvent.mouseDown(title, { shiftKey: true });
+      expect([...stores.ui.selectedTileIds]).toEqual([]);
+    });
   });
 });

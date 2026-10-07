@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { IJsonPatch, onPatch } from "mobx-state-tree";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -344,6 +345,54 @@ describe("pan functionality", () => {
     expect(content.canPanLeft).toBe(false);
     content.panBy(10 * 24 * 3600);
     expect(content.canPanRight).toBe(false);
+  });
+});
+
+describe("view preview", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+  const day = (n: number) => dataStart.plus({ days: n });
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+  let patches: IJsonPatch[];
+
+  beforeEach(() => {
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) =>
+        type === SharedSeismogram ? [{ startTime: dataStart, endTime: dataEnd }] : [],
+    } as any);
+    content = TimelineContentModel.create();
+    content.setViewRange(day(2), day(3));
+    patches = [];
+    onPatch(content, patch => patches.push(patch));
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("shows view changes without saving them until the preview ends", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    content.panBy(3600);
+    expect(content.viewStartTime?.toISO()).toBe(day(2).plus({ hours: 2 }).toISO());
+    expect(content.viewStartTimeISO).toBe(day(2).toISO());
+    expect(patches).toEqual([]);
+
+    content.endViewPreview();
+    expect(content.viewStartTimeISO).toBe(day(2).plus({ hours: 2 }).toISO());
+    expect(content.viewEndTimeISO).toBe(day(3).plus({ hours: 2 }).toISO());
+    expect(content.viewStartTime?.toISO()).toBe(day(2).plus({ hours: 2 }).toISO());
+    expect(patches).toHaveLength(2);
+  });
+
+  it("saves nothing when a preview ends without a change", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    content.panBy(-3600);
+    content.endViewPreview();
+    expect(patches).toEqual([]);
   });
 });
 

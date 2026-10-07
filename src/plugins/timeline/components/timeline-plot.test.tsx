@@ -10,6 +10,7 @@ jest.mock("uplot", () => {
 import { act, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
+import { ReadOnlyContext } from "../../../components/document/read-only-context";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { kAnnounceDelayMs } from "../../../hooks/use-live-announcer";
 import { TileModel } from "../../../models/tiles/tile-model";
@@ -69,18 +70,20 @@ describe("TimelinePlot", () => {
     mockedGetSharedModelManager.mockReset();
   });
 
-  function renderPlot(viewStart: DateTime, viewEnd: DateTime) {
+  function renderPlot(viewStart: DateTime, viewEnd: DateTime, { left = 0, readOnly = false } = {}) {
     const content = TimelineContentModel.create();
     content.setViewRange(viewStart, viewEnd);
     const model = TileModel.create({ content });
     const result = render(
-      <TileModelContext.Provider value={model}>
-        <TimelinePlot><div className="plot-content" /></TimelinePlot>
-      </TileModelContext.Provider>
+      <ReadOnlyContext.Provider value={readOnly}>
+        <TileModelContext.Provider value={model}>
+          <TimelinePlot><div className="plot-content" /></TimelinePlot>
+        </TileModelContext.Provider>
+      </ReadOnlyContext.Provider>
     );
     const plot = result.container.querySelector<HTMLElement>(".timeline-plot")!;
     plot.getBoundingClientRect = () => ({
-      left: 0, right: kPlotWidth, width: kPlotWidth, top: 0, bottom: 100, height: 100, x: 0, y: 0,
+      left, right: left + kPlotWidth, width: kPlotWidth, top: 0, bottom: 100, height: 100, x: left, y: 0,
       toJSON: () => ({})
     });
     return { content: content as TimelineContentModelType, plot, ...result };
@@ -117,6 +120,13 @@ describe("TimelinePlot", () => {
     expect(content.viewEndTime?.toISO()).toBe(day(3).toISO());
   });
 
+  it("measures the clicked time from the plot's left edge", () => {
+    const { content, plot } = renderPlot(dataStart, dataEnd, { left: 100 });
+    click(plot, 600);
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(day(3).toISO());
+  });
+
   it("ignores buttons other than the primary button", () => {
     const { content, plot } = renderPlot(dataStart, dataEnd);
     fireEvent.pointerDown(plot, { button: 2, clientX: 500 });
@@ -130,6 +140,35 @@ describe("TimelinePlot", () => {
     drag(plot, 500, 250);
     expect(content.viewStartTime?.toISO()).toBe(day(1).plus({ hours: 6 }).toISO());
     expect(content.viewEndTime?.toISO()).toBe(day(2).plus({ hours: 6 }).toISO());
+  });
+
+  it("pans by the horizontal part of a diagonal drag", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500, clientY: 10 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 250, clientY: 90 });
+    fireEvent.pointerUp(plot, { button: 0, clientX: 250, clientY: 90 });
+    expect(content.viewStartTime?.toISO()).toBe(day(1).plus({ hours: 6 }).toISO());
+  });
+
+  it("saves a drag only when it ends", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 250 });
+    expect(content.viewStartTime?.toISO()).toBe(day(1).plus({ hours: 6 }).toISO());
+    expect(content.viewStartTimeISO).toBe(day(1).toISO());
+    fireEvent.pointerUp(plot, { button: 0, clientX: 250 });
+    expect(content.viewStartTimeISO).toBe(day(1).plus({ hours: 6 }).toISO());
+  });
+
+  it("ends a drag when pointer capture is lost", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 250 });
+    fireEvent(plot, new PointerEvent("lostpointercapture", { bubbles: true }));
+    expect(plot).not.toHaveClass("grabbing");
+    expect(content.viewStartTimeISO).toBe(day(1).plus({ hours: 6 }).toISO());
+    fireEvent.pointerMove(plot, { button: 0, clientX: 0 });
+    expect(content.viewStartTime?.toISO()).toBe(day(1).plus({ hours: 6 }).toISO());
   });
 
   it("does not zoom when a drag is released", () => {
@@ -163,6 +202,26 @@ describe("TimelinePlot", () => {
     fireEvent.pointerCancel(plot, { pointerId: 2 });
     fireEvent.pointerMove(plot, { button: 0, clientX: 250, pointerId: 1 });
     expect(content.viewStartTime?.toISO()).toBe(day(1).plus({ hours: 6 }).toISO());
+  });
+
+  it("ignores the release of a second pointer", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500, pointerId: 1 });
+    fireEvent.pointerDown(plot, { button: 0, clientX: 100, pointerId: 2 });
+    fireEvent.pointerUp(plot, { button: 0, clientX: 100, pointerId: 2 });
+    expect(content.viewRangeSeconds).toBeCloseTo(24 * 3600, 3);
+    fireEvent.pointerUp(plot, { button: 0, clientX: 500, pointerId: 1 });
+    expect(content.viewRangeSeconds).toBeCloseTo(12 * 3600, 3);
+  });
+
+  it("neither zooms nor pans when read-only", () => {
+    const { container, content, plot } = renderPlot(day(1), day(2), { readOnly: true });
+    click(plot, 500);
+    drag(plot, 500, 250);
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(day(2).toISO());
+    expect(plot).not.toHaveClass("zoom-in");
+    expect(container.querySelector("[aria-live]")).toBeNull();
   });
 
   it("shows the zoom-in cursor, switching to zoom-out while Shift is held", () => {
@@ -213,14 +272,34 @@ describe("TimelinePlot", () => {
       return container.querySelector("[aria-live]")!.textContent;
     }
 
+    const format = (time: DateTime) => time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
+
     it("announces zooms and pans to screen readers", () => {
       const { container, plot } = renderPlot(day(1), day(2));
+      const noon = day(1).plus({ hours: 12 });
       click(plot, 500);
-      expect(announced(container)).toMatch(/^Zoomed in/);
+      expect(announced(container)).toBe(
+        `Zoomed in, centered on ${format(noon)}. ` +
+        `Showing ${format(day(1).plus({ hours: 6 }))} to ${format(day(1).plus({ hours: 18 }))}.`);
       click(plot, 500, true);
-      expect(announced(container)).toMatch(/^Zoomed out/);
+      expect(announced(container)).toBe(
+        `Zoomed out, centered on ${format(noon)}. Showing ${format(day(1))} to ${format(day(2))}.`);
       drag(plot, 500, 250);
-      expect(announced(container)).toMatch(/^Panned/);
+      expect(announced(container)).toBe(
+        `Panned. Showing ${format(day(1).plus({ hours: 6 }))} to ${format(day(2).plus({ hours: 6 }))}.`);
+    });
+
+    it("doesn't claim a zoom is centered when the data edge shifted it", () => {
+      const { container, plot } = renderPlot(dataStart, dataEnd);
+      click(plot, 0);
+      expect(announced(container)).toBe(`Zoomed in. Showing ${format(dataStart)} to ${format(day(2))}.`);
+    });
+
+    it("announces when a drag can't pan any further", () => {
+      const { container, content, plot } = renderPlot(dataStart, day(1));
+      drag(plot, 250, 500);
+      expect(announced(container)).toMatch(/^Already at the edge of the data\./);
+      expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
     });
 
     it("announces when a shift-click can't zoom out any further", () => {

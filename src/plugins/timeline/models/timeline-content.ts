@@ -26,6 +26,8 @@ export const TimelineContentModel = TileContentModel
   .volatile(self => ({
     hoverTime: undefined as DateTime | undefined,
     pinnedTime: undefined as DateTime | undefined,
+    // The view shown while a preview is active; see `beginViewPreview`.
+    viewPreview: undefined as { startISO?: string, endISO?: string } | undefined,
   }))
   .views(self => ({
     get isUserResizable() {
@@ -43,13 +45,15 @@ export const TimelineContentModel = TileContentModel
       return smm?.getTileSharedModelsByType(self, SharedDataSet)[0] as SharedDataSetType | undefined;
     },
     get viewStartTime() {
-      if (!self.viewStartTimeISO) return undefined;
-      const time = DateTime.fromISO(self.viewStartTimeISO);
+      const iso = self.viewPreview ? self.viewPreview.startISO : self.viewStartTimeISO;
+      if (!iso) return undefined;
+      const time = DateTime.fromISO(iso);
       return time.isValid ? time : undefined;
     },
     get viewEndTime() {
-      if (!self.viewEndTimeISO) return undefined;
-      const time = DateTime.fromISO(self.viewEndTimeISO);
+      const iso = self.viewPreview ? self.viewPreview.endISO : self.viewEndTimeISO;
+      if (!iso) return undefined;
+      const time = DateTime.fromISO(iso);
       return time.isValid ? time : undefined;
     }
   }))
@@ -207,8 +211,28 @@ export const TimelineContentModel = TileContentModel
     },
     setViewRange(start: DateTime, end: DateTime) {
       if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;
-      self.viewStartTimeISO = start.toISO() ?? undefined;
-      self.viewEndTimeISO = end.toISO() ?? undefined;
+      const startISO = start.toISO() ?? undefined;
+      const endISO = end.toISO() ?? undefined;
+      if (self.viewPreview) {
+        self.viewPreview = { startISO, endISO };
+      } else {
+        self.viewStartTimeISO = startISO;
+        self.viewEndTimeISO = endISO;
+      }
+    },
+    /**
+     * Until `endViewPreview`, view changes are shown but not saved, so that a continuous gesture
+     * like a drag is saved, and undone, as a single change.
+     */
+    beginViewPreview() {
+      self.viewPreview = { startISO: self.viewStartTimeISO, endISO: self.viewEndTimeISO };
+    },
+    endViewPreview() {
+      const preview = self.viewPreview;
+      self.viewPreview = undefined;
+      if (!preview) return;
+      if (preview.startISO !== self.viewStartTimeISO) self.viewStartTimeISO = preview.startISO;
+      if (preview.endISO !== self.viewEndTimeISO) self.viewEndTimeISO = preview.endISO;
     }
   }))
   .actions(self => ({

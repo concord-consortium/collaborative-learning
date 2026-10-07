@@ -1,6 +1,7 @@
 .timeline-plot {
-  // Keep a drag from selecting text or scrolling the page on touch devices.
-  touch-action: pan-y;
+  // Keep a drag from selecting text or panning the page sideways; vertical scrolling and
+  // pinch-zoom still work on touch devices.
+  touch-action: pan-y pinch-zoom;
   user-select: none;
 
   &.zoom-in {

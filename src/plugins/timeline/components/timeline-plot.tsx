@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef, useState } from "react";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 
@@ -29,14 +30,20 @@ interface IProps {
 
 /**
  * Wraps the timeline graph: a click zooms in centered on the clicked time, a shift-click zooms
- * out, and a drag pans.
+ * out, and a drag pans. Read-only, it only displays the graph.
  */
 export const TimelinePlot = observer(function TimelinePlot({ children }: IProps) {
   const content = useTimelineContent();
+  const readOnly = useReadOnlyContext();
   const dragRef = useRef<IDragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isShiftDown, setIsShiftDown] = useState(false);
   const { announcerRef, announce } = useLiveAnnouncer();
+
+  // Save a drag that is still in progress when the plot goes away.
+  useEffect(() => () => {
+    if (dragRef.current?.moved) content.endViewPreview();
+  }, [content]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -91,6 +98,7 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
       if (Math.hypot(dx, e.clientY - drag.startY) <= kDragThresholdPx) return;
       drag.moved = true;
       setIsDragging(true);
+      content.beginViewPreview();
     }
     // Pan relative to where the drag started, so the view stays under the pointer.
     const targetStartMs = drag.startViewStartMs - dx * drag.msPerPx;
@@ -98,8 +106,10 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   };
 
   const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
     dragRef.current = null;
     setIsDragging(false);
+    if (drag?.moved) content.endViewPreview();
     if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
@@ -110,7 +120,8 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     if (!drag || drag.pointerId !== e.pointerId) return;
     endDrag(e);
     if (drag.moved) {
-      announce(`Panned. ${describeView()}`);
+      const panned = content.viewStartMs !== drag.startViewStartMs;
+      announce(`${panned ? "Panned." : "Already at the edge of the data."} ${describeView()}`);
       return;
     }
     const time = timeAtClientX(e);
@@ -119,14 +130,24 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
       announce(`Already showing the full time range. ${describeView()}`);
       return;
     }
-    const action = e.shiftKey ? "Zoomed out" : content.canZoomIn ? "Zoomed in" : "Already at the closest zoom";
+    let action = "Zoomed in";
+    if (e.shiftKey) action = "Zoomed out";
+    else if (!content.canZoomIn) action = "Already at the closest zoom";
     content.zoom(e.shiftKey ? 2 : 0.5, time);
-    announce(`${action}, centered on ${formatTime(time)}. ${describeView()}`);
+    // Near the edges of the data, the view is shifted rather than centered on the clicked time.
+    const { viewStartMs = 0, viewRangeMs = 0 } = content;
+    const centered = Math.abs(viewStartMs + viewRangeMs / 2 - time.toMillis()) <= 1;
+    announce(`${action}${centered ? `, centered on ${formatTime(time)}` : ""}. ${describeView()}`);
   };
 
+  // Also handles a lost pointer capture, so a missed pointerup can't leave a drag running.
   const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
     if (dragRef.current?.pointerId === e.pointerId) endDrag(e);
   };
+
+  if (readOnly) {
+    return <div className="timeline-plot">{children}</div>;
+  }
 
   const cursorClass = isDragging ? "grabbing" : isShiftDown ? "zoom-out" : "zoom-in";
 
@@ -138,6 +159,7 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onLostPointerCapture={handlePointerCancel}
       >
         {children}
       </div>

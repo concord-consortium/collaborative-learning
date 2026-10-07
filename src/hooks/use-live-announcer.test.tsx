@@ -38,15 +38,18 @@ describe("useLiveAnnouncer", () => {
     const { container } = render(<Harness />);
     const region = container.querySelector("[aria-live]")!;
     act(() => announce("First"));
+    act(() => { jest.advanceTimersByTime(kAnnounceDelayMs - 1); });
     act(() => announce("Second"));
+    act(() => { jest.advanceTimersByTime(1); });
+    expect(region.textContent).toBe("");
     act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); });
     expect(region.textContent).toBe("Second");
   });
 
-  it("doesn't touch the region after unmounting", () => {
+  it("cancels a pending announcement on unmount", () => {
     const { unmount } = render(<Harness />);
     act(() => announce("Hello"));
     unmount();
-    expect(() => act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); })).not.toThrow();
+    expect(jest.getTimerCount()).toBe(0);
   });
 });
