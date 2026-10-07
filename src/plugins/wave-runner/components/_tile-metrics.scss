@@ -3,8 +3,9 @@
 // exactly that height - twice over when the panels stack.
 //
 //   title   18 + 10 gap
-//   graph   60 + 10 gap   (border-box, so the white border is inside the 60)
-//   status  22 + 10 gap
+//   graph   63 + 10 gap   (border-box: 60 of content, which is the waveform panel's own fixed
+//                          height, plus its 1.5px border either side)
+//   status  19 + 10 gap
 //   counts  26
 //   ----------------
 //           156
@@ -13,8 +14,8 @@
 
 $wave-runner-section-title-height: 18px;
 $wave-runner-row-gap: 10px;
-$wave-runner-graph-height: 60px;
-$wave-runner-status-line-height: 22px;
+$wave-runner-graph-height: 63px;
+$wave-runner-status-line-height: 19px;
 $wave-runner-counts-row-height: 26px;
 
 // The tile clips its own overflow, so a long station list would be cut off at the bottom edge.

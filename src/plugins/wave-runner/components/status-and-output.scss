@@ -5,7 +5,10 @@
   .waveform-container {
     // No width: 100% - with horizontal margins that makes the box as wide as the panel AND offset,
     // so it overhangs the right edge. Left to fill the space between its margins instead.
-    overflow-y: auto;
+    //
+    // The graph never scrolls: its height is exactly the waveform panel's own plus the border, so
+    // there is nothing to scroll to.
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 8px;
