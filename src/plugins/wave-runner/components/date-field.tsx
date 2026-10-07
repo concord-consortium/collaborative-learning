@@ -44,8 +44,8 @@ function monthOptions(focused: CalendarDate, latest?: CalendarDate) {
 }
 
 // No static `title`: it would mask the focused month the same way it would mask a chosen station
-// or model (see data-setup.tsx). The focused month is both the visible label and, since
-// CustomSelect has no aria-label prop, the accessible name.
+// or model (see data-setup.tsx). Unlike Station/Model, there is no separate field name to announce
+// here, so the focused month is left as both the visible label and the accessible name.
 function monthDropdownItems(
   focused: CalendarDate, setFocused: (date: CalendarDate) => void, latest?: CalendarDate
 ): ICustomDropdownItem[] {
@@ -120,7 +120,20 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
 
   const cancel = () => setIsOpen(false);
 
-  const clear = () => setPending(fromDateString(defaultValue ?? value) ?? null);
+  // defaultValue is a fixed constant (see kDefaultStartDate/kDefaultEndDate) with no knowledge of
+  // the other field's current value, so it can land outside this field's live minValue/maxValue -
+  // e.g. clearing the end field after the start field has moved past the default end date. Staging
+  // it unclamped would let OK commit a date the calendar itself would have refused to let you pick.
+  const clear = () => {
+    let next = fromDateString(defaultValue ?? value) ?? null;
+    if (next) {
+      const min = minValue ? fromDateString(minValue) : undefined;
+      const max = maxValue ? fromDateString(maxValue) : undefined;
+      if (min && next.compare(min) < 0) next = min;
+      if (max && next.compare(max) > 0) next = max;
+    }
+    setPending(next);
+  };
 
   return (
     <DatePicker

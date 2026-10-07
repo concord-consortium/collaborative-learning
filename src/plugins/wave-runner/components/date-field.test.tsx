@@ -135,6 +135,33 @@ describe("DateField buffering", () => {
     expect(onChange).toHaveBeenCalledWith("2026-09-01");
   });
 
+  // Reproduces the reported bug exactly: the end field's minValue tracks the start field (see
+  // data-setup.tsx), so moving start later than the fixed defaultValue leaves Clear with nowhere
+  // valid to land unless it clamps - otherwise OK can commit an end date before the start date.
+  it("clamps Clear to minValue when the default falls before it", () => {
+    const onChange = renderField({
+      id: "end", label: "End Date and Time", value: "2026-10-06",
+      defaultValue: "2026-10-01", minValue: "2026-10-05"
+    });
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+
+    expect(onChange).toHaveBeenCalledWith("2026-10-05");
+  });
+
+  // Symmetric case on the other bound, so a defaultValue past maxValue cannot be staged either.
+  it("clamps Clear to maxValue when the default falls after it", () => {
+    const onChange = renderField({
+      value: "2026-09-10", defaultValue: "2026-09-20", maxValue: "2026-09-15"
+    });
+    openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+
+    expect(onChange).toHaveBeenCalledWith("2026-09-15");
+  });
+
   // A cancelled edit must not linger into the next opening.
   it("reseeds the pending day from value each time it opens", () => {
     const onChange = renderField();
