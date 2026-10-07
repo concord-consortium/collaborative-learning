@@ -225,8 +225,9 @@ export const TimelineContentModel = TileContentModel
       if (!self.viewStartTime || self.viewRangeSeconds == null) return;
       if (!self.dataStartTime || !self.dataEndTime || self.dataRangeSeconds == null) return;
 
-      // Clamp to [kMinViewRangeSeconds, self.dataRangeSeconds]
-      const newRange = Math.max(Math.min(self.viewRangeSeconds * factor, self.dataRangeSeconds), kMinViewRangeSeconds);
+      // Clamp to [kMinViewRangeSeconds, self.dataRangeSeconds], with the data range winning when
+      // the data is shorter than the minimum
+      const newRange = Math.min(Math.max(self.viewRangeSeconds * factor, kMinViewRangeSeconds), self.dataRangeSeconds);
       center ??= self.viewStartTime.plus({ seconds: self.viewRangeSeconds / 2 });
       let newStart = center.minus({ seconds: newRange / 2 });
       let newEnd = center.plus({ seconds: newRange / 2 });

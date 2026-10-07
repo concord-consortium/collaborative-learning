@@ -11,6 +11,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
+import { kAnnounceDelayMs } from "../../../hooks/use-live-announcer";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
@@ -145,6 +146,25 @@ describe("TimelinePlot", () => {
     expect(content.viewRangeSeconds).toBeCloseTo(2 * 24 * 3600, 0);
   });
 
+  it("treats a mostly vertical drag as a drag rather than a click", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500, clientY: 20 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 502, clientY: 60 });
+    fireEvent.pointerUp(plot, { button: 0, clientX: 502, clientY: 60 });
+    expect(content.viewRangeSeconds).toBeCloseTo(24 * 3600, 3);
+  });
+
+  it("ignores a second pointer while dragging", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500, pointerId: 1 });
+    fireEvent.pointerDown(plot, { button: 0, clientX: 100, pointerId: 2 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 150, pointerId: 2 });
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+    fireEvent.pointerCancel(plot, { pointerId: 2 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 250, pointerId: 1 });
+    expect(content.viewStartTime?.toISO()).toBe(day(1).plus({ hours: 6 }).toISO());
+  });
+
   it("shows the zoom-in cursor, switching to zoom-out while Shift is held", () => {
     const { plot } = renderPlot(dataStart, dataEnd);
     expect(plot).toHaveClass("zoom-in");
@@ -184,30 +204,47 @@ describe("TimelinePlot", () => {
     expect(content.pinnedTime).toBeUndefined();
   });
 
-  it("announces zooms and pans to screen readers", () => {
-    const { container, plot } = renderPlot(day(1), day(2));
-    const status = container.querySelector("[aria-live]")!;
-    click(plot, 500);
-    expect(status.textContent).toMatch(/^Zoomed in/);
-    click(plot, 500, true);
-    expect(status.textContent).toMatch(/^Zoomed out/);
-    drag(plot, 500, 250);
-    expect(status.textContent).toMatch(/^Panned/);
-  });
+  describe("announcements", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
 
-  it("announces when a shift-click can't zoom out any further", () => {
-    const { container, content, plot } = renderPlot(dataStart, dataEnd);
-    const status = container.querySelector("[aria-live]")!;
-    click(plot, 500, true);
-    expect(status.textContent).toMatch(/^Already showing the full time range/);
-    expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
-    expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
-  });
+    function announced(container: HTMLElement) {
+      act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); });
+      return container.querySelector("[aria-live]")!.textContent;
+    }
 
-  it("announces when a click at the closest zoom only re-centers", () => {
-    const { container, plot } = renderPlot(day(1), day(1).plus({ seconds: kMinViewRangeSeconds }));
-    const status = container.querySelector("[aria-live]")!;
-    click(plot, 500);
-    expect(status.textContent).toMatch(/^Already at the closest zoom, centered on/);
+    it("announces zooms and pans to screen readers", () => {
+      const { container, plot } = renderPlot(day(1), day(2));
+      click(plot, 500);
+      expect(announced(container)).toMatch(/^Zoomed in/);
+      click(plot, 500, true);
+      expect(announced(container)).toMatch(/^Zoomed out/);
+      drag(plot, 500, 250);
+      expect(announced(container)).toMatch(/^Panned/);
+    });
+
+    it("announces when a shift-click can't zoom out any further", () => {
+      const { container, content, plot } = renderPlot(dataStart, dataEnd);
+      click(plot, 500, true);
+      expect(announced(container)).toMatch(/^Already showing the full time range/);
+      expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
+      expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
+    });
+
+    it("announces when a click at the closest zoom only re-centers", () => {
+      const { container, plot } = renderPlot(day(1), day(1).plus({ seconds: kMinViewRangeSeconds }));
+      click(plot, 500);
+      expect(announced(container)).toMatch(/^Already at the closest zoom, centered on/);
+    });
+
+    it("clears the announcement before repeating an identical one", () => {
+      const { container, plot } = renderPlot(dataStart, dataEnd);
+      const status = container.querySelector("[aria-live]")!;
+      click(plot, 500, true);
+      const first = announced(container);
+      click(plot, 500, true);
+      expect(status.textContent).toBe("");
+      expect(announced(container)).toBe(first);
+    });
   });
 });

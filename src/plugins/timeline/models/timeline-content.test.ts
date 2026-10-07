@@ -225,6 +225,33 @@ describe("zoom functionality", () => {
   });
 });
 
+describe("zoom with data shorter than the minimum view range", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = dataStart.plus({ seconds: kMinViewRangeSeconds / 2 });
+
+  beforeEach(() => {
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [{ station: {}, startTime: dataStart, endTime: dataEnd }];
+        return [];
+      },
+    } as any);
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("keeps the view within the data", () => {
+    const content = TimelineContentModel.create();
+    content.fitToData();
+    content.zoom(0.5, dataStart.plus({ milliseconds: 250 }));
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
+  });
+});
+
 describe("pan functionality", () => {
   const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
   const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");

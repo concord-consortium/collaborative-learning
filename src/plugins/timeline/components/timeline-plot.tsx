@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef, useState } from "react";
+import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 
 import "./timeline-plot.scss";
@@ -12,6 +13,7 @@ const kDragThresholdPx = 5;
 interface IDragState {
   pointerId: number;
   startX: number;
+  startY: number;
   startViewStartMs: number;
   msPerPx: number;
   moved: boolean;
@@ -34,7 +36,7 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   const dragRef = useRef<IDragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isShiftDown, setIsShiftDown] = useState(false);
-  const [announcement, setAnnouncement] = useState("");
+  const { announcerRef, announce } = useLiveAnnouncer();
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -68,11 +70,12 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const { viewStartMs, viewRangeMs } = content;
     const width = e.currentTarget.getBoundingClientRect().width;
-    if (e.button !== 0 || viewStartMs == null || !viewRangeMs || width <= 0) return;
+    if (e.button !== 0 || dragRef.current || viewStartMs == null || !viewRangeMs || width <= 0) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     dragRef.current = {
       pointerId: e.pointerId,
       startX: e.clientX,
+      startY: e.clientY,
       startViewStartMs: viewStartMs,
       msPerPx: viewRangeMs / width,
       moved: false
@@ -82,10 +85,10 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     setIsShiftDown(e.shiftKey);
     const drag = dragRef.current;
-    if (!drag) return;
+    if (!drag || drag.pointerId !== e.pointerId) return;
     const dx = e.clientX - drag.startX;
     if (!drag.moved) {
-      if (Math.abs(dx) <= kDragThresholdPx) return;
+      if (Math.hypot(dx, e.clientY - drag.startY) <= kDragThresholdPx) return;
       drag.moved = true;
       setIsDragging(true);
     }
@@ -107,22 +110,22 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     if (!drag || drag.pointerId !== e.pointerId) return;
     endDrag(e);
     if (drag.moved) {
-      setAnnouncement(`Panned. ${describeView()}`);
+      announce(`Panned. ${describeView()}`);
       return;
     }
     const time = timeAtClientX(e);
     if (!time) return;
     if (e.shiftKey && !content.canZoomOut) {
-      setAnnouncement(`Already showing the full time range. ${describeView()}`);
+      announce(`Already showing the full time range. ${describeView()}`);
       return;
     }
     const action = e.shiftKey ? "Zoomed out" : content.canZoomIn ? "Zoomed in" : "Already at the closest zoom";
     content.zoom(e.shiftKey ? 2 : 0.5, time);
-    setAnnouncement(`${action}, centered on ${formatTime(time)}. ${describeView()}`);
+    announce(`${action}, centered on ${formatTime(time)}. ${describeView()}`);
   };
 
   const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (dragRef.current) endDrag(e);
+    if (dragRef.current?.pointerId === e.pointerId) endDrag(e);
   };
 
   const cursorClass = isDragging ? "grabbing" : isShiftDown ? "zoom-out" : "zoom-in";
@@ -138,7 +141,7 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
       >
         {children}
       </div>
-      <div className="visually-hidden" aria-live="polite">{announcement}</div>
+      <div ref={announcerRef} className="visually-hidden" aria-live="polite" />
     </>
   );
 });
