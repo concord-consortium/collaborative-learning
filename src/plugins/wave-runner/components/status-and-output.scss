@@ -2,7 +2,8 @@
 
 .wave-runner-tile {
   .waveform-container {
-    width: 100%;
+    // No width: 100% - with horizontal margins that makes the box as wide as the panel AND offset,
+    // so it overhangs the right edge. Left to fill the space between its margins instead.
     overflow-y: auto;
     display: flex;
     flex-direction: column;
