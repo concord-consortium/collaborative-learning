@@ -50,7 +50,8 @@ describe("TimelineComponent", () => {
               ["data-set-view", "Table"],
               ["data-set-view", "DataCard"],
               ["data-set-view", "BarGraph"],
-              "|", "zoom-in", "zoom-out", "view-all"
+              "|", "zoom-in", "zoom-out", "view-all",
+              "|", "pan-left", "pan-right"
             ]
           }
         }
@@ -89,6 +90,12 @@ describe("TimelineComponent", () => {
     expect(viewAllButton).toHaveAttribute("aria-disabled", "true");
   });
 
+  it("pan buttons are disabled when no seismogram data is available", () => {
+    renderWithStores();
+    expect(screen.getByLabelText("Pan Left")).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByLabelText("Pan Right")).toHaveAttribute("aria-disabled", "true");
+  });
+
   it("displays the selected event label", () => {
     renderWithStores();
     expect(screen.getByText("Event")).toBeInTheDocument();
@@ -111,5 +118,7 @@ describe("TimelineComponent", () => {
     expect(toolbar).toContainHTML("Zoom In");
     expect(toolbar).toContainHTML("Zoom Out");
     expect(toolbar).toContainHTML("View All");
+    expect(toolbar).toContainHTML("Pan Left");
+    expect(toolbar).toContainHTML("Pan Right");
   });
 });
