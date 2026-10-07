@@ -37,6 +37,31 @@
     @include focus-ring;
   }
 
+  // Each part of the date is its own spinbutton: it takes digits, and ArrowUp/ArrowDown step it.
+  // Unstyled there was nothing to show they are separate editable units, so the field read as one
+  // inert piece of text.
+  .date-input {
+    display: flex;
+  }
+
+  .react-aria-DateSegment {
+    padding: 0 2px;
+    border-radius: 3px;
+    // Digits keep a fixed advance so stepping a segment does not shuffle the ones beside it.
+    font-variant-numeric: tabular-nums;
+
+    &[data-placeholder] {
+      color: $charcoal-light-1;
+      font-style: italic;
+    }
+
+    &:focus {
+      background-color: $workspace-teal-dark-1;
+      color: white;
+      outline: none;
+    }
+  }
+
   .static-time {
     color: $charcoal-dark-2;
   }
