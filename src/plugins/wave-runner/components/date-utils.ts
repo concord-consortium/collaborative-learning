@@ -1,9 +1,8 @@
 import { CalendarDate, parseDate, today } from "@internationalized/date";
 
 /**
- * The model stores dates as "YYYY-MM-DD" strings. CalendarDate carries no timezone, so this
- * conversion cannot shift a date — which is what lets the picker be swapped in without touching
- * the model or the range logic.
+ * The model stores dates as "YYYY-MM-DD" strings. CalendarDate carries no timezone, so converting
+ * between the two can never shift a date by a day.
  */
 export function fromDateString(value: string): CalendarDate | undefined {
   try {
@@ -13,6 +12,19 @@ export function fromDateString(value: string): CalendarDate | undefined {
     // valid, so this guards against a hand-edited document rather than ordinary input.
     return undefined;
   }
+}
+
+/**
+ * Clamps `value` into [min, max]. Clamped to max first, then to min: if the two bounds are
+ * themselves out of order - minValue and maxValue are computed from two independent fields (see
+ * data-setup.tsx) and can transiently disagree - this order guarantees the result still respects
+ * min rather than landing below it.
+ */
+export function clampDate(value: CalendarDate, min?: CalendarDate, max?: CalendarDate): CalendarDate {
+  let result = value;
+  if (max && result.compare(max) > 0) result = max;
+  if (min && result.compare(min) < 0) result = min;
+  return result;
 }
 
 export function toDateString(date: CalendarDate): string {

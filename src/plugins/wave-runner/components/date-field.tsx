@@ -7,7 +7,8 @@ import {
 
 import CalendarIcon from "../assets/calendar-icon.svg";
 import { CustomSelect, ICustomDropdownItem } from "../../../clue/components/custom-select";
-import { fromDateString, toDateString } from "./date-utils";
+import { kDefaultStartDate } from "../models/wave-runner-content";
+import { clampDate, fromDateString, toDateString } from "./date-utils";
 
 import "./date-field.scss";
 
@@ -26,14 +27,20 @@ const kMonthNames = ["January", "February", "March", "April", "May", "June",
  * Twelve months either side of the focused month. A fixed window keeps the list short; the prev
  * and next buttons still reach anything outside it.
  */
-function monthOptions(focused: CalendarDate, latest?: CalendarDate) {
+function monthOptions(focused: CalendarDate, earliest?: CalendarDate, latest?: CalendarDate) {
   const options: { value: string; label: string }[] = [];
   for (let offset = -12; offset <= 12; offset++) {
     const date = focused.add({ months: offset });
     // A month entirely past the last selectable date holds nothing that can be chosen, so it is
-    // left out rather than offered and then refused.
+    // left out rather than offered and then refused. The loop runs in increasing date order, so
+    // every month from here on is past it too.
     if (latest && (date.year > latest.year
         || (date.year === latest.year && date.month > latest.month))) break;
+    // A month entirely before the first selectable date is left out the same way, but only
+    // skipped rather than breaking out of the loop: at this point in the loop it is the months
+    // after it, not before, that are still to come.
+    if (earliest && (date.year < earliest.year
+        || (date.year === earliest.year && date.month < earliest.month))) continue;
     const month = String(date.month).padStart(2, "0");
     options.push({
       value: `${date.year}-${month}`,
@@ -47,10 +54,11 @@ function monthOptions(focused: CalendarDate, latest?: CalendarDate) {
 // or model (see data-setup.tsx). Unlike Station/Model, there is no separate field name to announce
 // here, so the focused month is left as both the visible label and the accessible name.
 function monthDropdownItems(
-  focused: CalendarDate, setFocused: (date: CalendarDate) => void, latest?: CalendarDate
+  focused: CalendarDate, setFocused: (date: CalendarDate) => void,
+  earliest?: CalendarDate, latest?: CalendarDate
 ): ICustomDropdownItem[] {
   const focusedValue = `${focused.year}-${String(focused.month).padStart(2, "0")}`;
-  return monthOptions(focused, latest).map(option => ({
+  return monthOptions(focused, earliest, latest).map(option => ({
     id: option.value,
     text: option.label,
     selected: option.value === focusedValue,
@@ -79,11 +87,14 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
   // authoritative until OK.
   const [pending, setPending] = useState<CalendarDate | null>(null);
   const [focused, setFocused] = useState<CalendarDate>(
-    () => fromDateString(value) ?? new CalendarDate(2026, 9, 1)
+    // kDefaultStartDate is a valid literal, so this can only be undefined if the picker is ever
+    // given a non-date default of its own - the assertion is the trade-off for not duplicating it
+    // as a second hardcoded fallback here.
+    () => fromDateString(value) ?? fromDateString(kDefaultStartDate)!
   );
-  // What the field is showing while it is being typed into. Handing the picker only the committed
-  // date meant a half-typed entry had nowhere to live, so the segments the student had not touched
-  // fell back to their mm/dd placeholders.
+  // What the field is showing while it is being typed into, so a half-typed entry has somewhere to
+  // live: the segments the student has not touched yet keep their last known value here instead of
+  // falling back to their mm/dd placeholders.
   const [draft, setDraft] = useState<CalendarDate | null>(() => fromDateString(value) ?? null);
   // Clearing a segment to empty does not reach `draft`: react-aria's onChange only fires for an
   // edit that is complete and valid, so the segment just displays its own mm/dd/yyyy placeholder
@@ -175,14 +186,11 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
   // e.g. clearing the end field after the start field has moved past the default end date. Staging
   // it unclamped would let OK commit a date the calendar itself would have refused to let you pick.
   const clear = () => {
-    let next = fromDateString(defaultValue ?? value) ?? null;
-    if (next) {
-      const min = minValue ? fromDateString(minValue) : undefined;
-      const max = maxValue ? fromDateString(maxValue) : undefined;
-      if (min && next.compare(min) < 0) next = min;
-      if (max && next.compare(max) > 0) next = max;
-    }
-    setPending(next);
+    const next = fromDateString(defaultValue ?? value) ?? null;
+    const min = minValue ? fromDateString(minValue) : undefined;
+    const max = maxValue ? fromDateString(maxValue) : undefined;
+    // See clampDate's own comment for why the clamp order matters.
+    setPending(next ? clampDate(next, min, max) : next);
   };
 
   return (
@@ -232,7 +240,11 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
               <CustomSelect
                 className="month-dropdown"
                 dataTestId="date-field-month"
-                items={monthDropdownItems(focused, setFocused, maxValue ? fromDateString(maxValue) : undefined)}
+                items={monthDropdownItems(
+                  focused, setFocused,
+                  minValue ? fromDateString(minValue) : undefined,
+                  maxValue ? fromDateString(maxValue) : undefined
+                )}
               />
               <Button slot="next" className="nav-button" aria-label="Next month">›</Button>
             </header>

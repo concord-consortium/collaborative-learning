@@ -12,12 +12,12 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
     eventsDataSet, runError, loadDataError
   } = model;
 
-  // The graph space is always a rectangle: grey until a station and model are chosen, black once
+  // The graph space is always a rectangle: gray until a station and model are chosen, black once
   // they are, and a waveform once there is data to draw.
   const isConfigured = !!model.station && !!model.selectedModelUrl;
 
-  // One line carries whatever the tile has to say. Reserving a row for each possible message left
-  // an empty one sitting between the graph and the text that was actually showing.
+  // One line carries whatever the tile has to say, so the layout reserves exactly that line's
+  // height (see _tile-metrics.scss) rather than a row per possible message.
   const error = loadDataError || runError;
   const statusMessage = error
     ? error
@@ -28,7 +28,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         : eventsDataSet
           ? "Run complete."
           : isConfigured
-            ? "Estimated time to complete run:"
+            ? "Ready to run the model."
             : "Set up data then run the model.";
 
   return (
