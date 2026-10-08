@@ -1,0 +1,114 @@
+@import "../../../components/vars";
+@import "./timeline-event-colors.scss";
+
+$full-timeline-overlay-color: #0592af;
+
+.full-timeline-area {
+  margin-top: 16px;
+
+  .full-timeline {
+    background-color: white;
+    border: 1px solid #333333;
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 40px;
+    position: relative;
+    // Keep a drag from selecting text or panning the page sideways; vertical scrolling and
+    // pinch-zoom still work on touch devices.
+    touch-action: pan-y pinch-zoom;
+    user-select: none;
+
+    &.read-only {
+      cursor: default;
+    }
+
+    // The strip holds the pointer capture while scrubbing, so its cursor is the one that shows.
+    &.is-scrubbing, &.is-scrubbing .full-timeline-overlay {
+      cursor: grabbing;
+    }
+  }
+
+  .full-timeline-event {
+    border: 1px solid;
+    box-sizing: border-box;
+    height: 100%;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+
+    @each $color, $value in (
+      "blue": $blue-full-timeline,
+      "orange": $orange-full-timeline,
+      "red": $red-full-timeline,
+      "yellow": $yellow-full-timeline,
+      "magenta": $magenta-full-timeline,
+      "purple": $purple-full-timeline,
+      "default": $default-full-timeline
+    ) {
+      &.#{$color}-event {
+        background-color: rgba($value, 0.45);
+        border-color: $value;
+      }
+    }
+  }
+
+  // Just above the strip's top border
+  .full-timeline-shape {
+    pointer-events: none;
+    position: absolute;
+    top: -9px;
+    transform: translateX(-50%);
+  }
+
+  .full-timeline-overlay {
+    background-color: rgba($full-timeline-overlay-color, 0.3);
+    border: 1px solid $full-timeline-overlay-color;
+    bottom: 1px;
+    box-sizing: border-box;
+    cursor: grab;
+    min-width: 8px;
+    position: absolute;
+    top: 1px;
+
+    &:hover {
+      background-color: rgba($full-timeline-overlay-color, 0.4);
+    }
+  }
+
+  .full-timeline.is-scrubbing .full-timeline-overlay {
+    background-color: rgba($full-timeline-overlay-color, 0.5);
+  }
+
+  .full-timeline.read-only .full-timeline-overlay {
+    background-color: rgba($full-timeline-overlay-color, 0.3);
+    cursor: default;
+  }
+
+  // The scrollbar thumb is the keyboard control for the view, and the overlay shows its focus.
+  &:has(.dynamic-scrollbar-thumb:focus-visible) {
+    .full-timeline-overlay {
+      background-color: rgba($full-timeline-overlay-color, 0.4);
+      border: $focus-ring-outer-width solid $focus-ring-color;
+    }
+
+    .dynamic-scrollbar-thumb {
+      outline: none;
+    }
+  }
+
+  .full-timeline-label {
+    background-color: white;
+    border: 1px solid #121212;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: bold;
+    left: 50%;
+    line-height: 18px;
+    padding: 0 12px;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+}

@@ -71,6 +71,29 @@ describe("WaveformPanel", () => {
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
+  it("draws the overview mode in black", () => {
+    const OriginalResizeObserver = global.ResizeObserver;
+    global.ResizeObserver = class {
+      constructor(private cb: ResizeObserverCallback) {}
+      observe() { this.cb([{ contentRect: { width: 500 } }] as any, this as any); }
+      unobserve() { /* noop */ }
+      disconnect() { /* noop */ }
+    } as any;
+    const mockUPlot = jest.requireMock("uplot") as jest.Mock;
+    mockUPlot.mockClear();
+    try {
+      const { container } = render(
+        <WaveformPanel mode="overview" sharedSeismogram={sharedSeismogram} startTime={START} endTime={END} />
+      );
+      expect(container.querySelector(".waveform-panel")).toHaveClass("overview");
+      const opts = mockUPlot.mock.calls[0][0];
+      expect(opts.series[1].stroke).toBe("rgb(0, 0, 0)");
+      expect(opts.bands[0].fill).toBe("rgba(0, 0, 0, 0.6)");
+    } finally {
+      global.ResizeObserver = OriginalResizeObserver;
+    }
+  });
+
   it("re-runs loadViewport when the envelope invalidation count is bumped", () => {
     jest.useFakeTimers();
     const OriginalResizeObserver = global.ResizeObserver;

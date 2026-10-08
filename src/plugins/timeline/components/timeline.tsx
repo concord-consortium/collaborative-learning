@@ -5,10 +5,10 @@ import { isValidDateTime } from "../../../utilities/luxon-utils";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { EventOverlay } from "./event-overlay";
+import { FullTimeline } from "./full-timeline";
 import { TimeLabel } from "./time-label";
 import { TimeMarkerOverlay } from "./time-marker-overlay";
 import { TimelinePlot } from "./timeline-plot";
-import { TimelineScrollbar } from "./timeline-scrollbar";
 
 import "./timeline.scss";
 
@@ -77,7 +77,7 @@ export const Timeline = observer(function Timeline() {
               <TimeLabel time={viewEndTime} />
             </div>
           </div>
-          <TimelineScrollbar />
+          <FullTimeline />
         </>
       ) : <div className="waveform" />}
     </div>
