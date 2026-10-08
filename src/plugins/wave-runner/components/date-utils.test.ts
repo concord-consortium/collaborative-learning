@@ -16,6 +16,13 @@ describe("date-utils", () => {
     expect(toDateString(new CalendarDate(2026, 1, 5))).toBe("2026-01-05");
   });
 
+  // A single-digit year - exactly what a year segment holds after its first typed keystroke -
+  // must still pad out to 4 digits, or the resulting string fails to round-trip through
+  // fromDateString, which is what let a malformed intermediate value reach the model.
+  it("zero-pads a single-digit year", () => {
+    expect(toDateString(new CalendarDate(2, 9, 15))).toBe("0002-09-15");
+  });
+
   it("returns undefined for a malformed or empty string rather than throwing", () => {
     expect(fromDateString("")).toBeUndefined();
     expect(fromDateString("not-a-date")).toBeUndefined();

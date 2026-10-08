@@ -1,5 +1,5 @@
 import { CalendarDate, parseDate } from "@internationalized/date";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button, Calendar, CalendarCell, CalendarGrid, DateInput, DatePicker,
   DateSegment, Dialog, Group, Label, Popover
@@ -85,6 +85,11 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
   // date meant a half-typed entry had nowhere to live, so the segments the student had not touched
   // fell back to their mm/dd placeholders.
   const [draft, setDraft] = useState<CalendarDate | null>(() => fromDateString(value) ?? null);
+  // Clearing a segment to empty does not reach `draft`: react-aria's onChange only fires for an
+  // edit that is complete and valid, so the segment just displays its own mm/dd/yyyy placeholder
+  // locally and draft keeps whatever complete value it last heard about. commitTyped reads this
+  // ref directly to catch that case rather than trusting draft alone.
+  const groupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setDraft(fromDateString(value) ?? null);
@@ -101,16 +106,61 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
     setIsOpen(open);
   };
 
-  // Only the calendar's selections are staged for OK. A change with the popover closed can only
-  // have come from typing, and there is no OK button to reach once the calendar is shut, so it
-  // shows immediately and commits as soon as it is a whole date.
+  // A change with the popover closed can only have come from typing. It is kept in draft only -
+  // not committed to the model - until commitTyped runs on blur or Enter. Committing on every
+  // keystroke (the previous behavior) could send the model a malformed intermediate value (typing
+  // "2024" into the year commits year "2" on the first keystroke) and bypassed minValue/maxValue
+  // entirely, since those bounds are validation-only for react-aria and the model setters do not
+  // validate.
   const handlePickerChange = (date: CalendarDate | null) => {
     if (isOpen) {
       setPending(date);
       return;
     }
     setDraft(date);
-    if (date) onChange(toDateString(date));
+  };
+
+  // Validates the typed draft before it can reach the model. A draft that is incomplete (either
+  // draft itself is null, or a segment still shows its placeholder - see groupRef above), invalid,
+  // or outside minValue/maxValue is discarded in favor of the model's own value rather than
+  // committed - so the field and the model can never be left disagreeing, and the model can never
+  // see an out-of-bounds or malformed date.
+  const commitTyped = () => {
+    const committed = fromDateString(value) ?? null;
+    const min = minValue ? fromDateString(minValue) : undefined;
+    const max = maxValue ? fromDateString(maxValue) : undefined;
+    // See the comment on groupRef above: a segment showing its placeholder means the date is
+    // incomplete even though draft itself still looks like a full date.
+    const isIncomplete = !!groupRef.current?.querySelector("[data-placeholder]");
+    const inBounds = !isIncomplete && !!draft
+      && (!min || draft.compare(min) >= 0) && (!max || draft.compare(max) <= 0);
+
+    if (draft && inBounds) {
+      if (!committed || draft.compare(committed) !== 0) onChange(toDateString(draft));
+    } else {
+      setDraft(committed);
+    }
+  };
+
+  // Blur commits a typed edit; Enter does too, without waiting for focus to leave. Both are
+  // no-ops while the calendar is open, since in that state the Group's contents are not what is
+  // being typed into - typing is why focus was inside the Group when it last mattered.
+  //
+  // react-aria swaps a DateSegment for a fresh node on some keystrokes, which blurs and
+  // synchronously re-focuses a segment with no relatedTarget to compare against - indistinguishable
+  // from a real blur if checked immediately. Deferring to a microtask lets that re-focus land
+  // first, so an internal focus shuffle between segments is not mistaken for the student tabbing
+  // or clicking away.
+  const handleGroupBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (isOpen) return;
+    const group = event.currentTarget;
+    queueMicrotask(() => {
+      if (!group.contains(document.activeElement)) commitTyped();
+    });
+  };
+
+  const handleGroupKeyDown = (event: React.KeyboardEvent) => {
+    if (!isOpen && event.key === "Enter") commitTyped();
   };
 
   const commit = () => {
@@ -153,7 +203,13 @@ export const DateField: React.FC<IDateFieldProps> = function DateField(props) {
       <Label className="field-label" htmlFor={id}>{label}</Label>
       {/* The field itself is for typing; only the glyph opens the calendar. Opening it from the
           whole field moved focus into the popover before a key could land. */}
-      <Group id={id} className="field-group">
+      <Group
+        id={id}
+        ref={groupRef}
+        className="field-group"
+        onBlur={handleGroupBlur}
+        onKeyDown={handleGroupKeyDown}
+      >
         <Button className="calendar-trigger" aria-label="Choose date">
           <CalendarIcon className="calendar-glyph" />
         </Button>

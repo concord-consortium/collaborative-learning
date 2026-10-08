@@ -16,9 +16,13 @@ export function fromDateString(value: string): CalendarDate | undefined {
 }
 
 export function toDateString(date: CalendarDate): string {
+  // The year must be padded too, not just month and day: an unpadded single-digit year (e.g. the
+  // "2" a student has typed so far while entering "2024") produced a string like "2-09-15" that
+  // fromDateString cannot parse, which is what let a malformed intermediate commit reach the model.
+  const year = String(date.year).padStart(4, "0");
   const month = String(date.month).padStart(2, "0");
   const day = String(date.day).padStart(2, "0");
-  return `${date.year}-${month}-${day}`;
+  return `${year}-${month}-${day}`;
 }
 
 /**

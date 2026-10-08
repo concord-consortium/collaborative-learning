@@ -1,8 +1,8 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { DateField } from "./date-field";
+import { DateField, IDateFieldProps } from "./date-field";
 
 function renderField(overrides: Partial<React.ComponentProps<typeof DateField>> = {}) {
   const onChange = jest.fn();
@@ -16,6 +16,20 @@ function renderField(overrides: Partial<React.ComponentProps<typeof DateField>> 
     />
   );
   return onChange;
+}
+
+// The field's own tab order never leaves its Group (the calendar-trigger button and the three
+// segments are the only tabbable things in these isolated renders, so Tab just cycles among them),
+// so leaving the field - the thing that actually fires its commit-on-blur - has to be simulated
+// directly. This is what a real page gives for free: tabbing out of the last segment lands on
+// whatever the page renders next (the other date field, a dropdown, and so on).
+async function blurAway() {
+  await act(async () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    // Lets the commit's queued microtask (see date-field.tsx's handleGroupBlur) run before this
+    // resolves, so the assertion right after sees its result.
+    await Promise.resolve();
+  });
 }
 
 // React Aria composes the trigger's accessible name as "Choose date <field label>" so that two
@@ -55,7 +69,12 @@ describe("DateField", () => {
     await user.click(month);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
+    // Typing does not commit by itself - see "DateField typed commit (controlled)" below for why
+    // this matters and cannot be seen with a fixed `value`.
     await user.keyboard("11");
+    expect(onChange).not.toHaveBeenCalled();
+
+    await blurAway();
     expect(onChange).toHaveBeenCalledWith("2026-11-01");
   });
 
@@ -242,5 +261,100 @@ describe("DateField month navigation", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+// Every test above passes a FIXED `value` prop: `onChange` is a bare jest.fn() and the component
+// never re-renders with its own committed output. That is exactly backwards from how DataSetup
+// uses this component - `onChange={date => content.setStartDate(date)}` writes into the model, and
+// the next render reads `value={content.startDate}` back out of it - and it hides any bug that only
+// shows up once a commit round-trips back into `value`. A per-keystroke commit of a malformed
+// intermediate date, for instance, cannot be observed against a fixed value: there is nothing for
+// the bad commit to feed back into, so the segments never go on to blank themselves out. This
+// wrapper closes that gap by feeding `onChange` back into `value`, exactly as the model does.
+function ControlledDateField(
+  props: Omit<IDateFieldProps, "value" | "onChange"> & { initialValue: string; onCommit: jest.Mock }
+) {
+  const { initialValue, onCommit, ...rest } = props;
+  const [value, setValue] = React.useState(initialValue);
+  return (
+    <DateField
+      {...rest}
+      value={value}
+      onChange={next => {
+        setValue(next);
+        onCommit(next);
+      }}
+    />
+  );
+}
+
+function renderControlled(
+  overrides: Partial<Omit<IDateFieldProps, "value" | "onChange">> & { initialValue?: string } = {}
+) {
+  const onCommit = jest.fn();
+  const { initialValue = "2026-09-15", ...rest } = overrides;
+  render(
+    <ControlledDateField
+      id="start"
+      label="Start Date and Time"
+      initialValue={initialValue}
+      onCommit={onCommit}
+      {...rest}
+    />
+  );
+  return onCommit;
+}
+
+describe("DateField typed commit (controlled)", () => {
+  // Reproduces the reported bug exactly: with a controlled value, a per-keystroke commit of year
+  // "2" produced the unparsable string "2-09-15" (toDateString did not pad the year), which nulled
+  // draft and blanked month/day back to their placeholders on the very next render.
+  it("commits a typed year once, on blur, leaving month and day untouched", async () => {
+    const user = userEvent.setup();
+    const onCommit = renderControlled();
+    const [month, day, year] = screen.getAllByRole("spinbutton");
+
+    await user.click(year);
+    await user.keyboard("2024");
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(month).toHaveTextContent("09");
+    expect(day).toHaveTextContent("15");
+
+    await blurAway();
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledWith("2024-09-15");
+  });
+
+  // minValue/maxValue are validation-only for react-aria; it never refuses the onChange itself.
+  // Without this check in commitTyped, this typed edit would reach the model silently - no field
+  // styling, no status message - even though the same date is unselectable in the calendar.
+  it("does not commit a typed month beyond maxValue, and reverts the field", async () => {
+    const user = userEvent.setup();
+    const onCommit = renderControlled({ maxValue: "2026-10-08" });
+    const [month] = screen.getAllByRole("spinbutton");
+
+    await user.click(month);
+    await user.keyboard("12");
+    await blurAway();
+
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(month).toHaveTextContent("09");
+  });
+
+  // Reproduces finding 3: backspacing a segment empty and tabbing away previously left the field
+  // showing the cleared segment while the model still held its old value. draft must be restored
+  // from value on blur rather than left null.
+  it("reverts a cleared segment to match the model on blur instead of leaving them disagree", async () => {
+    const user = userEvent.setup();
+    const onCommit = renderControlled();
+    const [, day] = screen.getAllByRole("spinbutton");
+
+    await user.click(day);
+    await user.keyboard("{Backspace}{Backspace}");
+    await blurAway();
+
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(day).toHaveTextContent("15");
   });
 });
