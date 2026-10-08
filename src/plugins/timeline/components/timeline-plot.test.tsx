@@ -74,19 +74,27 @@ describe("TimelinePlot", () => {
     const content = TimelineContentModel.create();
     content.setViewRange(viewStart, viewEnd);
     const model = TileModel.create({ content });
-    const result = render(
-      <ReadOnlyContext.Provider value={readOnly}>
+    const tree = (isReadOnly: boolean) => (
+      <ReadOnlyContext.Provider value={isReadOnly}>
         <TileModelContext.Provider value={model}>
           <TimelinePlot><div className="plot-content" /></TimelinePlot>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
     );
-    const plot = result.container.querySelector<HTMLElement>(".timeline-plot")!;
-    plot.getBoundingClientRect = () => ({
-      left, right: left + kPlotWidth, width: kPlotWidth, top: 0, bottom: 100, height: 100, x: left, y: 0,
-      toJSON: () => ({})
-    });
-    return { content: content as TimelineContentModelType, plot, ...result };
+    const result = render(tree(readOnly));
+    const getPlot = () => {
+      const plot = result.container.querySelector<HTMLElement>(".timeline-plot")!;
+      plot.getBoundingClientRect = () => ({
+        left, right: left + kPlotWidth, width: kPlotWidth, top: 0, bottom: 100, height: 100, x: left, y: 0,
+        toJSON: () => ({})
+      });
+      return plot;
+    };
+    const setReadOnly = (isReadOnly: boolean) => {
+      result.rerender(tree(isReadOnly));
+      return getPlot();
+    };
+    return { content: content as TimelineContentModelType, plot: getPlot(), setReadOnly, ...result };
   }
 
   function click(plot: HTMLElement, clientX: number, shiftKey = false) {
@@ -177,12 +185,21 @@ describe("TimelinePlot", () => {
     expect(content.viewRangeSeconds).toBeCloseTo(24 * 3600, 3);
   });
 
-  it("treats a press that moves only a few pixels as a click", () => {
+  it("treats a press that moves up to 5 pixels as a click", () => {
     const { content, plot } = renderPlot(dataStart, dataEnd);
-    fireEvent.pointerDown(plot, { button: 0, clientX: 500 });
-    fireEvent.pointerMove(plot, { button: 0, clientX: 503 });
-    fireEvent.pointerUp(plot, { button: 0, clientX: 503 });
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500, clientY: 50 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 503, clientY: 54 });
+    fireEvent.pointerUp(plot, { button: 0, clientX: 503, clientY: 54 });
     expect(content.viewRangeSeconds).toBeCloseTo(2 * 24 * 3600, 0);
+  });
+
+  it("treats a press that moves more than 5 pixels as a drag", () => {
+    const { content, plot } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 506 });
+    fireEvent.pointerUp(plot, { button: 0, clientX: 506 });
+    expect(content.viewRangeSeconds).toBeCloseTo(24 * 3600, 3);
+    expect(content.viewStartTime! < day(1)).toBe(true);
   });
 
   it("treats a mostly vertical drag as a drag rather than a click", () => {
@@ -220,8 +237,23 @@ describe("TimelinePlot", () => {
     drag(plot, 500, 250);
     expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
     expect(content.viewEndTime?.toISO()).toBe(day(2).toISO());
+    expect(plot).not.toHaveClass("interactive");
     expect(plot).not.toHaveClass("zoom-in");
     expect(container.querySelector("[aria-live]")).toBeNull();
+  });
+
+  it("saves and ends a drag when the plot becomes read-only", () => {
+    const { content, plot, setReadOnly } = renderPlot(day(1), day(2));
+    fireEvent.pointerDown(plot, { button: 0, clientX: 500 });
+    fireEvent.pointerMove(plot, { button: 0, clientX: 250 });
+    setReadOnly(true);
+    expect(content.viewStartTimeISO).toBe(day(1).plus({ hours: 6 }).toISO());
+
+    const editablePlot = setReadOnly(false);
+    expect(editablePlot).not.toHaveClass("grabbing");
+    // No preview is left active, so later view changes are saved.
+    content.panBy(3600);
+    expect(content.viewStartTimeISO).toBe(day(1).plus({ hours: 7 }).toISO());
   });
 
   it("shows the zoom-in cursor, switching to zoom-out while Shift is held", () => {
@@ -251,13 +283,13 @@ describe("TimelinePlot", () => {
     expect(plot).not.toHaveClass("grabbing");
   });
 
-  it("does not show a hover time marker", () => {
+  it("leaves the model's hover time unset on a pointer move", () => {
     const { content, plot } = renderPlot(day(1), day(2));
     fireEvent.pointerMove(plot, { clientX: 250 });
     expect(content.hoverTime).toBeUndefined();
   });
 
-  it("does not pin a time marker on a click", () => {
+  it("leaves the model's pinned time unset on a click", () => {
     const { content, plot } = renderPlot(dataStart, dataEnd);
     click(plot, 500);
     expect(content.pinnedTime).toBeUndefined();
@@ -298,7 +330,8 @@ describe("TimelinePlot", () => {
     it("announces when a drag can't pan any further", () => {
       const { container, content, plot } = renderPlot(dataStart, day(1));
       drag(plot, 250, 500);
-      expect(announced(container)).toMatch(/^Already at the edge of the data\./);
+      expect(announced(container)).toBe(
+        `Already at the edge of the data. Showing ${format(dataStart)} to ${format(day(1))}.`);
       expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
     });
 
@@ -307,21 +340,29 @@ describe("TimelinePlot", () => {
       fireEvent.pointerDown(plot, { button: 0, clientX: 500, clientY: 10 });
       fireEvent.pointerMove(plot, { button: 0, clientX: 500, clientY: 90 });
       fireEvent.pointerUp(plot, { button: 0, clientX: 500, clientY: 90 });
-      expect(announced(container)).toMatch(/^View unchanged\./);
+      expect(announced(container)).toBe(`View unchanged. Showing ${format(day(1))} to ${format(day(2))}.`);
     });
 
     it("announces when a shift-click can't zoom out any further", () => {
       const { container, content, plot } = renderPlot(dataStart, dataEnd);
       click(plot, 500, true);
-      expect(announced(container)).toMatch(/^Already showing the full time range/);
+      expect(announced(container)).toBe(
+        `Already showing the full time range. Showing ${format(dataStart)} to ${format(dataEnd)}.`);
       expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
       expect(content.viewEndTime?.toISO()).toBe(dataEnd.toISO());
     });
 
     it("announces when a click at the closest zoom only re-centers", () => {
-      const { container, plot } = renderPlot(day(1), day(1).plus({ seconds: kMinViewRangeSeconds }));
-      click(plot, 500);
-      expect(announced(container)).toMatch(/^Already at the closest zoom, centered on/);
+      const { container, content, plot } = renderPlot(day(1), day(1).plus({ seconds: kMinViewRangeSeconds }));
+      const clicked = day(1).plus({ seconds: kMinViewRangeSeconds * 0.75 });
+      const newStart = clicked.minus({ seconds: kMinViewRangeSeconds / 2 });
+      const newEnd = clicked.plus({ seconds: kMinViewRangeSeconds / 2 });
+      click(plot, 750);
+      expect(content.viewStartTime?.toISO()).toBe(newStart.toISO());
+      expect(content.viewEndTime?.toISO()).toBe(newEnd.toISO());
+      expect(announced(container)).toBe(
+        `Already at the closest zoom, centered on ${format(clicked)}. ` +
+        `Showing ${format(newStart)} to ${format(newEnd)}.`);
     });
 
     it("clears the announcement before repeating an identical one", () => {

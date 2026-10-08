@@ -1,4 +1,4 @@
-.timeline-plot {
+.timeline-plot.interactive {
   // Keep a drag from selecting text or panning the page sideways; vertical scrolling and
   // pinch-zoom still work on touch devices.
   touch-action: pan-y pinch-zoom;
