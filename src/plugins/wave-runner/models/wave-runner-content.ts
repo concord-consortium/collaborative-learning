@@ -203,6 +203,15 @@ export const WaveRunnerContentModel = TileContentModel
   .actions(self => ({
     runModel: flow(function* () {
       if (self.isRunning || self.isLoadingData) return;
+
+      // loadEnvelopeData and run are independent operations with independent errors, but the tile
+      // shows only one status line (see status-and-output.tsx) with errors first in priority.
+      // This must run before the guards below, not after them: a bail-out on "no model", "no
+      // station", etc. is still a completed run attempt, and leaving a stale loadDataError in
+      // place would let a failed load keep masking that attempt's own (possibly nonexistent)
+      // result indefinitely.
+      self.loadDataError = null;
+
       if (!self.selectedModelUrl) {
         self.runError = "No model selected";
         return;
@@ -222,11 +231,7 @@ export const WaveRunnerContentModel = TileContentModel
       const station = self.station;
 
       self.clearEventsDataSet();
-      // loadData and run are independent operations with independent errors, but the tile shows
-      // only one status line (see status-and-output.tsx) with errors first in priority - leaving
-      // the other operation's error in place would let a stale load failure mask a successful run.
       self.runError = null;
-      self.loadDataError = null;
       self.isRunning = true;
 
       const metadata = self.selectedModelMetadata;
@@ -238,7 +243,7 @@ export const WaveRunnerContentModel = TileContentModel
         const startMs = startDate.getTime();
         const endMs = endDate.getTime();
 
-        // endDate is inclusive, so start == end is a valid single-day range, matching loadData.
+        // endDate is inclusive, so start == end is a valid single-day range, matching loadEnvelopeData.
         if (isNaN(startMs) || isNaN(endMs) || endMs < startMs) {
           self.runError = "Invalid date range. End date must not be before start date.";
           self.isRunning = false;

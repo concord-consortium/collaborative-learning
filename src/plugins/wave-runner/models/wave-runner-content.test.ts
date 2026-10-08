@@ -608,6 +608,27 @@ describe("cross-operation error clearing", () => {
     expect(content.loadDataError).toBeNull();
     expect(content.runError).toBeNull();
   });
+
+  // The cross-clear used to run only after the "no model selected" guard, so a bailed-out runModel
+  // call - one that never gets far enough to do anything - left a previous load failure on screen
+  // indefinitely. Clearing loadDataError must happen before that guard, not after it.
+  it("clears a stale loadDataError even when runModel bails out on an early guard", async () => {
+    const content = setupTileInDocument();
+    content.setStation(testStation);
+
+    await content.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+    expect(content.loadDataError).toContain("offline");
+
+    // No model selected, so this bails out on the very first guard in runModel.
+    await content.runModel();
+
+    expect(content.runError).toBe("No model selected");
+    expect(content.loadDataError).toBeNull();
+  });
 });
 
 describe("loadEnvelopeData", () => {
