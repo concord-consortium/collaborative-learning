@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { VisuallyHidden } from "@chakra-ui/react";
 import { IDropdownItem } from "@concord-consortium/react-components";
 import { useDropdown } from "@concord-consortium/accessibility-tools/hooks";
@@ -30,21 +30,27 @@ interface IProps {
   titlePrefix?: string;
   titleIcon?: ReactNode;
   titleVisuallyHidden?: boolean;
-  /** The control's purpose for assistive tech, e.g. "Station". `title` only names the control
-   *  while nothing is selected, so once an item is chosen the visible text is just that value -
-   *  ariaLabel is what keeps the field's purpose announced regardless of selection state. */
-  ariaLabel?: string;
+  /** Id(s) of the element(s) naming this control's purpose for assistive tech, e.g. the id of a
+   *  visible `<label>` reading "Station". On a `role="button"` element, `aria-label` REPLACES the
+   *  text content as the accessible name - it does not supplement it - so an `aria-label` here
+   *  would announce "Station" alone and never the chosen value once one is picked. Passing the
+   *  label's id through `aria-labelledby` instead, alongside the header's own id, concatenates the
+   *  two: the field's purpose AND its current value. */
+  ariaLabelledBy?: string;
 }
 
 export const CustomSelect: React.FC<IProps> = (props) => {
   const {
     className, isDisabled, items, showItemChecks, showItemIcons,
     title, titlePrefix, titleIcon, titleVisuallyHidden,
-    dataTest, dataTestId, ariaLabel,
+    dataTest, dataTestId, ariaLabelledBy,
   } = props;
 
   const triggerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  // The header is itself part of its own accessible name (see aria-labelledby below, which
+  // references this id alongside the caller's label id) - its text content is the chosen value.
+  const headerId = useId();
 
   const [selected, setSelected] = useState(() =>
     items.find(item => item.selected)?.text || (items.length > 0 ? items[0].text : "")
@@ -71,7 +77,7 @@ export const CustomSelect: React.FC<IProps> = (props) => {
     itemSelector: ".list-item",
     onSelect: handleSelect,
     disabled: isDisabled || items.length === 0,
-    label: ariaLabel || title || titlePrefix,
+    label: title || titlePrefix,
   });
 
   const getDataTest = (suffix?: string) => {
@@ -103,10 +109,11 @@ export const CustomSelect: React.FC<IProps> = (props) => {
         data-testid={getDataTestIdValue()}>
       <div
         ref={triggerRef}
+        id={headerId}
         className={`header ${showListClass} ${disabledClass}`}
         data-test={getDataTest("header")}
         data-testid={getDataTestIdValue("header")}
-        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy ? `${ariaLabelledBy} ${headerId}` : undefined}
         {...(dropdown?.triggerProps ?? {})}
       >
         {titleIcon && <div className="title-icon">{titleIcon}</div>}

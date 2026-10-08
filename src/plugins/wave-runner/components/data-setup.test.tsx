@@ -126,24 +126,29 @@ describe("DataSetup dropdowns", () => {
     expect(content.station?.station).toBe("DDM");
   });
 
-  // CustomSelect's accessible name falls back to `title`, which this tile supplies only while
-  // nothing is selected - without an explicit aria-label, a screen reader loses the field's
-  // purpose the moment a station is chosen and announces just the station name. The control must
-  // stay findable by "Station" even once it reads "Dexter Display Mine" to a sighted user.
-  it("keeps a programmatic label on the station dropdown after a selection is made", () => {
+  // The control's accessible name is composed via aria-labelledby from the visible <label> (the
+  // field's purpose) plus the header's own text (its current value) - see custom-select.tsx. An
+  // accessible name of just "Station" (the old aria-label regression) or just "Dexter Display
+  // Mine" (falling back to `title`, which this tile supplies only while nothing is selected) would
+  // each fail only one of these two assertions, so both must hold for the fix to be proven.
+  it("keeps both the purpose and the chosen value in the station dropdown's accessible name", () => {
     renderSetup();
     fireEvent.click(screen.getByText("Dexter Display Mine"));
-    expect(screen.getByRole("button", { name: "Station" })).toHaveTextContent("Dexter Display Mine");
+    const header = screen.getByRole("button", { name: /Station/ });
+    expect(header).toHaveAccessibleName(/Station/);
+    expect(header).toHaveAccessibleName(/Dexter Display Mine/);
   });
 
   // Same bug, same fix, for the model dropdown. The only configured model is auto-selected on
   // mount, so its text already appears in both the closed control and the (hidden but present)
   // list option - scope the click to the list so it is unambiguous.
-  it("keeps a programmatic label on the model dropdown after a selection is made", () => {
+  it("keeps both the purpose and the chosen value in the model dropdown's accessible name", () => {
     const { container } = renderSetup();
     const option = container.querySelector('[data-testid="wave-runner-model-list"] .list-item')!;
     fireEvent.click(option);
-    expect(screen.getByRole("button", { name: "Model" })).toHaveTextContent("Compact Model");
+    const header = screen.getByRole("button", { name: /Model/ });
+    expect(header).toHaveAccessibleName(/Model/);
+    expect(header).toHaveAccessibleName(/Compact Model/);
   });
 
   it("lists the configured models", () => {

@@ -111,7 +111,11 @@ export const DataSetup: React.FC = observer(function DataSetup() {
       <div className="section-title">Data Setup</div>
       <div className="field-row">
         <div className="field">
-          <label className="field-label">Station</label>
+          {/* CustomSelect's header is not a native, labelable form control (it is a div with
+              role="button"), so a plain htmlFor cannot forward a click to it the way it would for
+              a real <select> - id-based aria-labelledby, wired below, is what actually links this
+              label to the control for assistive tech. */}
+          <label className="field-label" id="wave-runner-station-label">Station</label>
           {/* The placeholder is italic and a chosen label is not, which CSS alone cannot tell
               apart - the header markup is identical either way. */}
           <CustomSelect
@@ -119,18 +123,18 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             dataTestId="wave-runner-station"
             items={stationItems}
             title={stationPlaceholder}
-            ariaLabel="Station"
+            ariaLabelledBy="wave-runner-station-label"
             isDisabled={!hasStations || content.isRunning || content.isLoadingData}
           />
         </div>
         <div className="field">
-          <label className="field-label">Model</label>
+          <label className="field-label" id="wave-runner-model-label">Model</label>
           <CustomSelect
             className={classNames("wave-runner-dropdown", { "is-placeholder": !content.selectedModelUrl })}
             dataTestId="wave-runner-model"
             items={modelItems}
             title={modelPlaceholder}
-            ariaLabel="Model"
+            ariaLabelledBy="wave-runner-model-label"
             isDisabled={content.isRunning}
           />
         </div>
