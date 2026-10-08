@@ -9,7 +9,7 @@ import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
-import { kMinViewRangeSeconds, TimelineContentModelType } from "../models/timeline-content";
+import { TimelineContentModelType } from "../models/timeline-content";
 import { getEventColorClass } from "../timeline-types";
 import { describeView } from "./describe-view";
 import { EventShape } from "./event-shape";
@@ -116,7 +116,6 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
         totalEnd={totalEnd}
         viewStart={viewStart}
         viewEnd={viewEnd}
-        minViewRange={kMinViewRangeSeconds * 1000}
         disabled={readOnly}
         onViewChange={handleViewChange}
         onScrubStart={handleScrubStart}

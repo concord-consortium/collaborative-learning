@@ -351,7 +351,7 @@ describe("DynamicScrollbar", () => {
   });
 
   it("drags a thumb widened past its view all the way to the end", () => {
-    // The 0.1-unit view is 0.5px wide, so the thumb is drawn at its minimum width, past the view.
+    // The 0.1-unit view is 0.5px wide, so the thumb would be drawn at its minimum width, past the view.
     const { container, onViewChange } = renderScrollbar(10, 10.1, jest.fn(), { minViewRange: 0.01 });
     mockTrackWidth(container);
     const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
@@ -374,6 +374,34 @@ describe("DynamicScrollbar", () => {
     fireEvent.keyDown(thumb, { key: "ArrowRight" });
     expect(onViewChange).not.toHaveBeenCalled();
     expect(onScrubStart).not.toHaveBeenCalled();
+  });
+
+  it("ignores a right-button press", () => {
+    const onScrubStart = jest.fn();
+    const { container, onViewChange } = renderScrollbar(25, 75, jest.fn(), { onScrubStart });
+    const track = mockTrackWidth(container);
+
+    fireEvent.pointerDown(track, { button: 2, clientX: 450, pointerId: 1 });
+    expect(onViewChange).not.toHaveBeenCalled();
+    expect(onScrubStart).not.toHaveBeenCalled();
+  });
+
+  it("stops moving the view, and still ends the scrub, when disabled during a drag", () => {
+    const onScrubEnd = jest.fn();
+    const onViewChange = jest.fn();
+    const { container, rerender } = renderScrollbar(25, 75, onViewChange, { onScrubEnd });
+    const track = mockTrackWidth(container);
+
+    fireEvent.pointerDown(track, { clientX: 250, pointerId: 1 });
+    rerender(
+      <DynamicScrollbar totalStart={totalStart} totalEnd={totalEnd} viewStart={25} viewEnd={75}
+        onViewChange={onViewChange} onScrubEnd={onScrubEnd} disabled />
+    );
+    fireEvent.pointerMove(track, { clientX: 400, pointerId: 1 });
+    expect(onViewChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerUp(track, { pointerId: 1 });
+    expect(onScrubEnd).toHaveBeenCalledTimes(1);
   });
 
   it("takes the thumb out of the tab order when disabled", () => {

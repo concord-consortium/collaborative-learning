@@ -223,6 +223,30 @@ describe("FullTimeline", () => {
     expect(patches.map(p => p.path)).toEqual(["/viewStartTimeISO", "/viewEndTimeISO"]);
   });
 
+  it("saves a scrollbar key press right away", () => {
+    const { content, thumb } = renderFullTimeline(day(1), day(2));
+    fireEvent.keyDown(thumb, { key: "End" });
+    expect(content.viewStartTimeISO).toBe(day(3).toISO());
+    expect(content.viewEndTimeISO).toBe(day(4).toISO());
+  });
+
+  it("ignores a right-button press on the strip and the scrollbar", () => {
+    const { content, strip, track } = renderFullTimeline(day(1), day(2));
+    fireEvent.pointerDown(strip, { button: 2, clientX: 750, pointerId: 1 });
+    fireEvent.pointerDown(track, { button: 2, clientX: 750, pointerId: 2 });
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+  });
+
+  it("keeps the view within a record shorter than the shortest view", () => {
+    mockSharedSeismogram.endTime = dataStart.plus({ seconds: 1 });
+    const { content, track, thumb } = renderFullTimeline(dataStart, dataStart.plus({ seconds: 1 }));
+    expect(thumb.style.width).toBe("100%");
+    fireEvent.keyDown(thumb, { key: "End" });
+    drag(track, 900, 900);
+    expect(content.viewStartTime?.toISO()).toBe(dataStart.toISO());
+    expect(content.viewEndTime?.toISO()).toBe(dataStart.plus({ seconds: 1 }).toISO());
+  });
+
   it("labels the scrollbar and names the range in view as its value", () => {
     const { thumb } = renderFullTimeline(day(1), day(2));
     const format = (time: DateTime) => time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);

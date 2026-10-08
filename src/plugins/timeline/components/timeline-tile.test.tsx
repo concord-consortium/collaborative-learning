@@ -217,7 +217,9 @@ describe("TimelineComponent", () => {
       expect([...stores.ui.selectedTileIds]).toEqual([]);
     });
 
-    it("is selected by a press that a control cancels, as the Full Timeline does", () => {
+    // jsdom sends no mousedown after a pointerdown, so this can't check that canceling the pointerdown,
+    // as the Full Timeline does, leaves selection working; it checks that selection uses the pointerdown.
+    it("is selected by a pointerdown on a control within the tile", () => {
       const { fullTimeline } = renderInTile("other-tile");
       fireEvent.pointerDown(fullTimeline);
       expect([...stores.ui.selectedTileIds]).toEqual([model.id]);

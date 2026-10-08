@@ -2,7 +2,7 @@ import React, { RefObject, useEffect, useRef, useState } from "react";
 
 interface IScrubDrag {
   pointerId: number;
-  // Distance from the start of the view to the point under the pointer
+  // Distance from the start of the view to the point under the pointer, limited to the view
   grabOffset: number;
   viewRange: number;
 }
@@ -73,7 +73,8 @@ export function useScrub({
 
   const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
     const drag = dragRef.current;
-    if (!drag || drag.pointerId !== e.pointerId) return;
+    // A scrub that is disabled midway stops moving the view, but still ends normally.
+    if (!drag || drag.pointerId !== e.pointerId || disabled) return;
     const value = valueAtClientX(e.clientX);
     if (value !== undefined) scrubTo(value, drag);
   };
