@@ -21,10 +21,15 @@ export const WaveRunnerComponent: React.FC<ITileProps> = observer(
   // Skipped when read-only: the same document can render editable and read-only (four-up,
   // published view) at different widths at once, and onRequestRowHeight mutates the shared row
   // model, so a read-only instance would otherwise overwrite the height the editable one set.
+  // Skipped until containerWidth is measured: `vertical` defaults true while it is undefined, so
+  // the first render would otherwise ask for the stacked height even in a wide row. tile-row.tsx
+  // refuses to shrink a multi-tile row back down once a tile has asked for more, so that first,
+  // throwaway request could strand a wide WaveRunner at the stacked height with dead space below
+  // it, even after the real width comes in and asks for the smaller one.
   useEffect(() => {
-    if (readOnly) return;
+    if (readOnly || containerWidth === undefined) return;
     onRequestRowHeight(model.id, vertical ? kWaveRunnerStackedHeight : kWaveRunnerDefaultHeight);
-  }, [vertical, model.id, onRequestRowHeight, readOnly]);
+  }, [vertical, model.id, onRequestRowHeight, readOnly, containerWidth]);
 
   return (
     <div className="tile-content wave-runner-tile">

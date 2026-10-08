@@ -131,6 +131,17 @@ describe("WaveRunnerComponent", () => {
     expect(onRequestRowHeight).toHaveBeenCalledWith(expect.any(String), kWaveRunnerStackedHeight);
   });
 
+  // Before the width is measured, `vertical` defaults true (see wave-runner-tile.tsx), so asking
+  // for a height here would request the stacked one even in a row that will turn out wide -
+  // tile-row.tsx then refuses to shrink a multi-tile row back down, stranding it at the stacked
+  // height with dead space below once the real width comes in and asks for the smaller one.
+  it("does not request a row height before the width is known", () => {
+    mockWidth = undefined;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight });
+    expect(onRequestRowHeight).not.toHaveBeenCalled();
+  });
+
   it("asks for the single-panel height when the panels sit side by side", () => {
     mockWidth = 900;
     const onRequestRowHeight = jest.fn();
