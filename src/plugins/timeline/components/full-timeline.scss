@@ -57,6 +57,13 @@ $full-timeline-overlay-color: $workspace-teal;
     position: absolute;
     top: -9px;
     transform: translateX(-50%);
+
+    // At this size, the "?" would be too small to read beside the other shapes.
+    .event-shape.default-event text {
+      font-size: 17px;
+      font-weight: 900;
+      transform: translateY(1px);
+    }
   }
 
   .full-timeline-overlay {
