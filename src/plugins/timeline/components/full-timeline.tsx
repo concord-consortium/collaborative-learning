@@ -6,9 +6,10 @@ import { useReadOnlyContext } from "../../../components/document/read-only-conte
 import { DynamicScrollbar } from "../../../components/ui/dynamic-scrollbar";
 import { useScrub } from "../../../components/ui/use-scrub";
 import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
+import { SharedSeismogramType } from "../../shared-seismogram/shared-seismogram";
 import { WaveformPanel } from "../../shared-seismogram/components/waveform-panel";
 import { useTimelineContent } from "../hooks/use-timeline-content";
-import { kMinViewRangeSeconds } from "../models/timeline-content";
+import { kMinViewRangeSeconds, TimelineContentModelType } from "../models/timeline-content";
 import { getEventColorClass } from "../timeline-types";
 import { describeView } from "./describe-view";
 import { EventShape } from "./event-shape";
@@ -22,38 +23,62 @@ import "./full-timeline.scss";
  */
 export const FullTimeline = observer(function FullTimeline() {
   const content = useTimelineContent();
+  const { sharedSeismogram, dataStartTime, dataEndTime, viewStartTime, viewEndTime } = content;
+  if (!sharedSeismogram || !dataStartTime || !dataEndTime || !viewStartTime || !viewEndTime) return null;
+  if (dataEndTime <= dataStartTime) return null;
+  // A separate component, so that a scrub still in progress ends when the strip goes away
+  return (
+    <FullTimelineStrip
+      content={content}
+      sharedSeismogram={sharedSeismogram}
+      dataStartTime={dataStartTime}
+      dataEndTime={dataEndTime}
+    />
+  );
+});
+
+interface IFullTimelineStripProps {
+  content: TimelineContentModelType;
+  sharedSeismogram: SharedSeismogramType;
+  dataStartTime: DateTime;
+  dataEndTime: DateTime;
+}
+
+const FullTimelineStrip = observer(function FullTimelineStrip({
+  content, sharedSeismogram, dataStartTime, dataEndTime
+}: IFullTimelineStripProps) {
   const readOnly = useReadOnlyContext();
   const stripRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const scrubStartViewRef = useRef("");
   const { announcerRef, announce } = useLiveAnnouncer();
 
-  const { sharedSeismogram, dataStartTime, dataEndTime, viewStartTime, viewEndTime } = content;
-  const totalStart = dataStartTime?.toSeconds() ?? 0;
-  const totalEnd = dataEndTime?.toSeconds() ?? 0;
-  const viewStart = viewStartTime?.toSeconds() ?? 0;
-  const viewEnd = viewEndTime?.toSeconds() ?? 0;
+  const totalStart = dataStartTime.toMillis();
+  const totalEnd = dataEndTime.toMillis();
+  const viewStart = content.viewStartMs ?? totalStart;
+  const viewEnd = content.viewEndMs ?? totalEnd;
+  const toPct = (ms: number) => (ms - totalStart) / (totalEnd - totalStart) * 100;
 
   const handleViewChange = (start: number, end: number) => {
-    content.setViewRange(DateTime.fromSeconds(start), DateTime.fromSeconds(end));
+    // Whole milliseconds, so that rounding can't change the width of the view as it moves
+    const startMs = Math.round(start);
+    content.setViewRange(DateTime.fromMillis(startMs), DateTime.fromMillis(startMs + Math.round(end - start)));
   };
   // Each scrub is saved, and undone, as a single change.
-  const handleScrubStart = () => content.beginViewPreview();
+  const handleScrubStart = () => {
+    scrubStartViewRef.current = describeView(content);
+    content.beginViewPreview();
+  };
   const handleScrubEnd = () => {
     content.endViewPreview();
-    announce(describeView(content));
+    const description = describeView(content);
+    if (description !== scrubStartViewRef.current) announce(description);
   };
 
   const { isScrubbing, trackHandlers } = useScrub({
     trackRef: stripRef, handleRef: overlayRef, totalStart, totalEnd, viewStart, viewEnd, disabled: readOnly,
     onViewChange: handleViewChange, onScrubStart: handleScrubStart, onScrubEnd: handleScrubEnd
   });
-
-  if (!sharedSeismogram || !dataStartTime || !dataEndTime || !viewStartTime || !viewEndTime) return null;
-  const totalRange = totalEnd - totalStart;
-  if (totalRange <= 0) return null;
-
-  const toPct = (seconds: number) => (seconds - totalStart) / totalRange * 100;
-  const colorWords = content.eventTypeColorWords;
 
   return (
     <div className="full-timeline-area">
@@ -70,38 +95,23 @@ export const FullTimeline = observer(function FullTimeline() {
           startTime={dataStartTime}
           endTime={dataEndTime}
         />
-        {content.events.map(event => {
-          const left = toPct(event.windowStart.toSeconds());
-          const width = toPct(event.windowEnd.toSeconds()) - left;
-          const colorWord = colorWords.get(event.eventType);
-          return (
-            <React.Fragment key={event.index}>
-              <div
-                className={classNames("full-timeline-event", getEventColorClass(colorWord))}
-                style={{ left: `${left}%`, width: `${width}%` }}
-              />
-              <div className="full-timeline-shape" style={{ left: `${left + width / 2}%` }}>
-                <EventShape colorWord={colorWord} size={6} />
-              </div>
-            </React.Fragment>
-          );
-        })}
+        <FullTimelineEvents content={content} totalStart={totalStart} totalEnd={totalEnd} />
         <div
           ref={overlayRef}
           className="full-timeline-overlay"
-          style={{
-            "--overlay-left": `${toPct(viewStart)}%`, width: `${toPct(viewEnd) - toPct(viewStart)}%`
-          } as React.CSSProperties}
+          style={{ "--overlay-left": `${toPct(viewStart)}%`, width: `${toPct(viewEnd) - toPct(viewStart)}%` } as
+            React.CSSProperties}
         />
         <div className="full-timeline-label">Full Timeline</div>
       </div>
       <DynamicScrollbar
         thumbAriaLabel="Timeline scroll position"
+        thumbValueText={describeView(content)}
         totalStart={totalStart}
         totalEnd={totalEnd}
         viewStart={viewStart}
         viewEnd={viewEnd}
-        minViewRange={kMinViewRangeSeconds}
+        minViewRange={kMinViewRangeSeconds * 1000}
         disabled={readOnly}
         onViewChange={handleViewChange}
         onScrubStart={handleScrubStart}
@@ -109,5 +119,42 @@ export const FullTimeline = observer(function FullTimeline() {
       />
       <div ref={announcerRef} className="visually-hidden" aria-live="polite" />
     </div>
+  );
+});
+
+interface IFullTimelineEventsProps {
+  content: TimelineContentModelType;
+  totalStart: number;
+  totalEnd: number;
+}
+
+// Doesn't read the view, so that moving the view doesn't redraw the events
+const FullTimelineEvents = observer(function FullTimelineEvents(
+  { content, totalStart, totalEnd }: IFullTimelineEventsProps
+) {
+  const toPct = (ms: number) => Math.max(0, Math.min(100, (ms - totalStart) / (totalEnd - totalStart) * 100));
+  const colorWords = content.eventTypeColorWords;
+  return (
+    <>
+      {content.events.map(event => {
+        const windowStart = event.windowStart.toMillis();
+        const windowEnd = event.windowEnd.toMillis();
+        if (windowEnd < totalStart || windowStart > totalEnd) return null;
+        const left = toPct(windowStart);
+        const width = toPct(windowEnd) - left;
+        const colorWord = colorWords.get(event.eventType);
+        return (
+          <React.Fragment key={event.index}>
+            <div
+              className={classNames("full-timeline-event", getEventColorClass(colorWord))}
+              style={{ left: `${left}%`, width: `${width}%` }}
+            />
+            <div className="full-timeline-shape" style={{ left: `${left + width / 2}%` }}>
+              <EventShape colorWord={colorWord} size={6} />
+            </div>
+          </React.Fragment>
+        );
+      })}
+    </>
   );
 });

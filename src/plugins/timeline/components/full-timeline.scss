@@ -1,7 +1,8 @@
 @import "../../../components/vars";
+@import "../../../components/ui/dynamic-scrollbar-vars";
 @import "./timeline-event-colors.scss";
 
-$full-timeline-overlay-color: #0592af;
+$full-timeline-overlay-color: $workspace-teal;
 
 .full-timeline-area {
   margin-top: 16px;
@@ -13,8 +14,7 @@ $full-timeline-overlay-color: #0592af;
     cursor: pointer;
     height: 40px;
     position: relative;
-    // Keep a drag from selecting text or panning the page sideways; vertical scrolling and
-    // pinch-zoom still work on touch devices.
+    // Scrubs like the scrollbar's track; see dynamic-scrollbar.scss.
     touch-action: pan-y pinch-zoom;
     user-select: none;
 
@@ -22,7 +22,6 @@ $full-timeline-overlay-color: #0592af;
       cursor: default;
     }
 
-    // The strip holds the pointer capture while scrubbing, so its cursor is the one that shows.
     &.is-scrubbing, &.is-scrubbing .full-timeline-overlay {
       cursor: grabbing;
     }
@@ -67,8 +66,8 @@ $full-timeline-overlay-color: #0592af;
     box-sizing: border-box;
     cursor: grab;
     // Matches the scrollbar thumb, and likewise kept inside the strip
-    left: min(var(--overlay-left), calc(100% - 8px));
-    min-width: 8px;
+    left: min(var(--overlay-left), calc(100% - #{$dynamic-scrollbar-min-thumb-width}));
+    min-width: $dynamic-scrollbar-min-thumb-width;
     position: absolute;
     top: 1px;
 

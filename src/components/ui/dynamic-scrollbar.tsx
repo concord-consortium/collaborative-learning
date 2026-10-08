@@ -11,6 +11,8 @@ const kDefaultMinViewRange = 100;
 
 interface IDynamicScrollbarProps {
   thumbAriaLabel?: string;
+  /** Read in place of the thumb's 0-100 position, e.g. to name the range in view. */
+  thumbValueText?: string;
   totalStart: number;
   totalEnd: number;
   viewStart: number;
@@ -18,14 +20,14 @@ interface IDynamicScrollbarProps {
   minViewRange?: number;
   disabled?: boolean;
   onViewChange: (start: number, end: number) => void;
-  /** Called when a press on the track begins dragging the view, e.g. to group its changes. */
+  /** Called when a press on the track or thumb begins, and ends, a gesture, e.g. to group its changes. */
   onScrubStart?: () => void;
   onScrubEnd?: () => void;
 }
 
 export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
-  thumbAriaLabel, totalStart, totalEnd, viewStart, viewEnd, minViewRange = kDefaultMinViewRange, disabled,
-  onViewChange, onScrubStart, onScrubEnd
+  thumbAriaLabel, thumbValueText, totalStart, totalEnd, viewStart, viewEnd, minViewRange = kDefaultMinViewRange,
+  disabled, onViewChange, onScrubStart, onScrubEnd
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
@@ -98,6 +100,7 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={valueNow}
+        aria-valuetext={thumbValueText || undefined}
         aria-disabled={disabled || undefined}
         tabIndex={disabled ? -1 : 0}
         style={{ "--thumb-left": `${leftPercent}%`, width: `${widthPercent}%` } as React.CSSProperties}

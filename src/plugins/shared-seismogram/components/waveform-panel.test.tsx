@@ -85,7 +85,7 @@ describe("WaveformPanel", () => {
       const { container } = render(
         <WaveformPanel mode="overview" sharedSeismogram={sharedSeismogram} startTime={START} endTime={END} />
       );
-      expect(container.querySelector(".waveform-panel")).toHaveClass("overview");
+      expect(container.querySelector(".waveform-panel")).toHaveClass("mode-overview");
       const opts = mockUPlot.mock.calls[0][0];
       expect(opts.series[1].stroke).toBe("rgb(0, 0, 0)");
       expect(opts.bands[0].fill).toBe("rgba(0, 0, 0, 0.6)");

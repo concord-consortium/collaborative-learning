@@ -15,7 +15,7 @@ const AMPLITUDE_RANGE_SCALAR = 1.2;
 
 type WaveformPanelMode = "waveform" | "timeline" | "overview";
 
-// The overview is a compact trace of a whole record, drawn in black on a light background.
+// The overview mode is short and draws in black, for a light background.
 const kModeStyles: Record<WaveformPanelMode, { height: number, rgb: string }> = {
   waveform: { height: 60, rgb: "255, 255, 255" },
   timeline: { height: 100, rgb: "255, 255, 255" },
@@ -157,7 +157,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   }, [pixelWidth]);
 
   return (
-    <div className={classNames("waveform-panel", mode)}>
+    <div className={classNames("waveform-panel", `mode-${mode}`)}>
       <div ref={containerRef} className="waveform-panel-display" style={{ height: `${height}px` }} />
     </div>
   );

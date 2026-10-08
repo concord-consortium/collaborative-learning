@@ -61,7 +61,10 @@ export function useScrub({
     e.currentTarget.setPointerCapture(e.pointerId);
     const viewRange = viewEnd - viewStart;
     const grabbed = !!handleRef.current?.contains(e.target as Node) || (value >= viewStart && value <= viewEnd);
-    const drag = { pointerId: e.pointerId, grabOffset: grabbed ? value - viewStart : viewRange / 2, viewRange };
+    // A handle drawn wider than the view (at its minimum width) can be pressed outside the view;
+    // treat that as its nearer end, so a drag still reaches both ends of the track.
+    const grabOffset = grabbed ? Math.max(0, Math.min(value - viewStart, viewRange)) : viewRange / 2;
+    const drag = { pointerId: e.pointerId, grabOffset, viewRange };
     dragRef.current = drag;
     setIsScrubbing(true);
     onScrubStart?.();

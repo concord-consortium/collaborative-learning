@@ -4,8 +4,8 @@ import { getEventColorClass } from "../timeline-types";
 
 import "./event-shape.scss";
 
-// Each event type has a shape as well as a color, so that types can be told apart without color.
-// Shapes are drawn in a 12x12 box, inset by half the 1px outline.
+// Each event color has a shape as well, so that types can be told apart without color; types beyond
+// the six colors all share "?". Shapes are drawn in a 12x12 box, inset by half the 1px outline.
 const kShapes: Record<string, React.ReactNode> = {
   blue: <rect x="0.5" y="0.5" width="11" height="11" />,
   orange: <circle cx="6" cy="6" r="5.5" />,

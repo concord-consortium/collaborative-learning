@@ -15,6 +15,7 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
 import { userSelectTile } from "../../../models/stores/ui";
+import { mockPointerEvents } from "../../../test/pointer-events";
 import "../../../models/tiles/table/table-registration";
 import "../../bar-graph/bar-graph-registration";
 import "../../data-card/data-card-registration";
@@ -124,6 +125,7 @@ describe("TimelineComponent", () => {
   });
 
   describe("tile selection", () => {
+    beforeAll(mockPointerEvents);
     // userSelectTile is debounced, so a call right after the previous test's would be dropped.
     afterEach(() => userSelectTile.cancel());
 
@@ -134,7 +136,9 @@ describe("TimelineComponent", () => {
       const title = document.createElement("div");
       const dragHandle = document.createElement("div");
       dragHandle.className = "tool-tile-drag-handle-wrapper";
-      tileElt.append(plot, title, dragHandle);
+      const fullTimeline = document.createElement("div");
+      fullTimeline.addEventListener("pointerdown", e => e.preventDefault());
+      tileElt.append(plot, title, dragHandle, fullTimeline);
       document.body.append(tileElt);
       stores.ui.setSelectedTileId(selectedTileId);
       render(
@@ -144,25 +148,31 @@ describe("TimelineComponent", () => {
           </TileModelContext.Provider>
         </Provider>
       );
-      return { plot, title, dragHandle };
+      return { plot, title, dragHandle, fullTimeline };
     }
 
     it("leaves a press on the drag handle to the handle's own selection", () => {
       const { dragHandle } = renderInTile();
-      fireEvent.mouseDown(dragHandle, { shiftKey: true });
+      fireEvent.pointerDown(dragHandle, { shiftKey: true });
       expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
     });
 
     it("becomes the only selected tile on a Shift-click on the graph", () => {
       const { plot } = renderInTile("other-tile");
-      fireEvent.mouseDown(plot, { shiftKey: true });
+      fireEvent.pointerDown(plot, { shiftKey: true });
       expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
     });
 
     it("toggles out of the selection on a Shift-click elsewhere in the tile", () => {
       const { title } = renderInTile();
-      fireEvent.mouseDown(title, { shiftKey: true });
+      fireEvent.pointerDown(title, { shiftKey: true });
       expect([...stores.ui.selectedTileIds]).toEqual([]);
+    });
+
+    it("is selected by a press that a control cancels, as the Full Timeline does", () => {
+      const { fullTimeline } = renderInTile("other-tile");
+      fireEvent.pointerDown(fullTimeline);
+      expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
     });
   });
 });

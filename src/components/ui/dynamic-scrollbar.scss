@@ -1,4 +1,4 @@
-$min-thumb-width: 8px;
+@import "./dynamic-scrollbar-vars";
 
 .dynamic-scrollbar {
   align-items: center;
@@ -8,26 +8,28 @@ $min-thumb-width: 8px;
   display: flex;
   height: 17px;
   position: relative;
-  // Keep a drag from selecting text or panning the page sideways
+  // Keep a drag from selecting text or panning the page sideways; vertical scrolling and
+  // pinch-zoom still work on touch devices.
   touch-action: pan-y pinch-zoom;
   user-select: none;
   width: 100%;
 
   .dynamic-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.4);
+    // At least 3:1 against the track
+    background-color: rgba(0, 0, 0, 0.45);
     border-radius: 5px;
     box-sizing: border-box;
     cursor: grab;
     height: calc(100% - 4px);
     // Keep a thumb widened to its minimum inside the track
-    left: min(var(--thumb-left), calc(100% - #{$min-thumb-width}));
+    left: min(var(--thumb-left), calc(100% - #{$dynamic-scrollbar-min-thumb-width}));
     margin: 2px 0;
-    min-width: $min-thumb-width;
+    min-width: $dynamic-scrollbar-min-thumb-width;
     position: absolute;
     top: 0;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.55);
     }
   }
 
@@ -37,11 +39,11 @@ $min-thumb-width: 8px;
   }
 
   &.is-scrubbing .dynamic-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.65);
   }
 
   &.disabled .dynamic-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.45);
     cursor: default;
   }
 }

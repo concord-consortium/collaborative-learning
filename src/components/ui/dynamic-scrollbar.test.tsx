@@ -1,22 +1,9 @@
 import { render, fireEvent } from "@testing-library/react";
 import React from "react";
+import { mockPointerEvents } from "../../test/pointer-events";
 import { DynamicScrollbar } from "./dynamic-scrollbar";
 
-// jsdom doesn't support pointer capture or PointerEvent
-beforeAll(() => {
-  HTMLElement.prototype.setPointerCapture = jest.fn();
-  HTMLElement.prototype.releasePointerCapture = jest.fn();
-  // Polyfill PointerEvent so clientX is available in events
-  if (typeof PointerEvent === "undefined") {
-    (global as any).PointerEvent = class PointerEvent extends MouseEvent {
-      pointerId: number;
-      constructor(type: string, params: PointerEventInit = {}) {
-        super(type, params);
-        this.pointerId = params.pointerId ?? 0;
-      }
-    };
-  }
-});
+beforeAll(mockPointerEvents);
 
 describe("DynamicScrollbar", () => {
   const totalStart = 0;
@@ -103,10 +90,10 @@ describe("DynamicScrollbar", () => {
       width: 500, height: 17, top: 0, left: 0, right: 500, bottom: 17, x: 0, y: 0, toJSON: jest.fn()
     });
 
-    // Pointer down at x=100
-    fireEvent.pointerDown(thumb, { clientX: 100, pointerId: 1 });
-    // Drag to x=200 (100px right on 500px track = 20% of 100 = 20 shift)
-    fireEvent.pointerMove(thumb, { clientX: 200, pointerId: 1 });
+    // Pointer down on the thumb, which spans x=125 to 375
+    fireEvent.pointerDown(thumb, { clientX: 150, pointerId: 1 });
+    // Drag to x=250 (100px right on 500px track = 20% of 100 = 20 shift)
+    fireEvent.pointerMove(thumb, { clientX: 250, pointerId: 1 });
 
     expect(onViewChange).toHaveBeenCalledTimes(1);
     const [newStart, newEnd] = onViewChange.mock.calls[0];
@@ -334,6 +321,46 @@ describe("DynamicScrollbar", () => {
     fireEvent.pointerDown(track, { clientX: 250, pointerId: 1 });
     unmount();
     expect(onScrubEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it("ends a scrub when the pointer capture is lost", () => {
+    const onScrubEnd = jest.fn();
+    const { container } = renderScrollbar(25, 75, jest.fn(), { onScrubEnd });
+    const track = mockTrackWidth(container);
+
+    fireEvent.pointerDown(track, { clientX: 250, pointerId: 1 });
+    fireEvent.lostPointerCapture(track, { pointerId: 1 });
+    expect(onScrubEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a second pointer's press while a scrub is in progress", () => {
+    const onScrubStart = jest.fn();
+    const onScrubEnd = jest.fn();
+    const { container, onViewChange } = renderScrollbar(25, 75, jest.fn(), { onScrubStart, onScrubEnd });
+    const track = mockTrackWidth(container);
+
+    fireEvent.pointerDown(track, { clientX: 250, pointerId: 1 });
+    fireEvent.pointerDown(track, { clientX: 450, pointerId: 2 });
+    fireEvent.pointerUp(track, { pointerId: 2 });
+    expect(onScrubStart).toHaveBeenCalledTimes(1);
+    expect(onScrubEnd).not.toHaveBeenCalled();
+    expect(onViewChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerUp(track, { pointerId: 1 });
+    expect(onScrubEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it("drags a thumb widened past its view all the way to the end", () => {
+    // The 0.1-unit view is 0.5px wide, so the thumb is drawn at its minimum width, past the view.
+    const { container, onViewChange } = renderScrollbar(10, 10.1, jest.fn(), { minViewRange: 0.01 });
+    mockTrackWidth(container);
+    const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
+
+    fireEvent.pointerDown(thumb, { clientX: 57, pointerId: 1 });
+    fireEvent.pointerMove(thumb, { clientX: 2000, pointerId: 1 });
+    const [newStart, newEnd] = onViewChange.mock.calls[onViewChange.mock.calls.length - 1];
+    expect(newStart).toBeCloseTo(99.9);
+    expect(newEnd).toBeCloseTo(100);
   });
 
   it("does nothing when disabled", () => {

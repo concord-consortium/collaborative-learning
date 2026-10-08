@@ -23,9 +23,11 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
 
   // Select the tile as TileComponent would, except that a modifier-click on the graph (Shift-click
   // zooms out) keeps this the only selected tile rather than toggling it out of the selection.
+  // Listens for pointerdown because the Full Timeline and the scrollbar cancel it, which suppresses
+  // the mousedown that would follow.
   useEffect(() => {
     if (!tileElt) return;
-    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+    const handlePointerDown = (e: PointerEvent) => {
       const target = e.target instanceof Element ? e.target : null;
       // The drag handle selects the tile itself, on click.
       if (target?.closest(".tool-tile-drag-handle-wrapper")) return;
@@ -33,12 +35,8 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
       userSelectTile(ui, model, { readOnly, append: !onPlot && hasSelectionModifier(e), container });
     };
     const options = { capture: true, passive: true };
-    tileElt.addEventListener("mousedown", handlePointerDown, options);
-    tileElt.addEventListener("touchstart", handlePointerDown, options);
-    return () => {
-      tileElt.removeEventListener("mousedown", handlePointerDown, options);
-      tileElt.removeEventListener("touchstart", handlePointerDown, options);
-    };
+    tileElt.addEventListener("pointerdown", handlePointerDown, options);
+    return () => tileElt.removeEventListener("pointerdown", handlePointerDown, options);
   }, [container, model, readOnly, tileElt, ui]);
 
   return (

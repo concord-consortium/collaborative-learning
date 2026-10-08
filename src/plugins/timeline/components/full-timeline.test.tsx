@@ -1,5 +1,7 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
+import { observable, runInAction } from "mobx";
+import { IJsonPatch, onPatch } from "mobx-state-tree";
 import React from "react";
 import { ReadOnlyContext } from "../../../components/document/read-only-context";
 import { TileModelContext } from "../../../components/tiles/tile-api";
@@ -8,6 +10,7 @@ import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../mode
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { mockPointerEvents } from "../../../test/pointer-events";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { FullTimeline } from "./full-timeline";
@@ -28,20 +31,7 @@ jest.mock("../../shared-seismogram/components/waveform-panel", () => ({
 
 const mockedGetSharedModelManager = getSharedModelManager as jest.MockedFunction<typeof getSharedModelManager>;
 
-// jsdom doesn't support pointer capture or PointerEvent
-beforeAll(() => {
-  HTMLElement.prototype.setPointerCapture = jest.fn();
-  HTMLElement.prototype.releasePointerCapture = jest.fn();
-  if (typeof PointerEvent === "undefined") {
-    (global as any).PointerEvent = class PointerEvent extends MouseEvent {
-      pointerId: number;
-      constructor(type: string, params: PointerEventInit = {}) {
-        super(type, params);
-        this.pointerId = params.pointerId ?? 0;
-      }
-    };
-  }
-});
+beforeAll(mockPointerEvents);
 
 describe("FullTimeline", () => {
   const dataStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
@@ -50,13 +40,14 @@ describe("FullTimeline", () => {
   // 250px per day across the four days of data
   const kWidth = 1000;
   let mockSharedDataSet: any;
+  let mockSharedSeismogram: { station: any, startTime?: DateTime, endTime?: DateTime };
 
   beforeEach(() => {
-    const mockSharedSeismogram = {
+    mockSharedSeismogram = observable({
       station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
-      startTime: dataStart,
-      endTime: dataEnd,
-    };
+      startTime: dataStart as DateTime | undefined,
+      endTime: dataEnd as DateTime | undefined,
+    }, { startTime: observable.ref, endTime: observable.ref });
     mockSharedDataSet = undefined;
     mockedGetSharedModelManager.mockReturnValue({
       isReady: true,
@@ -134,11 +125,29 @@ describe("FullTimeline", () => {
     expect(events[1].style.left).toBe("75%");
     expect(events[1].style.width).toBe("12.5%");
 
-    // Each event's shape sits above the strip, centered on the event
+    // Each event's shape is centered on the event
     const shapes = container.querySelectorAll<HTMLElement>(".full-timeline-shape");
     expect(shapes).toHaveLength(2);
     expect(shapes[1].style.left).toBe("81.25%");
     expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
+  });
+
+  it("keeps events within the strip, leaving out those entirely outside the data", () => {
+    const dataSet = DataSet.create();
+    addAttributeToDataSet(dataSet, { name: "windowStart" });
+    addAttributeToDataSet(dataSet, { name: "windowEnd" });
+    addAttributeToDataSet(dataSet, { name: "eventType" });
+    addCasesToDataSet(dataSet, [
+      { windowStart: day(-1).toISO()!, windowEnd: day(-0.5).toISO()!, eventType: "Earthquake" },
+      { windowStart: day(3.5).toISO()!, windowEnd: day(4.5).toISO()!, eventType: "Earthquake" }
+    ]);
+    mockSharedDataSet = SharedDataSet.create({ dataSet });
+
+    const { container } = renderFullTimeline(day(1), day(2));
+    const events = container.querySelectorAll<HTMLElement>(".full-timeline-event");
+    expect(events).toHaveLength(1);
+    expect(events[0].style.left).toBe("87.5%");
+    expect(events[0].style.width).toBe("12.5%");
   });
 
   it("centers the view on a press outside the overlay", () => {
@@ -153,6 +162,26 @@ describe("FullTimeline", () => {
     drag(strip, 300, 550);
     expect(content.viewStartTime?.toISO()).toBe(day(2).toISO());
     expect(content.viewEndTime?.toISO()).toBe(day(3).toISO());
+  });
+
+  it("grabs the overlay on a press on it, even beyond the view, as at its minimum width", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    const overlay = container.querySelector<HTMLElement>(".full-timeline-overlay")!;
+    // 20px past the view's end; a press on the strip there would center the view instead
+    drag(overlay, 520, 620);
+    expect(content.viewStartTime?.toISO()).toBe(day(1.48).toISO());
+  });
+
+  it("ends a scrub in progress, and saves it, when the data goes away", () => {
+    const { content, strip } = renderFullTimeline(day(1), day(2));
+    fireEvent.pointerDown(strip, { button: 0, clientX: 300, pointerId: 1 });
+    fireEvent.pointerMove(strip, { button: 0, clientX: 550, pointerId: 1 });
+    act(() => runInAction(() => { mockSharedSeismogram.endTime = undefined; }));
+    expect(content.viewStartTimeISO).toBe(day(2).toISO());
+
+    // Later changes are saved as they happen
+    content.setViewRange(day(0), day(1));
+    expect(content.viewStartTimeISO).toBe(day(0).toISO());
   });
 
   it("saves a drag of the overlay only when it ends", () => {
@@ -175,6 +204,30 @@ describe("FullTimeline", () => {
     expect(content.viewStartTimeISO).toBe(day(2).toISO());
   });
 
+  it("saves overlapping drags of the strip and the scrollbar as a single change", () => {
+    const { content, strip, track } = renderFullTimeline(day(1), day(2));
+    const patches: IJsonPatch[] = [];
+    onPatch(content, patch => patches.push(patch));
+
+    fireEvent.pointerDown(strip, { button: 0, clientX: 300, pointerId: 1 });
+    fireEvent.pointerMove(strip, { button: 0, clientX: 400, pointerId: 1 });
+    fireEvent.pointerDown(track, { button: 0, clientX: 400, pointerId: 2 });
+    fireEvent.pointerMove(track, { button: 0, clientX: 550, pointerId: 2 });
+    fireEvent.pointerUp(strip, { button: 0, clientX: 400, pointerId: 1 });
+    expect(patches).toEqual([]);
+
+    fireEvent.pointerUp(track, { button: 0, clientX: 550, pointerId: 2 });
+    expect(content.viewStartTimeISO).toBe(day(2).toISO());
+    expect(patches.map(p => p.path)).toEqual(["/viewStartTimeISO", "/viewEndTimeISO"]);
+  });
+
+  it("labels the scrollbar and names the range in view as its value", () => {
+    const { thumb } = renderFullTimeline(day(1), day(2));
+    const format = (time: DateTime) => time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
+    expect(thumb).toHaveAttribute("aria-label", "Timeline scroll position");
+    expect(thumb).toHaveAttribute("aria-valuetext", `Showing ${format(day(1))} to ${format(day(2))}.`);
+  });
+
   it("neither the strip nor the scrollbar changes the view when read-only", () => {
     const { content, strip, track, thumb } = renderFullTimeline(day(1), day(2), { readOnly: true });
     drag(strip, 750, 750);
@@ -192,6 +245,18 @@ describe("FullTimeline", () => {
       const format = (time: DateTime) => time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
       expect(container.querySelector("[aria-live]")!.textContent).toBe(
         `Showing ${format(day(2.5))} to ${format(day(3.5))}.`);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("announces nothing when a press leaves the view where it was", () => {
+    jest.useFakeTimers();
+    try {
+      const { container, strip } = renderFullTimeline(day(1), day(2));
+      drag(strip, 300, 300);
+      act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); });
+      expect(container.querySelector("[aria-live]")!.textContent).toBe("");
     } finally {
       jest.useRealTimers();
     }

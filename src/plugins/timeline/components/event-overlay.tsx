@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useTimelineContent } from "../hooks/use-timeline-content";
@@ -40,8 +40,12 @@ export const EventOverlay = observer(function EventOverlay() {
 
         return (
           <React.Fragment key={i}>
-            <div className={clsx("event-overlay", colorClass)} style={overlayStyle} />
-            <button className={clsx("event-label-button", colorClass)} style={labelStyle} onClick={onLabelClick}>
+            <div className={classNames("event-overlay", colorClass)} style={overlayStyle} />
+            <button
+              className={classNames("event-label-button", colorClass)}
+              style={labelStyle}
+              onClick={onLabelClick}
+            >
               {event.index + 1}
             </button>
             <div className="event-label-shape" style={labelStyle}>

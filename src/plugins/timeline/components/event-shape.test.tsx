@@ -9,7 +9,7 @@ describe("EventShape", () => {
   }
 
   it("gives each event color its own shape", () => {
-    expect(renderShape("blue").querySelector("rect")).toBeInTheDocument();
+    expect(renderShape("blue").querySelectorAll("rect")).toHaveLength(1);
     expect(renderShape("orange").querySelector("circle")).toBeInTheDocument();
     expect(renderShape("red").querySelector("polygon")).toHaveAttribute("points", "6,0.5 11.5,11.5 0.5,11.5");
     expect(renderShape("yellow").querySelector("polygon")).toHaveAttribute("points", "0.5,0.5 11.5,0.5 6,11.5");
@@ -26,6 +26,7 @@ describe("EventShape", () => {
 
   it("is 12px unless given a size", () => {
     expect(renderShape("blue")).toHaveAttribute("width", "12");
+    expect(renderShape("blue", 6)).toHaveAttribute("width", "6");
     expect(renderShape("blue", 6)).toHaveAttribute("height", "6");
   });
 

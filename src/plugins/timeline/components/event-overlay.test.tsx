@@ -1,4 +1,4 @@
-// Mock uPlot — canvas won't work in jsdom
+// The tile registration loads uPlot, which needs browser APIs that jsdom lacks
 jest.mock("uplot", () => {
   return jest.fn().mockImplementation(() => ({
     setData: jest.fn(),
