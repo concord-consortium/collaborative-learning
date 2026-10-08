@@ -43,6 +43,13 @@
   }
 }
 
+.event-label-shape {
+  pointer-events: none;
+  position: absolute;
+  top: -15px;
+  transform: translateX(-50%);
+}
+
 .event-label-button {
   align-items: center;
   border: none;
@@ -56,7 +63,8 @@
   justify-content: center;
   padding: 0;
   position: absolute;
-  top: -24px;
+  // Above the event's shape
+  top: -37px;
   transform: translateX(-50%);
   width: 24px;
 

@@ -1,10 +1,10 @@
 import classNames from "classnames";
-import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { useTimelineContent } from "../hooks/use-timeline-content";
+import { describeView, formatTime } from "./describe-view";
 
 import "./timeline-plot.scss";
 
@@ -18,10 +18,6 @@ interface IDragState {
   startViewStartMs: number;
   msPerPx: number;
   moved: boolean;
-}
-
-function formatTime(time: DateTime) {
-  return time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
 }
 
 interface IProps {
@@ -68,13 +64,6 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     const rect = e.currentTarget.getBoundingClientRect();
     if (!viewStartTime || !viewRangeMs || rect.width <= 0) return undefined;
     return viewStartTime.plus({ milliseconds: (e.clientX - rect.left) / rect.width * viewRangeMs });
-  };
-
-  const describeView = () => {
-    const { viewStartTime, viewEndTime } = content;
-    return viewStartTime && viewEndTime
-      ? `Showing ${formatTime(viewStartTime)} to ${formatTime(viewEndTime)}.`
-      : "";
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -130,13 +119,13 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
       } else if ((dx > 0 && !content.canPanLeft) || (dx < 0 && !content.canPanRight)) {
         result = "Already at the edge of the data.";
       }
-      announce(`${result} ${describeView()}`);
+      announce(`${result} ${describeView(content)}`);
       return;
     }
     const time = timeAtClientX(e);
     if (!time) return;
     if (e.shiftKey && !content.canZoomOut) {
-      announce(`Already showing the full time range. ${describeView()}`);
+      announce(`Already showing the full time range. ${describeView(content)}`);
       return;
     }
     let action = "Zoomed in";
@@ -146,7 +135,7 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     // Near the edges of the data, the view is shifted rather than centered on the clicked time.
     const { viewStartMs = 0, viewRangeMs = 0 } = content;
     const centered = Math.abs(viewStartMs + viewRangeMs / 2 - time.toMillis()) <= 1;
-    announce(`${action}${centered ? `, centered on ${formatTime(time)}` : ""}. ${describeView()}`);
+    announce(`${action}${centered ? `, centered on ${formatTime(time)}` : ""}. ${describeView(content)}`);
   };
 
   // Also handles a lost pointer capture, so a missed pointerup can't leave a drag running.

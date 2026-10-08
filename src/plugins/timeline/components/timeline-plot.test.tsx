@@ -15,6 +15,7 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { kAnnounceDelayMs } from "../../../hooks/use-live-announcer";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { mockPointerEvents } from "../../../test/pointer-events";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { kMinViewRangeSeconds, TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { TimelinePlot } from "./timeline-plot";
@@ -30,20 +31,7 @@ jest.mock("../../../models/tiles/tile-environment", () => ({
 
 const mockedGetSharedModelManager = getSharedModelManager as jest.MockedFunction<typeof getSharedModelManager>;
 
-// jsdom doesn't support pointer capture or PointerEvent
-beforeAll(() => {
-  HTMLElement.prototype.setPointerCapture = jest.fn();
-  HTMLElement.prototype.releasePointerCapture = jest.fn();
-  if (typeof PointerEvent === "undefined") {
-    (global as any).PointerEvent = class PointerEvent extends MouseEvent {
-      pointerId: number;
-      constructor(type: string, params: PointerEventInit = {}) {
-        super(type, params);
-        this.pointerId = params.pointerId ?? 0;
-      }
-    };
-  }
-});
+beforeAll(mockPointerEvents);
 
 describe("TimelinePlot", () => {
   const dataStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");

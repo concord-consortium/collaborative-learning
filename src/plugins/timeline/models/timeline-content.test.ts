@@ -395,6 +395,33 @@ describe("view preview", () => {
     expect(patches).toEqual([]);
   });
 
+  it("saves overlapping previews together when the last one ends", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    content.beginViewPreview();
+    expect(content.viewStartTime?.toISO()).toBe(day(2).plus({ hours: 1 }).toISO());
+    content.panBy(3600);
+    content.endViewPreview();
+    content.panBy(3600);
+    expect(patches).toEqual([]);
+
+    content.endViewPreview();
+    expect(content.viewStartTimeISO).toBe(day(2).plus({ hours: 3 }).toISO());
+    expect(patches).toHaveLength(2);
+  });
+
+  it("ignores an end without a matching begin, and warns about it outside production", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => null);
+    content.endViewPreview();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("endViewPreview"));
+    warn.mockRestore();
+    content.beginViewPreview();
+    content.panBy(3600);
+    expect(patches).toEqual([]);
+    content.endViewPreview();
+    expect(patches).toHaveLength(2);
+  });
+
   it("discards the preview when the saved view changes before it ends", () => {
     content.beginViewPreview();
     content.panBy(3600);
@@ -402,6 +429,22 @@ describe("view preview", () => {
     applyPatch(content, { op: "replace", path: "/viewStartTimeISO", value: day(1).toISO() });
     applyPatch(content, { op: "replace", path: "/viewEndTimeISO", value: day(2).toISO() });
     patches = [];
+
+    content.endViewPreview();
+    expect(patches).toEqual([]);
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(day(2).toISO());
+  });
+
+  it("discards overlapping previews when the saved view changes before the last one ends", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    content.beginViewPreview();
+    applyPatch(content, { op: "replace", path: "/viewStartTimeISO", value: day(1).toISO() });
+    applyPatch(content, { op: "replace", path: "/viewEndTimeISO", value: day(2).toISO() });
+    patches = [];
+    content.endViewPreview();
+    content.panBy(3600);
 
     content.endViewPreview();
     expect(patches).toEqual([]);

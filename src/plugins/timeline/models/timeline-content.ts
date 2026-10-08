@@ -31,6 +31,7 @@ export const TimelineContentModel = TileContentModel
     viewPreview: undefined as {
       startISO?: string, endISO?: string, savedStartISO?: string, savedEndISO?: string
     } | undefined,
+    viewPreviewDepth: 0,
   }))
   .views(self => ({
     get isUserResizable() {
@@ -225,17 +226,29 @@ export const TimelineContentModel = TileContentModel
     },
     /**
      * Until `endViewPreview`, view changes are shown but not saved, so that a continuous gesture
-     * like a drag is saved, and undone, as a single change. If the saved view changes meanwhile
-     * (e.g. an undo), the preview is discarded rather than saved over it.
+     * like a drag is saved, and undone, as a single change. Previews nest, so gestures that overlap,
+     * such as two pointers on different controls, are saved together when the last one ends. If the
+     * saved view changes meanwhile (e.g. an undo), the preview is discarded rather than saved over it.
      */
     beginViewPreview() {
-      const { viewStartTimeISO, viewEndTimeISO } = self;
-      self.viewPreview = {
-        startISO: viewStartTimeISO, endISO: viewEndTimeISO,
-        savedStartISO: viewStartTimeISO, savedEndISO: viewEndTimeISO
-      };
+      if (self.viewPreviewDepth++ === 0) {
+        const { viewStartTimeISO, viewEndTimeISO } = self;
+        self.viewPreview = {
+          startISO: viewStartTimeISO, endISO: viewEndTimeISO,
+          savedStartISO: viewStartTimeISO, savedEndISO: viewEndTimeISO
+        };
+      }
     },
     endViewPreview() {
+      if (self.viewPreviewDepth === 0) {
+        // An end without a begin is a bug. Ignore it, so that the count can't go below zero and stop
+        // the next preview from starting.
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Timeline: endViewPreview called without a matching beginViewPreview");
+        }
+        return;
+      }
+      if (--self.viewPreviewDepth > 0) return;
       const preview = self.viewPreview;
       self.viewPreview = undefined;
       if (!preview) return;

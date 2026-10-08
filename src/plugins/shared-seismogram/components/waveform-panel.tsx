@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { DateTime } from "luxon";
@@ -12,8 +13,17 @@ const LOAD_VIEWPORT_DEBOUNCE_MS = 150;
 const DEFAULT_CHART_HEIGHT = 150;
 const AMPLITUDE_RANGE_SCALAR = 1.2;
 
+type WaveformPanelMode = "waveform" | "timeline" | "overview";
+
+// The overview mode is short and draws in black, for a light background.
+const kModeStyles: Record<WaveformPanelMode, { height: number, rgb: string }> = {
+  waveform: { height: 60, rgb: "255, 255, 255" },
+  timeline: { height: 100, rgb: "255, 255, 255" },
+  overview: { height: 38, rgb: "0, 0, 0" }
+};
+
 interface WaveformPanelProps {
-  mode?: "waveform" | "timeline";
+  mode?: WaveformPanelMode;
   sharedSeismogram: SharedSeismogramType;
   startTime: DateTime;
   endTime: DateTime;
@@ -27,6 +37,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
   const uplotRef = useRef<uPlot | null>(null);
   const callerIdRef = useRef(nanoid());
   const [pixelWidth, setPixelWidth] = useState(0);
+  const { height, rgb } = kModeStyles[mode];
 
   const stationInfo = sharedSeismogram.station;
 
@@ -94,6 +105,7 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
 
     isEnvelopeRef.current = isEnvelope;
 
+    const stroke = `rgb(${rgb})`;
     const opts: uPlot.Options = {
       width: pixelWidth,
       height: containerRef.current.clientHeight || DEFAULT_CHART_HEIGHT,
@@ -112,20 +124,20 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
       series: isEnvelope
         ? [
             {},
-            { label: "Min", stroke: "white", width: 1 },
-            { label: "Max", stroke: "white", width: 1 },
+            { label: "Min", stroke, width: 1 },
+            { label: "Max", stroke, width: 1 },
           ]
         : [
             {},
-            { label: "Value", stroke: "white", width: 1 },
+            { label: "Value", stroke, width: 1 },
           ],
       bands: isEnvelope
-        ? [{ series: [2, 1], fill: "rgba(255, 255, 255, 0.6)" }]
+        ? [{ series: [2, 1], fill: `rgba(${rgb}, 0.6)` }]
         : undefined,
     };
 
     uplotRef.current = new uPlot(opts, data, containerRef.current);
-  }, [queryResult, pixelWidth]);
+  }, [queryResult, pixelWidth, rgb]);
 
   // Destroy uPlot on unmount
   useEffect(() => {
@@ -144,12 +156,9 @@ export const WaveformPanel: React.FC<WaveformPanelProps> = observer(function Wav
     });
   }, [pixelWidth]);
 
-  const style = mode === "waveform"
-    ? { height: "60px"}
-    : { height: "100px" };
   return (
-    <div className="waveform-panel">
-      <div ref={containerRef} className="waveform-panel-display" style={style} />
+    <div className={classNames("waveform-panel", `mode-${mode}`)}>
+      <div ref={containerRef} className="waveform-panel-display" style={{ height: `${height}px` }} />
     </div>
   );
 });
