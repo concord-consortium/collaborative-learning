@@ -19,7 +19,9 @@
     height: 40px;
     box-sizing: border-box;
     border-radius: 5px;
-    border: solid 1.5px $charcoal-light-1;
+    // $charcoal, not $charcoal-light-1: this border sits against the data-setup panel's
+    // teal-light-7 background, where light-1 fell to 2.68:1 against the 3:1 WCAG 1.4.11 needs.
+    border: solid 1.5px $charcoal;
     background-color: white;
     font-size: 13px;
     color: $charcoal-dark-2;
@@ -54,7 +56,9 @@
     font-variant-numeric: tabular-nums;
 
     &[data-placeholder] {
-      color: $charcoal-light-1;
+      // $charcoal, not $charcoal-light-1: light-1 is only 3.03:1 on this white field, short of
+      // the 4.5:1 WCAG needs for text.
+      color: $charcoal;
       font-style: italic;
     }
 
@@ -109,7 +113,6 @@
   background-color: white;
   border-radius: 5px;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
-  z-index: 11;
 
   .date-field-dialog {
     padding: 12px;
@@ -141,8 +144,9 @@
     @include focus-ring;
   }
 
-  // CustomSelect, same as the station/model dropdowns, so its open list is no longer unstylable
-  // OS chrome. The shared look lives in a mixin so this and the data-setup fields cannot drift.
+  // CustomSelect, same as the station/model dropdowns: its open list is ordinary DOM, not OS
+  // chrome, so it can be styled. The shared look lives in a mixin so this and the data-setup
+  // fields cannot drift.
   .month-dropdown {
     flex-grow: 1;
 
