@@ -8,7 +8,7 @@ import { describeView, formatTime } from "./describe-view";
 
 import "./timeline-plot.scss";
 
-// A press that moves farther than this is a pan rather than a click.
+// A press that moves farther than this is a drag rather than a click.
 const kDragThresholdPx = 5;
 
 interface IDragState {
@@ -36,10 +36,13 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   const [isShiftDown, setIsShiftDown] = useState(false);
   const { announcerRef, announce } = useLiveAnnouncer();
 
-  // Save a drag that is still in progress when the plot goes away.
+  // Save a drag that is still in progress when the plot goes away or becomes read-only. Removing
+  // the plot's element sends its lost pointer capture to the document, not to the plot.
   useEffect(() => () => {
     if (dragRef.current?.moved) content.endViewPreview();
-  }, [content]);
+    dragRef.current = null;
+    setIsDragging(false);
+  }, [content, readOnly]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -149,7 +152,7 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   return (
     <>
       <div
-        className={classNames("timeline-plot", cursorClass)}
+        className={classNames("timeline-plot", "interactive", cursorClass)}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

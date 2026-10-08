@@ -26,8 +26,11 @@ export const TimelineContentModel = TileContentModel
   .volatile(self => ({
     hoverTime: undefined as DateTime | undefined,
     pinnedTime: undefined as DateTime | undefined,
-    // The view shown while a preview is active; see `beginViewPreview`.
-    viewPreview: undefined as { startISO?: string, endISO?: string } | undefined,
+    // The view shown while a preview is active, and the saved view it started from; see
+    // `beginViewPreview`.
+    viewPreview: undefined as {
+      startISO?: string, endISO?: string, savedStartISO?: string, savedEndISO?: string
+    } | undefined,
     viewPreviewDepth: 0,
   }))
   .views(self => ({
@@ -215,7 +218,7 @@ export const TimelineContentModel = TileContentModel
       const startISO = start.toISO() ?? undefined;
       const endISO = end.toISO() ?? undefined;
       if (self.viewPreview) {
-        self.viewPreview = { startISO, endISO };
+        self.viewPreview = { ...self.viewPreview, startISO, endISO };
       } else {
         self.viewStartTimeISO = startISO;
         self.viewEndTimeISO = endISO;
@@ -224,16 +227,22 @@ export const TimelineContentModel = TileContentModel
     /**
      * Until `endViewPreview`, view changes are shown but not saved, so that a continuous gesture
      * like a drag is saved, and undone, as a single change. Previews nest, so gestures that overlap,
-     * such as two pointers on different controls, are saved together when the last one ends.
+     * such as two pointers on different controls, are saved together when the last one ends. If the
+     * saved view changes meanwhile (e.g. an undo), the preview is discarded rather than saved over it.
      */
     beginViewPreview() {
       if (self.viewPreviewDepth++ === 0) {
-        self.viewPreview = { startISO: self.viewStartTimeISO, endISO: self.viewEndTimeISO };
+        const { viewStartTimeISO, viewEndTimeISO } = self;
+        self.viewPreview = {
+          startISO: viewStartTimeISO, endISO: viewEndTimeISO,
+          savedStartISO: viewStartTimeISO, savedEndISO: viewEndTimeISO
+        };
       }
     },
     endViewPreview() {
       if (self.viewPreviewDepth === 0) {
-        // Unpaired calls are a bug: a missing end leaves later view changes unsaved.
+        // An end without a begin is a bug. Ignore it, so that the count can't go below zero and stop
+        // the next preview from starting.
         if (process.env.NODE_ENV !== "production") {
           console.warn("Timeline: endViewPreview called without a matching beginViewPreview");
         }
@@ -243,6 +252,7 @@ export const TimelineContentModel = TileContentModel
       const preview = self.viewPreview;
       self.viewPreview = undefined;
       if (!preview) return;
+      if (preview.savedStartISO !== self.viewStartTimeISO || preview.savedEndISO !== self.viewEndTimeISO) return;
       if (preview.startISO !== self.viewStartTimeISO) self.viewStartTimeISO = preview.startISO;
       if (preview.endISO !== self.viewEndTimeISO) self.viewEndTimeISO = preview.endISO;
     }

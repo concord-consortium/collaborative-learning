@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { IJsonPatch, onPatch } from "mobx-state-tree";
+import { IJsonPatch, applyPatch, onPatch } from "mobx-state-tree";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -420,6 +420,36 @@ describe("view preview", () => {
     expect(patches).toEqual([]);
     content.endViewPreview();
     expect(patches).toHaveLength(2);
+  });
+
+  it("discards the preview when the saved view changes before it ends", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    // e.g. an undo while dragging
+    applyPatch(content, { op: "replace", path: "/viewStartTimeISO", value: day(1).toISO() });
+    applyPatch(content, { op: "replace", path: "/viewEndTimeISO", value: day(2).toISO() });
+    patches = [];
+
+    content.endViewPreview();
+    expect(patches).toEqual([]);
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(day(2).toISO());
+  });
+
+  it("discards overlapping previews when the saved view changes before the last one ends", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    content.beginViewPreview();
+    applyPatch(content, { op: "replace", path: "/viewStartTimeISO", value: day(1).toISO() });
+    applyPatch(content, { op: "replace", path: "/viewEndTimeISO", value: day(2).toISO() });
+    patches = [];
+    content.endViewPreview();
+    content.panBy(3600);
+
+    content.endViewPreview();
+    expect(patches).toEqual([]);
+    expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+    expect(content.viewEndTime?.toISO()).toBe(day(2).toISO());
   });
 });
 
