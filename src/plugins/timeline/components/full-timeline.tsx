@@ -50,7 +50,9 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
   const readOnly = useReadOnlyContext();
   const stripRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const scrubStartViewRef = useRef("");
+  // The strip and the scrollbar can each be scrubbing at once; the view as the first one began
+  const scrubCountRef = useRef(0);
+  const scrubStartViewRef = useRef({ start: 0, end: 0 });
   const { announcerRef, announce } = useLiveAnnouncer();
 
   const totalStart = dataStartTime.toMillis();
@@ -66,13 +68,16 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
   };
   // Each scrub is saved, and undone, as a single change.
   const handleScrubStart = () => {
-    scrubStartViewRef.current = describeView(content);
+    if (scrubCountRef.current++ === 0) {
+      scrubStartViewRef.current = { start: content.viewStartMs ?? 0, end: content.viewEndMs ?? 0 };
+    }
     content.beginViewPreview();
   };
   const handleScrubEnd = () => {
     content.endViewPreview();
-    const description = describeView(content);
-    if (description !== scrubStartViewRef.current) announce(description);
+    if (--scrubCountRef.current > 0) return;
+    const { start, end } = scrubStartViewRef.current;
+    if (content.viewStartMs !== start || content.viewEndMs !== end) announce(describeView(content));
   };
 
   const { isScrubbing, trackHandlers } = useScrub({
@@ -139,7 +144,7 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
       {content.events.map(event => {
         const windowStart = event.windowStart.toMillis();
         const windowEnd = event.windowEnd.toMillis();
-        if (windowEnd < totalStart || windowStart > totalEnd) return null;
+        if (windowEnd <= totalStart || windowStart >= totalEnd) return null;
         const left = toPct(windowStart);
         const width = toPct(windowEnd) - left;
         const colorWord = colorWords.get(event.eventType);

@@ -132,13 +132,15 @@ describe("FullTimeline", () => {
     expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
   });
 
-  it("keeps events within the strip, leaving out those entirely outside the data", () => {
+  it("keeps events within the strip, leaving out those that don't overlap the data", () => {
     const dataSet = DataSet.create();
     addAttributeToDataSet(dataSet, { name: "windowStart" });
     addAttributeToDataSet(dataSet, { name: "windowEnd" });
     addAttributeToDataSet(dataSet, { name: "eventType" });
     addCasesToDataSet(dataSet, [
       { windowStart: day(-1).toISO()!, windowEnd: day(-0.5).toISO()!, eventType: "Earthquake" },
+      { windowStart: day(-1).toISO()!, windowEnd: day(0).toISO()!, eventType: "Earthquake" },
+      { windowStart: day(4).toISO()!, windowEnd: day(5).toISO()!, eventType: "Earthquake" },
       { windowStart: day(3.5).toISO()!, windowEnd: day(4.5).toISO()!, eventType: "Earthquake" }
     ]);
     mockSharedDataSet = SharedDataSet.create({ dataSet });
@@ -245,6 +247,28 @@ describe("FullTimeline", () => {
       const format = (time: DateTime) => time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
       expect(container.querySelector("[aria-live]")!.textContent).toBe(
         `Showing ${format(day(2.5))} to ${format(day(3.5))}.`);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("announces overlapping scrubs once, when the last ends, if either moved the view", () => {
+    jest.useFakeTimers();
+    try {
+      const { container, strip, track } = renderFullTimeline(day(1), day(2));
+      const live = container.querySelector("[aria-live]")!;
+      fireEvent.pointerDown(strip, { button: 0, clientX: 300, pointerId: 1 });
+      fireEvent.pointerMove(strip, { button: 0, clientX: 550, pointerId: 1 });
+      // A press within the moved view grabs it without moving it
+      fireEvent.pointerDown(track, { button: 0, clientX: 600, pointerId: 2 });
+      fireEvent.pointerUp(strip, { button: 0, clientX: 550, pointerId: 1 });
+      act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); });
+      expect(live.textContent).toBe("");
+
+      fireEvent.pointerUp(track, { button: 0, clientX: 600, pointerId: 2 });
+      act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); });
+      const format = (time: DateTime) => time.toUTC().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
+      expect(live.textContent).toBe(`Showing ${format(day(2))} to ${format(day(3))}.`);
     } finally {
       jest.useRealTimers();
     }
