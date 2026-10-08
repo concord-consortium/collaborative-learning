@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { DateField, IDateFieldProps } from "./date-field";
@@ -107,10 +107,13 @@ describe("DateField", () => {
     });
   });
 
-  it("does not render a time column in the popover", () => {
+  // There is genuinely no time column to render - granularity="day" means the popover is only
+  // ever a day grid - so the real assertion is the absence of any time-editing control there,
+  // not a made-up test id this component has never produced.
+  it("renders no time-editing controls in the popover, only the day grid and footer", () => {
     renderField();
     openCalendar();
-    expect(screen.queryByTestId("date-field-time-column")).not.toBeInTheDocument();
+    expect(within(screen.getByRole("dialog")).queryAllByRole("spinbutton")).toHaveLength(0);
   });
 
   // Two pickers sit side by side in Data Setup. A screen-reader user must be able to tell which
@@ -154,9 +157,9 @@ describe("DateField buffering", () => {
     expect(onChange).toHaveBeenCalledWith("2026-09-01");
   });
 
-  // Reproduces the reported bug exactly: the end field's minValue tracks the start field (see
-  // data-setup.tsx), so moving start later than the fixed defaultValue leaves Clear with nowhere
-  // valid to land unless it clamps - otherwise OK can commit an end date before the start date.
+  // See clear()'s own comment in date-field.tsx for why defaultValue can land outside the field's
+  // live bounds and must be clamped. (clampDate's own comment, in date-utils.ts, covers what
+  // happens when the two bounds themselves disagree - see date-utils.test.ts for that case.)
   it("clamps Clear to minValue when the default falls before it", () => {
     const onChange = renderField({
       id: "end", label: "End Date and Time", value: "2026-10-06",
@@ -225,9 +228,6 @@ describe("DateField month navigation", () => {
     expect(screen.getByRole("button", { name: "September 2026" })).toBeInTheDocument();
   });
 
-  // A real click sequence (not a bare change event) is what would expose CustomSelect's own
-  // outside-click handling fighting with React Aria's popover dismissal, since both watch pointer
-  // events rather than "change".
   // There is no data for a month that has not happened, so it is not offered at all.
   it("offers no month beyond the last selectable date", async () => {
     const user = userEvent.setup();
@@ -239,6 +239,22 @@ describe("DateField month navigation", () => {
     expect(screen.queryByRole("option", { name: "November 2026" })).not.toBeInTheDocument();
   });
 
+  // Symmetric case on the other bound: the end field's minValue tracks the start field (see
+  // data-setup.tsx), so without this a student could pick a month entirely before the start date,
+  // which the calendar would then refuse to let them select a day in.
+  it("offers no month before the first selectable date", async () => {
+    const user = userEvent.setup();
+    renderField({ id: "end", label: "End Date and Time", value: "2026-09-20", minValue: "2026-08-06" });
+    openCalendar();
+    await user.click(screen.getByRole("button", { name: "September 2026" }));
+
+    expect(screen.getByRole("option", { name: "August 2026" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "July 2026" })).not.toBeInTheDocument();
+  });
+
+  // A real click sequence (not a bare change event) is what would expose CustomSelect's own
+  // outside-click handling fighting with React Aria's popover dismissal, since both watch pointer
+  // events rather than "change".
   it("moves the calendar to the chosen month", async () => {
     const user = userEvent.setup();
     renderField();
@@ -252,15 +268,24 @@ describe("DateField month navigation", () => {
 
   // Changing the month must not disturb the popover's open/close state machine, which the
   // Clear/Cancel/OK footer depends on - this is the proof that the two dropdowns do not fight.
+  // A day is picked before the month changes so there is a pending selection for the test to
+  // lose: without that, the dialog staying open proves nothing about the pick surviving.
   it("keeps the popover open and the pending selection intact when the month changes", async () => {
     const user = userEvent.setup();
     const onChange = renderField();
     openCalendar();
+    fireEvent.click(screen.getByRole("button", { name: /September 15, 2026/ }));
+
     await user.click(screen.getByRole("button", { name: "September 2026" }));
     await user.click(screen.getByRole("option", { name: "November 2026" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
+
+    // Proof the pick survived the month change, not just that the dialog is still open: OK
+    // commits the day chosen before navigating, even though November is now showing.
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(onChange).toHaveBeenCalledWith("2026-09-15");
   });
 });
 

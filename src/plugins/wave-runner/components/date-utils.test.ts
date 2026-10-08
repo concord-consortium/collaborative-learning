@@ -1,5 +1,5 @@
 import { CalendarDate } from "@internationalized/date";
-import { fromDateString, todayDateString, toDateString } from "./date-utils";
+import { clampDate, fromDateString, todayDateString, toDateString } from "./date-utils";
 
 describe("date-utils", () => {
   it("parses a stored date string", () => {
@@ -27,6 +27,34 @@ describe("date-utils", () => {
     expect(fromDateString("")).toBeUndefined();
     expect(fromDateString("not-a-date")).toBeUndefined();
     expect(fromDateString("2026-13-45")).toBeUndefined();
+  });
+});
+
+describe("clampDate", () => {
+  it("leaves a value already inside the bounds unchanged", () => {
+    const value = new CalendarDate(2026, 9, 15);
+    expect(clampDate(value, new CalendarDate(2026, 9, 1), new CalendarDate(2026, 9, 30))).toEqual(value);
+  });
+
+  it("clamps up to min", () => {
+    expect(clampDate(new CalendarDate(2026, 9, 1), new CalendarDate(2026, 9, 15)))
+      .toEqual(new CalendarDate(2026, 9, 15));
+  });
+
+  it("clamps down to max", () => {
+    expect(clampDate(new CalendarDate(2026, 9, 30), undefined, new CalendarDate(2026, 9, 15)))
+      .toEqual(new CalendarDate(2026, 9, 15));
+  });
+
+  // The DateField popover's own Calendar cannot even render with minValue past maxValue - its
+  // underlying react-aria components hang - so this contradictory-bounds case (minValue tracks
+  // the other field - see data-setup.tsx - and can transiently land past maxValue) can only be
+  // exercised at this level, not through the rendered field.
+  it("clamps to min, not max, when the bounds are themselves out of order", () => {
+    const min = new CalendarDate(2026, 10, 5);
+    const max = new CalendarDate(2026, 9, 15);
+    expect(clampDate(new CalendarDate(2026, 10, 1), min, max)).toEqual(min);
+    expect(clampDate(new CalendarDate(2026, 9, 1), min, max)).toEqual(min);
   });
 });
 
