@@ -24,8 +24,8 @@
 
   .sections {
     display: flex;
-    // Fill the tile rather than stopping at content height, which left the tile's own white
-    // showing below the panels.
+    // Fills the tile's full height rather than stopping at content height, so the panels reach
+    // the tile's bottom edge instead of leaving its own white showing below them.
     flex: 1;
     min-height: 0;
 
@@ -44,10 +44,11 @@
         border-left: 1px solid $workspace-teal-dark-1;
       }
 
-      // Data Setup holds 426px and neither grows nor shrinks: the surplus belongs to the graph,
-      // which uses the width, and a zero basis left this panel floored only by its own min-content
-      // so it narrowed as soon as a short station name was chosen. Scoped to horizontal, since
-      // flex-basis follows the main axis and would set a height in the stacked layout.
+      // Data Setup holds a fixed 426px and neither grows nor shrinks; the surplus belongs to the
+      // graph, which uses the width. Without an explicit basis the panel would be floored by its
+      // own min-content instead, narrowing whenever a short station name is chosen. Scoped to
+      // horizontal: flex-basis follows the main axis, which is vertical in the stacked layout, so
+      // there it would set a height rather than a width.
       .section.data-setup {
         flex: 0 0 426px;
       }

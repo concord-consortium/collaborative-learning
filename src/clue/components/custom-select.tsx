@@ -31,9 +31,9 @@ interface IProps {
   titleIcon?: ReactNode;
   titleVisuallyHidden?: boolean;
   /** Id(s) of the element(s) naming this control's purpose for assistive tech, e.g. the id of a
-   *  visible `<label>` reading "Station". On a `role="button"` element, `aria-label` REPLACES the
-   *  text content as the accessible name - it does not supplement it - so an `aria-label` here
-   *  would announce "Station" alone and never the chosen value once one is picked. Passing the
+   *  visible `<label>` for the field. On a `role="button"` element, `aria-label` REPLACES the text
+   *  content as the accessible name - it does not supplement it - so an `aria-label` here would
+   *  announce only the field's purpose and never the chosen value once one is picked. Passing the
    *  label's id through `aria-labelledby` instead, alongside the header's own id, concatenates the
    *  two: the field's purpose AND its current value. */
   ariaLabelledBy?: string;

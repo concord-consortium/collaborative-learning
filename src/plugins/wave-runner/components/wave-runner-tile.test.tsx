@@ -122,8 +122,7 @@ describe("WaveRunnerComponent", () => {
     expect(sections).not.toHaveClass("horizontal");
   });
 
-  // The tile asks for a height it knows rather than measuring: one panel's worth side by side,
-  // two when the panels stack.
+  // See wave-runner-types.ts for why the height is a known constant rather than measured.
   it("asks for the stacked height when the panels stack", () => {
     mockWidth = 650;
     const onRequestRowHeight = jest.fn();
@@ -159,7 +158,7 @@ describe("WaveRunnerComponent", () => {
     expect(onRequestRowHeight).not.toHaveBeenCalled();
   });
 
-  it("stacks sections vertically when width is less than 450", () => {
+  it("stacks sections vertically when width is less than 700", () => {
     mockWidth = 650;
     const { container } = renderWithStores();
     const sections = container.querySelector(".sections");
@@ -167,7 +166,7 @@ describe("WaveRunnerComponent", () => {
     expect(sections).not.toHaveClass("horizontal");
   });
 
-  it("stacks sections horizontally when width is 450 or greater", () => {
+  it("stacks sections horizontally when width is 700 or greater", () => {
     mockWidth = 700;
     const { container } = renderWithStores();
     const sections = container.querySelector(".sections");

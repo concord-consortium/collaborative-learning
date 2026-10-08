@@ -135,7 +135,7 @@ describe("WaveRunnerContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
-  it("has default start and end dates covering the mock data range", () => {
+  it("has the standard default start and end dates", () => {
     const content = WaveRunnerContentModel.create();
     expect(content.startDate).toBe("2026-09-01");
     expect(content.endDate).toBe("2026-10-01");
@@ -352,10 +352,10 @@ describe("WaveRunnerContent", () => {
       expect(content.isRunning).toBe(false);
     });
 
-    // The endMs < startMs comparison (vs. the old endMs <= startMs) only lives in this one
-    // branch of runModel, reached after the model/metadata/station guards pass. A test that
-    // never calls runModel - as the previous version of this test did - passes unconditionally,
-    // since runError starts out null anyway.
+    // start === end must be accepted as one valid day, not rejected as an invalid range - and that
+    // guard only lives in this one branch of runModel, reached after the model/metadata/station
+    // guards pass, so the assertions below must come from an actual run rather than runError's
+    // own default of null.
     it("treats start === end as one valid day, not an invalid range, when running the model", async () => {
       const singleDaySec = Date.UTC(2026, 8, 15) / 1000; // 2026-09-15
       const singleDay = singleDaySec / SECONDS_PER_DAY;
@@ -372,9 +372,8 @@ describe("WaveRunnerContent", () => {
 
       await content.runModel();
 
-      // The old `<=` comparison rejected this with "Invalid date range..."; proof the single
-      // day was actually processed (not just that runError happens to be null) is that the
-      // model ran on it.
+      // runError being null is not proof by itself - it starts out null anyway. Proof the single
+      // day was actually accepted and processed is that the model ran on it.
       expect(content.runError).not.toBe("Invalid date range. End date must not be before start date.");
       expect(content.runError).toBeNull();
       expect(fakeService.readDay).toHaveBeenCalledTimes(1);
@@ -559,9 +558,8 @@ describe("WaveRunnerContent", () => {
   });
 });
 
-// runModel and loadEnvelopeData are independent operations, but status-and-output.tsx shows a
-// single status line with errors first in priority. Neither action cleared the other's error, so
-// a failed load left its message on screen straight through a later successful run (and vice versa).
+// See runModel's and loadEnvelopeData's own comments in wave-runner-content.ts for why each must
+// clear the other's error as it starts.
 describe("cross-operation error clearing", () => {
   const testStation = { network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" };
 

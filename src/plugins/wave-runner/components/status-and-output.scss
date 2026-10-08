@@ -11,8 +11,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    // Centred rather than packed to the top: the chart can render shorter than the box it sits in,
-    // and the leftover was all falling below it.
+    // Centered rather than packed to the top: the chart can render shorter than the box it sits
+    // in, so the leftover space is split evenly above and below instead of all landing below it.
     justify-content: center;
     margin: 0 12px;
     border: solid 1.5px white;
@@ -34,7 +34,7 @@
     text-align: center;
   }
 
-  // One line, whatever it happens to be saying.
+  // Exactly one line - see status-and-output.tsx for why.
   .status-line {
     height: $wave-runner-status-line-height;
     box-sizing: border-box;

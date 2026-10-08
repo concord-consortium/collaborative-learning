@@ -12,7 +12,7 @@
     background-color: white;
 
     .item {
-      // The house component indents its header text by 2px; the design asks for 8px.
+      // CustomSelect indents its header text by 2px; the design asks for 8px.
       margin-left: 8px;
       max-height: none;
       white-space: nowrap;
@@ -25,9 +25,9 @@
       background-color: $workspace-teal-light-6;
     }
 
-    // The open state is restated in full rather than inherited from the house component: the
+    // The open state is restated in full rather than inherited from CustomSelect itself: the
     // white resting fill above matches `.custom-select .header.show-list` on specificity, so
-    // whichever stylesheet loaded last would win. The house also flattens the bottom corners to
+    // whichever stylesheet loaded last would win. CustomSelect also flattens the bottom corners to
     // fuse header and list; the design keeps them as separate rounded cards.
     &.show-list,
     &:active {
@@ -41,8 +41,8 @@
       fill: $workspace-teal-dark-1;
     }
 
-    // The house component hides the chevron when disabled; the design keeps it visible and
-    // greyed, with the label itself staying at full opacity.
+    // CustomSelect hides the chevron when disabled; the design keeps it visible and
+    // grayed, with the label itself staying at full opacity.
     &.disabled .arrow {
       display: block;
       fill: $charcoal-light-1;

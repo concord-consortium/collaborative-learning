@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: column;
     // Without this a flex item is floored by its own min-content, so choosing a long station name
-    // widens one field and both controls resize. The label ellipsises instead.
+    // widens one field and both controls resize. The label truncates with an ellipsis instead.
     min-width: 0;
   }
 
@@ -36,8 +36,8 @@
       }
 
       // Until a choice is made CustomSelect still treats its first row as selected, which would
-      // tick and embolden a station the student has not picked. The design shows no tick and no
-      // bold on any row in this state.
+      // checkmark and embolden a station the student has not picked. The design shows no checkmark
+      // and no bold on any row in this state.
       .list-item.selected {
         .check {
           background-image: url("../../../assets/icons/check/check.svg");

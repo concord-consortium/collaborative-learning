@@ -61,7 +61,7 @@ describe("DataSetup date fields", () => {
     expect(screen.getAllByRole("button", { name: /Choose date/ })).toHaveLength(2);
   });
 
-  it("no longer renders native datetime inputs", () => {
+  it("renders no native datetime inputs", () => {
     const { container } = renderSetup();
     expect(container.querySelectorAll('input[type="datetime-local"]')).toHaveLength(0);
   });
@@ -112,7 +112,7 @@ describe("DataSetup dropdowns", () => {
   });
 
   // Guards the placeholder-masking bug described in data-setup.tsx: picking a station must update
-  // the closed control's text, not just the open list's tick.
+  // the closed control's text, not just the open list's checkmark.
   it("shows the chosen station in the closed control", () => {
     const { container } = renderSetup();
     fireEvent.click(screen.getByText("Dexter Display Mine"));
@@ -126,11 +126,10 @@ describe("DataSetup dropdowns", () => {
     expect(content.station?.station).toBe("DDM");
   });
 
-  // The control's accessible name is composed via aria-labelledby from the visible <label> (the
-  // field's purpose) plus the header's own text (its current value) - see custom-select.tsx. An
-  // accessible name of just "Station" (the old aria-label regression) or just "Dexter Display
-  // Mine" (falling back to `title`, which this tile supplies only while nothing is selected) would
-  // each fail only one of these two assertions, so both must hold for the fix to be proven.
+  // The accessible name must contain both the field's purpose and its chosen value - see
+  // custom-select.tsx for how aria-labelledby concatenates the two, and data-setup.tsx for why
+  // `title` alone cannot carry the value. Each half is its own assertion so either going missing
+  // fails this test.
   it("keeps both the purpose and the chosen value in the station dropdown's accessible name", () => {
     renderSetup();
     fireEvent.click(screen.getByText("Dexter Display Mine"));
@@ -156,9 +155,9 @@ describe("DataSetup dropdowns", () => {
     expect(listLabels(container, "wave-runner-model")).toEqual(["Compact Model"]);
   });
 
-  // A native <select>'s option popup is OS chrome and cannot be styled, which is the whole reason
-  // these moved to the house dropdown. The month-and-year select inside each date picker is a
-  // native select and is expected; the station and model dropdowns must not be.
+  // A native <select>'s option popup is OS chrome and cannot be styled, which is why Station and
+  // Model are CustomSelect instead - the same reason the date picker's own month chooser (see
+  // date-field.tsx) is a CustomSelect too, not a native <select>.
   it("renders no native select for station or model", () => {
     const { container } = renderSetup();
     expect(container.querySelectorAll("select.dropdown")).toHaveLength(0);
