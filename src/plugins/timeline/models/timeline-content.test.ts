@@ -410,8 +410,11 @@ describe("view preview", () => {
     expect(patches).toHaveLength(2);
   });
 
-  it("ignores an end without a matching begin", () => {
+  it("ignores an end without a matching begin, and warns about it outside production", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => null);
     content.endViewPreview();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("endViewPreview"));
+    warn.mockRestore();
     content.beginViewPreview();
     content.panBy(3600);
     expect(patches).toEqual([]);

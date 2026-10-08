@@ -232,7 +232,13 @@ export const TimelineContentModel = TileContentModel
       }
     },
     endViewPreview() {
-      if (self.viewPreviewDepth === 0) return;
+      if (self.viewPreviewDepth === 0) {
+        // Unpaired calls are a bug: a missing end leaves later view changes unsaved.
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Timeline: endViewPreview called without a matching beginViewPreview");
+        }
+        return;
+      }
       if (--self.viewPreviewDepth > 0) return;
       const preview = self.viewPreview;
       self.viewPreview = undefined;
