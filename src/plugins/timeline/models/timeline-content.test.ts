@@ -394,6 +394,30 @@ describe("view preview", () => {
     content.endViewPreview();
     expect(patches).toEqual([]);
   });
+
+  it("saves overlapping previews together when the last one ends", () => {
+    content.beginViewPreview();
+    content.panBy(3600);
+    content.beginViewPreview();
+    expect(content.viewStartTime?.toISO()).toBe(day(2).plus({ hours: 1 }).toISO());
+    content.panBy(3600);
+    content.endViewPreview();
+    content.panBy(3600);
+    expect(patches).toEqual([]);
+
+    content.endViewPreview();
+    expect(content.viewStartTimeISO).toBe(day(2).plus({ hours: 3 }).toISO());
+    expect(patches).toHaveLength(2);
+  });
+
+  it("ignores an end without a matching begin", () => {
+    content.endViewPreview();
+    content.beginViewPreview();
+    content.panBy(3600);
+    expect(patches).toEqual([]);
+    content.endViewPreview();
+    expect(patches).toHaveLength(2);
+  });
 });
 
 describe("event views", () => {

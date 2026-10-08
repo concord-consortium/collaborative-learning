@@ -66,6 +66,8 @@ $full-timeline-overlay-color: #0592af;
     bottom: 1px;
     box-sizing: border-box;
     cursor: grab;
+    // Matches the scrollbar thumb, and likewise kept inside the strip
+    left: min(var(--overlay-left), calc(100% - 8px));
     min-width: 8px;
     position: absolute;
     top: 1px;

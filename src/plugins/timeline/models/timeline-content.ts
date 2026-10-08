@@ -28,6 +28,7 @@ export const TimelineContentModel = TileContentModel
     pinnedTime: undefined as DateTime | undefined,
     // The view shown while a preview is active; see `beginViewPreview`.
     viewPreview: undefined as { startISO?: string, endISO?: string } | undefined,
+    viewPreviewDepth: 0,
   }))
   .views(self => ({
     get isUserResizable() {
@@ -222,12 +223,17 @@ export const TimelineContentModel = TileContentModel
     },
     /**
      * Until `endViewPreview`, view changes are shown but not saved, so that a continuous gesture
-     * like a drag is saved, and undone, as a single change.
+     * like a drag is saved, and undone, as a single change. Previews nest, so gestures that overlap,
+     * such as two pointers on different controls, are saved together when the last one ends.
      */
     beginViewPreview() {
-      self.viewPreview = { startISO: self.viewStartTimeISO, endISO: self.viewEndTimeISO };
+      if (self.viewPreviewDepth++ === 0) {
+        self.viewPreview = { startISO: self.viewStartTimeISO, endISO: self.viewEndTimeISO };
+      }
     },
     endViewPreview() {
+      if (self.viewPreviewDepth === 0) return;
+      if (--self.viewPreviewDepth > 0) return;
       const preview = self.viewPreview;
       self.viewPreview = undefined;
       if (!preview) return;

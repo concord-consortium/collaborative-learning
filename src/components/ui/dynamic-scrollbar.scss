@@ -1,3 +1,5 @@
+$min-thumb-width: 8px;
+
 .dynamic-scrollbar {
   align-items: center;
   background-color: #f2f2f2;
@@ -17,8 +19,10 @@
     box-sizing: border-box;
     cursor: grab;
     height: calc(100% - 4px);
+    // Keep a thumb widened to its minimum inside the track
+    left: min(var(--thumb-left), calc(100% - #{$min-thumb-width}));
     margin: 2px 0;
-    min-width: 8px;
+    min-width: $min-thumb-width;
     position: absolute;
     top: 0;
 

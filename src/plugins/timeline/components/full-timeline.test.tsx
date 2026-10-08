@@ -111,7 +111,7 @@ describe("FullTimeline", () => {
   it("shows the view as an overlay on the whole data range", () => {
     const { container } = renderFullTimeline(day(1), day(2));
     const overlay = container.querySelector<HTMLElement>(".full-timeline-overlay")!;
-    expect(overlay.style.left).toBe("25%");
+    expect(overlay.style.getPropertyValue("--overlay-left")).toBe("25%");
     expect(overlay.style.width).toBe("25%");
   });
 

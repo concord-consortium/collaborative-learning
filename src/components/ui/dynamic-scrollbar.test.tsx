@@ -72,7 +72,7 @@ describe("DynamicScrollbar", () => {
   it("thumb fills full width when view equals data range", () => {
     const { container } = renderScrollbar();
     const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
-    expect(thumb.style.left).toBe("0%");
+    expect(thumb.style.getPropertyValue("--thumb-left")).toBe("0%");
     expect(thumb.style.width).toBe("100%");
   });
 
@@ -80,7 +80,7 @@ describe("DynamicScrollbar", () => {
     // View is the middle 50% of data range (25 to 75)
     const { container } = renderScrollbar(25, 75);
     const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
-    expect(thumb.style.left).toBe("25%");
+    expect(thumb.style.getPropertyValue("--thumb-left")).toBe("25%");
     expect(thumb.style.width).toBe("50%");
   });
 
@@ -88,7 +88,7 @@ describe("DynamicScrollbar", () => {
     // View is the last 20% of data range (80 to 100)
     const { container } = renderScrollbar(80, 100);
     const thumb = container.querySelector(".dynamic-scrollbar-thumb") as HTMLElement;
-    expect(thumb.style.left).toBe("80%");
+    expect(thumb.style.getPropertyValue("--thumb-left")).toBe("80%");
     expect(thumb.style.width).toBe("20%");
   });
 

@@ -89,7 +89,9 @@ export const FullTimeline = observer(function FullTimeline() {
         <div
           ref={overlayRef}
           className="full-timeline-overlay"
-          style={{ left: `${toPct(viewStart)}%`, width: `${toPct(viewEnd) - toPct(viewStart)}%` }}
+          style={{
+            "--overlay-left": `${toPct(viewStart)}%`, width: `${toPct(viewEnd) - toPct(viewStart)}%`
+          } as React.CSSProperties}
         />
         <div className="full-timeline-label">Full Timeline</div>
       </div>

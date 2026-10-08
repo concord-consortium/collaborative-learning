@@ -100,7 +100,7 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
         aria-valuenow={valueNow}
         aria-disabled={disabled || undefined}
         tabIndex={disabled ? -1 : 0}
-        style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+        style={{ "--thumb-left": `${leftPercent}%`, width: `${widthPercent}%` } as React.CSSProperties}
         onKeyDown={handleKeyDown}
       />
     </div>
