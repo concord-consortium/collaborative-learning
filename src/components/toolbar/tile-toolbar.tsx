@@ -161,7 +161,7 @@ export const TileToolbar = observer(
           };
 
           // Focuses the topbar slot's first (or, in reverse, last) focusable, or the slot element
-          // itself when it is the only control. Returns true if focus moved into the topbar.
+          // itself when it has no focusable children. Returns true if focus moved into the topbar.
           const tryFocusTopbar = (reverse: boolean) => {
             if (!topbarElement) return false;
             const focusables = getVisibleFocusables(topbarElement);

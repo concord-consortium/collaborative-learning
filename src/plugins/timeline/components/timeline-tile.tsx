@@ -18,8 +18,7 @@ import "../timeline-toolbar";
 import "./timeline-tile.scss";
 
 // The controls Tab visits in the tile's contents, in order: Prev, Next and the Full Timeline's
-// scrollbar thumb, less any that are disabled. Read from their disabled state, not their tabindex,
-// which the focus trap holds at -1 until the trap is entered.
+// scrollbar thumb, less any that are disabled.
 const kContentControls =
   ".event-row .timeline-button:not(:disabled), .dynamic-scrollbar-thumb:not([aria-disabled])";
 function getContentControls(container: HTMLElement | null) {
@@ -40,9 +39,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
   useLayoutEffect(() => {
     if (!refocusContentRef.current) return;
     refocusContentRef.current = false;
-    const target = getContentControls(timelineContainerRef.current)[0]
-      ?? tileElt?.querySelector<HTMLElement>(".timeline-info-button");
-    target?.focus();
+    getContentControls(timelineContainerRef.current)[0]?.focus();
   });
 
   const handleSelectEvent = (e: React.MouseEvent<HTMLButtonElement>, direction: "prev" | "next") => {

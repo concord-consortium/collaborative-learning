@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useModal } from "react-modal-hook";
 import CloseIconSvg from "../assets/icons/close/close.svg";
@@ -104,9 +104,9 @@ export const useCustomModal = <IContentProps,>({
   }, []);
   handleCloseRef.current = handleClose;
 
-  const idSuffix = (dataTestId || className || "default").replace(/\s+/g, "-");
-  const titleId = `custom-modal-title-${idSuffix}`;
-  const contentId = `custom-modal-content-${idSuffix}`;
+  const idPrefix = useId();
+  const titleId = `${idPrefix}-title`;
+  const contentId = `${idPrefix}-content`;
 
   const [showModal, hideModal] = useModal(() => {
     // NOTE: the data-testid attribute is not passed to the modal element

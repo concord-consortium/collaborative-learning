@@ -222,7 +222,7 @@ describe("TimelineComponent", () => {
       } as any);
     }
 
-    // A focus trap wired to the tile's API as TileComponent wires it.
+    // A focus trap wired to the tile's API as TileComponent wires these slots.
     function createFocusTrap(api: ITileApi) {
       const elements = () => api.getFocusableElements?.();
       const trap = new FocusTrapController(tileElt!, createClueTileStrategy({
@@ -277,28 +277,13 @@ describe("TimelineComponent", () => {
       trap.destroy();
     });
 
-    it("puts the scrollbar thumb in the focus cycle whenever there's seismogram data", () => {
+    it("reports the contents, holding the scrollbar thumb, when there's seismogram data but no events", () => {
       provideData({ seismogram: true });
       const { elements } = renderInTile();
       expect(screen.getByRole("button", { name: "Prev" })).toBeDisabled();
       expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
       expect(elements?.contentElement).toHaveClass("timeline-container");
       expect(elements?.contentElement).toContainElement(screen.getByRole("slider"));
-    });
-
-    it("keeps the contents in the focus cycle before the trap is entered", () => {
-      // Before the trap is entered, it holds the tile's controls at tabindex -1.
-      provideData({ eventCount: 2, seismogram: true });
-      const { api } = renderInTile();
-      const trap = createFocusTrap(api!);
-      trap.setEnabled(false);
-      expect(screen.getByRole("slider")).toHaveAttribute("tabindex", "-1");
-
-      const elements = api!.getFocusableElements!()!;
-      expect(elements.contentElement).toHaveClass("timeline-container");
-      act(() => { elements.focusContent!({ entryMode: "reverse" }); });
-      expect(document.activeElement).toBe(screen.getByRole("slider"));
-      trap.destroy();
     });
 
     it("moves focus to Prev when Next selects the last event", () => {
@@ -321,6 +306,17 @@ describe("TimelineComponent", () => {
       fireEvent.click(prev);
       expect(prev).toBeDisabled();
       expect(document.activeElement).toBe(screen.getByRole("button", { name: "Next" }));
+    });
+
+    it("leaves focus alone when an unfocused Next selects the last event", () => {
+      // A jsdom click doesn't move focus, so Next is clicked without having focus.
+      provideData({ eventCount: 2 });
+      (model.content as TimelineContentModelType).selectEvent(0);
+      renderInTile();
+      const next = screen.getByRole("button", { name: "Next" });
+      fireEvent.click(next);
+      expect(next).toBeDisabled();
+      expect(document.activeElement).toBe(document.body);
     });
 
     it("doesn't join the focus cycle when read-only", () => {

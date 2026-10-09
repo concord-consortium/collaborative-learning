@@ -128,4 +128,20 @@ describe("useCustomModal aria-describedby", () => {
     expect(describedBy).toBeTruthy();
     expect(document.getElementById(describedBy!)).toHaveClass("modal-content");
   });
+
+  it("labels and describes each of two open dialogs of the same class with its own elements", async () => {
+    render(
+      <ModalProvider>
+        <Harness onDefaultClick={jest.fn()} describeContent />
+        <Harness onDefaultClick={jest.fn()} describeContent />
+      </ModalProvider>
+    );
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+    const dialogs = Array.from(document.querySelectorAll(".custom-modal"));
+    expect(dialogs).toHaveLength(2);
+    dialogs.forEach(dialog => {
+      expect(dialog).toContainElement(document.getElementById(dialog.getAttribute("aria-labelledby")!));
+      expect(dialog).toContainElement(document.getElementById(dialog.getAttribute("aria-describedby")!));
+    });
+  });
 });
