@@ -21,11 +21,11 @@ export const TimelineContentModel = TileContentModel
     type: types.optional(types.literal(kTimelineTileType), kTimelineTileType),
     viewStartTimeISO: types.maybe(types.string),
     viewEndTimeISO: types.maybe(types.string),
+    markerTimeISO: types.maybe(types.string),
     selectedEventIndex: types.optional(types.number, 0),
   })
   .volatile(self => ({
     hoverTime: undefined as DateTime | undefined,
-    markerTime: undefined as DateTime | undefined,
     // The view shown while a preview is active, and the saved view it started from; see
     // `beginViewPreview`.
     viewPreview: undefined as {
@@ -56,6 +56,12 @@ export const TimelineContentModel = TileContentModel
     },
     get viewEndTime() {
       const iso = self.viewPreview ? self.viewPreview.endISO : self.viewEndTimeISO;
+      if (!iso) return undefined;
+      const time = DateTime.fromISO(iso);
+      return time.isValid ? time : undefined;
+    },
+    get markerTime() {
+      const iso = self.markerTimeISO;
       if (!iso) return undefined;
       const time = DateTime.fromISO(iso);
       return time.isValid ? time : undefined;
@@ -208,10 +214,10 @@ export const TimelineContentModel = TileContentModel
       self.hoverTime = undefined;
     },
     setMarkerTime(time: DateTime) {
-      self.markerTime = time;
+      self.markerTimeISO = time.toUTC().toISO() ?? undefined;
     },
     clearMarkerTime() {
-      self.markerTime = undefined;
+      self.markerTimeISO = undefined;
     },
     setViewRange(start: DateTime, end: DateTime) {
       if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;

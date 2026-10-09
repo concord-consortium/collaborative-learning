@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { IJsonPatch, applyPatch, onPatch } from "mobx-state-tree";
+import { IJsonPatch, applyPatch, getSnapshot, onPatch } from "mobx-state-tree";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -659,12 +659,6 @@ describe("time markers", () => {
     expect(content.markerTime).toBeUndefined();
   });
 
-  it("marker times are volatile, not serialized", () => {
-    const content = TimelineContentModel.create();
-    content.setMarkerTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
-    expect(JSON.parse(content.exportJson())).not.toHaveProperty("markerTime");
-  });
-
   it("timeToViewPct returns undefined when there is no view range", () => {
     const content = TimelineContentModel.create();
     expect(content.timeToViewPct(viewStart)).toBeUndefined();
@@ -683,5 +677,34 @@ describe("time markers", () => {
     content.setViewRange(viewStart, viewEnd);
     expect(content.timeToViewPct(viewStart.minus({ hours: 6 }))).toBe(-25);
     expect(content.timeToViewPct(viewEnd.plus({ hours: 12 }))).toBe(150);
+  });
+});
+
+describe("marker persistence", () => {
+  const markerISO = "2026-02-01T12:00:00.000Z";
+
+  it("round-trips the marker through a snapshot", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+
+    const reloaded = TimelineContentModel.create(getSnapshot(content));
+    expect(reloaded.markerTime?.toISO()).toBe(content.markerTime?.toISO());
+  });
+
+  // The inverse of the assertion it replaces: the marker used to be a transient pin and was
+  // deliberately kept out of the exported document. It is now the student's own work.
+  it("includes the marker in the exported document", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+
+    expect(JSON.parse(content.exportJson())).toHaveProperty("markerTimeISO", markerISO);
+  });
+
+  it("clears the marker out of the exported document", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+    content.clearMarkerTime();
+
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("markerTimeISO");
   });
 });
