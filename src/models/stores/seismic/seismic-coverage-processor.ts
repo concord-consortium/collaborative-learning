@@ -29,6 +29,9 @@ export interface ProcessCoverageOptions {
   onDayDownloaded?: (day: number, bytes: number) => void;
   /** Forwarded to the download service's raw-data fetches. */
   proxy?: boolean;
+  /** Stops the run after the day in progress. Days already processed stay persisted, so a
+   *  later run over the same range resumes from the uncovered remainder. */
+  signal?: AbortSignal;
   /** Test seams; production defaults construct real ones. */
   downloadService?: DayDownloadService;
   createRunner?: () => SeismicModelRunner;
@@ -55,10 +58,13 @@ async function saveDayResults(
 
 /** Runs the model over the uncovered parts of range, persisting events + coverage
  *  per day (writeEvents before markCovered; empty days covered, errored days not).
- *  Owns the runner lifecycle (loadModel/dispose). Returns day counts. */
+ *  Owns the runner lifecycle (loadModel/dispose). Returns day counts; when aborted,
+ *  the counts cover only the days handled before the abort. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
-  const { stationData, metadata, onEvents, onProgress, onDayCovered, onDayDownloaded, proxy, range } = options;
+  const {
+    stationData, metadata, onEvents, onProgress, onDayCovered, onDayDownloaded, proxy, range, signal
+  } = options;
   const modelId = metadata.id;
 
   const uncovered = options.uncovered ?? await getUncoveredRanges(stationData, modelId, range);
@@ -69,14 +75,18 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
 
   // Fully covered: nothing to do — skip runner creation (and its model-weights download).
   if (!spans.length) return { processed: 0, skipped: 0, total: 0 };
+  if (signal?.aborted) return { processed: 0, skipped: 0, total: totalDays };
 
   // Bulk-download each uncovered span into OPFS, running the model on each day as it lands.
   // Days may arrive out of order; detection is per-window independent, so that's fine.
   // No-data days come as `dayEmpty` and are simply never yielded.
   const downloadService = options.downloadService ?? new SeismicDownloadService();
   const runner = (options.createRunner ?? (() => new SeismicModelRunner()))();
-  await runner.loadModel(metadata);
+  // Cancelling the download ends a pending nextReadyDay wait with DONE.
+  const handleAbort = () => downloadService.cancel();
+  signal?.addEventListener("abort", handleAbort);
   try {
+    await runner.loadModel(metadata);
     let processed = 0;
     let skippedDays = 0;
     const updateProgress = () => {
@@ -86,6 +96,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
     };
 
     for (const span of spans) {
+      if (signal?.aborted) break;
       // ensureRange resets the service, so each span is fully drained before the next starts.
       // endSec is inclusive: the day containing it is downloaded (matches the downloader's daysInRange).
       downloadService.ensureRange({
@@ -94,7 +105,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
 
       for (;;) {
         const day = await downloadService.nextReadyDay();
-        if (day === DONE) break;
+        if (day === DONE || signal?.aborted) break;
         onDayDownloaded?.(day, downloadService.bytesForDay(day));
 
         const buffer = await downloadService.readDay(day);
@@ -103,7 +114,6 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
         // Parse miniSEED → Seismogram
         const records = miniseed.parseDataRecords(buffer);
         const seismogram = miniseed.merge(records);
-
         // Run model on this chunk
         const dayEvents: SeismicEvent[] = [];
         await runner.processChunk(
@@ -137,6 +147,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
 
     return { processed, skipped: skippedDays, total: totalDays };
   } finally {
+    signal?.removeEventListener("abort", handleAbort);
     downloadService.cancel();
     runner.dispose();
   }

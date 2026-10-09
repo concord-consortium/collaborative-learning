@@ -49,6 +49,9 @@ export const WaveRunnerContentModel = TileContentModel
   })
   .volatile(() => ({
     isRunning: false,
+    // Set by pauseModel. While isRunning is still true the run is finishing its current day.
+    isPaused: false,
+    runAbortController: null as AbortController | null,
     chunksProcessed: 0,
     chunksTotal: 0,
     runError: null as string | null,
@@ -89,7 +92,9 @@ export const WaveRunnerContentModel = TileContentModel
       return !!self.sharedSeismogram?.station;
     },
     get eventsFound() {
-      return self.isRunning ? self.detectedEvents.length : self.eventsDataSet?.dataSet.cases.length;
+      return self.isRunning || self.isPaused
+        ? self.detectedEvents.length
+        : self.eventsDataSet?.dataSet.cases.length;
     }
   }))
   .actions(self => ({
@@ -119,6 +124,14 @@ export const WaveRunnerContentModel = TileContentModel
       if (smm?.isReady) smm.removeTileSharedModel(self, self.eventsDataSet);
 
       // TODO: Delete the shared dataset if it's orphaned
+    },
+    /** Forget a paused run's progress, e.g. because the settings it ran with have changed. */
+    clearPausedRun() {
+      if (!self.isPaused || self.isRunning) return;
+      self.isPaused = false;
+      self.detectedEvents = [];
+      self.chunksProcessed = 0;
+      self.chunksTotal = 0;
     }
   }))
   .actions(self => ({
@@ -128,6 +141,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.startDate = date;
       self.loadData();
       self.clearEventsDataSet();
+      self.clearPausedRun();
     },
     setEndDate(date: string) {
       if (self.endDate === date) return;
@@ -135,6 +149,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.endDate = date;
       self.loadData();
       self.clearEventsDataSet();
+      self.clearPausedRun();
     },
     setStation(station: StationSnapshot) {
       if (self.station?.equals(station)) return;
@@ -142,6 +157,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.station = cast(station);
       self.loadData();
       self.clearEventsDataSet();
+      self.clearPausedRun();
     },
     updateChunkProgress(done: number, total: number) {
       self.chunksProcessed = done;
@@ -186,6 +202,7 @@ export const WaveRunnerContentModel = TileContentModel
       self.selectedModelMetadata = null;
       self.modelLoadError = null;
       self.clearEventsDataSet();
+      self.clearPausedRun();
 
       try {
         self.selectedModelMetadata = yield fetchModelMetadata(metadataUrl);
@@ -220,6 +237,11 @@ export const WaveRunnerContentModel = TileContentModel
       self.clearEventsDataSet();
       self.runError = null;
       self.isRunning = true;
+      // A resumed run reloads the paused run's persisted events from the database.
+      self.isPaused = false;
+      self.detectedEvents = [];
+      const abortController = new AbortController();
+      self.runAbortController = abortController;
 
       const metadata = self.selectedModelMetadata;
       const modelId = metadata.id;
@@ -249,11 +271,17 @@ export const WaveRunnerContentModel = TileContentModel
           console.warn("Seismic event database unavailable; processing the full range:", err);
         }
 
+        // Count days already covered by earlier (e.g. paused) runs as done, so progress is
+        // reported against the whole range.
+        const rangeDays = (rangeSec.end - rangeSec.start) / SECONDS_PER_DAY;
         yield processUncoveredRanges({
           stationData: station, metadata, range: rangeSec, uncovered,
           onEvents: events => self.addDetectedEvents(events),
-          onProgress: (progress, total) => self.updateChunkProgress(progress, total),
+          onProgress: (progress, total) => self.updateChunkProgress(rangeDays - total + progress, rangeDays),
+          signal: abortController.signal,
         });
+        // Keep the events found so far for display; Run resumes from the uncovered days.
+        if (abortController.signal.aborted) return;
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {
@@ -275,8 +303,15 @@ export const WaveRunnerContentModel = TileContentModel
         console.error("Wave Runner runModel error:", err);
       } finally {
         self.isRunning = false;
+        self.runAbortController = null;
       }
     }),
+    /** Stops the run after the day in progress. Its events stay persisted, so Run resumes. */
+    pauseModel() {
+      if (!self.isRunning || self.isPaused) return;
+      self.isPaused = true;
+      self.runAbortController?.abort();
+    },
     /** Generate + upload any missing envelope tiles for the current station and date range
      *  so the waveform display has data. */
     loadEnvelopeData: flow(function* (options: ILoadEnvelopeDataOptions) {

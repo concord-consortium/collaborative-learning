@@ -400,8 +400,9 @@ describe("WaveRunnerContent", () => {
         expect(fakeService.ensureRange).toHaveBeenCalledWith(
           expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec }));
         expect(processChunk).toHaveBeenCalledTimes(1);
-        expect(content.chunksProcessed).toBe(1);
-        expect(content.chunksTotal).toBe(1);
+        // Progress counts the two already-covered days as done.
+        expect(content.chunksProcessed).toBe(3);
+        expect(content.chunksTotal).toBe(3);
         expect(content.runError).toBeNull();
       });
 
@@ -486,8 +487,8 @@ describe("WaveRunnerContent", () => {
         expect(fakeService.ensureRange).toHaveBeenNthCalledWith(2,
           expect.objectContaining({ startSec: feb3Sec, endSec: feb3Sec }));
         expect(processChunk).toHaveBeenCalledTimes(2);
-        expect(content.chunksProcessed).toBe(2);
-        expect(content.chunksTotal).toBe(2);
+        expect(content.chunksProcessed).toBe(3);
+        expect(content.chunksTotal).toBe(3);
         expect(content.runError).toBeNull();
       });
 
@@ -508,6 +509,73 @@ describe("WaveRunnerContent", () => {
         expect(content.chunksTotal).toBe(3);
         expect(content.runError).toBeNull();
         expect(warn).toHaveBeenCalled();
+      });
+
+      describe("pauseModel", () => {
+        // Pauses from inside the first day's processChunk, as a click mid-run would.
+        async function runAndPauseOnFirstDay() {
+          const evt = makeEvent(Date.UTC(2026, 1, 1, 1));
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+            .mockImplementationOnce(async (_seismogram: any, callbacks: any) => {
+              callbacks.onEvents([evt]);
+              content.pauseModel();
+              return [];
+            });
+          await content.runModel();
+          return { content, processChunk, evt };
+        }
+
+        it("does nothing when no run is in progress", () => {
+          const content = WaveRunnerContentModel.create();
+          content.pauseModel();
+          expect(content.isPaused).toBe(false);
+        });
+
+        it("stops after the day in progress, keeping its events without making a dataset", async () => {
+          const { content, processChunk } = await runAndPauseOnFirstDay();
+
+          expect(processChunk).toHaveBeenCalledTimes(1);
+          expect(markCovered).toHaveBeenCalledTimes(1);
+          expect(content.isRunning).toBe(false);
+          expect(content.isPaused).toBe(true);
+          expect(content.runError).toBeNull();
+          expect(content.eventsDataSet).toBeUndefined();
+          expect(content.eventsFound).toBe(1);
+          expect(content.chunksProcessed).toBe(1);
+          expect(content.chunksTotal).toBe(3);
+        });
+
+        it("resumes with only the uncovered days, reloading the paused run's events", async () => {
+          const { content, evt } = await runAndPauseOnFirstDay();
+
+          const feb2Sec = feb1Sec + SECONDS_PER_DAY;
+          (loadEvents as jest.Mock).mockResolvedValueOnce([evt]);
+          (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+            [{ start: feb2Sec, end: feb2Sec + 2 * SECONDS_PER_DAY }]);
+          const fakeService = makeFakeService([feb1Day + 1, feb1Day + 2]);
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          processChunk.mockClear();
+          await content.runModel();
+
+          expect(fakeService.ensureRange).toHaveBeenCalledWith(
+            expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec + SECONDS_PER_DAY }));
+          expect(processChunk).toHaveBeenCalledTimes(2);
+          expect(content.isPaused).toBe(false);
+          expect(content.chunksProcessed).toBe(3);
+          expect(content.eventsDataSet?.dataSet.cases).toHaveLength(1);
+        });
+
+        it("forgets the paused run when a setting changes", async () => {
+          const { content } = await runAndPauseOnFirstDay();
+
+          content.setEndDate("2026-02-04");
+
+          expect(content.isPaused).toBe(false);
+          expect(content.eventsFound).toBeUndefined();
+          expect(content.chunksProcessed).toBe(0);
+        });
       });
     });
   });

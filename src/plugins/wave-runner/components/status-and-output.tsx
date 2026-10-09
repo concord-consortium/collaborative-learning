@@ -7,9 +7,19 @@ import "./status-and-output.scss";
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
   const {
-    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isLoadingData,
-    eventsDataSet, runError, loadDataError
+    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isPaused, isLoadingData,
+    eventsDataSet, runError, loadDataError, chunksProcessed, chunksTotal
   } = model;
+
+  function runStatus() {
+    if (isRunning) {
+      return isPaused
+        ? `Pausing after day ${chunksProcessed + 1} of ${chunksTotal || "?"}...`
+        : `Processing day ${chunksProcessed + 1} of ${chunksTotal || "?"}...`;
+    }
+    if (isPaused) return `Model paused at day ${chunksProcessed} of ${chunksTotal}. Run to continue.`;
+    return eventsDataSet ? "Run complete." : "Estimated time to complete run:";
+  }
 
   return (
     <div className="section status-and-output">
@@ -30,13 +40,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         {loadDataError && <div className="waveform-error">{loadDataError}</div>}
         {runError && <div className="waveform-error">{runError}</div>}
       </div>
-      <div className="estimated-time">
-        {isRunning
-          ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
-          : eventsDataSet
-            ? "Run complete."
-            : "Estimated time to complete run:"}
-      </div>
+      <div className="estimated-time">{runStatus()}</div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>
