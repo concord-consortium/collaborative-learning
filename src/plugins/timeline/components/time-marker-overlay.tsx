@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { TimeLabel } from "./time-label";
 
@@ -11,6 +12,7 @@ function isPctInView(pct?: number): pct is number {
 
 export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
   const content = useTimelineContent();
+  const readOnly = useReadOnlyContext();
   const { hoverTime, pinnedTime } = content;
   const hoverPct = hoverTime ? content.timeToViewPct(hoverTime) : undefined;
   const pinnedPct = pinnedTime ? content.timeToViewPct(pinnedTime) : undefined;
@@ -25,12 +27,12 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
       {pinnedTime && isPctInView(pinnedPct) && (
         <>
           <div className="time-marker-line pinned" style={{ left: `${pinnedPct}%` }} />
-          {/* Mouse-only until the graph has a keyboard design. */}
+          {/* Outside the editable tile's Tab cycle, as the event labels are (see EventOverlay). */}
           <button
             className="time-marker-label pinned"
             onClick={handlePinnedLabelClick}
             style={{ left: `${pinnedPct}%` }}
-            tabIndex={-1}
+            tabIndex={readOnly ? undefined : -1}
             type="button"
           >
             <TimeLabel time={pinnedTime} />

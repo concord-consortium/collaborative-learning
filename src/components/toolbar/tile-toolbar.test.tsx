@@ -112,8 +112,10 @@ function renderToolbarWithApi(options?: {
   hasContent?: boolean;
   hasTitle?: boolean;
   hasTopbar?: boolean;
+  // when set, the topbar is a group of this many buttons rather than a single button
+  topbarButtonCount?: number;
 }) {
-  const { hasContent = true, hasTitle = true, hasTopbar = false } = options ?? {};
+  const { hasContent = true, hasTitle = true, hasTopbar = false, topbarButtonCount } = options ?? {};
 
   const contentElement = hasContent ? document.createElement("div") : undefined;
   if (contentElement) {
@@ -128,9 +130,17 @@ function renderToolbarWithApi(options?: {
     document.body.appendChild(titleElement);
   }
 
-  const topbarElement = hasTopbar ? document.createElement("button") : undefined;
+  const topbarElement = hasTopbar
+    ? document.createElement(topbarButtonCount ? "div" : "button")
+    : undefined;
   if (topbarElement) {
     topbarElement.setAttribute("data-testid", "mock-topbar");
+    for (let i = 0; i < (topbarButtonCount ?? 0); i++) {
+      const button = document.createElement("button");
+      // jsdom has no layout, so report the button visible as a browser would
+      (button as any).checkVisibility = () => true;
+      topbarElement.appendChild(button);
+    }
     document.body.appendChild(topbarElement);
   }
 
@@ -433,6 +443,29 @@ describe("Tile toolbar ARIA and keyboard", () => {
     (buttons[0] as HTMLElement).focus();
     fireEvent.keyDown(buttons[0], { key: "Tab" });
     expect(document.activeElement).toBe(topbarElement);
+    cleanup();
+  });
+
+  it("Tab from toolbar goes to the title, not the topbar, when there is a title", () => {
+    const { buttons, titleElement, cleanup } = renderToolbarWithApi({ hasTopbar: true });
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab" });
+    expect(document.activeElement).toBe(titleElement);
+    cleanup();
+  });
+
+  it("enters a topbar of several controls at its first going forward and its last going back", () => {
+    const { buttons, topbarElement, cleanup } = renderToolbarWithApi({
+      hasContent: false, hasTitle: false, hasTopbar: true, topbarButtonCount: 2
+    });
+    const [first, last] = Array.from(topbarElement!.children);
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
     cleanup();
   });
 

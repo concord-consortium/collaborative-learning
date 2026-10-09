@@ -62,4 +62,14 @@ describe("TimelineInfoButton", () => {
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", keyCode: 27 });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("returns focus to the info button when it closes", async () => {
+    renderButton();
+    const infoButton = screen.getByRole("button", { name: "Zooming and Moving" });
+    act(() => infoButton.focus());
+    await clickInfoButton();
+    expect(infoButton).not.toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(infoButton).toHaveFocus();
+  });
 });

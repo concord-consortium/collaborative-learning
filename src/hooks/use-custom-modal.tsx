@@ -29,8 +29,7 @@ interface IProps<IContentProps> {
   Content: React.FC<IContentProps>;
   contentProps: IContentProps;
   focusElement?: string;
-  // Whether the content describes the dialog for assistive technology (aria-describedby). Suited to
-  // a message-only dialog, whose text would otherwise go unread when focus starts on a button; a
+  // Points aria-describedby at the content, so a message-only dialog's text is read on open. A
   // form's controls are announced as they're reached instead.
   describeContent?: boolean;
   canCancel?: boolean;

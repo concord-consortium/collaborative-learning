@@ -33,6 +33,12 @@
   }
 }
 
+// The title's edit box is at least 200px wide (kMinInputWidth in EditableTileTitle), centered on the
+// title, so it reaches past a shorter title's right edge.
+.editable-tile-title-editing ~ .timeline-info-button {
+  left: max(100%, calc(50% + 100px));
+}
+
 .custom-modal.timeline-info-modal {
   width: 320px;
 

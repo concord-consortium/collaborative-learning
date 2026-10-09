@@ -7,6 +7,7 @@ jest.mock("uplot", () => {
   }));
 });
 
+import { FocusTrapController } from "@concord-consortium/accessibility-tools/hooks";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { Provider } from "mobx-react";
@@ -15,6 +16,7 @@ import { ModalProvider } from "react-modal-hook";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { ITileApi, TileModelContext } from "../../../components/tiles/tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
+import { createClueTileStrategy } from "../../../hooks/create-clue-tile-strategy";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
 import { specStores } from "../../../models/stores/spec-stores";
@@ -198,7 +200,50 @@ describe("TimelineComponent", () => {
         { container: tileElt }
       );
       const api: ITileApi | undefined = onRegisterTileApi.mock.calls[0]?.[0];
-      return { onRegisterTileApi, elements: api?.getFocusableElements?.() };
+      return { onRegisterTileApi, api, elements: api?.getFocusableElements?.() };
+    }
+
+    // Provides the tile with events, a seismogram, or both.
+    function provideData({ eventCount = 0, seismogram = false }) {
+      const dataSet = DataSet.create();
+      ["windowStart", "windowEnd", "eventType"].forEach(name => addAttributeToDataSet(dataSet, { name }));
+      addCasesToDataSet(dataSet, Array.from({ length: eventCount }, (_, i) => ({
+        windowStart: `2026-02-0${i + 1}T00:00:00.000Z`, windowEnd: `2026-02-0${i + 1}T01:00:00.000Z`,
+        eventType: "Earthquake"
+      })));
+      const sharedDataSet = SharedDataSet.create({ dataSet });
+      const sharedSeismogram = {
+        startTime: DateTime.fromISO("2026-02-01T00:00:00.000Z"), endTime: DateTime.fromISO("2026-02-05T00:00:00.000Z")
+      };
+      mockedGetSharedModelManager.mockReturnValue({
+        isReady: true,
+        getTileSharedModelsByType: (_self: any, type: any) =>
+          type === SharedDataSet ? [sharedDataSet] : type === SharedSeismogram && seismogram ? [sharedSeismogram] : []
+      } as any);
+    }
+
+    // A focus trap wired to the tile's API as TileComponent wires it.
+    function createFocusTrap(api: ITileApi) {
+      const elements = () => api.getFocusableElements?.();
+      const trap = new FocusTrapController(tileElt!, createClueTileStrategy({
+        tileType: "Timeline",
+        onRegisterTileApi: jest.fn(),
+        onUnregisterTileApi: jest.fn(),
+        getTitleElement: () => elements()?.titleElement ?? undefined,
+        getTopbarElement: () => elements()?.topbarElement ?? undefined,
+        getContentElement: () => elements()?.contentElement ?? undefined,
+        focusContent: context => elements()?.focusContent?.(context) ?? false
+      }));
+      trap.setEnabled(true);
+      return trap;
+    }
+
+    // Presses Tab (or Shift+Tab) `count` times and returns the elements focused along the way.
+    function pressTab(count: number, shiftKey = false) {
+      return Array.from({ length: count }, () => {
+        document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey, bubbles: true }));
+        return document.activeElement;
+      });
     }
 
     it("puts the title, then the info button, in the focus cycle", () => {
@@ -212,38 +257,70 @@ describe("TimelineComponent", () => {
       expect(elements?.contentElement).toBeUndefined();
     });
 
-    it("puts Prev and Next in the focus cycle when there's an event to move to", () => {
-      const dataSet = DataSet.create();
-      ["windowStart", "windowEnd", "eventType"].forEach(name => addAttributeToDataSet(dataSet, { name }));
-      addCasesToDataSet(dataSet, [
-        { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Earthquake" },
-        { windowStart: "2026-02-02T00:00:00.000Z", windowEnd: "2026-02-02T01:00:00.000Z", eventType: "Noise" }
-      ]);
-      const sharedDataSet = SharedDataSet.create({ dataSet });
-      mockedGetSharedModelManager.mockReturnValue({
-        isReady: true,
-        getTileSharedModelsByType: (_self: any, type: any) => type === SharedDataSet ? [sharedDataSet] : []
-      } as any);
+    it("Tabs through the title, info button, Prev, Next and thumb, in both directions", () => {
+      provideData({ eventCount: 3, seismogram: true });
+      (model.content as TimelineContentModelType).selectEvent(1);
+      const { api, elements } = renderInTile();
+      const title = elements!.titleElement;
+      const info = screen.getByRole("button", { name: "Zooming and Moving" });
+      const prev = screen.getByRole("button", { name: "Prev" });
+      const next = screen.getByRole("button", { name: "Next" });
+      const thumb = screen.getByRole("slider");
+      expect(prev).toBeEnabled();
+      expect(next).toBeEnabled();
 
-      const { elements } = renderInTile();
-      expect(elements?.contentElement).toHaveClass("timeline-container");
-      expect(elements?.contentElement).toContainElement(screen.getByRole("button", { name: "Next" }));
+      const trap = createFocusTrap(api!);
+      act(() => trap.enterTrap());
+      expect(document.activeElement).toBe(title);
+      expect(pressTab(5)).toEqual([info, prev, next, thumb, title]);
+      expect(pressTab(5, true)).toEqual([thumb, next, prev, info, title]);
+      trap.destroy();
     });
 
-    it("puts the scrollbar thumb in the focus cycle when the view can scroll", () => {
-      const dataStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
-      const dataEnd = DateTime.fromISO("2026-02-05T00:00:00.000Z");
-      const sharedSeismogram = { startTime: dataStart, endTime: dataEnd };
-      mockedGetSharedModelManager.mockReturnValue({
-        isReady: true,
-        getTileSharedModelsByType: (_self: any, type: any) => type === SharedSeismogram ? [sharedSeismogram] : []
-      } as any);
-      (model.content as TimelineContentModelType).setViewRange(dataStart, dataStart.plus({ days: 1 }));
-
+    it("puts the scrollbar thumb in the focus cycle whenever there's seismogram data", () => {
+      provideData({ seismogram: true });
       const { elements } = renderInTile();
+      expect(screen.getByRole("button", { name: "Prev" })).toBeDisabled();
       expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
       expect(elements?.contentElement).toHaveClass("timeline-container");
       expect(elements?.contentElement).toContainElement(screen.getByRole("slider"));
+    });
+
+    it("keeps the contents in the focus cycle before the trap is entered", () => {
+      // Before the trap is entered, it holds the tile's controls at tabindex -1.
+      provideData({ eventCount: 2, seismogram: true });
+      const { api } = renderInTile();
+      const trap = createFocusTrap(api!);
+      trap.setEnabled(false);
+      expect(screen.getByRole("slider")).toHaveAttribute("tabindex", "-1");
+
+      const elements = api!.getFocusableElements!()!;
+      expect(elements.contentElement).toHaveClass("timeline-container");
+      act(() => { elements.focusContent!({ entryMode: "reverse" }); });
+      expect(document.activeElement).toBe(screen.getByRole("slider"));
+      trap.destroy();
+    });
+
+    it("moves focus to Prev when Next selects the last event", () => {
+      provideData({ eventCount: 2 });
+      (model.content as TimelineContentModelType).selectEvent(0);
+      renderInTile();
+      const next = screen.getByRole("button", { name: "Next" });
+      act(() => next.focus());
+      fireEvent.click(next);
+      expect(next).toBeDisabled();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Prev" }));
+    });
+
+    it("moves focus to Next when Prev selects the first event", () => {
+      provideData({ eventCount: 2 });
+      (model.content as TimelineContentModelType).selectEvent(1);
+      renderInTile();
+      const prev = screen.getByRole("button", { name: "Prev" });
+      act(() => prev.focus());
+      fireEvent.click(prev);
+      expect(prev).toBeDisabled();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Next" }));
     });
 
     it("doesn't join the focus cycle when read-only", () => {
