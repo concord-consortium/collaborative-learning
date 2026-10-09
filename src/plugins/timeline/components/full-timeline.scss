@@ -104,6 +104,23 @@ $full-timeline-overlay-color: $workspace-teal;
     }
   }
 
+  // Not interactive — dragging and deleting stay on the graph.
+  .full-timeline-marker {
+    background-color: $charcoal-dark-2;
+    height: 100%;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 1px;
+
+    // Dashed while placing, matching the graph's "not settled yet" treatment.
+    &.placing {
+      background-color: transparent;
+      border-left: 1px dashed $charcoal-dark-2;
+      width: 0;
+    }
+  }
+
   .full-timeline-label {
     background-color: white;
     border: 1px solid #121212;

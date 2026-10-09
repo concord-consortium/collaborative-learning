@@ -107,6 +107,7 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
           style={{ "--overlay-left": `${toPct(viewStart)}%`, width: `${toPct(viewEnd) - toPct(viewStart)}%` } as
             React.CSSProperties}
         />
+        <FullTimelineMarker content={content} totalStart={totalStart} totalEnd={totalEnd} />
         <div className="full-timeline-label">Full Timeline</div>
       </div>
       <DynamicScrollbar
@@ -160,5 +161,26 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
         );
       })}
     </>
+  );
+});
+
+interface IFullTimelineMarkerProps {
+  content: TimelineContentModelType;
+  totalStart: number;
+  totalEnd: number;
+}
+
+// An indicator only, positioned against the whole data range (unlike the graph's timeToViewPct) so
+// it still shows where the marker is once it has scrolled out of the graph's zoomed view. Dragging
+// and deleting stay on the graph.
+const FullTimelineMarker = observer(function FullTimelineMarker(
+  { content, totalStart, totalEnd }: IFullTimelineMarkerProps
+) {
+  const { markerTime, hoverTime, isPlacingMarker } = content;
+  const time = isPlacingMarker ? hoverTime : markerTime;
+  if (!time) return null;
+  const left = Math.max(0, Math.min(100, (time.toMillis() - totalStart) / (totalEnd - totalStart) * 100));
+  return (
+    <div className={classNames("full-timeline-marker", { placing: isPlacingMarker })} style={{ left: `${left}%` }} />
   );
 });

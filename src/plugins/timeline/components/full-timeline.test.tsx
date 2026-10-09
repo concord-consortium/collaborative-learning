@@ -152,6 +152,28 @@ describe("FullTimeline", () => {
     expect(events[0].style.width).toBe("12.5%");
   });
 
+  // The strip is how a student finds a marker that has scrolled out of the graph's view.
+  it("shows a placed marker", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => { content.setMarkerTime(day(3)); });
+    const marker = container.querySelector<HTMLElement>(".full-timeline-marker")!;
+    expect(marker).toBeInTheDocument();
+    expect(marker).not.toHaveClass("placing");
+    expect(marker.style.left).toBe("75%");
+  });
+
+  // Dashed on the strip too, so the two views agree about what is settled and what is not.
+  it("shows the preview dashed while placing", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => {
+      content.startPlacingMarker();
+      content.setHoverTime(day(0.5));
+    });
+    const marker = container.querySelector<HTMLElement>(".full-timeline-marker")!;
+    expect(marker).toHaveClass("placing");
+    expect(marker.style.left).toBe("12.5%");
+  });
+
   it("centers the view on a press outside the overlay", () => {
     const { content, strip } = renderFullTimeline(day(1), day(2));
     drag(strip, 750, 750);
