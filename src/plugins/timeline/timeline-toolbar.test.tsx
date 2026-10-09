@@ -63,7 +63,7 @@ function renderToolbarButton(content: TimelineContentModelType) {
   );
 }
 
-describe("Timeline toolbar — Add Marker button", () => {
+describe("Timeline toolbar — Add Time Marker button", () => {
   const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
   const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
 
@@ -76,7 +76,7 @@ describe("Timeline toolbar — Add Marker button", () => {
     const content = TimelineContentModel.create();
     renderToolbarButton(content);
 
-    fireEvent.click(screen.getByRole("button", { name: "Add Marker" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }));
     expect(content.isPlacingMarker).toBe(true);
   });
 
@@ -87,7 +87,7 @@ describe("Timeline toolbar — Add Marker button", () => {
     content.setMarkerTime(dataStart.plus({ days: 1 }));
     renderToolbarButton(content);
 
-    expect(screen.getByRole("button", { name: "Add Marker" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Add Time Marker" })).toHaveAttribute("aria-disabled", "true");
   });
 
   it("is enabled again once the marker is deleted", () => {
@@ -97,7 +97,7 @@ describe("Timeline toolbar — Add Marker button", () => {
     renderToolbarButton(content);
 
     act(() => { content.clearMarkerTime(); });
-    fireEvent.click(screen.getByRole("button", { name: "Add Marker" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }));
 
     expect(content.isPlacingMarker).toBe(true);
   });
@@ -108,6 +108,6 @@ describe("Timeline toolbar — Add Marker button", () => {
     const content = TimelineContentModel.create();
     renderToolbarButton(content);
 
-    expect(screen.getByRole("button", { name: "Add Marker" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Add Time Marker" })).toHaveAttribute("aria-disabled", "true");
   });
 });

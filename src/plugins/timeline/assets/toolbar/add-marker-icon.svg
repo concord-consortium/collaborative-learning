@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <title>Add Marker</title>
-    <g id="Add-Marker-ICON" stroke="none" fill="none">
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Add Time Marker</title>
+    <g id="Add-Time-Marker-ICON" stroke="none" fill="none">
         <rect id="Rectangle" x="0" y="0" width="36" height="34"></rect>
-        <g id="Add-Marker-icon" fill="#545454">
-            <rect x="9" y="5" width="2" height="24"></rect>
-            <path d="M13,6 L29,6 L29,16 L13,16 L13,6 Z M15,8 L15,14 L27,14 L27,8 L15,8 Z"></path>
-            <rect x="18" y="23" width="12" height="2"></rect>
-            <rect x="23" y="18" width="2" height="12"></rect>
-        </g>
+        <path d="M27,6 C28.6568542,6 30,7.34314575 30,9 L30,25 C30,26.6568542 28.6568542,28 27,28 L9,28 C7.34314575,28 6,26.6568542 6,25 L6,9 C6,7.34314575 7.34314575,6 9,6 L27,6 Z M27,8 L9,8 C8.44771525,8 8,8.44771525 8,9 L8,25 C8,25.5522847 8.44771525,26 9,26 L27,26 C27.5522847,26 28,25.5522847 28,25 L28,9 C28,8.44771525 27.5522847,8 27,8 Z" id="frame" fill="#545454" fill-rule="evenodd"></path>
+        <path d="M14,2 L16,2 L16,6 L14,6 Z" id="stem" fill="#545454"></path>
+        <path d="M15,11 C17.7614237,11 20,13.2385763 20,16 C20,18.7614237 17.7614237,21 15,21 C12.2385763,21 10,18.7614237 10,16 C10,13.2385763 12.2385763,11 15,11 Z M15,12.5 C13.0670034,12.5 11.5,14.0670034 11.5,16 C11.5,17.9329966 13.0670034,19.5 15,19.5 C16.9329966,19.5 18.5,17.9329966 18.5,16 C18.5,14.0670034 16.9329966,12.5 15,12.5 Z" id="clock" fill="#545454" fill-rule="evenodd"></path>
+        <path d="M14.25,13 L15.75,13 L15.75,15.25 L18,15.25 L18,16.75 L14.25,16.75 Z" id="hands" fill="#545454"></path>
+        <path d="M23,19 L25,19 L25,21 L27,21 L27,23 L25,23 L25,25 L23,25 L23,23 L21,23 L21,21 L23,21 Z" id="plus" fill="#545454"></path>
     </g>
 </svg>

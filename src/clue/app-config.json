@@ -322,11 +322,11 @@
           ["data-set-view", "DataCard"],
           ["data-set-view", "BarGraph"],
           "|",
+          "add-marker",
+          "|",
           "zoom-in",
           "zoom-out",
           "view-all",
-          "|",
-          "add-marker",
           "|",
           "pan-left",
           "pan-right"

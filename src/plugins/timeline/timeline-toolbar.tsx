@@ -95,7 +95,7 @@ const AddMarkerButton = observer(function AddMarkerButton({ name }: IToolbarButt
   return (
     <TileToolbarButton
       name={name}
-      title="Add Marker"
+      title="Add Time Marker"
       onClick={() => content?.startPlacingMarker()}
       selected={content?.isPlacingMarker}
       disabled={!!content?.markerTime || !content?.dataStartTime}
