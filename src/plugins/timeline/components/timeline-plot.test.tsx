@@ -363,4 +363,38 @@ describe("TimelinePlot", () => {
       expect(announced(container)).toBe(first);
     });
   });
+
+  describe("placing a marker", () => {
+    // While placing, the click belongs to the marker. Zooming would move the ground under it.
+    it("places the marker instead of zooming", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      const viewStartBefore = content.viewStartTime?.toISO();
+      const viewEndBefore = content.viewEndTime?.toISO();
+      content.startPlacingMarker();
+
+      click(plot, 500);
+
+      expect(content.markerTime).toBeDefined();
+      expect(content.isPlacingMarker).toBe(false);
+      expect(content.viewStartTime?.toISO()).toBe(viewStartBefore);
+      expect(content.viewEndTime?.toISO()).toBe(viewEndBefore);
+    });
+
+    it("zooms as usual when not placing", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      click(plot, 500);
+      expect(content.markerTime).toBeUndefined();
+      expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+      expect(content.viewEndTime?.toISO()).toBe(day(3).toISO());
+    });
+
+    it("leaves the mode on Escape without placing", () => {
+      const { content } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(content.isPlacingMarker).toBe(false);
+      expect(content.markerTime).toBeUndefined();
+    });
+  });
 });

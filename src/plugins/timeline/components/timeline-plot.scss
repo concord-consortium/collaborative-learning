@@ -15,4 +15,8 @@
   &.grabbing {
     cursor: grabbing;
   }
+
+  &.placing {
+    cursor: crosshair;
+  }
 }
