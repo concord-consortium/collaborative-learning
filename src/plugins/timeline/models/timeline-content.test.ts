@@ -680,6 +680,45 @@ describe("time markers", () => {
   });
 });
 
+describe("marker placement mode", () => {
+  it("starts off and toggles on", () => {
+    const content = TimelineContentModel.create({});
+    expect(content.isPlacingMarker).toBe(false);
+
+    content.startPlacingMarker();
+    expect(content.isPlacingMarker).toBe(true);
+
+    content.stopPlacingMarker();
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  // A half-finished placement is not something to reload into.
+  it("is not saved in the document", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("isPlacingMarker");
+  });
+
+  // Placing is one gesture, not a mode the student then has to turn off.
+  it("stops placing once a marker is set", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+    content.setMarkerTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  it("drops the hover preview when the mode ends", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+    content.setHoverTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+
+    content.stopPlacingMarker();
+    expect(content.hoverTime).toBeUndefined();
+  });
+});
+
 describe("marker persistence", () => {
   const markerISO = "2026-02-01T12:00:00.000Z";
 
