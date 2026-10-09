@@ -80,6 +80,19 @@ export const CustomSelect: React.FC<IProps> = (props) => {
     label: title || titlePrefix,
   });
 
+  // useDropdown's own onKeyDown closes the whole list on Escape but never calls
+  // stopPropagation(). When the list lives inside a React Aria Popover (e.g. the WaveRunner date
+  // picker's month/station/model lists), the unstopped Escape keeps bubbling and also dismisses
+  // the popover, discarding whatever the student was in the middle of picking. Run the hook's
+  // handler first so its own behavior (closing this list, returning focus) is unaffected, then
+  // stop Escape from propagating any further; every other key passes through untouched.
+  const handleListKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    dropdown?.listProps?.onKeyDown?.(e);
+    if (e.key === "Escape") {
+      e.stopPropagation();
+    }
+  }, [dropdown]);
+
   const getDataTest = (suffix?: string) => {
     return `${dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
   };
@@ -127,6 +140,7 @@ export const CustomSelect: React.FC<IProps> = (props) => {
           data-test={getDataTest("list")}
           data-testid={getDataTestIdValue("list")}
           {...(dropdown?.listProps ?? {})}
+          onKeyDown={handleListKeyDown}
         >
           {items.map((item, i) => {
             const itemDisabledClass = item.disabled ? "disabled" : "enabled";
@@ -142,6 +156,16 @@ export const CustomSelect: React.FC<IProps> = (props) => {
                 data-testid={`list-item-${itemId}`}
                 aria-disabled={item.disabled ? true : undefined}
                 {...itemProps}
+                // useDropdown's getItemProps sets aria-selected on whichever item has the
+                // keyboard cursor (activeIndex), not on the item the student actually chose - so
+                // every option a screen reader user arrows past is announced as "selected", and
+                // (see useDropdown's open effect, which looks for aria-selected="true" in the DOM
+                // to decide where to focus on open) nothing carries the attribute until a key is
+                // pressed, so opening the list always focuses item 0 instead of the chosen one.
+                // Overriding it here, after the spread, with the real selection fixes both: screen
+                // readers announce the right option, and the hook's open effect finds it and
+                // focuses it instead of defaulting to the first item.
+                aria-selected={selected === item.text ? true : undefined}
               >
                 {(showItemChecks !== false) &&
                   <div className={classNames("check", selectedClass, {
