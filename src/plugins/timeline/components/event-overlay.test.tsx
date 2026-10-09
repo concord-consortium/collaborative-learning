@@ -86,4 +86,11 @@ describe("EventOverlay", () => {
     expect(shapes[0].querySelector(".event-shape")).toHaveClass("blue-event");
     expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
   });
+
+  it("keeps the event labels out of the Tab order", () => {
+    const { container } = renderOverlay();
+    container.querySelectorAll(".event-label-button").forEach(button => {
+      expect(button).toHaveAttribute("tabindex", "-1");
+    });
+  });
 });

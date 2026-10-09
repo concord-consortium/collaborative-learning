@@ -41,10 +41,12 @@ export const EventOverlay = observer(function EventOverlay() {
         return (
           <React.Fragment key={i}>
             <div className={classNames("event-overlay", colorClass)} style={overlayStyle} />
+            {/* Mouse-only until the graph has a keyboard design; Prev and Next select events by keyboard. */}
             <button
               className={classNames("event-label-button", colorClass)}
               style={labelStyle}
               onClick={onLabelClick}
+              tabIndex={-1}
             >
               {event.index + 1}
             </button>

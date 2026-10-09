@@ -68,6 +68,7 @@ describe("TimeMarkerOverlay", () => {
     const label = container.querySelector<HTMLElement>("button.time-marker-label.pinned");
     expect(container.querySelector(".time-marker-line.pinned")).toBeInTheDocument();
     expect(label).toBeInTheDocument();
+    expect(label).toHaveAttribute("tabindex", "-1");
 
     fireEvent.click(label!);
     expect(content.pinnedTime).toBeUndefined();

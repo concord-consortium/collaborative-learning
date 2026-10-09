@@ -22,7 +22,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
   model, readOnly, tileElt, onRegisterTileApi, onUnregisterTileApi
 }) {
   const content = useTimelineContent();
-  const eventRowRef = useRef<HTMLDivElement>(null);
+  const timelineContainerRef = useRef<HTMLDivElement>(null);
   const { ui } = useStores();
   const container = useContainerContext().model;
 
@@ -56,8 +56,8 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
         <div>{content.dataStartTime?.toUTC().toLocaleString() ?? ""}</div>
         <div>{content.dataEndTime?.toUTC().toLocaleString() ?? ""}</div>
       </div>
-      <div className="timeline-container">
-        <div className="event-row" ref={eventRowRef}>
+      <div className="timeline-container" ref={timelineContainerRef}>
+        <div className="event-row">
           <button
             className="timeline-button prev-button"
             disabled={!content.canSelectPrev}
@@ -85,9 +85,10 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
           getTitleElement={() => getEditableTitleElement(tileElt)}
           getTopbarElement={() => tileElt?.querySelector<HTMLElement>(".timeline-info-button") ?? undefined}
           getContentElement={() => {
-            // The focus trap skips a slot with no element but stalls on one with nothing focusable,
-            // so report the event row only while Prev or Next is enabled.
-            const el = eventRowRef.current;
+            // Tab walks Prev, Next and the scrollbar thumb, skipping any that are disabled. The focus
+            // trap skips a slot with no element but stalls on one with nothing focusable, so report
+            // the container only while one of them is enabled.
+            const el = timelineContainerRef.current;
             return el && getVisibleFocusables(el).length > 0 ? el : undefined;
           }}
         />

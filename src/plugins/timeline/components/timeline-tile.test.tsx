@@ -207,7 +207,7 @@ describe("TimelineComponent", () => {
       expect(elements?.topbarElement).toBe(screen.getByRole("button", { name: "Zooming and Moving" }));
     });
 
-    it("leaves Prev and Next out of the focus cycle while both are disabled", () => {
+    it("leaves the tile's contents out of the focus cycle while nothing there is enabled", () => {
       const { elements } = renderInTile();
       expect(elements?.contentElement).toBeUndefined();
     });
@@ -226,8 +226,24 @@ describe("TimelineComponent", () => {
       } as any);
 
       const { elements } = renderInTile();
-      expect(elements?.contentElement).toHaveClass("event-row");
+      expect(elements?.contentElement).toHaveClass("timeline-container");
       expect(elements?.contentElement).toContainElement(screen.getByRole("button", { name: "Next" }));
+    });
+
+    it("puts the scrollbar thumb in the focus cycle when the view can scroll", () => {
+      const dataStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
+      const dataEnd = DateTime.fromISO("2026-02-05T00:00:00.000Z");
+      const sharedSeismogram = { startTime: dataStart, endTime: dataEnd };
+      mockedGetSharedModelManager.mockReturnValue({
+        isReady: true,
+        getTileSharedModelsByType: (_self: any, type: any) => type === SharedSeismogram ? [sharedSeismogram] : []
+      } as any);
+      (model.content as TimelineContentModelType).setViewRange(dataStart, dataStart.plus({ days: 1 }));
+
+      const { elements } = renderInTile();
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+      expect(elements?.contentElement).toHaveClass("timeline-container");
+      expect(elements?.contentElement).toContainElement(screen.getByRole("slider"));
     });
 
     it("doesn't join the focus cycle when read-only", () => {

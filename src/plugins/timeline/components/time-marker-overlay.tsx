@@ -25,10 +25,12 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
       {pinnedTime && isPctInView(pinnedPct) && (
         <>
           <div className="time-marker-line pinned" style={{ left: `${pinnedPct}%` }} />
+          {/* Mouse-only until the graph has a keyboard design. */}
           <button
             className="time-marker-label pinned"
             onClick={handlePinnedLabelClick}
             style={{ left: `${pinnedPct}%` }}
+            tabIndex={-1}
             type="button"
           >
             <TimeLabel time={pinnedTime} />
