@@ -223,6 +223,8 @@ export const WaveRunnerContentModel = TileContentModel
 
       // Fetch metadata if not already loaded (e.g., after page reload)
       yield self.ensureModelMetadata(self.selectedModelUrl);
+      // A second click while the metadata loaded may have started a run already.
+      if (self.isRunning) return;
       if (!self.selectedModelMetadata) {
         self.runError = self.modelLoadError || "Failed to load model metadata";
         return;
@@ -237,9 +239,11 @@ export const WaveRunnerContentModel = TileContentModel
       self.clearEventsDataSet();
       self.runError = null;
       self.isRunning = true;
-      // A resumed run reloads the paused run's persisted events from the database.
+      // A resumed run reloads the paused run's events from the database.
       self.isPaused = false;
       self.detectedEvents = [];
+      self.chunksProcessed = 0;
+      self.chunksTotal = 0;
       const abortController = new AbortController();
       self.runAbortController = abortController;
 
@@ -274,14 +278,18 @@ export const WaveRunnerContentModel = TileContentModel
         // Count days already covered by earlier (e.g. paused) runs as done, so progress is
         // reported against the whole range.
         const rangeDays = (rangeSec.end - rangeSec.start) / SECONDS_PER_DAY;
-        yield processUncoveredRanges({
+        const days: Awaited<ReturnType<typeof processUncoveredRanges>> = yield processUncoveredRanges({
           stationData: station, metadata, range: rangeSec, uncovered,
           onEvents: events => self.addDetectedEvents(events),
           onProgress: (progress, total) => self.updateChunkProgress(rangeDays - total + progress, rangeDays),
           signal: abortController.signal,
         });
-        // Keep the events found so far for display; Run resumes from the uncovered days.
-        if (abortController.signal.aborted) return;
+        // Keep the events found so far for display. A pause that landed after the last day
+        // falls through and completes the run.
+        if (abortController.signal.aborted) {
+          if (days.processed + days.skipped < days.total) return;
+          self.isPaused = false;
+        }
 
         const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
         if (dataSet) {
@@ -300,16 +308,20 @@ export const WaveRunnerContentModel = TileContentModel
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         self.runError = `Error running model: ${message}`;
+        self.isPaused = false;
         console.error("Wave Runner runModel error:", err);
       } finally {
         self.isRunning = false;
         self.runAbortController = null;
       }
     }),
-    /** Stops the run after the day in progress. Its events stay persisted, so Run resumes. */
+    /** Stops the run after the day in progress, so Run can resume it. */
     pauseModel() {
       if (!self.isRunning || self.isPaused) return;
       self.isPaused = true;
+      self.runAbortController?.abort();
+    },
+    beforeDestroy() {
       self.runAbortController?.abort();
     },
     /** Generate + upload any missing envelope tiles for the current station and date range

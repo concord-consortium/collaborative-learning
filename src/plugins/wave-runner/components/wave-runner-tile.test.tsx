@@ -9,6 +9,7 @@ jest.mock("uplot", () => {
 
 import { act, render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
+import { unprotect } from "mobx-state-tree";
 import React from "react";
 import "../../../models/tiles/table/table-registration";
 import { TileModel } from "../../../models/tiles/tile-model";
@@ -215,6 +216,45 @@ describe("WaveRunnerComponent", () => {
     await act(async () => {
       resolveRun({ uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 5 });
       await pending;
+    });
+  });
+
+  describe("Run/Pause", () => {
+    function renderRunState(state: { isRunning: boolean, isPaused: boolean }) {
+      const content2 = defaultWaveRunnerContent();
+      const model2 = TileModel.create({ content: content2 });
+      // The default station, so selecting it on mount doesn't clear the paused run.
+      content2.setStation({ network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" });
+      unprotect(model2);
+      Object.assign(content2, state, { chunksProcessed: 2, chunksTotal: 5 });
+      renderModel(model2);
+      return content2;
+    }
+
+    it("shows Pause while a run is in progress", () => {
+      const content2 = renderRunState({ isRunning: true, isPaused: false });
+      const button = screen.getByRole("button", { name: "Pause Model" });
+      expect(button).not.toHaveAttribute("aria-disabled");
+      expect(button).not.toHaveAttribute("aria-pressed");
+      expect(screen.getByText("Running model...")).toBeInTheDocument();
+      expect(screen.getByText("Processing day 3 of 5...")).toBeInTheDocument();
+
+      act(() => button.click());
+      expect(content2.isPaused).toBe(true);
+    });
+
+    it("disables Pause while the run finishes its current day", () => {
+      renderRunState({ isRunning: true, isPaused: true });
+      const button = screen.getByRole("button", { name: "Pause Model" });
+      expect(button).toHaveAttribute("aria-disabled", "true");
+      expect(screen.queryByText("Running model...")).not.toBeInTheDocument();
+      expect(screen.getByText("Pausing after day 3 of 5...")).toBeInTheDocument();
+    });
+
+    it("shows Run and where the run stopped once paused", () => {
+      renderRunState({ isRunning: false, isPaused: true });
+      expect(screen.getByRole("button", { name: "Run Model" })).toBeInTheDocument();
+      expect(screen.getByText("Model paused at day 2 of 5. Run to continue.")).toBeInTheDocument();
     });
   });
 

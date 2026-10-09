@@ -59,7 +59,7 @@ async function saveDayResults(
 /** Runs the model over the uncovered parts of range, persisting events + coverage
  *  per day (writeEvents before markCovered; empty days covered, errored days not).
  *  Owns the runner lifecycle (loadModel/dispose). Returns day counts; when aborted,
- *  the counts cover only the days handled before the abort. */
+ *  processed and skipped cover only the days handled before the abort. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
   const {
@@ -114,6 +114,7 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
         // Parse miniSEED → Seismogram
         const records = miniseed.parseDataRecords(buffer);
         const seismogram = miniseed.merge(records);
+
         // Run model on this chunk
         const dayEvents: SeismicEvent[] = [];
         await runner.processChunk(

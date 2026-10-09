@@ -13,9 +13,10 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
 
   function runStatus() {
     if (isRunning) {
+      const day = chunksTotal ? Math.min(chunksProcessed + 1, chunksTotal) : chunksProcessed + 1;
       return isPaused
-        ? `Pausing after day ${chunksProcessed + 1} of ${chunksTotal || "?"}...`
-        : `Processing day ${chunksProcessed + 1} of ${chunksTotal || "?"}...`;
+        ? `Pausing after day ${day} of ${chunksTotal || "?"}...`
+        : `Processing day ${day} of ${chunksTotal || "?"}...`;
     }
     if (isPaused) return `Model paused at day ${chunksProcessed} of ${chunksTotal}. Run to continue.`;
     return eventsDataSet ? "Run complete." : "Estimated time to complete run:";
@@ -36,11 +37,11 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
       </div>
       <div className="download-status-container">
         {isLoadingData && <div>Loading data: day {model.loadDaysDone + 1} of {model.loadDaysTotal || "?"}...</div>}
-        {isRunning && <div>Running model...</div>}
+        {isRunning && !isPaused && <div>Running model...</div>}
         {loadDataError && <div className="waveform-error">{loadDataError}</div>}
         {runError && <div className="waveform-error">{runError}</div>}
       </div>
-      <div className="estimated-time">{runStatus()}</div>
+      <div className="estimated-time" role="status">{runStatus()}</div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>

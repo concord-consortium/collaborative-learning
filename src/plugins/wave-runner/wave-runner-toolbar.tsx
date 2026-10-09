@@ -49,10 +49,10 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
 const PlayButton = observer(function PlayButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
   if (content.isRunning) {
-    // Disabled once paused, while the run finishes its current day.
     return (
       <TileToolbarButton name={name} title="Pause Model" onClick={() => content.pauseModel()}
-          selected={true} disabled={content.isPaused}>
+          highlighted={true} disabled={content.isPaused}
+          disabledMessage="Pausing after the current day">
         <PauseIcon/>
       </TileToolbarButton>
     );

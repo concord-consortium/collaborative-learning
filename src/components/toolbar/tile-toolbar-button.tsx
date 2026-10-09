@@ -21,7 +21,10 @@ export interface TileToolbarButtonProps {
   onClick: (e: React.MouseEvent) => void; // Action when clicked
   onTouchHold?: () => void; // Action when long-pressed
   selected?: boolean; // puts button in 'active' state if defined and true
+  // 'active' look without aria-pressed, for a button whose title changes with its state
+  highlighted?: boolean;
   disabled?: boolean; // makes button grey and unclickable if defined and true
+  disabledMessage?: string; // announced when the disabled button is activated
   extraContent?: JSX.Element; // Additional element added after the button.
   colorClass?: string; // color to use for the button icon
   dataTestId?: string; // data-testid attribute for testing
@@ -37,7 +40,9 @@ export const TileToolbarButton = function ({
   onClick,
   onTouchHold,
   selected,
+  highlighted,
   disabled,
+  disabledMessage = "Select something to enable this action",
   children,
   extraContent,
   colorClass,
@@ -50,8 +55,8 @@ export const TileToolbarButton = function ({
   const { announcement, announce } = useAnnounce();
   const handleDisabledClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    announce("Select something to enable this action");
-  }, [announce]);
+    announce(disabledMessage);
+  }, [announce, disabledMessage]);
 
   const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onClick: handleOnClick } = useTouchHold(
     () => onTouchHold?.(),
@@ -62,7 +67,7 @@ export const TileToolbarButton = function ({
     <Tooltip title={tooltip} {...tipOptions}>
       <button
         type="button"
-        className={classNames("toolbar-button", name, colorClass, { selected, disabled })}
+        className={classNames("toolbar-button", name, colorClass, { selected: selected || highlighted, disabled })}
         // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
         aria-disabled={disabled || undefined}
         aria-label={title}

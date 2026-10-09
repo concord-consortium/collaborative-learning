@@ -342,8 +342,10 @@ describe("processUncoveredRanges", () => {
       const fakeService = makeFakeDownloadService([feb1Day, feb1Day + 1, feb1Day + 2]);
       const runner = makeFakeModelRunner();
       const controller = new AbortController();
+      let cancelledOnAbort = false;
       runner.processChunk.mockImplementationOnce(async () => {
         controller.abort();
+        cancelledOnAbort = fakeService.cancel.mock.calls.length > 0;
         return [];
       });
       const result = await processUncoveredRanges({
@@ -355,7 +357,7 @@ describe("processUncoveredRanges", () => {
       expect(runner.processChunk).toHaveBeenCalledTimes(1);
       expect(markCovered).toHaveBeenCalledTimes(1);
       expect(markCovered).toHaveBeenCalledWith(station, metadata.id, dayRange(feb1Day));
-      expect(fakeService.cancel).toHaveBeenCalled();
+      expect(cancelledOnAbort).toBe(true);
       expect(runner.dispose).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ processed: 1, skipped: 0, total: 3 });
     });
@@ -399,6 +401,24 @@ describe("processUncoveredRanges", () => {
 
       await expect(run).resolves.toEqual({ processed: 0, skipped: 0, total: 3 });
       expect(fakeService.cancel).toHaveBeenCalled();
+    });
+
+    it("releases the model and stops listening when loading the model fails", async () => {
+      const fakeService = makeFakeDownloadService([feb1Day]);
+      const runner = makeFakeModelRunner();
+      runner.loadModel.mockRejectedValueOnce(new Error("no weights"));
+      const controller = new AbortController();
+
+      await expect(processUncoveredRanges({
+        ...makeOptions(fakeService, runner),
+        uncovered: [threeDayRange],
+        signal: controller.signal,
+      })).rejects.toThrow("no weights");
+      expect(runner.dispose).toHaveBeenCalledTimes(1);
+
+      const cancelCalls = fakeService.cancel.mock.calls.length;
+      controller.abort();
+      expect(fakeService.cancel).toHaveBeenCalledTimes(cancelCalls);
     });
   });
 });

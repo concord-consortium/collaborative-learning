@@ -1,3 +1,4 @@
+import { destroy, getParent, getRoot, unprotect } from "mobx-state-tree";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { createDocumentModel } from "../../../models/document/document";
 import { ProblemDocument } from "../../../models/document/document-types";
@@ -567,14 +568,131 @@ describe("WaveRunnerContent", () => {
           expect(content.eventsDataSet?.dataSet.cases).toHaveLength(1);
         });
 
-        it("forgets the paused run when a setting changes", async () => {
+        it("takes a resumed run's earlier events from the database, not from memory", async () => {
           const { content } = await runAndPauseOnFirstDay();
 
-          content.setEndDate("2026-02-04");
+          // loadEvents finds nothing, as if the paused day's events had been deleted.
+          const feb2Sec = feb1Sec + SECONDS_PER_DAY;
+          (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+            [{ start: feb2Sec, end: feb2Sec + 2 * SECONDS_PER_DAY }]);
+          makeFakeService([feb1Day + 1, feb1Day + 2]);
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          await content.runModel();
+
+          expect(content.eventsDataSet?.dataSet.cases).toHaveLength(0);
+        });
+
+        it("completes the run when the pause lands during the last day", async () => {
+          const feb3Sec = feb1Sec + 2 * SECONDS_PER_DAY;
+          (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+            [{ start: feb3Sec, end: feb3Sec + SECONDS_PER_DAY }]);
+          makeFakeService([feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockImplementationOnce(async () => {
+            content.pauseModel();
+            return [];
+          });
+          await content.runModel();
+
+          expect(content.isPaused).toBe(false);
+          expect(content.eventsDataSet).toBeDefined();
+        });
+
+        it("clears the pause when the run then fails", async () => {
+          jest.spyOn(console, "error").mockImplementation(() => undefined);
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockImplementationOnce(async () => {
+            content.pauseModel();
+            throw new Error("bad chunk");
+          });
+          await content.runModel();
+
+          expect(content.runError).toBe("Error running model: bad chunk");
+          expect(content.isPaused).toBe(false);
+        });
+
+        it.each([
+          ["start date", (content: any) => content.setStartDate("2026-01-31")],
+          ["end date", (content: any) => content.setEndDate("2026-02-04")],
+          ["station", (content: any) =>
+            content.setStation({ network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "y" })],
+          ["model", (content: any) => content.ensureModelMetadata("https://models.example.com/other/metadata.json")],
+        ])("forgets the paused run when the %s changes", async (_setting, change) => {
+          jest.spyOn(console, "error").mockImplementation(() => undefined);
+          const { content } = await runAndPauseOnFirstDay();
+
+          await change(content);
 
           expect(content.isPaused).toBe(false);
           expect(content.eventsFound).toBeUndefined();
           expect(content.chunksProcessed).toBe(0);
+        });
+
+        it("keeps the paused run if a setting changes while it is still pausing", async () => {
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockImplementationOnce(async () => {
+            content.pauseModel();
+            content.clearPausedRun();
+            return [];
+          });
+          await content.runModel();
+
+          expect(content.isPaused).toBe(true);
+          expect(content.chunksProcessed).toBe(1);
+        });
+      });
+
+      describe("run lifecycle", () => {
+        it("starts only one run when Run is clicked twice while the model metadata loads", async () => {
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          const content = setupTileInDocument();
+          content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+          content.setStartDate("2026-02-01");
+          content.setEndDate("2026-02-03");
+          // Selects the model without waiting for its metadata, as after a page reload.
+          content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+          await Promise.all([content.runModel(), content.runModel()]);
+
+          expect(loadEvents).toHaveBeenCalledTimes(1);
+          expect(processChunk).toHaveBeenCalledTimes(3);
+        });
+
+        it("resets progress when a new run starts", async () => {
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          const content = await setupRunReadyContent();
+          await content.runModel();
+          expect(content.chunksProcessed).toBe(3);
+
+          let progressAtStart: number[] = [];
+          (loadEvents as jest.Mock).mockImplementationOnce(async () => {
+            progressAtStart = [content.chunksProcessed, content.chunksTotal];
+            return [];
+          });
+          await content.runModel();
+
+          expect(progressAtStart).toEqual([0, 0]);
+        });
+
+        it("stops the run when the tile is deleted", async () => {
+          jest.spyOn(console, "warn").mockImplementation(() => undefined);
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+            .mockResolvedValue([])
+            .mockImplementationOnce(async () => {
+              unprotect(getRoot(content));
+              destroy(getParent(content));
+              return [];
+            });
+          await content.runModel();
+
+          expect(processChunk).toHaveBeenCalledTimes(1);
         });
       });
     });
