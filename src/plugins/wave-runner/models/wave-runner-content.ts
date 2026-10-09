@@ -80,7 +80,12 @@ export const WaveRunnerContentModel = TileContentModel
       return DateTime.fromISO(`${self.startDate}T00:00:00Z`, { zone: "utc" });
     },
     get endDateISO() {
-      return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" });
+      // The end date is inclusive (loadData/run already treat it that way, adding
+      // SECONDS_PER_DAY to cover the whole end day) so this returns the END of that day, not its
+      // start. Otherwise a single-day range - valid since this branch allows picking the same day
+      // for start and end - collapses start and end to the same instant, giving the seismogram
+      // viewport zero width and nothing to render.
+      return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" }).plus({ seconds: SECONDS_PER_DAY });
     },
     get eventsDataSet(): SharedDataSetType | undefined {
       const smm = getSharedModelManager(self);

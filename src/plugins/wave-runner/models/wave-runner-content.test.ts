@@ -56,6 +56,26 @@ describe("default date range", () => {
   });
 });
 
+describe("startDateISO and endDateISO", () => {
+  // The seismogram viewport (status-and-output.tsx) reads these two getters directly as
+  // startTime/endTime. endDate is inclusive - loadData/run already add SECONDS_PER_DAY to cover
+  // the whole end day - so a single-day range (start === end, now a valid pick) must still span
+  // a full day's worth of time, not collapse to a single zero-width instant.
+  it("gives a single-day range a non-zero span, spanning the whole end day", () => {
+    const content = WaveRunnerContentModel.create({ startDate: "2026-09-15", endDate: "2026-09-15" });
+    const spanMs = content.endDateISO.toMillis() - content.startDateISO.toMillis();
+    expect(spanMs).toBeGreaterThan(0);
+    expect(spanMs).toBe(SECONDS_PER_DAY * 1000);
+  });
+
+  it("still spans correctly across a multi-day range", () => {
+    const content = WaveRunnerContentModel.create({ startDate: "2026-09-01", endDate: "2026-09-04" });
+    const spanMs = content.endDateISO.toMillis() - content.startDateISO.toMillis();
+    // 3 full days between the two dates' starts, plus the inclusive end day itself.
+    expect(spanMs).toBe(4 * SECONDS_PER_DAY * 1000);
+  });
+});
+
 const mockCompactMetadata = {
   $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   id: "compact-v1",
