@@ -133,31 +133,24 @@ Then read the deployed rules back (preparing.md) and compare them with the tag's
 file (preparing.md):
 `npx firebase deploy --only database --project <project> --config <worktree>/firebase.json --non-interactive`.
 
-**functions-v2:**
+**functions-v2** and **authoring-api** take the same four steps. Below, `<codebase>` is
+`functions-v2` or `authoring-api`.
 
-1. **Build and compare params:** keep `functions-v2/.env` in the developer's checkout (gitignored).
-   If it's missing, build it from a deployed function's non-secret values (`functions:list --json`
-   → `environmentVariables`; `chatTutorOnWrite` carries all of them). Find every param the tag
-   declares by grepping for `defineString`, `defineInt` and `defineBoolean` in `functions-v2/src`
-   **and** `functions-v2/lib/src` (committed source lives there too). A param with a non-empty
-   default needs a value in the file, or a non-interactive deploy fails; one with an empty default
-   deploys as empty when the file leaves it out. Compare the file with each project's deployed
-   values. Don't create `.env.<projectId>` files: they aren't gitignored, the Firebase CLI loads
-   them too, and committing them needs its own change first.
-2. **Install:** `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/functions-v2 ci`.
-3. **Deploy:** copy `functions-v2/.env` into the worktree, then run
-   `npx firebase deploy --only functions:functions-v2 --project <project> --config <worktree>/firebase.json --non-interactive`.
-4. **Clean up and check:** delete the copied `.env`, and check the functions' deploy times and
-   params.
+1. **Compare params:** the tag has `<codebase>/.env.collaborative-learning-staging` and
+   `<codebase>/.env.collaborative-learning-ec215`. They set every non-secret param the tag
+   declares (`deploy-env-files.test.ts` in each codebase fails CI otherwise). Compare
+   `<worktree>/<codebase>/.env.<project>` with the project's deployed values (`functions:list
+   --json` → `environmentVariables`). A difference is either something this release changes or a
+   deploy that went out from somewhere else; find out which before deploying. Don't copy a `.env`
+   into the worktree: the CLI deploys every key a plain `.env` sets, as well as the project file's.
+2. **Install:** `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/<codebase> ci`.
+3. **Deploy:**
+   `npx firebase deploy --only functions:<codebase> --project <project> --config <worktree>/firebase.json --non-interactive`.
+4. **Check:** `git -C <worktree> status --short` is empty (a deploy that asked for a param would
+   have written to a project file), and check the functions' deploy times and params.
 
-Deploy all of functions-v2, not a subset. Each function keeps the params it was deployed with, so
-the empty-default ForeverLearning params would be wiped from `chatTutorOnWrite` by a deploy whose
-`.env` leaves them out.
-
-**authoring-api:** the same four steps as functions-v2, with `authoring-api/.env` (it declares
-string params with no default, so the file must set them; `authoring-api/.env.example` lists
-them), `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/authoring-api ci`, and
-`--only functions:authoring-api`.
+Deploy all of a codebase, not a subset. Each function keeps the params it was deployed with, so a
+subset deploy leaves the others on older values.
 
 **functions-v1:** stop and ask. Production's 1st-gen functions are in codebase `default` on
 nodejs16 while staging's are in `functions-v1` (preparing.md), so a `--only
