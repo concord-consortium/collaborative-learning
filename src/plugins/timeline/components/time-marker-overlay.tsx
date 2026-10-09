@@ -1,6 +1,7 @@
 import classNames from "classnames";
+import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { TimeLabel } from "./time-label";
 
@@ -14,28 +15,80 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
   const content = useTimelineContent();
   const { hoverTime, markerTime } = content;
   const hoverPct = hoverTime ? content.timeToViewPct(hoverTime) : undefined;
-  const markerPct = markerTime ? content.timeToViewPct(markerTime) : undefined;
+
+  const overlayRef = useRef<HTMLDivElement>(null);
+  // Where the marker sits mid-drag. The model is written once, on pointer-up.
+  const [dragTime, setDragTime] = useState<DateTime | undefined>(undefined);
+  const dragPointerRef = useRef<number | undefined>(undefined);
+  const isDragging = dragTime !== undefined;
+
+  const placedTime = dragTime ?? markerTime;
+  const placedPct = placedTime ? content.timeToViewPct(placedTime) : undefined;
+
+  const timeAtClientX = (clientX: number) => {
+    const rect = overlayRef.current?.getBoundingClientRect();
+    if (!rect || rect.width <= 0) return undefined;
+    return content.viewPctToTime((clientX - rect.left) / rect.width * 100);
+  };
+
+  const handleDragStart = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    dragPointerRef.current = e.pointerId;
+    (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    setDragTime(content.markerTime);
+  };
+
+  const handleDragMove = (e: React.PointerEvent) => {
+    if (dragPointerRef.current !== e.pointerId) return;
+    const time = timeAtClientX(e.clientX);
+    if (time) setDragTime(time);
+  };
+
+  const endDrag = (e: React.PointerEvent, commit: boolean) => {
+    if (dragPointerRef.current !== e.pointerId) return;
+    dragPointerRef.current = undefined;
+    if (commit && dragTime) content.setMarkerTime(dragTime);
+    setDragTime(undefined);
+  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     content.clearMarkerTime();
   };
 
+  // A pointerdown on the delete button would otherwise bubble up to the label and start a drag.
+  const handleDeletePointerDown = (e: React.PointerEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <>
-      {markerTime && isPctInView(markerPct) && (
+    <div ref={overlayRef} className="time-marker-overlay">
+      {placedTime && isPctInView(placedPct) && (
         <>
-          <div className="time-marker-line placed" style={{ left: `${markerPct}%` }} />
           <div
-            className="time-marker-label placed"
+            className={classNames("time-marker-line", "placed", { dragging: isDragging })}
+            data-testid="marker-stem"
+            style={{ left: `${placedPct}%` }}
+            onPointerDown={handleDragStart}
+            onPointerMove={handleDragMove}
+            onPointerUp={e => endDrag(e, true)}
+            onPointerCancel={e => endDrag(e, false)}
+          />
+          <div
+            className={classNames("time-marker-label", "placed", { dragging: isDragging })}
             data-testid="marker-label"
-            style={{ left: `${markerPct}%` }}
+            style={{ left: `${placedPct}%` }}
+            onPointerDown={handleDragStart}
+            onPointerMove={handleDragMove}
+            onPointerUp={e => endDrag(e, true)}
+            onPointerCancel={e => endDrag(e, false)}
           >
-            <TimeLabel time={markerTime} />
+            <TimeLabel time={placedTime} />
             <button
               aria-label="Delete marker"
               className="marker-delete"
               onClick={handleDeleteClick}
+              onPointerDown={handleDeletePointerDown}
               type="button"
             >
               ×
@@ -57,6 +110,6 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 });
