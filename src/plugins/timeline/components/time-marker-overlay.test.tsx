@@ -7,7 +7,7 @@ jest.mock("uplot", () => {
   }));
 });
 
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
@@ -40,6 +40,12 @@ describe("TimeMarkerOverlay", () => {
     return { content, ...result };
   }
 
+  function renderOverlayWithAMarker() {
+    const content = createContent();
+    act(() => { content.setMarkerTime(viewStart.plus({ hours: 12 })); });
+    return renderOverlay(content);
+  }
+
   it("renders no markers by default", () => {
     const { container } = renderOverlay(createContent());
     expect(container.querySelector(".time-marker-line")).toBeNull();
@@ -59,20 +65,6 @@ describe("TimeMarkerOverlay", () => {
     expect(line!.style.left).toBe("25%");
     expect(label!.textContent).toContain(hoverTime.toUTC().toLocaleString());
     expect(label!.textContent).toContain(hoverTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS));
-  });
-
-  it("renders a placed marker and clears it when its label is clicked", () => {
-    const content = createContent();
-    content.setMarkerTime(viewStart.plus({ hours: 12 }));
-    const { container } = renderOverlay(content);
-
-    const label = container.querySelector<HTMLElement>("button.time-marker-label.placed");
-    expect(container.querySelector(".time-marker-line.placed")).toBeInTheDocument();
-    expect(label).toBeInTheDocument();
-
-    fireEvent.click(label!);
-    expect(content.markerTime).toBeUndefined();
-    expect(container.querySelector(".time-marker-line.placed")).toBeNull();
   });
 
   it("hides the placed marker when its time is outside the view range", () => {
@@ -114,6 +106,21 @@ describe("TimeMarkerOverlay", () => {
       act(() => { content.setHoverTime(viewStart.plus({ hours: 12 })); });
 
       expect(container.querySelector(".time-marker-line.placing")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("deleting the marker", () => {
+    it("deletes from the x in the label", () => {
+      const { content } = renderOverlayWithAMarker();
+      fireEvent.click(screen.getByRole("button", { name: "Delete marker" }));
+      expect(content.markerTime).toBeUndefined();
+    });
+
+    // The label becomes a drag handle in the next task, so a click on it must no longer delete.
+    it("does not delete when the label itself is clicked", () => {
+      const { content } = renderOverlayWithAMarker();
+      fireEvent.click(screen.getByTestId("marker-label"));
+      expect(content.markerTime).toBeDefined();
     });
   });
 });

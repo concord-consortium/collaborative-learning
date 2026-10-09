@@ -16,7 +16,7 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
   const hoverPct = hoverTime ? content.timeToViewPct(hoverTime) : undefined;
   const markerPct = markerTime ? content.timeToViewPct(markerTime) : undefined;
 
-  const handleMarkerLabelClick = (e: React.MouseEvent) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     content.clearMarkerTime();
   };
@@ -26,14 +26,21 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
       {markerTime && isPctInView(markerPct) && (
         <>
           <div className="time-marker-line placed" style={{ left: `${markerPct}%` }} />
-          <button
+          <div
             className="time-marker-label placed"
-            onClick={handleMarkerLabelClick}
+            data-testid="marker-label"
             style={{ left: `${markerPct}%` }}
-            type="button"
           >
             <TimeLabel time={markerTime} />
-          </button>
+            <button
+              aria-label="Delete marker"
+              className="marker-delete"
+              onClick={handleDeleteClick}
+              type="button"
+            >
+              ×
+            </button>
+          </div>
         </>
       )}
       {hoverTime && isPctInView(hoverPct) && (

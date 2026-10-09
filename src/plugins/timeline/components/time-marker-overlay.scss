@@ -1,3 +1,5 @@
+@import "../../../components/vars";
+
 .time-marker-line {
   background-color: white;
   height: 100%;
@@ -51,4 +53,15 @@
       background-color: #eee;
     }
   }
+}
+
+.marker-delete {
+  background: none;
+  border: none;
+  color: $charcoal-light-1;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  margin-top: 2px;
+  padding: 0;
 }
