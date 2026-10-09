@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { IJsonPatch, applyPatch, onPatch } from "mobx-state-tree";
+import { IJsonPatch, applyPatch, getSnapshot, onPatch } from "mobx-state-tree";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -635,10 +635,10 @@ describe("time markers", () => {
   const viewStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
   const viewEnd = DateTime.fromISO("2026-02-02T00:00:00.000Z");
 
-  it("hoverTime and pinnedTime default to undefined", () => {
+  it("hoverTime and markerTime default to undefined", () => {
     const content = TimelineContentModel.create();
     expect(content.hoverTime).toBeUndefined();
-    expect(content.pinnedTime).toBeUndefined();
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("setHoverTime and clearHoverTime update hoverTime", () => {
@@ -650,19 +650,13 @@ describe("time markers", () => {
     expect(content.hoverTime).toBeUndefined();
   });
 
-  it("setPinnedTime and clearPinnedTime update pinnedTime", () => {
+  it("setMarkerTime and clearMarkerTime update markerTime", () => {
     const content = TimelineContentModel.create();
     const time = DateTime.fromISO("2026-02-01T12:00:00.000Z");
-    content.setPinnedTime(time);
-    expect(content.pinnedTime?.toISO()).toBe(time.toISO());
-    content.clearPinnedTime();
-    expect(content.pinnedTime).toBeUndefined();
-  });
-
-  it("marker times are volatile, not serialized", () => {
-    const content = TimelineContentModel.create();
-    content.setPinnedTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
-    expect(JSON.parse(content.exportJson())).not.toHaveProperty("pinnedTime");
+    content.setMarkerTime(time);
+    expect(content.markerTime?.toISO()).toBe(time.toISO());
+    content.clearMarkerTime();
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("timeToViewPct returns undefined when there is no view range", () => {
@@ -683,5 +677,120 @@ describe("time markers", () => {
     content.setViewRange(viewStart, viewEnd);
     expect(content.timeToViewPct(viewStart.minus({ hours: 6 }))).toBe(-25);
     expect(content.timeToViewPct(viewEnd.plus({ hours: 12 }))).toBe(150);
+  });
+});
+
+describe("marker placement mode", () => {
+  it("starts off and toggles on", () => {
+    const content = TimelineContentModel.create({});
+    expect(content.isPlacingMarker).toBe(false);
+
+    content.startPlacingMarker();
+    expect(content.isPlacingMarker).toBe(true);
+
+    content.stopPlacingMarker();
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  // A half-finished placement is not something to reload into.
+  it("is not saved in the document", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("isPlacingMarker");
+  });
+
+  // Placing is one gesture, not a mode the student then has to turn off.
+  it("stops placing once a marker is set", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+    content.setMarkerTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  it("drops the hover preview when the mode ends", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+    content.setHoverTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+
+    content.stopPlacingMarker();
+    expect(content.hoverTime).toBeUndefined();
+  });
+});
+
+describe("marker persistence", () => {
+  const markerISO = "2026-02-01T12:00:00.000Z";
+
+  it("round-trips the marker through a snapshot", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+
+    const reloaded = TimelineContentModel.create(getSnapshot(content));
+    expect(reloaded.markerTime?.toISO()).toBe(content.markerTime?.toISO());
+  });
+
+  // The inverse of the assertion it replaces: the marker used to be a transient pin and was
+  // deliberately kept out of the exported document. It is now the student's own work.
+  it("includes the marker in the exported document", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+
+    expect(JSON.parse(content.exportJson())).toHaveProperty("markerTimeISO", markerISO);
+  });
+
+  it("clears the marker out of the exported document", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+    content.clearMarkerTime();
+
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("markerTimeISO");
+  });
+});
+
+describe("viewPctToTime", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        return [];
+      },
+    } as any);
+
+    content = TimelineContentModel.create();
+    content.fitToData();
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("is the inverse of timeToViewPct", () => {
+    const time = dataStart.plus({ days: 3, hours: 12 });
+    const pct = content.timeToViewPct(time);
+
+    expect(pct).toBeDefined();
+    expect(content.viewPctToTime(pct!)?.toMillis()).toBe(time.toMillis());
+  });
+
+  it("clamps to the loaded data range", () => {
+    expect(content.viewPctToTime(-500)?.toMillis()).toBe(content.dataStartTime?.toMillis());
+    expect(content.viewPctToTime(500)?.toMillis()).toBe(content.dataEndTime?.toMillis());
+  });
+
+  it("returns undefined with no view set", () => {
+    expect(TimelineContentModel.create({}).viewPctToTime(50)).toBeUndefined();
   });
 });

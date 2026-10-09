@@ -125,11 +125,9 @@ describe("FullTimeline", () => {
     expect(events[1].style.left).toBe("75%");
     expect(events[1].style.width).toBe("12.5%");
 
-    // Each event's shape is centered on the event
-    const shapes = container.querySelectorAll<HTMLElement>(".full-timeline-shape");
-    expect(shapes).toHaveLength(2);
-    expect(shapes[1].style.left).toBe("81.25%");
-    expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
+    // The event shapes belong on the graph above. On the strip they crowded the Full Timeline
+    // header, which shares that band straddling the top border.
+    expect(container.querySelector(".event-shape")).toBeNull();
   });
 
   it("keeps events within the strip, leaving out those that don't overlap the data", () => {
@@ -150,6 +148,27 @@ describe("FullTimeline", () => {
     expect(events).toHaveLength(1);
     expect(events[0].style.left).toBe("87.5%");
     expect(events[0].style.width).toBe("12.5%");
+  });
+
+  it("shows a placed marker", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => { content.setMarkerTime(day(3)); });
+    const marker = container.querySelector<HTMLElement>(".full-timeline-marker")!;
+    expect(marker).toBeInTheDocument();
+    expect(marker).not.toHaveClass("placing");
+    expect(marker.style.left).toBe("75%");
+  });
+
+  // Dashed on the strip too, so the two views agree about what is settled and what is not.
+  it("shows the preview dashed while placing", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => {
+      content.startPlacingMarker();
+      content.setHoverTime(day(0.5));
+    });
+    const marker = container.querySelector<HTMLElement>(".full-timeline-marker")!;
+    expect(marker).toHaveClass("placing");
+    expect(marker.style.left).toBe("12.5%");
   });
 
   it("centers the view on a press outside the overlay", () => {

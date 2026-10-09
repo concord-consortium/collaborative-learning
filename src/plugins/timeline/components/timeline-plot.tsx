@@ -83,6 +83,10 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     setIsShiftDown(e.shiftKey);
+    if (content.isPlacingMarker) {
+      const time = timeAtClientX(e);
+      if (time) content.setHoverTime(time);
+    }
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
     const dx = e.clientX - drag.startX;
@@ -124,6 +128,12 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     }
     const time = timeAtClientX(e);
     if (!time) return;
+    // While placing, the click belongs to the marker: zooming would move the ground out from under it.
+    if (content.isPlacingMarker) {
+      content.setMarkerTime(time);
+      announce(`Marker placed at ${formatTime(time)}.`);
+      return;
+    }
     if (e.shiftKey && !content.canZoomOut) {
       announce(`Already showing the full time range. ${describeView(content)}`);
       return;
@@ -143,11 +153,22 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     if (dragRef.current?.pointerId === e.pointerId) endDrag(e);
   };
 
+  useEffect(() => {
+    if (!content.isPlacingMarker) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") content.stopPlacingMarker();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [content, content.isPlacingMarker]);
+
   if (readOnly) {
     return <div className="timeline-plot">{children}</div>;
   }
 
-  const cursorClass = isDragging ? "grabbing" : isShiftDown ? "zoom-out" : "zoom-in";
+  const cursorClass = content.isPlacingMarker
+    ? "placing"
+    : isDragging ? "grabbing" : isShiftDown ? "zoom-out" : "zoom-in";
 
   return (
     <>

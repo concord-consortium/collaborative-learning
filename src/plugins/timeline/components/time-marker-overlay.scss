@@ -1,3 +1,11 @@
+@import "../../../components/vars";
+
+.time-marker-overlay {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
 .time-marker-line {
   background-color: white;
   height: 100%;
@@ -8,6 +16,24 @@
 
   &.hover {
     opacity: 0.7;
+  }
+
+  // Dashed to say the marker isn't settled yet. The line is a solid background, so dashing it
+  // means swapping to a border instead of just adding a border-style.
+  &.placing {
+    background-color: transparent;
+    border-left: 1px dashed white;
+    opacity: 0.7;
+    width: 0;
+  }
+
+  &.placed {
+    cursor: grab;
+    pointer-events: auto;
+
+    &.dragging {
+      cursor: grabbing;
+    }
   }
 }
 
@@ -30,15 +56,34 @@
   white-space: nowrap;
   z-index: 1;
 
-  &.hover {
+  &.hover,
+  &.placing {
     pointer-events: none;
   }
 
-  &.pinned {
-    cursor: pointer;
+  &.placed {
+    cursor: grab;
+    // The overlay is pointer-events: none so it doesn't swallow the plot's clicks. The placed
+    // label has to opt back in, or the drag handle and the delete button inside it are both dead.
+    pointer-events: auto;
 
     &:hover {
       background-color: #eee;
     }
+
+    &.dragging {
+      cursor: grabbing;
+    }
   }
+}
+
+.marker-delete {
+  background: none;
+  border: none;
+  color: $charcoal-light-1;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  margin-top: 2px;
+  padding: 0;
 }

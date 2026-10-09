@@ -51,21 +51,6 @@ $full-timeline-overlay-color: $workspace-teal;
     }
   }
 
-  // Just above the strip's top border
-  .full-timeline-shape {
-    pointer-events: none;
-    position: absolute;
-    top: -9px;
-    transform: translateX(-50%);
-
-    // At this size, the "?" would be too small to read beside the other shapes.
-    .event-shape.default-event text {
-      font-size: 17px;
-      font-weight: 900;
-      transform: translateY(1px);
-    }
-  }
-
   .full-timeline-overlay {
     background-color: rgba($full-timeline-overlay-color, 0.3);
     border: 1px solid $full-timeline-overlay-color;
@@ -104,6 +89,25 @@ $full-timeline-overlay-color: $workspace-teal;
     }
   }
 
+  // Not interactive — dragging and deleting stay on the graph.
+  .full-timeline-marker {
+    background-color: $charcoal-dark-2;
+    height: 100%;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 1px;
+
+    // Dashed while placing, matching the graph's "not settled yet" treatment.
+    &.placing {
+      background-color: transparent;
+      border-left: 1px dashed $charcoal-dark-2;
+      width: 0;
+    }
+  }
+
+  // The graph's marker label hangs below the plot (top: 100%) and lands on this header. Nothing
+  // between the two creates a stacking context, so it has to outrank that label's z-index of 1.
   .full-timeline-label {
     background-color: white;
     border: 1px solid #121212;
@@ -118,5 +122,6 @@ $full-timeline-overlay-color: $workspace-teal;
     top: 0;
     transform: translate(-50%, -50%);
     white-space: nowrap;
+    z-index: 2;
   }
 }
