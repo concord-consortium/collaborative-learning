@@ -12,7 +12,6 @@ import { useTimelineContent } from "../hooks/use-timeline-content";
 import { TimelineContentModelType } from "../models/timeline-content";
 import { getEventColorClass } from "../timeline-types";
 import { describeView } from "./describe-view";
-import { EventShape } from "./event-shape";
 
 import "./full-timeline.scss";
 
@@ -149,15 +148,11 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
         const width = toPct(windowEnd) - left;
         const colorWord = colorWords.get(event.eventType);
         return (
-          <React.Fragment key={event.index}>
-            <div
-              className={classNames("full-timeline-event", getEventColorClass(colorWord))}
-              style={{ left: `${left}%`, width: `${width}%` }}
-            />
-            <div className="full-timeline-shape" style={{ left: `${left + width / 2}%` }}>
-              <EventShape colorWord={colorWord} size={6} />
-            </div>
-          </React.Fragment>
+          <div
+            key={event.index}
+            className={classNames("full-timeline-event", getEventColorClass(colorWord))}
+            style={{ left: `${left}%`, width: `${width}%` }}
+          />
         );
       })}
     </>

@@ -125,11 +125,9 @@ describe("FullTimeline", () => {
     expect(events[1].style.left).toBe("75%");
     expect(events[1].style.width).toBe("12.5%");
 
-    // Each event's shape is centered on the event
-    const shapes = container.querySelectorAll<HTMLElement>(".full-timeline-shape");
-    expect(shapes).toHaveLength(2);
-    expect(shapes[1].style.left).toBe("81.25%");
-    expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
+    // The event shapes belong on the graph above. On the strip they crowded the Full Timeline
+    // header, which shares that band straddling the top border.
+    expect(container.querySelector(".event-shape")).toBeNull();
   });
 
   it("keeps events within the strip, leaving out those that don't overlap the data", () => {
