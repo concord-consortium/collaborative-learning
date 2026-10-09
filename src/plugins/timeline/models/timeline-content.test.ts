@@ -747,3 +747,51 @@ describe("marker persistence", () => {
     expect(JSON.parse(content.exportJson())).not.toHaveProperty("markerTimeISO");
   });
 });
+
+describe("viewPctToTime", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        return [];
+      },
+    } as any);
+
+    content = TimelineContentModel.create();
+    content.fitToData();
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("is the inverse of timeToViewPct", () => {
+    const time = dataStart.plus({ days: 3, hours: 12 });
+    const pct = content.timeToViewPct(time);
+
+    expect(pct).toBeDefined();
+    expect(content.viewPctToTime(pct!)?.toMillis()).toBe(time.toMillis());
+  });
+
+  // A drag can run past the edge of the plot. The marker must not land where there is no data.
+  it("clamps to the loaded data range", () => {
+    expect(content.viewPctToTime(-500)?.toMillis()).toBe(content.dataStartTime?.toMillis());
+    expect(content.viewPctToTime(500)?.toMillis()).toBe(content.dataEndTime?.toMillis());
+  });
+
+  it("returns undefined with no view set", () => {
+    expect(TimelineContentModel.create({}).viewPctToTime(50)).toBeUndefined();
+  });
+});
