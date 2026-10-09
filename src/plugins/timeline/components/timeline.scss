@@ -3,14 +3,18 @@
   position: relative;
 
   .waveform-wrapper {
-    margin-top: 24px;
+    // Room for the event labels and shapes above the graph
+    margin-top: 37px;
     position: relative;
 
+    // Anchored to the graph's left edge so that a longer unit can't run into the graph
     .scale-unit {
-      left: -24px;
       position: absolute;
+      right: 100%;
       top: 50%;
-      transform: rotate(270deg) translateX(50%);
+      transform: translateY(-50%) rotate(180deg);
+      white-space: nowrap;
+      writing-mode: vertical-rl;
     }
   }
 
