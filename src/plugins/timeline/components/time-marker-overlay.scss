@@ -63,6 +63,9 @@
 
   &.placed {
     cursor: grab;
+    // The overlay is pointer-events: none so it doesn't swallow the plot's clicks. The placed
+    // label has to opt back in, or the drag handle and the delete button inside it are both dead.
+    pointer-events: auto;
 
     &:hover {
       background-color: #eee;

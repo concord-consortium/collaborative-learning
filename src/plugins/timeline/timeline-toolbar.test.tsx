@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { act, render, screen, fireEvent } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { DateTime } from "luxon";
@@ -88,6 +88,18 @@ describe("Timeline toolbar — Add Marker button", () => {
     renderToolbarButton(content);
 
     expect(screen.getByRole("button", { name: "Add Marker" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("is enabled again once the marker is deleted", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    content.setMarkerTime(dataStart.plus({ days: 1 }));
+    renderToolbarButton(content);
+
+    act(() => { content.clearMarkerTime(); });
+    fireEvent.click(screen.getByRole("button", { name: "Add Marker" }));
+
+    expect(content.isPlacingMarker).toBe(true);
   });
 
   // Nothing to place a marker against before data has loaded.
