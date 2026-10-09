@@ -83,11 +83,15 @@ describe("TimeMarkerOverlay", () => {
     expect(content.markerTime).toBeDefined();
   });
 
-  it("renders hover and placed markers simultaneously", () => {
+  // A hover preview and a placed marker can no longer coexist: the preview is only drawn while
+  // placing, and placing is unreachable once a marker exists. Placing one clears the preview, so
+  // a stale line is not left behind where the pointer happened to be.
+  it("clears the hover preview when a marker is placed", () => {
     const content = createContent();
     content.setHoverTime(viewStart.plus({ hours: 6 }));
     content.setMarkerTime(viewStart.plus({ hours: 12 }));
     const { container } = renderOverlay(content);
-    expect(container.querySelectorAll(".time-marker-line")).toHaveLength(2);
+    expect(container.querySelectorAll(".time-marker-line")).toHaveLength(1);
+    expect(container.querySelector(".time-marker-line.placed")).toBeInTheDocument();
   });
 });
