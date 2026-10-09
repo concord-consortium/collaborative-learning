@@ -11,27 +11,27 @@ function isPctInView(pct?: number): pct is number {
 
 export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
   const content = useTimelineContent();
-  const { hoverTime, pinnedTime } = content;
+  const { hoverTime, markerTime } = content;
   const hoverPct = hoverTime ? content.timeToViewPct(hoverTime) : undefined;
-  const pinnedPct = pinnedTime ? content.timeToViewPct(pinnedTime) : undefined;
+  const markerPct = markerTime ? content.timeToViewPct(markerTime) : undefined;
 
-  const handlePinnedLabelClick = (e: React.MouseEvent) => {
+  const handleMarkerLabelClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    content.clearPinnedTime();
+    content.clearMarkerTime();
   };
 
   return (
     <>
-      {pinnedTime && isPctInView(pinnedPct) && (
+      {markerTime && isPctInView(markerPct) && (
         <>
-          <div className="time-marker-line pinned" style={{ left: `${pinnedPct}%` }} />
+          <div className="time-marker-line placed" style={{ left: `${markerPct}%` }} />
           <button
-            className="time-marker-label pinned"
-            onClick={handlePinnedLabelClick}
-            style={{ left: `${pinnedPct}%` }}
+            className="time-marker-label placed"
+            onClick={handleMarkerLabelClick}
+            style={{ left: `${markerPct}%` }}
             type="button"
           >
-            <TimeLabel time={pinnedTime} />
+            <TimeLabel time={markerTime} />
           </button>
         </>
       )}

@@ -25,7 +25,7 @@ export const TimelineContentModel = TileContentModel
   })
   .volatile(self => ({
     hoverTime: undefined as DateTime | undefined,
-    pinnedTime: undefined as DateTime | undefined,
+    markerTime: undefined as DateTime | undefined,
     // The view shown while a preview is active, and the saved view it started from; see
     // `beginViewPreview`.
     viewPreview: undefined as {
@@ -207,11 +207,11 @@ export const TimelineContentModel = TileContentModel
     clearHoverTime() {
       self.hoverTime = undefined;
     },
-    setPinnedTime(time: DateTime) {
-      self.pinnedTime = time;
+    setMarkerTime(time: DateTime) {
+      self.markerTime = time;
     },
-    clearPinnedTime() {
-      self.pinnedTime = undefined;
+    clearMarkerTime() {
+      self.markerTime = undefined;
     },
     setViewRange(start: DateTime, end: DateTime) {
       if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;

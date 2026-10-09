@@ -277,10 +277,10 @@ describe("TimelinePlot", () => {
     expect(content.hoverTime).toBeUndefined();
   });
 
-  it("leaves the model's pinned time unset on a click", () => {
+  it("leaves the model's marker time unset on a click", () => {
     const { content, plot } = renderPlot(dataStart, dataEnd);
     click(plot, 500);
-    expect(content.pinnedTime).toBeUndefined();
+    expect(content.markerTime).toBeUndefined();
   });
 
   describe("announcements", () => {

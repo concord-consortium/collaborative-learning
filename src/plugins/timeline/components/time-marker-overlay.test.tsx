@@ -60,33 +60,33 @@ describe("TimeMarkerOverlay", () => {
     expect(label!.textContent).toContain(hoverTime.toUTC().toLocaleString(DateTime.TIME_WITH_SECONDS));
   });
 
-  it("renders a pinned marker and clears it when its label is clicked", () => {
+  it("renders a placed marker and clears it when its label is clicked", () => {
     const content = createContent();
-    content.setPinnedTime(viewStart.plus({ hours: 12 }));
+    content.setMarkerTime(viewStart.plus({ hours: 12 }));
     const { container } = renderOverlay(content);
 
-    const label = container.querySelector<HTMLElement>("button.time-marker-label.pinned");
-    expect(container.querySelector(".time-marker-line.pinned")).toBeInTheDocument();
+    const label = container.querySelector<HTMLElement>("button.time-marker-label.placed");
+    expect(container.querySelector(".time-marker-line.placed")).toBeInTheDocument();
     expect(label).toBeInTheDocument();
 
     fireEvent.click(label!);
-    expect(content.pinnedTime).toBeUndefined();
-    expect(container.querySelector(".time-marker-line.pinned")).toBeNull();
+    expect(content.markerTime).toBeUndefined();
+    expect(container.querySelector(".time-marker-line.placed")).toBeNull();
   });
 
-  it("hides the pinned marker when its time is outside the view range", () => {
+  it("hides the placed marker when its time is outside the view range", () => {
     const content = createContent();
-    content.setPinnedTime(viewEnd.plus({ hours: 1 }));
+    content.setMarkerTime(viewEnd.plus({ hours: 1 }));
     const { container } = renderOverlay(content);
-    expect(container.querySelector(".time-marker-line.pinned")).toBeNull();
-    // Still pinned — it reappears if the view pans back
-    expect(content.pinnedTime).toBeDefined();
+    expect(container.querySelector(".time-marker-line.placed")).toBeNull();
+    // Still placed — it reappears if the view pans back
+    expect(content.markerTime).toBeDefined();
   });
 
-  it("renders hover and pinned markers simultaneously", () => {
+  it("renders hover and placed markers simultaneously", () => {
     const content = createContent();
     content.setHoverTime(viewStart.plus({ hours: 6 }));
-    content.setPinnedTime(viewStart.plus({ hours: 12 }));
+    content.setMarkerTime(viewStart.plus({ hours: 12 }));
     const { container } = renderOverlay(content);
     expect(container.querySelectorAll(".time-marker-line")).toHaveLength(2);
   });

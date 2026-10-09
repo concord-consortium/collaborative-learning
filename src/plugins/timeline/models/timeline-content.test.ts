@@ -635,10 +635,10 @@ describe("time markers", () => {
   const viewStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
   const viewEnd = DateTime.fromISO("2026-02-02T00:00:00.000Z");
 
-  it("hoverTime and pinnedTime default to undefined", () => {
+  it("hoverTime and markerTime default to undefined", () => {
     const content = TimelineContentModel.create();
     expect(content.hoverTime).toBeUndefined();
-    expect(content.pinnedTime).toBeUndefined();
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("setHoverTime and clearHoverTime update hoverTime", () => {
@@ -650,19 +650,19 @@ describe("time markers", () => {
     expect(content.hoverTime).toBeUndefined();
   });
 
-  it("setPinnedTime and clearPinnedTime update pinnedTime", () => {
+  it("setMarkerTime and clearMarkerTime update markerTime", () => {
     const content = TimelineContentModel.create();
     const time = DateTime.fromISO("2026-02-01T12:00:00.000Z");
-    content.setPinnedTime(time);
-    expect(content.pinnedTime?.toISO()).toBe(time.toISO());
-    content.clearPinnedTime();
-    expect(content.pinnedTime).toBeUndefined();
+    content.setMarkerTime(time);
+    expect(content.markerTime?.toISO()).toBe(time.toISO());
+    content.clearMarkerTime();
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("marker times are volatile, not serialized", () => {
     const content = TimelineContentModel.create();
-    content.setPinnedTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
-    expect(JSON.parse(content.exportJson())).not.toHaveProperty("pinnedTime");
+    content.setMarkerTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("markerTime");
   });
 
   it("timeToViewPct returns undefined when there is no view range", () => {
