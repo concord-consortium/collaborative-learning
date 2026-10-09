@@ -326,6 +326,8 @@
           "zoom-out",
           "view-all",
           "|",
+          "add-marker",
+          "|",
           "pan-left",
           "pan-right"
         ]

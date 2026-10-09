@@ -11,6 +11,7 @@ import ZoomInIcon from "./assets/toolbar/zoom-in-icon.svg";
 import ZoomOutIcon from "./assets/toolbar/zoom-out-icon.svg";
 import ZoomToFitIcon from "./assets/toolbar/zoom-to-fit-icon.svg";
 import PanLeftIcon from "./assets/toolbar/pan-left-icon.svg";
+import AddMarkerIcon from "./assets/toolbar/add-marker-icon.svg";
 
 const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComponentProps) {
   const content = useTimelineContent();
@@ -88,6 +89,22 @@ const PanRightButton = observer(function PanRightButton({ name }: IToolbarButton
   );
 });
 
+const AddMarkerButton = observer(function AddMarkerButton({ name }: IToolbarButtonComponentProps) {
+  const content = useTimelineContent();
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Add Marker"
+      onClick={() => content?.startPlacingMarker()}
+      selected={content?.isPlacingMarker}
+      disabled={!!content?.markerTime || !content?.dataStartTime}
+    >
+      <AddMarkerIcon/>
+    </TileToolbarButton>
+  );
+});
+
 registerTileToolbarButtons("timeline",
 [
   {
@@ -98,6 +115,7 @@ registerTileToolbarButtons("timeline",
   { name: "zoom-in", component: ZoomInButton },
   { name: "zoom-out", component: ZoomOutButton },
   { name: "view-all", component: ViewAllButton },
+  { name: "add-marker", component: AddMarkerButton },
   { name: "pan-left", component: PanLeftButton },
   { name: "pan-right", component: PanRightButton }
 ]);
