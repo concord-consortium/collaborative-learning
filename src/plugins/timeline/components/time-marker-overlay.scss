@@ -9,6 +9,15 @@
   &.hover {
     opacity: 0.7;
   }
+
+  // Dashed to say the marker isn't settled yet. The line is a solid background, so dashing it
+  // means swapping to a border instead of just adding a border-style.
+  &.placing {
+    background-color: transparent;
+    border-left: 1px dashed white;
+    opacity: 0.7;
+    width: 0;
+  }
 }
 
 .time-marker-label {
@@ -30,7 +39,8 @@
   white-space: nowrap;
   z-index: 1;
 
-  &.hover {
+  &.hover,
+  &.placing {
     pointer-events: none;
   }
 

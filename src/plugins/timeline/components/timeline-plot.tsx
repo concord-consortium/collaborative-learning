@@ -83,6 +83,10 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     setIsShiftDown(e.shiftKey);
+    if (content.isPlacingMarker) {
+      const time = timeAtClientX(e);
+      if (time) content.setHoverTime(time);
+    }
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
     const dx = e.clientX - drag.startX;

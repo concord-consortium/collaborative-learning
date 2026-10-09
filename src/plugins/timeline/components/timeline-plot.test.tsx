@@ -396,5 +396,19 @@ describe("TimelinePlot", () => {
       expect(content.isPlacingMarker).toBe(false);
       expect(content.markerTime).toBeUndefined();
     });
+
+    it("tracks the pointer with a preview while placing", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+      fireEvent.pointerMove(plot, { clientX: 500 });
+      expect(content.hoverTime).toBeDefined();
+    });
+
+    // Outside the mode the preview stays dormant - CLUE-673 removed the follow line deliberately.
+    it("sets no preview when not placing", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      fireEvent.pointerMove(plot, { clientX: 500 });
+      expect(content.hoverTime).toBeUndefined();
+    });
   });
 });

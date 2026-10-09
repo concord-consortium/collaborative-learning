@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useTimelineContent } from "../hooks/use-timeline-content";
@@ -37,8 +38,14 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
       )}
       {hoverTime && isPctInView(hoverPct) && (
         <>
-          <div className="time-marker-line hover" style={{ left: `${hoverPct}%` }} />
-          <div className="time-marker-label hover" style={{ left: `${hoverPct}%` }}>
+          <div
+            className={classNames("time-marker-line", content.isPlacingMarker ? "placing" : "hover")}
+            style={{ left: `${hoverPct}%` }}
+          />
+          <div
+            className={classNames("time-marker-label", content.isPlacingMarker ? "placing" : "hover")}
+            style={{ left: `${hoverPct}%` }}
+          >
             <TimeLabel time={hoverTime} />
           </div>
         </>

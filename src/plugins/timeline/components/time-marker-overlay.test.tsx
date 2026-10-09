@@ -7,7 +7,7 @@ jest.mock("uplot", () => {
   }));
 });
 
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
@@ -30,13 +30,14 @@ describe("TimeMarkerOverlay", () => {
     });
   }
 
-  function renderOverlay(content: TimelineContentModelType) {
+  function renderOverlay(content: TimelineContentModelType = createContent()) {
     const model = TileModel.create({ content });
-    return render(
+    const result = render(
       <TileModelContext.Provider value={model}>
         <TimeMarkerOverlay />
       </TileModelContext.Provider>
     );
+    return { content, ...result };
   }
 
   it("renders no markers by default", () => {
@@ -93,5 +94,26 @@ describe("TimeMarkerOverlay", () => {
     const { container } = renderOverlay(content);
     expect(container.querySelectorAll(".time-marker-line")).toHaveLength(1);
     expect(container.querySelector(".time-marker-line.placed")).toBeInTheDocument();
+  });
+
+  describe("the placing preview", () => {
+    // The preview is what tells a student where the marker will land, and dashed is what tells them
+    // it is not settled yet.
+    it("draws a dashed preview at the hovered time while placing", () => {
+      const { content, container } = renderOverlay();
+      act(() => {
+        content.startPlacingMarker();
+        content.setHoverTime(viewStart.plus({ hours: 12 }));
+      });
+
+      expect(container.querySelector(".time-marker-line.placing")).toBeInTheDocument();
+    });
+
+    it("draws no preview when not placing", () => {
+      const { content, container } = renderOverlay();
+      act(() => { content.setHoverTime(viewStart.plus({ hours: 12 })); });
+
+      expect(container.querySelector(".time-marker-line.placing")).not.toBeInTheDocument();
+    });
   });
 });
