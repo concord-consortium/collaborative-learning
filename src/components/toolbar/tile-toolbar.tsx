@@ -112,6 +112,7 @@ export const TileToolbar = observer(
           const titleElement = focusable?.titleElement;
           const focusContentFn = focusable?.focusContent;
           const paletteElement = focusable?.paletteElement;
+          const topbarElement = focusable?.topbarElement;
           const dragHandle = tileElement.querySelector(
             ".tool-tile-drag-handle-wrapper"
           ) as HTMLElement | null;
@@ -159,11 +160,23 @@ export const TileToolbar = observer(
             return document.activeElement === target;
           };
 
+          // Focuses the topbar slot's first (or, in reverse, last) focusable, or the slot element
+          // itself when it is the only control. Returns true if focus moved into the topbar.
+          const tryFocusTopbar = (reverse: boolean) => {
+            if (!topbarElement) return false;
+            const focusables = getVisibleFocusables(topbarElement);
+            const target = focusables.length > 0
+              ? focusables[reverse ? focusables.length - 1 : 0]
+              : topbarElement;
+            target.focus();
+            return document.activeElement === target;
+          };
+
           // Cycle (matches the focus-trap controller's cycleOrder):
           //   title → topbar → content → palette → toolbar → dragHandle → resize → (wrap)
           // Try candidates in order, skipping any that can't actually receive focus.
           if (e.shiftKey) {
-            // Shift+Tab: toolbar → palette → last content child → title → resize → dragHandle → tile
+            // Shift+Tab: toolbar → palette → last content child → topbar → title → resize → dragHandle → tile
             if (!tryFocusPalette()) {
               const focusedLastChild = (() => {
                 if (!contentElement) return false;
@@ -175,7 +188,7 @@ export const TileToolbar = observer(
                 return false;
               })();
               if (!focusedLastChild) {
-                if (!tryFocusContent("reverse")) {
+                if (!tryFocusContent("reverse") && !tryFocusTopbar(true)) {
                   if (titleElement) { titleElement.focus(); }
                   if (document.activeElement !== titleElement) {
                     if (!tryFocusResize()) {
@@ -186,12 +199,12 @@ export const TileToolbar = observer(
               }
             }
           } else {
-            // Tab: toolbar → dragHandle → resize → title → content → tile
+            // Tab: toolbar → dragHandle → resize → title → topbar → content → tile
             if (!tryFocusDragHandle()) {
               if (!tryFocusResize()) {
                 if (titleElement) { titleElement.focus(); }
                 if (document.activeElement !== titleElement) {
-                  if (!tryFocusContent("forward")) { tileElement.focus(); }
+                  if (!tryFocusTopbar(false) && !tryFocusContent("forward")) { tileElement.focus(); }
                 }
               }
             }

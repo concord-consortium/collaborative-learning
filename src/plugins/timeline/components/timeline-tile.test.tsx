@@ -11,8 +11,12 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { Provider } from "mobx-react";
 import React from "react";
+import { ModalProvider } from "react-modal-hook";
 import { TileModel } from "../../../models/tiles/tile-model";
-import { TileModelContext } from "../../../components/tiles/tile-api";
+import { ITileApi, TileModelContext } from "../../../components/tiles/tile-api";
+import { ITileProps } from "../../../components/tiles/tile-component";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
 import { userSelectTile } from "../../../models/stores/ui";
@@ -49,8 +53,8 @@ describe("TimelineComponent", () => {
     onResizeRow: () => { throw new Error("Function not implemented."); },
     onSetCanAcceptDrop: () => { throw new Error("Function not implemented."); },
     onRequestRowHeight: () => { throw new Error("Function not implemented."); },
-    onRegisterTileApi: () => { throw new Error("Function not implemented."); },
-    onUnregisterTileApi: () => { throw new Error("Function not implemented."); }
+    onRegisterTileApi: jest.fn(),
+    onUnregisterTileApi: jest.fn()
   };
 
   const stores = specStores({
@@ -74,11 +78,13 @@ describe("TimelineComponent", () => {
   function renderWithStores() {
     stores.ui.setSelectedTileId(model.id);
     return render(
-      <Provider stores={stores}>
-        <TileModelContext.Provider value={model}>
-          <TimelineComponent {...defaultProps} {...{model}} />
-        </TileModelContext.Provider>
-      </Provider>
+      <ModalProvider>
+        <Provider stores={stores}>
+          <TileModelContext.Provider value={model}>
+            <TimelineComponent {...defaultProps} {...{model}} />
+          </TileModelContext.Provider>
+        </Provider>
+      </ModalProvider>
     );
   }
 
@@ -90,6 +96,12 @@ describe("TimelineComponent", () => {
   it("renders an editable tile title", () => {
     const { container } = renderWithStores();
     expect(container.querySelector(".title-area")).toBeInTheDocument();
+  });
+
+  it("renders the info button in the title area", () => {
+    const { container } = renderWithStores();
+    const infoButton = screen.getByRole("button", { name: "Zooming and Moving" });
+    expect(container.querySelector(".title-area")).toContainElement(infoButton);
   });
 
   it("zoom buttons are disabled when no seismogram data is available", () => {
@@ -163,6 +175,67 @@ describe("TimelineComponent", () => {
     expect(toolbar).toContainHTML("Pan Right");
   });
 
+  describe("keyboard focus slots", () => {
+    let tileElt: HTMLElement | undefined;
+
+    afterEach(() => {
+      tileElt?.remove();
+      mockedGetSharedModelManager.mockReset();
+    });
+
+    function renderInTile(props: Partial<ITileProps> = {}) {
+      tileElt = document.createElement("div");
+      document.body.append(tileElt);
+      const onRegisterTileApi = jest.fn();
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <TileModelContext.Provider value={model}>
+              <TimelineComponent {...defaultProps} {...{model, tileElt, onRegisterTileApi, ...props}} />
+            </TileModelContext.Provider>
+          </Provider>
+        </ModalProvider>,
+        { container: tileElt }
+      );
+      const api: ITileApi | undefined = onRegisterTileApi.mock.calls[0]?.[0];
+      return { onRegisterTileApi, elements: api?.getFocusableElements?.() };
+    }
+
+    it("puts the title, then the info button, in the focus cycle", () => {
+      const { elements } = renderInTile();
+      expect(elements?.titleElement).toHaveClass("editable-tile-title-text");
+      expect(elements?.topbarElement).toBe(screen.getByRole("button", { name: "Zooming and Moving" }));
+    });
+
+    it("leaves Prev and Next out of the focus cycle while both are disabled", () => {
+      const { elements } = renderInTile();
+      expect(elements?.contentElement).toBeUndefined();
+    });
+
+    it("puts Prev and Next in the focus cycle when there's an event to move to", () => {
+      const dataSet = DataSet.create();
+      ["windowStart", "windowEnd", "eventType"].forEach(name => addAttributeToDataSet(dataSet, { name }));
+      addCasesToDataSet(dataSet, [
+        { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Earthquake" },
+        { windowStart: "2026-02-02T00:00:00.000Z", windowEnd: "2026-02-02T01:00:00.000Z", eventType: "Noise" }
+      ]);
+      const sharedDataSet = SharedDataSet.create({ dataSet });
+      mockedGetSharedModelManager.mockReturnValue({
+        isReady: true,
+        getTileSharedModelsByType: (_self: any, type: any) => type === SharedDataSet ? [sharedDataSet] : []
+      } as any);
+
+      const { elements } = renderInTile();
+      expect(elements?.contentElement).toHaveClass("event-row");
+      expect(elements?.contentElement).toContainElement(screen.getByRole("button", { name: "Next" }));
+    });
+
+    it("doesn't join the focus cycle when read-only", () => {
+      const { onRegisterTileApi } = renderInTile({ readOnly: true });
+      expect(onRegisterTileApi).not.toHaveBeenCalled();
+    });
+  });
+
   describe("tile selection", () => {
     beforeAll(mockPointerEvents);
 
@@ -190,11 +263,13 @@ describe("TimelineComponent", () => {
       document.body.append(tileElt);
       stores.ui.setSelectedTileId(selectedTileId);
       render(
-        <Provider stores={stores}>
-          <TileModelContext.Provider value={model}>
-            <TimelineComponent {...defaultProps} {...{model, tileElt}} />
-          </TileModelContext.Provider>
-        </Provider>
+        <ModalProvider>
+          <Provider stores={stores}>
+            <TileModelContext.Provider value={model}>
+              <TimelineComponent {...defaultProps} {...{model, tileElt}} />
+            </TileModelContext.Provider>
+          </Provider>
+        </ModalProvider>
       );
       return { plot, title, dragHandle, fullTimeline };
     }

@@ -1,0 +1,47 @@
+@import "../../../components/vars";
+
+.timeline-info-button {
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  left: 100%;
+  margin-left: 4px;
+  padding: 0;
+  position: absolute;
+  width: 24px;
+
+  .info-icon-fill {
+    fill: $workspace-teal-light-5;
+  }
+
+  &:hover, &:focus-visible {
+    .info-icon-fill {
+      fill: $workspace-teal-light-4;
+    }
+  }
+
+  &:active .info-icon-fill {
+    fill: $workspace-teal-light-3;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus-ring-color;
+    outline-offset: 0;
+  }
+}
+
+.custom-modal.timeline-info-modal {
+  width: 320px;
+
+  .modal-content {
+    gap: 10px;
+
+    p {
+      line-height: 18px;
+      margin: 0;
+    }
+  }
+}

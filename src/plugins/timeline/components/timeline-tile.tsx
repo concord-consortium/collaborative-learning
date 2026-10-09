@@ -1,23 +1,28 @@
+import { getVisibleFocusables } from "@concord-consortium/accessibility-tools/hooks";
 import { observer } from "mobx-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import ScrollArrowIcon from "../../../assets/scroll-arrow-small-icon.svg";
 import { useContainerContext } from "../../../components/document/container-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
 import { useStores } from "../../../hooks/use-stores";
 import { userSelectTile } from "../../../models/stores/ui";
+import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { Timeline } from "./timeline";
+import { TimelineInfoButton } from "./timeline-info-button";
 import { TimelineKey } from "./timeline-key";
 import "../timeline-toolbar";
 import "./timeline-tile.scss";
 
 export const TimelineComponent: React.FC<ITileProps> = observer(function TimelineComponent({
-  model, readOnly, tileElt
+  model, readOnly, tileElt, onRegisterTileApi, onUnregisterTileApi
 }) {
   const content = useTimelineContent();
+  const eventRowRef = useRef<HTMLDivElement>(null);
   const { ui } = useStores();
   const container = useContainerContext().model;
 
@@ -41,7 +46,9 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
 
   return (
     <div className="tile-content timeline-tile">
-      <BasicEditableTileTitle />
+      <BasicEditableTileTitle>
+        <TimelineInfoButton />
+      </BasicEditableTileTitle>
       <TileToolbar tileType="timeline" readOnly={!!readOnly} tileElement={tileElt} />
       <div className="metadata-display">
         <div>{content.sharedSeismogram?.station?.label ?? ""}</div>
@@ -50,7 +57,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
         <div>{content.dataEndTime?.toUTC().toLocaleString() ?? ""}</div>
       </div>
       <div className="timeline-container">
-        <div className="event-row">
+        <div className="event-row" ref={eventRowRef}>
           <button
             className="timeline-button prev-button"
             disabled={!content.canSelectPrev}
@@ -70,6 +77,21 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
         <Timeline />
         <TimelineKey />
       </div>
+      {!readOnly && (
+        <ClueTileAccessibilityBridge
+          tileType="timeline"
+          onRegisterTileApi={onRegisterTileApi}
+          onUnregisterTileApi={onUnregisterTileApi}
+          getTitleElement={() => getEditableTitleElement(tileElt)}
+          getTopbarElement={() => tileElt?.querySelector<HTMLElement>(".timeline-info-button") ?? undefined}
+          getContentElement={() => {
+            // The focus trap skips a slot with no element but stalls on one with nothing focusable,
+            // so report the event row only while Prev or Next is enabled.
+            const el = eventRowRef.current;
+            return el && getVisibleFocusables(el).length > 0 ? el : undefined;
+          }}
+        />
+      )}
     </div>
   );
 });

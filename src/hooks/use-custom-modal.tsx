@@ -29,6 +29,10 @@ interface IProps<IContentProps> {
   Content: React.FC<IContentProps>;
   contentProps: IContentProps;
   focusElement?: string;
+  // Whether the content describes the dialog for assistive technology (aria-describedby). Suited to
+  // a message-only dialog, whose text would otherwise go unread when focus starts on a button; a
+  // form's controls are announced as they're reached instead.
+  describeContent?: boolean;
   canCancel?: boolean;
   // defined left-to-right, e.g. Extra Button, Cancel, OK
   buttons: IModalButton[];
@@ -36,7 +40,7 @@ interface IProps<IContentProps> {
   dataTestId?: string;
 }
 export const useCustomModal = <IContentProps,>({
-  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
+  className, Icon, title, Content, contentProps, focusElement, describeContent, canCancel, buttons,
   onClose, dataTestId
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
@@ -101,7 +105,9 @@ export const useCustomModal = <IContentProps,>({
   }, []);
   handleCloseRef.current = handleClose;
 
-  const titleId = `custom-modal-title-${(dataTestId || className || "default").replace(/\s+/g, "-")}`;
+  const idSuffix = (dataTestId || className || "default").replace(/\s+/g, "-");
+  const titleId = `custom-modal-title-${idSuffix}`;
+  const contentId = `custom-modal-content-${idSuffix}`;
 
   const [showModal, hideModal] = useModal(() => {
     // NOTE: the data-testid attribute is not passed to the modal element
@@ -109,7 +115,7 @@ export const useCustomModal = <IContentProps,>({
     // is passed to the modal header and content elements to allow for testing
     return (
       <Modal className={`custom-modal ${className || ""}`} isOpen
-              aria={{ labelledby: titleId, modal: true }}
+              aria={{ labelledby: titleId, describedby: describeContent ? contentId : undefined, modal: true }}
               shouldCloseOnEsc={canCancel}
               shouldCloseOnOverlayClick={false}
               onAfterOpen={handleAfterOpen as any}
@@ -124,7 +130,7 @@ export const useCustomModal = <IContentProps,>({
               <CloseIconSvg />
             </button>}
         </div>
-        <div className="modal-content" data-testid={dataTestId && `${dataTestId}-content`}>
+        <div className="modal-content" id={contentId} data-testid={dataTestId && `${dataTestId}-content`}>
           { /* TODO Fix type cast */ }
           <Content as any {...(contentProps)}/>
         </div>
