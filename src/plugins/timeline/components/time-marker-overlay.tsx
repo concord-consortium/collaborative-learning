@@ -51,6 +51,14 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
     setDragTime(undefined);
   };
 
+  // The stem and the label are two grips on the same marker.
+  const dragHandlers = {
+    onPointerDown: handleDragStart,
+    onPointerMove: handleDragMove,
+    onPointerUp: (e: React.PointerEvent) => endDrag(e, true),
+    onPointerCancel: (e: React.PointerEvent) => endDrag(e, false),
+  };
+
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     content.clearMarkerTime();
@@ -69,19 +77,13 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
             className={classNames("time-marker-line", "placed", { dragging: isDragging })}
             data-testid="marker-stem"
             style={{ left: `${placedPct}%` }}
-            onPointerDown={handleDragStart}
-            onPointerMove={handleDragMove}
-            onPointerUp={e => endDrag(e, true)}
-            onPointerCancel={e => endDrag(e, false)}
+            {...dragHandlers}
           />
           <div
             className={classNames("time-marker-label", "placed", { dragging: isDragging })}
             data-testid="marker-label"
             style={{ left: `${placedPct}%` }}
-            onPointerDown={handleDragStart}
-            onPointerMove={handleDragMove}
-            onPointerUp={e => endDrag(e, true)}
-            onPointerCancel={e => endDrag(e, false)}
+            {...dragHandlers}
           >
             <TimeLabel time={placedTime} />
             <button

@@ -152,7 +152,6 @@ describe("FullTimeline", () => {
     expect(events[0].style.width).toBe("12.5%");
   });
 
-  // The strip is how a student finds a marker that has scrolled out of the graph's view.
   it("shows a placed marker", () => {
     const { content, container } = renderFullTimeline(day(1), day(2));
     act(() => { content.setMarkerTime(day(3)); });

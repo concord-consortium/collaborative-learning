@@ -785,7 +785,6 @@ describe("viewPctToTime", () => {
     expect(content.viewPctToTime(pct!)?.toMillis()).toBe(time.toMillis());
   });
 
-  // A drag can run past the edge of the plot. The marker must not land where there is no data.
   it("clamps to the loaded data range", () => {
     expect(content.viewPctToTime(-500)?.toMillis()).toBe(content.dataStartTime?.toMillis());
     expect(content.viewPctToTime(500)?.toMillis()).toBe(content.dataEndTime?.toMillis());

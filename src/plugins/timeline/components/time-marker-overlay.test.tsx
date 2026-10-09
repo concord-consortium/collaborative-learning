@@ -80,9 +80,8 @@ describe("TimeMarkerOverlay", () => {
     expect(content.markerTime).toBeDefined();
   });
 
-  // A hover preview and a placed marker can no longer coexist: the preview is only drawn while
-  // placing, and placing is unreachable once a marker exists. Placing one clears the preview, so
-  // a stale line is not left behind where the pointer happened to be.
+  // The preview is drawn only while placing, and placing is unreachable once a marker exists, so
+  // the two can no longer coexist.
   it("clears the hover preview when a marker is placed", () => {
     const content = createContent();
     content.setHoverTime(viewStart.plus({ hours: 6 }));
@@ -93,8 +92,6 @@ describe("TimeMarkerOverlay", () => {
   });
 
   describe("the placing preview", () => {
-    // The preview is what tells a student where the marker will land, and dashed is what tells them
-    // it is not settled yet.
     it("draws a dashed preview at the hovered time while placing", () => {
       const { content, container } = renderOverlay();
       act(() => {
@@ -120,7 +117,6 @@ describe("TimeMarkerOverlay", () => {
       expect(content.markerTime).toBeUndefined();
     });
 
-    // The label becomes a drag handle in the next task, so a click on it must no longer delete.
     it("does not delete when the label itself is clicked", () => {
       const { content } = renderOverlayWithAMarker();
       fireEvent.click(screen.getByTestId("marker-label"));
@@ -197,7 +193,6 @@ describe("TimeMarkerOverlay", () => {
       expect(content.markerTime!.toMillis()).toBe(before.toMillis());
     });
 
-    // Deleting is a click on the x, not a drag of the label it sits in.
     it("does not start a drag from the delete control", () => {
       const { content } = renderOverlayWithAMarker();
       fireEvent.click(screen.getByRole("button", { name: "Delete marker" }));

@@ -365,7 +365,6 @@ describe("TimelinePlot", () => {
   });
 
   describe("placing a marker", () => {
-    // While placing, the click belongs to the marker. Zooming would move the ground under it.
     it("places the marker instead of zooming", () => {
       const { content, plot } = renderPlot(dataStart, dataEnd);
       const viewStartBefore = content.viewStartTime?.toISO();

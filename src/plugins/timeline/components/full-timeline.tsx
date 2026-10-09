@@ -171,8 +171,7 @@ interface IFullTimelineMarkerProps {
 }
 
 // An indicator only, positioned against the whole data range (unlike the graph's timeToViewPct) so
-// it still shows where the marker is once it has scrolled out of the graph's zoomed view. Dragging
-// and deleting stay on the graph.
+// it still shows where the marker is once it has scrolled out of the graph's zoomed view.
 const FullTimelineMarker = observer(function FullTimelineMarker(
   { content, totalStart, totalEnd }: IFullTimelineMarkerProps
 ) {
