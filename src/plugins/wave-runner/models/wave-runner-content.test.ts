@@ -3,6 +3,7 @@ import { DocumentContentModel } from "../../../models/document/document-content"
 import { createDocumentModel } from "../../../models/document/document";
 import { ProblemDocument } from "../../../models/document/document-types";
 import "../../../models/shared/shared-data-set-registration";
+import { kSharedDataSetType } from "../../../models/shared/shared-data-set";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
 import { kWaveRunnerTileType } from "../wave-runner-types";
@@ -313,6 +314,7 @@ describe("WaveRunnerContent", () => {
         ensureRange: jest.fn(),
         nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
         readDay: jest.fn(async () => new ArrayBuffer(8)),
+        bytesForDay: jest.fn(() => 0),
         cancel: jest.fn(),
         erroredDays: [],
         emptyDays: [],
@@ -679,20 +681,72 @@ describe("WaveRunnerContent", () => {
           expect(progressAtStart).toEqual([0, 0]);
         });
 
-        it("stops the run when the tile is deleted", async () => {
-          jest.spyOn(console, "warn").mockImplementation(() => undefined);
-          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
-          const content = await setupRunReadyContent();
-          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk")
-            .mockResolvedValue([])
-            .mockImplementationOnce(async () => {
-              unprotect(getRoot(content));
-              destroy(getParent(content));
-              return [];
-            });
-          await content.runModel();
+        describe("when the tile is deleted", () => {
+          let warn: jest.SpyInstance;
+          beforeEach(() => {
+            warn = jest.spyOn(console, "warn");
+          });
+          afterEach(() => {
+            const deadNodeWarnings = warn.mock.calls.filter(args =>
+              args.some((arg: unknown) => String(arg).includes("no longer part of a state tree")));
+            expect(deadNodeWarnings).toEqual([]);
+          });
 
-          expect(processChunk).toHaveBeenCalledTimes(1);
+          function deleteTile(content: any) {
+            unprotect(getRoot(content));
+            destroy(getParent(content));
+          }
+
+          it("stops the run after the day in progress", async () => {
+            makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+            const content = await setupRunReadyContent();
+            const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+              .mockResolvedValue([])
+              .mockImplementationOnce(async (_seismogram: any, callbacks: any) => {
+                deleteTile(content);
+                callbacks.onEvents([makeEvent(Date.UTC(2026, 1, 1, 1))]);
+                return [];
+              });
+            await content.runModel();
+
+            expect(processChunk).toHaveBeenCalledTimes(1);
+          });
+
+          it("doesn't start the run if deleted while the model metadata loads", async () => {
+            makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+            jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+            const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+            const content = setupTileInDocument();
+            content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+            content.setStartDate("2026-02-01");
+            content.setEndDate("2026-02-03");
+            // Selects the model without waiting for its metadata, as after a page reload.
+            content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+            const run = content.runModel();
+            deleteTile(content);
+            await run;
+
+            expect(loadEvents).not.toHaveBeenCalled();
+            expect(processChunk).not.toHaveBeenCalled();
+          });
+
+          it("doesn't make an events table if deleted during the last day", async () => {
+            makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+            const content = await setupRunReadyContent();
+            const docContent = getParent<any>(getParent(content), 2);
+            jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+              .mockResolvedValueOnce([])
+              .mockResolvedValueOnce([])
+              .mockImplementationOnce(async () => {
+                deleteTile(content);
+                return [];
+              });
+            await content.runModel();
+
+            const sharedTypes = [...docContent.sharedModelMap.values()].map((entry: any) => entry.sharedModel.type);
+            expect(sharedTypes).not.toContain(kSharedDataSetType);
+          });
         });
       });
     });

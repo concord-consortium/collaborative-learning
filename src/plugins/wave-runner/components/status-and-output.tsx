@@ -7,19 +7,26 @@ import "./status-and-output.scss";
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
   const {
-    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isPaused, isLoadingData,
-    eventsDataSet, runError, loadDataError, chunksProcessed, chunksTotal
+    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isPaused, isDayInProgress,
+    isLoadingData, eventsDataSet, runError, loadDataError, chunksProcessed, chunksTotal
   } = model;
+  const currentDay = `day ${chunksTotal ? Math.min(chunksProcessed + 1, chunksTotal) : chunksProcessed + 1}`
+    + ` of ${chunksTotal || "?"}`;
 
-  function runStatus() {
+  // Run state changes, announced to screen readers. The per-day progress is not, so a long
+  // run doesn't announce every day.
+  function runStateMessage() {
     if (isRunning) {
-      const day = chunksTotal ? Math.min(chunksProcessed + 1, chunksTotal) : chunksProcessed + 1;
-      return isPaused
-        ? `Pausing after day ${day} of ${chunksTotal || "?"}...`
-        : `Processing day ${day} of ${chunksTotal || "?"}...`;
+      if (!isPaused) return "";
+      return isDayInProgress ? `Pausing after ${currentDay}...` : "Pausing...";
     }
     if (isPaused) return `Model paused at day ${chunksProcessed} of ${chunksTotal}. Run to continue.`;
-    return eventsDataSet ? "Run complete." : "Estimated time to complete run:";
+    return eventsDataSet ? "Run complete." : "";
+  }
+
+  function runStatus() {
+    if (isRunning && !isPaused) return `Processing ${currentDay}...`;
+    return runStateMessage() || "Estimated time to complete run:";
   }
 
   return (
@@ -41,7 +48,8 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         {loadDataError && <div className="waveform-error">{loadDataError}</div>}
         {runError && <div className="waveform-error">{runError}</div>}
       </div>
-      <div className="estimated-time" role="status">{runStatus()}</div>
+      <div className="estimated-time">{runStatus()}</div>
+      <div className="visually-hidden" role="status">{runStateMessage()}</div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>

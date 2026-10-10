@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
-import { cast, flow, getSnapshot, types, Instance } from "mobx-state-tree";
+import { cast, flow, getSnapshot, isAlive, types, Instance } from "mobx-state-tree";
 import { EnvironmentName } from "@concord-consortium/token-service";
 import { eventDocId } from "../../../../shared/seismic/models/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
@@ -49,8 +49,11 @@ export const WaveRunnerContentModel = TileContentModel
   })
   .volatile(() => ({
     isRunning: false,
-    // Set by pauseModel. While isRunning is still true the run is finishing its current day.
+    // Set by pauseModel. While isRunning is still true the run is stopping, after the day in
+    // progress if there is one.
     isPaused: false,
+    // True from when a day's data is ready until the model has processed it.
+    isDayInProgress: false,
     runAbortController: null as AbortController | null,
     chunksProcessed: 0,
     chunksTotal: 0,
@@ -162,6 +165,10 @@ export const WaveRunnerContentModel = TileContentModel
     updateChunkProgress(done: number, total: number) {
       self.chunksProcessed = done;
       self.chunksTotal = total;
+      self.isDayInProgress = false;
+    },
+    startDay() {
+      self.isDayInProgress = true;
     },
     updateLoadProgress(done: number, total: number) {
       self.loadDaysDone = done;
@@ -205,11 +212,13 @@ export const WaveRunnerContentModel = TileContentModel
       self.clearPausedRun();
 
       try {
-        self.selectedModelMetadata = yield fetchModelMetadata(metadataUrl);
+        const metadata: ModelMetadata = yield fetchModelMetadata(metadataUrl);
+        if (isAlive(self)) self.selectedModelMetadata = metadata;
       } catch (err: unknown) {
+        console.error("Failed to load model metadata:", err);
+        if (!isAlive(self)) return;
         const message = err instanceof Error ? err.message : String(err);
         self.modelLoadError = message;
-        console.error("Failed to load model metadata:", err);
       }
     }),
   }))
@@ -223,8 +232,9 @@ export const WaveRunnerContentModel = TileContentModel
 
       // Fetch metadata if not already loaded (e.g., after page reload)
       yield self.ensureModelMetadata(self.selectedModelUrl);
-      // A second click while the metadata loaded may have started a run already.
-      if (self.isRunning) return;
+      // The tile may have been deleted, or a second click may have started a run, while the
+      // metadata was loading.
+      if (!isAlive(self) || self.isRunning) return;
       if (!self.selectedModelMetadata) {
         self.runError = self.modelLoadError || "Failed to load model metadata";
         return;
@@ -239,8 +249,10 @@ export const WaveRunnerContentModel = TileContentModel
       self.clearEventsDataSet();
       self.runError = null;
       self.isRunning = true;
-      // A resumed run reloads the paused run's events from the database.
+      // Every run starts from empty progress. A resumed run gets the paused run's events back
+      // from the database when it can reach it.
       self.isPaused = false;
+      self.isDayInProgress = false;
       self.detectedEvents = [];
       self.chunksProcessed = 0;
       self.chunksTotal = 0;
@@ -269,23 +281,29 @@ export const WaveRunnerContentModel = TileContentModel
         let uncovered: TimeRange[] = [rangeSec];
         try {
           const prior: SeismicEvent[] = yield loadEvents(station, modelId, rangeSec);
+          if (!isAlive(self)) return;
           self.addDetectedEvents(prior);
           uncovered = yield getUncoveredRanges(station, modelId, rangeSec);
         } catch (err) {
           console.warn("Seismic event database unavailable; processing the full range:", err);
         }
+        if (!isAlive(self)) return;
 
         // Count days already covered by earlier (e.g. paused) runs as done, so progress is
         // reported against the whole range.
         const rangeDays = (rangeSec.end - rangeSec.start) / SECONDS_PER_DAY;
         const days: Awaited<ReturnType<typeof processUncoveredRanges>> = yield processUncoveredRanges({
           stationData: station, metadata, range: rangeSec, uncovered,
-          onEvents: events => self.addDetectedEvents(events),
-          onProgress: (progress, total) => self.updateChunkProgress(rangeDays - total + progress, rangeDays),
+          onEvents: events => isAlive(self) && self.addDetectedEvents(events),
+          onProgress: (progress, total) =>
+            isAlive(self) && self.updateChunkProgress(rangeDays - total + progress, rangeDays),
+          onDayDownloaded: () => isAlive(self) && self.startDay(),
           signal: abortController.signal,
         });
-        // Keep the events found so far for display. A pause that landed after the last day
-        // falls through and completes the run.
+        if (!isAlive(self)) return;
+        // Keep the events found so far for display. An abort that left no day unprocessed (a
+        // pause during the last day, or any pause on a fully covered range) falls through and
+        // completes the run.
         if (abortController.signal.aborted) {
           if (days.processed + days.skipped < days.total) return;
           self.isPaused = false;
@@ -306,16 +324,20 @@ export const WaveRunnerContentModel = TileContentModel
 
         self.detectedEvents = [];
       } catch (err: unknown) {
+        console.error("Wave Runner runModel error:", err);
+        if (!isAlive(self)) return;
         const message = err instanceof Error ? err.message : String(err);
         self.runError = `Error running model: ${message}`;
         self.isPaused = false;
-        console.error("Wave Runner runModel error:", err);
       } finally {
-        self.isRunning = false;
-        self.runAbortController = null;
+        if (isAlive(self)) {
+          self.isRunning = false;
+          self.isDayInProgress = false;
+          self.runAbortController = null;
+        }
       }
     }),
-    /** Stops the run after the day in progress, so Run can resume it. */
+    /** Stops the run after the day in progress, if any, so Run can resume it. */
     pauseModel() {
       if (!self.isRunning || self.isPaused) return;
       self.isPaused = true;

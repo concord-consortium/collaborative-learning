@@ -29,8 +29,9 @@ export interface ProcessCoverageOptions {
   onDayDownloaded?: (day: number, bytes: number) => void;
   /** Forwarded to the download service's raw-data fetches. */
   proxy?: boolean;
-  /** Stops the run after the day in progress. Days already processed stay persisted, so a
-   *  later run over the same range resumes from the uncovered remainder. */
+  /** Cancels the download in progress at once and stops the run after the day being processed,
+   *  if any. Days already processed stay persisted, so a later run over the same range resumes
+   *  from the uncovered remainder. */
   signal?: AbortSignal;
   /** Test seams; production defaults construct real ones. */
   downloadService?: DayDownloadService;
@@ -58,8 +59,9 @@ async function saveDayResults(
 
 /** Runs the model over the uncovered parts of range, persisting events + coverage
  *  per day (writeEvents before markCovered; empty days covered, errored days not).
- *  Owns the runner lifecycle (loadModel/dispose). Returns day counts; when aborted,
- *  processed and skipped cover only the days handled before the abort. */
+ *  Owns the runner lifecycle (loadModel/dispose). Returns day counts. When aborted,
+ *  processed includes the day that finishes after the abort and skipped the empty or failed
+ *  days reported before it; days the abort left unprocessed are in neither. */
 export async function processUncoveredRanges(options: ProcessCoverageOptions):
   Promise<{ processed: number; skipped: number; total: number }> {
   const {
@@ -97,7 +99,8 @@ export async function processUncoveredRanges(options: ProcessCoverageOptions):
 
     for (const span of spans) {
       if (signal?.aborted) break;
-      // ensureRange resets the service, so each span is fully drained before the next starts.
+      // ensureRange resets the service, so each span is fully drained (unless aborted) before
+      // the next starts.
       // endSec is inclusive: the day containing it is downloaded (matches the downloader's daysInRange).
       downloadService.ensureRange({
         ...stationData, startSec: span.startDay * SECONDS_PER_DAY, endSec: span.endDay * SECONDS_PER_DAY, proxy

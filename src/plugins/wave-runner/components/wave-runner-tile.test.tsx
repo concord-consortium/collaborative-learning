@@ -220,10 +220,10 @@ describe("WaveRunnerComponent", () => {
   });
 
   describe("Run/Pause", () => {
-    function renderRunState(state: { isRunning: boolean, isPaused: boolean }) {
+    function renderRunState(state: { isRunning: boolean, isPaused: boolean, isDayInProgress?: boolean }) {
       const content2 = defaultWaveRunnerContent();
       const model2 = TileModel.create({ content: content2 });
-      // The default station, so selecting it on mount doesn't clear the paused run.
+      // With no station set, the mount effect would select one and clear the paused run.
       content2.setStation({ network: "AK", station: "K204", channel: "HNZ", label: "Anchorage Airport" });
       unprotect(model2);
       Object.assign(content2, state, { chunksProcessed: 2, chunksTotal: 5 });
@@ -231,30 +231,46 @@ describe("WaveRunnerComponent", () => {
       return content2;
     }
 
+    const runStatus = (text: string) => screen.getByText(text, { selector: ".estimated-time" });
+    const announced = (text: string) => screen.getByText(text, { selector: "[role=status]" });
+
     it("shows Pause while a run is in progress", () => {
-      const content2 = renderRunState({ isRunning: true, isPaused: false });
+      const content2 = renderRunState({ isRunning: true, isPaused: false, isDayInProgress: true });
       const button = screen.getByRole("button", { name: "Pause Model" });
       expect(button).not.toHaveAttribute("aria-disabled");
       expect(button).not.toHaveAttribute("aria-pressed");
       expect(screen.getByText("Running model...")).toBeInTheDocument();
-      expect(screen.getByText("Processing day 3 of 5...")).toBeInTheDocument();
+      expect(runStatus("Processing day 3 of 5...")).toBeInTheDocument();
+      // The per-day progress is not announced.
+      expect(screen.queryByText("Processing day 3 of 5...", { selector: "[role=status]" })).toBeNull();
 
       act(() => button.click());
       expect(content2.isPaused).toBe(true);
+      expect(announced("Pausing after day 3 of 5...")).toBeInTheDocument();
     });
 
     it("disables Pause while the run finishes its current day", () => {
-      renderRunState({ isRunning: true, isPaused: true });
+      renderRunState({ isRunning: true, isPaused: true, isDayInProgress: true });
       const button = screen.getByRole("button", { name: "Pause Model" });
       expect(button).toHaveAttribute("aria-disabled", "true");
       expect(screen.queryByText("Running model...")).not.toBeInTheDocument();
-      expect(screen.getByText("Pausing after day 3 of 5...")).toBeInTheDocument();
+      expect(runStatus("Pausing after day 3 of 5...")).toBeInTheDocument();
+
+      act(() => button.click());
+      expect(announced("Pausing after the current day")).toBeInTheDocument();
+    });
+
+    it("doesn't name a day when Pause is clicked before a day is in progress", () => {
+      renderRunState({ isRunning: true, isPaused: true, isDayInProgress: false });
+      expect(runStatus("Pausing...")).toBeInTheDocument();
+      expect(announced("Pausing...")).toBeInTheDocument();
     });
 
     it("shows Run and where the run stopped once paused", () => {
       renderRunState({ isRunning: false, isPaused: true });
       expect(screen.getByRole("button", { name: "Run Model" })).toBeInTheDocument();
-      expect(screen.getByText("Model paused at day 2 of 5. Run to continue.")).toBeInTheDocument();
+      expect(runStatus("Model paused at day 2 of 5. Run to continue.")).toBeInTheDocument();
+      expect(announced("Model paused at day 2 of 5. Run to continue.")).toBeInTheDocument();
     });
   });
 
