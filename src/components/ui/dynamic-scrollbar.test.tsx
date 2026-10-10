@@ -211,6 +211,24 @@ describe("DynamicScrollbar", () => {
     expect(newStart).toBeCloseTo(0);
   });
 
+  it("keeps the keys it handles from reaching a container, and passes the rest on", () => {
+    const onContainerKeyDown = jest.fn();
+    const { getByRole } = render(
+      <div onKeyDown={e => onContainerKeyDown(e.key)}>
+        <DynamicScrollbar totalStart={totalStart} totalEnd={totalEnd} viewStart={25} viewEnd={75}
+          onViewChange={jest.fn()} />
+      </div>
+    );
+    const thumb = getByRole("slider");
+
+    ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End"]
+      .forEach(key => fireEvent.keyDown(thumb, { key }));
+    expect(onContainerKeyDown).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(thumb, { key: "Escape" });
+    expect(onContainerKeyDown).toHaveBeenCalledWith("Escape");
+  });
+
   it("stops dragging on pointerUp", () => {
     const onViewChange = jest.fn();
     const { container } = renderScrollbar(25, 75, onViewChange);

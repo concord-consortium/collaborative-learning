@@ -83,7 +83,11 @@ export const DynamicScrollbar: React.FC<IDynamicScrollbarProps> = ({
         e.preventDefault();
         shiftView(totalRange - viewRange - viewStartOffset);
         break;
+      default:
+        return;
     }
+    // Keep the keys the slider uses from also acting on a container, such as a tile's ArrowUp exit.
+    e.stopPropagation();
   }, [disabled, totalRange, viewRange, viewStartOffset, shiftView]);
 
   return (

@@ -10,6 +10,7 @@ jest.mock("uplot", () => {
 import { fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
+import { ReadOnlyContext } from "../../../components/document/read-only-context";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
@@ -30,12 +31,14 @@ describe("TimeMarkerOverlay", () => {
     });
   }
 
-  function renderOverlay(content: TimelineContentModelType) {
+  function renderOverlay(content: TimelineContentModelType, readOnly = false) {
     const model = TileModel.create({ content });
     return render(
-      <TileModelContext.Provider value={model}>
-        <TimeMarkerOverlay />
-      </TileModelContext.Provider>
+      <ReadOnlyContext.Provider value={readOnly}>
+        <TileModelContext.Provider value={model}>
+          <TimeMarkerOverlay />
+        </TileModelContext.Provider>
+      </ReadOnlyContext.Provider>
     );
   }
 
@@ -72,6 +75,18 @@ describe("TimeMarkerOverlay", () => {
     fireEvent.click(label!);
     expect(content.pinnedTime).toBeUndefined();
     expect(container.querySelector(".time-marker-line.pinned")).toBeNull();
+  });
+
+  it.each([
+    { readOnly: false, tabIndex: "-1" },
+    { readOnly: true, tabIndex: null }
+  ])("gives the pinned label tabindex $tabIndex when readOnly is $readOnly", ({ readOnly, tabIndex }) => {
+    const content = createContent();
+    content.setPinnedTime(viewStart.plus({ hours: 12 }));
+    const { container } = renderOverlay(content, readOnly);
+    const label = container.querySelector("button.time-marker-label.pinned");
+    expect(label).toBeInTheDocument();
+    expect(label?.getAttribute("tabindex")).toBe(tabIndex);
   });
 
   it("hides the pinned marker when its time is outside the view range", () => {

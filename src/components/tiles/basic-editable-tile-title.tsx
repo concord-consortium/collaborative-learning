@@ -12,9 +12,11 @@ interface IBasicEditableTileTitleProps {
   onEndEdit?: (title?: string) => void;
   onBeforeClose?: () => void;
   onRegisterTextInserter?: (inserter: TitleTextInserter | null) => void;
+  // rendered after the title, inside the title area
+  children?: React.ReactNode;
 }
 export function BasicEditableTileTitle({
-  titleKey, className, onBeginEdit, onEndEdit, onBeforeClose, onRegisterTextInserter
+  titleKey, className, onBeginEdit, onEndEdit, onBeforeClose, onRegisterTextInserter, children
 }: IBasicEditableTileTitleProps) {
   return (
     <TileTitleArea>
@@ -27,6 +29,7 @@ export function BasicEditableTileTitle({
         onBeforeClose={onBeforeClose}
         onRegisterTextInserter={onRegisterTextInserter}
       />
+      {children}
     </TileTitleArea>
   );
 }
