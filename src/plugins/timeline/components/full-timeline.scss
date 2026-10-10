@@ -1,0 +1,122 @@
+@import "../../../components/vars";
+@import "../../../components/ui/dynamic-scrollbar-vars";
+@import "./timeline-event-colors.scss";
+
+$full-timeline-overlay-color: $workspace-teal;
+
+.full-timeline-area {
+  margin-top: 16px;
+
+  .full-timeline {
+    background-color: white;
+    border: 1px solid #333333;
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 40px;
+    position: relative;
+    // Scrubs like the scrollbar's track; see dynamic-scrollbar.scss.
+    touch-action: pan-y pinch-zoom;
+    user-select: none;
+
+    &.read-only {
+      cursor: default;
+    }
+
+    &.is-scrubbing, &.is-scrubbing .full-timeline-overlay {
+      cursor: grabbing;
+    }
+  }
+
+  .full-timeline-event {
+    border: 1px solid;
+    box-sizing: border-box;
+    height: 100%;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+
+    @each $color, $value in (
+      "blue": $blue-full-timeline,
+      "orange": $orange-full-timeline,
+      "red": $red-full-timeline,
+      "yellow": $yellow-full-timeline,
+      "magenta": $magenta-full-timeline,
+      "purple": $purple-full-timeline,
+      "default": $default-full-timeline
+    ) {
+      &.#{$color}-event {
+        background-color: rgba($value, 0.45);
+        border-color: $value;
+      }
+    }
+  }
+
+  // Just above the strip's top border
+  .full-timeline-shape {
+    pointer-events: none;
+    position: absolute;
+    top: -9px;
+    transform: translateX(-50%);
+
+    // At this size, the "?" would be too small to read beside the other shapes.
+    .event-shape.default-event text {
+      font-size: 17px;
+      font-weight: 900;
+      transform: translateY(1px);
+    }
+  }
+
+  .full-timeline-overlay {
+    background-color: rgba($full-timeline-overlay-color, 0.3);
+    border: 1px solid $full-timeline-overlay-color;
+    bottom: 1px;
+    box-sizing: border-box;
+    cursor: grab;
+    // Matches the scrollbar thumb, and likewise kept inside the strip
+    left: min(var(--overlay-left), calc(100% - #{$dynamic-scrollbar-min-thumb-width}));
+    min-width: $dynamic-scrollbar-min-thumb-width;
+    position: absolute;
+    top: 1px;
+
+    &:hover {
+      background-color: rgba($full-timeline-overlay-color, 0.4);
+    }
+  }
+
+  .full-timeline.is-scrubbing .full-timeline-overlay {
+    background-color: rgba($full-timeline-overlay-color, 0.5);
+  }
+
+  .full-timeline.read-only .full-timeline-overlay {
+    background-color: rgba($full-timeline-overlay-color, 0.3);
+    cursor: default;
+  }
+
+  // The scrollbar thumb is the keyboard control for the view, and the overlay shows its focus.
+  &:has(.dynamic-scrollbar-thumb:focus-visible) {
+    .full-timeline-overlay {
+      background-color: rgba($full-timeline-overlay-color, 0.4);
+      border: $focus-ring-outer-width solid $focus-ring-color;
+    }
+
+    .dynamic-scrollbar-thumb {
+      outline: none;
+    }
+  }
+
+  .full-timeline-label {
+    background-color: white;
+    border: 1px solid #121212;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: bold;
+    left: 50%;
+    line-height: 18px;
+    padding: 0 12px;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+}

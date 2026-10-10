@@ -1,13 +1,16 @@
-import clsx from "clsx";
+import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { getEventColorClass, TimelineEvent } from "../timeline-types";
+import { EventShape } from "./event-shape";
 
 import "./event-overlay.scss";
 
 export const EventOverlay = observer(function EventOverlay() {
   const content = useTimelineContent();
+  const readOnly = useReadOnlyContext();
   const visibleEvents = content.visibleEvents;
   const colorWords = content.eventTypeColorWords;
 
@@ -39,10 +42,20 @@ export const EventOverlay = observer(function EventOverlay() {
 
         return (
           <React.Fragment key={i}>
-            <div className={clsx("event-overlay", colorClass)} style={overlayStyle} />
-            <button className={clsx("event-label-button", colorClass)} style={labelStyle} onClick={onLabelClick}>
+            <div className={classNames("event-overlay", colorClass)} style={overlayStyle} />
+            {/* Outside the editable tile's Tab cycle until the graph has a keyboard design; Prev and
+                Next select events by keyboard. A read-only tile has no cycle, so Tab reaches them there. */}
+            <button
+              className={classNames("event-label-button", colorClass)}
+              style={labelStyle}
+              onClick={onLabelClick}
+              tabIndex={readOnly ? undefined : -1}
+            >
               {event.index + 1}
             </button>
+            <div className="event-label-shape" style={labelStyle}>
+              <EventShape colorWord={colorWord} />
+            </div>
           </React.Fragment>
         );
       })}

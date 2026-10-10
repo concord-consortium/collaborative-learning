@@ -4,6 +4,7 @@ import { observer } from "mobx-react";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { DataflowContentModelType, formatTime } from "../../model/dataflow-content";
 import { ProgramMode } from "../types/dataflow-tile-types";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./dataflow-rateselector-playback.scss";
 
@@ -12,15 +13,15 @@ interface IRateSelectorProps {
   rateOptions: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
-  readOnly: boolean;
   programMode: number;
   playBackIndex: number;
   tileContent: DataflowContentModelType;
 }
 
 export const RateSelectorOrPlayBack = observer(function RateSelectorOrPlayBack(props: IRateSelectorProps) {
-  const { onRateSelectClick, readOnly, dataRate, rateOptions, programMode, playBackIndex,
+  const { onRateSelectClick, dataRate, rateOptions, programMode, playBackIndex,
           tileContent } = props;
+  const readOnly = useReadOnlyContext();
 
   /* Max Recording Duration: */
   const maxRecordingDuration = Math.floor((dataRate / 1000) * tileContent.maxRecordableCases);

@@ -8,9 +8,22 @@ import "./status-and-output.scss";
 export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   const model = useWaveRunnerContent();
   const {
-    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isLoadingData,
-    eventsDataSet, runError, loadDataError
+    hasStationData, sharedSeismogram, startDateISO, endDateISO, isRunning, isPaused, isDayInProgress,
+    isLoadingData, eventsDataSet, runError, loadDataError, chunksProcessed, chunksTotal
   } = model;
+  const currentDay = `day ${chunksTotal ? Math.min(chunksProcessed + 1, chunksTotal) : chunksProcessed + 1}`
+    + ` of ${chunksTotal || "?"}`;
+
+  // Run state changes, announced to screen readers. The per-day progress is not, so a long
+  // run doesn't announce every day.
+  function runStateMessage() {
+    if (isRunning) {
+      if (!isPaused) return "";
+      return isDayInProgress ? `Pausing after ${currentDay}...` : "Pausing...";
+    }
+    if (isPaused) return `Model paused at day ${chunksProcessed} of ${chunksTotal}. Run to continue.`;
+    return eventsDataSet ? "Run complete." : "";
+  }
 
   // The graph space is always a rectangle: gray until a station and model are chosen, black once
   // they are, and a waveform once there is data to draw.
@@ -20,16 +33,10 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
   // height (see _tile-metrics.scss) rather than a row per possible message.
   const error = loadDataError || runError;
   const statusMessage = error
-    ? error
-    : isLoadingData
-      ? `Loading data: day ${model.loadDaysDone + 1} of ${model.loadDaysTotal || "?"}...`
-      : isRunning
-        ? `Processing day ${model.chunksProcessed + 1} of ${model.chunksTotal || "?"}...`
-        : eventsDataSet
-          ? "Run complete."
-          : isConfigured
-            ? "Ready to run the model."
-            : "Set up data then run the model.";
+    || (isLoadingData && `Loading data: day ${model.loadDaysDone + 1} of ${model.loadDaysTotal || "?"}...`)
+    || (isRunning && !isPaused && `Processing ${currentDay}...`)
+    || runStateMessage()
+    || (isConfigured ? "Ready to run the model." : "Set up data then run the model.");
 
   return (
     <div className="section status-and-output">
@@ -45,6 +52,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         )}
       </div>
       <div className={classNames("status-line", { "waveform-error": !!error })}>{statusMessage}</div>
+      <div className="visually-hidden" role="status">{runStateMessage()}</div>
       <div className="status-counts-row">
         <div className="status-count">
           <label className="status-count-label">Events Identified</label>

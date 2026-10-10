@@ -78,7 +78,7 @@ function SampleTile({type, model}: ISampleTileProps) {
 interface ISampleTileWithApiProps {
   type: string;
   model: ITileModel;
-  focusableElements?: { contentElement?: HTMLElement; titleElement?: HTMLElement };
+  focusableElements?: { contentElement?: HTMLElement; titleElement?: HTMLElement; topbarElement?: HTMLElement };
 }
 
 function SampleTileWithApi({ type, model, focusableElements }: ISampleTileWithApiProps) {
@@ -111,8 +111,11 @@ registerTileToolbarButtons("test", sampleButtons);
 function renderToolbarWithApi(options?: {
   hasContent?: boolean;
   hasTitle?: boolean;
+  hasTopbar?: boolean;
+  // when set, the topbar is a group of this many buttons rather than a single button
+  topbarButtonCount?: number;
 }) {
-  const { hasContent = true, hasTitle = true } = options ?? {};
+  const { hasContent = true, hasTitle = true, hasTopbar = false, topbarButtonCount } = options ?? {};
 
   const contentElement = hasContent ? document.createElement("div") : undefined;
   if (contentElement) {
@@ -125,6 +128,20 @@ function renderToolbarWithApi(options?: {
   if (titleElement) {
     titleElement.setAttribute("data-testid", "mock-title");
     document.body.appendChild(titleElement);
+  }
+
+  const topbarElement = hasTopbar
+    ? document.createElement(topbarButtonCount ? "div" : "button")
+    : undefined;
+  if (topbarElement) {
+    topbarElement.setAttribute("data-testid", "mock-topbar");
+    for (let i = 0; i < (topbarButtonCount ?? 0); i++) {
+      const button = document.createElement("button");
+      // jsdom has no layout, so report the button visible as a browser would
+      (button as any).checkVisibility = () => true;
+      topbarElement.appendChild(button);
+    }
+    document.body.appendChild(topbarElement);
   }
 
   const model = TileModel.create({ content: defaultTextContent() });
@@ -147,7 +164,7 @@ function renderToolbarWithApi(options?: {
         <SampleTileWithApi
           type="test"
           model={model}
-          focusableElements={{ contentElement, titleElement }}
+          focusableElements={{ contentElement, titleElement, topbarElement }}
         />
       </TileApiInterfaceContext.Provider>
     </Provider>
@@ -159,10 +176,11 @@ function renderToolbarWithApi(options?: {
 
   return {
     stores, model, tileElement, toolbar, buttons,
-    contentElement, titleElement,
+    contentElement, titleElement, topbarElement,
     cleanup: () => {
       contentElement?.parentNode?.removeChild(contentElement);
       titleElement?.parentNode?.removeChild(titleElement);
+      topbarElement?.parentNode?.removeChild(topbarElement);
     },
     ...result,
   };
@@ -257,6 +275,30 @@ describe("Tile toolbar button", () => {
     });
     const announcement = screen.getByRole("status");
     expect(announcement).toHaveTextContent("Select something to enable this action");
+  });
+
+  it("announces a button's own disabled message", () => {
+    render(
+      <TileToolbarButton name="busy" title="Busy" onClick={clickHandler} disabled={true}
+          disabledMessage="Still working">
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    act(() => {
+      screen.getByRole("button").click();
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("Still working");
+  });
+
+  it("highlighted button looks selected without aria-pressed", () => {
+    render(
+      <TileToolbarButton name="highlight" title="Stop" onClick={clickHandler} highlighted={true}>
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("selected");
+    expect(button).not.toHaveAttribute("aria-pressed");
   });
 });
 
@@ -401,6 +443,53 @@ describe("Tile toolbar ARIA and keyboard", () => {
     expect(escapeHandler).not.toHaveBeenCalled();
 
     tileElement.removeEventListener("toolbar-escape", escapeHandler);
+    cleanup();
+  });
+
+  it("Shift+Tab from toolbar goes to the topbar when there's no content", () => {
+    const { buttons, topbarElement, cleanup } = renderToolbarWithApi({ hasContent: false, hasTopbar: true });
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(topbarElement);
+    cleanup();
+  });
+
+  it("Shift+Tab from toolbar goes to content, not the topbar, when there is content", () => {
+    const { buttons, contentElement, cleanup } = renderToolbarWithApi({ hasTopbar: true });
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(contentElement);
+    cleanup();
+  });
+
+  it("Tab from toolbar goes to the topbar when there's no title", () => {
+    const { buttons, topbarElement, cleanup } = renderToolbarWithApi({ hasTitle: false, hasTopbar: true });
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab" });
+    expect(document.activeElement).toBe(topbarElement);
+    cleanup();
+  });
+
+  it("Tab from toolbar goes to the title, not the topbar, when there is a title", () => {
+    const { buttons, titleElement, cleanup } = renderToolbarWithApi({ hasTopbar: true });
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab" });
+    expect(document.activeElement).toBe(titleElement);
+    cleanup();
+  });
+
+  it("enters a topbar of several controls at its first going forward and its last going back", () => {
+    const { buttons, topbarElement, cleanup } = renderToolbarWithApi({
+      hasContent: false, hasTitle: false, hasTopbar: true, topbarButtonCount: 2
+    });
+    const [first, last] = Array.from(topbarElement!.children);
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+
+    (buttons[0] as HTMLElement).focus();
+    fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
     cleanup();
   });
 

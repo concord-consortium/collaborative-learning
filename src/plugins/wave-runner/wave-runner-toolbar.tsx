@@ -17,6 +17,7 @@ import { useWaveRunnerContent } from "./hooks/use-wave-runner-content";
 
 import LoadDataIcon from "./assets/toolbar/load-data-icon.svg";
 import RunIcon from "./assets/toolbar/run-icon.svg";
+import PauseIcon from "./assets/toolbar/pause-icon.svg";
 import RestartIcon from "./assets/toolbar/restart-icon.svg";
 import ClearAndResetIcon from "./assets/toolbar/clear-and-reset-icon.svg";
 import TimelineIcon from "../timeline/assets/timeline-icon.svg";
@@ -47,7 +48,16 @@ const LoadDataButton = observer(function LoadDataButton({ name }: IToolbarButton
 
 const PlayButton = observer(function PlayButton({ name }: IToolbarButtonComponentProps) {
   const content = useWaveRunnerContent();
-  const disabled = content.isRunning || content.isLoadingData || !content.selectedModelUrl || !!content.eventsDataSet;
+  if (content.isRunning) {
+    return (
+      <TileToolbarButton name={name} title="Pause Model" onClick={() => content.pauseModel()}
+          highlighted={true} disabled={content.isPaused}
+          disabledMessage="Pausing after the current day">
+        <PauseIcon/>
+      </TileToolbarButton>
+    );
+  }
+  const disabled = content.isLoadingData || !content.selectedModelUrl || !!content.eventsDataSet;
   return (
     <TileToolbarButton name={name} title="Run Model" onClick={() => content.runModel()} disabled={disabled}>
       <RunIcon/>

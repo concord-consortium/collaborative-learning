@@ -125,7 +125,8 @@ describe("StatusAndOutput status line priority", () => {
 
   it("shows a completion message once events are available", () => {
     renderStatusForModel(tileWithCompletedRun());
-    expect(screen.getByText("Run complete.")).toBeInTheDocument();
+    // Scoped to the visible line: the screen-reader status region announces the same text.
+    expect(screen.getByText("Run complete.", { selector: ".status-line" })).toBeInTheDocument();
   });
 
   it("invites a run once station and model are both chosen but nothing has run yet", () => {
