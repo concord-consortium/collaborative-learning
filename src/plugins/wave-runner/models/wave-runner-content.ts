@@ -22,6 +22,10 @@ import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 
+// Exported so the date pickers' Clear can reset to the same dates the model defaults to.
+export const kDefaultStartDate = "2026-09-01";
+export const kDefaultEndDate = "2026-10-01";
+
 export function defaultWaveRunnerContent(): WaveRunnerContentModelType {
   return WaveRunnerContentModel.create();
 }
@@ -42,8 +46,8 @@ export const WaveRunnerContentModel = TileContentModel
   .named("WaveRunnerTool")
   .props({
     type: types.optional(types.literal(kWaveRunnerTileType), kWaveRunnerTileType),
-    startDate: types.optional(types.string, "2025-01-01"),
-    endDate: types.optional(types.string, "2025-12-31"),
+    startDate: types.optional(types.string, kDefaultStartDate),
+    endDate: types.optional(types.string, kDefaultEndDate),
     station: types.maybe(StationModel),
     selectedModelUrl: types.maybe(types.string),
   })
@@ -82,7 +86,11 @@ export const WaveRunnerContentModel = TileContentModel
       return DateTime.fromISO(`${self.startDate}T00:00:00Z`, { zone: "utc" });
     },
     get endDateISO() {
-      return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" });
+      // The end date is inclusive (run and loadEnvelopeData add SECONDS_PER_DAY to cover the
+      // whole end day), so this returns the END of that day, not its start. Otherwise a single-day
+      // range collapses start and end to the same instant, giving the seismogram viewport and the
+      // shared seismogram (see loadData) zero width and nothing to render.
+      return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" }).plus({ seconds: SECONDS_PER_DAY });
     },
     get eventsDataSet(): SharedDataSetType | undefined {
       const smm = getSharedModelManager(self);
@@ -115,9 +123,11 @@ export const WaveRunnerContentModel = TileContentModel
 
       const { network, station, label, location, channel } = self.station;
       sharedSeismogram.setStation({ network, station, label, location, channel });
+      // Timeline It! copies this range, and the Timeline refuses a view whose start is not before
+      // its end, so the end must cover the whole inclusive end day (see endDateISO).
       sharedSeismogram.setTimeRange(
         `${self.startDate}T00:00:00Z`,
-        `${self.endDate}T00:00:00Z`
+        self.endDateISO.toISO() ?? `${self.endDate}T00:00:00Z`
       );
     },
     clearEventsDataSet() {
@@ -225,6 +235,15 @@ export const WaveRunnerContentModel = TileContentModel
   .actions(self => ({
     runModel: flow(function* () {
       if (self.isRunning || self.isLoadingData) return;
+
+      // loadEnvelopeData and run are independent operations with independent errors, but the tile
+      // shows only one status line (see status-and-output.tsx) with errors first in priority.
+      // This must run before the guards below, not after them: a bail-out on "no model", "no
+      // station", etc. is still a completed run attempt, and leaving a stale loadDataError in
+      // place would let a failed load keep masking that attempt's own (possibly nonexistent)
+      // result indefinitely.
+      self.loadDataError = null;
+
       if (!self.selectedModelUrl) {
         self.runError = "No model selected";
         return;
@@ -268,8 +287,9 @@ export const WaveRunnerContentModel = TileContentModel
         const startMs = startDate.getTime();
         const endMs = endDate.getTime();
 
-        if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) {
-          self.runError = "Invalid date range. End date must be after start date.";
+        // endDate is inclusive, so start == end is a valid single-day range, matching loadEnvelopeData.
+        if (isNaN(startMs) || isNaN(endMs) || endMs < startMs) {
+          self.runError = "Invalid date range. End date must not be before start date.";
           self.isRunning = false;
           return;
         }
@@ -365,7 +385,10 @@ export const WaveRunnerContentModel = TileContentModel
       }
       const range: TimeRange = { start: startMs / 1000, end: endMs / 1000 + SECONDS_PER_DAY };
 
+      // See the matching comment in runModel: the two operations' errors must not outlive
+      // each other, since the status line shows whichever is set with no way to tell it is stale.
       self.loadDataError = null;
+      self.runError = null;
       self.isLoadingData = true;
       self.loadDaysDone = 0;
       self.loadDaysTotal = 0;

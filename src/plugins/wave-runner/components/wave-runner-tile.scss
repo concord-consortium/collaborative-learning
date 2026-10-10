@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "./tile-metrics";
 
 .wave-runner-tile {
   color: $charcoal-dark-2;
@@ -11,6 +12,8 @@
     width: 100%;
     height: 100%;
     padding: 4px;
+    display: flex;
+    flex-direction: column;
   }
 
   .title-background {
@@ -21,6 +24,10 @@
 
   .sections {
     display: flex;
+    // Fills the tile's full height rather than stopping at content height, so the panels reach
+    // the tile's bottom edge instead of leaving its own white showing below them.
+    flex: 1;
+    min-height: 0;
 
     &.vertical {
       flex-direction: column;
@@ -36,26 +43,47 @@
       .section + .section {
         border-left: 1px solid $workspace-teal-dark-1;
       }
+
+      // Data Setup holds a fixed 426px and neither grows nor shrinks; the surplus belongs to the
+      // graph, which uses the width. Without an explicit basis the panel would be floored by its
+      // own min-content instead, narrowing whenever a short station name is chosen. Scoped to
+      // horizontal: flex-basis follows the main axis, which is vertical in the stacked layout, so
+      // there it would set a height rather than a width.
+      .section.data-setup {
+        flex: 0 0 426px;
+      }
     }
   }
 
   .section {
-    padding: 8px 8px 10px;
+    padding: $wave-runner-panel-top 8px 0;
     flex: 1;
 
     &.data-setup {
       background-color: $workspace-teal-light-7;
+      // Same 426px floor as the horizontal flex-basis above, restated as min-width: width is the
+      // cross axis in the stacked layout, where flex-basis has no effect, so this is what holds
+      // the panel's width there.
+      min-width: 426px;
     }
 
     &.status-and-output {
       background-color: $workspace-teal-light-6;
+      display: flex;
+      flex-direction: column;
+      // The waveform measures this panel and writes the result onto the chart as an explicit
+      // pixel width, which then becomes the panel's min-content. Without this the panel is floored
+      // by that width and each measurement grows the next, so the graph runs away.
+      min-width: 0;
+      overflow: hidden;
     }
   }
 
   .section-title {
     font-weight: bold;
     text-align: center;
-    margin-bottom: 8px;
+    height: $wave-runner-section-title-height;
+    margin-bottom: $wave-runner-row-gap;
   }
 
 }

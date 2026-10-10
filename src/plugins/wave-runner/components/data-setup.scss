@@ -1,4 +1,5 @@
 @import "../../../components/vars";
+@import "./dropdown-appearance";
 
 .wave-runner-tile {
   .field-row {
@@ -14,6 +15,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    // Without this a flex item is floored by its own min-content, so choosing a long station name
+    // widens one field and both controls resize. The label truncates with an ellipsis instead.
+    min-width: 0;
   }
 
   .field-label {
@@ -21,8 +25,28 @@
     margin-bottom: 5px;
   }
 
-  .dropdown,
-  .datetime {
+  .wave-runner-dropdown {
     width: 100%;
+
+    @include wave-runner-dropdown-appearance;
+
+    &.is-placeholder {
+      .header .item {
+        font-style: italic;
+      }
+
+      // Until a choice is made CustomSelect still treats its first row as selected, which would
+      // checkmark and embolden a station the student has not picked. The design shows no checkmark
+      // and no bold on any row in this state.
+      .list-item.selected {
+        .check {
+          background-image: url("../../../assets/icons/check/check.svg");
+        }
+
+        .item {
+          font-weight: normal;
+        }
+      }
+    }
   }
 }

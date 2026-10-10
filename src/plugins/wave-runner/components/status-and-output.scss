@@ -1,13 +1,30 @@
 @import "../../../components/vars";
+@import "./tile-metrics";
 
 .wave-runner-tile {
   .waveform-container {
-    width: 100%;
-    overflow-y: auto;
+    // No width: 100% - with horizontal margins that makes the box as wide as the panel AND offset,
+    // so it overhangs the right edge. Left to fill the space between its margins instead.
+    //
+    // The graph never scrolls: its height is exactly the waveform panel's own plus the border, so
+    // there is nothing to scroll to.
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 8px 0;
+    // Centered rather than packed to the top: the chart can render shorter than the box it sits
+    // in, so the leftover space is split evenly above and below instead of all landing below it.
+    justify-content: center;
+    margin: 0 12px;
+    border: solid 1.5px white;
+    // The graph space is always a rectangle, whatever state it is in, so an empty box matches a
+    // drawn one; see _tile-metrics.scss for how this height is built up.
+    height: $wave-runner-graph-height;
+    box-sizing: border-box;
+    background-color: $charcoal-light-4;
+
+    &.configured {
+      background-color: black;
+    }
   }
 
   .waveform-loading,
@@ -17,23 +34,25 @@
     text-align: center;
   }
 
-  .download-status-container {
-    height: 12px;
-    width: 100%;
-    background-color: white;
+  // Exactly one line - see status-and-output.tsx for why.
+  .status-line {
+    height: $wave-runner-status-line-height;
+    box-sizing: border-box;
+    font-style: italic;
+    font-size: 14px;
+    text-align: center;
+    margin: $wave-runner-row-gap 0 0;
+    padding: 0;
   }
 
-  .estimated-time {
-    text-align: center;
-    font-size: 13px;
-    margin-top: 5px;
-  }
+
 
   .status-counts-row {
     display: flex;
     gap: 20px;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: $wave-runner-row-gap;
+    height: $wave-runner-counts-row-height;
 
     .status-count {
       display: flex;

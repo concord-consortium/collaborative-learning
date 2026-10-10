@@ -17,6 +17,7 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
 import { defaultWaveRunnerContent } from "../models/wave-runner-content";
+import { kWaveRunnerDefaultHeight, kWaveRunnerStackedHeight } from "../wave-runner-types";
 import { WaveRunnerComponent } from "./wave-runner-tile";
 
 // The wave-runner tile needs to be registered so the TileModel.create
@@ -38,9 +39,10 @@ describe("WaveRunnerComponent", () => {
     docId: "",
     documentContent: null,
     isUserResizable: true,
+    readOnly: false,
     onResizeRow: () => { throw new Error("Function not implemented."); },
     onSetCanAcceptDrop: () => { throw new Error("Function not implemented."); },
-    onRequestRowHeight: () => { throw new Error("Function not implemented."); },
+    onRequestRowHeight: jest.fn(),
     onRegisterTileApi: () => { throw new Error("Function not implemented."); },
     onUnregisterTileApi: () => { throw new Error("Function not implemented."); }
   };
@@ -67,19 +69,20 @@ describe("WaveRunnerComponent", () => {
     })
   });
 
-  function renderModel(model2: ReturnType<typeof TileModel.create>) {
+  function renderModel(model2: ReturnType<typeof TileModel.create>,
+                      overrides: Partial<typeof defaultProps> = {}) {
     stores.ui.setSelectedTileId(model2.id);
     return render(
       <Provider stores={stores}>
         <TileModelContext.Provider value={model2}>
-          <WaveRunnerComponent {...defaultProps} {...{model: model2}} />
+          <WaveRunnerComponent {...defaultProps} {...overrides} {...{model: model2}} />
         </TileModelContext.Provider>
       </Provider>
     );
   }
 
-  function renderWithStores() {
-    return renderModel(model);
+  function renderWithStores(overrides: Partial<typeof defaultProps> = {}) {
+    return renderModel(model, overrides);
   }
 
   beforeEach(() => {
@@ -120,7 +123,43 @@ describe("WaveRunnerComponent", () => {
     expect(sections).not.toHaveClass("horizontal");
   });
 
-  it("stacks sections vertically when width is less than 450", () => {
+  // See wave-runner-types.ts for why the height is a known constant rather than measured.
+  it("asks for the stacked height when the panels stack", () => {
+    mockWidth = 650;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight });
+    expect(onRequestRowHeight).toHaveBeenCalledWith(expect.any(String), kWaveRunnerStackedHeight);
+  });
+
+  // Before the width is measured, `vertical` defaults true (see wave-runner-tile.tsx), so asking
+  // for a height here would request the stacked one even in a row that will turn out wide -
+  // tile-row.tsx then refuses to shrink a multi-tile row back down, stranding it at the stacked
+  // height with dead space below once the real width comes in and asks for the smaller one.
+  it("does not request a row height before the width is known", () => {
+    mockWidth = undefined;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight });
+    expect(onRequestRowHeight).not.toHaveBeenCalled();
+  });
+
+  it("asks for the single-panel height when the panels sit side by side", () => {
+    mockWidth = 900;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight });
+    expect(onRequestRowHeight).toHaveBeenCalledWith(expect.any(String), kWaveRunnerDefaultHeight);
+  });
+
+  // The same document can render editable and read-only at different widths at once (four-up,
+  // published documents); onRequestRowHeight mutates the shared row model, so a read-only instance
+  // must not fight the editable one over the row's height.
+  it("does not request a row height in a read-only rendering", () => {
+    mockWidth = 900;
+    const onRequestRowHeight = jest.fn();
+    renderWithStores({ onRequestRowHeight, readOnly: true });
+    expect(onRequestRowHeight).not.toHaveBeenCalled();
+  });
+
+  it("stacks sections vertically when width is less than 700", () => {
     mockWidth = 650;
     const { container } = renderWithStores();
     const sections = container.querySelector(".sections");
@@ -128,7 +167,7 @@ describe("WaveRunnerComponent", () => {
     expect(sections).not.toHaveClass("horizontal");
   });
 
-  it("stacks sections horizontally when width is 450 or greater", () => {
+  it("stacks sections horizontally when width is 700 or greater", () => {
     mockWidth = 700;
     const { container } = renderWithStores();
     const sections = container.querySelector(".sections");
@@ -138,19 +177,17 @@ describe("WaveRunnerComponent", () => {
 
   it("renders date pickers with default values", () => {
     renderWithStores();
-    const startInput = screen.getByLabelText("Start Date and Time") as HTMLInputElement;
-    const endInput = screen.getByLabelText("End Date and Time") as HTMLInputElement;
-    expect(startInput.value).toBe("2025-01-01T00:00");
-    expect(endInput.value).toBe("2025-12-31T00:00");
+    const startGroup = screen.getByRole("group", { name: "Start Date and Time" });
+    const endGroup = screen.getByRole("group", { name: "End Date and Time" });
+    expect(startGroup).toHaveTextContent("09/01/2026");
+    expect(endGroup).toHaveTextContent("10/01/2026");
   });
 
   it("renders station dropdown with options from config", () => {
-    renderWithStores();
-    const stationSelect = screen.getByLabelText("Station") as HTMLSelectElement;
-    const stationOptions = Array.from(stationSelect.options).filter(o => o.value !== "");
-    expect(stationOptions).toHaveLength(2);
-    expect(stationOptions[0].text).toBe("Anchorage Airport");
-    expect(stationOptions[1].text).toBe("Dexter Display Mine");
+    const { container } = renderWithStores();
+    const stationItems = container.querySelectorAll('[data-testid="wave-runner-station-list"] .list-item .item');
+    const labels = Array.from(stationItems).map(el => el.textContent);
+    expect(labels).toEqual(["Anchorage Airport", "Dexter Display Mine"]);
   });
 
   it("auto-selects the default station on mount", () => {
@@ -231,7 +268,7 @@ describe("WaveRunnerComponent", () => {
       return content2;
     }
 
-    const runStatus = (text: string) => screen.getByText(text, { selector: ".estimated-time" });
+    const runStatus = (text: string) => screen.getByText(text, { selector: ".status-line" });
     const announced = (text: string) => screen.getByText(text, { selector: "[role=status]" });
 
     it("shows Pause while a run is in progress", () => {
@@ -239,7 +276,6 @@ describe("WaveRunnerComponent", () => {
       const button = screen.getByRole("button", { name: "Pause Model" });
       expect(button).not.toHaveAttribute("aria-disabled");
       expect(button).not.toHaveAttribute("aria-pressed");
-      expect(screen.getByText("Running model...")).toBeInTheDocument();
       expect(runStatus("Processing day 3 of 5...")).toBeInTheDocument();
       // The per-day progress is not announced.
       expect(screen.queryByText("Processing day 3 of 5...", { selector: "[role=status]" })).toBeNull();
@@ -253,7 +289,6 @@ describe("WaveRunnerComponent", () => {
       renderRunState({ isRunning: true, isPaused: true, isDayInProgress: true });
       const button = screen.getByRole("button", { name: "Pause Model" });
       expect(button).toHaveAttribute("aria-disabled", "true");
-      expect(screen.queryByText("Running model...")).not.toBeInTheDocument();
       expect(runStatus("Pausing after day 3 of 5...")).toBeInTheDocument();
 
       act(() => button.click());

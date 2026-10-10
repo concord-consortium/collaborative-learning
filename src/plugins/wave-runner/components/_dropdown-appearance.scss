@@ -1,0 +1,87 @@
+@import "../../../components/vars";
+@import "./tile-metrics";
+
+// The look CustomSelect takes on in WaveRunner: the station/model fields and the date field's
+// month chooser must stay pixel-identical, so both import this instead of keeping their own copy.
+@mixin wave-runner-dropdown-appearance {
+  .header {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    height: 26px;
+    background-color: white;
+
+    .item {
+      // CustomSelect indents its header text by 2px; the design asks for 8px.
+      margin-left: 8px;
+      max-height: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &:hover:not(.show-list),
+    &:focus-visible:not(.show-list) {
+      background-color: $workspace-teal-light-6;
+    }
+
+    // The open state is restated in full rather than inherited from CustomSelect itself: the
+    // white resting fill above matches `.custom-select .header.show-list` on specificity, so
+    // whichever stylesheet loaded last would win. CustomSelect also flattens the bottom corners to
+    // fuse header and list; the design keeps them as separate rounded cards.
+    &.show-list,
+    &:active {
+      background-color: $workspace-teal-dark-1;
+      color: white;
+      border-color: white;
+      border-radius: 5px;
+    }
+
+    .arrow {
+      fill: $workspace-teal-dark-1;
+    }
+
+    // CustomSelect hides the chevron when disabled; the design keeps it visible and
+    // grayed, with the label itself staying at full opacity.
+    &.disabled .arrow {
+      display: block;
+      fill: $charcoal-light-1;
+    }
+  }
+
+  .list {
+    // Sized by its widest option rather than stretched to the trigger, and scrollable: the tile
+    // clips its own overflow, so a long station list would otherwise be cut off at its bottom edge.
+    width: max-content;
+    max-height: $wave-runner-flyout-max-height;
+    overflow-y: auto;
+    border-radius: 5px;
+  }
+
+  .list-item:last-child {
+    border-radius: 0 0 5px 5px;
+  }
+
+  .list-item {
+    height: 32px;
+    padding-right: 10px;
+
+    .item {
+      white-space: nowrap;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: $workspace-teal-light-6;
+    }
+
+    // Ordered after the rollover so a hovered selection keeps the selected fill.
+    &.selected {
+      background-color: $workspace-teal-light-4;
+
+      .item {
+        font-weight: bold;
+      }
+    }
+  }
+}

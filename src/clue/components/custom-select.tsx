@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { VisuallyHidden } from "@chakra-ui/react";
 import { IDropdownItem } from "@concord-consortium/react-components";
 import { useDropdown } from "@concord-consortium/accessibility-tools/hooks";
@@ -30,17 +30,27 @@ interface IProps {
   titlePrefix?: string;
   titleIcon?: ReactNode;
   titleVisuallyHidden?: boolean;
+  /** Id(s) of the element(s) naming this control's purpose for assistive tech, e.g. the id of a
+   *  visible `<label>` for the field. On a `role="button"` element, `aria-label` REPLACES the text
+   *  content as the accessible name - it does not supplement it - so an `aria-label` here would
+   *  announce only the field's purpose and never the chosen value once one is picked. Passing the
+   *  label's id through `aria-labelledby` instead, alongside the header's own id, concatenates the
+   *  two: the field's purpose AND its current value. */
+  ariaLabelledBy?: string;
 }
 
 export const CustomSelect: React.FC<IProps> = (props) => {
   const {
     className, isDisabled, items, showItemChecks, showItemIcons,
     title, titlePrefix, titleIcon, titleVisuallyHidden,
-    dataTest, dataTestId,
+    dataTest, dataTestId, ariaLabelledBy,
   } = props;
 
   const triggerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  // The header is itself part of its own accessible name (see aria-labelledby below, which
+  // references this id alongside the caller's label id) - its text content is the chosen value.
+  const headerId = useId();
 
   const [selected, setSelected] = useState(() =>
     items.find(item => item.selected)?.text || (items.length > 0 ? items[0].text : "")
@@ -69,6 +79,19 @@ export const CustomSelect: React.FC<IProps> = (props) => {
     disabled: isDisabled || items.length === 0,
     label: title || titlePrefix,
   });
+
+  // useDropdown's own onKeyDown closes the whole list on Escape but never calls
+  // stopPropagation(). When the list lives inside a React Aria Popover (e.g. the WaveRunner date
+  // picker's month/station/model lists), the unstopped Escape keeps bubbling and also dismisses
+  // the popover, discarding whatever the student was in the middle of picking. Run the hook's
+  // handler first so its own behavior (closing this list, returning focus) is unaffected, then
+  // stop Escape from propagating any further; every other key passes through untouched.
+  const handleListKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    dropdown?.listProps?.onKeyDown?.(e);
+    if (e.key === "Escape") {
+      e.stopPropagation();
+    }
+  }, [dropdown]);
 
   const getDataTest = (suffix?: string) => {
     return `${dataTest || "custom-select"}${suffix ? "-" + suffix : ""}`;
@@ -99,9 +122,11 @@ export const CustomSelect: React.FC<IProps> = (props) => {
         data-testid={getDataTestIdValue()}>
       <div
         ref={triggerRef}
+        id={headerId}
         className={`header ${showListClass} ${disabledClass}`}
         data-test={getDataTest("header")}
         data-testid={getDataTestIdValue("header")}
+        aria-labelledby={ariaLabelledBy ? `${ariaLabelledBy} ${headerId}` : undefined}
         {...(dropdown?.triggerProps ?? {})}
       >
         {titleIcon && <div className="title-icon">{titleIcon}</div>}
@@ -115,6 +140,7 @@ export const CustomSelect: React.FC<IProps> = (props) => {
           data-test={getDataTest("list")}
           data-testid={getDataTestIdValue("list")}
           {...(dropdown?.listProps ?? {})}
+          onKeyDown={handleListKeyDown}
         >
           {items.map((item, i) => {
             const itemDisabledClass = item.disabled ? "disabled" : "enabled";
@@ -130,6 +156,16 @@ export const CustomSelect: React.FC<IProps> = (props) => {
                 data-testid={`list-item-${itemId}`}
                 aria-disabled={item.disabled ? true : undefined}
                 {...itemProps}
+                // useDropdown's getItemProps sets aria-selected on whichever item has the
+                // keyboard cursor (activeIndex), not on the item the student actually chose - so
+                // every option a screen reader user arrows past is announced as "selected", and
+                // (see useDropdown's open effect, which looks for aria-selected="true" in the DOM
+                // to decide where to focus on open) nothing carries the attribute until a key is
+                // pressed, so opening the list always focuses item 0 instead of the chosen one.
+                // Overriding it here, after the spread, with the real selection fixes both: screen
+                // readers announce the right option, and the hook's open effect finds it and
+                // focuses it instead of defaulting to the first item.
+                aria-selected={selected === item.text ? true : undefined}
               >
                 {(showItemChecks !== false) &&
                   <div className={classNames("check", selectedClass, {

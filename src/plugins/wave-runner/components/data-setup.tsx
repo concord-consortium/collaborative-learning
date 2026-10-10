@@ -1,10 +1,15 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useMemo } from "react";
 import { ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
 import { StationConfig } from "../../../../shared/seismic/seismic-types";
+import { CustomSelect, ICustomDropdownItem } from "../../../clue/components/custom-select";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { stationId } from "../../shared-seismogram/station-model";
 import { useWaveRunnerContent } from "../hooks/use-wave-runner-content";
+import { kDefaultEndDate, kDefaultStartDate } from "../models/wave-runner-content";
+import { todayDateString } from "./date-utils";
+import { DateField } from "./date-field";
 import "./data-setup.scss";
 
 export const DataSetup: React.FC = observer(function DataSetup() {
@@ -67,83 +72,99 @@ export const DataSetup: React.FC = observer(function DataSetup() {
     }
   }, [content, modelConfigs, defaultModelIndex]);
 
-  const handleStationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
-    const match = dropdownOptions.find(opt => opt.id === selectedId);
-    if (match) {
-      const { network, station, channel, label } = match.config;
-      const location = match.config.location ?? "";
+  const hasStations = dropdownOptions.length > 0;
+
+  // There is no data for a day that has not happened yet, so neither field may reach past today.
+  // The start field is additionally capped by the end date, whichever comes first.
+  const latestSelectableDate = todayDateString();
+  const latestStartDate = content.endDate < latestSelectableDate ? content.endDate : latestSelectableDate;
+  // The end field's minimum is the start date, but never past today: a saved or authored document
+  // can carry a future start date, and a minimum above the maximum sends React Aria's calendar
+  // into an infinite render loop.
+  const earliestEndDate = content.startDate < latestSelectableDate ? content.startDate : latestSelectableDate;
+
+  // CustomSelect resolves its header as `title || selectedItem.text`, so a non-empty title would
+  // permanently mask the chosen station or model. Supply one only while nothing is selected.
+  const stationPlaceholder = !hasStations
+    ? "No stations configured"
+    : (currentStationId ? undefined : "Choose a station");
+  const modelPlaceholder = (modelConfigs ?? []).length === 0
+    ? "No models configured"
+    : (content.selectedModelUrl ? undefined : "Choose a model");
+
+  const stationItems: ICustomDropdownItem[] = dropdownOptions.map(opt => ({
+    id: opt.id,
+    text: opt.config.label ?? opt.id,
+    selected: opt.id === currentStationId,
+    onClick: () => {
+      const { network, station, channel, label } = opt.config;
+      const location = opt.config.location ?? "";
       content.setStation({ network, station, location, channel, label });
     }
-  };
+  }));
 
-  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const url = e.target.value;
-    if (url) {
-      content.ensureModelMetadata(url);
-    }
-  };
-
-  const hasStations = dropdownOptions.length > 0;
+  const modelItems: ICustomDropdownItem[] = (modelConfigs ?? []).map(model => ({
+    id: model.metadataUrl,
+    text: model.label,
+    selected: model.metadataUrl === content.selectedModelUrl,
+    onClick: () => content.ensureModelMetadata(model.metadataUrl)
+  }));
 
   return (
     <div className="section data-setup">
       <div className="section-title">Data Setup</div>
       <div className="field-row">
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-station">Station</label>
-          <select
-            id="wave-runner-station"
-            className="dropdown"
-            value={currentStationId ?? ""}
-            onChange={handleStationChange}
-            disabled={!hasStations || content.isRunning || content.isLoadingData}
-          >
-            {!hasStations && <option value="">No stations configured</option>}
-            {hasStations && !currentStationId && <option value="">Choose a station</option>}
-            {dropdownOptions.map(opt => (
-              <option key={opt.id} value={opt.id}>{opt.config.label}</option>
-            ))}
-          </select>
+          {/* CustomSelect's header is not a native, labelable form control (it is a div with
+              role="button"), so a plain htmlFor cannot forward a click to it the way it would for
+              a real <select> - id-based aria-labelledby, wired below, is what actually links this
+              label to the control for assistive tech. */}
+          <label className="field-label" id="wave-runner-station-label">Station</label>
+          {/* The placeholder is italic and a chosen label is not, which CSS alone cannot tell
+              apart - the header markup is identical either way. */}
+          <CustomSelect
+            className={classNames("wave-runner-dropdown", { "is-placeholder": !currentStationId })}
+            dataTestId="wave-runner-station"
+            items={stationItems}
+            title={stationPlaceholder}
+            ariaLabelledBy="wave-runner-station-label"
+            isDisabled={!hasStations || content.isRunning || content.isLoadingData}
+          />
         </div>
         <div className="field">
-          <label className="field-label">Model</label>
-          <select
-            className="dropdown"
-            value={content.selectedModelUrl ?? ""}
-            onChange={handleModelChange}
-            disabled={content.isRunning}
-          >
-            <option value="">Choose a model</option>
-            {(modelConfigs ?? []).map(model => (
-              <option key={model.metadataUrl} value={model.metadataUrl}>
-                {model.label}
-              </option>
-            ))}
-          </select>
+          <label className="field-label" id="wave-runner-model-label">Model</label>
+          <CustomSelect
+            className={classNames("wave-runner-dropdown", { "is-placeholder": !content.selectedModelUrl })}
+            dataTestId="wave-runner-model"
+            items={modelItems}
+            title={modelPlaceholder}
+            ariaLabelledBy="wave-runner-model-label"
+            isDisabled={content.isRunning || content.isLoadingData}
+          />
         </div>
       </div>
       <div className="field-row">
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-start-date">Start Date and Time</label>
-          <input
+          <DateField
             id="wave-runner-start-date"
-            className="datetime"
-            type="datetime-local"
-            value={`${content.startDate}T00:00`}
-            onChange={e => content.setStartDate(e.target.value.split("T")[0])}
-            disabled={content.isRunning || content.isLoadingData}
+            label="Start Date and Time"
+            value={content.startDate}
+            defaultValue={kDefaultStartDate}
+            maxValue={latestStartDate}
+            onChange={date => content.setStartDate(date)}
+            isDisabled={content.isRunning || content.isLoadingData}
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="wave-runner-end-date">End Date and Time</label>
-          <input
+          <DateField
             id="wave-runner-end-date"
-            className="datetime"
-            type="datetime-local"
-            value={`${content.endDate}T00:00`}
-            onChange={e => content.setEndDate(e.target.value.split("T")[0])}
-            disabled={content.isRunning || content.isLoadingData}
+            label="End Date and Time"
+            value={content.endDate}
+            defaultValue={kDefaultEndDate}
+            minValue={earliestEndDate}
+            maxValue={latestSelectableDate}
+            onChange={date => content.setEndDate(date)}
+            isDisabled={content.isRunning || content.isLoadingData}
           />
         </div>
       </div>
