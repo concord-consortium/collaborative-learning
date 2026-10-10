@@ -78,6 +78,10 @@ export const DataSetup: React.FC = observer(function DataSetup() {
   // The start field is additionally capped by the end date, whichever comes first.
   const latestSelectableDate = todayDateString();
   const latestStartDate = content.endDate < latestSelectableDate ? content.endDate : latestSelectableDate;
+  // The end field's minimum is the start date, but never past today: a saved or authored document
+  // can carry a future start date, and a minimum above the maximum sends React Aria's calendar
+  // into an infinite render loop.
+  const earliestEndDate = content.startDate < latestSelectableDate ? content.startDate : latestSelectableDate;
 
   // CustomSelect resolves its header as `title || selectedItem.text`, so a non-empty title would
   // permanently mask the chosen station or model. Supply one only while nothing is selected.
@@ -135,7 +139,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             items={modelItems}
             title={modelPlaceholder}
             ariaLabelledBy="wave-runner-model-label"
-            isDisabled={content.isRunning}
+            isDisabled={content.isRunning || content.isLoadingData}
           />
         </div>
       </div>
@@ -157,7 +161,7 @@ export const DataSetup: React.FC = observer(function DataSetup() {
             label="End Date and Time"
             value={content.endDate}
             defaultValue={kDefaultEndDate}
-            minValue={content.startDate}
+            minValue={earliestEndDate}
             maxValue={latestSelectableDate}
             onChange={date => content.setEndDate(date)}
             isDisabled={content.isRunning || content.isLoadingData}

@@ -5,6 +5,7 @@ jest.mock("uplot", () => jest.fn().mockImplementation(() => ({
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
+import { getRoot, unprotect } from "mobx-state-tree";
 
 import { specStores } from "../../../models/stores/spec-stores";
 import { specAppConfig } from "../../../models/stores/spec-app-config";
@@ -179,5 +180,32 @@ describe("DataSetup future dates", () => {
       .toHaveAttribute("aria-disabled", "true");
     expect(screen.getByRole("button", { name: /October 6, 2026/ }))
       .not.toHaveAttribute("aria-disabled", "true");
+  });
+
+  // A start date after today can still arrive from a saved or authored document. Handed straight
+  // to the end field as its minimum, it would sit above that field's maximum (today), and React
+  // Aria's calendar never finishes rendering with contradictory bounds.
+  it("opens the end picker when a saved start date is after today", () => {
+    const content = defaultWaveRunnerContent();
+    content.setStartDate("2026-10-20");
+    content.setEndDate("2026-10-25");
+    renderSetup(content);
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Choose date/ })[1]);
+    expect(screen.getByRole("button", { name: /October 6, 2026/ }))
+      .not.toHaveAttribute("aria-disabled", "true");
+  });
+});
+
+describe("DataSetup while loading data", () => {
+  it("disables both dropdowns", () => {
+    const content = defaultWaveRunnerContent();
+    // isLoadingData is volatile with no setter of its own; see status-and-output.test.tsx.
+    unprotect(getRoot(content));
+    content.isLoadingData = true;
+    const { container } = renderSetup(content);
+
+    expect(container.querySelector('[data-testid="wave-runner-station-header"]')).toHaveClass("disabled");
+    expect(container.querySelector('[data-testid="wave-runner-model-header"]')).toHaveClass("disabled");
   });
 });
