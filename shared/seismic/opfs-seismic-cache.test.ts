@@ -35,6 +35,14 @@ describe("opfs-seismic-cache", () => {
     expect(cached.has(d31)).toBe(false);
   });
 
+  it("doesn't count an empty day file as cached", async () => {
+    const root = new FakeDirHandle();
+    const cache = createOpfsCache(async () => root as any);
+    const day = dayIndex(utcDay(2026, 1, 30));
+    await cache.writeDayChunk(STA, day, new ArrayBuffer(0));
+    expect(await cache.scanCachedDays(STA, day, day)).toEqual(new Set());
+  });
+
   it("lists the (network, station, location, channel) present in the cache", async () => {
     const root = new FakeDirHandle();
     const cache = createOpfsCache(async () => root as any);

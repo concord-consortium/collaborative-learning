@@ -72,8 +72,9 @@ export function createOpfsCache(
       for (let day = startDay; day <= endDay; day++) {
         try {
           const dir = await channelYearDir(station, day, options);
-          await dir.getFileHandle(fileName(day), options);
-          cached.add(day);
+          const handle = await dir.getFileHandle(fileName(day), options);
+          // An interrupted writeDayChunk leaves an empty file; treat it as missing so it's re-downloaded.
+          if ((await handle.getFile()).size > 0) cached.add(day);
         } catch (err) {
           if (!isNotFound(err)) throw err;
         }

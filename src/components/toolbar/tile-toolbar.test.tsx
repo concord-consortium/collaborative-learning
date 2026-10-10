@@ -276,6 +276,30 @@ describe("Tile toolbar button", () => {
     const announcement = screen.getByRole("status");
     expect(announcement).toHaveTextContent("Select something to enable this action");
   });
+
+  it("announces a button's own disabled message", () => {
+    render(
+      <TileToolbarButton name="busy" title="Busy" onClick={clickHandler} disabled={true}
+          disabledMessage="Still working">
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    act(() => {
+      screen.getByRole("button").click();
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("Still working");
+  });
+
+  it("highlighted button looks selected without aria-pressed", () => {
+    render(
+      <TileToolbarButton name="highlight" title="Stop" onClick={clickHandler} highlighted={true}>
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("selected");
+    expect(button).not.toHaveAttribute("aria-pressed");
+  });
 });
 
 describe("Tile toolbar ARIA and keyboard", () => {
