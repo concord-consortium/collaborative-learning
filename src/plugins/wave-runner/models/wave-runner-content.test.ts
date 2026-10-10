@@ -58,7 +58,7 @@ describe("default date range", () => {
 
 describe("startDateISO and endDateISO", () => {
   // The seismogram viewport (status-and-output.tsx) reads these two getters directly as
-  // startTime/endTime. endDate is inclusive - loadData/run already add SECONDS_PER_DAY to cover
+  // startTime/endTime. endDate is inclusive - run/loadEnvelopeData add SECONDS_PER_DAY to cover
   // the whole end day - so a single-day range (start === end, now a valid pick) must still span
   // a full day's worth of time, not collapse to a single zero-width instant.
   it("gives a single-day range a non-zero span, spanning the whole end day", () => {
@@ -146,8 +146,24 @@ describe("WaveRunnerContent", () => {
     // Compared as instants: the shared model normalizes to millisecond precision.
     expect(new Date(shared.startTime).toISOString())
       .toBe(new Date(`${content.startDate}T00:00:00Z`).toISOString());
-    expect(new Date(shared.endTime).toISOString())
-      .toBe(new Date(`${content.endDate}T00:00:00Z`).toISOString());
+    // endDate is inclusive, so the shared range ends at the close of that day.
+    expect(new Date(shared.endTime).getTime())
+      .toBe(Date.parse(`${content.endDate}T00:00:00Z`) + SECONDS_PER_DAY * 1000);
+  });
+
+  // Timeline It! copies the shared range, and the Timeline rejects a view whose start is not
+  // before its end, so a single-day range must still reach it with a full day's span.
+  it("gives the shared seismogram a full day for a single-day range", async () => {
+    const content = setupTileInDocument();
+    content.setStation({
+      network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport"
+    });
+    content.setStartDate("2026-09-15");
+    content.setEndDate("2026-09-15");
+    await content.loadData();
+
+    const shared = content.sharedSeismogram!;
+    expect(shared.endTime!.toMillis() - shared.startTime!.toMillis()).toBe(SECONDS_PER_DAY * 1000);
   });
 
   it("is always user resizable", () => {

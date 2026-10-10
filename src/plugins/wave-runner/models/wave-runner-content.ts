@@ -80,11 +80,10 @@ export const WaveRunnerContentModel = TileContentModel
       return DateTime.fromISO(`${self.startDate}T00:00:00Z`, { zone: "utc" });
     },
     get endDateISO() {
-      // The end date is inclusive (loadData/run already treat it that way, adding
-      // SECONDS_PER_DAY to cover the whole end day) so this returns the END of that day, not its
-      // start. Otherwise a single-day range - valid since this branch allows picking the same day
-      // for start and end - collapses start and end to the same instant, giving the seismogram
-      // viewport zero width and nothing to render.
+      // The end date is inclusive (run and loadEnvelopeData add SECONDS_PER_DAY to cover the
+      // whole end day), so this returns the END of that day, not its start. Otherwise a single-day
+      // range collapses start and end to the same instant, giving the seismogram viewport and the
+      // shared seismogram (see loadData) zero width and nothing to render.
       return DateTime.fromISO(`${self.endDate}T00:00:00Z`, { zone: "utc" }).plus({ seconds: SECONDS_PER_DAY });
     },
     get eventsDataSet(): SharedDataSetType | undefined {
@@ -116,9 +115,11 @@ export const WaveRunnerContentModel = TileContentModel
 
       const { network, station, label, location, channel } = self.station;
       sharedSeismogram.setStation({ network, station, label, location, channel });
+      // Timeline It! copies this range, and the Timeline refuses a view whose start is not before
+      // its end, so the end must cover the whole inclusive end day (see endDateISO).
       sharedSeismogram.setTimeRange(
         `${self.startDate}T00:00:00Z`,
-        `${self.endDate}T00:00:00Z`
+        self.endDateISO.toISO() ?? `${self.endDate}T00:00:00Z`
       );
     },
     clearEventsDataSet() {
