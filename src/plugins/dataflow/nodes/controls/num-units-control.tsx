@@ -181,6 +181,9 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
   useStopEventPropagation(inputRef, "pointerdown");
   useStopEventPropagation(inputRef, "dblclick");
 
+  const unitsRef = useRef<HTMLDivElement>(null);
+  useStopEventPropagation(unitsRef, "pointerdown");
+
   const unitsCountClass = classNames({
     "one": control.units.length === 1,
     "multiple": control.units.length > 1
@@ -206,7 +209,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
         ? <div className="single-unit">
             {control.units[0]}
           </div>
-        : <div className="type-options-back">
+        : <div className="type-options-back" ref={unitsRef}>
             <div className="type-options">
               <select onChange={handleSelectChange}
                 value={control.getCurrentUnits()}

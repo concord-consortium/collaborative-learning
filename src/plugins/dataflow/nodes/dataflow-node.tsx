@@ -303,11 +303,13 @@ export const CustomDataflowNode = observer(
             }
           </div>
       ))}
-      <DataflowNodePlot
-        display={showPlot}
-        model={model}
-        recordedTicks={reteManager.recordedTicks}
-      />
+      {/* Mounted only while open: kept mounted and hidden, its pointerdown guard would never
+          attach. See useStopEventPropagation. */}
+      {showPlot &&
+        <DataflowNodePlot
+          model={model}
+          recordedTicks={reteManager.recordedTicks}
+        />}
 
     </div>
   );
