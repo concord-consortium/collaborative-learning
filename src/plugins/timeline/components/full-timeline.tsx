@@ -12,7 +12,6 @@ import { useTimelineContent } from "../hooks/use-timeline-content";
 import { TimelineContentModelType } from "../models/timeline-content";
 import { getEventColorClass } from "../timeline-types";
 import { describeView } from "./describe-view";
-import { EventShape } from "./event-shape";
 
 import "./full-timeline.scss";
 
@@ -107,6 +106,7 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
           style={{ "--overlay-left": `${toPct(viewStart)}%`, width: `${toPct(viewEnd) - toPct(viewStart)}%` } as
             React.CSSProperties}
         />
+        <FullTimelineMarker content={content} totalStart={totalStart} totalEnd={totalEnd} />
         <div className="full-timeline-label">Full Timeline</div>
       </div>
       <DynamicScrollbar
@@ -126,17 +126,22 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
   );
 });
 
-interface IFullTimelineEventsProps {
+interface IDataRangeProps {
   content: TimelineContentModelType;
   totalStart: number;
   totalEnd: number;
 }
 
+/** Position within the whole data range, clamped to the ends of the strip. */
+function toStripPct(ms: number, totalStart: number, totalEnd: number) {
+  return Math.max(0, Math.min(100, (ms - totalStart) / (totalEnd - totalStart) * 100));
+}
+
 // Doesn't read the view, so that moving the view doesn't redraw the events
 const FullTimelineEvents = observer(function FullTimelineEvents(
-  { content, totalStart, totalEnd }: IFullTimelineEventsProps
+  { content, totalStart, totalEnd }: IDataRangeProps
 ) {
-  const toPct = (ms: number) => Math.max(0, Math.min(100, (ms - totalStart) / (totalEnd - totalStart) * 100));
+  const toPct = (ms: number) => toStripPct(ms, totalStart, totalEnd);
   const colorWords = content.eventTypeColorWords;
   return (
     <>
@@ -148,17 +153,27 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
         const width = toPct(windowEnd) - left;
         const colorWord = colorWords.get(event.eventType);
         return (
-          <React.Fragment key={event.index}>
-            <div
-              className={classNames("full-timeline-event", getEventColorClass(colorWord))}
-              style={{ left: `${left}%`, width: `${width}%` }}
-            />
-            <div className="full-timeline-shape" style={{ left: `${left + width / 2}%` }}>
-              <EventShape colorWord={colorWord} size={6} />
-            </div>
-          </React.Fragment>
+          <div
+            key={event.index}
+            className={classNames("full-timeline-event", getEventColorClass(colorWord))}
+            style={{ left: `${left}%`, width: `${width}%` }}
+          />
         );
       })}
     </>
+  );
+});
+
+// An indicator only, positioned against the whole data range (unlike the graph's timeToViewPct) so
+// it still shows where the marker is once it has scrolled out of the graph's zoomed view.
+const FullTimelineMarker = observer(function FullTimelineMarker(
+  { content, totalStart, totalEnd }: IDataRangeProps
+) {
+  const { markerTime, hoverTime, isPlacingMarker } = content;
+  const time = isPlacingMarker ? hoverTime : markerTime;
+  if (!time) return null;
+  const left = toStripPct(time.toMillis(), totalStart, totalEnd);
+  return (
+    <div className={classNames("full-timeline-marker", { placing: isPlacingMarker })} style={{ left: `${left}%` }} />
   );
 });

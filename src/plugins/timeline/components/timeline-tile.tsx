@@ -12,18 +12,11 @@ import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { Timeline } from "./timeline";
+import { getContentControls } from "./timeline-content-controls";
 import { TimelineInfoButton } from "./timeline-info-button";
 import { TimelineKey } from "./timeline-key";
 import "../timeline-toolbar";
 import "./timeline-tile.scss";
-
-// The controls Tab visits in the tile's contents, in order: Prev, Next and the Full Timeline's
-// scrollbar thumb, less any that are disabled.
-const kContentControls =
-  ".event-row .timeline-button:not(:disabled), .dynamic-scrollbar-thumb:not([aria-disabled])";
-function getContentControls(container: HTMLElement | null) {
-  return container ? Array.from(container.querySelectorAll<HTMLElement>(kContentControls)) : [];
-}
 
 export const TimelineComponent: React.FC<ITileProps> = observer(function TimelineComponent({
   model, readOnly, tileElt, onRegisterTileApi, onUnregisterTileApi

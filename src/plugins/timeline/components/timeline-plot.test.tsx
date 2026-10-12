@@ -277,10 +277,10 @@ describe("TimelinePlot", () => {
     expect(content.hoverTime).toBeUndefined();
   });
 
-  it("leaves the model's pinned time unset on a click", () => {
+  it("leaves the model's marker time unset on a click", () => {
     const { content, plot } = renderPlot(dataStart, dataEnd);
     click(plot, 500);
-    expect(content.pinnedTime).toBeUndefined();
+    expect(content.markerTime).toBeUndefined();
   });
 
   describe("announcements", () => {
@@ -361,6 +361,53 @@ describe("TimelinePlot", () => {
       click(plot, 500, true);
       expect(status.textContent).toBe("");
       expect(announced(container)).toBe(first);
+    });
+  });
+
+  describe("placing a marker", () => {
+    it("places the marker instead of zooming", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      const viewStartBefore = content.viewStartTime?.toISO();
+      const viewEndBefore = content.viewEndTime?.toISO();
+      content.startPlacingMarker();
+
+      click(plot, 500);
+
+      expect(content.markerTime).toBeDefined();
+      expect(content.isPlacingMarker).toBe(false);
+      expect(content.viewStartTime?.toISO()).toBe(viewStartBefore);
+      expect(content.viewEndTime?.toISO()).toBe(viewEndBefore);
+    });
+
+    it("zooms as usual when not placing", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      click(plot, 500);
+      expect(content.markerTime).toBeUndefined();
+      expect(content.viewStartTime?.toISO()).toBe(day(1).toISO());
+      expect(content.viewEndTime?.toISO()).toBe(day(3).toISO());
+    });
+
+    it("leaves the mode on Escape without placing", () => {
+      const { content } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(content.isPlacingMarker).toBe(false);
+      expect(content.markerTime).toBeUndefined();
+    });
+
+    it("tracks the pointer with a preview while placing", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+      fireEvent.pointerMove(plot, { clientX: 500 });
+      expect(content.hoverTime).toBeDefined();
+    });
+
+    // Outside the mode the preview stays dormant - CLUE-673 removed the follow line deliberately.
+    it("sets no preview when not placing", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      fireEvent.pointerMove(plot, { clientX: 500 });
+      expect(content.hoverTime).toBeUndefined();
     });
   });
 });

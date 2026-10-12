@@ -477,6 +477,18 @@ Additionally these buttons are supported and can be added to the toolbar if the 
 - `insert-variable`
 - `edit-variable`
 
+#### Timeline
+
+Common toolbar framework; default buttons:
+
+- `add-marker`: Start placing the time marker; the next click on the graph places it. Disabled once
+  a marker exists, and while the tile has no data.
+- `zoom-in`
+- `zoom-out`
+- `view-all`
+- `pan-left`
+- `pan-right`
+
 #### Wave Runner
 
 Common toolbar framework; default buttons:

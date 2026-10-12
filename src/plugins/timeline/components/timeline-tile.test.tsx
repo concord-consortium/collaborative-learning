@@ -178,11 +178,14 @@ describe("TimelineComponent", () => {
   });
 
   describe("keyboard focus slots", () => {
+    const kDataStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
+    const kDataEnd = DateTime.fromISO("2026-02-05T00:00:00.000Z");
     let tileElt: HTMLElement | undefined;
 
     afterEach(() => {
       tileElt?.remove();
       mockedGetSharedModelManager.mockReset();
+      (model.content as TimelineContentModelType).clearMarkerTime();
     });
 
     function renderInTile(props: Partial<ITileProps> = {}) {
@@ -212,9 +215,7 @@ describe("TimelineComponent", () => {
         eventType: "Earthquake"
       })));
       const sharedDataSet = SharedDataSet.create({ dataSet });
-      const sharedSeismogram = {
-        startTime: DateTime.fromISO("2026-02-01T00:00:00.000Z"), endTime: DateTime.fromISO("2026-02-05T00:00:00.000Z")
-      };
+      const sharedSeismogram = { startTime: kDataStart, endTime: kDataEnd };
       mockedGetSharedModelManager.mockReturnValue({
         isReady: true,
         getTileSharedModelsByType: (_self: any, type: any) =>
@@ -317,6 +318,46 @@ describe("TimelineComponent", () => {
       fireEvent.click(next);
       expect(next).toBeDisabled();
       expect(document.activeElement).toBe(document.body);
+    });
+
+    // The model is shared across these tests, and an earlier one may have left it zoomed in, so the
+    // view is set alongside the marker rather than relying on the fit the tile does on mount.
+    function placeAMarker() {
+      const timeline = model.content as TimelineContentModelType;
+      timeline.setViewRange(kDataStart, kDataEnd);
+      timeline.setMarkerTime(kDataStart.plus({ days: 2 }));
+    }
+
+    it("puts a placed marker in the Tab order, between Next and the thumb", () => {
+      provideData({ eventCount: 3, seismogram: true });
+      (model.content as TimelineContentModelType).selectEvent(1);
+      placeAMarker();
+      const { api } = renderInTile();
+      const info = screen.getByRole("button", { name: "Zooming and Moving" });
+      const prev = screen.getByRole("button", { name: "Prev" });
+      const next = screen.getByRole("button", { name: "Next" });
+      const marker = screen.getByRole("slider", { name: "Time marker" });
+      const del = screen.getByRole("button", { name: "Delete marker" });
+      const thumb = screen.getByRole("slider", { name: "Timeline scroll position" });
+
+      const trap = createFocusTrap(api!);
+      act(() => trap.enterTrap());
+      expect(pressTab(6)).toEqual([info, prev, next, marker, del, thumb]);
+      trap.destroy();
+    });
+
+    it("moves focus to Prev when the marker is deleted from the keyboard", () => {
+      provideData({ eventCount: 3, seismogram: true });
+      (model.content as TimelineContentModelType).selectEvent(1);
+      placeAMarker();
+      renderInTile();
+      const marker = screen.getByRole("slider", { name: "Time marker" });
+      act(() => marker.focus());
+
+      fireEvent.keyDown(marker, { key: "Delete" });
+
+      expect(screen.queryByRole("slider", { name: "Time marker" })).not.toBeInTheDocument();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Prev" }));
     });
 
     it("doesn't join the focus cycle when read-only", () => {
