@@ -23,14 +23,17 @@ const Content: React.FC<any> = () => (
 interface IHarnessProps {
   onDefaultClick: () => void;
   defaultDisabled?: boolean;
+  describeContent?: boolean;
 }
 
-const Harness: React.FC<IHarnessProps> = ({ onDefaultClick, defaultDisabled }) => {
+const Harness: React.FC<IHarnessProps> = ({ onDefaultClick, defaultDisabled, describeContent }) => {
   const buttons: IModalButton[] = [
     { label: "Cancel" },
     { label: "Graph It!", isDefault: true, isDisabled: defaultDisabled, onClick: onDefaultClick }
   ];
-  const [showModal] = useCustomModal({ className: "test", title: "Test", Content, contentProps: {}, buttons });
+  const [showModal] = useCustomModal({
+    className: "test", title: "Test", Content, contentProps: {}, describeContent, buttons
+  });
   React.useEffect(() => { (showModal as () => void)(); }, [showModal]);
   return <div className="app" />;
 };
@@ -106,5 +109,39 @@ describe("useCustomModal Enter-key handling", () => {
     input.focus();
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onDefaultClick).not.toHaveBeenCalled();
+  });
+});
+
+describe("useCustomModal aria-describedby", () => {
+  beforeAll(() => {
+    Modal.setAppElement("body");
+  });
+
+  it("doesn't describe the dialog by default", async () => {
+    await openModal({ onDefaultClick: jest.fn() });
+    expect(document.querySelector(".custom-modal")).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("describes the dialog with its content when describeContent is set", async () => {
+    await openModal({ onDefaultClick: jest.fn(), describeContent: true });
+    const describedBy = document.querySelector(".custom-modal")?.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    expect(document.getElementById(describedBy!)).toHaveClass("modal-content");
+  });
+
+  it("labels and describes each of two open dialogs of the same class with its own elements", async () => {
+    render(
+      <ModalProvider>
+        <Harness onDefaultClick={jest.fn()} describeContent />
+        <Harness onDefaultClick={jest.fn()} describeContent />
+      </ModalProvider>
+    );
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+    const dialogs = Array.from(document.querySelectorAll(".custom-modal"));
+    expect(dialogs).toHaveLength(2);
+    dialogs.forEach(dialog => {
+      expect(dialog).toContainElement(document.getElementById(dialog.getAttribute("aria-labelledby")!));
+      expect(dialog).toContainElement(document.getElementById(dialog.getAttribute("aria-describedby")!));
+    });
   });
 });

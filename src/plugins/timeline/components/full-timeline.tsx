@@ -126,17 +126,22 @@ const FullTimelineStrip = observer(function FullTimelineStrip({
   );
 });
 
-interface IFullTimelineEventsProps {
+interface IDataRangeProps {
   content: TimelineContentModelType;
   totalStart: number;
   totalEnd: number;
 }
 
+/** Position within the whole data range, clamped to the ends of the strip. */
+function toStripPct(ms: number, totalStart: number, totalEnd: number) {
+  return Math.max(0, Math.min(100, (ms - totalStart) / (totalEnd - totalStart) * 100));
+}
+
 // Doesn't read the view, so that moving the view doesn't redraw the events
 const FullTimelineEvents = observer(function FullTimelineEvents(
-  { content, totalStart, totalEnd }: IFullTimelineEventsProps
+  { content, totalStart, totalEnd }: IDataRangeProps
 ) {
-  const toPct = (ms: number) => Math.max(0, Math.min(100, (ms - totalStart) / (totalEnd - totalStart) * 100));
+  const toPct = (ms: number) => toStripPct(ms, totalStart, totalEnd);
   const colorWords = content.eventTypeColorWords;
   return (
     <>
@@ -159,21 +164,15 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
   );
 });
 
-interface IFullTimelineMarkerProps {
-  content: TimelineContentModelType;
-  totalStart: number;
-  totalEnd: number;
-}
-
 // An indicator only, positioned against the whole data range (unlike the graph's timeToViewPct) so
 // it still shows where the marker is once it has scrolled out of the graph's zoomed view.
 const FullTimelineMarker = observer(function FullTimelineMarker(
-  { content, totalStart, totalEnd }: IFullTimelineMarkerProps
+  { content, totalStart, totalEnd }: IDataRangeProps
 ) {
   const { markerTime, hoverTime, isPlacingMarker } = content;
   const time = isPlacingMarker ? hoverTime : markerTime;
   if (!time) return null;
-  const left = Math.max(0, Math.min(100, (time.toMillis() - totalStart) / (totalEnd - totalStart) * 100));
+  const left = toStripPct(time.toMillis(), totalStart, totalEnd);
   return (
     <div className={classNames("full-timeline-marker", { placing: isPlacingMarker })} style={{ left: `${left}%` }} />
   );

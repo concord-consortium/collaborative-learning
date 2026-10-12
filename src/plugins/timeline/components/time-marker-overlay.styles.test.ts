@@ -4,7 +4,8 @@ import path from "path";
 // The overlay is pointer-events: none so it doesn't swallow the plot's clicks, and each interactive
 // part opts back in. jsdom ignores pointer-events when dispatching, so a rendering test cannot tell
 // a dead control from a live one — a placed label that forgot to opt back in still passes every
-// click test while being unusable in a browser. This reads the stylesheet instead.
+// click test while being unusable in a browser. touch-action is invisible to it in the same way.
+// This reads the stylesheet instead.
 describe("time-marker-overlay.scss", () => {
   const source = fs.readFileSync(path.join(__dirname, "time-marker-overlay.scss"), "utf8");
 
@@ -20,10 +21,21 @@ describe("time-marker-overlay.scss", () => {
     throw new Error(`unbalanced braces after ${selector}`);
   }
 
+  const grip = block("@mixin marker-grip");
+
+  it("lets a grip receive pointer events, so the marker can be dragged and deleted", () => {
+    expect(grip).toMatch(/pointer-events:\s*auto/);
+  });
+
+  // The grips sit outside .timeline-plot, so the plot's own touch-action does not cover them.
+  it("keeps a touch drag on a grip from being claimed for panning the page", () => {
+    expect(grip).toMatch(/touch-action:\s*pan-y pinch-zoom/);
+  });
+
   it.each([".time-marker-line", ".time-marker-label"])(
-    "lets a placed %s receive pointer events, so it can be dragged and deleted",
+    "makes a placed %s a grip only while the tile is interactive",
     selector => {
-      expect(block("&.placed", block(selector))).toMatch(/pointer-events:\s*auto/);
+      expect(block(selector)).toContain("&.placed.interactive {\n    @include marker-grip;");
     }
   );
 

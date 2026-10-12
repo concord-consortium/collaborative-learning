@@ -1,5 +1,22 @@
 @import "../../../components/vars";
 
+// Shared by the marker's two grips, the stem and the label.
+@mixin marker-grip {
+  cursor: grab;
+  // The overlay is pointer-events: none so it doesn't swallow the plot's clicks. A grip has to opt
+  // back in, or it — and the delete button inside the label — are dead.
+  pointer-events: auto;
+  // The overlay is a sibling of .timeline-plot, not a descendant, so it doesn't pick up the plot's
+  // touch-action policy. Without this the browser can claim a sideways touch drag on a grip for
+  // panning the page and cancel the pointer mid-drag.
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+
+  &.dragging {
+    cursor: grabbing;
+  }
+}
+
 .time-marker-overlay {
   inset: 0;
   pointer-events: none;
@@ -27,12 +44,13 @@
     width: 0;
   }
 
-  &.placed {
-    cursor: grab;
-    pointer-events: auto;
+  // Read-only, a placed marker is an indicator only; `interactive` is what makes it a grip.
+  &.placed.interactive {
+    @include marker-grip;
 
-    &.dragging {
-      cursor: grabbing;
+    &:focus-visible {
+      outline: $focus-ring-outer-width solid $focus-ring-color;
+      outline-offset: 1px;
     }
   }
 }
@@ -61,18 +79,11 @@
     pointer-events: none;
   }
 
-  &.placed {
-    cursor: grab;
-    // The overlay is pointer-events: none so it doesn't swallow the plot's clicks. The placed
-    // label has to opt back in, or the drag handle and the delete button inside it are both dead.
-    pointer-events: auto;
+  &.placed.interactive {
+    @include marker-grip;
 
     &:hover {
       background-color: #eee;
-    }
-
-    &.dragging {
-      cursor: grabbing;
     }
   }
 }

@@ -10,6 +10,7 @@ jest.mock("uplot", () => {
 import { render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
+import { ReadOnlyContext } from "../../../components/document/read-only-context";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -64,14 +65,16 @@ describe("EventOverlay", () => {
     mockedGetSharedModelManager.mockReset();
   });
 
-  function renderOverlay() {
+  function renderOverlay(readOnly = false) {
     const content = TimelineContentModel.create();
     content.setViewRange(dataStart, dataEnd);
     const model = TileModel.create({ content });
     return render(
-      <TileModelContext.Provider value={model}>
-        <EventOverlay />
-      </TileModelContext.Provider>
+      <ReadOnlyContext.Provider value={readOnly}>
+        <TileModelContext.Provider value={model}>
+          <EventOverlay />
+        </TileModelContext.Provider>
+      </ReadOnlyContext.Provider>
     );
   }
 
@@ -85,5 +88,19 @@ describe("EventOverlay", () => {
     expect(shapes[1].style.left).toBe("62.5%");
     expect(shapes[0].querySelector(".event-shape")).toHaveClass("blue-event");
     expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
+  });
+
+  it("keeps the event labels out of the Tab order", () => {
+    const { container } = renderOverlay();
+    const buttons = container.querySelectorAll(".event-label-button");
+    expect(buttons).toHaveLength(2);
+    buttons.forEach(button => expect(button).toHaveAttribute("tabindex", "-1"));
+  });
+
+  it("leaves the event labels in the Tab order when read-only", () => {
+    const { container } = renderOverlay(true);
+    const buttons = container.querySelectorAll(".event-label-button");
+    expect(buttons).toHaveLength(2);
+    buttons.forEach(button => expect(button).not.toHaveAttribute("tabindex"));
   });
 });

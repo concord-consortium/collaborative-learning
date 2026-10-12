@@ -11,10 +11,12 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { onPatch } from "mobx-state-tree";
 import React from "react";
+import { ReadOnlyContext } from "../../../components/document/read-only-context";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { mockPointerEvents } from "../../../test/pointer-events";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
+import { formatTime } from "./describe-view";
 import { TimeMarkerOverlay } from "./time-marker-overlay";
 
 // The timeline tile needs to be registered so TileModel.create
@@ -34,12 +36,14 @@ describe("TimeMarkerOverlay", () => {
     });
   }
 
-  function renderOverlay(content: TimelineContentModelType = createContent()) {
+  function renderOverlay(content: TimelineContentModelType = createContent(), readOnly = false) {
     const model = TileModel.create({ content });
     const result = render(
-      <TileModelContext.Provider value={model}>
-        <TimeMarkerOverlay />
-      </TileModelContext.Provider>
+      <ReadOnlyContext.Provider value={readOnly}>
+        <TileModelContext.Provider value={model}>
+          <TimeMarkerOverlay />
+        </TileModelContext.Provider>
+      </ReadOnlyContext.Provider>
     );
     return { content, ...result };
   }
@@ -197,6 +201,119 @@ describe("TimeMarkerOverlay", () => {
       const { content } = renderOverlayWithAMarker();
       fireEvent.click(screen.getByRole("button", { name: "Delete marker" }));
       expect(content.markerTime).toBeUndefined();
+    });
+
+    // Dragged past the edge of the view, the marker is still a placed marker out of view, which is
+    // normally not drawn. Unmounting it would take the captured pointer's target with it, so the
+    // pointerup that commits the move would never arrive.
+    it("holds the marker at the edge while it is dragged out of the view", () => {
+      const { content } = renderOverlayWithAMarker();
+      stubOverlayRect();
+      const stem = screen.getByTestId("marker-stem");
+
+      fireEvent.pointerDown(stem, { pointerId: 1, clientX: kOverlayWidth * 0.5 });
+      fireEvent.pointerMove(stem, { pointerId: 1, clientX: kOverlayWidth * 1.4 });
+      expect(stem).toBeInTheDocument();
+      expect(stem.style.left).toBe("100%");
+
+      fireEvent.pointerUp(stem, { pointerId: 1, clientX: kOverlayWidth * 1.4 });
+      expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(140);
+    });
+
+    // Capture can be lost without a cancel: a capture change fires lostpointercapture on its own.
+    it("ends the drag when the pointer capture is lost", () => {
+      const { content } = renderOverlayWithAMarker();
+      const before = content.markerTime!;
+      stubOverlayRect();
+      const stem = screen.getByTestId("marker-stem");
+
+      fireEvent.pointerDown(stem, { pointerId: 1, clientX: 100 });
+      fireEvent.lostPointerCapture(stem, { pointerId: 1 });
+      fireEvent.pointerMove(stem, { pointerId: 1, clientX: 400 });
+      fireEvent.pointerUp(stem, { pointerId: 1, clientX: 400 });
+
+      expect(content.markerTime!.toMillis()).toBe(before.toMillis());
+    });
+  });
+
+  describe("moving the marker from the keyboard", () => {
+    // The marker starts at the middle of the view; a step is 5% of it, a large step 20%.
+    it.each([
+      { key: "ArrowRight", pct: 55 },
+      { key: "ArrowUp", pct: 55 },
+      { key: "ArrowLeft", pct: 45 },
+      { key: "ArrowDown", pct: 45 },
+      { key: "PageUp", pct: 70 },
+      { key: "PageDown", pct: 30 },
+      { key: "Home", pct: 0 },
+      { key: "End", pct: 100 },
+    ])("moves the marker to $pct% of the view on $key", ({ key, pct }) => {
+      const { content } = renderOverlayWithAMarker();
+      fireEvent.keyDown(screen.getByRole("slider"), { key });
+      expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(pct);
+    });
+
+    // A marker nudged out of the view would stop being drawn, taking the focused slider with it.
+    it("stops at the edge of the view", () => {
+      const { content } = renderOverlayWithAMarker();
+      const slider = screen.getByRole("slider");
+      fireEvent.keyDown(slider, { key: "End" });
+      fireEvent.keyDown(slider, { key: "ArrowRight" });
+      expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(100);
+    });
+
+    it("writes the model once per press, so a nudge is a single undo step", () => {
+      const { content } = renderOverlayWithAMarker();
+      const writes: unknown[] = [];
+      onPatch(content, patch => { if (patch.path === "/markerTimeISO") writes.push(patch.value); });
+
+      fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowRight" });
+
+      expect(writes).toHaveLength(1);
+    });
+
+    it("deletes the marker on Delete", () => {
+      const { content } = renderOverlayWithAMarker();
+      fireEvent.keyDown(screen.getByRole("slider"), { key: "Delete" });
+      expect(content.markerTime).toBeUndefined();
+    });
+
+    it("reads out the marker's time as the slider's value", () => {
+      renderOverlayWithAMarker();
+      expect(screen.getByRole("slider")).toHaveAttribute(
+        "aria-valuetext", formatTime(viewStart.plus({ hours: 12 }))
+      );
+    });
+  });
+
+  // A read-only pane shares the document model, so anything live there edits the student's marker.
+  describe("a read-only tile", () => {
+    function renderReadOnlyWithAMarker() {
+      const content = createContent();
+      act(() => { content.setMarkerTime(viewStart.plus({ hours: 12 })); });
+      return renderOverlay(content, true);
+    }
+
+    it("still shows where the marker is", () => {
+      const { container } = renderReadOnlyWithAMarker();
+      expect(container.querySelector(".time-marker-line.placed")).toBeInTheDocument();
+    });
+
+    it("offers no way to delete it", () => {
+      renderReadOnlyWithAMarker();
+      expect(screen.queryByRole("button", { name: "Delete marker" })).not.toBeInTheDocument();
+    });
+
+    it("leaves it out of the Tab order, with nothing there to operate", () => {
+      renderReadOnlyWithAMarker();
+      expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+    });
+
+    it.each(["marker-stem", "marker-label"])("does not move it when the %s is dragged", testId => {
+      const { content } = renderReadOnlyWithAMarker();
+      const before = content.markerTime!;
+      dragBy(testId, 0.75);
+      expect(content.markerTime!.toMillis()).toBe(before.toMillis());
     });
   });
 });
