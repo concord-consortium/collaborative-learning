@@ -1,0 +1,23 @@
+// Every vertical step in the Status and Output panel is pinned here so its total height is
+// arithmetic rather than measured (see wave-runner-types.ts for how the tile's own height is built
+// from this number).
+//
+//   top      8             (the section's own padding-top; it has no padding-bottom)
+//   title   18 + 10 gap
+//   graph   63 + 10 gap   (border-box: 60 of content, which is the waveform panel's own fixed
+//                          height, plus its 1.5px border either side)
+//   status  19 + 10 gap   (one line - see status-and-output.tsx for why)
+//   counts  26
+//   ----------------
+//           164
+
+$wave-runner-panel-top: 8px;
+$wave-runner-section-title-height: 18px;
+$wave-runner-row-gap: 10px;
+$wave-runner-graph-height: 63px;
+$wave-runner-status-line-height: 19px;
+$wave-runner-counts-row-height: 26px;
+
+// Caps the dropdown flyout's height; see dropdown-appearance.scss .list for why it scrolls
+// instead of growing past it.
+$wave-runner-flyout-max-height: 140px;
