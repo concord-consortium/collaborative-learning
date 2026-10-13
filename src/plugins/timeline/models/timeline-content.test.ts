@@ -710,3 +710,89 @@ describe("hiding event types", () => {
     expect(reloaded.isEventTypeHidden("Earthquake")).toBe(true);
   });
 });
+
+describe("navigating with types hidden", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+    // Six events an hour apart, types A B A C A B, so hiding B leaves indices 0, 2, 3, 4.
+    const mockSharedDataSet = createEventsDataSet(
+      ["A", "B", "A", "C", "A", "B"].map((eventType, i) => ({
+        windowStart: dataStart.plus({ hours: i + 1 }).toISO()!,
+        windowEnd: dataStart.plus({ hours: i + 1, minutes: 30 }).toISO()!,
+        eventType
+      }))
+    );
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        if (type === SharedDataSet) return [mockSharedDataSet];
+        return [];
+      },
+    } as any);
+    content = TimelineContentModel.create();
+    // Wide enough to hold every event, so visibleEvents is never clipped by the view.
+    content.setViewRange(dataStart, dataEnd);
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("skips hidden events going forward", () => {
+    content.toggleEventType("B");
+    content.selectEvent(0);
+    content.selectNextEvent();
+    expect(content.selectedEventIndex).toBe(2);
+  });
+
+  it("skips hidden events going back", () => {
+    content.toggleEventType("B");
+    content.selectEvent(2);
+    content.selectPrevEvent();
+    expect(content.selectedEventIndex).toBe(0);
+  });
+
+  it("does not renumber the events that remain", () => {
+    content.toggleEventType("B");
+    content.selectEvent(2);
+    expect(content.selectedEventLabel).toBe("Event 3");
+  });
+
+  it("leaves the selection alone when its own type is hidden", () => {
+    content.selectEvent(1);
+    content.toggleEventType("B");
+    expect(content.selectedEventIndex).toBe(1);
+    expect(content.selectedEventLabel).toBe("Event 2");
+  });
+
+  it("walks on from a selection whose own type is hidden", () => {
+    content.selectEvent(1);
+    content.toggleEventType("B");
+    content.toggleEventType("A");
+    // Only the C at index 3 is left, so stepping by one would land on the hidden index 2.
+    expect(content.canSelectNext).toBe(true);
+    content.selectNextEvent();
+    expect(content.selectedEventIndex).toBe(3);
+  });
+
+  it("disables both Prev and Next when every type is hidden", () => {
+    ["A", "B", "C"].forEach(t => content.toggleEventType(t));
+    expect(content.canSelectPrev).toBe(false);
+    expect(content.canSelectNext).toBe(false);
+  });
+
+  it("leaves a hidden event out of visibleEvents", () => {
+    content.toggleEventType("B");
+    expect(content.visibleEvents.map(e => e.index)).toEqual([0, 2, 3, 4]);
+  });
+});

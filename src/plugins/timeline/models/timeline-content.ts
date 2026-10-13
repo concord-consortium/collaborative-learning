@@ -169,9 +169,10 @@ export const TimelineContentModel = TileContentModel
     get canPanRight() {
       return !!self.viewEndTime && !!self.dataEndTime && self.viewEndTime < self.dataEndTime;
     },
+    // Switched on in the Event Key and inside the current view: exactly what EventOverlay draws.
     get visibleEvents(): TimelineEvent[] {
       if (!self.viewStartTime || !self.viewEndTime) return [];
-      return self.events.filter(e =>
+      return self.shownEvents.filter(e =>
         e.windowEnd > self.viewStartTime! && e.windowStart < self.viewEndTime!
       );
     },
@@ -181,11 +182,14 @@ export const TimelineContentModel = TileContentModel
       const idx = Math.max(0, Math.min(self.selectedEventIndex, events.length - 1));
       return events[idx];
     },
+    // Prev and Next walk the shown events, so a switched-off type is stepped over rather than
+    // being zoomed to by `focusEvent` and left invisible. Numbering is untouched: an event keeps
+    // its index in the full list however many types are off.
     get canSelectPrev() {
-      return self.events.length > 0 && self.selectedEventIndex > 0;
+      return self.shownEvents.some(e => e.index < self.selectedEventIndex);
     },
     get canSelectNext() {
-      return self.selectedEventIndex < self.events.length - 1;
+      return self.shownEvents.some(e => e.index > self.selectedEventIndex);
     },
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
@@ -352,14 +356,13 @@ export const TimelineContentModel = TileContentModel
       else self.hiddenEventTypes.push(eventType);
     },
     selectNextEvent() {
-      if (self.canSelectNext) {
-        self.selectEvent(self.selectedEventIndex + 1);
-      }
+      const next = self.shownEvents.find(e => e.index > self.selectedEventIndex);
+      if (next) self.selectEvent(next.index);
     },
     selectPrevEvent() {
-      if (self.canSelectPrev) {
-        self.selectEvent(self.selectedEventIndex - 1);
-      }
+      const shownBefore = self.shownEvents.filter(e => e.index < self.selectedEventIndex);
+      const prev = shownBefore[shownBefore.length - 1];
+      if (prev) self.selectEvent(prev.index);
     }
   }));
 
