@@ -703,6 +703,27 @@ describe("hiding event types", () => {
     expect(content.isEventTypeHidden("Earthquake")).toBe(false);
   });
 
+  it("lets a reader hide a type without writing it to the document", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventTypeForReader("Earthquake");
+    expect(content.isEventTypeHidden("Earthquake")).toBe(true);
+    expect(content.hiddenEventTypes.slice()).toEqual([]);
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("hiddenEventTypes", ["Earthquake"]);
+  });
+
+  it("starts a reader's choices from the document's, then diverges", () => {
+    const content = TimelineContentModel.create({ hiddenEventTypes: ["Noise"] });
+    expect(content.isEventTypeHidden("Noise")).toBe(true);
+
+    content.toggleEventTypeForReader("Earthquake");
+    expect(content.isEventTypeHidden("Noise")).toBe(true);
+    expect(content.isEventTypeHidden("Earthquake")).toBe(true);
+
+    content.toggleEventTypeForReader("Noise");
+    expect(content.isEventTypeHidden("Noise")).toBe(false);
+    expect(content.hiddenEventTypes.slice()).toEqual(["Noise"]);
+  });
+
   it("keeps a hidden type through a save and reload", () => {
     const content = TimelineContentModel.create();
     content.toggleEventType("Earthquake");

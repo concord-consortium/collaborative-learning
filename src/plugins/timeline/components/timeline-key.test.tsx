@@ -109,10 +109,27 @@ describe("TimelineKey", () => {
     expect(screen.getByRole("checkbox", { name: "Noise" })).toBeChecked();
   });
 
-  // A read-only pane shares the document model, so a live checkbox there edits the student's work.
-  it("disables its checkboxes when read-only", () => {
-    renderKey(true);
-    screen.getAllByRole("checkbox").forEach(box => expect(box).toBeDisabled());
+  // A reader still needs to narrow what they are looking at, so the key works in a read-only pane.
+  // What it must not do there is change the document.
+  it("lets a reader switch a type off without touching the saved document", () => {
+    const { content } = renderKey(true);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Earthquake" }));
+
+    expect(content.isEventTypeHidden("Earthquake")).toBe(true);
+    expect(screen.getByRole("checkbox", { name: "Earthquake" })).not.toBeChecked();
+    expect(content.hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  it("starts a reader's filtering from what the document saved", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    renderKey(true, content);
+
+    expect(screen.getByRole("checkbox", { name: "Earthquake" })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Earthquake" }));
+    expect(content.isEventTypeHidden("Earthquake")).toBe(false);
+    // The document still has it hidden; only this reader's view changed.
+    expect(content.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
   });
 
   it("carries each type's icon, haloed for the dark checkbox", () => {

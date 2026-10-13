@@ -23,8 +23,9 @@ export const TimelineKey = observer(function TimelineKey() {
             <input
               type="checkbox"
               checked={!content.isEventTypeHidden(eventType)}
-              disabled={readOnly}
-              onChange={() => content.toggleEventType(eventType)}
+              onChange={() => readOnly
+                ? content.toggleEventTypeForReader(eventType)
+                : content.toggleEventType(eventType)}
             />
             <EventShape colorWord={colorWord} onDark />
           </span>

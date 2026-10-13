@@ -25,6 +25,10 @@ export const TimelineContentModel = TileContentModel
     selectedEventIndex: types.optional(types.number, 0),
   })
   .volatile(self => ({
+    // A reader cannot write to a document they do not own, but they still need to filter what they
+    // are reading. Toggling in a read-only pane diverges into this unsaved copy of
+    // `hiddenEventTypes`, which lasts as long as the tile is on screen.
+    readerHiddenEventTypes: undefined as string[] | undefined,
     hoverTime: undefined as DateTime | undefined,
     pinnedTime: undefined as DateTime | undefined,
     // The view shown while a preview is active, and the saved view it started from; see
@@ -139,12 +143,18 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    /** What the Event Key has switched off: a reader's own choice if they made one, else the document's. */
+    get hiddenTypes(): string[] {
+      return self.readerHiddenEventTypes ?? Array.from(self.hiddenEventTypes);
+    }
+  }))
+  .views(self => ({
     isEventTypeHidden(eventType: string) {
-      return self.hiddenEventTypes.includes(eventType);
+      return self.hiddenTypes.includes(eventType);
     },
     // The events whose type is still switched on in the Event Key.
     get shownEvents(): TimelineEvent[] {
-      return self.events.filter(e => !self.hiddenEventTypes.includes(e.eventType));
+      return self.events.filter(e => !self.hiddenTypes.includes(e.eventType));
     }
   }))
   .views(self => ({
@@ -354,6 +364,13 @@ export const TimelineContentModel = TileContentModel
       const at = self.hiddenEventTypes.indexOf(eventType);
       if (at >= 0) self.hiddenEventTypes.splice(at, 1);
       else self.hiddenEventTypes.push(eventType);
+    },
+    /** Toggles for a reader of someone else's work, leaving the saved document alone. */
+    toggleEventTypeForReader(eventType: string) {
+      const hidden = self.hiddenTypes;
+      self.readerHiddenEventTypes = hidden.includes(eventType)
+        ? hidden.filter(t => t !== eventType)
+        : [...hidden, eventType];
     },
     selectNextEvent() {
       const next = self.shownEvents.find(e => e.index > self.selectedEventIndex);

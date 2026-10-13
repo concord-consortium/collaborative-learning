@@ -8,12 +8,14 @@
  * The fixture holds ten events over one day across seven types. Events 2 and 5 are a couple of
  * minutes long, far below a pixel at this zoom, so they are the degenerate case.
  *
- * Switching a type off is not exercised here. An authored tile can only live in the curriculum
- * Problem panel, which is read-only, and a read-only tile has no drag handle to copy it into the
- * workspace with — so there is no editable Timeline holding events for Cypress to click. That
- * behaviour is covered by Jest instead: `timeline-key.test.tsx` for the checkbox, and
- * `timeline-content.test.ts` and `full-timeline.test.tsx` for what it hides.
+ * The tile sits in the curriculum Problem panel, which is read-only. The Event Key still works
+ * there — a reader needs to narrow what they are looking at — but it changes only the session's
+ * view, never the saved document. That the document is left alone is checked in Jest, where the
+ * model can be read directly; what these cover is that the marks actually come and go on screen.
  */
+const keyCheckbox = label =>
+  cy.get(".timeline-key").contains("label", label).find("input[type=checkbox]");
+
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent8Investigation4")}`;
   cy.visit(queryParams);
@@ -73,13 +75,49 @@ context("Timeline event marks and Event Key", () => {
     });
   });
 
-  it("leaves the Event Key inert in the read-only Problem panel", () => {
+  it("switches a type's marks off and on from the Event Key", () => {
     beforeTest();
 
-    // A read-only pane shares the document model, so a live checkbox there would edit content the
-    // reader does not own. The marks are still drawn; only the controls are dead.
-    cy.get(".nav-tab-panel .timeline-key input[type=checkbox]").should("be.disabled");
-    cy.get(".nav-tab-panel .event-overlay").should("have.length", 10);
+    cy.get(".event-overlay.blue-event").should("have.length", 2);
+    cy.get(".full-timeline-event.blue-event").should("have.length", 2);
+
+    cy.log("unchecking Avalanche removes its marks from the graph and the Full Timeline");
+    keyCheckbox("Avalanche").uncheck();
+    cy.get(".event-overlay.blue-event").should("not.exist");
+    cy.get(".full-timeline-event.blue-event").should("not.exist");
+    cy.get(".event-overlay.orange-event").should("exist");
+
+    cy.log("checking it again brings them back");
+    keyCheckbox("Avalanche").check();
+    cy.get(".event-overlay.blue-event").should("have.length", 2);
+    cy.get(".full-timeline-event.blue-event").should("have.length", 2);
+  });
+
+  it("keeps each event's number when a type is switched off", () => {
+    beforeTest();
+
+    // Event 1 is an Avalanche and event 3 an Explosion. Hiding the Avalanches must not renumber
+    // the Explosion to 2.
+    keyCheckbox("Avalanche").uncheck();
+    cy.get(".event-overlay.red-event").should("exist");
+    cy.get(".event-label-button").first().should("have.text", "2");
+    cy.get(".event-label-button").should("have.length", 8);
+  });
+
+  it("steps Prev and Next over switched-off events", () => {
+    beforeTest();
+
+    cy.log("Next from event 1 reaches event 2 while everything is shown");
+    cy.get(".event-label").should("have.text", "Event 1");
+    cy.get(".next-button").click();
+    cy.get(".event-label").should("have.text", "Event 2");
+
+    cy.log("with Earthquakes off, Next from event 1 skips event 2 and lands on 3");
+    cy.get(".prev-button").click();
+    keyCheckbox("Earthquake").uncheck();
+    cy.get(".event-label").should("have.text", "Event 1");
+    cy.get(".next-button").click();
+    cy.get(".event-label").should("have.text", "Event 3");
   });
 
   it("fits the tile without scrolling at its default height", () => {
