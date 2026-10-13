@@ -132,6 +132,27 @@ describe("FullTimeline", () => {
     expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
   });
 
+  it("stops drawing a type that is switched off in the Event Key", () => {
+    const dataSet = DataSet.create();
+    addAttributeToDataSet(dataSet, { name: "windowStart" });
+    addAttributeToDataSet(dataSet, { name: "windowEnd" });
+    addAttributeToDataSet(dataSet, { name: "eventType" });
+    addCasesToDataSet(dataSet, [
+      { windowStart: day(1.5).toISO()!, windowEnd: day(1.75).toISO()!, eventType: "Earthquake" },
+      { windowStart: day(3).toISO()!, windowEnd: day(3.5).toISO()!, eventType: "Noise" }
+    ]);
+    mockSharedDataSet = SharedDataSet.create({ dataSet });
+
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    expect(container.querySelectorAll(".full-timeline-event")).toHaveLength(2);
+
+    act(() => { content.toggleEventType("Earthquake"); });
+
+    const left = container.querySelectorAll<HTMLElement>(".full-timeline-event");
+    expect(left).toHaveLength(1);
+    expect(left[0]).toHaveClass("orange-event");
+  });
+
   it("keeps events within the strip, leaving out those that don't overlap the data", () => {
     const dataSet = DataSet.create();
     addAttributeToDataSet(dataSet, { name: "windowStart" });

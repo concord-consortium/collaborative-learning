@@ -140,7 +140,7 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
   const colorWords = content.eventTypeColorWords;
   return (
     <>
-      {content.events.map(event => {
+      {content.shownEvents.map(event => {
         const windowStart = event.windowStart.toMillis();
         const windowEnd = event.windowEnd.toMillis();
         if (windowEnd <= totalStart || windowStart >= totalEnd) return null;
