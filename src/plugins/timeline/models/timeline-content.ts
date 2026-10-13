@@ -142,7 +142,7 @@ export const TimelineContentModel = TileContentModel
     isEventTypeHidden(eventType: string) {
       return self.hiddenEventTypes.includes(eventType);
     },
-    // The events whose type is switched on in the Event Key.
+    // The events whose type is still switched on in the Event Key.
     get shownEvents(): TimelineEvent[] {
       return self.events.filter(e => !self.hiddenEventTypes.includes(e.eventType));
     }
@@ -169,7 +169,7 @@ export const TimelineContentModel = TileContentModel
     get canPanRight() {
       return !!self.viewEndTime && !!self.dataEndTime && self.viewEndTime < self.dataEndTime;
     },
-    // Switched on in the Event Key and inside the current view: exactly what EventOverlay draws.
+    // `shownEvents` clipped to the view, which is exactly what EventOverlay draws.
     get visibleEvents(): TimelineEvent[] {
       if (!self.viewStartTime || !self.viewEndTime) return [];
       return self.shownEvents.filter(e =>

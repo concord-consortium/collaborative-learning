@@ -80,8 +80,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
         <TimelineInfoButton />
       </BasicEditableTileTitle>
       <TileToolbar tileType="timeline" readOnly={!!readOnly} tileElement={tileElt} />
-      {/* The run: which station, and the dates it covers. Zero-padded, as the design has it —
-          Luxon's locale short date drops the leading zeros. */}
+      {/* Zero-padded, as the design has it: Luxon's locale short date drops the leading zeros. */}
       <div className="metadata-display">
         <div>{content.sharedSeismogram?.station?.label ?? ""}</div>
         <div>{content.dataStartTime?.toUTC().toFormat(kRunDateFormat) ?? ""}</div>
