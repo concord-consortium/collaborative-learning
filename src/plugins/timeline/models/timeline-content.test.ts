@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { IJsonPatch, applyPatch, onPatch } from "mobx-state-tree";
+import { IJsonPatch, applyPatch, getSnapshot, onPatch } from "mobx-state-tree";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -34,15 +34,18 @@ describe("TimelineContent", () => {
     const content = TimelineContentModel.create({
       viewStartTimeISO: "2026-02-01T00:00:00.000Z",
       viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      hiddenEventTypes: ["Noise"],
       selectedEventIndex: 3
     });
     const json = content.exportJson();
     expect(typeof json).toBe("string");
     expect(json.length).toBeGreaterThan(0);
+    // The types switched off in the Event Key travel with the document, like the view range.
     expect(JSON.parse(json)).toEqual({
       type: "Timeline",
       viewStartTimeISO: "2026-02-01T00:00:00.000Z",
       viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      hiddenEventTypes: ["Noise"],
       selectedEventIndex: 3
     });
   });
@@ -683,5 +686,27 @@ describe("time markers", () => {
     content.setViewRange(viewStart, viewEnd);
     expect(content.timeToViewPct(viewStart.minus({ hours: 6 }))).toBe(-25);
     expect(content.timeToViewPct(viewEnd.plus({ hours: 12 }))).toBe(150);
+  });
+});
+
+describe("hiding event types", () => {
+  it("hides no types by default", () => {
+    const content = TimelineContentModel.create();
+    expect(content.isEventTypeHidden("Earthquake")).toBe(false);
+  });
+
+  it("toggles a type off and on again", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    expect(content.isEventTypeHidden("Earthquake")).toBe(true);
+    content.toggleEventType("Earthquake");
+    expect(content.isEventTypeHidden("Earthquake")).toBe(false);
+  });
+
+  it("keeps a hidden type through a save and reload", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    const reloaded = TimelineContentModel.create(getSnapshot(content));
+    expect(reloaded.isEventTypeHidden("Earthquake")).toBe(true);
   });
 });

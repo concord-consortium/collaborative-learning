@@ -21,6 +21,7 @@ export const TimelineContentModel = TileContentModel
     type: types.optional(types.literal(kTimelineTileType), kTimelineTileType),
     viewStartTimeISO: types.maybe(types.string),
     viewEndTimeISO: types.maybe(types.string),
+    hiddenEventTypes: types.array(types.string),
     selectedEventIndex: types.optional(types.number, 0),
   })
   .volatile(self => ({
@@ -135,6 +136,15 @@ export const TimelineContentModel = TileContentModel
         }
       }
       return colorMap;
+    }
+  }))
+  .views(self => ({
+    isEventTypeHidden(eventType: string) {
+      return self.hiddenEventTypes.includes(eventType);
+    },
+    // The events whose type is switched on in the Event Key.
+    get shownEvents(): TimelineEvent[] {
+      return self.events.filter(e => !self.hiddenEventTypes.includes(e.eventType));
     }
   }))
   .views(self => ({
@@ -336,6 +346,11 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    toggleEventType(eventType: string) {
+      const at = self.hiddenEventTypes.indexOf(eventType);
+      if (at >= 0) self.hiddenEventTypes.splice(at, 1);
+      else self.hiddenEventTypes.push(eventType);
+    },
     selectNextEvent() {
       if (self.canSelectNext) {
         self.selectEvent(self.selectedEventIndex + 1);
