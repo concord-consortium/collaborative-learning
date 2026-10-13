@@ -1,6 +1,12 @@
 @import "../../../components/vars";
 @import "./timeline-event-colors.scss";
 
+// The design draws the checkbox as a thin black outline, a band of the icon colour, and a generous
+// centre of the 40% fill, in roughly 6 / 8 / 71 proportions of the box.
+$key-checkbox-size: 24px;
+$key-checkbox-outline: 2px;
+$key-checkbox-border: 2px;
+
 .timeline-key {
   align-items: center;
   display: flex;
@@ -36,12 +42,15 @@
       // A mark on the plot is its colour over the black graph. The checkbox carries its own black
       // so the swatch is a true miniature of the mark it governs.
       background-color: #121212;
-      border: 3px solid #121212;
+      border: $key-checkbox-outline solid #121212;
+      // border-box so the two borders eat into the box rather than growing it, keeping the fill
+      // the generous centre the design gives it.
+      box-sizing: border-box;
       cursor: pointer;
-      height: 22px;
+      height: $key-checkbox-size;
       margin: 0;
       position: relative;
-      width: 22px;
+      width: $key-checkbox-size;
 
       &:disabled {
         cursor: default;
@@ -52,16 +61,17 @@
         outline-offset: $focus-ring-inner-width;
       }
 
-      // The checkmark, drawn always so that hovering an unchecked box can ghost it in.
+      // The checkmark, drawn always so that hovering an unchecked box can ghost it in. Sized and
+      // placed against the fill, not the whole box, so the borders never crowd it.
       &::after {
         border: solid white;
-        border-width: 0 3px 3px 0;
+        border-width: 0 2.5px 2.5px 0;
         content: "";
-        height: 10px;
-        left: 6px;
+        height: 11px;
+        left: 8px;
         opacity: 0;
         position: absolute;
-        top: 1px;
+        top: 3px;
         transform: rotate(45deg);
         width: 5px;
       }
@@ -80,11 +90,11 @@
         // A gradient, not a background-color: the swatch needs two layers, the black backing and
         // the translucent colour over it, and background-color is only one.
         background-image: linear-gradient(map-get($colors, fill), map-get($colors, fill));
-        box-shadow: inset 0 0 0 4px map-get($colors, select);
+        box-shadow: inset 0 0 0 $key-checkbox-border map-get($colors, select);
 
         &:hover:not(:disabled) {
           background-image: linear-gradient(map-get($colors, hover-fill), map-get($colors, hover-fill));
-          box-shadow: inset 0 0 0 4px map-get($colors, hover);
+          box-shadow: inset 0 0 0 $key-checkbox-border map-get($colors, hover);
         }
       }
     }
