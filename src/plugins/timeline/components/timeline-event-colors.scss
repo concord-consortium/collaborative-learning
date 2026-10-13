@@ -1,37 +1,30 @@
 $blue-base: #aad7ff;
 $blue-hover: #84c5ff;
 $blue-select: #42a6ff;
-$blue-transparent: rgba(170, 215, 255, 0.5);
 
 $orange-base: #ffd097;
 $orange-hover: #ffba68;
 $orange-select: #ff9617;
-$orange-transparent: rgba(255, 208, 151, 0.5);
 
 $red-base: #ff9494;
 $red-hover: #ff6565;
 $red-select: #ff1212;
-$red-transparent: rgba(255, 148, 148, 0.5);
 
 $yellow-base: #e8ea95;
 $yellow-hover: #dde166;
 $yellow-select: #cbd114;
-$yellow-transparent: rgba(232, 234, 149, 0.5);
 
 $magenta-base: #eea3ff;
 $magenta-hover: #e67bff;
 $magenta-select: #d934ff;
-$magenta-transparent: rgba(238, 163, 255, 0.5);
 
 $purple-base: #cbb1ff;
 $purple-hover: #b48fff;
 $purple-select: #8c53ff;
-$purple-transparent: rgba(203, 177, 255, 0.5);
 
 $default-base: #dfdfdf;
 $default-hover: #d1d1d1;
 $default-select: #b9b9b9;
-$default-transparent: rgba(223, 223, 223, 0.5);
 
 // The Full Timeline draws events darker than the graph does, so they stand out against its white
 // background and the overlay that marks the view.
@@ -42,3 +35,40 @@ $yellow-full-timeline: #767909;
 $magenta-full-timeline: #c201ee;
 $purple-full-timeline: #884cff;
 $default-full-timeline: #747474;
+
+// The marks sit over the black plot, so a fill is its icon colour at 40%, per the design sheet.
+$blue-transparent: rgba($blue-select, 0.4);
+$orange-transparent: rgba($orange-select, 0.4);
+$red-transparent: rgba($red-select, 0.4);
+$yellow-transparent: rgba($yellow-select, 0.4);
+$magenta-transparent: rgba($magenta-select, 0.4);
+$purple-transparent: rgba($purple-select, 0.4);
+$default-transparent: rgba($default-select, 0.4);
+
+$blue-hover-transparent: rgba($blue-hover, 0.4);
+$orange-hover-transparent: rgba($orange-hover, 0.4);
+$red-hover-transparent: rgba($red-hover, 0.4);
+$yellow-hover-transparent: rgba($yellow-hover, 0.4);
+$magenta-hover-transparent: rgba($magenta-hover, 0.4);
+$purple-hover-transparent: rgba($purple-hover, 0.4);
+$default-hover-transparent: rgba($default-hover, 0.4);
+
+// Every per-colour rule in this plugin iterates this map, so a colour is declared once per
+// stylesheet. `timeline-event-styles.tsx` holds the same words for TypeScript, paired with their
+// icons; `event-overlay.styles.test.ts` asserts the two lists agree.
+$event-colors: (
+  "blue": (base: $blue-base, hover: $blue-hover, select: $blue-select,
+           fill: $blue-transparent, hover-fill: $blue-hover-transparent),
+  "orange": (base: $orange-base, hover: $orange-hover, select: $orange-select,
+             fill: $orange-transparent, hover-fill: $orange-hover-transparent),
+  "red": (base: $red-base, hover: $red-hover, select: $red-select,
+          fill: $red-transparent, hover-fill: $red-hover-transparent),
+  "yellow": (base: $yellow-base, hover: $yellow-hover, select: $yellow-select,
+             fill: $yellow-transparent, hover-fill: $yellow-hover-transparent),
+  "magenta": (base: $magenta-base, hover: $magenta-hover, select: $magenta-select,
+              fill: $magenta-transparent, hover-fill: $magenta-hover-transparent),
+  "purple": (base: $purple-base, hover: $purple-hover, select: $purple-select,
+             fill: $purple-transparent, hover-fill: $purple-hover-transparent),
+  "default": (base: $default-base, hover: $default-hover, select: $default-select,
+              fill: $default-transparent, hover-fill: $default-hover-transparent)
+);

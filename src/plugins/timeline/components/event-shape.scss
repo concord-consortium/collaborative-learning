@@ -6,16 +6,9 @@
   stroke: #121212;
   stroke-width: 1px;
 
-  @each $color, $value in (
-    "blue": $blue-select,
-    "orange": $orange-select,
-    "red": $red-select,
-    "yellow": $yellow-select,
-    "magenta": $magenta-select,
-    "purple": $purple-select
-  ) {
-    &.#{$color}-event {
-      fill: $value;
+  @each $word, $colors in $event-colors {
+    &.#{$word}-event {
+      fill: map-get($colors, select);
     }
   }
 

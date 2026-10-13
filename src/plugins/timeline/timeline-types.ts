@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { kEventStyles } from "./timeline-event-styles";
 
 export const kTimelineTileType = "Timeline";
 
@@ -11,7 +12,7 @@ export interface TimelineEvent {
   eventType: string;
 }
 
-export const kEventColorWords = ["blue", "orange", "red", "yellow", "magenta", "purple"];
+export const kEventColorWords = kEventStyles.map(s => s.colorWord);
 const allColorWords = new Set(kEventColorWords);
 
 export function getEventColorClass(colorWord?: string): string {
