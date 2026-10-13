@@ -12,6 +12,8 @@ $key-checkbox-border: 2px;
   display: flex;
   gap: 12px;
   justify-content: center;
+  // The same step the Full Timeline keeps from the graph above it.
+  margin-top: 16px;
 
   .key-title {
     font-weight: bold;

@@ -3,7 +3,10 @@ import { kEventStyles } from "./timeline-event-styles";
 
 export const kTimelineTileType = "Timeline";
 
-export const kTimelineDefaultHeight = 320;
+// Tall enough for the whole tile without scrolling. The stack measures 422px: a 26px title, the
+// container's 46px and 15px margins, an 18px event row, 251px of graph, range labels and Full
+// Timeline, and the 28px Event Key with the 16px step above it. The rest is slack.
+export const kTimelineDefaultHeight = 440;
 
 export interface TimelineEvent {
   index: number;
