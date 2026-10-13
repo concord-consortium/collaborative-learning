@@ -10,7 +10,11 @@ $key-checkbox-border: 2px;
 .timeline-key {
   align-items: center;
   display: flex;
-  gap: 12px;
+  // A unit may use all seven event types, which do not fit on one line in a narrow tile. Wrapping
+  // costs height, which the tile can be resized for; overflowing clips the key and puts a
+  // horizontal scrollbar on the tile.
+  flex-wrap: wrap;
+  gap: 6px 12px;
   justify-content: center;
   // The same step the Full Timeline keeps from the graph above it.
   margin-top: 16px;

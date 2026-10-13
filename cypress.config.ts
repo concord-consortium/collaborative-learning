@@ -24,6 +24,7 @@ export default defineConfig({
   qaUnitStudent5: '/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa/content.json',
   qaUnitStudent6: '/?appMode=qa&fakeClass=5&fakeUser=student:6&qaGroup=5&problem=1.1&unit=./demo/units/qa/content.json',
   qaUnitStudent7Investigation3: '/?appMode=qa&fakeClass=6&fakeUser=student:7&qaGroup=5&problem=3.1&unit=./demo/units/qa/content.json',
+  qaUnitStudent8Investigation4: '/?appMode=qa&fakeClass=6&fakeUser=student:8&qaGroup=5&problem=4.1&unit=./demo/units/qa/content.json',
   qaUnitTeacher6: '/?appMode=qa&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa/content.json',
   qaUnitTeacher6Network: "/?appMode=qa&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa/content.json&network=foo",
   qaNoGroupShareUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-no-group-share/content.json",

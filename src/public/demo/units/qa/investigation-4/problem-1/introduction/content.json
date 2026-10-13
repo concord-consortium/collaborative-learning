@@ -1,0 +1,157 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "timelineTestText",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Timeline test fixture.</strong> Seven event types, so every icon and colour is used and the seventh falls back to \"?\". Events 2 and 5 are too narrow to draw as rectangles and should appear as single lines.</p>"
+          ]
+        }
+      },
+      {
+        "id": "timelineTestTile",
+        "content": {
+          "type": "Timeline",
+          "viewStartTimeISO": "2026-02-17T00:00:00.000Z",
+          "viewEndTimeISO": "2026-02-18T00:00:00.000Z"
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "timelineTestDataSet",
+          "providerId": "timelineTestTile",
+          "dataSet": {
+            "id": "timelineTestEvents",
+            "name": "Timeline Test Events",
+            "attributes": [
+              {
+                "id": "timelineAttrStart",
+                "clientKey": "",
+                "name": "windowStart",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "2026-02-17T01:00:00.000Z",
+                  "2026-02-17T03:00:00.000Z",
+                  "2026-02-17T05:00:00.000Z",
+                  "2026-02-17T07:30:00.000Z",
+                  "2026-02-17T10:00:00.000Z",
+                  "2026-02-17T12:00:00.000Z",
+                  "2026-02-17T15:00:00.000Z",
+                  "2026-02-17T17:00:00.000Z",
+                  "2026-02-17T19:00:00.000Z",
+                  "2026-02-17T21:00:00.000Z"
+                ],
+                "title": ""
+              },
+              {
+                "id": "timelineAttrEnd",
+                "clientKey": "",
+                "name": "windowEnd",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "2026-02-17T02:30:00.000Z",
+                  "2026-02-17T03:03:00.000Z",
+                  "2026-02-17T06:00:00.000Z",
+                  "2026-02-17T09:00:00.000Z",
+                  "2026-02-17T10:01:12.000Z",
+                  "2026-02-17T14:00:00.000Z",
+                  "2026-02-17T16:00:00.000Z",
+                  "2026-02-17T18:00:00.000Z",
+                  "2026-02-17T20:30:00.000Z",
+                  "2026-02-17T23:00:00.000Z"
+                ],
+                "title": ""
+              },
+              {
+                "id": "timelineAttrType",
+                "clientKey": "",
+                "name": "eventType",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "Avalanche",
+                  "Earthquake",
+                  "Explosion",
+                  "Rockfall",
+                  "Tremor",
+                  "Landslide",
+                  "Unclassified",
+                  "Avalanche",
+                  "Earthquake",
+                  "Explosion"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "timelineTestCase00"
+              },
+              {
+                "__id__": "timelineTestCase01"
+              },
+              {
+                "__id__": "timelineTestCase02"
+              },
+              {
+                "__id__": "timelineTestCase03"
+              },
+              {
+                "__id__": "timelineTestCase04"
+              },
+              {
+                "__id__": "timelineTestCase05"
+              },
+              {
+                "__id__": "timelineTestCase06"
+              },
+              {
+                "__id__": "timelineTestCase07"
+              },
+              {
+                "__id__": "timelineTestCase08"
+              },
+              {
+                "__id__": "timelineTestCase09"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "timelineTestTile"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedSeismogram",
+          "id": "timelineTestSeismogram",
+          "providerId": "timelineTestTile",
+          "station": {
+            "network": "AK",
+            "station": "RF528",
+            "location": "",
+            "channel": "HNZ",
+            "label": "RF528 (Clark Middle School)"
+          },
+          "startTimeISO": "2026-02-17T00:00:00.000Z",
+          "endTimeISO": "2026-02-18T00:00:00.000Z"
+        },
+        "tiles": [
+          "timelineTestTile"
+        ]
+      }
+    ]
+  }
+}

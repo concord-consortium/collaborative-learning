@@ -1,12 +1,11 @@
 @import "./timeline-event-colors.scss";
 
 .event-overlay {
-  // An event narrower than its own borders becomes a single line in the outline colour: at the
-  // minimum width the two borders fill the box and leave no interior for the fill to show through.
+  // Everything inherits border-box from index.scss, so these borders also floor the width: an
+  // event too narrow to show an interior collapses to 2px of pure border, which is why a brief
+  // event reads as a single line in the outline colour and needs no threshold of its own.
   border: 1px solid;
-  box-sizing: border-box;
   height: 100%;
-  min-width: 2px;
   pointer-events: none;
   position: absolute;
   top: 0;

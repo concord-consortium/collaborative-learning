@@ -41,13 +41,11 @@ describe("timeline-event-colors.scss", () => {
 describe("event-overlay.scss", () => {
   const source = read("event-overlay.scss");
 
-  // An event narrower than its own borders must read as a single line in the outline colour. With
-  // border-box the two 1px borders fill the minimum width and leave no interior, so this falls out
-  // of the box model rather than needing a pixel threshold to pick.
-  it("draws a narrow event as a line in the outline colour", () => {
-    const rule = body(source, ".event-overlay", "{");
-    expect(rule).toMatch(/box-sizing:\s*border-box/);
-    expect(rule).toMatch(/min-width:\s*2px/);
+  // The border is what makes a brief event read as a line: under the global border-box from
+  // index.scss it floors the width at 2px with no interior left for the fill. The outcome is
+  // checked in a browser by timeline_event_key_spec, which is the only place the box model runs.
+  it("gives the rectangle the border that degenerates it", () => {
+    expect(body(source, ".event-overlay", "{")).toMatch(/border:\s*1px solid;/);
   });
 
   // "1- and 2-digit values use the same width button, while 3-digit values use a wider button."
