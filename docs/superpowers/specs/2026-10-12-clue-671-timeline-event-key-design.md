@@ -58,21 +58,25 @@ only shows types present in the sample" are already met. What follows is what is
 
 ## The colour and icon set
 
-CLUE's pattern for a palette is `src/clue/data-colors.scss`: scss variables, an `:export` block and
-a hand-written `data-colors.scss.d.ts` so TypeScript can read them, paired with `clueDataColorInfo`
-in `color-utils.ts`, which gives each colour a name. The Timeline's palette has the variables but no
-export, and its icons live somewhere else again — the colour words are a bare string array in
-`timeline-types.ts`, and the shapes are a separate record in `event-shape.tsx`, so adding a colour
-means editing four files and hoping they stay aligned.
-
-`timeline-event-colors.scss` gains an `:export` block and a matching `.d.ts` in the CLUE idiom. A new
-`timeline-event-styles.ts` becomes the one place an event colour word is defined, pairing its name
-with its exported colours and its icon. `kEventColorWords` derives from it, so the order that
-`eventTypeColorWords` assigns is a consequence of the set rather than a second copy of it.
-
+Adding a colour word currently means editing four files and hoping they stay aligned: the words are
+a bare string array in `timeline-types.ts`, the shapes a separate record in `event-shape.tsx`, and
 `event-overlay.scss` and `timeline-key.scss` each hand-write seven near-identical colour blocks.
-`event-shape.scss` already uses an `@each` loop over a map; the other two adopt it, so a colour is
-declared once per file instead of seven times.
+
+CLUE's pattern for a palette is `src/clue/data-colors.scss` — scss variables, an `:export` block and
+a hand-written `.d.ts` so TypeScript can read the values, paired with `clueDataColorInfo`, which
+gives each a name. **The Timeline takes the shape of that pattern but not its export.** CLUE exports
+those values because Graph and BarGraph draw with JavaScript and need the hexes at runtime; the
+Timeline draws entirely through CSS classes, so nothing would ever read the export. Declaring one
+with no consumer is dead weight.
+
+What the export was serving — one list rather than four — is better had another way. scss gets a
+single `$event-colors` map that every `@each` in the plugin iterates, `event-shape.scss` included,
+so a colour is declared once per stylesheet instead of seven times. TypeScript gets a single
+`timeline-event-styles.tsx` pairing each colour word with its icon, from which `kEventColorWords`
+derives, so the order `eventTypeColorWords` hands out is a consequence of the set rather than a
+second copy of it. A test then reads the stylesheet and asserts the two lists hold the same words in
+the same order, which is a single source of truth that actually fails when it is broken — something
+an `:export` nobody imports could never do.
 
 `timeline-key.tsx` imports `clsx`. CLAUDE.md requires `classnames` for conditional classes; it
 changes.
