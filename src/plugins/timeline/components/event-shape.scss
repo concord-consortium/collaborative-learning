@@ -12,6 +12,20 @@
     }
   }
 
+  // A dark stroke is invisible against the Event Key's checkbox, so the icon is ringed in white
+  // instead. paint-order puts the stroke behind the fill, so it reads as a halo rather than as a
+  // thick outline eating into the shape.
+  &.on-dark {
+    paint-order: stroke;
+    stroke: white;
+    stroke-width: 3px;
+
+    text {
+      fill: white;
+      stroke: none;
+    }
+  }
+
   &.default-event text {
     fill: #121212;
     font-size: 13px;

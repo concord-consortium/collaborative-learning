@@ -7,13 +7,15 @@ import "./event-shape.scss";
 
 interface IProps {
   colorWord?: string;
+  /** Adds a light halo, for the Event Key where the icon overlaps the dark checkbox. */
+  onDark?: boolean;
   size?: number;
 }
 
-export function EventShape({ colorWord, size = 12 }: IProps) {
+export function EventShape({ colorWord, onDark, size = 12 }: IProps) {
   return (
     <svg
-      className={classNames("event-shape", getEventColorClass(colorWord))}
+      className={classNames("event-shape", getEventColorClass(colorWord), { "on-dark": onDark })}
       width={size}
       height={size}
       viewBox="0 0 12 12"
