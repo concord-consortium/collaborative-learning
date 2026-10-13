@@ -37,3 +37,31 @@ describe("timeline-event-colors.scss", () => {
     });
   });
 });
+
+describe("event-overlay.scss", () => {
+  const source = read("event-overlay.scss");
+
+  // An event narrower than its own borders must read as a single line in the outline colour. With
+  // border-box the two 1px borders fill the minimum width and leave no interior, so this falls out
+  // of the box model rather than needing a pixel threshold to pick.
+  it("draws a narrow event as a line in the outline colour", () => {
+    const rule = body(source, ".event-overlay", "{");
+    expect(rule).toMatch(/box-sizing:\s*border-box/);
+    expect(rule).toMatch(/min-width:\s*2px/);
+  });
+
+  // "1- and 2-digit values use the same width button, while 3-digit values use a wider button."
+  // A fixed width cannot widen, so the rule has to be a minimum with padding to grow into.
+  it("lets a 3-digit event number widen its button", () => {
+    const rule = body(source, ".event-label-button", "{");
+    expect(rule).toMatch(/min-width:\s*24px/);
+    expect(rule).not.toMatch(/^\s*width:/m);
+  });
+
+  it("colours the rectangle from the icon colour, not the pale button colour", () => {
+    const rule = body(source, ".event-overlay", "{");
+    expect(rule).toMatch(/border-color:\s*map-get\(\$colors,\s*select\)/);
+    expect(rule).toMatch(/background-color:\s*map-get\(\$colors,\s*fill\)/);
+    expect(rule).not.toMatch(/\$[a-z]+-base/);
+  });
+});
