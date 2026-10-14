@@ -365,7 +365,7 @@
       "dataflow": {
         "tools": [
           ["data-set-view", "Table"],
-          ["data-set-link", "Graph"],
+          ["data-set-view", "Graph"],
           "delete",
           "group",
           "ungroup",
