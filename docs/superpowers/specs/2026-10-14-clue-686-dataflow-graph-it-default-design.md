@@ -59,6 +59,35 @@ The dialog did three things. What happens to each:
 - **Linking into a graph that already exists** — this one genuinely goes. Accepted: it is the
   uncommon case, and a unit that needs it can still configure `data-set-link`.
 
+## Two buttons of the same kind have to be tellable apart
+
+`TileToolbarButton` builds its class as `classNames("toolbar-button", name, ...)`, and `name` is
+`desc[0]` from the toolbar config — so an entry's tile-type argument never reaches the DOM. Both of
+Dataflow's export buttons would render as `.toolbar-button.data-set-view`, and Cypress's
+`clickToolbarButton` asserts exactly one match:
+
+```js
+cy.get(`... .toolbar-button.${buttonName}`).should('have.length', 1)
+```
+
+That breaks the *table* half of the existing spec as well as the graph half, and Timeline — which
+already ships three `data-set-view` buttons — has the same latent problem.
+
+`TileToolbarButton` cannot fix this itself: it never sees the args. So it gains an optional
+`extraClass`, and `DataSetViewButton`, which does know its tile type, passes
+`` `${name}-${newTileType}` ``. A button then carries both classes:
+
+```
+toolbar-button  data-set-view  data-set-view-Graph
+```
+
+Existing selectors matching `.data-set-view` keep working — `TableToolTile.js` and
+`shared_dataset_spec.js` both rely on that — and each button becomes individually addressable. No
+stylesheet keys on these classes, so nothing visual moves.
+
+`DataSetLinkButton` is deliberately left alone: nothing needs to address it individually today, and
+it is no longer on any default toolbar.
+
 ## Documentation
 
 `docs/unit-configuration.md` lists Dataflow's defaults explicitly and names
@@ -67,6 +96,9 @@ because both remain configurable. CLAUDE.md requires this doc to move in the sam
 setting it describes.
 
 ## Testing
+
+The Dataflow specs address the two export buttons by their qualified classes, `data-set-view-Table`
+and `data-set-view-Graph`, so each click names the button it means.
 
 `cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js` drives the whole
 dialog flow from the toolbar: create through "New Graph", unlink through "Clear It!", then relink to
