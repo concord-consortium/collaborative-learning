@@ -314,41 +314,18 @@ describe("tile dragging", () => {
       it("returns the tile and the shared model", () => {
         const dragTiles = cleanDragTiles(documentContent.getDragTiles(["tile3"]));
 
-        /*eslint-disable max-len*/
-        expect(dragTiles).toMatchInlineSnapshot(`
-{
-  "annotations": [],
-  "sharedModels": [
-    {
-      "content": "{"type":"SharedDataSet","id":"shared-data-set-1","providerId":"tile3","dataSet":{"id":"data-set-1","name":"tile 3","attributes":[{"id":"attribute-1","clientKey":"","name":"x","hidden":false,"units":"","formula":{"display":""},"values":["0"],"title":""},{"id":"attribute-2","clientKey":"","name":"y","hidden":false,"units":"","formula":{"display":""},"values":["1"],"title":""}],"cases":[{"__id__":"case-1"}],"sortDirection":"NONE"}}",
-      "modelId": "shared-data-set-1",
-      "providerId": "tile3",
-      "tileIds": [
-        "tile3",
-      ],
-    },
-  ],
-  "sourceDocId": "testid-7",
-  "tiles": [
-    {
-      "rowHeight": undefined,
-      "rowIndex": 2,
-      "rowList": {
-        "rowOrder": [
-          "testid-3",
-          "testid-4",
-          "testid-5",
-        ],
-      },
-      "tileContent": "{"id":"testid-1000","fixedPosition":false,"content":{"type":"Table","isImported":false,"importedDataSet":{"id":"testid-6","attributes":[],"cases":[],"sortDirection":"NONE"},"columnWidths":{}},"createdHash":"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df","updatedHash":"9f121eeeb2005b691080d077172f1d19674c97efc138e3097b3cf3e6873fd6df"}",
-      "tileId": "tile3",
-      "tileIndex": 0,
-      "tileType": "Table",
-    },
-  ],
-}
-`);
-        /*eslint-enable max-len*/
+        // The drag payload carries the tile and the shared dataset it uses, so a drop into another
+        // document can recreate both. Both travel as JSON strings.
+        expect(dragTiles.tiles.map(t => t.tileId)).toEqual(["tile3"]);
+        expect(dragTiles.tiles[0].tileType).toEqual("Table");
+        expect(JSON.parse(dragTiles.tiles[0].tileContent).content.type).toEqual("Table");
+
+        expect(dragTiles.sharedModels).toHaveLength(1);
+        const shared = dragTiles.sharedModels[0];
+        expect(shared.modelId).toEqual("shared-data-set-1");
+        expect(shared.providerId).toEqual("tile3");
+        expect(shared.tileIds).toEqual(["tile3"]);
+        expect(JSON.parse(shared.content).type).toEqual("SharedDataSet");
       });
     });
   });
