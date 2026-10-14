@@ -105,11 +105,12 @@ editable: true,
 
 Defaulting to `true` leaves every existing attribute behaving as it does now. It is not free,
 though, and the cost was measured rather than guessed: the prop lands on every attribute of every
-CLUE document, not only seismic ones. Adding it and running the suite fails six tests across
-`drag-tiles.test.ts` and `dc-shared-models.test.ts` — five of them snapshots that assert exact
-document JSON. So the plan must re-record those snapshots, saved documents gain one more boolean
-per attribute beside the `hidden`, `units` and `title` they already carry, and every document
-holding a dataset changes hash once.
+CLUE document, not only seismic ones. Saved documents gain one more boolean per attribute, beside
+the `hidden`, `units` and `title` they already carry, and six tests fail — see the next section.
+
+A tile's `createdHash` and `updatedHash` also change, because the hash is taken over the dataset
+snapshot. Nothing outside `tile-model.ts` reads either field, so this has no effect on behaviour;
+it shows up only inside the test snapshots below.
 
 That was accepted deliberately: it is a general mechanism rather than a seismic one, and CLUE-560
 will want the same for anything else it derives. The Wave Runner sets it `false` on `eventNumber`,
@@ -122,6 +123,39 @@ renderEditCell: !readOnly && !content.hasExpression(attr.id) && attr.editable ? 
 The alternative was for the table to recognise the attribute by name, which would put knowledge of
 seismic data inside a generic tile. A flag on the attribute keeps that knowledge with the plugin
 that owns the data, and gives CLUE-560 the same mechanism for anything else it derives.
+
+## The snapshot tests this disturbs, and why they get rewritten
+
+Adding the prop fails six tests. All six assert a whole serialized MST document or drag payload
+with `toMatchInlineSnapshot`:
+
+- `dc-shared-models.test.ts` — "can export content with shared models", "can copy a tile into
+  another empty document", "can copy a tile into another document's row", "can copy two tiles into
+  another document", "can move a tile within its own row before another tile in its own row".
+- `drag-tiles.test.ts` — "returns the tile and the shared model".
+
+**They are re-written rather than re-recorded.** A whole-document blob fails for any additive model
+change anywhere in CLUE, names nothing about the behaviour it protects, and gives a reviewer no way
+to tell an intended change from a regression — so the safe-looking response, re-recording it, is
+exactly how an unrelated regression gets baked in. One of them already carries the author's
+`// FIXME: the ids here are not going to be consistent`.
+
+The meaning is mostly already there, beside the blob rather than in it:
+
+```ts
+expect(documentContent.sharedModelMap.size).toEqual(1);
+expect(sharedDataSetSnasphot.tiles).toEqual(["tableTool", "graphTool"]);
+```
+
+Each blob is replaced by assertions on the data model for what that test's name claims — for "can
+copy a tile into another empty document": that the target document holds one row with one tile,
+that the tile is a Table, that the shared dataset travelled with it and is referenced by the copy's
+new id, and that the copy's ids differ from the source's. Those say what is being protected, and
+they do not fail when an unrelated model gains a field.
+
+Scope: the six tests above. `drag-tiles.test.ts` has five further inline snapshots, over Text tiles
+with no dataset, which this change does not disturb; they are left alone rather than swept into an
+unrelated refactor, and are a reasonable follow-up.
 
 ## Known edges
 
@@ -151,6 +185,6 @@ cell editor are both observable in jsdom — so a browser adds cost without addi
 fixture from CLUE-671 would make a browser check convenient once that merges, but this story does
 not wait on it and does not need it.
 
-The plan must also re-record the two document snapshot tests the new attribute prop disturbs, and
-check that the only change in them is the added `editable` field: a snapshot re-recorded without
-reading it is how an unrelated regression gets baked in.
+The six snapshot tests above are rewritten as described, and each rewrite is checked by running it
+against the branch *without* the `editable` prop first: an assertion that passes before and after
+the model change is testing the behaviour it names rather than the shape of a snapshot.
