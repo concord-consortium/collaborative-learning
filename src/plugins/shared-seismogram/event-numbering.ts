@@ -25,15 +25,26 @@ export function renumberEvents(dataSet: IDataSet) {
   const numberAttr = dataSet.attrFromName(kEventNumberAttrName);
   if (!numberAttr) return;
 
-  // An event whose windowStart will not parse sorts last, matching the Timeline, which leaves such
-  // a case out of `events` entirely.
-  const startMs = (caseId: string) => {
-    const time = DateTime.fromISO(dataSet.getStrValue(caseId, startAttr.id));
-    return time.isValid ? time.toMillis() : Number.POSITIVE_INFINITY;
-  };
+  // The Timeline draws a case only when both of its times parse and its type is non-empty (see
+  // `events` in timeline-content.ts). Numbering has to apply the same rule: a case the Timeline
+  // skips would otherwise take a number and shift every event drawn after it.
+  const endAttr = dataSet.attrFromName("windowEnd");
+  const typeAttr = dataSet.attrFromName("eventType");
+  const parses = (caseId: string, attrId: string) =>
+    DateTime.fromISO(dataSet.getStrValue(caseId, attrId)).isValid;
+  const isTimelineEvent = (caseId: string) =>
+    parses(caseId, startAttr.id) &&
+    !!endAttr && parses(caseId, endAttr.id) &&
+    !!typeAttr && !!dataSet.getStrValue(caseId, typeAttr.id);
+
+  // Anything the Timeline skips sorts after everything it draws, so it still gets a number for the
+  // table without disturbing the numbers the student sees on the graph.
+  const sortKey = (caseId: string) => isTimelineEvent(caseId)
+    ? DateTime.fromISO(dataSet.getStrValue(caseId, startAttr.id)).toMillis()
+    : Number.POSITIVE_INFINITY;
 
   const inTimeOrder = dataSet.cases.map(c => c.__id__)
-                        .sort((a, b) => startMs(a) - startMs(b));
+                        .sort((a, b) => sortKey(a) - sortKey(b));
 
   // Only what changes is written: merely opening a document must not dirty it, and a run that
   // appends in time order leaves every existing number alone.

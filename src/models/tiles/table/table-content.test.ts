@@ -12,7 +12,7 @@ import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types
 import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
-import { IDataSet } from "../../data/data-set";
+import { addAttributeToDataSet, addCasesToDataSet, IDataSet } from "../../data/data-set";
 import { SharedModelType } from "../../shared/shared-model";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
@@ -111,6 +111,37 @@ const setupContainer = (content: TableContentModelType, dataSetSnapshot?: Shared
 };
 
 describe("TableContent", () => {
+
+  describe("an attribute the owning tile derives", () => {
+    function contentWithDerivedColumn() {
+      const content = TableContentModel.create();
+      addAttributeToDataSet(content.dataSet, { id: "typedAttr", name: "typed" });
+      addAttributeToDataSet(content.dataSet, { id: "derivedAttr", name: "derived", editable: false });
+      addCasesToDataSet(content.dataSet, [{ typed: "a", derived: "1" }]);
+      return content;
+    }
+
+    // Suppressing the cell editor is not enough on its own: Clear cell, a paste and an image
+    // upload all reach the dataset through setCanonicalCaseValues without going near an editor.
+    it("cannot be written through setCanonicalCaseValues", () => {
+      const content = contentWithDerivedColumn();
+      const caseId = content.dataSet.cases[0].__id__;
+
+      content.setCanonicalCaseValues([{ __id__: caseId, derivedAttr: "" }]);
+
+      expect(content.dataSet.getStrValue(caseId, "derivedAttr")).toBe("1");
+    });
+
+    it("does not block the writable values sent alongside it", () => {
+      const content = contentWithDerivedColumn();
+      const caseId = content.dataSet.cases[0].__id__;
+
+      content.setCanonicalCaseValues([{ __id__: caseId, typedAttr: "b", derivedAttr: "99" }]);
+
+      expect(content.dataSet.getStrValue(caseId, "typedAttr")).toBe("b");
+      expect(content.dataSet.getStrValue(caseId, "derivedAttr")).toBe("1");
+    });
+  });
 
   it("can create empty/default TableContentModels", () => {
     const emptyTable = TableContentModel.create();

@@ -39,7 +39,7 @@ disturb it.
 
 **In**
 
-- An `eventNumber` attribute, first in the events dataset.
+- An `Event Number` attribute, first in the events dataset.
 - A shared `renumberEvents` helper that assigns numbers in `windowStart` order.
 - The Wave Runner writing numbers whenever it appends events.
 - The column being read-only, since it is derived.
@@ -54,7 +54,7 @@ disturb it.
 
 ## The attribute
 
-`eventNumber` is added ahead of `eventType`, so it is the dataset's first attribute and therefore
+`Event Number` is added ahead of `eventType`, so it is the dataset's first attribute and therefore
 the table's first column. No tile needs to detect "is this a timeline table?" — the column is there
 because the data is.
 
@@ -66,7 +66,9 @@ puts the attribute first whether the dataset is being created or backfilled.
 One exported function in `src/plugins/shared-seismogram/`, which both plugins already depend on:
 
 ```ts
-export const kEventNumberAttrName = "eventNumber";
+// The table shows an attribute's name as its column header, so the name is the heading the
+// student reads: "Event Number", as the story asks, not a camelCase key.
+export const kEventNumberAttrName = "Event Number";
 
 /**
  * Numbers every event by its place in `windowStart` order and writes the numbers into the dataset.
@@ -113,7 +115,7 @@ snapshot. Nothing outside `tile-model.ts` reads either field, so this has no eff
 it shows up only inside the test snapshots below.
 
 That was accepted deliberately: it is a general mechanism rather than a seismic one, and CLUE-560
-will want the same for anything else it derives. The Wave Runner sets it `false` on `eventNumber`,
+will want the same for anything else it derives. The Wave Runner sets it `false` on the number,
 and the Table extends the condition it already uses to suppress the editor on expression columns:
 
 ```ts

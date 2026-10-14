@@ -327,7 +327,13 @@ describe("tile dragging", () => {
         expect(shared.modelId).toEqual("shared-data-set-1");
         expect(shared.providerId).toEqual("tile3");
         expect(shared.tileIds).toEqual(["tile3"]);
-        expect(JSON.parse(shared.content).type).toEqual("SharedDataSet");
+        const sharedContent = JSON.parse(shared.content);
+        expect(sharedContent.type).toEqual("SharedDataSet");
+        // The dataset's contents travel too: a regression that emitted an empty SharedDataSet
+        // would drop the data on the drop, and asserting only its type would not notice.
+        expect(sharedContent.dataSet.attributes.map((attr: any) => attr.name)).toEqual(["x", "y"]);
+        expect(sharedContent.dataSet.attributes[0].values).toEqual(["0"]);
+        expect(sharedContent.dataSet.cases).toHaveLength(1);
       });
     });
   });

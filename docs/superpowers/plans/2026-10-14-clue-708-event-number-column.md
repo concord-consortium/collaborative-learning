@@ -4,7 +4,7 @@
 
 **Goal:** A table linked to a Wave Runner or a Timeline shows an Event Number as its first column, carrying the same number the Timeline puts on the event.
 
-**Architecture:** The number is an `eventNumber` attribute in the shared events dataset, not a row position, so sorting the table cannot disturb it and every consumer of the dataset sees it. One `renumberEvents` helper owns the attribute and the numbering, ranking events by `windowStart`. The column is read-only through a restored `editable` flag on the attribute model, which keeps knowledge of seismic data out of the generic Table tile.
+**Architecture:** The number is an `Event Number` attribute in the shared events dataset, not a row position, so sorting the table cannot disturb it and every consumer of the dataset sees it. One `renumberEvents` helper owns the attribute and the numbering, ranking events by `windowStart`. The column is read-only through a restored `editable` flag on the attribute model, which keeps knowledge of seismic data out of the generic Table tile.
 
 **Tech Stack:** TypeScript, MobX State Tree, React 18, Jest + React Testing Library, Luxon.
 
@@ -543,7 +543,9 @@ Create `src/plugins/shared-seismogram/event-numbering.ts`:
 import { DateTime } from "luxon";
 import { addAttributeToDataSet, ICase, IDataSet } from "../../models/data/data-set";
 
-export const kEventNumberAttrName = "eventNumber";
+// The table shows an attribute's name as its column header, so the name is the heading the
+// student reads: "Event Number", as the story asks, not a camelCase key.
+export const kEventNumberAttrName = "Event Number";
 
 /**
  * Numbers every event by its place in `windowStart` order and writes the numbers into `dataSet`,

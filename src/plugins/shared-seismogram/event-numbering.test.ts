@@ -8,9 +8,11 @@ describe("renumberEvents", () => {
     const dataSet = DataSet.create();
     addAttributeToDataSet(dataSet, { name: "eventType" });
     addAttributeToDataSet(dataSet, { name: "windowStart" });
+    addAttributeToDataSet(dataSet, { name: "windowEnd" });
     addCasesToDataSet(dataSet, startHours.map(h => ({
       eventType: "Earthquake",
-      windowStart: `2026-02-01T${String(h).padStart(2, "0")}:00:00.000Z`
+      windowStart: `2026-02-01T${String(h).padStart(2, "0")}:00:00.000Z`,
+      windowEnd: `2026-02-01T${String(h).padStart(2, "0")}:30:00.000Z`
     })));
     return dataSet;
   }
@@ -44,7 +46,8 @@ describe("renumberEvents", () => {
     const dataSet = eventsDataSet([1, 2]);
     renumberEvents(dataSet);
     addCasesToDataSet(dataSet, [
-      { eventType: "Avalanche", windowStart: "2026-02-01T01:30:00.000Z" }
+      { eventType: "Avalanche", windowStart: "2026-02-01T01:30:00.000Z",
+        windowEnd: "2026-02-01T01:45:00.000Z" }
     ]);
     renumberEvents(dataSet);
     expect(numbers(dataSet)).toEqual(["1", "3", "2"]);
@@ -83,10 +86,19 @@ describe("renumberEvents", () => {
     expect(dataSet.sortByAttribute).toBe(typeAttrId);
   });
 
-  it("numbers an event with an unusable windowStart last, as the Timeline drops it", () => {
+  // The Timeline draws a case only when both times parse and the type is non-empty, so numbering
+  // has to skip exactly the same ones or a case nobody can see shifts the numbers of ones they can.
+  it.each([
+    ["an unusable windowStart", { eventType: "Noise", windowStart: "", windowEnd: "2026-02-01T01:00:00.000Z" }],
+    ["an unusable windowEnd", { eventType: "Noise", windowStart: "2026-02-01T00:30:00.000Z", windowEnd: "" }],
+    ["no event type", { eventType: "", windowStart: "2026-02-01T00:30:00.000Z",
+                        windowEnd: "2026-02-01T01:00:00.000Z" }]
+  ])("numbers a case the Timeline skips for %s after the ones it draws", (_label, extraCase) => {
     const dataSet = eventsDataSet([2]);
-    addCasesToDataSet(dataSet, [{ eventType: "Noise", windowStart: "" }]);
+    addAttributeToDataSet(dataSet, { name: "windowEnd" });
+    addCasesToDataSet(dataSet, [extraCase]);
     renumberEvents(dataSet);
+    // The drawn event keeps number 1 even though the skipped case starts earlier.
     expect(numbers(dataSet)).toEqual(["1", "2"]);
   });
 

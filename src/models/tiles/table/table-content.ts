@@ -50,6 +50,22 @@ export const TableMetadataModel = TileMetadataModel
   .named("TableMetadata");
 export interface TableMetadataModelType extends Instance<typeof TableMetadataModel> {}
 
+/**
+ * Drops values for attributes marked `editable: false` -- ones the tile that owns the data derives
+ * rather than the user typing them. Returns undefined when nothing writable is left.
+ * Canonical case values are keyed by attribute id.
+ */
+function withoutDerivedValues(dataSet: IDataSet, caseValues: ICase) {
+  const writable: ICase = { __id__: caseValues.__id__ };
+  let hasWritableValue = false;
+  for (const attrId of Object.keys(caseValues)) {
+    if (attrId === "__id__" || dataSet.attrFromID(attrId)?.editable === false) continue;
+    writable[attrId] = caseValues[attrId];
+    hasWritableValue = true;
+  }
+  return hasWritableValue ? writable : undefined;
+}
+
 export const TableContentModel = TileContentModel
   .named("TableContent")
   .props({
@@ -270,9 +286,17 @@ export const TableContentModel = TileContentModel
           });
     },
     setCanonicalCaseValues(caseValues: ICase[]) {
-      self.dataSet.setCanonicalCaseValues(caseValues);
+      // An attribute the tile that owns the data derives is not the user's to write, however the
+      // write arrives: the cell editor, Clear cell, a paste and an image upload all land here.
+      // Suppressing the editor alone would still leave Clear cell able to erase a derived value.
+      const writableValues = caseValues
+        .map(aCase => withoutDerivedValues(self.dataSet, aCase))
+        .filter((aCase): aCase is ICase => !!aCase);
+      if (!writableValues.length) return;
+
+      self.dataSet.setCanonicalCaseValues(writableValues);
       const ids: string[] = [];
-      const values = caseValues.map(aCase => {
+      const values = writableValues.map(aCase => {
                       const { __id__, ...others } = aCase;
                       ids.push(__id__);
                       return others;
