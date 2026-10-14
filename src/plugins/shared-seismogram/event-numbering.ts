@@ -1,7 +1,9 @@
 import { DateTime } from "luxon";
 import { addAttributeToDataSet, ICase, IDataSet } from "../../models/data/data-set";
 
-export const kEventNumberAttrName = "eventNumber";
+// The table shows an attribute's name as its column header, so this is the heading the student
+// reads: "Event Number", as the story asks, not a camelCase key.
+export const kEventNumberAttrName = "Event Number";
 
 /**
  * Numbers every event by its place in `windowStart` order and writes the numbers into `dataSet`,
