@@ -44,6 +44,9 @@ export const DataSetViewButton = observer(function DataSetViewButton({name, args
     <TileToolbarButton
       disabled={!dataSet}
       name={name}
+      // A toolbar can carry more than one of these -- Dataflow's Table and Graph, the Timeline's
+      // three -- and `name` is the same for all of them, so the tile type goes in a class too.
+      extraClass={`${name}-${newTileType}`}
       title={tooltip}
       onClick={handleClick}
     >

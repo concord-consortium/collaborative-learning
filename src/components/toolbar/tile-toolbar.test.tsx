@@ -232,6 +232,29 @@ describe("Tile toolbar button", () => {
 
   });
 
+  // Two entries of the same button kind -- Dataflow's Table and Graph exports, or the Timeline's
+  // three -- would otherwise be indistinguishable in the DOM: the class comes from the config
+  // entry's name alone, which does not carry the tile type it was given.
+  it("gives a button an argument-qualified class as well as its plain one", () => {
+    render(
+      <TileToolbarButton name="data-set-view" extraClass="data-set-view-Graph"
+                         title="Graph It!" onClick={clickHandler}>
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("toolbar-button", "data-set-view", "data-set-view-Graph");
+  });
+
+  it("has only its plain class when given no extra one", () => {
+    render(
+      <TileToolbarButton name="data-set-view" title="Table It!" onClick={clickHandler}>
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    expect(screen.getByRole("button").className).toBe("toolbar-button data-set-view");
+  });
+
   // --- Button ARIA attributes ---
 
   it("button has aria-label from title", () => {

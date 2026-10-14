@@ -28,6 +28,9 @@ export interface TileToolbarButtonProps {
   extraContent?: JSX.Element; // Additional element added after the button.
   colorClass?: string; // color to use for the button icon
   dataTestId?: string; // data-testid attribute for testing
+  // An extra class for a button whose config entry carries an argument, so that two buttons of the
+  // same kind on one toolbar can be told apart. See DataSetViewButton.
+  extraClass?: string;
 }
 
 /**
@@ -46,7 +49,8 @@ export const TileToolbarButton = function ({
   children,
   extraContent,
   colorClass,
-  dataTestId
+  dataTestId,
+  extraClass
 }: PropsWithChildren<TileToolbarButtonProps>) {
   const tipOptions = useTooltipOptions();
   const tooltip = formatTooltip(title, keyHint);
@@ -67,7 +71,8 @@ export const TileToolbarButton = function ({
     <Tooltip title={tooltip} {...tipOptions}>
       <button
         type="button"
-        className={classNames("toolbar-button", name, colorClass, { selected: selected || highlighted, disabled })}
+        className={classNames("toolbar-button", name, extraClass, colorClass,
+                              { selected: selected || highlighted, disabled })}
         // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
         aria-disabled={disabled || undefined}
         aria-label={title}
