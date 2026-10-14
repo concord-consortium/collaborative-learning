@@ -91,7 +91,8 @@ export const useColumnsFromDataSet = ({
         sortable: false,
         renderHeaderCell: ColumnHeaderCell,
         renderCell: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
-        // `editable: false` marks a value the owning tile derives; an edit would be overwritten.
+        // An expression column has never had an editor; `editable: false` says the same of a
+        // column whose values the owning tile derives.
         renderEditCell: !readOnly && !content.hasExpression(attr.id) && attr.editable
                           ? CellTextEditor : undefined,
       };

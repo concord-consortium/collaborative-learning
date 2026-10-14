@@ -20,8 +20,9 @@ export const Attribute = types.model("Attribute", {
   sourceID: types.maybe(types.string),
   name: types.string,
   hidden: false,
-  // False for a value the owning tile derives, such as the Timeline's event number: the table
-  // offers no editor for it, because an edit would be overwritten the next time it is recomputed.
+  // False for a value the tile that owns the data derives rather than the user types, such as a
+  // seismic event's number. The table offers no editor for one, because anything typed into it
+  // would be discarded the next time the value is recomputed.
   editable: true,
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
