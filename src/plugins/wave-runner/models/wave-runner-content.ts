@@ -14,6 +14,7 @@ import { processEnvelopeCoverage } from "../../../models/stores/seismic/seismic-
 import { getUncoveredRanges, loadEvents } from "../../../models/stores/seismic/seismic-event-service";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { renumberEvents } from "../../shared-seismogram/event-numbering";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -233,6 +234,27 @@ export const WaveRunnerContentModel = TileContentModel
     }),
   }))
   .actions(self => ({
+    /** Moves the events the run has detected into the shared dataset, numbered in time order. */
+    recordDetectedEvents() {
+      const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
+      if (dataSet) {
+        const models = getAppConfig(self)?.getSetting("models", "wave-runner") as ModelListEntry[] | undefined;
+        const modelLabel = models?.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
+        addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
+          windowStart: new Date(evt.windowStart).toISOString(),
+          windowEnd: new Date(evt.windowEnd).toISOString(),
+          eventType: evt.eventType,
+          confidence: evt.confidence,
+          modelLabel,
+        })));
+        // The numbers describe time order across every event recorded so far, so they are
+        // rewritten once the day's events have arrived rather than assigned on the way in.
+        renumberEvents(dataSet);
+      }
+      self.detectedEvents = [];
+    },
+  }))
+  .actions(self => ({
     runModel: flow(function* () {
       if (self.isRunning || self.isLoadingData) return;
 
@@ -329,20 +351,7 @@ export const WaveRunnerContentModel = TileContentModel
           self.isPaused = false;
         }
 
-        const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
-        if (dataSet) {
-          const models = getAppConfig(self)?.getSetting("models", "wave-runner") as ModelListEntry[] | undefined;
-          const modelLabel = models?.find(m => m.metadataUrl === self.selectedModelUrl)?.label ?? "";
-          addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
-            windowStart: new Date(evt.windowStart).toISOString(),
-            windowEnd: new Date(evt.windowEnd).toISOString(),
-            eventType: evt.eventType,
-            confidence: evt.confidence,
-            modelLabel,
-          })));
-        }
-
-        self.detectedEvents = [];
+        self.recordDetectedEvents();
       } catch (err: unknown) {
         console.error("Wave Runner runModel error:", err);
         if (!isAlive(self)) return;

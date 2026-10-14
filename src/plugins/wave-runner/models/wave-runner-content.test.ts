@@ -6,6 +6,7 @@ import "../../../models/shared/shared-data-set-registration";
 import { kSharedDataSetType } from "../../../models/shared/shared-data-set";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
+import { kEventNumberAttrName } from "../../shared-seismogram/event-numbering";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
 import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
@@ -251,6 +252,33 @@ describe("WaveRunnerContent", () => {
     content.addDetectedEvents([{ ...evt, confidence: 0.8 }, { ...evt, eventType: "traffic" }]);
     expect(content.detectedEvents).toHaveLength(2);
     expect(content.detectedEvents.map((e: any) => e.eventType)).toEqual(["earthquake", "traffic"]);
+  });
+
+  it("numbers the events it records, in time order rather than detection order", () => {
+    const content = setupTileInDocument();
+    const hour = (h: number) => Date.UTC(2026, 1, 1, h);
+    // Detected out of order, as a re-run over an earlier range would produce.
+    content.addDetectedEvents([
+      { windowStart: hour(5), windowEnd: hour(6), eventType: "earthquake", confidence: 0.9 },
+      { windowStart: hour(1), windowEnd: hour(2), eventType: "avalanche", confidence: 0.8 },
+      { windowStart: hour(3), windowEnd: hour(4), eventType: "traffic", confidence: 0.7 }
+    ]);
+
+    content.recordDetectedEvents();
+
+    const dataSet = content.getOrCreateEventsDataSet()!.dataSet;
+    const numberAttr = dataSet.attrFromName(kEventNumberAttrName);
+    expect(numberAttr).toBeDefined();
+    const typeAttr = dataSet.attrFromName("eventType")!;
+    const numberOf = (eventType: string) => {
+      const match = dataSet.cases.find((c: { __id__: string }) =>
+        dataSet.getStrValue(c.__id__, typeAttr.id) === eventType)!;
+      return dataSet.getStrValue(match.__id__, numberAttr!.id);
+    };
+
+    expect(numberOf("avalanche")).toBe("1");
+    expect(numberOf("traffic")).toBe("2");
+    expect(numberOf("earthquake")).toBe("3");
   });
 
   it("configures the compact model in the wave-runner settings", () => {
