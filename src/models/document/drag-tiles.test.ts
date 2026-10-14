@@ -24,7 +24,9 @@ function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
 // For simplicify of comparing to a snapshot, replace the complex rowList object
 // with a simpler object that just has the rowOrder.
 function cleanDragTileItems(items: IDragTileItem[]) {
-  return items.map((item: { rowList: { rowOrder: any; }; }) => {
+  // Inferred from IDragTileItem[]: annotating the parameter narrowed the returned items to just
+  // the rowList, so a caller could not reach tileType or tileContent.
+  return items.map(item => {
     return {
       ...item,
       rowList: { rowOrder: item.rowList.rowOrder }

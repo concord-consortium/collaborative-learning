@@ -91,7 +91,9 @@ export const useColumnsFromDataSet = ({
         sortable: false,
         renderHeaderCell: ColumnHeaderCell,
         renderCell: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
-        renderEditCell: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,
+        // `editable: false` marks a value the owning tile derives; an edit would be overwritten.
+        renderEditCell: !readOnly && !content.hasExpression(attr.id) && attr.editable
+                          ? CellTextEditor : undefined,
       };
     });
     cols.unshift({
