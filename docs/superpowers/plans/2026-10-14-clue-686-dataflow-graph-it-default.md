@@ -4,9 +4,9 @@
 
 **Goal:** The Dataflow tile's default toolbar offers "Graph It!" beside "Table It!", so a unit wanting both export buttons no longer needs a custom toolbar.
 
-**Architecture:** One entry in the app config changes from `data-set-link` to `data-set-view`, so the Graph button creates a graph immediately instead of opening a link dialog. `data-set-link` stays registered and documented, so a unit can still configure the dialog; only the default moves. The authoring doc and the one Cypress test that drives the dialog off the toolbar move with it.
+**Architecture:** One entry in the app config changes from `data-set-link` to `data-set-view`, so the Graph button creates a graph immediately instead of opening a link dialog. That puts two `data-set-view` buttons on one toolbar, which share a CSS class today, so `DataSetViewButton` also gains an argument-qualified class to make each addressable. `data-set-link` stays registered and documented; only the default moves.
 
-**Tech Stack:** JSON app config, Cypress.
+**Tech Stack:** TypeScript, React, JSON app config, Jest, Cypress.
 
 **Spec:** `docs/superpowers/specs/2026-10-14-clue-686-dataflow-graph-it-default-design.md`
 
@@ -14,9 +14,9 @@
 
 ## What this does and does not touch
 
-No TypeScript changes. `DataSetViewButton`, `DataSetLinkButton` and
-`dataflow-toolbar-registration.tsx` are all unchanged — the button being swapped is already
-registered and already used by other tiles' defaults.
+`dataflow-toolbar-registration.tsx` and `DataSetLinkButton` are unchanged — the button being
+swapped is already registered and already used by other tiles' defaults. `TileToolbarButton` and
+`DataSetViewButton` change only to add a class.
 
 The Cypress spec runs against `src/public/demo/units/qa-config-subtabs/content.json`, which has no
 `dataflow` config of its own, so it picks up the app-config default. That is why changing the
@@ -25,14 +25,121 @@ default breaks it, and why the test is part of this change rather than incidenta
 ## File Structure
 
 **Modify**
+- `src/components/toolbar/tile-toolbar-button.tsx` — an optional `extraClass`.
+- `src/components/toolbar/data-set-view-button.tsx` — pass the argument-qualified class.
+- `src/components/toolbar/tile-toolbar.test.tsx` — covers the new class.
 - `src/clue/app-config.json` — the one default-toolbar entry.
 - `docs/unit-configuration.md` — the Dataflow "Defaults" list.
-- `cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js` — the graph
-  half of the first test, rewritten to the new flow.
+- `cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js` — every
+  toolbar click in it, plus the graph half of the first test rewritten to the new flow.
+- `cypress/e2e/functional/tile_tests/dataflow_tile_keyboard_spec.js` — its Tab-order list, if the
+  second button joins the order.
 
 ---
 
-## Task 1: Swap the default Graph button
+## Task 1: Make two buttons of the same kind addressable
+
+**Files:**
+- Modify: `src/components/toolbar/tile-toolbar-button.tsx`
+- Modify: `src/components/toolbar/data-set-view-button.tsx`
+- Test: `src/components/toolbar/tile-toolbar.test.tsx`
+
+A toolbar button's class comes from `classNames("toolbar-button", name, ...)`, where `name` is the
+config entry's first element. Two `["data-set-view", ...]` entries therefore render as the same
+`.toolbar-button.data-set-view`, which Cypress's `clickToolbarButton` cannot resolve — it asserts a
+single match. `TileToolbarButton` cannot fix this itself because it never sees the tile-type
+argument, so the button that does passes an extra class.
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `src/components/toolbar/tile-toolbar.test.tsx`, after "can read tools list from app
+configuration":
+
+```tsx
+  // Two entries of the same button kind, e.g. Dataflow's Table and Graph exports, would otherwise
+  // be indistinguishable in the DOM: the class comes from the config entry's name alone.
+  it("gives a button an argument-qualified class as well as its plain one", () => {
+    render(
+      <TileToolbarButton name="data-set-view" extraClass="data-set-view-Graph"
+                         title="Graph It!" onClick={clickHandler}>
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("toolbar-button", "data-set-view", "data-set-view-Graph");
+  });
+
+  it("has only its plain class when given no extra one", () => {
+    render(
+      <TileToolbarButton name="data-set-view" title="Table It!" onClick={clickHandler}>
+        <CopyIcon/>
+      </TileToolbarButton>
+    );
+    expect(screen.getByRole("button").className).toBe("toolbar-button data-set-view");
+  });
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `npx jest src/components/toolbar/tile-toolbar.test.tsx -t "argument-qualified"`
+Expected: FAIL — TypeScript rejects `extraClass`, which is not a prop.
+
+- [ ] **Step 3: Add the prop**
+
+In `src/components/toolbar/tile-toolbar-button.tsx`, add to the props interface, beside
+`dataTestId`:
+
+```ts
+  // An extra class for a button whose config entry carries an argument, so that two buttons of the
+  // same kind on one toolbar can be told apart. See DataSetViewButton.
+  extraClass?: string;
+```
+
+Add `extraClass` to the destructured props, and include it in the class list:
+
+```tsx
+        className={classNames("toolbar-button", name, extraClass, colorClass,
+                              { selected: selected || highlighted, disabled })}
+```
+
+`classNames` drops an undefined argument, so a button without one is unchanged.
+
+- [ ] **Step 4: Pass it from the button that knows its argument**
+
+In `src/components/toolbar/data-set-view-button.tsx`, on the `TileToolbarButton`:
+
+```tsx
+      extraClass={`${name}-${newTileType}`}
+```
+
+- [ ] **Step 5: Run to verify it passes**
+
+Run: `npx jest src/components/toolbar/tile-toolbar.test.tsx`
+Expected: all PASS.
+
+Run: `npm run check:types`
+Expected: no output.
+
+- [ ] **Step 6: Confirm nothing else moved**
+
+Run: `npx jest src/components/toolbar`
+Expected: all PASS.
+
+Run: `grep -rn "\.data-set-view" src --include="*.scss"`
+Expected: no output — no stylesheet keys on this class, so nothing visual changes.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/components/toolbar/tile-toolbar-button.tsx \
+        src/components/toolbar/data-set-view-button.tsx \
+        src/components/toolbar/tile-toolbar.test.tsx
+git commit -m "Let two toolbar buttons of the same kind be told apart [CLUE-686]"
+```
+
+---
+
+## Task 2: Swap the default Graph button
 
 **Files:**
 - Modify: `src/clue/app-config.json`
@@ -84,7 +191,7 @@ git commit -m "Put Graph It on the default Dataflow toolbar [CLUE-686]"
 
 ---
 
-## Task 2: Update the authoring doc
+## Task 3: Update the authoring doc
 
 **Files:**
 - Modify: `docs/unit-configuration.md`
@@ -137,7 +244,7 @@ git commit -m "Document the Dataflow toolbar default [CLUE-686]"
 
 ---
 
-## Task 3: Rewrite the graph half of the Cypress test
+## Task 4: Rewrite the Dataflow Cypress specs
 
 **Files:**
 - Modify: `cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js`
@@ -146,7 +253,8 @@ The first test, "Data is shared properly with tables and graphs", drives the lin
 toolbar three times: create a graph, clear the link, relink to the existing graph. The button it
 clicks is no longer on the default toolbar.
 
-The table half of the same test clicks `data-set-view` and is unaffected. Leave it alone.
+The table half of both tests also clicks `data-set-view`, which now matches two buttons, so those
+calls need the qualified name too. Task 1 made that possible.
 
 - [ ] **Step 1: Watch it fail against the new default**
 
@@ -193,7 +301,7 @@ and runs to the end of the `it` block, whose last statements are:
 That whole span — three toolbar clicks and their dialog interactions — becomes:
 
 ```js
-    clueCanvas.clickToolbarButton("dataflow", "data-set-view");
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Graph");
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("contain.text", programTitle);
     graphTile.getXAttributesLabel().should("contain.text", linkedTableAttributes[0]);
@@ -224,7 +332,25 @@ nothing to do with which button opens the graph:
 The relink-to-existing step goes with the rest: that path is no longer reachable from the default
 toolbar.
 
-- [ ] **Step 3: Drop the now-unused import**
+- [ ] **Step 3: Point the table clicks at the Table button**
+
+Both tests click the export button for the table. There are now two, so name which one. Replace
+every remaining occurrence of:
+
+```js
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view");
+```
+
+with:
+
+```js
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Table");
+```
+
+Run: `grep -n 'data-set-view"' cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js`
+Expected: no output — every click now names Table or Graph.
+
+- [ ] **Step 4: Drop the now-unused import**
 
 `tableTile` is still used by the table half of both tests (`checkEmptyLinkedTable` and
 `checkLinkedTableRecordedData` take it as an argument), so leave its import and `let` alone.
@@ -234,7 +360,7 @@ Confirm nothing became unused:
 Run: `npm run lint:build 2>&1 | grep -E "dataflow_table_graph"`
 Expected: no output. If an unused-variable warning names this file, remove what it names.
 
-- [ ] **Step 4: Run the spec**
+- [ ] **Step 5: Run the spec**
 
 Run:
 ```bash
@@ -244,10 +370,33 @@ env -u ELECTRON_RUN_AS_NODE npx cypress run \
 ```
 Expected: both tests PASS.
 
-- [ ] **Step 5: Prove the test still covers the link, not just the button**
+- [ ] **Step 6: Check the Tab-order spec**
 
-Temporarily comment out the `clickToolbarButton("dataflow", "data-set-view")` line added in Step 2
-and re-run. The test must fail on the graph assertions that follow it. Restore the line afterwards.
+`dataflow_tile_keyboard_spec.js` asserts the Tab order of an empty Dataflow tile, and its
+`focusOrder` list contains one `['class', 'data-set-view']` entry. Whether a second one joins that
+order depends on which toolbar buttons an empty tile puts in the Tab cycle, which this plan does not
+assume — run it and let it say.
+
+Run:
+```bash
+env -u ELECTRON_RUN_AS_NODE npx cypress run \
+  --spec "cypress/e2e/functional/tile_tests/dataflow_tile_keyboard_spec.js" \
+  --config "video=false"
+```
+
+If it passes, change nothing. If it fails because focus lands on a second export button, add the
+matching entry to `focusOrder` in the position the failure reports, using the qualified class so it
+names which button it means:
+
+```js
+    ['class', 'data-set-view-Table'],
+    ['class', 'data-set-view-Graph'],
+```
+
+- [ ] **Step 7: Prove the test still covers the link, not just the button**
+
+Temporarily comment out the `clickToolbarButton("dataflow", "data-set-view-Graph")` line added in
+Step 2 and re-run. The test must fail on the graph assertions that follow it. Restore the line afterwards.
 
 Comment the line out rather than pointing it at another button: clicking a disabled or unrelated
 button fails for its own reasons, which would look like a pass of this check without being one.
@@ -255,22 +404,22 @@ button fails for its own reasons, which would look like a pass of this check wit
 This guards against a rewrite that only proves a button exists. The assertions have to depend on the
 graph actually receiving the program's data.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js
+git add cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js \
+        cypress/e2e/functional/tile_tests/dataflow_tile_keyboard_spec.js
 git commit -m "Exercise the Dataflow graph button students now have [CLUE-686]"
 ```
 
 ---
 
-## Task 4: Verify the branch
+## Task 5: Verify the branch
 
 - [ ] **Step 1: Run the unit tests**
 
 Run: `npx jest --silent 2>&1 | tail -5`
-Expected: 0 failures. Nothing in this change touches code under test, so a failure here means
-something unexpected.
+Expected: 0 failures. The only production change under unit test is the toolbar class from Task 1.
 
 - [ ] **Step 2: Type-check**
 
@@ -320,6 +469,8 @@ Do not push until the hand-check passes and the user has confirmed.
 
 ## Notes carried from the spec
 
+- **`DataSetLinkButton` gets no `extraClass`.** Nothing needs to address it individually, and it is
+  no longer on any default toolbar. Give it one if that changes.
 - **`data-set-link` is not removed**, only demoted. It stays registered in
   `dataflow-toolbar-registration.tsx` and documented, so a unit can configure the dialog.
 - **Unlinking survives** on the Graph tile's own layer legend; only "link into a graph that already
