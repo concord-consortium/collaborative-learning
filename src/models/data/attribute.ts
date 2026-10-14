@@ -20,6 +20,9 @@ export const Attribute = types.model("Attribute", {
   sourceID: types.maybe(types.string),
   name: types.string,
   hidden: false,
+  // False for a value the owning tile derives, such as the Timeline's event number: the table
+  // offers no editor for it, because an edit would be overwritten the next time it is recomputed.
+  editable: true,
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
   values: types.array(ValueType),
@@ -196,9 +199,9 @@ export const Attribute = types.model("Attribute", {
   setPrecision(precision?: number) {
     self.precision = precision;
   },
-  // setEditable(editable: boolean) {
-  //   self.editable = editable;
-  // },
+  setEditable(editable: boolean) {
+    self.editable = editable;
+  },
   clearFormula() {
     // In CODAP the attribute formula is set to undefined when the formula is cleared
     // In CLUE the formula has been left around with undefined properties. With the use of
