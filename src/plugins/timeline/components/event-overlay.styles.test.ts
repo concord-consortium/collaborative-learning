@@ -28,6 +28,20 @@ describe("timeline-event-colors.scss", () => {
     expect(declared).toEqual([...kEventColorWords, "default"]);
   });
 
+  // Every stylesheet in the plugin reads this map, so an entry missing a value would leave one of
+  // them with nothing to emit for that colour word. This is what makes the map a single source of
+  // truth rather than merely the largest of several lists.
+  it("gives every colour word the whole set of values", () => {
+    const map = body(source, "$event-colors", "(");
+    [...kEventColorWords, "default"].forEach(word => {
+      const from = map.indexOf(`"${word}":`);
+      const entry = map.slice(from, map.indexOf(")", from));
+      ["base", "hover", "select", "fill", "hover-fill", "full-timeline"].forEach(key => {
+        expect(entry).toContain(`${key}:`);
+      });
+    });
+  });
+
   // The design draws a mark as its icon colour at 40% over the black plot, not as the pale button
   // colour. Each `fill` is derived so the two can never drift apart.
   it("derives every fill from the icon colour", () => {

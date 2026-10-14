@@ -4,6 +4,8 @@
 // The design draws the checkbox as a thin black outline, a band of the icon colour, and a generous
 // centre of the 40% fill, in roughly 6 / 8 / 71 proportions of the box.
 $key-checkbox-size: 24px;
+// How far the icon reaches beyond the checkbox's top-left corner.
+$key-icon-overhang: 5px;
 $key-checkbox-outline: 2px;
 $key-checkbox-border: 2px;
 
@@ -31,15 +33,25 @@ $key-checkbox-border: 2px;
 
     .key-checkbox {
       display: block;
+      // Padded to take in the icon's overhang, so this box encloses both it and the checkbox --
+      // which is what lets the focus ring go round the pair, as the design draws it.
+      padding: $key-icon-overhang 0 0 $key-icon-overhang;
       position: relative;
 
-      // The icon overlaps the box's top-left corner, as the design has it. It names nothing — the
-      // label does that — so it must not swallow clicks meant for the checkbox under it.
+      // The icon overlaps the box's top-left corner, as the design has it. It names nothing -- the
+      // label does that -- so it must not swallow clicks meant for the checkbox under it.
       .event-shape {
-        left: -5px;
+        left: 0;
         pointer-events: none;
         position: absolute;
-        top: -5px;
+        top: 0;
+      }
+
+      // The ring belongs to the whole control, but only :focus-visible on the input should raise
+      // it, so that a pointer click does not.
+      &:has(input:focus-visible) {
+        outline: $focus-ring-outer-width solid $focus-ring-color;
+        outline-offset: $focus-ring-inner-width;
       }
     }
 
@@ -60,11 +72,6 @@ $key-checkbox-border: 2px;
 
       &:disabled {
         cursor: default;
-      }
-
-      &:focus-visible {
-        outline: $focus-ring-outer-width solid $focus-ring-color;
-        outline-offset: $focus-ring-inner-width;
       }
 
       // The checkmark, drawn always so that hovering an unchecked box can ghost it in. Sized and
