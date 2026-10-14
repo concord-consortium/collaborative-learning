@@ -37,7 +37,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.checkInitialStateButtons();
 
     cy.log("create linked table, verify empty and with recorded data");
-    clueCanvas.clickToolbarButton("dataflow", "data-set-view");
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Table");
     dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
 
     dataflowToolTile.recordData("1000", timer1);
@@ -59,36 +59,21 @@ context('Dataflow Tool Tile', function () {
     // is open. For now we close the readOnly views first.
     docEditor.hideReadOnlyPanes();
 
-    clueCanvas.clickToolbarButton("dataflow", "data-set-link");
-    tableTile.getLinkGraphModalTileMenu().select("New Graph");
-    tableTile.getLinkGraphModalLinkButton()
-      .should("contain.text", "Graph It!")
-      .should("not.have.class", "disabled")
-      .click({force: true});
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Graph");
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("contain.text", programTitle);
     graphTile.getXAttributesLabel().should("contain.text", linkedTableAttributes[0]);
     graphTile.getYAttributesLabel().should("contain.text", linkedTableAttributes[1]);
     graphTile.getGraphDot().should("exist");
 
-    // Unlink
-    clueCanvas.clickToolbarButton("dataflow", "data-set-link");
-    tableTile.getLinkGraphModalTileMenu().select(graphTitle);
-    tableTile.getLinkGraphModalLinkButton().should("contain.text", "Clear It!").click({force: true});
+    cy.log("unlink the program from the graph");
+
+    // The dialog's "Clear It!" is no longer on the Dataflow toolbar; the graph carries its own
+    // unlink button on the layer legend, which is the path a student now has.
+    graphTile.getLayerDeleteButton().click({force: true});
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("not.exist");
     graphTile.getGraphDot().should("not.exist");
-
-    // Relink to existing tile
-    clueCanvas.clickToolbarButton("dataflow", "data-set-link");
-    tableTile.getLinkGraphModalTileMenu().select(graphTitle);
-    tableTile.getLinkGraphModalLinkButton().should("contain.text", "Graph It!").click({force: true});
-    graphTile.getTile().should("exist").contains(graphTitle);
-    graphTile.getLayerName().should("contain.text", programTitle);
-    graphTile.getXAttributesLabel().should("contain.text", linkedTableAttributes[0]);
-    graphTile.getYAttributesLabel().should("contain.text", linkedTableAttributes[1]);
-    graphTile.getGraphDot().should("exist");
-
   });
 
   it("verify the effect of page reload cause on various button states and linked table state", () => {
@@ -99,7 +84,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.createProgram(programNodes);
     dataflowToolTile.checkInitialStateButtons();
     dataflowToolTile.recordData("1000", timer1);
-    clueCanvas.clickToolbarButton("dataflow", "data-set-view");
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Table");
 
     // record data
     dataflowToolTile.clearRecordedData();
