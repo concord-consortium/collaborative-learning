@@ -39,7 +39,7 @@ only shows types present in the sample" are already met. What follows is what is
 
 **Out**
 
-- A seventh icon and colour for student-defined events. Separate story.
+- A seventh icon and colour for student-defined events. That is CLUE-560.
 - **The number buttons' keyboard focus state.** Giving them one means putting them in the Tab order,
   and `EventOverlay` deliberately keeps them out of it "until the graph has a keyboard design" — a
   decision CLUE-720 reaffirmed. This sheet is the beginning of that design, and reversing the
@@ -195,8 +195,10 @@ Next and the thumb are all disabled.
   focus to a control that is still enabled, and the key checkboxes are now among them.
 - **A hidden selected event** keeps its number in the Event label while nothing is drawn for it.
   Accepted above, as the cost of not moving the view on a checkbox click.
-- **More than six event types** share the `?` shape and the default grey, as they do today. The
-  seventh colour belongs to the student-defined events story.
+- **More than six event types** share the `?` shape and the default grey, as they do today — and,
+  because `eventTypeColorWords` stops after six, a seventh type gets no Event Key row, so it is
+  drawn but cannot be switched off. Recorded on CLUE-560, whose own acceptance criteria already
+  put the `?` type in the key.
 
 ## Testing
 
