@@ -6,6 +6,7 @@ import "../../../models/shared/shared-data-set-registration";
 import { kSharedDataSetType } from "../../../models/shared/shared-data-set";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
+import { addCasesToDataSet } from "../../../models/data/data-set";
 import { kEventNumberAttrName } from "../../shared-seismogram/event-numbering";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
@@ -279,6 +280,63 @@ describe("WaveRunnerContent", () => {
     expect(numberOf("avalanche")).toBe("1");
     expect(numberOf("traffic")).toBe("2");
     expect(numberOf("earthquake")).toBe("3");
+  });
+
+  describe("keeping the numbers in step with the table", () => {
+    const hour = (h: number) => Date.UTC(2026, 1, 1, h);
+
+    function contentWithRecordedEvents() {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([
+        { windowStart: hour(1), windowEnd: hour(2), eventType: "avalanche", confidence: 0.8 },
+        { windowStart: hour(3), windowEnd: hour(4), eventType: "traffic", confidence: 0.7 },
+        { windowStart: hour(5), windowEnd: hour(6), eventType: "earthquake", confidence: 0.9 }
+      ]);
+      content.recordDetectedEvents();
+      return { content, dataSet: content.getOrCreateEventsDataSet()!.dataSet };
+    }
+
+    const numbersFor = (dataSet: any) => {
+      const numberAttr = dataSet.attrFromName(kEventNumberAttrName);
+      return dataSet.cases.map((c: { __id__: string }) =>
+        dataSet.getStrValue(c.__id__, numberAttr!.id));
+    };
+
+    // A linked table can delete a row; the Timeline re-derives its numbering immediately, so the
+    // stored numbers have to follow or the two disagree until the next run, which may never come.
+    it("renumbers when a linked table deletes an event", () => {
+      const { dataSet } = contentWithRecordedEvents();
+      expect(numbersFor(dataSet)).toEqual(["1", "2", "3"]);
+
+      dataSet.removeCases([dataSet.cases[0].__id__]);
+
+      expect(numbersFor(dataSet)).toEqual(["1", "2"]);
+    });
+
+    it("renumbers when an event's start time is edited", () => {
+      const { dataSet } = contentWithRecordedEvents();
+      const startAttr = dataSet.attrFromName("windowStart")!;
+      const lastCaseId = dataSet.cases[2].__id__;
+
+      // Move the last event before the first.
+      dataSet.setCaseValues([{ __id__: lastCaseId, windowStart: "2026-02-01T00:00:00.000Z" }]);
+
+      expect(numbersFor(dataSet)).toEqual(["2", "3", "1"]);
+      expect(dataSet.getStrValue(lastCaseId, startAttr.id)).toBe("2026-02-01T00:00:00.000Z");
+    });
+
+    // Backfilling a document recorded before this feature stays the Wave Runner's job on its next
+    // run: opening one must not write to it, which a reaction that added the attribute would.
+    it("does not add the attribute to a dataset that has none", () => {
+      const content = setupTileInDocument();
+      const dataSet = content.getOrCreateEventsDataSet()!.dataSet;
+      addCasesToDataSet(dataSet, [
+        { eventType: "avalanche", windowStart: "2026-02-01T01:00:00.000Z",
+          windowEnd: "2026-02-01T02:00:00.000Z" }
+      ]);
+
+      expect(dataSet.attrFromName(kEventNumberAttrName)).toBeUndefined();
+    });
   });
 
   it("configures the compact model in the wave-runner settings", () => {

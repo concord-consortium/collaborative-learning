@@ -159,6 +159,19 @@ Scope: the six tests above. `drag-tiles.test.ts` has five further inline snapsho
 with no dataset, which this change does not disturb; they are left alone rather than swept into an
 unrelated refactor, and are a reasonable follow-up.
 
+## Keeping the numbers in step with a linked table
+
+A table sharing the events dataset can delete rows and edit `windowStart`, and the Timeline
+re-derives its numbering the moment it does. Numbering only where the Wave Runner writes would
+leave the stored numbers as the last run left them, so deleting an early event would show 1, 3, 4
+in the table against Event 1, 2, 3 on the graph, until a later run that may never happen.
+
+So the Wave Runner watches its own dataset and renumbers when the cases change — **but only when
+the attribute already exists.** That split is what keeps the rule this design set out with: a
+document recorded before this feature is still backfilled by the Wave Runner on its next run, and
+never by the act of opening it. The reaction reads `windowStart`, `windowEnd` and `eventType` and
+deliberately does not read `eventNumber`, so the renumber it triggers cannot retrigger it.
+
 ## Known edges
 
 - **A run saved before this story shows no Event Number until the Wave Runner next writes to that
