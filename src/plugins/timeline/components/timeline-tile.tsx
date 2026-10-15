@@ -35,10 +35,8 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
 }) {
   const content = useTimelineContent();
 
-  // Which types this pane has switched off. A reader gets their own copy, seeded from the document
-  // and kept here rather than on the model: CLUE shows one model in an editable pane and a
-  // read-only one at the same time, and a filter on the model would reach both. It lasts as long
-  // as this pane is open.
+  // A reader's own hidden set, seeded from the document and kept out of it; see
+  // hidden-event-types-context for why it is per pane and why the two are allowed to diverge.
   const [readerHiddenTypes, setReaderHiddenTypes] = useState<string[]>(() =>
     Array.from(content.hiddenEventTypes));
   const toggleHiddenType = useCallback((eventType: string) => {

@@ -170,9 +170,8 @@ describe("TimelineKey", () => {
     expect(content.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
   });
 
-  // CLUE shows one document model in more than one pane at a time: My Work renders a student's own
-  // document read-only beside the editable workspace. A reader's filtering must stay in its pane,
-  // or the editable Key draws one thing while saving another.
+  // The case hidden-event-types-context exists for: My Work renders a student's own document
+  // read-only beside the editable workspace, both on one model.
   it("keeps a reader's filtering out of an editable pane showing the same model", () => {
     const { content, boxIn } = renderTwoPanes();
 

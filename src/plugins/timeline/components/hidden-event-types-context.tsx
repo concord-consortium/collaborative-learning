@@ -13,6 +13,11 @@ export interface IHiddenEventTypes {
  * than one pane at a time: My Work renders a student's own document read-only beside the editable
  * workspace, and the doc editor does the same. A reader's filtering kept on the model would reach
  * the editable pane, where the Event Key would then draw one thing and save another.
+ *
+ * So a read-only pane seeds its set from the document once, at mount, and from then on the two
+ * diverge: an author switching a type off afterwards does not change what the reader sees, and the
+ * reader's choices are dropped when the pane closes. Reconciling them would mean deciding whose
+ * choice wins on each type, which is not something either person asked for.
  */
 export const HiddenEventTypesContext = createContext<IHiddenEventTypes>({ types: [], toggle: () => undefined });
 

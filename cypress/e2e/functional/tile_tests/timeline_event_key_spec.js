@@ -11,6 +11,10 @@
  * The tile sits in the curriculum Problem panel, which is read-only, so these exercise a reader's
  * filtering. That a reader's choices stay in their own pane is checked in Jest, where one model
  * can be rendered in two panes at once; what these cover is that the marks come and go on screen.
+ *
+ * The editable path -- a toggle that writes `hiddenEventTypes` and survives a reload -- has no
+ * browser coverage, only Jest. Adding it needs a workspace document holding a Timeline tile with
+ * several event types, which the QA unit does not have.
  */
 const keyCheckbox = label =>
   cy.get(".timeline-key").contains("label", label).find("input[type=checkbox]");

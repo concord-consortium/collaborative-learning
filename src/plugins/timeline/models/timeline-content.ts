@@ -193,6 +193,9 @@ export const TimelineContentModel = TileContentModel
     canSelectNext(hiddenEventTypes: string[]) {
       return self.shownEvents(hiddenEventTypes).some(e => e.index > self.selectedEventIndex);
     },
+    // The label keeps the selected event's number even when its type is switched off and nothing
+    // is drawn for it. Clearing the selection instead would move the view out from under a reader
+    // who only meant to filter the key.
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
       return `Event ${self.selectedEventIndex + 1}`;
