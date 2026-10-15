@@ -2,9 +2,8 @@ import fs from "fs";
 import path from "path";
 import { kEventColorWords } from "../timeline-types";
 
-// jsdom applies no stylesheets, so a rendering test cannot tell a colour word that scss knows about
-// from one it has never heard of, nor a rule that degenerates correctly from one that doesn't.
-// These read the stylesheets instead.
+// jsdom applies no stylesheets, so a rendering test cannot tell a color word that scss knows about
+// from one it has never heard of. These read the stylesheets instead.
 const read = (file: string) => fs.readFileSync(path.join(__dirname, file), "utf8");
 
 /** The body of `name(...)` or `selector { ... }`, matched to its closing bracket so nesting comes along. */
@@ -22,33 +21,36 @@ function body(source: string, name: string, open: "(" | "{") {
 
 describe("timeline-event-colors.scss", () => {
   const source = read("timeline-event-colors.scss");
+  const map = body(source, "$event-colors", "(");
+  const words = [...kEventColorWords, "default"];
 
-  it("declares every colour word TypeScript knows about, and no others", () => {
-    const declared = Array.from(body(source, "$event-colors", "(").matchAll(/"([a-z]+)":/g)).map(m => m[1]);
-    expect(declared).toEqual([...kEventColorWords, "default"]);
+  it("declares every color word TypeScript knows about, and no others", () => {
+    const declared = Array.from(map.matchAll(/"([a-z]+)":/g)).map(m => m[1]);
+    expect(declared).toEqual(words);
   });
 
-  // Every stylesheet in the plugin reads this map, so an entry missing a value would leave one of
-  // them with nothing to emit for that colour word. This is what makes the map a single source of
-  // truth rather than merely the largest of several lists.
-  it("gives every colour word the whole set of values", () => {
-    const map = body(source, "$event-colors", "(");
-    [...kEventColorWords, "default"].forEach(word => {
+  // Every per-color rule in the plugin reads this map, so an entry missing one of these would
+  // leave some rule with nothing to emit for that word. `fill` and `hover-fill` are not checked:
+  // they are derived for every entry by the `@each` below the map, so they cannot go missing for
+  // one word alone.
+  it("gives every color word the values the rules read", () => {
+    words.forEach(word => {
       const from = map.indexOf(`"${word}":`);
       const entry = map.slice(from, map.indexOf(")", from));
-      ["base", "hover", "select", "fill", "hover-fill", "full-timeline"].forEach(key => {
-        expect(entry).toContain(`${key}:`);
+      ["base", "hover", "select", "full-timeline"].forEach(key => {
+        expect(entry).toMatch(new RegExp(`\\b${key}: #[0-9a-f]{6}`));
       });
     });
   });
 
-  // The design draws a mark as its icon colour at 40% over the black plot, not as the pale button
-  // colour. Each `fill` is derived so the two can never drift apart.
-  it("derives every fill from the icon colour", () => {
-    kEventColorWords.concat("default").forEach(word => {
-      expect(source).toContain(`$${word}-transparent: rgba($${word}-select, 0.4);`);
-      expect(source).toContain(`$${word}-hover-transparent: rgba($${word}-hover, 0.4);`);
+  // A color word sharing another's hex would be a copy-paste that no rendering test would catch:
+  // the two would simply look alike.
+  it("gives every color word its own select color", () => {
+    const selects = words.map(word => {
+      const from = map.indexOf(`"${word}":`);
+      return map.slice(from, map.indexOf(")", from)).match(/select: (#[0-9a-f]{6})/)![1];
     });
+    expect(new Set(selects).size).toBe(words.length);
   });
 });
 
