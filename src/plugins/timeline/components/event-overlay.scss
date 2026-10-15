@@ -3,7 +3,7 @@
 .event-overlay {
   // Everything inherits border-box from index.scss, so these borders also floor the width: an
   // event too narrow to show an interior collapses to 2px of pure border, which is why a brief
-  // event reads as a single line in the outline colour and needs no threshold of its own.
+  // event reads as a single line in the outline color and needs no threshold of its own.
   border: 1px solid;
   height: 100%;
   pointer-events: none;

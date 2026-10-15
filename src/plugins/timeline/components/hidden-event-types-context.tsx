@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import { createContext, useContext } from "react";
 
 export interface IHiddenEventTypes {
   /** The event types switched off in this pane's Event Key. */

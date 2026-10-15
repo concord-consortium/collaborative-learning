@@ -8,7 +8,7 @@
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Timeline test fixture.</strong> Seven event types, so every icon and colour is used and the seventh falls back to \"?\". Events 2 and 5 are too narrow to draw as rectangles and should appear as single lines.</p>"
+            "<p><strong>Timeline test fixture.</strong> Seven event types, so every icon and color is used and the seventh falls back to \"?\". Events 2 and 5 are too narrow to draw as rectangles and should appear as single lines.</p>"
           ]
         }
       },

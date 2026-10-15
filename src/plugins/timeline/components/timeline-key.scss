@@ -1,8 +1,8 @@
 @import "../../../components/vars";
 @import "./timeline-event-colors.scss";
 
-// The design draws the checkbox as a thin black outline, a band of the icon colour, and a generous
-// centre of the 40% fill, in roughly 6 / 8 / 71 proportions of the box.
+// The checkbox is a thin black outline, a band of the icon color, and the 40% fill: 2px, 2px
+// and a 16px center of a 24px box.
 $key-checkbox-size: 24px;
 // How far the icon reaches beyond the checkbox's top-left corner.
 $key-icon-overhang: 5px;
@@ -12,7 +12,7 @@ $key-checkbox-border: 2px;
 .timeline-key {
   align-items: center;
   display: flex;
-  // A unit may use all seven event types, which do not fit on one line in a narrow tile. Wrapping
+  // The key holds up to six entries, which do not fit on one line in a narrow tile. Wrapping
   // costs height, which the tile can be resized for; overflowing clips the key and puts a
   // horizontal scrollbar on the tile.
   flex-wrap: wrap;
@@ -57,12 +57,10 @@ $key-checkbox-border: 2px;
 
     input[type="checkbox"] {
       appearance: none;
-      // A mark on the plot is its colour over the black graph. The checkbox carries its own black
+      // A mark on the plot is its color over the black graph. The checkbox carries its own black
       // so the swatch is a true miniature of the mark it governs.
       background-color: #121212;
       border: $key-checkbox-outline solid #121212;
-      // border-box so the two borders eat into the box rather than growing it, keeping the fill
-      // the generous centre the design gives it.
       box-sizing: border-box;
       cursor: pointer;
       height: $key-checkbox-size;
@@ -101,7 +99,7 @@ $key-checkbox-border: 2px;
     @each $word, $colors in $event-colors {
       &.#{$word}-event input[type="checkbox"] {
         // A gradient, not a background-color: the swatch needs two layers, the black backing and
-        // the translucent colour over it, and background-color is only one.
+        // the translucent color over it, and background-color is only one.
         background-image: linear-gradient(map-get($colors, fill), map-get($colors, fill));
         box-shadow: inset 0 0 0 $key-checkbox-border map-get($colors, select);
 

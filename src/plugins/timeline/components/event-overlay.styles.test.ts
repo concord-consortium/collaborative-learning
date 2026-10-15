@@ -57,9 +57,9 @@ describe("timeline-event-colors.scss", () => {
 describe("event-overlay.scss", () => {
   const source = read("event-overlay.scss");
 
-  // The border is what makes a brief event read as a line: under the global border-box from
-  // index.scss it floors the width at 2px with no interior left for the fill. The outcome is
-  // checked in a browser by timeline_event_key_spec, which is the only place the box model runs.
+  // See event-overlay.scss for why the border is what makes a brief event read as a line. Only
+  // that it is still declared is checked here; the outcome is checked in a browser by
+  // timeline_event_key_spec, which is the only place the box model runs.
   it("gives the rectangle the border that degenerates it", () => {
     expect(body(source, ".event-overlay", "{")).toMatch(/border:\s*1px solid;/);
   });
@@ -72,7 +72,7 @@ describe("event-overlay.scss", () => {
     expect(rule).not.toMatch(/^\s*width:/m);
   });
 
-  it("colours the rectangle from the icon colour, not the pale button colour", () => {
+  it("colors the rectangle from the icon color, not the pale button color", () => {
     const rule = body(source, ".event-overlay", "{");
     expect(rule).toMatch(/border-color:\s*map-get\(\$colors,\s*select\)/);
     expect(rule).toMatch(/background-color:\s*map-get\(\$colors,\s*fill\)/);

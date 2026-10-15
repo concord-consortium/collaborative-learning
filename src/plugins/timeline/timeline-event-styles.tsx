@@ -1,8 +1,8 @@
 import React from "react";
 
 /**
- * The event colour words, in the order `eventTypeColorWords` hands them out, each with the shape
- * that lets its type be told apart without colour. `timeline-event-colors.scss` holds the matching
+ * The event color words, in the order `eventTypeColorWords` hands them out, each with the shape
+ * that lets its type be told apart without color. `timeline-event-colors.scss` holds the matching
  * `$event-colors` map; `event-overlay.styles.test.ts` asserts the two lists agree.
  *
  * Shapes are drawn in a 12x12 box, inset by half the 1px outline.

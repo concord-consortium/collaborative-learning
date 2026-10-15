@@ -139,7 +139,7 @@ describe("TimelineComponent", () => {
     it("heads the tile with the station and the run's dates, zero-padded", () => {
       const { container } = renderWithStores();
       const lines = container.querySelectorAll(".metadata-display div");
-      // Station, start, end. The model label the header used to carry is not in the design.
+      // Station, start, end: the three lines the design shows.
       expect(lines).toHaveLength(3);
       expect(lines[1]).toHaveTextContent("02/01/2026");
       expect(lines[2]).toHaveTextContent("02/05/2026");
