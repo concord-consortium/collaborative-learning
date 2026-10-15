@@ -5,13 +5,16 @@ import { useReadOnlyContext } from "../../../components/document/read-only-conte
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { getEventColorClass, TimelineEvent } from "../timeline-types";
 import { EventShape } from "./event-shape";
+import { useHiddenEventTypes } from "./hidden-event-types-context";
 
 import "./event-overlay.scss";
 
 export const EventOverlay = observer(function EventOverlay() {
   const content = useTimelineContent();
   const readOnly = useReadOnlyContext();
-  const visibleEvents = content.visibleEvents;
+  const hiddenEventTypes = useHiddenEventTypes();
+  const visibleEvents = content.visibleEvents
+                          .filter(event => !hiddenEventTypes.types.includes(event.eventType));
   const colorWords = content.eventTypeColorWords;
 
   function getEventPosition(event: TimelineEvent) {
@@ -27,7 +30,7 @@ export const EventOverlay = observer(function EventOverlay() {
 
   return (
     <>
-      {visibleEvents.map((event, i) => {
+      {visibleEvents.map(event => {
         const pos = getEventPosition(event);
         if (!pos) return null;
 
@@ -41,7 +44,7 @@ export const EventOverlay = observer(function EventOverlay() {
         const onLabelClick = () => content.selectEvent(event.index);
 
         return (
-          <React.Fragment key={i}>
+          <React.Fragment key={event.index}>
             <div className={classNames("event-overlay", colorClass)} style={overlayStyle} />
             {/* Outside the editable tile's Tab cycle until the graph has a keyboard design; Prev and
                 Next select events by keyboard. A read-only tile has no cycle, so Tab reaches them there. */}

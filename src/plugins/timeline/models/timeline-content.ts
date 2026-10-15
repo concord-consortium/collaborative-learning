@@ -25,10 +25,6 @@ export const TimelineContentModel = TileContentModel
     selectedEventIndex: types.optional(types.number, 0),
   })
   .volatile(self => ({
-    // A reader cannot write to a document they do not own, but they still need to filter what they
-    // are reading. Toggling in a read-only pane diverges into this unsaved copy of
-    // `hiddenEventTypes`, which lasts as long as the tile is on screen.
-    readerHiddenEventTypes: undefined as string[] | undefined,
     hoverTime: undefined as DateTime | undefined,
     pinnedTime: undefined as DateTime | undefined,
     // The view shown while a preview is active, and the saved view it started from; see
@@ -143,18 +139,13 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    /** What the Event Key has switched off: a reader's own choice if they made one, else the document's. */
-    get hiddenTypes(): string[] {
-      return self.readerHiddenEventTypes ?? Array.from(self.hiddenEventTypes);
-    }
-  }))
-  .views(self => ({
-    isEventTypeHidden(eventType: string) {
-      return self.hiddenTypes.includes(eventType);
-    },
-    // The events whose type is still switched on in the Event Key.
-    get shownEvents(): TimelineEvent[] {
-      return self.events.filter(e => !self.hiddenTypes.includes(e.eventType));
+    /**
+     * The events whose type is still switched on in the Event Key. The hidden set is passed in
+     * rather than read from here because it belongs to a pane, not to the document: see
+     * `HiddenEventTypesContext`.
+     */
+    shownEvents(hiddenEventTypes: string[]): TimelineEvent[] {
+      return self.events.filter(e => !hiddenEventTypes.includes(e.eventType));
     }
   }))
   .views(self => ({
@@ -179,10 +170,11 @@ export const TimelineContentModel = TileContentModel
     get canPanRight() {
       return !!self.viewEndTime && !!self.dataEndTime && self.viewEndTime < self.dataEndTime;
     },
-    // `shownEvents` clipped to the view, which is exactly what EventOverlay draws.
+    // The events inside the current view. EventOverlay draws these less whatever its pane has
+    // switched off in the Event Key.
     get visibleEvents(): TimelineEvent[] {
       if (!self.viewStartTime || !self.viewEndTime) return [];
-      return self.shownEvents.filter(e =>
+      return self.events.filter(e =>
         e.windowEnd > self.viewStartTime! && e.windowStart < self.viewEndTime!
       );
     },
@@ -195,11 +187,11 @@ export const TimelineContentModel = TileContentModel
     // Prev and Next walk the shown events, so a switched-off type is stepped over rather than
     // being zoomed to by `focusEvent` and left invisible. Numbering is untouched: an event keeps
     // its index in the full list however many types are off.
-    get canSelectPrev() {
-      return self.shownEvents.some(e => e.index < self.selectedEventIndex);
+    canSelectPrev(hiddenEventTypes: string[]) {
+      return self.shownEvents(hiddenEventTypes).some(e => e.index < self.selectedEventIndex);
     },
-    get canSelectNext() {
-      return self.shownEvents.some(e => e.index > self.selectedEventIndex);
+    canSelectNext(hiddenEventTypes: string[]) {
+      return self.shownEvents(hiddenEventTypes).some(e => e.index > self.selectedEventIndex);
     },
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
@@ -361,23 +353,19 @@ export const TimelineContentModel = TileContentModel
   }))
   .actions(self => ({
     toggleEventType(eventType: string) {
-      const at = self.hiddenEventTypes.indexOf(eventType);
-      if (at >= 0) self.hiddenEventTypes.splice(at, 1);
-      else self.hiddenEventTypes.push(eventType);
+      if (self.hiddenEventTypes.includes(eventType)) {
+        // Every match, not the first: a hand-edited document could hold the type twice.
+        self.hiddenEventTypes.replace(self.hiddenEventTypes.filter(t => t !== eventType));
+      } else {
+        self.hiddenEventTypes.push(eventType);
+      }
     },
-    /** Toggles for a reader of someone else's work, leaving the saved document alone. */
-    toggleEventTypeForReader(eventType: string) {
-      const hidden = self.hiddenTypes;
-      self.readerHiddenEventTypes = hidden.includes(eventType)
-        ? hidden.filter(t => t !== eventType)
-        : [...hidden, eventType];
-    },
-    selectNextEvent() {
-      const next = self.shownEvents.find(e => e.index > self.selectedEventIndex);
+    selectNextEvent(hiddenEventTypes: string[]) {
+      const next = self.shownEvents(hiddenEventTypes).find(e => e.index > self.selectedEventIndex);
       if (next) self.selectEvent(next.index);
     },
-    selectPrevEvent() {
-      const shownBefore = self.shownEvents.filter(e => e.index < self.selectedEventIndex);
+    selectPrevEvent(hiddenEventTypes: string[]) {
+      const shownBefore = self.shownEvents(hiddenEventTypes).filter(e => e.index < self.selectedEventIndex);
       const prev = shownBefore[shownBefore.length - 1];
       if (prev) self.selectEvent(prev.index);
     }

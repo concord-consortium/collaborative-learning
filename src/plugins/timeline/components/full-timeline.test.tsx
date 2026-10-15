@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { observable, runInAction } from "mobx";
 import { IJsonPatch, onPatch } from "mobx-state-tree";
@@ -14,6 +14,7 @@ import { mockPointerEvents } from "../../../test/pointer-events";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { FullTimeline } from "./full-timeline";
+import { HiddenEventTypesContext } from "./hidden-event-types-context";
 
 // The timeline tile needs to be registered so TileModel.create
 // knows it is a supported tile type
@@ -69,14 +70,17 @@ describe("FullTimeline", () => {
     });
   }
 
-  function renderFullTimeline(viewStart: DateTime, viewEnd: DateTime, { readOnly = false } = {}) {
+  function renderFullTimeline(viewStart: DateTime, viewEnd: DateTime,
+                              { readOnly = false, hiddenEventTypes = [] as string[] } = {}) {
     const content = TimelineContentModel.create();
     content.setViewRange(viewStart, viewEnd);
     const model = TileModel.create({ content });
     const result = render(
       <ReadOnlyContext.Provider value={readOnly}>
         <TileModelContext.Provider value={model}>
-          <FullTimeline />
+          <HiddenEventTypesContext.Provider value={{ types: hiddenEventTypes, toggle: () => undefined }}>
+            <FullTimeline />
+          </HiddenEventTypesContext.Provider>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
     );
@@ -143,10 +147,12 @@ describe("FullTimeline", () => {
     ]);
     mockSharedDataSet = SharedDataSet.create({ dataSet });
 
-    const { content, container } = renderFullTimeline(day(1), day(2));
-    expect(container.querySelectorAll(".full-timeline-event")).toHaveLength(2);
+    expect(renderFullTimeline(day(1), day(2))
+             .container.querySelectorAll(".full-timeline-event")).toHaveLength(2);
+    cleanup();
 
-    act(() => { content.toggleEventType("Earthquake"); });
+    // The hidden set belongs to the pane, not the document, so the strip is told rather than asked.
+    const { container } = renderFullTimeline(day(1), day(2), { hiddenEventTypes: ["Earthquake"] });
 
     const left = container.querySelectorAll<HTMLElement>(".full-timeline-event");
     expect(left).toHaveLength(1);
