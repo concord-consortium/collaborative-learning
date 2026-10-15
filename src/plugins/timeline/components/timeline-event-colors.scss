@@ -20,7 +20,7 @@ $event-colors: (
   "default": (base: #dfdfdf, hover: #d1d1d1, select: #b9b9b9, full-timeline: #747474)
 );
 
-// A mark sits over the black plot, so its fill is its own color at 40%. Derived here rather than
+// A mark sits over the black graph, so its fill is its own color at 40%. Derived here rather than
 // written out per word, so a fill cannot name a different word than the border beside it.
 @each $word, $colors in $event-colors {
   $event-colors: map-merge($event-colors, ($word: map-merge($colors, (

@@ -64,8 +64,8 @@ describe("event-overlay.scss", () => {
     expect(body(source, ".event-overlay", "{")).toMatch(/border:\s*1px solid;/);
   });
 
-  // "1- and 2-digit values use the same width button, while 3-digit values use a wider button."
-  // A fixed width cannot widen, so the rule has to be a minimum with padding to grow into.
+  // The design gives 1- and 2-digit numbers one width and lets 3-digit ones grow, so the rule has
+  // to be a minimum with padding to grow into rather than a fixed width.
   it("lets a 3-digit event number widen its button", () => {
     const rule = body(source, ".event-label-button", "{");
     expect(rule).toMatch(/min-width:\s*24px/);
