@@ -14,8 +14,14 @@ jobs:
   firmware:
     name: Check Spiker:bit firmware hex
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The job runs third-party install scripts, so don't leave the token in .git/config.
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
