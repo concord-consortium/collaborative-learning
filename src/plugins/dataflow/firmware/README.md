@@ -62,8 +62,8 @@ and the checks will fail.
 
 Change `pxt-core` and `pxt-microbit` in `scripts/spikerbit-firmware/package.json` together
 (exact versions; the micro:bit target's `package.json` names the `pxt-core` it was built
-with), update `targetVersions` in `scripts/spikerbit-firmware/project/pxt.json` to match,
-run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test.
+with), run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test. The
+build records the versions in the hex itself.
 
 ## Bench-test firmware
 

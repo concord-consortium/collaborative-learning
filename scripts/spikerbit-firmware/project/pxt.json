@@ -9,12 +9,5 @@
     "files": [
         "main.ts"
     ],
-    "targetVersions": {
-        "branch": "stable9.0",
-        "tag": "v9.0.5",
-        "commits": "https://github.com/microsoft/pxt-microbit/commits/2a6e8761e315e61d584f0882b25a276fc766db37",
-        "target": "9.0.5",
-        "pxt": "13.0.4"
-    },
     "preferredEditor": "tsprj"
 }
