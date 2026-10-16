@@ -1,0 +1,29 @@
+name: CI Firmware
+# Rebuilds the Spiker:bit firmware hex with the pinned MakeCode toolchain and fails when it
+# differs from the committed spikerbit-clue.hex, i.e. when spikerbit-clue.ts changed but the
+# hex wasn't rebuilt. See src/plugins/dataflow/firmware/README.md.
+
+on:
+  push:
+    paths:
+      - 'src/plugins/dataflow/firmware/**'
+      - 'scripts/spikerbit-firmware/**'
+      - '.github/workflows/firmware.yml'
+
+jobs:
+  firmware:
+    name: Check Spiker:bit firmware hex
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: scripts/spikerbit-firmware/package-lock.json
+      - name: Install MakeCode toolchain
+        working-directory: ./scripts/spikerbit-firmware
+        run: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
+      - name: Rebuild and compare
+        working-directory: ./scripts/spikerbit-firmware
+        run: npm run check
