@@ -133,12 +133,16 @@ embedded source, and the `CI Firmware` workflow (§5.4) checks the compiled prog
 
 ### 5.4 CI job: rebuild and diff
 
-A workflow, `.github/workflows/firmware.yml`, following the path-filtered pattern of
-`functions-v2.yml`. It relies on the build being deterministic, which §6 confirmed.
+A workflow, `.github/workflows/firmware.yml`. It relies on the build being deterministic,
+which §6 confirmed.
 
-- **Trigger:** `push` with `paths` `src/plugins/dataflow/firmware/**`,
-  `scripts/spikerbit-firmware/**` and `.github/workflows/firmware.yml`. Changes to the
-  bench-test programs also trigger it, which is harmless.
+- **Trigger:** `pull_request` with `paths` `src/plugins/dataflow/firmware/**`,
+  `scripts/spikerbit-firmware/**` and `.github/workflows/firmware.yml`, for pull requests
+  into any branch. The path filter compares the whole pull request with its base, so every
+  new head of a pull request that touches the firmware gets the check. A `push` filter only
+  looks at what one push changed, so a later push that didn't touch the firmware would leave
+  the head without the check, and an earlier failure would drop off the pull request.
+  Changes to the bench-test programs also trigger it, which is harmless.
 - **Steps:** checkout; `actions/setup-node` with Node 20 (the version `ci.yml` uses) and npm
   caching keyed on `scripts/spikerbit-firmware/package-lock.json`; `npm ci` and
   `npm run check` in `scripts/spikerbit-firmware`. A last step appends a line to the source
