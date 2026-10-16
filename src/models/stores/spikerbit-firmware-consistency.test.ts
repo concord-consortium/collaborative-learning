@@ -11,7 +11,7 @@ import { kSpikerbitFirmwareVersion } from "./spikerbit-device";
 // The files are read from disk (not imported) so the .hex isn't the Jest fileMock stub.
 //
 // These tests can't tell whether the compiled program in the hex matches its embedded
-// source. The firmware CI workflow covers that by rebuilding the hex and comparing.
+// source. The `CI Firmware` workflow covers that by rebuilding the hex and comparing.
 
 const firmwareDir = path.join(__dirname, "../../plugins/dataflow/firmware");
 const sourcePath = path.join(firmwareDir, "spikerbit-clue.ts");
