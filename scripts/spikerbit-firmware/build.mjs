@@ -18,8 +18,9 @@ const pxtRunner = path.join(toolDir, "pxt.cjs");
 function buildHex() {
   const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "spikerbit-firmware-"));
   try {
-    // A hex embeds every file in its MakeCode project, so the project is just main.ts and
-    // pxt.json; importing the hex into the MakeCode editor opens main.ts in JavaScript.
+    // The hex embeds every file in the project, so the project holds only what MakeCode needs:
+    // main.ts and pxt.json. Importing the hex into the MakeCode editor opens main.ts in
+    // JavaScript.
     fs.copyFileSync(path.join(toolDir, "project/pxt.json"), path.join(projectDir, "pxt.json"));
     fs.copyFileSync(sourcePath, path.join(projectDir, "main.ts"));
     // pxt runs in its own process: it works on the current directory, and on a failed build
