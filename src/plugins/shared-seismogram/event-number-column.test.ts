@@ -64,6 +64,15 @@ describe("the Event Number column", () => {
     expect(numbers(eventsDataSet([{ windowStart: at(2) }, skipped]))).toEqual(["1", ""]);
   });
 
+  // A known limit of the filter, pinned so it is not mistaken for correct. The Timeline requires
+  // windowEnd to *parse*; the formula can only ask that it be non-empty, because `date()` and a
+  // nested `rank()` both collapse inside a semi-aggregate argument, which is evaluated as a whole
+  // column. Blank is the case that actually arises, and it is handled above.
+  it("numbers an event whose windowEnd is non-empty but unparseable, which the Timeline skips", () => {
+    expect(numbers(eventsDataSet([{ windowStart: at(2) }, { windowStart: at(1), windowEnd: "lunchtime" }])))
+      .toEqual(["2", "1"]);
+  });
+
   it("numbers a tied pair consecutively in case order, as the Timeline does", () => {
     expect(numbers(eventsDataSet([{ windowStart: at(3) }, { windowStart: at(3) }, { windowStart: at(1) }])))
       .toEqual(["2", "3", "1"]);
