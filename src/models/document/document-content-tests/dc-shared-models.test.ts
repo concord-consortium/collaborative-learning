@@ -4,6 +4,7 @@ import { getSnapshot } from "mobx-state-tree";
 import { parsedExport, getColumnWidths } from "./dc-test-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
 import { SharedDataSetSnapshotType } from "../../shared/shared-data-set";
+import { SharedModelEntryType } from "../shared-model-entry";
 import { IDropRowInfo } from "../tile-row";
 
 import { IDocumentImportSnapshot } from "../document-content-import-types";
@@ -47,6 +48,26 @@ function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
   const content = DocumentContentModel.create(snapshot as DocumentContentSnapshotType, environment);
   sharedModelManager.setDocument(content);
   return content;
+}
+
+/**
+ * Asserts everything a copied shared dataset has to carry. Checking that it arrived is not enough
+ * on its own: a copy that made the wrapper but dropped the data would look the same from outside.
+ */
+function expectCopiedDataSet(copiedShared: SharedModelEntryType, copiedTableId: string) {
+  const entry = getSnapshot(copiedShared);
+  // Rewired onto the copy. Left as "tableTool", the dataset would name a tile in another document.
+  expect(entry.provider).toEqual(copiedTableId);
+  // The snapshot's sharedModel is the union's base type, which has no dataSet of its own.
+  const sharedModel = entry.sharedModel as SharedDataSetSnapshotType;
+  expect(sharedModel.providerId).toEqual(copiedTableId);
+
+  const dataSet = sharedModel.dataSet!;
+  expect(dataSet.attributes!.map(attr => attr.name)).toEqual(["x", "y"]);
+  expect(dataSet.attributes![0].values).toEqual(["1", "2", "3"]);
+  expect(dataSet.cases).toHaveLength(3);
+  // Fresh ids, so editing the copy cannot reach back into the source's attributes.
+  expect(dataSet.attributes!.map(attr => attr.id)).not.toEqual(["attribute1", "attribute2"]);
 }
 
 describe("DocumentContentModel -- shared Models --", () => {
@@ -97,7 +118,6 @@ describe("DocumentContentModel -- shared Models --", () => {
               attributes: [
                 {
                   clientKey: "",
-                  editable: true,
                   formula: { display: "" },
                   hidden: false,
                   id: "attribute1",
@@ -108,7 +128,6 @@ describe("DocumentContentModel -- shared Models --", () => {
                 },
                 {
                   clientKey: "",
-                  editable: true,
                   formula: { display: "" },
                   hidden: false,
                   id: "attribute2",
@@ -163,8 +182,6 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowInsertIndex: 0
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
-      // FIXME: the ids here are not going to be consistent, so we should
-      // reset them in beforeEach
       // The copy lands as the only tile in the only row, under a new id, and the shared dataset
       // comes with it rewired to that id rather than the source tile's.
       expect(targetDocument.rowOrder).toHaveLength(1);
@@ -177,13 +194,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       const copiedShared = Array.from(targetDocument.sharedModelMap.values())[0];
       expect(getSnapshot(copiedShared).tiles).toEqual(copiedIds);
 
-      // The dataset travels with its contents, not just its wrapper: a copy path that made the
-      // shared model but dropped its attributes or cases would otherwise pass here.
-      // The snapshot's sharedModel is the union's base type, which has no dataSet of its own.
-      const copiedDataSet = (getSnapshot(copiedShared).sharedModel as SharedDataSetSnapshotType).dataSet!;
-      expect(copiedDataSet.attributes!.map(attr => attr.name)).toEqual(["x", "y"]);
-      expect(copiedDataSet.attributes![0].values).toEqual(["1", "2", "3"]);
-      expect(copiedDataSet.cases).toHaveLength(3);
+      expectCopiedDataSet(copiedShared, copiedIds[0]);
     });
 
     it("can copy a tile into another document's row", () => {
@@ -199,8 +210,6 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowDropLocation: "right"
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
-      // FIXME: the ids here are not going to be consistent, so we should
-      // reset them in beforeEach
       // The copy joins the existing row beside the text tile rather than making a row of its own.
       expect(targetDocument.rowOrder).toHaveLength(1);
       const rowTileIds = targetDocument.getAllTilesInRow(targetDocument.getRowByIndex(0)!.id)
@@ -216,13 +225,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       const copiedShared = Array.from(targetDocument.sharedModelMap.values())[0];
       expect(getSnapshot(copiedShared).tiles).toEqual([copiedId]);
 
-      // The dataset travels with its contents, not just its wrapper: a copy path that made the
-      // shared model but dropped its attributes or cases would otherwise pass here.
-      // The snapshot's sharedModel is the union's base type, which has no dataSet of its own.
-      const copiedDataSet = (getSnapshot(copiedShared).sharedModel as SharedDataSetSnapshotType).dataSet!;
-      expect(copiedDataSet.attributes!.map(attr => attr.name)).toEqual(["x", "y"]);
-      expect(copiedDataSet.attributes![0].values).toEqual(["1", "2", "3"]);
-      expect(copiedDataSet.cases).toHaveLength(3);
+      expectCopiedDataSet(copiedShared, copiedId);
     });
 
   });
@@ -235,8 +238,6 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowInsertIndex: 0
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
-      // FIXME: the ids here are not going to be consistent, so we should
-      // reset them in beforeEach
       // Both tiles arrive, and the one dataset they shared is copied once rather than twice, with
       // both copies referencing it.
       const copiedIds = targetDocument.getTilesInDocumentOrder();
@@ -248,13 +249,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       const copiedShared = Array.from(targetDocument.sharedModelMap.values())[0];
       expect(getSnapshot(copiedShared).tiles).toEqual(copiedIds);
 
-      // The dataset travels with its contents, not just its wrapper: a copy path that made the
-      // shared model but dropped its attributes or cases would otherwise pass here.
-      // The snapshot's sharedModel is the union's base type, which has no dataSet of its own.
-      const copiedDataSet = (getSnapshot(copiedShared).sharedModel as SharedDataSetSnapshotType).dataSet!;
-      expect(copiedDataSet.attributes!.map(attr => attr.name)).toEqual(["x", "y"]);
-      expect(copiedDataSet.attributes![0].values).toEqual(["1", "2", "3"]);
-      expect(copiedDataSet.cases).toHaveLength(3);
+      expectCopiedDataSet(copiedShared, copiedIds[0]);
     });
   });
 
