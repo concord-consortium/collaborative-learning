@@ -16,6 +16,7 @@ import {
   registerMathjsFunction, typedFnRegistry
 } from "@concord-consortium/codap-formulas/models/formula/functions/math";
 
+import { registerRankFunction } from "./models/formula/rank-function";
 import { AppMode } from "./models/stores/store-types";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
@@ -60,6 +61,8 @@ export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAp
   AttributeFormulaAdapter.register();
   // Add an alias for the mean function
   registerMathjsFunction("average", typedFnRegistry.mean);
+  // CLUE's own: the seismic Event Number column is a rank() formula
+  registerRankFunction();
 
   const user = UserModel.create();
 
