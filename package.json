@@ -34,6 +34,7 @@
       "/functions-v2/",
       "/authoring-api/",
       "/scripts/ai-harness/",
+      "/scripts/spikerbit-firmware/",
       "/.yalc/"
     ],
     "transform": {
@@ -87,6 +88,8 @@
     "build": "npm-run-all lint:build clean build:version build:webpack",
     "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
+    "build:firmware": "npm --prefix scripts/spikerbit-firmware ci && npm --prefix scripts/spikerbit-firmware run build",
+    "check:firmware": "npm --prefix scripts/spikerbit-firmware ci && npm --prefix scripts/spikerbit-firmware run check",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
     "build:for-deploy": "npm-run-all clean build:webpack",
     "check:types": "tsc --noEmit",
