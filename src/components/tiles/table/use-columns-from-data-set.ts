@@ -91,10 +91,7 @@ export const useColumnsFromDataSet = ({
         sortable: false,
         renderHeaderCell: ColumnHeaderCell,
         renderCell: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
-        // An expression column has never had an editor; `editable: false` says the same of a
-        // column whose values the owning tile derives.
-        renderEditCell: !readOnly && !content.hasExpression(attr.id) && attr.editable
-                          ? CellTextEditor : undefined,
+        renderEditCell: !readOnly && !content.hasExpression(attr.id) ? CellTextEditor : undefined,
       };
     });
     cols.unshift({

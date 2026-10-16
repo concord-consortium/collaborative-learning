@@ -20,10 +20,6 @@ export const Attribute = types.model("Attribute", {
   sourceID: types.maybe(types.string),
   name: types.string,
   hidden: false,
-  // False for a value the tile that owns the data derives rather than the user types, such as a
-  // seismic event's number. The table offers no editor for one, because anything typed into it
-  // would be discarded the next time the value is recomputed.
-  editable: true,
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
   values: types.array(ValueType),
@@ -200,9 +196,9 @@ export const Attribute = types.model("Attribute", {
   setPrecision(precision?: number) {
     self.precision = precision;
   },
-  setEditable(editable: boolean) {
-    self.editable = editable;
-  },
+  // setEditable(editable: boolean) {
+  //   self.editable = editable;
+  // },
   clearFormula() {
     // In CODAP the attribute formula is set to undefined when the formula is cleared
     // In CLUE the formula has been left around with undefined properties. With the use of

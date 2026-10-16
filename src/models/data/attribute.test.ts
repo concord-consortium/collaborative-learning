@@ -26,19 +26,6 @@ expect.addSnapshotSerializer({
 });
 
 describe("DataSet Attributes", () => {
-
-  it("is editable unless told otherwise", () => {
-    expect(Attribute.create({ name: "a" }).editable).toBe(true);
-  });
-
-  // Set on an attribute whose values the owning tile derives, so the table offers no cell editor
-  // for something the next recomputation would overwrite.
-  it("can be marked as not editable", () => {
-    const attr = Attribute.create({ name: "a", editable: false });
-    expect(attr.editable).toBe(false);
-    attr.setEditable(true);
-    expect(attr.editable).toBe(true);
-  });
   test("Basic attribute functionality", () => {
     const attribute = Attribute.create({ name: "foo" } as any);
     expect(attribute.id).toBeDefined();

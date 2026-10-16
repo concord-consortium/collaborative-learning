@@ -1,7 +1,6 @@
 import { DateTime } from "luxon";
 import stringify from "json-stringify-pretty-compact";
-import { reaction } from "mobx";
-import { addDisposer, cast, flow, getSnapshot, isAlive, types, Instance } from "mobx-state-tree";
+import { cast, flow, getSnapshot, isAlive, types, Instance } from "mobx-state-tree";
 import { EnvironmentName } from "@concord-consortium/token-service";
 import { eventDocId } from "../../../../shared/seismic/models/event-database";
 import { fetchModelMetadata, ModelListEntry } from "../../../../shared/seismic/models/model-metadata";
@@ -15,7 +14,7 @@ import { processEnvelopeCoverage } from "../../../models/stores/seismic/seismic-
 import { getUncoveredRanges, loadEvents } from "../../../models/stores/seismic/seismic-event-service";
 import { ModelMetadata, SeismicEvent } from "../../../../shared/seismic/models/seismic-model-types";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
-import { kEventNumberAttrName, renumberEvents } from "../../shared-seismogram/event-numbering";
+import { addEventNumberColumn } from "../../shared-seismogram/event-number-column";
 import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -235,34 +234,8 @@ export const WaveRunnerContentModel = TileContentModel
     }),
   }))
   .actions(self => ({
-    afterAttach() {
-      // A linked table can add, delete and edit events too, and the Timeline re-derives its
-      // numbering from `windowStart` the moment it does. Without this the stored numbers would
-      // stay as the last run left them, so deleting an early event would show 1, 3, 4 in the
-      // table against Event 1, 2, 3 on the graph.
-      addDisposer(self, reaction(
-        () => {
-          const dataSet = self.eventsDataSet?.dataSet;
-          if (!dataSet) return undefined;
-          // Everything the numbering depends on: which cases exist, their order in time, and
-          // whether the Timeline will draw them at all. `eventNumber` is deliberately not read
-          // here, so the renumber below cannot retrigger this.
-          return dataSet.cases.map(aCase => ["windowStart", "windowEnd", "eventType"]
-            .map(name => {
-              const attr = dataSet.attrFromName(name);
-              return attr ? dataSet.getStrValue(aCase.__id__, attr.id) : "";
-            }).join("|")).join(",");
-        },
-        () => {
-          const dataSet = self.eventsDataSet?.dataSet;
-          // Only keeps existing numbers in step; it never adds the attribute. Backfilling a
-          // document recorded before this feature stays the Wave Runner's job on its next run,
-          // so merely opening one never writes to it.
-          if (dataSet?.attrFromName(kEventNumberAttrName)) renumberEvents(dataSet);
-        }
-      ));
-    },
-    /** Moves the events the run has detected into the shared dataset, numbered in time order. */
+    /** The one place events enter the shared dataset: a run's detections, and the column that
+     *  numbers them. */
     recordDetectedEvents() {
       const dataSet = self.getOrCreateEventsDataSet()?.dataSet;
       if (dataSet) {
@@ -275,9 +248,9 @@ export const WaveRunnerContentModel = TileContentModel
           confidence: evt.confidence,
           modelLabel,
         })));
-        // The numbers describe time order across every event recorded so far, so they are
-        // rewritten once the day's events have arrived rather than assigned on the way in.
-        renumberEvents(dataSet);
+        // Adding it is all the Wave Runner ever does about the numbers: the formula keeps them in
+        // step afterwards, including when a linked table it knows nothing about edits the events.
+        addEventNumberColumn(dataSet);
       }
       self.detectedEvents = [];
     },
