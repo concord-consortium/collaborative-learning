@@ -1,6 +1,6 @@
 .vscode/*.json linguist-language=JSON-with-Comments
 
-# The firmware build embeds these files byte for byte, so keep LF on every platform.
+# The firmware checks compare these byte for byte, so keep LF on every platform.
 src/plugins/dataflow/firmware/spikerbit-clue.ts text eol=lf
 src/plugins/dataflow/firmware/spikerbit-clue.hex text eol=lf
 scripts/spikerbit-firmware/project/pxt.json text eol=lf
