@@ -44,8 +44,8 @@ Two checks keep them in sync:
 - **Jest** (`spikerbit-firmware-consistency.test.ts`) checks the version numbers, and checks
   that the source embedded in the hex equals `spikerbit-clue.ts`.
 - **The `CI Firmware` workflow** runs on every pull request that changes this directory or the
-  build tooling. Like `npm run check:firmware`, it rebuilds the hex and fails if it differs
-  from the committed one.
+  build tooling, and on master when a merge changes them. Like `npm run check:firmware`, it
+  rebuilds the hex and fails if it differs from the committed one.
 
 Behavior changes still need a bench test on real hardware; the checks only prove the hex
 was built from the source.
