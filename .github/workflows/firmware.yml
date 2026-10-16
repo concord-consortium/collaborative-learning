@@ -3,8 +3,11 @@ name: CI Firmware
 # differs from the committed spikerbit-clue.hex, i.e. when spikerbit-clue.ts changed but the
 # hex wasn't rebuilt. See src/plugins/dataflow/firmware/README.md.
 
+# pull_request, not push: its path filter compares the whole PR with its base branch, so every
+# new head of a PR that touches the firmware gets the check. A push filter only looks at what
+# that one push changed, so a later unrelated push would leave the PR's head without it.
 on:
-  push:
+  pull_request:
     paths:
       - 'src/plugins/dataflow/firmware/**'
       - 'scripts/spikerbit-firmware/**'
