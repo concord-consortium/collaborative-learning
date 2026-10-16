@@ -33,9 +33,9 @@ the same source always produces the same hex.
 1. Edit `spikerbit-clue.ts`.
 2. If behavior changed, bump `VERSION` there and `kSpikerbitFirmwareVersion` in
    `src/models/stores/spikerbit-device.ts`.
-3. Run `npm run build:firmware`. It installs the toolchain (about 550 MB, kept in
-   `scripts/spikerbit-firmware/node_modules`), compiles, and overwrites
-   `spikerbit-clue.hex`. A compile error is printed and leaves the hex untouched.
+3. Run `npm run build:firmware`. It reinstalls the pinned toolchain into
+   `scripts/spikerbit-firmware/node_modules` (about 550 MB) with `npm ci`, compiles, and
+   overwrites `spikerbit-clue.hex`. A compile error is printed and leaves the hex untouched.
 4. Commit the source and the hex together. Any edit to the source changes the hex, even a
    comment, because the hex embeds the source.
 
@@ -55,8 +55,8 @@ was built from the source.
 Importing `spikerbit-clue.hex` into <https://makecode.microbit.org> opens its embedded source.
 That's handy for trying changes with the simulator or the device console, but copy the
 result back into `spikerbit-clue.ts` and rebuild with `npm run build:firmware`. Don't commit a
-hex exported from the website: the editor there may be a newer MakeCode than the pinned one,
-and the checks will fail.
+hex exported from the website: the website adds files to the embedded project (and may run a
+newer MakeCode), so the CI check fails.
 
 ### Upgrading MakeCode
 
