@@ -33,3 +33,8 @@ jobs:
       - name: Rebuild and compare
         working-directory: ./scripts/spikerbit-firmware
         run: npm run check
+      - name: Check that a stale hex fails
+        working-directory: ./scripts/spikerbit-firmware
+        run: |
+          echo "// stale" >> ../../src/plugins/dataflow/firmware/spikerbit-clue.ts
+          if npm run check; then echo "check passed with a stale source" >&2; exit 1; fi
