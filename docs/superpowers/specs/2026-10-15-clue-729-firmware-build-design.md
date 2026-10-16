@@ -143,6 +143,11 @@ which §6 confirmed.
   looks at what one push changed, so a later push that didn't touch the firmware would leave
   the head without the check, and an earlier failure would drop off the pull request.
   Changes to the bench-test programs also trigger it, which is harmless.
+- **Also `push` to `master`,** with the same paths. Two pull requests can each pass and still
+  leave a stale hex once both are merged, for example one that rebuilt the hex from new
+  source while the other bumped the toolchain pins. A run on master after the merge catches
+  that. A long-running branch with its own pull request into master is covered by that pull
+  request's runs: each merge into the branch moves its head and runs the check again.
 - **Steps:** checkout; `actions/setup-node` with Node 20 (the version `ci.yml` uses) and npm
   caching keyed on `scripts/spikerbit-firmware/package-lock.json`; `npm ci` and
   `npm run check` in `scripts/spikerbit-firmware`. A last step appends a line to the source
