@@ -23,7 +23,13 @@ function sortKey(value: unknown): number | undefined {
   return date.isValid ? date.toMillis() : undefined;
 }
 
-const asArray = (value: unknown) => Array.isArray(value) ? value : [value];
+/**
+ * An argument as one value per case. An argument that names no attribute -- a constant filter such
+ * as `rank(v, true)` -- evaluates to a single value rather than a column, and has to apply to every
+ * case rather than only the first.
+ */
+const asColumn = (value: unknown, caseCount: number) =>
+  Array.isArray(value) ? value : new Array(caseCount).fill(value);
 
 /**
  * rank(expression, filterExpression)
@@ -45,8 +51,9 @@ const rankFunction: IFormulaMathjsFunction = {
     const cacheKey = `rank(${args.toString()})-${scope.getCaseAggregateGroupId()}`;
     let ranks = scope.getCached<Map<number, number>>(cacheKey);
     if (!ranks) {
-      const values = asArray(evaluateNode(valueArg, scope));
-      const filters = filterArg ? asArray(evaluateNode(filterArg, scope)) : undefined;
+      const caseCount = scope.getNumberOfCases();
+      const values = asColumn(evaluateNode(valueArg, scope), caseCount);
+      const filters = filterArg ? asColumn(evaluateNode(filterArg, scope), caseCount) : undefined;
       const ordered = values
         .map((value, index) => ({ index, key: sortKey(value) }))
         .filter(({ index, key }) => key != null && (!filters || isValueTruthy(filters[index])))

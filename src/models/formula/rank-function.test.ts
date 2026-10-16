@@ -47,6 +47,12 @@ describe("rank", () => {
     ])).toEqual(["1", "", "2"]);
   });
 
+  // A filter naming no attribute evaluates to one value rather than a column. Paired off by
+  // position it would reach only the first case, leaving the rest unranked.
+  it("applies a constant filter to every case, not just the first", () => {
+    expect(ranks("rank(v, true)", [{ v: 30 }, { v: 10 }, { v: 20 }])).toEqual(["3", "1", "2"]);
+  });
+
   it("gives no rank to an empty or unparseable value, and does not spend a rank on it", () => {
     expect(ranks("rank(v)", [{ v: 10 }, { v: "" }, { v: "not a time" }, { v: 30 }]))
       .toEqual(["1", "", "", "2"]);
