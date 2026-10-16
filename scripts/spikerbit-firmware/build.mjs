@@ -15,31 +15,20 @@ const sourcePath = path.join(firmwareDir, "spikerbit-clue.ts");
 const hexPath = path.join(firmwareDir, "spikerbit-clue.hex");
 const pxtRunner = path.join(toolDir, "pxt.cjs");
 
-// A hex embeds every file in its MakeCode project, so the build recreates the project a
-// website export contains: these two files are what the website puts in a new project
-// alongside main.ts and pxt.json. Matching it means the hex still opens in the MakeCode
-// editor as a normal project.
-const kMainBlocks = '<xml xmlns="https://developers.google.com/blockly/xml"><variables></variables>'
-  + '<block type="pxt-on-start" x="20" y="20"></block>'
-  + '<block type="device_forever" x="225" y="20"></block></xml>';
-const kReadme = "";
-
-function runPxt(projectDir, command) {
-  const result = spawnSync(process.execPath, [pxtRunner, command], { cwd: projectDir, stdio: "inherit" });
-  if (result.status !== 0) {
-    throw new Error(`pxt ${command} failed (${result.status ?? result.signal})`);
-  }
-}
-
 function buildHex() {
   const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "spikerbit-firmware-"));
   try {
+    // A hex embeds every file in its MakeCode project, so the project is just main.ts and
+    // pxt.json; importing the hex into the MakeCode editor opens main.ts in JavaScript.
     fs.copyFileSync(path.join(toolDir, "project/pxt.json"), path.join(projectDir, "pxt.json"));
     fs.copyFileSync(sourcePath, path.join(projectDir, "main.ts"));
-    fs.writeFileSync(path.join(projectDir, "main.blocks"), kMainBlocks);
-    fs.writeFileSync(path.join(projectDir, "README.md"), kReadme);
-    runPxt(projectDir, "install");
-    runPxt(projectDir, "build");
+    // pxt runs in its own process: it works on the current directory, and on a failed build
+    // it exits the process itself.
+    const result = spawnSync(process.execPath, [pxtRunner, "build", "--install"],
+      { cwd: projectDir, stdio: "inherit" });
+    if (result.status !== 0) {
+      throw new Error(`pxt build failed (${result.status ?? result.signal})`);
+    }
     // binary.hex is the universal (V1+V2) hex; mbdal-/mbcodal-binary.hex are the per-board halves.
     return fs.readFileSync(path.join(projectDir, "built/binary.hex"));
   } finally {

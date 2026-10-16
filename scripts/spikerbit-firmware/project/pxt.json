@@ -7,9 +7,7 @@
         "microphone": "*"
     },
     "files": [
-        "main.blocks",
-        "main.ts",
-        "README.md"
+        "main.ts"
     ],
     "targetVersions": {
         "branch": "stable9.0",
