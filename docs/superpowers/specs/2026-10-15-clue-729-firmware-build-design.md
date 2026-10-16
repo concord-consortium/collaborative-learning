@@ -81,26 +81,30 @@ A self-contained package, like `firebase-test/` and `scripts/ai-harness/`. It ha
 toolchain.
 
 - **`package.json`** pins `pxt-core` and `pxt-microbit` to exact versions (no `^`/`~`).
-- **`pxt.json`** is the project template: name `spikerbit-clue`, dependencies `core`,
-  `radio`, `microphone`, files `main.blocks`, `main.ts`, `README.md`, `preferredEditor`
-  `tsprj`, and the `targetVersions` block that matches the pinned packages. A future firmware
-  that needs an extension adds it here.
+- **`project/pxt.json`** is the project template: name `spikerbit-clue`, dependencies
+  `core`, `radio`, `microphone`, files `main.ts` only, and `preferredEditor` `tsprj`. It has
+  no `targetVersions` block: pxt fills one in from the pinned target's `built/target.json`. A
+  future firmware that needs an extension adds it here.
+- **`pxt.cjs`** runs the pxt command line against the pinned target by passing its directory
+  to `pxt-core`'s `mainCli`. The usual `pxt` command finds the target by searching up for a
+  `node_modules/pxtcli.json`, which a temporary project doesn't have. pxt runs in its own
+  process because it works on the current directory and exits the process itself when a
+  build fails.
+- **`.puppeteerrc.cjs`** skips the Chrome download that `pxt-core`'s puppeteer dependency
+  would otherwise do on install; the build never starts a browser.
 - **`build.mjs`** does the build:
-  1. Create a temporary directory and write a project shaped like a website export into it:
-     `pxt.json` from the template, `spikerbit-clue.ts` copied as `main.ts`, the stub
-     `main.blocks`, and an empty `README.md`. Matching the website export keeps the output
-     comparable with today's hex, and the hex still opens in the MakeCode editor as a normal
-     project.
-  2. Make the pinned target resolvable from the temporary project (for example by linking its
-     `node_modules` to the tooling package's), then run `pxt build`.
-  3. Take the universal hex from the project's `built/` directory. If `pxt build` writes
-     separate V1 and V2 hexes, not one universal hex, combine them with
-     `@microbit/microbit-universal-hex` (pinned in the tooling package).
-  4. Default mode: copy the result to `src/plugins/dataflow/firmware/spikerbit-clue.hex`.
+  1. Create a temporary directory holding `pxt.json` from the template and
+     `spikerbit-clue.ts` copied as `main.ts`. A website export also has a stub `main.blocks`
+     and an empty `README.md`; the build leaves them out, since the hex embeds every project
+     file and MakeCode doesn't need them. Importing the hex into the MakeCode editor opens the
+     source in JavaScript, without a Blocks toggle.
+  2. Run `pxt build --install` there through `pxt.cjs`, which installs the dependencies and
+     builds in one step. It writes the universal (V1+V2) hex as `built/binary.hex`.
+  3. Default mode: copy the result to `src/plugins/dataflow/firmware/spikerbit-clue.hex`.
      `--check` mode: compare the result with the committed hex and write nothing. On a
      mismatch, exit nonzero with a message telling the developer to run
      `npm run build:firmware` and commit the result.
-  5. Remove the temporary directory.
+  4. Remove the temporary directory.
 
 ### 5.2 Root scripts
 
@@ -122,7 +126,8 @@ Extend `src/models/stores/spikerbit-firmware-consistency.test.ts` with a test th
 3. LZMA-decompresses the payload, skips `headerSize` bytes of project header, parses the file
    map, and asserts its `main.ts` equals the contents of `spikerbit-clue.ts`.
 
-Node has no LZMA decoder, so this adds the pure-JS `lzma` package as a root devDependency.
+Node has no LZMA decoder, so this adds the pure-JS `lzma` package and `@types/lzma` as root
+devDependencies.
 The test runs in the existing `jest` CI job with no toolchain.
 
 Against today's committed hex this test fails (the `NOTE:` comment), which is the drift in §1.
@@ -143,7 +148,10 @@ A new workflow, `.github/workflows/firmware.yml`, following the path-filtered pa
   bench-test programs also trigger it, which is harmless.
 - **Steps:** checkout; `actions/setup-node` with Node 20 (the version `ci.yml` uses) and npm
   caching keyed on `scripts/spikerbit-firmware/package-lock.json`; `npm ci` and
-  `npm run check` in `scripts/spikerbit-firmware`.
+  `npm run check` in `scripts/spikerbit-firmware`. A last step appends a line to the source
+  and expects `npm run check` to fail, so a check that can't fail is caught.
+- **Hardening:** `permissions: contents: read`, `persist-credentials: false` on checkout (the
+  job runs third-party install scripts), and `timeout-minutes: 15`.
 
 This job is added only if the feasibility check finds the build deterministic.
 
@@ -159,8 +167,8 @@ Rewrite "Rebuilding the hex" in `src/plugins/dataflow/firmware/README.md`:
 
 Also cover:
 
-- **Upgrading MakeCode.** Bump `pxt-core`, `pxt-microbit` and the template's
-  `targetVersions` together, rebuild, and bench test on real hardware.
+- **Upgrading MakeCode.** Bump `pxt-core` and `pxt-microbit` together, rebuild, and bench
+  test on real hardware.
 - **Prototyping in the web editor.** Importing `spikerbit-clue.hex` into MakeCode opens its
   embedded source. Copy any changes back into `spikerbit-clue.ts` and rebuild with the script;
   don't commit a hex exported from the website.
@@ -191,9 +199,10 @@ Also cover:
 
 - **Jest:** the new embedded-source test, which fails on the old hex and passes on the
   regenerated one. The existing version tests are unchanged.
-- **CI job:** passes on the branch. To show it can fail, push a commit that edits
+- **CI job:** passes on the branch. To show it can fail, push a throwaway branch that edits
   `spikerbit-clue.ts` without rebuilding, confirm the job fails with the "run
-  `npm run build:firmware`" message, then revert. Mention that run in the PR description.
+  `npm run build:firmware`" message, then delete the branch. Mention that run in the PR
+  description. The job's last step repeats this check on every run.
 - **Build script:** run `npm run build:firmware` and `npm run check:firmware` locally on a
   clean checkout; `check` passes, and `build` leaves `git status` clean.
 - No Cypress tests; nothing in the app changes.
