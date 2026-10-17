@@ -99,7 +99,19 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
     self.setTimerRunning(true);
     self.waitTimerId = setTimeout(self.stopWaitTimer, self.waitDuration * 1000);
   }
-}));
+}))
+.actions(self => {
+  const baseResetRunningState = self.resetRunningState;
+  return {
+    // Stop the timer before the tick entries are cleared so it can't write to a missing entry.
+    resetRunningState() {
+      self.clearWaitTimer();
+      self.setHeldValue(null);
+      self.setGateActive(false);
+      baseResetRunningState();
+    }
+  };
+});
 export interface IControlNodeModel extends Instance<typeof ControlNodeModel> {}
 
 export class ControlNode extends BaseNode<
