@@ -443,7 +443,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const transport = new WebSerialTransport();
     const opened = await transport.open();
     const deviceFamily = transport.deviceFamily;
-    if (!opened || !deviceFamily) return;
+    if (opened !== "opened" || !deviceFamily) return;
     this.stores.serialDevice.setActiveDevice(deviceFamily, transport);
     this.stores.serialDevice.setRaisesWebSerialConnect(transport.raisesWebSerialConnect);
     transport.startReading();

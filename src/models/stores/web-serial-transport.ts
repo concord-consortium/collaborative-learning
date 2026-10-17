@@ -14,6 +14,13 @@ function log(message: string) {
 // of port state.
 const kArduinoUsbProductId = 67;
 
+export type WebSerialOpenResult = "opened" | "canceled" | "failed";
+
+/** The ports this origin already has permission for; empty when Web Serial is unavailable. */
+export async function getGrantedSerialPorts(): Promise<SerialPort[]> {
+  return (await navigator.serial?.getPorts()) ?? [];
+}
+
 export class WebSerialTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: () => void;
@@ -21,6 +28,8 @@ export class WebSerialTransport implements IDeviceTransport {
   deviceFamily: string | undefined;
   private deviceInfo: SerialPortInfo | null = null;
   private port: SerialPort | null = null;
+  // The most recently opened port; unlike `port`, it is kept after close() so it can be reopened.
+  lastPort: SerialPort | null = null;
   private writer: WritableStreamDefaultWriter | undefined;
   private reading = false;
   private readonly READ_TIMEOUT_MS = 2000;
@@ -39,25 +48,27 @@ export class WebSerialTransport implements IDeviceTransport {
     return info.usbProductId === 516 && info.usbVendorId === 3368 ? "microbit" : "arduino";
   }
 
-  // requestPort + open + resolve deviceFamily/deviceInfo. Returns false if the user
-  // cancels the chooser or the port cannot be opened for writing.
-  public async open(): Promise<boolean> {
+  // Opens `port`, or asks the user to choose one when none is given, then resolves
+  // deviceFamily/deviceInfo. Resolves "canceled" if the user dismisses the chooser, and
+  // "failed" for any other error or a port that cannot be opened for writing.
+  public async open(port?: SerialPort): Promise<WebSerialOpenResult> {
     try {
-      this.port = await navigator.serial.requestPort();
+      this.port = port ?? await navigator.serial.requestPort();
+      this.lastPort = this.port;
       this.deviceInfo = await this.port.getInfo();
       this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
     } catch (error) {
       console.error("error requesting port: ", error);
-      return false;
+      return (error as Error | undefined)?.name === "NotFoundError" ? "canceled" : "failed";
     }
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
     if (!this.port.writable) {
       console.error("Port is not writable");
       await this.closePort();
-      return false;
+      return "failed";
     }
     this.writer = this.port.writable.getWriter();
-    return true;
+    return "opened";
   }
 
   public write(line: string){

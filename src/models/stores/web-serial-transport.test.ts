@@ -1,4 +1,4 @@
-import { WebSerialTransport } from "./web-serial-transport";
+import { getGrantedSerialPorts, WebSerialTransport } from "./web-serial-transport";
 
 // Minimal fake SerialPort. `chunks` are delivered by the reader in order, then done.
 function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
@@ -20,7 +20,7 @@ function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
 }
 
 function stubSerial(port: any) {
-  (navigator as any).serial = { requestPort: async () => port, addEventListener: jest.fn() };
+  (navigator as any).serial = { requestPort: jest.fn(async () => port), addEventListener: jest.fn() };
 }
 
 describe("WebSerialTransport", () => {
@@ -29,7 +29,7 @@ describe("WebSerialTransport", () => {
   it("resolves deviceFamily=microbit and raisesWebSerialConnect=false for a micro:bit", async () => {
     stubSerial(fakePort({ usbProductId: 516, usbVendorId: 3368 }));
     const t = new WebSerialTransport();
-    expect(await t.open()).toBe(true);
+    expect(await t.open()).toBe("opened");
     expect(t.deviceFamily).toBe("microbit");
     expect(t.raisesWebSerialConnect).toBe(false);
   });
@@ -37,9 +37,62 @@ describe("WebSerialTransport", () => {
   it("resolves deviceFamily=arduino and raisesWebSerialConnect=true for an authentic Arduino", async () => {
     stubSerial(fakePort({ usbProductId: 67, usbVendorId: 9999 }));
     const t = new WebSerialTransport();
-    expect(await t.open()).toBe(true);
+    expect(await t.open()).toBe("opened");
     expect(t.deviceFamily).toBe("arduino");
     expect(t.raisesWebSerialConnect).toBe(true);
+  });
+
+  it("open returns canceled when the chooser is dismissed", async () => {
+    stubSerial(fakePort({}));
+    (navigator as any).serial.requestPort = jest.fn(async () => { throw new DOMException("", "NotFoundError"); });
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("canceled");
+    expect(t.lastPort).toBeNull();
+  });
+
+  it("open returns failed when the chooser throws any other error", async () => {
+    stubSerial(fakePort({}));
+    (navigator as any).serial.requestPort = jest.fn(async () => { throw new DOMException("", "SecurityError"); });
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("failed");
+  });
+
+  it("open returns failed when the port isn't writable", async () => {
+    const port = fakePort({ usbProductId: 67 });
+    port.writable = null;
+    stubSerial(port);
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("failed");
+  });
+
+  it("open(port) opens the given port without the chooser", async () => {
+    const port = fakePort({ usbProductId: 67 });
+    stubSerial(fakePort({}));
+    const t = new WebSerialTransport();
+    expect(await t.open(port)).toBe("opened");
+    expect((navigator as any).serial.requestPort).not.toHaveBeenCalled();
+    expect(port.open).toHaveBeenCalled();
+    expect(t.deviceFamily).toBe("arduino");
+  });
+
+  it("lastPort survives close", async () => {
+    const port = fakePort({ usbProductId: 67 });
+    stubSerial(port);
+    const t = new WebSerialTransport();
+    await t.open();
+    expect(t.lastPort).toBe(port);
+    await t.close();
+    expect(t.lastPort).toBe(port);
+  });
+
+  it("getGrantedSerialPorts returns the granted ports, or none without Web Serial", async () => {
+    expect(await getGrantedSerialPorts()).toEqual([]);
+    const port = fakePort({});
+    (navigator as any).serial = { getPorts: async () => [port] };
+    expect(await getGrantedSerialPorts()).toEqual([port]);
   });
 
   it("frames and writes when open, and no-ops when the port is closed", async () => {
