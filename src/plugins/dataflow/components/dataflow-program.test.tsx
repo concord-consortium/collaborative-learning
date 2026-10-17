@@ -8,12 +8,11 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { specStores } from "../../../models/stores/spec-stores";
 import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowNodeModel } from "../model/dataflow-program-model";
+import { fsrSensorChannel } from "../model/utilities/channel";
 import { ReteManager } from "../rete/rete-manager";
 import { DataflowProgram } from "./dataflow-program";
 
 import "../dataflow-registration";
-
-jest.mock("../firmware/spikerbit-clue.hex", () => "hex", { virtual: true });
 
 const kDataRate = 50;
 
@@ -160,7 +159,13 @@ describe("DataflowProgram channel source", () => {
     try {
       const { unmount } = renderProgram(content);
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy.mock.calls[0][0]()).toBe(content.channels);
+      // The source reads the tile's channels each time it is called, so it sees later changes.
+      const getChannels = spy.mock.calls[0][0];
+      const initialChannels = content.channels;
+      content.setChannels([fsrSensorChannel]);
+      expect(content.channels).not.toBe(initialChannels);
+      expect(getChannels()).toBe(content.channels);
+      expect(getChannels()).toEqual([fsrSensorChannel]);
       expect(disposer).not.toHaveBeenCalled();
       unmount();
       expect(disposer).toHaveBeenCalledTimes(1);

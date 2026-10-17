@@ -126,8 +126,9 @@ export class ReteManager implements INodeServices {
     this.setupComplete = this.setup();
 
     if (!this.readOnly && !this.playback) {
-      // Reading the node count makes the autorun follow blocks being added and removed; the
-      // blocks' own settings are read inside updateNeedsDevice.
+      // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
+      // block's settings and the connection state. Reading the node count here keeps the
+      // dependency on blocks being added and removed visible at the autorun itself.
       this.needsDeviceDisposer = autorun(() => {
         void this.mstProgram.nodes.size;
         this.updateNeedsDevice();

@@ -5,8 +5,6 @@ import { SerialDevice } from "../../../../models/stores/serial";
 import { DeviceConnection } from "../../model/device-connection";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 
-jest.mock("../../firmware/spikerbit-clue.hex", () => "hex", { virtual: true });
-
 function setup(options: { connected?: boolean } = {}) {
   const serialDevice = new SerialDevice();
   if (options.connected) {

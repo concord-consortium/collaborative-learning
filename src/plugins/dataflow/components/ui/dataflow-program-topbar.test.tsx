@@ -13,8 +13,6 @@ import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 
 import "../../dataflow-registration";
 
-jest.mock("../../firmware/spikerbit-clue.hex", () => "hex", { virtual: true });
-
 function renderTopbar(readOnly: boolean) {
   const stores = specStores();
   return render(

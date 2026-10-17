@@ -37,9 +37,9 @@ interface TopbarProps {
 }
 
 export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(props: TopbarProps) {
-  const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection, programDataRates, dataRate, onRateSelectClick,
-          handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
-          handleChangeIsPlaying, tileContent} = props;
+  const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection,
+          programDataRates, dataRate, onRateSelectClick, handleChangeOfProgramMode,
+          programMode, playBackIndex, isPlaying, handleChangeIsPlaying, tileContent} = props;
   const readOnly = useReadOnlyContext();
 
   return (

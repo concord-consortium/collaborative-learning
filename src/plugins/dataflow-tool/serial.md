@@ -60,7 +60,8 @@ the device by the choice the user connected with (`lastChoice`), not by the dete
 `deviceFamily`.
 
 `DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
-reconnect resolve `"connected"`, `"canceled"` or `"failed"`. A Web Serial board and the
+reconnect resolve `"connected"`, `"canceled"` or `"failed"`. When a device is already
+connected, both disconnect it first. A Web Serial board and the
 Spiker:bit take different flows, and both end by calling
 `SerialDevice.setActiveDevice(deviceFamily, transport)`, which records the active transport,
 wires its inbound callbacks, and marks the store connected. `setActiveDevice` does not take
@@ -93,18 +94,26 @@ usbVendorId === 3368`; anything else is assumed to be an Arduino. We've only see
 Arduinos raise the Web Serial `connect` event. We check for that `usbProductId` (67), and only
 drive the connect-button UI with it when we think we are getting this `connect` event.
 
-**Spiker:bit:** `DeviceConnection` constructs a `SpikerbitDevice` and calls
-`connectAndStream`, which connects over WebUSB, checks and if needed flashes the firmware
-(see [Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing) below),
-then calls `setActiveDevice("spikerbit", transport)`.
+**Spiker:bit:** each Connect disconnects any earlier `SpikerbitDevice` and constructs a new
+one with a new `@microbit/microbit-connection` USB connection, so the browser's chooser
+shows every time. `connectAndStream` connects over WebUSB, checks and if needed flashes the
+firmware (see [Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing)
+below), then calls `setActiveDevice("spikerbit", transport)`. If any step fails after the
+link opens, `connectAndStream` disconnects the library connection before it rethrows, so a
+failed attempt doesn't leave the board open.
 
 **Reconnect.** `reconnect()` repeats the last choice without asking the user to pick again.
 For a Web Serial board it tries, in order: the last port (`WebSerialTransport.lastPort`,
 which survives `close()`); a previously granted port (`getGrantedSerialPorts()`) with the
 same USB vendor and product ids; and finally the browser's chooser. For a Spiker:bit it
-reuses the same `SpikerbitDevice` and runs `connectAndStream` again.
+runs `connectAndStream` again on the known `SpikerbitDevice`, whose library connection
+remembers the board and reopens it without the chooser. If that fails, for example because
+the board was unplugged and plugged back in, it disconnects that device and falls back to a
+new one, which shows the chooser. CLUE doesn't call the library's `initialize()`, so it
+doesn't watch for the board being unplugged.
 
-**Disconnect** closes the transport and clears the active device.
+**Disconnect** closes the transport and clears the active device. For a Spiker:bit, closing
+the transport disconnects the library connection; the device is kept for Reconnect.
 
 **Per-tile actions.** The menu calls the tile actions in `device-actions.ts`, which wrap
 `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE` events with the operations
@@ -213,8 +222,8 @@ Walkthrough:
   handler to decide whether to flash; EMG parsing begins once the transport becomes the
   active device.
 - **Into the node:** both paths mutate the same `NodeChannelInfo` objects (the tile's
-  `channels`, found through the registered channel sources). Each tick the Rete manager samples them and the `Sensor node`'s `data()`
-  reads `getChannels().find(...).value`.
+  `channels`, found through the registered channel sources). Each tick the Rete manager
+  samples them and the `Sensor node`'s `data()` reads `getChannels().find(...).value`.
 
 > **micro:bit vs. Spiker:bit.** Both are physically micro:bits, but they connect
 > differently. A **radio-hub micro:bit** connects over **Web Serial** (same transport as
@@ -298,15 +307,16 @@ Walkthrough:
 
 Beyond the active transport, `SerialDevice` keeps bookkeeping the UI reads to reflect
 connection state: `connectChangeStamp`/`lastConnectMessage` (the last time and reason the
-status changed, updated via `updateConnectionInfo`), `serialModalShown` (so the connect
+status changed, updated via `updateConnectionInfo`), and `serialModalShown` (so the connect
 modal isn't shown repeatedly). `isConnected()` is observable, so the menu re-renders as the
 connection changes.
 
 Whether a program needs a device is per tile. Each DataFlow tile's `content.needsDevice` is a
 volatile value that its `ReteManager` keeps current as the student edits
 (`updateNeedsDevice`, using `programNeedsDevice` in
-`src/plugins/dataflow/utilities/program-needs-device.ts`). The app-wide alert
-(`postSerialModal`, gated by `serialModalShown`) still shows, driven by this value.
+`src/plugins/dataflow/utilities/program-needs-device.ts`). When a tile's program needs a
+device and none is connected, `updateNeedsDevice` shows the app-wide alert
+(`postSerialModal`), at most once per page load because `serialModalShown` gates it.
 
 The browser's own `navigator.serial` `connect`/`disconnect` events are wired once at store
 creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping
