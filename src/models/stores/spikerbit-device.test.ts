@@ -32,7 +32,7 @@ describe("SpikerbitDevice", () => {
     conn.respondVersion = kSpikerbitFirmwareVersion;
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream([], "HEX");
+    await device.connectAndStream("HEX");
 
     expect(conn.flashed).toBe(false);
     expect(serialDevice.isConnected()).toBe(true);
@@ -44,7 +44,7 @@ describe("SpikerbitDevice", () => {
     conn.respondVersion = null; // never answers "?"
     const device = new SpikerbitDevice(serialDevice, conn, { versionQueryTimeoutMs: 50 });
 
-    await device.connectAndStream([], "HEX");
+    await device.connectAndStream("HEX");
 
     expect(conn.flashed).toBe(true);
   });
@@ -55,7 +55,7 @@ describe("SpikerbitDevice", () => {
     conn.respondVersion = kSpikerbitFirmwareVersion - 1; // older firmware still running
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream([], "HEX");
+    await device.connectAndStream("HEX");
 
     expect(conn.flashed).toBe(true);
   });
@@ -66,7 +66,7 @@ describe("SpikerbitDevice", () => {
     conn.respondVersion = kSpikerbitFirmwareVersion;
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream([], "HEX");
+    await device.connectAndStream("HEX");
     serialDevice.writeLine("90");
 
     expect(conn.written).toContain("90\n");
@@ -79,7 +79,8 @@ describe("SpikerbitDevice", () => {
     const channel = { channelId: "emg", value: 0 } as any;
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream([channel], "HEX");
+    serialDevice.registerChannelSource(() => [channel]);
+    await device.connectAndStream("HEX");
     // Data arriving after setActiveDevice flows transport.onData -> receive ->
     // parseKeyValueData (spikerbit maps to the keyValue protocol).
     conn.emitSerial("emg:57\r\n");
@@ -93,7 +94,7 @@ describe("SpikerbitDevice", () => {
     conn.respondVersion = kSpikerbitFirmwareVersion;
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream([], "HEX");
+    await device.connectAndStream("HEX");
     conn.statusListeners.forEach(l => l({ status: "Disconnected" }));
 
     expect(serialDevice.isConnected()).toBe(false);

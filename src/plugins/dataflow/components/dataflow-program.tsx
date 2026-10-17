@@ -444,8 +444,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const opened = await transport.open();
     const deviceFamily = transport.deviceFamily;
     if (!opened || !deviceFamily) return;
-    this.stores.serialDevice.setActiveDevice(
-      deviceFamily, transport, this.props.tileContent.channels);
+    this.stores.serialDevice.setActiveDevice(deviceFamily, transport);
     this.stores.serialDevice.setRaisesWebSerialConnect(transport.raisesWebSerialConnect);
     transport.startReading();
   };
@@ -456,7 +455,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const connection = createSpikerbitConnection();
       this.spikerbitDevice = new SpikerbitDevice(this.stores.serialDevice, connection);
       await this.spikerbitDevice.connectAndStream(
-        this.props.tileContent.channels,
         makeSpikerbitFlashDataSource(spikerbitHex)
       );
     } catch (e) {

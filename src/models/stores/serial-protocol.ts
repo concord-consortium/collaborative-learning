@@ -16,13 +16,12 @@ export function parseKeyValueData(buffer: string, channels: NodeChannelInfo[]): 
     if (match) {
       const [fullMatch, channel, numStr] = match;
       buffer = buffer.substring(match.index + fullMatch.length);
-      const targetChannel = channels.find((c: NodeChannelInfo) => c.channelId === channel);
-      if (targetChannel) {
+      channels.filter((c: NodeChannelInfo) => c.channelId === channel).forEach(targetChannel => {
         targetChannel.value = Math.round(Number(numStr));
         // Stamp arrival time so the rete-manager freshness check can flip a channel to
         // `missing` when its device stops sending it (e.g. a Spiker:bit never emits fsr/a1).
         targetChannel.lastMessageReceivedAt = Date.now();
-      }
+      });
     } else {
       const lineEndIndex = buffer.indexOf("\r\n");
       if (lineEndIndex !== -1) {

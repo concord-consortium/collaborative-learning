@@ -1,4 +1,3 @@
-import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 import { SerialDevice } from "./serial";
 import { detectSpikerbitVersion } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
@@ -58,7 +57,6 @@ export class SpikerbitDevice {
   private serialDevice: SerialDevice;
   private connection: IMicrobitUsbConnection;
   private transport: MicrobitUsbTransport;
-  private channels: NodeChannelInfo[] = [];
   private buffer = "";
   private detectedVersion: number | null = null;
   private versionQueryTimeoutMs: number;
@@ -71,11 +69,9 @@ export class SpikerbitDevice {
   }
 
   public async connectAndStream(
-    channels: NodeChannelInfo[],
     flashDataSource: unknown,
     progress?: (stage: string, pct?: number) => void
   ){
-    this.channels = channels;
     // During connect, inbound data feeds only version detection. EMG parsing begins once
     // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
     this.transport.onData = this.handleVersionData;
@@ -106,7 +102,7 @@ export class SpikerbitDevice {
     // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
     // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
     // the connect-time version handler.
-    this.serialDevice.setActiveDevice("spikerbit", this.transport, this.channels);
+    this.serialDevice.setActiveDevice("spikerbit", this.transport);
   }
 
   // Connect-time only: scan inbound data for the firmware version reply, surfaced via

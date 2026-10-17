@@ -17,6 +17,17 @@ describe("parseKeyValueData", () => {
     expect(remaining).toBe("");
   });
 
+  it("updates every channel with the matching id", () => {
+    const a = emgChannel();
+    const b = emgChannel();
+    const before = Date.now();
+    parseKeyValueData("emg:42\r\n", [a, b]);
+    expect(a.value).toBe(42);
+    expect(b.value).toBe(42);
+    expect(a.lastMessageReceivedAt).toBeGreaterThanOrEqual(before);
+    expect(b.lastMessageReceivedAt).toBeGreaterThanOrEqual(before);
+  });
+
   it("keeps an incomplete trailing line in the returned buffer", () => {
     const channels = [emgChannel()];
     const remaining = parseKeyValueData("emg:512\r\nemg:2", channels);
