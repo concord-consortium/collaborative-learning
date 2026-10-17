@@ -6,7 +6,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { onPatch, onSnapshot } from "mobx-state-tree";
-import { observable, reaction, runInAction } from "mobx";
+import { autorun, observable, reaction, runInAction, untracked } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -14,6 +14,7 @@ import {
   DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { programNeedsDevice } from "../utilities/program-needs-device";
 import { MarqueeSelection, Rect } from "../utilities/marquee-selection";
 import { accumulateOnModifier, ISelectionAccumulator } from "../utilities/selection-accumulator";
 import { NodeEditorMST } from "../nodes/node-editor-mst";
@@ -105,6 +106,7 @@ export class ReteManager implements INodeServices {
   public disposed = false;
   public setupComplete: Promise<void>;
   private previousChannelIds = "";
+  private needsDeviceDisposer: (() => void) | undefined;
   private fitTimeout: number | undefined;
   private visibilityReapplyPending = false;
 
@@ -122,6 +124,15 @@ export class ReteManager implements INodeServices {
     this.updateMainProcessor();
 
     this.setupComplete = this.setup();
+
+    if (!this.readOnly && !this.playback) {
+      // Reading the node count makes the autorun follow blocks being added and removed; the
+      // blocks' own settings are read inside updateNeedsDevice.
+      this.needsDeviceDisposer = autorun(() => {
+        void this.mstProgram.nodes.size;
+        this.updateNeedsDevice();
+      });
+    }
   }
 
   async setup() {
@@ -395,15 +406,16 @@ export class ReteManager implements INodeServices {
       });
 
       // Reprocess when connections are changed
-      // And also count the serial nodes some of which only get counted if they are
-      // connected
+      // And also recheck whether the program needs a device, since some blocks only need one
+      // once they are connected
       editor.addPipe((context) => {
-        if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
+        if (["nodecreated", "noderemoved", "connectioncreated", "connectionremoved"]
+          .includes(context.type)) {
           // FIXME: Any changes to the state caused by these events should be combined
           // into the history entry with the actual node removal, connection creation or removal
           // In the meantime we wrap this in an action so it only creates one more history entry
           this.processAfterProgramChange();
-          this.countSerialDataNodes();
+          this.updateNeedsDevice();
         }
         return context;
       });
@@ -1311,27 +1323,23 @@ export class ReteManager implements INodeServices {
     ];
   }
 
-  public countSerialDataNodes(){
-    // Hack the type for now
-    const nodes = this.editor.getNodes() as IBaseNode[];
+  /**
+   * Records on the tile whether its program needs a connected device, and posts the connection
+   * alert when it does and none is connected. Called inside an autorun, so it tracks each block's
+   * settings and the connection state. Setting the volatile and posting the alert are untracked
+   * so they can't re-trigger the autorun.
+   */
+  public updateNeedsDevice() {
+    if (this.readOnly || this.playback) return;
 
-    // implementing with a "count" of 1 or 0 in case we need to count nodes in future
-    let serialNodesCt = 0;
-    nodes.forEach((n) => {
-      if ((n instanceof LiveOutputNode || n instanceof SensorNode) && n.requiresSerial()){
-        serialNodesCt++;
+    const needsDevice = programNeedsDevice(this.editor.getNodes());
+    const connected = this.stores.serialDevice.isConnected();
+    untracked(() => {
+      this.mstContent.setNeedsDevice(needsDevice);
+      if (needsDevice && !connected) {
+        this.postSerialModal();
       }
     });
-    // constraining all counts to 1 or 0 for now
-    if (serialNodesCt > 0){
-      this.stores.serialDevice.setSerialNodesCount(1);
-    } else {
-      this.stores.serialDevice.setSerialNodesCount(0);
-    }
-
-    if (serialNodesCt > 0 && !this.stores.serialDevice.isConnected()){
-      this.postSerialModal();
-    }
   }
 
   private postSerialModal(){
@@ -1343,14 +1351,13 @@ export class ReteManager implements INodeServices {
       Click the ⚡️ button on the upper left, then select your device in the popup.
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
-    if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
+    if (lastMsg !== "connect"){
       alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
     }
 
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
         && !this.stores.serialDevice.isConnected()
-        && this.stores.serialDevice.serialNodesCount > 0
     ){
       alertMessage += btnMsg;
     }
@@ -1376,7 +1383,7 @@ export class ReteManager implements INodeServices {
       this.previousChannelIds = channelIds;
       this.mstContent.setChannels(channels);
 
-      this.countSerialDataNodes();
+      this.updateNeedsDevice();
     }
 
     // NOTE: these channels are observable, so changes to their missing or connected
@@ -1414,6 +1421,7 @@ export class ReteManager implements INodeServices {
     this.collapsedConnectionsDisposer?.();
     this.marquee?.destroy();
     this.arrowPanDisposer?.();
+    this.needsDeviceDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;

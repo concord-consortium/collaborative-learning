@@ -1,4 +1,5 @@
 import React from "react";
+import { observer } from "mobx-react";
 import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { SerialDevice } from "../../../../models/stores/serial";
@@ -31,7 +32,7 @@ interface TopbarProps {
   tileContent: DataflowContentModelType;
 }
 
-export const DataflowProgramTopbar = (props: TopbarProps) => {
+export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(props: TopbarProps) {
   const { onConnectDevice, serialDevice, programDataRates, dataRate, onRateSelectClick,
           handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
           handleChangeIsPlaying, tileContent} = props;
@@ -42,6 +43,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <DataflowSerialConnectButton
           onConnectDevice={onConnectDevice}
           serialDevice={serialDevice}
+          needsDevice={tileContent.needsDevice}
         />
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
@@ -75,7 +77,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </div>
     </div>
   );
-};
+});
 
 /* ==[ Record Data Button ] == */
 enum Mode { //button text

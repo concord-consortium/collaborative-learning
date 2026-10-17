@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import classNames from "classnames";
+import { observer } from "mobx-react";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
@@ -9,10 +10,13 @@ import "./dataflow-program-topbar.scss";
 interface SerialConnectProps {
   onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
   serialDevice: SerialDevice;
+  needsDevice: boolean;
 }
 
-export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
-  const { onConnectDevice, serialDevice } = props;
+export const DataflowSerialConnectButton = observer(function DataflowSerialConnectButton(
+  props: SerialConnectProps
+) {
+  const { onConnectDevice, serialDevice, needsDevice } = props;
   const readOnly = useReadOnlyContext();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -23,18 +27,18 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     "icon-serial",
     { "physical-connection": lastMsg === "connect"},
     { "no-physical-connection": lastMsg === "disconnect" && raisesWebSerialConnect},
-    serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
+    needsDevice ? "nodes-in-need" : "no-serial-needed",
     serialDevice.isConnected() ? "connected" : "not-connected"
   );
   function serialMessage(){
     // nodes that use serial, but no device physically connected
-    if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
+    if (lastMsg !== "connect" && needsDevice){
       return raisesWebSerialConnect ? "connect a device" : "";
     }
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
         && !serialDevice.isConnected()
-        && serialDevice.serialNodesCount > 0
+        && needsDevice
     ){
       return "click to finish connecting";
     }
@@ -70,4 +74,4 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
       </div>
     </div>
   );
-};
+});

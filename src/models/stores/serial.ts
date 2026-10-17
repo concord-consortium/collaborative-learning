@@ -14,7 +14,6 @@ export class SerialDevice {
   localBuffer: string;
   connectChangeStamp: number | null;
   lastConnectMessage: string | null;
-  serialNodesCount: number;
   serialModalShown: boolean | null;
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
@@ -47,10 +46,6 @@ export class SerialDevice {
 
   private get allChannels(): NodeChannelInfo[] {
     return Array.from(this.channelSources).flatMap(getChannels => getChannels());
-  }
-
-  public setSerialNodesCount(n: number){
-    this.serialNodesCount = n;
   }
 
   // TODO, revise this so it is more clear how its used

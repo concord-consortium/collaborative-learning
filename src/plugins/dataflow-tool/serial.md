@@ -259,8 +259,8 @@ Walkthrough:
 Beyond the active transport, `SerialDevice` keeps bookkeeping the UI reads to reflect
 connection state: `connectChangeStamp`/`lastConnectMessage` (the last time and reason the
 status changed, updated via `updateConnectionInfo`), `serialModalShown` (so the connect
-modal isn't shown repeatedly), and `serialNodesCount` (how many nodes currently need a
-serial connection).
+modal isn't shown repeatedly). Whether a program needs a device is per tile: each DataFlow
+tile's `content.needsDevice` is kept current by its `ReteManager` (`updateNeedsDevice`).
 
 The browser's own `navigator.serial` `connect`/`disconnect` events are wired once at store
 creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping
