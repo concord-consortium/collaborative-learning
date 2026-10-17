@@ -45,7 +45,9 @@ export class DeviceConnection {
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
   private lastWebSerialTransport: WebSerialTransport | undefined;
-  // Kept for the life of this object so Reconnect reuses the library's known device.
+  // The Spiker:bit from the last Spiker:bit Connect. Its library connection remembers the
+  // board, so Reconnect reopens it without the chooser. Connect replaces it, which shows
+  // the chooser.
   private spikerbitDevice: SpikerbitDevice | undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
@@ -91,7 +93,7 @@ export class DeviceConnection {
     if (!choice) return "canceled";
     return this.attempt(choice, async () => {
       if (this.isConnected) await this.disconnect();
-      return choice === "spikerbit" ? this.connectSpikerbit() : this.reconnectWebSerial();
+      return choice === "spikerbit" ? this.reconnectSpikerbit() : this.reconnectWebSerial();
     });
   }
 
@@ -174,15 +176,44 @@ export class DeviceConnection {
     });
   }
 
+  // A fresh device has a fresh library connection, which shows the chooser.
   private async connectSpikerbit(): Promise<ConnectResult> {
+    await this.disposeSpikerbit();
+    const device = this.deps.createSpikerbitDevice(this.serialDevice);
+    this.spikerbitDevice = device;
+    return this.streamSpikerbit(device);
+  }
+
+  // Reopens the known board without the chooser. If that fails, for example because the
+  // board was unplugged, falls back to a fresh device and the chooser.
+  private async reconnectSpikerbit(): Promise<ConnectResult> {
+    const known = this.spikerbitDevice;
+    if (known) {
+      const result = await this.streamSpikerbit(known);
+      if (result !== "failed") return result;
+    }
+    return this.connectSpikerbit();
+  }
+
+  private async streamSpikerbit(device: SpikerbitDevice): Promise<ConnectResult> {
     try {
-      this.spikerbitDevice ??= this.deps.createSpikerbitDevice(this.serialDevice);
-      await this.spikerbitDevice.connectAndStream(this.deps.getSpikerbitFlashDataSource());
+      await device.connectAndStream(this.deps.getSpikerbitFlashDataSource());
       return "connected";
     } catch (e) {
       if (isNoDeviceSelected(e)) return "canceled";
       console.error("Spiker:bit connection failed", e);
+      await this.disposeSpikerbit();
       return "failed";
+    }
+  }
+
+  private async disposeSpikerbit() {
+    const device = this.spikerbitDevice;
+    this.spikerbitDevice = undefined;
+    try {
+      await device?.disconnect();
+    } catch (e) {
+      console.error("Spiker:bit disconnect failed", e);
     }
   }
 }

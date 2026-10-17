@@ -88,6 +88,33 @@ describe("SpikerbitDevice", () => {
     expect(channel.value).toBe(57);
   });
 
+  it("disconnects the connection when connecting fails after the link opens", async () => {
+    const serialDevice = new SerialDevice();
+    const conn = new FakeConnection();
+    conn.respondVersion = null;
+    conn.flash = jest.fn().mockRejectedValue(new Error("flash failed"));
+    const disconnect = jest.spyOn(conn, "disconnect");
+    const device = new SpikerbitDevice(serialDevice, conn, { versionQueryTimeoutMs: 50 });
+
+    await expect(device.connectAndStream("HEX")).rejects.toThrow("flash failed");
+
+    expect(disconnect).toHaveBeenCalled();
+    expect(serialDevice.isConnected()).toBe(false);
+  });
+
+  it("disconnect closes the connection", async () => {
+    const serialDevice = new SerialDevice();
+    const conn = new FakeConnection();
+    conn.respondVersion = kSpikerbitFirmwareVersion;
+    const disconnect = jest.spyOn(conn, "disconnect");
+    const device = new SpikerbitDevice(serialDevice, conn);
+
+    await device.connectAndStream("HEX");
+    await device.disconnect();
+
+    expect(disconnect).toHaveBeenCalled();
+  });
+
   it("clears the store's transport on disconnect", async () => {
     const serialDevice = new SerialDevice();
     const conn = new FakeConnection();

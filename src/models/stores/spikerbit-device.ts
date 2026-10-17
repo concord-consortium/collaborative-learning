@@ -76,6 +76,34 @@ export class SpikerbitDevice {
     // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
     this.transport.onData = this.handleVersionData;
 
+    try {
+      await this.connectAndCheckFirmware(flashDataSource, progress);
+    } catch (e) {
+      // Close the link so a failed attempt doesn't leave the board open and still feeding
+      // the version handler.
+      await this.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
+      throw e;
+    }
+
+    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
+    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
+    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
+    // the connect-time version handler.
+    this.serialDevice.setActiveDevice("spikerbit", this.transport);
+  }
+
+  // Closes the WebUSB link. The library connection's status event then clears the store's
+  // active device if this transport holds it.
+  public disconnect() {
+    this.transport.onData = undefined;
+    this.buffer = "";
+    return this.connection.disconnect();
+  }
+
+  private async connectAndCheckFirmware(
+    flashDataSource: unknown,
+    progress?: (stage: string, pct?: number) => void
+  ) {
     await this.connection.connect();
 
     const running = await this.queryVersion();
@@ -97,12 +125,6 @@ export class SpikerbitDevice {
         );
       }
     }
-
-    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
-    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
-    // the connect-time version handler.
-    this.serialDevice.setActiveDevice("spikerbit", this.transport);
   }
 
   // Connect-time only: scan inbound data for the firmware version reply, surfaced via

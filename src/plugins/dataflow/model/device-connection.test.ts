@@ -1,9 +1,9 @@
 import { SerialDevice } from "../../../models/stores/serial";
-import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
+import {
+  IMicrobitUsbConnection, kSpikerbitFirmwareVersion, SpikerbitDevice
+} from "../../../models/stores/spikerbit-device";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import { DeviceConnection, getDeviceConnection, IDeviceConnectionDeps } from "./device-connection";
-
-jest.mock("../firmware/spikerbit-clue.hex", () => "hex", { virtual: true });
 
 function makePort(usbVendorId: number, usbProductId: number) {
   return { getInfo: () => ({ usbVendorId, usbProductId }) } as unknown as SerialPort;
@@ -44,9 +44,38 @@ function setup(transports: FakeTransport[], extra: Partial<IDeviceConnectionDeps
 function makeSpikerbit(serialDevice: SerialDevice) {
   const transport = { write: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
   const device = {
-    connectAndStream: jest.fn(async () => { serialDevice.setActiveDevice("spikerbit", transport); })
+    connectAndStream: jest.fn(async () => { serialDevice.setActiveDevice("spikerbit", transport); }),
+    disconnect: jest.fn().mockResolvedValue(undefined)
   };
   return { device, transport };
+}
+
+// A fake @microbit/microbit-connection USB connection for driving a real SpikerbitDevice.
+function makeUsbConnection(options: { failWrite?: boolean } = {}) {
+  const serialListeners: Array<(d: { data: string }) => void> = [];
+  const connection = {
+    addEventListener: jest.fn((type: string, listener: (d: { data: string }) => void) => {
+      if (type === "serialdata") serialListeners.push(listener);
+    }),
+    connect: jest.fn().mockResolvedValue(undefined),
+    flash: jest.fn().mockResolvedValue(undefined),
+    serialWrite: jest.fn(async (data: string) => {
+      if (options.failWrite) throw new Error("write failed");
+      if (data === "?\n") {
+        serialListeners.forEach(l => l({ data: `CLUE-SPIKERBIT v${kSpikerbitFirmwareVersion}\r\n` }));
+      }
+    }),
+    disconnect: jest.fn().mockResolvedValue(undefined)
+  };
+  return connection;
+}
+
+function realSpikerbitDeps(usbConnection: ReturnType<typeof makeUsbConnection>): Partial<IDeviceConnectionDeps> {
+  return {
+    createSpikerbitDevice: (serialDevice) =>
+      new SpikerbitDevice(serialDevice, usbConnection as unknown as IMicrobitUsbConnection),
+    getSpikerbitFlashDataSource: () => "flash-source"
+  };
 }
 
 describe("DeviceConnection", () => {
@@ -106,7 +135,10 @@ describe("DeviceConnection", () => {
 
   it("connect('spikerbit') returns canceled on no-device-selected", async () => {
     const serialDevice = new SerialDevice();
-    const device = { connectAndStream: jest.fn().mockRejectedValue({ code: "no-device-selected" }) };
+    const device = {
+      connectAndStream: jest.fn().mockRejectedValue({ code: "no-device-selected" }),
+      disconnect: jest.fn().mockResolvedValue(undefined)
+    };
     const connection = new DeviceConnection(serialDevice, {
       createSpikerbitDevice: () => device as unknown as SpikerbitDevice
     });
@@ -116,7 +148,10 @@ describe("DeviceConnection", () => {
 
   it("connect('spikerbit') returns failed on any other error", async () => {
     const serialDevice = new SerialDevice();
-    const device = { connectAndStream: jest.fn().mockRejectedValue(new Error("boom")) };
+    const device = {
+      connectAndStream: jest.fn().mockRejectedValue(new Error("boom")),
+      disconnect: jest.fn().mockResolvedValue(undefined)
+    };
     const connection = new DeviceConnection(serialDevice, {
       createSpikerbitDevice: () => device as unknown as SpikerbitDevice
     });
@@ -217,6 +252,68 @@ describe("DeviceConnection", () => {
     expect(await connection.reconnect()).toBe("connected");
     expect(createSpikerbitDevice).toHaveBeenCalledTimes(1);
     expect(device.connectAndStream).toHaveBeenCalledTimes(2);
+  });
+
+  it("connect('spikerbit') after a disconnect uses a fresh device (shows the chooser)", async () => {
+    const serialDevice = new SerialDevice();
+    const first = makeSpikerbit(serialDevice);
+    const second = makeSpikerbit(serialDevice);
+    const createSpikerbitDevice = jest.fn()
+      .mockReturnValueOnce(first.device)
+      .mockReturnValueOnce(second.device);
+    const connection = new DeviceConnection(serialDevice, {
+      createSpikerbitDevice, getSpikerbitFlashDataSource: () => "flash-source"
+    });
+    await connection.connect("spikerbit");
+    await connection.disconnect();
+    expect(await connection.connect("spikerbit")).toBe("connected");
+    expect(createSpikerbitDevice).toHaveBeenCalledTimes(2);
+    expect(first.device.connectAndStream).toHaveBeenCalledTimes(1);
+    expect(first.device.disconnect).toHaveBeenCalled();
+    expect(second.device.connectAndStream).toHaveBeenCalledWith("flash-source");
+    expect(serialDevice.activeTransport).toBe(second.transport);
+  });
+
+  it("reconnect falls back to a fresh Spiker:bit device when the known one fails", async () => {
+    const serialDevice = new SerialDevice();
+    const first = makeSpikerbit(serialDevice);
+    const second = makeSpikerbit(serialDevice);
+    const createSpikerbitDevice = jest.fn()
+      .mockReturnValueOnce(first.device)
+      .mockReturnValueOnce(second.device);
+    const connection = new DeviceConnection(serialDevice, {
+      createSpikerbitDevice, getSpikerbitFlashDataSource: () => "flash-source"
+    });
+    await connection.connect("spikerbit");
+    await connection.disconnect();
+    first.device.connectAndStream.mockRejectedValueOnce(new Error("device unplugged"));
+    expect(await connection.reconnect()).toBe("connected");
+    expect(first.device.connectAndStream).toHaveBeenCalledTimes(2);
+    expect(first.device.disconnect).toHaveBeenCalled();
+    expect(createSpikerbitDevice).toHaveBeenCalledTimes(2);
+    expect(second.device.connectAndStream).toHaveBeenCalledTimes(1);
+    expect(serialDevice.activeTransport).toBe(second.transport);
+  });
+
+  it("a failed Spiker:bit attempt disconnects the library connection", async () => {
+    const serialDevice = new SerialDevice();
+    const usbConnection = makeUsbConnection({ failWrite: true });
+    const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+    expect(await connection.connect("spikerbit")).toBe("failed");
+    expect(usbConnection.connect).toHaveBeenCalled();
+    expect(usbConnection.disconnect).toHaveBeenCalled();
+    expect(serialDevice.isConnected()).toBe(false);
+  });
+
+  it("disconnect closes a Spiker:bit connection", async () => {
+    const serialDevice = new SerialDevice();
+    const usbConnection = makeUsbConnection();
+    const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+    expect(await connection.connect("spikerbit")).toBe("connected");
+    expect(usbConnection.disconnect).not.toHaveBeenCalled();
+    await connection.disconnect();
+    expect(usbConnection.disconnect).toHaveBeenCalled();
+    expect(serialDevice.isConnected()).toBe(false);
   });
 
   it("disconnect closes the transport and clears the active device", async () => {
