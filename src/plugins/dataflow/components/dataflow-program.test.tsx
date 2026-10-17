@@ -4,6 +4,7 @@ import { DndContext } from "@dnd-kit/core";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
+import { SerialDevice } from "../../../models/stores/serial";
 import { specStores } from "../../../models/stores/spec-stores";
 import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowNodeModel } from "../model/dataflow-program-model";
@@ -11,6 +12,8 @@ import { ReteManager } from "../rete/rete-manager";
 import { DataflowProgram } from "./dataflow-program";
 
 import "../dataflow-registration";
+
+jest.mock("../firmware/spikerbit-clue.hex", () => "hex", { virtual: true });
 
 const kDataRate = 50;
 
@@ -57,14 +60,16 @@ function createContent() {
   return content;
 }
 
-function renderProgram(content: DataflowContentModelType) {
+function renderProgram(content: DataflowContentModelType, options: { readOnly?: boolean } = {}) {
   const onActiveReteManagerChanged = jest.fn();
+  const stores = specStores();
   const result = render(
     <ModalProvider>
-      <Provider stores={specStores()}>
+      <Provider stores={stores}>
         <DndContext>
           <DataflowProgram
             tileId="tile1"
+            readOnly={options.readOnly}
             program={content.program}
             programDataRate={kDataRate}
             tileContent={content}
@@ -76,7 +81,7 @@ function renderProgram(content: DataflowContentModelType) {
       </Provider>
     </ModalProvider>
   );
-  return { ...result, onActiveReteManagerChanged };
+  return { ...result, onActiveReteManagerChanged, stores };
 }
 
 // The instance the nth `new ReteManager(...)` returned.
@@ -144,5 +149,27 @@ describe("DataflowProgram rete manager routing (CLUE-573)", () => {
     unmount();
     expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(2);
     expect(lastReportedManager(onActiveReteManagerChanged)).toBeUndefined();
+  });
+});
+
+describe("DataflowProgram channel source", () => {
+  it("registers the tile's channels with the serial device only while mounted and editable", () => {
+    const content = createContent();
+    const disposer = jest.fn();
+    const spy = jest.spyOn(SerialDevice.prototype, "registerChannelSource").mockReturnValue(disposer);
+    try {
+      const { unmount } = renderProgram(content);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]()).toBe(content.channels);
+      expect(disposer).not.toHaveBeenCalled();
+      unmount();
+      expect(disposer).toHaveBeenCalledTimes(1);
+
+      spy.mockClear();
+      renderProgram(createContent(), { readOnly: true });
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

@@ -8,6 +8,7 @@ import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
 import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
 import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
+import { DeviceChoice, DeviceConnection } from "../../model/device-connection";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import { ProgramMode } from "../types/dataflow-tile-types";
@@ -20,10 +21,13 @@ interface TopbarProps {
   programDataRates: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
-  onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
+  onConnectDevice: (choice: DeviceChoice) => void;
+  onReconnectDevice: () => void;
+  onDisconnectDevice: () => void;
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
+  connection: DeviceConnection;
   handleChangeOfProgramMode: () => void;
   programMode: ProgramMode;
   playBackIndex: number;
@@ -33,7 +37,7 @@ interface TopbarProps {
 }
 
 export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(props: TopbarProps) {
-  const { onConnectDevice, serialDevice, programDataRates, dataRate, onRateSelectClick,
+  const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection, programDataRates, dataRate, onRateSelectClick,
           handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
           handleChangeIsPlaying, tileContent} = props;
   const readOnly = useReadOnlyContext();
@@ -42,7 +46,10 @@ export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(pro
     <div className="program-editor-topbar">
         <DataflowSerialConnectButton
           onConnectDevice={onConnectDevice}
+          onReconnectDevice={onReconnectDevice}
+          onDisconnectDevice={onDisconnectDevice}
           serialDevice={serialDevice}
+          connection={connection}
           needsDevice={tileContent.needsDevice}
         />
         <div className="topbar-center-container">

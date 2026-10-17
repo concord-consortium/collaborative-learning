@@ -4,19 +4,23 @@ import { observer } from "mobx-react";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
+import { DeviceChoice, DeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder } from "../../model/device-connection";
 
 import "./dataflow-program-topbar.scss";
 
 interface SerialConnectProps {
-  onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
+  onConnectDevice: (choice: DeviceChoice) => void;
+  onReconnectDevice: () => void;
+  onDisconnectDevice: () => void;
   serialDevice: SerialDevice;
+  connection: DeviceConnection;
   needsDevice: boolean;
 }
 
 export const DataflowSerialConnectButton = observer(function DataflowSerialConnectButton(
   props: SerialConnectProps
 ) {
-  const { onConnectDevice, serialDevice, needsDevice } = props;
+  const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection, needsDevice } = props;
   const readOnly = useReadOnlyContext();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -47,10 +51,11 @@ export const DataflowSerialConnectButton = observer(function DataflowSerialConne
     }
   }
 
-  const chooseDevice = (deviceType: "serial" | "spikerbit") => {
+  const choose = (action: () => void) => {
     setMenuOpen(false);
-    onConnectDevice(deviceType);
+    action();
   };
+  const busy = connection.busyChoice !== undefined;
 
   return (
     <div className="topbar-icon">
@@ -64,9 +69,17 @@ export const DataflowSerialConnectButton = observer(function DataflowSerialConne
       />
       { menuOpen &&
         <div className="serial-device-menu">
-          <button onClick={() => chooseDevice("serial")}>Arduino</button>
-          <button onClick={() => chooseDevice("serial")}>micro:bit (radio hub)</button>
-          <button onClick={() => chooseDevice("spikerbit")}>Spiker:bit</button>
+          { connection.isConnected
+            ? <>
+                <button disabled={busy} onClick={() => choose(onReconnectDevice)}>Reconnect</button>
+                <button disabled={busy} onClick={() => choose(onDisconnectDevice)}>Disconnect</button>
+              </>
+            : kDeviceChoiceOrder.map(choice => (
+                <button key={choice} disabled={busy} onClick={() => choose(() => onConnectDevice(choice))}>
+                  {kDeviceChoiceLabels[choice]}
+                </button>
+              ))
+          }
         </div>
       }
       <div className="serial-message">
