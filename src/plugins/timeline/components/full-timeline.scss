@@ -35,16 +35,11 @@ $full-timeline-overlay-color: $workspace-teal;
     position: absolute;
     top: 0;
 
-    @each $color, $value in (
-      "blue": $blue-full-timeline,
-      "orange": $orange-full-timeline,
-      "red": $red-full-timeline,
-      "yellow": $yellow-full-timeline,
-      "magenta": $magenta-full-timeline,
-      "purple": $purple-full-timeline,
-      "default": $default-full-timeline
-    ) {
-      &.#{$color}-event {
+    // The strip is white, so an event is drawn in the darker `full-timeline` variant rather than
+    // the `select` the graph uses against black.
+    @each $word, $colors in $event-colors {
+      &.#{$word}-event {
+        $value: map-get($colors, full-timeline);
         background-color: rgba($value, 0.45);
         border-color: $value;
       }

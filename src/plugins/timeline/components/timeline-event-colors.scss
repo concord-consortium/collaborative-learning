@@ -1,44 +1,30 @@
-$blue-base: #aad7ff;
-$blue-hover: #84c5ff;
-$blue-select: #42a6ff;
-$blue-transparent: rgba(170, 215, 255, 0.5);
+// The event colors, one entry per color word. Every per-color rule in this plugin iterates this
+// map, and `timeline-event-styles.tsx` holds the same words for TypeScript, paired with their
+// icons; `event-overlay.styles.test.ts` asserts the two lists agree.
+//
+// Do not re-sample these from the spec sheet attached to the story. That file is Display P3
+// converted to sRGB, so every saturated color reads desaturated — blue samples as #5ea4f8 where
+// the design is #42a6ff — while the grays come back exact, which makes the file look trustworthy
+// when it is not. The values here are the designer's own.
+//
+// `base` is the event number button, `hover` and `select` its other two states; `select` is also
+// the icon's fill and the event rectangle's border. `full-timeline` is darker, so an event stands
+// out against the Full Timeline's white strip and the overlay marking the view.
+$event-colors: (
+  "blue":    (base: #aad7ff, hover: #84c5ff, select: #42a6ff, full-timeline: #0274dc),
+  "orange":  (base: #ffd097, hover: #ffba68, select: #ff9617, full-timeline: #b06002),
+  "red":     (base: #ff9494, hover: #ff6565, select: #ff1212, full-timeline: #eb0300),
+  "yellow":  (base: #e8ea95, hover: #dde166, select: #cbd114, full-timeline: #767909),
+  "magenta": (base: #eea3ff, hover: #e67bff, select: #d934ff, full-timeline: #c201ee),
+  "purple":  (base: #cbb1ff, hover: #b48fff, select: #8c53ff, full-timeline: #884cff),
+  "default": (base: #dfdfdf, hover: #d1d1d1, select: #b9b9b9, full-timeline: #747474)
+);
 
-$orange-base: #ffd097;
-$orange-hover: #ffba68;
-$orange-select: #ff9617;
-$orange-transparent: rgba(255, 208, 151, 0.5);
-
-$red-base: #ff9494;
-$red-hover: #ff6565;
-$red-select: #ff1212;
-$red-transparent: rgba(255, 148, 148, 0.5);
-
-$yellow-base: #e8ea95;
-$yellow-hover: #dde166;
-$yellow-select: #cbd114;
-$yellow-transparent: rgba(232, 234, 149, 0.5);
-
-$magenta-base: #eea3ff;
-$magenta-hover: #e67bff;
-$magenta-select: #d934ff;
-$magenta-transparent: rgba(238, 163, 255, 0.5);
-
-$purple-base: #cbb1ff;
-$purple-hover: #b48fff;
-$purple-select: #8c53ff;
-$purple-transparent: rgba(203, 177, 255, 0.5);
-
-$default-base: #dfdfdf;
-$default-hover: #d1d1d1;
-$default-select: #b9b9b9;
-$default-transparent: rgba(223, 223, 223, 0.5);
-
-// The Full Timeline draws events darker than the graph does, so they stand out against its white
-// background and the overlay that marks the view.
-$blue-full-timeline: #0274dc;
-$orange-full-timeline: #b06002;
-$red-full-timeline: #eb0300;
-$yellow-full-timeline: #767909;
-$magenta-full-timeline: #c201ee;
-$purple-full-timeline: #884cff;
-$default-full-timeline: #747474;
+// A mark sits over the black graph, so its fill is its own color at 40%. Derived here rather than
+// written out per word, so a fill cannot name a different word than the border beside it.
+@each $word, $colors in $event-colors {
+  $event-colors: map-merge($event-colors, ($word: map-merge($colors, (
+    fill: rgba(map-get($colors, select), 0.4),
+    hover-fill: rgba(map-get($colors, hover), 0.4)
+  )))) !global;
+}

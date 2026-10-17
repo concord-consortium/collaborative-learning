@@ -136,6 +136,15 @@ describe("TimelineComponent", () => {
 
     afterEach(() => mockedGetSharedModelManager.mockReset());
 
+    it("heads the tile with the station and the run's dates, zero-padded", () => {
+      const { container } = renderWithStores();
+      const lines = container.querySelectorAll(".metadata-display div");
+      // Station, start, end: the three lines the design shows.
+      expect(lines).toHaveLength(3);
+      expect(lines[1]).toHaveTextContent("02/01/2026");
+      expect(lines[2]).toHaveTextContent("02/05/2026");
+    });
+
     it("enables each pan button only while the view can pan that way", () => {
       const timeline = model.content as TimelineContentModelType;
       timeline.setViewRange(dataStart, dataStart.plus({ days: 1 }));
@@ -257,7 +266,7 @@ describe("TimelineComponent", () => {
       expect(elements?.contentElement).toBeUndefined();
     });
 
-    it("Tabs through the title, info button, Prev, Next and thumb, in both directions", () => {
+    it("Tabs through the title, info button, Prev, Next, thumb and the Event Key, both ways", () => {
       provideData({ eventCount: 3, seismogram: true });
       (model.content as TimelineContentModelType).selectEvent(1);
       const { api, elements } = renderInTile();
@@ -266,14 +275,17 @@ describe("TimelineComponent", () => {
       const prev = screen.getByRole("button", { name: "Prev" });
       const next = screen.getByRole("button", { name: "Next" });
       const thumb = screen.getByRole("slider");
+      // provideData gives every event one type, so the Event Key holds a single checkbox, and it
+      // renders after the Full Timeline — making it the last control in the tile's contents.
+      const keyBox = screen.getByRole("checkbox");
       expect(prev).toBeEnabled();
       expect(next).toBeEnabled();
 
       const trap = createFocusTrap(api!);
       act(() => trap.enterTrap());
       expect(document.activeElement).toBe(title);
-      expect(pressTab(5)).toEqual([info, prev, next, thumb, title]);
-      expect(pressTab(5, true)).toEqual([thumb, next, prev, info, title]);
+      expect(pressTab(6)).toEqual([info, prev, next, thumb, keyBox, title]);
+      expect(pressTab(6, true)).toEqual([keyBox, thumb, next, prev, info, title]);
       trap.destroy();
     });
 

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ScrollArrowIcon from "../../../assets/scroll-arrow-small-icon.svg";
 import { useContainerContext } from "../../../components/document/container-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -11,24 +11,49 @@ import { userSelectTile } from "../../../models/stores/ui";
 import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { useTimelineContent } from "../hooks/use-timeline-content";
+import { HiddenEventTypesContext } from "./hidden-event-types-context";
 import { Timeline } from "./timeline";
 import { TimelineInfoButton } from "./timeline-info-button";
 import { TimelineKey } from "./timeline-key";
 import "../timeline-toolbar";
 import "./timeline-tile.scss";
 
-// The controls Tab visits in the tile's contents, in order: Prev, Next and the Full Timeline's
-// scrollbar thumb, less any that are disabled.
+// The controls Tab visits in the tile's contents, in order: Prev, Next, the Full Timeline's
+// scrollbar thumb and the Event Key's checkboxes, less any that are disabled.
 const kContentControls =
-  ".event-row .timeline-button:not(:disabled), .dynamic-scrollbar-thumb:not([aria-disabled])";
+  ".event-row .timeline-button:not(:disabled), .dynamic-scrollbar-thumb:not([aria-disabled]), " +
+  ".timeline-key input[type=\"checkbox\"]:not(:disabled)";
 function getContentControls(container: HTMLElement | null) {
   return container ? Array.from(container.querySelectorAll<HTMLElement>(kContentControls)) : [];
 }
+
+// The design zero-pads; Luxon's locale short date doesn't.
+const kRunDateFormat = "MM/dd/yyyy";
 
 export const TimelineComponent: React.FC<ITileProps> = observer(function TimelineComponent({
   model, readOnly, tileElt, onRegisterTileApi, onUnregisterTileApi
 }) {
   const content = useTimelineContent();
+
+  // A reader's own hidden set, seeded from the document and kept out of it; see
+  // hidden-event-types-context for why it is per pane and why the two are allowed to diverge.
+  const [readerHiddenTypes, setReaderHiddenTypes] = useState<string[]>(() =>
+    Array.from(content.hiddenEventTypes));
+  const toggleHiddenType = useCallback((eventType: string) => {
+    if (readOnly) {
+      setReaderHiddenTypes(hidden => hidden.includes(eventType)
+        ? hidden.filter(t => t !== eventType)
+        : [...hidden, eventType]);
+    } else {
+      content.toggleEventType(eventType);
+    }
+  }, [content, readOnly]);
+  const savedHiddenTypes = Array.from(content.hiddenEventTypes);
+  const hiddenEventTypes = useMemo(
+    () => ({ types: readOnly ? readerHiddenTypes : savedHiddenTypes, toggle: toggleHiddenType }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [readOnly, readerHiddenTypes, savedHiddenTypes.join("\u0000"), toggleHiddenType]);
+
   const timelineContainerRef = useRef<HTMLDivElement>(null);
   const refocusContentRef = useRef(false);
   const { ui } = useStores();
@@ -45,11 +70,12 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
   const handleSelectEvent = (e: React.MouseEvent<HTMLButtonElement>, direction: "prev" | "next") => {
     const hadFocus = e.currentTarget === document.activeElement;
     if (direction === "prev") {
-      content.selectPrevEvent();
+      content.selectPrevEvent(hiddenEventTypes.types);
     } else {
-      content.selectNextEvent();
+      content.selectNextEvent(hiddenEventTypes.types);
     }
-    const staysEnabled = direction === "prev" ? content.canSelectPrev : content.canSelectNext;
+    const staysEnabled = direction === "prev"
+      ? content.canSelectPrev(hiddenEventTypes.types) : content.canSelectNext(hiddenEventTypes.types);
     if (hadFocus && !staysEnabled) refocusContentRef.current = true;
   };
 
@@ -72,6 +98,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
   }, [container, model, readOnly, tileElt, ui]);
 
   return (
+    <HiddenEventTypesContext.Provider value={hiddenEventTypes}>
     <div className="tile-content timeline-tile">
       <BasicEditableTileTitle>
         <TimelineInfoButton />
@@ -79,22 +106,21 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
       <TileToolbar tileType="timeline" readOnly={!!readOnly} tileElement={tileElt} />
       <div className="metadata-display">
         <div>{content.sharedSeismogram?.station?.label ?? ""}</div>
-        <div>{content.modelLabel}</div>
-        <div>{content.dataStartTime?.toUTC().toLocaleString() ?? ""}</div>
-        <div>{content.dataEndTime?.toUTC().toLocaleString() ?? ""}</div>
+        <div>{content.dataStartTime?.toUTC().toFormat(kRunDateFormat) ?? ""}</div>
+        <div>{content.dataEndTime?.toUTC().toFormat(kRunDateFormat) ?? ""}</div>
       </div>
       <div className="timeline-container" ref={timelineContainerRef}>
         <div className="event-row">
           <button
             className="timeline-button prev-button"
-            disabled={!content.canSelectPrev}
+            disabled={!content.canSelectPrev(hiddenEventTypes.types)}
             onClick={e => handleSelectEvent(e, "prev")}
           >
             <ScrollArrowIcon /><span>Prev</span>
           </button>
           <button
             className="timeline-button next-button"
-            disabled={!content.canSelectNext}
+            disabled={!content.canSelectNext(hiddenEventTypes.types)}
             onClick={e => handleSelectEvent(e, "next")}
           >
             <span>Next</span><ScrollArrowIcon style={{ transform: "rotate(180deg)" }} />
@@ -128,6 +154,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
         />
       )}
     </div>
+    </HiddenEventTypesContext.Provider>
   );
 });
 TimelineComponent.displayName = "TimelineComponent";

@@ -58,6 +58,7 @@ on:
           - functional/tile_tests/simulator_tile_spec.js
           - functional/tile_tests/table_tool_spec.js
           - functional/tile_tests/text_tool_spec.js
+          - functional/tile_tests/timeline_event_key_spec.js
           - functional/tile_tests/xy_plot_tool_spec.js
           - functional/standalone_tests/standalone_load_spec.js
           - portal/teacher_chat_spec.js
