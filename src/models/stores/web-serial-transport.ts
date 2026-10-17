@@ -31,6 +31,9 @@ export class WebSerialTransport implements IDeviceTransport {
   // The most recently opened port; unlike `port`, it is kept after close() so it can be reopened.
   lastPort: SerialPort | null = null;
   private writer: WritableStreamDefaultWriter | undefined;
+  // The read loop's current reader. It holds a lock on `port.readable`, which must be
+  // released before the port can be closed.
+  private activeReader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   private reading = false;
   private readonly READ_TIMEOUT_MS = 2000;
 
@@ -81,6 +84,12 @@ export class WebSerialTransport implements IDeviceTransport {
 
   public async close(){
     this.reading = false;
+    const reader = this.activeReader;
+    this.activeReader = undefined;
+    if (reader) {
+      try { await reader.cancel(); } catch (e) { /* reader may already be released */ }
+      try { reader.releaseLock(); } catch (e) { /* lock may already be released */ }
+    }
     await this.closePort();
     this.port = null;
   }
@@ -103,6 +112,7 @@ export class WebSerialTransport implements IDeviceTransport {
       }
 
       const streamReader = this.port.readable!.getReader();
+      this.activeReader = streamReader;
       try {
         while (this.reading && this.port.readable) {
           const { value, done, timedOut } = await this.readWithTimeout(streamReader);
@@ -121,6 +131,7 @@ export class WebSerialTransport implements IDeviceTransport {
         // If it hasn't, we need to release it here so we can get a new reader later.
         // It is idempotent so it is safe to call a second time.
         streamReader.releaseLock();
+        if (this.activeReader === streamReader) this.activeReader = undefined;
       }
     }
     // If we exited the loop without an explicit stop (close()), the connection failed.

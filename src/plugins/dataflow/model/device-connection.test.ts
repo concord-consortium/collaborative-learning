@@ -152,6 +152,32 @@ describe("DeviceConnection", () => {
     expect(connection.connectedLabel).toBe("Arduino");
   });
 
+  it("reconnect while connected closes the current transport before reopening", async () => {
+    const order: string[] = [];
+    const first = makeTransport();
+    const second = makeTransport();
+    first.close.mockImplementation(async () => { order.push("close"); });
+    second.open.mockReset().mockImplementation(async () => { order.push("open"); return "opened"; });
+    const { serialDevice, connection } = setup([first, second]);
+    await connection.connect("arduino");
+    expect(await connection.reconnect()).toBe("connected");
+    expect(order).toEqual(["close", "open"]);
+    expect(serialDevice.activeTransport).toBe(second);
+  });
+
+  it("connect while connected disconnects first", async () => {
+    const order: string[] = [];
+    const first = makeTransport();
+    const second = makeTransport();
+    first.close.mockImplementation(async () => { order.push("close"); });
+    second.open.mockReset().mockImplementation(async () => { order.push("open"); return "opened"; });
+    const { serialDevice, connection } = setup([first, second]);
+    await connection.connect("arduino");
+    expect(await connection.connect("arduino")).toBe("connected");
+    expect(order).toEqual(["close", "open"]);
+    expect(serialDevice.activeTransport).toBe(second);
+  });
+
   it("reconnect falls back to a granted port with the same USB ids", async () => {
     const first = makeTransport(["opened"], { lastPort: makePort(1, 2) });
     const second = makeTransport(["failed"]);

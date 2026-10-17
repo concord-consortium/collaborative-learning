@@ -109,6 +109,44 @@ describe("WebSerialTransport", () => {
     expect(port._writer.write).not.toHaveBeenCalled();
   });
 
+  it("close during an active read releases the reader and closes the port", async () => {
+    let locked = false;
+    let resolveRead: ((r: { done: boolean }) => void) | undefined;
+    const reader = {
+      read: jest.fn(() => new Promise<{ done: boolean }>(resolve => { resolveRead = resolve; })),
+      cancel: jest.fn(async () => { resolveRead?.({ done: true }); }),
+      releaseLock: jest.fn(() => { locked = false; }),
+    };
+    const port = {
+      getInfo: async () => ({ usbProductId: 67 }),
+      open: jest.fn(async () => undefined),
+      // Like a real stream, closing a port whose readable is locked rejects.
+      close: jest.fn(async () => { if (locked) throw new TypeError("locked"); }),
+      writable: { getWriter: () => ({ write: jest.fn(), close: jest.fn(async () => undefined) }) },
+      readable: { getReader: () => { locked = true; return reader; } },
+    } as any;
+    stubSerial(port);
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const t = new WebSerialTransport();
+    await t.open();
+    const onDisconnect = jest.fn();
+    t.onDisconnect = onDisconnect;
+    errorSpy.mockClear();
+    const readingDone = t.startReading();
+    await Promise.resolve();
+
+    await t.close();
+    await readingDone;
+
+    expect(reader.cancel).toHaveBeenCalled();
+    expect(locked).toBe(false);
+    expect(port.close).toHaveBeenCalledTimes(1);
+    expect(errorSpy).not.toHaveBeenCalled();
+    expect(onDisconnect).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
   // NOTE: unlike the other cases, this test doesn't reuse the shared `fakePort`/its
   // "done" reader response. A reader that reports `done` (without a timeout) leaves
   // `port.readable` untouched, so the transport's outer loop just re-acquires a reader
