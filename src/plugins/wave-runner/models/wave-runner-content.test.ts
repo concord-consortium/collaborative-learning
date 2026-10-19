@@ -6,6 +6,7 @@ import "../../../models/shared/shared-data-set-registration";
 import { kSharedDataSetType } from "../../../models/shared/shared-data-set";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
+import { kEventNumberAttrName } from "../../shared-seismogram/event-number-column";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
 import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
@@ -251,6 +252,23 @@ describe("WaveRunnerContent", () => {
     content.addDetectedEvents([{ ...evt, confidence: 0.8 }, { ...evt, eventType: "traffic" }]);
     expect(content.detectedEvents).toHaveLength(2);
     expect(content.detectedEvents.map((e: any) => e.eventType)).toEqual(["earthquake", "traffic"]);
+  });
+
+  // Where the column comes from is the Wave Runner's only part in this. What the numbers are, and
+  // how they keep up with a linked table's edits, belong to the formula and are tested with it.
+  it("gives the events dataset its Event Number column when it records a run", () => {
+    const content = setupTileInDocument();
+    content.addDetectedEvents([
+      { windowStart: Date.UTC(2026, 1, 1, 1), windowEnd: Date.UTC(2026, 1, 1, 2),
+        eventType: "avalanche", confidence: 0.8 }
+    ]);
+
+    content.recordDetectedEvents();
+
+    const dataSet = content.getOrCreateEventsDataSet()!.dataSet;
+    expect(dataSet.attributes[0].name).toBe(kEventNumberAttrName);
+    expect(dataSet.attrFromName(kEventNumberAttrName)!.formula.display)
+      .toBe(`rank(windowStart, windowEnd != "" and eventType != "")`);
   });
 
   it("configures the compact model in the wave-runner settings", () => {
