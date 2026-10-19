@@ -19,7 +19,7 @@ import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibili
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileApi } from "../../../components/tiles/tile-api";
 import { getDeviceConnection } from "../model/device-connection";
-import { DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
+import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "./dataflow-focus-slots";
 
 import "../dataflow-toolbar-registration";
@@ -118,12 +118,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   };
 
-  // Acknowledging the tutorial dismisses it on every tile; the tile is selected so its toolbar,
-  // with the connect button the dialog refers to, is showing.
   private handleDismissConnectTutorial = () => {
-    const { model, readOnly } = this.props;
-    getDeviceConnection(this.stores.serialDevice).dismissConnectTutorial();
-    this.stores.ui.setSelectedTileId(model.id, { readOnly });
+    const { model, readOnly, tileElt } = this.props;
+    acknowledgeConnectTutorial({
+      connection: getDeviceConnection(this.stores.serialDevice), ui: this.stores.ui,
+      tileId: model.id, readOnly, tileElt
+    });
   };
 
   private getFocusSlots() {

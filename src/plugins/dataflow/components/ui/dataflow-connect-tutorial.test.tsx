@@ -4,7 +4,7 @@ import { DataflowContentModel } from "../../model/dataflow-content";
 import { DeviceConnection } from "../../model/device-connection";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { createClueTileStrategy } from "../../../../hooks/create-clue-tile-strategy";
-import { DataflowConnectTutorialGate } from "./dataflow-connect-tutorial";
+import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "../dataflow-focus-slots";
 
 const kTitle = "This program uses a real device";
@@ -153,5 +153,42 @@ describe("DataflowConnectTutorialGate", () => {
       expect(elements.content).toHaveClass("dataflow-program-content");
       expect(firstSlot()).toBe(elements.title);
     });
+  });
+});
+
+describe("acknowledgeConnectTutorial", () => {
+  function setup() {
+    const connection = new DeviceConnection(new SerialDevice());
+    const ui = { setSelectedTileId: jest.fn() };
+    const tileElt = document.createElement("div");
+    tileElt.tabIndex = 0;
+    document.body.appendChild(tileElt);
+    const dialog = document.createElement("div");
+    dialog.className = "dataflow-connect-tutorial-box";
+    const ok = document.createElement("button");
+    dialog.appendChild(ok);
+    tileElt.appendChild(dialog);
+    return { connection, ui, tileElt, ok };
+  }
+
+  afterEach(() => { document.body.innerHTML = ""; });
+
+  it("dismisses through the connection, selects the tile and moves focus from OK to the tile", () => {
+    const { connection, ui, tileElt, ok } = setup();
+    ok.focus();
+    expect(ok).toHaveFocus();
+    acknowledgeConnectTutorial({ connection, ui, tileId: "tile1", readOnly: false, tileElt });
+    expect(connection.connectTutorialDismissed).toBe(true);
+    expect(ui.setSelectedTileId).toHaveBeenCalledWith("tile1", { readOnly: false });
+    expect(tileElt).toHaveFocus();
+  });
+
+  it("leaves focus alone when it was not inside the dialog", () => {
+    const { connection, ui, tileElt } = setup();
+    const other = document.createElement("button");
+    document.body.appendChild(other);
+    other.focus();
+    acknowledgeConnectTutorial({ connection, ui, tileId: "tile1", tileElt });
+    expect(other).toHaveFocus();
   });
 });
