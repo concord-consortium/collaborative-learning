@@ -1,7 +1,9 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { autoUpdate, flip, getOverflowAncestors, offset, shift, useFloating } from "@floating-ui/react";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
+import { useTileToolbarTileElement } from "../../../../components/toolbar/tile-toolbar-context";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
@@ -56,12 +58,51 @@ interface IConnectPaneProps {
 }
 
 const ConnectPane = observer(function ConnectPane({ connection, content, tileId, onClose }: IConnectPaneProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const { busyChoice, isConnected, connectedLabel } = connection;
   const busy = !!busyChoice;
 
+  // The trigger button is the pane's previous sibling in the toolbar; TileToolbarButton doesn't
+  // expose a ref, and the pane has to stay beside the button in the DOM.
+  const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null);
+  // Opens below the trigger and flips above it when there is no room left below. The room that
+  // matters is the visible part of the tile's scroll containers (the document's scroll area). The
+  // toolbar is portaled outside that area, so neither the pane's nor the trigger's own ancestors
+  // include it; the boundary comes from the tile's ancestors instead. The tile itself clips, but
+  // the toolbar sits outside it on purpose, and <body> and <html> are left to the viewport check.
+  const tileElement = useTileToolbarTileElement();
+  const boundary = useMemo(() => {
+    const scrollers = tileElement
+      ? getOverflowAncestors(tileElement).filter((a): a is Element =>
+          a instanceof Element && a !== document.body && a !== document.documentElement)
+      : [];
+    return scrollers.length ? scrollers : "clippingAncestors";
+  }, [tileElement]);
+  const { refs, floatingStyles } = useFloating({
+    open: true,
+    placement: "bottom-start",
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset(1),
+      flip({ fallbackPlacements: ["top-start"], boundary }),
+      shift({ boundary })
+    ],
+    elements: { reference: triggerElement }
+  });
+  const { setFloating } = refs;
+  const setContainer = useCallback((el: HTMLDivElement | null) => {
+    containerRef.current = el;
+    setFloating(el);
+  }, [setFloating]);
+
+  useLayoutEffect(() => {
+    setTriggerElement(containerRef.current?.parentElement?.querySelector<HTMLElement>("button.toolbar-button")
+      ?? null);
+  }, []);
+
   useEffect(() => {
-    containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus();
+    // preventScroll: the first render sits at an unpositioned spot, and focus() would scroll to it.
+    containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
     // Mount-only: re-running on re-render would yank focus back to the first control.
   }, []);
 
@@ -77,7 +118,7 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
     }
     const active = document.activeElement;
     if (holdsFocus.current && (!active || active === document.body)) {
-      containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus();
+      containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
     }
   }, [isConnected]);
 
@@ -112,7 +153,7 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
     : isConnected ? `Connected: ${connectedLabel}` : "Not connected";
 
   return (
-    <div ref={containerRef} className="toolbar-palette dataflow-connect-pane"
+    <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
         role="group" aria-label={kPaneLabel} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading">{kPaneLabel}</div>

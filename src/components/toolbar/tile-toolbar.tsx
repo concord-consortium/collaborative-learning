@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
+import { TileToolbarTileElementContext } from "./tile-toolbar-context";
 import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileApiInterfaceContext, TileModelContext, RegisterToolbarContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
@@ -335,14 +336,16 @@ export const TileToolbar = observer(
             toolbarPlacement,
             { "disabled": !enabled })}
         >
-          <div className="toolbar-row">
-            {renderButtons(firstRow, "row1")}
-          </div>
-          {secondRow.length > 0 && (
+          <TileToolbarTileElementContext.Provider value={tileElement}>
             <div className="toolbar-row">
-              {renderButtons(secondRow, "row2")}
+              {renderButtons(firstRow, "row1")}
             </div>
-          )}
+            {secondRow.length > 0 && (
+              <div className="toolbar-row">
+                {renderButtons(secondRow, "row2")}
+              </div>
+            )}
+          </TileToolbarTileElementContext.Provider>
         </div>
       </FloatingPortal>);
   });
