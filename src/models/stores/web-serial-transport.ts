@@ -9,10 +9,6 @@ function log(message: string) {
   console.log(`[WebSerialTransport] ${message}`);
 }
 
-// Authentic Arduinos report this productId and are the only tested boards that raise the
-// browser `connect` event, which the UI uses to track physical connection independently
-// of port state.
-
 export type WebSerialOpenResult = "opened" | "canceled" | "failed";
 
 /** The ports this origin already has permission for; empty when Web Serial is unavailable. */
