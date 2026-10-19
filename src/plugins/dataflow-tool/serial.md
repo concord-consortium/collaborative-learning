@@ -315,8 +315,9 @@ Whether a program needs a device is per tile. Each DataFlow tile's `content.need
 volatile value that its `ReteManager` keeps current as the student edits
 (`updateNeedsDevice`, using `programNeedsDevice` in
 `src/plugins/dataflow/utilities/program-needs-device.ts`). When a tile's program needs a
-device and none is connected, `updateNeedsDevice` shows the app-wide alert
-(`postSerialModal`), at most once per page load because `serialModalShown` gates it.
+device and none is connected, the app-wide alert (`postSerialModal`) is shown. That is checked
+only once, when the tile's editable program finishes opening, never after an edit or a
+connection change, and it is limited to once per page load because `serialModalShown` gates it.
 
 The browser's own `navigator.serial` `connect`/`disconnect` events are wired once at store
 creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping

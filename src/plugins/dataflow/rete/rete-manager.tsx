@@ -123,7 +123,8 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    this.setupComplete = this.setup();
+    // The needs-a-device alert is checked once, when the editable program has finished opening.
+    this.setupComplete = this.setup().then(() => this.alertIfOpenedWithoutNeededDevice());
 
     if (!this.readOnly && !this.playback) {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
@@ -1325,22 +1326,31 @@ export class ReteManager implements INodeServices {
   }
 
   /**
-   * Records on the tile whether its program needs a connected device, and posts the connection
-   * alert when it does and none is connected. Called inside an autorun, so it tracks each block's
-   * settings and the connection state. Setting the volatile and posting the alert are untracked
-   * so they can't re-trigger the autorun.
+   * Records on the tile whether its program needs a connected device. Called inside an autorun, so
+   * it tracks each block's settings. Setting the volatile is untracked so it can't re-trigger the
+   * autorun. It only records the state; the alert is posted by alertIfOpenedWithoutNeededDevice.
    */
   public updateNeedsDevice() {
     if (this.readOnly || this.playback) return;
 
     const needsDevice = programNeedsDevice(this.editor.getNodes());
-    const connected = this.stores.serialDevice.isConnected();
     untracked(() => {
       this.mstContent.setNeedsDevice(needsDevice);
-      if (needsDevice && !connected) {
-        this.postSerialModal();
-      }
     });
+  }
+
+  /**
+   * Posts the connection alert when an editable program has just opened, needs a device and none
+   * is connected. It runs once, after setup, so a later edit or a connection change never raises
+   * it. The need is computed here rather than read from the tile so it reflects the program as
+   * it opened.
+   */
+  private alertIfOpenedWithoutNeededDevice() {
+    if (this.disposed || this.readOnly || this.playback) return;
+
+    if (programNeedsDevice(this.editor.getNodes()) && !this.stores.serialDevice.isConnected()) {
+      this.postSerialModal();
+    }
   }
 
   private postSerialModal(){
