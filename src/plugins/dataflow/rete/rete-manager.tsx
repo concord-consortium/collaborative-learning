@@ -123,8 +123,8 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    // The needs-a-device alert is checked once, when the editable program has finished opening.
-    this.setupComplete = this.setup().then(() => this.alertIfOpenedWithoutNeededDevice());
+    // Whether the program needs a device is recorded once, when the editable program has finished opening.
+    this.setupComplete = this.setup().then(() => this.recordNeedsDeviceOnOpen());
 
     if (!this.readOnly && !this.playback) {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
@@ -1328,7 +1328,7 @@ export class ReteManager implements INodeServices {
   /**
    * Records on the tile whether its program needs a connected device. Called inside an autorun, so
    * it tracks each block's settings. Setting the volatile is untracked so it can't re-trigger the
-   * autorun. It only records the state; the alert is posted by alertIfOpenedWithoutNeededDevice.
+   * autorun. It only records the state; the on-open state is recorded by recordNeedsDeviceOnOpen.
    */
   public updateNeedsDevice() {
     if (this.readOnly || this.playback) return;
@@ -1340,43 +1340,18 @@ export class ReteManager implements INodeServices {
   }
 
   /**
-   * Posts the connection alert when an editable program has just opened, needs a device and none
-   * is connected. It runs once, after setup, so a later edit or a connection change never raises
-   * it. The need is computed here rather than read from the tile so it reflects the program as
-   * it opened.
+   * Records on the tile whether an editable program needed a device, with none connected, when it
+   * opened, for the tile's connect tutorial dialog. It runs once, after setup, so a later edit or
+   * a connection change never changes it; in particular a disconnect can't bring the dialog back
+   * for a program that opened while a device was connected. The need is computed here rather than
+   * read from the tile so it reflects the program as it opened.
    */
-  private alertIfOpenedWithoutNeededDevice() {
+  private recordNeedsDeviceOnOpen() {
     if (this.disposed || this.readOnly || this.playback) return;
 
-    if (programNeedsDevice(this.editor.getNodes()) && !this.stores.serialDevice.isConnected()) {
-      this.postSerialModal();
-    }
-  }
-
-  private postSerialModal(){
-    const lastMsg = localStorage.getItem("last-connect-message");
-
-    let alertMessage = "";
-
-    const btnMsg = `
-      Click the ⚡️ button on the upper left, then select your device in the popup.
-      Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
-
-    if (lastMsg !== "connect"){
-      alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
-    }
-
-    // physical connection has been made but user action needed
-    if (lastMsg === "connect"
-        && !this.stores.serialDevice.isConnected()
-    ){
-      alertMessage += btnMsg;
-    }
-
-    if (!this.stores.serialDevice.serialModalShown){
-      this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
-      this.stores.serialDevice.serialModalShown = true;
-    }
+    this.mstContent.setShowConnectTutorialOnOpen(
+      programNeedsDevice(this.editor.getNodes()) && !this.stores.serialDevice.isConnected()
+    );
   }
 
   private get simulatedChannels() {

@@ -2,6 +2,7 @@ import { applySnapshot, getSnapshot, SnapshotIn } from "mobx-state-tree";
 import { DataflowContentModel } from "../model/dataflow-content";
 import { DataflowNodeModel } from "../model/dataflow-program-model";
 import { specStores } from "../../../models/stores/spec-stores";
+import { IDeviceTransport } from "../../../models/stores/device-transport";
 import { ReteManager } from "./rete-manager";
 
 function sensorNode(id: string, sensor: string) {
@@ -16,78 +17,105 @@ function numberNode(id: string) {
   });
 }
 
+function fakeTransport(): IDeviceTransport {
+  return { write: jest.fn(), close: jest.fn() };
+}
+
 async function openProgram(
   nodes: Array<ReturnType<typeof sensorNode | typeof numberNode>>,
-  options: { readOnly?: boolean; connected?: boolean } = {}
+  options: { readOnly?: boolean; playback?: boolean; connected?: boolean } = {}
 ) {
   const content = DataflowContentModel.create();
   nodes.forEach(node => content.program.addNode(node));
   const stores = specStores();
-  const alert = jest.spyOn(stores.ui, "alert").mockImplementation(() => undefined);
-  const connected = options.connected ?? false;
-  jest.spyOn(stores.serialDevice, "isConnected").mockImplementation(() => connected);
+  if (options.connected) stores.serialDevice.setActiveDevice("arduino", fakeTransport());
   const manager = new ReteManager(
     content.program, "tile1", document.createElement("div"), content, stores,
-    options.readOnly, false
+    options.readOnly, options.playback ?? false
   );
   await manager.setupComplete;
   // Let anything the manager queued after setup run before the test makes its edits.
   await Promise.resolve();
-  return { alert, content, manager, stores };
+  return { content, manager, stores };
 }
 
-describe("ReteManager needs-a-device alert", () => {
+describe("ReteManager needs-a-device on open", () => {
   const managers: ReteManager[] = [];
   afterEach(() => {
     managers.splice(0).forEach(m => m.dispose());
     jest.restoreAllMocks();
   });
 
-  it("shows the alert when an editable program that needs a device opens with nothing connected", async () => {
-    const { alert, content, manager } = await openProgram([sensorNode("s1", "emg")]);
+  it("flags an editable program that needs a device and opens with nothing connected", async () => {
+    const { content, manager } = await openProgram([sensorNode("s1", "emg")]);
     managers.push(manager);
     expect(content.needsDevice).toBe(true);
-    expect(alert).toHaveBeenCalledTimes(1);
+    expect(content.showConnectTutorialOnOpen).toBe(true);
   });
 
-  it("does not show the alert when an edit later makes the program need a device", async () => {
-    const { alert, content, manager } = await openProgram([numberNode("n1")]);
+  it("does not flag a program that does not need a device", async () => {
+    const { content, manager } = await openProgram([numberNode("n1")]);
+    managers.push(manager);
+    expect(content.showConnectTutorialOnOpen).toBe(false);
+  });
+
+  it("does not flag when an edit later makes the program need a device", async () => {
+    const { content, manager } = await openProgram([numberNode("n1")]);
     managers.push(manager);
     expect(content.needsDevice).toBe(false);
 
     content.program.addNode(sensorNode("s1", "emg"));
     await Promise.resolve();
     expect(content.needsDevice).toBe(true);
-    expect(alert).not.toHaveBeenCalled();
+    expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 
-  it("does not show the alert when a sensor is switched to a hardware one", async () => {
-    const { alert, content, manager } = await openProgram([sensorNode("s1", "temperature")]);
+  it("does not flag when a sensor is switched to a hardware one", async () => {
+    const { content, manager } = await openProgram([sensorNode("s1", "temperature")]);
     managers.push(manager);
     expect(content.needsDevice).toBe(false);
 
     const { data } = content.program.nodes.get("s1")!;
     applySnapshot(data, { ...getSnapshot(data), sensor: "emg" } as SnapshotIn<typeof data>);
     expect(content.needsDevice).toBe(true);
-    expect(alert).not.toHaveBeenCalled();
+    expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 
-  it("does not show the alert after a disconnect", async () => {
-    const { alert, content, manager, stores } = await openProgram(
+  it("does not flag after a real disconnect of a device that was connected at open", async () => {
+    const { content, manager, stores } = await openProgram(
       [sensorNode("s1", "emg")], { connected: true }
     );
     managers.push(manager);
-    expect(alert).not.toHaveBeenCalled();
+    expect(content.showConnectTutorialOnOpen).toBe(false);
 
-    jest.spyOn(stores.serialDevice, "isConnected").mockImplementation(() => false);
-    manager.updateNeedsDevice();
+    stores.serialDevice.clearActiveDevice();
+    await Promise.resolve();
     expect(content.needsDevice).toBe(true);
-    expect(alert).not.toHaveBeenCalled();
+    expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 
-  it("does not show the alert for a read-only program", async () => {
-    const { alert, manager } = await openProgram([sensorNode("s1", "emg")], { readOnly: true });
+  it("does not flag a read-only program", async () => {
+    const { content, manager } = await openProgram([sensorNode("s1", "emg")], { readOnly: true });
     managers.push(manager);
-    expect(alert).not.toHaveBeenCalled();
+    expect(content.showConnectTutorialOnOpen).toBe(false);
+  });
+
+  it("does not flag for the playback manager in Done mode", async () => {
+    const { content, manager } = await openProgram([sensorNode("s1", "emg")], { playback: true });
+    managers.push(manager);
+    expect(content.showConnectTutorialOnOpen).toBe(false);
+  });
+
+  it("does not flag when the manager is disposed before setup finishes", async () => {
+    // Disposing mid-setup makes the manager warn that it was asked to process.
+    jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const content = DataflowContentModel.create();
+    content.program.addNode(sensorNode("s1", "emg"));
+    const manager = new ReteManager(
+      content.program, "tile1", document.createElement("div"), content, specStores(), false, false
+    );
+    manager.dispose();
+    await manager.setupComplete;
+    expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 });

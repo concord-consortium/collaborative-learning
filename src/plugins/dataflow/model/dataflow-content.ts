@@ -123,6 +123,9 @@ export const DataflowContentModel = TileContentModel
     // Whether this tile's program has blocks that only work with a connected device. Kept current
     // by the tile's ReteManager while the tile is editable.
     needsDevice: false,
+    // Whether this tile's program needed a device when it opened. Set once by the editable
+    // tile's ReteManager, never by later edits; the connect tutorial dialog reads it.
+    showConnectTutorialOnOpen: false,
     // Whether the toolbar's connect pane is showing.
     connectPaneOpen: false,
     // The message for this tile's last failed connection attempt, shown in the connect pane.
@@ -364,6 +367,9 @@ export const DataflowContentModel = TileContentModel
     },
     setNeedsDevice(value: boolean) {
       self.needsDevice = value;
+    },
+    setShowConnectTutorialOnOpen(value: boolean) {
+      self.showConnectTutorialOnOpen = value;
     },
     setPanPaletteOpen(open: boolean) {
       self.panPaletteOpen = open;

@@ -41,6 +41,9 @@ export class DeviceConnection {
   lastChoice: DeviceChoice | undefined = undefined;
   // Set while a connect or reconnect attempt is in progress.
   busyChoice: DeviceChoice | undefined = undefined;
+  // True once any tile's "needs a device" tutorial dialog has been acknowledged. In memory only,
+  // so the dialog shows again after a page reload.
+  connectTutorialDismissed = false;
 
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
@@ -79,6 +82,10 @@ export class DeviceConnection {
 
   get connectedLabel(): string | undefined {
     return this.isConnected && this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
+  }
+
+  dismissConnectTutorial() {
+    this.connectTutorialDismissed = true;
   }
 
   async connect(choice: DeviceChoice): Promise<ConnectResult> {

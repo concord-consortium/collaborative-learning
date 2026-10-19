@@ -20,6 +20,8 @@ import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibili
 import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileApi } from "../../../components/tiles/tile-api";
+import { getDeviceConnection } from "../model/device-connection";
+import { DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -117,6 +119,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   };
 
+  // Acknowledging the tutorial dismisses it on every tile; the tile is selected so its toolbar,
+  // with the connect button the dialog refers to, is showing.
+  private handleDismissConnectTutorial = () => {
+    const { model, readOnly } = this.props;
+    getDeviceConnection(this.stores.serialDevice).dismissConnectTutorial();
+    this.stores.ui.setSelectedTileId(model.id, { readOnly });
+  };
+
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -149,6 +159,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
           />
           <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
+        <DataflowConnectTutorialGate
+          content={tileContent}
+          connection={getDeviceConnection(this.stores.serialDevice)}
+          readOnly={readOnly}
+          onDismiss={this.handleDismissConnectTutorial}
+        />
         {!readOnly && (
           <ClueTileAccessibilityBridge
             tileType="dataflow"

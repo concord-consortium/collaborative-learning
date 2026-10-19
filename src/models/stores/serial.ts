@@ -14,7 +14,6 @@ export class SerialDevice {
   localBuffer: string;
   connectChangeStamp: number | null;
   lastConnectMessage: string | null;
-  serialModalShown: boolean | null;
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;

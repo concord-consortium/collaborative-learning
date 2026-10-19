@@ -307,17 +307,17 @@ Walkthrough:
 
 Beyond the active transport, `SerialDevice` keeps bookkeeping the UI reads to reflect
 connection state: `connectChangeStamp`/`lastConnectMessage` (the last time and reason the
-status changed, updated via `updateConnectionInfo`), and `serialModalShown` (so the connect
-modal isn't shown repeatedly). `isConnected()` is observable, so the menu re-renders as the
+status changed, updated via `updateConnectionInfo`). `isConnected()` is observable, so the menu re-renders as the
 connection changes.
 
 Whether a program needs a device is per tile. Each DataFlow tile's `content.needsDevice` is a
 volatile value that its `ReteManager` keeps current as the student edits
 (`updateNeedsDevice`, using `programNeedsDevice` in
 `src/plugins/dataflow/utilities/program-needs-device.ts`). When a tile's program needs a
-device and none is connected, the app-wide alert (`postSerialModal`) is shown. That is checked
-only once, when the tile's editable program finishes opening, never after an edit or a
-connection change, and it is limited to once per page load because `serialModalShown` gates it.
+device and none is connected, a dialog is drawn over that tile only. Whether the program needed
+a device is recorded once, when the tile's editable program finishes opening
+(`showConnectTutorialOnOpen`), never after an edit or a connection change. One OK dismisses the
+dialog on every tile for the rest of the page load (`DeviceConnection.connectTutorialDismissed`).
 
 The browser's own `navigator.serial` `connect`/`disconnect` events are wired once at store
 creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping
