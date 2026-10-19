@@ -476,6 +476,34 @@ describe("Dataflow connect button and pane", () => {
     expect(connect).toHaveBeenCalledWith("spikerbit");
   });
 
+  it("focus stays in the pane when its controls change", () => {
+    const r = openPane();
+    act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
+    fakeConnected(r);
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Reconnect" }));
+    act(() => r.stores.serialDevice.clearActiveDevice());
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Connect Arduino" }));
+  });
+
+  it("focus stays in the pane after activating Disconnect", async () => {
+    const r = openPane();
+    fakeConnected(r);
+    act(() => screen.getByRole("button", { name: "Disconnect" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Connect Arduino" }));
+  });
+
+  it("a device dropping does not pull focus into the pane when focus is elsewhere", () => {
+    const r = openPane();
+    fakeConnected(r);
+    const outside = document.createElement("input");
+    document.body.appendChild(outside);
+    act(() => outside.focus());
+    act(() => r.stores.serialDevice.clearActiveDevice());
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+  });
+
   it("Reconnect and Disconnect call the connection", () => {
     const r = openPane();
     fakeConnected(r);

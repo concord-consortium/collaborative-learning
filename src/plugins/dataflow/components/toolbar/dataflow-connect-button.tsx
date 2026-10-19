@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
@@ -65,6 +65,33 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
     // Mount-only: re-running on re-render would yank focus back to the first control.
   }, []);
 
+  // Swapping between the device list and the connected actions unmounts the focused control, which
+  // drops focus to <body> where the pane's Escape handler can no longer hear it. Track whether the
+  // pane holds focus and, if the swap orphaned it, move it to the pane's first control.
+  const holdsFocus = useRef(false);
+  const firstRender = useRef(true);
+  useLayoutEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const active = document.activeElement;
+    if (holdsFocus.current && (!active || active === document.body)) {
+      containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus();
+    }
+  }, [isConnected]);
+
+  function handleFocus() {
+    holdsFocus.current = true;
+  }
+
+  // A removed element fires no blur with a relatedTarget, so only a move to an element outside the
+  // pane counts as leaving.
+  function handleBlur(e: React.FocusEvent) {
+    const next = e.relatedTarget as Node | null;
+    if (next && !containerRef.current?.contains(next)) holdsFocus.current = false;
+  }
+
   // Capture phase is required for Escape: the toolbar's focus-trap exit is a native capture-phase
   // listener on the toolbar container, and React delegates above it, so only a React capture
   // handler runs first. Closing removes the focused control, so hand focus back to the trigger.
@@ -86,7 +113,8 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
 
   return (
     <div ref={containerRef} className="toolbar-palette dataflow-connect-pane"
-        role="group" aria-label={kPaneLabel} onKeyDownCapture={handleKeyDownCapture}>
+        role="group" aria-label={kPaneLabel} onKeyDownCapture={handleKeyDownCapture}
+        onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading">{kPaneLabel}</div>
       <div className="connect-status" role="status">
         <div className="connect-status-line">{status}</div>
