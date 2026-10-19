@@ -1,8 +1,12 @@
 import React from "react";
 import { render, fireEvent, screen, act, within } from "@testing-library/react";
+import { runInAction } from "mobx";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { SerialDevice } from "../../../../models/stores/serial";
+import { getDeviceConnection } from "../../model/device-connection";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { TileModel } from "../../../../models/tiles/tile-model";
 import { specStores } from "../../../../models/stores/spec-stores";
@@ -35,6 +39,7 @@ function createContentWithOneNode() {
 interface RenderOptions {
   manager?: ManagerStub | null;
   content?: DataflowContentModelType;
+  readOnly?: boolean;
 }
 
 function renderToolbarButton(buttonName: string, opts: RenderOptions = {}) {
@@ -295,4 +300,190 @@ describe("Dataflow pan split button (CLUE-573)", () => {
     expect(document.activeElement).toBe(getTrigger(container));
   });
 
+});
+
+describe("Dataflow connect button and pane", () => {
+  function renderConnect(opts: RenderOptions = {}) {
+    const info = getToolbarButtonInfo("dataflow", "connect");
+    if (!info) throw new Error("connect is not registered");
+    const Component = info.component;
+    const stores = specStores();
+    const content = opts.content ?? DataflowContentModel.create();
+    const model = TileModel.create({ content });
+    const connection = getDeviceConnection(stores.serialDevice);
+    const result = render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <ReadOnlyContext.Provider value={!!opts.readOnly}>
+            <TileModelContext.Provider value={model}>
+              <DataflowReteManagerContext.Provider value={makeManagerStub(content) as ReteManager}>
+                <Component name="connect" />
+              </DataflowReteManagerContext.Provider>
+            </TileModelContext.Provider>
+          </ReadOnlyContext.Provider>
+        </Provider>
+      </ModalProvider>
+    );
+    return { ...result, content, stores, connection, tileId: model.id };
+  }
+
+  function getTrigger(container: HTMLElement) {
+    const trigger = container.querySelector<HTMLButtonElement>("button.toolbar-button.connect");
+    if (!trigger) throw new Error("connect trigger button not found");
+    return trigger;
+  }
+
+  function openPane(opts: RenderOptions = {}) {
+    const r = renderConnect(opts);
+    fireEvent.click(getTrigger(r.container));
+    return r;
+  }
+
+  const fakeTransport = () => ({
+    close: jest.fn(), write: jest.fn(), onData: undefined, onDisconnect: undefined
+  }) as unknown as Parameters<SerialDevice["setActiveDevice"]>[1];
+
+  function fakeConnected(r: ReturnType<typeof renderConnect>) {
+    act(() => {
+      r.stores.serialDevice.setActiveDevice("spikerbit", fakeTransport());
+      runInAction(() => { r.connection.lastChoice = "spikerbit"; });
+    });
+  }
+
+  it("'connect' is registered and opens and closes its pane on click", () => {
+    const { container, content } = renderConnect();
+    expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    fireEvent.click(getTrigger(container));
+    expect(content.connectPaneOpen).toBe(true);
+    expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
+    fireEvent.click(getTrigger(container));
+    expect(content.connectPaneOpen).toBe(false);
+    expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+  });
+
+  it("opening the pane moves focus to the first control", () => {
+    openPane();
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(document.activeElement).toBe(within(group).getAllByRole("button")[0]);
+  });
+
+  it("Escape closes the pane and returns focus to the trigger", () => {
+    const { container, content } = openPane();
+    const group = screen.getByRole("group", { name: "Device connection" });
+    fireEvent.keyDown(within(group).getAllByRole("button")[0], { key: "Escape" });
+    expect(content.connectPaneOpen).toBe(false);
+    expect(document.activeElement).toBe(getTrigger(container));
+  });
+
+  it("pointerdown outside closes the pane; inside it does not", () => {
+    const { content } = openPane();
+    const group = screen.getByRole("group", { name: "Device connection" });
+    fireEvent.pointerDown(within(group).getAllByRole("button")[0]);
+    expect(content.connectPaneOpen).toBe(true);
+    fireEvent.pointerDown(document.body);
+    expect(content.connectPaneOpen).toBe(false);
+  });
+
+  it("unmounting the toolbar closes the pane", () => {
+    const { content, unmount } = openPane();
+    unmount();
+    expect(content.connectPaneOpen).toBe(false);
+  });
+
+  it("not connected: shows Not connected and a Connect control for each device", () => {
+    openPane();
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
+    for (const label of ["Arduino", "micro:bit (radio hub)", "Spiker:bit"]) {
+      expect(within(group).getByRole("button", { name: `Connect ${label}` })).toBeInTheDocument();
+    }
+    expect(within(group).queryByRole("button", { name: "Disconnect" })).toBeNull();
+  });
+
+  it("connected: shows Connected: Spiker:bit with Reconnect and Disconnect and no device list", () => {
+    const r = openPane();
+    fakeConnected(r);
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(within(group).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
+    expect(within(group).getByRole("button", { name: "Reconnect" })).toBeInTheDocument();
+    expect(within(group).getByRole("button", { name: "Disconnect" })).toBeInTheDocument();
+    expect(within(group).queryByRole("button", { name: /^Connect / })).toBeNull();
+    expect(getTrigger(r.container).classList.contains("connect-connected")).toBe(true);
+  });
+
+  it("pane returns to the device list when the device drops", () => {
+    const r = openPane();
+    fakeConnected(r);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
+    expect(within(group).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
+  });
+
+  it("after a failure: shows the message and the device list again", () => {
+    const r = openPane();
+    act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
+    expect(within(group).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(within(group).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
+  });
+
+  it("while connecting: shows Connecting to Spiker:bit… and disables the controls", () => {
+    const r = openPane();
+    act(() => runInAction(() => { r.connection.busyChoice = "spikerbit"; }));
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(within(group).getByRole("status")).toHaveTextContent("Connecting to Spiker:bit…");
+    const controls = within(group).getAllByRole("button");
+    expect(controls.length).toBeGreaterThan(0);
+    controls.forEach(control => expect(isDisabled(control)).toBe(true));
+    const connect = jest.spyOn(r.connection, "connect");
+    fireEvent.click(within(group).getByRole("button", { name: "Connect Arduino" }));
+    fireEvent.keyDown(within(group).getByRole("button", { name: "Connect Arduino" }), { key: "Enter" });
+    expect(connect).not.toHaveBeenCalled();
+  });
+
+  it("the button pulses when the program needs a device", () => {
+    const content = DataflowContentModel.create();
+    content.setNeedsDevice(true);
+    const { container } = renderConnect({ content });
+    const trigger = getTrigger(container);
+    expect(trigger.classList.contains("connect-attention")).toBe(true);
+    expect(trigger.getAttribute("aria-label")).toBe("This program needs a device. Click to connect.");
+  });
+
+  it("opening the pane clears an unseen error's pulse", () => {
+    const content = DataflowContentModel.create();
+    content.setUnseenConnectError(true);
+    const { container } = renderConnect({ content });
+    expect(getTrigger(container).classList.contains("connect-attention")).toBe(true);
+    fireEvent.click(getTrigger(container));
+    expect(content.unseenConnectError).toBe(false);
+    expect(getTrigger(container).classList.contains("connect-attention")).toBe(false);
+  });
+
+  it("the button is disabled when read-only", () => {
+    const { container } = renderConnect({ readOnly: true });
+    expect(isDisabled(getTrigger(container))).toBe(true);
+    fireEvent.click(getTrigger(container));
+    expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+  });
+
+  it("clicking Connect for Spiker:bit calls the connection with \"spikerbit\"", () => {
+    const r = openPane();
+    const connect = jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
+    fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" }));
+    expect(connect).toHaveBeenCalledWith("spikerbit");
+  });
+
+  it("Reconnect and Disconnect call the connection", () => {
+    const r = openPane();
+    fakeConnected(r);
+    const reconnect = jest.spyOn(r.connection, "reconnect").mockResolvedValue("canceled");
+    const disconnect = jest.spyOn(r.connection, "disconnect").mockResolvedValue();
+    fireEvent.keyDown(screen.getByRole("button", { name: "Reconnect" }), { key: " " });
+    expect(reconnect).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
+    expect(disconnect).toHaveBeenCalledTimes(1);
+  });
 });

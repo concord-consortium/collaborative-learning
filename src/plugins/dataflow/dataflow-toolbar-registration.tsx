@@ -6,6 +6,7 @@ import { registerTileToolbarButtons, IToolbarButtonComponentProps }
   from "../../components/toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import { DataflowReteManagerContext } from "./components/dataflow-rete-manager-context";
+import { ConnectDeviceButton } from "./components/toolbar/dataflow-connect-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton, PanButton } from "./components/toolbar/dataflow-zoom-pan-buttons";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
@@ -104,5 +105,9 @@ registerTileToolbarButtons('dataflow',
   {
     name: "pan",
     component: PanButton
+  },
+  {
+    name: "connect",
+    component: ConnectDeviceButton
   }
 ]);
