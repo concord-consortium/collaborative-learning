@@ -373,7 +373,10 @@
           "zoom-in",
           "zoom-out",
           "fit-all",
-          "pan"
+          "pan",
+          "|",
+          "connect",
+          "reset"
         ]
       },
       "diagram": {

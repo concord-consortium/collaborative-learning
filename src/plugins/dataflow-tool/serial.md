@@ -52,12 +52,19 @@ by more than one device (the Arduino and the Spiker:bit both speak `keyValue`).
 
 The connection is app-wide: there is one `DeviceConnection` per `SerialDevice` (from
 `getDeviceConnection`), and it does not live in any tile component. At most one device is
-connected at a time. The top-bar menu of a DataFlow tile lists three device choices while
-nothing is connected: Arduino, micro:bit (radio hub) and Spiker:bit (`kDeviceChoiceLabels`).
-While a device is connected the menu shows Reconnect and Disconnect instead. All of the
-controls are disabled while a connection attempt is in progress (`busyChoice`). The UI names
-the device by the choice the user connected with (`lastChoice`), not by the detected
-`deviceFamily`.
+connected at a time. The `connect` button in a DataFlow tile's toolbar
+(`dataflow-connect-button.tsx`) opens a pane. While nothing is connected the pane lists three
+device choices: Arduino, micro:bit (radio hub) and Spiker:bit (`kDeviceChoiceLabels`). While a
+device is connected it shows Reconnect and Disconnect instead. All of the controls are disabled
+while a connection attempt is in progress (`busyChoice`). The UI names the device by the choice
+the user connected with (`lastChoice`), not by the detected `deviceFamily`.
+
+The pane starts with a status line and an error line. The error line shows the tile's
+`connectError`; the tile's `unseenConnectError` is set when an attempt fails and cleared when the
+pane opens. The button face has three states, chosen by `connectButtonState`
+(`utilities/connect-button-state.ts`), each with its own tooltip: idle, connected, and attention
+(the program needs a device and none is connected, or there is an error the user hasn't seen).
+The toolbar's `reset` button restarts the tile's program through `program.resetRunningState()`.
 
 `DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
 reconnect resolve `"connected"`, `"canceled"` or `"failed"`. When a device is already
@@ -73,8 +80,7 @@ channels; inbound data is matched against registered channel sources (see
 1. `new WebSerialTransport()`, then `transport.open()`:
    `navigator.serial.requestPort()` shows the browser's device chooser; on selection we
    read `getInfo()`, resolve `deviceFamily`, and open the port at 9600 baud.
-2. `setActiveDevice(transport.deviceFamily, transport)` and
-   `setRaisesWebSerialConnect(transport.raisesWebSerialConnect)`.
+2. `setActiveDevice(transport.deviceFamily, transport)`.
 3. `transport.startReading()` starts the inbound read loop.
 
 `WebSerialTransport.close()` cancels and releases the read loop's reader before it closes
@@ -90,9 +96,7 @@ from it.)
 
 **Device identity** is resolved from the USB descriptor in
 `WebSerialTransport.determineDeviceFamily`: a micro:bit reports `usbProductId === 516 &&
-usbVendorId === 3368`; anything else is assumed to be an Arduino. We've only seen authentic
-Arduinos raise the Web Serial `connect` event. We check for that `usbProductId` (67), and only
-drive the connect-button UI with it when we think we are getting this `connect` event.
+usbVendorId === 3368`; anything else is assumed to be an Arduino.
 
 **Spiker:bit:** each Connect disconnects any earlier `SpikerbitDevice` and constructs a new
 one with a new `@microbit/microbit-connection` USB connection, so the browser's chooser
@@ -115,7 +119,7 @@ doesn't watch for the board being unplugged.
 **Disconnect** closes the transport and clears the active device. For a Spiker:bit, closing
 the transport disconnects the library connection; the device is kept for Reconnect.
 
-**Per-tile actions.** The menu calls the tile actions in `device-actions.ts`, which wrap
+**Per-tile actions.** The pane and the `reset` button call the tile actions in `device-actions.ts`, which wrap
 `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE` events with the operations
 `connectDevice`, `reconnectDevice`, `disconnectDevice` and `resetProgram`. A successful
 connect or reconnect resets only the clicking tile's program, through
@@ -305,25 +309,25 @@ Walkthrough:
 
 ## Connection status tracking
 
-Beyond the active transport, `SerialDevice` keeps bookkeeping the UI reads to reflect
-connection state: `connectChangeStamp`/`lastConnectMessage` (the last time and reason the
-status changed, updated via `updateConnectionInfo`). `isConnected()` is observable, so the menu re-renders as the
-connection changes.
+The UI reflects connection state through `SerialDevice.isConnected()`, which is observable, so
+the connect button and pane re-render as the connection changes.
 
 Whether a program needs a device is per tile. Each DataFlow tile's `content.needsDevice` is a
 volatile value that its `ReteManager` keeps current as the student edits
 (`updateNeedsDevice`, using `programNeedsDevice` in
 `src/plugins/dataflow/utilities/program-needs-device.ts`). When a tile's program needs a
-device and none is connected, a dialog is drawn over that tile only. Whether the program needed
-a device is recorded once, when the tile's editable program finishes opening
-(`showConnectTutorialOnOpen`), never after an edit or a connection change. One OK dismisses the
-dialog on every tile for the rest of the page load (`DeviceConnection.connectTutorialDismissed`).
+device and none is connected, a dialog (`DataflowConnectTutorial`, with its gate) is drawn over
+that tile only. When an editable tile's program opens, `ReteManager.recordNeedsDeviceOnOpen()`
+sets the content's volatile `showConnectTutorialOnOpen` if the program needs a device and none
+is connected. It skips managers that are disposed, read-only or playback, and it never runs
+after an edit or a connection change. One OK, or any successful connection, sets
+`DeviceConnection.connectTutorialDismissed`, which dismisses the dialog on every tile for the
+rest of the page load. While the dialog shows, the tile's focus slots shrink to the dialog plus
+the toolbar (`dataflow-focus-slots.ts`).
 
-The browser's own `navigator.serial` `connect`/`disconnect` events are wired once at store
-creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping
-`navigator.serial` out of `SerialDevice`. Authentic Arduinos raise `connect` before the
-user clicks, so this affordance can note a board is present. The `disconnect` handler only
-tears down the store when a `WebSerialTransport` currently owns the connection, so an
+The browser's own `navigator.serial` `disconnect` event is wired once at store creation by
+`initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping `navigator.serial` out of
+`SerialDevice`. The handler only tears down the store when a `WebSerialTransport` currently owns the connection, so an
 unrelated Web Serial disconnect cannot kill a live WebUSB (Spiker:bit) session.
 
 ## Summary

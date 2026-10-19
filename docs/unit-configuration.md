@@ -281,6 +281,9 @@ Common toolbar framework.  Supports:
 - `fit-all`: Zoom and centre the canvas so every block is visible. Disabled when the program is empty.
 - `pan`: Pan the canvas. The button's face repeats the last direction used; its corner triangle opens
   a palette of the four directions.
+- `connect`: Connect, reconnect or disconnect a device. The button shows the connection's state.
+- `reset`: Restart the program's running state: releases holds and clears the mini-graphs.
+  Recorded data is kept.
 
 Defaults:
 
@@ -294,6 +297,9 @@ Defaults:
 - `zoom-out`
 - `fit-all`
 - `pan`
+- `|`
+- `connect`
+- `reset`
 
 Additional Live Output / sampling keys (all optional; each defaults to today's behavior):
 
