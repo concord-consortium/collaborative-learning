@@ -122,7 +122,13 @@ export const DataflowContentModel = TileContentModel
     lastPanDirection: "right" as PanDirection,
     // Whether this tile's program has blocks that only work with a connected device. Kept current
     // by the tile's ReteManager while the tile is editable.
-    needsDevice: false
+    needsDevice: false,
+    // Whether the toolbar's connect pane is showing.
+    connectPaneOpen: false,
+    // The message for this tile's last failed connection attempt, shown in the connect pane.
+    connectError: undefined as string | undefined,
+    // True when a connection failed while the pane was closed; opening the pane clears it.
+    unseenConnectError: false
   }))
   .views(self => ({
     get sharedModel() {
@@ -361,6 +367,16 @@ export const DataflowContentModel = TileContentModel
     },
     setPanPaletteOpen(open: boolean) {
       self.panPaletteOpen = open;
+    },
+    setConnectPaneOpen(open: boolean) {
+      self.connectPaneOpen = open;
+      if (open) self.unseenConnectError = false;
+    },
+    setConnectError(message?: string) {
+      self.connectError = message;
+    },
+    setUnseenConnectError(value: boolean) {
+      self.unseenConnectError = value;
     },
     setLastPanDirection(direction: PanDirection) {
       self.lastPanDirection = direction;

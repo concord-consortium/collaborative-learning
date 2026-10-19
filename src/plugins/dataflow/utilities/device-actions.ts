@@ -35,9 +35,22 @@ export function resetProgramForTile({ content, tileId, trigger }: ITileOptions &
   });
 }
 
+function clearConnectError(content: DataflowContentModelType) {
+  content.setConnectError(undefined);
+  content.setUnseenConnectError(false);
+}
+
+/** A user looking at the pane sees the error there, so only a closed pane leaves it unseen. */
+function recordConnectFailure(content: DataflowContentModelType, label: string | undefined) {
+  content.setConnectError(`Couldn't connect to ${label ?? "the device"}.`);
+  content.setUnseenConnectError(!content.connectPaneOpen);
+}
+
 export async function connectDeviceForTile(o: IConnectionOptions & { choice: DeviceChoice }): Promise<ConnectResult> {
   const { connection, content, tileId, choice } = o;
+  clearConnectError(content);
   const result = await connection.connect(choice);
+  if (result === "failed") recordConnectFailure(content, labelFor(choice));
   if (result === "connected") {
     logDeviceEvent(tileId, "connectDevice", labelFor(choice));
     resetProgramForTile({ content, tileId, trigger: "connect" });
@@ -48,7 +61,9 @@ export async function connectDeviceForTile(o: IConnectionOptions & { choice: Dev
 export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<ConnectResult> {
   const { connection, content, tileId } = o;
   const label = labelFor(connection.lastChoice);
+  clearConnectError(content);
   const result = await connection.reconnect();
+  if (result === "failed") recordConnectFailure(content, label);
   if (result === "connected") {
     logDeviceEvent(tileId, "reconnectDevice", label);
     resetProgramForTile({ content, tileId, trigger: "reconnect" });
@@ -58,8 +73,9 @@ export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<Con
 
 /** Disconnects the app-wide device. The program is not reset. */
 export async function disconnectDeviceForTile(o: IConnectionOptions): Promise<void> {
-  const { connection, tileId } = o;
+  const { connection, content, tileId } = o;
   if (!connection.isConnected) return;
+  clearConnectError(content);
   const label = labelFor(connection.lastChoice);
   await connection.disconnect();
   logDeviceEvent(tileId, "disconnectDevice", label);
