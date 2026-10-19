@@ -181,6 +181,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   return (
     <TileToolbarButton name={name} title={title} colorClass={`connect-${state}`}
         dataTestId="connect-device-button" disabled={readOnly || !content}
+        disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
       <SerialIcon />
     </TileToolbarButton>

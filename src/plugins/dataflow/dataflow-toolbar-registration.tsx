@@ -85,7 +85,8 @@ const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolb
   }
 
   return (
-    <TileToolbarButton name={name} title="Reset program" onClick={handleClick} disabled={disabled}>
+    <TileToolbarButton name={name} title="Reset program" onClick={handleClick} disabled={disabled}
+        disabledMessage="Reset isn't available while a recording is shown or in a read-only view">
       <RefreshIcon />
     </TileToolbarButton>
   );

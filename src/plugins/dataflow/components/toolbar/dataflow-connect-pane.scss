@@ -17,6 +17,11 @@
 
     &.connect-attention {
       animation: connect-slowpulse 1.5s linear infinite;
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        background-color: $star-yellow;
+      }
     }
 
     &.connect-connected,
