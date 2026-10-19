@@ -5,11 +5,15 @@ import { DataSetViewButton } from "../../components/toolbar/data-set-view-button
 import { registerTileToolbarButtons, IToolbarButtonComponentProps }
   from "../../components/toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
+import { TileModelContext } from "../../components/tiles/tile-api";
 import { DataflowReteManagerContext } from "./components/dataflow-rete-manager-context";
+import { DataflowContentModelType } from "./model/dataflow-content";
+import { resetProgramForTile } from "./utilities/device-actions";
 import { ConnectDeviceButton } from "./components/toolbar/dataflow-connect-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton, PanButton } from "./components/toolbar/dataflow-zoom-pan-buttons";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
+import RefreshIcon from "./assets/icons/refresh/refresh.svg";
 import GroupIcon from "../drawing/assets/group-objects-icon.svg";
 import UngroupIcon from "../drawing/assets/ungroup-objects-icon.svg";
 
@@ -66,6 +70,27 @@ const UngroupNodesButton = observer(function UngroupNodesButton({ name }: IToolb
   );
 });
 
+// Restarts the program's running state (holds, mini-graphs); recorded data is kept. Disabled for
+// read-only views and for the playback manager shown in Done mode, which is constructed read-only.
+const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolbarButtonComponentProps) {
+  const reteManager = useContext(DataflowReteManagerContext);
+  const model = useContext(TileModelContext);
+  const disabled = !reteManager || reteManager.readOnly || !model;
+
+  function handleClick() {
+    if (!model) return;
+    resetProgramForTile({
+      content: model.content as DataflowContentModelType, tileId: model.id, trigger: "button"
+    });
+  }
+
+  return (
+    <TileToolbarButton name={name} title="Reset program" onClick={handleClick} disabled={disabled}>
+      <RefreshIcon />
+    </TileToolbarButton>
+  );
+});
+
 registerTileToolbarButtons('dataflow',
 [
   {
@@ -109,5 +134,9 @@ registerTileToolbarButtons('dataflow',
   {
     name: "connect",
     component: ConnectDeviceButton
+  },
+  {
+    name: "reset",
+    component: ResetProgramButton
   }
 ]);

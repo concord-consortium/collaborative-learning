@@ -15,16 +15,20 @@ import { DataflowContentModel, DataflowContentModelType } from "../../model/data
 import { DataflowNodeModel } from "../../model/dataflow-program-model";
 import { DataflowReteManagerContext } from "../dataflow-rete-manager-context";
 import { MIN_ZOOM, MAX_ZOOM, ReteManager } from "../../rete/rete-manager";
+import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
+import { LogEventName } from "../../../../lib/logger-types";
 import "../../dataflow-toolbar-registration";
 import "../../dataflow-registration";
 
+jest.mock("../../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
 // A stub covering just the members the buttons read/call — a real ReteManager needs a live DOM
 // area, so tests substitute this via the context rather than constructing one.
-type ManagerStub = Pick<ReteManager, "mstContent" | "zoomIn" | "zoomOut" | "fitContent" | "pan">;
+type ManagerStub = Pick<ReteManager, "mstContent" | "readOnly" | "zoomIn" | "zoomOut" | "fitContent" | "pan">;
 
 function makeManagerStub(content: DataflowContentModelType): ManagerStub {
   return {
-    mstContent: content,
+    mstContent: content, readOnly: false,
     zoomIn: jest.fn(), zoomOut: jest.fn(), fitContent: jest.fn(), pan: jest.fn()
   };
 }
@@ -513,5 +517,41 @@ describe("Dataflow connect button and pane", () => {
     expect(reconnect).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
     expect(disconnect).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Dataflow reset button", () => {
+  beforeEach(() => (logTileChangeEvent as jest.Mock).mockClear());
+
+  it("'reset' is registered and exposes accessible name 'Reset program'", () => {
+    renderToolbarButton("reset");
+    expect(screen.getByRole("button", { name: "Reset program" })).toBeInTheDocument();
+  });
+
+  it("reset is disabled with no rete manager, and with a read-only (playback) manager", () => {
+    const first = renderToolbarButton("reset", { manager: null });
+    expect(isDisabled(screen.getByRole("button", { name: "Reset program" }))).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Reset program" }));
+    first.unmount();
+
+    const content = DataflowContentModel.create();
+    const readOnlyManager = { ...makeManagerStub(content), readOnly: true };
+    renderToolbarButton("reset", { content, manager: readOnlyManager });
+    expect(isDisabled(screen.getByRole("button", { name: "Reset program" }))).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Reset program" }));
+    expect(logTileChangeEvent).not.toHaveBeenCalled();
+  });
+
+  it("clicking reset resets the tile's program and logs resetProgram", () => {
+    const content = DataflowContentModel.create();
+    const resetSpy = jest.spyOn(content.program, "resetRunningState");
+    renderToolbarButton("reset", { content });
+    const button = screen.getByRole("button", { name: "Reset program" });
+    expect(isDisabled(button)).toBe(false);
+    fireEvent.click(button);
+    expect(resetSpy).toHaveBeenCalledTimes(1);
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.DATAFLOW_TOOL_CHANGE, {
+      tileId: expect.any(String), operation: "resetProgram", change: { targetType: "program", trigger: "button" }
+    });
   });
 });
