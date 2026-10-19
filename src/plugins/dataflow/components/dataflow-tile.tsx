@@ -21,7 +21,7 @@ import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileApi } from "../../../components/tiles/tile-api";
 import { getDeviceConnection } from "../model/device-connection";
-import { DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
+import { DataflowConnectTutorialGate, getConnectTutorialElement } from "./ui/dataflow-connect-tutorial";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -172,6 +172,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             onUnregisterTileApi={this.props.onUnregisterTileApi}
             getTitleElement={() => getEditableTitleElement(this.props.tileElt ?? undefined)}
             getContentElement={() => {
+              // While the connect dialog shows it is the tile's content, so Tab and Enter reach
+              // its OK button rather than the blocks underneath.
+              const dialog = getConnectTutorialElement(this.props.tileElt);
+              if (dialog) return dialog;
               const el = this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content");
               // The focus trap advances past a slot only if it can put focus somewhere inside it,
               // and it treats a slot with no element as "not present" and skips it. An empty

@@ -6,7 +6,10 @@ import { DeviceConnection } from "../../model/device-connection";
 
 import "./dataflow-connect-tutorial.scss";
 
-const kTitleId = "dataflow-connect-tutorial-title";
+/** The dialog box inside a tile element, if one is showing. */
+export function getConnectTutorialElement(tileElt: HTMLElement | null | undefined) {
+  return tileElt?.querySelector<HTMLElement>(".dataflow-connect-tutorial-box") ?? null;
+}
 
 interface IDialogProps {
   onDismiss: () => void;
@@ -17,11 +20,15 @@ interface IDialogProps {
  * It doesn't move focus on mount, because several tiles may show it at once.
  */
 export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ onDismiss }) => {
+  const id = React.useId();
+  const titleId = `${id}-title`;
+  const bodyId = `${id}-body`;
   return (
     <div className="dataflow-connect-tutorial">
-      <div className="dataflow-connect-tutorial-box" role="dialog" aria-labelledby={kTitleId}>
-        <h3 className="dataflow-connect-tutorial-title" id={kTitleId}>This program uses a real device</h3>
-        <p className="dataflow-connect-tutorial-body">
+      <div className="dataflow-connect-tutorial-box" role="dialog"
+        aria-labelledby={titleId} aria-describedby={bodyId}>
+        <h3 className="dataflow-connect-tutorial-title" id={titleId}>This program uses a real device</h3>
+        <p className="dataflow-connect-tutorial-body" id={bodyId}>
           Connect your Arduino, micro:bit or Spiker:bit to the computer. Then click the flashing
           ⚡ button in this tile&apos;s toolbar and choose your device.
         </p>

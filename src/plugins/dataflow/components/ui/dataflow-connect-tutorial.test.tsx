@@ -3,7 +3,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DataflowContentModel } from "../../model/dataflow-content";
 import { DeviceConnection } from "../../model/device-connection";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { DataflowConnectTutorialGate } from "./dataflow-connect-tutorial";
+import { createClueTileStrategy } from "../../../../hooks/create-clue-tile-strategy";
+import { DataflowConnectTutorialGate, getConnectTutorialElement } from "./dataflow-connect-tutorial";
 
 const kTitle = "This program uses a real device";
 
@@ -76,11 +77,40 @@ describe("DataflowConnectTutorialGate", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("does not come back after a disconnect when the flag was never set", () => {
+  it("does not come back after a disconnect of a device connected while it was showing", () => {
     const serialDevice = new SerialDevice();
-    connectedDevice(serialDevice);
-    renderTile(DataflowContentModel.create(), new DeviceConnection(serialDevice));
+    const connection = new DeviceConnection(serialDevice);
+    renderTile(openedContent(), connection);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    act(() => { connectedDevice(serialDevice); });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     act(() => { serialDevice.clearActiveDevice(); });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("gives each open dialog its own title id", () => {
+    const connection = new DeviceConnection(new SerialDevice());
+    render(
+      <>
+        <DataflowConnectTutorialGate content={openedContent()} connection={connection} onDismiss={jest.fn()} />
+        <DataflowConnectTutorialGate content={openedContent()} connection={connection} onDismiss={jest.fn()} />
+      </>
+    );
+    const [a, b] = screen.getAllByRole("dialog");
+    expect(a.getAttribute("aria-labelledby")).not.toBe(b.getAttribute("aria-labelledby"));
+    expect(a).toHaveAccessibleDescription(/Connect your Arduino/);
+  });
+
+  it("is the tile's content slot while showing, so keyboard focus reaches OK", () => {
+    const connection = new DeviceConnection(new SerialDevice());
+    const { container } = renderTile(openedContent(), connection);
+    const strategy = createClueTileStrategy({
+      onRegisterTileApi: jest.fn(), onUnregisterTileApi: jest.fn(), tileType: "dataflow",
+      getContentElement: () => getConnectTutorialElement(container) ?? undefined
+    });
+    const content = strategy.getElements().content!;
+    expect(content).toContainElement(screen.getByRole("button", { name: "OK" }));
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(getConnectTutorialElement(container)).toBeNull();
   });
 });

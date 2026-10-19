@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
@@ -74,6 +74,11 @@ export class DeviceConnection {
         disconnect: false
       }
     );
+    // A connection made any way, from any tile, ends the tutorial, so a later disconnect can't
+    // bring it back.
+    reaction(() => this.isConnected, connected => {
+      if (connected) this.dismissConnectTutorial();
+    }, { fireImmediately: true });
   }
 
   get isConnected() {
