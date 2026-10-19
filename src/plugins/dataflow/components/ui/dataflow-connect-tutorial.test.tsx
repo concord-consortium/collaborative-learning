@@ -4,7 +4,8 @@ import { DataflowContentModel } from "../../model/dataflow-content";
 import { DeviceConnection } from "../../model/device-connection";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { createClueTileStrategy } from "../../../../hooks/create-clue-tile-strategy";
-import { DataflowConnectTutorialGate, getConnectTutorialElement } from "./dataflow-connect-tutorial";
+import { DataflowConnectTutorialGate } from "./dataflow-connect-tutorial";
+import { getDataflowFocusSlots } from "../dataflow-focus-slots";
 
 const kTitle = "This program uses a real device";
 
@@ -101,16 +102,56 @@ describe("DataflowConnectTutorialGate", () => {
     expect(a).toHaveAccessibleDescription(/Connect your Arduino/);
   });
 
-  it("is the tile's content slot while showing, so keyboard focus reaches OK", () => {
-    const connection = new DeviceConnection(new SerialDevice());
-    const { container } = renderTile(openedContent(), connection);
-    const strategy = createClueTileStrategy({
-      onRegisterTileApi: jest.fn(), onUnregisterTileApi: jest.fn(), tileType: "dataflow",
-      getContentElement: () => getConnectTutorialElement(container) ?? undefined
+  describe("keyboard focus slots", () => {
+    function setupTile() {
+      const serialDevice = new SerialDevice();
+      const connection = new DeviceConnection(serialDevice);
+      const { container } = render(
+        <div className="tool-tile">
+          <div className="editable-tile-title"><input aria-label="title" /></div>
+          <div className="program">
+            <div className="program-editor-topbar"><button>Record</button></div>
+            <div className="dataflow-program-content"><button>Block</button></div>
+            <div className="program-toolbar"><button>Add</button></div>
+          </div>
+          <DataflowConnectTutorialGate content={openedContent()} connection={connection}
+            onDismiss={() => connection.dismissConnectTutorial()} />
+        </div>
+      );
+      const tileElt = container.firstElementChild as HTMLElement;
+      const strategy = createClueTileStrategy({
+        onRegisterTileApi: jest.fn(), onUnregisterTileApi: jest.fn(), tileType: "dataflow",
+        getTitleElement: () => getDataflowFocusSlots({ tileElt, programContainerEl: tileElt }).title,
+        getContentElement: () => getDataflowFocusSlots({ tileElt, programContainerEl: tileElt }).content,
+        getTopbarElement: () => getDataflowFocusSlots({ tileElt, programContainerEl: tileElt }).topbar,
+        getPaletteElement: () => getDataflowFocusSlots({ tileElt, programContainerEl: tileElt }).palette
+      });
+      const firstSlot = () => {
+        const elements = strategy.getElements();
+        const name = (strategy.cycleOrder ?? []).find(slot => elements[slot]);
+        return name && elements[name];
+      };
+      return { strategy, firstSlot };
+    }
+
+    it("makes the dialog the first slot and hides the title, topbar and palette while showing", () => {
+      const { strategy, firstSlot } = setupTile();
+      const elements = strategy.getElements();
+      expect(elements.title).toBeUndefined();
+      expect(elements.topbar).toBeUndefined();
+      expect(elements.palette).toBeUndefined();
+      expect(firstSlot()).toContainElement(screen.getByRole("button", { name: "OK" }));
     });
-    const content = strategy.getElements().content!;
-    expect(content).toContainElement(screen.getByRole("button", { name: "OK" }));
-    fireEvent.click(screen.getByRole("button", { name: "OK" }));
-    expect(getConnectTutorialElement(container)).toBeNull();
+
+    it("brings the normal slots back after OK", () => {
+      const { strategy, firstSlot } = setupTile();
+      fireEvent.click(screen.getByRole("button", { name: "OK" }));
+      const elements = strategy.getElements();
+      expect(elements.title).toBeDefined();
+      expect(elements.topbar).toHaveClass("program-editor-topbar");
+      expect(elements.palette).toHaveClass("program-toolbar");
+      expect(elements.content).toHaveClass("dataflow-program-content");
+      expect(firstSlot()).toBe(elements.title);
+    });
   });
 });

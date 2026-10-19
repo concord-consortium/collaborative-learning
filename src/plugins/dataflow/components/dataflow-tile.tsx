@@ -1,7 +1,6 @@
 import React from "react";
 import { observer, inject } from "mobx-react";
 import classNames from "classnames";
-import { getVisibleFocusables } from "@concord-consortium/accessibility-tools/hooks";
 
 import { DataflowProgram, IDataflowProgramApi } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
@@ -17,11 +16,11 @@ import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { ReteManager } from "../rete/rete-manager";
 import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
 import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
-import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileApi } from "../../../components/tiles/tile-api";
 import { getDeviceConnection } from "../model/device-connection";
-import { DataflowConnectTutorialGate, getConnectTutorialElement } from "./ui/dataflow-connect-tutorial";
+import { DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
+import { getDataflowFocusSlots } from "./dataflow-focus-slots";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -127,6 +126,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.stores.ui.setSelectedTileId(model.id, { readOnly });
   };
 
+  private getFocusSlots() {
+    return getDataflowFocusSlots({
+      tileElt: this.props.tileElt, programContainerEl: this.programContainerEl
+    });
+  }
+
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -170,27 +175,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             tileType="dataflow"
             onRegisterTileApi={this.props.onRegisterTileApi}
             onUnregisterTileApi={this.props.onUnregisterTileApi}
-            getTitleElement={() => getEditableTitleElement(this.props.tileElt ?? undefined)}
-            getContentElement={() => {
-              // While the connect dialog shows it is the tile's content, so Tab and Enter reach
-              // its OK button rather than the blocks underneath.
-              const dialog = getConnectTutorialElement(this.props.tileElt);
-              if (dialog) return dialog;
-              const el = this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content");
-              // The focus trap advances past a slot only if it can put focus somewhere inside it,
-              // and it treats a slot with no element as "not present" and skips it. An empty
-              // program has no focusable blocks — and since zoom moved to the toolbar, nothing
-              // else — so reporting the element here would swallow Tab instead of moving on.
-              // Deliberately the accessibility-tools helper rather than the similar one in
-              // utilities/dom-utils: this has to agree with what the trap itself counts as
-              // focusable, or the slot can be reported as non-empty and swallow Tab anyway.
-              return el && getVisibleFocusables(el).length > 0 ? el : undefined;
-            }}
-            getTopbarElement={() =>
-              this.programContainerEl?.querySelector<HTMLElement>(".program-editor-topbar")
-              ?? undefined}
-            getPaletteElement={() =>
-              this.programContainerEl?.querySelector<HTMLElement>(".program-toolbar") ?? undefined}
+            getTitleElement={() => this.getFocusSlots().title}
+            getContentElement={() => this.getFocusSlots().content}
+            getTopbarElement={() => this.getFocusSlots().topbar}
+            getPaletteElement={() => this.getFocusSlots().palette}
             additionalApi={this.getAdditionalApi()}
           />
         )}
