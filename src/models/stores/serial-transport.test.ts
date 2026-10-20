@@ -1,6 +1,7 @@
 import { autorun } from "mobx";
 import { SerialDevice } from "./serial";
 import { IDeviceTransport } from "./device-transport";
+import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 
 function fakeTransport(sink: string[]): IDeviceTransport {
   return {
@@ -89,6 +90,18 @@ describe("SerialDevice.receive protocol routing", () => {
     device.receive("emg:7\r\n");
     expect(a.value).toBe(7);
     expect(b.value).toBe(7);
+  });
+
+  it("receive updates the matching radio-hub channel in every registered source", () => {
+    const device = new SerialDevice();
+    const a = { channelId: "t-a", value: 0 } as NodeChannelInfo;
+    const b = { channelId: "t-a", value: 0 } as NodeChannelInfo;
+    device.registerChannelSource(() => [a]);
+    device.registerChannelSource(() => [b]);
+    device.deviceFamily = "microbit";
+    device.receive("sat23.5\r\n");
+    expect(a.value).toBe(23.5);
+    expect(b.value).toBe(23.5);
   });
 
   it("a disposed source stops receiving", () => {

@@ -1,10 +1,12 @@
+// This lives in the DataFlow plugin, not src/models/stores, because it imports the Spiker:bit
+// firmware hex, which has to stay in the DataFlow chunk.
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
 } from "../../../models/stores/spikerbit-connection";
-import { getGrantedSerialPorts, WebSerialTransport } from "../../../models/stores/web-serial-transport";
+import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 
 export type DeviceChoice = "arduino" | "microbitHub" | "spikerbit";
@@ -21,7 +23,6 @@ export type ConnectResult = "connected" | "canceled" | "failed";
 
 export interface IDeviceConnectionDeps {
   createWebSerialTransport(): WebSerialTransport;
-  getGrantedSerialPorts(): Promise<SerialPort[]>;
   createSpikerbitDevice(serialDevice: SerialDevice): SpikerbitDevice;
   getSpikerbitFlashDataSource(): unknown;
 }
@@ -34,10 +35,11 @@ function isNoDeviceSelected(error: unknown) {
 
 /**
  * The one device connection shared by every DataFlow tile. It owns connect, reconnect and
- * disconnect; the tiles only read its state.
+ * disconnect. Tiles start them through the tile device actions in `device-actions.ts`.
  */
 export class DeviceConnection {
-  // The menu choice the user last connected with; it names the device in the UI.
+  // The menu choice the user last connected with. Reconnect repeats it, and the log events name
+  // the device by it.
   lastChoice: DeviceChoice | undefined = undefined;
   // Set while a connect or reconnect attempt is in progress.
   busyChoice: DeviceChoice | undefined = undefined;
@@ -48,16 +50,15 @@ export class DeviceConnection {
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
   private lastWebSerialTransport: WebSerialTransport | undefined;
-  // The Spiker:bit from the last Spiker:bit Connect. Its library connection remembers the
-  // board, so Reconnect reopens it without the chooser. Connect replaces it, which shows
-  // the chooser.
+  // The Spiker:bit from the last Spiker:bit attempt, cleared when an attempt fails. Its library
+  // connection remembers the board, so Reconnect reopens it without the chooser. Connect
+  // replaces it with a fresh one, which shows the chooser.
   private spikerbitDevice: SpikerbitDevice | undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
     this.deps = {
       createWebSerialTransport: () => new WebSerialTransport(),
-      getGrantedSerialPorts,
       createSpikerbitDevice: (device) => new SpikerbitDevice(device, createSpikerbitConnection()),
       getSpikerbitFlashDataSource: () => makeSpikerbitFlashDataSource(spikerbitHex),
       ...deps
@@ -163,15 +164,6 @@ export class DeviceConnection {
     if (lastPort) {
       const transport = this.deps.createWebSerialTransport();
       if (await transport.open(lastPort) === "opened") return this.finishWebSerial(transport);
-      // Chrome gives a replugged board a new port object, so a missing lastPort means the
-      // board was unplugged and maybe replugged. USB ids only identify the board model, so
-      // a match is trusted only when it is the single one. If lastPort is still granted,
-      // the original board is still attached and another port could be a different board.
-      const matching = await this.findOnlyGrantedPortMatching(lastPort);
-      if (matching) {
-        const matchTransport = this.deps.createWebSerialTransport();
-        if (await matchTransport.open(matching) === "opened") return this.finishWebSerial(matchTransport);
-      }
     }
 
     const chooserTransport = this.deps.createWebSerialTransport();
@@ -182,17 +174,6 @@ export class DeviceConnection {
   private finishWebSerial(transport: WebSerialTransport) {
     this.lastWebSerialTransport = transport;
     return this.activateWebSerial(transport);
-  }
-
-  private async findOnlyGrantedPortMatching(lastPort: SerialPort): Promise<SerialPort | undefined> {
-    const { usbVendorId, usbProductId } = lastPort.getInfo();
-    const granted = await this.deps.getGrantedSerialPorts();
-    if (granted.includes(lastPort)) return undefined;
-    const matches = granted.filter(port => {
-      const info = port.getInfo();
-      return info.usbVendorId === usbVendorId && info.usbProductId === usbProductId;
-    });
-    return matches.length === 1 ? matches[0] : undefined;
   }
 
   // A fresh device has a fresh library connection, which shows the chooser.

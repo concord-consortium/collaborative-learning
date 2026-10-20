@@ -42,7 +42,7 @@ describe("device actions", () => {
     (logTileChangeEvent as jest.Mock).mockClear();
   });
 
-  it("a successful connect resets the tile's program and logs connectDevice with the device label", async () => {
+  it("a successful connect resets the tile's program and logs connectDevice with the device choice", async () => {
     const content = makeContent();
     expect(content.program.recentTicks.length).toBeGreaterThan(1);
     const connection = makeConnection("connected");
@@ -55,7 +55,7 @@ describe("device actions", () => {
     expect(logTileChangeEvent).toHaveBeenCalledTimes(2);
     expect((logTileChangeEvent as jest.Mock).mock.calls.map(c => c[1].operation))
       .toEqual(["connectDevice", "resetProgram"]);
-    expectLog("connectDevice", { targetType: "device", device: "micro:bit (radio hub)" });
+    expectLog("connectDevice", { targetType: "device", device: "microbitHub" });
     expectLog("resetProgram", { targetType: "program", trigger: "connect" });
   });
 
@@ -77,7 +77,7 @@ describe("device actions", () => {
     expect(await reconnectDeviceForTile({ connection, content, tileId })).toBe("connected");
 
     expect(content.program.recentTicks.length).toBe(1);
-    expectLog("reconnectDevice", { targetType: "device", device: "Spiker:bit" });
+    expectLog("reconnectDevice", { targetType: "device", device: "spikerbit" });
     expectLog("resetProgram", { targetType: "program", trigger: "reconnect" });
   });
 
@@ -143,7 +143,7 @@ describe("device actions", () => {
     expect(connection.disconnect).toHaveBeenCalled();
     expect(content.program.recentTicks.length).toBe(ticks);
     expect(logTileChangeEvent).toHaveBeenCalledTimes(1);
-    expectLog("disconnectDevice", { targetType: "device", device: "Arduino" });
+    expectLog("disconnectDevice", { targetType: "device", device: "arduino" });
   });
 
   it("disconnect with nothing connected does nothing and logs nothing", async () => {

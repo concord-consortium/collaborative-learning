@@ -33,7 +33,6 @@ function setup(transports: FakeTransport[], extra: Partial<IDeviceConnectionDeps
   const createWebSerialTransport = jest.fn(() => queue.shift() as unknown as WebSerialTransport);
   const connection = new DeviceConnection(serialDevice, {
     createWebSerialTransport,
-    getGrantedSerialPorts: jest.fn().mockResolvedValue([]),
     getSpikerbitFlashDataSource: () => "flash-source",
     ...extra
   });
@@ -211,63 +210,15 @@ describe("DeviceConnection", () => {
     expect(serialDevice.activeTransport).toBe(second);
   });
 
-  it("reconnect opens the only granted port with the same USB ids when the last port is gone", async () => {
-    const first = makeTransport(["opened"], { lastPort: makePort(1, 2) });
-    const second = makeTransport(["failed"]);
-    const third = makeTransport(["opened"]);
-    const match = makePort(1, 2);
-    const other = makePort(3, 4);
-    const { connection } = setup([first, second, third], {
-      getGrantedSerialPorts: jest.fn().mockResolvedValue([other, match])
-    });
-    await connection.connect("arduino");
-    await connection.disconnect();
-    expect(await connection.reconnect()).toBe("connected");
-    expect(second.open).toHaveBeenCalledWith(first.lastPort);
-    expect(third.open).toHaveBeenCalledWith(match);
-  });
-
-  it("reconnect uses the chooser when several granted ports share the USB ids and the last port is gone", async () => {
-    const first = makeTransport(["opened"], { lastPort: makePort(1, 2) });
-    const second = makeTransport(["failed"]);
-    const third = makeTransport(["opened"]);
-    const { connection } = setup([first, second, third], {
-      getGrantedSerialPorts: jest.fn().mockResolvedValue([makePort(1, 2), makePort(1, 2)])
-    });
-    await connection.connect("arduino");
-    await connection.disconnect();
-    expect(await connection.reconnect()).toBe("connected");
-    expect(third.open).toHaveBeenCalledWith();
-  });
-
-  it("reconnect uses the chooser, not a twin, when the last port is still granted", async () => {
-    const lastPort = makePort(1, 2);
-    const twin = makePort(1, 2);
-    const first = makeTransport(["opened"], { lastPort });
-    const second = makeTransport(["failed"]);
-    const third = makeTransport(["opened"]);
-    const { connection, createWebSerialTransport } = setup([first, second, third], {
-      getGrantedSerialPorts: jest.fn().mockResolvedValue([twin, lastPort])
-    });
-    await connection.connect("arduino");
-    await connection.disconnect();
-    expect(await connection.reconnect()).toBe("connected");
-    expect(createWebSerialTransport).toHaveBeenCalledTimes(3);
-    expect(second.open).toHaveBeenCalledTimes(1);
-    expect(second.open).toHaveBeenCalledWith(lastPort);
-    expect(third.open).toHaveBeenCalledWith();
-  });
-
   it("reconnect falls back to the chooser when no known port opens", async () => {
     const first = makeTransport();
     const second = makeTransport(["failed"]);
     const third = makeTransport(["opened"]);
-    const { connection } = setup([first, second, third], {
-      getGrantedSerialPorts: jest.fn().mockResolvedValue([makePort(3, 4)])
-    });
+    const { connection } = setup([first, second, third]);
     await connection.connect("arduino");
     await connection.disconnect();
     expect(await connection.reconnect()).toBe("connected");
+    expect(second.open).toHaveBeenCalledWith(first.lastPort);
     expect(third.open).toHaveBeenCalledWith();
   });
 

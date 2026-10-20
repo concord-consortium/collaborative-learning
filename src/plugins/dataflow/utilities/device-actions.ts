@@ -19,14 +19,15 @@ function labelFor(choice: DeviceChoice | undefined) {
   return choice ? kDeviceChoiceLabels[choice] : undefined;
 }
 
-function logDeviceEvent(tileId: string, operation: string, device: string | undefined) {
+// Logs the menu choice's id, not its label, so rewording a label doesn't change the logged value.
+function logDeviceEvent(tileId: string, operation: string, device: DeviceChoice | undefined) {
   logTileChangeEvent(LogEventName.DATAFLOW_TOOL_CHANGE, {
     tileId, operation, change: { targetType: "device", device }
   });
 }
 
 /**
- * Clears the running state of this tile's program. Recorded data, blocks, connections and
+ * Clears the running state of this tile's program. Recorded data, blocks, block connections and
  * settings are left alone.
  */
 export function resetProgramForTile({ content, tileId, trigger }: ITileOptions & { trigger: ResetTrigger }) {
@@ -55,7 +56,7 @@ export async function connectDeviceForTile(o: IConnectionOptions & { choice: Dev
   if (!isAlive(content)) return result;
   if (result === "failed") recordConnectFailure(content, labelFor(choice));
   if (result === "connected") {
-    logDeviceEvent(tileId, "connectDevice", labelFor(choice));
+    logDeviceEvent(tileId, "connectDevice", choice);
     resetProgramForTile({ content, tileId, trigger: "connect" });
   }
   return result;
@@ -63,13 +64,13 @@ export async function connectDeviceForTile(o: IConnectionOptions & { choice: Dev
 
 export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<ConnectResult> {
   const { connection, content, tileId } = o;
-  const label = labelFor(connection.lastChoice);
+  const choice = connection.lastChoice;
   clearConnectError(content);
   const result = await connection.reconnect();
   if (!isAlive(content)) return result;
-  if (result === "failed") recordConnectFailure(content, label);
+  if (result === "failed") recordConnectFailure(content, labelFor(choice));
   if (result === "connected") {
-    logDeviceEvent(tileId, "reconnectDevice", label);
+    logDeviceEvent(tileId, "reconnectDevice", choice);
     resetProgramForTile({ content, tileId, trigger: "reconnect" });
   }
   return result;
@@ -80,7 +81,7 @@ export async function disconnectDeviceForTile(o: IConnectionOptions): Promise<vo
   const { connection, content, tileId } = o;
   if (!connection.isConnected) return;
   clearConnectError(content);
-  const label = labelFor(connection.lastChoice);
+  const choice = connection.lastChoice;
   await connection.disconnect();
-  logDeviceEvent(tileId, "disconnectDevice", label);
+  logDeviceEvent(tileId, "disconnectDevice", choice);
 }

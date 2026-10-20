@@ -27,7 +27,7 @@ export interface IMicrobitUsbConnection {
 
 // IDeviceTransport over a micro:bit WebUSB serial connection. Like WebSerialTransport,
 // it owns the connection's inbound events: it forwards serial chunks to onData and fires
-// onDisconnect on a lost/deauthorised connection, so SerialDevice can receive centrally.
+// onDisconnect on a lost/deauthorized connection, so SerialDevice can receive centrally.
 export class MicrobitUsbTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: () => void;
@@ -110,7 +110,7 @@ export class SpikerbitDevice {
     if (running == null || running < kSpikerbitFirmwareVersion) {
       // Flash when the board is running no known firmware (no reply) or an out-of-date
       // version. USB connection stays Connected through a flash (DAPLink interface chip is
-      // untouched) and serial auto-reinitialises, so no explicit reconnect here.
+      // untouched) and serial auto-reinitializes, so no explicit reconnect here.
       await this.connection.flash(flashDataSource, { partial: true, progress });
       // Re-query to confirm the flash took, but proceed regardless: the board was just written
       // with the known-good bundled hex, so a null/stale reply here is far more likely a serial

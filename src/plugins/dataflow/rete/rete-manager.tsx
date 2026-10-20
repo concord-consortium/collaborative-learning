@@ -6,7 +6,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { onPatch, onSnapshot } from "mobx-state-tree";
-import { autorun, observable, reaction, runInAction, untracked } from "mobx";
+import { autorun, observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -123,13 +123,12 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    // Whether the program needs a device is recorded once, when the editable program has finished opening.
     this.setupComplete = this.setup().then(() => this.recordNeedsDeviceOnOpen());
 
     if (!this.readOnly && !this.playback) {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
-      // block's settings and block connections. Reading the node count here keeps the
-      // dependency on blocks being added and removed visible at the autorun itself.
+      // block's settings and wiring. Reading the node count here keeps the dependency on blocks
+      // being added and removed visible at the autorun itself.
       this.needsDeviceDisposer = autorun(() => {
         void this.mstProgram.nodes.size;
         this.updateNeedsDevice();
@@ -408,16 +407,12 @@ export class ReteManager implements INodeServices {
       });
 
       // Reprocess when connections are changed
-      // And also recheck whether the program needs a device, since some blocks only need one
-      // once they are connected
       editor.addPipe((context) => {
-        if (["nodecreated", "noderemoved", "connectioncreated", "connectionremoved"]
-          .includes(context.type)) {
+        if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
           // FIXME: Any changes to the state caused by these events should be combined
           // into the history entry with the actual node removal, connection creation or removal
           // In the meantime we wrap this in an action so it only creates one more history entry
           this.processAfterProgramChange();
-          this.updateNeedsDevice();
         }
         return context;
       });
@@ -1326,17 +1321,14 @@ export class ReteManager implements INodeServices {
   }
 
   /**
-   * Records on the tile whether its program needs a connected device. Called inside an autorun, so
-   * it tracks each block's settings. Setting the volatile is untracked so it can't re-trigger the
-   * autorun. It only records the state; the on-open state is recorded by recordNeedsDeviceOnOpen.
+   * Records on the tile whether its program needs a connected device. The constructor's autorun
+   * calls it, so it tracks each block's settings and wiring. It only records the state; the
+   * on-open state is recorded by recordNeedsDeviceOnOpen.
    */
   public updateNeedsDevice() {
     if (this.readOnly || this.playback) return;
 
-    const needsDevice = programNeedsDevice(this.editor.getNodes());
-    untracked(() => {
-      this.mstContent.setNeedsDevice(needsDevice);
-    });
+    this.mstContent.setNeedsDevice(programNeedsDevice(this.editor.getNodes()));
   }
 
   /**
@@ -1368,8 +1360,6 @@ export class ReteManager implements INodeServices {
     if (channelIds !== this.previousChannelIds) {
       this.previousChannelIds = channelIds;
       this.mstContent.setChannels(channels);
-
-      this.updateNeedsDevice();
     }
 
     // NOTE: these channels are observable, so changes to their missing or connected

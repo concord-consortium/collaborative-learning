@@ -33,8 +33,8 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect`. |
 | `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect/version/flash state machine; taps `onData` for connect-time version detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. |
-| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect for the one `SerialDevice`; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice` and `busyChoice`. |
-| tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Per-tile wrappers around `DeviceConnection` that reset the clicking tile's program and log the change. |
+| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice` and `busyChoice`. |
+| tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program and log the change. |
 | `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | Shared parser: `emg:<n>\r\n` lines → channel values. |
 | tile serial channels | `NodeChannelInfo[]` (`.../model/utilities/channel.ts`) | The shared blackboard: parsers write `channel.value`; the Sensor node reads it. Each mounted, editable tile registers its channels with `SerialDevice` as a channel source. |
 | `SensorNode` / `LiveOutputNode` | `.../nodes/sensor-node.ts`, `live-output-node.ts` | DataFlow nodes that read inbound values / emit outbound values each tick. |
@@ -59,8 +59,9 @@ device is connected it shows Reconnect and Disconnect instead. All of the contro
 while a connection attempt is in progress (`busyChoice`). A successful Connect, Reconnect or
 Disconnect closes the pane and returns focus to the button, whose color and tooltip then show the
 result. A failed or canceled attempt leaves the pane open. The arrow keys and Home/End move focus
-between the pane's controls, wrapping at the ends. The UI names the device by the choice
-the user connected with (`lastChoice`), not by the detected `deviceFamily`.
+between the pane's controls, wrapping at the ends. The UI names the device by the label of the
+choice the user connected with (`lastChoice`), and the log events by its id (such as
+`microbitHub`), not by the detected `deviceFamily`.
 
 The pane starts with a heading and a status block. The status block holds a status line and,
 only while nothing is connected and the tile has a `connectError`, an error line showing it. The
@@ -74,11 +75,10 @@ The toolbar's `reset` button restarts the tile's program through `program.resetR
 
 `DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
 reconnect resolve `"connected"`, `"canceled"` or `"failed"`. When a device is already
-connected, both disconnect it first. A Web Serial board and the
-Spiker:bit take different flows, and both end by calling
-`SerialDevice.setActiveDevice(deviceFamily, transport)`, which records the active transport,
-wires its inbound callbacks, and marks the store connected. `setActiveDevice` does not take
-channels; inbound data is matched against registered channel sources (see
+connected, both disconnect it first. A Web Serial board and the Spiker:bit take different
+flows, and both end by calling `SerialDevice.setActiveDevice(deviceFamily, transport)`, which
+records the active transport, wires its inbound callbacks, and marks the store connected.
+Inbound data is matched against the registered channel sources (see
 [Channel sources](#channel-sources)).
 
 **Web Serial (Arduino and radio-hub micro:bit):**
@@ -112,38 +112,36 @@ below), then calls `setActiveDevice("spikerbit", transport)`. If any step fails 
 link opens, `connectAndStream` disconnects the library connection before it rethrows, so a
 failed attempt doesn't leave the board open.
 
-**Reconnect.** `reconnect()` repeats the last choice without asking the user to pick again.
-For a Web Serial board it tries the last port (`WebSerialTransport.lastPort`, which
-survives `close()`) first. If that fails and the last port is no longer among the granted
-ports (`getGrantedSerialPorts()`), the board was unplugged and maybe replugged, and Chrome
-gives a replugged board a new port object. Reconnect then opens a granted port with the same
-USB vendor and product ids, but only when exactly one matches, because the ids identify the
-board model and can't tell identical boards apart. In every other case, including when the
-last port is still granted and so the original board is still attached, it shows the
-browser's chooser. For a Spiker:bit it runs `connectAndStream` again on the known
+**Reconnect.** `reconnect()` repeats the last device choice, so the user doesn't pick a
+device type again. For a Web Serial board it tries the last port
+(`WebSerialTransport.lastPort`, which survives `close()`) first, and if that fails it shows
+the browser's chooser. A Web Serial unplug is noticed quickly, by the browser's `disconnect`
+event or by the read loop giving up, and either one clears the active device. So Reconnect
+isn't offered for an unplugged board: the menu shows the device choices, and Connect shows
+the chooser. For a Spiker:bit it runs `connectAndStream` again on the known
 `SpikerbitDevice`, whose library connection remembers the board and reopens it without the
-chooser. If that fails, for example because
-the board was unplugged and plugged back in, it disconnects that device and falls back to a
-new one, which shows the chooser. CLUE doesn't call the library's `initialize()`, so it
-doesn't watch for the board being unplugged.
+chooser. If that fails, for example because the board was unplugged and plugged back in, it
+disconnects that device and falls back to a new one, which shows the chooser. CLUE doesn't
+call the library's `initialize()`, so it doesn't watch for the board being unplugged.
 
 **Disconnect** closes the transport and clears the active device. For a Spiker:bit, closing
 the transport disconnects the library connection; the device is kept for Reconnect.
 
-**Per-tile actions.** The pane and the `reset` button call the tile actions in
-`device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE` events with the operations
-`connectDevice`, `reconnectDevice`, `disconnectDevice` and `resetProgram`. A successful
-connect or reconnect resets only the clicking tile's program, through
-`program.resetRunningState()`. Disconnect never resets. Reset does not touch recorded data,
-blocks, connections or settings.
+**Tile device actions.** The pane and the `reset` button call the tile device actions in
+`device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE` events with
+the operations `connectDevice`, `reconnectDevice`, `disconnectDevice` and `resetProgram`. A successful
+connect or reconnect resets only the clicking tile's program, through `resetProgramForTile`,
+which says what Reset leaves alone. Disconnect never resets.
 
 ### Channel sources
 
 Each DataFlow tile owns its own `NodeChannelInfo[]`. While a tile is mounted and editable,
-`DataflowProgram` registers its channels with `SerialDevice.registerChannelSource(() =>
-channels)`, which returns a disposer that it calls on unmount. `SerialDevice.receive`
-parses inbound data against the flattened channels of every registered source, and every
-channel with a matching id updates, so several tiles can read the same device at once.
+`DataflowProgram` registers a channel source,
+`SerialDevice.registerChannelSource(() => this.props.tileContent.channels)`, which reads the
+tile's current channels on each call, since `setChannels` replaces the array. It returns a
+disposer that `DataflowProgram` calls on unmount. `SerialDevice.receive` parses inbound data
+against the flattened channels of every registered source, and every channel with a
+matching id updates, so several tiles can read the same device at once.
 
 ## Spiker:bit version check and flashing
 
@@ -159,7 +157,7 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
 3. If no banner arrives (no known firmware) or the reported version is older than
    `kSpikerbitFirmwareVersion`, it flashes the bundled hex (a partial flash, reporting
    progress) and queries again. The USB connection stays Connected across the flash — the
-   DAPLink interface chip is untouched and serial auto-reinitialises — so no explicit
+   DAPLink interface chip is untouched and serial auto-reinitializes — so no explicit
    reconnect is needed.
 4. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
    `onData` from version detection to `SerialDevice.receive` and begins EMG streaming.
@@ -227,7 +225,7 @@ Walkthrough:
   read loop decodes each chunk and calls `onData`, which `SerialDevice.setActiveDevice`
   wired to `SerialDevice.receive`. `receive` looks up the device's protocol in the
   capability map and dispatches to `handleKeyValueStreamObj` → `parseKeyValueData`,
-  which writes `channel.value` on the matching channel.
+  which writes `channel.value` on every matching channel.
 - **Spiker:bit (WebUSB):** `MicrobitUsbTransport` owns the connection's `serialdata` event
   and forwards each chunk to `onData`, which `SerialDevice.setActiveDevice` wired to
   `SerialDevice.receive` — exactly like the Web Serial path. The Spiker:bit's `deviceFamily`
@@ -236,9 +234,9 @@ Walkthrough:
   `setActiveDevice`), `SpikerbitDevice` temporarily points `onData` at a version-detection
   handler to decide whether to flash; EMG parsing begins once the transport becomes the
   active device.
-- **Into the node:** both paths mutate the same `NodeChannelInfo` objects (the tile's
-  `channels`, found through the registered channel sources). Each tick the Rete manager
-  samples them and the `Sensor node`'s `data()` reads `getChannels().find(...).value`.
+- **Into the node:** both paths mutate the same `NodeChannelInfo` objects (each registered
+  tile's `channels`). Each tick the Rete manager samples them and the `Sensor node`'s
+  `data()` reads `getChannels().find(...).value`.
 
 > **micro:bit vs. Spiker:bit.** Both are physically micro:bits, but they connect
 > differently. A **radio-hub micro:bit** connects over **Web Serial** (same transport as

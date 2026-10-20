@@ -1,4 +1,4 @@
-import { getGrantedSerialPorts, WebSerialTransport } from "./web-serial-transport";
+import { WebSerialTransport } from "./web-serial-transport";
 
 // Minimal fake SerialPort. `chunks` are delivered by the reader in order, then done.
 function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
@@ -84,13 +84,6 @@ describe("WebSerialTransport", () => {
     expect(t.lastPort).toBe(port);
     await t.close();
     expect(t.lastPort).toBe(port);
-  });
-
-  it("getGrantedSerialPorts returns the granted ports, or none without Web Serial", async () => {
-    expect(await getGrantedSerialPorts()).toEqual([]);
-    const port = fakePort({});
-    (navigator as any).serial = { getPorts: async () => [port] };
-    expect(await getGrantedSerialPorts()).toEqual([port]);
   });
 
   it("frames and writes when open, and no-ops when the port is closed", async () => {
