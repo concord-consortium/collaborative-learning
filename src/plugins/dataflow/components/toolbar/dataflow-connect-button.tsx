@@ -144,9 +144,29 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
     onClose();
   }
 
-  const connect = (choice: DeviceChoice) => { void connectDeviceForTile({ connection, content, tileId, choice }); };
-  const reconnect = () => { void reconnectDeviceForTile({ connection, content, tileId }); };
-  const disconnect = () => { void disconnectDeviceForTile({ connection, content, tileId }); };
+  // A successful action closes the pane; the trigger's name and color then report the result. A failed
+  // or canceled attempt leaves it open. Closing removes the focused control, so if the pane held
+  // focus, it moves to the trigger. If the user already closed the pane during a slow attempt,
+  // the container is gone and closing again is harmless.
+  function closeAfterSuccess() {
+    const container = containerRef.current;
+    const paneHadFocus = !!container && container.contains(document.activeElement);
+    const trigger = container?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button");
+    onClose();
+    if (paneHadFocus) trigger?.focus();
+  }
+
+  const connect = (choice: DeviceChoice) => {
+    void connectDeviceForTile({ connection, content, tileId, choice })
+      .then(result => { if (result === "connected") closeAfterSuccess(); });
+  };
+  const reconnect = () => {
+    void reconnectDeviceForTile({ connection, content, tileId })
+      .then(result => { if (result === "connected") closeAfterSuccess(); });
+  };
+  const disconnect = () => {
+    void disconnectDeviceForTile({ connection, content, tileId }).then(closeAfterSuccess);
+  };
 
   const status = busyChoice
     ? `Connecting to ${kDeviceChoiceLabels[busyChoice]}…`

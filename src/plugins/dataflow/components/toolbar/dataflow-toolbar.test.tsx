@@ -489,12 +489,62 @@ describe("Dataflow connect button and pane", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Connect Arduino" }));
   });
 
-  it("focus stays in the pane after activating Disconnect", async () => {
+  const paneGroup = () => screen.getByRole("group", { name: "Device connection" });
+
+  it("a successful Connect closes the pane and returns focus to the trigger", async () => {
+    const r = openPane();
+    jest.spyOn(r.connection, "connect").mockImplementation(async () => {
+      r.stores.serialDevice.setActiveDevice("spikerbit", fakeTransport());
+      return "connected";
+    });
+    act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(r.content.connectPaneOpen).toBe(false);
+    expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(document.activeElement).toBe(getTrigger(r.container));
+  });
+
+  it("a successful Reconnect closes the pane and returns focus to the trigger", async () => {
     const r = openPane();
     fakeConnected(r);
+    jest.spyOn(r.connection, "reconnect").mockResolvedValue("connected");
+    act(() => screen.getByRole("button", { name: "Reconnect" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Reconnect" })); });
+    expect(r.content.connectPaneOpen).toBe(false);
+    expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(document.activeElement).toBe(getTrigger(r.container));
+  });
+
+  it("Disconnect closes the pane and returns focus to the trigger", async () => {
+    const r = openPane();
+    fakeConnected(r);
+    jest.spyOn(r.connection, "disconnect").mockImplementation(async () => {
+      r.stores.serialDevice.clearActiveDevice();
+    });
     act(() => screen.getByRole("button", { name: "Disconnect" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Connect Arduino" }));
+    expect(r.content.connectPaneOpen).toBe(false);
+    expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(document.activeElement).toBe(getTrigger(r.container));
+  });
+
+  it("a failed Connect keeps the pane open and shows the error", async () => {
+    const r = openPane();
+    jest.spyOn(r.connection, "connect").mockResolvedValue("failed");
+    act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(r.content.connectPaneOpen).toBe(true);
+    expect(within(paneGroup()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(within(paneGroup()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
+  });
+
+  it("a canceled Connect keeps the pane open", async () => {
+    const r = openPane();
+    jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
+    act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(r.content.connectPaneOpen).toBe(true);
+    expect(within(paneGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
   });
 
   it("a device dropping does not pull focus into the pane when focus is elsewhere", () => {
