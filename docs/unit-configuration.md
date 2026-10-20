@@ -278,7 +278,7 @@ Common toolbar framework.  Supports:
 - `ungroup`: Ungroup the selected group.
 - `zoom-in`: Zoom the program canvas in one step. Disabled at maximum zoom.
 - `zoom-out`: Zoom the program canvas out one step. Disabled at minimum zoom.
-- `fit-all`: Zoom and centre the canvas so every block is visible. Disabled when the program is empty.
+- `fit-all`: Zoom and center the canvas so every block is visible. Disabled when the program is empty.
 - `pan`: Pan the canvas. The button's face repeats the last direction used; its corner triangle opens
   a palette of the four directions.
 - `connect`: Connect, reconnect or disconnect a device. The button shows the connection's state.
