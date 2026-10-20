@@ -1,7 +1,19 @@
-import { getSnapshot } from "mobx-state-tree";
+import { getSnapshot, Instance } from "mobx-state-tree";
 import { ConnectionModel, DataflowNodeModel, DataflowProgramModel } from "./dataflow-program-model";
+import { DataflowContentModelType, kDataflowTileType } from "./dataflow-content";
 import { IControlNodeModel } from "../nodes/control-node";
 import { INumberNodeModel } from "../nodes/number-node";
+import { createDocumentModel } from "../../../models/document/document";
+import { ProblemDocument } from "../../../models/document/document-types";
+import { TreeManager } from "../../../models/history/tree-manager";
+import { expectEntryToBeComplete } from "../../../models/history/undo-store-test-utils";
+
+import "../../../models/shared/shared-data-set-registration";
+import "../../../models/shared/shared-program-data-registration";
+import "../dataflow-registration";
+
+// The undo test needs the tile registered, but not its component.
+jest.mock("../components/dataflow-tile", () => ({ __esModule: true, default: () => null }));
 
 describe("DataflowProgramModel", () => {
   it("should handle nodes with explicit x and y", () => {
@@ -205,6 +217,25 @@ describe("DataflowProgramModel.resetRunningState", () => {
 
     jest.advanceTimersByTime(3000);
     expect(warn).not.toHaveBeenCalledWith("No current tick entry");
+  });
+
+  it("does not create an undo step", async () => {
+    const document = createDocumentModel({
+      type: ProblemDocument, uid: "1", key: "test", createdAt: 1, content: {}, visibility: "public"
+    });
+    const tileId = document.addTile(kDataflowTileType)!.tileId;
+    const { program } = document.content!.getTile(tileId)!.content as DataflowContentModelType;
+    program.addNode(DataflowNodeModel.create({
+      id: "num", name: "Number", x: 0, y: 0, data: { type: "Number", value: 7 }
+    }));
+    program.addNewTick("t0");
+    document.treeMonitor!.enableMonitoring();
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+
+    program.resetRunningState();
+
+    await expectEntryToBeComplete(manager, 1);
+    expect(manager.undoStore.canUndo).toBe(false);
   });
 
   it("leaves blocks, connections and settings alone", () => {
