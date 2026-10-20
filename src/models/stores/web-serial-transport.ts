@@ -23,7 +23,8 @@ export class WebSerialTransport implements IDeviceTransport {
   deviceFamily: string | undefined;
   private deviceInfo: SerialPortInfo | null = null;
   private port: SerialPort | null = null;
-  // The most recently opened port; unlike `port`, it is kept after close() so it can be reopened.
+  // The port most recently given to or chosen in open(); unlike `port`, it is kept after close()
+  // so it can be reopened.
   lastPort: SerialPort | null = null;
   private writer: WritableStreamDefaultWriter | undefined;
   // The read loop's current reader. It holds a lock on `port.readable`, which must be
@@ -89,9 +90,9 @@ export class WebSerialTransport implements IDeviceTransport {
     this.port = null;
   }
 
-  // Read loop. Delivers decoded chunks to onData; on give-up (reopen fails) fires
-  // onDisconnect. Preserves the prior reopen/timeout recovery behavior. Relies on the
-  // browser nulling `port.readable` on a real disconnect to drive the reopen check below.
+  // Read loop. Delivers decoded chunks to onData; on give-up (reopen fails) closes the port,
+  // then fires onDisconnect. Relies on the browser nulling `port.readable` on a real
+  // disconnect to drive the reopen check below.
   public async startReading(){
     // Not proactively stopped by the navigator.serial "disconnect" event; it self-terminates
     // within one reopen cycle once the port stops being readable (see the timeout/reopen logic below).
