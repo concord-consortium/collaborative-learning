@@ -303,8 +303,6 @@ export const CustomDataflowNode = observer(
             }
           </div>
       ))}
-      {/* Mounted only while open: kept mounted and hidden, its pointerdown guard would never
-          attach. See useStopEventPropagation. */}
       {showPlot &&
         <DataflowNodePlot
           model={model}

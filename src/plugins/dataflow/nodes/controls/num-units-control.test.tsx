@@ -22,7 +22,6 @@ function makeFakeControl(units: string[]): INumberUnitsControl {
   };
 }
 
-// The units dropdown had no guard, so it could not be opened with the mouse (CLUE-711).
 describe("NumberUnitsControl keeps pointer presses away from the node drag handler", () => {
   const kUnits = ["sec", "min", "hr"];
 

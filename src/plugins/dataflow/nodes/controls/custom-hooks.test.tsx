@@ -1,15 +1,13 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { fireEvent, render } from "@testing-library/react";
 
 import { useStopEventPropagation } from "./custom-hooks";
 
-// Pins the first-render requirement documented on the hook. The minigraph was mounted and hidden,
-// so its zoom buttons were guarded by nothing and the mouse could not reach them (CLUE-711).
 describe("useStopEventPropagation", () => {
   function Guarded({ render: renderTarget }: { render: boolean }) {
-    const ref = useRef<HTMLDivElement>(null);
-    useStopEventPropagation(ref, "pointerdown");
-    return renderTarget ? <div ref={ref} data-testid="target" /> : null;
+    const [el, setEl] = useState<HTMLDivElement | null>(null);
+    useStopEventPropagation(el, "pointerdown");
+    return renderTarget ? <div ref={setEl} data-testid="target" /> : null;
   }
 
   function pressTarget(initiallyRendered: boolean) {
@@ -26,7 +24,10 @@ describe("useStopEventPropagation", () => {
     expect(pressTarget(true)).not.toHaveBeenCalled();
   });
 
-  it("does not guard an element that appears only after the first render", () => {
-    expect(pressTarget(false)).toHaveBeenCalled();
+  // The minigraph is mounted hidden and its content rendered when it opens, so the element the
+  // guard is for does not exist on the first render. Taking a ref instead of the element, the
+  // effect ran once with nothing to attach to and the zoom buttons were guarded by nothing.
+  it("guards an element that appears only after the first render", () => {
+    expect(pressTarget(false)).not.toHaveBeenCalled();
   });
 });

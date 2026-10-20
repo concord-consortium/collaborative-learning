@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataset } from "chart.js";
 import "chart.js/auto";
@@ -37,22 +37,21 @@ enum Zoom {
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
   function DataflowNodePlot({model, recordedTicks})
 {
-  const divRef = useRef<HTMLDivElement>(null);
-  useStopEventPropagation(divRef, "pointerdown");
-  useStopEventPropagation(divRef, "dblclick");
+  const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null);
+  useStopEventPropagation(plotEl, "pointerdown");
+  useStopEventPropagation(plotEl, "dblclick");
 
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(model);
     const min = minY(model);
-    // A block whose value never moves plots a zero-width range, and before anything is plotted
-    // the bounds are still +/-Infinity. Scaling either leaves it exactly where it was, so the
-    // buttons would do nothing forever; fall back to a span the student can zoom from.
     const haveRange = isFinite(max) && isFinite(min);
+    const halfRange = haveRange ? Math.abs(max - min) / 2 : 0;
     const midpoint = haveRange ? (max + min) / 2 : 0;
-    const distanceFromMidpoint = haveRange ? Math.abs(max - min) / 2 : 0;
+    // Scaling zero leaves it at zero, so a block whose value never moves, or one with nothing
+    // plotted yet, would have dead zoom buttons forever.
+    const distanceFromMidpoint = halfRange > 0 ? halfRange : kMinZoomHalfSpan;
     const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
-    const newDistanceFromMidpoint =
-      scalar * (distanceFromMidpoint > 0 ? distanceFromMidpoint : kMinZoomHalfSpan);
+    const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
     model.setTickMax(midpoint + newDistanceFromMidpoint);
     model.setTickMin(midpoint - newDistanceFromMidpoint);
   };
@@ -61,7 +60,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
 
   // FIXME: for some reason onClick doesn't work on these buttons but onMouseDown does
   return (
-    <div className="node-bottom-section" ref={divRef} >
+    <div className="node-bottom-section" ref={setPlotEl} >
       <div className="node-bottom-buttons">
         <button
           className={`scale-buttons ${scaleBtnColorClass} plus`} onMouseDown={() => handleClickOffset(Zoom.In)}>

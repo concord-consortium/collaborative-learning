@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ClassicPreset } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import { NodePeriodUnits } from "../../model/utilities/node";
@@ -177,12 +177,12 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
   // with the nodes. It would be better to make this more clear somehow.
   const possiblyReadOnlyInputValue = control.node.readOnly ? control.getValue() : inputValue;
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  useStopEventPropagation(inputRef, "pointerdown");
-  useStopEventPropagation(inputRef, "dblclick");
+  const [inputEl, setInputEl] = useState<HTMLInputElement | null>(null);
+  useStopEventPropagation(inputEl, "pointerdown");
+  useStopEventPropagation(inputEl, "dblclick");
 
-  const unitsRef = useRef<HTMLDivElement>(null);
-  useStopEventPropagation(unitsRef, "pointerdown");
+  const [unitsEl, setUnitsEl] = useState<HTMLDivElement | null>(null);
+  useStopEventPropagation(unitsEl, "pointerdown");
 
   const unitsCountClass = classNames({
     "one": control.units.length === 1,
@@ -196,7 +196,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
         : null
       }
       <input className={`number-input units ${unitsCountClass}`}
-        ref={inputRef}
+        ref={setInputEl}
         tabIndex={-1}
         type={"text"}
         value={possiblyReadOnlyInputValue}
@@ -209,7 +209,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
         ? <div className="single-unit">
             {control.units[0]}
           </div>
-        : <div className="type-options-back" ref={unitsRef}>
+        : <div className="type-options-back" ref={setUnitsEl}>
             <div className="type-options">
               <select onChange={handleSelectChange}
                 value={control.getCurrentUnits()}
