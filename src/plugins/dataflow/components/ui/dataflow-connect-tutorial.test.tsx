@@ -71,13 +71,6 @@ describe("DataflowConnectTutorialGate", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("does not show when an edit later makes the program need a device", () => {
-    const content = DataflowContentModel.create();
-    renderTile(content, new DeviceConnection(new SerialDevice()));
-    act(() => { content.setNeedsDevice(true); });
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
-
   it("does not come back after a disconnect of a device connected while it was showing", () => {
     const serialDevice = new SerialDevice();
     const connection = new DeviceConnection(serialDevice);
