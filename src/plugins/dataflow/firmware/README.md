@@ -17,25 +17,53 @@ longer required. See the header of `spikerbit-clue.ts` for the full rationale.
 - **Source of record:** [`spikerbit-clue.ts`](./spikerbit-clue.ts) — the MakeCode
   program. This directory is excluded from the CLUE tsconfig/eslint because the
   program uses MakeCode-only globals.
-- **Compiled artifact:** `spikerbit-clue.hex` — imported by the app as a string
-  (webpack `asset/source`) in `dataflow-program.tsx`; TypeScript resolves the import via
-  the ambient `*.hex` declaration in `src/typings.d.ts`. The file must be present for the
-  production webpack build (`asset/source` reads it at build time).
+- **Compiled artifact:** `spikerbit-clue.hex` — built from `spikerbit-clue.ts` by
+  `npm run build:firmware` and committed, so the app build doesn't need the MakeCode
+  toolchain. It is imported by the app as a string (webpack `asset/source`) in
+  `dataflow-program.tsx`; TypeScript resolves the import via the ambient `*.hex` declaration
+  in `src/typings.d.ts`. The file must be present for the production webpack build
+  (`asset/source` reads it at build time).
 
 ## Rebuilding the hex
 
-1. Open <https://makecode.microbit.org> and start a new project (no extension needed).
-2. Switch to the JavaScript view and paste in `spikerbit-clue.ts`.
-3. If behavior changed, bump `VERSION` there and `kSpikerbitFirmwareVersion` in
-   `src/models/stores/spikerbit-device.ts` (the `spikerbit-firmware-consistency`
-   Jest test enforces that these and the exported hex all agree).
-4. Export the **universal hex** and save it as `spikerbit-clue.hex` in this
-   directory.
+The hex is built from `spikerbit-clue.ts` with the MakeCode command-line tools, pinned to
+exact versions in [`scripts/spikerbit-firmware/`](../../../../scripts/spikerbit-firmware/), so
+the same source always produces the same hex.
 
-> **Note:** the `spikerbit-firmware-consistency` test only checks that the version
-> *string* is embedded in the hex — it can't verify the hex was actually compiled from
-> `spikerbit-clue.ts`. Always confirm real behavior with the bench-test firmware after a
-> re-export; the hex is a hand-built binary, not a reproducible in-repo build.
+1. Edit `spikerbit-clue.ts`.
+2. If behavior changed, bump `VERSION` there and `kSpikerbitFirmwareVersion` in
+   `src/models/stores/spikerbit-device.ts`.
+3. Run `npm run build:firmware`. It reinstalls the pinned toolchain into
+   `scripts/spikerbit-firmware/node_modules` (about 550 MB) with `npm ci`, compiles, and
+   overwrites `spikerbit-clue.hex`. A compile error is printed and leaves the hex untouched.
+4. Commit the source and the hex together. Any edit to the source changes the hex, even a
+   comment, because the hex embeds the source.
+
+Two checks keep them in sync:
+
+- **Jest** (`spikerbit-firmware-consistency.test.ts`) checks the version numbers, and checks
+  that the source embedded in the hex equals `spikerbit-clue.ts`.
+- **The `CI Firmware` workflow** runs on every pull request that changes this directory or the
+  build tooling, and on master when a merge changes them. Like `npm run check:firmware`, it
+  rebuilds the hex and fails if it differs from the committed one.
+
+Behavior changes still need a bench test on real hardware; the checks only prove the hex
+was built from the source.
+
+### Prototyping in the MakeCode editor
+
+Importing `spikerbit-clue.hex` into <https://makecode.microbit.org> opens its embedded source.
+That's handy for trying changes with the simulator or the device console, but copy the
+result back into `spikerbit-clue.ts` and rebuild with `npm run build:firmware`. Don't commit a
+hex exported from the website: the website adds files to the embedded project (and may run a
+newer MakeCode), so the CI check fails.
+
+### Upgrading MakeCode
+
+Change `pxt-core` and `pxt-microbit` in `scripts/spikerbit-firmware/package.json` together
+(exact versions; the micro:bit target's `package.json` names the `pxt-core` it was built
+with), run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test. The
+build records the versions in the hex itself.
 
 ## Bench-test firmware
 
