@@ -357,13 +357,18 @@ describe("Dataflow connect button and pane", () => {
     });
   }
 
+  // A real click starts with a pointerdown, which reaches the pane's outside-click handler first.
   it("'connect' is registered and opens and closes its pane on click", () => {
     const { container, content } = renderConnect();
+    const press = () => {
+      fireEvent.pointerDown(getTrigger(container));
+      fireEvent.click(getTrigger(container));
+    };
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
-    fireEvent.click(getTrigger(container));
+    press();
     expect(content.connectPaneOpen).toBe(true);
     expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
-    fireEvent.click(getTrigger(container));
+    press();
     expect(content.connectPaneOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
   });
@@ -382,6 +387,19 @@ describe("Dataflow connect button and pane", () => {
     expect(document.activeElement).toBe(getTrigger(container));
   });
 
+  // See the pan palette's test of the same name for why an ancestor's capture listener stands in for
+  // the toolbar's focus-trap exit.
+  it("Escape does not reach a capture-phase listener on an ancestor", () => {
+    const { container } = openPane();
+    const ancestor = container.firstElementChild as HTMLElement;
+    const ancestorListener = jest.fn();
+    ancestor.addEventListener("keydown", ancestorListener, true);
+    const group = screen.getByRole("group", { name: "Device connection" });
+    fireEvent.keyDown(within(group).getAllByRole("button")[0], { key: "Escape" });
+    ancestor.removeEventListener("keydown", ancestorListener, true);
+    expect(ancestorListener).not.toHaveBeenCalled();
+  });
+
   it("pointerdown outside closes the pane; inside it does not", () => {
     const { content } = openPane();
     const group = screen.getByRole("group", { name: "Device connection" });
@@ -389,6 +407,14 @@ describe("Dataflow connect button and pane", () => {
     expect(content.connectPaneOpen).toBe(true);
     fireEvent.pointerDown(document.body);
     expect(content.connectPaneOpen).toBe(false);
+  });
+
+  it("closing by outside pointerdown returns focus to the trigger", () => {
+    const { container } = openPane();
+    const group = screen.getByRole("group", { name: "Device connection" });
+    expect(group.contains(document.activeElement)).toBe(true);
+    fireEvent.pointerDown(document.body);
+    expect(document.activeElement).toBe(getTrigger(container));
   });
 
   it("unmounting the toolbar closes the pane", () => {
@@ -474,6 +500,14 @@ describe("Dataflow connect button and pane", () => {
     expect(isDisabled(getTrigger(container))).toBe(true);
     fireEvent.click(getTrigger(container));
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+  });
+
+  // The controls are `div role="button"`, so activation keys are handled in the component.
+  it.each(["Enter", " "])("'%s' on a pane control activates it", (key) => {
+    const r = openPane();
+    const connect = jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
+    fireEvent.keyDown(screen.getByRole("button", { name: "Connect Spiker:bit" }), { key });
+    expect(connect).toHaveBeenCalledWith("spikerbit");
   });
 
   it("clicking Connect for Spiker:bit calls the connection with \"spikerbit\"", () => {
@@ -564,6 +598,18 @@ describe("Dataflow connect button and pane", () => {
 
   // Deleting a tile destroys its model. The unmount cleanup that follows warns on the dead node too,
   // so only the warnings logged while the attempt resolves are checked.
+  it("a success with focus outside the pane leaves focus where it is", async () => {
+    const r = openPane();
+    const resolve = pendingConnect(r);
+    const outside = document.createElement("input");
+    document.body.appendChild(outside);
+    act(() => outside.focus());
+    await resolve("connected");
+    expect(r.content.connectPaneOpen).toBe(false);
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+  });
+
   it("a success after the tile was deleted does not touch the destroyed content", async () => {
     const r = openPane();
     const resolve = pendingConnect(r);
@@ -596,6 +642,26 @@ describe("Dataflow connect button and pane", () => {
     expect(within(paneGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
   });
 
+  // Reconnect disconnects first, so after a failed or canceled attempt nothing is connected.
+  it.each<ConnectResult>(["failed", "canceled"])("a %s Reconnect keeps the pane open", async (result) => {
+    const r = openPane();
+    fakeConnected(r);
+    jest.spyOn(r.connection, "reconnect").mockImplementation(async () => {
+      r.stores.serialDevice.clearActiveDevice();
+      return result;
+    });
+    act(() => screen.getByRole("button", { name: "Reconnect" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Reconnect" })); });
+    expect(r.content.connectPaneOpen).toBe(true);
+    const error = within(paneGroup()).queryByText("Couldn't connect to Spiker:bit.");
+    if (result === "failed") {
+      expect(error).toBeInTheDocument();
+    } else {
+      expect(error).toBeNull();
+    }
+    expect(within(paneGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
+  });
+
   it("a device dropping does not pull focus into the pane when focus is elsewhere", () => {
     const r = openPane();
     fakeConnected(r);
@@ -605,6 +671,19 @@ describe("Dataflow connect button and pane", () => {
     act(() => r.stores.serialDevice.clearActiveDevice());
     expect(document.activeElement).toBe(outside);
     outside.remove();
+  });
+
+  // Focus that left the pane and then fell to <body> is not the pane's to restore.
+  it("a device dropping does not pull focus into the pane after focus left it for <body>", () => {
+    const r = openPane();
+    fakeConnected(r);
+    const outside = document.createElement("input");
+    document.body.appendChild(outside);
+    act(() => outside.focus());
+    act(() => outside.remove());
+    expect(document.activeElement).toBe(document.body);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+    expect(document.activeElement).toBe(document.body);
   });
 
   it("Reconnect and Disconnect call the connection", () => {
