@@ -470,6 +470,38 @@ context('Dataflow Tool Tile', function () {
     cy.get(".primary-workspace [data-testid='connect-device-button']")
       .should("have.class", "connect-attention");
 
+    cy.log("reopening a program that needs a device shows the connect tutorial");
+    // Deleting the tile and undoing that mounts the program again, as opening its document does.
+    clueCanvas.deleteTile("dataflow");
+    dataflowToolTile.getDataflowTile().should("not.exist");
+    clueCanvas.getUndoTool().click();
+    cy.get(".primary-workspace .dataflow-connect-tutorial [role='dialog']").should("be.visible");
+    // The read-only copy of the document never shows it.
+    cy.get(".read-only-local-workspace .dataflow-connect-tutorial").should("not.exist");
+
+    cy.log("keyboard focus reaches the tutorial's OK and skips the controls it covers");
+    dataflowToolTile.getDataflowTile().click(20, 20);
+    cy.realPress("Enter");
+    cy.focused().should("have.class", "dataflow-connect-tutorial-ok");
+    // One Tab cycle visits the toolbar and the handles, then wraps to OK without the title or topbar.
+    cy.realPress("Tab");
+    cy.focused().closest("[data-testid='tile-toolbar']").should("exist");
+    cy.realPress("Tab");
+    cy.focused().should("have.class", "tool-tile-drag-handle-wrapper");
+    cy.realPress("Tab");
+    cy.focused().should("have.class", "tool-tile-resize-handle-wrapper");
+    cy.realPress("Tab");
+    cy.focused().should("have.class", "dataflow-connect-tutorial-ok");
+
+    cy.log("OK closes the connect tutorial and selects the tile, whose connect button needs attention");
+    cy.get(".primary-workspace .spacer").click();
+    dataflowToolTile.getDataflowTile().should("not.have.class", "selected");
+    cy.get(".primary-workspace .dataflow-connect-tutorial-ok").click();
+    cy.get(".primary-workspace .dataflow-connect-tutorial").should("not.exist");
+    dataflowToolTile.getDataflowTile().should("have.class", "selected");
+    cy.get(".primary-workspace [data-testid='connect-device-button']")
+      .should("have.class", "connect-attention");
+
     cy.log("should show needs connection message when fan is selected and there are no outputs");
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(3).click();
