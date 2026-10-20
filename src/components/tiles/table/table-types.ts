@@ -1,4 +1,5 @@
 import { Column, RenderCellProps, RenderHeaderCellProps } from "react-data-grid";
+import { defaultFont } from "../../constants";
 
 export const kIndexColumnWidth = 34;
 export const kIndexColumnWidthWithLabel = kIndexColumnWidth + 7;
@@ -12,6 +13,13 @@ export const kRowHeight = kCellLineHeight + 2 * kCellVerticalPadding;
 export const kDefaultImageCellHeight = 32;
 export const kHeaderRowHeight = 34;
 export const kHeaderCellHorizontalPadding = 32; // half on either side of text
+// The header's sort and remove controls are absolutely positioned, 36px each, and the header text
+// is centred -- so overflow is symmetric and one control costs the same space on both sides.
+export const kHeaderControlsReserve = 2 * kControlsColumnWidth;
+// A name longer than this is left to wrap rather than letting one column take over the tile.
+export const kMaxAutoColumnWidth = 200;
+// The header renders bold; measuring it with anything else under-measures.
+export const kHeaderFont = `700 ${defaultFont}`;
 export const kExpressionCellPadding = 20;
 export const kTitlePadding = 8;
 export interface IGridContext {
