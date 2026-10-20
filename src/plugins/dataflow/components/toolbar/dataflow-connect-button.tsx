@@ -42,8 +42,8 @@ interface IPaneControlProps {
   onActivate: () => void;
 }
 
-// `div role="button"`, not a real button: the toolbar's roving tabindex sweeps
-// querySelectorAll("button"), which would pull the pane's controls into its Left/Right cycle.
+// `div role="button"`, not a real button, for the reason given at PanPalette's arrows
+// (dataflow-zoom-pan-buttons.tsx).
 function PaneControl({ label, text, busy, onActivate }: IPaneControlProps) {
   function activate(e: React.SyntheticEvent) {
     e.stopPropagation();
@@ -119,7 +119,7 @@ const ConnectPane = observer(function ConnectPane(
   useEffect(() => {
     // preventScroll: the first render sits at an unpositioned spot, and focus() would scroll to it.
     containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
-    // Mount-only: re-running on re-render would yank focus back to the first control.
+    // Mount-only, as in PanPalette.
   }, []);
 
   // Swapping between the device list and the connected actions unmounts the focused control, which
@@ -149,11 +149,9 @@ const ConnectPane = observer(function ConnectPane(
     if (next && !containerRef.current?.contains(next)) holdsFocus.current = false;
   }
 
-  // Arrow keys and Home/End move focus among the pane's controls, wrapping at the ends. Capture phase
-  // is required: the toolbar's focus-trap exit (Escape) is a native capture-phase listener on the
-  // toolbar container, and React delegates above it, so only a React capture handler runs first. The
-  // arrows are stopped here too, because they would otherwise reach the toolbar's roving tabindex
-  // (bubble) and the tile's window-level arrow handling. Tab is left to the toolbar's focus routing.
+  // Arrow keys and Home/End move focus among the pane's controls, wrapping at the ends; Tab is left
+  // to the toolbar's focus routing. Capture phase, and stopping Escape and the arrows, for the
+  // reasons in PanPalette's handleKeyDownCapture (dataflow-zoom-pan-buttons.tsx).
   function handleKeyDownCapture(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       e.stopPropagation();
@@ -245,8 +243,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open.
   useEffect(() => () => content?.setConnectPaneOpen(false), [content]);
 
-  // Clicking anywhere outside the trigger or the pane closes it (capture phase, so a click that
-  // something else swallows still closes it).
+  // Clicking anywhere outside the trigger or the pane closes it, handing focus back to the trigger
+  // if the pane held it, as PanButton does for its palette (dataflow-zoom-pan-buttons.tsx).
   useEffect(() => {
     if (!isOpen) return;
     const handlePointerDown = (e: PointerEvent) => {
