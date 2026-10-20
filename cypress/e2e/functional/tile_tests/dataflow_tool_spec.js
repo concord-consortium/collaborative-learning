@@ -457,7 +457,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(0).click();
 
-    cy.log("can connect, and wiring a Live Output asks for a device without a dialog");
+    cy.log("wiring a block to a Live Output asks for a device without showing the connect tutorial");
     dataflowToolTile.getCreateNodeButton("number").click();
     dataflowToolTile.getNode("number").should("exist");
     dataflowToolTile.getNumberField().type("1{enter}");
@@ -465,7 +465,8 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNumberNodeOutput().click();
     dataflowToolTile.getLiveOutputNodeInput().click();
 
-    // The dialog shows only when a program opens, never after an edit; the button flashes instead.
+    // The connect tutorial shows only when a program opens, never after an edit; the connect button
+    // turns to its yellow attention state instead.
     cy.get(".primary-workspace .dataflow-connect-tutorial").should("not.exist");
     cy.get(".primary-workspace [data-testid='connect-device-button']")
       .should("have.class", "connect-attention");
