@@ -621,7 +621,7 @@ describe("Dataflow connect pane keyboard navigation in the real toolbar", () => 
 
   function renderRealToolbar() {
     const stores = specStores({
-      appConfig: specAppConfig({ config: { settings: { dataflow: { tools: ["connect", "reset"] } } } })
+      appConfig: specAppConfig({ config: { settings: { dataflow: { tools: ["reset", "connect"] } } } })
     });
     const model = TileModel.create({ content: DataflowContentModel.create() });
     stores.ui.setSelectedTileId(model.id);
@@ -672,5 +672,14 @@ describe("Dataflow connect pane keyboard navigation in the real toolbar", () => 
     const notCanceled = fireEvent.keyDown(document.activeElement as Element, { key: "ArrowDown" });
     expect(notCanceled).toBe(false);
     expect(content.connectPaneOpen).toBe(true);
+  });
+
+  // Reset comes first in this toolbar, so a trigger lookup that lands on the row's first button fails.
+  it("Escape closes the pane and returns focus to the connect button", () => {
+    const { content } = openRealPane();
+    press("Escape");
+    expect(content.connectPaneOpen).toBe(false);
+    expect(document.activeElement).toBe(
+      screen.getByTestId("tile-toolbar").querySelector("button.toolbar-button.connect"));
   });
 });

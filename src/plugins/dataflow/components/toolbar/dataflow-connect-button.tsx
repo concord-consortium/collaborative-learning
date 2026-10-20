@@ -28,6 +28,12 @@ const kFocusSteps: Record<string, number | "first" | "last"> = {
   ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1, Home: "first", End: "last"
 };
 
+// The pane renders as the trigger's sibling (extraContent) inside the Tooltip's wrapper. Closing the
+// pane removes the focused control, so each close path hands focus back to the trigger found here.
+function findTrigger(pane: Element | null | undefined) {
+  return pane?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button.connect") ?? null;
+}
+
 interface IPaneControlProps {
   label: string;
   text: string;
@@ -67,8 +73,8 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
   const { busyChoice, isConnected, connectedLabel } = connection;
   const busy = !!busyChoice;
 
-  // The trigger button is the pane's previous sibling in the toolbar; TileToolbarButton doesn't
-  // expose a ref, and the pane has to stay beside the button in the DOM.
+  // TileToolbarButton doesn't expose a ref, and the pane has to stay beside the button in the DOM,
+  // so the trigger is found from the pane (findTrigger).
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null);
   // Opens below the trigger and flips above it when there is no room left below. The room that
   // matters is the visible part of the tile's scroll containers (the document's scroll area). The
@@ -101,8 +107,7 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
   }, [setFloating]);
 
   useLayoutEffect(() => {
-    setTriggerElement(containerRef.current?.parentElement?.querySelector<HTMLElement>("button.toolbar-button")
-      ?? null);
+    setTriggerElement(findTrigger(containerRef.current));
   }, []);
 
   useEffect(() => {
@@ -143,12 +148,11 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
   // toolbar container, and React delegates above it, so only a React capture handler runs first. The
   // arrows are stopped here too, because they would otherwise reach the toolbar's roving tabindex
   // (bubble) and the tile's window-level arrow handling. Tab is left to the toolbar's focus routing.
-  // Closing on Escape removes the focused control, so hand focus back to the trigger.
   function handleKeyDownCapture(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       e.stopPropagation();
       e.preventDefault();
-      containerRef.current?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button")?.focus();
+      findTrigger(containerRef.current)?.focus();
       onClose();
       return;
     }
@@ -166,13 +170,13 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
   }
 
   // A successful action closes the pane; the trigger's name and color then report the result. A failed
-  // or canceled attempt leaves it open. Closing removes the focused control, so if the pane held
-  // focus, it moves to the trigger. If the user already closed the pane during a slow attempt,
-  // the container is gone and closing again is harmless.
+  // or canceled attempt leaves it open. Focus moves to the trigger only if the pane held it. If the
+  // user already closed the pane during a slow attempt, the container is gone and closing again is
+  // harmless.
   function closeAfterSuccess() {
     const container = containerRef.current;
     const paneHadFocus = !!container && container.contains(document.activeElement);
-    const trigger = container?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button");
+    const trigger = findTrigger(container);
     onClose();
     if (paneHadFocus) trigger?.focus();
   }
@@ -238,9 +242,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     if (!isOpen) return;
     const handlePointerDown = (e: PointerEvent) => {
       if ((e.target as Element | null)?.closest?.(".toolbar-button.connect, .dataflow-connect-pane")) return;
-      // Closing unmounts the focused control; hand focus back to the trigger so it doesn't fall to <body>.
-      const focusedPane = document.activeElement?.closest(".dataflow-connect-pane");
-      focusedPane?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button")?.focus();
+      findTrigger(document.activeElement?.closest(".dataflow-connect-pane"))?.focus();
       content?.setConnectPaneOpen(false);
     };
     document.addEventListener("pointerdown", handlePointerDown, true);
