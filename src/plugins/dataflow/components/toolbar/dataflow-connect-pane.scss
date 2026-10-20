@@ -81,9 +81,12 @@
         background: $workspace-teal-light-4;
       }
 
+      // Fades the text and border rather than the whole element, so the focus ring on the control
+      // the user just activated keeps its contrast while the attempt runs.
       &.disabled {
         cursor: default;
-        opacity: 35%;
+        color: rgba(0, 0, 0, 0.35);
+        border-color: rgba($workspace-teal, 0.35);
       }
     }
   }
