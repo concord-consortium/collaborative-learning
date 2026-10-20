@@ -23,7 +23,7 @@ function logDeviceEvent(tileId: string, operation: string, device: DeviceChoice 
 }
 
 /**
- * Clears the running state of this tile's program. Recorded data, blocks, connections and
+ * Clears the running state of this tile's program. Recorded data, blocks, block connections and
  * settings are left alone.
  */
 export function resetProgramForTile({ content, tileId, trigger }: ITileOptions & { trigger: ResetTrigger }) {
