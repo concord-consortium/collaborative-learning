@@ -100,7 +100,7 @@ function recordAndStop() {
   fireEvent.click(screen.getByTestId("record-data-button"));
 }
 
-describe("DataflowProgram rete manager routing (CLUE-573)", () => {
+describe("DataflowProgram rete manager routing", () => {
   beforeEach(() => {
     MockedReteManager.mockClear();
     jest.useFakeTimers();
