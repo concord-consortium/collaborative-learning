@@ -1,6 +1,7 @@
 import React from "react";
 import { render, fireEvent, screen, act, within } from "@testing-library/react";
 import { runInAction } from "mobx";
+import { destroy } from "mobx-state-tree";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
@@ -330,7 +331,7 @@ describe("Dataflow connect button and pane", () => {
         </Provider>
       </ModalProvider>
     );
-    return { ...result, content, stores, connection, tileId: model.id };
+    return { ...result, content, stores, connection, model, tileId: model.id };
   }
 
   function getTrigger(container: HTMLElement) {
@@ -559,6 +560,21 @@ describe("Dataflow connect button and pane", () => {
     await resolve("connected");
     expect(r.content.connectPaneOpen).toBe(false);
     expect(document.activeElement).toBe(trigger);
+  });
+
+  // Deleting a tile destroys its model. The unmount cleanup that follows warns on the dead node too,
+  // so only the warnings logged while the attempt resolves are checked.
+  it("a success after the tile was deleted does not touch the destroyed content", async () => {
+    const r = openPane();
+    const resolve = pendingConnect(r);
+    destroy(r.model);
+    r.unmount();
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    await resolve("connected");
+    const deadNodeWarnings = warn.mock.calls.filter(args =>
+      String(args[0]).includes("no longer part of a state tree"));
+    warn.mockRestore();
+    expect(deadNodeWarnings).toEqual([]);
   });
 
   it("a failed Connect keeps the pane open and shows the error", async () => {

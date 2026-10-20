@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { autoUpdate, flip, getOverflowAncestors, offset, shift, useFloating } from "@floating-ui/react";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
@@ -177,8 +178,10 @@ const ConnectPane = observer(function ConnectPane(
   // A successful action closes the pane; the trigger's name and color then report the result. A failed
   // or canceled attempt leaves it open. The pane that started the attempt may have closed since, and
   // another one opened, so this reads whichever pane is showing now. Focus moves to the trigger only
-  // if that pane held it. If no pane is showing, closing again is harmless.
+  // if that pane held it. If no pane is showing, closing again is harmless. A tile deleted during the
+  // attempt has nothing left to close.
   function closeAfterSuccess() {
+    if (!isAlive(content)) return;
     const live = paneRef.current;
     const paneHadFocus = !!live && live.contains(document.activeElement);
     const trigger = findTrigger(live);
