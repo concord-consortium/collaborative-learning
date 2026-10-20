@@ -10,7 +10,7 @@
 .dataflow-toolbar {
   // Specificity has to beat the toolbar's own `.toolbar-row button` background and hover rules.
   .toolbar-row button.toolbar-button.connect {
-    // Pulses a few times when the button first needs attention, to catch the eye, then stays
+    // Pulses three times when the button first needs attention, to catch the eye, then stays
     // yellow. The animation replays whenever the class is newly applied, including each time the
     // toolbar mounts.
     &.connect-attention,
