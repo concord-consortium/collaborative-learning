@@ -6,7 +6,7 @@ import { ModalProvider } from "react-modal-hook";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { getDeviceConnection } from "../../model/device-connection";
+import { ConnectResult, getDeviceConnection } from "../../model/device-connection";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
 import { specStores } from "../../../../models/stores/spec-stores";
@@ -528,6 +528,37 @@ describe("Dataflow connect button and pane", () => {
     expect(r.content.connectPaneOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(document.activeElement).toBe(getTrigger(r.container));
+  });
+
+  // Mocks connection.connect with an attempt that stays pending until the test resolves it.
+  function pendingConnect(r: ReturnType<typeof renderConnect>) {
+    let resolveConnect: (result: ConnectResult) => void = () => undefined;
+    jest.spyOn(r.connection, "connect").mockImplementation(() =>
+      new Promise<ConnectResult>(resolve => { resolveConnect = resolve; }));
+    const connectSpikerbit = () => screen.getByRole("button", { name: "Connect Spiker:bit" });
+    act(() => connectSpikerbit().focus());
+    fireEvent.click(connectSpikerbit());
+    return async (result: ConnectResult) => {
+      await act(async () => {
+        if (result === "connected") r.stores.serialDevice.setActiveDevice("spikerbit", fakeTransport());
+        resolveConnect(result);
+      });
+    };
+  }
+
+  // A Spiker:bit attempt runs for seconds while it flashes, and the user can close and reopen the
+  // pane meanwhile. The success then closes the reopened pane, which holds focus.
+  it("a success after the pane was closed and reopened returns focus to the trigger", async () => {
+    const r = openPane();
+    const resolve = pendingConnect(r);
+    const trigger = getTrigger(r.container);
+    act(() => trigger.focus());
+    fireEvent.click(trigger);
+    fireEvent.click(trigger);
+    expect(paneGroup().contains(document.activeElement)).toBe(true);
+    await resolve("connected");
+    expect(r.content.connectPaneOpen).toBe(false);
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("a failed Connect keeps the pane open and shows the error", async () => {

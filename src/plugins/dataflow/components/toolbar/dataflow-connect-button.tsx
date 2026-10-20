@@ -65,10 +65,14 @@ interface IConnectPaneProps {
   connection: DeviceConnection;
   content: DataflowContentModelType;
   tileId: string;
+  // The pane that is showing now. A slow attempt can outlive the pane that started it, when the
+  // user closes and reopens the pane, so its result reads the live pane from here.
+  paneRef: React.MutableRefObject<HTMLDivElement | null>;
   onClose: () => void;
 }
 
-const ConnectPane = observer(function ConnectPane({ connection, content, tileId, onClose }: IConnectPaneProps) {
+const ConnectPane = observer(function ConnectPane(
+    { connection, content, tileId, paneRef, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { busyChoice, isConnected, connectedLabel } = connection;
   const busy = !!busyChoice;
@@ -103,8 +107,9 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
   const { setFloating } = refs;
   const setContainer = useCallback((el: HTMLDivElement | null) => {
     containerRef.current = el;
+    paneRef.current = el;
     setFloating(el);
-  }, [setFloating]);
+  }, [paneRef, setFloating]);
 
   useLayoutEffect(() => {
     setTriggerElement(findTrigger(containerRef.current));
@@ -170,13 +175,13 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
   }
 
   // A successful action closes the pane; the trigger's name and color then report the result. A failed
-  // or canceled attempt leaves it open. Focus moves to the trigger only if the pane held it. If the
-  // user already closed the pane during a slow attempt, the container is gone and closing again is
-  // harmless.
+  // or canceled attempt leaves it open. The pane that started the attempt may have closed since, and
+  // another one opened, so this reads whichever pane is showing now. Focus moves to the trigger only
+  // if that pane held it. If no pane is showing, closing again is harmless.
   function closeAfterSuccess() {
-    const container = containerRef.current;
-    const paneHadFocus = !!container && container.contains(document.activeElement);
-    const trigger = findTrigger(container);
+    const live = paneRef.current;
+    const paneHadFocus = !!live && live.contains(document.activeElement);
+    const trigger = findTrigger(live);
     onClose();
     if (paneHadFocus) trigger?.focus();
   }
@@ -232,6 +237,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const readOnly = useReadOnlyContext();
   const connection = getDeviceConnection(serialDevice);
   const isOpen = !!content?.connectPaneOpen;
+  const paneRef = useRef<HTMLDivElement | null>(null);
 
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open.
   useEffect(() => () => content?.setConnectPaneOpen(false), [content]);
@@ -258,7 +264,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const title = connectButtonTooltip({ ...stateInput, connectedLabel: connection.connectedLabel });
 
   const pane = isOpen && content && model
-    ? <ConnectPane connection={connection} content={content} tileId={model.id}
+    ? <ConnectPane connection={connection} content={content} tileId={model.id} paneRef={paneRef}
         onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 
