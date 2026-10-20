@@ -8,8 +8,10 @@ import { ReadOnlyContext } from "../../../../components/document/read-only-conte
 import { SerialDevice } from "../../../../models/stores/serial";
 import { getDeviceConnection } from "../../model/device-connection";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
-import { TileModel } from "../../../../models/tiles/tile-model";
+import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
 import { specStores } from "../../../../models/stores/spec-stores";
+import { specAppConfig } from "../../../../models/stores/spec-app-config";
+import { TileToolbar } from "../../../../components/toolbar/tile-toolbar";
 import { getToolbarButtonInfo } from "../../../../components/toolbar/toolbar-button-manager";
 import { DataflowContentModel, DataflowContentModelType } from "../../model/dataflow-content";
 import { DataflowNodeModel } from "../../model/dataflow-program-model";
@@ -603,5 +605,72 @@ describe("Dataflow reset button", () => {
     expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.DATAFLOW_TOOL_CHANGE, {
       tileId: expect.any(String), operation: "resetProgram", change: { targetType: "program", trigger: "button" }
     });
+  });
+});
+
+describe("Dataflow connect pane keyboard navigation in the real toolbar", () => {
+  function PaneTile({ model }: { model: ITileModel }) {
+    const [tileElt, setTileElt] = React.useState<HTMLDivElement | null>(null);
+    return (
+      <TileModelContext.Provider value={model}>
+        <div ref={setTileElt} className="tool-tile" data-tool-id={model.id} tabIndex={-1}>Tile content.</div>
+        {tileElt && <TileToolbar readOnly={false} tileElement={tileElt} tileType="dataflow" />}
+      </TileModelContext.Provider>
+    );
+  }
+
+  function renderRealToolbar() {
+    const stores = specStores({
+      appConfig: specAppConfig({ config: { settings: { dataflow: { tools: ["connect", "reset"] } } } })
+    });
+    const model = TileModel.create({ content: DataflowContentModel.create() });
+    stores.ui.setSelectedTileId(model.id);
+    const result = render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <ReadOnlyContext.Provider value={false}>
+            <PaneTile model={model} />
+          </ReadOnlyContext.Provider>
+        </Provider>
+      </ModalProvider>
+    );
+    return { ...result, content: model.content as DataflowContentModelType };
+  }
+
+  const press = (key: string) => fireEvent.keyDown(document.activeElement as Element, { key });
+  const focusedName = () => document.activeElement?.getAttribute("aria-label");
+
+  function openRealPane() {
+    const r = renderRealToolbar();
+    fireEvent.click(screen.getByTestId("tile-toolbar").querySelector("button.toolbar-button.connect")!);
+    return r;
+  }
+
+  it("arrow keys, Home and End move focus among the pane's controls instead of the toolbar's buttons", () => {
+    openRealPane();
+    expect(focusedName()).toBe("Connect Arduino");
+    press("ArrowDown");
+    expect(focusedName()).toBe("Connect micro:bit (radio hub)");
+    press("ArrowDown");
+    expect(focusedName()).toBe("Connect Spiker:bit");
+    press("ArrowDown");
+    expect(focusedName()).toBe("Connect Arduino");
+    press("ArrowUp");
+    expect(focusedName()).toBe("Connect Spiker:bit");
+    press("ArrowLeft");
+    expect(focusedName()).toBe("Connect micro:bit (radio hub)");
+    press("ArrowRight");
+    expect(focusedName()).toBe("Connect Spiker:bit");
+    press("Home");
+    expect(focusedName()).toBe("Connect Arduino");
+    press("End");
+    expect(focusedName()).toBe("Connect Spiker:bit");
+  });
+
+  it("arrow keys in the pane keep the pane open and are not left to default handling", () => {
+    const { content } = openRealPane();
+    const notCanceled = fireEvent.keyDown(document.activeElement as Element, { key: "ArrowDown" });
+    expect(notCanceled).toBe(false);
+    expect(content.connectPaneOpen).toBe(true);
   });
 });

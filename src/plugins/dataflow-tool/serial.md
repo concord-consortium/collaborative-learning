@@ -58,7 +58,8 @@ device choices: Arduino, micro:bit (radio hub) and Spiker:bit (`kDeviceChoiceLab
 device is connected it shows Reconnect and Disconnect instead. All of the controls are disabled
 while a connection attempt is in progress (`busyChoice`). A successful Connect, Reconnect or
 Disconnect closes the pane and returns focus to the button, whose color and tooltip then show the
-result. A failed or canceled attempt leaves the pane open. The UI names the device by the choice
+result. A failed or canceled attempt leaves the pane open. The arrow keys and Home/End move focus
+between the pane's controls, wrapping at the ends. The UI names the device by the choice
 the user connected with (`lastChoice`), not by the detected `deviceFamily`.
 
 The pane starts with a heading and a status block. The status block holds a status line and,

@@ -23,6 +23,11 @@ import "./dataflow-connect-pane.scss";
 
 const kPaneLabel = "Device connection";
 
+// How each navigation key moves focus: by a signed number of controls, or to the first or last one.
+const kFocusSteps: Record<string, number | "first" | "last"> = {
+  ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1, Home: "first", End: "last"
+};
+
 interface IPaneControlProps {
   label: string;
   text: string;
@@ -133,15 +138,31 @@ const ConnectPane = observer(function ConnectPane({ connection, content, tileId,
     if (next && !containerRef.current?.contains(next)) holdsFocus.current = false;
   }
 
-  // Capture phase is required for Escape: the toolbar's focus-trap exit is a native capture-phase
-  // listener on the toolbar container, and React delegates above it, so only a React capture
-  // handler runs first. Closing removes the focused control, so hand focus back to the trigger.
+  // Arrow keys and Home/End move focus among the pane's controls, wrapping at the ends. Capture phase
+  // is required: the toolbar's focus-trap exit (Escape) is a native capture-phase listener on the
+  // toolbar container, and React delegates above it, so only a React capture handler runs first. The
+  // arrows are stopped here too, because they would otherwise reach the toolbar's roving tabindex
+  // (bubble) and the tile's window-level arrow handling. Tab is left to the toolbar's focus routing.
+  // Closing on Escape removes the focused control, so hand focus back to the trigger.
   function handleKeyDownCapture(e: React.KeyboardEvent) {
-    if (e.key !== "Escape") return;
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      e.preventDefault();
+      containerRef.current?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button")?.focus();
+      onClose();
+      return;
+    }
+    const step = kFocusSteps[e.key];
+    if (step === undefined) return;
     e.stopPropagation();
     e.preventDefault();
-    containerRef.current?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button")?.focus();
-    onClose();
+    const controls = Array.from(containerRef.current?.querySelectorAll<HTMLElement>("[role='button']") ?? []);
+    if (!controls.length) return;
+    const current = controls.indexOf(document.activeElement as HTMLElement);
+    const next = step === "first" ? 0
+      : step === "last" ? controls.length - 1
+      : (current + step + controls.length) % controls.length;
+    controls[next].focus({ preventScroll: true });
   }
 
   // A successful action closes the pane; the trigger's name and color then report the result. A failed

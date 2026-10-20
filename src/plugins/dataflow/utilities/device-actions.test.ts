@@ -111,6 +111,28 @@ describe("device actions", () => {
       expect(logTileChangeEvent).not.toHaveBeenCalled();
     });
 
+  it.each(["connect", "reconnect"])(
+    "a %s that fails after the tile was deleted does not throw or log", async operation => {
+      const content = makeContent();
+      let finish: (r: ConnectResult) => void = () => undefined;
+      const pending = new Promise<ConnectResult>(resolve => { finish = resolve; });
+      const connection = makeConnection("failed", { lastChoice: "arduino" });
+      (connection.connect as jest.Mock).mockReturnValue(pending);
+      (connection.reconnect as jest.Mock).mockReturnValue(pending);
+
+      const acting = operation === "connect"
+        ? connectDeviceForTile({ connection, content, tileId, choice: "arduino" })
+        : reconnectDeviceForTile({ connection, content, tileId });
+      destroy(content);
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      finish("failed");
+
+      await expect(acting).resolves.toBe("failed");
+      expect(warn).not.toHaveBeenCalled();
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
   it("disconnect logs disconnectDevice and does not reset", async () => {
     const content = makeContent();
     const ticks = content.program.recentTicks.length;
