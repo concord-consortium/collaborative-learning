@@ -234,7 +234,7 @@ describe("DataflowProgramModel.resetRunningState", () => {
     expect(manager.undoStore.canUndo).toBe(false);
   });
 
-  it("leaves blocks, connections and settings alone", () => {
+  it("leaves blocks, block connections and settings alone", () => {
     const program = makeRunningProgram();
     program.addConnection(ConnectionModel.create({
       id: "c1", source: "num", sourceOutput: "value", target: "ctl", targetInput: "num2"
