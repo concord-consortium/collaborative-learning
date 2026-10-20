@@ -1344,10 +1344,9 @@ export class ReteManager implements INodeServices {
 
   /**
    * Records on the tile whether an editable program needed a device, with none connected, when it
-   * opened, for the tile's connect tutorial dialog. It runs once, after setup, so a later edit or
-   * a connection change never changes it; in particular a disconnect can't bring the dialog back
-   * for a program that opened while a device was connected. The need is computed here rather than
-   * read from the tile so it reflects the program as it opened.
+   * opened. It runs once, after setup, so later edits and connection changes, including a
+   * disconnect, never change it. The need is computed here rather than read from the tile so it
+   * reflects the program as it opened.
    */
   private recordNeedsDeviceOnOpen() {
     if (this.disposed || this.readOnly || this.playback) return;
