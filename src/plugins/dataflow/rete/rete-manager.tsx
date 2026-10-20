@@ -6,7 +6,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { onPatch, onSnapshot } from "mobx-state-tree";
-import { autorun, observable, reaction, runInAction, untracked } from "mobx";
+import { autorun, observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -123,13 +123,12 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    // The needs-a-device alert is checked once, when the editable program has finished opening.
     this.setupComplete = this.setup().then(() => this.alertIfOpenedWithoutNeededDevice());
 
     if (!this.readOnly && !this.playback) {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
-      // block's settings and the connection state. Reading the node count here keeps the
-      // dependency on blocks being added and removed visible at the autorun itself.
+      // block's settings and wiring. Reading the node count here keeps the dependency on blocks
+      // being added and removed visible at the autorun itself.
       this.needsDeviceDisposer = autorun(() => {
         void this.mstProgram.nodes.size;
         this.updateNeedsDevice();
@@ -1322,17 +1321,14 @@ export class ReteManager implements INodeServices {
   }
 
   /**
-   * Records on the tile whether its program needs a connected device. Called inside an autorun, so
-   * it tracks each block's settings. Setting the volatile is untracked so it can't re-trigger the
-   * autorun. It only records the state; the alert is posted by alertIfOpenedWithoutNeededDevice.
+   * Records on the tile whether its program needs a connected device. The constructor's autorun
+   * calls it, so it tracks each block's settings and wiring. It only records the state; the alert
+   * is posted by alertIfOpenedWithoutNeededDevice.
    */
   public updateNeedsDevice() {
     if (this.readOnly || this.playback) return;
 
-    const needsDevice = programNeedsDevice(this.editor.getNodes());
-    untracked(() => {
-      this.mstContent.setNeedsDevice(needsDevice);
-    });
+    this.mstContent.setNeedsDevice(programNeedsDevice(this.editor.getNodes()));
   }
 
   /**
