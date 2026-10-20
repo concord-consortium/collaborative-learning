@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { kMinColumnWidth } from "./table-types";
+import { headerFitWidth } from "./column-width";
 import { IAttribute } from "../../../models/data/attribute";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 
@@ -17,7 +17,9 @@ export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
     if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
       return resizeColumnWidth.current;
     } else {
-      return content.columnWidth(attr.id) || kMinColumnWidth;
+      // Fit the heading when nobody has set a width. Falling back to the minimum is what made
+      // every unsized column 80px and every longer name wrap.
+      return content.storedColumnWidth(attr.id) ?? headerFitWidth(attr.name);
     }
   }, [content]);
 

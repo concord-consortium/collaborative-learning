@@ -112,6 +112,13 @@ export const TableContentModel = TileContentModel
     columnWidth(attrId: string) {
       return self.columnWidths.get(attrId) || kMinColumnWidth;
     },
+    /**
+     * The width stored for this column, if one was ever set. `columnWidth` above substitutes the
+     * minimum when there is none, which cannot tell "nobody set one" from "somebody set 80".
+     */
+    storedColumnWidth(attrId: string) {
+      return self.columnWidths.get(attrId);
+    },
     get isUserResizable() {
       return true;
     },
