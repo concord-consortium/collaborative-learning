@@ -1,3 +1,4 @@
+import { isAlive } from "mobx-state-tree";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -38,7 +39,8 @@ export function resetProgramForTile({ content, tileId, trigger }: ITileOptions &
 export async function connectDeviceForTile(o: IConnectionOptions & { choice: DeviceChoice }): Promise<ConnectResult> {
   const { connection, content, tileId, choice } = o;
   const result = await connection.connect(choice);
-  if (result === "connected") {
+  // The tile may have been deleted while the connection was being made.
+  if (result === "connected" && isAlive(content)) {
     logDeviceEvent(tileId, "connectDevice", labelFor(choice));
     resetProgramForTile({ content, tileId, trigger: "connect" });
   }
@@ -49,7 +51,7 @@ export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<Con
   const { connection, content, tileId } = o;
   const label = labelFor(connection.lastChoice);
   const result = await connection.reconnect();
-  if (result === "connected") {
+  if (result === "connected" && isAlive(content)) {
     logDeviceEvent(tileId, "reconnectDevice", label);
     resetProgramForTile({ content, tileId, trigger: "reconnect" });
   }

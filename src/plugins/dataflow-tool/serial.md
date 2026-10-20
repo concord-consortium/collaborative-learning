@@ -103,11 +103,16 @@ link opens, `connectAndStream` disconnects the library connection before it reth
 failed attempt doesn't leave the board open.
 
 **Reconnect.** `reconnect()` repeats the last choice without asking the user to pick again.
-For a Web Serial board it tries, in order: the last port (`WebSerialTransport.lastPort`,
-which survives `close()`); a previously granted port (`getGrantedSerialPorts()`) with the
-same USB vendor and product ids; and finally the browser's chooser. For a Spiker:bit it
-runs `connectAndStream` again on the known `SpikerbitDevice`, whose library connection
-remembers the board and reopens it without the chooser. If that fails, for example because
+For a Web Serial board it tries the last port (`WebSerialTransport.lastPort`, which
+survives `close()`) first. If that fails and the last port is no longer among the granted
+ports (`getGrantedSerialPorts()`), the board was unplugged and maybe replugged, and Chrome
+gives a replugged board a new port object. Reconnect then opens a granted port with the same
+USB vendor and product ids, but only when exactly one matches, because the ids identify the
+board model and can't tell identical boards apart. In every other case, including when the
+last port is still granted and so the original board is still attached, it shows the
+browser's chooser. For a Spiker:bit it runs `connectAndStream` again on the known
+`SpikerbitDevice`, whose library connection remembers the board and reopens it without the
+chooser. If that fails, for example because
 the board was unplugged and plugged back in, it disconnects that device and falls back to a
 new one, which shows the chooser. CLUE doesn't call the library's `initialize()`, so it
 doesn't watch for the board being unplugged.

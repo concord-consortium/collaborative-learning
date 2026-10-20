@@ -197,4 +197,34 @@ describe("WebSerialTransport", () => {
       jest.useRealTimers();
     }
   });
+
+  it("closes the port before firing onDisconnect when it gives up", async () => {
+    const order: string[] = [];
+    const reader = {
+      read: jest.fn(async () => ({ done: true })),
+      cancel: jest.fn(async () => undefined),
+      releaseLock: jest.fn(),
+    };
+    const port = {
+      getInfo: async () => ({ usbProductId: 67 }),
+      open: jest.fn(),
+      close: jest.fn(async () => { order.push("close"); }),
+      writable: { getWriter: () => ({ write: jest.fn(), close: jest.fn(async () => undefined) }) },
+      readable: { getReader: () => reader },
+    } as any;
+    // The first open succeeds; the stream then ends, the readable goes away and the reopen fails.
+    port.open.mockImplementationOnce(async () => undefined).mockImplementation(async () => {
+      throw new DOMException("already open", "InvalidStateError");
+    });
+    reader.read.mockImplementation(async () => { port.readable = null; return { done: true }; });
+    stubSerial(port);
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const t = new WebSerialTransport();
+    await t.open();
+    t.onDisconnect = () => { order.push("onDisconnect"); };
+    await t.startReading();
+
+    expect(order).toEqual(["close", "onDisconnect"]);
+  });
 });
